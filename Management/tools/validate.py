@@ -16,7 +16,7 @@ Rule groups
   SRC  C# source      01 public type in Internal   02 MonoBehaviour in Internal
                       03 InternalsVisibleTo   04 banned API
   AST  assets         01 reference to another feature's private asset   02 not text-serialized
-  DOC  01 CLAUDE.md too long        CFG  01 invalid exception in rules.json
+  DOC  01 md file too long      CFG  01 invalid exception in rules.json
 
 C# is scanned as text (regex), not parsed. Standard library only.
 """
@@ -33,7 +33,7 @@ NAME_RX = re.compile(r"^[A-Z][A-Za-z0-9]*$")
 FEATURE_ID_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")
 RESERVED = ("Services", "Core", "Composition")
 OWN_ROOTS = ("Features", "Core", "_Composition")
-ROOT_MD_MAX, FEATURE_MD_MAX = 30, 20
+ROOT_MD_MAX, FEATURE_MD_MAX, RULES_MD_MAX = 30, 20, 40
 
 # ---------------------------------------------------------------- C# text helpers
 STRIP_RX = re.compile(
@@ -331,11 +331,14 @@ class Scan:
 
     def check_md_size(self):
         targets = [(self.root / "CLAUDE.md", ROOT_MD_MAX)] + [(f["dir"] / "CLAUDE.md", FEATURE_MD_MAX) for f in self.features]
+        rules_dir = self.root / ".claude" / "rules"
+        if rules_dir.is_dir():
+            targets += [(p, RULES_MD_MAX) for p in sorted(rules_dir.rglob("*.md"))]
         for path, limit in targets:
             if path.is_file():
                 n = len(read_text(path).splitlines())
                 if n > limit:
-                    self.add("DOC-01", path, n, f"CLAUDE.md has {n} lines; the limit is {limit}")
+                    self.add("DOC-01", path, n, f"{path.name} has {n} lines; the limit is {limit}")
 
     def check_assemblies(self):
         cs_files = [f for f in self.files if f.suffix.lower() == ".cs"]

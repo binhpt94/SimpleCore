@@ -22,6 +22,8 @@ sys.path.insert(0, str(HERE))
 import validate as V  # noqa: E402
 
 RULES = json.loads((HERE / "rules.json").read_text(encoding="utf-8-sig"))
+RULES["exceptions"] = []  # the project's approved exceptions must not change what these cases expect
+RULES_FILE = None  # the same rules written to the temp folder, for the command-line cases
 A = "UnityProject/Assets"
 F = A + "/Features"
 G = {  # fixed GUIDs of the sample assets
@@ -90,6 +92,7 @@ namespace Game.Wallet
 
 def build_clean(r):
     put(r, "CLAUDE.md", "# root\n")
+    put(r, ".claude/rules/unity.md", "line\n" * 40)  # exactly at the limit: must stay clean
     # Core
     put_asmdef(r, f"{A}/Core", "Game.Core", [])
     put(r, f"{A}/Core/IServiceRegistry.cs", "namespace Game.Core { public interface IServiceRegistry { void Register<T>(T s) where T : class; } }")
@@ -170,6 +173,7 @@ CASES = [
     ("STR-07", "unexpected folder under Scripts", lambda d: put(d, f"{F}/Wallet/Scripts/Utils/a.txt", "x")),
     ("DOC-01", "feature CLAUDE.md over 20 lines", lambda d: put(d, f"{F}/Wallet/CLAUDE.md", "line\n" * 21)),
     ("DOC-01", "root CLAUDE.md over 30 lines", lambda d: put(d, "CLAUDE.md", "line\n" * 31)),
+    ("DOC-01", ".claude/rules md over 40 lines", lambda d: put(d, ".claude/rules/unity.md", "line\n" * 41), "*unity.md*"),
 
     ("ASM-00", "asmdef is not JSON", lambda d: put(d, WI_ASM, "{ broken")),
     ("ASM-01", "wrong assembly name", lambda d: set_json(d, WI_ASM, name="Game.Shop.Internal")),
@@ -245,7 +249,7 @@ def run_cli(root, *args, env_feature=None):
     env.pop("FEATURE", None)
     if env_feature is not None:
         env["FEATURE"] = env_feature
-    p = subprocess.run([sys.executable, str(HERE / "validate.py"), "--root", str(root), "--json", *args],
+    p = subprocess.run([sys.executable, str(HERE / "validate.py"), "--root", str(root), "--rules", str(RULES_FILE), "--json", *args],
                        capture_output=True, text=True, env=env)
     try:
         return p.returncode, json.loads(p.stdout)
@@ -254,7 +258,10 @@ def run_cli(root, *args, env_feature=None):
 
 
 def main():
+    global RULES_FILE
     base = Path(tempfile.mkdtemp(prefix="valfx-"))
+    RULES_FILE = base / "rules.json"
+    RULES_FILE.write_text(json.dumps(RULES), encoding="utf-8")
     try:
         clean = base / "clean"
         build_clean(clean)
