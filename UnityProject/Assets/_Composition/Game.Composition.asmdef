@@ -1,0 +1,16 @@
+{
+  "name": "Game.Composition",
+  "rootNamespace": "Game.Composition",
+  "references": [
+    "Game.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

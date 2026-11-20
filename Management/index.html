@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoreSimple — Quản lý</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --text: #1d1c1a; --muted: #6b6860;
+    --line: #dedbd2; --accent: #2f6f5e; --warn-bg: #fbf1d8; --warn-text: #6b4e00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161614; --panel: #1f1f1c; --text: #ecebe6; --muted: #9c998f;
+      --line: #33322d; --accent: #7fc4ae; --warn-bg: #3a2f10; --warn-text: #f0d68a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.6 "Segoe UI", system-ui, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 40px 16px 64px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 32px; }
+  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1 { margin: 4px 0 0; font-size: 30px; line-height: 1.25; text-wrap: balance; }
+  h2 { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+  p { margin: 0; }
+  ul { margin: 0; padding-left: 20px; }
+  li + li { margin-top: 6px; }
+  .muted { color: var(--muted); }
+  .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+  footer { margin-top: 24px; font-size: 13px; color: var(--muted); }
+  code { font-family: Consolas, monospace; font-size: .92em; }
+  [hidden] { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">CoreSimple · Trang quản lý</div>
+    <h1 id="title"></h1>
+  </header>
+
+  <div id="notice" class="notice" hidden></div>
+
+  <section>
+    <h2>Ý tưởng cốt lõi</h2>
+    <p id="summary"></p>
+  </section>
+
+  <section id="pillars-box" hidden>
+    <h2>Trụ cột thiết kế</h2>
+    <ul id="pillars"></ul>
+  </section>
+
+  <section>
+    <h2>Feature</h2>
+    <p class="muted">Chưa có số liệu. Danh sách và tình trạng feature sẽ lấy từ script đo, không do AI khai.</p>
+  </section>
+
+  <footer id="footer"></footer>
+</main>
+
+<!-- Trang này chỉ là vỏ. Mọi nội dung nằm trong data/. -->
+<script src="data/idea.js"></script>
+<script>
+  (function () {
+    var idea = window.CORESIMPLE_IDEA;
+    var $ = function (id) { return document.getElementById(id); };
+    var notice = function (text) { $("notice").textContent = text; $("notice").hidden = false; };
+
+    if (!idea) {
+      $("title").textContent = "Chưa nạp được dữ liệu";
+      $("summary").textContent = "—";
+      notice("Không đọc được data/idea.js. Kiểm tra file có tồn tại và có gán window.CORESIMPLE_IDEA.");
+      return;
+    }
+
+    $("title").textContent = idea.title || "Chưa đặt tên game";
+    if (idea.summary) {
+      $("summary").textContent = idea.summary;
+    } else {
+      $("summary").textContent = "Chưa có ý tưởng được duyệt.";
+      $("summary").className = "muted";
+      notice("data/idea.js đang trống. Người duyệt điền ý tưởng vào file đó; AI chỉ được đề xuất trong proposals/.");
+    }
+
+    var pillars = Array.isArray(idea.pillars) ? idea.pillars : [];
+    pillars.forEach(function (text) {
+      var li = document.createElement("li");
+      li.textContent = text;
+      $("pillars").appendChild(li);
+    });
+    $("pillars-box").hidden = pillars.length === 0;
+
+    $("footer").textContent = idea.approvedAt ? "Ý tưởng duyệt ngày " + idea.approvedAt : "Ý tưởng chưa được duyệt.";
+  })();
+</script>
+</body>
+</html>

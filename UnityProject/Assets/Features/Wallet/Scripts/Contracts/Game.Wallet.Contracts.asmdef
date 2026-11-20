@@ -1,0 +1,16 @@
+{
+  "name": "Game.Wallet.Contracts",
+  "rootNamespace": "Game.Wallet",
+  "references": [
+    "Game.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

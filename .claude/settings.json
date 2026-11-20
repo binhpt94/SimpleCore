@@ -1,0 +1,54 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "disableBypassPermissionsMode": "disable",
+    "ask": [
+      "Edit(/UnityProject/Assets/_Composition/**)",
+      "Edit(/UnityProject/Assets/Core/**)",
+      "Edit(/.claude/**)",
+      "Edit(/CLAUDE.md)",
+      "Edit(/Management/data/**)",
+      "Edit(/Management/tools/**)",
+      "Edit(/Management/index.html)",
+      "Edit(/UnityProject/Packages/**)",
+      "Edit(/UnityProject/ProjectSettings/**)"
+    ],
+    "deny": [
+      "Read(/UnityProject/Library/**)",
+      "Read(/UnityProject/Temp/**)",
+      "Read(/UnityProject/Logs/**)",
+      "Read(/UnityProject/obj/**)",
+      "Read(/UnityProject/UserSettings/**)",
+      "Edit(/UnityProject/Library/**)",
+      "Edit(/UnityProject/Temp/**)",
+      "Edit(/UnityProject/Logs/**)",
+      "Edit(/UnityProject/obj/**)",
+      "Edit(/UnityProject/UserSettings/**)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I \"D:/AI/CoreSimple/.claude/hooks/stop_validate.py\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I \"D:/AI/CoreSimple/.claude/hooks/guard.py\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

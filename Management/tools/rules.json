@@ -1,0 +1,32 @@
+{
+  "_doc": [
+    "Cấu hình cho validate.py. Chỉ người sửa file này.",
+    "extraAssetRoots: thư mục cấp 1 trong Assets ngoài Features/Core/_Composition (ví dụ 'Plugins', 'TextMesh Pro'). Validator coi là bên thứ ba, không quét.",
+    "allowedPackages / allowedDlls: theo lớp (Contracts, Internal, View, Tests, Core, Composition, hoặc '*' cho mọi lớp).",
+    "bannedApis: regex quét trên code đã bỏ chú thích và chuỗi; không áp dụng cho Tests.",
+    "exceptions: { rule, path, reason, approvedBy, date }. path dùng wildcard * và tính từ gốc project, ví dụ 'UnityProject/Assets/Features/_Services/Popup/Scripts/Contracts/*'. Thiếu reason hoặc approvedBy thì ngoại lệ không có hiệu lực."
+  ],
+  "extraAssetRoots": [],
+  "allowedPackages": {
+    "View": ["UnityEngine.UI", "Unity.TextMeshPro"],
+    "Tests": ["UnityEngine.TestRunner", "UnityEditor.TestRunner"]
+  },
+  "allowedDlls": {
+    "Tests": ["nunit.framework.dll"]
+  },
+  "bannedApis": [
+    { "id": "reflection", "pattern": "\\bSystem\\.Reflection\\b|\\bType\\.GetType\\s*\\(|\\bActivator\\.CreateInstance\\b", "reason": "reflection vuot duoc ranh gioi asmdef" },
+    { "id": "send-message", "pattern": "\\b(SendMessage|SendMessageUpwards|BroadcastMessage)\\s*\\(", "reason": "goi ham theo ten chuoi, vuot contract" },
+    { "id": "find-by-name", "pattern": "\\bGameObject\\.Find\\w*\\s*\\(", "reason": "lay object cua feature khac theo ten" },
+    { "id": "resources-load", "pattern": "\\bResources\\.Load\\w*\\b", "reason": "nap asset theo duong dan chuoi, vuot quet GUID" }
+  ],
+  "exceptions": [
+    {
+      "rule": "ASM-05",
+      "path": "UnityProject/Assets/Features/_Services/Popup/Scripts/Contracts/*",
+      "reason": "IPopupService nhận prefab (GameObject) do feature gọi mang tới, nên Contracts của Popup phải dùng UnityEngine.",
+      "approvedBy": "chủ dự án (chốt điểm 3 khi bàn luật asmdef)",
+      "date": "2026-11-21"
+    }
+  ]
+}

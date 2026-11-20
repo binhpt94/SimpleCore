@@ -1,0 +1,26 @@
+{
+  "name": "Game.Services.Popup.Tests",
+  "rootNamespace": "Game.Services.Popup.Tests",
+  "references": [
+    "Game.Core",
+    "Game.Services.Popup.Contracts",
+    "Game.Services.Popup.Internal",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
