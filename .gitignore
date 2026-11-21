@@ -31,3 +31,7 @@ __pycache__/
 /.claude/settings.local.json
 .DS_Store
 Thumbs.db
+
+# Trang quản lý: sinh bởi Management/tools/sync_page.py
+/Management/data/project.js
+/Management/data/project.js.tmp

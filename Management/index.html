@@ -8,33 +8,81 @@
   :root {
     --bg: #f6f5f1; --panel: #ffffff; --text: #1d1c1a; --muted: #6b6860;
     --line: #dedbd2; --accent: #2f6f5e; --warn-bg: #fbf1d8; --warn-text: #6b4e00;
+    --bad: #a3352b; --ok: #2f6f5e;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #161614; --panel: #1f1f1c; --text: #ecebe6; --muted: #9c998f;
       --line: #33322d; --accent: #7fc4ae; --warn-bg: #3a2f10; --warn-text: #f0d68a;
+      --bad: #f08a7e; --ok: #7fc4ae;
     }
   }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     margin: 0; background: var(--bg); color: var(--text);
-    font: 16px/1.6 "Segoe UI", system-ui, sans-serif;
+    font: 15px/1.6 "Segoe UI", system-ui, sans-serif;
   }
-  main { max-width: 760px; margin: 0 auto; padding: 40px 16px 64px; }
-  header { border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 32px; }
-  .eyebrow { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-  h1 { margin: 4px 0 0; font-size: 30px; line-height: 1.25; text-wrap: balance; }
-  h2 { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
-  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 24px; margin-bottom: 16px; }
+  .top {
+    display: flex; align-items: center; gap: 32px; height: 56px; padding: 0 20px;
+    background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2;
+  }
+  .brand { flex: none; }
+  .eyebrow { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); line-height: 1.2; }
+  .brand strong { display: block; font-size: 15px; line-height: 1.3; }
+  #topnav { display: flex; gap: 4px; align-self: stretch; overflow-x: auto; min-width: 0; }
+  #topnav a {
+    display: flex; align-items: center; padding: 0 14px; color: var(--muted); text-decoration: none;
+    border-bottom: 2px solid transparent; white-space: nowrap;
+  }
+  #topnav a:hover { color: var(--text); }
+  #topnav a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  #topnav a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 56px); }
+  #nav {
+    background: var(--panel); border-right: 1px solid var(--line);
+    padding: 8px 12px 20px; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
+  }
+  .group { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 14px 10px 4px; }
+  #nav a {
+    display: flex; justify-content: space-between; gap: 8px; align-items: center;
+    padding: 6px 10px; border-radius: 6px; color: var(--text); text-decoration: none; white-space: nowrap;
+  }
+  #nav a:hover { background: var(--bg); }
+  #nav a[aria-current="page"] { background: var(--accent); color: var(--panel); }
+  #nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex: none; }
+  .dot.bad { background: var(--bad); }
+  #nav a[aria-current="page"] .dot { background: var(--panel); }
+  main { padding: 32px 40px 64px; min-width: 0; }
+  h1 { margin: 0 0 4px; font-size: 26px; line-height: 1.25; text-wrap: balance; }
+  h2 { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
+  h3 { margin: 0; font-size: 15px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 20px 24px; margin-bottom: 16px; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items: start; }
+  .cols > section { margin-bottom: 0; }
   p { margin: 0; }
   ul { margin: 0; padding-left: 20px; }
-  li + li { margin-top: 6px; }
+  li + li { margin-top: 4px; }
   .muted { color: var(--muted); }
   .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
-  footer { margin-top: 24px; font-size: 13px; color: var(--muted); }
   code { font-family: Consolas, monospace; font-size: .92em; }
-  [hidden] { display: none; }
-  h3 { margin: 0; font-size: 16px; }
+  [hidden] { display: none !important; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td a { color: var(--accent); }
+  .bad-text { color: var(--bad); font-weight: 600; }
+  .ok-text { color: var(--ok); }
+  .doc { white-space: pre-wrap; font: 14px/1.6 Consolas, monospace; margin: 0; overflow-x: auto; }
+  .layer + .layer { margin-top: 12px; }
+  .layer ul { font: 14px/1.6 Consolas, monospace; }
+  .viol { border-left: 3px solid var(--bad); padding: 6px 12px; }
+  .viol.ex { border-left-color: var(--line); }
+  .viol + .viol { margin-top: 8px; }
+  .viol code { display: block; color: var(--muted); word-break: break-all; }
   .session { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
   .session .muted { font-size: 14px; }
   .cmd { display: flex; gap: 8px; align-items: stretch; margin-top: 8px; }
@@ -53,166 +101,274 @@
   button.copy:hover { background: var(--accent); color: var(--panel); }
   button.copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .gap { margin-top: 16px; }
+  footer { margin-top: 24px; font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 700px) {
+    .top { padding: 0 16px; gap: 0; }
+    .brand { display: none; }
+    .app { display: block; }
+    #nav {
+      position: sticky; top: 56px; height: auto; display: flex; gap: 4px; align-items: center;
+      overflow-x: auto; padding: 8px 16px; border-right: 0; border-bottom: 1px solid var(--line); z-index: 1;
+    }
+    .group { display: none; }
+    main { padding: 20px 16px 48px; }
+    .cols { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
-<main>
-  <header>
-    <div class="eyebrow">CoreSimple · Trang quản lý</div>
-    <h1 id="title"></h1>
-  </header>
+<header class="top">
+  <div class="brand"><div class="eyebrow">CoreSimple</div><strong>Trang quản lý</strong></div>
+  <nav id="topnav" aria-label="Tab chung"></nav>
+</header>
+<div class="app">
+  <nav id="nav" aria-label="Tab feature"></nav>
+  <main id="main">
+    <div id="notice" class="notice" hidden></div>
+    <div id="panes"></div>
+    <footer id="footer"></footer>
+  </main>
+</div>
 
-  <div id="notice" class="notice" hidden></div>
-
-  <section>
-    <h2>Ý tưởng cốt lõi</h2>
-    <p id="summary"></p>
-  </section>
-
-  <section id="pillars-box" hidden>
-    <h2>Trụ cột thiết kế</h2>
-    <ul id="pillars"></ul>
-  </section>
-
-  <section>
-    <h2>Feature</h2>
-    <p class="muted">Chưa có số liệu. Danh sách và tình trạng feature sẽ lấy từ script đo, không do AI khai.</p>
-  </section>
-
-  <section id="sessions-box" hidden>
-    <h2>Gán chat theo feature</h2>
-    <p id="sessions-intro"></p>
-    <div id="pin-box" class="session" hidden>
-      <h3 id="pin-title"></h3>
-      <p id="pin-hint" class="muted"></p>
-    </div>
-    <div id="sessions"></div>
-    <ul id="sessions-notes" class="gap muted"></ul>
-  </section>
-
-  <section id="brief-box" hidden>
-    <h2 id="brief-title"></h2>
-    <p id="brief-hint" class="muted"></p>
-    <div id="brief"></div>
-  </section>
-
-  <footer id="footer"></footer>
-</main>
-
-<!-- Trang này chỉ là vỏ. Mọi nội dung nằm trong data/. -->
+<!-- Trang này chỉ là vỏ. Mọi nội dung nằm trong data/. project.js do tools/sync_page.py sinh ra. -->
 <script src="data/idea.js"></script>
 <script src="data/sessions.js"></script>
+<script src="data/project.js"></script>
 <script>
-  (function () {
-    var idea = window.CORESIMPLE_IDEA;
-    var $ = function (id) { return document.getElementById(id); };
-    var notice = function (text) { $("notice").textContent = text; $("notice").hidden = false; };
+(function () {
+  var idea = window.CORESIMPLE_IDEA || null;
+  var sessions = window.CORESIMPLE_SESSIONS || null;
+  var project = window.CORESIMPLE_PROJECT || null;
+  var $ = function (id) { return document.getElementById(id); };
+  var el = function (tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  };
+  // add(parent, ...children) trả về parent; put(parent, child) trả về child.
+  var add = function (parent) {
+    for (var i = 1; i < arguments.length; i++) if (arguments[i]) parent.appendChild(arguments[i]);
+    return parent;
+  };
+  var put = function (parent, child) { parent.appendChild(child); return child; };
+  var notices = [];
 
+  var copyText = function (text) {
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+    // Trang mở từ file:// có thể không có Clipboard API: chép qua một ô nhập tạm.
+    return new Promise(function (resolve, reject) {
+      var box = el("textarea");
+      box.value = text;
+      box.style.position = "fixed";
+      box.style.opacity = "0";
+      document.body.appendChild(box);
+      box.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      document.body.removeChild(box);
+      if (ok) resolve(); else reject(new Error("copy failed"));
+    });
+  };
+
+  // `copy` là chữ được chép, mặc định giống chữ hiển thị.
+  var commandBlock = function (text, tall, copy) {
+    var wrap = el("div", tall ? "cmd tall" : "cmd");
+    var pre = el("pre", "", text);
+    var button = el("button", "copy", "Chép");
+    button.type = "button";
+    button.addEventListener("click", function () {
+      copyText(copy === undefined ? text : copy).then(
+        function () { button.textContent = "Đã chép"; },
+        function () { button.textContent = "Không chép được, hãy bôi đen và Ctrl+C"; }
+      ).then(function () {
+        setTimeout(function () { button.textContent = "Chép"; }, 2000);
+      });
+    });
+    return add(wrap, pre, button);
+  };
+
+  var section = function (title) {
+    var s = el("section");
+    if (title) s.appendChild(el("h2", "", title));
+    return s;
+  };
+
+  // ---------------------------------------------------------------- tabs
+  var tabs = [];   // {key, label, group, bad, build}
+  var tab = function (key, label, group, build, bad) { tabs.push({ key: key, label: label, group: group, build: build, bad: bad }); };
+
+  // Tổng quan
+  tab("tong-quan", "Tổng quan", "", function (pane) {
+    add(pane, el("h1", "", idea && idea.title ? idea.title : "Chưa đặt tên game"));
+    var sub = el("p", "sub", project ? "Dữ liệu feature cập nhật lúc " + project.generatedAt.replace("T", " ") : "");
+    add(pane, sub);
+
+    var cols = put(pane, el("div", "cols"));
+    var s = put(cols, section("Ý tưởng cốt lõi"));
     if (!idea) {
-      $("title").textContent = "Chưa nạp được dữ liệu";
-      $("summary").textContent = "—";
-      notice("Không đọc được data/idea.js. Kiểm tra file có tồn tại và có gán window.CORESIMPLE_IDEA.");
+      add(s, el("p", "muted", "Không đọc được data/idea.js."));
+    } else if (idea.summary) {
+      add(s, el("p", "", idea.summary));
+    } else {
+      add(s, el("p", "muted", "Chưa có ý tưởng được duyệt. Người duyệt điền vào data/idea.js; AI chỉ được đề xuất trong proposals/."));
+    }
+    var pillars = idea && Array.isArray(idea.pillars) ? idea.pillars : [];
+    if (pillars.length) {
+      var ps = put(cols, section("Trụ cột thiết kế"));
+      var ul = put(ps, el("ul"));
+      pillars.forEach(function (t) { add(ul, el("li", "", t)); });
+    }
+
+    var fs = put(pane, section("Feature"));
+    fs.style.marginTop = "16px";
+    if (!project) {
+      add(fs, el("p", "muted", "Chưa có data/project.js."));
       return;
     }
-
-    $("title").textContent = idea.title || "Chưa đặt tên game";
-    if (idea.summary) {
-      $("summary").textContent = idea.summary;
-    } else {
-      $("summary").textContent = "Chưa có ý tưởng được duyệt.";
-      $("summary").className = "muted";
-      notice("data/idea.js đang trống. Người duyệt điền ý tưởng vào file đó; AI chỉ được đề xuất trong proposals/.");
-    }
-
-    var pillars = Array.isArray(idea.pillars) ? idea.pillars : [];
-    pillars.forEach(function (text) {
-      var li = document.createElement("li");
-      li.textContent = text;
-      $("pillars").appendChild(li);
+    var table = put(fs, el("table"));
+    var head = add(el("tr"), el("th", "", "Tên"), el("th", "", "Loại"), el("th", "num", "Contracts"),
+                   el("th", "num", "Internal"), el("th", "num", "View"), el("th", "num", "Tests"),
+                   el("th", "num", "Vi phạm"), el("th", "num", "Ngoại lệ"));
+    add(table, add(el("thead"), head));
+    var body = put(table, el("tbody"));
+    project.features.forEach(function (f) {
+      var link = el("a", "", f.id);
+      link.href = "#" + f.id;
+      var v = el("td", "num " + (f.violations.length ? "bad-text" : "ok-text"), String(f.violations.length));
+      add(body, add(el("tr"), add(el("td"), link), el("td", "", f.kind === "service" ? "Dịch vụ" : "Feature"),
+        el("td", "num", String(f.files.Contracts.length)), el("td", "num", String(f.files.Internal.length)),
+        el("td", "num", String(f.files.View.length)), el("td", "num", String(f.files.Tests.length)),
+        v, el("td", "num", String(f.excepted.length))));
     });
-    $("pillars-box").hidden = pillars.length === 0;
+    if (project.otherViolations.length) {
+      add(fs, el("p", "gap bad-text", project.otherViolations.length + " vi phạm ngoài feature (Core, _Composition, rules.json): chạy python Management/tools/validate.py để xem."));
+    }
+  });
 
-    $("footer").textContent = idea.approvedAt ? "Ý tưởng duyệt ngày " + idea.approvedAt : "Ý tưởng chưa được duyệt.";
-  })();
+  // Mỗi feature một tab
+  var violList = function (list, ex) {
+    var wrap = el("div", "gap");
+    list.forEach(function (v) {
+      var box = add(el("div", ex ? "viol ex" : "viol"), el("strong", "", v.rule + " "), document.createTextNode(v.message));
+      add(box, el("code", "", v.line ? v.file + ":" + v.line : v.file));
+      if (ex) add(box, el("p", "muted", "Đã duyệt: " + v.reason + " (" + v.approvedBy + ")"));
+      add(wrap, box);
+    });
+    return wrap;
+  };
 
-  (function () {
-    var data = window.CORESIMPLE_SESSIONS;
-    if (!data) return;
-    var $ = function (id) { return document.getElementById(id); };
-    var el = function (tag, className, text) {
-      var node = document.createElement(tag);
-      if (className) node.className = className;
-      if (text) node.textContent = text;
-      return node;
-    };
+  if (project) {
+    project.features.forEach(function (f) {
+      tab(f.id, f.id.replace("_Services/", ""), f.kind === "service" ? "Dịch vụ" : "Feature", function (pane) {
+        add(pane, el("h1", "", f.id));
+        add(pane, el("p", "sub", (f.kind === "service" ? "Dịch vụ" : "Feature") + " · UnityProject/Assets/Features/" + f.id));
 
-    var copyText = function (text) {
-      if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
-      // Trang mở từ file:// có thể không có Clipboard API: chép qua một ô nhập tạm.
-      return new Promise(function (resolve, reject) {
-        var box = el("textarea");
-        box.value = text;
-        box.style.position = "fixed";
-        box.style.opacity = "0";
-        document.body.appendChild(box);
-        box.select();
-        var ok = false;
-        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
-        document.body.removeChild(box);
-        if (ok) resolve(); else reject(new Error("copy failed"));
-      });
-    };
+        var cols = put(pane, el("div", "cols"));
+        var left = put(cols, el("div"));
+        var cmd = put(left, section("Lệnh"));
+        add(cmd, el("p", "muted", "Gán chat (gõ thêm PIN rồi Enter):"));
+        add(cmd, commandBlock("FEATURE=" + f.id + " <PIN>", false, "FEATURE=" + f.id + " "));
+        add(cmd, el("p", "muted gap", "Kiểm tra ranh giới:"));
+        add(cmd, commandBlock("python Management/tools/validate.py --feature " + f.id));
 
-    // `copy` là chữ được chép, mặc định giống chữ hiển thị.
-    var commandBlock = function (text, tall, copy) {
-      var wrap = el("div", tall ? "cmd tall" : "cmd");
-      var pre = el("pre", "", text);
-      var button = el("button", "copy", "Chép");
-      button.type = "button";
-      button.addEventListener("click", function () {
-        copyText(copy === undefined ? text : copy).then(
-          function () { button.textContent = "Đã chép"; },
-          function () { button.textContent = "Không chép được, hãy bôi đen và Ctrl+C"; }
-        ).then(function () {
-          setTimeout(function () { button.textContent = "Chép"; }, 2000);
+        var st = put(left, section("Ranh giới"));
+        st.style.marginTop = "16px";
+        if (f.violations.length) {
+          add(st, el("p", "bad-text", f.violations.length + " vi phạm"));
+          add(st, violList(f.violations, false));
+        } else {
+          add(st, el("p", "ok-text", "0 vi phạm"));
+        }
+        if (f.excepted.length) {
+          add(st, el("p", "muted gap", f.excepted.length + " ngoại lệ đã duyệt"));
+          add(st, violList(f.excepted, true));
+        }
+
+        var files = put(left, section("File theo lớp"));
+        files.style.marginTop = "16px";
+        Object.keys(f.files).forEach(function (layer) {
+          var box = put(files, el("div", "layer"));
+          add(box, el("h3", "", layer + " (" + f.files[layer].length + ")"));
+          if (!f.files[layer].length) { add(box, el("p", "muted", "—")); return; }
+          var ul = put(box, el("ul"));
+          f.files[layer].forEach(function (name) { add(ul, el("li", "", name)); });
         });
-      });
-      wrap.appendChild(pre);
-      wrap.appendChild(button);
-      return wrap;
-    };
 
-    var features = Array.isArray(data.features) ? data.features : [];
-    if (features.length) {
-      $("sessions-intro").textContent = data.intro || "";
-      if (data.pinCommand) {
-        $("pin-title").textContent = data.pinTitle || "Đặt PIN";
-        $("pin-hint").textContent = data.pinHint || "";
-        $("pin-box").appendChild(commandBlock(data.pinCommand));
-        $("pin-box").hidden = false;
+        var doc = put(cols, section("CLAUDE.md"));
+        add(doc, f.claude ? el("pre", "doc", f.claude) : el("p", "muted", "Feature chưa có CLAUDE.md ở gốc."));
+      }, f.violations.length > 0);
+    });
+  }
+
+  // Gán chat
+  if (sessions) {
+    tab("gan-chat", "Gán chat", "", function (pane) {
+      add(pane, el("h1", "", "Gán chat theo feature"));
+      var s = put(pane, section(""));
+      add(s, el("p", "", sessions.intro || ""));
+      if (sessions.pinCommand) {
+        var pin = put(s, el("div", "session"));
+        add(pin, el("h3", "", sessions.pinTitle || "Đặt PIN"), el("p", "muted", sessions.pinHint || ""), commandBlock(sessions.pinCommand));
       }
-      features.forEach(function (feature) {
-        var box = el("div", "session");
-        box.appendChild(el("h3", "", feature.label || feature.id));
-        if (feature.note) box.appendChild(el("p", "muted", feature.note));
+      (Array.isArray(sessions.features) ? sessions.features : []).forEach(function (feature) {
+        var box = put(s, el("div", "session"));
+        add(box, el("h3", "", feature.label || feature.id));
+        if (feature.note) add(box, el("p", "muted", feature.note));
         // Chỉ chép phần trước PIN: PIN do người tự gõ, không nằm trong trang.
         var bind = "FEATURE=" + feature.id + " ";
-        box.appendChild(commandBlock(bind + "<PIN>", false, feature.copy || bind));
-        $("sessions").appendChild(box);
+        add(box, commandBlock(bind + "<PIN>", false, feature.copy || bind));
       });
-      (Array.isArray(data.notes) ? data.notes : []).forEach(function (text) {
-        $("sessions-notes").appendChild(el("li", "", text));
+      var notes = put(s, el("ul", "gap muted"));
+      (Array.isArray(sessions.notes) ? sessions.notes : []).forEach(function (t) { add(notes, el("li", "", t)); });
+    });
+    if (sessions.brief) {
+      tab("giao-viec", sessions.briefTitle || "Giao việc", "", function (pane) {
+        add(pane, el("h1", "", sessions.briefTitle || "Mẫu lệnh giao việc"));
+        var s = put(pane, section(""));
+        add(s, el("p", "muted", sessions.briefHint || ""), commandBlock(sessions.brief, true));
       });
-      $("sessions-box").hidden = false;
     }
+  }
 
-    if (data.brief) {
-      $("brief-title").textContent = data.briefTitle || "Mẫu lệnh giao việc";
-      $("brief-hint").textContent = data.briefHint || "";
-      $("brief").appendChild(commandBlock(data.brief, true));
-      $("brief-box").hidden = false;
-    }
-  })();
+  // ---------------------------------------------------------------- render
+  // Tab không có group (dữ liệu chung) nằm trên thanh ngang; tab feature nằm ở cột trái.
+  var nav = $("nav"), topnav = $("topnav"), panes = $("panes"), links = {}, built = {};
+  var lastGroup = null;
+  tabs.forEach(function (t) {
+    var a = add(el("a"), el("span", "", t.label));
+    a.href = "#" + t.key;
+    links[t.key] = a;
+    if (!t.group) { add(topnav, a); return; }
+    if (t.group !== lastGroup) add(nav, el("div", "group", t.group));
+    lastGroup = t.group;
+    add(a, el("span", t.bad ? "dot bad" : "dot"));
+    add(nav, a);
+  });
+  if (!nav.children.length) { nav.hidden = true; document.querySelector(".app").style.display = "block"; }
+
+  var show = function () {
+    var key = decodeURIComponent(location.hash.slice(1));
+    var t = tabs.filter(function (x) { return x.key === key; })[0] || tabs[0];
+    tabs.forEach(function (x) {
+      links[x.key].removeAttribute("aria-current");
+      if (built[x.key]) built[x.key].hidden = true;
+    });
+    links[t.key].setAttribute("aria-current", "page");
+    if (!built[t.key]) { built[t.key] = put(panes, el("div")); t.build(built[t.key]); }
+    built[t.key].hidden = false;
+    document.title = t.label + " — CoreSimple";
+    window.scrollTo(0, 0);
+  };
+  window.addEventListener("hashchange", show);
+  show();
+
+  if (!project) notices.push("Chưa có data/project.js. Chạy: python Management/tools/sync_page.py (Stop hook tự chạy sau mỗi lượt chat).");
+  if (!idea) notices.push("Không đọc được data/idea.js.");
+  if (notices.length) { $("notice").textContent = notices.join(" "); $("notice").hidden = false; }
+  $("footer").textContent = idea && idea.approvedAt ? "Ý tưởng duyệt ngày " + idea.approvedAt : "Ý tưởng chưa được duyệt.";
+})();
 </script>
 </body>
 </html>
