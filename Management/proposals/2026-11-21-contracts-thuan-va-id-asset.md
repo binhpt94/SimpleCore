@@ -1,6 +1,17 @@
 # Đề xuất: Contracts luôn thuần C#, asset giao cho dịch vụ qua id
 
-Ngày: 2026-11-21. Trạng thái: đã duyệt. Bước 2 (SRC-05) đã làm; các bước sau chưa làm.
+Ngày: 2026-11-21. Trạng thái: đã duyệt, đã làm bước 2 đến 6.
+
+## Kết quả và chỗ làm khác bản gốc
+
+Người duyệt chốt thêm trong lúc làm:
+
+- **Catalog là kiểu chung trong Core** (`AssetCatalog`: loại + danh sách id → asset; `IAssetCatalogs`), không phải `PopupCatalog` trong Popup. Lý do: Boot ở `_Composition` không gọi tên được kiểu internal của Popup (SRC-01 chỉ cho installer là public), và asset của Popup không được trỏ tới prefab của Shop (AST-01). Boot của mỗi scene đăng ký `IAssetCatalogs` trước mọi installer; Popup lấy catalog loại `"Popup"`.
+- **Chưa nạp/nhả asset qua SessionScene.** Dịch vụ không được tham chiếu Contracts của dịch vụ khác (ASM-04), và catalog trỏ thẳng prefab nên prefab nạp cùng scene. Làm khi chuyển sang Addressables, bằng đề xuất riêng.
+- **Id khai báo trong Internal** (đã ghi ở mục 2).
+- **Chưa làm `Show(id, payload)` và `IPopupContent<T>` (mục 4):** chưa feature nào cần đưa dữ liệu vào popup; luật "không mở contract phòng khi cần". Khi cần thì làm theo mục 4. Phần B của đề xuất `popup-opened-callback` không còn áp dụng được (nó dựa trên `PopupRequest`, đã bỏ).
+
+Đã có: `PopupId`, `IPopupService.Show(PopupId)`, Contracts của Popup thuần C#, `rules.json` không còn ngoại lệ nào, `ShopPopups.Purchased`, `PurchasedPopup.prefab` ở `Shop/FeatureAssets/Public` (giữ GUID), `Boot.Loading.prefab` / `Boot.Game.prefab`, `_Composition/Game.Popups.asset`, `unity.md` và `CLAUDE.md` của Popup, Shop.
 
 ## Vì sao cần
 

@@ -5,14 +5,18 @@ using UnityEngine;
 namespace Game.Composition
 {
     /// <summary>
-    /// Starts the game: runs each feature's installer in list order. The list on Boot.prefab is the
-    /// boot order, one entry per feature. No game logic here.
+    /// Starts a scene: registers the scene's asset catalogs, then runs each feature's installer in list order.
+    /// Each scene uses its own variant of Boot.prefab (Boot.Loading, Boot.Game); the variant's lists are
+    /// that scene's boot order and shared assets. No game logic here.
     /// </summary>
     public sealed class Boot : MonoBehaviour
     {
-        [SerializeField] private InstallerAsset[] installers;
+        [SerializeField] private InstallerAsset[] installers = new InstallerAsset[0];
+        [SerializeField] private AssetCatalog[] catalogs = new AssetCatalog[0];
 
         internal IReadOnlyList<InstallerAsset> Installers => installers;
+
+        internal IReadOnlyList<AssetCatalog> Catalogs => catalogs;
 
         private void Awake()
         {
@@ -22,6 +26,7 @@ namespace Game.Composition
         internal IServiceRegistry Run()
         {
             var registry = new ServiceRegistry();
+            registry.Register<IAssetCatalogs>(new AssetCatalogs(catalogs));
             foreach (var installer in installers)
             {
                 installer.Install(registry);

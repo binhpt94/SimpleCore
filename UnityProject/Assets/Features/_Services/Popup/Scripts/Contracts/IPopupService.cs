@@ -4,10 +4,10 @@ namespace Game.Services.Popup
     public interface IPopupService
     {
         /// <summary>
-        /// Queues a popup. It opens immediately when nothing else is open.
-        /// Returns an invalid handle when the request has no prefab.
+        /// Queues the popup named <paramref name="id"/>. It opens immediately when nothing else is open.
+        /// Throws when the id is the default value or is not in the current scene's popup catalog.
         /// </summary>
-        PopupHandle Show(PopupRequest request);
+        PopupHandle Show(PopupId id);
 
         /// <summary>Closes an open popup or cancels a queued one. Unknown handles are ignored.</summary>
         void Close(PopupHandle handle);

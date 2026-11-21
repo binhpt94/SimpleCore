@@ -4,8 +4,6 @@ using System.Threading;
 using Game.Services.Popup;
 using Game.Wallet;
 using NUnit.Framework;
-using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Game.Shop.Tests
 {
@@ -14,7 +12,6 @@ namespace Game.Shop.Tests
         private FakeWallet wallet;
         private FakePopups popups;
         private FakeViewSource views;
-        private GameObject popupPrefab;
         private ShopBuyPresenter presenter;
 
         [SetUp]
@@ -23,15 +20,8 @@ namespace Game.Shop.Tests
             wallet = new FakeWallet { Coins = 100 };
             popups = new FakePopups();
             views = new FakeViewSource();
-            popupPrefab = new GameObject("PurchasedPopup");
-            var logic = new ShopLogic(wallet, popups, new[] { new ShopItem("gem_small", 30) }, popupPrefab);
+            var logic = new ShopLogic(wallet, popups, new[] { new ShopItem("gem_small", 30) });
             presenter = new ShopBuyPresenter(logic, views);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            Object.DestroyImmediate(popupPrefab);
         }
 
         [Test]
@@ -59,8 +49,7 @@ namespace Game.Shop.Tests
             views.View.PressBuy("gem_small");
 
             Assert.That(wallet.Coins, Is.EqualTo(70));
-            Assert.That(popups.Shown, Has.Count.EqualTo(1));
-            Assert.That(popups.Shown[0].Prefab, Is.SameAs(popupPrefab));
+            Assert.That(popups.Shown, Is.EqualTo(new[] { ShopPopups.Purchased }));
         }
 
         [Test]
@@ -141,11 +130,11 @@ namespace Game.Shop.Tests
 
         private sealed class FakePopups : IPopupService
         {
-            internal readonly List<PopupRequest> Shown = new List<PopupRequest>();
+            internal readonly List<PopupId> Shown = new List<PopupId>();
 
-            public PopupHandle Show(PopupRequest request)
+            public PopupHandle Show(PopupId id)
             {
-                Shown.Add(request);
+                Shown.Add(id);
                 return new PopupHandle(Shown.Count);
             }
 

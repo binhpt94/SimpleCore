@@ -15,7 +15,6 @@ namespace Game.Shop.Tests
     {
         private FakeWallet wallet;
         private FakePopups popups;
-        private GameObject popupPrefab;
         private ShopLogic shop;
 
         [SetUp]
@@ -23,15 +22,8 @@ namespace Game.Shop.Tests
         {
             wallet = new FakeWallet { Coins = 100 };
             popups = new FakePopups();
-            popupPrefab = new GameObject("PurchasedPopup");
             shop = new ShopLogic(wallet, popups,
-                new[] { new ShopItem("gem_small", 30), new ShopItem("gem_large", 250) }, popupPrefab);
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            Object.DestroyImmediate(popupPrefab);
+                new[] { new ShopItem("gem_small", 30), new ShopItem("gem_large", 250) });
         }
 
         [Test]
@@ -40,8 +32,7 @@ namespace Game.Shop.Tests
             Assert.That(shop.TryPurchase("gem_small"), Is.EqualTo(PurchaseResult.Ok));
 
             Assert.That(wallet.Coins, Is.EqualTo(70));
-            Assert.That(popups.Shown, Has.Count.EqualTo(1));
-            Assert.That(popups.Shown[0].Prefab, Is.SameAs(popupPrefab));
+            Assert.That(popups.Shown, Is.EqualTo(new[] { ShopPopups.Purchased }));
         }
 
         [Test]
@@ -91,8 +82,7 @@ namespace Game.Shop.Tests
             Assert.That(session.Joined[0], Is.InstanceOf<ShopBuyPresenter>());
             ((ShopBuyPresenter)session.Joined[0]).Buy("gem_small");
             Assert.That(wallet.Coins, Is.EqualTo(70), "price of gem_small should come from ShopConfig.asset");
-            Assert.That(popups.Shown[0].Prefab, Is.Not.Null, "popup prefab should come from ShopConfig.asset");
-            Assert.That(popups.Shown[0].Prefab.name, Is.EqualTo("PurchasedPopup"));
+            Assert.That(popups.Shown, Is.EqualTo(new[] { new PopupId("Shop/Purchased") }));
         }
 
         [Test]
@@ -181,11 +171,11 @@ namespace Game.Shop.Tests
 
         private sealed class FakePopups : IPopupService
         {
-            internal readonly List<PopupRequest> Shown = new List<PopupRequest>();
+            internal readonly List<PopupId> Shown = new List<PopupId>();
 
-            public PopupHandle Show(PopupRequest request)
+            public PopupHandle Show(PopupId id)
             {
-                Shown.Add(request);
+                Shown.Add(id);
                 return new PopupHandle(Shown.Count);
             }
 

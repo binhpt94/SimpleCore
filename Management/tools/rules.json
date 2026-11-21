@@ -21,13 +21,5 @@
     { "id": "find-by-name", "pattern": "\\bGameObject\\.Find\\w*\\s*\\(", "reason": "lay object cua feature khac theo ten" },
     { "id": "resources-load", "pattern": "\\bResources\\.Load\\w*\\b", "reason": "nap asset theo duong dan chuoi, vuot quet GUID" }
   ],
-  "exceptions": [
-    {
-      "rule": "ASM-05",
-      "path": "UnityProject/Assets/Features/_Services/Popup/Scripts/Contracts/*",
-      "reason": "IPopupService nhận prefab (GameObject) do feature gọi mang tới, nên Contracts của Popup phải dùng UnityEngine.",
-      "approvedBy": "chủ dự án (chốt điểm 3 khi bàn luật asmdef)",
-      "date": "2026-11-21"
-    }
-  ]
+  "exceptions": []
 }

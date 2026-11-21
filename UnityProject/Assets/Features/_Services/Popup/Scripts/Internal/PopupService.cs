@@ -7,24 +7,26 @@ namespace Game.Services.Popup
     internal sealed class PopupService : IPopupService
     {
         private readonly IPopupPresenter presenter;
+        private readonly IPopupPrefabs prefabs;
         private readonly List<Entry> waiting = new List<Entry>();
         private Entry open;
         private int lastId;
 
-        internal PopupService(IPopupPresenter presenter)
+        internal PopupService(IPopupPresenter presenter, IPopupPrefabs prefabs)
         {
             this.presenter = presenter;
+            this.prefabs = prefabs;
         }
 
         internal PopupHandle Current => open != null ? open.Handle : default;
 
         internal int WaitingCount => waiting.Count;
 
-        public PopupHandle Show(PopupRequest request)
+        public PopupHandle Show(PopupId id)
         {
-            if (request == null || request.Prefab == null) return default;
+            var prefab = prefabs.Get(id);   // throws for an unknown or default id: a typo must not pass silently
 
-            var entry = new Entry(new PopupHandle(++lastId), request.Prefab);
+            var entry = new Entry(new PopupHandle(++lastId), prefab);
             if (open == null) Open(entry);
             else waiting.Add(entry);
             return entry.Handle;

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Game.Services.Popup;
 using Game.Wallet;
-using UnityEngine;
 
 namespace Game.Shop
 {
@@ -11,15 +10,12 @@ namespace Game.Shop
         private readonly IWalletService wallet;
         private readonly IPopupService popups;
         private readonly IReadOnlyList<ShopItem> items;
-        private readonly GameObject purchasedPopupPrefab;
 
-        internal ShopLogic(IWalletService wallet, IPopupService popups, IReadOnlyList<ShopItem> items,
-            GameObject purchasedPopupPrefab)
+        internal ShopLogic(IWalletService wallet, IPopupService popups, IReadOnlyList<ShopItem> items)
         {
             this.wallet = wallet;
             this.popups = popups;
             this.items = items;
-            this.purchasedPopupPrefab = purchasedPopupPrefab;
         }
 
         internal PurchaseResult TryPurchase(string itemId)
@@ -29,7 +25,7 @@ namespace Game.Shop
             // A free or mispriced item makes the wallet answer InvalidAmount; treat every refusal as "not bought".
             if (wallet.TrySpend(item.Price) != SpendResult.Ok) return PurchaseResult.NotEnoughCoins;
 
-            popups.Show(new PopupRequest(purchasedPopupPrefab));
+            popups.Show(ShopPopups.Purchased);
             return PurchaseResult.Ok;
         }
 

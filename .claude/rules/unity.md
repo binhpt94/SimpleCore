@@ -20,7 +20,7 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 - Lấy dịch vụ của feature khác chỉ qua `IServiceRegistry`, và chỉ trong `Install`. Không static, không singleton dùng chung.
 - Installer chỉ nối dây: tạo lớp logic, đăng ký contract. Không chứa luật game. Trong `Install` chỉ tạo object Unity khi đang Play.
 - Thiếu phụ thuộc, config hay prefab thì lỗi ngay đầu `Install`, thông báo nêu tên thứ bị thiếu. Không âm thầm bỏ qua.
-- Thứ tự cài trong Boot: SessionScene đứng đầu; bên Game của SceneFlow đứng cuối.
+- Mỗi scene một variant của `Boot.prefab` (`Boot.Loading`, `Boot.Game`) giữ danh sách installer và catalog asset (id → asset) của scene đó; scene không override. Thứ tự cài: SessionScene đầu, bên SceneFlow của scene cuối.
 - Cần dùng chung thứ gì với feature khác: đề xuất. Không chép code sang, không đẩy vào `Core`.
 - `Core` không chứa luật game và không biết tên feature nào.
 
@@ -32,7 +32,7 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 
 ## Asset
 - Không đổi GUID trong `.meta` đã có. Xoá hay đổi tên asset ở `FeatureAssets/Public` là đổi contract: phải hỏi.
-- Prefab giao cho dịch vụ (ví dụ Popup) là của feature gọi, đặt trong feature gọi.
+- Asset giao cho dịch vụ (ví dụ prefab popup) là của feature gọi, đặt ở `FeatureAssets/Public` của nó, và đi qua id `<Owner>/<Name>` (ví dụ `Shop/Purchased`), không qua object Unity. Id khai báo một lần, `static readonly` (giá trị bất biến, không phải trạng thái), trong Internal của chủ; validator SRC-05 kiểm.
 
 ## Không lách
 - Không viết code để né regex của validator (tách chuỗi, gọi gián tiếp API cấm).

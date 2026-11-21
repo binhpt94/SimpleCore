@@ -17,8 +17,6 @@ namespace Game.Shop
         {
             if (config == null)
                 throw new InvalidOperationException($"{name}: ShopConfig is not assigned (field 'config').");
-            if (config.PurchasedPopupPrefab == null)
-                throw new InvalidOperationException($"{config.name}: purchasedPopupPrefab is not assigned.");
             if (config.BuyViewPrefab == null)
                 throw new InvalidOperationException($"{config.name}: buyViewPrefab is not assigned.");
             if (!PrefabShopBuyViewSource.HasView(config.BuyViewPrefab))
@@ -29,8 +27,7 @@ namespace Game.Shop
             var logic = new ShopLogic(
                 registry.Resolve<IWalletService>(),
                 registry.Resolve<IPopupService>(),
-                config.Items,
-                config.PurchasedPopupPrefab);
+                config.Items);
 
             session.Join(new ShopBuyPresenter(logic, new PrefabShopBuyViewSource(config.BuyViewPrefab)));
         }
