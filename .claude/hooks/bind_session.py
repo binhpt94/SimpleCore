@@ -6,6 +6,8 @@
 
 guard.py then reads the binding by session_id. It is the only source: the FEATURE environment
 variable is not used, so a chat without a binding may edit nothing.
+Every other prompt is let through with one line of context telling the model what the chat is bound to
+(the binding command itself never reaches the model, so this is how it learns).
 
 Why a PIN: this hook also runs for prompts the agent can cause (a subagent's report, a message from
 another session, a scheduled task), and nothing in the input tells them apart from typed text. The
@@ -132,6 +134,28 @@ def handle(data, root, store):
     return f"Đã gán chat này: FEATURE={value}."
 
 
+def context(data, root, store):
+    """One line for the model on every prompt that gets through: what this chat is bound to.
+    Read from the binding each time, so it stays right after a rebind or a compaction. Never has the PIN."""
+    raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
+    if raw == "@human":
+        return ("guard: chat này gán FEATURE=@human (phiên của người): không giới hạn feature; sửa Core, "
+                "_Composition, .claude, CLAUDE.md gốc vẫn bị hỏi từng lần.")
+    if raw and guard.valid_feature(raw, root):
+        return (f"guard: chat này gán FEATURE={raw}. Sửa được trong UnityProject/Assets/Features/{raw}/ theo bảng "
+                "quyền ở CLAUDE.md gốc; không cần dò lại quyền.")
+    if raw:
+        return f"guard: chat này gán FEATURE={raw}, giá trị không hợp lệ: mọi thao tác sửa bị chặn."
+    return ("guard: chat này chưa gán FEATURE: mọi thao tác sửa bị chặn. Chỉ người gán được, "
+            "bằng FEATURE=<tên> <PIN>; AI không gán và không hỏi PIN.")
+
+
+def add_context(text):
+    out = {"hookSpecificOutput": {"hookEventName": "UserPromptSubmit", "additionalContext": text}}
+    sys.stdout.buffer.write(json.dumps(out, ensure_ascii=False).encode("utf-8"))
+    sys.stdout.buffer.flush()
+
+
 def block(message):
     out = {"decision": "block", "reason": "guard: " + message,
            "hookSpecificOutput": {"hookEventName": "UserPromptSubmit", "suppressOriginalPrompt": True}}
@@ -166,9 +190,13 @@ def main(argv):
     try:
         raw = sys.stdin.buffer.read()
         data = json.loads(raw.decode("utf-8-sig"))
-        message = handle(data, root, store) if isinstance(data, dict) else None
+        if not isinstance(data, dict):
+            return 0
+        message = handle(data, root, store)
         if message:
             block(message)
+        else:
+            add_context(context(data, root, store))
         return 0
     except BaseException as ex:
         # An ordinary prompt must not be lost to a broken hook, but one that may carry the PIN must not get through.

@@ -380,25 +380,29 @@ def run_cases():
 
 
 def say(group, expect, label, prompt, session="chat1", store=None):
-    """Real bind_session.py process. got = 'pass' (prompt goes on) or 'block', plus the binding it left."""
+    """Real bind_session.py process. got = 'pass' (prompt goes on, with a context line naming this chat's
+    binding and never the PIN) or 'block', plus the binding it left."""
     env = dict(os.environ)
     env.pop("FEATURE", None)
     args = [sys.executable, "-I", str(HERE / "bind_session.py"), "--root", FX, "--store", store or STORE]
     stdin = json.dumps({"hook_event_name": "UserPromptSubmit", "session_id": session, "prompt": prompt})
     p = subprocess.run(args, input=stdin.encode("utf-8"), capture_output=True, env=env)
+    bound = guard.bound_feature(session, store or STORE) if isinstance(session, str) else None
     if p.returncode != 0:
         got = f"exit{p.returncode}"
-    elif not p.stdout.strip():
-        got = "pass"
     else:
         try:
             out = json.loads(p.stdout)
-            hidden = out["hookSpecificOutput"]["suppressOriginalPrompt"] is True
-            leaked = PIN in out["reason"]
-            got = out["decision"] if hidden and not leaked else "garbage"
+            if "decision" in out:
+                hidden = out["hookSpecificOutput"]["suppressOriginalPrompt"] is True
+                leaked = PIN in out["reason"]
+                got = out["decision"] if hidden and not leaked else "garbage"
+            else:
+                ctx = out["hookSpecificOutput"]["additionalContext"]
+                names = f"FEATURE={bound}" in ctx if bound else "chưa gán" in ctx
+                got = "pass" if names and PIN not in ctx else "garbage: " + ctx
         except Exception:
             got = "garbage"
-    bound = guard.bound_feature(session, store or STORE) if isinstance(session, str) else None
     check(group, "", expect, label, f"{got}, bound={bound}")
 
 
@@ -439,12 +443,14 @@ def run_binding_cases(payload):
     say(g, "block, bound=_Services/Popup", "right PIN, wrapped in client context", f"{ide}\nFEATURE=_Services/Popup {PIN}",
         session="chat-ide")
     say(g, "block, bound=Wallet", "status of a bound chat", "feature")
+    say(g, "pass, bound=Wallet", "next ordinary prompt tells the model its binding", "Làm tiếp đi")
     say(g, "block, bound=Wallet", "wrong PIN keeps the old binding", "FEATURE=@human 0000")
     say(g, "block, bound=_Services/Popup", "service, backslash, spaces, lower case",
         f"  feature = _Services\\Popup   {PIN}\n", session="chat2")
     say(g, "block, bound=@human", "human", f"FEATURE=@human {PIN}", session="chat3")
     say(g, "block, bound=Shop", "the human may rebind", f"FEATURE=Shop {PIN}", session="chat3")
     say(g, "block, bound=@human", "and bind back", f"FEATURE=@human {PIN}", session="chat3")
+    say(g, "pass, bound=@human", "after a rebind the context follows the new binding", "tiếp", session="chat3")
 
     # ---- the guard reads the binding of the chat that makes the call
     g = "bind: guard uses it"
