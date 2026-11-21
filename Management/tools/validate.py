@@ -3,8 +3,8 @@
 
     python Management/tools/validate.py [--feature <id>] [--all] [--json]
 
-Scope: --feature <id> shows only that feature. With neither --feature nor --all, FEATURE from
-the environment is used when it names a feature; otherwise the whole project is shown.
+Scope: --feature <id> shows only that feature; without it the whole project is shown (--all says
+the same, kept for old commands). The FEATURE environment variable is not used.
 Exit code: 0 = no violation in scope, 1 = violations, 2 = the validator itself failed.
 
 Rule groups
@@ -30,7 +30,6 @@ from datetime import datetime
 from pathlib import Path
 
 NAME_RX = re.compile(r"^[A-Z][A-Za-z0-9]*$")
-FEATURE_ID_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")
 RESERVED = ("Services", "Core", "Composition")
 OWN_ROOTS = ("Features", "Core", "_Composition")
 ROOT_MD_MAX, FEATURE_MD_MAX, RULES_MD_MAX = 30, 20, 40
@@ -547,14 +546,13 @@ def main(argv=None):
     ap.add_argument("--root", default=str(here.parent.parent), help="project root (default: two levels above this file)")
     ap.add_argument("--rules", default=str(here / "rules.json"))
     ap.add_argument("--feature", help="show only this feature, e.g. Wallet or _Services/Popup")
-    ap.add_argument("--all", action="store_true", help="whole project, ignoring the FEATURE environment variable")
+    ap.add_argument("--all", action="store_true", help="whole project (the default; kept for old commands)")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args(argv)
+    if args.all and args.feature:
+        ap.error("--all and --feature cannot be used together")
 
     feature = args.feature
-    env = os.environ.get("FEATURE", "").strip().replace("\\", "/")
-    if not feature and not args.all and FEATURE_ID_RX.match(env):
-        feature = env
     if feature:
         feature = feature.replace("\\", "/")
 

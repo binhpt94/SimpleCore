@@ -192,7 +192,7 @@ CASES = [
     ("ASM-04", "_Composition -> Contracts", lambda d: add_ref(d, COMP_ASM, "Game.Wallet.Contracts")),
     ("ASM-04", "_Composition -> View", lambda d: add_ref(d, COMP_ASM, "Game.Wallet.View")),
     ("ASM-04", "Core -> feature Contracts", lambda d: add_ref(d, f"{A}/Core/Game.Core.asmdef", "Game.Wallet.Contracts")),
-    ("ASM-04", "package not on the allow-list", lambda d: add_ref(d, WI_ASM, "UniTask"), "*allowedPackages*"),
+    ("ASM-04", "package not on the allow-list", lambda d: add_ref(d, WI_ASM, "Some.Unlisted.Package"), "*allowedPackages*"),
     ("ASM-04", "UI package in Internal", lambda d: add_ref(d, WI_ASM, "UnityEngine.UI"), "*allowedPackages*"),
     ("ASM-05", "Contracts with engine references", lambda d: set_json(d, WC_ASM, noEngineReferences=False)),
     ("ASM-06", "precompiled DLL in Internal", lambda d: set_json(d, WI_ASM, precompiledReferences=["Evil.dll"])),
@@ -306,17 +306,19 @@ def main():
         r = V.validate(d, RULES, "_Services/Popup")
         report("feature _Services/Popup: sees only its ASM-05", rules_of(r) == ["ASM-05"])
 
-        # ----- command line: exit codes and FEATURE from the environment
+        # ----- command line: exit codes and scope; the FEATURE environment variable is ignored
         code, j = run_cli(clean, "--all")
         report("CLI clean project -> exit 0", code == 0 and j is not None and not j["violations"], f"exit={code}")
-        code, j = run_cli(d, env_feature="Shop")
-        report("CLI scope taken from FEATURE", code == 1 and j and j["scope"] == "Shop", f"exit={code}")
+        code, j = run_cli(d, "--feature", "Shop")
+        report("CLI --feature Shop -> its own violation", code == 1 and j and j["scope"] == "Shop", f"exit={code}")
+        code, j = run_cli(d, "--feature", "Wallet")
+        report("CLI --feature Wallet -> exit 0", code == 0 and j and j["hiddenCount"] == 2, f"exit={code}")
+        code, j = run_cli(d)
+        report("CLI no --feature -> whole project", code == 1 and j and j["scope"] == "all" and len(j["violations"]) == 2, f"exit={code}")
         code, j = run_cli(d, env_feature="Wallet")
-        report("CLI FEATURE=Wallet -> exit 0", code == 0 and j and j["hiddenCount"] == 2, f"exit={code}")
-        code, j = run_cli(d, env_feature="@human")
-        report("CLI FEATURE=@human -> whole project", code == 1 and j and j["scope"] == "all" and len(j["violations"]) == 2, f"exit={code}")
-        code, j = run_cli(d, "--all", env_feature="Wallet")
-        report("CLI --all overrides FEATURE", code == 1 and j and j["scope"] == "all", f"exit={code}")
+        report("CLI FEATURE=Wallet in the environment is ignored", code == 1 and j and j["scope"] == "all", f"exit={code}")
+        code, j = run_cli(d, "--all", "--feature", "Wallet")
+        report("CLI --all with --feature -> usage error", code == 2 and j is None, f"exit={code}")
         code, j = run_cli(base / "nope", "--all")
         report("CLI missing project -> exit 2, not 'clean'", code == 2, f"exit={code}")
     finally:

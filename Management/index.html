@@ -80,8 +80,12 @@
   </section>
 
   <section id="sessions-box" hidden>
-    <h2>Mở phiên làm việc theo feature</h2>
+    <h2>Gán chat theo feature</h2>
     <p id="sessions-intro"></p>
+    <div id="pin-box" class="session" hidden>
+      <h3 id="pin-title"></h3>
+      <p id="pin-hint" class="muted"></p>
+    </div>
     <div id="sessions"></div>
     <ul id="sessions-notes" class="gap muted"></ul>
   </section>
@@ -159,13 +163,14 @@
       });
     };
 
-    var commandBlock = function (text, tall) {
+    // `copy` là chữ được chép, mặc định giống chữ hiển thị.
+    var commandBlock = function (text, tall, copy) {
       var wrap = el("div", tall ? "cmd tall" : "cmd");
       var pre = el("pre", "", text);
       var button = el("button", "copy", "Chép");
       button.type = "button";
       button.addEventListener("click", function () {
-        copyText(text).then(
+        copyText(copy === undefined ? text : copy).then(
           function () { button.textContent = "Đã chép"; },
           function () { button.textContent = "Không chép được, hãy bôi đen và Ctrl+C"; }
         ).then(function () {
@@ -180,11 +185,19 @@
     var features = Array.isArray(data.features) ? data.features : [];
     if (features.length) {
       $("sessions-intro").textContent = data.intro || "";
+      if (data.pinCommand) {
+        $("pin-title").textContent = data.pinTitle || "Đặt PIN";
+        $("pin-hint").textContent = data.pinHint || "";
+        $("pin-box").appendChild(commandBlock(data.pinCommand));
+        $("pin-box").hidden = false;
+      }
       features.forEach(function (feature) {
         var box = el("div", "session");
         box.appendChild(el("h3", "", feature.label || feature.id));
         if (feature.note) box.appendChild(el("p", "muted", feature.note));
-        box.appendChild(commandBlock('cd "' + data.root + '"; $env:FEATURE = "' + feature.id + '"; claude'));
+        // Chỉ chép phần trước PIN: PIN do người tự gõ, không nằm trong trang.
+        var bind = "FEATURE=" + feature.id + " ";
+        box.appendChild(commandBlock(bind + "<PIN>", false, feature.copy || bind));
         $("sessions").appendChild(box);
       });
       (Array.isArray(data.notes) ? data.notes : []).forEach(function (text) {

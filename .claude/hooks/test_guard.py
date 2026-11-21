@@ -24,6 +24,8 @@ FX = tempfile.mkdtemp(prefix="guardfx-")
 A = FX + r"\UnityProject\Assets"
 F = A + r"\Features"
 VALIDATE = "python Management/tools/validate.py"
+STORE = FX + r"\guard-store"      # stands in for guard.STORE_DIR; the real one is never touched
+PIN = "tr0ng-test"
 
 results = []
 
@@ -48,13 +50,25 @@ def e(g, f, x, p): t(g, f, x, "Edit", {"file_path": p})
 def w(g, f, x, p): t(g, f, x, "Write", {"file_path": p})
 
 
-def cli(group, feature, expect, label, stdin_text, root=FX):
-    """Real process: stdin JSON in, stdout JSON out, FEATURE from the environment."""
+def cli(group, feature, expect, label, stdin_text, root=FX, env_feature=None):
+    """Real process: stdin JSON in, stdout JSON out. FEATURE comes from a chat binding in STORE;
+    env_feature is put in the environment only to show that the guard ignores it."""
+    session = "cli-" + "".join(c for c in feature if c.isalnum()) if feature else "cli-unbound"
+    if feature:
+        os.makedirs(STORE + r"\sessions", exist_ok=True)
+        Path(guard.binding_path(session, STORE)).write_text(json.dumps({"feature": feature}))
+    try:
+        data = json.loads(stdin_text)
+        if isinstance(data, dict):
+            data["session_id"] = session
+            stdin_text = json.dumps(data)
+    except ValueError:
+        pass
     env = dict(os.environ)
     env.pop("FEATURE", None)
-    if feature:
-        env["FEATURE"] = feature
-    args = [sys.executable, "-I", str(HERE / "guard.py")] + (["--root", root] if root else [])
+    if env_feature:
+        env["FEATURE"] = env_feature
+    args = [sys.executable, "-I", str(HERE / "guard.py")] + (["--root", root, "--store", STORE] if root else [])
     p = subprocess.run(args, input=stdin_text.encode("utf-8"), capture_output=True, env=env)
     if p.returncode != 0:
         got = f"exit{p.returncode}"
@@ -201,7 +215,6 @@ def run_cases():
     # ---- unlisted zones
     g = "unlisted"
     r(g, W, "deny", F + r"\Shop\Tests\T.cs")
-    r(g, W, "deny", F + r"\Shop\CLAUDE.md")
     r(g, W, "allow", FX + r"\CLAUDE.md")
     e(g, W, "deny", FX + r"\CLAUDE.md")
     w(g, W, "deny", FX + r"\notes.md")
@@ -337,7 +350,7 @@ def run_cases():
     t(g, H, "pass", "Bash", {"command": "ls"})
     e("human case-sensitive", "@Human", "deny", F + r"\Wallet\Scripts\Internal\W.cs")
 
-    # ---- the real process: wire format, environment, fail-closed
+    # ---- the real process: wire format, binding, fail-closed
     g = "process"
     payload = lambda tool, ti: json.dumps({"tool_name": tool, "tool_input": ti, "cwd": FX})  # noqa: E731
     cli(g, W, "allow", "Edit own feature", payload("Edit", {"file_path": F + r"\Wallet\Scripts\Internal\W.cs"}))
@@ -352,11 +365,136 @@ def run_cases():
     cli(g, W, "deny", "JSON array instead of object", "[1,2]")
     cli(g, W, "deny", "no tool_name", "{}")
     cli(g, W, "allow", "UTF-8 path", payload("Write", {"file_path": F + "\\Wallet\\Scripts\\Internal\\Ví.cs"}))
+    cli(g, "", "deny", "Edit, unbound, FEATURE=@human in the environment is ignored",
+        payload("Edit", {"file_path": F + r"\Shop\Scripts\Internal\S.cs"}), env_feature="@human")
+    cli(g, "", "deny", "Edit, unbound, FEATURE=Wallet in the environment is ignored",
+        payload("Edit", {"file_path": F + r"\Wallet\Scripts\Internal\W.cs"}), env_feature=W)
+    cli(g, W, "deny", "Edit, bound to Wallet, FEATURE=@human in the environment is ignored",
+        payload("Edit", {"file_path": F + r"\Shop\Scripts\Internal\S.cs"}), env_feature="@human")
+    run_binding_cases(payload)
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + r"\x.txt"}, "cwd": real}), root=None)
     cli("real root", "", "allow", "Read <real root>\\CLAUDE.md, no --root",
         json.dumps({"tool_name": "Read", "tool_input": {"file_path": real + r"\CLAUDE.md"}, "cwd": real}), root=None)
+
+
+def say(group, expect, label, prompt, session="chat1", store=None):
+    """Real bind_session.py process. got = 'pass' (prompt goes on) or 'block', plus the binding it left."""
+    env = dict(os.environ)
+    env.pop("FEATURE", None)
+    args = [sys.executable, "-I", str(HERE / "bind_session.py"), "--root", FX, "--store", store or STORE]
+    stdin = json.dumps({"hook_event_name": "UserPromptSubmit", "session_id": session, "prompt": prompt})
+    p = subprocess.run(args, input=stdin.encode("utf-8"), capture_output=True, env=env)
+    if p.returncode != 0:
+        got = f"exit{p.returncode}"
+    elif not p.stdout.strip():
+        got = "pass"
+    else:
+        try:
+            out = json.loads(p.stdout)
+            hidden = out["hookSpecificOutput"]["suppressOriginalPrompt"] is True
+            leaked = PIN in out["reason"]
+            got = out["decision"] if hidden and not leaked else "garbage"
+        except Exception:
+            got = "garbage"
+    bound = guard.bound_feature(session, store or STORE) if isinstance(session, str) else None
+    check(group, "", expect, label, f"{got}, bound={bound}")
+
+
+def run_binding_cases(payload):
+    import bind_session
+    W, S = "Wallet", F + r"\Shop\Scripts\Internal\S.cs"
+    own = F + r"\Wallet\Scripts\Internal\W.cs"
+    bind_session.write_pin(STORE, PIN)
+
+    def b(group, expect, session, tool, ti):
+        """Resolves the session exactly as guard.main() does, then decides."""
+        data = {"tool_name": tool, "tool_input": ti, "cwd": FX, "session_id": session}
+        try:
+            result = guard.decide(data, guard.session_feature(session, STORE), FX)
+        except Exception:
+            result = ("deny", "error")
+        check(group, "", expect, f"session={session} {tool} " + " ".join(str(v) for v in ti.values()),
+              result[0] if result else "pass")
+
+    # ---- the human binds a chat by typing FEATURE=<value> <PIN>
+    g = "bind: typed command"
+    say(g, "pass, bound=None", "ordinary prompt", "Sửa lỗi trong Wallet giúp tôi")
+    say(g, "pass, bound=None", "prompt that only mentions the word", "feature flags là gì?")
+    say(g, "block, bound=None", "status of an unbound chat", "FEATURE?")
+    say(g, "block, bound=None", "no PIN", "FEATURE=Wallet")
+    say(g, "block, bound=None", "wrong PIN", "FEATURE=Wallet 0000")
+    say(g, "block, bound=None", "unknown feature, right PIN", f"FEATURE=Nope {PIN}")
+    say(g, "block, bound=None", "path trick, right PIN", f"FEATURE=../Shop {PIN}")
+    say(g, "block, bound=None", "extra words after the PIN", f"FEATURE=Wallet {PIN} làm ơn")
+    say(g, "block, bound=None", "session id unusable as a file name", f"FEATURE=Wallet {PIN}", session="..\\x")
+    ide = "<ide_opened_file>The user opened d:\\x\\FEATURE=1.cs\nline two</ide_opened_file>"
+    say(g, "block, bound=None", "status, wrapped in client context", ide + "FEATURE?")
+    say(g, "block, bound=None", "status, context after it", "FEATURE?\n" + ide + "\n<a b='c'>x</a>")
+    say(g, "block, bound=None", "wrong PIN, wrapped in client context", ide + "\nFEATURE=Wallet 0000\n")
+    say(g, "pass, bound=None", "the word only inside client context", ide + "\nSửa giúp tôi")
+    say(g, "pass, bound=None", "a command-like line in the middle of a pasted text", "Xem đoạn này:\nFEATURE = 1\nđúng không?")
+    say(g, "block, bound=Wallet", "right PIN", f"FEATURE=Wallet {PIN}")
+    say(g, "block, bound=_Services/Popup", "right PIN, wrapped in client context", f"{ide}\nFEATURE=_Services/Popup {PIN}",
+        session="chat-ide")
+    say(g, "block, bound=Wallet", "status of a bound chat", "feature")
+    say(g, "block, bound=Wallet", "wrong PIN keeps the old binding", "FEATURE=@human 0000")
+    say(g, "block, bound=_Services/Popup", "service, backslash, spaces, lower case",
+        f"  feature = _Services\\Popup   {PIN}\n", session="chat2")
+    say(g, "block, bound=@human", "human", f"FEATURE=@human {PIN}", session="chat3")
+    say(g, "block, bound=Shop", "the human may rebind", f"FEATURE=Shop {PIN}", session="chat3")
+    say(g, "block, bound=@human", "and bind back", f"FEATURE=@human {PIN}", session="chat3")
+
+    # ---- the guard reads the binding of the chat that makes the call
+    g = "bind: guard uses it"
+    b(g, "allow", "chat1", "Edit", {"file_path": own})
+    b(g, "deny", "chat1", "Edit", {"file_path": S})
+    b(g, "deny", "chat1", "Bash", {"command": "ls"})
+    b(g, "allow", "chat2", "Edit", {"file_path": F + r"\_Services\Popup\Scripts\Internal\P.cs"})
+    b(g, "deny", "chat2", "Edit", {"file_path": own})
+    b(g, "pass", "chat3", "Edit", {"file_path": S})
+    b(g, "ask", "chat3", "Edit", {"file_path": FX + r"\.claude\hooks\guard.py"})
+    b(g, "deny", "other-chat", "Edit", {"file_path": own})           # a binding belongs to one chat only
+    b(g, "deny", None, "Edit", {"file_path": own})
+    b(g, "deny", "..\\chat1", "Edit", {"file_path": own})
+    Path(guard.binding_path("broken", STORE)).write_text("{ not json")
+    b(g, "deny", "broken", "Edit", {"file_path": own})
+    Path(guard.binding_path("gone", STORE)).write_text('{"feature": "Nope"}')
+    b(g, "deny", "gone", "Edit", {"file_path": own})                 # a binding to a missing feature
+    b(g, "allow", "chat1", "Bash", {"command": VALIDATE + " --feature Wallet"})
+    b(g, "allow", "chat1", "Bash", {"command": VALIDATE + " --feature _Services/Popup"})
+    b(g, "deny", "chat1", "Bash", {"command": VALIDATE + " --feature ../x"})
+    b(g, "deny", "chat1", "Bash", {"command": VALIDATE + " --feature Wallet --root x"})
+
+    # ---- the real guard process reads the store it is given, and none when it is given none
+    g = "bind: process"
+    with_session = lambda s: json.dumps({"tool_name": "Edit", "tool_input": {"file_path": own}, "cwd": FX,  # noqa: E731
+                                         "session_id": s})
+    for expect, session, store in (("allow", "chat1", STORE), ("deny", "chat2", STORE), ("deny", "chat1", None)):
+        args = [sys.executable, "-I", str(HERE / "guard.py"), "--root", FX] + (["--store", store] if store else [])
+        env = dict(os.environ)
+        env.pop("FEATURE", None)
+        p = subprocess.run(args, input=with_session(session).encode("utf-8"), capture_output=True, env=env)
+        try:
+            got = json.loads(p.stdout)["hookSpecificOutput"]["permissionDecision"]
+        except Exception:
+            got = "garbage"
+        check(g, "", expect, f"Edit own feature, session={session}, store={'yes' if store else 'no'}", got)
+
+    # ---- guessing the PIN locks binding; a missing PIN binds nothing
+    g = "bind: PIN lock"
+    for i in range(bind_session.MAX_FAILURES):
+        say(g, "block, bound=None", f"wrong PIN #{i + 1}", "FEATURE=@human 0000", session="thief")
+    say(g, "block, bound=None", "right PIN after the lock", f"FEATURE=@human {PIN}", session="thief")
+    bind_session.write_pin(STORE, PIN)
+    say(g, "block, bound=@human", "right PIN after the human set it again", f"FEATURE=@human {PIN}", session="thief")
+    say(g, "block, bound=None", "no PIN was ever set", f"FEATURE=Wallet {PIN}", store=FX + r"\empty-store")
+    for expect, label, stdin in ((2, "broken input that may carry the PIN is blocked", '{"prompt": "FEATURE=Wallet ' + PIN),
+                                 (0, "broken input of an ordinary prompt is let through", '{"prompt": "xin chào')):
+        args = [sys.executable, "-I", str(HERE / "bind_session.py"), "--root", FX, "--store", STORE]
+        p = subprocess.run(args, input=stdin.encode("utf-8"), capture_output=True)
+        check(g, "", f"exit{expect}, no output", label, f"exit{p.returncode}, {'output' if p.stdout.strip() else 'no output'}")
 
 
 def main():

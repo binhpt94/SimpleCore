@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """PreToolUse hook. Enforces the permission table in /CLAUDE.md.
 
-FEATURE environment variable (set by the human who starts the session, not by the agent):
+Who a session is comes from the human, never from the agent: the binding for this chat (session_id),
+made when the human types `FEATURE=<value> <PIN>` in the chat; see bind_session.py. Bindings and the
+PIN live outside the project, in STORE_DIR. The FEATURE environment variable is not used.
+The value means:
     <Name> or _Services/<Name>  -> agent bound to that feature
     @human                      -> no feature limits; still asks for .claude, _Composition, Core
     unset / invalid             -> every edit is denied
@@ -20,7 +23,7 @@ import sys
 # Shell commands an agent may run. Each entry is a regex that must match the WHOLE command.
 # The command must be run from the project root.
 ALLOWED_COMMANDS = [
-    r"python Management/tools/validate\.py",
+    r"python Management/tools/validate\.py( --feature (_Services/)?[A-Za-z][A-Za-z0-9]*)?",
 ]
 
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
@@ -36,6 +39,40 @@ HUMAN_ASK_ZONES = {".claude", "_Composition", "Core"}
 UNITY_ASSET_TOOL = "mcp__unityMCP__manage_asset"
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")
 SHELL_META_RX = re.compile(r"[;&|<>`$(){}\r\n]")
+# Per-chat bindings and the PIN. Outside the project, so no agent session can read or write it.
+STORE_DIR = ntpath.join(os.path.expanduser("~"), ".coresimple-guard")
+SESSION_RX = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
+
+
+def binding_path(session_id, store):
+    """File that holds the binding of one chat, or None when the session id is not usable as a file name."""
+    if not store or not isinstance(session_id, str) or not SESSION_RX.match(session_id):
+        return None
+    return ntpath.join(store, "sessions", session_id + ".json")
+
+
+def bound_feature(session_id, store):
+    """FEATURE value the human bound to this chat, or None when the chat has no binding."""
+    path = binding_path(session_id, store)
+    if not path:
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            value = json.load(f).get("feature")
+    except (OSError, ValueError, AttributeError):
+        return None
+    return value if isinstance(value, str) else None
+
+
+def session_feature(session_id, store):
+    """The raw FEATURE value of a session: the chat's binding, or "" when it has none."""
+    return bound_feature(session_id, store) or ""
+
+
+def valid_feature(raw, root):
+    """True when raw names an existing feature folder."""
+    return bool(FEATURE_RX.match(raw)) and os.path.isdir(
+        ntpath.join(root, "UnityProject", "Assets", "Features", *raw.split("/")))
 
 
 def resolve_target(p, cwd):
@@ -174,7 +211,7 @@ def decide_unity_delete(ti, mode, feature, root):
     return "allow", f"delete inside {name}"
 
 
-def decide(data, feature_env, root):
+def decide(data, session_value, root):
     """Returns (decision, reason), or None to leave the call to the normal permission flow."""
     tool = text_of(data.get("tool_name"))
     if not tool:
@@ -186,11 +223,11 @@ def decide(data, feature_env, root):
     cwd = resolve_target(text_of(data.get("cwd")), root) if data.get("cwd") else root
 
     # --- who is this session?
-    raw = (feature_env or "").strip().replace("\\", "/")
+    raw = (session_value or "").strip().replace("\\", "/")
     mode, feature = "none", None
     if raw == "@human":
         mode = "human"
-    elif FEATURE_RX.match(raw) and os.path.isdir(ntpath.join(root, "UnityProject", "Assets", "Features", *raw.split("/"))):
+    elif valid_feature(raw, root):
         mode, feature = "feature", raw
 
     edit_path = text_of(ti.get("file_path")) or text_of(ti.get("notebook_path"))
@@ -219,7 +256,8 @@ def decide(data, feature_env, root):
         if goes_through_link(full, root):
             return "deny", "path goes through a link or junction"
         if mode == "none":
-            return "deny", "FEATURE is not set or is not an existing feature folder; all edits are blocked"
+            return "deny", ("this chat has no valid FEATURE, so all edits are blocked. Only the human can set it "
+                            "(by typing FEATURE=<name> <PIN> in the chat). Stop and tell the human.")
         name, _, edit = zone(full, root, feature)
         # Files that define the boundary itself.
         if full.lower().endswith(".asmref"):
@@ -273,12 +311,14 @@ def main(argv):
     try:
         try:
             root = ntpath.dirname(ntpath.dirname(ntpath.dirname(ntpath.abspath(__file__))))
-            if len(argv) == 3 and argv[1] == "--root":      # test-only override; the real hook never passes it
+            store = STORE_DIR
+            if len(argv) in (3, 5) and argv[1] == "--root":      # test-only override; the real hook never passes it
                 root = ntpath.abspath(argv[2])
+                store = argv[4] if len(argv) == 5 and argv[3] == "--store" else None
             data = json.loads(sys.stdin.buffer.read().decode("utf-8-sig"))
             if not isinstance(data, dict):
                 raise ValueError("hook input is not a JSON object")
-            result = decide(data, os.environ.get("FEATURE", ""), root)
+            result = decide(data, session_feature(data.get("session_id"), store), root)
         except Exception as ex:      # fail closed
             result = ("deny", f"blocked on error: {ex}")
         if result:
