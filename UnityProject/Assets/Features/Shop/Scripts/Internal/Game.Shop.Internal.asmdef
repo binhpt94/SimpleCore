@@ -4,7 +4,9 @@
   "references": [
     "Game.Core",
     "Game.Wallet.Contracts",
-    "Game.Services.Popup.Contracts"
+    "Game.Services.Popup.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

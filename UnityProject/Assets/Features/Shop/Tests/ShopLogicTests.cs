@@ -1,10 +1,13 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Game.Core;
 using Game.Services.Popup;
+using Game.Services.SessionScene;
 using Game.Wallet;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using SessionState = Game.Services.SessionScene.SessionState;
 
 namespace Game.Shop.Tests
 {
@@ -74,33 +77,91 @@ namespace Game.Shop.Tests
         }
 
         [Test]
-        public void InstallerAsset_BuildsShopFromConfigAsset()
+        public void InstallerAsset_JoinsTheSessionWithAShopBuiltFromTheConfigAsset()
         {
-            var installer = AssetDatabase.LoadAssetAtPath<ShopInstaller>(
-                "Assets/Features/Shop/FeatureAssets/Public/ShopInstaller.asset");
-            Assert.That(installer, Is.Not.Null, "ShopInstaller.asset missing or its script reference is broken");
+            var session = new FakeSession();
             var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(session);
             registry.Register<IWalletService>(wallet);
             registry.Register<IPopupService>(popups);
 
-            installer.Install(registry);
+            LoadInstallerAsset().Install(registry);
 
-            Assert.That(ShopRuntime.Logic.TryPurchase("gem_small"), Is.EqualTo(PurchaseResult.Ok));
+            Assert.That(session.Joined, Has.Count.EqualTo(1), "the shop should join the session exactly once");
+            Assert.That(session.Joined[0], Is.InstanceOf<ShopBuyPresenter>());
+            ((ShopBuyPresenter)session.Joined[0]).Buy("gem_small");
             Assert.That(wallet.Coins, Is.EqualTo(70), "price of gem_small should come from ShopConfig.asset");
             Assert.That(popups.Shown[0].Prefab, Is.Not.Null, "popup prefab should come from ShopConfig.asset");
             Assert.That(popups.Shown[0].Prefab.name, Is.EqualTo("PurchasedPopup"));
         }
 
         [Test]
-        public void Install_WithoutWallet_FailsWithAMessageNamingTheMissingContract()
+        public void InstallerAsset_WithoutSession_FailsWithAMessageNamingTheMissingContract()
         {
-            var installer = ScriptableObject.CreateInstance<ShopInstaller>();
             var registry = new ServiceRegistry();
+            registry.Register<IWalletService>(wallet);
+            registry.Register<IPopupService>(popups);
 
-            var error = Assert.Throws<System.InvalidOperationException>(() => installer.Install(registry));
+            var error = Assert.Throws<System.InvalidOperationException>(() => LoadInstallerAsset().Install(registry));
+
+            Assert.That(error.Message, Does.Contain(nameof(ISessionScene)));
+        }
+
+        [Test]
+        public void InstallerAsset_WithoutWallet_FailsWithAMessageNamingTheMissingContract()
+        {
+            var session = new FakeSession();
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(session);
+            registry.Register<IPopupService>(popups);
+
+            var error = Assert.Throws<System.InvalidOperationException>(() => LoadInstallerAsset().Install(registry));
 
             Assert.That(error.Message, Does.Contain(nameof(IWalletService)));
+            Assert.That(session.Joined, Is.Empty, "a shop that could not be built must not join the session");
+        }
+
+        [Test]
+        public void Install_WithoutConfig_FailsWithAMessageNamingTheConfig()
+        {
+            var installer = ScriptableObject.CreateInstance<ShopInstaller>();
+
+            var error = Assert.Throws<System.InvalidOperationException>(
+                () => installer.Install(new ServiceRegistry()));
+
+            Assert.That(error.Message, Does.Contain(nameof(ShopConfig)));
             Object.DestroyImmediate(installer);
+        }
+
+        private static ShopInstaller LoadInstallerAsset()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<ShopInstaller>(
+                "Assets/Features/Shop/FeatureAssets/Public/ShopInstaller.asset");
+            Assert.That(installer, Is.Not.Null, "ShopInstaller.asset missing or its script reference is broken");
+            return installer;
+        }
+
+        private sealed class FakeSession : ISessionScene
+        {
+            internal readonly List<ISessionParticipant> Joined = new List<ISessionParticipant>();
+
+            public SessionState State => SessionState.Init;
+
+            public event System.Action<SessionState> StateChanged
+            {
+                add { }
+                remove { }
+            }
+
+            public void Join(ISessionParticipant participant)
+            {
+                Joined.Add(participant);
+            }
+
+            public UniTask EndAsync()
+            {
+                return UniTask.CompletedTask;
+            }
         }
 
         private sealed class FakeWallet : IWalletService

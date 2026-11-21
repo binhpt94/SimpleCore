@@ -11,10 +11,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 22220000000000000000000000000002, type: 3}
   m_Name: ShopConfig
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   items:
   - id: gem_small
     price: 30
   - id: gem_large
     price: 250
   purchasedPopupPrefab: {fileID: 2000000000000001, guid: 22220000000000000000000000000005, type: 3}
+  buyViewPrefab: {fileID: 1250967391009883649, guid: 8a602e7b7cb6c7c42bed7b9019baaf27, type: 3}

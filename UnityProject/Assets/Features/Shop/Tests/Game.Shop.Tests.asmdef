@@ -6,6 +6,8 @@
     "Game.Shop.Internal",
     "Game.Wallet.Contracts",
     "Game.Services.Popup.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],

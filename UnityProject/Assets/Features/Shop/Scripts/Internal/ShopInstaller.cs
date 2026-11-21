@@ -1,11 +1,13 @@
+using System;
 using Game.Core;
 using Game.Services.Popup;
+using Game.Services.SessionScene;
 using Game.Wallet;
 using UnityEngine;
 
 namespace Game.Shop
 {
-    /// <summary>Needs Wallet and Popup installed first.</summary>
+    /// <summary>Needs SessionScene, Wallet and Popup installed first.</summary>
     [CreateAssetMenu(menuName = "Game/Installers/Shop")]
     public sealed class ShopInstaller : InstallerAsset
     {
@@ -13,11 +15,24 @@ namespace Game.Shop
 
         public override void Install(IServiceRegistry registry)
         {
-            ShopRuntime.Logic = new ShopLogic(
+            if (config == null)
+                throw new InvalidOperationException($"{name}: ShopConfig is not assigned (field 'config').");
+            if (config.PurchasedPopupPrefab == null)
+                throw new InvalidOperationException($"{config.name}: purchasedPopupPrefab is not assigned.");
+            if (config.BuyViewPrefab == null)
+                throw new InvalidOperationException($"{config.name}: buyViewPrefab is not assigned.");
+            if (!PrefabShopBuyViewSource.HasView(config.BuyViewPrefab))
+                throw new InvalidOperationException(
+                    $"{config.name}: buyViewPrefab '{config.BuyViewPrefab.name}' has no {nameof(IShopBuyView)} component on its root.");
+
+            var session = registry.Resolve<ISessionScene>();
+            var logic = new ShopLogic(
                 registry.Resolve<IWalletService>(),
                 registry.Resolve<IPopupService>(),
-                config != null ? config.Items : new ShopItem[0],
-                config != null ? config.PurchasedPopupPrefab : null);
+                config.Items,
+                config.PurchasedPopupPrefab);
+
+            session.Join(new ShopBuyPresenter(logic, new PrefabShopBuyViewSource(config.BuyViewPrefab)));
         }
     }
 }

@@ -1,13 +1,16 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Game.Shop
 {
-    /// <summary>Sends "buy this item" to the shop logic when clicked. Decides nothing itself.</summary>
-    internal sealed class ShopBuyButton : MonoBehaviour
+    /// <summary>Reports "buy this item" when clicked. Decides nothing itself.</summary>
+    internal sealed class ShopBuyButton : MonoBehaviour, IShopBuyView
     {
         [SerializeField] private Button button;
         [SerializeField] private string itemId;
+
+        public event Action<string> BuyRequested;
 
         private void OnEnable()
         {
@@ -21,7 +24,7 @@ namespace Game.Shop
 
         private void Buy()
         {
-            ShopRuntime.Logic?.TryPurchase(itemId);
+            BuyRequested?.Invoke(itemId);
         }
     }
 }
