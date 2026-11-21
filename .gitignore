@@ -35,3 +35,6 @@ Thumbs.db
 # Trang quản lý: sinh bởi Management/tools/sync_page.py
 /Management/data/project.js
 /Management/data/project.js.tmp
+
+# Báo cáo cho @Manager: Stop hook stop_report.py ghi, nhật ký điều phối trên máy này
+/Management/reports/

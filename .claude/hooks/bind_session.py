@@ -39,7 +39,9 @@ ITERATIONS = 200_000
 # Anything that starts like the command is handled here and never passed on: it may carry the PIN.
 COMMAND_RX = re.compile(r"feature\s*(\?|=(.*))?", re.I)
 CONTEXT_BLOCK_RX = re.compile(r"<([A-Za-z][\w-]*)\b[^>]*>.*?</\1>", re.S)
-USAGE = "Cách gõ: FEATURE=<tên feature hoặc @human> <PIN>. Xem chat đang gán gì: FEATURE?"
+USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Composition, @Manager hoặc @human> <PIN>. "
+         "Xem chat đang gán gì: FEATURE?")
+MAX_LISTED_REPORTS = 20
 
 
 def pin_hash(pin, salt):
@@ -89,7 +91,7 @@ def check_pin(store, pin):
 
 def describe(session_id, root, store):
     raw = guard.session_feature(session_id, store).strip().replace("\\", "/")
-    if raw == "@human" or guard.valid_feature(raw, root):
+    if guard.role_of(raw) or guard.valid_feature(raw, root):
         return f"Chat này: FEATURE={raw}."
     if raw:
         return f"Chat này: FEATURE={raw} không hợp lệ, mọi thao tác sửa bị chặn."
@@ -127,23 +129,68 @@ def handle(data, root, store):
     error = check_pin(store, pin)
     if error:
         return "Không gán. " + error
-    if value != "@human" and not guard.valid_feature(value, root):
-        return f"Không gán: '{value}' không phải @human và không phải thư mục feature đã có."
+    value = guard.canonical_role(value) or value
+    if not guard.role_of(value) and not guard.valid_feature(value, root):
+        return (f"Không gán: '{value}' không phải vai trò ({', '.join(guard.ROLES)}) "
+                "và không phải thư mục feature đã có.")
     write_json(guard.binding_path(session_id, store),
                {"feature": value, "bound_at": time.strftime("%Y-%m-%d %H:%M:%S")})
     return f"Đã gán chat này: FEATURE={value}."
+
+
+def report_field(text, name):
+    m = re.search(rf"^-\s*{name}:\s*(.*)$", text, re.M)
+    return m.group(1).strip() if m else "?"
+
+
+def unread_reports(root, store):
+    """Reports in Management/reports the Manager has not been shown yet; marks them as shown."""
+    folder = ntpath.join(root, "Management", "reports")
+    try:
+        names = sorted(n for n in os.listdir(folder) if n.endswith(".md"))
+    except OSError:
+        names = []
+    seen_path = ntpath.join(store, "manager-seen.json")
+    seen = read_json(seen_path, [])
+    seen = set(seen) if isinstance(seen, list) else set()
+    new = [n for n in names if n not in seen]
+    if not new:
+        return " Không có báo cáo mới."
+    lines = []
+    for n in new[-MAX_LISTED_REPORTS:]:
+        try:
+            with open(ntpath.join(folder, n), encoding="utf-8") as f:
+                text = f.read()
+        except OSError:
+            continue
+        lines.append(f"- {n}: {report_field(text, 'Phiên')} | {report_field(text, 'Trạng thái')} | "
+                     f"{report_field(text, 'Việc')} | cần bên khác: {report_field(text, 'Cần bên khác')}")
+    write_json(seen_path, sorted(seen | set(new)))
+    more = f" (chỉ liệt kê {MAX_LISTED_REPORTS} cái mới nhất)" if len(new) > MAX_LISTED_REPORTS else ""
+    return f" {len(new)} báo cáo mới{more}, đọc file để xem đủ:\n" + "\n".join(lines)
 
 
 def context(data, root, store):
     """One line for the model on every prompt that gets through: what this chat is bound to.
     Read from the binding each time, so it stays right after a rebind or a compaction. Never has the PIN."""
     raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
-    if raw == "@human":
+    role = guard.role_of(raw)
+    if role == "@human":
         return ("guard: chat này gán FEATURE=@human (phiên của người): không giới hạn feature; sửa Core, "
                 "_Composition, .claude, CLAUDE.md gốc vẫn bị hỏi từng lần.")
+    if role in guard.ROLE_AREAS:
+        area = guard.ROLE_AREAS[role]
+        return (f"guard: chat này gán FEATURE={role}. Chỉ sửa UnityProject/Assets/{area}/ (.asmdef, InternalsVisibleTo "
+                "vẫn hỏi người); đọc phần công khai của feature. Lượt có sửa file phải kết thúc bằng báo cáo cho "
+                "@Manager theo .claude/rules/report.md.")
+    if role == "@Manager":
+        return ("guard: chat này gán FEATURE=@Manager: điều phối, không sửa code hay asset; chỉ tạo file mới trong "
+                "Management/proposals và nhắn các phiên bằng SendMessage. Báo cáo của các phiên ở Management/reports/."
+                + unread_reports(root, store))
     if raw and guard.valid_feature(raw, root):
         return (f"guard: chat này gán FEATURE={raw}. Sửa được trong UnityProject/Assets/Features/{raw}/ theo bảng "
-                "quyền ở CLAUDE.md gốc; không cần dò lại quyền.")
+                "quyền ở CLAUDE.md gốc; không cần dò lại quyền. Lượt có sửa file phải kết thúc bằng báo cáo cho "
+                "@Manager theo .claude/rules/report.md.")
     if raw:
         return f"guard: chat này gán FEATURE={raw}, giá trị không hợp lệ: mọi thao tác sửa bị chặn."
     return ("guard: chat này chưa gán FEATURE: mọi thao tác sửa bị chặn. Chỉ người gán được, "

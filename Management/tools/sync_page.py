@@ -7,6 +7,7 @@ Runs from the Stop hook after every chat turn; running it by hand is fine too.
 - Features, violations and approved exceptions: validate.py.
 - Each feature: root CLAUDE.md, .cs files by layer, asset ids it declares (SRC-05 pattern).
 - Each scene in _Composition: its Boot variant, installers in boot order, asset catalogs (kind, id -> asset).
+- Reports for @Manager in Management/reports (written by .claude/hooks/stop_report.py), newest first.
 Unity YAML is read as text. Nothing here is written by an AI.
 On error the old project.js is kept and the exit code is 2.
 """
@@ -133,6 +134,27 @@ def asset_ids(base):
     return out
 
 
+REPORT_FIELDS = ("Phiên", "Việc", "Trạng thái", "Đã đổi", "Công khai đổi", "Cần bên khác", "Kiểm tra", "Ghi chú")
+MAX_REPORTS = 50
+
+
+def reports(root):
+    """Reports written by .claude/hooks/stop_report.py, newest first."""
+    folder = Path(root) / "Management" / "reports"
+    out = []
+    for p in sorted(folder.glob("*.md"), reverse=True)[:MAX_REPORTS] if folder.is_dir() else []:
+        text = validate.read_text(p)
+        fields = {}
+        for name in REPORT_FIELDS:
+            m = re.search(rf"^-\s*{name}:\s*(.*)$", text, re.M)
+            fields[name] = m.group(1).strip() if m else ""
+        stamp = re.match(r"(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})", p.name)
+        when = "{}-{}-{} {}:{}:{}".format(*stamp.groups()) if stamp else ""
+        out.append({"file": p.name, "time": when, "fields": fields,
+                    "text": re.sub(r"^<!--.*?-->\n", "", text, flags=re.S)})
+    return out
+
+
 def build(root, cfg):
     result = validate.validate(root, cfg)
     unity = Path(root) / "UnityProject"
@@ -162,7 +184,8 @@ def build(root, cfg):
             "excepted": [v for v in result["excepted"] if v["owner"] == fid],
         })
     others = [v for v in result["violations"] if v["owner"] not in ids]
-    return {"generatedAt": result["generatedAt"], "features": features, "scenes": scene_list, "otherViolations": others}
+    return {"generatedAt": result["generatedAt"], "features": features, "scenes": scene_list,
+            "reports": reports(root), "otherViolations": others}
 
 
 def main():

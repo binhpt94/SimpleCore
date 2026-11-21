@@ -10,12 +10,16 @@ window.CORESIMPLE_SESSIONS = {
   // `copy`: chữ được chép, khi khác "FEATURE=<id> ".
   features: [
     { id: "@human", label: "Phiên của người (tích hợp)", note: "Không giới hạn feature; vẫn bị hỏi khi sửa Core, _Composition, .claude. Là phiên duy nhất biên dịch, chạy test và Play qua unity-mcp." },
-    { id: "<Tên>", label: "Phiên feature", copy: "FEATURE=", note: "Tên thư mục trong Assets/Features, ví dụ Wallet; dịch vụ thì thêm _Services/, ví dụ _Services/Popup." }
+    { id: "<Tên>", label: "Phiên feature", copy: "FEATURE=", note: "Tên thư mục trong Assets/Features, ví dụ Wallet; dịch vụ thì thêm _Services/, ví dụ _Services/Popup." },
+    { id: "@Core", label: "Phiên Core", note: "Chỉ sửa Assets/Core (.asmdef, InternalsVisibleTo vẫn hỏi); đọc phần công khai của feature." },
+    { id: "@Composition", label: "Phiên Composition", note: "Chỉ sửa Assets/_Composition: Boot variant, scene, catalog asset; đọc phần công khai của feature. Việc cần Unity (scene, prefab) nhờ @human." },
+    { id: "@Manager", label: "Phiên điều phối", note: "Không sửa code. Thấy báo cáo mới của các phiên ở đầu mỗi tin, nhắn các phiên bằng SendMessage, viết đề xuất trong Management/proposals." }
   ],
 
   notes: [
     "Mỗi chat một feature, nhiều chat chạy chung một cửa sổ VS Code. Gõ FEATURE? để xem chat đang gán gì.",
     "Không đưa PIN cho AI.",
+    "Phiên feature, dịch vụ, @Core, @Composition: lượt có sửa file phải kết thúc bằng báo cáo cho @Manager (.claude/rules/report.md); hook lưu vào Management/reports.",
     "Chat chưa gán thì không sửa được gì. Chat mới, /clear hoặc chat tách nhánh phải gán lại.",
     "Phiên feature không biên dịch hay chạy test được. Khi nó báo xong, chạy test trong Unity hoặc nhờ phiên @human.",
     "Phiên feature chỉ nên báo xong khi code của nó biên dịch được: cả project dùng chung một Unity Editor, lỗi biên dịch của một feature chặn test của mọi feature.",

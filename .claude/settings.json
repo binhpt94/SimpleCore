@@ -41,6 +41,11 @@
           },
           {
             "type": "command",
+            "command": "python -I \"D:/AI/CoreSimple/.claude/hooks/stop_report.py\"",
+            "timeout": 30
+          },
+          {
+            "type": "command",
             "command": "python -I \"D:/AI/CoreSimple/Management/tools/sync_page.py\"",
             "timeout": 60
           }

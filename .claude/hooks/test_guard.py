@@ -372,6 +372,8 @@ def run_cases():
     cli(g, W, "deny", "Edit, bound to Wallet, FEATURE=@human in the environment is ignored",
         payload("Edit", {"file_path": F + r"\Shop\Scripts\Internal\S.cs"}), env_feature="@human")
     run_binding_cases(payload)
+    run_role_cases(payload)
+    run_report_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + r"\x.txt"}, "cwd": real}), root=None)
@@ -501,6 +503,155 @@ def run_binding_cases(payload):
         args = [sys.executable, "-I", str(HERE / "bind_session.py"), "--root", FX, "--store", STORE]
         p = subprocess.run(args, input=stdin.encode("utf-8"), capture_output=True)
         check(g, "", f"exit{expect}, no output", label, f"exit{p.returncode}, {'output' if p.stdout.strip() else 'no output'}")
+
+
+def run_role_cases(payload):
+    """@Core, @Composition: like a feature session whose feature is Core / _Composition. @Manager: edits nothing."""
+    Path(A + r"\Core\Old.cs").write_text("x")
+    Path(A + r"\_Composition\Old.cs").write_text("x")
+    own_w = F + r"\Wallet\Scripts\Internal\Old.cs"
+    delete = lambda p: {"action": "delete", "path": p}       # noqa: E731
+    sh = lambda c: {"command": c}                            # noqa: E731
+
+    for role, own, other, owner in (("@Core", r"\Core", r"\_Composition", "Core"),
+                                    ("@Composition", r"\_Composition", r"\Core", "_Composition")):
+        g = "role " + role
+        e(g, role, "allow", A + own + r"\Old.cs")
+        w(g, role, "allow", A + own + r"\New.cs")
+        w(g, role, "allow", A + own + r"\Tests\T.cs")
+        e(g, role, "ask", A + own + r"\Game.Thing.asmdef")
+        w(g, role, "ask", A + own + r"\AssemblyInfo.cs")
+        w(g, role, "deny", A + own + r"\x.asmref")
+        e(g, role, "deny", A + other + r"\Old.cs")
+        e(g, role, "deny", own_w)
+        r(g, role, "deny", own_w)
+        r(g, role, "allow", F + r"\Wallet\Scripts\Contracts\IWallet.cs")
+        r(g, role, "allow", F + r"\Wallet\CLAUDE.md")
+        r(g, role, "allow", A + other + r"\Old.cs")
+        w(g, role, "allow", FX + r"\Management\proposals\new.md")
+        e(g, role, "ask", FX + r"\Management\tools\rules.json")
+        e(g, role, "deny", FX + r"\.claude\settings.json")
+        t(g, role, "allow", "Bash", sh(VALIDATE + " --feature " + owner))
+        t(g, role, "deny", "Bash", sh("dotnet build"))
+        t(g, role, "allow", guard.UNITY_ASSET_TOOL, delete("Assets" + own.replace("\\", "/") + "/Old.cs"))
+        t(g, role, "deny", guard.UNITY_ASSET_TOOL, delete("Assets" + other.replace("\\", "/") + "/Old.cs"))
+        t(g, role, "deny", guard.UNITY_ASSET_TOOL, delete("Assets/Features/Wallet/Scripts/Internal/Old.cs"))
+
+    g = "role @Manager"
+    M = "@Manager"
+    for p in (own_w, A + r"\Core\Old.cs", A + r"\_Composition\Old.cs", F + r"\Wallet\Scripts\Contracts\IWallet.cs",
+              FX + r"\Management\tools\rules.json", FX + r"\Management\data\x.js", FX + r"\.claude\settings.json"):
+        e(g, M, "deny", p)
+    w(g, M, "allow", FX + r"\Management\proposals\plan.md")
+    e(g, M, "deny", FX + r"\Management\proposals\old.md")
+    r(g, M, "allow", F + r"\Wallet\Scripts\Contracts\IWallet.cs")
+    r(g, M, "allow", A + r"\Core\Old.cs")
+    r(g, M, "deny", own_w)
+    t(g, M, "allow", "Bash", sh(VALIDATE))
+    t(g, M, "allow", "Bash", sh(VALIDATE + " --feature Shop"))
+    t(g, M, "deny", guard.UNITY_ASSET_TOOL, delete("Assets/Core/Old.cs"))
+    t(g, M, "pass", "SendMessage", {"to": "Shop", "message": "x"})
+    t(g, M, "pass", "ListAgents", {})
+
+    g = "role spelling"
+    e(g, "@core", "deny", A + r"\Core\Old.cs")          # stored values are exact; bind_session stores "@Core"
+    e(g, "@MANAGER", "deny", A + r"\Core\Old.cs")
+    e(g, "@Cor", "deny", A + r"\Core\Old.cs")
+    cli(g, "@Core", "allow", "process: @Core edits Core", payload("Edit", {"file_path": A + r"\Core\Old.cs"}))
+    cli(g, "@Manager", "deny", "process: @Manager edits Core", payload("Edit", {"file_path": A + r"\Core\Old.cs"}))
+
+    g = "bind: roles"
+    say(g, "block, bound=@Core", "bind @Core", f"FEATURE=@Core {PIN}", session="role-core")
+    say(g, "pass, bound=@Core", "@Core is told its area", "làm đi", session="role-core")
+    say(g, "block, bound=@Composition", "bind @composition, any case", f"FEATURE=@composition {PIN}", session="role-comp")
+    say(g, "block, bound=@Manager", "bind @Manager", f"FEATURE=@Manager {PIN}", session="role-mgr")
+    say(g, "block, bound=None", "unknown role", f"FEATURE=@Boss {PIN}", session="role-x")
+
+
+REPORT_OK = """Xong rồi.
+
+## Báo cáo cho @Manager
+- Phiên: FEATURE=Wallet
+- Việc: Thêm số xu ban đầu vào config
+- Trạng thái: xong
+- Đã đổi: Wallet/Scripts/Internal/WalletConfig.cs
+- Công khai đổi: không
+- Cần bên khác: không
+- Kiểm tra: validate.py 0 vi phạm; cần người chạy Game.Wallet.Tests
+- Ghi chú: không
+"""
+
+
+def run_report_cases():
+    import bind_session
+    import stop_report
+    reports = FX + r"\Management\reports"
+    human = {"type": "user", "message": {"role": "user", "content": "làm đi"}}
+    meta = {"type": "user", "isMeta": True, "message": {"role": "user", "content": "<context>"}}
+    result = {"type": "user", "message": {"content": [{"type": "tool_result", "content": "ok"}]}}
+    def use(name, **ti): return {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": name, "input": ti}]}}
+    def say_text(text): return {"type": "assistant", "message": {"content": [{"type": "text", "text": text}]}}
+    edit = use("Edit", file_path="x")
+    count = lambda: len(os.listdir(reports)) if os.path.isdir(reports) else 0     # noqa: E731
+    for session, value in (("rep-wallet", "Wallet"), ("rep-core", "@Core"), ("rep-human", "@human"), ("rep-mgr", "@Manager")):
+        Path(guard.binding_path(session, STORE)).write_text(json.dumps({"feature": value}))
+
+    def rep(expect, label, session, entries, active=False, transcript=True, keep_pending=False):
+        pending = stop_report.pending_path(session, STORE)
+        if not keep_pending and os.path.exists(pending):
+            os.remove(pending)
+        path = FX + rf"\transcript-{len(results)}.jsonl"
+        if transcript:
+            Path(path).write_text("\n".join(json.dumps(x, ensure_ascii=False) for x in entries) + "\n", encoding="utf-8")
+        before = count()
+        stdin = json.dumps({"session_id": session, "transcript_path": path, "stop_hook_active": active})
+        p = subprocess.run([sys.executable, "-I", str(HERE / "stop_report.py"), "--root", FX, "--store", STORE],
+                           input=stdin.encode("utf-8"), capture_output=True)
+        try:
+            got = json.loads(p.stdout)["decision"] if p.stdout.strip() else "pass"
+        except Exception:
+            got = "garbage"
+        check("stop report", "", expect, label, f"{got}, +{count() - before} report")
+
+    rep("pass, +0 report", "turn without edits", "rep-wallet", [human, say_text("đây là câu trả lời")])
+    rep("block, +0 report", "edited, no report", "rep-wallet", [human, edit, result, say_text("Xong.")])
+    rep("block, +0 report", "edited, report missing lines", "rep-wallet",
+        [human, edit, result, say_text("## Báo cáo cho @Manager\n- Phiên: FEATURE=Wallet\n- Việc: x")])
+    rep("block, +0 report", "edited, unknown Trạng thái", "rep-wallet",
+        [human, edit, result, say_text(REPORT_OK.replace("Trạng thái: xong", "Trạng thái: ổn"))])
+    rep("pass, +1 report", "edited, full report", "rep-wallet", [human, edit, result, say_text(REPORT_OK)])
+    rep("pass, +1 report", "edited, report split over two messages, context entries between", "rep-wallet",
+        [human, meta, say_text("Bắt đầu."), edit, result, say_text(REPORT_OK)])
+    rep("pass, +1 report", "second stop still without report: let go, note saved", "rep-wallet",
+        [human, edit, result, say_text("Xong.")], active=True)
+    rep("pass, +0 report", "edit was in an earlier turn", "rep-wallet", [human, edit, result, say_text("x"), human, say_text("y")])
+    rep("pass, +0 report", "unity-mcp search is not a change", "rep-wallet",
+        [human, use(guard.UNITY_ASSET_TOOL, action="search"), result, say_text("x")])
+    rep("block, +0 report", "unity-mcp delete is a change", "rep-wallet",
+        [human, use(guard.UNITY_ASSET_TOOL, action="delete", path="Assets/x"), result, say_text("x")])
+    rep("pass, +1 report", "@Core with report", "rep-core", [human, edit, result, say_text(REPORT_OK)])
+    rep("pass, +0 report", "@human is not asked", "rep-human", [human, edit, result, say_text("Xong.")])
+    rep("pass, +0 report", "@Manager is not asked", "rep-mgr", [human, edit, result, say_text("Xong.")])
+    rep("pass, +0 report", "unbound chat is not asked", "rep-none", [human, edit, result, say_text("Xong.")])
+    rep("pass, +0 report", "missing transcript lets the agent stop", "rep-wallet", [], transcript=False)
+    # The hook's own message may show up as a new user entry: the pending mark keeps the check on.
+    rep("block, +0 report", "sent back for a report", "rep-wallet", [human, edit, result, say_text("Xong.")])
+    rep("pass, +1 report", "after a hook message that looks like a prompt, the report is still taken", "rep-wallet",
+        [human, edit, result, say_text("Xong."), human, say_text(REPORT_OK)], keep_pending=True)
+    rep("block, +0 report", "sent back again", "rep-wallet", [human, edit, result, say_text("Xong.")])
+    rep("pass, +1 report", "and when it still writes none, the note is saved", "rep-wallet",
+        [human, edit, result, say_text("Xong."), human, say_text("Đã xong rồi mà.")], keep_pending=True)
+    rep("pass, +0 report", "the mark is gone after that", "rep-wallet", [human, say_text("hỏi đáp")], keep_pending=True)
+
+    saved = sorted(os.listdir(reports))
+    text = Path(reports, saved[0]).read_text(encoding="utf-8")
+    check("stop report", "", True, "saved file holds the block and who wrote it",
+          "## Báo cáo cho @Manager" in text and "FEATURE=Wallet" in text and "Xong rồi" not in text)
+    first = bind_session.context({"session_id": "rep-mgr"}, FX, STORE)
+    check("stop report", "", True, "@Manager is told about every new report",
+          f"{len(saved)} báo cáo mới" in first and all(n in first for n in saved))
+    again = bind_session.context({"session_id": "rep-mgr"}, FX, STORE)
+    check("stop report", "", True, "and not again on its next prompt", "Không có báo cáo mới" in again)
 
 
 def main():

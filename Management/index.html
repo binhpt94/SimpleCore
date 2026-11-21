@@ -66,6 +66,9 @@
   ul, ol { margin: 0; padding-left: 20px; }
   h3 + table, h3 + ol, h3 + p { margin-top: 6px; }
   .block + .block { margin-top: 16px; }
+  details summary { cursor: pointer; }
+  details[open] summary { margin-bottom: 8px; }
+  td { vertical-align: top; }
   li + li { margin-top: 4px; }
   .muted { color: var(--muted); }
   .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
@@ -317,6 +320,29 @@
           });
           catalogProblems(c).forEach(function (t) { add(cats, el("p", "bad-text", t)); });
         });
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------- báo cáo cho @Manager
+  if (project && project.reports) {
+    tab("bao-cao", "Báo cáo", "", function (pane) {
+      add(pane, el("h1", "", "Báo cáo cho @Manager"));
+      add(pane, el("p", "sub", "Phiên feature, dịch vụ, @Core, @Composition kết thúc mỗi lượt có sửa file bằng một báo cáo; " +
+        "Stop hook lưu vào Management/reports. Mới nhất trước, tối đa 50."));
+      var s = put(pane, section(""));
+      if (!project.reports.length) { add(s, el("p", "muted", "Chưa có báo cáo nào.")); return; }
+      var table = put(s, el("table"));
+      add(table, headRow(["Thời gian", "Phiên", "Trạng thái", "Việc", "Cần bên khác"]));
+      var body = put(table, el("tbody"));
+      project.reports.forEach(function (rp) {
+        var f = rp.fields;
+        var state = (f["Trạng thái"] || "").toLowerCase();
+        var cls = state.indexOf("xong") === 0 ? "ok-text" : (state.indexOf("bị chặn") === 0 ? "bad-text" : "");
+        var details = add(el("details"), el("summary", "", f["Việc"] || rp.file), el("pre", "doc", rp.text));
+        var need = f["Cần bên khác"] || "";
+        add(body, row([rp.time, f["Phiên"] || "?", el("span", cls, f["Trạng thái"] || "?"), details,
+          /^không\b/i.test(need) || !need ? el("span", "muted", need || "—") : el("span", "bad-text", need)]));
       });
     });
   }

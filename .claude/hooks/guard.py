@@ -6,8 +6,13 @@ made when the human types `FEATURE=<value> <PIN>` in the chat; see bind_session.
 PIN live outside the project, in STORE_DIR. The FEATURE environment variable is not used.
 The value means:
     <Name> or _Services/<Name>  -> agent bound to that feature
+    @Core                       -> agent that edits only Assets/Core
+    @Composition                -> agent that edits only Assets/_Composition
+    @Manager                    -> coordinator: edits nothing but new files in Management/proposals
     @human                      -> no feature limits; still asks for .claude, _Composition, Core
     unset / invalid             -> every edit is denied
+Every agent role reads what a feature session reads: public parts of features, Core, _Composition,
+Management, .claude, root CLAUDE.md.
 
 Default is deny: unknown tools, unknown zones and any error in this script are blocked.
 Reads the hook JSON on stdin, writes the decision JSON on stdout. Standard library only.
@@ -23,7 +28,7 @@ import sys
 # Shell commands an agent may run. Each entry is a regex that must match the WHOLE command.
 # The command must be run from the project root.
 ALLOWED_COMMANDS = [
-    r"python Management/tools/validate\.py( --feature (_Services/)?[A-Za-z][A-Za-z0-9]*)?",
+    r"python Management/tools/validate\.py( --feature ((_Services/)?[A-Za-z][A-Za-z0-9]*|_Composition))?",
 ]
 
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
@@ -35,6 +40,9 @@ PASS_TOOLS = {"AskUserQuestion", "TodoWrite", "TaskCreate", "TaskUpdate", "TaskL
               "SendMessage"}
 FORBIDDEN_DIRS = {"library", "temp", "logs", "obj", "usersettings"}
 HUMAN_ASK_ZONES = {".claude", "_Composition", "Core"}
+# FEATURE values that are not feature folders.
+ROLES = ("@human", "@Core", "@Composition", "@Manager")
+ROLE_AREAS = {"@Core": "Core", "@Composition": "_Composition"}
 # The one unity-mcp call a feature session may make: manage_asset with action "delete".
 UNITY_ASSET_TOOL = "mcp__unityMCP__manage_asset"
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")
@@ -73,6 +81,17 @@ def valid_feature(raw, root):
     """True when raw names an existing feature folder."""
     return bool(FEATURE_RX.match(raw)) and os.path.isdir(
         ntpath.join(root, "UnityProject", "Assets", "Features", *raw.split("/")))
+
+
+def role_of(raw):
+    """The role a stored FEATURE value names (exact spelling), or None."""
+    raw = (raw or "").strip()
+    return raw if raw in ROLES else None
+
+
+def canonical_role(typed):
+    """The role a human typed, in any letter case, as stored; None when it is not a role."""
+    return next((r for r in ROLES if r.lower() == (typed or "").strip().lower()), None)
 
 
 def resolve_target(p, cwd):
@@ -123,8 +142,9 @@ def goes_through_link(full, root):
     return False
 
 
-def zone(full, root, feature):
-    """(name, readable, edit) for a path; edit is 'allow' | 'ask' | 'create' | 'deny'."""
+def zone(full, root, feature, area=None):
+    """(name, readable, edit) for a path; edit is 'allow' | 'ask' | 'create' | 'deny'.
+    feature: the session's own feature; area: "Core" or "_Composition" for the @Core / @Composition roles."""
     if full.lower() == root.lower():
         return "project root", False, "deny"
     if not inside(full, root):
@@ -153,10 +173,15 @@ def zone(full, root, feature):
     if low[1] != "assets" or n < 3:
         return "unlisted", False, "deny"
 
+    # A feature session asks for Core / _Composition; @Core and @Composition edit only their own one.
     if low[2] == "_composition":
-        return "_Composition", True, "ask"
+        if area == "_Composition":
+            return "own _Composition", True, "allow"
+        return "_Composition", True, "deny" if area else "ask"
     if low[2] == "core":
-        return "Core", True, "ask"
+        if area == "Core":
+            return "own Core", True, "allow"
+        return "Core", True, "deny" if area else "ask"
     if low[2] != "features" or n < 4:
         return "unlisted", False, "deny"
 
@@ -181,12 +206,14 @@ def text_of(value):
     return value if isinstance(value, str) else ""
 
 
-def decide_unity_delete(ti, mode, feature, root):
-    """Deleting through unity-mcp: one existing file inside the session's own feature, nothing else."""
+def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
+    """Deleting through unity-mcp: one existing file inside the session's own feature or area, nothing else."""
     if text_of(ti.get("action")) != "delete":
         return "deny", "unity-mcp manage_asset: a feature session may use only action 'delete'"
     if mode == "none":
         return "deny", "FEATURE is not set or is not an existing feature folder; deleting is blocked"
+    if mode == "manager":
+        return "deny", "@Manager does not change the project; ask the session that owns the file"
     path = text_of(ti.get("path")).replace("\\", "/")
     if not re.match(r"^Assets/[^/]", path):
         return "deny", "unity-mcp delete: write the path from the Unity project root, starting with 'Assets/'"
@@ -195,11 +222,11 @@ def decide_unity_delete(ti, mode, feature, root):
         return "deny", "unity-mcp delete: the path leaves UnityProject/Assets"
     if goes_through_link(full, root):
         return "deny", "path goes through a link or junction"
-    name, _, edit = zone(full, root, feature)
+    name, _, edit = zone(full, root, feature, area)
     if edit == "ask":
         return "ask", f"deleting in {name} needs human approval"
     if edit != "allow":
-        return "deny", f"FEATURE={feature} may not delete in: {name}"
+        return "deny", f"FEATURE={who} may not delete in: {name}"
     low = full.lower()
     if low.endswith(".asmref"):
         return "deny", ".asmref files are forbidden"
@@ -224,11 +251,17 @@ def decide(data, session_value, root):
 
     # --- who is this session?
     raw = (session_value or "").strip().replace("\\", "/")
-    mode, feature = "none", None
-    if raw == "@human":
+    role = role_of(raw)
+    mode, feature, area = "none", None, None
+    if role == "@human":
         mode = "human"
+    elif role == "@Manager":
+        mode = "manager"
+    elif role in ROLE_AREAS:
+        mode, area = "area", ROLE_AREAS[role]
     elif valid_feature(raw, root):
         mode, feature = "feature", raw
+    who = role or raw
 
     edit_path = text_of(ti.get("file_path")) or text_of(ti.get("notebook_path"))
 
@@ -258,10 +291,13 @@ def decide(data, session_value, root):
         if mode == "none":
             return "deny", ("this chat has no valid FEATURE, so all edits are blocked. Only the human can set it "
                             "(by typing FEATURE=<name> <PIN> in the chat). Stop and tell the human.")
-        name, _, edit = zone(full, root, feature)
+        name, _, edit = zone(full, root, feature, area)
         # Files that define the boundary itself.
         if full.lower().endswith(".asmref"):
             return "deny", ".asmref files are forbidden: they put code into another assembly"
+        if mode == "manager" and edit != "create":
+            return "deny", ("@Manager does not edit code, assets or settings; it may only create new files in "
+                            "Management/proposals. Ask the session that owns the area.")
         if edit == "allow":
             new = text_of(ti.get("content")) + text_of(ti.get("new_string")) + text_of(ti.get("new_source"))
             edits = ti.get("edits")
@@ -269,18 +305,18 @@ def decide(data, session_value, root):
                 if isinstance(e, dict):
                     new += text_of(e.get("new_string"))
             if full.lower().endswith(".asmdef"):
-                return "ask", "editing an .asmdef changes what this feature may reference; needs human approval"
+                return "ask", "editing an .asmdef changes what this area may reference; needs human approval"
             if ntpath.basename(full).lower() == "assemblyinfo.cs" or re.search("InternalsVisibleTo", new, re.I):
                 return "ask", "InternalsVisibleTo opens internal types to another assembly; needs human approval"
             return "allow", f"edit inside {name}"
         if edit == "ask":
             return "ask", (f"editing {name} needs human approval. Say what changes and why it cannot be done "
-                           "inside the feature.")
+                           "inside your own area.")
         if edit == "create":
             if tool == "Write" and not os.path.lexists(full):
                 return "allow", "new proposal file"
             return "deny", "Management/proposals is create-only: write a new file, do not change an existing one"
-        return "deny", f"FEATURE={feature} may not edit: {name}"
+        return "deny", f"FEATURE={who} may not edit: {name}"
 
     if tool in READ_TOOLS:
         if tool == "Read":
@@ -296,13 +332,13 @@ def decide(data, session_value, root):
         full = resolve_target(target, cwd)
         if goes_through_link(full, root):
             return "deny", "path goes through a link or junction"
-        name, readable, _ = zone(full, root, feature)
+        name, readable, _ = zone(full, root, feature, area)
         if readable:
             return "allow", f"read inside {name}"
-        return "deny", f"may not read: {name}. Search and read only inside your feature or a readable zone."
+        return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."
 
     if tool == UNITY_ASSET_TOOL:
-        return decide_unity_delete(ti, mode, feature, root)
+        return decide_unity_delete(ti, mode, feature, root, area, who)
 
     return "deny", f"tool '{tool}' is not on the guard's list of known tools"
 
