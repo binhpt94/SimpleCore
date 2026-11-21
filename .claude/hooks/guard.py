@@ -134,7 +134,8 @@ def zone(full, root, feature):
         if re.match(r"^Scripts/Contracts(/|$)", rest, re.I):
             return "own Contracts", True, "ask"
         return "own feature", True, "allow"
-    if re.match(r"^(Scripts/Contracts|FeatureAssets/Public)(/|$)", rest, re.I):
+    # The CLAUDE.md at a feature's root describes it to the others: readable by all, like its Contracts.
+    if re.match(r"^(Scripts/Contracts|FeatureAssets/Public)(/|$)", rest, re.I) or rest.lower() == "claude.md":
         return f"public part of feature {name}", True, "deny"
     return f"private part of feature {name}", False, "deny"
 

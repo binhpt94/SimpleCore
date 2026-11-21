@@ -147,6 +147,17 @@ def run_cases():
     e(g, W, "ask", FX + r"\Management\tools\rules.json")
     e(g, "", "deny", FX + r"\Management\tools\rules.json")
     e(g, W, "deny", FX + r"\Management\tools\sub\rules.json")
+
+    g = "other feature's CLAUDE.md"
+    r(g, W, "allow", F + r"\Shop\CLAUDE.md")
+    r(g, W, "allow", F + r"\Shop\claude.md")
+    r(g, W, "allow", F + r"\_Services\Popup\CLAUDE.md")
+    r(g, "", "allow", F + r"\Shop\CLAUDE.md")
+    e(g, W, "deny", F + r"\Shop\CLAUDE.md")
+    w(g, W, "deny", F + r"\_Services\Popup\CLAUDE.md")
+    r(g, W, "deny", F + r"\Shop\Scripts\Internal\CLAUDE.md")
+    r(g, W, "deny", F + r"\Shop\NOTES.md")
+    t(g, W, "deny", "mcp__unityMCP__manage_asset", {"action": "delete", "path": "Assets/Features/Shop/CLAUDE.md"})
     r(g, W, "allow", FX + r"\Management\index.html")
     e(g, W, "deny", FX + r"\Management\index.html")
 

@@ -14,7 +14,7 @@ Feature nằm ở `UnityProject/Assets/Features/<Tên>/`, dịch vụ ở `Featu
 |---|---|---|
 | Feature của mình | được | được |
 | `Scripts/Contracts` của mình | được | hỏi người |
-| `Scripts/Contracts`, `FeatureAssets/Public` của feature khác | được | cấm |
+| `Scripts/Contracts`, `FeatureAssets/Public`, `CLAUDE.md` gốc của feature khác | được | cấm |
 | `Scripts/Internal`, `Scripts/View`, `FeatureAssets/Private` của feature khác | cấm | cấm |
 | `Assets/_Composition`, `Assets/Core` | được | hỏi người, từng lần |
 | `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json` | được | hỏi người, từng lần |
