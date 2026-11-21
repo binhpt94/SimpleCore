@@ -1,6 +1,6 @@
 # Đề xuất: Contracts luôn thuần C#, asset giao cho dịch vụ qua id
 
-Ngày: 2026-11-21. Trạng thái: chờ duyệt. Chưa có dòng code nào được sửa.
+Ngày: 2026-11-21. Trạng thái: đã duyệt. Bước 2 (SRC-05) đã làm; các bước sau chưa làm.
 
 ## Vì sao cần
 
@@ -32,7 +32,7 @@ Mục tiêu:
 - Regex: `^(_Services/)?[A-Z][A-Za-z0-9]*/[A-Z][A-Za-z0-9]*(\.[A-Z][A-Za-z0-9]*)*$`
 - Ví dụ: `Shop/Purchased`, `Wallet/NotEnoughCoins`, `Shop/Buy.Confirm`.
 
-Vì tiền tố là tên feature, hai feature không thể trùng id. Trùng trong cùng một feature thì test catalog bắt (mục 5).
+Vì tiền tố là tên feature, hai feature không thể trùng id. Trùng trong cùng một feature thì validator bắt (mục 5).
 
 Mỗi loại id là một kiểu riêng do dịch vụ định nghĩa trong Contracts của nó, ví dụ `PopupId`, `SoundId`. Kiểu đã phân biệt loại, nên không ghi loại vào chuỗi: `Shop/Click` vừa là âm thanh vừa là popup cũng không lẫn.
 
@@ -46,22 +46,23 @@ public readonly struct PopupId : IEquatable<PopupId>
 }
 ```
 
-Feature sở hữu asset khai báo id đúng một lần, trong Contracts của nó:
+Feature sở hữu asset khai báo id đúng một lần, trong Internal của nó (hoặc trong Contracts, nếu feature khác cần dùng id đó):
 
 ```csharp
-// Shop/Scripts/Contracts/ShopPopups.cs
-public static class ShopPopups
+// Shop/Scripts/Internal/ShopPopups.cs
+internal static class ShopPopups
 {
     public static readonly PopupId Purchased = new PopupId("Shop/Purchased");
 }
 ```
 
+- Mặc định đặt trong Internal: chỉ chính Shop gọi `Show` với popup của nó. Không đặt trong Contracts được nếu kiểu id thuộc dịch vụ khác, vì Contracts chỉ được tham chiếu `Game.Core` (ASM-04).
 - Nơi khác chỉ dùng hằng (`ShopPopups.Purchased`), không gõ lại chuỗi.
 - `static readonly` chỉ giữ giá trị bất biến, không phải trạng thái, nên không phạm luật "không static giữ trạng thái". Câu này sẽ được ghi vào `.claude/rules/unity.md`.
 - Id đã có nơi dùng là contract: không đổi chuỗi, không xoá. Cần đổi thì đề xuất.
 - Không băm chuỗi, để id đọc được trong log và catalog.
 
-Hệ quả cho Shop: Shop chưa có Contracts. Theo chuẩn này Shop sẽ có `Scripts/Contracts` (asmdef `Game.Shop.Contracts`) chỉ để chứa `ShopPopups`. Contracts này chỉ là danh sách id, không mở hành vi nào của Shop.
+Hệ quả cho Shop: không cần thêm Contracts. `ShopPopups` nằm trong Internal của Shop.
 
 ## 3. Catalog theo scene, do `_Composition` giữ
 
@@ -117,17 +118,23 @@ Mất kiểm tra lúc biên dịch (gõ sai id chỉ lộ lúc chạy), nên bù
 |---|---|
 | Chuỗi đúng regex | Constructor của id; validator |
 | Tiền tố `Owner` trùng feature chứa file | Validator: trong Shop chỉ được tạo id `Shop/...` |
-| `new XxxId("...")` chỉ nằm trong `Scripts/Contracts` | Validator |
-| Không trùng id, id nào cũng có asset, không có asset thừa | Test EditMode của mỗi dịch vụ nạp catalog thật |
+| Id chỉ được tạo trong `Scripts/Contracts` hoặc `Scripts/Internal` của feature | Validator |
+| Mỗi cặp (kiểu, chuỗi) chỉ được tạo một lần trong cả project | Validator |
+| Id nào trong catalog cũng có asset, không có asset thừa | Test EditMode của mỗi dịch vụ nạp catalog thật |
 | Thiếu catalog hoặc catalog rỗng | `Install` của dịch vụ lỗi ngay, nêu tên thứ bị thiếu |
 
-Luật validator mới, tạm gọi `SRC-05`: quét `new <Tên>Id("<chuỗi>")` (tên kiểu kết thúc bằng `Id`) trong mọi file `.cs` của feature và dịch vụ, báo ba lỗi đầu của bảng. Chỉ nhận chuỗi viết thẳng; tạo id từ biến hay ghép chuỗi trong Contracts cũng bị báo, để luật không bị lách.
+Luật validator `SRC-05` (đã có trong `validate.py`): quét `new <Tên>Id("<chuỗi>")` và dạng viết tắt `<Tên>Id x = new("<chuỗi>")` (tên kiểu kết thúc bằng `Id`) trong mọi file `.cs` của project, báo bốn lỗi đầu của bảng.
+
+- Chỉ nhận một chuỗi viết thẳng. Tạo id từ biến, chuỗi `$"..."`, `@"..."` hay ghép chuỗi đều bị báo, để luật không bị lách.
+- Thư mục `Tests` được miễn, để test kiểm được constructor với chuỗi sai và dùng id giả.
+- Cùng chuỗi nhưng khác kiểu (`PopupId` và `SoundId`) không tính là trùng.
+- Còn hở: id tạo trong thân hàm (`static PopupId Make() => new("...")`) không bị quét. Chỗ này dựa vào luật "Không lách" trong `unity.md`.
 
 ## 6. Đổi luật trong `.claude/rules/unity.md`
 
 Thêm mục "Asset giao cho dịch vụ":
 
-- Dịch vụ nhận asset qua id, không qua object Unity. Id dạng `<Owner>/<Name>`, khai báo một lần trong Contracts của chủ.
+- Dịch vụ nhận asset qua id, không qua object Unity. Id dạng `<Owner>/<Name>`, khai báo một lần trong Internal của chủ (Contracts nếu feature khác cần).
 - `static readonly` cho id là giá trị bất biến, được phép.
 - Asset giao cho dịch vụ nằm ở `FeatureAssets/Public` của chủ; catalog nằm ở `_Composition`.
 
@@ -138,10 +145,10 @@ Mục "Prefab giao cho dịch vụ (ví dụ Popup) là của feature gọi, đ�
 Mỗi bước duyệt riêng; bước nào đụng vùng "hỏi người" thì hỏi từng lần.
 
 1. Duyệt đề xuất này, và chọn giữa mục 4 và phần B của đề xuất popup-opened-callback.
-2. Thêm `SRC-05` vào `validate.py`, kèm test trong `test_validate.py`.
+2. Thêm `SRC-05` vào `validate.py`, kèm test trong `test_validate.py`. **Đã làm.**
 3. `_Composition`, Boot theo scene: tạo `Boot.Loading.prefab` và `Boot.Game.prefab` (variant), chuyển danh sách installer từ override trong scene sang variant, mỗi scene đặt variant của nó. `BootTests` kiểm từng variant. Bước này chưa đổi hành vi, làm và kiểm riêng được.
 4. Popup: thêm `PopupId`, `IPopupContent<T>`, `PopupCatalog` và interface đọc catalog; tham gia `ISessionScene` để nạp và nhả asset; đổi `IPopupService`; bỏ `PopupRequest`; bật `noEngineReferences: true`; xoá ngoại lệ ASM-05 trong `rules.json`. Sửa test của Popup. Đồng thời thêm trường catalog vào `Boot` và catalog cho variant Game (Loading chưa có popup nào).
-5. Shop: thêm `Scripts/Contracts` với `ShopPopups`; chuyển `PurchasedPopup.prefab` sang `FeatureAssets/Public`; `ShopLogic` gọi `Show(ShopPopups.Purchased)` và không còn giữ `GameObject`; bỏ prefab popup khỏi `ShopConfig`.
+5. Shop: thêm `ShopPopups` vào Internal; chuyển `PurchasedPopup.prefab` sang `FeatureAssets/Public`; `ShopLogic` gọi `Show(ShopPopups.Purchased)` và không còn giữ `GameObject`; bỏ prefab popup khỏi `ShopConfig`.
 6. Cập nhật `.claude/rules/unity.md`, `CLAUDE.md` của Popup và Shop.
 
 Bước 4 và 5 phải đi cùng một lần biên dịch, vì đổi `IPopupService` làm Shop hỏng biên dịch.

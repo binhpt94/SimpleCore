@@ -14,9 +14,13 @@ Rule groups
                       04 reference against the matrix   05 Contracts uses the engine
                       06 precompiled DLL   07 Tests without UNITY_INCLUDE_TESTS
   SRC  C# source      01 public type in Internal   02 MonoBehaviour in Internal
-                      03 InternalsVisibleTo   04 banned API
-  AST  assets         01 reference to another feature's private asset   02 not text-serialized
+                      03 InternalsVisibleTo   04 banned API   05 asset id
+  AST  assets        01 reference to another feature's private asset   02 not text-serialized
   DOC  01 md file too long      CFG  01 invalid exception in rules.json
+
+SRC-05: an asset id (`new XxxId("...")` or `XxxId x = new("...")`, type name ending in Id) is a plain
+string literal "<Owner>/<Name>", created only in Scripts/Contracts or Scripts/Internal of the feature
+named by Owner, and each (type, string) pair is created once in the whole project. Tests are not checked.
 
 C# is scanned as text (regex), not parsed. Standard library only.
 """
@@ -194,6 +198,11 @@ YAML_EXT = {".prefab", ".unity", ".asset", ".mat", ".controller", ".overridecont
 GUID_RX = re.compile(r"guid[:=]\s*([0-9a-f]{32})")
 META_GUID_RX = re.compile(r"^guid:\s*([0-9a-f]{32})", re.M)
 IVT_RX = re.compile(r'\bInternalsVisibleTo(?:Attribute)?\s*\(\s*"([^"]*)"\s*\)')
+ID_ARG = r"\((?P<arg>[^()]*(?:\([^()]*\)[^()]*)*)\)"
+ID_NEW_RX = re.compile(r"\bnew\s+(?:[\w.]+\.)?(?P<type>[A-Z]\w*Id)\s*" + ID_ARG
+                       + r"|\b(?P<ttype>[A-Z]\w*Id)\s+\w+\s*=>?\s*new\s*" + ID_ARG.replace("arg", "targ"))
+ID_LITERAL_RX = re.compile(r'^\s*"((?:[^"\\\n]|\\.)*)"\s*$')
+ID_RX = re.compile(r"^(_Services/)?[A-Z][A-Za-z0-9]*/[A-Z][A-Za-z0-9]*(\.[A-Z][A-Za-z0-9]*)*$")
 
 
 class Scan:
@@ -394,6 +403,7 @@ class Scan:
         banned = [(re.compile(b["pattern"]), b.get("reason", "")) for b in self.cfg.get("bannedApis") or []]
         exported = {}   # Internal assembly name -> [(type name, file, line)]
         classes = {}    # Internal / Core assembly name -> [(class name, bases, file, line)]
+        ids = {}        # (id type, string) -> [(file, line)]
 
         for c in sorted(f for f in self.files if f.suffix.lower() == ".cs"):
             e = self.assembly_of(c)
@@ -431,10 +441,40 @@ class Scan:
                     for m in rx.finditer(code):
                         self.add("SRC-04", c, line_of(code, m.start()), f"banned API '{m.group(0).strip()}': {reason}")
 
+            # SRC-05
+            if layer != "Tests":
+                for m in ID_NEW_RX.finditer(no_comments):
+                    kind, arg = m.group("type") or m.group("ttype"), m.group("arg") if m.group("type") else m.group("targ")
+                    line = line_of(no_comments, m.start())
+                    if e["scope"] != "feature" or layer not in ("Contracts", "Internal"):
+                        self.add("SRC-05", c, line, f"{kind} created here: asset ids are created only in Scripts/Contracts "
+                                 "or Scripts/Internal of the feature that owns the asset")
+                        continue
+                    lit = ID_LITERAL_RX.match(arg)
+                    if not lit:
+                        self.add("SRC-05", c, line, f"{kind} must take one plain string literal so it can be checked")
+                        continue
+                    value = lit.group(1)
+                    if not ID_RX.match(value):
+                        self.add("SRC-05", c, line, f"'{value}' is not a valid asset id: use <Owner>/<Name>, "
+                                 "for example Shop/BuyConfirm or Shop/Buy.Confirm")
+                    elif value.rsplit("/", 1)[0] != e["feature"]:
+                        self.add("SRC-05", c, line, f"'{value}' belongs to another feature: {e['feature']} may create "
+                                 f"only ids starting with '{e['feature']}/'")
+                    else:
+                        ids.setdefault((kind, value), []).append((c, line))
+
             if layer == "Internal":
                 exported.setdefault(e["name"], []).extend((n, c, line_of(code, i)) for n, i in exported_types(code))
             if layer in ("Internal", "Core"):
                 classes.setdefault(e["name"], []).extend((n, b, c, line_of(code, i)) for n, b, i in class_bases(code))
+
+        # SRC-05: each (type, string) is created once
+        for (kind, value), places in ids.items():
+            first, first_line = places[0]
+            for path, line in places[1:]:
+                self.add("SRC-05", path, line, f"{kind} '{value}' is already created at {self.rel(first)}:{first_line}; "
+                         "create each id once and reuse it")
 
         # SRC-01: exactly one public type per Internal, and it is the installer
         for types in exported.values():

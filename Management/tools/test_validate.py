@@ -91,7 +91,7 @@ WALLET_LOGIC = r'''using UnityEngine;
 namespace Game.Wallet
 {
     // public class FakeInComment : MonoBehaviour {}
-    /* public class AlsoFake {}  Resources.Load("x") */
+    /* public class AlsoFake {}  Resources.Load("x")  new PopupId("bad id") */
     internal sealed class WalletLogic : IWalletReader
     {
         public int Coins { get; private set; }
@@ -103,6 +103,22 @@ namespace Game.Wallet
     }
     internal class WalletConfig : ScriptableObject { public int startCoins; }
     internal record Entry(int Id);
+}
+'''
+
+
+# Valid asset ids (SRC-05): explicit and target-typed `new`, a dotted name, a full type name, and the
+# same string under another id type.
+SHOP_IDS = f"{F}/Shop/Scripts/Internal/ShopPopups.cs"
+SHOP_IDS_TEXT = '''namespace Game.Shop
+{
+    internal static class ShopPopups
+    {
+        public static readonly PopupId Bought = new PopupId("Shop/Bought");
+        public static readonly PopupId Confirm = new("Shop/Buy.Confirm");
+        public static PopupId Help => new Game.Services.Popup.PopupId( "Shop/Help" );
+        public static readonly SoundId BoughtSound = new SoundId("Shop/Bought");
+    }
 }
 '''
 
@@ -128,6 +144,7 @@ def build_clean(r):
     put_meta(r, f"{w}/Scripts/View/WalletView.cs", G["walletView"])
     put_asmdef(r, f"{w}/Tests", "Game.Wallet.Tests", ["Game.Core", "Game.Wallet.Contracts", "Game.Wallet.Internal", "Game.Wallet.View", "Game.Shop.Contracts", "UnityEngine.TestRunner", "UnityEditor.TestRunner"], **TESTS_EXTRA)
     put(r, f"{w}/Tests/WalletTests.cs", "using System.Reflection;\nnamespace Game.Wallet.Tests { public class WalletTests { } }")
+    put(r, f"{w}/Tests/IdTests.cs", 'namespace Game.Wallet.Tests { class IdTests { object X() { return new PopupId("not an id"); } } }')
     put(r, f"{w}/FeatureAssets/Public/Icon.prefab", yaml(G["walletView"]))
     put_meta(r, f"{w}/FeatureAssets/Public/Icon.prefab", G["walletIcon"])
     put(r, f"{w}/FeatureAssets/Private/Config.asset", yaml())
@@ -138,6 +155,7 @@ def build_clean(r):
     put(r, f"{s}/Scripts/Contracts/IShop.cs", "namespace Game.Shop { public interface IShop { } }")
     put_asmdef(r, f"{s}/Scripts/Internal", "Game.Shop.Internal", ["Game.Core", "Game.Shop.Contracts", "Game.Wallet.Contracts"])
     put(r, f"{s}/Scripts/Internal/ShopInstaller.cs", "namespace Game.Shop;\npublic sealed class ShopInstaller { }\ninternal class ShopLogic { }")
+    put(r, SHOP_IDS, SHOP_IDS_TEXT)
     put_asmdef(r, f"{s}/Scripts/View", "Game.Shop.View", ["Game.Core", "Game.Shop.Internal", "Game.Shop.Contracts"])
     put(r, f"{s}/Scripts/View/ShopView.cs", "using UnityEngine;\nnamespace Game.Shop { public class ShopView : MonoBehaviour { } }")
     put_meta(r, f"{s}/Scripts/View/ShopView.cs", G["shopView"])
@@ -147,6 +165,9 @@ def build_clean(r):
     p = f"{F}/_Services/Popup"
     put_asmdef(r, f"{p}/Scripts/Contracts", "Game.Services.Popup.Contracts", ["Game.Core"], noEngineReferences=True)
     put(r, f"{p}/Scripts/Contracts/IPopupService.cs", "namespace Game.Services.Popup { public interface IPopupService { } public delegate void PopupClosed(int id); }")
+    put(r, f"{p}/Scripts/Contracts/PopupId.cs", "namespace Game.Services.Popup {\n"
+        "  public readonly struct PopupId { public PopupId(string value) { Value = value; } public string Value { get; } }\n"
+        '  public static class PopupIds { public static readonly PopupId Error = new PopupId("_Services/Popup/Error"); }\n}')
     put_asmdef(r, f"{p}/Scripts/Internal", "Game.Services.Popup.Internal", ["Game.Core", "Game.Services.Popup.Contracts"])
     put(r, f"{p}/Scripts/Internal/PopupInstaller.cs", "namespace Game.Services.Popup { public static class PopupInstaller { } internal class PopupQueue { } }")
     put(r, f"{p}/FeatureAssets/Private/Frame.prefab", yaml())
@@ -239,6 +260,21 @@ CASES = [
     ("SRC-04", "SendMessage in View", lambda d: put(d, f"{F}/Wallet/Scripts/View/S.cs", NS % 'class S : UnityEngine.MonoBehaviour { void X() { SendMessage("Buy"); } }')),
     ("SRC-04", "GameObject.Find in View", lambda d: put(d, f"{F}/Wallet/Scripts/View/S.cs", NS % 'class S : UnityEngine.MonoBehaviour { void X() { var g = UnityEngine.GameObject.Find("Shop"); } }')),
     ("SRC-04", "Resources.Load in _Composition", lambda d: put(d, f"{A}/_Composition/L.cs", 'namespace Game.Composition { class L { void X() { UnityEngine.Resources.Load("p"); } } }')),
+    ("SRC-05", "id created in View", lambda d: put(d, f"{F}/Wallet/Scripts/View/I.cs", NS % 'class I { object X = new PopupId("Wallet/Low"); }'), "*only in Scripts/Contracts or Scripts/Internal*"),
+    ("SRC-05", "target-typed id in View", lambda d: put(d, f"{F}/Wallet/Scripts/View/I.cs", NS % 'class I { PopupId X = new("Wallet/Low"); }'), "*only in Scripts/Contracts or Scripts/Internal*"),
+    ("SRC-05", "id created in _Composition", lambda d: put(d, f"{A}/_Composition/I.cs", 'namespace Game.Composition { class I { object X = new PopupId("Shop/Bought"); } }'), "*only in Scripts/Contracts or Scripts/Internal*"),
+    ("SRC-05", "id created in Core", lambda d: put(d, f"{A}/Core/I.cs", 'namespace Game.Core { class I { object X = new PopupId("Shop/Bought"); } }'), "*only in Scripts/Contracts or Scripts/Internal*"),
+    ("SRC-05", "id from a variable", lambda d: put(d, f"{WI}/I.cs", NS % 'class I { object X(string s) { return new PopupId(s); } }'), "*plain string literal*"),
+    ("SRC-05", "id from interpolation", lambda d: put(d, f"{WI}/I.cs", NS % 'class I { object X(int n) { return new PopupId($"Wallet/Low{n}"); } }'), "*plain string literal*"),
+    ("SRC-05", "id from concatenation", lambda d: put(d, f"{WI}/I.cs", NS % 'class I { object X = new PopupId("Wallet/" + "Low"); }'), "*plain string literal*"),
+    ("SRC-05", "id from verbatim string", lambda d: put(d, f"{WI}/I.cs", NS % 'class I { object X = new PopupId(@"Wallet/Low"); }'), "*plain string literal*"),
+    ("SRC-05", "id with lowercase name", lambda d: put(d, f"{WI}/I.cs", NS % 'class I { object X = new PopupId("Wallet/low"); }'), "*not a valid asset id*"),
+    ("SRC-05", "id without owner", lambda d: put(d, f"{WI}/I.cs", NS % 'class I { object X = new PopupId("Low"); }'), "*not a valid asset id*"),
+    ("SRC-05", "id with two slashes", lambda d: put(d, f"{WI}/I.cs", NS % 'class I { object X = new PopupId("Wallet/Low/Coins"); }'), "*not a valid asset id*"),
+    ("SRC-05", "target-typed id, bad string", lambda d: put(d, f"{WI}/I.cs", NS % 'class I { static readonly PopupId X = new("bad"); }'), "*not a valid asset id*"),
+    ("SRC-05", "id of another feature", lambda d: put(d, f"{WI}/I.cs", NS % 'class I { object X = new PopupId("Shop/Low"); }'), "*belongs to another feature*"),
+    ("SRC-05", "service id without _Services/", lambda d: put(d, f"{F}/_Services/Popup/Scripts/Internal/I.cs", 'namespace Game.Services.Popup { class I { object X = new PopupId("Popup/Error"); } }'), "*belongs to another feature*"),
+    ("SRC-05", "same id created twice", lambda d: put(d, f"{F}/Shop/Scripts/Internal/Again.cs", 'namespace Game.Shop { class Again { object X = new PopupId("Shop/Bought"); } }'), "*'Shop/Bought' is already created at*"),
 
     ("AST-01", "prefab -> other Private asset", lambda d: put(d, f"{F}/Shop/FeatureAssets/Public/Shop.prefab", yaml(G["walletCfg"]))),
     ("AST-01", "prefab -> other View script", lambda d: put(d, f"{F}/Shop/FeatureAssets/Private/P.prefab", yaml(G["walletView"]))),
