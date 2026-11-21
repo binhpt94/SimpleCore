@@ -3,36 +3,25 @@ using UnityEngine.UI;
 
 namespace Game.Wallet
 {
-    /// <summary>Shows the current coin count. Holds no game state: it only mirrors WalletLogic.</summary>
-    internal sealed class WalletCoinsLabel : MonoBehaviour
+    /// <summary>Shows the coin count it is given. Knows nothing about the wallet itself.</summary>
+    internal sealed class WalletCoinsLabel : MonoBehaviour, ICoinsDisplay
     {
         [SerializeField] private Text label;
 
-        private WalletLogic logic;
-
-        private void OnEnable()
+        void ICoinsDisplay.ShowCoins(int coins)
         {
-            logic = WalletRuntime.Logic;
-            if (logic == null) return;
+            if (label == null)
+            {
+                Debug.LogError("WalletCoinsLabel has no label assigned; the coin count cannot be shown.", this);
+                return;
+            }
 
-            logic.CoinsChanged += OnCoinsChanged;
-            Show(logic.Coins);
+            label.text = coins.ToString();
         }
 
-        private void OnDisable()
+        void ICoinsDisplay.Close()
         {
-            if (logic != null) logic.CoinsChanged -= OnCoinsChanged;
-            logic = null;
-        }
-
-        private void OnCoinsChanged(CoinsChanged change)
-        {
-            Show(change.Current);
-        }
-
-        private void Show(int coins)
-        {
-            if (label != null) label.text = coins.ToString();
+            Destroy(gameObject);
         }
     }
 }

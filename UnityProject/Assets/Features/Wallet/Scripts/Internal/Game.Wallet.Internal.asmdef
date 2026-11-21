@@ -3,7 +3,9 @@
   "rootNamespace": "Game.Wallet",
   "references": [
     "Game.Core",
-    "Game.Wallet.Contracts"
+    "Game.Wallet.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

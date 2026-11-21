@@ -5,6 +5,8 @@
     "Game.Core",
     "Game.Wallet.Contracts",
     "Game.Wallet.Internal",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],

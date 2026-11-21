@@ -1,4 +1,6 @@
+using System;
 using Game.Core;
+using Game.Services.SessionScene;
 using UnityEngine;
 
 namespace Game.Wallet
@@ -7,12 +9,23 @@ namespace Game.Wallet
     public sealed class WalletInstaller : InstallerAsset
     {
         [SerializeField] private WalletConfig config;
+        [SerializeField] private GameObject coinsLabelPrefab;
 
         public override void Install(IServiceRegistry registry)
         {
-            var logic = new WalletLogic(config != null ? config.StartCoins : 0);
-            WalletRuntime.Logic = logic;
+            if (config == null) throw Missing("config");
+            if (coinsLabelPrefab == null) throw Missing("coinsLabelPrefab");
+
+            var session = registry.Resolve<ISessionScene>();
+
+            var logic = new WalletLogic(config.StartCoins);
             registry.Register<IWalletService>(logic);
+            session.Join(new WalletCoinsPresenter(logic, new PrefabCoinsDisplaySource(coinsLabelPrefab)));
+        }
+
+        private InvalidOperationException Missing(string field)
+        {
+            return new InvalidOperationException($"{name}: '{field}' is not assigned.");
         }
     }
 }
