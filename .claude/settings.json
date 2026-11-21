@@ -1,7 +1,11 @@
 {
+  "enabledMcpjsonServers": ["unityMCP"],
   "permissions": {
     "defaultMode": "default",
     "disableBypassPermissionsMode": "disable",
+    "allow": [
+      "mcp__unityMCP"
+    ],
     "ask": [
       "Edit(/UnityProject/Assets/_Composition/**)",
       "Edit(/UnityProject/Assets/Core/**)",

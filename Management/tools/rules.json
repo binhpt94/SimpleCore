@@ -1,6 +1,6 @@
 {
   "_doc": [
-    "Cấu hình cho validate.py. Chỉ người sửa file này.",
+    "Cấu hình cho validate.py. AI chỉ sửa file này sau khi hỏi và được người đồng ý, từng lần.",
     "extraAssetRoots: thư mục cấp 1 trong Assets ngoài Features/Core/_Composition (ví dụ 'Plugins', 'TextMesh Pro'). Validator coi là bên thứ ba, không quét.",
     "allowedPackages / allowedDlls: theo lớp (Contracts, Internal, View, Tests, Core, Composition, hoặc '*' cho mọi lớp).",
     "bannedApis: regex quét trên code đã bỏ chú thích và chuỗi; không áp dụng cho Tests.",
@@ -8,6 +8,7 @@
   ],
   "extraAssetRoots": [],
   "allowedPackages": {
+    "*": ["UniTask"],
     "View": ["UnityEngine.UI", "Unity.TextMeshPro"],
     "Tests": ["UnityEngine.TestRunner", "UnityEditor.TestRunner"]
   },

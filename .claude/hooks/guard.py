@@ -32,6 +32,8 @@ PASS_TOOLS = {"AskUserQuestion", "TodoWrite", "TaskCreate", "TaskUpdate", "TaskL
               "SendMessage"}
 FORBIDDEN_DIRS = {"library", "temp", "logs", "obj", "usersettings"}
 HUMAN_ASK_ZONES = {".claude", "_Composition", "Core"}
+# The one unity-mcp call a feature session may make: manage_asset with action "delete".
+UNITY_ASSET_TOOL = "mcp__unityMCP__manage_asset"
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")
 SHELL_META_RX = re.compile(r"[;&|<>`$(){}\r\n]")
 
@@ -101,6 +103,8 @@ def zone(full, root, feature):
     if low[0] == "management":
         if n >= 2 and low[1] == "proposals":
             return "Management/proposals", True, "create"
+        if low[1:] == ["tools", "rules.json"]:
+            return "Management/tools/rules.json", True, "ask"
         return "Management", True, "deny"
     if low[0] != "unityproject" or n < 2:
         return "unlisted", False, "deny"
@@ -137,6 +141,36 @@ def zone(full, root, feature):
 
 def text_of(value):
     return value if isinstance(value, str) else ""
+
+
+def decide_unity_delete(ti, mode, feature, root):
+    """Deleting through unity-mcp: one existing file inside the session's own feature, nothing else."""
+    if text_of(ti.get("action")) != "delete":
+        return "deny", "unity-mcp manage_asset: a feature session may use only action 'delete'"
+    if mode == "none":
+        return "deny", "FEATURE is not set or is not an existing feature folder; deleting is blocked"
+    path = text_of(ti.get("path")).replace("\\", "/")
+    if not re.match(r"^Assets/[^/]", path):
+        return "deny", "unity-mcp delete: write the path from the Unity project root, starting with 'Assets/'"
+    full = resolve_target("UnityProject/" + path, root)
+    if not inside(full, ntpath.join(root, "UnityProject", "Assets")):
+        return "deny", "unity-mcp delete: the path leaves UnityProject/Assets"
+    if goes_through_link(full, root):
+        return "deny", "path goes through a link or junction"
+    name, _, edit = zone(full, root, feature)
+    if edit == "ask":
+        return "ask", f"deleting in {name} needs human approval"
+    if edit != "allow":
+        return "deny", f"FEATURE={feature} may not delete in: {name}"
+    low = full.lower()
+    if low.endswith(".asmref"):
+        return "deny", ".asmref files are forbidden"
+    if not os.path.isfile(full):
+        return "ask", "deleting a folder (or a path that is not a file) needs human approval"
+    if (low.endswith(".asmdef") or ntpath.basename(low) == "assemblyinfo.cs"
+            or re.search(r"\\featureassets\\public\\", low)):
+        return "ask", "deleting an .asmdef, AssemblyInfo.cs or a FeatureAssets/Public asset changes the feature's boundary"
+    return "allow", f"delete inside {name}"
 
 
 def decide(data, feature_env, root):
@@ -227,6 +261,9 @@ def decide(data, feature_env, root):
         if readable:
             return "allow", f"read inside {name}"
         return "deny", f"may not read: {name}. Search and read only inside your feature or a readable zone."
+
+    if tool == UNITY_ASSET_TOOL:
+        return decide_unity_delete(ti, mode, feature, root)
 
     return "deny", f"tool '{tool}' is not on the guard's list of known tools"
 

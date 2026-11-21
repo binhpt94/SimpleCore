@@ -77,6 +77,10 @@ def build_fixture():
         os.makedirs(A + d)
     Path(FX + r"\Management\proposals\old.md").write_text("x")
     Path(F + r"\Shop\Scripts\Internal\S.cs").write_text("x")
+    os.makedirs(F + r"\Wallet\FeatureAssets\Public")
+    for f in (r"\Scripts\Internal\Old.cs", r"\Scripts\Internal\AssemblyInfo.cs", r"\Scripts\Contracts\IWallet.cs",
+              r"\Scripts\Internal\Game.Wallet.Internal.asmdef", r"\FeatureAssets\Public\Icon.prefab"):
+        Path(F + r"\Wallet" + f).write_text("x")
     _winapi.CreateJunction(F + r"\Shop\Scripts\Internal", F + r"\Wallet\link")
 
 
@@ -139,6 +143,10 @@ def run_cases():
     w(g, W, "deny", FX + r"\Management\data\new.js")
     r(g, W, "allow", FX + r"\Management\tools\validate.py")
     w(g, W, "deny", FX + r"\Management\tools\validate.py")
+    r(g, W, "allow", FX + r"\Management\tools\rules.json")
+    e(g, W, "ask", FX + r"\Management\tools\rules.json")
+    e(g, "", "deny", FX + r"\Management\tools\rules.json")
+    e(g, W, "deny", FX + r"\Management\tools\sub\rules.json")
     r(g, W, "allow", FX + r"\Management\index.html")
     e(g, W, "deny", FX + r"\Management\index.html")
 
@@ -264,6 +272,34 @@ def run_cases():
     t(g, W, "deny", "Artifact", {"file_path": F + r"\Shop\Scripts\Internal\S.cs"})
     t(g, W, "pass", "TodoWrite", {"todos": []})
     t(g, W, "pass", "AskUserQuestion", {"questions": []})
+
+    # ---- unity-mcp: only deleting a file of the session's own feature
+    g, U = "unity-mcp delete", "mcp__unityMCP__manage_asset"
+    d = lambda feature, expect, path, action="delete": t(g, feature, expect, U, {"action": action, "path": path})  # noqa: E731
+    d(W, "allow", "Assets/Features/Wallet/Scripts/Internal/Old.cs")
+    d(W, "allow", "Assets\\Features\\Wallet\\Scripts\\Internal\\Old.cs")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/Old.cs", action="modify")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/Old.cs", action="")
+    d(W, "deny", "Features/Wallet/Scripts/Internal/Old.cs")
+    d(W, "deny", FX + r"\UnityProject\Assets\Features\Wallet\Scripts\Internal\Old.cs")
+    d(W, "deny", "Assets/Features/Shop/Scripts/Internal/S.cs")
+    d(W, "deny", "Assets/Features/Wallet/../Shop/Scripts/Internal/S.cs")
+    d(W, "deny", "Assets/Features/Wallet/link/S.cs")
+    d(W, "deny", "Assets/../../Management/tools/rules.json")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/*.cs")
+    d(W, "ask", "Assets/Core/Base.cs")
+    d(W, "ask", "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")
+    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal")
+    d(W, "ask", "Assets/Features/Wallet")
+    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Missing.cs")
+    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/AssemblyInfo.cs")
+    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
+    d(W, "ask", "Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
+    d("", "deny", "Assets/Features/Wallet/Scripts/Internal/Old.cs")
+    d("@human", "pass", "Assets/Features/Shop/Scripts/Internal/S.cs")
+    t(g, W, "deny", "mcp__unityMCP__manage_script", {"action": "delete", "name": "Old", "path": "Assets/Features/Wallet/"})
+    t(g, W, "deny", "mcp__unityMCP__delete_script", {"uri": "Assets/Features/Wallet/Scripts/Internal/Old.cs"})
+    t(g, W, "deny", "mcp__unityMCP__execute_menu_item", {"menu_path": "Assets/Delete"})
 
     # ---- boundary files inside the agent's own feature
     g = "boundary files"
