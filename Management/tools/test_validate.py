@@ -21,8 +21,25 @@ sys.dont_write_bytecode = True   # no __pycache__ in the tools folder
 sys.path.insert(0, str(HERE))
 import validate as V  # noqa: E402
 
-RULES = json.loads((HERE / "rules.json").read_text(encoding="utf-8-sig"))
-RULES["exceptions"] = []  # the project's approved exceptions must not change what these cases expect
+# The tests' own rules, fixed here: approving a package or an exception in the project's rules.json
+# must not change what these cases expect. Same shape as rules.json.
+RULES = {
+    "extraAssetRoots": [],
+    "allowedPackages": {
+        "*": ["UniTask"],
+        "View": ["UnityEngine.UI", "Unity.TextMeshPro"],
+        "Tests": ["UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+    },
+    "allowedDlls": {"Tests": ["nunit.framework.dll"]},
+    "bannedApis": [
+        {"id": "reflection", "pattern": r"\bSystem\.Reflection\b|\bType\.GetType\s*\(|\bActivator\.CreateInstance\b",
+         "reason": "reflection"},
+        {"id": "send-message", "pattern": r"\b(SendMessage|SendMessageUpwards|BroadcastMessage)\s*\(", "reason": "by name"},
+        {"id": "find-by-name", "pattern": r"\bGameObject\.Find\w*\s*\(", "reason": "by name"},
+        {"id": "resources-load", "pattern": r"\bResources\.Load\w*\b", "reason": "by path"},
+    ],
+    "exceptions": [],
+}
 RULES_FILE = None  # the same rules written to the temp folder, for the command-line cases
 A = "UnityProject/Assets"
 F = A + "/Features"
