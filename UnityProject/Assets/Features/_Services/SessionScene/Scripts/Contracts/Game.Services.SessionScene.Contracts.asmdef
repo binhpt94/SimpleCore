@@ -1,0 +1,16 @@
+{
+  "name": "Game.Services.SessionScene.Contracts",
+  "rootNamespace": "Game.Services.SessionScene",
+  "references": [
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

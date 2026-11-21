@@ -1,0 +1,16 @@
+{
+  "name": "Game.Services.SessionScene.View",
+  "rootNamespace": "Game.Services.SessionScene",
+  "references": [
+    "Game.Services.SessionScene.Internal"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
