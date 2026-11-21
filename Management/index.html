@@ -34,6 +34,25 @@
   footer { margin-top: 24px; font-size: 13px; color: var(--muted); }
   code { font-family: Consolas, monospace; font-size: .92em; }
   [hidden] { display: none; }
+  h3 { margin: 0; font-size: 16px; }
+  .session { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
+  .session .muted { font-size: 14px; }
+  .cmd { display: flex; gap: 8px; align-items: stretch; margin-top: 8px; }
+  .cmd pre {
+    flex: 1; min-width: 0; margin: 0; padding: 10px 12px; overflow-x: auto;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+    font: 14px/1.5 Consolas, monospace; white-space: pre;
+  }
+  .cmd.tall { flex-direction: column; }
+  .cmd.tall pre { white-space: pre-wrap; }
+  .cmd.tall button { align-self: flex-start; }
+  button.copy {
+    flex: none; padding: 8px 14px; border: 1px solid var(--accent); border-radius: 6px;
+    background: transparent; color: var(--accent); font: inherit; font-size: 14px; cursor: pointer;
+  }
+  button.copy:hover { background: var(--accent); color: var(--panel); }
+  button.copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .gap { margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -60,11 +79,25 @@
     <p class="muted">Chưa có số liệu. Danh sách và tình trạng feature sẽ lấy từ script đo, không do AI khai.</p>
   </section>
 
+  <section id="sessions-box" hidden>
+    <h2>Mở phiên làm việc theo feature</h2>
+    <p id="sessions-intro"></p>
+    <div id="sessions"></div>
+    <ul id="sessions-notes" class="gap muted"></ul>
+  </section>
+
+  <section id="brief-box" hidden>
+    <h2 id="brief-title"></h2>
+    <p id="brief-hint" class="muted"></p>
+    <div id="brief"></div>
+  </section>
+
   <footer id="footer"></footer>
 </main>
 
 <!-- Trang này chỉ là vỏ. Mọi nội dung nằm trong data/. -->
 <script src="data/idea.js"></script>
+<script src="data/sessions.js"></script>
 <script>
   (function () {
     var idea = window.CORESIMPLE_IDEA;
@@ -96,6 +129,76 @@
     $("pillars-box").hidden = pillars.length === 0;
 
     $("footer").textContent = idea.approvedAt ? "Ý tưởng duyệt ngày " + idea.approvedAt : "Ý tưởng chưa được duyệt.";
+  })();
+
+  (function () {
+    var data = window.CORESIMPLE_SESSIONS;
+    if (!data) return;
+    var $ = function (id) { return document.getElementById(id); };
+    var el = function (tag, className, text) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text) node.textContent = text;
+      return node;
+    };
+
+    var copyText = function (text) {
+      if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
+      // Trang mở từ file:// có thể không có Clipboard API: chép qua một ô nhập tạm.
+      return new Promise(function (resolve, reject) {
+        var box = el("textarea");
+        box.value = text;
+        box.style.position = "fixed";
+        box.style.opacity = "0";
+        document.body.appendChild(box);
+        box.select();
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+        document.body.removeChild(box);
+        if (ok) resolve(); else reject(new Error("copy failed"));
+      });
+    };
+
+    var commandBlock = function (text, tall) {
+      var wrap = el("div", tall ? "cmd tall" : "cmd");
+      var pre = el("pre", "", text);
+      var button = el("button", "copy", "Chép");
+      button.type = "button";
+      button.addEventListener("click", function () {
+        copyText(text).then(
+          function () { button.textContent = "Đã chép"; },
+          function () { button.textContent = "Không chép được, hãy bôi đen và Ctrl+C"; }
+        ).then(function () {
+          setTimeout(function () { button.textContent = "Chép"; }, 2000);
+        });
+      });
+      wrap.appendChild(pre);
+      wrap.appendChild(button);
+      return wrap;
+    };
+
+    var features = Array.isArray(data.features) ? data.features : [];
+    if (features.length) {
+      $("sessions-intro").textContent = data.intro || "";
+      features.forEach(function (feature) {
+        var box = el("div", "session");
+        box.appendChild(el("h3", "", feature.label || feature.id));
+        if (feature.note) box.appendChild(el("p", "muted", feature.note));
+        box.appendChild(commandBlock('cd "' + data.root + '"; $env:FEATURE = "' + feature.id + '"; claude'));
+        $("sessions").appendChild(box);
+      });
+      (Array.isArray(data.notes) ? data.notes : []).forEach(function (text) {
+        $("sessions-notes").appendChild(el("li", "", text));
+      });
+      $("sessions-box").hidden = false;
+    }
+
+    if (data.brief) {
+      $("brief-title").textContent = data.briefTitle || "Mẫu lệnh giao việc";
+      $("brief-hint").textContent = data.briefHint || "";
+      $("brief").appendChild(commandBlock(data.brief, true));
+      $("brief-box").hidden = false;
+    }
   })();
 </script>
 </body>
