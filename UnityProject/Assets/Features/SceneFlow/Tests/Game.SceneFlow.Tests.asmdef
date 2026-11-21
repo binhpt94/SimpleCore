@@ -1,0 +1,27 @@
+{
+  "name": "Game.SceneFlow.Tests",
+  "rootNamespace": "Game.SceneFlow.Tests",
+  "references": [
+    "Game.Core",
+    "Game.SceneFlow.Internal",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

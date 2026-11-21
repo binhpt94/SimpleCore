@@ -1,0 +1,18 @@
+{
+  "name": "Game.SceneFlow.Internal",
+  "rootNamespace": "Game.SceneFlow",
+  "references": [
+    "Game.Core",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

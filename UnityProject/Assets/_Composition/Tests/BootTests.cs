@@ -14,7 +14,7 @@ namespace Game.Composition.Tests
             var boot = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath).GetComponent<Boot>();
 
             Assert.That(boot, Is.Not.Null, "Boot component missing on Boot.prefab");
-            Assert.That(boot.Installers.Count, Is.EqualTo(3));
+            Assert.That(boot.Installers.Count, Is.EqualTo(4));
             Assert.That(boot.Installers, Has.None.Null);
         }
 
@@ -23,7 +23,8 @@ namespace Game.Composition.Tests
         {
             var boot = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath).GetComponent<Boot>();
 
-            // Shop resolves Wallet and Popup during Install, so a wrong order throws here.
+            // Wallet resolves the session, Shop resolves Wallet and Popup during Install,
+            // so a wrong order throws here.
             Assert.DoesNotThrow(() => boot.Run());
         }
     }
