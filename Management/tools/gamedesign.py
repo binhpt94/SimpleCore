@@ -12,6 +12,7 @@ Both tables have the same shape. A folder is a node; its depth is its round (ROU
     data.md                    the core data: title, short summary, and the core ideas, each with the AI's score
     CLAUDE.md                  the detailed explanation; points to data.md; changing it never forces a redo
     .images/                   pictures plus index.md (`- <file>: <what it is for>`)
+    priority.json              how important the node is, 0-10, scored by the AI on leaf nodes (see PHASES)
     .ai-need-user-choose/      questions.json (by @GameDesigner), answers.json (by the page)
     .user-review/review.json   the human's score and feedback per idea (by the page)
     .history/                  log.jsonl and a copy of every version of data.md (by this code only)
@@ -81,6 +82,17 @@ BANDS = [
     {"key": "fine", "min": 5, "max": 7, "label": "Chấp nhận ở hiện tại, sẽ cập nhật nếu có yêu cầu"},
     {"key": "bad", "min": 2, "max": 4, "label": "Ý tưởng xấu, cần làm lại"},
     {"key": "off", "min": 0, "max": 1, "label": "Ý tưởng lạc, nên tránh"},
+]
+# How important a node is, 0-10, and the development phase that needs it. Kept beside the node, outside every
+# hash: changing it never forces a redo, never makes a node differ from live, never locks anything.
+#   <node>/priority.json               {"ai": 0-10, "why": "..."}   by @GameDesigner, on leaf nodes only
+#   <node>/.user-review/priority.json  {"score": 0-10, "at": ...}   by the page (the human)
+PRIORITY_FILE = "priority.json"
+PHASES = [
+    {"key": "idea", "name": "IDEA", "min": 8, "max": 10, "label": "Chạy đủ core game, art siêu cơ bản"},
+    {"key": "prototype", "name": "PROTOTYPE", "min": 5, "max": 7, "label": "Đủ tính năng quan trọng, art đủ cho phần core game"},
+    {"key": "full", "name": "FULL", "min": 2, "max": 4, "label": "Đủ tính năng, đủ art; giai đoạn điều chỉnh"},
+    {"key": "optional", "name": "TUỲ CHỌN", "min": 0, "max": 1, "label": "Có cũng được, không có cũng được"},
 ]
 ITEMS_TITLE = "Ý cốt lõi"
 KEY_RX = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -239,6 +251,80 @@ def parse_data(text):
 def read_data(folder):
     path = folder / DATA_FILE
     return parse_data(read_text(path)) if path.is_file() else None
+
+
+def score_of(value):
+    """value when it is a whole score 0-10, otherwise None."""
+    return value if isinstance(value, int) and not isinstance(value, bool) and 0 <= value <= 10 else None
+
+
+def phase_of(score):
+    return next((p["key"] for p in PHASES if score is not None and p["min"] <= score <= p["max"]), "")
+
+
+def read_priority(folder):
+    """What is stored about a node's importance: the AI's score and reason, the human's score."""
+    try:
+        ai = read_json(folder / PRIORITY_FILE)
+    except ValueError:
+        ai = None
+    try:
+        user = read_json(folder / REVIEW_DIR / PRIORITY_FILE)
+    except ValueError:
+        user = None
+    ai = ai if isinstance(ai, dict) else {}
+    user = user if isinstance(user, dict) else {}
+    return {"ai": score_of(ai.get("ai")), "why": ai.get("why") if isinstance(ai.get("why"), str) else "",
+            "user": score_of(user.get("score"))}
+
+
+def mark_priority(tree):
+    """Fills every node's `priority` with what follows from the stored scores:
+    leaf, ignoredAi (an AI score on a node that has children counts for nothing), base, effective, offset, from, phase.
+    Up from the leaves: a leaf is worth the human's score, else the AI's; a parent's base is the highest worth below.
+    Down from the root: a node the human scored has exactly that score, and the difference from its base is the
+    offset its unscored descendants get on top of their own base (the nearest scored ancestor counts), within 0-10."""
+    def up(node):
+        p = node["priority"]
+        worth = [w for w in (up(c) for c in node["children"]) if w is not None]
+        p["leaf"] = not node["children"]
+        p["ignoredAi"] = not p["leaf"] and p["ai"] is not None
+        p["base"] = p["ai"] if p["leaf"] else (max(worth) if worth else None)
+        return p["user"] if p["user"] is not None else p["base"]
+
+    def down(node, offset, source):
+        p = node["priority"]
+        if p["user"] is not None:
+            p["effective"], p["offset"], p["from"] = p["user"], 0, ""
+            offset, source = (p["user"] - p["base"] if p["base"] is not None else 0), node["title"] or node["path"] or "(gốc)"
+        elif p["base"] is None:
+            p["effective"], p["offset"], p["from"] = None, 0, ""
+        else:
+            p["effective"] = max(0, min(10, p["base"] + offset))
+            p["offset"], p["from"] = offset, source if offset else ""
+        p["phase"] = phase_of(p["effective"])
+        for child in node["children"]:
+            down(child, offset, source)
+
+    if tree:
+        up(tree)
+        down(tree, 0, "")
+
+
+def save_priority(root, path, score):
+    """Stores the human's importance score (0-10) for the idea node at `path`; None removes it. Not in the history."""
+    parts = check_path(path)
+    folder = table_dir(root, "idea").joinpath(*parts)
+    if not (folder / DATA_FILE).is_file():
+        raise ValueError(f"idea không có node '{path or '(gốc)'}'")
+    target = folder / REVIEW_DIR / PRIORITY_FILE
+    if score is None:
+        if target.is_file():
+            target.unlink()
+        return
+    if score_of(score) is None:
+        raise ValueError("độ quan trọng phải là số nguyên từ 0 tới 10")
+    write_json(target, {"score": score, "at": now()})
 
 
 def band_of(score):
@@ -491,7 +577,8 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "summary": data["summary"], "body": doc, "items": items, "dataHash": data["hash"], "basedOn": data["based_on"],
             "parentHash": parent_hash or "", "stale": stale, "passed": passed, "reasons": reasons,
             "images": images, "imagesNote": images_note, "questions": questions, "pending": pending,
-            "history": read_history(folder)[-HISTORY_SHOWN:][::-1], "hash": own_hash(folder), "children": []}
+            "history": read_history(folder)[-HISTORY_SHOWN:][::-1], "hash": own_hash(folder),
+            "priority": read_priority(folder), "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
         if not KEY_RX.match(child.name):
@@ -750,5 +837,10 @@ def snapshot(root):
     live, live_problems = read_tree(root, "live", mode)
     idea, idea_problems = read_tree(root, "idea", mode)
     mark_states(idea, live, mode)
-    return {"rounds": ROUNDS, "mode": mode, "bands": BANDS, "passMin": PASS_MIN, "live": live, "idea": idea,
+    mark_priority(idea)
+    mark_priority(live)
+    ranked = {n["path"]: n["priority"] for n in walk(idea)}
+    for n in walk(live):      # importance is kept with the proposed node; the fixed node of the same path shows it
+        n["priority"] = ranked.get(n["path"], n["priority"])
+    return {"rounds": ROUNDS, "mode": mode, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}}

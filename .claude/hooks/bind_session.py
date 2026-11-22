@@ -210,7 +210,8 @@ def context(data, root, store):
                 "Management/game-design và .claude/rules/gamedesigner.md; chỉ ghi trong Management/game-design/ai "
                 "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
                 "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
-                "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on. "
+                "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on. Độ quan trọng "
+                "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
                 + designer_mode(root) +
                 " Làm theo .claude/rules/gamedesigner.md.")
     if role == "@Manager":

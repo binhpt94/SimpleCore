@@ -32,6 +32,18 @@ def lines_for(root, node, out):
                    + (" -> LỆCH, rà lại node rồi ghi hash mới" if node["stale"] else " -> khớp"))
     out.append(f"- So với live: {dict(new='chưa có trong live', changed='khác live', same='giống live')[node['state']]}"
                + ("; các node con đang mở cho bạn ghi" if node["approved"] else "; các node con đang bị khoá"))
+    p = node["priority"]
+    phase = next((x["name"] for x in gd.PHASES if x["key"] == p["phase"]), "chưa xếp")
+    line = f"- Độ quan trọng: {'chưa có' if p['effective'] is None else p['effective']} ({phase})"
+    if p["user"] is not None:
+        line += f"; người chấm {p['user']}"
+    elif p["offset"]:
+        line += f"; {p['offset']:+d} do người chấm node '{p['from']}'"
+    if p["leaf"]:
+        line += f"; AI {p['ai']}" if p["ai"] is not None else f"; BẠN CHƯA CHẤM: ghi {gd.PRIORITY_FILE} cho node lá này"
+    elif p["ignoredAi"]:
+        line += f"; {gd.PRIORITY_FILE} ở node này bị bỏ qua vì nó có node con (chỉ chấm ở node lá)"
+    out.append(line)
     for it in node["items"]:
         user = "chưa chấm" if it["user"] is None else str(it["user"])
         out.append(f"- Ý {it['id']}: AI {it['ai']}, người {user}" + (f", phản hồi: {it['feedback']}" if it["feedback"] else "")
@@ -73,7 +85,8 @@ def report(root, arg=""):
         raise ValueError(f"idea không có node '{path or '(gốc)'}'")
     mode = "User control (người chấm hết, mọi điểm từ %d)" if snap["mode"] == "user" else "Full Auto (điểm hiệu lực từ %d; người bấm Sync để chép node đạt sang live)"
     out = [f"# Game design: {mode % gd.PASS_MIN}",
-           "Thang điểm: " + " · ".join(f"{b['min']}-{b['max']} {b['label']}" for b in gd.BANDS)]
+           "Thang điểm: " + " · ".join(f"{b['min']}-{b['max']} {b['label']}" for b in gd.BANDS),
+           "Độ quan trọng (chỉ chấm ở node lá): " + " · ".join(f"{x['min']}-{x['max']} {x['name']}: {x['label']}" for x in gd.PHASES)]
     lines_for(root, node, out)
     problems = [p for p in snap["problems"]["idea"] if not path or p["path"] == path or p["path"].startswith(path + "/")]
     if problems:

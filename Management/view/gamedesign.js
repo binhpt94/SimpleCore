@@ -32,7 +32,7 @@
   };
 
   var CSS = [
-    ".gd-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }",
+    ".gd-bar { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; margin-bottom: 16px; }",
     ".gd-bar .gd-time { color: var(--muted); font-size: 13px; margin-left: auto; }",
     ".gd-btn { padding: 7px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; font-size: 14px; cursor: pointer; }",
     ".gd-btn:hover { border-color: var(--accent); }",
@@ -40,7 +40,11 @@
     ".gd-btn[aria-pressed='true'] { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 600; }",
     ".gd-btn:disabled { opacity: .5; cursor: default; }",
     ".gd-btn.main { border-color: var(--accent); color: var(--accent); font-weight: 600; }",
-    ".gd-sep { width: 1px; align-self: stretch; background: var(--line); margin: 0 4px; }",
+    ".gd-group { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding: 4px 6px 4px 10px; border: 1px solid var(--line); border-radius: 8px; }",
+    ".gd-group-name { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-right: 4px; white-space: nowrap; }",
+    ".gd-group .gd-btn { padding: 5px 11px; font-size: 13.5px; }",
+    ".gd-confirm { padding: 10px 14px; border: 1px solid var(--accent); border-radius: 8px; }",
+    ".gd-confirm span { flex: 1; min-width: 240px; }",
     ".gd-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 16px; }",
     ".gd-inline input { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }",
     ".gd-problems { margin: 0 0 16px; padding-left: 20px; }",
@@ -130,6 +134,15 @@
     ".gd-history li { padding: 8px 0; border-bottom: 1px solid var(--line); }",
     ".gd-history time { display: block; font-size: 12px; color: var(--muted); }",
     ".gd-history .out { color: var(--bad); }",
+    ".gd-card.dim, .gd-chips.dim { opacity: .28; }",
+    ".gd-tag.ph { font-weight: 600; }",
+    ".gd-tag.ph-idea { border-color: var(--accent); background: var(--accent); color: var(--panel); }",
+    ".gd-tag.ph-prototype { border-color: var(--accent); color: var(--accent); }",
+    ".gd-tag.ph-full { border-color: var(--muted); color: var(--muted); }",
+    ".gd-tag.ph-optional, .gd-tag.ph-none { border-style: dashed; font-weight: 400; }",
+    ".gd-rank { margin: 8px 0 0; border-top: 1px solid var(--line); }",
+    ".gd-score .gd-link { margin-left: 10px; font-size: 12px; }",
+    ".gd-score .gd-link:disabled { opacity: .4; cursor: default; }",
     ".gd-scale { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); margin: 0 0 4px; }"
   ].join("\n");
 
@@ -216,8 +229,9 @@
     var el = ctx.el, add = ctx.add, put = ctx.put;
     var data = window.CORESIMPLE_GAMEDESIGN || null;
     // selected: path của node đang chọn; mọi thứ của node đó (duyệt ý, câu hỏi, chốt, diễn giải) hiện dưới bản đồ.
-    // modeAsk: mode đang chờ nhập PIN để đổi.
-    var state = { table: "live", focus: null, selected: null, message: null, modeAsk: null };
+    // ask: việc đang chờ nhập PIN để xác nhận ({kind: "sync"} hoặc {kind: "mode", key}).
+    // phase: giai đoạn đang lọc trên bản đồ (khoá trong data.phases), null là tất cả.
+    var state = { table: "live", focus: null, selected: null, message: null, ask: null, phase: null };
 
     add(pane, el("h1", "", "Game design"));
     add(pane, el("p", "sub", "Bản đồ thiết kế, từ ý tưởng sơ khai tới yêu cầu kĩ thuật. Bấm một node, phần dưới bản đồ hiện các ý cốt lõi của nó: bấm vào từng ý để xem chi tiết, chấm điểm và ghi ý kiến; bấm một feature (vòng " +
@@ -276,6 +290,23 @@
       return node.items.length ? Math.min.apply(null, node.items.map(function (i) { return i.effective; })) : null;
     };
     var failingBelow = function (node) { var n = 0; each(node, function (x) { if (!x.passed) n++; }); return n; };
+    // Độ quan trọng: giai đoạn của một điểm, nhãn "IDEA 9", và node có cần cho giai đoạn đang lọc không.
+    var phases = function () { return data && data.phases || []; };
+    var phase = function (key) { return phases().filter(function (p) { return p.key === key; })[0] || null; };
+    var rank = function (node) { return node.priority || { ai: null, user: null, base: null, effective: null, offset: 0, from: "", phase: "", why: "", leaf: true }; };
+    var phaseTag = function (node) {
+      var r = rank(node), p = phase(r.phase);
+      var tag = el("span", "gd-tag ph" + (p ? " ph-" + p.key : " ph-none"), p ? p.name + " " + r.effective : "chưa xếp");
+      tag.title = p ? "Độ quan trọng " + r.effective + ": cần cho giai đoạn " + p.name + " (" + p.label + ")" : "Chưa có điểm độ quan trọng";
+      return tag;
+    };
+    // Lọc theo giai đoạn là cộng dồn: chọn PROTOTYPE thì node của IDEA cũng sáng.
+    var needed = function (node) {
+      var p = state.phase ? phase(state.phase) : null;
+      if (!p) return true;
+      var e = rank(node).effective;
+      return e !== null && e !== undefined && e >= p.min;
+    };
     // Ý bạn đã chấm dưới mức đạt (dùng cho thẻ ở bảng live).
     var turnedDown = function (node) { return node.items.filter(function (i) { return i.user !== null && i.user < passMin(); }).length; };
     // Node đề xuất đang đạt mà khác live: thứ nút Sync sẽ chép, đi từ gốc xuống và dừng ở node chưa đạt.
@@ -331,34 +362,55 @@
     };
 
     // ---------------------------------------------------------------- thanh trên và thông báo
+    // Thanh trên chia nhóm theo việc: xem gì (bảng, bản đồ, lọc giai đoạn) rồi tới thay đổi (chốt, mode).
+    // Nút thay đổi dữ liệu chung (Sync, đổi mode) có dấu khoá và phải nhập PIN mới chạy.
     var renderBar = function () {
       bar.textContent = "";
+      var group = function (name, hint) {
+        var g = put(bar, el("div", "gd-group"));
+        g.setAttribute("role", "group");
+        g.setAttribute("aria-label", name);
+        var label = put(g, el("span", "gd-group-name", name));
+        if (hint) label.title = hint;
+        return g;
+      };
+      var ask = function (next) { state.ask = next; state.message = null; render(); };
+
+      var tables = group("Bảng", "Bảng đã chốt (live) hay bảng AI đề xuất (idea)");
       TABLES.forEach(function (t) {
-        add(bar, button(t.label, function () { state.table = t.key; state.message = null; render(); }, state.table === t.key));
+        add(tables, button(t.label, function () { state.table = t.key; state.message = null; render(); }, state.table === t.key));
       });
-      if (state.focus !== null) add(bar, button("← Tất cả feature", function () { state.focus = null; render(); }));
-      add(bar, button("Reload", reload));
+
+      var map = group("Bản đồ");
+      var whole = put(map, button("Tất cả feature", function () { state.focus = null; render(); }));
+      whole.title = "Bỏ chế độ xem một nhánh, hiện lại mọi feature";
+      whole.disabled = state.focus === null;
+      var again = put(map, button("Reload", reload));
+      again.title = "Đọc lại dữ liệu từ Management/game-design";
+
+      if (data && phases().length) {
+        var filter = group("Giai đoạn", "Làm mờ các node không cần cho giai đoạn được chọn");
+        var all = put(filter, button("Tất cả", function () { state.phase = null; render(); }, state.phase === null));
+        all.title = "Không lọc theo giai đoạn";
+        phases().filter(function (ph) { return ph.min > 1; }).forEach(function (ph) {
+          var b = put(filter, button(ph.name, function () { state.phase = ph.key; render(); }, state.phase === ph.key));
+          b.title = "Làm mờ các node không cần cho giai đoạn " + ph.name + " (độ quan trọng dưới " + ph.min + "). " + ph.label + ".";
+        });
+      }
+
       if (data) {
+        var live = group("Chốt 🔒", "Chép sang bảng đã chốt. Cần PIN.");
         var ready = syncable();
-        var sync = button(ready ? "Sync (" + ready + ")" : "Sync", function () {
-          state.message = null;
-          send("/api/gamedesign/sync", {}, function (res) {
-            return res.written.length ? "Đã chép sang live: " + res.written.join(", ") : "Không có node nào để chép sang live.";
-          });
-        }, null, ready ? "gd-btn main" : "gd-btn");
-        sync.title = "Chép sang live mọi node đề xuất đang đạt mà khác live, từ gốc xuống, dừng ở node chưa đạt. Không có gì tự sang live." +
+        var sync = put(live, button(ready ? "Sync (" + ready + ")" : "Sync", function () { ask({ kind: "sync" }); }, null, ready ? "gd-btn main" : "gd-btn"));
+        sync.title = "Chép sang live mọi node đề xuất đang đạt mà khác live, từ gốc xuống, dừng ở node chưa đạt. Cần PIN." +
           (ctx.setup ? "" : " Cần mở trang qua setup_server.py.");
         sync.disabled = !ready || !ctx.setup;
-        add(bar, sync);
-        add(bar, el("span", "gd-sep"));
+
+        var modes = group("Mode 🔒", "Cách @GameDesigner làm việc. Đổi mode cần PIN.");
         MODES.forEach(function (m) {
-          var b = button(m.label, function () {
-            if (m.key === mode()) return;
-            state.modeAsk = m.key; state.message = null; render();
-          }, mode() === m.key);
-          b.title = m.hint + (ctx.setup ? "" : " Muốn đổi mode: mở trang qua setup_server.py.");
+          var b = put(modes, button(m.label, function () { if (m.key !== mode()) ask({ kind: "mode", key: m.key }); }, mode() === m.key));
+          b.title = m.hint + (ctx.setup ? " Đổi mode cần PIN." : " Muốn đổi mode: mở trang qua setup_server.py.");
           if (!ctx.setup && mode() !== m.key) b.disabled = true;
-          add(bar, b);
         });
       }
       add(bar, el("span", "gd-time", data && data.generatedAt ? "Đọc lúc " + data.generatedAt.replace("T", " ") : ""));
@@ -366,22 +418,35 @@
 
     var renderNotice = function () {
       noticeBox.textContent = "";
-      if (state.modeAsk && ctx.setup) {
-        var target = MODES.filter(function (m) { return m.key === state.modeAsk; })[0];
-        var ask = put(noticeBox, el("div", "gd-inline"));
-        add(ask, el("span", "", "Đổi sang " + target.label + ": " + target.hint));
-        var modePin = put(ask, el("input"));
-        modePin.type = "password";
-        modePin.autocomplete = "new-password";
-        modePin.placeholder = "PIN (không lưu)";
-        modePin.setAttribute("aria-label", "PIN để đổi mode");
-        add(ask, button("Đổi mode", function () {
-          if (!modePin.value) { modePin.focus(); return; }
-          send("/api/gamedesign/mode", { pin: modePin.value, mode: target.key }, function () {
-            state.modeAsk = null;
-            return "Đã đổi sang " + target.label + ".";
-          }, function (text) { say("Không đổi mode: " + text); });
-        }), button("Thôi", function () { state.modeAsk = null; render(); }));
+      if (state.ask && ctx.setup) {
+        // Một khung xác nhận dùng chung cho mọi nút cần PIN: nói rõ sẽ làm gì, rồi mới hỏi PIN.
+        var target = state.ask.kind === "mode" ? MODES.filter(function (m) { return m.key === state.ask.key; })[0] : null;
+        var what = target ? "Đổi sang " + target.label + ": " + target.hint
+          : "Sync: chép " + syncable() + " node đang đạt sang live (bảng đã chốt), ghi đè bản cũ của các node đó.";
+        var confirmBox = put(noticeBox, el("div", "gd-confirm gd-inline"));
+        add(confirmBox, el("span", "", what));
+        var pin = put(confirmBox, el("input"));
+        pin.type = "password";
+        pin.autocomplete = "new-password";
+        pin.placeholder = "PIN (không lưu)";
+        pin.setAttribute("aria-label", "PIN để xác nhận");
+        var go = function () {
+          if (!pin.value) { pin.focus(); return; }
+          var failed = function (text) { say("Không thực hiện: " + text); };
+          if (target) {
+            send("/api/gamedesign/mode", { pin: pin.value, mode: target.key }, function () {
+              state.ask = null;
+              return "Đã đổi sang " + target.label + ".";
+            }, failed);
+          } else {
+            send("/api/gamedesign/sync", { pin: pin.value }, function (res) {
+              state.ask = null;
+              return res.written.length ? "Đã chép sang live: " + res.written.join(", ") : "Không có node nào để chép sang live.";
+            }, failed);
+          }
+        };
+        pin.addEventListener("keydown", function (e) { if (e && e.key === "Enter") go(); });
+        add(confirmBox, button(target ? "Đổi mode" : "Sync", go, null, "gd-btn main"), button("Thôi", function () { state.ask = null; render(); }));
       }
       if (state.message) add(noticeBox, el("p", state.message.bad ? "bad-text" : "ok-text", state.message.text));
       if (state.table === "live" && data && data.idea) {
@@ -410,7 +475,7 @@
 
     // Các nút nhỏ ở đáy thẻ (bảng đề xuất): việc cần bạn làm tại node đó, và trạng thái của node.
     var chipsFor = function (n) {
-      var out = [];
+      var out = [phaseTag(n)];
       var open = function () { state.selected = n.path; state.message = null; render(); };
       if (state.table === "live") {      // bản đã chốt: vẫn chấm được; ý bị chấm thấp thì cảnh báo
         var down = turnedDown(n);
@@ -477,7 +542,7 @@
           if (n.path === state.selected) line.setAttribute("class", "on");
           svg.appendChild(line);
         }
-        var kind = !idea ? "" : n.redo ? " redo" : n.passed && n.state === "same" ? " done" : " wait";
+        var kind = (!idea ? "" : n.redo ? " redo" : n.passed && n.state === "same" ? " done" : " wait") + (needed(n) ? "" : " dim");
         var card = el("button", "gd-card" + (n.path === state.selected ? " sel" : "") + kind);
         card.type = "button";
         card.style.left = x + "px";
@@ -496,7 +561,7 @@
         var chips = chipsFor(n);
         if (item.hidden > 0) chips.push(el("span", "gd-tag", "+" + item.hidden + (n.round === FOCUS_ROUND - 1 ? " feature ẩn" : " node con")));
         if (!chips.length) return;
-        var row = el("div", "gd-chips");
+        var row = el("div", needed(n) ? "gd-chips" : "gd-chips dim");
         row.style.left = (x + 10) + "px";
         row.style.top = (y + CARD_H - 30) + "px";
         row.style.width = (CARD_W - 20) + "px";
@@ -707,6 +772,58 @@
     };
 
     // ---------------------------------------------------------------- dưới bản đồ: mọi thứ của node đang chọn
+    // Độ quan trọng của node: một hàng; bấm vào mới mở hàng nút 0-10. Bấm một điểm là lưu ngay.
+    var renderPriority = function (body, node) {
+      var r = rank(node);
+      var block = put(body, el("div", "gd-rank gd-item"));
+      var head = put(block, el("div", "gd-head"));
+      head.tabIndex = 0;
+      head.title = "Bấm để chấm độ quan trọng của node này";
+      head.setAttribute("role", "button");
+      head.setAttribute("aria-expanded", "false");
+      add(head, el("p", "text", "Độ quan trọng"));
+      var marks = put(head, el("div", "gd-marks"));
+      add(marks, phaseTag(node));
+      var aiMark = put(marks, el("span", "gd-mark" + (r.base === null ? " none" : ""),
+        (r.leaf ? "AI: " : "Cao nhất bên dưới: ") + (r.base === null ? "Chưa" : r.base)));
+      aiMark.title = r.leaf ? "Điểm AI chấm cho node lá này" + (r.why ? ": " + r.why : "") : "Node cha lấy điểm cao nhất của các node bên dưới";
+      add(marks, el("span", "gd-mark" + (r.user === null ? " none" : ""), "User: " + (r.user === null ? "Chưa" : r.user)));
+      var editor = put(block, el("div", "gd-edit"));
+      editor.hidden = true;
+      if (r.leaf && r.why) add(editor, el("p", "gd-more", "AI: " + r.why));
+      if (r.user === null && r.offset) {
+        add(editor, el("p", "gd-id", (r.offset > 0 ? "+" : "") + r.offset + " từ " + r.from + " (bạn đã chấm node đó; node này giữ khoảng cách so với nó)."));
+      }
+      var row = put(editor, el("div", "gd-score"));
+      var save = function (score) {
+        state.message = null;
+        send("/api/gamedesign/priority", { path: node.path, score: score }, function () {
+          return score === null ? "Đã bỏ điểm độ quan trọng của bạn ở node " + where(node) + "."
+            : "Đã lưu độ quan trọng " + score + " cho node " + where(node) + ".";
+        });
+      };
+      for (var s = 0; s <= 10; s++) (function (value) {
+        var b = button(String(value), function () { save(value); }, r.user === value, "");
+        var p = phases().filter(function (x) { return value >= x.min && value <= x.max; })[0];
+        b.title = value + (p ? " · " + p.name + ": " + p.label : "");
+        if (!ctx.setup) b.disabled = true;
+        put(row, b);
+      })(s);
+      var clear = put(row, button("Bỏ điểm của tôi", function () { save(null); }, null, "gd-link"));
+      clear.disabled = r.user === null || !ctx.setup;
+      if (!ctx.setup) add(editor, el("p", "gd-id", SERVER_HINT));
+      var toggle = function () {
+        editor.hidden = !editor.hidden;
+        head.setAttribute("aria-expanded", editor.hidden ? "false" : "true");
+      };
+      head.addEventListener("click", toggle);
+      head.addEventListener("keydown", function (e) {
+        if (!e || (e.key !== "Enter" && e.key !== " ")) return;
+        if (e.preventDefault) e.preventDefault();
+        toggle();
+      });
+    };
+
     var renderDetail = function (root) {
       detailBox.textContent = "";
       var node = state.selected === null ? null : find(root, state.selected);
@@ -717,11 +834,17 @@
       add(body, el("p", "gd-path", "Vòng " + node.round + " · " + ((data.rounds || [])[node.round - 1] || "") + " · " +
         table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "") + " · hash data " + node.dataHash));
       if (node.summary) add(body, el("p", "", node.summary));
+      renderPriority(body, node);
       // Ý cốt lõi: bấm vào một ý để hiện chi tiết, hàng nút chấm điểm và ô nhập ý kiến.
       if (state.table === "idea") renderVerdict(body, node);
       renderItems(body, node);
       renderQuestions(body, node);
       renderPromote(body, node);
+      add(body, el("h3", "", "Độ quan trọng và giai đoạn"));
+      var stages = put(body, el("div", "gd-scale"));
+      phases().forEach(function (p) { add(stages, el("span", "", p.min + "–" + p.max + " " + p.name + ": " + p.label)); });
+      add(body, el("p", "gd-note", "AI chỉ chấm ở node lá; node cha lấy điểm cao nhất bên dưới. Điểm bạn chấm cho một node là tuyệt đối, " +
+        "và các node con bạn chưa chấm dời theo cùng khoảng cách. Độ quan trọng không làm đổi hash, không ảnh hưởng việc đạt hay chốt."));
       add(body, el("h3", "", "Thang điểm"));
       var scale = put(body, el("div", "gd-scale"));
       (data.bands || []).forEach(function (b) { add(scale, el("span", "", b.min + "–" + b.max + ": " + b.label)); });

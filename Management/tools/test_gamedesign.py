@@ -288,6 +288,79 @@ def run_live_scores(root):
     check("and stops at the node the human has not scored", snap_node(root, "feature-hero")["passed"], False)
 
 
+def run_priority(root):
+    """Importance 0-10 and the phase it means: leaves are scored, parents take the highest below, a human score is
+    absolute and shifts the unscored nodes below it by the same offset. Outside every hash."""
+    mk(root, "")
+    mk(root, "feature-hero"), mk(root, "feature-hero/skills"), mk(root, "feature-hero/skills/cooldown"), mk(root, "feature-hero/level")
+    mk(root, "feature-shop"), mk(root, "feature-wallet")
+    ai = lambda path, score, why="vì": put(root, f"idea/{path}/priority.json", json.dumps({"ai": score, "why": why}))      # noqa: E731
+    eff = lambda: {n["path"]: n["priority"]["effective"] for n in gd.walk(gd.snapshot(root)["idea"])}      # noqa: E731
+    pr = lambda path: snap_node(root, path)["priority"]      # noqa: E731
+    check("nothing scored: nothing ranked", (set(eff().values()), pr("")["phase"]), ({None}, ""))
+    ai("feature-hero/skills/cooldown", 4), ai("feature-hero/level", 6), ai("feature-shop", 3), ai("feature-wallet", 9, "tiền là lõi")
+    check("a parent takes the highest leaf below it", eff(),
+          {"": 9, "feature-hero": 6, "feature-hero/skills": 4, "feature-hero/skills/cooldown": 4, "feature-hero/level": 6, "feature-shop": 3, "feature-wallet": 9})
+    check("phases", [pr(x)["phase"] for x in ("feature-wallet", "feature-hero", "feature-shop")], ["idea", "prototype", "full"])
+    check("a leaf keeps the AI's reason", (pr("feature-wallet")["why"], pr("feature-wallet")["leaf"], pr("feature-hero")["leaf"]), ("tiền là lõi", True, False))
+    ai("feature-hero", 10)
+    check("an AI score on a node with children counts for nothing", (pr("feature-hero")["effective"], pr("feature-hero")["ignoredAi"]), (6, True))
+    put(root, "idea/feature-shop/priority.json", "{ broken")
+    check("a broken or out-of-range priority.json is no score", pr("feature-shop")["effective"], None)
+    ai("feature-shop", 11)
+    check("out of range", pr("feature-shop")["effective"], None)
+    ai("feature-shop", 1)
+    check("0-1 is optional", pr("feature-shop")["phase"], "optional")
+
+    # ---- the human
+    for label, path, score in (("11", "feature-shop", 11), ("-1", "feature-shop", -1), ("text", "feature-shop", "7"), ("true", "feature-shop", True),
+                               ("bad path", "../x", 5), ("unknown node", "feature-none", 5)):
+        check("priority refused: " + label, refused(gd.save_priority, root, path, score))
+    gd.save_priority(root, "feature-hero/skills/cooldown", 10)
+    check("the human's score on a leaf lifts every parent above it", eff(),
+          {"": 10, "feature-hero": 10, "feature-hero/skills": 10, "feature-hero/skills/cooldown": 10, "feature-hero/level": 6, "feature-shop": 1, "feature-wallet": 9})
+    gd.save_priority(root, "feature-hero/skills/cooldown", None)
+    check("removing it gives the AI's ranking back", (eff()["feature-hero"], pr("feature-hero/skills/cooldown")["user"]), (6, None))
+    gd.save_priority(root, "feature-hero/skills/cooldown", None)      # removing twice is fine
+    gd.save_priority(root, "feature-hero", 9)
+    h = pr("feature-hero/level")
+    check("scoring a parent: it gets exactly that; unscored nodes below keep their distance (+3)",
+          (eff()["feature-hero"], eff()["feature-hero/level"], eff()["feature-hero/skills"], eff()["feature-hero/skills/cooldown"], h["offset"], h["from"]),
+          (9, 9, 7, 7, 3, "feature-hero"))
+    check("nodes outside that branch are untouched; the root follows the highest", (eff()["feature-shop"], eff()["feature-wallet"], eff()[""]), (1, 9, 9))
+    gd.save_priority(root, "feature-hero/skills", 2)
+    check("a scored node below keeps its own score and shifts its own children (nearest scored ancestor counts)",
+          (eff()["feature-hero/skills"], eff()["feature-hero/skills/cooldown"], eff()["feature-hero/level"], pr("feature-hero/skills/cooldown")["from"]),
+          (2, 2, 9, "skills"))
+    gd.save_priority(root, "feature-hero", 0)
+    check("the offset is kept inside 0-10", (eff()["feature-hero/level"], pr("feature-hero/level")["offset"]), (0, -6))
+    gd.save_priority(root, "feature-hero", 10)
+    check("and at the top", eff()["feature-hero/level"], 10)
+    gd.save_priority(root, "", 5)
+    check("the root can be scored too: unscored branches shift, scored ones do not", (eff()[""], eff()["feature-wallet"], eff()["feature-hero"]), (5, 4, 10))
+    gd.save_priority(root, "", None), gd.save_priority(root, "feature-hero", None), gd.save_priority(root, "feature-hero/skills", None)
+
+    # ---- outside every hash, every gate and the history
+    before = snap_node(root, "feature-wallet")
+    gd.record_versions(root), gd.sync_live(root)
+    n_events = len(gd.read_history(folder(root, "idea/feature-wallet")))
+    ai("feature-wallet", 2), gd.save_priority(root, "feature-wallet", 7)
+    after = snap_node(root, "feature-wallet")
+    check("changing importance changes no hash, no verdict and no state against live",
+          [(n["dataHash"], n["hash"], n["passed"], n["state"], n["dirty"]) for n in (before, after)][1],
+          (before["dataHash"], before["hash"], True, "same", False))
+    check("and writes nothing to the history", (gd.record_versions(root), len(gd.read_history(folder(root, "idea/feature-wallet")))), ([], n_events))
+    check("nothing about importance is copied to live", [x.name for x in gd.table_dir(root, "live").rglob("priority.json")], [])
+    live = {n["path"]: n["priority"]["effective"] for n in gd.walk(gd.snapshot(root)["live"])}
+    check("the live table shows the proposed node's importance", (live["feature-wallet"], live["feature-hero"]), (7, 6))
+    check("the snapshot carries the phases", [x["name"] for x in gd.snapshot(root)["phases"]], ["IDEA", "PROTOTYPE", "FULL", "TUỲ CHỌN"])
+    put(root, "idea/feature-shop/priority.json", "{}")
+    text = gd_status.report(root)
+    for label, part in (("phase scale", "8-10 IDEA"), ("a node's importance", "Độ quan trọng: 7 (PROTOTYPE); người chấm 7; AI 2"),
+                        ("misplaced AI score", "bị bỏ qua vì nó có node con"), ("unscored leaf", "BẠN CHƯA CHẤM")):
+        check("status shows: " + label, part in text)
+
+
 def run_flow(root):
     """Sync; history; delete; status."""
     mk(root, "", items=(("loop", 8, "Vòng lặp."), ("win", 6, "Thắng sau 10 đợt.")))
@@ -365,7 +438,7 @@ def run_flow(root):
 
 
 def main():
-    for case in (run_data, run_scores, run_live_scores, run_flow):
+    for case in (run_data, run_scores, run_live_scores, run_priority, run_flow):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

@@ -783,6 +783,8 @@ def run_designer_cases():
     w(g, D, "allow", idea + r"\feature-hero\skills\data.md")
     w(g, D, "allow", idea + r"\feature-hero\.images\index.md")
     w(g, D, "allow", idea + choose + r"\questions.json")
+    w(g, D, "allow", idea + r"\feature-hero\priority.json")      # its own importance score of a node
+    w(g, D, "deny", idea + r"\feature-hero\.user-review\priority.json")      # the human's importance score
     w(g, D, "allow", ai + r"\notes.md")
     for p in (live + r"\node.md", live + r"\feature-new\node.md", base + r"\readme.md", base + r"\other\node.md",
               base + r"\mode.json", base + r"\idea\node.md",

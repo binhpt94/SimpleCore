@@ -15,11 +15,11 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   model and effort; default opus / medium) and then bound. Binding writes the same
   file bind_session.py writes, so the PIN never goes through a chat (a bind command typed as the first message
   of a chat can end up in the thread's generated title).
-- Game design tab: GET /api/gamedesign re-reads Management/game-design. POST /api/gamedesign/promote copies one
-  idea node into live (gamedesign.promote), /sync every passing one (gamedesign.sync_live), /answers stores the
-  human's answers to @GameDesigner's questions, /review the human's score and feedback per idea: all four
-  without the PIN, the page token is enough. Nothing reaches live without one of the first two. POST /api/gamedesign/mode switches Full Auto / User control and
-  needs the PIN.
+- Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
+  enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /answers stores the
+  human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
+  human's importance score of a node. With the PIN: /sync copies every passing node into live at once
+  (gamedesign.sync_live), /mode switches Full Auto / User control. Nothing reaches live without promote or sync.
 """
 import argparse
 import html
@@ -74,7 +74,8 @@ TITLE_RX = re.compile(r'"type"\s*:\s*"custom-title".*?"customTitle"\s*:\s*"((?:[
 MAX_BODY = 4096
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
-              "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY}
+              "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
+              "/api/gamedesign/priority": MAX_BODY}
 
 
 def transcripts_dir():
@@ -201,8 +202,21 @@ def promote(path, deep):
     return {"ok": True, "written": written, "data": sync_page.write_gamedesign(ROOT)}
 
 
-def sync_live():
-    """The Sync button: every passing idea node that differs from live is copied into live. No PIN."""
+def priority(path, score):
+    """The importance buttons of a node: the human's score 0-10, or None to remove it. No PIN."""
+    try:
+        gamedesign.save_priority(ROOT, path, score)
+    except (ValueError, OSError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "data": sync_page.write_gamedesign(ROOT)}
+
+
+def sync_live(pin):
+    """The Sync button: every passing idea node that differs from live is copied into live. Needs the PIN: it
+    rewrites many fixed nodes at once."""
+    error = bind_session.check_pin(guard.STORE_DIR, pin)
+    if error:
+        return {"ok": False, "error": error}
     try:
         written = gamedesign.sync_live(ROOT)
     except (ValueError, OSError) as ex:
@@ -306,8 +320,10 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, promote(data.get("path"), data.get("deep") is True))
             if self.path == "/api/gamedesign/review":
                 return self.send_json(200, review(data.get("path"), data.get("items"), data.get("table")))
+            if self.path == "/api/gamedesign/priority":
+                return self.send_json(200, priority(data.get("path"), data.get("score")))
             if self.path == "/api/gamedesign/sync":
-                return self.send_json(200, sync_live())
+                return self.send_json(200, sync_live(str(data.get("pin") or "")))
             if self.path == "/api/gamedesign/mode":
                 return self.send_json(200, set_mode(str(data.get("pin") or ""), data.get("mode")))
             if self.path == "/api/gamedesign/answers":

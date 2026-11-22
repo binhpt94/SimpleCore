@@ -32,6 +32,7 @@ Vòng 4 nói code phải đạt gì, không nói viết thế nào (lớp, hàm,
 <key>/
   data.md                    dữ liệu cốt lõi: tiêu đề, tóm tắt, các ý có điểm        GD ghi
   CLAUDE.md                  diễn giải chi tiết; dòng đầu trỏ tới data.md           GD ghi
+  priority.json              độ quan trọng do AI chấm, chỉ ở node lá                GD ghi
   .images/                   ảnh + index.md (`- <tên file>: <ảnh để làm gì>`)       người bỏ ảnh, GD ghi index.md
   .ai-need-user-choose/      questions.json (GD ghi), answers.json (người)
   .user-review/review.json   điểm và phản hồi của người cho từng ý                  chỉ đọc
@@ -88,6 +89,22 @@ Mode Full Auto thêm mục `## Đã tự quyết`: quyết gì, vì sao, phươn
 - Điểm của người gắn với đúng nội dung ý lúc chấm. Viết lại một ý thì ý đó thành chưa chấm; điểm và phản hồi cũ vẫn nằm trong lịch sử.
 - Người chấm được ở cả bảng đề xuất và bảng `live`; đó là một bộ điểm chung. Một ý đã chốt bị người chấm dưới 5 thì node đề xuất tương ứng cũng thành "cần làm lại" (khi nội dung ý còn giống).
 
+## Độ quan trọng của node (tiền đề cho kế hoạch)
+Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn phát triển nào. Đây là chỗ **duy nhất** ghi dữ liệu theo giai đoạn.
+
+| Điểm | Giai đoạn | Nghĩa |
+|---|---|---|
+| 8, 9, 10 | IDEA | Phải có để chạy đủ core game (art siêu cơ bản) |
+| 5, 6, 7 | PROTOTYPE | Tính năng quan trọng (art đủ cho phần core game) |
+| 2, 3, 4 | FULL | Cần để đủ tính năng, đủ art; giai đoạn điều chỉnh |
+| 0, 1 | (tuỳ chọn) | Có cũng được, không có cũng được |
+
+- GD chỉ chấm ở **node lá** (node chưa có node con), ghi vào `<node>/priority.json`: `{"ai": 8, "why": "Không có đợt quái thì không có gì để chơi."}`. `why` một câu.
+- Node cha tự lấy điểm cao nhất của các node bên dưới; `priority.json` đặt ở node cha bị bỏ qua. Khi một lá có node con thì chuyển việc chấm xuống các node con.
+- Chấm theo câu hỏi "thiếu node này thì giai đoạn đó có chạy được không", không theo độ khó hay độ thích.
+- Người chấm được ở mọi node; điểm của người là tuyệt đối, và các node con người chưa chấm dời theo cùng khoảng cách. `gd_status.py` in điểm hiệu lực; đừng sửa điểm AI để "bù" lại điểm của người.
+- Đổi độ quan trọng không đổi hash, không làm node phải làm lại, không ảnh hưởng đạt hay chốt, không ghi vào lịch sử.
+
 ## Khi nào một node đạt
 Node **đạt** khi có ít nhất một ý, `based-on` khớp hash data của cha, và:
 - **Full Auto**: mọi ý có điểm hiệu lực từ 5 trở lên (điểm của người nếu đã chấm, chưa thì điểm AI). Node đạt chỉ sang `live` khi người bấm Sync hoặc Chốt; node con của node đạt thì mở ngay, không cần chờ.
@@ -139,4 +156,4 @@ Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đ
 ## Yêu cầu riêng của người
 (Người bổ sung tại đây; mục này đứng trên mọi quy ước ở trên.)
 
-- **Không đưa dữ liệu theo giai đoạn vào feature** (người yêu cầu, 2026-11-23). Node mô tả feature là gì, không mô tả bản phát hành nào làm tới đâu. Không viết "bản đầu", "giai đoạn 1", "MVP", "làm trước / để sau", hay con số gắn với một bản (sai: "số loại hero (dự kiến 2 cho bản đầu)"; đúng: "có nhiều loại hero"). Áp dụng cho `data.md`, `CLAUDE.md` và câu hỏi. Dữ liệu theo giai đoạn sẽ có hệ thống riêng sau; cho tới lúc đó, nếu thấy cần thì nêu với người trong chat, không ghi vào node.
+- **Không đưa dữ liệu theo giai đoạn vào feature** (người yêu cầu, 2026-11-23). Node mô tả feature là gì, không mô tả bản phát hành nào làm tới đâu. Không viết "bản đầu", "giai đoạn 1", "MVP", "làm trước / để sau", hay con số gắn với một bản (sai: "số loại hero (dự kiến 2 cho bản đầu)"; đúng: "có nhiều loại hero"). Áp dụng cho `data.md`, `CLAUDE.md` và câu hỏi. Dữ liệu theo giai đoạn chỉ nằm ở `priority.json` (mục "Độ quan trọng của node"); phạm vi cụ thể của từng bản thì nêu với người trong chat, không ghi vào node.
