@@ -1,0 +1,21 @@
+{
+ "hash": "6bd8e5861fbd",
+ "items": {
+  "gap-length": {
+   "hash": "bf58dfbdb31d",
+   "text": "Lúc thở dài 3 giây, như nhau ở mọi đợt\nNgắn hơn hẳn thời gian thả của đợt ngắn nhất (đợt 1: 7 s). Đủ để thấy ranh giới đợt và bấm một nâng cấp."
+  },
+  "gap-start-next": {
+   "hash": "abe49eb0101d",
+   "text": "Hết 3 giây thì số đợt tăng 1 và đợt mới bắt đầu, con đầu tiên ra ở 0 giây của đợt mới\nKhông cần người chơi bấm."
+  },
+  "gap-pause-freeze": {
+   "hash": "5a499610fe53",
+   "text": "Tạm dừng trong lúc thở thì đồng hồ 3 giây đứng yên, bỏ tạm dừng thì đếm tiếp phần còn lại\nVí dụ dừng ở giây 1.2 thì sau khi tiếp tục còn 1.8 giây."
+  },
+  "gap-same-rules": {
+   "hash": "7d952949eb62",
+   "text": "Trong lúc thở: mua nâng cấp, dùng kĩ năng thành, hồi chiêu, hồi sinh hero 8 giây vẫn chạy; máu thành không hồi\nNode này không đổi hành vi hero, thành hay nâng cấp; chỉ không thả quái mới."
+  }
+ }
+}

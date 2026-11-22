@@ -1,0 +1,21 @@
+{
+ "hash": "78ed2dcc0859",
+ "items": {
+  "two-scenes": {
+   "hash": "6e7c2d142a3a",
+   "text": "Game có đúng hai scene: Loading và Game\nLoading chỉ lo tải lúc mở game; Game chứa mọi thứ người chơi thao tác. Đã loại: mỗi màn một scene (thêm chờ tải giữa các màn, trái với lượt chơi ngắn)."
+  },
+  "boot-path": {
+   "hash": "879058b5d4aa",
+   "text": "Mở game thì vào scene Loading trước, tải xong tự sang scene Game\nNgười chơi không bấm gì ở Loading. Đã loại: màn Loading có nút \"chạm để chơi\" (thừa, màn bắt đầu đã có nút chơi)."
+  },
+  "game-holds-screens": {
+   "hash": "5c530502c4f1",
+   "text": "Màn bắt đầu, chọn đội, trận và các popup cùng nằm trong scene Game\nĐổi màn là đổi trong scene, không chuyển scene. Chơi lại nhanh, không màn tải giữa các lượt. Đã loại: tách trận thành scene riêng."
+  },
+  "no-return-loading": {
+   "hash": "bd876d74d5f8",
+   "text": "Đã vào scene Game thì không quay lại scene Loading\nVề màn bắt đầu hay chơi lại đều là đổi màn trong scene Game."
+  }
+ }
+}

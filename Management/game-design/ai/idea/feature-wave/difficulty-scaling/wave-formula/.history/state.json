@@ -1,0 +1,33 @@
+{
+ "hash": "4ec2cc7f93ed",
+ "items": {
+  "count-formula": {
+   "hash": "9259943ce494",
+   "text": "Số quái của đợt w là 6 + 2×w con (đợt 1: 8 con, đợt 10: 26 con, đợt 20: 46 con)\nLuôn là số chẵn, chia đúng một nửa cho mỗi bên. Trùm, nếu có, tính trong số này."
+  },
+  "interval-formula": {
+   "hash": "e3a5aebd3e9d",
+   "text": "Nhịp thả của đợt w là 1.0 − 0.05×(w − 1) giây, thấp nhất 0.3 giây (chạm sàn từ đợt 15)\nĐợt 1: 1.0 s, đợt 5: 0.8 s, đợt 10: 0.55 s, đợt 15 trở đi: 0.3 s."
+  },
+  "stat-multiplier": {
+   "hash": "3acdbbf1e7b9",
+   "text": "Máu và sức đánh của quái đợt w nhân hệ số 1 + 0.10×(w − 1) (đợt 10: ×1.9, đợt 20: ×2.9)\nÁp cho chỉ số gốc của `feature-enemy`. Tốc độ đánh, tầm đánh, tốc độ di chuyển và tiền khi hạ không nhân."
+  },
+  "type-unlock": {
+   "hash": "6ae6bb0a761c",
+   "text": "Lính có từ đợt 1, Sói từ đợt 3, Khổng lồ từ đợt 5, Cung thủ quái từ đợt 7\nLoại đã mở giữ mở tới hết lượt. Đợt mở loại mới luôn có ít nhất 1 con loại đó."
+  },
+  "boss-wave": {
+   "hash": "43f0e0c115c2",
+   "text": "Đợt có số chia hết cho 10 (10, 20, 30…) có đúng 1 Trùm, chiếm 1 chỗ trong số quái\nCác đợt khác không có Trùm. Trùm cũng nhân hệ số máu và sức đánh của đợt."
+  },
+  "type-mix": {
+   "hash": "9ab38aa05d1f",
+   "text": "Phần trăm từng loại theo bậc đợt; đợt 15 trở đi cố định Lính 35%, Sói 25%, Khổng lồ 20%, Cung thủ quái 20%\nBậc: đợt 1–2 Lính 100%; đợt 3–4 Lính 70%, Sói 30%; đợt 5–6 Lính 55%, Sói 30%, Khổng lồ 15%; đợt 7–9 Lính 45%, Sói 25%, Khổng lồ 15%, Cung thủ quái 15%; đợt 10–14 Lính 40%, Sói 25%, Khổng lồ 20%, Cung thủ quái 15%. Phần trăm tính trên số chỗ còn lại sau Trùm; mỗi loại không phải Lính lấy phần nguyên của (phần trăm × số chỗ), tối thiểu 1; Lính lấy phần còn lại."
+  },
+  "reward-by-mix": {
+   "hash": "e311af73f28a",
+   "text": "Tiền mỗi con giữ theo loại; tiền trung bình mỗi con tăng theo đợt nhờ phần loại trâu tăng (5 xu ở đợt 1, khoảng 9 xu ở đợt 20)\nKhông có hệ số tiền theo đợt. Thu của đợt tăng theo số quái và phần Khổng lồ tăng; ngoại lệ có chủ đích: đợt ngay sau đợt Trùm thu ít hơn đợt Trùm (đợt 10: 272 xu, đợt 11: 187 xu) vì 100 xu của Trùm là phần thưởng riêng."
+  }
+ }
+}

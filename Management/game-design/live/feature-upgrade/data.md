@@ -1,26 +1,20 @@
 ---
-based-on: cf568e2870fe
+based-on: c266fb040742
 ---
 # Nâng cấp
 
-Thanh nút nâng cấp luôn hiện trên màn hình trận. Người chơi dùng tiền nâng từng hero trong đội và thành bất kì lúc nào; trận không dừng, nâng cấp có hiệu lực ngay.
+Cách người chơi biến tiền thành sức mạnh: nâng từng hero trong đội và nâng thành, bất kì lúc nào trong trận; trận không dừng và nâng cấp có hiệu lực ngay.
 
 ## Ý cốt lõi
 
-### upgrade-anytime | AI 8
-Mua nâng cấp được bất kì lúc nào trong trận, kể cả lúc đang đánh và lúc nghỉ giữa hai đợt. Trận không dừng khi mua.
+### upgrade-anytime | AI 8 | Mua nâng cấp lúc nào cũng được, trận không dừng
+Kể cả lúc đang đánh. Đã loại (người loại ở vòng 1): chỉ nâng cấp giữa hai đợt.
 
-### upgrade-bar | AI 7
-Các nút nâng cấp nằm trên một thanh cố định ở mép màn hình, không mở bảng riêng. Mỗi nút hiện cấp hiện tại và giá cấp tiếp theo; không đủ tiền thì nút mờ đi.
+### upgrade-instant | AI 8 | Mua xong là mạnh lên ngay
+Kể cả với hero đang gục chờ hồi sinh.
 
-### upgrade-items | AI 7
-Danh sách nâng cấp cố định: mỗi hero trong đội một nút (lên cấp hero, tăng mọi chỉ số), cộng ba nút của thành (máu, sức đánh, kĩ năng).
+### upgrade-items | AI 7 | Nâng được từng hero trong đội và nâng được thành, danh sách cố định
+Đã loại: bốc thẻ nâng cấp ngẫu nhiên (khó nắm với người chơi phổ thông).
 
-### upgrade-instant | AI 8
-Nâng cấp có hiệu lực ngay lập tức, kể cả với hero đang gục chờ hồi sinh.
-
-### upgrade-cost | AI 7
-Giá tăng theo cấp. Không có cấp tối đa ở vòng này; giá tăng dần tự hãm.
-
-### upgrade-reset | AI 7
-Mọi cấp nâng cấp mất khi lượt chơi kết thúc; không bán lại, không hoàn tiền.
+### upgrade-cost | AI 7 | Càng nâng nhiều thì lần nâng sau càng đắt
+Giá tăng dần tự hãm, nên không cần cấp tối đa. Đã loại: giá cố định.

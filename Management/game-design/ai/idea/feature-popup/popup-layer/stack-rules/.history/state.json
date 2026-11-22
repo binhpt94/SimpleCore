@@ -1,0 +1,33 @@
+{
+ "hash": "3144e590f77b",
+ "items": {
+  "stack-max": {
+   "hash": "c7871940093e",
+   "text": "Tối đa 3 popup chồng cùng lúc; mở cái thứ 4 thì bị từ chối và ghi lỗi nêu id\nGame cần nhiều nhất 2 (popup tạm dừng và hộp xác nhận bỏ lượt chồng lên). Đã loại: không giới hạn (lỗi mở lặp không bị phát hiện)."
+  },
+  "same-id-once": {
+   "hash": "87d95b853a64",
+   "text": "Một id popup chỉ mở một bản mỗi lúc; xin mở id đang mở thì bị từ chối, popup đang mở giữ nguyên\nBấm nút tạm dừng hai lần nhanh không ra hai popup."
+  },
+  "backdrop-dim": {
+   "hash": "f88e04ad735c",
+   "text": "Nền che làm tối phần bên dưới 60% (dự kiến); mỗi popup một nền, nền chồng thì tối thêm\nHộp xác nhận chồng lên popup tạm dừng thì popup tạm dừng cũng bị tối đi, người chơi biết đang ở hộp nào."
+  },
+  "backdrop-tap-nothing": {
+   "hash": "8b326f0b4c54",
+   "text": "Bấm vào nền che không làm gì: không đóng popup, không xuống phần bên dưới"
+  },
+  "back-key-nothing": {
+   "hash": "4bac0455b311",
+   "text": "Nút quay lại của điện thoại không đóng popup và không xuống phần bên dưới khi có popup mở\nPopup chỉ đóng khi feature gọi yêu cầu (`feature-popup/popup-request`)."
+  },
+  "input-instant": {
+   "hash": "c32a7410b1d3",
+   "text": "Popup hiện và đóng tức thì; popup trên cùng nhận bấm ngay khung hình nó hiện"
+  },
+  "runs-while-frozen": {
+   "hash": "1acef0975a2d",
+   "text": "Popup hiện, nhận bấm và đóng được cả khi trận đang đứng yên\nPopup tạm dừng và popup thua đều mở lúc trận đã dừng."
+  }
+ }
+}

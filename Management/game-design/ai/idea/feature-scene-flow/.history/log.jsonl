@@ -1,0 +1,2 @@
+{"at": "2026-11-23 02:12:00", "event": "data", "hash": "9e167e1aa89f", "previous": "", "added": ["scene-boot", "scene-switch"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 02:14:34", "event": "promote", "by": "người", "hash": "9e167e1aa89f"}

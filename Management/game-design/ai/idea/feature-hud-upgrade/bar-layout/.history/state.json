@@ -1,0 +1,21 @@
+{
+ "hash": "4a9d06c74198",
+ "items": {
+  "bar-bottom-edge": {
+   "hash": "1164f5cb43a7",
+   "text": "Thanh nằm cố định ở mép dưới màn hình, dưới dải chiến trường\nNgón cái chạm tới dễ khi cầm ngang; dải đất chạy ngang giữa màn hình nên mép dưới không che trận. Đã loại: mép trên (xa tay); hai mép bên (che chỗ quái vào)."
+  },
+  "bar-one-button-per-item": {
+   "hash": "25078c490195",
+   "text": "Mỗi mục nâng cấp có đúng một nút, đủ nút cho mọi mục\nDanh sách mục là của `feature-upgrade/upgrade-list`. Đã loại: một nút mở danh sách con."
+  },
+  "bar-two-groups": {
+   "hash": "ed33bb5a29f1",
+   "text": "Nút hero xếp thành một nhóm, nút thành xếp thành nhóm riêng\nLiếc là biết đang nâng hero hay nâng thành. Nút hero xếp theo thứ tự đội đã chọn. Đã loại: trộn chung."
+  },
+  "bar-always-visible": {
+   "hash": "97ad589da4b5",
+   "text": "Thanh hiện suốt trận, không thu gọn, không bật tắt\nĐã loại (vòng 2): bảng nâng cấp bật lên."
+  }
+ }
+}

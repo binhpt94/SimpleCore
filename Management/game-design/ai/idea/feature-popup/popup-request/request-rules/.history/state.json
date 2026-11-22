@@ -1,0 +1,29 @@
+{
+ "hash": "a234ea9f82ce",
+ "items": {
+  "id-list": {
+   "hash": "d44886061067",
+   "text": "Scene Game có 3 id popup: `PopupLose/Main`, `PopupPause/Main`, `PopupPause/QuitConfirm`\nLần lượt là popup thua, popup tạm dừng và hộp xác nhận bỏ lượt. Tên `Name` do feature sở hữu đặt; đây là tên dự kiến."
+  },
+  "preload": {
+   "hash": "fb1903e00112",
+   "text": "Mọi popup có id trong danh sách của scene được chuẩn bị ở bước tải, nên xin mở là popup hiện ngay trong khung hình đó"
+  },
+  "unknown-id": {
+   "hash": "41386dd18afe",
+   "text": "Xin mở id không có trong danh sách của scene thì không hiện gì và ghi lỗi nêu id đó\nKhông âm thầm bỏ qua."
+  },
+  "close-twice": {
+   "hash": "b9d0aac9ac0f",
+   "text": "Xin đóng một popup đã đóng thì bỏ qua, không lỗi\nHai đường đóng cùng lúc (ví dụ bấm nút và lượt kết thúc) không gây lỗi."
+  },
+  "dispose-silent": {
+   "hash": "3bea0e877b97",
+   "text": "Rời scene thì mọi popup đang mở bị huỷ, không popup nào báo bấm nút cho feature gọi"
+  },
+  "caller-one-press": {
+   "hash": "48e27fae557e",
+   "text": "Feature gọi chỉ xử lí lần bấm nút đầu tiên của mỗi lần mở popup, các lần bấm sau tới khi đóng đều bỏ qua\nChặn bấm đúp làm chơi lại hai lần. Dịch vụ chỉ chuyển lần bấm, việc bỏ qua là của feature gọi."
+  }
+ }
+}

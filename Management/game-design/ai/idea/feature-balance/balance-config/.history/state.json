@@ -1,0 +1,21 @@
+{
+ "hash": "6934878b1b70",
+ "items": {
+  "config-owner": {
+   "hash": "7d9492e403c1",
+   "text": "Mỗi số liệu nằm trong cấu hình của đúng một feature sở hữu, không có bảng số dùng chung\nGiữ các feature độc lập theo luật của project. Đã loại: một bảng số chung cho cả game."
+  },
+  "config-no-code": {
+   "hash": "b9d19cf65c60",
+   "text": "Đổi số liệu chỉ cần sửa cấu hình, không cần sửa code\nĐã loại: số viết thẳng trong code."
+  },
+  "config-map": {
+   "hash": "dd193178ce49",
+   "text": "Feature này giữ danh sách: số liệu nào, nằm ở feature nào, quan hệ với số nào khác\nĐể khi đổi một số biết phải xem lại số nào. Đã loại: mỗi feature tự chỉnh số không đối chiếu."
+  },
+  "config-playtest": {
+   "hash": "feec5be6535d",
+   "text": "Đối chiếu số liệu bằng bảng so sánh và chơi thử, không có công cụ mô phỏng trong game\nGiữ trong ý tưởng vòng 1. Đã loại: mô phỏng tự động lượt chơi."
+  }
+ }
+}

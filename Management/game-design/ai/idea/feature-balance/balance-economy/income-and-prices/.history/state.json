@@ -1,0 +1,33 @@
+{
+ "hash": "295cfe59ac28",
+ "items": {
+  "income-formula": {
+   "hash": "ea61bcc61b6a",
+   "text": "Thu của đợt w = tổng tiền gốc các quái trong đợt + (20 + 5×w) xu thưởng dọn đợt\nTiền quái không nhân theo đợt; thu tăng nhờ số quái và phần loại trâu tăng. Đợt 1: 40 + 25 = 65 xu; đợt 10: 272 + 70 = 342 xu; đợt 20: 413 + 120 = 533 xu."
+  },
+  "income-total": {
+   "hash": "17c3fd29669e",
+   "text": "Tiền có ở đầu đợt w = 50 xu đầu lượt + tổng thu các đợt trước (đầu đợt 5: 393 xu, đầu đợt 20: 4685 xu)\nTính khi người chơi hạ hết quái mỗi đợt; dùng để dự đoán sức đội mua được."
+  },
+  "kill-over-bonus": {
+   "hash": "2811c45d97f6",
+   "text": "Ở mọi đợt, tiền hạ quái lớn hơn thưởng dọn đợt (đợt 1: 40 so với 25 xu, đợt 20: 413 so với 120 xu)\nGiữ tiền hạ quái là nguồn chính."
+  },
+  "price-ladder": {
+   "hash": "6802ba1edbd6",
+   "text": "Giá cấp tiếp theo tăng theo hệ số: hero ×1.35, máu và sức đánh thành ×1.4, kĩ năng ×1.5 mỗi cấp, làm tròn lên\nHero: 30, 41, 55, 74, 100, 135, 182, 246, 331 xu; máu hoặc sức đánh thành: 40, 56, 79, 110, 154, 216, 302 xu; kĩ năng: 60, 90, 135, 203, 304, 456 xu."
+  },
+  "buy-each-wave": {
+   "hash": "01d37db8a194",
+   "text": "Đợt nào cũng thu đủ ít nhất 1 lần nâng rẻ nhất đang có (đợt 1 thu 65 xu so với giá rẻ nhất 30 xu)\nKiểm ở đợt 20: thu 533 xu, các mục theo cách mua đều có giá từ 135 tới 331 xu."
+  },
+  "never-max": {
+   "hash": "c958682be6f8",
+   "text": "Tổng tiền tới đợt 20 (khoảng 5200 xu) chỉ đủ đưa 3 hero lên khoảng cấp 9 và thành lên khoảng cấp 5–7\nĐưa mọi mục (3 hero, 2 mục thành, 3 kĩ năng) lên cấp 10 cần khoảng 21 000 xu, gấp 4 lần."
+  },
+  "value-drop": {
+   "hash": "4182a22513a1",
+   "text": "Lời mỗi xu giảm theo cấp: nâng hero cấp 1→2 cho khoảng 0.1 sát thương mỗi giây mỗi xu, cấp 4→5 còn khoảng 0.05\nNâng sức đánh thành cấp 1→2 cho 0.05, Sấm sét cấp 1→2 khoảng 0.06; nên mua rải đều là cách chơi tốt."
+  }
+ }
+}

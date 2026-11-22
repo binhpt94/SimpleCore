@@ -1,26 +1,23 @@
 ---
-based-on: cf568e2870fe
+based-on: c266fb040742
 ---
 # Hero
 
-Các chiến binh người chơi chọn vào đội trước mỗi lượt chơi. Trong trận, hero tự tìm và đánh quái gần nhất, gục thì hồi sinh ở thành; người chơi chỉ tác động qua nâng cấp.
+Các chiến binh trong đội của người chơi. Trong trận, hero tự lao ra đánh quái hai bên thành, gục thì hồi sinh ở thành, và mạnh lên qua nâng cấp.
 
 ## Ý cốt lõi
 
-### hero-roster | AI 7
-Có một danh sách hero, mỗi hero có tên, cách đánh và chỉ số riêng (máu, sức đánh, tốc độ đánh, tầm đánh, tốc độ chạy). Bản đầu dự kiến 6 hero, mở sẵn hết.
+### hero-auto-combat | AI 8 | Hero tự đánh quái để giữ thành, người chơi không điều khiển hero
+Đã loại: kéo thả hero, chọn mục tiêu.
 
-### team-select | AI 7
-Trước mỗi lượt chơi có màn chọn đội: chọn đúng số hero cố định (dự kiến 4) từ danh sách, mỗi hero một lần. Đủ người mới bấm vào trận được.
+### hero-roles | AI 7 | Mỗi hero có một cách đánh riêng
+Ví dụ cận chiến đứng trước chắn quái, bắn xa đứng sau. Cách ghép đội là lựa chọn chính trước trận.
 
-### hero-roles | AI 7
-Hero chia theo cách đánh, ít nhất có cận chiến (máu cao, tầm ngắn, chắn quái) và bắn xa (máu thấp, tầm xa, đứng sau).
+### hero-roster | AI 7 | Có nhiều hero hơn số chỗ trong đội, mọi hero dùng được ngay
+Không mở khoá, vì game không có tiến trình lâu dài. Đã loại: mở khoá dần.
 
-### hero-auto-combat | AI 8
-Hero tự tìm quái gần nhất, chạy tới trong tầm và đánh; hết quái thì về đứng gần thành. Người chơi không điều khiển hero.
+### hero-respawn | AI 7 | Hero gục thì sau một lúc hồi sinh ở thành
+Gục không mất nâng cấp đã mua. Đã loại: chết hẳn tới hết lượt.
 
-### hero-respawn | AI 7
-Hero hết máu thì gục, biến mất khỏi trận, rồi hồi sinh ở thành sau một khoảng thời gian chờ; trong lúc chờ có hiện thời gian còn lại.
-
-### hero-upgrade | AI 7
-Mỗi hero trong đội có cấp riêng trong lượt chơi; lên cấp thì mọi chỉ số tăng. Cấp giữ nguyên khi hero gục và hồi sinh.
+### hero-upgrade | AI 7 | Mỗi hero trong đội mạnh lên riêng qua nâng cấp trong lượt
+Mua qua `feature-upgrade`. Đã loại: nâng theo loại hero.

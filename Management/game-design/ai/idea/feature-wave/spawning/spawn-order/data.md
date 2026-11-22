@@ -1,0 +1,29 @@
+---
+based-on: 8c9e1c247bf1
+---
+# Thứ tự và cách thả quái
+
+Đầu đợt lập danh sách thả từ số con từng loại, xáo thứ tự, chia đúng một nửa cho mỗi bên rồi thả từng con theo nhịp của đợt ở x = −17u hoặc x = +17u. Khi đã có 40 quái sống thì hoãn thả tới khi bớt.
+
+## Ý cốt lõi
+
+### spawn-point | AI 8 | Quái ra trên mặt đất ở x = −17u (bên trái) hoặc x = +17u (bên phải), ngoài mép màn hình 1u
+Ra xong tự đi vào thành theo `feature-enemy`. Lính đi 1.5 u/s cần khoảng 10 s để tới mép thành (x = ±1.5u), nên người chơi thấy quái đi vào chứ không hiện sát thành.
+
+### half-split | AI 8 | Mỗi bên đúng một nửa số quái của đợt (đợt 1: 4 trái, 4 phải)
+Số quái luôn chẵn. Trùm, nếu có, ra ở bên được bốc ngẫu nhiên và tính vào nửa của bên đó.
+
+### shuffle-order | AI 7 | Thứ tự loại quái xáo ngẫu nhiên, trừ Trùm luôn là con thứ (số quái ÷ 2 + 1)
+Đợt 10 có 26 con: Trùm là con thứ 14, ra giữa đợt để thành đỉnh căng thẳng chứ không phải lúc đầu khi đội còn rảnh hay lúc cuối khi đã yếu.
+
+### side-run | AI 7 | Không có quá 3 con liên tiếp ra cùng một bên
+Giữ cảm giác bị kẹp liên tục; không có lúc một bên bỏ trống lâu. Bên ra vẫn ngẫu nhiên trong giới hạn này.
+
+### spawn-timing | AI 8 | Con đầu tiên ra lúc 0 s của đợt, mỗi con sau cách con trước đúng một nhịp thả của đợt
+Đợt 1: 8 con ra trong 7 s; đợt 20: 46 con ra trong 13.5 s (nếu không bị hoãn).
+
+### alive-cap | AI 7 | Đã có 40 quái sống thì hoãn thả; còn dưới 40 thì con kế tiếp ra ngay, rồi lại đếm nhịp từ đó
+Giữ màn hình đọc được và máy không quá tải. Đồng hồ nhịp đứng yên trong lúc hoãn.
+
+### stop-on-end | AI 8 | Thành bị phá thì ngừng thả ngay, các con chưa ra bị bỏ
+Đợt đó không được tính là dọn sạch.

@@ -1,0 +1,2 @@
+{"at": "2026-11-23 02:20:17", "event": "data", "hash": "2748621645f8", "previous": "", "added": ["shared-stats", "stat-damage", "hero-stats-differ", "hero-level", "hero-level-kept"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 02:27:23", "event": "promote", "by": "người", "hash": "2748621645f8"}

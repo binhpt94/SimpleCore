@@ -1,4 +1,25 @@
 {
- "hash": "a3aa323fc3cc",
- "items": {}
+ "hash": "8c9e1c247bf1",
+ "items": {
+  "wave-list": {
+   "hash": "d95ce86cf698",
+   "text": "Một đợt là một danh sách quái, mỗi con ghi loại quái, bên ra và lúc ra\nĐây là \"nội dung đợt\" mà các node khác dùng: độ khó quyết danh sách dài bao nhiêu, gồm loại nào; node này quyết chia bên và chia lúc ra. Đã loại: thả theo thời gian không có danh sách (không biết lúc nào đã ra hết)."
+  },
+  "spawn-edges": {
+   "hash": "1044d9c19247",
+   "text": "Quái chỉ ra ở mép trái và mép phải của dải đất, rồi tự đi thẳng vào thành\nRa xong thì cách đi, cách đánh là của `feature-enemy`. Đã loại: quái rơi từ trên xuống, ra giữa đường."
+  },
+  "spawn-both-sides": {
+   "hash": "cbfae6117aaf",
+   "text": "Đợt nào cũng có quái ở cả hai bên, chia gần đều\nGiữ cảm giác bị kẹp ở mọi đợt; người chơi không phải đoán bên nào nguy hơn. Đã loại: cả đợt dồn về một bên; lệch bên theo đợt."
+  },
+  "spawn-spread": {
+   "hash": "edb1bd23dfc4",
+   "text": "Quái của đợt ra rải từng con trong suốt đợt, không ra cả đợt một lúc\nMàn hình điện thoại nhìn rõ từng con, hero có lúc đánh xong con trước. Đã loại: cả đợt ra cùng lúc; ra theo cụm lớn."
+  },
+  "spawn-shuffle": {
+   "hash": "1ca2f0a9d7f2",
+   "text": "Số quái và loại quái cố định theo số đợt, chỉ thứ tự và bên ra là ngẫu nhiên\nCùng một đợt thì độ khó như nhau giữa các lượt, nhưng không lặp y hệt. Đã loại: thứ tự cố định (dễ thuộc lòng); số quái ngẫu nhiên (độ khó khó đoán)."
+  }
+ }
 }

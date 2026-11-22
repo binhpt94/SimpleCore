@@ -1,0 +1,25 @@
+{
+ "hash": "70f3b17acc2e",
+ "items": {
+  "participant-list": {
+   "hash": "affdbf26cd0d",
+   "text": "Mỗi scene có một danh sách feature tham gia, cố định cho scene đó\nScene Loading và scene Game mỗi scene một danh sách riêng. Đã loại: feature tự đăng kí lúc chạy (khó biết scene gồm những gì)."
+  },
+  "step-load": {
+   "hash": "53808f1c06be",
+   "text": "Bước tải: mọi feature tham gia tải xong thứ mình cần thì scene mới sang bước chạy\nTải gồm hình, prefab, cấu hình. Không feature nào chạy khi feature khác còn đang tải."
+  },
+  "step-run": {
+   "hash": "298c74c87658",
+   "text": "Bước chạy: các feature tạo view của mình; scene không có view đặt sẵn\nView chỉ sinh ra ở bước này. Đã loại: đặt sẵn view trong scene (khó dọn, khó biết ai sở hữu)."
+  },
+  "step-dispose": {
+   "hash": "5b0145b6d869",
+   "text": "Bước huỷ: mọi feature tham gia huỷ view và bỏ thứ mình đã tải\nChạy khi rời scene, do `feature-scene-flow` yêu cầu."
+  },
+  "fixed-order": {
+   "hash": "8254425b7ef8",
+   "text": "Các feature đi qua mỗi bước theo thứ tự của danh sách, huỷ theo thứ tự ngược lại\nFeature đứng sau dùng được thứ feature đứng trước đã chuẩn bị; huỷ ngược để không feature nào mất thứ nó đang dựa vào."
+  }
+ }
+}

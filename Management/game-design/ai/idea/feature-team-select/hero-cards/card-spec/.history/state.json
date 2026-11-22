@@ -1,0 +1,29 @@
+{
+ "hash": "781181ffcb86",
+ "items": {
+  "cards-five-order": {
+   "hash": "e45c87a76b40",
+   "text": "Có 5 thẻ theo thứ tự cố định: Hiệp sĩ, Đấu sĩ rìu, Kiếm khách, Cung thủ, Pháp sư\nCận chiến trước, bắn xa sau. Thứ tự không đổi theo đội đã chọn."
+  },
+  "card-four-parts": {
+   "hash": "a43608dda1c3",
+   "text": "Mỗi thẻ có 4 phần: hình hero, tên hero, dòng cách đánh, dấu vai trò\nHình hero là sprite 2D gen bằng AI, cùng hình hero dùng trong trận."
+  },
+  "card-role-text": {
+   "hash": "7bade907cb51",
+   "text": "Dòng cách đánh ghi nhóm và kiểu đòn, ví dụ \"Cận chiến · Chém vùng\"\nHiệp sĩ \"Cận chiến · Chắn\", Đấu sĩ rìu \"Cận chiến · Chém vùng\", Kiếm khách \"Cận chiến · Đánh nhanh\", Cung thủ \"Bắn xa · Tầm xa\", Pháp sư \"Bắn xa · Nổ vùng\"."
+  },
+  "card-role-mark-two": {
+   "hash": "e0fdadc6b4f6",
+   "text": "Có 2 dấu vai trò: một dấu cho cận chiến (3 thẻ), một dấu cho bắn xa (2 thẻ)\nHai hero cùng nhóm có cùng dấu."
+  },
+  "card-selected-mark": {
+   "hash": "2f41c23bb694",
+   "text": "Thẻ của hero đã vào đội có dấu \"đã chọn\"; bỏ chọn thì dấu mất ngay trong khung hình đó"
+  },
+  "card-no-stats": {
+   "hash": "481e2476a3fd",
+   "text": "Thẻ không có con số chỉ số nào\nChỉ chữ cách đánh; chỉ số ở `feature-hero` và `feature-balance`."
+  }
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "hash": "f1aa8b544f79",
+ "items": {
+  "button-shows": {
+   "hash": "8d50276be88a",
+   "text": "Mỗi nút hiện hình của mục, cấp hiện tại và giá cấp sau\nHình là chân dung hero hoặc biểu tượng máu, sức đánh, kĩ năng của thành. Đã loại: chỉ hiện giá (không biết đã nâng tới đâu)."
+  },
+  "button-dim": {
+   "hash": "49f14f65d596",
+   "text": "Nút mờ khi không mua được, sáng lại ngay khi mua được\nKhông mua được là không đủ tiền hoặc đang tạm dừng. Cập nhật mỗi khi số dư hoặc cấp đổi. Đã loại: ẩn nút không đủ tiền (thanh nhảy chỗ)."
+  },
+  "button-one-tap": {
+   "hash": "be54faee628c",
+   "text": "Chạm một lần vào nút sáng là mua một cấp\nKhông có bước xác nhận. Chạm nút mờ thì không mua. Đã loại: giữ để mua, hỏi lại trước khi mua."
+  },
+  "button-no-logic": {
+   "hash": "bb793c7b90bb",
+   "text": "Nút không tự tính giá hay quyết mua; mọi thứ lấy từ feature-upgrade\nNút chỉ hiện thông tin được đưa và chuyển cú chạm xuống `feature-upgrade/upgrade-purchase`. Đã loại: nút tự so tiền với giá."
+  }
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "hash": "8b12c189d8a4",
+ "items": {
+  "home-title-text": {
+   "hash": "28c6de4d6bdd",
+   "text": "Dòng tên game hiện chữ \"Thủ thành anh hùng\", không bấm được\nTên tạm của game (node gốc). Đổi tên chỉ đổi chữ."
+  },
+  "home-record-text": {
+   "hash": "58a7cc265138",
+   "text": "Dòng kỉ lục hiện \"Kỉ lục: N đợt\", N là kỉ lục hiện tại, chưa có thì N = 0\nĐọc lại mỗi lần màn hiện, nên vừa phá kỉ lục rồi về màn này là thấy số mới."
+  },
+  "home-play-button": {
+   "hash": "1978924bb52d",
+   "text": "Có đúng 1 nút \"Chơi\"; chạm 1 lần là báo đã bấm chơi, sang màn chọn đội\nChỉ lần chạm đầu có tác dụng; chạm thêm trong lúc đổi màn bị bỏ qua."
+  },
+  "home-nothing-else": {
+   "hash": "978542620f81",
+   "text": "Ngoài nút \"Chơi\", không có chỗ nào trên màn bấm được\nKhông nút thoát, không cài đặt, không cửa hàng."
+  }
+ }
+}

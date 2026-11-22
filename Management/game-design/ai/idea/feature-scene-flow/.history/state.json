@@ -1,0 +1,13 @@
+{
+ "hash": "9e167e1aa89f",
+ "items": {
+  "scene-boot": {
+   "hash": "a9fa44404f79",
+   "text": "Mở game thì đi qua màn tải rồi vào scene chơi"
+  },
+  "scene-switch": {
+   "hash": "2862b84a8b75",
+   "text": "Các feature khác xin chuyển scene qua feature này, không tự tải scene"
+  }
+ }
+}

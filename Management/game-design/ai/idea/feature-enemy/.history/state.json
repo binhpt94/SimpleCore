@@ -1,21 +1,17 @@
 {
- "hash": "32201d73f1f7",
+ "hash": "b74c0b7d272a",
  "items": {
-  "enemy-stats": {
-   "hash": "b0f06d6c502b",
-   "text": "Mỗi quái có máu, sức đánh, tốc độ đánh, tốc độ đi và số tiền rơi khi bị hạ."
-  },
   "enemy-path": {
-   "hash": "7334a34f62ce",
-   "text": "Quái đi thẳng về phía thành trên dải mặt đất. Gặp hero trong tầm thì dừng lại đánh hero; hero gục thì đi tiếp. Tới thành thì đứng đánh thành."
-  },
-  "enemy-reward": {
-   "hash": "7805e5817b16",
-   "text": "Quái bị hạ (bởi hero, đòn bắn hay kĩ năng của thành) thì rơi tiền vào `feature-wallet` và báo `feature-wave` là đợt bớt một quái."
+   "hash": "7714220ced86",
+   "text": "Quái đi từ hai mép màn hình vào thành, đánh hero chắn đường và đánh thành khi tới nơi\nCho hero cận chiến có vai trò chắn. Đã loại: quái bỏ qua hero, chỉ nhắm thành."
   },
   "enemy-types": {
-   "hash": "e0bb2ea6c65b",
-   "text": "Có vài loại quái để đợt sau khác đợt trước; bản đầu dự kiến 3 loại: thường, nhanh nhưng yếu, chậm nhưng trâu. Chưa có quái bắn xa và quái trùm."
+   "hash": "52326dc1c6c4",
+   "text": "Có nhiều loại quái với cách đi và sức chịu khác nhau\nĐể đợt sau khác đợt trước và mỗi kiểu hero có chỗ mạnh. Đã loại: một loại quái chỉ tăng chỉ số."
+  },
+  "enemy-reward": {
+   "hash": "03cd594c0b36",
+   "text": "Hạ quái thì được tiền, dù hạ bằng hero hay bằng thành\nTiền vào thẳng `feature-wallet`, không cần nhặt."
   }
  }
 }

@@ -1,0 +1,25 @@
+{
+ "hash": "fd6c29c2b1b5",
+ "items": {
+  "six-items": {
+   "hash": "87cad41f6c01",
+   "text": "Mỗi lượt có đúng 6 mục: 3 mục cấp hero và 3 mục thành\nĐội có 3 hero nên có 3 mục hero; thành có máu, sức đánh, kĩ năng."
+  },
+  "item-order": {
+   "hash": "0c4a88e0f9c1",
+   "text": "Thứ tự mục cố định: hero chỗ 1, hero chỗ 2, hero chỗ 3, máu thành, sức đánh thành, kĩ năng thành\nHero theo đúng thứ tự người chơi xếp lúc chọn đội."
+  },
+  "start-level-1": {
+   "hash": "c6f11370e573",
+   "text": "Mọi mục vào trận ở cấp 1, chưa mua lần nào\nCấp = 1 + số lần đã mua mục đó trong lượt."
+  },
+  "built-at-run-start": {
+   "hash": "b348d3a36846",
+   "text": "Danh sách 6 mục được lập một lần khi vào trận, từ đội nhận qua feature-run, và không đổi tới hết lượt\nHero gục không làm mất mục; lượt mới lập lại từ đầu."
+  },
+  "item-identity": {
+   "hash": "441a138d4f0c",
+   "text": "Mỗi mục được nhận diện bằng chỗ trong đội (hero 1-3) hoặc tên mục thành, không bằng thứ tự nút\nĐể mục hero luôn trỏ đúng hero kể cả khi hai hero cùng loại."
+  }
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "hash": "0b7bee05c524",
+ "items": {
+  "two-buttons-text": {
+   "hash": "b1d3627dd69f",
+   "text": "Có 2 nút: \"Chơi lại\" là nút chính, \"Về màn bắt đầu\" là nút phụ\nNút chính đặt trước và nổi hơn nút phụ; cách làm nổi do chuyên gia giao diện quyết."
+  },
+  "replay-report": {
+   "hash": "4a2e2a40af7e",
+   "text": "Chạm \"Chơi lại\" thì báo `feature-run` chọn chơi lại; `feature-run` đóng popup và sang màn chọn đội"
+  },
+  "home-report": {
+   "hash": "5e52b387a6ee",
+   "text": "Chạm \"Về màn bắt đầu\" thì báo `feature-run` chọn về màn bắt đầu; `feature-run` đóng popup và sang màn bắt đầu"
+  },
+  "first-tap-only": {
+   "hash": "72a2322c7130",
+   "text": "Chỉ lần chạm nút đầu tiên được báo; sau đó cả 2 nút không nhận chạm\nTránh chạm cả hai nút hay chạm một nút hai lần."
+  },
+  "no-other-close": {
+   "hash": "0c826fb2f22c",
+   "text": "Chạm nền che, chạm ngoài popup hay nút quay lại của máy đều không đóng popup"
+  }
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "hash": "25d160950007",
+ "items": {
+  "popup-open-close": {
+   "hash": "40972416be08",
+   "text": "Popup mở đúng lúc trận vào tạm dừng và đóng đúng lúc trận chạy lại\nMở khi bấm nút tạm dừng (`feature-hud/hud-pause-button`) hoặc khi rời khỏi game giữa trận. Popup không tự làm trận đứng yên; nó là mặt hiển thị của trạng thái tạm dừng."
+  },
+  "popup-two-buttons": {
+   "hash": "f07f97a73882",
+   "text": "Popup có hai nút: tiếp tục và bỏ lượt\nĐã loại: cài đặt âm thanh, chơi lại từ đầu (vòng 1 không nhắc; chơi lại đi qua bỏ lượt rồi màn bắt đầu)."
+  },
+  "popup-resume-main": {
+   "hash": "ab99d9ed5355",
+   "text": "Tiếp tục là nút chính, đóng popup và trận chạy tiếp từ chỗ đã dừng\nBị ngắt rồi quay lại là việc hay gặp nhất."
+  },
+  "popup-quit-confirm": {
+   "hash": "401f4d5ab837",
+   "text": "Bỏ lượt phải bấm xác nhận một lần nữa\nBỏ lượt mất cả lượt đang chơi; một lần xác nhận tránh bấm nhầm. Xác nhận ngay trong popup, không mở popup thứ hai. Đã loại: bỏ lượt ngay khi chạm."
+  },
+  "popup-quit-result": {
+   "hash": "390127e1897d",
+   "text": "Bỏ lượt thì lượt kết thúc, tính điểm như thua, rồi về màn bắt đầu\nĐợt dở không tính (`feature-run/run-score`). Popup chỉ báo lựa chọn cho `feature-run/run-pause`."
+  }
+ }
+}

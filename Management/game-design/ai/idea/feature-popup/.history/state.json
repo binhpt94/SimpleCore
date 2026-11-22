@@ -1,0 +1,13 @@
+{
+ "hash": "04fa62031f0e",
+ "items": {
+  "popup-show": {
+   "hash": "76e0040e0b8e",
+   "text": "Feature khác nhờ dịch vụ này hiện popup của mình, không tự dựng popup"
+  },
+  "popup-block": {
+   "hash": "77dfb27c629e",
+   "text": "Popup đang mở che lên trên và chặn bấm vào phần bên dưới"
+  }
+ }
+}

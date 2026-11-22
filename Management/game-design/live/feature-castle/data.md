@@ -1,26 +1,22 @@
 ---
-based-on: cf568e2870fe
+based-on: c266fb040742
 ---
 # Thành
 
-Tòa thành đứng giữa màn hình: thứ người chơi phải bảo vệ, nơi đội hero xuất phát và hồi sinh. Thành tự bắn quái trong tầm và có kĩ năng người chơi bấm để dùng; máu về 0 là thua.
+Tòa thành đứng giữa màn hình: thứ người chơi phải giữ, đồng thời là một chiến binh tự đánh quái và có kĩ năng người chơi bấm để cứu nguy. Thành bị phá là hết lượt.
 
 ## Ý cốt lõi
 
-### castle-health | AI 8
-Thành có máu tối đa và máu hiện tại. Quái tới được thành thì đánh trừ máu. Máu về 0 thì báo thua cho `feature-run`.
+### castle-health | AI 8 | Thành là thứ phải giữ: quái tới được thì đánh thành, thành bị phá là thua
+Báo cho `feature-run` khi thành bị phá.
 
-### castle-no-regen | AI 6
-Máu thành không tự hồi giữa các đợt. Nâng cấp máu thì cả máu tối đa và máu hiện tại cùng tăng thêm phần đó.
+### castle-auto-attack | AI 7 | Thành tự đánh quái ở cả hai bên, không cần người chơi bấm
+Đánh quái lọt qua hàng hero. Đã loại: người chơi chạm vào quái để thành bắn.
 
-### castle-auto-attack | AI 7
-Thành tự bắn quái gần nhất trong tầm, cả hai phía, không cần người chơi bấm.
+### castle-skills | AI 7 | Thành có kĩ năng người chơi bấm để dùng, dùng xong phải chờ hồi mới dùng lại
+Đây là thao tác chủ động chính trong trận. Bấm là dùng ngay, không cần chọn vị trí. Đã loại (người loại ở vòng 1): thành không đánh, không kĩ năng.
 
-### castle-skills | AI 7
-Thành có kĩ năng (dự kiến 2 cho bản đầu), mỗi kĩ năng một nút trên màn hình. Bấm thì dùng ngay, sau đó chờ hết thời gian hồi chiêu mới dùng lại; nút hiện rõ thời gian còn lại.
+### castle-hero-base | AI 7 | Thành là nơi đội hero xuất phát khi vào trận và hồi sinh khi gục
 
-### castle-hero-base | AI 7
-Thành là nơi đội hero xuất hiện khi vào trận và là nơi hero gục hồi sinh.
-
-### castle-upgrades | AI 7
-Ba thứ của thành nâng cấp được: máu, sức đánh (của đòn tự bắn), kĩ năng (mạnh hơn hoặc hồi chiêu ngắn hơn).
+### castle-upgrades | AI 7 | Thành mạnh lên qua nâng cấp trong trận
+Nâng được độ bền, sức đánh và kĩ năng của thành; mua qua `feature-upgrade`.

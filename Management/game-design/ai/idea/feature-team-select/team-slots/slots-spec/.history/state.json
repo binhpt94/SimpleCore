@@ -1,0 +1,33 @@
+{
+ "hash": "14fc91ea0d47",
+ "items": {
+  "slots-three": {
+   "hash": "afac915b4f7e",
+   "text": "Đội có đúng 3 chỗ, chọn từ 5 hero; mỗi lượt bỏ lại 2 hero"
+  },
+  "tap-add-first-empty": {
+   "hash": "c0d72582a6da",
+   "text": "Chạm thẻ hero chưa chọn khi còn chỗ trống: hero vào chỗ trống có số nhỏ nhất\nBỏ hero ở chỗ 2 rồi chọn hero khác thì hero mới vào chỗ 2."
+  },
+  "tap-remove": {
+   "hash": "21987a8b26f7",
+   "text": "Chạm thẻ hero đã chọn, hoặc chạm chỗ đang có hero: hero rời đội, chỗ đó trống\nCác hero khác giữ nguyên chỗ, không dồn lên."
+  },
+  "tap-full-ignored": {
+   "hash": "6dd28727cce2",
+   "text": "Đội đã đủ 3 mà chạm thẻ hero chưa chọn thì không có gì đổi\nPhải bỏ một hero trước."
+  },
+  "start-button-gate": {
+   "hash": "5a3e9bf2f9e4",
+   "text": "Nút \"Vào trận\" chỉ có tác dụng khi đủ 3 chỗ; thiếu thì nút ở trạng thái khoá, chạm không làm gì\nTrạng thái khoá phải nhìn khác trạng thái bấm được."
+  },
+  "start-button-once": {
+   "hash": "2fdc359a0882",
+   "text": "Chạm \"Vào trận\" khi đủ 3: báo đội cho `feature-run` đúng một lần, rồi màn không nhận chạm nữa"
+  },
+  "screen-parts": {
+   "hash": "7cc0620308f8",
+   "text": "Màn chọn đội có 3 phần: 5 thẻ hero, 3 chỗ trong đội, 1 nút \"Vào trận\"\nKhông có nút quay lại màn bắt đầu."
+  }
+ }
+}

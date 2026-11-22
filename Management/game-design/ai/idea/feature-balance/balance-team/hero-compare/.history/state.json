@@ -1,0 +1,29 @@
+{
+ "hash": "d356532cffe9",
+ "items": {
+  "power-formula": {
+   "hash": "a4a99bb961a3",
+   "text": "Sức tổng S = căn bậc hai của (máu hiệu dụng × sát thương mỗi giây hiệu dụng); đòn vùng tính trúng 2 con, hero tầm từ 5u tính máu ×2\nHero bắn xa ít bị đánh nên máu hiệu dụng gấp đôi. Đây là số so sánh, không phải số trong cấu hình."
+  },
+  "power-close": {
+   "hash": "0358ce228dca",
+   "text": "Sức tổng lv1 của 5 hero nằm trong khoảng ±10% quanh trung bình 65 (thấp nhất Hiệp sĩ 60, cao nhất Đấu sĩ rìu 69)\nKiếm khách 64, Cung thủ 65, Pháp sư 67."
+  },
+  "stat-tradeoff": {
+   "hash": "5568f8d206cb",
+   "text": "Mỗi hero có ít nhất 1 chỉ số cao nhất hoặc nhì và 1 chỉ số thấp nhất hoặc nhì trong 5 hero\nVí dụ Hiệp sĩ máu cao nhất (300) mà sát thương mỗi đòn thấp nhất (12); Pháp sư nổ vùng mà máu thấp nhất (100)."
+  },
+  "counter-table": {
+   "hash": "d28aa2bd503d",
+   "text": "Mỗi hero có ít nhất 1 loại quái nó hợp và 1 loại nó khó, theo bảng hợp khó\nVí dụ Cung thủ hợp Cung thủ quái (tầm 7u lớn hơn 5u của quái) và khó với Sói (đi 3.0 u/s, tới sát nhanh)."
+  },
+  "equal-growth": {
+   "hash": "9c15f1277af0",
+   "text": "Mỗi hero nhận cùng mức tăng +15% máu và sát thương lv1 mỗi cấp với cùng giá, nên sức tổng tăng cùng tỉ lệ\nKhông hero nào là chỗ đổ tiền rẻ nhất."
+  },
+  "mono-team-ok": {
+   "hash": "785a46246cf5",
+   "text": "Đội toàn cận chiến (Hiệp sĩ, Đấu sĩ rìu, Kiếm khách) có sát thương mỗi giây lv1 55, gần đội trộn 52, nên vẫn qua các đợt đầu\nGặp khó từ đợt 7 khi Cung thủ quái mở, vì phải đuổi quái bắn xa."
+  }
+ }
+}

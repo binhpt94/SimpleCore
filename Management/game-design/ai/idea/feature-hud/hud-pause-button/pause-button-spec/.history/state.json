@@ -1,0 +1,21 @@
+{
+ "hash": "0302c1de6433",
+ "items": {
+  "pause-icon": {
+   "hash": "118a66302bdb",
+   "text": "Có đúng 1 nút, biểu tượng hai vạch đứng, đại diện cho \"tạm dừng trận\"; không có chữ"
+  },
+  "pause-tap-report": {
+   "hash": "2ef28236670f",
+   "text": "Trận đang đánh: chạm 1 lần là báo \"đã bấm tạm dừng\" cho `feature-run/run-pause` đúng một lần\nNút không tự dừng trận hay mở popup."
+  },
+  "pause-inactive": {
+   "hash": "0e8f644c1e7e",
+   "text": "Trận đang tạm dừng hoặc lượt đã kết thúc: chạm nút không báo gì\nLúc tạm dừng popup che nút; lúc kết thúc nút vẫn hiện nhưng vô tác dụng."
+  },
+  "pause-shown-all-battle": {
+   "hash": "459aafdbedb0",
+   "text": "Nút hiện suốt trận, từ lúc trận dựng xong tới lúc trận bị huỷ"
+  }
+ }
+}

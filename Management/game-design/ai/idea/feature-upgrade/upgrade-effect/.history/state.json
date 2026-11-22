@@ -1,0 +1,29 @@
+{
+ "hash": "b9bcec737959",
+ "items": {
+  "effect-instant": {
+   "hash": "5bfe674b9684",
+   "text": "Cấp mới có hiệu lực ngay lúc mua, không chờ hết đợt\nĐã loại (người loại ở vòng 1): chỉ nâng cấp giữa hai đợt."
+  },
+  "effect-hero-all-stats": {
+   "hash": "a04e545e71f1",
+   "text": "Lên cấp hero thì mọi chỉ số của hero đó cùng tăng\nVí dụ máu và sức đánh cùng tăng. Hero nào tăng chỉ số nào bao nhiêu là của `feature-hero`."
+  },
+  "effect-fallen-hero": {
+   "hash": "4e48b75f60d5",
+   "text": "Hero đang gục vẫn lên cấp, hồi sinh là mang cấp mới\nKhông phải chờ hero đứng dậy mới mua. Gục không làm mất cấp (`feature-hero`, `hero-respawn`)."
+  },
+  "effect-castle-health": {
+   "hash": "9443460dc87e",
+   "text": "Lên cấp máu thành thì máu tối đa tăng và máu hiện tại tăng thêm đúng phần đó\nMua máu vừa làm thành bền hơn vừa cứu nguy ngay. Đã loại: chỉ tăng máu tối đa (mua lúc nguy không thấy tác dụng)."
+  },
+  "effect-castle-attack": {
+   "hash": "517ba47a28da",
+   "text": "Lên cấp sức đánh thì đòn tự bắn của thành mạnh hơn\nKhông đổi kĩ năng thành."
+  },
+  "effect-castle-skill": {
+   "hash": "d4bd4c465fff",
+   "text": "Lên cấp kĩ năng thì cả ba kĩ năng thành cùng mạnh hơn, hồi chiêu không đổi\nMỗi kĩ năng mạnh hơn theo kiểu riêng do `feature-castle/castle-upgrade-effects` quyết. Đã loại: giảm hồi chiêu."
+  }
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "hash": "80fd04c1bb2b",
+ "items": {
+  "top-row-order": {
+   "hash": "c434090b25bd",
+   "text": "Mép trên từ trái sang phải: nút tạm dừng, tiền, máu thành, đợt\nMáu thành ở giữa, thẳng phía trên thành. Nút tạm dừng ở góc trên bên trái, xa góc dưới bên phải nơi có nút kĩ năng."
+  },
+  "skills-bottom-right": {
+   "hash": "aa8f1e97ee75",
+   "text": "3 nút kĩ năng gom thành một cụm ở góc dưới bên phải, xếp ngang theo thứ tự Sấm sét, Băng giá, Cổ vũ\nNgón cái phải chạm tới. Cụm này không đổi chỗ trong trận."
+  },
+  "upgrade-gets-rest": {
+   "hash": "27265827682e",
+   "text": "Thanh nâng cấp (`feature-hud-upgrade`) dùng phần mép dưới từ cạnh trái tới sát cụm kĩ năng\nHai bên không chồng lên nhau ở bất kì tỉ lệ màn hình nào."
+  },
+  "strip-never-covered": {
+   "hash": "38dcf83b90f9",
+   "text": "Không phần HUD nào chồng lên dải chiến trường, ở mọi tỉ lệ màn hình ngang từ 16:9 tới 21:9\nKiểm bằng cách so khung của từng phần HUD với khung dải chiến trường: không giao nhau."
+  },
+  "safe-area": {
+   "hash": "affc4f8dd18f",
+   "text": "Mọi phần HUD nằm trong vùng an toàn của máy (không bị tai thỏ, góc bo hay thanh điều hướng che)"
+  }
+ }
+}

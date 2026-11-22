@@ -1,4 +1,25 @@
 {
- "hash": "2b192fa4ee7c",
- "items": {}
+ "hash": "0a1f233f1919",
+ "items": {
+  "scale-by-number": {
+   "hash": "b491c9d976f5",
+   "text": "Độ khó của đợt chỉ phụ thuộc số đợt, tính bằng quy tắc chứ không viết tay\nCùng số đợt thì luôn khó như nhau, ở mọi lượt. Đã loại: bảng đợt viết tay (không vô tận được); độ khó theo sức đội người chơi (người chơi giỏi bị phạt)."
+  },
+  "scale-count": {
+   "hash": "df63ac84d09d",
+   "text": "Đợt sau có nhiều quái hơn đợt trước và quái ra dày hơn\nÁp lực thấy bằng mắt: dải đất đông dần."
+  },
+  "scale-stats": {
+   "hash": "9080d1951ba0",
+   "text": "Quái đợt sau có máu và sức đánh cao hơn; tốc độ đánh, tầm đánh, tốc độ di chuyển giữ theo loại quái\nGiữ \"quái nào trông ra quái nấy\": quái nhanh vẫn nhanh, quái trâu vẫn chậm. Đã loại: tăng mọi chỉ số (quái đợt muộn chạy quá nhanh, khó nhìn)."
+  },
+  "scale-types": {
+   "hash": "6a46fcc1d2f8",
+   "text": "Loại quái mở dần theo đợt; đợt đầu chỉ có loại đơn giản, càng về sau càng trộn nhiều loại\nNgười chơi gặp từng loại mới khi đã quen loại cũ. Danh sách loại là của `feature-enemy`. Đã loại: mọi loại có ngay từ đợt đầu."
+  },
+  "scale-reward": {
+   "hash": "1cfca878e161",
+   "text": "Tiền khi hạ một con quái tăng theo đợt\nĐể thu nhập theo kịp giá nâng cấp tăng theo cấp; mức tăng chậm hơn sức quái (`feature-balance`). Đã loại: tiền mỗi con cố định."
+  }
+ }
 }

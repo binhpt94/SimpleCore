@@ -1,0 +1,21 @@
+{
+ "hash": "5fe05cebab72",
+ "items": {
+  "econ-kill-main": {
+   "hash": "0491643e0547",
+   "text": "Tiền hạ quái là nguồn chính, thưởng dọn sạch đợt là phần thêm nhỏ hơn\nTiền tới đều trong lúc đánh, hợp với nâng cấp mua mọi lúc. Đã loại: thưởng dọn đợt là nguồn chính (mua dồn cuối đợt, giống nâng cấp giữa hai đợt mà người đã loại)."
+  },
+  "econ-steady-buy": {
+   "hash": "57bb9072f36d",
+   "text": "Trong mỗi đợt người chơi thường đủ tiền mua ít nhất một nâng cấp\nLuôn có quyết định để làm trong trận. Đã loại: phải dành nhiều đợt mới mua được một lần."
+  },
+  "econ-never-all": {
+   "hash": "dbe24a8ddeb5",
+   "text": "Giá tăng theo cấp nhanh hơn thu tăng theo đợt, nên không bao giờ mua hết, phải chọn\nChọn hero nào, thành mục nào là quyết định chính trong trận. Đã loại: thu đủ để nâng đều mọi mục."
+  },
+  "econ-no-best": {
+   "hash": "ae649053561c",
+   "text": "Không có mục nâng cấp nào luôn lời nhất; giá rẻ ở cấp thấp kéo người chơi rải đều\nĐã loại: một mục luôn đáng mua nhất (người chơi chỉ bấm một nút)."
+  }
+ }
+}

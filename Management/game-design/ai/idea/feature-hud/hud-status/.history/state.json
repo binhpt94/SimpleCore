@@ -1,0 +1,21 @@
+{
+ "hash": "5e6dc1e8532e",
+ "items": {
+  "status-castle-hp": {
+   "hash": "5f79ac47c7e2",
+   "text": "Máu thành hiện bằng một thanh máu: phần còn lại so với lúc đầy\nLiếc là biết an toàn hay sắp nguy. Thanh ngắn lại khi thành mất máu. Đã loại: chỉ hiện con số (khó đọc nhanh)."
+  },
+  "status-money": {
+   "hash": "899e66cb2940",
+   "text": "Số tiền hiện bằng một con số kèm biểu tượng tiền, đổi ngay khi nhận hay tiêu\nĐể người chơi biết mua được gì; trạng thái từng nút mua là việc của `feature-hud-upgrade`."
+  },
+  "status-wave": {
+   "hash": "dec85e953e39",
+   "text": "HUD hiện số thứ tự của đợt đang đánh\nĐợt đang đánh là đợt thứ mấy trong lượt, lấy từ `feature-wave`. Khác với điểm (số đợt đã dọn, `feature-run/run-score`). Đã loại: hiện điểm thay số đợt (người chơi quen nhìn \"đợt mấy\")."
+  },
+  "status-read-only": {
+   "hash": "35f6921e9cd6",
+   "text": "Mọi thông tin HUD đọc từ feature chủ của nó và đổi ngay khi feature đó đổi\nMáu từ `feature-castle`, tiền từ `feature-wallet`, đợt từ `feature-wave`. HUD không giữ hay tính số nào."
+  }
+ }
+}

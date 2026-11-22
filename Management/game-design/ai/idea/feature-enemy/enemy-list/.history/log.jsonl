@@ -1,0 +1,2 @@
+{"at": "2026-11-23 02:21:08", "event": "data", "hash": "10b291cde6dc", "previous": "", "added": ["enemy-roster", "enemy-soldier", "enemy-wolf", "enemy-giant", "enemy-archer", "enemy-boss"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 02:26:33", "event": "promote", "by": "người", "hash": "10b291cde6dc"}

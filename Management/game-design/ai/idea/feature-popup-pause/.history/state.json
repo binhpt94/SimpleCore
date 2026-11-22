@@ -1,0 +1,13 @@
+{
+ "hash": "27ce83b88e6d",
+ "items": {
+  "pause-freeze": {
+   "hash": "5139a535906c",
+   "text": "Khi popup tạm dừng mở, trận đứng yên hoàn toàn"
+  },
+  "pause-actions": {
+   "hash": "548f99855f79",
+   "text": "Popup tạm dừng cho tiếp tục trận hoặc bỏ lượt về màn bắt đầu\nBỏ lượt thì không tính kỉ lục cho đợt đang đánh dở."
+  }
+ }
+}

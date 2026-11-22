@@ -1,0 +1,21 @@
+{
+ "hash": "7294a54c79df",
+ "items": {
+  "hero-level-item": {
+   "hash": "48a545a39719",
+   "text": "Mỗi hero trong đội có đúng một mục \"cấp hero\"\nÍt nút, dễ hiểu với người chơi phổ thông. Đã loại: mỗi chỉ số của hero một mục."
+  },
+  "castle-items": {
+   "hash": "e12d52d32c81",
+   "text": "Thành có đúng ba mục: máu, sức đánh, kĩ năng\nKhớp với `feature-castle` (`castle-upgrades`). Đã loại: gộp thành một mục \"cấp thành\" (mất lựa chọn giữa giữ thành và đánh mạnh)."
+  },
+  "list-fixed": {
+   "hash": "90b6b9dc17a2",
+   "text": "Danh sách mục cố định trong lượt, theo đội đã chọn\nĐội có bao nhiêu hero thì có bấy nhiêu mục hero, cộng ba mục thành. Không có mục mới xuất hiện giữa trận. Đã loại (vòng 2): bốc thẻ ngẫu nhiên."
+  },
+  "item-level": {
+   "hash": "e2cfcd5f7a9c",
+   "text": "Mỗi mục có một cấp riêng, vào lượt ở cấp thấp nhất, mỗi lần mua tăng một cấp\nCấp của các mục độc lập với nhau. Đã loại: một cấp chung cho cả đội."
+  }
+ }
+}

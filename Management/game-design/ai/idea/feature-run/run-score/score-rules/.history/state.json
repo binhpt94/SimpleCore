@@ -1,0 +1,29 @@
+{
+ "hash": "54a8417a7ccd",
+ "items": {
+  "score-start-zero": {
+   "hash": "18bd686f6336",
+   "text": "Đầu lượt điểm bằng 0; mỗi lần `feature-wave` báo dọn sạch một đợt thì điểm cộng 1\nDọn sạch đợt 1 thì điểm 1; thua giữa đợt 4 thì điểm 3."
+  },
+  "score-lock-once": {
+   "hash": "e82b9756e080",
+   "text": "Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thua hoặc đồng ý bỏ lượt)\nSau khi chốt, báo dọn sạch tới muộn không làm đổi điểm."
+  },
+  "record-update": {
+   "hash": "ee245bca5cf7",
+   "text": "Chốt điểm xong: điểm lớn hơn kỉ lục thì kỉ lục bằng điểm và cờ \"kỉ lục mới\" bật\nBằng hoặc nhỏ hơn thì kỉ lục giữ nguyên, cờ tắt. Điểm 0 không bao giờ bật cờ."
+  },
+  "record-default-zero": {
+   "hash": "8862664f3c2d",
+   "text": "Chưa có kỉ lục lưu trên máy thì kỉ lục là 0\nLần mở game đầu tiên, hoặc dữ liệu lưu đọc không được, đều coi là 0."
+  },
+  "record-save-now": {
+   "hash": "403c316e6e09",
+   "text": "Kỉ lục mới được ghi xuống máy ngay khi đổi, trước khi popup thua hiện\nTắt game ngay trên popup thua vẫn giữ kỉ lục mới."
+  },
+  "record-read-anytime": {
+   "hash": "cde7c9dfa319",
+   "text": "Điểm, kỉ lục và cờ kỉ lục mới đọc được bất cứ lúc nào, không cần chờ\n`feature-home` đọc kỉ lục; `feature-popup-lose` đọc cả ba."
+  }
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "hash": "38dc08b97bc3",
+ "items": {
+  "pressure-formula": {
+   "hash": "5e9882f53397",
+   "text": "Áp lực P của đợt = tổng máu quái ÷ (sát thương mỗi giây của đội × thời gian thả đợt tính bằng giây)\nP dưới 1: đội hạ kịp nhịp thả. P từ 1 tới 2: quái dồn lại, thành bắt đầu mất máu. P từ 2.5 trở lên trong vài đợt liền: thành không trụ được."
+  },
+  "team-dps": {
+   "hash": "c0982b196af2",
+   "text": "Sát thương mỗi giây của đội = tổng của 3 hero (đòn vùng tính trúng 2 con) + đòn tự bắn + Sấm sét chia 20 giây\nSấm sét tính trúng 4 con ở đợt 1–5, 5 con ở đợt 6–15, 6 con từ đợt 16. Hero cấp L nhân (1 + 0.15×(L−1)) × (1 + 0.03×(L−1))."
+  },
+  "early-easy-check": {
+   "hash": "d1e58b09b876",
+   "text": "Đợt 1–9 có P dưới 1.1 (đợt 1: 0.6, đợt 5: 0.9, đợt 9: 1.1)\nKhớp luật \"các đợt đầu trụ được mà chưa cần nâng cấp nhiều\"."
+  },
+  "mid-pressure": {
+   "hash": "f1635a28f6c1",
+   "text": "Từ đợt 11 tới đợt 15, P tăng từ khoảng 1.5 lên khoảng 2.5, thành mất máu đều mỗi đợt\nNhịp thả chạm sàn 0.3 s ở đợt 15 làm quái dồn nhanh hơn."
+  },
+  "normal-break": {
+   "hash": "3ba6bbc13e3c",
+   "text": "Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–9 phút\nĐợt 20 (Trùm, P khoảng 2.9) gần như chắc gãy với cách chơi này."
+  },
+  "skill-gap": {
+   "hash": "e1e987e62a0f",
+   "text": "Chơi vụng gãy ở khoảng đợt 10 (Trùm đầu tiên), chơi khéo kéo tới khoảng đợt 20–25\nKhác nhau ở: đội có hero hợp loại quái, Sấm sét bắn lúc quái dồn đông, Băng giá dùng khi Trùm tới, không để tiền nằm yên."
+  }
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "hash": "6f1909d90f98",
+ "items": {
+  "score-def": {
+   "hash": "fc3ad70594ba",
+   "text": "Điểm của lượt bằng số đợt đã dọn sạch; đợt đang đánh dở không tính\nMỗi lần `feature-wave` báo dọn sạch một đợt thì điểm tăng một bậc. Đã loại: điểm theo số quái hạ, điểm theo thời gian trụ."
+  },
+  "score-final": {
+   "hash": "d15dc17af8be",
+   "text": "Điểm được chốt lúc lượt kết thúc, dù thua hay bỏ lượt\nHai cách kết thúc tính điểm giống nhau. Đã loại: bỏ lượt thì mất điểm."
+  },
+  "record-def": {
+   "hash": "57fcbd5d552e",
+   "text": "Kỉ lục là điểm cao nhất trong mọi lượt đã chơi\nChốt điểm xong, điểm lớn hơn kỉ lục cũ thì điểm đó thành kỉ lục mới; bằng hoặc thấp hơn thì kỉ lục giữ nguyên."
+  },
+  "record-save": {
+   "hash": "14003271b383",
+   "text": "Kỉ lục được lưu lại, tắt game mở lại vẫn còn\nĐây là thứ duy nhất lưu khi tắt game. Đã loại: chỉ nhớ trong lúc game đang mở."
+  },
+  "record-new-flag": {
+   "hash": "443c587fcb4a",
+   "text": "Lượt vừa kết thúc biết mình có phá kỉ lục hay không\nCờ \"phá kỉ lục\" để `feature-popup-lose` báo cho người chơi."
+  }
+ }
+}

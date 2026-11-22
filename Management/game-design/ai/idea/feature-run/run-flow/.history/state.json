@@ -1,0 +1,25 @@
+{
+ "hash": "db634f5dac0b",
+ "items": {
+  "flow-order": {
+   "hash": "9173492f94d3",
+   "text": "Một lượt đi đúng một đường: màn bắt đầu, màn chọn đội, trận, popup thua\nMở game là tới màn bắt đầu (`feature-home`); bấm chơi sang màn chọn đội (`feature-team-select`); đủ đội bấm vào trận; thua thì hiện popup thua (`feature-popup-lose`). Không có lối tắt bỏ qua màn chọn đội. Đã loại: vào thẳng trận khi bấm chơi."
+  },
+  "flow-end-trigger": {
+   "hash": "92fc2bdb51c9",
+   "text": "Lượt kết thúc khi thành báo bị phá; lúc đó cả trận dừng lại\nChỉ `feature-castle` báo thua; feature này nhận báo, dừng trận (quái thôi tới, hero và quái thôi đánh, không mua nâng cấp, không bấm kĩ năng) rồi mới hiện popup thua. Đã loại: trận vẫn chạy phía sau popup thua."
+  },
+  "flow-after-lose": {
+   "hash": "61357c8c9420",
+   "text": "Từ popup thua có hai lối: chơi lại về màn chọn đội, hoặc về màn bắt đầu\nChơi lại không đi qua màn bắt đầu. Đã loại: chơi lại vào thẳng trận với đội cũ (người chơi mất dịp đổi đội)."
+  },
+  "flow-quit": {
+   "hash": "d027f9a0185f",
+   "text": "Bỏ lượt từ popup tạm dừng về thẳng màn bắt đầu\nBỏ lượt kết thúc lượt giống như thua về mặt điểm (`feature-run/run-score`), nhưng không hiện popup thua. Đã loại: bỏ lượt rồi hiện popup thua (người chơi đã chủ động rời, xem kết quả là thừa)."
+  },
+  "flow-scenes": {
+   "hash": "9f64ce7021dc",
+   "text": "Mở game qua scene Loading rồi vào màn bắt đầu; màn bắt đầu, chọn đội, trận và hai popup đều trong scene Game\nChuyển màn là đổi trong scene Game, không chuyển scene; chơi lại không tải lại scene. Lượt mới vẫn sạch vì trận được dựng mới và huỷ hết mỗi lần. Theo `feature-scene-flow/scene-list`. Đã loại: scene menu và scene trận riêng (thêm chờ tải giữa các lượt); mỗi màn một scene."
+  }
+ }
+}

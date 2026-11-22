@@ -1,0 +1,25 @@
+{
+ "hash": "2748621645f8",
+ "items": {
+  "shared-stats": {
+   "hash": "df69b9b370d5",
+   "text": "Cả game dùng chung năm chỉ số: máu, sức đánh, tốc độ đánh, tầm đánh, tốc độ di chuyển\nHero, quái và thành cùng một bộ từ nên so sánh được với nhau. Thành không có tốc độ di chuyển. Đã loại: thêm giáp, chí mạng, né (khó đọc với người chơi phổ thông)."
+  },
+  "stat-damage": {
+   "hash": "b6135cddb1c5",
+   "text": "Một đòn trúng thì trừ máu mục tiêu đúng bằng sức đánh của bên đánh\nKhông có giáp hay giảm sát thương. Đã loại: công thức giáp trừ sát thương."
+  },
+  "hero-stats-differ": {
+   "hash": "d6bbecdbcc01",
+   "text": "Mỗi hero có bộ giá trị chỉ số riêng, hợp với cách đánh của nó\nVí dụ hero cận chiến máu nhiều, tầm ngắn; hero bắn xa máu ít, tầm xa. Danh sách hero ở `feature-hero/hero-list`."
+  },
+  "hero-level": {
+   "hash": "5673138fb122",
+   "text": "Mỗi hero trong đội có một cấp; lên cấp thì mọi chỉ số chiến đấu của hero đó tăng\nMột mục \"cấp hero\" cho mỗi hero, ít nút. Tốc độ di chuyển không tăng để đội hình không đổi dáng. Đã loại: nâng từng chỉ số riêng (nhiều nút), nâng theo loại hero."
+  },
+  "hero-level-kept": {
+   "hash": "73186052b854",
+   "text": "Cấp hero giữ suốt lượt chơi, kể cả khi hero gục\nGục không mất cấp (`feature-hero/hero-respawn`). Lượt mới thì về cấp ban đầu do `feature-run`."
+  }
+ }
+}

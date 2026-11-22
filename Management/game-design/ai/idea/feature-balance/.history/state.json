@@ -1,0 +1,17 @@
+{
+ "hash": "700960590953",
+ "items": {
+  "balance-curve": {
+   "hash": "143b7efda083",
+   "text": "Quái mạnh lên nhanh hơn sức mạnh mua được, nên lượt nào rồi cũng thua\nChơi vô tận cần một điểm gãy; người chơi giỏi chọn đội và chi tiền khéo thì gãy muộn hơn."
+  },
+  "balance-tunable": {
+   "hash": "964a7ea76984",
+   "text": "Chỉnh được số liệu mà không sửa code\nMỗi feature giữ số của mình trong cấu hình riêng; feature này quyết các số đó cùng nhau."
+  },
+  "balance-team-fair": {
+   "hash": "8de97bdf2678",
+   "text": "Không có đội hero nào luôn thắng mọi đội khác\nĐể màn chọn đội thật sự là một lựa chọn."
+  }
+ }
+}

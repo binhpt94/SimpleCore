@@ -1,0 +1,25 @@
+{
+ "hash": "e1440a2a0de0",
+ "items": {
+  "castle-one": {
+   "hash": "3c6e72fadca2",
+   "text": "Mỗi trận có đúng một thành, đứng yên giữa dải đất, hai bên là chiến trường\nThành chia dải đất thành bên trái và bên phải. Đã loại: thành di chuyển được, nhiều thành."
+  },
+  "castle-hp": {
+   "hash": "518738b99708",
+   "text": "Thành có máu; quái tới thành thì đánh trừ máu thành\nMáu là thước đo duy nhất cho biết thành đang an toàn hay sắp nguy. Chỉ quái làm mất máu thành."
+  },
+  "castle-no-regen": {
+   "hash": "4ed33919b646",
+   "text": "Máu thành không tự hồi trong trận\nMáu mất ở đợt trước kéo áp lực sang đợt sau; không có lúc nghỉ nào đầy máu lại. Cách duy nhất có thêm máu là nâng cấp máu (`feature-castle/castle-upgrade-effects`). Đã loại: tự hồi chậm theo thời gian, hồi đầy khi dọn sạch đợt."
+  },
+  "castle-destroyed": {
+   "hash": "9348ee8ae490",
+   "text": "Máu thành về 0 thì thành bị phá, lượt chơi thua ngay\nThành báo \"bị phá\" cho `feature-run`; mọi việc sau đó (dừng trận, báo thua) là của `feature-run`."
+  },
+  "castle-hero-base": {
+   "hash": "2369819f4b42",
+   "text": "Thành là điểm xuất phát của đội hero khi vào trận và là nơi hero hồi sinh\nHero sinh ra ngay tại thành rồi tự đi ra hai bên. Thành chỉ là vị trí; luật gục và hồi sinh nằm ở `feature-hero/hero-respawn`. Đã loại: hero hồi sinh tại chỗ gục."
+  }
+ }
+}

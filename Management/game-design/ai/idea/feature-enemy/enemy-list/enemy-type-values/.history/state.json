@@ -1,0 +1,21 @@
+{
+ "hash": "a91bdaba8708",
+ "items": {
+  "type-boxes": {
+   "hash": "2eb98ab3fb39",
+   "text": "Hộp quái (rộng×cao, u): Lính 1×1.2, Sói 1.2×0.8, Khổng lồ 2×2.5, Cung thủ quái 1×1.2, Trùm 3×3.5\nKích thước nói lên vai: Sói thấp dài, Khổng lồ và Trùm to hơn hẳn hero (1×1.5u). Mọi quái chân trên mặt đất y=0."
+  },
+  "type-first-wave": {
+   "hash": "6a21872d7982",
+   "text": "Đợt đầu có mặt: Lính đợt 1, Sói đợt 3, Khổng lồ đợt 5, Cung thủ quái đợt 7, Trùm đợt 10, 20, 30...\nMỗi 2 đợt có một loại mới tới đợt 7, người chơi thấy trận thay đổi. Tỉ lệ từng loại trong đợt là việc của `feature-wave`."
+  },
+  "type-melee-ranged": {
+   "hash": "6b80d97985a7",
+   "text": "Bốn loại cận chiến tầm 1.0-1.5u; Cung thủ quái bắn xa tầm 5u, hình đạn bay 0.15s\nCung thủ quái là quái duy nhất đánh được hero và thành từ ngoài tầm hero cận chiến. Sát thương tức thì như mọi đòn xa (`feature-hero/hero-stats/hero-level-values`)."
+  },
+  "boss-single": {
+   "hash": "3fc99fc570d1",
+   "text": "Trùm: mỗi đợt có Trùm thì có đúng 1 con, ra cuối đợt, không có đòn riêng\nRa cuối để là đỉnh căng thẳng của đợt. Luật đi và đánh như mọi quái (`feature-enemy/enemy-behavior`)."
+  }
+ }
+}

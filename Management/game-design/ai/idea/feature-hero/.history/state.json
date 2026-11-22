@@ -1,29 +1,25 @@
 {
- "hash": "38906eccad9b",
+ "hash": "c5b904d13f66",
  "items": {
-  "hero-roster": {
-   "hash": "93300a34483b",
-   "text": "Có một danh sách hero, mỗi hero có tên, cách đánh và chỉ số riêng (máu, sức đánh, tốc độ đánh, tầm đánh, tốc độ chạy). Bản đầu dự kiến 6 hero, mở sẵn hết."
-  },
-  "team-select": {
-   "hash": "ebcd7f79aa93",
-   "text": "Trước mỗi lượt chơi có màn chọn đội: chọn đúng số hero cố định (dự kiến 4) từ danh sách, mỗi hero một lần. Đủ người mới bấm vào trận được."
+  "hero-auto-combat": {
+   "hash": "a06ca8a02eac",
+   "text": "Hero tự đánh quái để giữ thành, người chơi không điều khiển hero\nĐã loại: kéo thả hero, chọn mục tiêu."
   },
   "hero-roles": {
-   "hash": "74efd01d49c0",
-   "text": "Hero chia theo cách đánh, ít nhất có cận chiến (máu cao, tầm ngắn, chắn quái) và bắn xa (máu thấp, tầm xa, đứng sau)."
+   "hash": "ebf16ca3cb39",
+   "text": "Mỗi hero có một cách đánh riêng\nVí dụ cận chiến đứng trước chắn quái, bắn xa đứng sau. Cách ghép đội là lựa chọn chính trước trận."
   },
-  "hero-auto-combat": {
-   "hash": "14f5d50f28cb",
-   "text": "Hero tự tìm quái gần nhất, chạy tới trong tầm và đánh; hết quái thì về đứng gần thành. Người chơi không điều khiển hero."
+  "hero-roster": {
+   "hash": "b5a5bcaadef7",
+   "text": "Có nhiều hero hơn số chỗ trong đội, mọi hero dùng được ngay\nKhông mở khoá, vì game không có tiến trình lâu dài. Đã loại: mở khoá dần."
   },
   "hero-respawn": {
-   "hash": "26900e17e657",
-   "text": "Hero hết máu thì gục, biến mất khỏi trận, rồi hồi sinh ở thành sau một khoảng thời gian chờ; trong lúc chờ có hiện thời gian còn lại."
+   "hash": "e8303e25d26b",
+   "text": "Hero gục thì sau một lúc hồi sinh ở thành\nGục không mất nâng cấp đã mua. Đã loại: chết hẳn tới hết lượt."
   },
   "hero-upgrade": {
-   "hash": "31ddcfc0ec50",
-   "text": "Mỗi hero trong đội có cấp riêng trong lượt chơi; lên cấp thì mọi chỉ số tăng. Cấp giữ nguyên khi hero gục và hồi sinh."
+   "hash": "bdcdb3ab0c7c",
+   "text": "Mỗi hero trong đội mạnh lên riêng qua nâng cấp trong lượt\nMua qua `feature-upgrade`. Đã loại: nâng theo loại hero."
   }
  }
 }

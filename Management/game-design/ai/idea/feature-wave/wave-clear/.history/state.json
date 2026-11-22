@@ -1,4 +1,21 @@
 {
- "hash": "ea8d1b1e1923",
- "items": {}
+ "hash": "b7789c127bb4",
+ "items": {
+  "clear-condition": {
+   "hash": "d8452ca44b62",
+   "text": "Đợt được dọn sạch khi quái của đợt đã ra hết và không còn con nào sống\nQuái bị hạ bằng hero hay bằng thành đều tính. Đã loại: hết giờ của đợt là xong (quái sót lại làm rối ranh giới đợt)."
+  },
+  "clear-reward": {
+   "hash": "98849777f867",
+   "text": "Dọn sạch đợt thì được một khoản tiền thưởng, đợt càng sau thưởng càng nhiều\nTiền vào `feature-wallet`. Thưởng không phụ thuộc máu thành còn lại. Đã loại: thưởng thêm khi thành không mất máu (phạt thêm người đang yếu)."
+  },
+  "clear-score": {
+   "hash": "d0b0eb7459c5",
+   "text": "Mỗi đợt dọn sạch làm điểm của lượt tăng một\nĐiểm và kỉ lục giữ ở `feature-run`; node này chỉ báo \"đã dọn sạch đợt\". Đã loại: điểm theo số quái hạ."
+  },
+  "clear-next": {
+   "hash": "688440d9d20a",
+   "text": "Dọn sạch đợt thì chuyển sang lúc thở, rồi tới đợt kế tiếp\nLúc thở là `feature-wave/wave-gap`. Đã loại: chuyển sang màn nghỉ để nâng cấp (người đã loại ở vòng 1)."
+  }
+ }
 }

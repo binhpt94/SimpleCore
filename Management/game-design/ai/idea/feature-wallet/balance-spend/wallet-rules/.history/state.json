@@ -1,0 +1,33 @@
+{
+ "hash": "1367fdb78322",
+ "items": {
+  "start-50": {
+   "hash": "cd4ce6bf1db6",
+   "text": "Đầu mỗi lượt số dư là 50 tiền\nĐủ mua ngay một cấp hero (giá 30) nhưng chưa đủ mua thêm một mục thành (giá 40), nên lựa chọn đầu tiên đã có ý nghĩa."
+  },
+  "integer-non-negative": {
+   "hash": "bc43a11ff38c",
+   "text": "Số dư là số nguyên từ 0 tiền trở lên, không có phần lẻ\nMọi khoản cộng và mọi giá đều là số nguyên."
+  },
+  "spend-equal-ok": {
+   "hash": "fffce6ae8b3a",
+   "text": "Số dư bằng đúng giá thì trừ được, số dư về 0 tiền\nĐiều kiện trừ là số dư lớn hơn hoặc bằng giá."
+  },
+  "one-at-a-time": {
+   "hash": "ef795595aa09",
+   "text": "Mỗi yêu cầu trừ được xử lí xong mới tới yêu cầu sau, nên hai lần trừ liền nhau không bao giờ làm số dư dưới 0 tiền\nVí dụ số dư 50, hai yêu cầu trừ 30 tới gần như cùng lúc: lần đầu được (còn 20), lần sau \"không đủ\"."
+  },
+  "reject-bad-amount": {
+   "hash": "5981abd042a4",
+   "text": "Cộng 0 tiền thì bỏ qua; cộng hay trừ một số âm là lỗi và bị từ chối, số dư giữ nguyên\nLỗi được ghi ra log để phiên code thấy, không làm dừng trận."
+  },
+  "notify-on-change": {
+   "hash": "8eefd897be05",
+   "text": "Ví báo số dư mới ngay trong khung hình số dư đổi, và luôn báo một lần khi đặt lại về 50 tiền\nSố dư không đổi (cộng 0, trừ bị từ chối) thì không báo."
+  },
+  "cap-max": {
+   "hash": "87bb0e190c7a",
+   "text": "Số dư không vượt quá 999.999.999 tiền; cộng vượt thì dừng ở mức đó\nTrong chơi thường không chạm tới; chỉ để tránh tràn số."
+  }
+ }
+}

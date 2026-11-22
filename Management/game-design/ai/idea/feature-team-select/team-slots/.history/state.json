@@ -1,0 +1,25 @@
+{
+ "hash": "c34032308bdd",
+ "items": {
+  "slots-fixed": {
+   "hash": "eb1ea5696f22",
+   "text": "Đội có số chỗ cố định, ít hơn số hero trong danh sách\nPhải bỏ lại một số hero mỗi lượt, đó là quyết định trước trận. Số chỗ do `feature-balance` chỉnh. Đã loại: đội lớn tuỳ ý."
+  },
+  "slots-unique": {
+   "hash": "62c112118cde",
+   "text": "Mỗi hero chỉ vào đội một lần, không chọn trùng\nĐội khác nhau là ghép cách đánh khác nhau; chọn trùng làm mất ý nghĩa danh sách. Đã loại: chọn trùng một hero nhiều lần."
+  },
+  "slots-toggle": {
+   "hash": "52fc499d6194",
+   "text": "Chạm hero trong danh sách để đưa vào chỗ trống; chạm hero trong đội để bỏ ra\nMột chạm cho mỗi việc, hợp điện thoại. Đã loại: kéo thả vào từng chỗ."
+  },
+  "slots-full-to-start": {
+   "hash": "f2de1b172c3c",
+   "text": "Nút vào trận chỉ bấm được khi mọi chỗ trong đội đã có hero\nĐã loại: vào trận với đội thiếu người."
+  },
+  "slots-order-free": {
+   "hash": "76dc0dc84739",
+   "text": "Thứ tự hero trong đội không ảnh hưởng trận\nHero tự đánh theo cách đánh của mình (`feature-hero`); chỗ nào trong đội cũng như nhau. Đã loại: chỗ trước, chỗ sau quyết định vị trí đứng."
+  }
+ }
+}

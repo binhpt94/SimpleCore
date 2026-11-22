@@ -1,0 +1,2 @@
+{"at": "2026-11-23 02:21:08", "event": "data", "hash": "dda5759077eb", "previous": "", "added": ["skill-one-button-each", "skill-two-states", "skill-cooldown-show", "skill-ready-cue", "skill-hud-only-relays"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 02:27:28", "event": "promote", "by": "người", "hash": "dda5759077eb"}

@@ -1,41 +1,41 @@
 # Thả quái
 
-Dữ liệu cốt lõi (tóm tắt và các ý có điểm): [data.md](data.md)
+Dữ liệu cốt lõi: [data.md](data.md)
 
-## Người chơi làm gì
-- Không làm gì: quái tự ra. Người chơi chỉ quan sát và có thể tạm dừng.
+## Quan hệ
+- Một lượt có nhiều đợt nối tiếp; mỗi lúc chỉ có MỘT đợt đang đánh.
+- Một đợt có NHIỀU quái, thuộc MỘT hay NHIỀU loại quái.
+- Mỗi con quái ra ở MỘT bên (trái hoặc phải), vào MỘT dải đất duy nhất (một làn).
+- Danh sách quái của đợt (bao nhiêu con, loại nào) lấy từ `feature-wave/difficulty-scaling`; loại quái và chỉ số gốc của nó là của `feature-enemy`.
+- Node này chỉ đưa quái vào trận; quái ra rồi thì đi, đánh, bị hạ theo luật của `feature-enemy`.
 
-## Người chơi thấy gì
-- Đầu đợt: chữ "Đợt N" hiện giữa màn hình một lúc rồi mờ đi; sau đó quái mới bắt đầu ra.
-- Quái xuất hiện ở mép trái và mép phải, đi vào phía thành.
-- Góc màn hình hiện số đợt hiện tại và số quái còn lại của đợt (gồm cả quái chưa ra).
+## Định nghĩa
+- **Đợt**: một danh sách quái ra trong một khoảng của trận; đợt đang đánh là đợt có quái đang ra hoặc còn sống.
+- **Bên ra**: mép trái hoặc mép phải của dải đất.
+- **Lúc ra**: thời điểm con quái xuất hiện, tính từ đầu đợt.
+- **Đã ra hết**: mọi con trong danh sách của đợt đã xuất hiện trong trận.
+- **Nhịp thả**: khoảng cách giữa hai lần ra quái liên tiếp.
 
-## Luật
-- Quái ra từng con một, cách nhau một khoảng thời gian gọi là khoảng thả.
-- Chia hai bên: mỗi bên một nửa số quái của đợt; số lẻ thì con dư ra bên ngẫu nhiên.
-- Thứ tự bên ra ngẫu nhiên, nhưng không quá 3 con liên tiếp cùng một bên (để không bên nào trống quá lâu).
-- Thứ tự loại quái trong đợt được xáo ngẫu nhiên.
-- Quái ra ở mép màn hình, vị trí dọc lệch ngẫu nhiên một chút trong dải mặt đất để không chồng hình lên nhau.
-- Số quái còn sống trên màn hình có giới hạn. Đủ giới hạn thì tạm hoãn thả, có con chết thì thả tiếp.
-- Khoảng thả ngắn dần theo đợt, có mức thấp nhất.
+## Danh sách
+Mỗi mục trong danh sách đợt gồm:
+- Loại quái (một loại trong danh sách của `feature-enemy`).
+- Bên ra: trái hoặc phải.
+- Lúc ra.
 
-## Trường hợp biên
-- Tạm dừng: ngừng đếm thời gian thả, tiếp tục đúng chỗ khi bỏ tạm dừng.
-- Thành hết máu giữa lúc thả: dừng thả ngay, quái chưa ra thì bỏ.
-- Đợt chỉ có 1 quái: ra ở bên ngẫu nhiên.
-- Hết giới hạn quái trên màn hình kéo dài: đồng hồ thả đứng chờ, không dồn quái ra một lúc khi có chỗ.
-
-## Con số dự kiến
-- Thời gian hiện chữ "Đợt N": 1.5 giây. Đủ đọc, không làm chậm nhịp.
-- Khoảng thả đợt 1: 1.0 giây; mỗi đợt ngắn đi 0.05 giây; thấp nhất 0.3 giây (đạt ở đợt 15). Đợt sau dồn dập hơn nhưng vẫn kịp nhìn từng con.
-- Giới hạn quái còn sống cùng lúc: 40 con. Giữ màn hình điện thoại còn đọc được và máy không bị nặng.
-- Giới hạn liên tiếp cùng bên: 3 con.
+## Luật cơ bản
+- Đầu đợt, danh sách quái được lập theo số đợt; rồi thứ tự và bên ra được xáo.
+- Mỗi bên đều có quái; số quái hai bên gần bằng nhau.
+- Quái ra lần lượt theo nhịp thả, cho tới khi đã ra hết.
+- Đợt sau có nhịp thả dày hơn đợt trước (mức dày hơn bao nhiêu là của `feature-wave/difficulty-scaling` và `feature-balance`).
+- Quái mới ra mang chỉ số theo đợt đang đánh.
+- Lượt chơi kết thúc (`feature-run`) thì ngừng thả.
 
 ## Đã tự quyết
-- **Thả từng con theo nhịp đều, không thả theo cụm.** Dễ đọc, dễ cân bằng. Đã loại: cụm 5 con một lúc (có thể thêm sau như biến thể đợt).
-- **Chia đều hai bên.** Người chơi không phải đoán bên nào nguy hơn; hero cũng được thành chia đều hai bên (`feature-castle`). Đã loại: lệch bên theo đợt.
-- **Có giới hạn quái trên màn hình.** Vì đợt muộn có thể rất đông. Đã loại: không giới hạn.
-- **Một dải mặt đất, không chia làn.** Hợp với "quái đi thẳng về phía thành" ở `feature-enemy`. Đã loại: nhiều làn trên dưới.
+- **Đợt là danh sách lập sẵn đầu đợt.** Nhờ vậy biết chắc khi nào "đã ra hết" để `feature-wave/wave-clear` xét dọn sạch. Đã loại: thả liên tục theo đồng hồ.
+- **Chia gần đều hai bên.** Giữ cảm giác bị kẹp, và kĩ năng thành, hero không bị lệch về một bên. Đã loại: lệch bên theo đợt.
+- **Thả từng con theo nhịp.** Dễ đọc trên màn hình thấp. Đã loại: cụm lớn một lúc.
+- **Ngẫu nhiên chỉ ở thứ tự và bên ra.** Độ khó của một đợt luôn như nhau, cân bằng được. Đã loại: số quái dao động.
+- **Viết lại theo luật vòng 3 mới (2026-11-23).** Bỏ mọi con số (khoảng thả, giới hạn quái trên màn, số con liên tiếp cùng bên), bỏ trường hợp biên (tạm dừng, đợt một con, đủ giới hạn), bỏ chữ "Đợt N" giữa màn hình (hiển thị là của `feature-hud`).
 
 ## Chưa rõ
-- Không có điểm chặn.
+- Có giới hạn số quái còn sống cùng lúc trên màn hình hay không: để vòng 4 cùng thông số.

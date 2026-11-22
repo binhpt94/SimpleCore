@@ -1,0 +1,29 @@
+{
+ "hash": "10b291cde6dc",
+ "items": {
+  "enemy-roster": {
+   "hash": "59442c3b7b48",
+   "text": "Năm loại quái: Lính, Sói, Khổng lồ, Cung thủ quái, Trùm\nMỗi loại một kiểu áp lực khác nhau. Đã loại: một loại quái chỉ tăng chỉ số (vòng 2), quái bay (cần thêm làn, trái với chiến trường một làn)."
+  },
+  "enemy-soldier": {
+   "hash": "82aa7cecaea5",
+   "text": "Lính: cận chiến, chỉ số trung bình, ra nhiều nhất\nLoại chuẩn để so các loại khác."
+  },
+  "enemy-wolf": {
+   "hash": "975612ac2fa3",
+   "text": "Sói: đi nhanh, máu ít, đánh yếu\nÉp hero phản ứng nhanh và lọt tới thành nếu đội dồn về bên kia."
+  },
+  "enemy-giant": {
+   "hash": "164177dc404f",
+   "text": "Khổng lồ: đi chậm, máu nhiều, đánh mạnh\nThử sức đánh của đội; hợp hero đánh một mục tiêu."
+  },
+  "enemy-archer": {
+   "hash": "7fda6ee42264",
+   "text": "Cung thủ quái: bắn xa, máu ít, đứng ngoài tầm hero cận chiến\nBuộc đội có hero bắn xa hoặc hero cận chiến đi nhanh. Đánh hero và thành từ xa."
+  },
+  "enemy-boss": {
+   "hash": "521b18f365b0",
+   "text": "Trùm: máu và sức đánh cao hơn hẳn mọi loại, đi chậm, ra ít\nTạo đỉnh căng thẳng trong đợt. Khi nào trùm ra là việc của `feature-wave`."
+  }
+ }
+}

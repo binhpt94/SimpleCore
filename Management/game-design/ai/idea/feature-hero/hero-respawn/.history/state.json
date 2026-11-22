@@ -1,0 +1,25 @@
+{
+ "hash": "2ae1008b33cd",
+ "items": {
+  "team-enter": {
+   "hash": "4aea5ac14ca3",
+   "text": "Vào trận cả đội sinh ra ở thành cùng một lúc\nĐội là đội đã chọn ở `feature-team-select`. Đã loại (người loại ở vòng 1): thành tự sinh hero theo thời gian."
+  },
+  "hero-down": {
+   "hash": "d54ad37a3d58",
+   "text": "Hero máu về 0 thì gục và rời chiến trường\nHero gục không đánh, không bị đánh, không chắn quái."
+  },
+  "respawn-wait": {
+   "hash": "eebb7a4028a2",
+   "text": "Hero gục chờ một khoảng thời gian rồi hồi sinh ở thành, đầy máu\nThời gian chờ như nhau với mọi hero và không đổi theo cấp. Đã loại: chờ lâu hơn khi cấp cao (phạt việc nâng hero), hồi sinh tại chỗ gục."
+  },
+  "respawn-keep-level": {
+   "hash": "d5b276908ac8",
+   "text": "Gục không mất cấp, không mất tiền\nPhạt của việc gục chỉ là đội thiếu người trong lúc chờ. Đã loại (vòng 2): mất cấp khi gục."
+  },
+  "no-self-heal": {
+   "hash": "671807456daa",
+   "text": "Hero không tự hồi máu trong trận; máu chỉ về đầy khi hồi sinh\nHero còn được hồi máu bằng kĩ năng Cổ vũ của thành (`feature-castle/castle-skills`). Đã loại: tự hồi theo thời gian, hồi đầy khi dọn sạch đợt."
+  }
+ }
+}

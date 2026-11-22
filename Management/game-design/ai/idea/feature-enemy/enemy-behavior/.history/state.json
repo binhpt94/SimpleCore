@@ -1,0 +1,25 @@
+{
+ "hash": "cf9290ce16e6",
+ "items": {
+  "walk-to-castle": {
+   "hash": "0bab857fb6eb",
+   "text": "Quái đi thẳng từ mép bên mình vào thành, không quay đầu\nMột làn, một hướng, người chơi đọc được ngay quái nào sắp tới thành. Đã loại: quái đi vòng, rút lui."
+  },
+  "stop-for-hero": {
+   "hash": "0378102bfe71",
+   "text": "Có hero trong tầm thì quái dừng lại đánh hero gần nhất\nCho hero cận chiến vai chắn quái. Hero hơn thành: có cả hero và thành trong tầm thì đánh hero. Đã loại (vòng 2): quái bỏ qua hero, chỉ nhắm thành."
+  },
+  "resume-walk": {
+   "hash": "f29f2af8e5f7",
+   "text": "Hero trong tầm bị hạ hoặc đi khỏi tầm thì quái đi tiếp vào thành\nQuái không đuổi theo hero đi ra xa."
+  },
+  "attack-castle": {
+   "hash": "28fa4510da16",
+   "text": "Tới thành thì quái đứng đánh thành tới khi bị hạ\nMỗi đòn trừ máu thành (`feature-castle/castle-core`). Quái không đi qua thành."
+  },
+  "enemy-no-block": {
+   "hash": "92bc2901e589",
+   "text": "Quái không chắn nhau, không đánh nhau, đi qua nhau được\nQuái dồn cụm tự nhiên khi bị hero chắn, hợp với đòn vùng của hero và kĩ năng thành."
+  }
+ }
+}

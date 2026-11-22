@@ -1,0 +1,21 @@
+{
+ "hash": "639d373f52f2",
+ "items": {
+  "castle-shoot-nearest": {
+   "hash": "5657ec8381ca",
+   "text": "Thành tự bắn quái gần thành nhất trong tầm, xét cả hai bên\nQuái gần thành nhất là quái nguy nhất. Đã loại: người chơi chạm vào quái để thành bắn; thành bắn luân phiên hai bên."
+  },
+  "castle-single-target": {
+   "hash": "f0fa017a0af8",
+   "text": "Mỗi phát bắn của thành trúng một quái\nĐòn đánh nhiều quái là việc của kĩ năng thành (`feature-castle/castle-skills`), để kĩ năng có giá trị riêng. Đã loại: đòn thường nổ vùng."
+  },
+  "castle-attack-stats": {
+   "hash": "750a79f1effc",
+   "text": "Đòn tự bắn có sức đánh, tốc độ đánh và tầm đánh; thành không di chuyển\nDùng chung định nghĩa chỉ số với hero và quái (`feature-hero/hero-stats`), để mọi thứ đọc được bằng một bộ từ."
+  },
+  "castle-short-range": {
+   "hash": "0405d0b65598",
+   "text": "Tầm bắn của thành ngắn hơn khoảng đất mỗi bên, quái ở xa là việc của hero\nThành là tuyến chặn cuối, đánh quái đã lọt qua hàng hero. Đã loại: thành bắn khắp chiến trường (hero mất vai trò)."
+  }
+ }
+}

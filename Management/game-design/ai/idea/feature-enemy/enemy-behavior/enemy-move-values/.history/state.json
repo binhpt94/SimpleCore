@@ -1,0 +1,25 @@
+{
+ "hash": "f5adc15dbc17",
+ "items": {
+  "spawn-walk": {
+   "hash": "e8f7fc8b599a",
+   "text": "Quái bên trái sinh ở x=-17u đi sang phải, bên phải sinh ở x=+17u đi sang trái, theo tốc độ của loại (0.6-3.0u/s)\nBên do `feature-wave` chọn. Lính 1.5u/s đi từ x=17u tới lúc chạm tầm thành (mép cách mép thành 1.0u) mất khoảng (17-0.5-1.5-1.0)/1.5 ≈ 9.3s."
+  },
+  "hero-first": {
+   "hash": "c4c361f379b9",
+   "text": "Có hero đang đứng trong tầm thì quái dừng lại đánh hero gần nhất, kể cả khi thành cũng trong tầm\nGiữ hero đó tới khi hero gục, hết trong tầm, hoặc rời trận; rồi xét lại. Hero trong 0.3s hồi sinh không tính."
+  },
+  "castle-stop": {
+   "hash": "bfdefee5a03c",
+   "text": "Khoảng cách tới mép thành ≤ tầm của quái thì quái đứng yên đánh thành, không đi thêm\nLính (tầm 1.0u) dừng với mép cách mép thành 1.0u; Cung thủ quái (tầm 5u) dừng cách 5u, tức tâm ở x=±7.0u, vẫn trong tầm tự bắn 6u của thành."
+  },
+  "slow-values": {
+   "hash": "9ce86d7e38a3",
+   "text": "Bị Băng giá: tốc độ đi ×0.5 và giây mỗi đòn ×2 trong suốt thời gian chậm, hết chậm thì trở lại ngay\nLần đánh đang chờ lúc trúng chậm: thời gian còn lại nhân 2; lúc hết chậm thì thời gian còn lại chia 2."
+  },
+  "enemy-feedback": {
+   "hash": "1f15c94667f4",
+   "text": "Quái đi thì nhún 0.1u mỗi 0.4s, ra đòn thì nhích 0.2u về phía mục tiêu trong 0.15s, bị đánh thì nháy 0.1s\nCùng bộ chuyển động với hero (`feature-hero/hero-list/hero-roster-values`) để mọi unit đọc giống nhau."
+  }
+ }
+}

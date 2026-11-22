@@ -1,0 +1,2 @@
+{"at": "2026-11-23 02:21:08", "event": "data", "hash": "5e6dc1e8532e", "previous": "", "added": ["status-castle-hp", "status-money", "status-wave", "status-read-only"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 02:27:29", "event": "promote", "by": "người", "hash": "5e6dc1e8532e"}

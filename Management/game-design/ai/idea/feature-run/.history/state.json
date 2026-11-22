@@ -1,29 +1,29 @@
 {
- "hash": "495ce1410fc8",
+ "hash": "d8a90fd4adc0",
  "items": {
   "run-flow": {
-   "hash": "78e2740bd3b4",
-   "text": "Thứ tự màn hình: màn bắt đầu (tên game, kỉ lục, nút chơi) → màn chọn đội (`feature-hero`) → trận → màn thua."
+   "hash": "33352ab07630",
+   "text": "Một lượt đi theo thứ tự: màn bắt đầu, chọn đội, trận, báo thua\nCác màn là `feature-home`, `feature-team-select`, trận, `feature-popup-lose`."
   },
   "run-reset": {
-   "hash": "ae90f975bcb8",
-   "text": "Bắt đầu lượt: máu thành, tiền, mọi cấp nâng cấp, số đợt đều về ban đầu; đội hero là đội vừa chọn."
+   "hash": "387f572906a4",
+   "text": "Mỗi lượt bắt đầu lại từ đầu: thành, tiền, nâng cấp, đợt đều về ban đầu"
   },
   "run-score": {
-   "hash": "8155c31e2747",
-   "text": "Điểm của lượt là số đợt đã dọn sạch; đợt đang đánh dở không tính."
+   "hash": "bc3c5ea98549",
+   "text": "Điểm của lượt là số đợt đã dọn sạch\nĐã loại: điểm theo số quái hạ."
   },
   "run-record": {
-   "hash": "8d9a92676671",
-   "text": "Kỉ lục là điểm cao nhất, lưu lại sau khi tắt game. Đây là thứ duy nhất giữ qua các lượt."
+   "hash": "015b15938d95",
+   "text": "Kỉ lục được giữ lại cả khi tắt game; đây là thứ duy nhất giữ qua các lượt"
   },
-  "run-lose-screen": {
-   "hash": "1287c3a8b68a",
-   "text": "Thành còn 0 máu: trận dừng, hiện màn thua với điểm lượt này, kỉ lục, nút chơi lại (về màn chọn đội) và nút về màn bắt đầu."
+  "run-replay": {
+   "hash": "ebd34d732319",
+   "text": "Chơi lại thì về màn chọn đội để đổi đội nếu muốn\nĐã loại: vào thẳng trận với đội cũ."
   },
   "run-pause": {
-   "hash": "a5bbfcc470a9",
-   "text": "Trong trận có nút tạm dừng: mọi thứ đứng yên, không bấm kĩ năng hay mua nâng cấp được cho tới khi tiếp tục."
+   "hash": "a1916f2070ae",
+   "text": "Người chơi tạm dừng được trận đang đánh\nChơi trên điện thoại hay bị ngắt. Popup là `feature-popup-pause`."
   }
  }
 }

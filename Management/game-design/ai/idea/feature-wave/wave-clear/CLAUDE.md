@@ -1,36 +1,36 @@
 # Dọn sạch đợt
 
-Dữ liệu cốt lõi (tóm tắt và các ý có điểm): [data.md](data.md)
+Dữ liệu cốt lõi: [data.md](data.md)
 
-## Người chơi làm gì
-- Không làm gì: tự xảy ra khi con quái cuối của đợt chết.
+## Quan hệ
+- MỘT đợt dọn sạch cho MỘT khoản thưởng và MỘT điểm.
+- Thưởng dọn đợt cộng thêm vào tiền hạ quái (`feature-enemy`); cả hai vào `feature-wallet`.
+- Điểm của lượt là số đợt dọn sạch, do `feature-run` giữ; node này chỉ báo.
+- Dọn sạch xong thì giao cho `feature-wave/wave-gap`.
+- Mức thưởng so với giá nâng cấp là của `feature-balance/balance-economy`.
 
-## Người chơi thấy gì
-- Chữ "Dọn sạch đợt N!" và số tiền thưởng "+X" bay về ô tiền.
-- Hero đang sống chạy về đứng quanh thành.
-- Sau một lúc thì màn nghỉ mở (`feature-wave/break-phase`).
+## Định nghĩa
+- **Dọn sạch đợt**: quái của đợt đã ra hết (`feature-wave/spawning`) và không còn con quái nào của đợt còn sống.
+- **Thưởng dọn đợt**: tiền nhận một lần khi dọn sạch một đợt, ngoài tiền hạ từng con quái.
+- **Số đợt đã dọn sạch**: số lần dọn sạch trong lượt; là điểm của lượt.
 
-## Luật
-- Đợt kết thúc khi cả hai điều cùng đúng: đã thả hết quái của đợt, và không còn quái nào sống.
-- Tiền rơi từ con quái cuối được cộng trước, rồi mới cộng thưởng dọn đợt.
-- Thưởng dọn đợt tính theo số đợt (con số bên dưới), cộng vào `feature-wallet`.
-- Số đợt đã dọn sạch tăng 1; đây là điểm của lượt chơi ở `feature-run`.
-- Hero đang sống được giữ lại sang đợt sau, không bị xoá.
-- Thưởng không phụ thuộc máu thành còn lại.
+## Danh sách
+Khi dọn sạch đợt, ba việc xảy ra:
+- Cộng thưởng dọn đợt vào `feature-wallet`.
+- Số đợt đã dọn sạch tăng một (báo `feature-run`).
+- Chuyển sang lúc thở (`feature-wave/wave-gap`).
 
-## Trường hợp biên
-- Thành hết máu cùng lúc con quái cuối chết: tính là thua, đợt này không được tính là đã dọn, không có thưởng. Thua luôn được xét trước.
-- Quái chết vì lí do bất kì (hero đánh, hay sau này có cách khác) đều tính là đã hạ.
-- Tạm dừng đúng lúc dọn sạch: thông báo đứng yên, tiếp tục khi bỏ tạm dừng.
-
-## Con số dự kiến
-- Thưởng dọn đợt N = 20 + 5 × N tiền (đợt 1: 25, đợt 10: 70). Đủ mua ít nhất một nâng cấp rẻ ở vài đợt đầu; con số cuối cùng chỉnh cùng giá ở `feature-upgrade`.
-- Thời gian hiện "Dọn sạch đợt N!" trước khi mở màn nghỉ: 1.5 giây.
+## Luật cơ bản
+- Chỉ xét dọn sạch khi quái của đợt đã ra hết.
+- Thưởng dọn đợt tăng theo số đợt.
+- Thưởng như nhau dù thành còn nhiều hay ít máu, dù hero nào còn sống.
+- Thành bị phá thì lượt kết thúc; đợt đang đánh không được tính là dọn sạch.
 
 ## Đã tự quyết
-- **Thưởng cố định theo số đợt, không theo máu thành còn lại.** Dễ hiểu; không phạt thêm người đang yếu. Đã loại: thưởng thêm khi thành không mất máu.
-- **Thua xét trước dọn sạch.** Luật rõ ràng, không có tình huống nửa thắng nửa thua. Đã loại: ưu tiên dọn sạch.
-- **Giữ hero còn sống.** Hero sống sót là phần thưởng cho việc chơi tốt. Đã loại: xoá hết hero mỗi đợt.
+- **Thưởng chỉ theo số đợt.** Dễ hiểu, không phạt thêm người đang yếu. Đã loại: thưởng theo máu thành còn lại.
+- **Điểm do `feature-run` giữ.** Tránh hai feature cùng giữ điểm.
+- **Sang lúc thở thay vì màn nghỉ.** Nâng cấp mua được mọi lúc (vòng 1), nên không cần màn riêng.
+- **Viết lại theo luật vòng 3 mới (2026-11-23).** Bỏ công thức thưởng, thời gian hiện chữ, trường hợp biên (thua cùng lúc dọn sạch, tạm dừng), bỏ hiệu ứng hiển thị (thuộc `feature-hud`).
 
 ## Chưa rõ
 - Không có điểm chặn.

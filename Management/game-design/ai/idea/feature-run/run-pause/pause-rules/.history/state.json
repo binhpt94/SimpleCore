@@ -1,0 +1,29 @@
+{
+ "hash": "2f184465270c",
+ "items": {
+  "pause-enter": {
+   "hash": "5d40e51c9c10",
+   "text": "Trận vào tạm dừng khi bấm nút tạm dừng, bấm nút quay lại của máy, hoặc game rời khỏi màn hình\nChỉ áp dụng khi trận đang đánh. Đang tạm dừng hay lượt đã kết thúc thì ba cách này không làm gì."
+  },
+  "pause-freeze-all": {
+   "hash": "f84a50d67d18",
+   "text": "Lúc tạm dừng thời gian trận đứng hẳn: quái, hero, đạn, hồi sinh, hồi chiêu 20s/35s/25s, nghỉ 3s giữa đợt\nMọi bộ đếm giữ nguyên giá trị lúc bắt đầu dừng; tiếp tục là chạy tiếp đúng từ giá trị đó."
+  },
+  "pause-block-input": {
+   "hash": "d73d31c696c8",
+   "text": "Lúc tạm dừng không mua nâng cấp và không dùng kĩ năng, kể cả khi bấm lọt qua\nPopup che chặn bấm; ngoài ra `feature-upgrade` và `feature-castle` tự từ chối thao tác khi trận đang tạm dừng."
+  },
+  "pause-resume-instant": {
+   "hash": "b19e43780169",
+   "text": "Bấm tiếp tục thì trận chạy lại ngay trong khung hình đó, không đếm ngược\nĐã loại: đếm ngược 3 giây (thêm chờ cho người chơi phổ thông)."
+  },
+  "pause-return-stays": {
+   "hash": "3ffccf17b0e9",
+   "text": "Quay lại game sau khi rời thì trận vẫn tạm dừng, popup tạm dừng đang mở chờ bấm"
+  },
+  "pause-quit-ends": {
+   "hash": "8065a64a729a",
+   "text": "Đồng ý bỏ lượt thì lượt kết thúc với điểm bằng số đợt đã dọn sạch, đợt đang dở không tính\nSau đó về màn bắt đầu (`feature-run/run-flow/flow-rules`)."
+  }
+ }
+}

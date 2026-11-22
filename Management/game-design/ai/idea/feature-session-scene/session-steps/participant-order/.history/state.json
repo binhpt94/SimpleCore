@@ -1,0 +1,29 @@
+{
+ "hash": "aa6627fee3fe",
+ "items": {
+  "loading-list": {
+   "hash": "ec6f826570ce",
+   "text": "Scene Loading chỉ có một feature tham gia: `feature-scene-flow` (màn Loading)"
+  },
+  "game-list": {
+   "hash": "75022293a881",
+   "text": "Scene Game có 14 feature tham gia theo thứ tự: popup, run, wallet, castle, hero, enemy, wave, upgrade, home, team-select, hud, hud-upgrade, popup-lose, popup-pause\nDịch vụ và luật trận đứng trước, màn hình và popup đứng sau, để feature đứng sau dùng được thứ feature đứng trước đã chuẩn bị. `feature-balance` không tham gia: nó chỉ là số liệu nằm trong cấu hình của từng feature."
+  },
+  "load-timeout": {
+   "hash": "af81b03fe983",
+   "text": "Mỗi feature tải tối đa 10 giây (dự kiến); quá thì coi là tải lỗi\nCác feature tải lần lượt theo thứ tự danh sách."
+  },
+  "run-no-wait": {
+   "hash": "2556f16c88de",
+   "text": "Bước chạy không tải thêm gì và xong trong cùng khung hình\nMọi thứ cần cho view đã có từ bước tải, nên view hiện ra cùng lúc, không thiếu hình."
+  },
+  "load-or-run-fail": {
+   "hash": "652033320af5",
+   "text": "Một feature lỗi ở bước tải hoặc chạy thì scene dừng, các feature đã qua bước đó được huỷ theo thứ tự ngược, lỗi nêu tên feature lỗi\nKhông feature nào sau nó được tải hay chạy. Đã loại: bỏ qua feature lỗi rồi chạy tiếp (scene thiếu thứ, lỗi khó lần)."
+  },
+  "dispose-never-stops": {
+   "hash": "704c2558048e",
+   "text": "Một feature lỗi ở bước huỷ thì ghi lỗi nêu tên nó, vẫn huỷ tiếp các feature còn lại\nBước huỷ phải đi hết danh sách để không còn gì sống sót."
+  }
+ }
+}

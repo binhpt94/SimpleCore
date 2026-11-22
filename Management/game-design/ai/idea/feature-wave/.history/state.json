@@ -1,29 +1,21 @@
 {
- "hash": "5d92c04667b5",
+ "hash": "1a74f8c24f86",
  "items": {
-  "wave-number": {
-   "hash": "e73d15e5178e",
-   "text": "Đợt có số thứ tự, bắt đầu từ đợt 1; số đợt hiện tại luôn hiện trên màn hình."
+  "wave-scaling": {
+   "hash": "39d77abf3eba",
+   "text": "Quái tới theo đợt, đợt sau khó hơn đợt trước, không có đợt cuối\nĐộ khó tính theo số đợt chứ không viết tay từng đợt, để chơi vô tận. Đã loại: bảng đợt viết tay."
   },
   "wave-content": {
-   "hash": "dfc1927bc9ae",
-   "text": "Mỗi đợt có danh sách quái (loại, số lượng) và nhịp thả, chia ra hai bên trái và phải."
-  },
-  "wave-scaling": {
-   "hash": "8c85a856765e",
-   "text": "Đợt sau đông hơn và quái mạnh hơn đợt trước, tính bằng công thức theo số đợt (không viết tay từng đợt) để chơi vô tận."
+   "hash": "38cf792d72f5",
+   "text": "Mỗi đợt quyết định quái nào ra, ra ở bên nào và ra lúc nào\nQuái của một đợt chia cho cả hai bên trái và phải."
   },
   "wave-clear": {
-   "hash": "37ba18065bb4",
-   "text": "Đợt kết thúc khi đã thả hết và hạ hết quái của đợt. Dọn sạch thì được thưởng thêm tiền và số đợt đã dọn tăng 1 (điểm ở `feature-run`)."
+   "hash": "5a44ab2792a7",
+   "text": "Dọn sạch một đợt thì được thưởng tiền và điểm của lượt tăng\nĐiểm nằm ở `feature-run`, tiền thưởng vào `feature-wallet`. Đã loại: chỉ có tiền từ quái."
   },
   "wave-gap": {
-   "hash": "55308504668a",
-   "text": "Giữa hai đợt có khoảng nghỉ ngắn tự đếm ngược (dự kiến 5 giây) rồi đợt sau tự bắt đầu; người chơi có thể bấm để vào sớm."
-  },
-  "wave-stop-on-lose": {
-   "hash": "c16ddf4f0f7e",
-   "text": "Thành hết máu giữa đợt thì dừng thả quái ngay và báo `feature-run`."
+   "hash": "933343f3b723",
+   "text": "Giữa hai đợt có một lúc thở ngắn rồi đợt sau tự tới\nĐể thấy rõ ranh giới \"đã dọn sạch\". Đã loại: đợt sau nối liền ngay; nghỉ dài để nâng cấp (người đã loại ở vòng 1: nâng cấp ngay trong trận)."
   }
  }
 }

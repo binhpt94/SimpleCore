@@ -1,0 +1,33 @@
+{
+ "hash": "0e76a8e0f351",
+ "items": {
+  "three-buttons-order": {
+   "hash": "a60a9722b34a",
+   "text": "Có 3 nút theo thứ tự cố định: Sấm sét, Băng giá, Cổ vũ, mỗi nút một biểu tượng riêng\nBiểu tượng đại diện cho kĩ năng: Sấm sét (sét đánh quanh thành), Băng giá (làm chậm mọi quái), Cổ vũ (hồi máu mọi hero)."
+  },
+  "ready-tap": {
+   "hash": "de13a1be5ced",
+   "text": "Nút sẵn sàng: chạm 1 lần là báo `feature-castle` dùng kĩ năng đó\nMột chạm chỉ dùng một lần; chạm liền nhiều lần trong cùng lúc cũng chỉ dùng một lần."
+  },
+  "cooldown-seconds": {
+   "hash": "1b96cd1e95cd",
+   "text": "Nút đang hồi hiện số giây còn lại làm tròn lên: Sấm sét bắt đầu từ 20, Băng giá 35, Cổ vũ 25\nCòn 0.3 giây thì hiện \"1\". Hồi xong thì số biến mất. Thời gian lấy từ `feature-castle`, HUD không tự đếm."
+  },
+  "cooldown-overlay": {
+   "hash": "afa951f81f53",
+   "text": "Nút đang hồi có lớp phủ vơi dần theo tỉ lệ thời gian còn lại trên tổng hồi chiêu\nVừa bấm thì phủ kín; còn một nửa thời gian thì phủ một nửa; hết thì không còn phủ."
+  },
+  "cooldown-tap-nothing": {
+   "hash": "2a7acfd6d9c0",
+   "text": "Chạm nút đang hồi thì không có gì xảy ra và không báo `feature-castle`"
+  },
+  "ready-bounce": {
+   "hash": "dd3b8f5c5c4a",
+   "text": "Lúc vừa hồi xong, nút phóng to lên 1.2 lần rồi về cỡ cũ trong 0.3 giây, một lần\nNgười chơi đang nhìn chiến trường vẫn nhận ra kĩ năng dùng lại được."
+  },
+  "buttons-locked-off-battle": {
+   "hash": "2a05691cf777",
+   "text": "Lúc tạm dừng hoặc lượt đã kết thúc, cả 3 nút không nhận chạm và số giây đứng yên"
+  }
+ }
+}

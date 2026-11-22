@@ -1,0 +1,25 @@
+{
+ "hash": "b10f4f27eaf5",
+ "items": {
+  "clear-check": {
+   "hash": "66b4fc08c77b",
+   "text": "Đợt dọn sạch khi đã ra hết và số quái sống của đợt bằng 0\nXét mỗi lần một con quái bị hạ, sau khi mục cuối danh sách đã ra. Ai hạ cũng tính."
+  },
+  "clear-bonus": {
+   "hash": "5ac826998026",
+   "text": "Thưởng dọn đợt w là 20 + 5×w xu (đợt 1: 25 xu, đợt 10: 70 xu, đợt 20: 120 xu)\nCộng vào `feature-wallet` một lần, ngay lúc dọn sạch. Không phụ thuộc máu thành hay hero còn sống."
+  },
+  "clear-score-plus": {
+   "hash": "b6694a8c6d64",
+   "text": "Mỗi lần dọn sạch, điểm của lượt tăng đúng 1 (dọn xong đợt 5 thì điểm là 5)\nBáo cho `feature-run`; node này không giữ điểm."
+  },
+  "clear-order": {
+   "hash": "1505b99456cc",
+   "text": "Thứ tự trong cùng một lúc: cộng thưởng, báo điểm, rồi bắt đầu lúc thở\nNgười chơi thấy tiền và điểm cùng lúc, tiêu được tiền thưởng ngay trong lúc thở."
+  },
+  "lose-first": {
+   "hash": "e7c14dd7c1b3",
+   "text": "Thành bị phá cùng lúc với con quái cuối bị hạ thì tính là thua, đợt đó không được dọn sạch\nKhông cộng thưởng, điểm không tăng. Luật đơn giản, không gây tranh cãi về \"kịp hay không\"."
+  }
+ }
+}

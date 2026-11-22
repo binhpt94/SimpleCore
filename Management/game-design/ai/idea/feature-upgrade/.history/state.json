@@ -1,29 +1,21 @@
 {
- "hash": "2c578992a476",
+ "hash": "e712e2fbe1f0",
  "items": {
   "upgrade-anytime": {
-   "hash": "04c356b39702",
-   "text": "Mua nâng cấp được bất kì lúc nào trong trận, kể cả lúc đang đánh và lúc nghỉ giữa hai đợt. Trận không dừng khi mua."
-  },
-  "upgrade-bar": {
-   "hash": "d2445ff6bb4d",
-   "text": "Các nút nâng cấp nằm trên một thanh cố định ở mép màn hình, không mở bảng riêng. Mỗi nút hiện cấp hiện tại và giá cấp tiếp theo; không đủ tiền thì nút mờ đi."
-  },
-  "upgrade-items": {
-   "hash": "8a805c2b21b4",
-   "text": "Danh sách nâng cấp cố định: mỗi hero trong đội một nút (lên cấp hero, tăng mọi chỉ số), cộng ba nút của thành (máu, sức đánh, kĩ năng)."
+   "hash": "7a8a0670e3ab",
+   "text": "Mua nâng cấp lúc nào cũng được, trận không dừng\nKể cả lúc đang đánh. Đã loại (người loại ở vòng 1): chỉ nâng cấp giữa hai đợt."
   },
   "upgrade-instant": {
-   "hash": "5b64a83f7dc6",
-   "text": "Nâng cấp có hiệu lực ngay lập tức, kể cả với hero đang gục chờ hồi sinh."
+   "hash": "84faad5d065d",
+   "text": "Mua xong là mạnh lên ngay\nKể cả với hero đang gục chờ hồi sinh."
+  },
+  "upgrade-items": {
+   "hash": "84de2d60928a",
+   "text": "Nâng được từng hero trong đội và nâng được thành, danh sách cố định\nĐã loại: bốc thẻ nâng cấp ngẫu nhiên (khó nắm với người chơi phổ thông)."
   },
   "upgrade-cost": {
-   "hash": "8cac81731497",
-   "text": "Giá tăng theo cấp. Không có cấp tối đa ở vòng này; giá tăng dần tự hãm."
-  },
-  "upgrade-reset": {
-   "hash": "27c69846d0bb",
-   "text": "Mọi cấp nâng cấp mất khi lượt chơi kết thúc; không bán lại, không hoàn tiền."
+   "hash": "d8ea7af9c3e9",
+   "text": "Càng nâng nhiều thì lần nâng sau càng đắt\nGiá tăng dần tự hãm, nên không cần cấp tối đa. Đã loại: giá cố định."
   }
  }
 }

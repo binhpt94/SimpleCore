@@ -1,0 +1,25 @@
+{
+ "hash": "49b5ce7a72b8",
+ "items": {
+  "target-nearest": {
+   "hash": "03db5d1c9089",
+   "text": "Hero nhắm quái gần mình nhất, xét cả hai bên thành\nLuật một câu, người chơi đoán được hero sẽ làm gì. Đã loại: mỗi hero giữ cố định một bên (người chơi phải chia đội, thêm thao tác); nhắm quái máu thấp nhất."
+  },
+  "move-then-attack": {
+   "hash": "1b09a0a83f1b",
+   "text": "Mục tiêu ngoài tầm thì hero đi về phía nó; vào tầm thì dừng lại đánh\nHero cận chiến vì vậy đứng trước, hero bắn xa đứng sau một cách tự nhiên, không cần luật xếp hàng."
+  },
+  "retarget": {
+   "hash": "1e12aca66a9e",
+   "text": "Mục tiêu bị hạ thì hero chọn lại quái gần nhất\nHero không bám mục tiêu cũ khi có quái khác đến gần hơn lúc đang đi; khi đã đứng đánh thì đánh tới khi mục tiêu bị hạ hoặc ra khỏi tầm."
+  },
+  "idle-at-castle": {
+   "hash": "ac6079f50927",
+   "text": "Không còn quái trên chiến trường thì hero đi về đứng ở thành\nGiữa hai đợt cả đội tụ lại ở thành, sẵn sàng cho cả hai bên. Đã loại: đứng yên tại chỗ (đội có thể kẹt ở một mép khi đợt mới vào từ mép kia)."
+  },
+  "no-player-control": {
+   "hash": "4579308230bd",
+   "text": "Người chơi không ra lệnh, kéo thả hay chọn mục tiêu cho hero\nNgười chơi tác động qua nâng cấp và kĩ năng thành. Đã loại (vòng 2): kéo thả hero, chọn mục tiêu."
+  }
+ }
+}

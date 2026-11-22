@@ -1,0 +1,21 @@
+{
+ "hash": "504e5ffe01a8",
+ "items": {
+  "enemy-shared-stats": {
+   "hash": "08fc2d4eddab",
+   "text": "Quái có đủ năm chỉ số chung, cùng định nghĩa với hero\nĐịnh nghĩa ở `feature-hero/hero-stats`; một đòn trúng trừ máu đúng bằng sức đánh. Đã loại: quái có giáp hay chỉ số riêng."
+  },
+  "enemy-stats-per-type": {
+   "hash": "9fc4bc69bd5a",
+   "text": "Mỗi loại quái có bộ giá trị chỉ số riêng\nCác loại khác nhau chủ yếu ở máu, tốc độ di chuyển và tầm đánh (`feature-enemy/enemy-list`)."
+  },
+  "enemy-no-level": {
+   "hash": "54eca603b1ae",
+   "text": "Quái không có cấp, không mạnh lên trong lúc đang sống\nĐộ khó theo đợt là việc của `feature-wave`: đợt sau ra nhiều quái hơn, loại trâu hơn, hoặc quái mạnh hơn. Đã loại: quái lên cấp theo thời gian sống."
+  },
+  "enemy-defeated": {
+   "hash": "0c1ac1af2165",
+   "text": "Quái máu về 0 thì bị hạ và biến mất khỏi chiến trường\nBị hạ là lúc quái cho tiền (`feature-enemy/enemy-reward`). Quái không hồi sinh."
+  }
+ }
+}

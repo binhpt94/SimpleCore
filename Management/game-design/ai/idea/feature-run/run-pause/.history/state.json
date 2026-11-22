@@ -1,0 +1,25 @@
+{
+ "hash": "f8e9d49f5079",
+ "items": {
+  "pause-states": {
+   "hash": "683a9d9a6ef0",
+   "text": "Trận có hai trạng thái khi chưa kết thúc: đang đánh và tạm dừng\nBấm nút tạm dừng (`feature-hud`) thì sang tạm dừng; bấm tiếp tục thì về đang đánh."
+  },
+  "pause-what-stops": {
+   "hash": "1a41c5aedb27",
+   "text": "Lúc tạm dừng mọi thứ đứng yên: quái, hero, thành, đợt, hồi sinh và hồi chiêu\nKhông thứ gì trong trận trôi theo thời gian khi đang tạm dừng. Đã loại: hồi chiêu vẫn chạy (người chơi lợi dụng dừng để chờ kĩ năng)."
+  },
+  "pause-no-actions": {
+   "hash": "f33c097c1409",
+   "text": "Lúc tạm dừng không mua nâng cấp và không bấm kĩ năng được\nGiữ áp lực quyết định ngay giữa trận. Đã loại: dừng để mua thoải mái (gần với \"chỉ nâng cấp giữa hai đợt\" người đã loại ở vòng 1)."
+  },
+  "pause-on-leave": {
+   "hash": "e0cda021c136",
+   "text": "Rời khỏi game giữa trận thì trận tự tạm dừng\nNgười chơi điện thoại bị ngắt (cuộc gọi, chuyển ứng dụng); quay lại thấy popup tạm dừng chứ không thấy thành đã bị phá."
+  },
+  "pause-quit": {
+   "hash": "8589ba5c1d6b",
+   "text": "Bỏ lượt khi đang tạm dừng là kết thúc lượt, tính điểm như thua\nĐợt đang dở không tính (`feature-run/run-score`); sau đó về màn bắt đầu (`feature-run/run-flow`)."
+  }
+ }
+}

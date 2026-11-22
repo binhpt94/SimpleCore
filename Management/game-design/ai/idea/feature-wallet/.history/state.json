@@ -1,21 +1,21 @@
 {
- "hash": "d515ad5333bd",
+ "hash": "5ba24132c4d3",
  "items": {
   "single-currency": {
-   "hash": "46a380f6fd0f",
-   "text": "Chỉ có một loại tiền. Số tiền hiện tại luôn không âm và luôn hiện trên màn hình."
+   "hash": "2c08549729b5",
+   "text": "Game chỉ có một loại tiền\nĐã loại: đá quý hay tiền lâu dài (game không có tiến trình lâu dài)."
   },
   "earn": {
-   "hash": "ed79c9f27aa5",
-   "text": "Tiền cộng khi quái bị hạ và khi dọn sạch một đợt."
+   "hash": "e93c4745e765",
+   "text": "Nhận tiền khi hạ quái và khi dọn sạch một đợt"
   },
   "spend": {
-   "hash": "ecc7790c6483",
-   "text": "Tiền trừ khi mua nâng cấp; không đủ tiền thì không mua được."
+   "hash": "3472ea0a4ba9",
+   "text": "Tiêu tiền để mua nâng cấp; không đủ tiền thì không mua được"
   },
   "run-scoped": {
-   "hash": "07db778541ee",
-   "text": "Đầu mỗi lượt chơi tiền về số ban đầu; tiền không giữ qua các lượt."
+   "hash": "2ed399700d65",
+   "text": "Tiền chỉ dùng trong một lượt, lượt mới bắt đầu lại"
   }
  }
 }

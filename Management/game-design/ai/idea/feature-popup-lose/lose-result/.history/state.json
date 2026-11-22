@@ -1,0 +1,21 @@
+{
+ "hash": "4b9f46cc241a",
+ "items": {
+  "result-score": {
+   "hash": "77639e55cb51",
+   "text": "Popup thua hiện điểm của lượt: số đợt đã dọn sạch\nĐiểm lấy từ `feature-run/run-score`, đã chốt lúc lượt kết thúc. Popup không tính điểm."
+  },
+  "result-record": {
+   "hash": "4b7afb963e93",
+   "text": "Popup thua hiện kỉ lục ngay dưới điểm\nKỉ lục là giá trị sau khi đã cập nhật với lượt vừa xong. Để người chơi so điểm mình với mục tiêu."
+  },
+  "result-new-record": {
+   "hash": "1d9dd9d9af7f",
+   "text": "Lượt vừa phá kỉ lục thì popup báo rõ \"kỉ lục mới\" và trông vui hơn hẳn\nDựa vào cờ phá kỉ lục của `feature-run/run-score`. Không phá kỉ lục thì không có lời báo. Đã loại: luôn hiện câu động viên (làm nhạt lúc phá kỉ lục thật)."
+  },
+  "result-title": {
+   "hash": "339dbd22161d",
+   "text": "Popup có tiêu đề cho biết thành đã bị phá\nNgười chơi hiểu ngay vì sao lượt kết thúc."
+  }
+ }
+}

@@ -1,0 +1,2 @@
+{"at": "2026-11-23 02:20:17", "event": "data", "hash": "f8e9d49f5079", "previous": "", "added": ["pause-states", "pause-what-stops", "pause-no-actions", "pause-on-leave", "pause-quit"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 02:27:44", "event": "promote", "by": "người", "hash": "f8e9d49f5079"}

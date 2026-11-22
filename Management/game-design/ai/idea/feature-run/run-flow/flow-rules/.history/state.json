@@ -1,0 +1,33 @@
+{
+ "hash": "5a872f474e5b",
+ "items": {
+  "boot-to-home": {
+   "hash": "36de003e0c3d",
+   "text": "Mở game: scene Loading tải xong tự sang scene Game, màn đầu tiên là màn bắt đầu\nKhông có nút ở Loading. Đã vào scene Game thì không quay lại Loading; mọi đổi màn sau đó là đổi trong scene Game, không tải scene."
+  },
+  "fresh-battle": {
+   "hash": "33bded91ba45",
+   "text": "Mỗi lần bấm vào trận, trận được dựng mới hoàn toàn; không giữ gì của trận trước\nThành, hero, quái, HUD, thanh nâng cấp của trận trước bị huỷ hết khi rời trận. Vào trận là dựng lại từ đầu rồi báo \"lượt mới\" (`feature-run/run-start`)."
+  },
+  "lose-stop-same-moment": {
+   "hash": "8971635e2202",
+   "text": "Thành báo bị phá thì trong cùng khung hình trận dừng hẳn và điểm được chốt\nQuái thôi ra, mọi unit thôi đi và thôi đánh, nút kĩ năng và thanh nâng cấp thôi nhận bấm, nút tạm dừng thôi tác dụng. Báo dọn sạch đợt tới sau lúc này bị bỏ qua."
+  },
+  "lose-popup-delay": {
+   "hash": "fb5023520449",
+   "text": "Popup thua hiện sau 1 giây kể từ lúc trận dừng\n1 giây (dự kiến) để người chơi thấy thành vừa bị phá rồi mới đọc kết quả. Trong 1 giây này không có gì bấm được."
+  },
+  "replay-path": {
+   "hash": "cc93a7249165",
+   "text": "Chơi lại ở popup thua: huỷ trận, sang màn chọn đội; về màn bắt đầu: huỷ trận, sang màn bắt đầu\nChơi lại không đi qua màn bắt đầu. Không có hồi sinh."
+  },
+  "quit-path": {
+   "hash": "89aec6b4ce50",
+   "text": "Đồng ý bỏ lượt: chốt điểm như thua, huỷ trận, về thẳng màn bắt đầu, không hiện popup thua\nKỉ lục cập nhật như thua; màn bắt đầu hiện kỉ lục đã cập nhật."
+  },
+  "transition-lock": {
+   "hash": "9d26d1c5984d",
+   "text": "Trong lúc đổi màn chỉ lần bấm đầu tiên có tác dụng\nBấm thêm nút ở màn cũ trong lúc đang đổi màn thì bỏ qua, để không mở hai trận hay chuyển màn hai lần."
+  }
+ }
+}

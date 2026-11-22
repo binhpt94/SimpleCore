@@ -1,0 +1,17 @@
+{
+ "hash": "d8d13ced1680",
+ "items": {
+  "nothing-survives": {
+   "hash": "6bd8a39be3af",
+   "text": "Sau bước huỷ, không view hay trạng thái nào của scene còn lại\nChuyển scene xong như mới mở. Đã loại: giữ lại một phần view cho scene sau dùng (khó biết ai dọn)."
+  },
+  "saved-data-only": {
+   "hash": "a75663e43340",
+   "text": "Thứ duy nhất đi qua scene là dữ liệu đã lưu (kỉ lục)\nKỉ lục do `feature-run` lưu, không phải dịch vụ này giữ."
+  },
+  "run-reset-in-scene": {
+   "hash": "8bf982b6c521",
+   "text": "Lượt mới trong scene Game được đặt lại bởi các feature chơi, không bằng cách tải lại scene\nChơi lại không phải chờ tải. `feature-run` báo bắt đầu lượt; từng feature tự về trạng thái ban đầu. Đã loại: tải lại scene Game mỗi lượt (chậm, mất màn chọn đội liền mạch)."
+  }
+ }
+}

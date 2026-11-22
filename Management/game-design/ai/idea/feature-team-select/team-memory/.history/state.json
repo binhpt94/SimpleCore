@@ -1,0 +1,17 @@
+{
+ "hash": "4a24db16dcc6",
+ "items": {
+  "memory-prefill": {
+   "hash": "ef3294bed0a6",
+   "text": "Mở màn chọn đội thì đội của lượt trước đã nằm sẵn trong các chỗ\nNgười chơi vẫn đổi được như bình thường. Đã loại: lần nào cũng chọn lại từ đầu."
+  },
+  "memory-which-team": {
+   "hash": "1bc96339c86e",
+   "text": "Đội được nhớ là đội đã vào trận gần nhất\nĐội được nhớ luôn là một đội đủ đã từng đánh."
+  },
+  "memory-session-only": {
+   "hash": "db41198f6979",
+   "text": "Đội chỉ được nhớ trong lúc game đang mở, tắt game thì quên\nKỉ lục là thứ duy nhất lưu qua khi tắt game (`feature-run/run-score`). Đội nhớ chỉ là lựa chọn sẵn cho tiện, không phải trạng thái của lượt. Đã loại: lưu đội khi tắt game (thành thêm một thứ lưu lâu dài)."
+  }
+ }
+}

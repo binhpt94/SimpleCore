@@ -1,0 +1,21 @@
+{
+ "hash": "4b7bbae60edf",
+ "items": {
+  "team-tradeoff": {
+   "hash": "407c6ac743c9",
+   "text": "Mỗi hero mạnh ở một vài chỉ số và yếu ở chỉ số khác, không hero nào hơn hẳn ở mọi mặt\nVí dụ cận chiến nhiều máu mà tầm ngắn, bắn xa tầm dài mà ít máu. Đã loại: hero sau mạnh hơn hero trước."
+  },
+  "team-counter": {
+   "hash": "23ddb1b803d7",
+   "text": "Mỗi cách đánh hợp với một số loại quái hơn loại khác\nĐể thứ tự loại quái mở theo đợt làm đội nào cũng có lúc khó. Đã loại: hero mạnh đều với mọi quái."
+  },
+  "team-mix": {
+   "hash": "0609ba567232",
+   "text": "Đội trộn nhiều cách đánh trụ ổn hơn đội chỉ một cách đánh, nhưng đội lệch vẫn chơi được\nCó lí do để nghĩ khi chọn, mà không phạt người thử đội lạ. Đã loại: đội lệch thua ngay."
+  },
+  "team-equal-upgrade": {
+   "hash": "9a5da280c6b6",
+   "text": "Mỗi hero nhận cùng một mức lợi cho cùng một số tiền nâng cấp\nKhông hero nào là chỗ đổ tiền rẻ nhất. Đã loại: giá nâng khác nhau theo hero."
+  }
+ }
+}

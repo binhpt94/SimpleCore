@@ -1,0 +1,2 @@
+{"at": "2026-11-23 02:21:57", "event": "data", "hash": "cf9290ce16e6", "previous": "", "added": ["walk-to-castle", "stop-for-hero", "resume-walk", "attack-castle", "enemy-no-block"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 02:26:32", "event": "promote", "by": "người", "hash": "cf9290ce16e6"}

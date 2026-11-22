@@ -1,0 +1,21 @@
+{
+ "hash": "f1f04ceb7020",
+ "items": {
+  "curve-outpace": {
+   "hash": "ae602972aec9",
+   "text": "Sức quái tăng theo đợt nhanh hơn sức đội mua được, nên lượt nào rồi cũng thua\nChơi vô tận cần điểm kết thúc. Đã loại: hai bên tăng ngang nhau (lượt kéo dài mãi); có trần độ khó."
+  },
+  "curve-early-easy": {
+   "hash": "223fb17d0668",
+   "text": "Các đợt đầu đội đã chọn trụ được mà chưa cần nâng cấp nhiều; áp lực tăng dần sau đó\nNgười chơi phổ thông làm quen trước khi phải tính chi tiền. Đã loại: khó ngay từ đợt đầu."
+  },
+  "curve-smooth": {
+   "hash": "09743248e0d4",
+   "text": "Áp lực tăng đều qua các đợt; ngoại lệ có chủ đích duy nhất là đợt có Trùm theo chu kì khó vọt hơn, rồi đợt sau dịu lại\nThua thì thấy được mình yếu dần ở đâu, không phải bị bất ngờ. Đợt Trùm là đỉnh căng thẳng người chơi biết trước (`feature-enemy/enemy-list`). Đã loại: đợt mốc khó vọt không báo trước, hay nhiều loại đợt đặc biệt khác."
+  },
+  "curve-skill-matters": {
+   "hash": "6b5c744cb49b",
+   "text": "Chọn đội, chọn nâng cấp và canh kĩ năng thành khéo thì đợt gãy tới muộn hơn rõ rệt\nĐây là lí do chơi lại để phá kỉ lục. Đã loại: điểm gãy gần như cố định dù chơi thế nào."
+  }
+ }
+}

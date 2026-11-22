@@ -1,0 +1,13 @@
+{
+ "hash": "43be0f08eadd",
+ "items": {
+  "session-lifecycle": {
+   "hash": "9da410213ac4",
+   "text": "Mỗi scene đi qua ba bước: tải, chạy, huỷ"
+  },
+  "session-clean": {
+   "hash": "52aade670657",
+   "text": "Rời scene thì mọi thứ của scene đó được dọn sạch, lượt sau bắt đầu sạch sẽ\nKhớp với việc mỗi lượt chơi bắt đầu lại từ đầu (vòng 1)."
+  }
+ }
+}

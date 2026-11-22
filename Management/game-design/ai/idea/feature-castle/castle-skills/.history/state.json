@@ -1,0 +1,29 @@
+{
+ "hash": "8bc45d0edc8d",
+ "items": {
+  "skill-list": {
+   "hash": "ed8dfe706164",
+   "text": "Thành có ba kĩ năng: Sấm sét, Băng giá, Cổ vũ\nBa kĩ năng ba việc khác nhau: gây sát thương, làm chậm, hồi máu hero. Đủ để người chơi phải chọn lúc nào dùng cái nào, không quá nhiều nút. Đã loại: một kĩ năng (không có lựa chọn), kĩ năng gọi thêm hero (người đã loại thành tự sinh hero)."
+  },
+  "skill-thunder": {
+   "hash": "b4473c4ba485",
+   "text": "Sấm sét: đánh trúng mọi quái trong một vùng quanh thành ở cả hai bên\nGiải vây khi quái dồn sát thành. Vùng quanh thành nên không cần chọn vị trí."
+  },
+  "skill-frost": {
+   "hash": "8ab509dc2dcd",
+   "text": "Băng giá: làm chậm di chuyển và đòn đánh của mọi quái trên chiến trường trong một lúc\nMua thời gian cho hero và thành dọn quái. Không gây sát thương."
+  },
+  "skill-rally": {
+   "hash": "e18686ed53ae",
+   "text": "Cổ vũ: hồi một phần máu cho mọi hero đang trên chiến trường\nCứu hero sắp gục. Không hồi máu thành (máu thành không tự hồi, `feature-castle/castle-core`) và không làm hero đang gục hồi sinh sớm. Đã loại: hồi máu thành."
+  },
+  "skill-cooldown": {
+   "hash": "60e0d9dfba77",
+   "text": "Mỗi kĩ năng có hồi chiêu riêng; kĩ năng mạnh hơn thì hồi lâu hơn\nVào trận mọi kĩ năng đều sẵn sàng. Kĩ năng không tốn tiền. Đã loại: dùng kĩ năng tốn tiền (tranh tiền với nâng cấp làm người chơi ngại bấm)."
+  },
+  "skill-press-instant": {
+   "hash": "fab0beb9efbc",
+   "text": "Bấm là dùng ngay, không chọn vị trí, không chọn mục tiêu\nHợp thao tác một chạm trên điện thoại. Lúc tạm dừng không bấm được. Đã loại: kéo thả để nhắm vùng."
+  }
+ }
+}

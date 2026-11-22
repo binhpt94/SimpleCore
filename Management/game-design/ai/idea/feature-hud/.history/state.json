@@ -1,0 +1,21 @@
+{
+ "hash": "09ba60c454c5",
+ "items": {
+  "hud-status": {
+   "hash": "97ff7ae4a6f3",
+   "text": "Màn hình trận luôn cho thấy tình trạng thành, số tiền và đợt đang đánh"
+  },
+  "hud-skills": {
+   "hash": "d4a511c7510d",
+   "text": "Nút kĩ năng của thành luôn trên màn hình, cho thấy lúc nào dùng được lại"
+  },
+  "hud-pause": {
+   "hash": "53ec821aabbc",
+   "text": "Có nút tạm dừng trên màn hình trận\nBấm thì mở `feature-popup-pause`."
+  },
+  "hud-clear-view": {
+   "hash": "2f25badefa66",
+   "text": "HUD nằm ở mép màn hình, không che dải chiến trường\nMàn hình điện thoại cầm ngang thấp; chiến trường hai bên thành phải luôn nhìn rõ."
+  }
+ }
+}

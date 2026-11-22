@@ -1,0 +1,29 @@
+{
+ "hash": "2d489af38e03",
+ "items": {
+  "distance-gap": {
+   "hash": "037b868bd5a9",
+   "text": "Khoảng cách giữa hai bên là khoảng trống theo trục x giữa hai mép hộp, tính bằng u; chồng lên nhau thì là 0u\nMọi tầm đánh (hero, quái, thành) và vùng kĩ năng dùng cách đo này. Hiệp sĩ tầm 1.2u đánh được quái khi mép hai hộp cách nhau không quá 1.2u. Đã loại: đo từ tâm (unit to như Trùm 3u sẽ đánh hụt)."
+  },
+  "attack-interval": {
+   "hash": "e7627cd6e3e0",
+   "text": "\"Giây mỗi đòn\" là thời gian chờ giữa hai đòn; đòn đầu ra ngay khi có mục tiêu trong tầm nếu đã chờ đủ\nBộ đếm chạy cả lúc đi. Ví dụ Cung thủ 0.8s: đòn 1 ở giây 0, đòn 2 ở giây 0.8. Áp cho hero, quái và thành."
+  },
+  "damage-instant": {
+   "hash": "4760dc4838a4",
+   "text": "Sát thương trừ ngay lúc ra đòn, đúng bằng sức đánh; hình đạn bay 0.15s chỉ để nhìn\nKhông trượt, không giáp. Đòn đánh xa không bay thật, nên không có đạn trúng quái đã chết."
+  },
+  "level-formula": {
+   "hash": "d93da35b2829",
+   "text": "Cấp n: máu và sát thương = lv1 × (1 + 0.15×(n-1)); tốc độ đánh = lv1 × (1 + min(0.03×(n-1), 0.6))\nGiây mỗi đòn ở cấp n = giây mỗi đòn lv1 / (1 + min(0.03×(n-1), 0.6)). Hiệp sĩ cấp 5: 480 máu, 19.2 sát thương, 0.893s mỗi đòn. Tốc độ đánh chạm trần ở cấp 21. Tầm và tốc độ chạy không đổi."
+  },
+  "level-hp-gain": {
+   "hash": "e972d66c8286",
+   "text": "Lên cấp khi đang đứng: máu hiện tại cộng đúng phần máu tối đa vừa tăng\nHiệp sĩ 100/300 lên cấp 2 thành 145/345. Lên cấp khi đang gục: hồi sinh với đầy máu của cấp mới."
+  },
+  "decimal-stats": {
+   "hash": "5bfc643e1e74",
+   "text": "Máu và sát thương giữ số thực; máu hiện ra làm tròn lên, sát thương hiện ra làm tròn xuống\nCòn 0.4 máu thì hiện 1 và chưa gục; máu ≤ 0 mới là gục hay bị hạ."
+  }
+ }
+}

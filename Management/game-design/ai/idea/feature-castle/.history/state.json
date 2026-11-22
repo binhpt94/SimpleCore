@@ -1,29 +1,25 @@
 {
- "hash": "fc3cb478546c",
+ "hash": "24fd307bbdcd",
  "items": {
   "castle-health": {
-   "hash": "6e724f67367f",
-   "text": "Thành có máu tối đa và máu hiện tại. Quái tới được thành thì đánh trừ máu. Máu về 0 thì báo thua cho `feature-run`."
-  },
-  "castle-no-regen": {
-   "hash": "0b24284deb25",
-   "text": "Máu thành không tự hồi giữa các đợt. Nâng cấp máu thì cả máu tối đa và máu hiện tại cùng tăng thêm phần đó."
+   "hash": "eaa0aaec6ac8",
+   "text": "Thành là thứ phải giữ: quái tới được thì đánh thành, thành bị phá là thua\nBáo cho `feature-run` khi thành bị phá."
   },
   "castle-auto-attack": {
-   "hash": "838f91a7c36e",
-   "text": "Thành tự bắn quái gần nhất trong tầm, cả hai phía, không cần người chơi bấm."
+   "hash": "380bab35cff8",
+   "text": "Thành tự đánh quái ở cả hai bên, không cần người chơi bấm\nĐánh quái lọt qua hàng hero. Đã loại: người chơi chạm vào quái để thành bắn."
   },
   "castle-skills": {
-   "hash": "ce49894eca49",
-   "text": "Thành có kĩ năng (dự kiến 2 cho bản đầu), mỗi kĩ năng một nút trên màn hình. Bấm thì dùng ngay, sau đó chờ hết thời gian hồi chiêu mới dùng lại; nút hiện rõ thời gian còn lại."
+   "hash": "309d0ee7cd8e",
+   "text": "Thành có kĩ năng người chơi bấm để dùng, dùng xong phải chờ hồi mới dùng lại\nĐây là thao tác chủ động chính trong trận. Bấm là dùng ngay, không cần chọn vị trí. Đã loại (người loại ở vòng 1): thành không đánh, không kĩ năng."
   },
   "castle-hero-base": {
-   "hash": "a5f12de8fbd0",
-   "text": "Thành là nơi đội hero xuất hiện khi vào trận và là nơi hero gục hồi sinh."
+   "hash": "f4aa3f02c18b",
+   "text": "Thành là nơi đội hero xuất phát khi vào trận và hồi sinh khi gục"
   },
   "castle-upgrades": {
-   "hash": "17ccb832bcf6",
-   "text": "Ba thứ của thành nâng cấp được: máu, sức đánh (của đòn tự bắn), kĩ năng (mạnh hơn hoặc hồi chiêu ngắn hơn)."
+   "hash": "b60cf20fc626",
+   "text": "Thành mạnh lên qua nâng cấp trong trận\nNâng được độ bền, sức đánh và kĩ năng của thành; mua qua `feature-upgrade`."
   }
  }
 }

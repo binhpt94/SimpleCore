@@ -1,0 +1,2 @@
+{"at": "2026-11-23 02:12:00", "event": "data", "hash": "cdb98c5c2b2c", "previous": "", "added": ["upgrade-bar-always", "upgrade-bar-state", "upgrade-bar-edge"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 02:12:37", "event": "promote", "by": "người", "hash": "cdb98c5c2b2c"}

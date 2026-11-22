@@ -1,0 +1,17 @@
+{
+ "hash": "fe94740dab29",
+ "items": {
+  "team-pick": {
+   "hash": "412e93789e41",
+   "text": "Trước mỗi trận, người chơi chọn đội hero từ toàn bộ danh sách hero\nĐội đủ người mới vào trận được. Đã loại (người loại ở vòng 1): thành tự sinh hero."
+  },
+  "team-compare": {
+   "hash": "12fe1e570335",
+   "text": "Màn chọn đội cho thấy cách đánh của từng hero để người chơi so sánh\nNgười chơi phổ thông cần biết hero nào chắn, hero nào bắn xa trước khi chọn."
+  },
+  "team-remember": {
+   "hash": "52cdc698399a",
+   "text": "Màn chọn đội nhớ đội của lượt trước\nAi muốn giữ nguyên đội thì chỉ cần bấm vào trận. Đã loại: lần nào cũng chọn lại từ đầu."
+  }
+ }
+}

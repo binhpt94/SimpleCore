@@ -1,0 +1,33 @@
+{
+ "hash": "ecc0af822edd",
+ "items": {
+  "start-castle-1000": {
+   "hash": "d02313462acb",
+   "text": "Đầu lượt thành có 1000 máu trên 1000 máu tối đa, cấp mọi nâng cấp của thành là 1\nMáu tối đa về 1000 dù lượt trước đã nâng."
+  },
+  "start-money-50": {
+   "hash": "ed1bad753540",
+   "text": "Đầu lượt tiền là 50, không cộng dồn từ lượt trước"
+  },
+  "start-levels-1": {
+   "hash": "b664f2ab4aac",
+   "text": "Đầu lượt mọi hero trong đội ở cấp 1"
+  },
+  "start-wave-1": {
+   "hash": "7ff475d75045",
+   "text": "Đầu lượt đợt hiện tại là 1, điểm là 0"
+  },
+  "start-skills-ready": {
+   "hash": "3c0495df647b",
+   "text": "Đầu lượt cả ba kĩ năng thành Sấm sét, Băng giá, Cổ vũ đều sẵn sàng, không có hồi chiêu"
+  },
+  "start-team-3": {
+   "hash": "80d35ad1c760",
+   "text": "Đầu lượt cả 3 hero của đội đã chọn sinh ra ở thành cùng lúc, đủ máu\nĐội 3 hero không trùng; trong trận không đổi đội."
+  },
+  "start-before-wave": {
+   "hash": "3fde595b840b",
+   "text": "Mọi giá trị trên đã đặt xong và HUD đã hiện đúng trước khi quái đầu tiên của đợt 1 ra"
+  }
+ }
+}

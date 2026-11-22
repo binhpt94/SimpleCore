@@ -1,0 +1,17 @@
+{
+ "hash": "cdb98c5c2b2c",
+ "items": {
+  "upgrade-bar-always": {
+   "hash": "d4291adc7112",
+   "text": "Thanh nút nâng cấp luôn hiện trên màn hình trận, một chạm là mua\nĐã loại: bảng nâng cấp bật lên (che trận, phải dừng)."
+  },
+  "upgrade-bar-state": {
+   "hash": "b55cb7cc68c1",
+   "text": "Mỗi nút cho thấy mua được hay chưa và đang nâng tới đâu"
+  },
+  "upgrade-bar-edge": {
+   "hash": "651d0280d25b",
+   "text": "Thanh nằm ở mép màn hình, không che dải chiến trường"
+  }
+ }
+}

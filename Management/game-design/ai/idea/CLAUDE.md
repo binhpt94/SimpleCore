@@ -1,43 +1,46 @@
 # Thủ thành anh hùng (tên tạm)
 
-Dữ liệu cốt lõi (tóm tắt và các ý có điểm): [data.md](data.md)
+Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Người chơi
 - Người chơi phổ thông, chơi lượt ngắn trên điện thoại cầm ngang.
-- Trước trận: chọn đội hero. Trong trận: canh lúc bấm kĩ năng thành, chọn nâng cấp nào mua lúc nào.
-- Thích nhìn đội hero của mình mạnh dần.
+- Không cần nhanh tay. Trước trận chọn đội hero; trong trận canh lúc bấm kĩ năng thành và chọn nâng cấp nào mua lúc nào.
+- Thích nhìn đội hero của mình mạnh dần và thử đội khác ở lượt sau.
 
 ## Cảm giác chính
 - Bị kẹp từ hai phía, áp lực tăng dần qua mỗi đợt.
 - Tự tay cứu nguy: bấm kĩ năng thành đúng lúc quái dồn đông.
-- Thấy rõ mình mạnh lên ngay trong trận: mua nâng cấp là hero, thành đánh mạnh hơn liền.
-- Hồi hộp khi máu thành tụt thấp, nhẹ nhõm khi dọn sạch một đợt.
-- Muốn chơi lại để thử đội hero khác và vượt kỉ lục.
+- Thấy rõ mình mạnh lên ngay trong trận: vừa mua nâng cấp là hero, thành đánh mạnh hơn liền.
+- Hồi hộp khi thành sắp bị phá, nhẹ nhõm khi dọn sạch một đợt.
 
 ## Vòng lặp chơi
-1. Trước lượt chơi: chọn đội hero (dự kiến 4 hero từ danh sách 6).
-2. Vào trận: cả đội sinh ra ở thành.
-3. Đợt quái bắt đầu: quái đi từ mép trái và mép phải vào phía thành.
-4. Hero tự đánh quái gần nhất; thành tự bắn quái trong tầm; người chơi bấm kĩ năng thành khi hồi chiêu xong.
-5. Hạ quái được tiền; người chơi mua nâng cấp ngay trong trận, trận không dừng.
-6. Hero gục thì hồi sinh ở thành sau một lúc. Quái tới thành thì đánh trừ máu thành.
-7. Dọn sạch đợt thì sang đợt sau đông hơn, mạnh hơn.
-8. Thành còn 0 máu: thua, hiện số đợt đã trụ được và kỉ lục.
+1. **Làm gì:** chọn đội hero, vào trận; đội tự đánh quái từ hai bên, người chơi bấm kĩ năng thành và mua nâng cấp.
+2. **Được gì:** hạ quái được tiền; tiền đổi ra nâng cấp; dọn sạch đợt thì điểm tăng.
+3. **Lặp lại thế nào:** đợt sau khó hơn, phải mua thêm nâng cấp để trụ, tới khi thành bị phá. Thua thì xem điểm và kỉ lục, chọn đội khác, chơi lại từ đầu.
+
+Kể trong một phút: một tòa thành đứng giữa màn hình, quái kéo tới từ cả hai bên. Bạn chọn trước một đội hero; vào trận, hero tự lao ra đánh, thành tự bắn. Việc của bạn: canh lúc bấm kĩ năng của thành và tiêu tiền hạ quái vào nâng cấp, ngay giữa trận. Đợt sau đông hơn, mạnh hơn. Thành bị phá là hết lượt; trụ được càng nhiều đợt càng cao điểm.
+
+Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc điều khiển hero): không xây, không điều khiển; bị kẹp hai phía; quyết định nằm ở chọn đội, canh kĩ năng và chi tiền.
 
 ## Đã tự quyết
-- **Đối tượng: người chơi phổ thông.** Hero tự đánh, thao tác chỉ là bấm kĩ năng và mua nâng cấp. Đã loại: game nặng tính toán, nhiều cây nâng cấp.
-- **Quái vào từ hai bên trái và phải.** Màn hình ngang, thành ở giữa, hai bên là hướng tự nhiên. Đã loại: bốn phía.
+- **Đối tượng: người chơi phổ thông.** Hero tự đánh, thao tác chỉ là bấm kĩ năng và mua nâng cấp. Đã loại: game nặng tính toán.
+- **Nhìn ngang từ bên cạnh, thành ở giữa.** "Màn hình ngang" trong ý tưởng gốc hiểu là góc nhìn ngang trên điện thoại cầm ngang. Đã loại: nhìn từ trên xuống.
+- **Quái vào từ hai bên trái và phải.** Thành ở giữa thì hai bên là hướng tự nhiên. Đã loại: bốn phía, một phía.
 - **Đội hero cố định, chọn trước lượt chơi (theo phản hồi của người).** Hiểu "mỗi màn" là mỗi lượt chơi, vì game có một bản đồ và chơi vô tận. Nếu người muốn nhiều màn tách biệt thì cần chấm lại `single-map` và `endless-score`. Đã loại (người loại): thành tự sinh hero theo thời gian.
-- **Số hero trong đội: dự kiến 4.** Đủ để mỗi bên thành có hero, màn hình điện thoại vẫn dễ nhìn.
-- **Hero gục thì hồi sinh ở thành sau một lúc.** Đội cố định mà chết hẳn thì chơi vô tận sẽ sụp nhanh và mất cảm giác "đội của mình". Đã loại: chết hẳn tới hết lượt.
-- **Danh sách hero, mỗi hero chọn một lần, dự kiến 6, chọn được hết ngay.** Chọn 4 trong 6 đã có lựa chọn đáng nghĩ; không có tiến trình lâu dài nên không có mở khoá. Đã loại: mở loại hero bằng nâng cấp trong lượt.
-- **Thành tự đánh và có kĩ năng người chơi bấm (theo phản hồi của người).** Số kĩ năng và kĩ năng cụ thể quyết ở `feature-castle`. Đã loại (người loại): thành không đánh.
+- **Hero gục thì hồi sinh ở thành.** Đội cố định mà chết hẳn thì chơi vô tận sẽ sụp nhanh và mất cảm giác "đội của mình". Đã loại: chết hẳn tới hết lượt.
+- **Nhiều hero hơn số chỗ trong đội, chọn được hết ngay.** Thừa hero so với chỗ là đã có lựa chọn đáng nghĩ; không có tiến trình lâu dài nên không mở khoá.
+- **Thành tự đánh và có kĩ năng người chơi bấm (theo phản hồi của người).** Đã loại (người loại): thành không đánh.
 - **Nâng cấp ngay trong trận, trận không dừng (theo phản hồi của người).** Đã loại (người loại): chỉ nâng cấp giữa hai đợt. Giữ `id` `upgrade-between-waves` theo quy trình dù tên không còn khớp.
-- **Nâng cấp thành gồm máu, sức đánh, kĩ năng.** Bỏ tốc độ sinh hero và giới hạn số hero vì đội cố định.
-- **Mỗi lượt chơi bắt đầu lại từ đầu.** Ý tưởng gốc chưa nhắc tới tiến trình lâu dài. Chỉ lưu kỉ lục. Đã loại: nâng cấp vĩnh viễn giữa các lượt.
-- **Chơi vô tận tới khi thua; điểm là số đợt trụ được.** Điều kiện kết thúc duy nhất trong ý tưởng là thành hết máu. Đã loại: thắng khi qua đủ N đợt.
+- **Mỗi lượt bắt đầu lại từ đầu, chỉ lưu kỉ lục.** Ý tưởng gốc chưa nhắc tới tiến trình lâu dài. Đã loại: nâng cấp vĩnh viễn giữa các lượt.
+- **Không có thắng, chơi vô tận.** Điều kiện kết thúc duy nhất trong ý tưởng là thành bị phá. Đã loại: thắng khi qua đủ một số đợt.
 - **Một bản đồ duy nhất.** Giữ game gọn. Đã loại: nhiều màn.
-- **Bỏ mọi chữ theo bản phát hành ("bản đầu").** Theo yêu cầu của người ngày 2026-11-23; số lượng giờ ghi là "dự kiến".
+- **Làm lại theo luật vòng 1 mới (2026-11-23):**
+  - Thêm góc nhìn và điểm khác với game cùng thể loại (tóm tắt, mục "Kể trong một phút").
+  - Bỏ mọi con số (thời lượng lượt, số hero trong đội, số hero trong danh sách); để vòng 4.
+  - Bỏ chi tiết mức định nghĩa và danh sách: "0 máu" thành "thành bị phá"; "hero đánh quái gần nhất", "thành bắn quái trong tầm", danh sách nâng cấp của thành (máu, sức đánh, kĩ năng) chuyển xuống các vòng sau.
+  - Không dùng chữ theo bản phát hành ("bản đầu"), theo yêu cầu của người.
+
+- **Game 2D nhìn ngang (quyết khi vào vòng 4, 2026-11-23).** Vòng 4 cần biết 2D hay 3D để ghi kích thước unit. 2D hợp góc nhìn ngang một dải đất, sprite gen bằng AI làm nhanh ở mức IDEA. Đã loại: 3D low poly (thêm việc dựng model mà góc nhìn ngang không cần chiều sâu).
 
 ## Chưa rõ
-- Tên chính thức và phong cách hình ảnh: chưa có, không chặn việc chia feature.
+- Tên chính thức và phong cách hình ảnh: chưa có, không chặn việc thiết kế.

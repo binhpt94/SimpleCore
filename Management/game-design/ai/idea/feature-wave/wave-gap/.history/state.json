@@ -1,0 +1,21 @@
+{
+ "hash": "d9d4c35f6907",
+ "items": {
+  "gap-short": {
+   "hash": "56983ef2716c",
+   "text": "Lúc thở ngắn hơn hẳn một đợt, chỉ đủ thấy ranh giới \"đã dọn sạch\"\nĐã loại: nghỉ dài để nâng cấp (người đã loại ở vòng 1); không có lúc thở, đợt sau nối liền."
+  },
+  "gap-auto": {
+   "hash": "718ddf51075c",
+   "text": "Hết lúc thở thì đợt sau tự bắt đầu, người chơi không phải bấm\nGiữ thao tác ít cho người chơi phổ thông. Đã loại: nút gọi đợt sớm để lấy thêm thưởng (thêm luật ngoài vòng 1)."
+  },
+  "gap-no-pause": {
+   "hash": "39a3b1479f1b",
+   "text": "Trong lúc thở trận không dừng: nâng cấp, kĩ năng thành, hồi sinh hero vẫn như mọi lúc\nLúc thở không phải màn riêng; chỉ là không có quái mới. Thành không được hồi máu. Đã loại: hồi máu thành giữa hai đợt (thành không tự hồi)."
+  },
+  "gap-one-wave": {
+   "hash": "a88e87aefbda",
+   "text": "Đợt sau chỉ bắt đầu sau khi đợt trước đã dọn sạch, hai đợt không bao giờ chồng nhau\nRanh giới đợt rõ, điểm đếm được. Đã loại: đợt sau tới theo giờ dù đợt trước còn quái."
+  }
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "hash": "c2280c4f2bf3",
+ "items": {
+  "target-on-screen": {
+   "hash": "8b120ff17a91",
+   "text": "Hero chỉ nhắm quái còn sống có tâm trong x=-16u tới +16u, chọn con có khoảng cách nhỏ nhất\nQuái vừa sinh ở x=±17u chưa bị nhắm cho tới khi vào màn. Bằng khoảng cách thì chọn quái gần thành hơn, vẫn bằng thì chọn quái ra trước. Khoảng cách theo `feature-hero/hero-stats/hero-level-values`."
+  },
+  "walk-limit": {
+   "hash": "8d10690f7086",
+   "text": "Tâm hero luôn trong x=-15u tới +15u; mục tiêu ngoài đó thì hero đứng ở mốc ±15u chờ\nĐứng ở mốc mà mục tiêu vào tầm thì đánh. Hero bắn xa tầm 6-7u luôn với tới quái trên màn; Hiệp sĩ ở x=15u với tới quái có mép trong tới 16.7u."
+  },
+  "retarget-check": {
+   "hash": "650ebdbbddcd",
+   "text": "Khi đang đi, mỗi khung hình chọn lại quái gần nhất; khi đang đánh, giữ mục tiêu tới khi nó bị hạ hoặc khoảng cách lớn hơn tầm\nHero cận chiến đang đi về bên trái mà một con Sói tới gần hơn ở bên phải thì quay sang Sói ngay."
+  },
+  "idle-return": {
+   "hash": "ebac556df760",
+   "text": "Không còn quái nào trên màn thì hero đi về điểm xuất phát của chỗ mình (x=-1.5u hoặc +1.5u) và đứng chờ\nĐi với tốc độ chạy bình thường. Quái mới vào màn khi hero đang về thì hero quay ra ngay."
+  }
+ }
+}

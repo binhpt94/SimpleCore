@@ -1,0 +1,21 @@
+{
+ "hash": "646c23aa767e",
+ "items": {
+  "request-by-name": {
+   "hash": "1f990edff300",
+   "text": "Feature khác xin chuyển bằng tên scene đích, không tự tải scene\nFeature xin không cần biết scene được tải thế nào. Đã loại: mỗi feature tự gọi tải scene (dễ tải chồng, bỏ sót bước huỷ)."
+  },
+  "switch-order": {
+   "hash": "ae2be394901e",
+   "text": "Chuyển scene luôn theo thứ tự: huỷ xong scene cũ rồi mới tải scene mới\nHai bước nhờ `feature-session-scene` làm. Huỷ trước để không có hai scene cùng chạy."
+  },
+  "one-switch-at-a-time": {
+   "hash": "ea5b466203c0",
+   "text": "Mỗi lúc chỉ có một lần chuyển scene\nĐang chuyển thì không bắt đầu lần chuyển khác."
+  },
+  "switch-cover": {
+   "hash": "5b77ee5ed971",
+   "text": "Trong lúc chuyển, màn hình được che, người chơi không thấy scene dở dang\nChe bằng một lớp chung của feature này. Đã loại: để màn đen trống."
+  }
+ }
+}

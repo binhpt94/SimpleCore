@@ -1,0 +1,29 @@
+{
+ "hash": "8dc236dfca8b",
+ "items": {
+  "six-buttons": {
+   "hash": "f4b1826f2643",
+   "text": "Thanh có đúng 6 nút, mỗi nút ứng với một trong 6 mục nâng cấp\nKhông có nút nào khác trên thanh (không nút đóng, không nút mở rộng)."
+  },
+  "hero-group": {
+   "hash": "a5d376dd525b",
+   "text": "Nhóm hero có 3 nút theo thứ tự chỗ 1, 2, 3 của đội\nNút hero chỗ 1 nằm ở đầu nhóm."
+  },
+  "castle-group": {
+   "hash": "4e995fe85d16",
+   "text": "Nhóm thành có 3 nút theo thứ tự máu, sức đánh, kĩ năng\nMáu: máu thành. Sức đánh: đòn tự bắn của thành. Kĩ năng: cả ba kĩ năng thành."
+  },
+  "group-gap": {
+   "hash": "03b92cea688f",
+   "text": "Giữa 2 nhóm có một khoảng trống rộng hơn khoảng cách giữa hai nút trong cùng nhóm\nLiếc là thấy hai nhóm; kiểm bằng ảnh chụp màn hình. Độ rộng cụ thể do người làm giao diện quyết."
+  },
+  "show-when": {
+   "hash": "40933e6343d2",
+   "text": "Thanh hiện từ khung hình đầu của trận tới khi popup kết thúc lượt hiện, kể cả lúc nghỉ giữa đợt và lúc tạm dừng, 0 lần ẩn giữa chừng\nLúc tạm dừng thanh vẫn hiện, các nút ở trạng thái không mua được."
+  },
+  "no-cover": {
+   "hash": "726026270a8a",
+   "text": "Thanh không che dải đất chiến trường: 0 phần của dải đất nằm dưới thanh\nKiểm bằng ảnh chụp màn hình ở tỉ lệ 16:9 và 20:9."
+  }
+ }
+}

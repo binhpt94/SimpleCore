@@ -1,0 +1,25 @@
+{
+ "hash": "2c1e443d0ced",
+ "items": {
+  "castle-upgrade-three": {
+   "hash": "0f4b9456b9ca",
+   "text": "Thành có đúng ba mục nâng cấp: máu, sức đánh, kĩ năng\nMỗi mục ứng với một vai của thành: chịu đòn, tự bắn, cứu nguy. Đã loại: nâng tốc độ đánh, tầm bắn riêng (thêm nút mà ít khác biệt)."
+  },
+  "castle-upgrade-level": {
+   "hash": "731081bb077b",
+   "text": "Mỗi mục có cấp riêng, mỗi lần mua lên một cấp\nBa mục độc lập; nâng mục này không đổi mục kia. Cấp giữ tới hết lượt."
+  },
+  "upgrade-hp-effect": {
+   "hash": "6a4eb6ea5e36",
+   "text": "Nâng máu tăng máu tối đa, và máu hiện tại tăng thêm đúng phần đó\nĐây là cách duy nhất thành có thêm máu trong trận. Không hồi phần máu đã mất trước đó. Đã loại: nâng máu hồi đầy máu (biến nâng cấp thành nút hồi máu)."
+  },
+  "upgrade-attack-effect": {
+   "hash": "2e326c31c5f6",
+   "text": "Nâng sức đánh làm mỗi phát tự bắn của thành trừ nhiều máu quái hơn\nChỉ tăng sức đánh của đòn tự bắn (`feature-castle/castle-attack`), không đổi tốc độ đánh hay tầm."
+  },
+  "upgrade-skill-effect": {
+   "hash": "054b12e2e3fa",
+   "text": "Nâng kĩ năng làm cả ba kĩ năng thành mạnh hơn, hồi chiêu không đổi\nSấm sét trừ nhiều máu hơn, Băng giá làm chậm lâu hơn, Cổ vũ hồi nhiều máu hơn (`feature-castle/castle-skills`). Đã loại: nâng riêng từng kĩ năng (thêm nút), giảm hồi chiêu (người chơi phổ thông khó thấy rõ)."
+  }
+ }
+}

@@ -1,26 +1,24 @@
 ---
-based-on: cf568e2870fe
+based-on: c266fb040742
 ---
 # Lượt chơi
 
-Một lượt chơi từ lúc bấm chơi, qua màn chọn đội, tới lúc thành hết máu. Feature này lo các màn hình đầu và cuối, đặt lại mọi thứ khi bắt đầu lượt, tính điểm và lưu kỉ lục.
+Một lượt chơi từ lúc bấm chơi, qua chọn đội, vào trận, tới khi thành bị phá. Feature này nối các màn hình theo thứ tự, đặt lại mọi thứ khi bắt đầu lượt, tính điểm và giữ kỉ lục.
 
 ## Ý cốt lõi
 
-### run-flow | AI 8
-Thứ tự màn hình: màn bắt đầu (tên game, kỉ lục, nút chơi) → màn chọn đội (`feature-hero`) → trận → màn thua.
+### run-flow | AI 8 | Một lượt đi theo thứ tự: màn bắt đầu, chọn đội, trận, báo thua
+Các màn là `feature-home`, `feature-team-select`, trận, `feature-popup-lose`.
 
-### run-reset | AI 8
-Bắt đầu lượt: máu thành, tiền, mọi cấp nâng cấp, số đợt đều về ban đầu; đội hero là đội vừa chọn.
+### run-reset | AI 8 | Mỗi lượt bắt đầu lại từ đầu: thành, tiền, nâng cấp, đợt đều về ban đầu
 
-### run-score | AI 8
-Điểm của lượt là số đợt đã dọn sạch; đợt đang đánh dở không tính.
+### run-score | AI 8 | Điểm của lượt là số đợt đã dọn sạch
+Đã loại: điểm theo số quái hạ.
 
-### run-record | AI 7
-Kỉ lục là điểm cao nhất, lưu lại sau khi tắt game. Đây là thứ duy nhất giữ qua các lượt.
+### run-record | AI 7 | Kỉ lục được giữ lại cả khi tắt game; đây là thứ duy nhất giữ qua các lượt
 
-### run-lose-screen | AI 7
-Thành còn 0 máu: trận dừng, hiện màn thua với điểm lượt này, kỉ lục, nút chơi lại (về màn chọn đội) và nút về màn bắt đầu.
+### run-replay | AI 7 | Chơi lại thì về màn chọn đội để đổi đội nếu muốn
+Đã loại: vào thẳng trận với đội cũ.
 
-### run-pause | AI 6
-Trong trận có nút tạm dừng: mọi thứ đứng yên, không bấm kĩ năng hay mua nâng cấp được cho tới khi tiếp tục.
+### run-pause | AI 6 | Người chơi tạm dừng được trận đang đánh
+Chơi trên điện thoại hay bị ngắt. Popup là `feature-popup-pause`.

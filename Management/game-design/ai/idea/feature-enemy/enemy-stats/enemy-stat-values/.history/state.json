@@ -1,0 +1,21 @@
+{
+ "hash": "213bae407954",
+ "items": {
+  "base-stats": {
+   "hash": "ff313a4295d0",
+   "text": "Chỉ số gốc (máu / sát thương / giây mỗi đòn / tầm u / đi u/s): Lính 40/5/1.0/1.0/1.5, Sói 20/3/0.8/1.0/3.0, Khổng lồ 150/15/1.5/1.2/0.8, Cung thủ quái 25/6/1.2/5/1.5, Trùm 400/40/2.0/1.5/0.6\nSói nhanh gấp đôi Lính, Khổng lồ gần gấp 4 máu Lính, Trùm 10 lần máu Lính. Đợt có Trùm khó vọt hơn đợt trước là ngoại lệ có chủ đích."
+  },
+  "wave-multiplier": {
+   "hash": "1a38cd0804b0",
+   "text": "Lúc ra, máu tối đa và sát thương nhân (1 + 0.10×(đợt-1)); quái ra rồi thì không đổi nữa\nLính đợt 10: 76 máu, 9.5 sát thương. Hệ số đợt do `feature-wave` đưa vào lúc sinh. Tốc độ đi, giây mỗi đòn và tầm không nhân."
+  },
+  "defeated-values": {
+   "hash": "817d2243d753",
+   "text": "Máu ≤ 0 thì quái bị hạ ngay khung hình đó: không đánh, không bị nhắm, cho tiền, thu nhỏ về 0 trong 0.3s rồi biến mất\n0.3s thu nhỏ chỉ để nhìn; quái không chắn đòn khác trong lúc đó. Đòn vùng không tính quái đã bị hạ."
+  },
+  "no-regen-enemy": {
+   "hash": "4dd64279e9e5",
+   "text": "Quái không tự hồi máu, máu chỉ giảm\nĐã loại: quái tự hồi (người chơi phải hạ dứt điểm sẽ khó đọc)."
+  }
+ }
+}

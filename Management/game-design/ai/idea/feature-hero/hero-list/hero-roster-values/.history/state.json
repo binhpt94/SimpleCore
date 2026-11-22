@@ -1,0 +1,33 @@
+{
+ "hash": "7e08a91df0cf",
+ "items": {
+  "team-size": {
+   "hash": "b74a1c4f0e89",
+   "text": "Đội có 3 chỗ, chọn từ danh sách 5 hero, không chọn trùng\nMỗi lượt bỏ ra 2 hero nên luôn có lựa chọn. Màn chọn là `feature-team-select`."
+  },
+  "knight-values": {
+   "hash": "85203bbc0d5a",
+   "text": "Hiệp sĩ: 300 máu, 12 sát thương mỗi 1.0s, tầm 1.2u, chạy 2.5u/s, một mục tiêu\nMáu nhiều nhất, đứng chắn. 12 sát thương/s."
+  },
+  "axeman-values": {
+   "hash": "e763bae08943",
+   "text": "Đấu sĩ rìu: 240 máu, 14 sát thương mỗi 1.4s, tầm 1.3u, chạy 2.5u/s, chém trúng mọi quái trong 1.5u phía trước\nVùng chém tính từ mép trước của hero về phía mục tiêu, cùng bên với mục tiêu. 10 sát thương/s mỗi quái, thấp hơn Hiệp sĩ nhưng trúng nhiều con."
+  },
+  "swordsman-values": {
+   "hash": "ed94ddf6cba1",
+   "text": "Kiếm khách: 180 máu, 16 sát thương mỗi 0.7s, tầm 1.2u, chạy 3.5u/s, một mục tiêu\nĐi nhanh nhất, 22.9 sát thương/s cao nhất; máu ít nên dễ gục."
+  },
+  "archer-values": {
+   "hash": "bde43b059bae",
+   "text": "Cung thủ: 120 máu, 14 sát thương mỗi 0.8s, tầm 7u, chạy 2.5u/s, một mục tiêu\nTầm xa nhất, hơn tầm Cung thủ quái (5u), 17.5 sát thương/s."
+  },
+  "mage-values": {
+   "hash": "82348eddfeac",
+   "text": "Pháp sư: 100 máu, 18 sát thương mỗi 1.6s, tầm 6u, chạy 2.2u/s, nổ trúng mục tiêu và mọi quái cách tâm mục tiêu không quá 1.5u\n11.25 sát thương/s mỗi quái, chậm nhất nhưng dọn cụm."
+  },
+  "hero-feedback": {
+   "hash": "13086c97764e",
+   "text": "Hero đi thì nhún 0.1u mỗi 0.4s, ra đòn thì nhích 0.2u về phía mục tiêu trong 0.15s, bị đánh thì nháy 0.1s\nNgười chơi phân biệt được hero đang đi, đang đánh, đang bị đánh mà không cần thanh trạng thái."
+  }
+ }
+}

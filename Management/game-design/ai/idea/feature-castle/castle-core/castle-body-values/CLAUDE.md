@@ -1,0 +1,47 @@
+# Thông số thân thành
+
+Dữ liệu cốt lõi: [data.md](data.md)
+
+## Làm gì
+- Đặt một thành 2D đứng yên ở giữa dải đất, chân trên mặt đất (y=0).
+- Giữ máu tối đa và máu hiện tại; nhận sát thương từ quái; báo `feature-run` khi bị phá.
+- Cho `feature-hero/hero-respawn` biết điểm xuất phát của từng chỗ trong đội.
+- Nhận lệnh "tăng máu" từ `feature-castle/castle-upgrade-effects` (cộng vào cả máu tối đa và máu hiện tại).
+
+## Thông số
+| Thông số | Giá trị | Đơn vị | Lí do |
+|---|---|---|---|
+| Tâm thành | x=0 | u | Thành ở giữa màn hình (màn thấy x=-16u tới +16u) |
+| Kích thước | rộng 3 × cao 4 | u | Bộ số chung; đủ lớn để nhận ra giữa các unit cao 0.8-3.5u |
+| Mép thành | x=-1.5 và x=+1.5 | u | Mọi tầm tính từ đây |
+| Máu tối đa lúc vào trận | 1000 | máu | Dự kiến; xem cân bằng ở "Chưa rõ" |
+| Tự hồi | 0 | máu/s | Luật vòng 3 |
+| Điểm xuất phát chỗ 1, 2, 3 | -1.5 / +1.5 / -1.5 | x (u) | Chia hai bên, không chồng toàn bộ |
+| Nháy khi bị đánh | 0.1 | s | Đủ thấy, không nhấp nháy liên tục khó chịu |
+| Thu nhỏ khi bị phá | 0.5 | s | Cho người chơi thấy khoảnh khắc thua trước khi `feature-run` báo |
+
+Cân bằng dự kiến: đợt 10 có 26 quái, Lính 40×1.9=76 máu, 5×1.9=9.5 sát thương/1.0s. 10 Lính đứng đánh thành cùng lúc trừ 95 máu/s, thành 1000 máu trụ khoảng 10.5s: đủ để người chơi kịp bấm Sấm sét và mua máu.
+
+## Thông số theo giai đoạn
+| Thông số | IDEA | PROTOTYPE | FULL |
+|---|---|---|---|
+| Máu tối đa lúc vào trận | 1000 | 1000 (chỉnh sau khi chơi thử) | theo số đã chỉnh |
+| Hình thành | 1 sprite gen bằng AI | 1 sprite, có hình khi máu dưới 50% | đủ hình theo mức máu (100%, 50%, 25%) |
+| Phản hồi bị đánh | nháy 0.1s | nháy 0.1s + rung nhẹ 0.1s | đủ hiệu ứng và âm thanh |
+| Phản hồi bị phá | thu nhỏ còn 0 trong 0.5s | như IDEA | hiệu ứng sụp đổ riêng |
+
+## Trường hợp biên
+- Nhiều quái đánh trúng cùng một khung hình: trừ lần lượt; lần đưa máu về ≤0 là lần báo bị phá; các lần sau bị bỏ qua.
+- Nâng máu đúng lúc máu về 0 cùng khung hình: bị phá xử lý trước; đã bị phá thì không mua được nữa (`feature-run` dừng trận).
+- Máu hiện tại có số lẻ (sát thương quái nhân hệ số đợt): giữ số thực, hiện ra làm tròn lên, nên còn 0.4 máu vẫn hiện 1 và thành chưa bị phá.
+- Tạm dừng: thành không nhận sát thương vì mọi quái đứng yên; hiệu ứng nháy đang chạy cũng dừng.
+- Hero và đòn của chính thành, kĩ năng thành không bao giờ trừ máu thành.
+
+## Đã tự quyết
+- **Mọi tầm tính từ mép thành.** Khớp bộ số chung ("tầm 6u tính từ mép thành"). Đã loại: tính từ tâm.
+- **Điểm xuất phát 2 trái 1 phải theo thứ tự chỗ.** Một quy tắc cố định, dễ kiểm. Đã loại: xuất phát về phía có quái gần nhất (lúc vào trận chưa có quái nên vô nghĩa).
+- **Hiển thị máu làm tròn lên.** Người chơi không thấy "0" mà thành vẫn đứng.
+- **Bị phá chỉ báo 1 lần.** Tránh `feature-run` nhận hai lần thua.
+
+## Chưa rõ
+- 1000 máu có thể dư ở đợt đầu (Lính đợt 1 cần 200s một mình): giữ theo bộ số chung, đề xuất chỉnh sau chơi thử xuống 600-800 nếu đợt 1-5 không thấy áp lực.

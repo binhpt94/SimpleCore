@@ -1,0 +1,37 @@
+{
+ "hash": "558a0d06d13f",
+ "items": {
+  "step-main": {
+   "hash": "f4a0b7625703",
+   "text": "Bước chính có tiêu đề \"Tạm dừng\" và 2 nút: \"Tiếp tục\" (nút chính) và \"Bỏ lượt\"\nPopup luôn mở ở bước chính."
+  },
+  "resume-tap": {
+   "hash": "0e86f3b2f2af",
+   "text": "Chạm \"Tiếp tục\" thì báo `feature-run/run-pause` tiếp tục; popup đóng và trận chạy ngay"
+  },
+  "quit-to-confirm": {
+   "hash": "33ad405fb2ef",
+   "text": "Chạm \"Bỏ lượt\" ở bước chính thì popup đổi sang bước hỏi, không mở popup thứ hai\nBước hỏi có câu \"Bỏ lượt này? Điểm tính theo số đợt đã dọn.\" và 2 nút: \"Bỏ lượt\" và \"Không\" (nút chính)."
+  },
+  "confirm-yes": {
+   "hash": "04291f156014",
+   "text": "Chạm \"Bỏ lượt\" ở bước hỏi thì báo `feature-run/run-pause` bỏ lượt; popup đóng, về màn bắt đầu"
+  },
+  "confirm-no": {
+   "hash": "1d59e347fe34",
+   "text": "Chạm \"Không\" ở bước hỏi thì quay lại bước chính; trận vẫn tạm dừng"
+  },
+  "back-key": {
+   "hash": "d5a6ec3a270b",
+   "text": "Nút quay lại của máy: ở bước chính như chạm \"Tiếp tục\", ở bước hỏi như chạm \"Không\""
+  },
+  "no-backdrop-close": {
+   "hash": "5664d23fb855",
+   "text": "Chạm nền che không đóng popup và không đổi bước"
+  },
+  "one-report-per-choice": {
+   "hash": "cee4b2d28989",
+   "text": "Sau khi đã báo tiếp tục hoặc bỏ lượt, mọi nút của popup không nhận chạm nữa"
+  }
+ }
+}

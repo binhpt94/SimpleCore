@@ -1,0 +1,25 @@
+{
+ "hash": "ff4b78bc4b2c",
+ "items": {
+  "popup-owned-by-caller": {
+   "hash": "93d2beba31e9",
+   "text": "Hình dáng và nội dung popup thuộc feature gọi, dịch vụ không biết popup nói gì\nVí dụ popup thua là của `feature-popup-lose`. Đã loại: dịch vụ giữ sẵn mẫu popup cho mọi feature."
+  },
+  "popup-id": {
+   "hash": "ea061e3cf34b",
+   "text": "Feature gọi xin hiện popup bằng id dạng `<Owner>/<Name>`\n`Owner` là tên feature gọi, `Name` là tên popup của nó. Đã loại: đưa thẳng object popup cho dịch vụ."
+  },
+  "popup-caller-fills": {
+   "hash": "f9e9437d060f",
+   "text": "Dịch vụ dựng popup xong thì feature gọi điền nội dung và xử lí nút bấm\nDịch vụ không quyết định kết quả bấm nút."
+  },
+  "popup-close": {
+   "hash": "9ff8b241d1ff",
+   "text": "Popup đóng khi feature gọi yêu cầu đóng\nThường sau khi người chơi bấm một nút của popup. Đã loại: popup tự đóng khi bấm ra ngoài (dễ bấm nhầm mất popup thua)."
+  },
+  "popup-scene-bound": {
+   "hash": "8ee2b7b3a22f",
+   "text": "Popup thuộc scene đang chạy; rời scene thì popup đang mở bị huỷ theo\nDịch vụ tham gia vòng đời scene (`feature-session-scene`)."
+  }
+ }
+}

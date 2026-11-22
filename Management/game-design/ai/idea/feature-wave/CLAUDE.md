@@ -1,30 +1,24 @@
 # Đợt quái
 
-Dữ liệu cốt lõi (tóm tắt và các ý có điểm): [data.md](data.md)
+Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Người chơi được gì
 - Nhịp rõ ràng: đánh, thở một chút, đánh tiếp.
 - Độ khó tăng đều, luôn biết mình đang ở đợt thứ mấy.
 - Phần thưởng mỗi lần dọn sạch đợt.
 
-## Cốt lõi
-- Đợt đánh số từ 1, vô tận.
-- Mỗi đợt một danh sách quái và nhịp thả, chia hai bên.
-- Độ khó tăng theo công thức.
-- Dọn sạch: thưởng tiền, tăng điểm, nghỉ ngắn, tự sang đợt sau.
-- Thành hết máu: dừng thả, báo thua.
-
 ## Liên quan
 - `feature-enemy`: các quái được thả.
 - `feature-wallet`: thưởng dọn đợt.
-- `feature-run`: số đợt đã dọn là điểm; nhận báo thua.
-- `feature-upgrade`: không còn phụ thuộc; nâng cấp mua được mọi lúc.
+- `feature-run`: số đợt đã dọn là điểm; lượt kết thúc thì dừng thả quái.
+- `feature-hud`: hiện số đợt.
+- `feature-balance`: độ khó tăng nhanh cỡ nào.
 
 ## Đã tự quyết
-- **Bỏ màn nghỉ dài để nâng cấp.** Vòng 1 đã đổi: nâng cấp ngay trong trận (người loại bản "chỉ nâng cấp giữa hai đợt"). Node con `feature-wave/break-phase` sẽ phải làm lại hoặc xoá khi tới vòng 3.
-- **Vẫn có khoảng nghỉ ngắn tự đếm ngược.** Cho người chơi thở và thấy rõ ranh giới giữa hai đợt. Đã loại: đợt sau nối liền ngay (mất cảm giác "dọn sạch"), nghỉ tới khi bấm (không cần nữa vì nâng cấp mua được lúc đánh).
-- **Có thưởng tiền khi dọn sạch đợt.** Thêm phần thưởng cho việc trụ được. Đã loại: chỉ tiền từ quái.
-- **Độ khó theo công thức.** Vì chơi vô tận. Đã loại: bảng đợt viết tay.
+- **Bỏ ý `wave-number` và `wave-stop-on-lose`.** Hiện số đợt là việc của `feature-hud`; dừng khi thua là luật nối với `feature-run`, để vòng 3.
+- **Vẫn có lúc thở ngắn giữa hai đợt, không phải màn nghỉ để nâng cấp.** Nâng cấp mua được mọi lúc (vòng 1).
+- **Bỏ "dự kiến 5 giây" và nút vào sớm.** Con số để vòng 4; nút vào sớm là chi tiết, xét lại ở vòng 3.
+- **Node con `feature-wave/break-phase` (màn nghỉ để nâng cấp) không còn khớp.** Khi làm lại vòng 3 sẽ xoá hoặc viết lại thành lúc thở ngắn.
 
 ## Chưa rõ
 - Không có điểm chặn.

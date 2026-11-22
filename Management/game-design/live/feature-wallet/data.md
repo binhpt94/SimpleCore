@@ -1,5 +1,5 @@
 ---
-based-on: cf568e2870fe
+based-on: c266fb040742
 ---
 # Tiền
 
@@ -7,14 +7,11 @@ Loại tiền duy nhất của lượt chơi: nhận khi hạ quái và khi dọ
 
 ## Ý cốt lõi
 
-### single-currency | AI 8
-Chỉ có một loại tiền. Số tiền hiện tại luôn không âm và luôn hiện trên màn hình.
+### single-currency | AI 8 | Game chỉ có một loại tiền
+Đã loại: đá quý hay tiền lâu dài (game không có tiến trình lâu dài).
 
-### earn | AI 8
-Tiền cộng khi quái bị hạ và khi dọn sạch một đợt.
+### earn | AI 8 | Nhận tiền khi hạ quái và khi dọn sạch một đợt
 
-### spend | AI 8
-Tiền trừ khi mua nâng cấp; không đủ tiền thì không mua được.
+### spend | AI 8 | Tiêu tiền để mua nâng cấp; không đủ tiền thì không mua được
 
-### run-scoped | AI 7
-Đầu mỗi lượt chơi tiền về số ban đầu; tiền không giữ qua các lượt.
+### run-scoped | AI 7 | Tiền chỉ dùng trong một lượt, lượt mới bắt đầu lại
