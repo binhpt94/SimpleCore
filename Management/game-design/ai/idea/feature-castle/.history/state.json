@@ -1,0 +1,29 @@
+{
+ "hash": "fc3cb478546c",
+ "items": {
+  "castle-health": {
+   "hash": "6e724f67367f",
+   "text": "Thành có máu tối đa và máu hiện tại. Quái tới được thành thì đánh trừ máu. Máu về 0 thì báo thua cho `feature-run`."
+  },
+  "castle-no-regen": {
+   "hash": "0b24284deb25",
+   "text": "Máu thành không tự hồi giữa các đợt. Nâng cấp máu thì cả máu tối đa và máu hiện tại cùng tăng thêm phần đó."
+  },
+  "castle-auto-attack": {
+   "hash": "838f91a7c36e",
+   "text": "Thành tự bắn quái gần nhất trong tầm, cả hai phía, không cần người chơi bấm."
+  },
+  "castle-skills": {
+   "hash": "ce49894eca49",
+   "text": "Thành có kĩ năng (dự kiến 2 cho bản đầu), mỗi kĩ năng một nút trên màn hình. Bấm thì dùng ngay, sau đó chờ hết thời gian hồi chiêu mới dùng lại; nút hiện rõ thời gian còn lại."
+  },
+  "castle-hero-base": {
+   "hash": "a5f12de8fbd0",
+   "text": "Thành là nơi đội hero xuất hiện khi vào trận và là nơi hero gục hồi sinh."
+  },
+  "castle-upgrades": {
+   "hash": "17ccb832bcf6",
+   "text": "Ba thứ của thành nâng cấp được: máu, sức đánh (của đòn tự bắn), kĩ năng (mạnh hơn hoặc hồi chiêu ngắn hơn)."
+  }
+ }
+}

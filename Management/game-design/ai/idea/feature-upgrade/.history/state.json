@@ -1,0 +1,29 @@
+{
+ "hash": "2c578992a476",
+ "items": {
+  "upgrade-anytime": {
+   "hash": "04c356b39702",
+   "text": "Mua nâng cấp được bất kì lúc nào trong trận, kể cả lúc đang đánh và lúc nghỉ giữa hai đợt. Trận không dừng khi mua."
+  },
+  "upgrade-bar": {
+   "hash": "d2445ff6bb4d",
+   "text": "Các nút nâng cấp nằm trên một thanh cố định ở mép màn hình, không mở bảng riêng. Mỗi nút hiện cấp hiện tại và giá cấp tiếp theo; không đủ tiền thì nút mờ đi."
+  },
+  "upgrade-items": {
+   "hash": "8a805c2b21b4",
+   "text": "Danh sách nâng cấp cố định: mỗi hero trong đội một nút (lên cấp hero, tăng mọi chỉ số), cộng ba nút của thành (máu, sức đánh, kĩ năng)."
+  },
+  "upgrade-instant": {
+   "hash": "5b64a83f7dc6",
+   "text": "Nâng cấp có hiệu lực ngay lập tức, kể cả với hero đang gục chờ hồi sinh."
+  },
+  "upgrade-cost": {
+   "hash": "8cac81731497",
+   "text": "Giá tăng theo cấp. Không có cấp tối đa ở vòng này; giá tăng dần tự hãm."
+  },
+  "upgrade-reset": {
+   "hash": "27c69846d0bb",
+   "text": "Mọi cấp nâng cấp mất khi lượt chơi kết thúc; không bán lại, không hoàn tiền."
+  }
+ }
+}

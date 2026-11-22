@@ -1,0 +1,21 @@
+{
+ "hash": "d515ad5333bd",
+ "items": {
+  "single-currency": {
+   "hash": "46a380f6fd0f",
+   "text": "Chỉ có một loại tiền. Số tiền hiện tại luôn không âm và luôn hiện trên màn hình."
+  },
+  "earn": {
+   "hash": "ed79c9f27aa5",
+   "text": "Tiền cộng khi quái bị hạ và khi dọn sạch một đợt."
+  },
+  "spend": {
+   "hash": "ecc7790c6483",
+   "text": "Tiền trừ khi mua nâng cấp; không đủ tiền thì không mua được."
+  },
+  "run-scoped": {
+   "hash": "07db778541ee",
+   "text": "Đầu mỗi lượt chơi tiền về số ban đầu; tiền không giữ qua các lượt."
+  }
+ }
+}
