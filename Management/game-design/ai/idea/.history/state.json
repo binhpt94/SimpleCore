@@ -1,57 +1,57 @@
 {
- "hash": "cf568e2870fe",
+ "hash": "7abd012372d0",
  "items": {
   "target-player": {
-   "hash": "a54b1ca9839c",
-   "text": "Người chơi phổ thông trên điện thoại cầm ngang, mỗi lượt chơi khoảng 10 đến 20 phút (dự kiến). Thao tác trong trận vừa phải: bấm kĩ năng của thành và mua nâng cấp; cái hay nằm ở chọn đội hero, chọn nâng cấp và canh lúc dùng kĩ năng."
+   "hash": "7a2c0eaf7f0b",
+   "text": "Người chơi phổ thông, điện thoại cầm ngang, lượt chơi ngắn\nMỗi lượt khoảng 10 đến 20 phút (dự kiến). Thao tác trong trận vừa phải: bấm kĩ năng của thành và mua nâng cấp. Cái hay nằm ở chọn đội hero, chọn nâng cấp và canh lúc dùng kĩ năng."
   },
   "layout": {
-   "hash": "e861b8a4a00f",
-   "text": "Màn hình ngang, một tòa thành đứng yên ở giữa, một dải mặt đất chạy ngang hai bên thành."
+   "hash": "e45280746a01",
+   "text": "Thành đứng yên giữa màn hình ngang, mặt đất chạy hai bên\nMột dải mặt đất chạy ngang qua thành; mọi trận đánh diễn ra trên dải này."
   },
   "enemy-two-sides": {
-   "hash": "ed884572203a",
-   "text": "Quái kéo tới theo từng đợt, đi từ mép trái và mép phải màn hình vào phía thành."
+   "hash": "f1d0b85289d2",
+   "text": "Quái kéo tới theo đợt từ mép trái và mép phải\nQuái đi từ hai mép màn hình vào phía thành. Đã loại: bốn phía (khó nhìn trên màn hình thấp)."
   },
   "hero-auto-spawn": {
-   "hash": "58015de8ffe6",
-   "text": "Trước mỗi lượt chơi, người chơi chọn sẵn một đội hero với số lượng cố định (dự kiến 4 hero). Vào trận, cả đội sinh ra ở thành; trong trận không có thêm hero. Hero gục thì hồi sinh ở thành sau một khoảng thời gian."
+   "hash": "d9b2bcbd1e9f",
+   "text": "Đội hero cố định, chọn trước mỗi lượt, gục thì hồi sinh ở thành\nTrước mỗi lượt chơi, người chơi chọn sẵn một đội hero với số lượng cố định (dự kiến 4). Vào trận cả đội sinh ra ở thành; trong trận không có thêm hero. Hero gục thì hồi sinh ở thành sau một lúc. Đã loại (người loại): thành tự sinh hero theo thời gian."
   },
   "hero-auto-fight": {
-   "hash": "27e6ba47b13a",
-   "text": "Người chơi không điều khiển hero. Hero tự tìm và đánh quái gần nhất; người chơi tác động qua nâng cấp và kĩ năng của thành."
+   "hash": "f8cc9e0d6503",
+   "text": "Hero tự đánh, người chơi không điều khiển hero\nHero tự tìm và đánh quái gần nhất. Người chơi tác động qua nâng cấp và kĩ năng của thành. Đã loại: kéo thả, chọn mục tiêu."
   },
   "hero-types": {
-   "hash": "ac52a32278d1",
-   "text": "Có một danh sách hero với cách đánh khác nhau (ví dụ cận chiến chắn quái, bắn xa đứng sau). Người chơi chọn đội từ danh sách này, mỗi hero chọn một lần. Bản đầu dự kiến 6 hero, mở sẵn hết."
+   "hash": "bb0ab3f1ae24",
+   "text": "Có nhiều hero với cách đánh khác nhau để chọn vào đội\nVí dụ cận chiến chắn quái, bắn xa đứng sau. Mỗi hero chọn vào đội một lần. Danh sách dự kiến 6 hero, đều chọn được ngay, không cần mở khoá."
   },
   "castle-role": {
-   "hash": "c79f0da678c2",
-   "text": "Thành tự đánh quái trong tầm. Thành có kĩ năng (dự kiến 1 đến 2 cho bản đầu) có thời gian hồi chiêu; người chơi bấm để kích hoạt. Quái tới được thành thì đánh trừ máu thành."
+   "hash": "30dd37c01039",
+   "text": "Thành tự đánh quái và có kĩ năng hồi chiêu do người chơi bấm\nThành tự bắn quái trong tầm. Thành có vài kĩ năng, mỗi kĩ năng có thời gian hồi chiêu; người chơi bấm để kích hoạt. Quái tới được thành thì đánh trừ máu thành. Đã loại (người loại): thành không đánh."
   },
   "upgrade-between-waves": {
-   "hash": "4f917e60c8f0",
-   "text": "Hạ quái được tiền. Nâng cấp được bất kì lúc nào, kể cả đang đánh; trận không dừng khi mua, nâng cấp có hiệu lực ngay."
+   "hash": "09f12795191e",
+   "text": "Nâng cấp được ngay trong trận, trận không dừng\nHạ quái được tiền. Mua nâng cấp bất kì lúc nào, kể cả đang đánh; nâng cấp có hiệu lực ngay. Đã loại (người loại): chỉ nâng cấp giữa hai đợt."
   },
   "upgrade-targets": {
-   "hash": "e4a69a33087b",
-   "text": "Nâng cấp được hai thứ: chỉ số của từng hero trong đội, và thành (máu, sức đánh, kĩ năng)."
+   "hash": "47aa36542aa4",
+   "text": "Nâng cấp từng hero trong đội và thành\nThành nâng được máu, sức đánh, kĩ năng."
   },
   "lose-condition": {
-   "hash": "2f8da9e1dd1b",
-   "text": "Thành còn 0 máu là thua lượt chơi."
+   "hash": "0e4c8d6511ac",
+   "text": "Thành còn 0 máu là thua lượt chơi"
   },
   "endless-score": {
-   "hash": "ea31f5751925",
-   "text": "Chơi vô tận, không có đợt cuối; đợt sau đông hơn và mạnh hơn. Điểm là số đợt đã dọn sạch; lưu kỉ lục điểm cao nhất."
+   "hash": "d8dd4c8b2ad2",
+   "text": "Chơi vô tận, điểm là số đợt đã dọn sạch, lưu kỉ lục\nKhông có đợt cuối; đợt sau đông hơn và mạnh hơn. Đã loại: thắng khi qua đủ N đợt."
   },
   "run-reset": {
-   "hash": "44ff9cbcc1e9",
-   "text": "Mỗi lượt chơi bắt đầu lại từ đầu: tiền và mọi nâng cấp mất khi thua; lượt sau chọn lại đội hero. Chỉ kỉ lục được giữ."
+   "hash": "ac032e4dfe01",
+   "text": "Mỗi lượt chơi bắt đầu lại từ đầu, chỉ giữ kỉ lục\nTiền và mọi nâng cấp mất khi thua; lượt sau chọn lại đội hero. Đã loại: nâng cấp vĩnh viễn giữa các lượt."
   },
   "single-map": {
-   "hash": "b3e62a6251bd",
-   "text": "Bản đầu chỉ có một bản đồ."
+   "hash": "4134de30c47f",
+   "text": "Game có một bản đồ duy nhất\nĐã loại: nhiều màn, nhiều bản đồ."
   }
  }
 }

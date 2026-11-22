@@ -4,41 +4,40 @@ Game thủ thành màn hình ngang: một tòa thành đứng giữa màn hình,
 
 ## Ý cốt lõi
 
-### target-player | AI 7
-Người chơi phổ thông trên điện thoại cầm ngang, mỗi lượt chơi khoảng 10 đến 20 phút (dự kiến). Thao tác trong trận vừa phải: bấm kĩ năng của thành và mua nâng cấp; cái hay nằm ở chọn đội hero, chọn nâng cấp và canh lúc dùng kĩ năng.
+### target-player | AI 7 | Người chơi phổ thông, điện thoại cầm ngang, lượt chơi ngắn
+Mỗi lượt khoảng 10 đến 20 phút (dự kiến). Thao tác trong trận vừa phải: bấm kĩ năng của thành và mua nâng cấp. Cái hay nằm ở chọn đội hero, chọn nâng cấp và canh lúc dùng kĩ năng.
 
-### layout | AI 8
-Màn hình ngang, một tòa thành đứng yên ở giữa, một dải mặt đất chạy ngang hai bên thành.
+### layout | AI 8 | Thành đứng yên giữa màn hình ngang, mặt đất chạy hai bên
+Một dải mặt đất chạy ngang qua thành; mọi trận đánh diễn ra trên dải này.
 
-### enemy-two-sides | AI 8
-Quái kéo tới theo từng đợt, đi từ mép trái và mép phải màn hình vào phía thành.
+### enemy-two-sides | AI 8 | Quái kéo tới theo đợt từ mép trái và mép phải
+Quái đi từ hai mép màn hình vào phía thành. Đã loại: bốn phía (khó nhìn trên màn hình thấp).
 
-### hero-auto-spawn | AI 7
-Trước mỗi lượt chơi, người chơi chọn sẵn một đội hero với số lượng cố định (dự kiến 4 hero). Vào trận, cả đội sinh ra ở thành; trong trận không có thêm hero. Hero gục thì hồi sinh ở thành sau một khoảng thời gian.
+### hero-auto-spawn | AI 7 | Đội hero cố định, chọn trước mỗi lượt, gục thì hồi sinh ở thành
+Trước mỗi lượt chơi, người chơi chọn sẵn một đội hero với số lượng cố định (dự kiến 4). Vào trận cả đội sinh ra ở thành; trong trận không có thêm hero. Hero gục thì hồi sinh ở thành sau một lúc. Đã loại (người loại): thành tự sinh hero theo thời gian.
 
-### hero-auto-fight | AI 7
-Người chơi không điều khiển hero. Hero tự tìm và đánh quái gần nhất; người chơi tác động qua nâng cấp và kĩ năng của thành.
+### hero-auto-fight | AI 7 | Hero tự đánh, người chơi không điều khiển hero
+Hero tự tìm và đánh quái gần nhất. Người chơi tác động qua nâng cấp và kĩ năng của thành. Đã loại: kéo thả, chọn mục tiêu.
 
-### hero-types | AI 6
-Có một danh sách hero với cách đánh khác nhau (ví dụ cận chiến chắn quái, bắn xa đứng sau). Người chơi chọn đội từ danh sách này, mỗi hero chọn một lần. Bản đầu dự kiến 6 hero, mở sẵn hết.
+### hero-types | AI 6 | Có nhiều hero với cách đánh khác nhau để chọn vào đội
+Ví dụ cận chiến chắn quái, bắn xa đứng sau. Mỗi hero chọn vào đội một lần. Danh sách dự kiến 6 hero, đều chọn được ngay, không cần mở khoá.
 
-### castle-role | AI 7
-Thành tự đánh quái trong tầm. Thành có kĩ năng (dự kiến 1 đến 2 cho bản đầu) có thời gian hồi chiêu; người chơi bấm để kích hoạt. Quái tới được thành thì đánh trừ máu thành.
+### castle-role | AI 7 | Thành tự đánh quái và có kĩ năng hồi chiêu do người chơi bấm
+Thành tự bắn quái trong tầm. Thành có vài kĩ năng, mỗi kĩ năng có thời gian hồi chiêu; người chơi bấm để kích hoạt. Quái tới được thành thì đánh trừ máu thành. Đã loại (người loại): thành không đánh.
 
-### upgrade-between-waves | AI 7
-Hạ quái được tiền. Nâng cấp được bất kì lúc nào, kể cả đang đánh; trận không dừng khi mua, nâng cấp có hiệu lực ngay.
+### upgrade-between-waves | AI 7 | Nâng cấp được ngay trong trận, trận không dừng
+Hạ quái được tiền. Mua nâng cấp bất kì lúc nào, kể cả đang đánh; nâng cấp có hiệu lực ngay. Đã loại (người loại): chỉ nâng cấp giữa hai đợt.
 
-### upgrade-targets | AI 7
-Nâng cấp được hai thứ: chỉ số của từng hero trong đội, và thành (máu, sức đánh, kĩ năng).
+### upgrade-targets | AI 7 | Nâng cấp từng hero trong đội và thành
+Thành nâng được máu, sức đánh, kĩ năng.
 
-### lose-condition | AI 9
-Thành còn 0 máu là thua lượt chơi.
+### lose-condition | AI 9 | Thành còn 0 máu là thua lượt chơi
 
-### endless-score | AI 6
-Chơi vô tận, không có đợt cuối; đợt sau đông hơn và mạnh hơn. Điểm là số đợt đã dọn sạch; lưu kỉ lục điểm cao nhất.
+### endless-score | AI 6 | Chơi vô tận, điểm là số đợt đã dọn sạch, lưu kỉ lục
+Không có đợt cuối; đợt sau đông hơn và mạnh hơn. Đã loại: thắng khi qua đủ N đợt.
 
-### run-reset | AI 6
-Mỗi lượt chơi bắt đầu lại từ đầu: tiền và mọi nâng cấp mất khi thua; lượt sau chọn lại đội hero. Chỉ kỉ lục được giữ.
+### run-reset | AI 6 | Mỗi lượt chơi bắt đầu lại từ đầu, chỉ giữ kỉ lục
+Tiền và mọi nâng cấp mất khi thua; lượt sau chọn lại đội hero. Đã loại: nâng cấp vĩnh viễn giữa các lượt.
 
-### single-map | AI 6
-Bản đầu chỉ có một bản đồ.
+### single-map | AI 6 | Game có một bản đồ duy nhất
+Đã loại: nhiều màn, nhiều bản đồ.
