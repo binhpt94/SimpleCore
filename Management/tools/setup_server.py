@@ -15,6 +15,11 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   model and effort; default opus / medium) and then bound. Binding writes the same
   file bind_session.py writes, so the PIN never goes through a chat (a bind command typed as the first message
   of a chat can end up in the thread's generated title).
+- Game design tab: GET /api/gamedesign re-reads Management/game-design. POST /api/gamedesign/promote copies one
+  idea node into live (gamedesign.promote), /sync every passing one (gamedesign.sync_live), /answers stores the
+  human's answers to @GameDesigner's questions, /review the human's score and feedback per idea: all four
+  without the PIN, the page token is enough. Nothing reaches live without one of the first two. POST /api/gamedesign/mode switches Full Auto / User control and
+  needs the PIN.
 """
 import argparse
 import html
@@ -36,12 +41,15 @@ ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / ".claude" / "hooks"))
 import bind_session  # noqa: E402
+import gamedesign  # noqa: E402
 import guard  # noqa: E402
 import sync_page  # noqa: E402
 import validate  # noqa: E402
 
-BASIC = ["@human", "@Manager", "@CodeLead", "@Core", "@Composition"]
-ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@Core": "Basic", "@Composition": "Basic"}
+BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Core", "@Composition"]
+ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
+               "@Core": "Basic", "@Composition": "Basic"}
+STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp")
 
 
 def group_of(name):
@@ -56,9 +64,17 @@ MODELS = ["opus", "sonnet", "haiku", "fable"]
 EFFORTS = ["low", "medium", "high", "xhigh", "max"]
 DEFAULT_MODEL, DEFAULT_EFFORT = "opus", "medium"
 EFFORT_RX = re.compile(r'"effort"\s*:\s*"([a-z]+)"')
+# The VS Code extension lists only sessions whose transcript says they were started from it. `claude -p` run from
+# a plain terminal records "sdk-cli" and the thread never shows up there, so create() sets the entry point itself
+# and a thread recorded only as "sdk-cli" ("unlisted") is skipped like an archived one.
+ENTRY_RX = re.compile(r'"entrypoint"\s*:\s*"([^"]+)"')
+VSCODE_ENTRY, HEADLESS_ENTRY = "claude-vscode", "sdk-cli"
 VSCODE_STATE = Path.home() / "AppData" / "Roaming" / "Code" / "User" / "globalStorage" / "state.vscdb"
 TITLE_RX = re.compile(r'"type"\s*:\s*"custom-title".*?"customTitle"\s*:\s*"((?:[^"\\]|\\.)*)"')
 MAX_BODY = 4096
+# POST paths and the largest body each takes. Answers carry free text for every question of a node.
+POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
+              "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY}
 
 
 def transcripts_dir():
@@ -88,9 +104,13 @@ def threads():
     out = []
     folder = transcripts_dir()
     for p in folder.glob("*.jsonl") if folder.is_dir() else []:
-        title, model, effort = None, "", ""
+        title, model, effort, entries = None, "", "", set()
         with open(p, encoding="utf-8", errors="replace") as f:
             for line in f:
+                if '"entrypoint"' in line:
+                    m = ENTRY_RX.search(line)
+                    if m:
+                        entries.add(m.group(1))
                 if '"custom-title"' in line:
                     m = TITLE_RX.search(line)
                     if m:
@@ -106,6 +126,7 @@ def threads():
         if title:
             sid = p.stem
             out.append({"id": sid, "title": title, "group": group_of(title), "archived": sid in hidden,
+                        "unlisted": entries == {HEADLESS_ENTRY},
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
                         "binding": guard.bound_feature(sid, guard.STORE_DIR) or "",
                         "modified": time.strftime("%Y-%m-%d %H:%M", time.localtime(p.stat().st_mtime))})
@@ -135,6 +156,7 @@ def create(name, model, effort):
     prompt = f"Thread {name} được tạo bởi trang Setup. Chỉ trả lời đúng một chữ: Sẵn sàng."
     p = subprocess.run(["claude", "-n", name, "--session-id", sid, "--model", model, "--effort", effort, "-p", prompt],
                        cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace",
+                       env=dict(os.environ, CLAUDE_CODE_ENTRYPOINT=VSCODE_ENTRY),
                        timeout=180, shell=(os.name == "nt"))
     if p.returncode != 0:
         raise RuntimeError((p.stderr or p.stdout or f"exit {p.returncode}").strip()[:300])
@@ -150,7 +172,7 @@ def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
     error = bind_session.check_pin(guard.STORE_DIR, pin)
     if error:
         return {"ok": False, "error": error}
-    current = [t for t in threads() if not t["archived"]]
+    current = [t for t in threads() if not t["archived"] and not t["unlisted"]]
     results = []
     for name in names:
         same = [t for t in current if t["title"] == name]
@@ -166,6 +188,57 @@ def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
         except Exception as ex:
             results.append({"name": name, "action": "error", "detail": str(ex)})
     return {"ok": True, "results": results}
+
+
+def promote(path, deep):
+    """The Chốt button of the Game design tab: copies one idea node (deep: its whole branch) into live. No PIN:
+    the page token shows the request comes from the page this server served, and the guard lets no feature or
+    role session run or call this server. gamedesign.promote refuses a node that does not pass."""
+    try:
+        written = gamedesign.promote(ROOT, path, deep)
+    except (ValueError, OSError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "written": written, "data": sync_page.write_gamedesign(ROOT)}
+
+
+def sync_live():
+    """The Sync button: every passing idea node that differs from live is copied into live. No PIN."""
+    try:
+        written = gamedesign.sync_live(ROOT)
+    except (ValueError, OSError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "written": written, "data": sync_page.write_gamedesign(ROOT)}
+
+
+def set_mode(pin, mode):
+    """The mode switch of the Game design tab (Full Auto / User control); needs the PIN."""
+    if mode not in gamedesign.MODES:      # before the PIN: a bad request must not cost a try
+        return {"ok": False, "error": f"mode phải là một trong {gamedesign.MODES}"}
+    error = bind_session.check_pin(guard.STORE_DIR, pin)
+    if error:
+        return {"ok": False, "error": error}
+    gamedesign.write_mode(ROOT, mode)
+    return {"ok": True, "data": sync_page.write_gamedesign(ROOT)}
+
+
+def answer(path, answers):
+    """The OK button of the questions panel: stores the human's choices beside the node. No PIN: it changes
+    nothing in live, and the page token already shows the request comes from the page this server served."""
+    try:
+        count = gamedesign.save_answers(ROOT, path, answers)
+    except (ValueError, OSError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "saved": count, "data": sync_page.write_gamedesign(ROOT)}
+
+
+def review(path, items, table):
+    """The Lưu button of a node's panel: the human's score (0-10) and feedback per idea, given in the idea or the
+    live table. No PIN, like answers."""
+    try:
+        count = gamedesign.save_review(ROOT, path, items, table if isinstance(table, str) else "idea")
+    except (ValueError, OSError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "saved": count, "data": sync_page.write_gamedesign(ROOT)}
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -203,6 +276,8 @@ class Handler(SimpleHTTPRequestHandler):
             if path == "/api/threads":
                 return self.send_json(200, {"threads": threads(), "sets": sets(), "models": MODELS, "efforts": EFFORTS,
                                             "defaults": {"model": DEFAULT_MODEL, "effort": DEFAULT_EFFORT}})
+            if path == "/api/gamedesign":
+                return self.send_json(200, sync_page.write_gamedesign(ROOT))
             return self.send_error(404)
         if path in ("/", "/index.html"):
             sync_page.main()      # fresh project data each time the page is opened
@@ -215,18 +290,28 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             return self.wfile.write(body)
-        if path.startswith("/data/") or path.endswith((".css", ".js", ".png", ".svg")):
+        if path.startswith("/data/") or path.lower().endswith(STATIC_EXT):
             return super().do_GET()
         return self.send_error(404)
 
     def do_POST(self):
-        if not self.api_ok() or self.path != "/api/setup":
+        if not self.api_ok() or self.path not in POST_PATHS:
             return self.send_error(403)
         length = int(self.headers.get("Content-Length") or 0)
-        if length <= 0 or length > MAX_BODY:
+        if length <= 0 or length > POST_PATHS[self.path]:
             return self.send_error(400)
         try:
             data = json.loads(self.rfile.read(length).decode("utf-8"))
+            if self.path == "/api/gamedesign/promote":
+                return self.send_json(200, promote(data.get("path"), data.get("deep") is True))
+            if self.path == "/api/gamedesign/review":
+                return self.send_json(200, review(data.get("path"), data.get("items"), data.get("table")))
+            if self.path == "/api/gamedesign/sync":
+                return self.send_json(200, sync_live())
+            if self.path == "/api/gamedesign/mode":
+                return self.send_json(200, set_mode(str(data.get("pin") or ""), data.get("mode")))
+            if self.path == "/api/gamedesign/answers":
+                return self.send_json(200, answer(data.get("path"), data.get("answers")))
             pin, mode = str(data.get("pin") or ""), str(data.get("mode") or "")
             model = str(data.get("model") or DEFAULT_MODEL)
             effort = str(data.get("effort") or DEFAULT_EFFORT)

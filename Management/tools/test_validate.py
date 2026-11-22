@@ -209,9 +209,9 @@ CASES = [
     ("STR-06", "reserved feature name", lambda d: put(d, f"{F}/Core/CLAUDE.md", "x")),
     ("STR-07", "unexpected folder in a feature", lambda d: put(d, f"{F}/Wallet/Extra/a.txt", "x")),
     ("STR-07", "unexpected folder under Scripts", lambda d: put(d, f"{F}/Wallet/Scripts/Utils/a.txt", "x")),
-    ("DOC-01", "feature CLAUDE.md over 20 lines", lambda d: put(d, f"{F}/Wallet/CLAUDE.md", "line\n" * 21)),
+    ("DOC-01", "feature CLAUDE.md over 200 lines", lambda d: put(d, f"{F}/Wallet/CLAUDE.md", "line\n" * 201)),
     ("DOC-01", "root CLAUDE.md over 30 lines", lambda d: put(d, "CLAUDE.md", "line\n" * 31)),
-    ("DOC-01", ".claude/rules md over 40 lines", lambda d: put(d, ".claude/rules/unity.md", "line\n" * 41), "*unity.md*"),
+    ("DOC-01", ".claude/rules md over 200 lines", lambda d: put(d, ".claude/rules/unity.md", "line\n" * 201), "*unity.md*"),
 
     ("ASM-00", "asmdef is not JSON", lambda d: put(d, WI_ASM, "{ broken")),
     ("ASM-01", "wrong assembly name", lambda d: set_json(d, WI_ASM, name="Game.Shop.Internal")),

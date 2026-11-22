@@ -10,6 +10,11 @@ The value, by group:
               @CodeLead                   checks code and settles conflicts: edits NOTHING; reads all source of
                                           Basic/Features/Services; compiles, tests and plays through a read-only
                                           subset of unity-mcp (CODELEAD_UNITY)
+              @GameDesigner               designs, never codes: reads only Management/game-design (and its own rules
+                                          file), writes only in Management/game-design/ai, deletes there with
+                                          gd_delete.py, reads its status with gd_status.py; live, mode.json, the
+                                          answers, the scores and the history are not its to write. A node is
+                                          writable only when every node above it is approved (gamedesign.py)
     Basic     @Core / @Composition        edits only Assets/Core / Assets/_Composition
     Features  <Name>                      edits only its feature
     Services  _Services/<Name>            edits only its service
@@ -35,6 +40,12 @@ ALLOWED_COMMANDS = [
     r"python Management/tools/validate\.py( --feature ((_Services/)?[A-Za-z][A-Za-z0-9]*|_Composition))?",
 ]
 
+# One more command, for @GameDesigner only: delete a file or a node inside Management/game-design/ai.
+DESIGNER_COMMANDS = [
+    r"python Management/tools/gd_delete\.py ai(/[A-Za-z0-9._-]+)+",
+    r"python Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+]
+
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
 READ_TOOLS = {"Read", "Grep", "Glob"}
 SHELL_TOOLS = {"Bash", "PowerShell"}
@@ -43,9 +54,17 @@ PASS_TOOLS = {"AskUserQuestion", "TodoWrite", "TaskCreate", "TaskUpdate", "TaskL
               "Skill", "ToolSearch", "WebSearch", "WebFetch", "EnterPlanMode", "ExitPlanMode", "ListAgents",
               "SendMessage"}
 FORBIDDEN_DIRS = {"library", "temp", "logs", "obj", "usersettings"}
-HUMAN_ASK_ZONES = {".claude", "_Composition", "Core"}
+DESIGN_AI, DESIGN_LIVE, DESIGN_BASE = ("Management/game-design/ai", "Management/game-design/live",
+                                       "Management/game-design")
+DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE}
+# Inside ai: the proposed tree; the human's answers file that sits beside each node's questions; and the folders
+# only the page and the history code write (the human's scores, the node's history).
+DESIGN_TREE, DESIGN_CHOOSE, DESIGN_ANSWERS = "idea", ".ai-need-user-choose", "answers.json"
+DESIGN_KEPT = {".user-review", ".history"}
+DESIGNER_RULES = ntpath.join(".claude", "rules", "gamedesigner.md")
+HUMAN_ASK_ZONES = {".claude", "_Composition", "Core", DESIGN_LIVE}
 # FEATURE values that are not feature folders.
-ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead")
+ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead", "@GameDesigner")
 ROLE_AREAS = {"@Core": "Core", "@Composition": "_Composition"}
 # The one unity-mcp call a Basic/Features/Services session may make: manage_asset with action "delete".
 UNITY_ASSET_TOOL = "mcp__unityMCP__manage_asset"
@@ -169,7 +188,8 @@ def goes_through_link(full, root):
 
 
 def zone(full, root, feature, area=None, read_all=False):
-    """(name, readable, edit) for a path; edit is 'allow' | 'ask' | 'create' | 'deny'.
+    """(name, readable, edit) for a path; edit is 'allow' | 'ask' | 'create' | 'design' | 'deny'.
+    'design': only @GameDesigner edits there.
     feature: the session's own feature; area: "Core" or "_Composition" for @Core / @Composition;
     read_all: @CodeLead, who may read the private parts of every feature as well."""
     if full.lower() == root.lower():
@@ -187,6 +207,12 @@ def zone(full, root, feature, area=None, read_all=False):
     if low[0] == "management":
         if n >= 2 and low[1] == "proposals":
             return "Management/proposals", True, "create"
+        if n >= 2 and low[1] == "game-design":
+            if n >= 3 and low[2] == "ai":
+                return DESIGN_AI, True, "design"
+            if n >= 3 and low[2] == "live":
+                return DESIGN_LIVE, True, "deny"
+            return DESIGN_BASE, True, "deny"
         if low[1:] == ["tools", "rules.json"]:
             return "Management/tools/rules.json", True, "ask"
         return "Management", True, "deny"
@@ -235,7 +261,7 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         return "deny", "unity-mcp manage_asset: a feature session may use only action 'delete'"
     if mode == "none":
         return "deny", "FEATURE is not set or is not an existing feature folder; deleting is blocked"
-    if mode in ("manager", "codelead"):
+    if mode in ("manager", "codelead", "gamedesigner"):
         return "deny", f"{who} does not change the project; ask the session that owns the file"
     path = text_of(ti.get("path")).replace("\\", "/")
     if not re.match(r"^Assets/[^/]", path):
@@ -253,6 +279,36 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
     if not os.path.isfile(full):
         return "ask", "deleting a folder (or a path that is not a file) needs human approval"
     return "allow", f"delete inside {name}"
+
+
+def decide_designer_edit(full, root, name):
+    """@GameDesigner writing inside Management/game-design/ai: never the human's answers or scores, never the
+    history; and inside the proposed tree only where the write gate lets it (Management/tools/gamedesign.py, the
+    same code the page uses)."""
+    seg = full[len(root) + 1:].split("\\")[3:]      # below Management\game-design\ai
+    low = [s.lower() for s in seg]
+    if low and low[-1] == DESIGN_ANSWERS and DESIGN_CHOOSE in low:
+        return "deny", (f"{DESIGN_ANSWERS} holds the human's answers; only the management page writes it. "
+                        "Read it, then update the node from it.")
+    if DESIGN_KEPT.intersection(low):
+        return "deny", (".user-review (the human's scores and feedback) and .history (the node's history) are "
+                        "written only by the management page and its tools. Read them; do not write them.")
+    if low[:1] == [DESIGN_TREE]:
+        keys = []
+        for s in seg[1:-1]:      # the node folders between the tree root and the file
+            if s.startswith("."):
+                break
+            keys.append(s)
+        tools = ntpath.join(root, "Management", "tools")
+        if tools not in sys.path:
+            sys.path.insert(0, tools)
+        import gamedesign
+        ok, reason = gamedesign.can_write_node(root, keys)
+        if not ok:
+            return "deny", ("this node is locked because a node above it is not approved yet "
+                            f"({reason}). Redo that node if it is yours to redo, otherwise stop and tell the human; "
+                            "do not work on this round until then.")
+    return "allow", f"edit inside {name}"
 
 
 def decide_codelead_unity(tool, ti):
@@ -286,6 +342,8 @@ def decide(data, session_value, root):
         mode = "manager"
     elif role == "@CodeLead":
         mode = "codelead"
+    elif role == "@GameDesigner":
+        mode = "gamedesigner"
     elif role in ROLE_AREAS:
         mode, area = "area", ROLE_AREAS[role]
     elif valid_feature(raw, root):
@@ -308,7 +366,8 @@ def decide(data, session_value, root):
 
     if tool in SHELL_TOOLS:
         cmd = text_of(ti.get("command")).strip()
-        if any(re.fullmatch(rx, cmd) for rx in ALLOWED_COMMANDS) and not SHELL_META_RX.search(cmd):
+        commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else [])
+        if any(re.fullmatch(rx, cmd) for rx in commands) and not SHELL_META_RX.search(cmd) and ".." not in cmd:
             return "allow", "shell command is on the allow-list"
         return "deny", "shell command is not on the allow-list in guard.py. Stop and tell the human."
 
@@ -328,6 +387,14 @@ def decide(data, session_value, root):
         # Files that define the boundary itself.
         if full.lower().endswith(".asmref"):
             return "deny", ".asmref files are forbidden: they put code into another assembly"
+        if mode == "gamedesigner":
+            if edit == "design":
+                return decide_designer_edit(full, root, name)
+            return "deny", ("@GameDesigner writes only inside Management/game-design/ai. live is fixed by the human "
+                            "(the promote button of the management page). See .claude/rules/gamedesigner.md.")
+        if edit == "design":
+            return "deny", (f"FEATURE={who} may not edit {name}: only @GameDesigner writes there. Ask @GameDesigner "
+                            "(or the human) for a design change.")
         if mode == "manager" and edit != "create":
             return "deny", ("@Manager does not edit code, assets or settings; it may only create new files in "
                             "Management/proposals. Ask the session that owns the area.")
@@ -357,6 +424,8 @@ def decide(data, session_value, root):
         if goes_through_link(full, root):
             return "deny", "path goes through a link or junction"
         name, readable, _ = zone(full, root, feature, area, read_all)
+        if mode == "gamedesigner":      # sees the design tree and its own rules, nothing else
+            readable = name in DESIGN_ZONES or full.lower() == ntpath.join(root, DESIGNER_RULES).lower()
         if readable:
             return "allow", f"read inside {name}"
         return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."

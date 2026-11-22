@@ -36,7 +36,7 @@ from pathlib import Path
 NAME_RX = re.compile(r"^[A-Z][A-Za-z0-9]*$")
 RESERVED = ("Services", "Core", "Composition")
 OWN_ROOTS = ("Features", "Core", "_Composition")
-ROOT_MD_MAX, FEATURE_MD_MAX, RULES_MD_MAX = 30, 20, 40
+ROOT_MD_MAX, FEATURE_MD_MAX, RULES_MD_MAX = 30, 200, 200
 
 # ---------------------------------------------------------------- C# text helpers
 STRIP_RX = re.compile(

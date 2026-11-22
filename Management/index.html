@@ -140,6 +140,9 @@
 <script src="data/idea.js"></script>
 <script src="data/sessions.js"></script>
 <script src="data/project.js"></script>
+<script src="data/gamedesign.js"></script>
+<!-- Mỗi tab lớn một file trong view/, đăng ký vào window.CORESIMPLE_VIEWS. -->
+<script src="view/gamedesign.js"></script>
 <script>
 (function () {
   var idea = window.CORESIMPLE_IDEA || null;
@@ -417,6 +420,14 @@
     });
   }
 
+  // ---------------------------------------------------------------- game design: code vẽ nằm ở view/gamedesign.js
+  var views = window.CORESIMPLE_VIEWS || {};
+  if (views.gamedesign) {
+    tab("game-design", "Game design", "", function (pane) {
+      views.gamedesign(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
+    });
+  }
+
   // ---------------------------------------------------------------- setup: tạo và gán đủ bộ thread
   // Chạy qua Management/tools/setup_server.py (127.0.0.1). Tên thread = giá trị FEATURE.
   var setupInfo = window.CORESIMPLE_SETUP || null;
@@ -506,6 +517,7 @@
       data.sets.full.forEach(function (n) { wanted[n] = true; });
       data.threads.forEach(function (t) {
         var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")
+          : t.unlisted ? el("span", "muted", "VS Code không hiện (tạo ngoài VS Code), bỏ qua")
           : (!wanted[t.title] ? el("span", "muted", "ngoài bộ setup")
           : (t.binding === t.title ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
         add(body, row([t.title, t.group || "—", t.binding || "—", (t.model || "—").replace(/^claude-/, ""), t.effort || "—",

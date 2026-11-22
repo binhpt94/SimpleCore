@@ -7,6 +7,7 @@ Feeds fake hook input to guard.py and compares the decision. Works on a throw-aw
 folder layout in a temp folder; the real project is not touched.
 """
 import _winapi
+import importlib.util
 import json
 import os
 import shutil
@@ -375,6 +376,7 @@ def run_cases():
     run_role_cases(payload)
     run_report_cases()
     run_codelead_cases()
+    run_designer_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + r"\x.txt"}, "cwd": real}), root=None)
@@ -595,7 +597,7 @@ def run_report_cases():
     edit = use("Edit", file_path="x")
     count = lambda: len(os.listdir(reports)) if os.path.isdir(reports) else 0     # noqa: E731
     for session, value in (("rep-wallet", "Wallet"), ("rep-core", "@Core"), ("rep-human", "@human"), ("rep-mgr", "@Manager"),
-                           ("rep-lead", "@CodeLead")):
+                           ("rep-lead", "@CodeLead"), ("rep-gd", "@GameDesigner")):
         Path(guard.binding_path(session, STORE)).write_text(json.dumps({"feature": value}))
 
     def rep(expect, label, session, entries, active=False, transcript=True, keep_pending=False):
@@ -635,6 +637,8 @@ def run_report_cases():
     rep("pass, +0 report", "@human is not asked", "rep-human", [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "@Manager is not asked", "rep-mgr", [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "@CodeLead is not asked (its edits are denied anyway)", "rep-lead",
+        [human, edit, result, say_text("Xong.")])
+    rep("pass, +0 report", "@GameDesigner is not asked (its work is the design tree)", "rep-gd",
         [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "unbound chat is not asked", "rep-none", [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "missing transcript lets the agent stop", "rep-wallet", [], transcript=False)
@@ -731,6 +735,206 @@ def run_codelead_cases():
     check(g, L, True, "and not again", "Không có báo cáo mới" in again)
     mgr = bind_session.context({"session_id": "rep-mgr"}, FX, STORE)
     check(g, "@Manager", True, "@Manager keeps its own read list", "20990101-000000-Shop.md" in mgr)
+
+
+def run_designer_cases():
+    """@GameDesigner reads only Management/game-design and its own rules file, writes only in .../ai, deletes
+    there with gd_delete.py, never writes the human's answers. Nobody else writes in ai; live is the human's
+    (a human session is asked). In mode user a node is writable only when every node above it is approved."""
+    import bind_session
+    W, D = "Wallet", "@GameDesigner"
+    base = FX + r"\Management\game-design"
+    ai, live = base + r"\ai", base + r"\live"
+    idea = ai + r"\idea"
+    choose = r"\.ai-need-user-choose"
+    for d in (idea + r"\feature-hero\.images", live + r"\feature-hero", FX + r"\Management\tools"):
+        os.makedirs(d, exist_ok=True)
+    # The gate is gamedesign.can_write_node; the guard loads it from the project it guards. The test loads the
+    # same file under another name, only to compute hashes for its fixture.
+    source = HERE.parent.parent / "Management" / "tools" / "gamedesign.py"
+    shutil.copy2(source, FX + r"\Management\tools\gamedesign.py")
+    spec = importlib.util.spec_from_file_location("gamedesign_for_fixture", source)
+    gd = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gd)
+
+    def node(folder, ai=8, based="", idea_text="Một ý."):
+        """Writes data.md (one idea with the AI's score) and CLAUDE.md; returns the data hash."""
+        head = f"---\nbased-on: {based}\n---\n" if based else ""
+        os.makedirs(folder, exist_ok=True)
+        Path(folder + r"\data.md").write_text(f"{head}# x\n\nTóm tắt.\n\n## Ý cốt lõi\n\n### one | AI {ai}\n{idea_text}\n", encoding="utf-8")
+        Path(folder + r"\CLAUDE.md").write_text("# x\n\ndata.md\n", encoding="utf-8")
+        return gd.read_data(Path(folder))["hash"]
+
+    def score(folder, value):
+        """The human's score for the idea, as the page would store it."""
+        item = gd.read_data(Path(folder))["items"][0]
+        os.makedirs(folder + r"\.user-review", exist_ok=True)
+        Path(folder + r"\.user-review\review.json").write_text(json.dumps({"items": {"one": {"score": value, "hash": item["hash"]}}}))
+
+    root_hash = node(idea)
+    node(idea + r"\feature-hero", based=root_hash)
+    node(live)
+    DELETE = "python Management/tools/gd_delete.py "
+    STATUS = "python Management/tools/gd_status.py"
+
+    g = "designer: writes only in ai"
+    e(g, D, "allow", idea + r"\data.md")
+    e(g, D, "allow", idea + r"\CLAUDE.md")
+    w(g, D, "allow", idea + r"\feature-hero\skills\data.md")
+    w(g, D, "allow", idea + r"\feature-hero\.images\index.md")
+    w(g, D, "allow", idea + choose + r"\questions.json")
+    w(g, D, "allow", ai + r"\notes.md")
+    for p in (live + r"\node.md", live + r"\feature-new\node.md", base + r"\readme.md", base + r"\other\node.md",
+              base + r"\mode.json", base + r"\idea\node.md",
+              FX + r"\Management\proposals\gd.md", FX + r"\Management\data\idea.js", FX + r"\Management\tools\rules.json",
+              F + r"\Wallet\Scripts\Internal\W.cs", A + r"\Core\Base.cs", FX + r"\.claude\rules\gamedesigner.md",
+              FX + r"\CLAUDE.md", idea + r"\..\..\live\node.md", FX + r"\Management\game-design-x\ai\node.md"):
+        w(g, D, "deny", p)
+    w(g, D, "deny", idea + r"\x.asmref")
+    for p in (idea + choose + r"\answers.json", idea + r"\feature-hero" + choose + r"\answers.json",
+              idea + choose + r"\ANSWERS.JSON", idea + r"\.user-review\review.json", idea + r"\feature-hero\.user-review\review.json",
+              idea + r"\.USER-REVIEW\x.json", idea + r"\.history\log.jsonl", idea + r"\.history\state.json",
+              idea + r"\feature-hero\.history\removed\x\log.jsonl", ai + r"\.history\log.jsonl"):
+        w(g + " (never the human's files or the history)", D, "deny", p)
+        e(g + " (never the human's files or the history)", D, "deny", p)
+    t(g, D, "deny", "MultiEdit", {"file_path": live + r"\node.md", "edits": []})
+    t(g, D, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
+    t(g, D, "deny", "mcp__unityMCP__refresh_unity", {})
+    t(g, D, "pass", "SendMessage", {"to": "@Manager", "message": "x"})
+
+    g = "designer: reads only the design tree"
+    for p in (idea + r"\data.md", live + r"\data.md", idea + r"\feature-hero\.images\a.png", base, base + r"\mode.json",
+              idea + choose + r"\answers.json", idea + r"\.user-review\review.json", idea + r"\.history\log.jsonl",
+              FX + r"\.claude\rules\gamedesigner.md"):
+        r(g, D, "allow", p)
+    t(g, D, "allow", "Glob", {"pattern": "**/node.md", "path": base})
+    t(g, D, "allow", "Grep", {"pattern": "hero", "path": live})
+    for p in (FX + r"\Management\proposals\old.md", FX + r"\Management\reports\r.md", FX + r"\Management\tools\validate.py",
+              FX + r"\Management", FX + r"\CLAUDE.md", FX + r"\.claude\rules\codelead.md", FX + r"\.claude\hooks\guard.py",
+              F + r"\Wallet\Scripts\Contracts\IWallet.cs", F + r"\Wallet\CLAUDE.md", A + r"\Core\Base.cs",
+              FX + r"\UnityProject\Library\x", r"C:\Windows\x", base + r"\..\proposals\old.md"):
+        r(g, D, "deny", p)
+    t(g, D, "deny", "Grep", {"pattern": "x"})
+    t(g, D, "deny", "Glob", {"pattern": "**/*.md", "path": FX + r"\Management"})
+
+    g = "designer: the others"
+    for who in (W, "@Manager", "@CodeLead", "@Core", ""):
+        w(g, who, "deny", idea + r"\feature-x\data.md")
+        e(g, who, "deny", idea + r"\data.md")
+        w(g, who, "deny", idea + choose + r"\answers.json")
+        w(g, who, "deny", idea + r"\.user-review\review.json")
+        w(g, who, "deny", live + r"\data.md")
+        w(g, who, "deny", base + r"\mode.json")
+    for who in (W, "@Manager", "@CodeLead"):
+        r(g, who, "allow", live + r"\data.md")
+        r(g, who, "allow", idea + r"\data.md")
+    w(g, "@human", "pass", idea + r"\data.md")
+    w(g, "@human", "ask", live + r"\data.md")
+    e(g, "@human", "ask", live + r"\feature-hero\data.md")
+
+    g = "designer: delete command"
+    for path in ("ai/idea/feature-hero", "ai/idea/feature-hero/node.md", "ai/idea/feature-hero/.images/Hero_01.png", "ai/notes.md"):
+        t(g, D, "allow", "Bash", {"command": DELETE + path})
+    t(g, D, "allow", "PowerShell", {"command": DELETE + "ai/idea/feature-hero"})
+    for path in ("ai", "ai/", "idea/feature-hero", "live/node.md", "ai/../live/node.md", "ai/a/../../live", "ai/..", "../ai/a",
+                 "ai/a b", "ai/a; rm -rf .", "ai/a && del x", "ai/$(x)", "ai/a\nrm x", "ai\\a",
+                 "ai/a --root C:/x", "C:/x", "ai/a ai/b"):
+        t(g, D, "deny", "Bash", {"command": DELETE + path})
+    t(g, D, "deny", "Bash", {"command": "python Management/tools/gd_delete.py"})
+    t(g, D, "deny", "Bash", {"command": "python Management/tools/gamedesign.py ai/a"})
+    t(g, D, "deny", "Bash", {"command": "rm -rf Management/game-design/ai"})
+    t(g, D, "allow", "Bash", {"command": VALIDATE})
+    for who in (W, "@Manager", "@CodeLead", "@Core", ""):
+        t(g + " (others)", who, "deny", "Bash", {"command": DELETE + "ai/idea/feature-hero"})
+
+    g = "designer: status command"
+    for cmd in (STATUS, STATUS + " ai/idea", STATUS + " ai/idea/feature-hero", STATUS + " ai/idea/feature-hero/skills/cool-down"):
+        t(g, D, "allow", "Bash", {"command": cmd})
+    for tail in (" live", " ai", " ai/idea/..", " ai/idea/../live", " ai/idea/Feature", " ai/idea/a b", " ai/idea/a; ls",
+                 " --root C:/x", " ai/idea/.history", " ai/idea ai/idea"):
+        t(g, D, "deny", "Bash", {"command": STATUS + tail})
+    for who in (W, "@Manager", "@CodeLead", "@Core", ""):
+        t(g + " (others)", who, "deny", "Bash", {"command": STATUS})
+
+    g = "designer: write gate"
+    hero_dir = idea + r"\feature-hero"
+    hero, skills = hero_dir + r"\data.md", hero_dir + r"\skills\data.md"
+    questions = idea + choose + r"\questions.json"
+    # ---- mode auto: every node above must pass (AI's score unless the human scored; based-on = the parent's hash)
+    w(g + " (auto)", D, "allow", skills)
+    node(idea, ai=3)
+    w(g + " (auto)", D, "deny", hero)                           # the root's idea has an AI score of 3
+    w(g + " (auto)", D, "deny", skills)
+    w(g + " (auto)", D, "allow", idea + r"\data.md")            # the failing node itself is redone in place
+    w(g + " (auto)", D, "allow", idea + r"\CLAUDE.md")
+    score(idea, 7)
+    w(g + " (auto)", D, "allow", hero)                          # the human's 7 overrides the AI's 3
+    score(idea, 2)
+    node(idea, ai=9)
+    w(g + " (auto)", D, "deny", hero)                           # the human's 2 overrides the AI's 9
+    new_hash = node(idea, ai=9, idea_text="Viết lại ý.")
+    w(g + " (auto)", D, "allow", hero)                          # rewritten idea: the old human score no longer applies
+    w(g + " (auto)", D, "deny", skills)                         # feature-hero was written against the old root data
+    w(g + " (auto)", D, "allow", hero_dir + r"\CLAUDE.md")
+    node(hero_dir, based=new_hash)
+    w(g + " (auto)", D, "allow", skills)
+    w(g + " (auto)", D, "allow", hero_dir + r"\skills\.images\index.md")
+    node(hero_dir, based="")
+    w(g + " (auto)", D, "deny", skills)                         # no based-on at all
+    node(hero_dir, based=new_hash)
+    os.remove(idea + r"\data.md")
+    w(g + " (auto)", D, "deny", hero)                           # the root has no data.md
+    w(g + " (auto)", D, "allow", idea + r"\data.md")
+    node(idea, ai=9, idea_text="Viết lại ý.")
+    # ---- mode user: the human scored every idea, no open question, and the node is the same in live
+    Path(base + r"\mode.json").write_text('{"mode": "user"}')
+    w(g + " (user)", D, "deny", hero)                           # the human has not scored the root
+    score(idea, 8)
+    w(g + " (user)", D, "deny", hero)                           # scored, but live differs
+    shutil.copy2(idea + r"\data.md", live + r"\data.md")
+    w(g + " (user)", D, "allow", hero)
+    os.makedirs(idea + choose)
+    Path(questions).write_text('{"questions": [{"id": "q1", "text": "?", "options": [{"id": "a", "label": "A"}]}]}')
+    w(g + " (user)", D, "deny", hero)                           # an unanswered question
+    w(g + " (user)", D, "allow", questions)
+    Path(idea + choose + r"\answers.json").write_text('{"answers": {"q1": {"chosen": ["a"], "other": ""}}}')
+    w(g + " (user)", D, "allow", hero)
+    w(g + " (user)", D, "deny", skills)                         # feature-hero: unscored and not in live
+    score(hero_dir, 6)
+    for name in ("data.md", "CLAUDE.md"):
+        shutil.copy2(hero_dir + "\\" + name, live + r"\feature-hero" + "\\" + name)
+    w(g + " (user)", D, "allow", skills)
+    score(hero_dir, 4)
+    w(g + " (user)", D, "deny", skills)                         # a human 4 does not pass
+    score(hero_dir, 6)
+    Path(idea + r"\CLAUDE.md").write_text("# x\n\ndata.md\n\nSửa.\n", encoding="utf-8")
+    w(g + " (user)", D, "deny", hero)                           # the root now differs from live
+    w(g + " (user)", D, "deny", skills)
+    w(g + " (user)", D, "allow", idea + r"\data.md")
+    w(g + " (user)", D, "allow", ai + r"\notes.md")             # outside the tree: not a node
+    w(g + " (the human is not gated)", "@human", "pass", skills)
+    shutil.copy2(idea + r"\CLAUDE.md", live + r"\CLAUDE.md")
+    w(g + " (user)", D, "allow", skills)
+    os.rename(FX + r"\Management\tools\gamedesign.py", FX + r"\Management\tools\gamedesign.off")
+    sys.modules.pop("gamedesign", None)
+    w(g + " (gate code missing: closed)", D, "deny", skills)
+    w(g + " (gate code missing: closed)", D, "deny", idea + r"\data.md")
+    os.rename(FX + r"\Management\tools\gamedesign.off", FX + r"\Management\tools\gamedesign.py")
+    score(idea, 1)
+    cli(g + " (real process)", D, "deny", "Write a round-2 node while the root fails",
+        json.dumps({"tool_name": "Write", "tool_input": {"file_path": hero}, "cwd": FX}))
+    cli(g + " (real process)", D, "allow", "Write the root node",
+        json.dumps({"tool_name": "Write", "tool_input": {"file_path": idea + r"\data.md"}, "cwd": FX}))
+
+    g = "designer: bind"
+    say(g, "block, bound=@GameDesigner", "bind @GameDesigner", f"FEATURE=@gamedesigner {PIN}", session="role-gd")
+    say(g, "pass, bound=@GameDesigner", "@GameDesigner is told its job", "làm đi", session="role-gd")
+    told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
+    check(g, D, True, "the context names ai, live, the rules file, both commands and mode user",
+          all(s in told for s in ("game-design/ai", "live", "gamedesigner.md", "gd_delete.py", "gd_status.py", "User control")))
+    os.remove(base + r"\mode.json")
+    told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
+    check(g, D, True, "without a mode file the context says Full Auto", "Full Auto" in told and "User control" not in told)
 
 
 def main():

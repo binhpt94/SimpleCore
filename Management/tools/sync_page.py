@@ -8,6 +8,7 @@ Runs from the Stop hook after every chat turn; running it by hand is fine too.
 - Each feature: root CLAUDE.md, .cs files by layer, asset ids it declares (SRC-05 pattern).
 - Each scene in _Composition: its Boot variant, installers in boot order, asset catalogs (kind, id -> asset).
 - Reports for @Manager in Management/reports (written by .claude/hooks/stop_report.py), newest first.
+- Management/data/gamedesign.js: the game-design trees (live and idea), read by gamedesign.py.
 Unity YAML is read as text. Nothing here is written by an AI.
 On error the old project.js is kept and the exit code is 2.
 """
@@ -15,11 +16,13 @@ import json
 import os
 import re
 import sys
+import time
 from pathlib import Path
 
 sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))      # `python -I` leaves the script folder out
+import gamedesign  # noqa: E402
 import validate  # noqa: E402
 
 LAYERS = {"Contracts": "Scripts/Contracts", "Internal": "Scripts/Internal", "View": "Scripts/View", "Tests": "Tests"}
@@ -188,17 +191,35 @@ def build(root, cfg):
             "reports": reports(root), "otherViolations": others}
 
 
+def write_js(out, name, data):
+    """Writes `window.<name> = <data>;` whole or not at all."""
+    tmp = out.with_suffix(".js.tmp")
+    tmp.write_text("// Sinh tự động bởi Management/tools/sync_page.py. Không sửa tay.\n"
+                   f"window.{name} = " + json.dumps(data, ensure_ascii=False, indent=1) + ";\n", encoding="utf-8")
+    os.replace(tmp, out)
+
+
+def write_gamedesign(root=None):
+    """Writes Management/data/gamedesign.js from Management/game-design (live and idea) and returns the data.
+    Also keeps the nodes' history (gamedesign.record_versions). It never changes live."""
+    root = Path(root) if root else HERE.parent.parent
+    gamedesign.record_versions(root)      # history: what changed in data.md since the last run
+    data = gamedesign.snapshot(root)
+    data["generatedAt"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+    write_js(root / "Management" / "data" / "gamedesign.js", "CORESIMPLE_GAMEDESIGN", data)
+    return data
+
+
 def main():
     root = HERE.parent.parent
+    try:      # its own file and its own try: a broken design tree must not stop the project data, nor the reverse
+        write_gamedesign(root)
+    except Exception as ex:
+        print(f"sync_page.py: game design failed: {type(ex).__name__}: {ex}", file=sys.stderr)
     try:
         cfg = json.loads((HERE / "rules.json").read_text(encoding="utf-8-sig"))
         data = build(root, cfg)
-        out = root / "Management" / "data" / "project.js"
-        tmp = out.with_suffix(".js.tmp")
-        tmp.write_text("// Sinh tự động bởi Management/tools/sync_page.py. Không sửa tay.\n"
-                       "window.CORESIMPLE_PROJECT = " + json.dumps(data, ensure_ascii=False, indent=1) + ";\n",
-                       encoding="utf-8")
-        os.replace(tmp, out)
+        write_js(root / "Management" / "data" / "project.js", "CORESIMPLE_PROJECT", data)
     except Exception as ex:   # keep the old file; never write half a page
         print(f"sync_page.py failed: {type(ex).__name__}: {ex}", file=sys.stderr)
         return 2

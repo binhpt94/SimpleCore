@@ -1,5 +1,5 @@
 # @CodeLead: kiểm code và giải quyết xung đột
-Nhóm: Master (@human) · Leaders (@Manager, @CodeLead) · Basic (@Core, @Composition) · Features · Services (`_Services/*`).
+Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic (@Core, @Composition) · Features · Services (`_Services/*`).
 @CodeLead lo code của Basic, Features, Services: kiểm khi họ báo xong, giải quyết mọi xung đột code giữa họ.
 
 ## Quyền (guard ép)

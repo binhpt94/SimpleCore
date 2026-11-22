@@ -39,7 +39,7 @@ ITERATIONS = 200_000
 # Anything that starts like the command is handled here and never passed on: it may carry the PIN.
 COMMAND_RX = re.compile(r"feature\s*(\?|=(.*))?", re.I)
 CONTEXT_BLOCK_RX = re.compile(r"<([A-Za-z][\w-]*)\b[^>]*>.*?</\1>", re.S)
-USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Composition, @Manager, @CodeLead hoặc @human> <PIN>. "
+USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Composition, @Manager, @CodeLead, @GameDesigner hoặc @human> <PIN>. "
          "Xem chat đang gán gì: FEATURE?")
 MAX_LISTED_REPORTS = 20
 
@@ -171,6 +171,20 @@ def unread_reports(root, store, reader):
     return f" {len(new)} báo cáo mới{more}, đọc file để xem đủ:\n" + "\n".join(lines)
 
 
+def designer_mode(root):
+    """What the mode in Management/game-design/mode.json asks of @GameDesigner; read on every prompt."""
+    mode = read_json(ntpath.join(root, "Management", "game-design", "mode.json"), None)
+    if isinstance(mode, dict) and mode.get("mode") == "user":
+        return ("Mode hiện tại: User control. Không tự quyết thay người: mọi điểm cần quyết ghi thành câu hỏi trong "
+                ".ai-need-user-choose/questions.json của node đó; câu trả lời của người nằm ở answers.json cùng thư "
+                "mục (chỉ đọc). Node chỉ đạt khi người chấm mọi ý từ 5 trở lên và hết câu hỏi; node con bị guard khoá "
+                "cho tới khi node cha đạt và đã được người chốt sang live.")
+    return ("Mode hiện tại: Full Auto. Tự phân tích và tự quyết, không cần hỏi người; điểm đã tự quyết ghi rõ trong "
+            "CLAUDE.md của node. Node đạt khi mọi ý có điểm hiệu lực từ 5 trở lên (điểm của người nếu đã chấm, chưa thì "
+            "điểm AI); người bấm Sync để chép node đạt sang live; node con bị guard khoá khi node cha chưa đạt. "
+            "Người chấm được cả ý đã chốt trong live: điểm dưới 5 ở đó cũng bắt làm lại.")
+
+
 def context(data, root, store):
     """One line for the model on every prompt that gets through: what this chat is bound to.
     Read from the binding each time, so it stays right after a rebind or a compaction. Never has the PIN."""
@@ -191,6 +205,14 @@ def context(data, root, store):
                 "Basic, Features, Services. Không sửa bất kỳ file nào; đọc được toàn bộ source các nhóm đó; unity-mcp "
                 "chỉ để biên dịch, chạy test, Play và xem. Lỗi thì gửi yêu cầu sửa cụ thể cho phiên sở hữu. Quy trình "
                 "ở .claude/rules/codelead.md." + unread_reports(root, store, role))
+    if role == "@GameDesigner":
+        return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Chỉ đọc "
+                "Management/game-design và .claude/rules/gamedesigner.md; chỉ ghi trong Management/game-design/ai "
+                "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
+                "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
+                "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on. "
+                + designer_mode(root) +
+                " Làm theo .claude/rules/gamedesigner.md.")
     if role == "@Manager":
         return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "
                 "file mới trong Management/proposals và nhắn các phiên bằng SendMessage. Báo cáo của các phiên ở "
