@@ -41,6 +41,16 @@ import sync_page  # noqa: E402
 import validate  # noqa: E402
 
 BASIC = ["@human", "@Manager", "@CodeLead", "@Core", "@Composition"]
+ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@Core": "Basic", "@Composition": "Basic"}
+
+
+def group_of(name):
+    """Master, Leaders, Basic, Services or Features for a session name; "" for a name outside the setup."""
+    if name in ROLE_GROUPS:
+        return ROLE_GROUPS[name]
+    if name.startswith("@") or not guard.valid_feature(name, str(ROOT)):
+        return ""
+    return "Services" if name.startswith("_Services/") else "Features"
 # Model aliases the claude CLI takes, and its effort levels. New threads default to opus / medium.
 MODELS = ["opus", "sonnet", "haiku", "fable"]
 EFFORTS = ["low", "medium", "high", "xhigh", "max"]
@@ -72,7 +82,7 @@ def archived_ids():
 
 
 def threads():
-    """[{id, title, archived, binding, model, effort, modified}] for this project's sessions that have a name.
+    """[{id, title, group, archived, binding, model, effort, modified}] for this project's sessions that have a name.
     model: of the last answer; effort: of the last request (both as the transcript recorded them)."""
     hidden = archived_ids()
     out = []
@@ -95,7 +105,7 @@ def threads():
                         pass
         if title:
             sid = p.stem
-            out.append({"id": sid, "title": title, "archived": sid in hidden,
+            out.append({"id": sid, "title": title, "group": group_of(title), "archived": sid in hidden,
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
                         "binding": guard.bound_feature(sid, guard.STORE_DIR) or "",
                         "modified": time.strftime("%Y-%m-%d %H:%M", time.localtime(p.stat().st_mtime))})
@@ -110,7 +120,8 @@ def sets():
     features = [f["id"] for f in ids.features]
     services = sorted(f for f in features if f.startswith("_Services/"))
     others = sorted(f for f in features if not f.startswith("_Services/"))
-    return {"basic": BASIC, "full": BASIC + services + others}
+    full = BASIC + services + others
+    return {"basic": BASIC, "full": full, "groups": {n: group_of(n) for n in full}}
 
 
 def bind(session_id, value):

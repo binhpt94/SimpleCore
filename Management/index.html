@@ -233,7 +233,7 @@
       return;
     }
     var table = put(fs, el("table"));
-    var head = add(el("tr"), el("th", "", "Tên"), el("th", "", "Loại"), el("th", "", "Scene"), el("th", "num", "Contracts"),
+    var head = add(el("tr"), el("th", "", "Tên"), el("th", "", "Nhóm"), el("th", "", "Scene"), el("th", "num", "Contracts"),
                    el("th", "num", "Internal"), el("th", "num", "View"), el("th", "num", "Tests"),
                    el("th", "num", "Vi phạm"), el("th", "num", "Ngoại lệ"));
     add(table, add(el("thead"), head));
@@ -242,7 +242,7 @@
       var link = el("a", "", f.id);
       link.href = "#" + f.id;
       var v = el("td", "num " + (f.violations.length ? "bad-text" : "ok-text"), String(f.violations.length));
-      add(body, add(el("tr"), add(el("td"), link), el("td", "", f.kind === "service" ? "Dịch vụ" : "Feature"),
+      add(body, add(el("tr"), add(el("td"), link), el("td", "", f.kind === "service" ? "Services" : "Features"),
         f.scenes.length ? el("td", "", f.scenes.join(", ")) : el("td", "bad-text", "chưa scene nào"),
         el("td", "num", String(f.files.Contracts.length)), el("td", "num", String(f.files.Internal.length)),
         el("td", "num", String(f.files.View.length)), el("td", "num", String(f.files.Tests.length)),
@@ -327,9 +327,9 @@
   // ---------------------------------------------------------------- báo cáo cho @Manager
   if (project && project.reports) {
     tab("bao-cao", "Báo cáo", "", function (pane) {
-      add(pane, el("h1", "", "Báo cáo cho @Manager"));
-      add(pane, el("p", "sub", "Phiên feature, dịch vụ, @Core, @Composition, @CodeLead kết thúc mỗi lượt có sửa file bằng một báo cáo; " +
-        "Stop hook lưu vào Management/reports. Mới nhất trước, tối đa 50."));
+      add(pane, el("h1", "", "Báo cáo cho @CodeLead và @Manager"));
+      add(pane, el("p", "sub", "Nhóm Basic, Features, Services kết thúc mỗi lượt có sửa file bằng một báo cáo; Stop hook lưu vào " +
+        "Management/reports, @CodeLead (kiểm code) và @Manager (điều phối) đều thấy. Mới nhất trước, tối đa 50."));
       var s = put(pane, section(""));
       if (!project.reports.length) { add(s, el("p", "muted", "Chưa có báo cáo nào.")); return; }
       var table = put(s, el("table"));
@@ -361,9 +361,9 @@
 
   if (project) {
     project.features.forEach(function (f) {
-      tab(f.id, f.id.replace("_Services/", ""), f.kind === "service" ? "Dịch vụ" : "Feature", function (pane) {
+      tab(f.id, f.id.replace("_Services/", ""), f.kind === "service" ? "Services" : "Features", function (pane) {
         add(pane, el("h1", "", f.id));
-        add(pane, el("p", "sub", (f.kind === "service" ? "Dịch vụ" : "Feature") + " · UnityProject/Assets/Features/" + f.id +
+        add(pane, el("p", "sub", (f.kind === "service" ? "Nhóm Services" : "Nhóm Features") + " · UnityProject/Assets/Features/" + f.id +
           " · Scene: " + (f.scenes.length ? f.scenes.join(", ") : "chưa scene nào cài")));
 
         var cols = put(pane, el("div", "cols"));
@@ -484,14 +484,23 @@
     var renderThreads = function (data) {
       fill(modelSel, data.models, data.defaults.model);
       fill(effortSel, data.efforts, data.defaults.effort);
-      setsNote.textContent = "Cơ bản: " + data.sets.basic.join(", ") + ". Full: thêm " +
-        data.sets.full.slice(data.sets.basic.length).join(", ") +
+      var byGroup = function (names) {
+        var order = [], list = {};
+        names.forEach(function (n) {
+          var g = data.sets.groups[n] || "?";
+          if (!list[g]) { list[g] = []; order.push(g); }
+          list[g].push(n);
+        });
+        return order.map(function (g) { return g + " (" + list[g].join(", ") + ")"; }).join(", ");
+      };
+      setsNote.textContent = "Cơ bản: " + byGroup(data.sets.basic) + ". Full: thêm " +
+        (byGroup(data.sets.full.slice(data.sets.basic.length)) || "không có gì") +
         ". Model và effort chỉ áp cho thread tạo mới (mặc định " + data.defaults.model + ", " + data.defaults.effort +
         "); thread đã có giữ nguyên.";
       listBody.textContent = "";
       if (!data.threads.length) { add(listBody, el("p", "muted", "Chưa có thread nào có tên.")); return; }
       var table = put(listBody, el("table"));
-      add(table, headRow(["Tên", "Đang gán", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id"]));
+      add(table, headRow(["Tên", "Nhóm", "Đang gán", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id"]));
       var body = put(table, el("tbody"));
       var wanted = {};
       data.sets.full.forEach(function (n) { wanted[n] = true; });
@@ -499,7 +508,7 @@
         var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")
           : (!wanted[t.title] ? el("span", "muted", "ngoài bộ setup")
           : (t.binding === t.title ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
-        add(body, row([t.title, t.binding || "—", (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
+        add(body, row([t.title, t.group || "—", t.binding || "—", (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
           t.modified, state, el("code", "", t.id.slice(0, 8))]));
       });
     };
@@ -554,7 +563,7 @@
       }
       (Array.isArray(sessions.features) ? sessions.features : []).forEach(function (feature) {
         var box = put(s, el("div", "session"));
-        add(box, el("h3", "", feature.label || feature.id));
+        add(box, el("h3", "", (feature.group ? "[" + feature.group + "] " : "") + (feature.label || feature.id)));
         if (feature.note) add(box, el("p", "muted", feature.note));
         // Chỉ chép phần trước PIN: PIN do người tự gõ, không nằm trong trang.
         var bind = "FEATURE=" + feature.id + " ";
