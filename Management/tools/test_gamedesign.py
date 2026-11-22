@@ -453,6 +453,25 @@ def run_progress(root):
     code("feature-wallet", ["Wallet"])
 
 
+def run_infra(root):
+    """Round 2 always owes the infrastructure features; the reminder blocks nothing."""
+    owed = lambda: [(m["path"], "chưa có node" in m["text"]) for m in gd.snapshot(root)["missing"]]      # noqa: E731
+    mk(root, "", items=[("one", 3, "Ý kém.")])
+    check("nothing is owed while round 1 does not pass", owed(), [])
+    mk(root, "")
+    check("round 1 passes: all three are owed", owed(), [("feature-scene-flow", True), ("feature-session-scene", True), ("feature-popup", True)])
+    check("status lists them", all(k in gd_status.report(root) for k in gd.INFRA_FEATURES) and "Thiếu feature hạ tầng" in gd_status.report(root))
+    mk(root, "feature-popup"), mk(root, "feature-scene-flow"), mk(root, "feature-session-scene")
+    put(root, "idea/feature-popup/code.json", '{"unity": ["_Services/Popup"]}')
+    put(root, "idea/feature-scene-flow/code.json", '{"unity": ["Popup"]}')
+    check("a node without the right code.json is still owed, by another text", owed(), [("feature-scene-flow", False), ("feature-session-scene", False)])
+    put(root, "idea/feature-scene-flow/code.json", '{"unity": ["SceneFlow"]}')
+    put(root, "idea/feature-session-scene/code.json", '{"unity": ["_Services/SessionScene"]}')
+    check("all three there with their folders: nothing owed", (owed(), "Thiếu feature hạ tầng" in gd_status.report(root)), ([], False))
+    check("the reminder is no structure problem and blocks no promote", (gd.snapshot(root)["problems"]["idea"], gd.promote(root, "", False)), ([], ["(gốc)"]))
+    check("an infrastructure feature is locked like any other until round 4 is in live", gd.code_allowed(root, "SceneFlow")[0], False)
+
+
 def run_flow(root):
     """Sync; history; delete; status."""
     mk(root, "", items=(("loop", 8, "Vòng lặp."), ("win", 6, "Thắng sau 10 đợt.")))
@@ -530,7 +549,7 @@ def run_flow(root):
 
 
 def main():
-    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_flow):
+    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_flow):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

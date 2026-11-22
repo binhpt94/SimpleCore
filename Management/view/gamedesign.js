@@ -1,4 +1,4 @@
-// Tab "Game design" của trang quản lý: bản đồ node từ ý tưởng sơ khai tới yêu cầu kĩ thuật.
+// Tab "Game design" của trang quản lý: bản đồ node từ ý tưởng sơ khai tới quyết định chi tiết.
 // Code thuần, không AI, không thư viện. Dữ liệu: window.CORESIMPLE_GAMEDESIGN (data/gamedesign.js, do
 // tools/sync_page.py sinh từ Management/game-design; cấu trúc cây và luật đạt/chốt do tools/gamedesign.py quy định,
 // trang chỉ hiển thị kết quả đã tính sẵn: passed, reasons, stale, approved, state...).
@@ -247,7 +247,7 @@
     var state = { table: "live", focus: null, selected: null, message: null, ask: null, phase: null };
 
     add(pane, el("h1", "", "Game design"));
-    add(pane, el("p", "sub", "Bản đồ thiết kế, từ ý tưởng sơ khai tới yêu cầu kĩ thuật. Bấm một node, phần dưới bản đồ hiện các ý cốt lõi của nó: bấm vào từng ý để xem chi tiết, chấm điểm và ghi ý kiến; bấm một feature (vòng " +
+    add(pane, el("p", "sub", "Bản đồ thiết kế, từ ý tưởng sơ khai tới quyết định chi tiết. Bấm một node, phần dưới bản đồ hiện các ý cốt lõi của nó: bấm vào từng ý để xem chi tiết, chấm điểm và ghi ý kiến; bấm một feature (vòng " +
       FOCUS_ROUND + ") thì bản đồ chỉ còn nhánh của nó tới vòng cuối."));
     var bar = put(pane, el("div", "gd-bar"));
     var noticeBox = put(pane, el("div"));
@@ -473,6 +473,12 @@
             state.table = "idea"; state.message = null; render();
           }));
         }
+      }
+      var missing = data && state.table === "idea" ? data.missing || [] : [];
+      if (missing.length) {
+        add(noticeBox, el("p", "", "Vòng 2 còn thiếu " + missing.length + " feature hạ tầng (việc của @GameDesigner):"));
+        var owed = put(noticeBox, el("ul", "gd-problems"));
+        missing.forEach(function (p) { add(owed, el("li", "", p.path + ": " + p.text)); });
       }
       var list = data && data.problems ? data.problems[state.table] || [] : [];
       if (!list.length) return;

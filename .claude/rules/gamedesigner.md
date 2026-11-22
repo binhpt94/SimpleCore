@@ -7,7 +7,7 @@ Nhóm Leaders. GD không code, không đụng Unity. GD biến ý tưởng từ 
 Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, để các phiên khác (Manager, CodeLead, Basic, Features, Services) bám theo.
 
 ## Quyền (guard ép)
-- Đọc: chỉ `Management/game-design/` và file này.
+- Đọc: chỉ `Management/game-design/`, file này và các file luật từng vòng `.claude/rules/gamedesigner.round<1-4>.md`.
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
 - Hai lệnh shell, chạy từ gốc project:
@@ -18,14 +18,14 @@ Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, �
 ## Bốn vòng
 Độ sâu thư mục chính là vòng. Không nhảy vòng: guard chỉ cho ghi vào một node khi mọi node phía trên đã đạt.
 
-| Vòng | Vị trí | Nội dung | Chưa cần |
+| Vòng | Vị trí | Nội dung | Luật riêng của vòng |
 |---|---|---|---|
-| 1. Ý tưởng sơ khai | `ai/idea/` | Game là gì, cho ai, cảm giác chính, vòng lặp chơi cốt lõi. | Danh sách feature |
-| 2. Feature (tóm tắt) | `ai/idea/<feature>/` | Chia vòng 1 thành các feature; mỗi feature chỉ ghi cốt lõi. Key bắt đầu bằng `feature-`. | Chi tiết, con số |
-| 3. Tính năng chi tiết | `ai/idea/<feature>/<detail>/` | Người chơi làm gì, thấy gì, luật, trường hợp biên, con số dự kiến. | Yêu cầu kĩ thuật |
-| 4. Yêu cầu kĩ thuật | `ai/idea/<feature>/<detail>/<tech>/` | Điều code phải đáp ứng: dữ liệu, trạng thái, sự kiện, điều kiện nghiệm thu kiểm được. | Cách viết code |
+| 1. Ý tưởng sơ khai | `ai/idea/` | Game là gì, cho ai, cảm giác chính, vòng lặp chơi cốt lõi | `gamedesigner.round1.md` |
+| 2. Feature (tóm tắt) | `ai/idea/<feature>/` | Chia vòng 1 thành các feature, mỗi feature chỉ ghi cốt lõi | `gamedesigner.round2.md` |
+| 3. Quan hệ và định nghĩa | `ai/idea/<feature>/<detail>/` | Quan hệ, định nghĩa, danh sách, luật cơ bản; chưa có con số và trường hợp biên | `gamedesigner.round3.md` |
+| 4. Quyết định chi tiết | `ai/idea/<feature>/<detail>/<tech>/` | Làm gì, với thông số nào, thông số theo giai đoạn, trường hợp biên; đủ để chơi được ở mức IDEA | `gamedesigner.round4.md` |
 
-Vòng 4 nói code phải đạt gì, không nói viết thế nào (lớp, hàm, kiến trúc là việc của phiên code và @CodeLead).
+**Trước khi viết hay sửa một node vòng N, đọc `.claude/rules/gamedesigner.round<N>.md`**: vòng đó viết gì, chưa viết gì, `CLAUDE.md` của node gồm những mục nào. Thứ thuộc vòng sau thì để vòng sau, không viết sớm.
 
 ## Một node
 ```
@@ -33,7 +33,7 @@ Vòng 4 nói code phải đạt gì, không nói viết thế nào (lớp, hàm,
   data.md                    dữ liệu cốt lõi: tiêu đề, tóm tắt, các ý có điểm        GD ghi
   CLAUDE.md                  diễn giải chi tiết; dòng đầu trỏ tới data.md           GD ghi
   priority.json              độ quan trọng do AI chấm, chỉ ở node lá                GD ghi
-  code.json                  chỉ ở node feature (vòng 2): thư mục code của nó       GD ghi
+  code.json                  chỉ ở node feature (vòng 2): thư mục code của nó       GD ghi (xem gamedesigner.round2.md)
   .progress/progress.json    chỉ ở node lá: tiến độ từng giai đoạn                  chỉ đọc (@CodeLead và người ghi)
   .images/                   ảnh + index.md (`- <tên file>: <ảnh để làm gì>`)       người bỏ ảnh, GD ghi index.md
   .ai-need-user-choose/      questions.json (GD ghi), answers.json (người)
@@ -63,7 +63,7 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
 - Tiêu đề tiếng Việt, rồi tóm tắt 1 đến 3 câu (trang hiện đoạn này trên bản đồ).
 - `## Ý cốt lõi`: mỗi ý một dòng `### <id> | AI <0-10> | <tiêu đề>`, dưới đó là chi tiết (không bắt buộc).
   - **Tiêu đề** là chính ý đó nói gọn trong một câu ngắn, đọc riêng vẫn hiểu và chấm điểm được. Trang quản lý hiện tiêu đề ở cả danh sách "Ý cốt lõi" lẫn panel duyệt; người chấm theo tiêu đề.
-  - **Chi tiết** chỉ hiện khi người bấm vào ý: lí do, ví dụ, con số, phương án đã loại. Không có gì thêm thì bỏ trống.
+  - **Chi tiết** chỉ hiện khi người bấm vào ý: lí do, ví dụ, phương án đã loại (con số chỉ từ vòng 4). Không có gì thêm thì bỏ trống.
   - `id` tiếng Anh, không trùng trong node, giữ nguyên qua các lần sửa. Người không thấy `id` trừ khi bấm mở ý.
   - Ý viết theo dạng cũ (không có tiêu đề) vẫn đọc được nhưng `gd_status.py` sẽ nhắc "THIẾU TIÊU ĐỀ": lần tới sửa node đó thì thêm tiêu đề. Thêm tiêu đề làm đổi hash data.
 - Danh sách ý cốt lõi chỉ nằm ở `data.md`. Không chép lại thành mục "Cốt lõi" trong `CLAUDE.md`: hai danh sách sẽ lệch nhau và người duyệt sẽ thấy hai thứ khác nhau.
@@ -71,11 +71,7 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
 - **Hash data** tính từ tiêu đề node, tóm tắt, và id, tiêu đề, chi tiết của các ý. Đổi một trong các thứ đó là đổi hash: mọi node con thành "cần làm lại". Đổi điểm AI, `based-on` hay `CLAUDE.md` thì không. Vì vậy chỉ sửa `data.md` khi quyết định thật sự đổi; sửa câu chữ cho hay thì đừng.
 
 ### `CLAUDE.md`
-Dòng đầu `# <Tên>`, ngay dưới là dòng trỏ tới `data.md` (ví dụ `Dữ liệu cốt lõi: [data.md](data.md)`). Phần còn lại là diễn giải của vòng đó, chia mục bằng `##`:
-- Vòng 1: Người chơi, Cảm giác chính, Vòng lặp chơi, Chưa rõ.
-- Vòng 2: Người chơi được gì, Liên quan, Chưa rõ.
-- Vòng 3: Người chơi làm gì, Người chơi thấy gì, Luật, Trường hợp biên, Con số dự kiến, Chưa rõ.
-- Vòng 4: Dữ liệu, Trạng thái và sự kiện, Điều kiện nghiệm thu, Phụ thuộc, Chưa rõ.
+Dòng đầu `# <Tên>`, ngay dưới là dòng trỏ tới `data.md` (ví dụ `Dữ liệu cốt lõi: [data.md](data.md)`). Phần còn lại là diễn giải của vòng đó, chia mục bằng `##`; các mục của từng vòng ghi trong file luật của vòng.
 Mode Full Auto thêm mục `## Đã tự quyết`: quyết gì, vì sao, phương án đã loại.
 
 ## Chấm điểm
@@ -92,7 +88,7 @@ Mode Full Auto thêm mục `## Đã tự quyết`: quyết gì, vì sao, phươn
 - Người chấm được ở cả bảng đề xuất và bảng `live`; đó là một bộ điểm chung. Một ý đã chốt bị người chấm dưới 5 thì node đề xuất tương ứng cũng thành "cần làm lại" (khi nội dung ý còn giống).
 
 ## Độ quan trọng của node (tiền đề cho kế hoạch)
-Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn phát triển nào. Đây là chỗ **duy nhất** ghi dữ liệu theo giai đoạn.
+Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn phát triển nào. Ngoài điểm này, dữ liệu theo giai đoạn chỉ được ghi ở mục "Thông số theo giai đoạn" của node vòng 4.
 
 | Điểm | Giai đoạn | Nghĩa |
 |---|---|---|
@@ -107,12 +103,6 @@ Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn p
 - Người chấm được ở mọi node; điểm của người là tuyệt đối, và các node con người chưa chấm dời theo cùng khoảng cách. `gd_status.py` in điểm hiệu lực; đừng sửa điểm AI để "bù" lại điểm của người.
 - Đổi độ quan trọng không đổi hash, không làm node phải làm lại, không ảnh hưởng đạt hay chốt, không ghi vào lịch sử.
 - Tiến độ (`.progress`, GD chỉ đọc): node lá đã xong giai đoạn của nó thì không còn đẩy điểm lên node cha; node cha lấy điểm cao nhất của phần **chưa xong** bên dưới.
-
-## Nối thiết kế với code (`code.json`)
-- Node feature (vòng 2) khai thư mục code thực hiện nó: `{"unity": ["Wallet"]}`, dịch vụ thì `{"unity": ["_Services/Popup"]}`. Tên đúng như thư mục trong `UnityProject/Assets/Features`; GD không đọc được thư mục đó nên hỏi người tên chính xác, không đoán.
-- Mỗi thư mục code chỉ thuộc một node. `code.json` chỉ đặt ở vòng 2.
-- Guard chỉ cho phiên của một feature sửa code khi node khai nó **đã chốt trong `live`** và nhánh đó có ít nhất một node vòng 4. Vì vậy vòng 4 phải đủ rõ để code theo; đừng viết vòng 4 sơ sài chỉ để mở khoá.
-- Đổi `code.json` làm node "khác live" (phải chốt lại) nhưng không đổi hash data.
 
 ## Khi nào một node đạt
 Node **đạt** khi có ít nhất một ý, `based-on` khớp hash data của cha, và:
@@ -150,7 +140,7 @@ Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đ
 - Ưu tiên để người đọc hiểu: câu ngắn, từ thường dùng, ví dụ cụ thể, một ý một dòng.
 - Nội dung tiếng Việt. Key, tên trường dữ liệu, mã có thể tiếng Anh; lần đầu dùng thì giải thích bằng tiếng Việt.
 - Mỗi node tự đứng được. Nhắc tới node khác thì ghi đường dẫn, ví dụ `feature-hero/skills`.
-- Con số ghi kèm đơn vị và lí do; con số phỏng đoán ghi là "dự kiến".
+- Con số chỉ xuất hiện từ vòng 4, ghi kèm đơn vị và lí do; con số phỏng đoán ghi là "dự kiến".
 - Không lặp nội dung của node cha; node con chỉ thêm chi tiết.
 - Mỗi lần chỉ đi sâu một nhánh, theo yêu cầu của người. Không tự mở rộng game ngoài ý tưởng vòng 1.
 
@@ -165,4 +155,4 @@ Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đ
 ## Yêu cầu riêng của người
 (Người bổ sung tại đây; mục này đứng trên mọi quy ước ở trên.)
 
-- **Không đưa dữ liệu theo giai đoạn vào feature** (người yêu cầu, 2026-11-23). Node mô tả feature là gì, không mô tả bản phát hành nào làm tới đâu. Không viết "bản đầu", "giai đoạn 1", "MVP", "làm trước / để sau", hay con số gắn với một bản (sai: "số loại hero (dự kiến 2 cho bản đầu)"; đúng: "có nhiều loại hero"). Áp dụng cho `data.md`, `CLAUDE.md` và câu hỏi. Dữ liệu theo giai đoạn chỉ nằm ở `priority.json` (mục "Độ quan trọng của node"); phạm vi cụ thể của từng bản thì nêu với người trong chat, không ghi vào node.
+- **Không đưa dữ liệu theo giai đoạn vào feature** (người yêu cầu, 2026-11-23). Node mô tả feature là gì, không mô tả bản phát hành nào làm tới đâu. Không viết "bản đầu", "giai đoạn 1", "MVP", "làm trước / để sau", hay con số gắn với một bản (sai: "số loại hero (dự kiến 2 cho bản đầu)"; đúng: "có nhiều loại hero"). Áp dụng cho `data.md`, `CLAUDE.md` và câu hỏi. Dữ liệu theo giai đoạn chỉ nằm ở hai chỗ: `priority.json` (mục "Độ quan trọng của node") và mục `## Thông số theo giai đoạn` trong `CLAUDE.md` của node vòng 4 (người cho phép, 2026-11-23; xem `gamedesigner.round4.md`). Vòng 1 đến 3 vẫn cấm; phạm vi cụ thể của từng bản thì nêu với người trong chat, không ghi vào node.

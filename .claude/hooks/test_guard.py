@@ -798,7 +798,7 @@ def run_designer_cases():
     for p in (live + r"\node.md", live + r"\feature-new\node.md", base + r"\readme.md", base + r"\other\node.md",
               base + r"\mode.json", base + r"\idea\node.md",
               FX + r"\Management\proposals\gd.md", FX + r"\Management\data\idea.js", FX + r"\Management\tools\rules.json",
-              F + r"\Wallet\Scripts\Internal\W.cs", A + r"\Core\Base.cs", FX + r"\.claude\rules\gamedesigner.md",
+              F + r"\Wallet\Scripts\Internal\W.cs", A + r"\Core\Base.cs", FX + r"\.claude\rules\gamedesigner.md", FX + r"\.claude\rules\gamedesigner.round2.md",
               FX + r"\CLAUDE.md", idea + r"\..\..\live\node.md", FX + r"\Management\game-design-x\ai\node.md"):
         w(g, D, "deny", p)
     w(g, D, "deny", idea + r"\x.asmref")
@@ -817,8 +817,12 @@ def run_designer_cases():
     g = "designer: reads only the design tree"
     for p in (idea + r"\data.md", live + r"\data.md", idea + r"\feature-hero\.images\a.png", base, base + r"\mode.json",
               idea + choose + r"\answers.json", idea + r"\.user-review\review.json", idea + r"\.history\log.jsonl",
-              FX + r"\.claude\rules\gamedesigner.md"):
+              FX + r"\.claude\rules\gamedesigner.md", FX + r"\.claude\rules\gamedesigner.round1.md",
+              FX + r"\.claude\rules\GameDesigner.Round4.md"):
         r(g, D, "allow", p)
+    for p in (FX + r"\.claude\rules\codelead.md", FX + r"\.claude\rules\gamedesigner.round5.md", FX + r"\.claude\rules\gamedesigner.round2.md.bak",
+              FX + r"\.claude\rules\sub\gamedesigner.md", FX + r"\.claude\hooks\gamedesigner.md"):
+        r(g + " (of the rules only its own)", D, "deny", p)
     t(g, D, "allow", "Glob", {"pattern": "**/node.md", "path": base})
     t(g, D, "allow", "Grep", {"pattern": "hero", "path": live})
     for p in (FX + r"\Management\proposals\old.md", FX + r"\Management\reports\r.md", FX + r"\Management\tools\validate.py",

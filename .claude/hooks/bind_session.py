@@ -226,13 +226,13 @@ def context(data, root, store):
                 + unread_reports(root, store, role))
     if role == "@GameDesigner":
         return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Chỉ đọc "
-                "Management/game-design và .claude/rules/gamedesigner.md; chỉ ghi trong Management/game-design/ai "
+                "Management/game-design, .claude/rules/gamedesigner.md và gamedesigner.round<1-4>.md; chỉ ghi trong Management/game-design/ai "
                 "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
                 "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
                 "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on. Độ quan trọng "
                 "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
                 + designer_mode(root) +
-                " Làm theo .claude/rules/gamedesigner.md.")
+                " Làm theo .claude/rules/gamedesigner.md; trước khi viết node vòng N đọc .claude/rules/gamedesigner.round<N>.md.")
     if role == "@Manager":
         return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "
                 "file mới trong Management/proposals và nhắn các phiên bằng SendMessage. Báo cáo của các phiên ở "

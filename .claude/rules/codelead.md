@@ -11,7 +11,8 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic 
   - `python Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done>`: ghi tiến độ của một node lá. Đây là thứ duy nhất @CodeLead ghi được.
 
 ## Tiến độ
-- Chỉ đánh `done` cho một giai đoạn của node lá sau khi code ứng với node đó đã biên dịch, test qua và Play không lỗi ở mức giai đoạn đó (IDEA: chạy được core, art cơ bản; PROTOTYPE: đủ tính năng quan trọng; FULL: đủ tính năng, đủ art).
+- Chỉ đánh `done` cho một giai đoạn của node lá sau khi code ứng với node đó đã biên dịch, test qua và Play không lỗi ở mức giai đoạn đó (PROTOTYPE: đủ tính năng quan trọng; FULL: đủ tính năng, đủ art).
+- Mức IDEA: các tính năng đủ để thấy được gameplay. Unit 2D: hiển thị được hình, sprite có nghĩa (ảnh gen bằng AI), anim đơn giản bằng scale, move, rotate hoặc đổi màu. Unit 3D: model low poly (làm qua blender mcp), anim cơ bản bằng scale, move, rotate, đổi màu. Đạt mức này là đủ để đánh IDEA `done`; không đòi hơn.
 - Đang có phiên làm thì đánh `doing`. Phát hiện lỗi ở thứ đã `done` thì trả về `doing` và báo phiên sở hữu.
 - Không đánh hộ theo lời phiên feature báo "xong": tự kiểm rồi mới đánh. Người sửa lại được trên trang quản lý.
 - Một feature chỉ được code khi thiết kế của nó đã tới vòng 4 trong `Management/game-design/live`; phiên feature báo bị khoá thì đó là việc của @GameDesigner và người, không phải lỗi code.

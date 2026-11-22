@@ -60,7 +60,7 @@ import shutil
 import time
 from pathlib import Path
 
-ROUNDS = ["Ý tưởng sơ khai", "Feature (tóm tắt)", "Tính năng chi tiết", "Yêu cầu kĩ thuật"]
+ROUNDS = ["Ý tưởng sơ khai", "Feature (tóm tắt)", "Quan hệ và định nghĩa", "Quyết định chi tiết"]
 BASE = ("Management", "game-design")
 WORK_DIR = "ai"
 TABLES = {"idea": (WORK_DIR, "idea"), "live": ("live",)}
@@ -84,6 +84,8 @@ WORK_STATES = ("todo", "doing", "done")
 CODE_FILE = "code.json"      # on a round-2 node: the Unity feature folders that implement it
 CODE_ROUND = 2
 CODE_NAME_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")      # the same shape guard.py takes as a FEATURE
+# Round 2 always has these infrastructure features: key of the node -> the code folder its code.json names.
+INFRA_FEATURES = {"feature-scene-flow": "SceneFlow", "feature-session-scene": "_Services/SessionScene", "feature-popup": "_Services/Popup"}
 NOT_COPIED = (QUESTIONS_DIR, REVIEW_DIR, HISTORY_DIR, PROGRESS_DIR, "priority.json")      # stay in the idea table
 MODE_FILE = "mode.json"
 MODES = ("auto", "user")
@@ -417,7 +419,7 @@ def code_allowed(root, feature):
                 deepest = max(deepest, CODE_ROUND + len(below))
     if deepest < len(ROUNDS):
         return False, (f"thiết kế của '{feature}' ({', '.join(n.name for n in owners)}) mới được chốt tới vòng {deepest}; "
-                       f"phải có yêu cầu kĩ thuật (vòng {len(ROUNDS)}) trong live mới được code")
+                       f"phải có quyết định chi tiết (vòng {len(ROUNDS)}) trong live mới được code")
     return True, ""
 
 
@@ -950,6 +952,22 @@ def sync_live(root):
     return written
 
 
+def missing_infra(idea):
+    """What the proposal still owes of INFRA_FEATURES, as [{"path", "text"}]. A reminder: it blocks nothing.
+    Empty until round 1 passes, since nothing may be written under it before that."""
+    if not idea or not idea["passed"]:
+        return []
+    nodes = {n["key"]: n for n in idea["children"]}
+    out = []
+    for key, folder in INFRA_FEATURES.items():
+        want = json.dumps({"unity": [folder]}, ensure_ascii=False)
+        if key not in nodes:
+            out.append({"path": key, "text": f"chưa có node feature hạ tầng này ({CODE_FILE}: {want})"})
+        elif folder.lower() not in [name.lower() for name in nodes[key]["code"]]:
+            out.append({"path": key, "text": f"{CODE_FILE} phải khai {want}"})
+    return out
+
+
 def snapshot(root):
     """Everything the page shows: the mode, the score scale, both trees (idea marked against live) and their
     structure problems. Reads only."""
@@ -968,4 +986,4 @@ def snapshot(root):
     for n in walk(idea):
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
     return {"rounds": ROUNDS, "mode": mode, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
-            "problems": {"live": live_problems, "idea": idea_problems}}
+            "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea)}

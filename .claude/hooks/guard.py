@@ -69,7 +69,8 @@ DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE}
 # only the page and the history code write (the human's scores, the node's history).
 DESIGN_TREE, DESIGN_CHOOSE, DESIGN_ANSWERS = "idea", ".ai-need-user-choose", "answers.json"
 DESIGN_KEPT = {".user-review", ".history", ".progress"}
-DESIGNER_RULES = ntpath.join(".claude", "rules", "gamedesigner.md")
+DESIGNER_RULES_DIR = ntpath.join(".claude", "rules")      # the shared rules and one file per round
+DESIGNER_RULES_RX = re.compile(r"^gamedesigner(\.round[1-4])?\.md$", re.I)
 HUMAN_ASK_ZONES = {".claude", "_Composition", "Core", DESIGN_LIVE}
 # FEATURE values that are not feature folders.
 ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead", "@GameDesigner")
@@ -455,7 +456,8 @@ def decide(data, session_value, root):
             return "deny", "path goes through a link or junction"
         name, readable, _ = zone(full, root, feature, area, read_all)
         if mode == "gamedesigner":      # sees the design tree and its own rules, nothing else
-            readable = name in DESIGN_ZONES or full.lower() == ntpath.join(root, DESIGNER_RULES).lower()
+            readable = name in DESIGN_ZONES or (ntpath.dirname(full).lower() == ntpath.join(root, DESIGNER_RULES_DIR).lower()
+                                                and bool(DESIGNER_RULES_RX.match(ntpath.basename(full))))
         if readable:
             return "allow", f"read inside {name}"
         return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."
