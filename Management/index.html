@@ -328,7 +328,7 @@
   if (project && project.reports) {
     tab("bao-cao", "Báo cáo", "", function (pane) {
       add(pane, el("h1", "", "Báo cáo cho @Manager"));
-      add(pane, el("p", "sub", "Phiên feature, dịch vụ, @Core, @Composition kết thúc mỗi lượt có sửa file bằng một báo cáo; " +
+      add(pane, el("p", "sub", "Phiên feature, dịch vụ, @Core, @Composition, @CodeLead kết thúc mỗi lượt có sửa file bằng một báo cáo; " +
         "Stop hook lưu vào Management/reports. Mới nhất trước, tối đa 50."));
       var s = put(pane, section(""));
       if (!project.reports.length) { add(s, el("p", "muted", "Chưa có báo cáo nào.")); return; }
@@ -416,6 +416,131 @@
       }, f.violations.length > 0);
     });
   }
+
+  // ---------------------------------------------------------------- setup: tạo và gán đủ bộ thread
+  // Chạy qua Management/tools/setup_server.py (127.0.0.1). Tên thread = giá trị FEATURE.
+  var setupInfo = window.CORESIMPLE_SETUP || null;
+  tab("setup", "Setup", "", function (pane) {
+    add(pane, el("h1", "", "Setup thread"));
+    add(pane, el("p", "sub", "Mỗi thread là một chat Claude Code của project, tên đúng bằng giá trị FEATURE. " +
+      "Thread trùng tên đã có thì chỉ gán; chưa có thì tạo mới với model và effort chọn bên dưới (tốn một câu trả lời ngắn). Thread đã archive bị bỏ qua."));
+
+    if (!setupInfo) {
+      var off = put(pane, section("Chạy server Setup"));
+      add(off, el("p", "", "Trang đang mở thẳng từ file nên không tạo hay gán thread được. Chạy lệnh này ở gốc project (terminal VS Code), rồi mở link nó in ra:"));
+      add(off, commandBlock("python Management/tools/setup_server.py"));
+      add(off, el("p", "muted gap", "Server chỉ nghe ở 127.0.0.1. PIN chỉ đi từ trang này tới server, không qua chat, không được lưu."));
+      return;
+    }
+
+    var api = function (method, path, body) {
+      return fetch(path, {
+        method: method,
+        headers: { "Content-Type": "application/json", "X-Setup-Token": setupInfo.token },
+        body: body ? JSON.stringify(body) : undefined,
+        cache: "no-store"
+      }).then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      });
+    };
+
+    var form = put(pane, section("PIN"));
+    var pinRow = put(form, el("div", "cmd"));
+    var pin = put(pinRow, el("input"));
+    pin.type = "password";
+    pin.autocomplete = "new-password";
+    pin.placeholder = "PIN (chỉ giữ trong ô này, không lưu)";
+    pin.setAttribute("aria-label", "PIN");
+    pin.style.cssText = "flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font:inherit";
+    var picker = function (label) {
+      var s = el("select");
+      s.setAttribute("aria-label", label);
+      s.title = label + " cho thread tạo mới";
+      s.style.cssText = "padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font:inherit";
+      return put(pinRow, s);
+    };
+    var modelSel = picker("Model");
+    var effortSel = picker("Effort");
+    var fill = function (sel, values, chosen) {
+      if (sel.options.length) return;
+      values.forEach(function (v) {
+        var o = add(el("option", "", v));
+        o.value = v;
+        o.selected = v === chosen;
+        add(sel, o);
+      });
+    };
+    var basicBtn = put(pinRow, el("button", "copy", "Setup cơ bản"));
+    var fullBtn = put(pinRow, el("button", "copy", "Setup full"));
+    var setsNote = put(form, el("p", "muted gap", ""));
+    var status = put(form, el("p", "gap", ""));
+    var resultBox = put(form, el("div", "gap"));
+
+    var listBox = put(pane, section("Thread hiện có"));
+    listBox.style.marginTop = "16px";
+    var listBody = put(listBox, el("div"));
+
+    var renderThreads = function (data) {
+      fill(modelSel, data.models, data.defaults.model);
+      fill(effortSel, data.efforts, data.defaults.effort);
+      setsNote.textContent = "Cơ bản: " + data.sets.basic.join(", ") + ". Full: thêm " +
+        data.sets.full.slice(data.sets.basic.length).join(", ") +
+        ". Model và effort chỉ áp cho thread tạo mới (mặc định " + data.defaults.model + ", " + data.defaults.effort +
+        "); thread đã có giữ nguyên.";
+      listBody.textContent = "";
+      if (!data.threads.length) { add(listBody, el("p", "muted", "Chưa có thread nào có tên.")); return; }
+      var table = put(listBody, el("table"));
+      add(table, headRow(["Tên", "Đang gán", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id"]));
+      var body = put(table, el("tbody"));
+      var wanted = {};
+      data.sets.full.forEach(function (n) { wanted[n] = true; });
+      data.threads.forEach(function (t) {
+        var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")
+          : (!wanted[t.title] ? el("span", "muted", "ngoài bộ setup")
+          : (t.binding === t.title ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
+        add(body, row([t.title, t.binding || "—", (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
+          t.modified, state, el("code", "", t.id.slice(0, 8))]));
+      });
+    };
+    var refresh = function () {
+      return api("GET", "/api/threads").then(renderThreads, function (e) {
+        listBody.textContent = "Không đọc được danh sách thread: " + e.message;
+      });
+    };
+
+    var run = function (mode) {
+      if (!pin.value) { status.className = "gap bad-text"; status.textContent = "Nhập PIN trước."; pin.focus(); return; }
+      basicBtn.disabled = fullBtn.disabled = true;
+      status.className = "gap muted";
+      status.textContent = "Đang chạy… tạo thread mới mất vài giây mỗi cái.";
+      resultBox.textContent = "";
+      api("POST", "/api/setup", { pin: pin.value, mode: mode, model: modelSel.value, effort: effortSel.value }).then(function (res) {
+        if (!res.ok) { status.className = "gap bad-text"; status.textContent = res.error; return; }
+        status.className = "gap ok-text";
+        status.textContent = "Xong. Mở thread trong danh sách chat của VS Code (có thể phải tải lại danh sách).";
+        var table = put(resultBox, el("table"));
+        add(table, headRow(["Tên", "Kết quả"]));
+        var body = put(table, el("tbody"));
+        res.results.forEach(function (r) {
+          var text = r.action === "created" ? el("span", "ok-text", "tạo mới (" + r.model + ", " + r.effort + ") và gán")
+            : r.action === "bound" ? el("span", "ok-text", "đã có, chỉ gán (" + r.ids.length + " thread)")
+            : el("span", "bad-text", "lỗi: " + r.detail);
+          add(body, row([r.name, text]));
+        });
+      }, function (e) {
+        status.className = "gap bad-text";
+        status.textContent = "Lỗi gọi server: " + e.message;
+      }).then(function () {
+        basicBtn.disabled = fullBtn.disabled = false;
+        refresh();
+      });
+    };
+    basicBtn.type = fullBtn.type = "button";
+    basicBtn.addEventListener("click", function () { run("basic"); });
+    fullBtn.addEventListener("click", function () { run("full"); });
+    refresh();
+  });
 
   // Gán chat
   if (sessions) {
