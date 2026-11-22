@@ -112,8 +112,8 @@ def run_cases():
 
     g = "2 own Contracts"
     r(g, W, "allow", F + r"\Wallet\Scripts\Contracts\IWallet.cs")
-    e(g, W, "ask", F + r"\Wallet\Scripts\Contracts\IWallet.cs")
-    w(g, W, "ask", F + r"\Wallet\Scripts\Contracts\New.cs")
+    e(g, W, "allow", F + r"\Wallet\Scripts\Contracts\IWallet.cs")      # agreed with @CodeLead first (rules, not guard)
+    w(g, W, "allow", F + r"\Wallet\Scripts\Contracts\New.cs")
 
     g = "3 other public"
     r(g, W, "allow", F + r"\Shop\Scripts\Contracts\IShop.cs")
@@ -135,9 +135,9 @@ def run_cases():
 
     g = "5 _Composition/Core"
     r(g, W, "allow", A + r"\_Composition\Boot.cs")
-    e(g, W, "ask", A + r"\_Composition\Boot.cs")
+    e(g, W, "deny", A + r"\_Composition\Boot.cs")
     r(g, W, "allow", A + r"\Core\Base.cs")
-    w(g, W, "ask", A + r"\Core\Base.cs")
+    w(g, W, "deny", A + r"\Core\Base.cs")
 
     g = "6 Packages/ProjectSettings"
     r(g, W, "allow", FX + r"\UnityProject\Packages\manifest.json")
@@ -189,7 +189,7 @@ def run_cases():
     # ---- FEATURE variants
     g, P = "service agent", "_Services/Popup"
     e(g, P, "allow", F + r"\_Services\Popup\Scripts\Internal\P.cs")
-    e(g, P, "ask", F + r"\_Services\Popup\Scripts\Contracts\IPopup.cs")
+    e(g, P, "allow", F + r"\_Services\Popup\Scripts\Contracts\IPopup.cs")
     r(g, P, "deny", F + r"\Wallet\Scripts\Internal\W.cs")
     e(g, P, "deny", F + r"\Wallet\Scripts\Internal\W.cs")
     r(g, P, "allow", F + r"\Wallet\Scripts\Contracts\IWallet.cs")
@@ -231,7 +231,7 @@ def run_cases():
     r(g, W, "deny", F + r"\Wallet\..\Shop\Scripts\Internal\S.cs")
     r(g, W, "deny", (F + r"\Shop\Scripts\Internal\S.cs").lower())
     e(g, W, "allow", F + r"\WALLET\scripts\internal\W.cs")
-    e(g, W, "ask", F + r"\wallet\SCRIPTS\CONTRACTS\I.cs")
+    e(g, W, "allow", F + r"\wallet\SCRIPTS\CONTRACTS\I.cs")
     e(g, W, "deny", (F + r"\Shop\Scripts\Internal\S.cs").replace("\\", "/"))
     e(g, W, "allow", (F + r"\Wallet\Scripts\Internal\W.cs").replace("\\", "/"))
     t(g, W, "allow", "Edit", {"file_path": r"Scripts\Internal\W.cs"}, F + r"\Wallet")
@@ -311,14 +311,14 @@ def run_cases():
     d(W, "deny", "Assets/Features/Wallet/link/S.cs")
     d(W, "deny", "Assets/../../Management/tools/rules.json")
     d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/*.cs")
-    d(W, "ask", "Assets/Core/Base.cs")
-    d(W, "ask", "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")
+    d(W, "deny", "Assets/Core/Base.cs")
+    d(W, "allow", "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")
     d(W, "ask", "Assets/Features/Wallet/Scripts/Internal")
     d(W, "ask", "Assets/Features/Wallet")
     d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Missing.cs")
-    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/AssemblyInfo.cs")
-    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
-    d(W, "ask", "Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
+    d(W, "allow", "Assets/Features/Wallet/Scripts/Internal/AssemblyInfo.cs")
+    d(W, "allow", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
+    d(W, "allow", "Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
     d("", "deny", "Assets/Features/Wallet/Scripts/Internal/Old.cs")
     d("@human", "pass", "Assets/Features/Shop/Scripts/Internal/S.cs")
     t(g, W, "deny", "mcp__unityMCP__manage_script", {"action": "delete", "name": "Old", "path": "Assets/Features/Wallet/"})
@@ -327,15 +327,15 @@ def run_cases():
 
     # ---- boundary files inside the agent's own feature
     g = "boundary files"
-    w(g, W, "ask", F + r"\Wallet\Scripts\Internal\Game.Wallet.Internal.asmdef")
-    e(g, W, "ask", F + r"\Wallet\Tests\Game.Wallet.Tests.asmdef")
+    w(g, W, "allow", F + r"\Wallet\Scripts\Internal\Game.Wallet.Internal.asmdef")
+    e(g, W, "allow", F + r"\Wallet\Tests\Game.Wallet.Tests.asmdef")
     w(g, W, "deny", F + r"\Wallet\Scripts\Internal\x.asmref")
     w(g, W, "deny", F + r"\Wallet\Scripts\Internal\X.ASMREF")
-    e(g, W, "ask", F + r"\Wallet\Scripts\Internal\AssemblyInfo.cs")
+    e(g, W, "allow", F + r"\Wallet\Scripts\Internal\AssemblyInfo.cs")
     other = F + r"\Wallet\Scripts\Internal\Other.cs"
-    t(g, W, "ask", "Write", {"file_path": other, "content": '[assembly: InternalsVisibleTo("Game.Shop.Internal")]'})
-    t(g, W, "ask", "Edit", {"file_path": other, "old_string": "a", "new_string": 'InternalsVisibleTo("X")'})
-    t(g, W, "ask", "MultiEdit", {"file_path": other, "edits": [{"old_string": "a", "new_string": "InternalsVisibleTo"}]})
+    t(g, W, "allow", "Write", {"file_path": other, "content": '[assembly: InternalsVisibleTo("Game.Shop.Internal")]'})
+    t(g, W, "allow", "Edit", {"file_path": other, "old_string": "a", "new_string": 'InternalsVisibleTo("X")'})
+    t(g, W, "allow", "MultiEdit", {"file_path": other, "edits": [{"old_string": "a", "new_string": "InternalsVisibleTo"}]})
     t(g, W, "allow", "Write", {"file_path": other, "content": "internal class Other {}"})
     w(g, W, "deny", F + r"\Shop\Scripts\Internal\Game.Shop.Internal.asmdef")
 
@@ -355,7 +355,7 @@ def run_cases():
     payload = lambda tool, ti: json.dumps({"tool_name": tool, "tool_input": ti, "cwd": FX})  # noqa: E731
     cli(g, W, "allow", "Edit own feature", payload("Edit", {"file_path": F + r"\Wallet\Scripts\Internal\W.cs"}))
     cli(g, W, "deny", "Edit other feature", payload("Edit", {"file_path": F + r"\Shop\Scripts\Internal\S.cs"}))
-    cli(g, W, "ask", "Edit Core", payload("Edit", {"file_path": A + r"\Core\Base.cs"}))
+    cli(g, W, "deny", "Edit Core", payload("Edit", {"file_path": A + r"\Core\Base.cs"}))
     cli(g, W, "pass", "TodoWrite", payload("TodoWrite", {}))
     cli(g, "", "deny", "Edit, FEATURE unset", payload("Edit", {"file_path": F + r"\Wallet\Scripts\Internal\W.cs"}))
     cli(g, "@human", "pass", "Edit, @human", payload("Edit", {"file_path": F + r"\Shop\Scripts\Internal\S.cs"}))
@@ -374,6 +374,7 @@ def run_cases():
     run_binding_cases(payload)
     run_role_cases(payload)
     run_report_cases()
+    run_codelead_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + r"\x.txt"}, "cwd": real}), root=None)
@@ -401,7 +402,7 @@ def say(group, expect, label, prompt, session="chat1", store=None):
                 got = out["decision"] if hidden and not leaked else "garbage"
             else:
                 ctx = out["hookSpecificOutput"]["additionalContext"]
-                names = f"FEATURE={bound}" in ctx if bound else "chưa gán" in ctx
+                names = (f"FEATURE={bound}" in ctx and "không hợp lệ" not in ctx) if bound else "chưa gán" in ctx
                 got = "pass" if names and PIN not in ctx else "garbage: " + ctx
         except Exception:
             got = "garbage"
@@ -519,8 +520,8 @@ def run_role_cases(payload):
         e(g, role, "allow", A + own + r"\Old.cs")
         w(g, role, "allow", A + own + r"\New.cs")
         w(g, role, "allow", A + own + r"\Tests\T.cs")
-        e(g, role, "ask", A + own + r"\Game.Thing.asmdef")
-        w(g, role, "ask", A + own + r"\AssemblyInfo.cs")
+        e(g, role, "allow", A + own + r"\Game.Thing.asmdef")
+        w(g, role, "allow", A + own + r"\AssemblyInfo.cs")
         w(g, role, "deny", A + own + r"\x.asmref")
         e(g, role, "deny", A + other + r"\Old.cs")
         e(g, role, "deny", own_w)
@@ -593,7 +594,8 @@ def run_report_cases():
     def say_text(text): return {"type": "assistant", "message": {"content": [{"type": "text", "text": text}]}}
     edit = use("Edit", file_path="x")
     count = lambda: len(os.listdir(reports)) if os.path.isdir(reports) else 0     # noqa: E731
-    for session, value in (("rep-wallet", "Wallet"), ("rep-core", "@Core"), ("rep-human", "@human"), ("rep-mgr", "@Manager")):
+    for session, value in (("rep-wallet", "Wallet"), ("rep-core", "@Core"), ("rep-human", "@human"), ("rep-mgr", "@Manager"),
+                           ("rep-lead", "@CodeLead")):
         Path(guard.binding_path(session, STORE)).write_text(json.dumps({"feature": value}))
 
     def rep(expect, label, session, entries, active=False, transcript=True, keep_pending=False):
@@ -632,6 +634,8 @@ def run_report_cases():
     rep("pass, +1 report", "@Core with report", "rep-core", [human, edit, result, say_text(REPORT_OK)])
     rep("pass, +0 report", "@human is not asked", "rep-human", [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "@Manager is not asked", "rep-mgr", [human, edit, result, say_text("Xong.")])
+    rep("pass, +0 report", "@CodeLead is not asked (its edits are denied anyway)", "rep-lead",
+        [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "unbound chat is not asked", "rep-none", [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "missing transcript lets the agent stop", "rep-wallet", [], transcript=False)
     # The hook's own message may show up as a new user entry: the pending mark keeps the check on.
@@ -652,6 +656,81 @@ def run_report_cases():
           f"{len(saved)} báo cáo mới" in first and all(n in first for n in saved))
     again = bind_session.context({"session_id": "rep-mgr"}, FX, STORE)
     check("stop report", "", True, "and not again on its next prompt", "Không có báo cáo mới" in again)
+
+
+def run_codelead_cases():
+    """@CodeLead edits nothing, reads every layer of Basic/Features/Services, and uses unity-mcp only to
+    compile, test, play and look. A feature session changes its own Contracts/asmdef (agreed with @CodeLead by
+    message first; the guard does not check that) but never Core or _Composition."""
+    import bind_session
+    W, L = "Wallet", "@CodeLead"
+    internal = F + r"\Wallet\Scripts\Internal\Old.cs"
+    u = lambda name, **ti: t(g, L, ti.pop("expect"), "mcp__unityMCP__" + name, ti)      # noqa: E731
+
+    g = "codelead: edits nothing"
+    for p in (internal, F + r"\Wallet\Scripts\Contracts\IWallet.cs", A + r"\Core\Old.cs", A + r"\_Composition\Old.cs",
+              FX + r"\Management\proposals\decision.md", FX + r"\Management\tools\rules.json",
+              FX + r"\Management\data\x.js", FX + r"\.claude\settings.json", FX + r"\CLAUDE.md"):
+        w(g, L, "deny", p)
+    t(g, L, "deny", "MultiEdit", {"file_path": internal, "edits": []})
+    t(g, L, "deny", "NotebookEdit", {"notebook_path": internal})
+    t(g, L, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
+    t(g, L, "allow", "Bash", {"command": VALIDATE})
+    t(g, L, "deny", "Bash", {"command": "dotnet build"})
+    t(g, L, "pass", "SendMessage", {"to": W, "message": "Sửa giúp ..."})
+
+    g = "codelead: reads every layer of Basic, Features, Services"
+    for p in (internal, F + r"\Shop\Scripts\View\V.cs", F + r"\Wallet\Tests\T.cs", F + r"\Wallet\FeatureAssets\Private\c.asset",
+              F + r"\_Services\Popup\Scripts\Internal\P.cs", A + r"\Core\Old.cs", A + r"\_Composition\Old.cs",
+              FX + r"\Management\reports\r.md"):
+        r(g, L, "allow", p)
+    t(g, L, "allow", "Grep", {"pattern": "x", "path": F + r"\Shop\Scripts\Internal"})
+    for p in (FX + r"\UnityProject\Library\x", FX + r"\UnityProject\Temp\x", FX + r"\secret.txt", r"C:\Windows\x"):
+        r(g, L, "deny", p)
+    r(g + " (others still may not)", W, "deny", F + r"\Shop\Scripts\Internal\S.cs")
+    r(g + " (others still may not)", "@Manager", "deny", internal)
+
+    g = "codelead: unity-mcp"
+    for name in ("refresh_unity", "read_console", "run_tests", "get_test_job", "find_gameobjects", "validate_script"):
+        u(name, expect="allow")
+    for action in ("play", "pause", "stop"):
+        u("manage_editor", expect="allow", action=action)
+    u("manage_scene", expect="allow", action="get_hierarchy")
+    u("manage_asset", expect="allow", action="search", path="Assets")
+    u("manage_prefabs", expect="allow", action="get_info")
+    t(g, L, "allow", "ReadMcpResourceTool", {"server": "unityMCP", "uri": "mcpforunity://editor/state"})
+    for name, action in (("manage_editor", "add_tag"), ("manage_editor", "deploy_package"), ("manage_scene", "save"),
+                         ("manage_scene", "create"), ("manage_asset", "delete"), ("manage_asset", "modify"),
+                         ("manage_prefabs", "modify_contents"), ("manage_gameobject", "create"),
+                         ("create_script", ""), ("apply_text_edits", ""), ("execute_code", "execute"),
+                         ("script_apply_edits", ""), ("manage_components", "add")):
+        u(name, expect="deny", action=action)
+    t(g + " (others)", W, "deny", "mcp__unityMCP__refresh_unity", {})
+    t(g + " (others)", W, "deny", "ReadMcpResourceTool", {"server": "unityMCP", "uri": "x"})
+
+    g = "codelead: own boundary files, no gate"
+    for who, path in ((W, F + r"\Wallet\Scripts\Contracts\IWallet.cs"),
+                      (W, F + r"\Wallet\Scripts\Internal\Game.Wallet.Internal.asmdef"),
+                      ("@Core", A + r"\Core\Game.Core.asmdef"), ("@Composition", A + r"\_Composition\AssemblyInfo.cs")):
+        e(g, who, "allow", path)
+    for p in (A + r"\Core\Old.cs", A + r"\_Composition\Old.cs"):
+        e(g + ": a feature never edits Core/_Composition", W, "deny", p)
+    e(g, W, "ask", FX + r"\Management\tools\rules.json")
+    e(g, W, "deny", FX + r"\Management\approvals\a.json")          # the old approval folder means nothing now
+
+    g = "codelead: bind and reports"
+    say(g, "block, bound=@CodeLead", "bind @CodeLead", f"FEATURE=@codelead {PIN}", session="role-lead")
+    say(g, "pass, bound=@CodeLead", "@CodeLead is told its job", "làm đi", session="role-lead")
+    reports = FX + r"\Management\reports"
+    os.makedirs(reports, exist_ok=True)
+    Path(reports, "20990101-000000-Shop.md").write_text("## Báo cáo cho @Manager\n- Phiên: FEATURE=Shop\n- Việc: x\n"
+                                                        "- Trạng thái: xong\n", encoding="utf-8")
+    lead = bind_session.context({"session_id": "role-lead"}, FX, STORE)
+    check(g, L, True, "@CodeLead is told about new reports", "20990101-000000-Shop.md" in lead)
+    again = bind_session.context({"session_id": "role-lead"}, FX, STORE)
+    check(g, L, True, "and not again", "Không có báo cáo mới" in again)
+    mgr = bind_session.context({"session_id": "rep-mgr"}, FX, STORE)
+    check(g, "@Manager", True, "@Manager keeps its own read list", "20990101-000000-Shop.md" in mgr)
 
 
 def main():

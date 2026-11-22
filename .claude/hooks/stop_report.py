@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Stop hook. A turn that changed files must end with a report for @Manager.
 
-Applies to feature and service sessions, @Core and @Composition. Not to @human, @Manager or unbound chats.
+Applies to the groups Basic (@Core, @Composition), Features and Services. Not to @human, @Manager, @CodeLead
+(it edits nothing) or unbound chats. @CodeLead and @Manager are both shown new reports (bind_session.py).
 "Changed files" = an Edit/Write/MultiEdit/NotebookEdit or a unity-mcp delete after the human's last prompt,
 read from the transcript. The agent's last message must hold the block in REPORT_FORMAT (see
 .claude/rules/report.md). The hook saves it to Management/reports/<time>-<role>.md, where @Manager is told
@@ -120,7 +121,7 @@ def main(argv):
             root, store = ntpath.abspath(argv[2]), argv[4]
         raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
         role = guard.role_of(raw)
-        if role in ("@human", "@Manager") or not (role or guard.valid_feature(raw, root)):
+        if role in ("@human", "@Manager", "@CodeLead") or not (role or guard.valid_feature(raw, root)):
             return 0
         who = role or raw
         pending = pending_path(data.get("session_id"), store)

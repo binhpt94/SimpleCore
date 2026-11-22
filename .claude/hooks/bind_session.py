@@ -39,7 +39,7 @@ ITERATIONS = 200_000
 # Anything that starts like the command is handled here and never passed on: it may carry the PIN.
 COMMAND_RX = re.compile(r"feature\s*(\?|=(.*))?", re.I)
 CONTEXT_BLOCK_RX = re.compile(r"<([A-Za-z][\w-]*)\b[^>]*>.*?</\1>", re.S)
-USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Composition, @Manager hoặc @human> <PIN>. "
+USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Composition, @Manager, @CodeLead hoặc @human> <PIN>. "
          "Xem chat đang gán gì: FEATURE?")
 MAX_LISTED_REPORTS = 20
 
@@ -143,14 +143,15 @@ def report_field(text, name):
     return m.group(1).strip() if m else "?"
 
 
-def unread_reports(root, store):
-    """Reports in Management/reports the Manager has not been shown yet; marks them as shown."""
+def unread_reports(root, store, reader):
+    """Reports in Management/reports `reader` (@Manager or @CodeLead) has not been shown yet; marks them as shown.
+    Each reader keeps its own list."""
     folder = ntpath.join(root, "Management", "reports")
     try:
         names = sorted(n for n in os.listdir(folder) if n.endswith(".md"))
     except OSError:
         names = []
-    seen_path = ntpath.join(store, "manager-seen.json")
+    seen_path = ntpath.join(store, reader.strip("@").lower() + "-seen.json")
     seen = read_json(seen_path, [])
     seen = set(seen) if isinstance(seen, list) else set()
     new = [n for n in names if n not in seen]
@@ -178,19 +179,26 @@ def context(data, root, store):
     if role == "@human":
         return ("guard: chat này gán FEATURE=@human (phiên của người): không giới hạn feature; sửa Core, "
                 "_Composition, .claude, CLAUDE.md gốc vẫn bị hỏi từng lần.")
+    worker = (" Đổi Contracts, .asmdef, InternalsVisibleTo: thống nhất với @CodeLead trước (gửi ngữ cảnh, file, đề "
+              "xuất). Xung đột code do @CodeLead giải quyết; lỗi @CodeLead báo về thì tự sửa. Lượt có sửa file phải "
+              "kết thúc bằng báo cáo (gửi @CodeLead và @Manager) theo .claude/rules/report.md.")
     if role in guard.ROLE_AREAS:
         area = guard.ROLE_AREAS[role]
-        return (f"guard: chat này gán FEATURE={role}. Chỉ sửa UnityProject/Assets/{area}/ (.asmdef, InternalsVisibleTo "
-                "vẫn hỏi người); đọc phần công khai của feature. Lượt có sửa file phải kết thúc bằng báo cáo cho "
-                "@Manager theo .claude/rules/report.md.")
+        return (f"guard: chat này gán FEATURE={role} (nhóm Basic). Chỉ sửa UnityProject/Assets/{area}/; đọc phần "
+                "công khai của feature." + worker)
+    if role == "@CodeLead":
+        return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders): kiểm code và giải quyết xung đột của nhóm "
+                "Basic, Features, Services. Không sửa bất kỳ file nào; đọc được toàn bộ source các nhóm đó; unity-mcp "
+                "chỉ để biên dịch, chạy test, Play và xem. Lỗi thì gửi yêu cầu sửa cụ thể cho phiên sở hữu. Quy trình "
+                "ở .claude/rules/codelead.md." + unread_reports(root, store, role))
     if role == "@Manager":
-        return ("guard: chat này gán FEATURE=@Manager: điều phối, không sửa code hay asset; chỉ tạo file mới trong "
-                "Management/proposals và nhắn các phiên bằng SendMessage. Báo cáo của các phiên ở Management/reports/."
-                + unread_reports(root, store))
+        return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "
+                "file mới trong Management/proposals và nhắn các phiên bằng SendMessage. Báo cáo của các phiên ở "
+                "Management/reports/." + unread_reports(root, store, role))
     if raw and guard.valid_feature(raw, root):
-        return (f"guard: chat này gán FEATURE={raw}. Sửa được trong UnityProject/Assets/Features/{raw}/ theo bảng "
-                "quyền ở CLAUDE.md gốc; không cần dò lại quyền. Lượt có sửa file phải kết thúc bằng báo cáo cho "
-                "@Manager theo .claude/rules/report.md.")
+        group = "Services" if raw.startswith("_Services/") else "Features"
+        return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "
+                "theo bảng quyền ở CLAUDE.md gốc; không cần dò lại quyền." + worker)
     if raw:
         return f"guard: chat này gán FEATURE={raw}, giá trị không hợp lệ: mọi thao tác sửa bị chặn."
     return ("guard: chat này chưa gán FEATURE: mọi thao tác sửa bị chặn. Chỉ người gán được, "

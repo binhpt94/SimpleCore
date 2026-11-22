@@ -9,19 +9,20 @@ window.CORESIMPLE_SESSIONS = {
 
   // `copy`: chữ được chép, khi khác "FEATURE=<id> ".
   features: [
-    { id: "@human", label: "Phiên của người (tích hợp)", note: "Không giới hạn feature; vẫn bị hỏi khi sửa Core, _Composition, .claude. Là phiên duy nhất biên dịch, chạy test và Play qua unity-mcp." },
-    { id: "<Tên>", label: "Phiên feature", copy: "FEATURE=", note: "Tên thư mục trong Assets/Features, ví dụ Wallet; dịch vụ thì thêm _Services/, ví dụ _Services/Popup." },
-    { id: "@Core", label: "Phiên Core", note: "Chỉ sửa Assets/Core (.asmdef, InternalsVisibleTo vẫn hỏi); đọc phần công khai của feature." },
-    { id: "@Composition", label: "Phiên Composition", note: "Chỉ sửa Assets/_Composition: Boot variant, scene, catalog asset; đọc phần công khai của feature. Việc cần Unity (scene, prefab) nhờ @human." },
-    { id: "@Manager", label: "Phiên điều phối", note: "Không sửa code. Thấy báo cáo mới của các phiên ở đầu mỗi tin, nhắn các phiên bằng SendMessage, viết đề xuất trong Management/proposals." }
+    { id: "@human", group: "Master", label: "Phiên của người (tích hợp)", note: "Không giới hạn feature; vẫn bị hỏi khi sửa Core, _Composition, .claude. Biên dịch, chạy test, Play và sửa scene/prefab qua unity-mcp." },
+    { id: "@Manager", group: "Leaders", label: "Phiên điều phối", note: "Không sửa code. Thấy báo cáo mới của các phiên ở đầu mỗi tin, nhắn các phiên bằng SendMessage, viết đề xuất trong Management/proposals." },
+    { id: "@CodeLead", group: "Leaders", label: "Phiên kiểm code", note: "Không sửa file nào. Đọc toàn bộ source nhóm Basic, Features, Services; biên dịch, chạy test, Play qua unity-mcp; giải quyết xung đột code và báo lỗi về phiên sở hữu (.claude/rules/codelead.md)." },
+    { id: "@Core", group: "Basic", label: "Phiên Core", note: "Chỉ sửa Assets/Core; đọc phần công khai của feature." },
+    { id: "@Composition", group: "Basic", label: "Phiên Composition", note: "Chỉ sửa Assets/_Composition: Boot variant, scene, catalog asset; đọc phần công khai của feature. Việc cần Unity (scene, prefab) nhờ @human." },
+    { id: "<Tên>", group: "Features / Services", label: "Phiên feature", copy: "FEATURE=", note: "Tên thư mục trong Assets/Features, ví dụ Wallet (nhóm Features); dịch vụ thì thêm _Services/, ví dụ _Services/Popup (nhóm Services)." }
   ],
 
   notes: [
     "Mỗi chat một feature, nhiều chat chạy chung một cửa sổ VS Code. Gõ FEATURE? để xem chat đang gán gì.",
     "Không đưa PIN cho AI.",
-    "Phiên feature, dịch vụ, @Core, @Composition: lượt có sửa file phải kết thúc bằng báo cáo cho @Manager (.claude/rules/report.md); hook lưu vào Management/reports.",
+    "Nhóm Basic, Features, Services: lượt có sửa file phải kết thúc bằng báo cáo (.claude/rules/report.md); hook lưu vào Management/reports, @CodeLead và @Manager đều thấy.",
     "Chat chưa gán thì không sửa được gì. Chat mới, /clear hoặc chat tách nhánh phải gán lại.",
-    "Phiên feature không biên dịch hay chạy test được. Khi nó báo xong, chạy test trong Unity hoặc nhờ phiên @human.",
+    "Phiên feature không biên dịch hay chạy test được. Khi nó báo xong, @CodeLead biên dịch và chạy test (hoặc bạn chạy trong Unity).",
     "Phiên feature chỉ nên báo xong khi code của nó biên dịch được: cả project dùng chung một Unity Editor, lỗi biên dịch của một feature chặn test của mọi feature.",
     "Việc phụ thuộc nhau thì làm nối tiếp: feature cần contract mới của feature khác phải chờ feature kia xong.",
     "Thử lại guard sau khi sửa nó: python .claude/hooks/test_guard.py"
@@ -42,7 +43,8 @@ window.CORESIMPLE_SESSIONS = {
     "1. <VIỆC 1>",
     "2. <VIỆC 2>",
     "",
-    "Dừng và hỏi người trước khi sửa: Scripts/Contracts của bạn, bất kỳ *.asmdef nào, AssemblyInfo.cs, Core, _Composition, rules.json.",
+    "Trước khi sửa Scripts/Contracts của bạn, *.asmdef, AssemblyInfo.cs/InternalsVisibleTo: gửi @CodeLead ngữ cảnh, file, đề xuất và chờ thống nhất. Core, _Composition: nhờ @Core/@Composition. rules.json: dừng và hỏi người.",
+    "Xong thì báo @CodeLead (khối báo cáo); lỗi @CodeLead báo về thì tự sửa.",
     "Cần đổi thứ gì ở feature khác: viết đề xuất vào Management/proposals rồi dừng.",
     "Xoá file chỉ qua unity-mcp (manage_asset, action delete, path bắt đầu bằng Assets/).",
     "",

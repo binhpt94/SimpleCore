@@ -31,7 +31,7 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 - Mỗi asset installer có test nạp asset thật và gọi `Install` trong EditMode.
 
 ## Asset
-- Không đổi GUID trong `.meta` đã có. Xoá hay đổi tên asset ở `FeatureAssets/Public` là đổi contract: phải hỏi.
+- Không đổi GUID trong `.meta` đã có. Xoá hay đổi tên asset ở `FeatureAssets/Public` là đổi contract: thống nhất với @CodeLead trước.
 - Asset giao cho dịch vụ (ví dụ prefab popup) là của feature gọi, đặt ở `FeatureAssets/Public` của nó, và đi qua id `<Owner>/<Name>` (ví dụ `Shop/Purchased`), không qua object Unity. Id khai báo một lần, `static readonly` (giá trị bất biến, không phải trạng thái), trong Internal của chủ; validator SRC-05 kiểm.
 
 ## Không lách

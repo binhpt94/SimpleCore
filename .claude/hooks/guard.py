@@ -4,15 +4,19 @@
 Who a session is comes from the human, never from the agent: the binding for this chat (session_id),
 made when the human types `FEATURE=<value> <PIN>` in the chat; see bind_session.py. Bindings and the
 PIN live outside the project, in STORE_DIR. The FEATURE environment variable is not used.
-The value means:
-    <Name> or _Services/<Name>  -> agent bound to that feature
-    @Core                       -> agent that edits only Assets/Core
-    @Composition                -> agent that edits only Assets/_Composition
-    @Manager                    -> coordinator: edits nothing but new files in Management/proposals
-    @human                      -> no feature limits; still asks for .claude, _Composition, Core
-    unset / invalid             -> every edit is denied
-Every agent role reads what a feature session reads: public parts of features, Core, _Composition,
-Management, .claude, root CLAUDE.md.
+The value, by group:
+    Master    @human                      no feature limits; still asks for .claude, _Composition, Core
+    Leaders   @Manager                    coordinator: edits nothing but new files in Management/proposals
+              @CodeLead                   checks code and settles conflicts: edits NOTHING; reads all source of
+                                          Basic/Features/Services; compiles, tests and plays through a read-only
+                                          subset of unity-mcp (CODELEAD_UNITY)
+    Basic     @Core / @Composition        edits only Assets/Core / Assets/_Composition
+    Features  <Name>                      edits only its feature
+    Services  _Services/<Name>            edits only its service
+    unset / invalid                       every edit is denied
+Basic, Features and Services read the public parts of features, Core, _Composition, Management, .claude and
+the root CLAUDE.md. Changing their own Contracts, an .asmdef or InternalsVisibleTo is allowed here; the rules
+(.claude/rules/codelead.md) make them agree it with @CodeLead first. rules.json and deleting folders ask the human.
 
 Default is deny: unknown tools, unknown zones and any error in this script are blocked.
 Reads the hook JSON on stdin, writes the decision JSON on stdout. Standard library only.
@@ -41,10 +45,32 @@ PASS_TOOLS = {"AskUserQuestion", "TodoWrite", "TaskCreate", "TaskUpdate", "TaskL
 FORBIDDEN_DIRS = {"library", "temp", "logs", "obj", "usersettings"}
 HUMAN_ASK_ZONES = {".claude", "_Composition", "Core"}
 # FEATURE values that are not feature folders.
-ROLES = ("@human", "@Core", "@Composition", "@Manager")
+ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead")
 ROLE_AREAS = {"@Core": "Core", "@Composition": "_Composition"}
-# The one unity-mcp call a feature session may make: manage_asset with action "delete".
+# The one unity-mcp call a Basic/Features/Services session may make: manage_asset with action "delete".
 UNITY_ASSET_TOOL = "mcp__unityMCP__manage_asset"
+# What @CodeLead may call in unity-mcp: compile, test, play and look. None = every action of that tool.
+CODELEAD_UNITY = {
+    "mcp__unityMCP__refresh_unity": None,
+    "mcp__unityMCP__read_console": None,
+    "mcp__unityMCP__run_tests": None,
+    "mcp__unityMCP__get_test_job": None,
+    "mcp__unityMCP__find_gameobjects": None,
+    "mcp__unityMCP__find_in_file": None,
+    "mcp__unityMCP__get_sha": None,
+    "mcp__unityMCP__validate_script": None,
+    "mcp__unityMCP__unity_docs": None,
+    "mcp__unityMCP__unity_reflect": None,
+    "mcp__unityMCP__manage_script_capabilities": None,
+    "mcp__unityMCP__debug_request_context": None,
+    "mcp__unityMCP__manage_editor": {"play", "pause", "stop", "telemetry_status", "telemetry_ping"},
+    "mcp__unityMCP__manage_scene": {"get_hierarchy", "get_active", "get_loaded_scenes", "get_build_settings"},
+    "mcp__unityMCP__manage_asset": {"search", "get_info", "get_components"},
+    "mcp__unityMCP__manage_prefabs": {"get_info", "get_hierarchy"},
+    "ReadMcpResourceTool": None,
+    "ListMcpResourcesTool": None,
+    "ReadMcpResourceDirTool": None,
+}
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")
 SHELL_META_RX = re.compile(r"[;&|<>`$(){}\r\n]")
 # Per-chat bindings and the PIN. Outside the project, so no agent session can read or write it.
@@ -142,9 +168,10 @@ def goes_through_link(full, root):
     return False
 
 
-def zone(full, root, feature, area=None):
+def zone(full, root, feature, area=None, read_all=False):
     """(name, readable, edit) for a path; edit is 'allow' | 'ask' | 'create' | 'deny'.
-    feature: the session's own feature; area: "Core" or "_Composition" for the @Core / @Composition roles."""
+    feature: the session's own feature; area: "Core" or "_Composition" for @Core / @Composition;
+    read_all: @CodeLead, who may read the private parts of every feature as well."""
     if full.lower() == root.lower():
         return "project root", False, "deny"
     if not inside(full, root):
@@ -173,15 +200,11 @@ def zone(full, root, feature, area=None):
     if low[1] != "assets" or n < 3:
         return "unlisted", False, "deny"
 
-    # A feature session asks for Core / _Composition; @Core and @Composition edit only their own one.
+    # Only @Core / @Composition edit Core / _Composition; a feature session asks them.
     if low[2] == "_composition":
-        if area == "_Composition":
-            return "own _Composition", True, "allow"
-        return "_Composition", True, "deny" if area else "ask"
+        return ("own _Composition", True, "allow") if area == "_Composition" else ("_Composition", True, "deny")
     if low[2] == "core":
-        if area == "Core":
-            return "own Core", True, "allow"
-        return "Core", True, "deny" if area else "ask"
+        return ("own Core", True, "allow") if area == "Core" else ("Core", True, "deny")
     if low[2] != "features" or n < 4:
         return "unlisted", False, "deny"
 
@@ -194,12 +217,12 @@ def zone(full, root, feature, area=None):
 
     if feature and name.lower() == feature.lower():
         if re.match(r"^Scripts/Contracts(/|$)", rest, re.I):
-            return "own Contracts", True, "ask"
+            return "own Contracts", True, "allow"
         return "own feature", True, "allow"
     # The CLAUDE.md at a feature's root describes it to the others: readable by all, like its Contracts.
     if re.match(r"^(Scripts/Contracts|FeatureAssets/Public)(/|$)", rest, re.I) or rest.lower() == "claude.md":
         return f"public part of feature {name}", True, "deny"
-    return f"private part of feature {name}", False, "deny"
+    return f"private part of feature {name}", read_all, "deny"
 
 
 def text_of(value):
@@ -212,8 +235,8 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         return "deny", "unity-mcp manage_asset: a feature session may use only action 'delete'"
     if mode == "none":
         return "deny", "FEATURE is not set or is not an existing feature folder; deleting is blocked"
-    if mode == "manager":
-        return "deny", "@Manager does not change the project; ask the session that owns the file"
+    if mode in ("manager", "codelead"):
+        return "deny", f"{who} does not change the project; ask the session that owns the file"
     path = text_of(ti.get("path")).replace("\\", "/")
     if not re.match(r"^Assets/[^/]", path):
         return "deny", "unity-mcp delete: write the path from the Unity project root, starting with 'Assets/'"
@@ -223,19 +246,23 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
     if goes_through_link(full, root):
         return "deny", "path goes through a link or junction"
     name, _, edit = zone(full, root, feature, area)
-    if edit == "ask":
-        return "ask", f"deleting in {name} needs human approval"
     if edit != "allow":
         return "deny", f"FEATURE={who} may not delete in: {name}"
-    low = full.lower()
-    if low.endswith(".asmref"):
+    if full.lower().endswith(".asmref"):
         return "deny", ".asmref files are forbidden"
     if not os.path.isfile(full):
         return "ask", "deleting a folder (or a path that is not a file) needs human approval"
-    if (low.endswith(".asmdef") or ntpath.basename(low) == "assemblyinfo.cs"
-            or re.search(r"\\featureassets\\public\\", low)):
-        return "ask", "deleting an .asmdef, AssemblyInfo.cs or a FeatureAssets/Public asset changes the feature's boundary"
     return "allow", f"delete inside {name}"
+
+
+def decide_codelead_unity(tool, ti):
+    """@CodeLead in unity-mcp: compile, test, play and look; never change the project."""
+    actions = CODELEAD_UNITY[tool]
+    action = text_of(ti.get("action"))
+    if actions is None or action in actions:
+        return "allow", f"@CodeLead may use {tool}" + (f" ({action})" if action else "")
+    return "deny", (f"@CodeLead may not use {tool} action '{action}': it compiles, tests, plays and reads, but "
+                    "changes nothing. Ask the session that owns the area to make the change.")
 
 
 def decide(data, session_value, root):
@@ -257,11 +284,14 @@ def decide(data, session_value, root):
         mode = "human"
     elif role == "@Manager":
         mode = "manager"
+    elif role == "@CodeLead":
+        mode = "codelead"
     elif role in ROLE_AREAS:
         mode, area = "area", ROLE_AREAS[role]
     elif valid_feature(raw, root):
         mode, feature = "feature", raw
     who = role or raw
+    read_all = mode == "codelead"
 
     edit_path = text_of(ti.get("file_path")) or text_of(ti.get("notebook_path"))
 
@@ -291,6 +321,9 @@ def decide(data, session_value, root):
         if mode == "none":
             return "deny", ("this chat has no valid FEATURE, so all edits are blocked. Only the human can set it "
                             "(by typing FEATURE=<name> <PIN> in the chat). Stop and tell the human.")
+        if mode == "codelead":
+            return "deny", ("@CodeLead edits nothing. Send the owning session exactly what to fix (file, change, "
+                            "why); it makes the change. See .claude/rules/codelead.md.")
         name, _, edit = zone(full, root, feature, area)
         # Files that define the boundary itself.
         if full.lower().endswith(".asmref"):
@@ -299,15 +332,6 @@ def decide(data, session_value, root):
             return "deny", ("@Manager does not edit code, assets or settings; it may only create new files in "
                             "Management/proposals. Ask the session that owns the area.")
         if edit == "allow":
-            new = text_of(ti.get("content")) + text_of(ti.get("new_string")) + text_of(ti.get("new_source"))
-            edits = ti.get("edits")
-            for e in edits if isinstance(edits, list) else []:
-                if isinstance(e, dict):
-                    new += text_of(e.get("new_string"))
-            if full.lower().endswith(".asmdef"):
-                return "ask", "editing an .asmdef changes what this area may reference; needs human approval"
-            if ntpath.basename(full).lower() == "assemblyinfo.cs" or re.search("InternalsVisibleTo", new, re.I):
-                return "ask", "InternalsVisibleTo opens internal types to another assembly; needs human approval"
             return "allow", f"edit inside {name}"
         if edit == "ask":
             return "ask", (f"editing {name} needs human approval. Say what changes and why it cannot be done "
@@ -332,10 +356,13 @@ def decide(data, session_value, root):
         full = resolve_target(target, cwd)
         if goes_through_link(full, root):
             return "deny", "path goes through a link or junction"
-        name, readable, _ = zone(full, root, feature, area)
+        name, readable, _ = zone(full, root, feature, area, read_all)
         if readable:
             return "allow", f"read inside {name}"
         return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."
+
+    if mode == "codelead" and tool in CODELEAD_UNITY:
+        return decide_codelead_unity(tool, ti)
 
     if tool == UNITY_ASSET_TOOL:
         return decide_unity_delete(ti, mode, feature, root, area, who)

@@ -1,5 +1,6 @@
 # Báo cáo cho @Manager
-Áp dụng cho phiên feature, dịch vụ, @Core, @Composition. @human và @Manager không phải báo.
+Áp dụng cho nhóm Basic (@Core, @Composition), Features, Services. @human, @Manager, @CodeLead không phải báo.
+Báo cáo đi tới cả @CodeLead (kiểm code, biên dịch, chạy test) và @Manager (điều phối).
 
 ## Khi nào
 - Lượt nào có sửa file (Edit, Write, xoá qua unity-mcp) thì kết thúc câu trả lời bằng khối báo cáo bên dưới.
@@ -26,5 +27,6 @@
 
 ## Đi đâu
 - Hook lưu khối vào `Management/reports/<thời gian>-<vai trò>.md` (không commit).
-- Phiên @Manager thấy danh sách báo cáo mới ở đầu mỗi tin; trang quản lý có tab Báo cáo.
+- Phiên @CodeLead và @Manager mỗi bên thấy danh sách báo cáo mới ở đầu mỗi tin; trang quản lý có tab Báo cáo.
+- @CodeLead kiểm code rồi nhắn lỗi về đúng phiên; phiên đó tự sửa.
 - @Manager điều phối bằng SendMessage tới các phiên và đề xuất trong `Management/proposals`; không sửa code.
