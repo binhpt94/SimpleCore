@@ -97,6 +97,14 @@ def build_fixture():
               r"\Scripts\Internal\Game.Wallet.Internal.asmdef", r"\FeatureAssets\Public\Icon.prefab"):
         Path(F + r"\Wallet" + f).write_text("x")
     _winapi.CreateJunction(F + r"\Shop\Scripts\Internal", F + r"\Wallet\link")
+    # The code gate (gamedesign.code_allowed): a feature is coded only when the live design names its folder and
+    # has reached round 4. Wallet and _Services/Popup have that here; Shop has no design at all.
+    live = FX + r"\Management\game-design\live"
+    os.makedirs(live + r"\feature-code\detail\tech")
+    for d in ("", r"\feature-code", r"\feature-code\detail", r"\feature-code\detail\tech"):
+        Path(live + d + r"\data.md").write_text("# x\n")
+    Path(live + r"\feature-code\code.json").write_text('{"unity": ["Wallet", "_Services/Popup"]}')
+    shutil.copy2(HERE.parent.parent / "Management" / "tools" / "gamedesign.py", FX + r"\Management\tools\gamedesign.py")
 
 
 def run_cases():
@@ -377,6 +385,7 @@ def run_cases():
     run_report_cases()
     run_codelead_cases()
     run_designer_cases()
+    run_progress_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + r"\x.txt"}, "cwd": real}), root=None)
@@ -796,7 +805,8 @@ def run_designer_cases():
     for p in (idea + choose + r"\answers.json", idea + r"\feature-hero" + choose + r"\answers.json",
               idea + choose + r"\ANSWERS.JSON", idea + r"\.user-review\review.json", idea + r"\feature-hero\.user-review\review.json",
               idea + r"\.USER-REVIEW\x.json", idea + r"\.history\log.jsonl", idea + r"\.history\state.json",
-              idea + r"\feature-hero\.history\removed\x\log.jsonl", ai + r"\.history\log.jsonl"):
+              idea + r"\feature-hero\.history\removed\x\log.jsonl", ai + r"\.history\log.jsonl",
+              idea + r"\feature-hero\.progress\progress.json", idea + r"\.PROGRESS\x.json"):
         w(g + " (never the human's files or the history)", D, "deny", p)
         e(g + " (never the human's files or the history)", D, "deny", p)
     t(g, D, "deny", "MultiEdit", {"file_path": live + r"\node.md", "edits": []})
@@ -855,7 +865,7 @@ def run_designer_cases():
     for tail in (" live", " ai", " ai/idea/..", " ai/idea/../live", " ai/idea/Feature", " ai/idea/a b", " ai/idea/a; ls",
                  " --root C:/x", " ai/idea/.history", " ai/idea ai/idea"):
         t(g, D, "deny", "Bash", {"command": STATUS + tail})
-    for who in (W, "@Manager", "@CodeLead", "@Core", ""):
+    for who in (W, "@Manager", "@Core", ""):      # @CodeLead may run it too: see "codelead: progress command"
         t(g + " (others)", who, "deny", "Bash", {"command": STATUS})
 
     g = "designer: write gate"
@@ -937,6 +947,74 @@ def run_designer_cases():
     os.remove(base + r"\mode.json")
     told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
     check(g, D, True, "without a mode file the context says Full Auto", "Full Auto" in told and "User control" not in told)
+
+
+def run_progress_cases():
+    """The code gate for Features and Services sessions, and the one thing @CodeLead writes: progress."""
+    import bind_session
+    W, S, L = "Wallet", "Shop", "@CodeLead"
+    live = FX + r"\Management\game-design\live"
+    own = F + r"\Shop\Scripts\Internal\S.cs"
+
+    g = "code gate"
+    e(g, W, "allow", F + r"\Wallet\Scripts\Internal\Old.cs")                 # live design names Wallet and reached round 4
+    e(g, "wallet", "allow", F + r"\Wallet\Scripts\Internal\Old.cs")          # any letter case of the bound name
+    e(g, "_Services/Popup", "allow", F + r"\_Services\Popup\Scripts\Internal\P.cs")
+    for p in (own, F + r"\Shop\Scripts\Contracts\IShop.cs", F + r"\Shop\Tests\T.cs", F + r"\Shop\CLAUDE.md"):
+        w(g + " (no design names Shop)", S, "deny", p)
+    e(g + " (no design names Shop)", S, "deny", own)
+    t(g + " (no design names Shop)", S, "deny", "MultiEdit", {"file_path": own, "edits": []})
+    t(g + " (no design names Shop)", S, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Features/Shop/Scripts/Internal/S.cs"})
+    r(g + ": reading is not gated", S, "allow", own)
+    w(g + ": proposals are not gated", S, "allow", FX + r"\Management\proposals\shop-gate.md")
+    t(g + ": validate is not gated", S, "allow", "Bash", {"command": VALIDATE})
+    os.makedirs(live + r"\feature-shop\detail")
+    for d in (r"\feature-shop", r"\feature-shop\detail"):
+        Path(live + d + r"\data.md").write_text("# x\n")
+    Path(live + r"\feature-shop\code.json").write_text('{"unity": ["Shop"]}')
+    e(g + " (design stops at round 3)", S, "deny", own)
+    os.makedirs(live + r"\feature-shop\detail\tech")
+    Path(live + r"\feature-shop\detail\tech\data.md").write_text("# x\n")
+    e(g + " (round 4 in live)", S, "allow", own)
+    t(g + " (round 4 in live)", S, "allow", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Features/Shop/Scripts/Internal/S.cs"})
+    Path(live + r"\feature-shop\code.json").write_text("{ broken")
+    e(g + " (unreadable code.json)", S, "deny", own)
+    Path(live + r"\feature-shop\code.json").write_text('{"unity": ["Shop"]}')
+    e(g + ": others", "@Core", "allow", A + r"\Core\Old.cs")
+    e(g + ": others", "@Composition", "allow", A + r"\_Composition\Old.cs")
+    e(g + ": others", "@human", "pass", F + r"\Shop\Scripts\Internal\S.cs")
+    cli(g + " (real process)", S, "allow", "Edit own code once the design reached round 4",
+        json.dumps({"tool_name": "Edit", "tool_input": {"file_path": own}, "cwd": FX}))
+    os.rename(FX + r"\Management\tools\gamedesign.py", FX + r"\Management\tools\gamedesign.off")
+    sys.modules.pop("gamedesign", None)
+    e(g + " (gate code missing: closed)", W, "deny", F + r"\Wallet\Scripts\Internal\Old.cs")
+    e(g + " (gate code missing: closed)", "@Core", "allow", A + r"\Core\Old.cs")
+    os.rename(FX + r"\Management\tools\gamedesign.off", FX + r"\Management\tools\gamedesign.py")
+    importlib.invalidate_caches()      # this process just failed to import it; a real hook is a new process each time
+    shutil.rmtree(live + r"\feature-shop")
+    cli(g + " (real process)", S, "deny", "Edit own code with no design",
+        json.dumps({"tool_name": "Edit", "tool_input": {"file_path": own}, "cwd": FX}))
+    for session, value in (("gate-wallet", W), ("gate-shop", S)):
+        Path(guard.binding_path(session, STORE)).write_text(json.dumps({"feature": value}))
+    check(g, W, True, "an open feature is told it may code", "được code" in bind_session.context({"session_id": "gate-wallet"}, FX, STORE))
+    told = bind_session.context({"session_id": "gate-shop"}, FX, STORE)
+    check(g, S, True, "a locked feature is told so, and why", "ĐANG KHOÁ" in told and "chưa có node thiết kế nào" in told)
+
+    g = "codelead: progress command"
+    PROGRESS = "python Management/tools/gd_progress.py "
+    for tail in ("ai/idea/feature-hero idea done", "ai/idea/feature-wave/spawning/spawn-timer prototype doing", "ai/idea/feature-hero full todo"):
+        t(g, L, "allow", "Bash", {"command": PROGRESS + tail})
+    t(g, L, "allow", "PowerShell", {"command": PROGRESS + "ai/idea/feature-hero idea done"})
+    for tail in ("ai/idea/feature-hero idea", "ai/idea/feature-hero optional done", "ai/idea/feature-hero idea finished", "live/feature-hero idea done",
+                 "ai/idea/../live idea done", "ai/idea/Feature idea done", "ai/idea/feature-hero idea done; ls", "ai/idea/feature-hero idea done --root C:/x",
+                 "ai/idea/feature-hero/.progress idea done", "ai/idea idea done x", ""):
+        t(g, L, "deny", "Bash", {"command": (PROGRESS + tail).strip()})
+    for cmd in ("python Management/tools/gd_status.py", "python Management/tools/gd_status.py ai/idea/feature-hero"):
+        t(g, L, "allow", "Bash", {"command": cmd})
+    t(g, L, "deny", "Bash", {"command": "python Management/tools/gd_delete.py ai/idea/feature-hero"})
+    for who in (W, "@Manager", "@GameDesigner", "@Core", ""):
+        t(g + " (others)", who, "deny", "Bash", {"command": PROGRESS + "ai/idea/feature-hero idea done"})
+    w(g, L, "deny", FX + r"\Management\game-design\ai\idea\feature-hero\.progress\progress.json")      # only through the command
 
 
 def main():

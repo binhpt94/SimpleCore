@@ -141,6 +141,19 @@
     ".gd-tag.ph-full { border-color: var(--muted); color: var(--muted); }",
     ".gd-tag.ph-optional, .gd-tag.ph-none { border-style: dashed; font-weight: 400; }",
     ".gd-rank { margin: 8px 0 0; border-top: 1px solid var(--line); }",
+    ".gd-tag.ph-done { opacity: .75; }",
+    ".gd-work { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); }",
+    ".gd-work-name { flex: 1; min-width: 120px; }",
+    ".gd-cell { padding: 3px 10px; border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; }",
+    ".gd-cell:hover { border-color: var(--accent); }",
+    ".gd-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }",
+    ".gd-cell.own { font-weight: 700; color: var(--text); }",
+    ".gd-cell.doing { border-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); }",
+    ".gd-cell.done { border-color: var(--ok); background: var(--ok); color: var(--panel); }",
+    ".gd-cell:disabled { opacity: .6; cursor: default; }",
+    ".gd-gate { margin: 8px 0 0; font-size: 13.5px; }",
+    ".gd-gate.ok { color: var(--ok); }",
+    ".gd-gate.bad { color: var(--bad); }",
     ".gd-score .gd-link { margin-left: 10px; font-size: 12px; }",
     ".gd-score .gd-link:disabled { opacity: .4; cursor: default; }",
     ".gd-scale { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); margin: 0 0 4px; }"
@@ -296,8 +309,11 @@
     var rank = function (node) { return node.priority || { ai: null, user: null, base: null, effective: null, offset: 0, from: "", phase: "", why: "", leaf: true }; };
     var phaseTag = function (node) {
       var r = rank(node), p = phase(r.phase);
-      var tag = el("span", "gd-tag ph" + (p ? " ph-" + p.key : " ph-none"), p ? p.name + " " + r.effective : "chưa xếp");
-      tag.title = p ? "Độ quan trọng " + r.effective + ": cần cho giai đoạn " + p.name + " (" + p.label + ")" : "Chưa có điểm độ quan trọng";
+      // Lá đã xong vẫn giữ điểm của nó (thêm dấu ✓); node cha mà mọi lá bên dưới đã xong thì chỉ ghi "xong".
+      var text = p ? p.name + " " + r.effective + (r.done ? " ✓" : "") : (r.done ? "xong ✓" : "chưa xếp");
+      var tag = el("span", "gd-tag ph" + (p ? " ph-" + p.key : " ph-none") + (r.done ? " ph-done" : ""), text);
+      tag.title = (p ? "Độ quan trọng " + r.effective + ": cần cho giai đoạn " + p.name + " (" + p.label + ")"
+        : r.done ? "Mọi node lá bên dưới đã xong" : "Chưa có điểm độ quan trọng") + (r.done && p ? ". Đã xong." : "");
       return tag;
     };
     // Lọc theo giai đoạn là cộng dồn: chọn PROTOTYPE thì node của IDEA cũng sáng.
@@ -824,6 +840,41 @@
       });
     };
 
+    // Tiến độ của node lá: một ô cho mỗi giai đoạn; bấm ô để đổi chưa làm → đang làm → xong (lưu ngay).
+    var WORK = { todo: "chưa làm", doing: "đang làm", done: "xong" };
+    var renderProgress = function (body, node) {
+      if (!rank(node).leaf || !node.progress) return;
+      var states = data.workStates || ["todo", "doing", "done"];
+      var row = put(body, el("div", "gd-work"));
+      add(row, el("span", "gd-work-name", "Tiến độ"));
+      phases().filter(function (p) { return node.progress[p.key]; }).forEach(function (p) {
+        var cell = node.progress[p.key];
+        var next = states[(states.indexOf(cell.state) + 1) % states.length];
+        var b = put(row, button(p.name + ": " + (WORK[cell.state] || cell.state), function () {
+          state.message = null;
+          send("/api/gamedesign/progress", { path: node.path, phase: p.key, state: next },
+            function () { return "Đã ghi tiến độ " + p.name + " của node " + where(node) + ": " + (WORK[next] || next) + "."; });
+        }, null, "gd-cell " + cell.state + (rank(node).phase === p.key ? " own" : "")));
+        b.title = (cell.by ? "Đánh dấu bởi " + cell.by + " lúc " + cell.at + ". " : "") + (cell.note ? cell.note + ". " : "") +
+          "Bấm để đổi sang: " + (WORK[next] || next) + "." + (rank(node).phase === p.key ? " Đây là giai đoạn của node này theo độ quan trọng." : "");
+        if (!ctx.setup) b.disabled = true;
+      });
+      if (!ctx.setup) add(row, el("span", "gd-id", SERVER_HINT));
+    };
+
+    // Node feature: thư mục code đã khai và có được code chưa (đúng điều kiện guard áp cho phiên feature).
+    var renderCode = function (body, node) {
+      var gates = node.codeGate || [];
+      if (!gates.length) {
+        if (node.round === 2) add(body, el("p", "gd-note", "Node feature này chưa khai thư mục code (code.json): chưa phiên feature nào được code theo nó."));
+        return;
+      }
+      gates.forEach(function (g) {
+        var line = put(body, el("p", "gd-gate " + (g.ok ? "ok" : "bad")));
+        add(line, el("code", "", g.unity), el("span", "", g.ok ? " được code: thiết kế đã tới vòng 4 trong live." : " đang khoá code: " + g.reason + "."));
+      });
+    };
+
     var renderDetail = function (root) {
       detailBox.textContent = "";
       var node = state.selected === null ? null : find(root, state.selected);
@@ -835,6 +886,8 @@
         table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "") + " · hash data " + node.dataHash));
       if (node.summary) add(body, el("p", "", node.summary));
       renderPriority(body, node);
+      renderProgress(body, node);
+      renderCode(body, node);
       // Ý cốt lõi: bấm vào một ý để hiện chi tiết, hàng nút chấm điểm và ô nhập ý kiến.
       if (state.table === "idea") renderVerdict(body, node);
       renderItems(body, node);

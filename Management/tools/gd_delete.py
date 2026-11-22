@@ -23,7 +23,7 @@ sys.path.insert(0, str(HERE))
 import gamedesign  # noqa: E402
 
 WORK = gamedesign.WORK_DIR
-KEPT = (gamedesign.REVIEW_DIR, gamedesign.HISTORY_DIR, gamedesign.ANSWERS_FILE)
+KEPT = (gamedesign.REVIEW_DIR, gamedesign.HISTORY_DIR, gamedesign.PROGRESS_DIR, gamedesign.ANSWERS_FILE)
 
 
 def is_link(path):
@@ -58,7 +58,7 @@ def delete(root, arg):
     if tuple(parts) in set(gamedesign.TABLES.values()):
         raise ValueError("không xoá cả một bảng")
     if any(p in KEPT for p in parts):
-        raise ValueError("điểm, câu trả lời của người và lịch sử (.user-review, answers.json, .history) không xoá được")
+        raise ValueError("điểm, câu trả lời của người, tiến độ và lịch sử (.user-review, answers.json, .progress, .history) không xoá được")
     work = Path(root).joinpath(*gamedesign.BASE, WORK)
     target = work.joinpath(*parts[1:])
     cur = work

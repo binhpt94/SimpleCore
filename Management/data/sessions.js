@@ -23,6 +23,8 @@ window.CORESIMPLE_SESSIONS = {
     "Không đưa PIN cho AI.",
     "Nhóm Basic, Features, Services: lượt có sửa file phải kết thúc bằng báo cáo (.claude/rules/report.md); hook lưu vào Management/reports, @CodeLead và @Manager đều thấy.",
     "Chat chưa gán thì không sửa được gì. Chat mới, /clear hoặc chat tách nhánh phải gán lại.",
+    "Phiên feature chỉ sửa được code khi thiết kế của nó đã tới vòng 4 trong Management/game-design/live (node feature khai thư mục code trong code.json). Bị khoá thì việc tiếp theo là của @GameDesigner và bạn (tab Game design).",
+    "Tiến độ: @CodeLead đánh dấu từng node lá xong tới giai đoạn nào sau khi biên dịch và test; bạn sửa lại được ở tab Game design.",
     "Phiên feature không biên dịch hay chạy test được. Khi nó báo xong, @CodeLead biên dịch và chạy test (hoặc bạn chạy trong Unity).",
     "Phiên feature chỉ nên báo xong khi code của nó biên dịch được: cả project dùng chung một Unity Editor, lỗi biên dịch của một feature chặn test của mọi feature.",
     "Việc phụ thuộc nhau thì làm nối tiếp: feature cần contract mới của feature khác phải chờ feature kia xong.",

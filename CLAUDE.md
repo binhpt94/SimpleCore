@@ -8,7 +8,7 @@ Quyền do `.claude/hooks/guard.py` ép theo `FEATURE` của phiên, chia 5 nhó
 Bị guard chặn thì dừng và báo người, không tìm đường vòng. Xoá file: chỉ file trong vùng của mình, qua unity-mcp (`manage_asset`, action `delete`, path bắt đầu bằng `Assets/`). Lệnh shell duy nhất được chạy, từ gốc project:
 `python Management/tools/validate.py --feature <Tên>` — kiểm tra ranh giới feature (bỏ `--feature` là cả project); còn vi phạm thì chưa xong việc.
 
-Feature nằm ở `UnityProject/Assets/Features/<Tên>/`, dịch vụ ở `Features/_Services/<Tên>/`. Không tạo `Shared/`.
+Feature nằm ở `UnityProject/Assets/Features/<Tên>/`, dịch vụ ở `Features/_Services/<Tên>/`. Không tạo `Shared/`. Phiên Features/Services chỉ sửa được code của mình khi thiết kế của nó đã tới vòng 4 trong `Management/game-design/live` (guard kiểm; dòng `guard:` đầu tin báo đang mở hay khoá); bị khoá thì dừng và báo người.
 
 | Vùng | Đọc | Sửa |
 |---|---|---|

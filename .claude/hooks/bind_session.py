@@ -171,6 +171,22 @@ def unread_reports(root, store, reader):
     return f" {len(new)} báo cáo mới{more}, đọc file để xem đủ:\n" + "\n".join(lines)
 
 
+def code_gate(root, feature):
+    """Whether this Features/Services chat may code now (the gate guard.py applies), in one sentence."""
+    try:
+        tools = ntpath.join(root, "Management", "tools")
+        if tools not in sys.path:
+            sys.path.insert(0, tools)
+        import gamedesign
+        ok, reason = gamedesign.code_allowed(root, feature)
+    except Exception as ex:
+        ok, reason = False, f"không đọc được thiết kế ({ex})"
+    if ok:
+        return "Thiết kế của feature này đã tới vòng 4 trong live nên được code; bám theo Management/game-design/live."
+    return ("SỬA CODE ĐANG KHOÁ: " + reason + ". Đọc thì vẫn được. Dừng và báo người; thiết kế là việc của "
+            "@GameDesigner, người chốt sang live.")
+
+
 def designer_mode(root):
     """What the mode in Management/game-design/mode.json asks of @GameDesigner; read on every prompt."""
     mode = read_json(ntpath.join(root, "Management", "game-design", "mode.json"), None)
@@ -203,8 +219,11 @@ def context(data, root, store):
     if role == "@CodeLead":
         return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders): kiểm code và giải quyết xung đột của nhóm "
                 "Basic, Features, Services. Không sửa bất kỳ file nào; đọc được toàn bộ source các nhóm đó; unity-mcp "
-                "chỉ để biên dịch, chạy test, Play và xem. Lỗi thì gửi yêu cầu sửa cụ thể cho phiên sở hữu. Quy trình "
-                "ở .claude/rules/codelead.md." + unread_reports(root, store, role))
+                "chỉ để biên dịch, chạy test, Play và xem. Lỗi thì gửi yêu cầu sửa cụ thể cho phiên sở hữu. Thứ duy nhất "
+                "được ghi là tiến độ của node thiết kế lá, sau khi đã biên dịch và test qua: python "
+                "Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done> (xem bằng "
+                "python Management/tools/gd_status.py). Quy trình ở .claude/rules/codelead.md."
+                + unread_reports(root, store, role))
     if role == "@GameDesigner":
         return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Chỉ đọc "
                 "Management/game-design và .claude/rules/gamedesigner.md; chỉ ghi trong Management/game-design/ai "
@@ -221,7 +240,7 @@ def context(data, root, store):
     if raw and guard.valid_feature(raw, root):
         group = "Services" if raw.startswith("_Services/") else "Features"
         return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "
-                "theo bảng quyền ở CLAUDE.md gốc; không cần dò lại quyền." + worker)
+                "theo bảng quyền ở CLAUDE.md gốc; không cần dò lại quyền. " + code_gate(root, raw) + worker)
     if raw:
         return f"guard: chat này gán FEATURE={raw}, giá trị không hợp lệ: mọi thao tác sửa bị chặn."
     return ("guard: chat này chưa gán FEATURE: mọi thao tác sửa bị chặn. Chỉ người gán được, "

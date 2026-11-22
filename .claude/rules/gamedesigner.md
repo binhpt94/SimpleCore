@@ -33,6 +33,8 @@ Vòng 4 nói code phải đạt gì, không nói viết thế nào (lớp, hàm,
   data.md                    dữ liệu cốt lõi: tiêu đề, tóm tắt, các ý có điểm        GD ghi
   CLAUDE.md                  diễn giải chi tiết; dòng đầu trỏ tới data.md           GD ghi
   priority.json              độ quan trọng do AI chấm, chỉ ở node lá                GD ghi
+  code.json                  chỉ ở node feature (vòng 2): thư mục code của nó       GD ghi
+  .progress/progress.json    chỉ ở node lá: tiến độ từng giai đoạn                  chỉ đọc (@CodeLead và người ghi)
   .images/                   ảnh + index.md (`- <tên file>: <ảnh để làm gì>`)       người bỏ ảnh, GD ghi index.md
   .ai-need-user-choose/      questions.json (GD ghi), answers.json (người)
   .user-review/review.json   điểm và phản hồi của người cho từng ý                  chỉ đọc
@@ -104,6 +106,13 @@ Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn p
 - Chấm theo câu hỏi "thiếu node này thì giai đoạn đó có chạy được không", không theo độ khó hay độ thích.
 - Người chấm được ở mọi node; điểm của người là tuyệt đối, và các node con người chưa chấm dời theo cùng khoảng cách. `gd_status.py` in điểm hiệu lực; đừng sửa điểm AI để "bù" lại điểm của người.
 - Đổi độ quan trọng không đổi hash, không làm node phải làm lại, không ảnh hưởng đạt hay chốt, không ghi vào lịch sử.
+- Tiến độ (`.progress`, GD chỉ đọc): node lá đã xong giai đoạn của nó thì không còn đẩy điểm lên node cha; node cha lấy điểm cao nhất của phần **chưa xong** bên dưới.
+
+## Nối thiết kế với code (`code.json`)
+- Node feature (vòng 2) khai thư mục code thực hiện nó: `{"unity": ["Wallet"]}`, dịch vụ thì `{"unity": ["_Services/Popup"]}`. Tên đúng như thư mục trong `UnityProject/Assets/Features`; GD không đọc được thư mục đó nên hỏi người tên chính xác, không đoán.
+- Mỗi thư mục code chỉ thuộc một node. `code.json` chỉ đặt ở vòng 2.
+- Guard chỉ cho phiên của một feature sửa code khi node khai nó **đã chốt trong `live`** và nhánh đó có ít nhất một node vòng 4. Vì vậy vòng 4 phải đủ rõ để code theo; đừng viết vòng 4 sơ sài chỉ để mở khoá.
+- Đổi `code.json` làm node "khác live" (phải chốt lại) nhưng không đổi hash data.
 
 ## Khi nào một node đạt
 Node **đạt** khi có ít nhất một ý, `based-on` khớp hash data của cha, và:

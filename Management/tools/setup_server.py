@@ -18,7 +18,7 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
   enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
-  human's importance score of a node. With the PIN: /sync copies every passing node into live at once
+  human's importance score of a node, /progress the progress of a leaf. With the PIN: /sync copies every passing node into live at once
   (gamedesign.sync_live), /mode switches Full Auto / User control. Nothing reaches live without promote or sync.
 """
 import argparse
@@ -75,7 +75,7 @@ MAX_BODY = 4096
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
-              "/api/gamedesign/priority": MAX_BODY}
+              "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024}
 
 
 def transcripts_dir():
@@ -211,6 +211,15 @@ def priority(path, score):
     return {"ok": True, "data": sync_page.write_gamedesign(ROOT)}
 
 
+def progress(path, phase, state, note):
+    """The progress cells of a leaf node: todo | doing | done for one phase, set by the human. No PIN."""
+    try:
+        gamedesign.save_progress(ROOT, path, phase, state, "người", note if isinstance(note, str) else None)
+    except (ValueError, OSError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "data": sync_page.write_gamedesign(ROOT)}
+
+
 def sync_live(pin):
     """The Sync button: every passing idea node that differs from live is copied into live. Needs the PIN: it
     rewrites many fixed nodes at once."""
@@ -320,6 +329,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, promote(data.get("path"), data.get("deep") is True))
             if self.path == "/api/gamedesign/review":
                 return self.send_json(200, review(data.get("path"), data.get("items"), data.get("table")))
+            if self.path == "/api/gamedesign/progress":
+                return self.send_json(200, progress(data.get("path"), data.get("phase"), data.get("state"), data.get("note")))
             if self.path == "/api/gamedesign/priority":
                 return self.send_json(200, priority(data.get("path"), data.get("score")))
             if self.path == "/api/gamedesign/sync":

@@ -14,6 +14,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
 import gd_delete  # noqa: E402
+import gd_progress  # noqa: E402
 import gd_status  # noqa: E402
 
 results = []
@@ -361,6 +362,97 @@ def run_priority(root):
         check("status shows: " + label, part in text)
 
 
+def run_progress(root):
+    """Progress on leaves; parents ranked by what is not done; code.json and the round-4 code gate."""
+    mk(root, "")
+    mk(root, "feature-hero"), mk(root, "feature-hero/skills"), mk(root, "feature-hero/skills/cooldown"), mk(root, "feature-hero/level")
+    mk(root, "feature-wallet")
+    ai = lambda path, score: put(root, f"idea/{path}/priority.json", json.dumps({"ai": score, "why": "vì"}))      # noqa: E731
+    pr = lambda path: snap_node(root, path)["priority"]      # noqa: E731
+    ai("feature-hero/skills/cooldown", 9), ai("feature-hero/level", 6), ai("feature-wallet", 3)
+    check("a leaf starts with every phase todo", {k: v["state"] for k, v in snap_node(root, "feature-wallet")["progress"].items()},
+          {"idea": "todo", "prototype": "todo", "full": "todo"})
+    for label, args in (("a node with children", ("feature-hero", "idea", "done", "x")), ("the root", ("", "idea", "done", "x")),
+                        ("unknown phase", ("feature-wallet", "optional", "done", "x")), ("unknown state", ("feature-wallet", "full", "finished", "x")),
+                        ("unknown node", ("feature-none", "idea", "done", "x")), ("bad path", ("../x", "idea", "done", "x")),
+                        ("note too long", ("feature-wallet", "full", "done", "x", "n" * 2001))):
+        check("progress refused: " + label, refused(gd.save_progress, root, *args))
+    before = snap_node(root, "feature-hero/skills/cooldown")
+    gd.record_versions(root)
+    events = len(gd.read_history(folder(root, "idea/feature-hero/skills/cooldown")))
+    gd.save_progress(root, "feature-hero/skills/cooldown", "prototype", "done", "người", "làm trước")
+    check("done for another phase than the leaf's own does not finish it", (pr("feature-hero/skills/cooldown")["done"], pr("feature-hero")["effective"]), (False, 9))
+    gd.save_progress(root, "feature-hero/skills/cooldown", "idea", "doing", "@CodeLead")
+    check("doing is not done", pr("feature-hero/skills/cooldown")["done"], False)
+    check(gd_progress.mark(root, "ai/idea/feature-hero/skills/cooldown", "idea", "done"), True, True) if False else None
+    msg = gd_progress.mark(root, "ai/idea/feature-hero/skills/cooldown", "idea", "done")
+    cell = snap_node(root, "feature-hero/skills/cooldown")["progress"]
+    check("the command marks the leaf, by @CodeLead; other cells keep their note",
+          ("idea = done" in msg, cell["idea"]["state"], cell["idea"]["by"], cell["prototype"]["note"]), (True, "done", "@CodeLead", "làm trước"))
+    check("a done leaf keeps its own score", (pr("feature-hero/skills/cooldown")["done"], pr("feature-hero/skills/cooldown")["effective"]), (True, 9))
+    check("but no longer lifts its parents: they take the highest of what is not done",
+          (pr("feature-hero/skills")["done"], pr("feature-hero/skills")["effective"], pr("feature-hero")["effective"], pr("")["effective"]), (True, None, 6, 6))
+    after = snap_node(root, "feature-hero/skills/cooldown")
+    check("progress changes no hash, no verdict, no state and writes no history",
+          ((after["dataHash"], after["hash"], after["passed"], after["state"]), gd.record_versions(root), len(gd.read_history(folder(root, "idea/feature-hero/skills/cooldown")))),
+          ((before["dataHash"], before["hash"], before["passed"], before["state"]), [], events))
+    gd.save_progress(root, "feature-hero/level", "prototype", "done", "@CodeLead")
+    gd.save_progress(root, "feature-wallet", "full", "done", "@CodeLead")
+    check("every leaf done: the parents are done", (pr("feature-hero")["done"], pr("")["done"], pr("")["effective"]), (True, True, None))
+    gd.save_priority(root, "feature-wallet", 9)
+    check("a leaf the human moves to another phase is open again there", (pr("feature-wallet")["done"], pr("")["effective"]), (False, 9))
+    gd.save_priority(root, "feature-wallet", None)
+    gd.save_progress(root, "feature-wallet", "full", "todo", "người")
+    check("the human can reopen a leaf", (pr("feature-wallet")["done"], pr("")["effective"]), (False, 3))
+    for arg, phase, state in (("live/feature-wallet", "full", "done"), ("ai/idea/../live", "full", "done"), ("ai/idea/feature-hero", "idea", "done"),
+                              ("ai/idea/feature-wallet", "idea", "finished"), ("feature-wallet", "idea", "done")):
+        check(f"command refused: {arg} {phase} {state}", refused(gd_progress.mark, root, arg, phase, state))
+    text = gd_status.report(root)
+    for label, part in (("progress cells", "Tiến độ: IDEA done (@CodeLead"), ("a done branch", "ĐÃ XONG (mọi node lá bên dưới đã xong)")):
+        check("status shows: " + label, part in text)
+    check("progress cannot be deleted by @GameDesigner's command", refused(gd_delete.delete, root, "ai/idea/feature-wallet/.progress"))
+
+    # ---- code.json and the gate
+    code = lambda path, names: put(root, f"idea/{path}/code.json", json.dumps({"unity": names}))      # noqa: E731
+    gate = lambda name: gd.code_allowed(root, name)      # noqa: E731
+    check("no live table: locked", (gate("Wallet")[0], "chưa có node thiết kế nào" in gate("Wallet")[1]), (False, True))
+    code("feature-hero", ["Hero", "_Services/Popup"]), code("feature-wallet", ["Wallet"])
+    n = snap_node(root, "feature-hero")
+    check("a feature node names its code folders", (n["code"], gd.snapshot(root)["problems"]["idea"]), (["Hero", "_Services/Popup"], []))
+    check("named only in the proposal: still locked", gate("Hero")[0], False)
+    before_hash = n["dataHash"]
+    gd.sync_live(root)
+    check("code.json goes to live with the node", folder(root, "live/feature-hero/code.json").is_file())
+    check("neither progress nor importance goes to live",
+          [x.name for x in gd.table_dir(root, "live").rglob("*") if x.name in (".progress", "priority.json")], [])
+    check("a branch that reached round 4 in live may be coded, under each name, in any letter case",
+          (gate("Hero"), gate("_Services/Popup"), gate("hero")), ((True, ""), (True, ""), (True, "")))
+    check("a feature whose design stops at round 2 is locked, and the reason says so", (gate("Wallet")[0], "tới vòng 2" in gate("Wallet")[1]), (False, True))
+    check("a folder no node names is locked", gate("Shop")[0], False)
+    mk(root, "feature-wallet/coins"), gd.sync_live(root)
+    check("round 3 is not enough", (gate("Wallet")[0], "tới vòng 3" in gate("Wallet")[1]), (False, True))
+    mk(root, "feature-wallet/coins/cap")
+    check("round 4 only in the proposal is not enough", gate("Wallet")[0], False)
+    gd.sync_live(root)
+    check("round 4 in live opens it", gate("Wallet"), (True, ""))
+    check("the snapshot says so per folder", snap_node(root, "feature-wallet")["codeGate"], [{"unity": "Wallet", "ok": True, "reason": ""}])
+    code("feature-wallet", ["Wallet", "Shop"])
+    n = snap_node(root, "feature-wallet")
+    check("changing code.json makes the node differ from live but changes no data hash", (n["state"], gate("Shop")[0]), ("changed", False))
+    check("status shows the gate", "Thư mục code Wallet: ĐƯỢC CODE" in gd_status.report(root) and "Thư mục code Shop: ĐANG KHOÁ" in gd_status.report(root))
+    check("hero's data hash did not move through all this", snap_node(root, "feature-hero")["dataHash"], before_hash)
+    for label, path, text, part in (
+            ("not JSON", "feature-wallet", "{ broken", "không phải JSON"), ("wrong shape", "feature-wallet", '{"unity": "Wallet"}', "phải có dạng"),
+            ("bad name", "feature-wallet", '{"unity": ["../x"]}', "phải có dạng"), ("not on a feature node", "feature-hero/skills", '{"unity": ["Skills"]}', "chỉ đặt ở node feature"),
+            ("claimed twice", "feature-wallet", '{"unity": ["hero"]}', "đã được node 'feature-hero' khai")):
+        saved = {x: folder(root, f"idea/{x}/code.json") for x in ("feature-wallet", "feature-hero/skills")}
+        put(root, f"idea/{path}/code.json", text)
+        check("code.json problem: " + label, any(part in x["text"] for x in gd.snapshot(root)["problems"]["idea"]))
+        if path == "feature-hero/skills":
+            saved[path].unlink()
+    code("feature-wallet", ["Wallet"])
+
+
 def run_flow(root):
     """Sync; history; delete; status."""
     mk(root, "", items=(("loop", 8, "Vòng lặp."), ("win", 6, "Thắng sau 10 đợt.")))
@@ -420,7 +512,7 @@ def run_flow(root):
     gd.save_review(root, "feature-hero/skills", {"three": {"score": 1, "feedback": "bỏ"}})
     for arg in ("live/keep.md", "ai", "ai/", "ai/idea", "idea/data.md", "ai/../live/keep.md", "ai/../../outside.md", "../x",
                 "ai/./idea/data.md", "C:/x", "ai/idea/nope.md", "ai/idea/feature-hero/.ai-need-user-choose/answers.json",
-                "ai/idea/.history", "ai/idea/.history/log.jsonl", "ai/idea/feature-hero/skills/.user-review",
+                "ai/idea/.history", "ai/idea/.history/log.jsonl", "ai/idea/feature-hero/skills/.user-review", "ai/idea/feature-shop/.progress",
                 "ai/idea/feature-hero/skills/.user-review/review.json"):
         check(f"delete refused: {arg}", refused(gd_delete.delete, root, arg))
     check("live untouched", folder(root, "live/keep.md").is_file())
@@ -438,7 +530,7 @@ def run_flow(root):
 
 
 def main():
-    for case in (run_data, run_scores, run_live_scores, run_priority, run_flow):
+    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_flow):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

@@ -9,7 +9,8 @@ The value, by group:
     Leaders   @Manager                    coordinator: edits nothing but new files in Management/proposals
               @CodeLead                   checks code and settles conflicts: edits NOTHING; reads all source of
                                           Basic/Features/Services; compiles, tests and plays through a read-only
-                                          subset of unity-mcp (CODELEAD_UNITY)
+                                          subset of unity-mcp (CODELEAD_UNITY); writes one thing, the progress
+                                          of a design leaf, through gd_progress.py
               @GameDesigner               designs, never codes: reads only Management/game-design (and its own rules
                                           file), writes only in Management/game-design/ai, deletes there with
                                           gd_delete.py, reads its status with gd_status.py; live, mode.json, the
@@ -22,6 +23,8 @@ The value, by group:
 Basic, Features and Services read the public parts of features, Core, _Composition, Management, .claude and
 the root CLAUDE.md. Changing their own Contracts, an .asmdef or InternalsVisibleTo is allowed here; the rules
 (.claude/rules/codelead.md) make them agree it with @CodeLead first. rules.json and deleting folders ask the human.
+Features and Services may edit their own folder only once its design has reached round 4 in the live table
+(Management/tools/gamedesign.py, code_allowed); reading is not gated, and neither are @Core and @Composition.
 
 Default is deny: unknown tools, unknown zones and any error in this script are blocked.
 Reads the hook JSON on stdin, writes the decision JSON on stdout. Standard library only.
@@ -45,6 +48,11 @@ DESIGNER_COMMANDS = [
     r"python Management/tools/gd_delete\.py ai(/[A-Za-z0-9._-]+)+",
     r"python Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
 ]
+# For @CodeLead only: mark the progress of a design leaf after checking the code, and look at the design's status.
+CODELEAD_COMMANDS = [
+    r"python Management/tools/gd_progress\.py ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* (idea|prototype|full) (todo|doing|done)",
+    r"python Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+]
 
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
 READ_TOOLS = {"Read", "Grep", "Glob"}
@@ -60,7 +68,7 @@ DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE}
 # Inside ai: the proposed tree; the human's answers file that sits beside each node's questions; and the folders
 # only the page and the history code write (the human's scores, the node's history).
 DESIGN_TREE, DESIGN_CHOOSE, DESIGN_ANSWERS = "idea", ".ai-need-user-choose", "answers.json"
-DESIGN_KEPT = {".user-review", ".history"}
+DESIGN_KEPT = {".user-review", ".history", ".progress"}
 DESIGNER_RULES = ntpath.join(".claude", "rules", "gamedesigner.md")
 HUMAN_ASK_ZONES = {".claude", "_Composition", "Core", DESIGN_LIVE}
 # FEATURE values that are not feature folders.
@@ -276,6 +284,10 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         return "deny", f"FEATURE={who} may not delete in: {name}"
     if full.lower().endswith(".asmref"):
         return "deny", ".asmref files are forbidden"
+    if mode == "feature":
+        locked = design_gate(root, feature)
+        if locked:
+            return "deny", locked
     if not os.path.isfile(full):
         return "ask", "deleting a folder (or a path that is not a file) needs human approval"
     return "allow", f"delete inside {name}"
@@ -291,8 +303,9 @@ def decide_designer_edit(full, root, name):
         return "deny", (f"{DESIGN_ANSWERS} holds the human's answers; only the management page writes it. "
                         "Read it, then update the node from it.")
     if DESIGN_KEPT.intersection(low):
-        return "deny", (".user-review (the human's scores and feedback) and .history (the node's history) are "
-                        "written only by the management page and its tools. Read them; do not write them.")
+        return "deny", (".user-review (the human's scores and feedback), .history (the node's history) and "
+                        ".progress (what is built) are written only by the management page and its tools. "
+                        "Read them; do not write them.")
     if low[:1] == [DESIGN_TREE]:
         keys = []
         for s in seg[1:-1]:      # the node folders between the tree root and the file
@@ -309,6 +322,18 @@ def decide_designer_edit(full, root, name):
                             f"({reason}). Redo that node if it is yours to redo, otherwise stop and tell the human; "
                             "do not work on this round until then.")
     return "allow", f"edit inside {name}"
+
+
+def design_gate(root, feature):
+    """None when the Features/Services session `feature` may code now, otherwise the reason it may not: its design
+    must have reached round 4 in the live table (Management/tools/gamedesign.py, the same code the page uses)."""
+    tools = ntpath.join(root, "Management", "tools")
+    if tools not in sys.path:
+        sys.path.insert(0, tools)
+    import gamedesign
+    ok, reason = gamedesign.code_allowed(root, feature)
+    return None if ok else ("this feature may not be coded yet: " + reason + ". Stop and tell the human; the design "
+                            "is @GameDesigner's work and the human fixes it into live.")
 
 
 def decide_codelead_unity(tool, ti):
@@ -366,7 +391,8 @@ def decide(data, session_value, root):
 
     if tool in SHELL_TOOLS:
         cmd = text_of(ti.get("command")).strip()
-        commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else [])
+        commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else []) + (
+            CODELEAD_COMMANDS if mode == "codelead" else [])
         if any(re.fullmatch(rx, cmd) for rx in commands) and not SHELL_META_RX.search(cmd) and ".." not in cmd:
             return "allow", "shell command is on the allow-list"
         return "deny", "shell command is not on the allow-list in guard.py. Stop and tell the human."
@@ -399,6 +425,10 @@ def decide(data, session_value, root):
             return "deny", ("@Manager does not edit code, assets or settings; it may only create new files in "
                             "Management/proposals. Ask the session that owns the area.")
         if edit == "allow":
+            if mode == "feature":
+                locked = design_gate(root, feature)
+                if locked:
+                    return "deny", locked
             return "allow", f"edit inside {name}"
         if edit == "ask":
             return "ask", (f"editing {name} needs human approval. Say what changes and why it cannot be done "

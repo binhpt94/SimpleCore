@@ -13,6 +13,8 @@ Both tables have the same shape. A folder is a node; its depth is its round (ROU
     CLAUDE.md                  the detailed explanation; points to data.md; changing it never forces a redo
     .images/                   pictures plus index.md (`- <file>: <what it is for>`)
     priority.json              how important the node is, 0-10, scored by the AI on leaf nodes (see PHASES)
+    code.json                  round-2 nodes only: {"unity": ["Wallet"]}, the feature folders that implement it
+    .progress/progress.json    leaf nodes only: todo | doing | done for each phase (by @CodeLead or the page)
     .ai-need-user-choose/      questions.json (by @GameDesigner), answers.json (by the page)
     .user-review/review.json   the human's score and feedback per idea (by the page)
     .history/                  log.jsonl and a copy of every version of data.md (by this code only)
@@ -43,6 +45,11 @@ A node may be written only when every node above it is approved: it passes and, 
 Nothing reaches live by itself: the human presses Chốt on a node, or Sync for every passing node (sync_live).
 The human may score an idea in either table; the score belongs to the idea's text, so one low score on a
 fixed idea makes the proposed node fail wherever the text is still the same.
+Progress: a leaf is done when the cell of the phase its own score means is "done". A done leaf keeps its score
+but no longer lifts its parents: a parent's importance is the highest among what is NOT done below it, and a
+parent whose leaves are all done is done.
+Code gate: a feature folder may be coded only when a node of the LIVE table names it in code.json and that node's
+branch has reached round 4 (code_allowed, asked by guard.py for Features and Services sessions).
 To add a round: add its name to ROUNDS. Standard library only.
 """
 import hashlib
@@ -71,7 +78,13 @@ REVIEW_FILE = "review.json"
 HISTORY_DIR = ".history"
 LOG_FILE = "log.jsonl"
 STATE_FILE = "state.json"
-NOT_COPIED = (QUESTIONS_DIR, REVIEW_DIR, HISTORY_DIR)      # stay in the idea table
+PROGRESS_DIR = ".progress"
+PROGRESS_FILE = "progress.json"
+WORK_STATES = ("todo", "doing", "done")
+CODE_FILE = "code.json"      # on a round-2 node: the Unity feature folders that implement it
+CODE_ROUND = 2
+CODE_NAME_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")      # the same shape guard.py takes as a FEATURE
+NOT_COPIED = (QUESTIONS_DIR, REVIEW_DIR, HISTORY_DIR, PROGRESS_DIR, "priority.json")      # stay in the idea table
 MODE_FILE = "mode.json"
 MODES = ("auto", "user")
 DEFAULT_MODE = "auto"
@@ -285,12 +298,24 @@ def mark_priority(tree):
     Down from the root: a node the human scored has exactly that score, and the difference from its base is the
     offset its unscored descendants get on top of their own base (the nearest scored ancestor counts), within 0-10."""
     def up(node):
+        """(what the node is worth to its parent, or None when it is done or unranked; whether it is done)."""
         p = node["priority"]
-        worth = [w for w in (up(c) for c in node["children"]) if w is not None]
+        below = [up(c) for c in node["children"]]
         p["leaf"] = not node["children"]
         p["ignoredAi"] = not p["leaf"] and p["ai"] is not None
-        p["base"] = p["ai"] if p["leaf"] else (max(worth) if worth else None)
-        return p["user"] if p["user"] is not None else p["base"]
+        if p["leaf"]:
+            own = p["user"] if p["user"] is not None else p["ai"]
+            # Done is judged on the leaf's own score (the human's, else the AI's), not on what a scored parent
+            # shifts it to: otherwise done-ness and the parents' ranking would each depend on the other.
+            cell = node.get("progress", {}).get(phase_of(own))
+            p["base"], p["done"] = p["ai"], bool(cell) and cell["state"] == "done"
+            return (None if p["done"] else own), p["done"]
+        worth = [w for w, _ in below if w is not None]
+        p["base"] = max(worth) if worth else None
+        p["done"] = all(done for _, done in below)
+        if p["done"]:
+            return None, True
+        return (p["user"] if p["user"] is not None else p["base"]), False
 
     def down(node, offset, source):
         p = node["priority"]
@@ -309,6 +334,91 @@ def mark_priority(tree):
     if tree:
         up(tree)
         down(tree, 0, "")
+
+
+# ---------------------------------------------------------------- progress (leaf nodes)
+def progress_phases():
+    """The phases a leaf can be worked on for: every phase but the optional one."""
+    return [ph["key"] for ph in PHASES if ph["min"] > 1]
+
+
+def read_progress(folder):
+    """{phase: {state, by, at, note}} of a node; "todo" for whatever is not stored."""
+    saved = read_dict(folder / PROGRESS_DIR / PROGRESS_FILE, "phases")
+    out = {}
+    for key in progress_phases():
+        cell = saved.get(key) if isinstance(saved.get(key), dict) else {}
+        out[key] = {"state": cell.get("state") if cell.get("state") in WORK_STATES else "todo",
+                    "by": str(cell.get("by") or ""), "at": str(cell.get("at") or ""),
+                    "note": cell.get("note") if isinstance(cell.get("note"), str) else ""}
+    return out
+
+
+def save_progress(root, path, phase, state, by, note=None):
+    """Marks one phase of the idea leaf at `path` as todo, doing or done. Only leaves have progress.
+    note: None keeps the note already there. Not in any hash, not in the history."""
+    parts = check_path(path)
+    folder = table_dir(root, "idea").joinpath(*parts)
+    if not (folder / DATA_FILE).is_file():
+        raise ValueError(f"idea không có node '{path or '(gốc)'}'")
+    if any(c.is_dir() and not c.name.startswith(".") for c in folder.iterdir()):
+        raise ValueError(f"node '{path or '(gốc)'}' có node con: tiến độ chỉ ghi ở node lá")
+    if phase not in progress_phases():
+        raise ValueError(f"giai đoạn phải là một trong {progress_phases()}")
+    if state not in WORK_STATES:
+        raise ValueError(f"trạng thái phải là một trong {WORK_STATES}")
+    if note is not None and (not isinstance(note, str) or len(note) > MAX_TEXT):
+        raise ValueError(f"ghi chú phải là chữ, tối đa {MAX_TEXT} kí tự")
+    target = folder / PROGRESS_DIR / PROGRESS_FILE
+    saved = read_dict(target, "phases")
+    old = saved.get(phase) if isinstance(saved.get(phase), dict) else {}
+    saved[phase] = {"state": state, "by": str(by), "at": now(),
+                    "note": note.strip() if note is not None else (old.get("note") if isinstance(old.get("note"), str) else "")}
+    write_json(target, {"phases": saved})
+
+
+# ---------------------------------------------------------------- code.json and the code gate
+def read_code(folder, where, depth, problems):
+    """The Unity feature folders a node says it is implemented by (code.json); only round-2 nodes may say so."""
+    path = folder / CODE_FILE
+    if not path.is_file():
+        return []
+    try:
+        data = read_json(path)
+    except ValueError:
+        problems.append({"path": where, "text": f"{CODE_FILE} không phải JSON hợp lệ"})
+        return []
+    names = data.get("unity") if isinstance(data, dict) else None
+    if not isinstance(names, list) or any(not isinstance(n, str) or not CODE_NAME_RX.match(n) for n in names):
+        problems.append({"path": where, "text": f'{CODE_FILE} phải có dạng {{"unity": ["Wallet", "_Services/Popup"]}}'})
+        return []
+    if depth != CODE_ROUND:
+        problems.append({"path": where, "text": f"{CODE_FILE} chỉ đặt ở node feature (vòng {CODE_ROUND})"})
+        return []
+    return names
+
+
+def code_allowed(root, feature):
+    """(ok, reason): may the Unity feature folder `feature` be coded? Only when a round-2 node of the LIVE table
+    names it in code.json and that node's branch has a round-4 node. Read straight from the files."""
+    live = table_dir(root, "live")
+    owners = []
+    for node in sorted(c for c in live.iterdir() if c.is_dir() and not c.name.startswith(".")) if live.is_dir() else []:
+        if feature.lower() in (n.lower() for n in read_code(node, node.name, CODE_ROUND, [])):
+            owners.append(node)
+    if not owners:
+        return False, (f"chưa có node thiết kế nào trong live khai thư mục code '{feature}' "
+                       f"(file {CODE_FILE} ở node feature, do @GameDesigner viết và người chốt)")
+    deepest = CODE_ROUND
+    for node in owners:
+        for data in node.rglob(DATA_FILE):
+            below = data.parent.relative_to(node).parts
+            if not any(part.startswith(".") for part in below):
+                deepest = max(deepest, CODE_ROUND + len(below))
+    if deepest < len(ROUNDS):
+        return False, (f"thiết kế của '{feature}' ({', '.join(n.name for n in owners)}) mới được chốt tới vòng {deepest}; "
+                       f"phải có yêu cầu kĩ thuật (vòng {len(ROUNDS)}) trong live mới được code")
+    return True, ""
 
 
 def save_priority(root, path, score):
@@ -529,7 +639,7 @@ def record_versions(root):
 def own_hash(folder):
     """Hash of what belongs to the node itself (data.md, CLAUDE.md, .images): what promote copies into live."""
     h = hashlib.sha1()
-    items = [folder / name for name in NODE_FILES]
+    items = [folder / name for name in NODE_FILES + (CODE_FILE,)]
     images = folder / IMAGES_DIR
     if images.is_dir():
         items += sorted(p for p in images.iterdir() if p.is_file())
@@ -578,7 +688,8 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "parentHash": parent_hash or "", "stale": stale, "passed": passed, "reasons": reasons,
             "images": images, "imagesNote": images_note, "questions": questions, "pending": pending,
             "history": read_history(folder)[-HISTORY_SHOWN:][::-1], "hash": own_hash(folder),
-            "priority": read_priority(folder), "children": []}
+            "priority": read_priority(folder), "progress": read_progress(folder),
+            "code": read_code(folder, where, depth, problems), "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
         if not KEY_RX.match(child.name):
@@ -597,7 +708,14 @@ def read_tree(root, table, mode=None):
     if not (folder / DATA_FILE).is_file() and not any(p.is_dir() and not p.name.startswith(".") for p in folder.iterdir()):
         return None, problems      # an empty table, not a broken one
     review = table_dir(root, "idea") if table != "idea" else None
-    return read_node(folder, "", 1, problems, mode or read_mode(root), None, review), problems
+    tree = read_node(folder, "", 1, problems, mode or read_mode(root), None, review)
+    claimed = {}
+    for n in walk(tree):      # one feature folder, one design node
+        for name in n["code"]:
+            if name.lower() in claimed:
+                problems.append({"path": n["path"], "text": f"{CODE_FILE}: thư mục code '{name}' đã được node '{claimed[name.lower()]}' khai"})
+            claimed.setdefault(name.lower(), n["path"])
+    return tree, problems
 
 
 def walk(node):
@@ -788,6 +906,8 @@ def promote(root, path, deep, by="người"):
         tmp.mkdir(parents=True)
         for name in NODE_FILES:
             shutil.copy2(src / name, tmp / name)
+        if (src / CODE_FILE).is_file():
+            shutil.copy2(src / CODE_FILE, tmp / CODE_FILE)
         if (src / IMAGES_DIR).is_dir():
             shutil.copytree(src / IMAGES_DIR, tmp / IMAGES_DIR)
         if dst.is_dir():      # keep what live already has below this node
@@ -839,8 +959,13 @@ def snapshot(root):
     mark_states(idea, live, mode)
     mark_priority(idea)
     mark_priority(live)
-    ranked = {n["path"]: n["priority"] for n in walk(idea)}
-    for n in walk(live):      # importance is kept with the proposed node; the fixed node of the same path shows it
-        n["priority"] = ranked.get(n["path"], n["priority"])
-    return {"rounds": ROUNDS, "mode": mode, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "live": live, "idea": idea,
+    ranked = {n["path"]: n for n in walk(idea)}
+    for n in walk(live):      # importance and progress are kept with the proposed node; the fixed node shows them
+        if n["path"] in ranked:
+            n["priority"], n["progress"] = ranked[n["path"]]["priority"], ranked[n["path"]]["progress"]
+    for n in walk(live):      # whether each named feature folder may be coded now (the gate guard.py applies)
+        n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
+    for n in walk(idea):
+        n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
+    return {"rounds": ROUNDS, "mode": mode, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}}

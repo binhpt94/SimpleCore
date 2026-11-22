@@ -43,7 +43,15 @@ def lines_for(root, node, out):
         line += f"; AI {p['ai']}" if p["ai"] is not None else f"; BẠN CHƯA CHẤM: ghi {gd.PRIORITY_FILE} cho node lá này"
     elif p["ignoredAi"]:
         line += f"; {gd.PRIORITY_FILE} ở node này bị bỏ qua vì nó có node con (chỉ chấm ở node lá)"
+    if p["done"]:
+        line += "; ĐÃ XONG" + ("" if p["leaf"] else " (mọi node lá bên dưới đã xong)")
     out.append(line)
+    if p["leaf"]:
+        names = {x["key"]: x["name"] for x in gd.PHASES}
+        cells = [f"{names[k]} {c['state']}" + (f" ({c['by']} {c['at']})" if c["by"] else "") for k, c in node["progress"].items()]
+        out.append("- Tiến độ: " + " · ".join(cells))
+    for gate in node["codeGate"]:
+        out.append(f"- Thư mục code {gate['unity']}: " + ("ĐƯỢC CODE" if gate["ok"] else "ĐANG KHOÁ, " + gate["reason"]))
     for it in node["items"]:
         user = "chưa chấm" if it["user"] is None else str(it["user"])
         out.append(f"- Ý {it['id']}: AI {it['ai']}, người {user}" + (f", phản hồi: {it['feedback']}" if it["feedback"] else "")

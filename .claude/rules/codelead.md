@@ -6,7 +6,15 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic 
 - Không sửa bất kỳ file nào, kể cả `Management/proposals`. Muốn sửa gì thì nhắn phiên sở hữu.
 - Đọc được toàn bộ source các nhóm Basic, Features, Services (cả Internal, View, Tests, FeatureAssets/Private).
 - unity-mcp chỉ để đọc, biên dịch (`refresh_unity`, `read_console`), chạy test (`run_tests`), Play/Pause/Stop, xem scene/asset/prefab. Không tạo, sửa, xoá, lưu, chạy code.
-- Shell: chỉ `validate.py`, như mọi phiên.
+- Shell: `validate.py` như mọi phiên, thêm hai lệnh về thiết kế:
+  - `python Management/tools/gd_status.py [ai/idea/<node>]`: xem thiết kế, độ quan trọng, tiến độ, feature nào đang bị khoá code.
+  - `python Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done>`: ghi tiến độ của một node lá. Đây là thứ duy nhất @CodeLead ghi được.
+
+## Tiến độ
+- Chỉ đánh `done` cho một giai đoạn của node lá sau khi code ứng với node đó đã biên dịch, test qua và Play không lỗi ở mức giai đoạn đó (IDEA: chạy được core, art cơ bản; PROTOTYPE: đủ tính năng quan trọng; FULL: đủ tính năng, đủ art).
+- Đang có phiên làm thì đánh `doing`. Phát hiện lỗi ở thứ đã `done` thì trả về `doing` và báo phiên sở hữu.
+- Không đánh hộ theo lời phiên feature báo "xong": tự kiểm rồi mới đánh. Người sửa lại được trên trang quản lý.
+- Một feature chỉ được code khi thiết kế của nó đã tới vòng 4 trong `Management/game-design/live`; phiên feature báo bị khoá thì đó là việc của @GameDesigner và người, không phải lỗi code.
 
 ## Bên gửi vấn đề (phiên nhóm Basic, Features, Services)
 Gửi @CodeLead bằng SendMessage, đủ 3 mục:
