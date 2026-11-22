@@ -6,13 +6,24 @@ paths:
 # GD vòng 2: Feature (tóm tắt)
 Luật chung: `.claude/rules/gamedesigner.md`. File này chỉ thêm phần riêng của vòng 2 (`ai/idea/<feature>/`).
 
+## Mục tiêu
+Danh sách feature phủ hết vòng lặp chơi của vòng 1, không feature nào trùng việc của feature khác, và mỗi feature đủ rõ để giao riêng cho một phiên.
+
 ## Viết gì
-- Chia ý tưởng vòng 1 thành các feature; mỗi feature chỉ ghi cốt lõi: nó là gì, người chơi được gì từ nó.
+Vòng 2 quyết định game gồm những feature nào:
+- Mỗi feature: nó là gì, người chơi được gì từ nó, nó liên quan tới feature nào.
 - Key bắt đầu bằng `feature-` (ví dụ `feature-hero`).
 
-## Chưa viết
-- Quan hệ, định nghĩa, danh sách, luật (vòng 3).
+## Cụ thể tới mức nào
+- Đúng: "Hero: nhân vật tự chiến đấu giữ thành, mạnh lên qua nâng cấp."
+- Đúng: "Popup thua: báo kết quả trận và cho chơi lại."
+
+## Không cụ thể tới mức này (để vòng sau)
+- Quan hệ, định nghĩa, danh sách, luật (vòng 3). Sai: "Hero có HP, một hero đánh nhiều quái."
 - Thông số, con số, trường hợp biên (vòng 4).
+
+## Không mơ hồ
+Mỗi feature phải nói được nó làm gì. Sai: "Hệ thống hero đa dạng."
 
 ## Cách chia feature
 HUD, popup, balance cắt ngang nhiều feature, nên không gộp chúng vào feature khác:
