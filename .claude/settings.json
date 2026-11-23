@@ -4,7 +4,8 @@
     "defaultMode": "default",
     "disableBypassPermissionsMode": "disable",
     "allow": [
-      "mcp__unityMCP"
+      "mcp__unityMCP",
+      "Edit(/Management/studio/**)"
     ],
     "ask": [
       "Edit(/UnityProject/Assets/_Composition/**)",
