@@ -57,7 +57,7 @@ def html_page(table, node):
     style = ("body{font-family:system-ui,sans-serif;margin:16px;max-width:1100px;background:#fff;color:#222}"
              "section{margin:0 0 28px}h2{font-size:16px}.warn{color:#a0520c}pre{background:#f3f4f6;padding:8px;overflow:auto}"
              "@media (prefers-color-scheme: dark){body{background:#16181c;color:#ddd}pre{background:#22252b}"
-             ":root{--fr-bg:#1e2126;--fr-ink:#c9d1db;--fr-line:#5c6570;--fr-box:rgba(140,170,220,.12)}}\n" + gd.FRAME_CSS)
+             ":root{--fr-bg:#1e2126;--fr-ink:#c9d1db;--fr-line:#5c6570;--fr-box:#262a31;--fr-accent-soft:#1f2d40}}\n" + gd.FRAME_CSS)
     return ("<!doctype html><html lang='vi'><head><meta charset='utf-8'>"
             "<meta name='viewport' content='width=device-width,initial-scale=1'>"
             f"<title>{html.escape(title)}</title><style>{style}</style></head><body><h1>{html.escape(title)}</h1>"

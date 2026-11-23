@@ -10,6 +10,9 @@ way Codex and Blender are run. Every run, delivery and refusal is kept, so a mis
     python Management/tools/studio.py deliver <codex|blender> <F>/<id>  the tool chat: hand the order over
     python Management/tools/studio.py take <F>/<id>                   the feature: copy the delivery into its assets
     python Management/tools/studio.py reject <F>/<id>                 the feature: send it back (after feedback-<n>.md)
+    python Management/tools/studio.py approve <_design/...>/<id>      the human: let an art order run (spends Codex)
+    python Management/tools/studio.py accept <_design/...>/<id>       the human: the art delivered is what the node shows
+    python Management/tools/studio.py anchor <_design/...>/<id> <item> the human: an accepted art guides its style (toggle)
 
 Layout (see .claude/rules/studio.md):
     Management/studio/<tool>/lessons.md                    mistakes met and how to avoid them; put before every prompt
@@ -23,6 +26,15 @@ Layout (see .claude/rules/studio.md):
 <F> is the code folder of the feature that ordered (Hero, _Services/Popup); <id> and <item>: lower case, digits, '-'.
 Exactly one result per item: a run that makes more takes none of them. A rejected order is run again only after
 lessons.md names its feedback file. Standard library only; Windows and Linux.
+
+Art concepts (kind: art, @Codex): the owner is a design node, `_design/<node path with '.' for '/'>`, and
+@GameDesigner writes the order. One item per frame of the node in live; style: names styles of the root's
+.art-style/. Nothing runs until the human approves the order (approval.json, written by the page through
+setup_server.py, or by `approve`); the approval holds the order's text and the node's live hash, so changing either
+asks again. Each approved item runs at most ART_RUNS_PER_ITEM times, all art at most ART_DAILY_MAX times a day.
+The prompt carries the styles; the images handed to Codex are the frame drawn as PNG, the styles' pictures and up to
+ART_ANCHORS accepted pictures marked as anchors. Delivered to Resources/_design/<node>/codex/<id>/v<n>/ with
+meta.json (node hash, frame hashes, style hashes), which the page uses to label a picture stale.
 """
 import json
 import os
@@ -35,9 +47,20 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import gamedesign as gd  # noqa: E402
 
-TOOLS = {"codex": ("image", "consult"), "blender": ("model",)}
+TOOLS = {"codex": ("image", "consult", "art"), "blender": ("model",)}
 DELIVER_TO = ("Private", "Public")
+ART_DELIVER = "concept"          # an art order is never copied into Assets
+APPROVAL_FILE = "approval.json"
+ART_RUNS_PER_ITEM = 2
+ART_DAILY_MAX = 20
+ART_ANCHORS = 3
+DESIGN_RX = re.compile(r"^_design/[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)*$")
+ONE_ART = ("Ảnh đầu tiên được đính kèm là frame của màn này: các hình cơ bản mang kích thước thật. Giữ đúng bố cục, "
+           "vị trí và tỉ lệ của frame, khung hình và hướng màn; chỉ thay hình cơ bản bằng art theo style. Không thêm "
+           "chữ chú thích, số đo hay đường kẻ của frame vào ảnh.")
 STUDIO = ("Management", "studio")
 RESOURCES = "Resources"
 LESSONS = "lessons.md"
@@ -80,7 +103,7 @@ def studio_dir(root, tool=None):
 def split_ref(ref):
     """(feature, id) of '<F>/<id>'; raises ValueError."""
     feature, _, oid = (ref or "").replace("\\", "/").strip("/").rpartition("/")
-    if not FEATURE_RX.match(feature) or not ID_RX.match(oid):
+    if not (FEATURE_RX.match(feature) or DESIGN_RX.match(feature)) or not ID_RX.match(oid):
         raise ValueError(f"order phải ghi dạng <Feature>/<id>, ví dụ Hero/hero-icons (nhận được '{ref}')")
     return feature, oid
 
@@ -141,8 +164,8 @@ def parse_order(text):
         errors.append(f"count phải là số nguyên từ 1 tới {MAX_COUNT}")
     elif count and int(count) != len(items):
         errors.append(f"count là {count} nhưng Danh sách có {len(items)} dòng: phải bằng nhau")
-    if fields.get("deliver") and fields["deliver"] not in DELIVER_TO:
-        errors.append("deliver phải là Private hoặc Public")
+    if fields.get("deliver") and fields["deliver"] not in DELIVER_TO + (ART_DELIVER,):
+        errors.append(f"deliver phải là Private hoặc Public ({ART_DELIVER} với kind: art)")
     refs = [r.strip().strip("`") for r in re.split(r"[,\s]+", fields.get("references", "")) if r.strip()]
     return {"fields": fields, "title": title, "sections": sections, "items": items, "refs": refs, "errors": errors}
 
@@ -199,16 +222,202 @@ def check_order(root, tool, feature, oid, folder):
     problems = list(data["errors"])
     if data["fields"].get("tool") and data["fields"]["tool"] != tool:
         problems.append(f"order nằm trong thư mục {tool} nhưng ghi tool: {data['fields']['tool']}")
-    if not FEATURE_RX.match(feature) or not ID_RX.match(oid):
+    design = bool(DESIGN_RX.match(feature))
+    kind = data["fields"].get("kind", "")
+    if design:
+        problems += check_art(root, feature, oid, folder, data)
+    elif not FEATURE_RX.match(feature) or not ID_RX.match(oid):
         problems.append("thư mục order phải là orders/<Feature>/<id> (id: chữ thường, số, gạch nối)")
     elif not (Path(root) / "UnityProject" / "Assets" / "Features" / Path(*feature.split("/"))).is_dir():
         problems.append(f"không có feature {feature}")
+    if kind == "art" and not design:
+        problems.append(f"kind: art chỉ dành cho order của node thiết kế (orders/{gd.DESIGN_OWNER}/<node>/<id>, do @GameDesigner đặt)")
+    if data["fields"].get("deliver") == ART_DELIVER and kind != "art":
+        problems.append(f"deliver: {ART_DELIVER} chỉ dùng với kind: art")
     for r in data["refs"]:
         try:
             ref_source(root, feature, r)
         except ValueError as ex:
             problems.append(str(ex))
     return data, problems
+
+
+# ---------------------------------------------------------------- art concepts
+def node_of(feature):
+    """The design node path of an owner '_design/<a.b.c>'."""
+    return feature[len(gd.DESIGN_OWNER) + 1:].replace(".", "/")
+
+
+def live_node(root, path):
+    """(node, root node) of the live tree, read the way the page reads it; node None when live lacks it."""
+    tree, _ = gd.read_tree(root, "live")
+    nodes = {n["path"]: n for n in gd.walk(tree)} if tree else {}
+    return nodes.get(path), nodes.get("")
+
+
+def order_styles(data):
+    return [s.strip() for s in re.split(r"[,\s]+", data["fields"].get("style", "")) if s.strip()]
+
+
+def check_art(root, feature, oid, folder, data):
+    """The problems of an art order: its node in live with frames, one item per frame, known styles, and no frame
+    that already has a picture still good (unless this order is the one that made it)."""
+    problems = []
+    if data["fields"].get("tool") not in ("", "codex") or data["fields"].get("kind") not in ("", "art"):
+        problems.append("order của node thiết kế chỉ là tool: codex, kind: art")
+    if data["fields"].get("deliver") and data["fields"]["deliver"] != ART_DELIVER:
+        problems.append(f"order art ghi deliver: {ART_DELIVER} (ảnh không vào Assets)")
+    path = node_of(feature)
+    node, top = live_node(root, path)
+    if node is None:
+        return problems + [f"node '{path}' chưa có trong live: chỉ gen art cho node đã chốt"]
+    frames = {Path(fr["file"]).stem for fr in node["frames"]}
+    if not frames:
+        problems.append(f"node '{path}' trong live chưa có frame: viết frame và chốt trước")
+    for item, _ in data["items"]:
+        if frames and item not in frames:
+            problems.append(f"item '{item}' phải là tên một frame của node ({', '.join(sorted(frames))})")
+    known = {s["id"] for s in (top or {}).get("styles", [])}
+    wanted = order_styles(data)
+    if not known:
+        problems.append(f"vòng 1 trong live chưa có style nào ({gd.STYLE_DIR}/ của node gốc)")
+    elif not wanted:
+        problems.append("thiếu 'style:' ở phần đầu (một hay nhiều id style của vòng 1)")
+    for s in wanted:
+        if known and s not in known:
+            problems.append(f"style '{s}' không có ở vòng 1 ({', '.join(sorted(known))})")
+    if read_status(folder)["version"] == 0:
+        tree, _ = gd.read_tree(root, "live")
+        art, _ = gd.read_art(root, tree)
+        good = {e["frame"]: e["ref"] for e in art.get(path, []) if e["label"] in ("chờ nhận", "đang dùng")}
+        mine = f"{feature}/{oid}"
+        for item, _ in data["items"]:
+            if good.get(item) and good[item] != mine:
+                problems.append(f"frame '{item}' đã có ảnh còn dùng được ({good[item]}); chỉ xin lại khi ảnh đó cũ hoặc bị trả")
+    return problems
+
+
+def order_hash(folder):
+    return gd.short_hash(read_text(folder / ORDER_FILE).strip())
+
+
+def attempts(root, since="", day=""):
+    """[(ref, item, at)] of the art runs logged in every design order, after `since` or on `day` (YYYY-MM-DD)."""
+    base = studio_dir(root, "codex") / "orders" / gd.DESIGN_OWNER
+    out = []
+    for logf in sorted(base.glob(f"*/*/{LOG_FILE}")) if base.is_dir() else []:
+        ref = f"{gd.DESIGN_OWNER}/{logf.parent.parent.name}/{logf.parent.name}"
+        for line in read_text(logf).split("\n"):
+            try:
+                e = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(e, dict) and e.get("event") == "attempt" and e.get("at", "") > since and e.get("at", "").startswith(day):
+                out.append((ref, e.get("item"), e["at"]))
+    return out
+
+
+def runs_since_approval(folder, item):
+    """The art runs of `item` logged after the order's last approval (the log keeps their order)."""
+    events = []
+    for line in read_text(folder / LOG_FILE).split("\n") if (folder / LOG_FILE).is_file() else []:
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(e, dict):
+            events.append(e)
+    last = max([i for i, e in enumerate(events) if e.get("event") == "approve"] or [-1])
+    return [e for e in events[last + 1:] if e.get("event") == "attempt" and e.get("item") == item]
+
+
+def art_gate(root, feature, oid, folder, item):
+    """Raises ValueError unless the human's approval lets this item run once more now."""
+    approval = None
+    try:
+        approval = json.loads(read_text(folder / APPROVAL_FILE))
+    except (OSError, ValueError):
+        pass
+    ref = f"{feature}/{oid}"
+    if not isinstance(approval, dict):
+        raise ValueError(f"order {ref} chưa được người duyệt gen: chờ người bấm Duyệt gen ở tab Game design")
+    node, _ = live_node(root, node_of(feature))
+    if approval.get("order") != order_hash(folder):
+        raise ValueError("order.md đã đổi sau khi người duyệt: chờ người duyệt lại")
+    if not node or approval.get("node") != node["dataHash"]:
+        raise ValueError("node trong live đã đổi sau khi người duyệt: chờ người duyệt lại")
+    if item not in (approval.get("items") or []):
+        raise ValueError(f"item '{item}' không nằm trong phần người đã duyệt")
+    used = runs_since_approval(folder, item)
+    if len(used) >= ART_RUNS_PER_ITEM:
+        raise ValueError(f"item '{item}' đã chạy {len(used)}/{ART_RUNS_PER_ITEM} lần cho lần duyệt này: xin người duyệt lại")
+    today = attempts(root, day=time.strftime("%Y-%m-%d"))
+    if len(today) >= ART_DAILY_MAX:
+        raise ValueError(f"đã chạy {len(today)}/{ART_DAILY_MAX} lần gen art hôm nay (trần chung): để mai, hoặc người nâng trần")
+
+
+def svg_to_png(svg_path, png_path):
+    """Draws an SVG into a PNG with whatever the machine has (STUDIO_SVG2PNG overrides: a command or a .py taking
+    <in> <out>). Returns the converter used, or '' when none worked."""
+    override = os.environ.get("STUDIO_SVG2PNG")
+    tries = []
+    if override:
+        tries.append(([sys.executable, override] if override.endswith(".py") else [override]) + [str(svg_path), str(png_path)])
+    if shutil.which("rsvg-convert"):
+        tries.append(["rsvg-convert", "-w", "1920", "-o", str(png_path), str(svg_path)])
+    if shutil.which("inkscape"):
+        tries.append(["inkscape", str(svg_path), "-o", str(png_path), "-w", "1920"])
+    for magick in ("magick", "convert"):
+        if shutil.which(magick):
+            tries.append([magick, str(svg_path), str(png_path)])
+            break
+    for cmd in tries:
+        code, _ = run(cmd)
+        if code == 0 and Path(png_path).is_file():
+            return cmd[0]
+    return ""
+
+
+def frame_png(root, path, frame, dest):
+    """The frame of the live node drawn into dest/<frame>.frame.png (colours fixed, no page variables)."""
+    node, _ = live_node(root, path)
+    fr = next((f for f in (node or {}).get("frames", []) if Path(f["file"]).stem == frame), None)
+    if fr is None:
+        return None
+    css = re.sub(r"var\(--[\w-]+, ((?:[^()]|\([^()]*\))*)\)", r"\1", gd.FRAME_CSS)
+    svg = fr["svg"].replace("</defs>", f"</defs><style>{css}</style>", 1)
+    dest.mkdir(parents=True, exist_ok=True)
+    svg_path, png_path = dest / f"{frame}.frame.svg", dest / f"{frame}.frame.png"
+    svg_path.write_text(svg, encoding="utf-8")
+    return png_path if svg_to_png(svg_path, png_path) else None
+
+
+def art_inputs(root, feature, data, item, work):
+    """(prompt part, images) an art run adds: the styles' text, the frame PNG, the styles' pictures, the anchors."""
+    path = node_of(feature)
+    _, top = live_node(root, path)
+    styles = {s["id"]: s for s in (top or {}).get("styles", [])}
+    wanted = [styles[s] for s in order_styles(data) if s in styles]
+    text = "\n\n".join(f"Style {s['id']}: {s['title']}\n{s['text']}" for s in wanted)
+    images, notes = [], []
+    png = frame_png(root, path, item, work / "_frames")
+    if png:
+        images.append(png)
+    else:
+        notes.append("không đổi được frame sang PNG (cần rsvg-convert, inkscape hoặc magick): ảnh sẽ không bám bố cục")
+    live_root = gd.table_dir(root, "live")
+    for s in wanted:
+        images += [live_root / gd.STYLE_DIR / n for n in s["images"]]
+    anchors = gd._json(studio_dir(root, "codex") / gd.ANCHORS_FILE) or []
+    picked = 0
+    for a in reversed(anchors):
+        if picked >= ART_ANCHORS or not isinstance(a, dict) or not set(a.get("styles") or []) & set(order_styles(data)):
+            continue
+        f = Path(root) / str(a.get("file", ""))
+        if f.is_file():
+            images.append(f)
+            picked += 1
+    return ("Phong cách (vòng 1, bắt buộc theo):\n" + text if text else ""), images, notes
 
 
 # ---------------------------------------------------------------- status, log, lessons
@@ -336,12 +545,14 @@ def prepare(root, tool, ref, item, kinds):
     if item not in items:
         raise ValueError(f"order không có item '{item}'. Có: {', '.join(items)}")
     status = read_status(folder)
-    if status["state"] == "taken":
-        raise ValueError("order đã được feature nhận; việc mới thì feature đặt order mới")
+    if status["state"] in ("taken", "accepted"):
+        raise ValueError("order đã được nhận; việc mới thì đặt order mới")
     missing = unlearnt(root, tool, feature, oid, folder)
     if missing:
         raise ValueError(f"order đã bị trả: ghi bài học vào Management/studio/{tool}/{LESSONS} trước, mỗi mục ghi "
                          f"đường dẫn phản hồi: " + ", ".join(feedback_key(tool, feature, oid, f) for f in missing))
+    if DESIGN_RX.match(feature):
+        art_gate(root, feature, oid, folder, item)
     work = folder / "work"
     (work / "out").mkdir(parents=True, exist_ok=True)
     (work / "_log").mkdir(parents=True, exist_ok=True)
@@ -392,9 +603,17 @@ def take_result(work, item, new, exts):
 
 def cmd_codex(root, ref, item):
     with RunLock(root, "codex"):
-        feature, oid, folder, data, text, work, refs = prepare(root, "codex", ref, item, ("image",))
+        feature, oid, folder, data, text, work, refs = prepare(root, "codex", ref, item, ("image", "art"))
         exe = tool_exe("codex")
-        prompt = prompt_for(root, "codex", data, item, text, work, ONE_IMAGE.format(item=item))
+        extra = ONE_IMAGE.format(item=item)
+        if data["fields"]["kind"] == "art":
+            style_text, art_images, notes = art_inputs(root, feature, data, item, work)
+            refs = art_images + refs
+            extra = "\n\n".join(x for x in (style_text, ONE_ART, extra) if x)
+            for n in notes:
+                print(f"Lưu ý: {n}", file=sys.stderr)
+            log(folder, "attempt", item=item, images=[Path(r).name for r in refs])
+        prompt = prompt_for(root, "codex", data, item, text, work, extra)
         stamp = time.strftime("%Y%m%d-%H%M%S")
         (work / "_log" / f"{item}-{stamp}.prompt.md").write_text(prompt, encoding="utf-8")
         images = [a for r in refs for a in ("-i", str(r))]
@@ -505,12 +724,26 @@ def cmd_deliver(root, tool, ref):
     dest = Path(root) / RESOURCES / Path(*feature.split("/")) / tool / oid / f"v{version}"
     if dest.exists():
         raise ValueError(f"{dest} đã có; không ghi đè bản đã giao")
+    meta = None
+    if DESIGN_RX.match(feature):
+        node, top = live_node(root, node_of(feature))
+        styles = {s["id"]: s["hash"] for s in (top or {}).get("styles", [])}
+        meta = {"node": node_of(feature), "nodeHash": node["dataHash"],
+                "frames": {Path(f["file"]).stem: gd.frame_text_hash(f["text"]) for f in node["frames"]},
+                "styles": {s: styles.get(s, "") for s in order_styles(data)}, "order": f"{feature}/{oid}",
+                "version": version, "at": now(), "stamp": time.time()}
     dest.mkdir(parents=True)
     for i in ids:
         shutil.copy2(by_item[i][0], dest / by_item[i][0].name)
+    if meta:
+        write_json(dest / gd.ART_META, meta)
     save_status(folder, state="delivered", version=version)
     log(folder, "deliver", version=version, files=sorted(p.name for p in dest.iterdir()))
     rel = dest.relative_to(Path(root)).as_posix()
+    if meta:
+        print(f"Đã giao bản v{version}: {rel} ({len(ids)} ảnh). Ảnh hiện ở tab Game design (node {meta['node']}) với nhãn "
+              f"'chờ nhận'; người nhận hoặc trả ở đó. Nhắn @GameDesigner bằng SendMessage rằng order {feature}/{oid} đã giao.")
+        return 0
     print(f"Đã giao bản v{version}: {rel} ({len(ids)} file).\nNhắn phiên {feature} bằng SendMessage: "
           f"\"Order {feature}/{oid} đã giao bản v{version} ở {rel}. Nhận: python Management/tools/studio.py take "
           f"{feature}/{oid}; chưa đạt thì viết feedback-<n>.md trong thư mục order rồi chạy reject.\"")
@@ -523,6 +756,8 @@ def cmd_take(root, ref):
     status = read_status(folder)
     if status["version"] < 1 or status["state"] == "rejected":
         raise ValueError(f"order {ref} chưa có bản giao nào đang chờ nhận (trạng thái: {status['state']})")
+    if data["fields"].get("kind") == "art":
+        raise ValueError("ảnh art của node thiết kế không chép vào Assets: người nhận trên tab Game design (studio.py accept)")
     if data["fields"].get("kind") == "consult":
         raise ValueError(f"order tham vấn không chép vào Assets: đọc câu trả lời ở {RESOURCES}/{feature}/{tool}/{oid}/v{status['version']}/")
     src = Path(root) / RESOURCES / Path(*feature.split("/")) / tool / oid / f"v{status['version']}"
@@ -545,7 +780,7 @@ def cmd_take(root, ref):
 def cmd_reject(root, ref):
     tool, feature, oid, folder = find_order(root, ref)
     status = read_status(folder)
-    if status["state"] not in ("delivered", "taken"):
+    if status["state"] not in ("delivered", "taken", "accepted"):
         raise ValueError(f"order {ref} chưa giao nên chưa trả được (trạng thái: {status['state']})")
     fresh = sorted((p.name for p in folder.iterdir() if FEEDBACK_RX.match(p.name) and p.name not in status["feedback"]),
                    key=lambda n: int(FEEDBACK_RX.match(n).group(1)))
@@ -553,7 +788,83 @@ def cmd_reject(root, ref):
         raise ValueError("viết feedback-<n>.md mới trong thư mục order trước: sai ở đâu, item nào, cần thế nào")
     save_status(folder, state="rejected", feedback=status["feedback"] + fresh)
     log(folder, "reject", version=status["version"], feedback=fresh)
+    if (folder / APPROVAL_FILE).is_file():      # the next run needs the human again
+        os.replace(folder / APPROVAL_FILE, folder / f"approval-v{status['version']}.json")
+    if DESIGN_RX.match(feature):      # a picture sent back is no anchor any more
+        path = studio_dir(root, "codex") / gd.ANCHORS_FILE
+        anchors = [x for x in (gd._json(path) or []) if isinstance(x, dict)]
+        kept = [x for x in anchors if not (x.get("ref") == ref.strip("/") and x.get("version") == status["version"])]
+        if len(kept) != len(anchors):
+            write_json(path, kept)
     print(f"Đã trả order {ref} ({', '.join(fresh)}). Nhắn @{tool.capitalize()} bằng SendMessage để làm lại.")
+    return 0
+
+
+def design_order(root, ref):
+    tool, feature, oid, folder = find_order(root, ref, "codex")
+    if not DESIGN_RX.match(feature):
+        raise ValueError(f"{ref} không phải order art của node thiết kế")
+    return feature, oid, folder
+
+
+def cmd_approve(root, ref):
+    """The human lets an art order run: every item once (twice with a retry), for this text of the order and this
+    hash of the node in live."""
+    feature, oid, folder = design_order(root, ref)
+    data, problems = check_order(root, "codex", feature, oid, folder)
+    if problems:
+        raise ValueError("order chưa hợp lệ, chưa duyệt được: " + "; ".join(problems[:4]))
+    status = read_status(folder)
+    if status["state"] in ("delivered", "accepted"):
+        raise ValueError(f"order {ref} đã giao (trạng thái {status['state']}): nhận hoặc trả trước")
+    missing = unlearnt(root, "codex", feature, oid, folder)
+    if missing:
+        raise ValueError("@Codex chưa ghi bài học cho phản hồi: " + ", ".join(missing))
+    node, _ = live_node(root, node_of(feature))
+    approval = {"order": order_hash(folder), "node": node["dataHash"], "items": [i for i, _ in data["items"]],
+                "runsPerItem": ART_RUNS_PER_ITEM, "at": now(), "by": "người"}
+    write_json(folder / APPROVAL_FILE, approval)
+    save_status(folder, state="approved")
+    log(folder, "approve", items=approval["items"], node=approval["node"])
+    print(f"Đã duyệt gen {ref}: {len(approval['items'])} ảnh, mỗi ảnh tối đa {ART_RUNS_PER_ITEM} lần chạy. "
+          f"Nhắn @Codex bằng SendMessage để làm.")
+    return 0
+
+
+def cmd_accept(root, ref):
+    feature, oid, folder = design_order(root, ref)
+    status = read_status(folder)
+    if status["state"] != "delivered":
+        raise ValueError(f"order {ref} không có bản giao nào chờ nhận (trạng thái: {status['state']})")
+    save_status(folder, state="accepted")
+    log(folder, "accept", version=status["version"])
+    print(f"Đã nhận bản v{status['version']} của {ref}.")
+    return 0
+
+
+def cmd_anchor(root, ref, item):
+    """Marks (or unmarks) one accepted picture as an anchor of its styles: later art runs of those styles see it."""
+    feature, oid, folder = design_order(root, ref)
+    status = read_status(folder)
+    if status["state"] != "accepted":
+        raise ValueError("chỉ ảnh đã nhận mới làm mốc được")
+    version = status["version"]
+    vdir = Path(root) / RESOURCES / Path(*feature.split("/")) / "codex" / oid / f"v{version}"
+    hit = next((p for p in vdir.iterdir() if p.is_file() and p.stem == item and p.name != gd.ART_META), None) if vdir.is_dir() else None
+    if hit is None:
+        raise ValueError(f"bản v{version} không có ảnh '{item}'")
+    meta = gd._json(vdir / gd.ART_META) or {}
+    path = studio_dir(root, "codex") / gd.ANCHORS_FILE
+    anchors = [a for a in (gd._json(path) or []) if isinstance(a, dict)]
+    key = (f"{feature}/{oid}", version, item)
+    kept = [a for a in anchors if (a.get("ref"), a.get("version"), a.get("item")) != key]
+    on = len(kept) == len(anchors)
+    if on:
+        kept.append({"ref": key[0], "version": version, "item": item, "styles": sorted(meta.get("styles") or {}),
+                     "file": hit.relative_to(Path(root)).as_posix(), "at": now()})
+    write_json(path, kept)
+    log(folder, "anchor" if on else "unanchor", version=version, item=item)
+    print(f"{'Đã đặt' if on else 'Đã bỏ'} ảnh {item} (v{version}) làm mốc style.")
     return 0
 
 
@@ -574,7 +885,8 @@ def summary(root, tool=None):
 def pending_line(root, tool):
     """One line for the tool chat's prompt: what waits for it."""
     try:
-        rows = [r for r in summary(root, tool) if r[2] in ("new", "doing", "rejected")]
+        rows = [r for r in summary(root, tool) if r[2] in ("new", "doing", "rejected", "approved")
+                and not (DESIGN_RX.match(r[0].rsplit("/", 1)[0]) and r[2] in ("new", "rejected"))]      # art waits for the human
     except OSError:
         return ""
     if not rows:
@@ -591,7 +903,8 @@ def cmd_status(root, arg=""):
     if not rows:
         print("Chưa có order nào.")
     for ref, tool, state, version, count, title, problems, missing in rows:
-        print(f"- {tool} {ref}: {state}" + (f", đã giao v{version}" if version else "") + f", {count} item · {title}")
+        print(f"- {tool} {ref}: {state}" + (f", đã giao v{version}" if version else "") + f", {count} item · {title}"
+              + (" · CHỜ NGƯỜI DUYỆT GEN" if DESIGN_RX.match(ref.rsplit("/", 1)[0]) and state in ("new", "rejected") else ""))
         for p in problems:
             print(f"    LỖI ORDER: {p}")
         for m in missing:
@@ -624,8 +937,10 @@ def main(argv):
             return {"codex": cmd_codex, "consult": cmd_consult, "blender": cmd_blender}[args[0]](root, args[1], args[2])
         if len(args) == 3 and args[0] == "deliver" and args[1] in TOOLS:
             return cmd_deliver(root, args[1], args[2])
-        if len(args) == 2 and args[0] in ("take", "reject"):
-            return (cmd_take if args[0] == "take" else cmd_reject)(root, args[1])
+        if len(args) == 2 and args[0] in ("take", "reject", "approve", "accept"):
+            return {"take": cmd_take, "reject": cmd_reject, "approve": cmd_approve, "accept": cmd_accept}[args[0]](root, args[1])
+        if len(args) == 3 and args[0] == "anchor":
+            return cmd_anchor(root, args[1], args[2])
         print("Cách dùng:\n" + usage, file=sys.stderr)
         return 2
     except (ValueError, OSError) as ex:

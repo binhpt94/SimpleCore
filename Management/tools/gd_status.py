@@ -47,6 +47,13 @@ def lines_for(root, node, out):
     if not node["path"] and node["screen"]:
         w, h = gd.SCREENS[node["screen"]]
         out.append(f"- Màn hình: {node['screen']} ({w}x{h} px; frame ui vẽ theo màn này)")
+    for s in node.get("styles", []):
+        out.append(f"- Style {s['id']}: {s['title']}" + (f" ({len(s['images'])} ảnh tham chiếu)" if s["images"] else ""))
+    seen_art = set()
+    for a in node.get("art", []):
+        if a["frame"] not in seen_art:
+            seen_art.add(a["frame"])
+            out.append(f"- Art {a['frame']}: {a['label']} (v{a['version']}, {a['ref']})")
     for fr in node["frames"]:
         out += ["- " + line.lstrip() if i == 0 else "  " + line for i, line in enumerate(gd.frame_brief(fr))]
     if node["frameNone"]:

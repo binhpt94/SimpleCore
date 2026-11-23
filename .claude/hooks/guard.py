@@ -113,10 +113,12 @@ ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead", "@GameDesig
 TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender"}
 STUDIO_ZONE, RESOURCES_ZONE = "Management/studio", "Resources"
 # What studio.py alone writes in an order folder; the feature writes order.md and feedback-<n>.md once.
-STUDIO_SCRIPT_FILES = {"status.json", "log.jsonl", ".run.lock"}
+STUDIO_SCRIPT_FILES = {"status.json", "log.jsonl", ".run.lock", "approval.json", "anchors.json"}
 STUDIO_FEATURE_FILE_RX = re.compile(r"^(order\.md|feedback-[1-9][0-9]*\.md)$")
 STUDIO_ID = r"[a-z0-9]+(-[a-z0-9]+)*"
-STUDIO_REF = r"(_Services/)?[A-Za-z][A-Za-z0-9]*/" + STUDIO_ID
+# An order's owner: a feature folder, or a design node (art concepts, ordered by @GameDesigner: _design/<a.b.c>).
+DESIGN_OWNER_RX = re.compile(r"^_design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*$")
+STUDIO_REF = r"((_Services/)?[A-Za-z][A-Za-z0-9]*|_design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*)/" + STUDIO_ID
 # The studio (orders to the tool chats; see studio.py). Reading it: any chat. Running a tool: that tool's chat.
 STUDIO = PY + r"Management/tools/studio\.py "
 ALLOWED_COMMANDS.append(STUDIO + r"(check|status( (codex|blender|" + STUDIO_REF + "))?)")
@@ -564,7 +566,8 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
             return "allow", f"lessons of @{tool_name.capitalize()}"
         if len(seg) >= 5 and seg[0] == tool_name and seg[1] == "orders" and "work" in seg[3:-1]:
             at = seg.index("work", 3)
-            if at >= 4 and FEATURE_RX.match("/".join(seg[2:at - 1])) and re.fullmatch(STUDIO_ID, seg[at - 1]):
+            owner = "/".join(seg[2:at - 1])
+            if at >= 4 and (FEATURE_RX.match(owner) or DESIGN_OWNER_RX.match(owner)) and re.fullmatch(STUDIO_ID, seg[at - 1]):
                 return "allow", "the work folder of an order"
         return "deny", (f"in Management/studio a tool chat writes only {tool_name}/lessons.md and "
                         f"{tool_name}/orders/<F>/<id>/work/**; order.md, feedback, status.json, log.jsonl and refs are "
@@ -581,8 +584,16 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
         if locked:
             return "deny", locked
         return "allow", f"new {name} for {seg[0]}"
+    if mode == "gamedesigner" and len(seg) == 6 and seg[:3] == ["codex", "orders", "_design"]:
+        owner, oid, name = "/".join(seg[2:4]), seg[4], seg[5]
+        if not DESIGN_OWNER_RX.match(owner) or not re.fullmatch(STUDIO_ID, oid) or not STUDIO_FEATURE_FILE_RX.match(name):
+            return "deny", ("an art order lives in codex/orders/_design/<node path with '.' for '/'>/<id>/ and holds "
+                            "order.md and feedback-<n>.md")
+        if tool != "Write" or os.path.lexists(full):
+            return "deny", "order.md and feedback-<n>.md are written once: a change is a new order"
+        return "allow", f"new {name} of an art order"
     return "deny", ("Management/studio: the tool chats write their lessons and work, the features their orders and "
-                    "feedback, studio.py the rest")
+                    "feedback, @GameDesigner the art orders (codex/orders/_design), studio.py and the page the rest")
 
 
 def decide_designer_edit(full, root, name):

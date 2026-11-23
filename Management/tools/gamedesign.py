@@ -149,6 +149,14 @@ FRAME_SHAPES = BOX_SHAPES + ROUND_SHAPES + LINE_SHAPES + ("grid",)
 FRAME_NUM_RX = re.compile(r"^(-?\d+(?:\.\d+)?)(u?)$")
 FRAME_NAME_RX = re.compile(r"^[a-z][a-z0-9-]*$")
 FRAME_TOKEN_RX = re.compile(r'(\w[\w-]*)="([^"]*)"|(\w[\w-]*)=(\S+)|(\S+)')
+# Styles: the art direction of the game, decided in round 1 (.art-style/ of the root, in its data hash).
+STYLE_DIR = ".art-style"
+STYLE_IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp")
+# Art concepts: images @Codex makes from a round-4 node's frames (orders of the owner _design, see studio.py).
+DESIGN_OWNER = "_design"
+ART_TOOL = "codex"
+ART_META = "meta.json"
+ANCHORS_FILE = "anchors.json"
 HISTORY_SHOWN = 30
 STATES = ("new", "changed", "same")      # an idea node against live
 
@@ -333,7 +341,56 @@ def read_data(folder):
     frames = frame_files(folder)
     if frames:
         data["hash"] = short_hash(data["hash"], *[part for name, text in frames for part in (name, text)])
+    styles = style_parts(folder)
+    if styles:
+        data["hash"] = short_hash(data["hash"], STYLE_DIR, *styles)
     return data
+
+
+def style_parts(folder):
+    """What of .art-style/ goes into the data hash: every file's name and content (images by their sha1)."""
+    d = Path(folder) / STYLE_DIR
+    if not d.is_dir():
+        return []
+    parts = []
+    for p in sorted(x for x in d.iterdir() if x.is_file()):
+        if p.suffix == ".md":
+            parts += [p.name, tidy(read_text(p).replace("\r", ""))]
+        elif p.suffix.lower() in STYLE_IMAGE_EXT:
+            parts += [p.name, hashlib.sha1(p.read_bytes()).hexdigest()]
+    return parts
+
+
+def read_styles(folder):
+    """([{id, title, text, images, hash}], errors) of the root's .art-style/: one <id>.md per style (first line
+    '# <name>', then what it is for and how it looks), reference pictures named <id>-<anything>.<png|jpg|webp>."""
+    d = Path(folder) / STYLE_DIR
+    if not d.is_dir():
+        return [], []
+    files = sorted(x for x in d.iterdir() if x.is_file())
+    out, errors = [], []
+    for p in files:
+        if p.suffix != ".md":
+            continue
+        sid = p.stem
+        text = tidy(read_text(p).replace("\r", ""))
+        lines = text.split("\n")
+        if not KEY_RX.match(sid):
+            errors.append(f"{STYLE_DIR}/{p.name}: id style phải là chữ thường, số, gạch nối")
+            continue
+        if not lines[0].startswith("# ") or not "\n".join(lines[1:]).strip():
+            errors.append(f"{STYLE_DIR}/{p.name}: dòng đầu '# <tên style>', dưới đó mô tả style (dùng cho gì, góc nhìn, màu, nét)")
+            continue
+        images = [x.name for x in files if x.suffix.lower() in STYLE_IMAGE_EXT and x.name.startswith(sid + "-")]
+        h = short_hash(text, *[hashlib.sha1((d / n).read_bytes()).hexdigest() for n in images])
+        out.append({"id": sid, "title": lines[0][2:].strip(), "text": "\n".join(lines[1:]).strip(), "images": images, "hash": h})
+    ids = {s["id"] for s in out}
+    for p in files:
+        if p.suffix.lower() in STYLE_IMAGE_EXT and not any(p.name.startswith(i + "-") for i in ids):
+            errors.append(f"{STYLE_DIR}/{p.name}: ảnh phải đặt tên <id style>-<tên>, theo một style có file .md")
+        elif p.suffix != ".md" and p.suffix.lower() not in STYLE_IMAGE_EXT:
+            errors.append(f"{STYLE_DIR}/{p.name}: chỉ chứa <id>.md và ảnh tham chiếu")
+    return out, errors
 
 
 def score_of(value):
@@ -946,10 +1003,10 @@ def frame_svg(fr):
 FRAME_CSS = """.fr-svg { width: 100%; height: auto; display: block; }
 .fr-screen { fill: var(--fr-bg, #f6f7f9); stroke: var(--fr-line, #9aa3ad); stroke-width: 4; }
 .fr-ground { stroke: var(--fr-line, #9aa3ad); stroke-width: 4; stroke-dasharray: 20 12; }
-.fr-rect, .fr-round-rect, .fr-icon, .fr-label, .fr-bar, .fr-circle, .fr-cell { fill: var(--fr-box, rgba(80,110,160,.10)); stroke: var(--fr-ink, #44546a); stroke-width: 4; }
+.fr-rect, .fr-round-rect, .fr-icon, .fr-label, .fr-bar, .fr-circle, .fr-cell { fill: var(--fr-box, #e9eef5); stroke: var(--fr-ink, #44546a); stroke-width: 4; }
 .fr-label { fill: none; stroke-dasharray: 12 8; }
 .fr-icon { stroke-dasharray: 6 6; }
-.fr-button { fill: var(--fr-accent-soft, rgba(40,120,220,.18)); stroke: var(--fr-accent, #2878dc); stroke-width: 5; }
+.fr-button { fill: var(--fr-accent-soft, #d6e6fa); stroke: var(--fr-accent, #2878dc); stroke-width: 5; }
 .fr-fill { fill: var(--fr-accent, #2878dc); opacity: .5; }
 .fr-ring { fill: none; stroke: var(--fr-warn, #d07a18); stroke-width: 4; stroke-dasharray: 16 10; }
 .fr-dot, .fr-head { fill: var(--fr-warn, #d07a18); }
@@ -1293,7 +1350,7 @@ def own_hash(folder):
     into live."""
     h = hashlib.sha1()
     items = [folder / name for name in NODE_FILES + (CODE_FILE,)]
-    for extra in (IMAGES_DIR, FRAME_DIR):
+    for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR):
         d = folder / extra
         if d.is_dir():
             items += sorted(p for p in d.iterdir() if p.is_file())
@@ -1366,6 +1423,10 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
                            f"thì viết {FRAME_DIR}/<tên>{FRAME_EXT}; không có bố cục thì khai 'frame: {FRAME_NONE}'")
     if depth != FRAME_ROUND and frames:
         frame_notes.append(f"frame chỉ dùng ở node vòng {FRAME_ROUND}")
+    styles, style_errors = read_styles(folder)
+    if path and (folder / STYLE_DIR).is_dir():
+        problems.append({"path": where, "text": f"{STYLE_DIR} chỉ đặt ở node gốc (style là quyết định của vòng 1)"})
+    problems.extend({"path": where, "text": e} for e in style_errors)
     for text in refs["unknown"]:
         problems.append({"path": where, "text": text})
     passed, reasons = verdict(items, pending, stale, mode, refs)
@@ -1390,7 +1451,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
             "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE,
-            "screen": data["screen"],
+            "screen": data["screen"], "styles": styles,
             "refText": raw + "\n" + doc, "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
@@ -1613,7 +1674,7 @@ def promote(root, path, deep, by="người"):
             shutil.copy2(src / name, tmp / name)
         if (src / CODE_FILE).is_file():
             shutil.copy2(src / CODE_FILE, tmp / CODE_FILE)
-        for extra in (IMAGES_DIR, FRAME_DIR):
+        for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR):
             if (src / extra).is_dir():
                 shutil.copytree(src / extra, tmp / extra)
         if dst.is_dir():      # keep what live already has below this node
@@ -1728,6 +1789,88 @@ def live_feature_names(root):
     return sorted(((n, k, d) for n, (k, d) in out.items()), key=lambda x: x[0].lower())
 
 
+# ---------------------------------------------------------------- art concepts (read here, written by studio.py)
+def design_owner(path):
+    """The order owner of a design node: _design/<path with '.' for '/'>."""
+    return f"{DESIGN_OWNER}/{path.replace('/', '.')}"
+
+
+def art_orders_dir(root):
+    return Path(root) / "Management" / "studio" / ART_TOOL / "orders" / DESIGN_OWNER
+
+
+def _json(path):
+    try:
+        value = json.loads(read_text(path))
+    except (OSError, ValueError):
+        return None
+    return value
+
+
+def frame_text_hash(text):
+    return short_hash(tidy(text.replace("\r", "")))
+
+
+def read_art(root, live):
+    """What art each design node has, and the orders that wait for the human's approval:
+        ({node path: [{frame, file, ref, version, state, label, stale, anchor, at}]}, [pending order])
+    file is relative to the project root. One entry per frame: its newest delivery. label:
+        chờ nhận | đang dùng | đã trả | CŨ · node đã đổi | CŨ · style đã đổi   (stale wins over waiting and in use)
+    live: the live tree (read_tree), for the node hashes and the styles they are checked against."""
+    base = art_orders_dir(root)
+    nodes = {n["path"]: n for n in walk(live)} if live else {}
+    styles = {s["id"]: s["hash"] for s in (nodes.get("", {}) or {}).get("styles", [])}
+    anchors = _json(Path(root) / "Management" / "studio" / ART_TOOL / ANCHORS_FILE) or []
+    anchored = {(a.get("ref"), a.get("version"), a.get("item")) for a in anchors if isinstance(a, dict)}
+    art, pending = {}, []
+    if not base.is_dir():
+        return art, pending
+    for order in sorted(base.glob("*/*/order.md")):
+        folder = order.parent
+        dotted, oid = folder.parent.name, folder.name
+        path = dotted.replace(".", "/")
+        ref = f"{DESIGN_OWNER}/{dotted}/{oid}"
+        status = _json(folder / "status.json") or {}
+        state, version = status.get("state") or "new", int(status.get("version") or 0)
+        if state in ("new", "rejected", "approved", "doing"):
+            text = read_text(order)
+            title = next((l[2:].strip() for l in text.split("\n") if l.startswith("# ")), oid)
+            items = [m.group(1) for m in re.finditer(r"(?m)^\s*-\s*`?([a-z0-9]+(?:-[a-z0-9]+)*)`?\s*:", text)]
+            style = next((l.split(":", 1)[1].strip() for l in text.split("\n") if l.startswith("style:")), "")
+            pending.append({"ref": ref, "node": path, "title": title, "items": items, "style": style, "state": state,
+                            "approved": (folder / "approval.json").is_file()})
+        for v in range(1, version + 1):
+            vdir = Path(root) / "Resources" / DESIGN_OWNER / dotted / ART_TOOL / oid / f"v{v}"
+            meta = _json(vdir / ART_META)
+            if not isinstance(meta, dict):
+                continue
+            node = nodes.get(path)
+            if v < version:
+                label_state = "cũ hơn"
+            else:
+                label_state = {"delivered": "chờ nhận", "accepted": "đang dùng", "rejected": "đã trả"}.get(state, state)
+            stale = []
+            if not node or meta.get("nodeHash") != node["dataHash"]:
+                stale.append("node đã đổi")
+            if any(styles.get(sid) != h for sid, h in (meta.get("styles") or {}).items()):
+                stale.append("style đã đổi")
+            for name in sorted(x.name for x in vdir.iterdir() if x.is_file() and x.name != ART_META):
+                item = Path(name).stem
+                label = label_state if label_state in ("đã trả", "cũ hơn") or not stale else "CŨ · " + stale[0]
+                entry = {"frame": item, "file": (vdir / name).relative_to(Path(root)).as_posix(), "ref": ref,
+                         "version": v, "state": label_state, "label": label, "stale": stale,
+                         "anchor": (ref, v, item) in anchored, "at": meta.get("at", ""), "stamp": meta.get("stamp", 0),
+                         "styles": sorted(meta.get("styles") or {})}
+                art.setdefault(path, []).append(entry)
+    for path, entries in art.items():      # newest delivery of each frame first, the older ones after it
+        entries.sort(key=lambda e: (e["frame"], e["at"], e["stamp"]))
+        newest = {}
+        for e in entries:
+            newest[e["frame"]] = e
+        art[path] = sorted(newest.values(), key=lambda e: e["frame"]) + [e for e in entries if newest[e["frame"]] is not e]
+    return art, pending
+
+
 def snapshot(root):
     """Everything the page shows: the mode, the score scale, both trees (idea marked against live) and their
     structure problems. Reads only."""
@@ -1745,11 +1888,15 @@ def snapshot(root):
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
     for n in walk(idea):
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
+    art, art_pending = read_art(root, live)
+    for name, tree in (("idea", idea), ("live", live)):
+        for n in walk(tree):
+            n["art"] = art.get(n["path"], [])
     glossary, term_notes = {}, {}
     for name, tree in (("idea", idea), ("live", live)):
         glossary[name], term_notes[name] = glossary_view(tree)
         for n in walk(tree):
             n.pop("refText", None)      # read by glossary_view only; the page does not need a second copy
-    return {"rounds": ROUNDS, "mode": mode, "frameCss": FRAME_CSS, "screens": SCREENS, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
+    return {"rounds": ROUNDS, "mode": mode, "frameCss": FRAME_CSS, "screens": SCREENS, "artPending": art_pending, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
             "missingCode": missing_code(idea)}

@@ -262,6 +262,162 @@ def run_blender(root):
     check("summary for the blender chat", "Wallet/coin-model" in studio.pending_line(root, "blender"))
 
 
+FAKE_SVG2PNG = r'''
+import sys
+open(sys.argv[2], "wb").write(b"\x89PNG frame")
+'''
+ART_ORDER = """---
+tool: codex
+kind: art
+count: {count}
+deliver: concept
+format: png 1920x1080
+style: {style}
+---
+# Art popup thua
+
+## Mô tả
+Popup thua trên nền trận.
+
+## Danh sách
+{items}
+
+## Tiêu chí nhận
+Giữ bố cục frame.
+"""
+NODE = "feature-pop/pop-lose/lose-spec"
+
+
+def design_tree(root, frame="kind: ui\n- panel round-rect x=560 y=190 w=800 h=700\n", style="Phẳng, màu tươi, viền dày."):
+    """A live table: the root with one style and a picture, a branch down to a round-4 node with one frame."""
+    live = Path(root) / "Management/game-design/live"
+    for i, part in enumerate(["", "feature-pop", "feature-pop/pop-lose", NODE]):
+        d = live / part if part else live
+        d.mkdir(parents=True, exist_ok=True)
+        head = "---\nscreen: landscape\n---\n" if not part else ""
+        (d / "data.md").write_text(f"{head}# N{i}\n\nTóm tắt.\n\n## Ý cốt lõi\n\n### a | AI 8 | Ý\n", encoding="utf-8")
+        (d / "CLAUDE.md").write_text(f"# N{i}\n\nDữ liệu cốt lõi: data.md\n", encoding="utf-8")
+    (live / ".art-style").mkdir(exist_ok=True)
+    (live / ".art-style/ui-flat.md").write_text(f"# UI phẳng\n\n{style}\n", encoding="utf-8")
+    (live / ".art-style/ui-flat-ref.png").write_bytes(b"style ref")
+    (live / NODE / ".frame-concept").mkdir(exist_ok=True)
+    (live / NODE / ".frame-concept/main.frame").write_text(frame, encoding="utf-8")
+
+
+def art_order(root, oid="lose-art", items=("main",), style="ui-flat"):
+    feature = studio.gd.design_owner(NODE)
+    folder = studio.order_dir(root, "codex", feature, oid)
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "order.md").write_text(ART_ORDER.format(count=len(items), style=style,
+                                                      items="\n".join(f"- {i}: cảnh {i}" for i in items)), encoding="utf-8")
+    return f"{feature}/{oid}", folder
+
+
+def art_of(root, frame="main"):
+    tree, _ = studio.gd.read_tree(root, "live")
+    art, pending = studio.gd.read_art(root, tree)
+    return next((a for a in art.get(NODE, []) if a["frame"] == frame), None), pending
+
+
+def run_art(root):
+    os.environ["STUDIO_CODEX"] = str(Path(root) / "fake_codex.py")
+    os.environ["STUDIO_SVG2PNG"] = str(Path(root) / "fake_svg2png.py")
+    (Path(root) / "fake_svg2png.py").write_text(FAKE_SVG2PNG, encoding="utf-8")
+    os.environ["FAKE_MODE"] = "write1"
+    ref, folder = art_order(root)
+    problems = studio.check_order(root, "codex", studio.gd.design_owner(NODE), "lose-art", folder)[1]
+    check("art: a node not in live is refused", any("chưa có trong live" in p for p in problems))
+    design_tree(root)
+    check("art: a good order passes check", studio.check_order(root, "codex", studio.gd.design_owner(NODE), "lose-art", folder)[1], [])
+    _, bad = art_order(root, oid="bad-frame", items=("other",))
+    check("art: an item must be a frame", any("tên một frame" in p for p in
+                                              studio.check_order(root, "codex", studio.gd.design_owner(NODE), "bad-frame", bad)[1]))
+    _, bad = art_order(root, oid="bad-style", style="paint")
+    check("art: a style must exist in round 1", any("style 'paint'" in p for p in
+                                                    studio.check_order(root, "codex", studio.gd.design_owner(NODE), "bad-style", bad)[1]))
+    shutil.rmtree(bad.parent / "bad-frame"), shutil.rmtree(bad)
+    plain = order(root, oid="art-in-feature", kind="art", items=("x",))
+    check("art: only for design nodes", any("chỉ dành cho order của node thiết kế" in p for p in
+                                            studio.check_order(root, "codex", "Wallet", "art-in-feature", plain)[1]))
+    shutil.rmtree(plain)
+    code, out = call(root, "status", ref)
+    check("art: status says it waits for the human", "CHỜ NGƯỜI DUYỆT GEN" in out)
+    check("art: the page lists it as waiting", [o["ref"] for o in art_of(root)[1] if not o["approved"]], [ref])
+    code, out = call(root, "codex", ref, "main")
+    check("art: no approval, no run", (code, "chưa được người duyệt" in out, (folder / "log.jsonl").is_file()), (1, True, False))
+    check("art: approve", call(root, "approve", ref)[0], 0)
+    approval = json.loads((folder / "approval.json").read_text(encoding="utf-8"))
+    check("art: the approval holds the order and the node", (approval["items"], approval["order"] == studio.order_hash(folder)), (["main"], True))
+    Path(os.environ["FAKE_PROMPT"]).write_text("", encoding="utf-8")
+    code, out = call(root, "codex", ref, "main")
+    check("art: approved, it runs", (code, (folder / "work/out/main.png").is_file()), (0, True))
+    prompt = Path(os.environ["FAKE_PROMPT"]).read_text(encoding="utf-8")
+    check("art: the prompt carries the style and the frame rule", ("Phẳng, màu tươi" in prompt, "Giữ đúng bố cục" in prompt), (True, True))
+    attempt = [e for e in log_of(folder) if e["event"] == "attempt"][-1]
+    check("art: Codex sees the frame first, then the style picture", attempt["images"][:2], ["main.frame.png", "ui-flat-ref.png"])
+    call(root, "codex", ref, "main")
+    code, out = call(root, "codex", ref, "main")
+    check("art: at most 2 runs per item and approval", (code, "2/2" in out), (1, True))
+    call(root, "approve", ref)
+    old_daily = studio.ART_DAILY_MAX
+    studio.ART_DAILY_MAX = 2      # two runs already today
+    code, out = call(root, "codex", ref, "main")
+    check("art: the daily cap", (code, "trần chung" in out), (1, True))
+    studio.ART_DAILY_MAX = old_daily
+    (folder / "order.md").write_text((folder / "order.md").read_text(encoding="utf-8") + "\nThêm.\n", encoding="utf-8")
+    code, out = call(root, "codex", ref, "main")
+    check("art: the order changed after approval", (code, "order.md đã đổi" in out), (1, True))
+    call(root, "approve", ref)
+    frame_file = Path(root) / "Management/game-design/live" / NODE / ".frame-concept/main.frame"
+    frame_file.write_text("kind: ui\n- panel round-rect x=500 y=190 w=800 h=700\n", encoding="utf-8")
+    code, out = call(root, "codex", ref, "main")
+    check("art: the node changed after approval", (code, "node trong live đã đổi" in out), (1, True))
+    design_tree(root)
+    code, out = call(root, "take", ref)
+    check("art: take is for features, not art", code, 1)
+    code, out = call(root, "deliver", "codex", ref)
+    vdir = Path(root) / "Resources/_design" / NODE.replace("/", ".") / "codex/lose-art/v1"
+    meta = json.loads((vdir / "meta.json").read_text(encoding="utf-8"))
+    check("art: delivered with meta", (code, (vdir / "main.png").is_file(), sorted(meta["styles"]), "main" in meta["frames"]),
+          (0, True, ["ui-flat"], True))
+    check("art: the page labels it waiting", art_of(root)[0]["label"], "chờ nhận")
+    check("art: anchor needs an accepted picture", call(root, "anchor", ref, "main")[0], 1)
+    check("art: accept", call(root, "accept", ref)[0], 0)
+    check("art: in use", art_of(root)[0]["label"], "đang dùng")
+    check("art: anchor", (call(root, "anchor", ref, "main")[0], art_of(root)[0]["anchor"]), (0, True))
+    ref2, folder2 = art_order(root, oid="again")
+    check("art: no second order for a frame whose picture is still good",
+          any("đã có ảnh còn dùng được" in p for p in studio.check_order(root, "codex", studio.gd.design_owner(NODE), "again", folder2)[1]))
+    design_tree(root, style="Vẽ tay, màu trầm.")
+    check("art: the style changed", art_of(root)[0]["label"], "CŨ · style đã đổi")
+    design_tree(root, frame="kind: ui\n- panel round-rect x=400 y=190 w=800 h=700\n", style="Vẽ tay, màu trầm.")
+    check("art: the node changed", art_of(root)[0]["label"], "CŨ · node đã đổi")
+    check("art: a stale picture lets a new order in", studio.check_order(root, "codex", studio.gd.design_owner(NODE), "again", folder2)[1], [])
+    call(root, "approve", ref2)
+    Path(os.environ["FAKE_PROMPT"]).write_text("", encoding="utf-8")
+    call(root, "codex", ref2, "main")
+    attempt = [e for e in log_of(folder2) if e["event"] == "attempt"][-1]
+    check("art: the anchor of the style is handed to Codex", "main.png" in attempt["images"][2:])
+    call(root, "deliver", "codex", ref2)
+    (folder2 / "feedback-1.md").write_text("Màu quá tối.", encoding="utf-8")
+    code, out = call(root, "reject", ref2)
+    ref1_anchor = json.loads((studio.studio_dir(root, "codex") / "anchors.json").read_text(encoding="utf-8"))
+    check("art: the first picture is still an anchor", [x["ref"] for x in ref1_anchor], [ref])
+    check("art: reject sets the approval aside", (code, (folder2 / "approval.json").is_file(), (folder2 / "approval-v1.json").is_file()),
+          (0, False, True))
+    check("art: rejected shows as such", art_of(root)[0]["label"], "đã trả")
+    code, out = call(root, "approve", ref2)
+    check("art: no new approval before the lesson", (code, "bài học" in out), (1, True))
+    (studio.studio_dir(root, "codex") / "lessons.md").write_text(
+        f"- Màu đủ sáng (codex/orders/{studio.gd.design_owner(NODE)}/again/feedback-1.md)\n", encoding="utf-8")
+    check("art: approved again after the lesson", call(root, "approve", ref2)[0], 0)
+    check("art: pending_line hides orders waiting for the human", "again" in studio.pending_line(root, "codex"), True)
+    (folder / "feedback-1.md").write_text("Không đúng style mới.", encoding="utf-8")
+    call(root, "reject", ref)
+    check("art: a picture sent back is no anchor any more",
+          json.loads((studio.studio_dir(root, "codex") / "anchors.json").read_text(encoding="utf-8")), [])
+
+
 def main():
     root = Path(tempfile.mkdtemp(prefix="studiofx-"))
     try:
@@ -269,7 +425,7 @@ def main():
         (root / "UnityProject/Assets/Features/Shop/FeatureAssets/Private").mkdir(parents=True)
         (root / "fake_codex.py").write_text(FAKE_CODEX, encoding="utf-8")
         (root / "fake_blender.py").write_text(FAKE_BLENDER, encoding="utf-8")
-        for case in (run_check, run_codex, run_deliver, run_blender):
+        for case in (run_check, run_codex, run_deliver, run_blender, run_art):
             case(root)
     finally:
         shutil.rmtree(root, ignore_errors=True)

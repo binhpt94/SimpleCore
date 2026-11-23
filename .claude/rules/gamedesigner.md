@@ -142,6 +142,22 @@ Làm lại từ trên xuống: node cha đạt rồi mới tới node con.
 - Node dùng một từ thì nhắc `` `glossary#wave` `` và khai `glossary#wave@<hash>` trong refs. Đổi nghĩa một từ là đổi quyết định: mọi node khai từ đó thành "cần làm lại"; sửa từ khác thì không ảnh hưởng.
 - Chỉ thêm từ khi đã có node dùng. Thấy từ định nghĩa ở hai nơi, hoặc một node định nghĩa lại từ đã có, thì `gd_status.py` (cả cây) nhắc ở mục "Thuật ngữ": gom về glossary, nghĩa khác nhau thì quyết một (User control: hỏi người).
 
+## Ảnh art-concept (order cho @Codex)
+Frame rẻ, sửa thoải mái theo vòng 4. Ảnh art tốn lượt Codex, nên có cổng:
+- Chỉ đặt cho node vòng 4 **đã ở `live`, có frame**, khi vòng 1 trong `live` đã có style. Mỗi dòng Danh sách là tên một frame của node, mỗi frame đúng một ảnh.
+- Order nằm ở `Management/studio/codex/orders/_design/<đường dẫn node, '/' thay bằng '.'>/<id>/order.md`, theo khung của `.claude/rules/studio.md` với phần đầu:
+  ```
+  tool: codex
+  kind: art
+  count: 1
+  deliver: concept
+  format: png 1920x1080
+  style: ui-flat            # một hay nhiều id style của vòng 1, cách nhau dấu phẩy
+  ```
+- Viết xong chạy `python Management/tools/studio.py check`. Order **chờ người duyệt gen** trên tab Game design; chưa duyệt thì @Codex không chạy được. Không nhắn @Codex trước khi người duyệt.
+- Không xin ảnh mới cho frame còn ảnh dùng được (nhãn "chờ nhận" hay "đang dùng"): `check` từ chối. Ảnh mang nhãn "CŨ" (node hay style đã đổi) hoặc "đã trả" thì mới đặt order mới, và chỉ khi thật cần; frame đổi nhỏ không đáng một lần gen.
+- Người nhận, trả (kèm phản hồi) và đặt ảnh làm mốc style trên trang. Ảnh mốc được đưa cho Codex ở các lần gen sau cùng style.
+
 ## Hai mode
 Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đầu mỗi tin báo mode hiện tại.
 

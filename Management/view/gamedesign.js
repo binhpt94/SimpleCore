@@ -126,12 +126,34 @@
     ".gd-q label input { margin-top: 4px; flex: none; }",
     ".gd-q label small { display: block; color: var(--muted); font-size: 12.5px; }",
     ".gd-q.done h4::after { content: ' ✓'; color: var(--ok); }",
-    ".gd-frame { --fr-bg: var(--bg); --fr-ink: var(--text); --fr-line: var(--line); --fr-accent: var(--accent); max-width: 760px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }",
+    ".gd-frame, .gd-lightbox-svg { --fr-bg: var(--bg); --fr-ink: var(--text); --fr-line: var(--line); --fr-accent: var(--accent); --fr-box: var(--panel); --fr-accent-soft: var(--panel); max-width: 760px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }",
     ".gd-frame-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }",
     ".gd-frame-tabs .gd-btn.on { border-color: var(--accent); color: var(--accent); }",
     ".gd-frame-warn { margin: 8px 0 0; padding-left: 20px; font-size: 13px; color: var(--bad); }",
     ".gd-frame-src { margin-top: 6px; font-size: 13px; }",
     ".gd-frame-src pre { white-space: pre; overflow-x: auto; font-size: 12.5px; }",
+    ".gd-zoomable { cursor: zoom-in; }",
+    ".gd-lightbox { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.82); display: flex; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out; }",
+    ".gd-lightbox img, .gd-lightbox .gd-lightbox-svg { max-width: 96vw; max-height: 90vh; object-fit: contain; background: var(--bg); border-radius: 6px; }",
+    ".gd-lightbox .gd-lightbox-svg { width: 96vw; }",
+    ".gd-lightbox-close { position: fixed; top: 12px; right: 16px; font-size: 28px; line-height: 1; color: #fff; background: none; border: 0; cursor: pointer; }",
+    ".gd-lightbox-cap { position: fixed; bottom: 12px; left: 0; right: 0; text-align: center; color: #eee; font-size: 13px; }",
+    ".gd-art { display: flex; flex-wrap: wrap; gap: 14px; }",
+    ".gd-art figure { margin: 0; width: 280px; }",
+    ".gd-art .gd-art-pic { position: relative; }",
+    ".gd-art img { display: block; width: 100%; max-height: 200px; object-fit: contain; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }",
+    ".gd-art .gd-art-label { position: absolute; top: 6px; left: 6px; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; background: var(--panel); color: var(--text); border: 1px solid var(--line); }",
+    ".gd-art .gd-art-label.stale { background: var(--bad); color: #fff; border-color: var(--bad); }",
+    ".gd-art .gd-art-label.wait { border-color: var(--accent); color: var(--accent); }",
+    ".gd-art .gd-art-label.ok { background: var(--ok); color: #fff; border-color: var(--ok); }",
+    ".gd-art .gd-art-anchor { position: absolute; top: 6px; right: 6px; padding: 2px 8px; border-radius: 10px; font-size: 12px; background: var(--accent); color: var(--panel); }",
+    ".gd-art figcaption { font-size: 12.5px; color: var(--muted); margin-top: 4px; }",
+    ".gd-art .gd-inline { margin: 6px 0 0; }",
+    ".gd-art textarea { width: 100%; min-height: 54px; font: inherit; font-size: 13px; }",
+    ".gd-styles { display: grid; gap: 12px; }",
+    ".gd-style { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }",
+    ".gd-style h4 { margin: 0 0 4px; }",
+    ".gd-style p { white-space: pre-wrap; margin: 0 0 8px; font-size: 13.5px; color: var(--muted); }",
     ".gd-images { display: flex; flex-wrap: wrap; gap: 12px; }",
     ".gd-images figure { margin: 0; width: 220px; }",
     ".gd-images img { display: block; width: 100%; max-height: 180px; object-fit: contain; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }",
@@ -178,6 +200,47 @@
     document.head.appendChild(s);
   };
   var SVG_NS = "http://www.w3.org/2000/svg";
+
+  // Bấm một ảnh (hoặc hình frame) để xem to: lớp phủ toàn màn, đóng bằng Esc, bấm nền hoặc nút ×.
+  var lightbox = function (source, caption) {
+    var box = document.createElement("div");
+    box.className = "gd-lightbox";
+    box.setAttribute("role", "dialog");
+    var shown;
+    if (typeof source === "string") {
+      shown = document.createElement("img");
+      shown.src = source;
+      shown.alt = caption || "";
+    } else {
+      shown = document.createElement("div");
+      shown.className = "gd-lightbox-svg";
+      shown.innerHTML = source.innerHTML;
+    }
+    box.appendChild(shown);
+    var close = document.createElement("button");
+    close.className = "gd-lightbox-close";
+    close.type = "button";
+    close.textContent = "×";
+    close.setAttribute("aria-label", "Đóng");
+    box.appendChild(close);
+    if (caption) {
+      var cap = document.createElement("div");
+      cap.className = "gd-lightbox-cap";
+      cap.textContent = caption;
+      box.appendChild(cap);
+    }
+    var done = function () { box.remove(); document.removeEventListener("keydown", key); };
+    var key = function (e) { if (e.key === "Escape") done(); };
+    box.addEventListener("click", function (e) { if (e.target === box || e.target === close || e.target === shown) done(); });
+    document.addEventListener("keydown", key);
+    document.body.appendChild(box);
+  };
+  var zoomable = function (node, source, caption) {
+    node.classList.add("gd-zoomable");
+    node.title = "Bấm để xem to";
+    node.addEventListener("click", function () { lightbox(source || node.src, caption); });
+    return node;
+  };
 
   // ---------------------------------------------------------------- cây
   var find = function (node, path) {
@@ -447,7 +510,10 @@
       if (state.ask && ctx.setup) {
         // Một khung xác nhận dùng chung cho mọi nút cần PIN: nói rõ sẽ làm gì, rồi mới hỏi PIN.
         var target = state.ask.kind === "mode" ? MODES.filter(function (m) { return m.key === state.ask.key; })[0] : null;
+        var art = state.ask.kind === "art" ? state.ask.order : null;
         var what = target ? "Đổi sang " + target.label + ": " + target.hint
+          : art ? "Duyệt gen " + art.ref + ": " + art.items.length + " ảnh (" + art.items.join(", ") + "), style " + (art.style || "?") +
+            ". Mỗi ảnh tối đa 2 lần chạy Codex; tốn lượt Codex."
           : "Sync: chép " + syncable() + " node đang đạt sang live (bảng đã chốt), ghi đè bản cũ của các node đó.";
         var confirmBox = put(noticeBox, el("div", "gd-confirm gd-inline"));
         add(confirmBox, el("span", "", what));
@@ -459,7 +525,12 @@
         var go = function () {
           if (!pin.value) { pin.focus(); return; }
           var failed = function (text) { say("Không thực hiện: " + text); };
-          if (target) {
+          if (art) {
+            send("/api/studio/approve", { pin: pin.value, ref: art.ref }, function (res) {
+              state.ask = null;
+              return res.message || "Đã duyệt gen.";
+            }, failed);
+          } else if (target) {
             send("/api/gamedesign/mode", { pin: pin.value, mode: target.key }, function () {
               state.ask = null;
               return "Đã đổi sang " + target.label + ".";
@@ -472,7 +543,7 @@
           }
         };
         pin.addEventListener("keydown", function (e) { if (e && e.key === "Enter") go(); });
-        add(confirmBox, button(target ? "Đổi mode" : "Sync", go, null, "gd-btn main"), button("Thôi", function () { state.ask = null; render(); }));
+        add(confirmBox, button(target ? "Đổi mode" : art ? "Duyệt gen" : "Sync", go, null, "gd-btn main"), button("Thôi", function () { state.ask = null; render(); }));
       }
       if (state.message) add(noticeBox, el("p", state.message.bad ? "bad-text" : "ok-text", state.message.text));
       if (state.table === "live" && data && data.idea) {
@@ -483,6 +554,16 @@
             state.table = "idea"; state.message = null; render();
           }));
         }
+      }
+      var waitingArt = (data && data.artPending || []).filter(function (o) { return !o.approved; });
+      if (waitingArt.length) {
+        add(noticeBox, el("p", "", waitingArt.length + " order ảnh art đang chờ bạn duyệt gen (mỗi lần gen tốn lượt Codex):"));
+        var artList = put(noticeBox, el("div", "gd-inline"));
+        waitingArt.forEach(function (o) {
+          add(artList, button(o.node + " · " + o.title + " (" + o.items.length + " ảnh)", function () {
+            state.selected = o.node; state.message = null; render();
+          }));
+        });
       }
       var missing = data && state.table === "idea" ? data.missing || [] : [];
       if (missing.length) {
@@ -992,8 +1073,87 @@
           pic.src = table().dir + (node.path ? node.path + "/" : "") + ".images/" + encodeURIComponent(img.file);
           pic.alt = img.note || img.file;
           pic.loading = "lazy";
+          zoomable(pic, null, img.file + (img.note ? ": " + img.note : ""));
           add(fig, el("figcaption", "", img.file + (img.note ? ": " + img.note : "")));
         });
+      }
+      // Style (vòng 1): .art-style của node gốc, tính vào hash của node gốc.
+      if (node.styles && node.styles.length) {
+        add(body, el("h3", "", "Style (phong cách hình ảnh)"));
+        var styles = put(body, el("div", "gd-styles"));
+        node.styles.forEach(function (s) {
+          var card = put(styles, el("div", "gd-style"));
+          add(card, el("h4", "", s.title + " (" + s.id + ")"), el("p", "", s.text));
+          if (s.images.length) {
+            var row = put(card, el("div", "gd-images"));
+            s.images.forEach(function (name) {
+              var fig = put(row, el("figure"));
+              var pic = put(fig, el("img"));
+              pic.src = table().dir + ".art-style/" + encodeURIComponent(name);
+              pic.alt = name;
+              pic.loading = "lazy";
+              zoomable(pic, null, s.title + ": " + name);
+              add(fig, el("figcaption", "", name));
+            });
+          }
+        });
+      }
+      // Art: ảnh @Codex gen theo frame của node (order _design), nhãn tính từ hash node và hash style.
+      var artPending = (data.artPending || []).filter(function (o) { return o.node === node.path; });
+      if ((node.art && node.art.length) || artPending.length) {
+        add(body, el("h3", "", "Art (ảnh concept)"));
+        artPending.forEach(function (o) {
+          var line = put(body, el("div", "gd-inline"));
+          add(line, el("span", "", "Order " + o.ref + ": " + o.title + " · " + o.items.length + " ảnh · style " + (o.style || "?") +
+            (o.approved ? " · đã duyệt, chờ @Codex gen" : o.state === "rejected" ? " · bạn đã trả, chờ duyệt lại" : " · chờ bạn duyệt gen")));
+          if (!o.approved && ctx.setup) {
+            add(line, button("Duyệt gen", function () { state.ask = { kind: "art", order: o }; state.message = null; render(); window.scrollTo(0, 0); }, null, "gd-btn main"));
+          }
+        });
+        var latest = {};
+        (node.art || []).forEach(function (a) { if (!latest[a.frame]) latest[a.frame] = a; });
+        var gallery = put(body, el("div", "gd-art"));
+        Object.keys(latest).forEach(function (frame) {
+          var a = latest[frame];
+          var fig = put(gallery, el("figure"));
+          var holder = put(fig, el("div", "gd-art-pic"));
+          var pic = put(holder, el("img"));
+          pic.src = "../" + a.file.split("/").map(encodeURIComponent).join("/");
+          pic.alt = frame;
+          pic.loading = "lazy";
+          zoomable(pic, null, frame + " · v" + a.version + " · " + a.label);
+          var kind = a.stale.length ? "stale" : a.state === "chờ nhận" ? "wait" : a.state === "đang dùng" ? "ok" : "";
+          add(holder, el("span", "gd-art-label " + kind, a.label));
+          if (a.anchor) add(holder, el("span", "gd-art-anchor", "mốc"));
+          add(fig, el("figcaption", "", frame + " · v" + a.version + " · " + a.ref + (a.styles.length ? " · style " + a.styles.join(", ") : "")));
+          if (!ctx.setup) return;
+          var acts = put(fig, el("div", "gd-inline"));
+          if (a.state === "chờ nhận") {
+            add(acts, button("Nhận", function () {
+              send("/api/studio/accept", { ref: a.ref }, function (res) { return res.message || "Đã nhận."; });
+            }, null, "gd-btn main"));
+          }
+          if (a.state === "chờ nhận" || a.state === "đang dùng") {
+            add(acts, button("Trả", function () {
+              acts.textContent = "";
+              var note = put(acts, el("textarea"));
+              note.placeholder = "Ảnh nào sai, sai gì, cần thế nào";
+              add(acts, button("Gửi trả", function () {
+                if (!note.value.trim()) { note.focus(); return; }
+                send("/api/studio/reject", { ref: a.ref, text: note.value }, function (res) { return res.message || "Đã trả."; });
+              }, null, "gd-btn main"), button("Thôi", function () { render(); }));
+              note.focus();
+            }));
+          }
+          if (a.state === "đang dùng" && !a.stale.length) {
+            add(acts, button(a.anchor ? "Bỏ mốc" : "Đặt làm mốc", function () {
+              send("/api/studio/anchor", { ref: a.ref, item: a.frame }, function (res) { return res.message || "Đã đổi mốc."; });
+            }));
+          }
+        });
+        var older = (node.art || []).filter(function (a) { return latest[a.frame] !== a; });
+        if (older.length) add(body, el("p", "gd-note", older.length + " bản cũ hơn vẫn giữ trong Resources (không ghi đè)."));
+        if (!ctx.setup) add(body, el("p", "gd-note", "Nhận, trả, đặt mốc và duyệt gen cần mở trang qua server Setup (python Management/tools/setup_server.py)."));
       }
       // Frame: bố cục dạng chữ trong .frame-concept, đã được gamedesign.py giải số và vẽ sẵn thành SVG.
       if (node.frames && node.frames.length || node.frameNotes && node.frameNotes.length || node.frameNone) {
@@ -1018,6 +1178,7 @@
             }
             var box = put(shown, el("div", "gd-frame"));
             box.innerHTML = fr.svg;
+            zoomable(box, box, fr.file + (fr.title ? ": " + fr.title : ""));
             var notes = fr.warnings.concat(fr.errors);
             if (notes.length) {
               var ul = put(shown, el("ul", "gd-frame-warn"));

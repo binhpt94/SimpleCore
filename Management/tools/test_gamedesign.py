@@ -874,8 +874,43 @@ def run_frames(root):
     check("frame: the snapshot carries the frame CSS", "fr-button" in gd.snapshot(root)["frameCss"])
 
 
+def run_styles(root):
+    """Styles (.art-style of the root): read, checked, in the root's data hash, copied to live, only at the root."""
+    mk(root, "")
+    mk(root, "feature-a")
+    before = gd.read_data(folder(root, "idea"))["hash"]
+    put(root, "idea/.art-style/ui-flat.md", "# UI phẳng\n\nPhẳng, viền dày, màu tươi.\n")
+    after = gd.read_data(folder(root, "idea"))["hash"]
+    check("style: adding a style changes the root's data hash", before != after)
+    check("style: so the children are stale", snap_node(root, "feature-a")["stale"])
+    put(root, "idea/.art-style/ui-flat-ref.png", "png1")
+    with_pic = gd.read_data(folder(root, "idea"))["hash"]
+    check("style: a reference picture is in the hash too", with_pic != after)
+    put(root, "idea/.art-style/ui-flat-ref.png", "png2")
+    check("style: changing the picture changes it again", gd.read_data(folder(root, "idea"))["hash"] != with_pic)
+    styles, errors = gd.read_styles(folder(root, "idea"))
+    check("style: read", ([(s["id"], s["title"], s["images"]) for s in styles], errors), ([("ui-flat", "UI phẳng", ["ui-flat-ref.png"])], []))
+    put(root, "idea/.art-style/orphan.png", "x")
+    put(root, "idea/.art-style/Bad.md", "# X\n\ny\n")
+    put(root, "idea/.art-style/empty.md", "# Rỗng\n")
+    errors = gd.read_styles(folder(root, "idea"))[1]
+    check("style: a picture of no style, a bad id, an empty style", (any("orphan.png" in e for e in errors),
+          any("Bad.md" in e for e in errors), any("empty.md" in e for e in errors)), (True, True, True))
+    for name in ("orphan.png", "Bad.md", "empty.md"):
+        folder(root, f"idea/.art-style/{name}").unlink()
+    check("style: the root node carries its styles", [s["id"] for s in snap_node(root)["styles"]], ["ui-flat"])
+    put(root, "idea/feature-a/.art-style/x.md", "# X\n\ny\n")
+    check("style: only at the root", any(".art-style chỉ đặt ở node gốc" in p["text"] for p in gd.read_tree(root, "idea")[1]))
+    shutil.rmtree(folder(root, "idea/feature-a/.art-style"))
+    mk(root, "feature-a")      # based-on the new root hash
+    gd.promote(root, "", False)
+    check("style: Chốt copies the styles", folder(root, "live/.art-style/ui-flat-ref.png").is_file())
+    check("style: the root is the same as live after Chốt", snap_node(root)["state"], "same")
+    check("style: gd_status prints the styles", "- Style ui-flat: UI phẳng (1 ảnh tham chiếu)" in gd_status.report(root))
+
+
 def main():
-    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames):
+    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_styles):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

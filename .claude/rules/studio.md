@@ -21,7 +21,7 @@ Mọi phiên đã gán đọc được `Management/studio` và `Resources`. `<Fe
 ```
 ---
 tool: codex | blender
-kind: image | consult | model          codex: image, consult; blender: model
+kind: image | consult | model          codex: image, consult; blender: model (art: chỉ order của node thiết kế, xem dưới)
 count: 3                               đúng bằng số dòng của Danh sách
 deliver: Private | Public              FeatureAssets nào sẽ nhận hàng
 format: png 512x512, nền trong suốt
@@ -54,6 +54,20 @@ design: feature-hero/hero-list/hero-roster-values                (không bắt b
 5. **Feature nhận**: `studio.py take <F>/<id>`, chép vào `FeatureAssets/<deliver>/Generated/<id>/`; refresh Unity để có `.meta`. Order tham vấn thì đọc câu trả lời ở `Resources/`.
 6. **Feature trả**: viết `feedback-<n>.md` (item nào, sai gì, cần thế nào), rồi `studio.py reject <F>/<id>`, rồi nhắn tool.
 7. **Tool làm lại**: trước hết thêm một mục vào `lessons.md`. Thiếu mục này thì studio.py không cho chạy lại.
+
+## Ảnh art-concept của node thiết kế (`kind: art`)
+@GameDesigner đặt order cho một node vòng 4 đã ở `live`: `orders/_design/<node, '/' thay bằng '.'>/<id>/`. Mỗi item là tên một frame của node; `style:` là các style của vòng 1; `deliver: concept`.
+- **Cổng duyệt:** order chờ người bấm "Duyệt gen" (nhập PIN) trên tab Game design. Trang ghi `approval.json`; không phiên nào ghi được file này.
+  - Approval gắn với đúng nội dung `order.md` và hash của node trong live; một trong hai đổi thì phải duyệt lại.
+  - Mỗi item được chạy tối đa 2 lần cho một lần duyệt (một lần thử lại khi tự kiểm chưa đạt). Toàn project tối đa 20 lần chạy art mỗi ngày.
+  - Hết lượt: dừng, báo người. Không tìm đường vòng (không gọi Codex bằng shell, không qua unity-mcp để né cổng).
+- **Khi chạy:** `studio.py codex` tự đưa vào prompt nội dung các style, và đưa cho Codex, theo thứ tự:
+  1. frame vẽ ra PNG (bố cục và tỉ lệ phải giữ);
+  2. ảnh tham chiếu của style;
+  3. tối đa 3 ảnh mốc cùng style.
+  `work/<item>.md` chỉ thêm chi tiết cảnh; không viết lại style hay bố cục.
+- **Giao:** `deliver codex <ref>` ghi `Resources/_design/<node>/codex/<id>/v<n>/` kèm `meta.json` (hash node, frame, style). Không có `take`: người nhận hoặc trả trên trang, rồi @Codex nhắn @GameDesigner.
+- **Bị trả:** ghi bài học vào `lessons.md` như mọi order, rồi chờ người duyệt lại.
 
 ## Đúng số lượng
 - Mỗi item một kết quả. Không tự gen thêm biến thể, bản nháp, ảnh xem trước hay item ngoài Danh sách.

@@ -39,6 +39,15 @@ def full_lines(node, out, doc=True):
         out.append(f"### Frame (bố cục ước lượng; nguồn {LIVE}/{node['path']}/{gd.FRAME_DIR}/)")
         for fr in node["frames"]:
             out += gd.frame_brief(fr)
+    latest = {}
+    for a in node.get("art", []):
+        latest.setdefault(a["frame"], a)
+    if latest:
+        out.append("")
+        out.append("### Art concept (ảnh @Codex gen theo frame; xem phong cách, không đo kích thước từ ảnh)")
+        for frame, a in sorted(latest.items()):
+            use = "dùng làm mẫu" if a["state"] == "đang dùng" and not a["stale"] else "chỉ để tham khảo"
+            out.append(f"- {frame}: {a['file']} ({a['label']}; {use})")
     body = node["body"].split("\n", 1)[1].strip() if "\n" in node["body"] else ""
     if doc and body:
         out.append("")

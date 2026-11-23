@@ -25,6 +25,16 @@ Phần đầu `data.md` của node gốc có dòng `screen: landscape` (màn nga
 - Thiếu dòng này thì `gd_status.py` nhắc ở node gốc, và frame giao diện tạm vẽ theo màn ngang.
 - Chọn hướng màn khi chọn góc nhìn và người chơi; ghi lí do ở `CLAUDE.md` như mọi quyết định.
 
+## Style hình ảnh (`.art-style/` của node gốc)
+Style quyết định cảm nhận của cả game, nên là quyết định của vòng 1 và **tính vào hash data của node gốc**: thêm, sửa, bỏ một style hay đổi một ảnh tham chiếu thì mọi node bên dưới thành "cần làm lại". Chỉ sửa khi quyết định thật sự đổi.
+- Mỗi style một file `<id>.md` (id: chữ thường, số, gạch nối). Dòng đầu `# <tên style>`, dưới đó:
+  - dùng cho gì: UI, nhân vật, quái, nền, hiệu ứng;
+  - góc nhìn, bảng màu, nét viền, độ chi tiết, ánh sáng;
+  - làm gì và không làm gì (ví dụ "không gradient", "viền tối thiểu 3 px ở 1080p").
+- Ảnh tham chiếu do người bỏ vào, đặt tên `<id>-<tên>.png|jpg|webp`. Ảnh không thuộc style nào là lỗi cấu trúc.
+- Được mix style: mỗi style cho một nhóm thứ (ví dụ `ui-flat` cho giao diện, `chars-chibi` cho nhân vật). Order art khai một hay nhiều style.
+- Chưa có style nào trong `live` thì không đặt được order art (xem `gamedesigner.md`, mục "Ảnh art-concept").
+
 ## Cụ thể tới mức nào
 - Đúng: "Thủ thành: hero tự đánh, người chơi chọn nâng cấp giữa các đợt quái."
 - Đúng: "Thua khi thành bị phá."

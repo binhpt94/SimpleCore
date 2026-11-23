@@ -1210,6 +1210,33 @@ def run_tool_cases():
     w(g, "@Manager", "deny", studio + "/codex/orders/Wallet/m/order.md")
     w(g, "@Core", "deny", studio + "/codex/orders/Core/m/order.md")
 
+    g = "tools: @GameDesigner orders art for design nodes"
+    art = studio + "/codex/orders/_design/feature-popup-lose.lose-actions.actions-spec/lose-art"
+    D = "@GameDesigner"
+    w(g, D, "allow", art + "/order.md")
+    w(g, D, "allow", art + "/feedback-1.md")
+    for p_ in (art + "/approval.json", art + "/status.json", art + "/work/main.md", studio + "/codex/anchors.json",
+               studio + "/codex/orders/Wallet/x/order.md", studio + "/blender/orders/_design/feature-a/x/order.md",
+               studio + "/codex/orders/_design/Feature.A/x/order.md", studio + "/codex/lessons.md",
+               res + "/_design/feature-a/codex/x/v1/main.png"):
+        w(g, D, "deny", p_)
+    os.makedirs(art, exist_ok=True)
+    Path(art + "/order.md").write_text("x")
+    w(g + " (written once)", D, "deny", art + "/order.md")
+    w(g, W, "deny", art + "/feedback-2.md")
+    w(g, X, "allow", art + "/work/main.md")
+    for who in (X, W, "@human"):
+        w(g + " (the page writes approvals)", who, "deny" if who != "@human" else "pass", art + "/approval.json")
+    for cmd in (P + " codex _design/feature-popup-lose.lose-actions.actions-spec/lose-art main",
+                P + " deliver codex _design/feature-popup-lose.lose-actions.actions-spec/lose-art"):
+        t(g, X, "allow", "Bash", {"command": cmd})
+        t(g, D, "deny", "Bash", {"command": cmd})
+    for who in (D, X, W):
+        t(g + " (status for all)", who, "allow", "Bash", {"command": P + " status _design/feature-a.a1/lose-art"})
+        for cmd in (P + " approve _design/feature-a.a1/lose-art", P + " accept _design/feature-a.a1/lose-art",
+                    P + " anchor _design/feature-a.a1/lose-art main", P + " take _design/feature-a.a1/lose-art"):
+            t(g + " (the human approves, accepts, anchors)", who, "deny", "Bash", {"command": cmd})
+
     g = "tools: studio commands"
     for who in (W, X, B, "@Manager", "@GameDesigner", "@CodeLead"):
         for cmd in (P + " check", P + " status", P + " status codex", P + " status Wallet/coin-icons"):

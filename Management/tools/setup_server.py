@@ -20,6 +20,10 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
   human's importance score of a node, /progress the progress of a leaf. With the PIN: /sync copies every passing node into live at once
   (gamedesign.sync_live), /mode switches Full Auto / User control. Nothing reaches live without promote or sync.
+- Art concepts (studio.py): with the PIN, POST /api/studio/approve lets one art order run (it spends Codex). Without
+  it: /accept takes the delivered pictures, /reject writes the human's feedback-<n>.md and sends the order back,
+  /anchor marks an accepted picture as a style anchor. GET /Resources/<...> serves the delivered pictures (images
+  only, read only) so the page can show them.
 """
 import argparse
 import html
@@ -44,6 +48,7 @@ sys.path.insert(0, str(ROOT / ".claude" / "hooks"))
 import bind_session  # noqa: E402
 import gamedesign  # noqa: E402
 import guard  # noqa: E402
+import studio  # noqa: E402
 import sync_page  # noqa: E402
 import validate  # noqa: E402
 import vscode_groups  # noqa: E402
@@ -80,7 +85,9 @@ MAX_BODY = 4096
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
-              "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY}
+              "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY,
+              "/api/studio/approve": MAX_BODY, "/api/studio/accept": MAX_BODY, "/api/studio/reject": 64 * 1024,
+              "/api/studio/anchor": MAX_BODY}
 
 
 def transcripts_dir():
@@ -296,6 +303,43 @@ def review(path, items, table):
     return {"ok": True, "saved": count, "data": sync_page.write_gamedesign(ROOT)}
 
 
+def studio_call(fn, *args):
+    """Runs one studio.py command for the page; its printed lines become the message."""
+    import contextlib
+    import io
+    out = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(out):
+            fn(ROOT, *args)
+    except (ValueError, OSError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "message": out.getvalue().strip(), "data": sync_page.write_gamedesign(ROOT)}
+
+
+def art_approve(pin, ref):
+    """Duyệt gen: lets an art order run. Needs the PIN: it spends Codex."""
+    if not isinstance(ref, str) or not ref.startswith("_design/"):
+        return {"ok": False, "error": "không phải order art"}
+    error = bind_session.check_pin(guard.STORE_DIR, pin)
+    if error:
+        return {"ok": False, "error": error}
+    return studio_call(studio.cmd_approve, ref)
+
+
+def art_reject(ref, text):
+    """Trả: writes the next feedback-<n>.md of the order with the human's words, then studio.py reject."""
+    if not isinstance(ref, str) or not ref.startswith("_design/") or not isinstance(text, str) or not text.strip():
+        return {"ok": False, "error": "ghi phản hồi: ảnh nào sai, cần thế nào"}
+    try:
+        _, feature, oid, folder = studio.find_order(ROOT, ref, "codex")
+    except ValueError as ex:
+        return {"ok": False, "error": str(ex)}
+    n = 1 + max([int(m.group(1)) for m in (studio.FEEDBACK_RX.match(p.name) for p in folder.iterdir()) if m] or [0])
+    (folder / f"feedback-{n}.md").write_text(f"# Phản hồi {n} của người\n\n{text.strip()[:gamedesign.MAX_TEXT]}\n",
+                                            encoding="utf-8")
+    return studio_call(studio.cmd_reject, ref)
+
+
 class Handler(SimpleHTTPRequestHandler):
     token = ""
     port = 0
@@ -346,9 +390,25 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             return self.wfile.write(body)
+        if path.startswith("/Resources/"):
+            return self.send_resource(urllib.parse.unquote(path))
         if path.startswith("/data/") or path.lower().endswith(STATIC_EXT):
             return super().do_GET()
         return self.send_error(404)
+
+    def send_resource(self, path):
+        """A delivered picture under Resources/, read only; anything else is 404."""
+        base = (ROOT / "Resources").resolve()
+        target = (ROOT / path.lstrip("/")).resolve()
+        types = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}
+        if base not in target.parents or target.suffix.lower() not in types or not target.is_file():
+            return self.send_error(404)
+        body = target.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", types[target.suffix.lower()])
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        return self.wfile.write(body)
 
     def do_POST(self):
         if not self.api_ok() or self.path not in POST_PATHS:
@@ -374,6 +434,14 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, answer(data.get("path"), data.get("answers")))
             if self.path == "/api/vscode-groups":
                 return self.send_json(200, group_in_vscode())
+            if self.path == "/api/studio/approve":
+                return self.send_json(200, art_approve(str(data.get("pin") or ""), data.get("ref")))
+            if self.path == "/api/studio/accept":
+                return self.send_json(200, studio_call(studio.cmd_accept, str(data.get("ref") or "")))
+            if self.path == "/api/studio/reject":
+                return self.send_json(200, art_reject(data.get("ref"), data.get("text")))
+            if self.path == "/api/studio/anchor":
+                return self.send_json(200, studio_call(studio.cmd_anchor, str(data.get("ref") or ""), str(data.get("item") or "")))
             pin, mode = str(data.get("pin") or ""), str(data.get("mode") or "")
             model = str(data.get("model") or DEFAULT_MODEL)
             effort = str(data.get("effort") or DEFAULT_EFFORT)
