@@ -49,15 +49,15 @@ import validate  # noqa: E402
 import vscode_groups  # noqa: E402
 from vscode_groups import vscode_state  # noqa: E402
 
-BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Core", "@Composition"]
+BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender", "@Core", "@Composition"]
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
-               "@Core": "Basic", "@Composition": "Basic"}
-GROUP_ORDER = ["Master", "Leaders", "Basic", "Services", "Features"]      # the tiers of CLAUDE.md, top to bottom
+               "@Codex": "Tools", "@Blender": "Tools", "@Core": "Basic", "@Composition": "Basic"}
+GROUP_ORDER = ["Master", "Leaders", "Tools", "Basic", "Services", "Features"]      # the tiers of CLAUDE.md, top to bottom
 STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp")
 
 
 def group_of(name):
-    """Master, Leaders, Basic, Services or Features for a session name; "" for a name outside the setup."""
+    """Master, Leaders, Tools, Basic, Services or Features for a session name; "" for a name outside the setup."""
     if name in ROLE_GROUPS:
         return ROLE_GROUPS[name]
     if name.startswith("@"):

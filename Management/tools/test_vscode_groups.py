@@ -63,7 +63,7 @@ ASSIGN = [("s-human", "Master"), ("s-mgr", "Leaders"), ("s-lead", "Leaders"), ("
 def run_plan():
     out = vg.plan_groups([], ASSIGN)
     check("tier groups in tier order, empty tiers dropped", [g["name"] for g in out],
-          ["1 · Master", "2 · Leaders", "4 · Services", "5 · Features"])
+          ["1 · Master", "2 · Leaders", "5 · Services", "6 · Features"])
     check("sessions in setup order", out[1]["sessionIds"], ["s-mgr", "s-lead"])
     check("new groups are open", all(g["collapsed"] is False for g in out))
     mine = {"id": "g-mine", "name": "Việc riêng", "collapsed": True, "sessionIds": ["s-other", "s-hero"]}
@@ -77,6 +77,13 @@ def run_plan():
     check("your own group is kept after the tiers, without the sessions moved into a tier",
           (out[-1]["name"], out[-1]["sessionIds"], out[-1]["collapsed"]), ("Việc riêng", ["s-other"], True))
     check("running the plan again changes nothing", vg.plan_groups(out, ASSIGN), out)
+    older = {"id": "g-pop", "name": "4 · Services", "collapsed": True, "sessionIds": ["s-pop"]}
+    out = vg.plan_groups([older], ASSIGN + [("s-codex", "Tools")])
+    check("a tier group of the older numbering is renamed, keeping its id and state",
+          [(g["name"], g["id"], g["collapsed"]) for g in out if g["id"] == "g-pop"], [("5 · Services", "g-pop", True)])
+    check("the Tools tier sits between Leaders and Basic", [g["name"] for g in out][:4],
+          ["1 · Master", "2 · Leaders", "3 · Tools", "5 · Services"])
+    check("no leftover group of the old name", any(g["name"] == "4 · Services" for g in out), False)
 
 
 def run_keys():
@@ -104,7 +111,7 @@ def run_apply(folder):
     check("refused while VS Code runs, nothing written", (refused(vg.apply, ROOT, ASSIGN, db=db, running=RUNNING), read(db)), (True, before))
     vg.apply(ROOT, ASSIGN, db=db, running=NOT_RUNNING)
     after = json.loads(read(db))
-    check("groups written for this project", [g["name"] for g in groups_of(db)], ["1 · Master", "2 · Leaders", "4 · Services", "5 · Features"])
+    check("groups written for this project", [g["name"] for g in groups_of(db)], ["1 · Master", "2 · Leaders", "5 · Services", "6 · Features"])
     check("every other field unchanged", {k: v for k, v in after.items() if k != vg.GROUPS_PREFIX + ROOT}, data)
     check("written the compact way the extension writes", read(db), json.dumps(after, separators=(",", ":"), ensure_ascii=False))
     check("other rows untouched", read(db, "other.key"), "keep me")

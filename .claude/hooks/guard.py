@@ -19,12 +19,16 @@ The value, by group:
                                           gd_delete.py, reads its status with gd_status.py; live, mode.json, the
                                           answers, the scores and the history are not its to write. A node is
                                           writable only when every node above it is approved (gamedesign.py)
+    Tools     @Codex / @Blender           take orders from the features (Management/studio, studio.py): write only their
+                                          lessons.md and the work folder of an order; run Codex / Blender through
+                                          studio.py; blender MCP (@Blender) and unity-mcp custom tools are a soft gate
     Basic     @Core / @Composition        edits only Assets/Core / Assets/_Composition
     Features  <Name>                      edits only its feature
     Services  _Services/<Name>            edits only its service
     unset / invalid                       every edit is denied
-Basic, Features and Services read the public parts of features, Core, _Composition, Management, .claude and
-the root CLAUDE.md. rules.json and deleting folders ask the human.
+Basic, Features, Services and Tools read the public parts of features, Core, _Composition, Management, .claude and
+the root CLAUDE.md. Every bound chat (@GameDesigner too) reads Management/studio and Resources; a feature creates
+the order.md and feedback-<n>.md of its own orders there, once. rules.json and deleting folders ask the human.
 unity-mcp (UNITY_RULES): code sessions read through it, change assets of their own area (write), compile
 (shared) and change the open scene or a prefab stage (state); play, tests and project settings are @CodeLead's.
 state/play/lead take the Editor lock (LOCK_FILE in STORE_DIR): one chat at a time, renewed on every call, freed
@@ -94,6 +98,7 @@ FORBIDDEN_DIRS = {"library", "temp", "logs", "obj", "usersettings"}
 DESIGN_AI, DESIGN_LIVE, DESIGN_BASE = ("Management/game-design/ai", "Management/game-design/live",
                                        "Management/game-design")
 DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE}
+READ_ALL_ZONES = {"Management/studio", "Resources"}      # the orders and what was delivered: every bound chat reads
 # Inside ai: the proposed tree; the human's answers file that sits beside each node's questions; and the folders
 # only the page and the history code write (the human's scores, the node's history).
 DESIGN_TREE, DESIGN_CHOOSE, DESIGN_ANSWERS = "idea", ".ai-need-user-choose", "answers.json"
@@ -101,7 +106,23 @@ DESIGN_KEPT = {".user-review", ".history", ".progress"}
 DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per round
 HUMAN_ASK_ZONES = {".claude", "_Composition", "Core", DESIGN_LIVE}
 # FEATURE values that are not feature folders.
-ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead", "@GameDesigner")
+ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender")
+# Tools: they take orders from the features and make images (Codex) or 3D models (Blender); they never code.
+TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender"}
+STUDIO_ZONE, RESOURCES_ZONE = "Management/studio", "Resources"
+# What studio.py alone writes in an order folder; the feature writes order.md and feedback-<n>.md once.
+STUDIO_SCRIPT_FILES = {"status.json", "log.jsonl", ".run.lock"}
+STUDIO_FEATURE_FILE_RX = re.compile(r"^(order\.md|feedback-[1-9][0-9]*\.md)$")
+STUDIO_ID = r"[a-z0-9]+(-[a-z0-9]+)*"
+STUDIO_REF = r"(_Services/)?[A-Za-z][A-Za-z0-9]*/" + STUDIO_ID
+# The studio (orders to the tool chats; see studio.py). Reading it: any chat. Running a tool: that tool's chat.
+STUDIO = PY + r"Management/tools/studio\.py "
+ALLOWED_COMMANDS.append(STUDIO + r"(check|status( (codex|blender|" + STUDIO_REF + "))?)")
+TOOL_COMMANDS = {
+    "codex": [STUDIO + r"(codex|consult) " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver codex " + STUDIO_REF],
+    "blender": [STUDIO + r"blender " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver blender " + STUDIO_REF],
+}
+FEATURE_STUDIO_RX = re.compile(r"^python3? Management/tools/studio\.py (take|reject) (" + STUDIO_REF + r")$")
 ROLE_AREAS = {"@Core": "Core", "@Composition": "_Composition"}
 # unity-mcp: every tool and action, by what it touches (kind). A tool or action missing here is denied.
 #   read    looks only; any path it names must be readable by the session           every code session, @CodeLead
@@ -114,6 +135,8 @@ ROLE_AREAS = {"@Core": "Core", "@Composition": "_Composition"}
 #   script  writes code: code is written with Edit/Write only                        nobody (@human passes)
 # "Code session": Basic, Features, Services. @human passes everything; @Manager, @GameDesigner and an unset chat get nothing.
 UNITY_PREFIX = "mcp__unityMCP__"
+BLENDER_PREFIX = "mcp__blender__"
+TOOL_UNITY = {"execute_custom_tool", "execute_menu_item"}      # the indirect way of a tool chat (soft gate), with the lock
 UNITY_ASSET_TOOL = UNITY_PREFIX + "manage_asset"
 UNITY_SERVER = "unityMCP"
 UNITY_RESOURCE_TOOLS = {"ReadMcpResourceTool", "ListMcpResourcesTool", "ReadMcpResourceDirTool"}
@@ -373,12 +396,18 @@ def zone(full, root, feature, area=None, read_all=False):
         return ".claude", True, "deny"
     if low[0] == "claude.md" and n == 1:
         return "root CLAUDE.md", True, "deny"
+    if low[0] == "resources":      # deliveries of the tool chats; only studio.py writes there
+        return RESOURCES_ZONE, same(seg[0], "Resources"), "deny"
     if low[0] == "management":
         if not same(seg[0], "Management"):
             return "Management", True, "deny"
         if n >= 2 and low[1] == "proposals":
             if exact(seg[:2], "Management/proposals"):
                 return "Management/proposals", True, "create"
+            return "Management", True, "deny"
+        if n >= 2 and low[1] == "studio":
+            if exact(seg[:2], STUDIO_ZONE):
+                return STUDIO_ZONE, True, "studio"
             return "Management", True, "deny"
         if n >= 2 and low[1] == "game-design":
             if n >= 3 and low[2] == "ai" and exact(seg[:3], DESIGN_AI):
@@ -522,6 +551,36 @@ def gamedesign_module(root):
         sys.path.insert(0, tools)
     import gamedesign
     return gamedesign
+
+
+def decide_studio_edit(tool, full, root, mode, feature, tool_name):
+    """Edits inside Management/studio. The tool chat: its own lessons.md and the work folder of its orders.
+    A feature: creates order.md or feedback-<n>.md of its own order, once. studio.py writes the rest."""
+    seg = rel_segments(full, under(root, "Management", "studio"))
+    if mode == "tool":
+        if len(seg) == 2 and seg[0] == tool_name and seg[1] == "lessons.md":
+            return "allow", f"lessons of @{tool_name.capitalize()}"
+        if len(seg) >= 5 and seg[0] == tool_name and seg[1] == "orders" and "work" in seg[3:-1]:
+            at = seg.index("work", 3)
+            if at >= 4 and FEATURE_RX.match("/".join(seg[2:at - 1])) and re.fullmatch(STUDIO_ID, seg[at - 1]):
+                return "allow", "the work folder of an order"
+        return "deny", (f"in Management/studio a tool chat writes only {tool_name}/lessons.md and "
+                        f"{tool_name}/orders/<F>/<id>/work/**; order.md, feedback, status.json, log.jsonl and refs are "
+                        "not its to write")
+    if mode == "feature" and len(seg) in (5, 6) and seg[0] in TOOL_ROLES.values() and seg[1] == "orders":
+        ordered, oid, name = "/".join(seg[2:-2]), seg[-2], seg[-1]
+        if not same(ordered, feature):
+            return "deny", f"FEATURE={feature} orders only for itself (orders/{feature}/<id>/)"
+        if not re.fullmatch(STUDIO_ID, oid) or not STUDIO_FEATURE_FILE_RX.match(name):
+            return "deny", "an order folder holds order.md and feedback-<n>.md; the id: lower case, digits, '-'"
+        if tool != "Write" or os.path.lexists(full):
+            return "deny", "order.md and feedback-<n>.md are written once: a change is a new feedback file or a new order"
+        locked = design_gate(root, feature)
+        if locked:
+            return "deny", locked
+        return "allow", f"new {name} for {seg[0]}"
+    return "deny", ("Management/studio: the tool chats write their lessons and work, the features their orders and "
+                    "feedback, studio.py the rest")
 
 
 def decide_designer_edit(full, root, name):
@@ -691,7 +750,13 @@ def decide_unity_one(tool, ti, ctx, work):
         return "deny", f"unity-mcp {short} {action or ''}: not on the guard's list (guard.py UNITY_RULES); ask the human", False
     if kind == "script":
         return "deny", f"unity-mcp {short}: code is written with Edit/Write only, where the guard checks it", False
-    if kind in ("play", "lead") and not lead:
+    if mode == "tool":
+        if kind == "read" or (kind == "lead" and short in TOOL_UNITY):
+            pass      # reads, and the indirect way to run Codex or Blender (it takes the Editor lock below)
+        else:
+            return "deny", (f"unity-mcp {short} {action}: a tool chat only reads and, when its tool cannot run, "
+                            f"calls {' or '.join(sorted(TOOL_UNITY))}"), False
+    elif kind in ("play", "lead") and not lead:
         return "deny", f"unity-mcp {short} {action}: only @CodeLead (play, tests, project settings); ask @CodeLead", False
     paths = unity_paths(short, action, ti)
     if kind == "read":
@@ -837,6 +902,8 @@ def decide(data, session_value, root, store=None):
         mode = "gamedesigner"
     elif role in ROLE_AREAS:
         mode, area = "area", ROLE_AREAS[role]
+    elif role in TOOL_ROLES:
+        mode = "tool"
     elif valid_feature(raw, root):
         mode, feature = "feature", raw
     who = role or raw
@@ -858,7 +925,14 @@ def decide(data, session_value, root, store=None):
     if tool in SHELL_TOOLS:
         cmd = text_of(ti.get("command")).strip()
         commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else []) + (
-            CODELEAD_COMMANDS if mode == "codelead" else []) + (MANAGER_COMMANDS if mode == "manager" else [])
+            CODELEAD_COMMANDS if mode == "codelead" else []) + (MANAGER_COMMANDS if mode == "manager" else []) + (
+            TOOL_COMMANDS[TOOL_ROLES[role]] if mode == "tool" else [])
+        m = FEATURE_STUDIO_RX.match(cmd)
+        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd:      # take or reject: only the feature that ordered
+            ordered = m.group(2).rpartition("/")[0]
+            if mode == "feature" and ordered == feature:
+                return "allow", f"studio: {m.group(1)} an order of {feature}"
+            return "deny", f"only the chat of {ordered} takes or rejects its own orders"
         if any(re.fullmatch(rx, cmd) for rx in commands) and not SHELL_META_RX.search(cmd) and ".." not in cmd:
             return "allow", "shell command is on the allow-list"
         return "deny", "shell command is not on the allow-list in guard.py. Stop and tell the human."
@@ -886,6 +960,11 @@ def decide(data, session_value, root, store=None):
                 return "deny", locked
             return "allow", f"@CodeLead edits {name}"
         name, _, edit = zone(full, root, feature, area)
+        if edit == "studio":
+            return decide_studio_edit(tool, full, root, mode, feature, TOOL_ROLES.get(role))
+        if mode == "tool":
+            return "deny", (f"{who} writes only inside Management/studio/{TOOL_ROLES[role]} (lessons.md, the work folder "
+                            "of an order) and never codes; results reach the feature through studio.py deliver")
         if mode == "gamedesigner":
             if edit == "design":
                 return decide_designer_edit(full, root, name)
@@ -932,13 +1011,18 @@ def decide(data, session_value, root, store=None):
         if goes_through_link(full, root):
             return "deny", "path goes through a link or junction"
         name, readable, _ = zone(full, root, feature, area, read_all)
-        if mode == "gamedesigner":      # sees the design tree and its own rules, nothing else
-            readable = name in DESIGN_ZONES or (
+        if mode == "gamedesigner":      # sees the design tree, its own rules and the studio, nothing else
+            readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
                 same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
                 and bool(DESIGNER_RULES_RX.match(posixpath.basename(full))))
         if readable:
             return "allow", f"read inside {name}"
         return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."
+
+    if tool.startswith(BLENDER_PREFIX):      # soft gate: the guard cannot read the Python it runs (.claude/rules/studio.md)
+        if mode == "tool" and TOOL_ROLES[role] == "blender":
+            return "allow", "@Blender uses blender MCP when headless Blender fails"
+        return "deny", "blender MCP is @Blender's; order a model from @Blender (.claude/rules/studio.md)"
 
     if tool.startswith(UNITY_PREFIX) or tool in UNITY_RESOURCE_TOOLS:
         return decide_unity(tool, ti, mode, feature, area, who, root, data.get("session_id"), store)

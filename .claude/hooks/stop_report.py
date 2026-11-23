@@ -2,7 +2,8 @@
 """Stop hook. A turn that changed files must end with a report for @Manager.
 
 Applies to the groups Basic (@Core, @Composition), Features and Services, and to @CodeLead (it edits the skeleton).
-Not to @human, @Manager (it only creates proposals), @GameDesigner (its work is the design tree) or unbound chats.
+Not to @human, @Manager (it only creates proposals), @GameDesigner (its work is the design tree), the tool chats
+@Codex and @Blender (studio.py keeps their history) or unbound chats.
 @CodeLead and @Manager are both shown new reports (bind_session.py).
 "Changed files" = an Edit/Write/MultiEdit/NotebookEdit, or a unity-mcp call that changes something (an asset, the
 open scene, a prefab stage, project settings: guard.unity_changes; also inside batch_execute), after the human's last prompt,
@@ -124,7 +125,7 @@ def main(argv):
             root, store = os.path.abspath(argv[2]), argv[4]
         raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
         role = guard.role_of(raw)
-        if role in ("@human", "@Manager", "@GameDesigner") or not (role or guard.valid_feature(raw, root)):
+        if role in ("@human", "@Manager", "@GameDesigner", "@Codex", "@Blender") or not (role or guard.valid_feature(raw, root)):
             return 0
         who = role or raw
         pending = pending_path(data.get("session_id"), store)

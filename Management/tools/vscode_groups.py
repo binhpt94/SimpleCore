@@ -20,6 +20,7 @@ state.vscdb.coresimple-bak before each write, and --restore copies that back.
 """
 import json
 import os
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -33,8 +34,15 @@ HERE = Path(__file__).resolve().parent
 STATE_KEY = "Anthropic.claude-code"
 GROUPS_PREFIX = "sessionGroups:"
 WORKSPACE_PREFIXES = (GROUPS_PREFIX, "sessionUnread:", "sessionSectionCollapseState:")
-TIERS = ["Master", "Leaders", "Basic", "Services", "Features"]      # the order of CLAUDE.md, top to bottom
+TIERS = ["Master", "Leaders", "Tools", "Basic", "Services", "Features"]      # the order of CLAUDE.md, top to bottom
 TIER_NAMES = {tier: f"{i} · {tier}" for i, tier in enumerate(TIERS, 1)}
+TIER_NAME_RX = re.compile(r"^\d+ · (" + "|".join(TIERS) + r")$")      # also a tier group of an older numbering
+
+
+def tier_of(name):
+    """The tier a group name stands for ('3 · Basic' and '4 · Basic' both: Basic), or None for your own groups."""
+    m = TIER_NAME_RX.match(name or "")
+    return m.group(1) if m else None
 BACKUP_SUFFIX = ".coresimple-bak"
 WINDOWS = os.name == "nt"
 
@@ -101,12 +109,15 @@ def plan_groups(existing, assign):
     """The new group list. existing: the current list; assign: [(session id, tier)] in the order of the setup.
     Tier groups come first, in tier order; your other groups follow, without the sessions moved into a tier."""
     moved = {sid for sid, _ in assign}
-    by_name = {g["name"]: g for g in existing}
-    ours = set(TIER_NAMES.values())
+    by_tier = {}
+    for g in existing:      # the current name first, then a group of an older numbering
+        t = tier_of(g["name"])
+        if t and (t not in by_tier or g["name"] == TIER_NAMES[t]):
+            by_tier[t] = g
     out = []
     for tier in TIERS:
         name = TIER_NAMES[tier]
-        old = by_name.get(name)
+        old = by_tier.get(tier)
         want = [sid for sid, t in assign if t == tier]
         if not want:
             continue
@@ -115,7 +126,7 @@ def plan_groups(existing, assign):
         out.append({"id": old["id"] if old else str(uuid.uuid4()), "name": name,
                     "collapsed": old["collapsed"] if old else False, "sessionIds": ids})
     for g in existing:
-        if g["name"] in ours:
+        if tier_of(g["name"]):
             continue
         out.append(dict(g, sessionIds=[sid for sid in g["sessionIds"] if sid not in moved]))
     return out

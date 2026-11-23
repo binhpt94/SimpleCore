@@ -421,6 +421,7 @@ def run_cases():
     run_designer_cases()
     run_progress_cases()
     run_unity_cases()
+    run_tool_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + "/x.txt"}, "cwd": real}), root=None)
@@ -1138,6 +1139,118 @@ def run_progress_cases():
         t(g + " (others)", who, "deny", "Bash", {"command": PROGRESS + "ai/idea/feature-hero idea done"})
     w(g, L, "deny", FX + "/Management/game-design/ai/idea/feature-hero/.progress/progress.json")      # only through the command
 
+
+
+def run_tool_cases():
+    """@Codex and @Blender: take orders from the features, write only their lessons and the work of an order, run
+    their tool through studio.py; everybody reads Management/studio and Resources."""
+    X, B, W = "@Codex", "@Blender", "Wallet"
+    studio, res = FX + "/Management/studio", FX + "/Resources"
+    order = studio + "/codex/orders/Wallet/coin-icons"
+    os.makedirs(order + "/work", exist_ok=True)
+    os.makedirs(res + "/Wallet/codex/coin-icons/v1", exist_ok=True)
+    Path(order + "/order.md").write_text("x")
+    Path(res + "/Wallet/codex/coin-icons/v1/coin.png").write_text("x")
+    P = "python Management/tools/studio.py"
+
+    g = "tools: everybody reads the studio and Resources"
+    for who in (W, "@Core", "@Manager", "@GameDesigner", "@CodeLead", X, B, "_Services/Popup"):
+        r(g, who, "allow", order + "/order.md")
+        r(g, who, "allow", res + "/Wallet/codex/coin-icons/v1/coin.png")
+        t(g, who, "allow", "Grep", {"pattern": "x", "path": studio})
+        t(g, who, "allow", "Glob", {"pattern": "**/*.png", "path": res})
+    r(g + " (still not the rest)", "@GameDesigner", "deny", FX + "/Management/proposals/old.md")
+    r(g + " (still not the rest)", X, "deny", F + "/Shop/Scripts/Internal/S.cs")
+    r(g + " (still not the rest)", X, "deny", F + "/Wallet/FeatureAssets/Private/c.asset")
+    r(g + " (still not the rest)", X, "allow", F + "/Wallet/FeatureAssets/Public/Icon.prefab")
+    r(g + " (still not the rest)", X, "allow", order + "/refs/ref.png")
+
+    g = "tools: what a tool chat writes"
+    w(g, X, "allow", studio + "/codex/lessons.md")
+    w(g, X, "allow", order + "/work/coin.md")
+    e(g, X, "allow", order + "/work/sub/draft.md")
+    w(g, X, "allow", studio + "/codex/orders/_Services/Popup/pop-bg/work/bg.md")
+    for p in (order + "/order.md", order + "/feedback-1.md", order + "/status.json", order + "/log.jsonl",
+              order + "/refs/ref.png", studio + "/blender/lessons.md", studio + "/blender/orders/Wallet/m/work/a.py",
+              studio + "/codex/other.md", res + "/Wallet/codex/coin-icons/v1/coin.png", F + "/Wallet/FeatureAssets/Private/x.png",
+              F + "/Wallet/Scripts/Internal/Old.cs", FX + "/Management/proposals/new.md", FX + "/CLAUDE.md"):
+        w(g, X, "deny", p)
+    w(g, B, "allow", studio + "/blender/orders/Wallet/coin-model/work/coin.py")
+    w(g, B, "deny", order + "/work/coin.md")
+
+    g = "tools: a feature orders for itself"
+    w(g, W, "allow", studio + "/codex/orders/Wallet/new-icons/order.md")
+    w(g, W, "allow", studio + "/blender/orders/Wallet/coin-model/order.md")
+    w(g, W, "allow", order + "/feedback-1.md")
+    w(g, W, "deny", order + "/order.md")      # exists: written once
+    e(g, W, "deny", studio + "/codex/orders/Wallet/new-icons/order.md")
+    w(g, W, "deny", studio + "/codex/orders/Shop/x/order.md")
+    w(g, W, "deny", order + "/work/coin.md")
+    w(g, W, "deny", order + "/status.json")
+    w(g, W, "deny", order + "/feedback-0.md")
+    w(g, W, "deny", studio + "/codex/orders/Wallet/Bad_Id/order.md")
+    w(g, W, "deny", studio + "/codex/lessons.md")
+    w(g, W, "deny", studio + "/paint/orders/Wallet/x/order.md")
+    w(g, W, "deny", res + "/Wallet/codex/coin-icons/v2/coin.png")
+    w(g, "_Services/Popup", "allow", studio + "/codex/orders/_Services/Popup/pop-bg/order.md")
+    w(g, "Shop", "deny", studio + "/codex/orders/Shop/x/order.md")      # its code gate is locked
+    w(g, "@Manager", "deny", studio + "/codex/orders/Wallet/m/order.md")
+    w(g, "@Core", "deny", studio + "/codex/orders/Core/m/order.md")
+
+    g = "tools: studio commands"
+    for who in (W, X, B, "@Manager", "@GameDesigner", "@CodeLead"):
+        for cmd in (P + " check", P + " status", P + " status codex", P + " status Wallet/coin-icons"):
+            t(g, who, "allow", "Bash", {"command": cmd})
+    for cmd in (P + " codex Wallet/coin-icons coin", P + " consult Wallet/coin-icons coin", P + " deliver codex Wallet/coin-icons"):
+        t(g, X, "allow", "Bash", {"command": cmd})
+        t(g, B, "deny", "Bash", {"command": cmd})
+        t(g, W, "deny", "Bash", {"command": cmd})
+    for cmd in (P + " blender Wallet/coin-model coin", P + " deliver blender Wallet/coin-model"):
+        t(g, B, "allow", "Bash", {"command": cmd})
+        t(g, X, "deny", "Bash", {"command": cmd})
+    for cmd in (P + " take Wallet/coin-icons", P + " reject Wallet/coin-icons", P + " take _Services/Popup/pop-bg"):
+        t(g, W if "Wallet" in cmd else "_Services/Popup", "allow", "Bash", {"command": cmd})
+        t(g, "Shop", "deny", "Bash", {"command": cmd})
+        t(g, X, "deny", "Bash", {"command": cmd})
+    for cmd in (P + " codex Wallet/coin-icons coin; rm -rf x", P + " codex ../x coin", P + " codex Wallet/coin-icons",
+                P + " take Wallet/coin-icons --root /tmp", "codex exec -s danger-full-access x", "blender -b -P x.py"):
+        t(g, X, "deny", "Bash", {"command": cmd})
+        t(g, B, "deny", "Bash", {"command": cmd})
+
+    g = "tools: MCP"
+    t(g, B, "allow", "mcp__blender__execute_blender_code", {"code": "import bpy"})
+    t(g, B, "allow", "mcp__blender__get_scene_info", {})
+    for who in (X, W, "@CodeLead", "@GameDesigner"):
+        t(g, who, "deny", "mcp__blender__execute_blender_code", {"code": "import bpy"})
+    t(g, "@human", "pass", "mcp__blender__execute_blender_code", {"code": "import bpy"})
+    guard.release_lock(STORE)
+    for who in (X, B):
+        t(g, who, "allow", "mcp__unityMCP__read_console", {"action": "get"}, session="t-" + who)
+        t(g, who, "deny", "mcp__unityMCP__manage_asset", {"action": "create", "path": "Assets/Features/Wallet/FeatureAssets/Private/x.png"},
+          session="t-" + who)
+        t(g, who, "deny", "mcp__unityMCP__manage_scene", {"action": "load", "path": "Assets/Features/Wallet/FeatureAssets/Private/s.unity"},
+          session="t-" + who)
+        t(g, who, "deny", "mcp__unityMCP__run_tests", {"mode": "EditMode"}, session="t-" + who)
+        t(g, who, "allow", "mcp__unityMCP__execute_custom_tool", {"tool_name": "codex_exec"}, session="t-" + who)
+        guard.release_lock(STORE)
+    t(g, X, "allow", "mcp__unityMCP__execute_menu_item", {"menu_path": "Tools/Codex"}, session="t-x")
+    t(g, B, "deny", "mcp__unityMCP__execute_custom_tool", {"tool_name": "blender_run"}, session="t-b")      # @Codex holds the Editor
+    guard.release_lock(STORE)
+    t(g, W, "deny", "mcp__unityMCP__execute_custom_tool", {"tool_name": "codex_exec"})
+
+    g = "tools: no report needed"
+    os.makedirs(STORE + "/sessions", exist_ok=True)
+    for who, sid in ((X, "rep-codex"), (B, "rep-blender")):
+        Path(guard.binding_path(sid, STORE)).write_text(json.dumps({"feature": who}))
+        tr = FX + f"/{sid}.jsonl"
+        entries = [{"type": "user", "message": {"content": "làm order"}},
+                   {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Write",
+                                                                  "input": {"file_path": order + "/work/a.md"}}]}},
+                   {"type": "assistant", "message": {"content": [{"type": "text", "text": "Xong."}]}}]
+        Path(tr).write_text("\n".join(json.dumps(x) for x in entries))
+        p = subprocess.run([sys.executable, "-I", str(HERE / "stop_report.py"), "--root", FX, "--store", STORE],
+                           input=json.dumps({"session_id": sid, "transcript_path": tr}).encode(), capture_output=True)
+        check(g, who, True, "a tool chat stops without a report block", p.returncode == 0 and b'"block"' not in p.stdout)
 
 
 def run_unity_cases():

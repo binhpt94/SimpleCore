@@ -534,7 +534,7 @@
       if (!data.threads.length) { add(listBody, el("p", "muted", "Chưa có thread nào có tên.")); return; }
       var wanted = {};
       data.sets.full.forEach(function (n, i) { wanted[n] = i + 1; });
-      // Gom theo tầng (Master, Leaders, Basic, Services, Features); trong một tầng theo thứ tự của bộ setup.
+      // Gom theo tầng (Master, Leaders, Tools, Basic, Services, Features); trong một tầng theo thứ tự của bộ setup.
       var order = (data.sets.order || []).concat([""]);
       var tierOf = function (t) { var g = data.sets.groups[t.title] || t.group || ""; return order.indexOf(g) >= 0 ? g : ""; };
       var sorted = data.threads.slice().sort(function (a, b) {

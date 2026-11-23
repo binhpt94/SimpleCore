@@ -181,6 +181,18 @@ def editor_status(store):
         f" (scene {lock['scene']})" if lock.get("scene") else "") + "."
 
 
+def studio_pending(root, tool):
+    """What waits for a tool chat (studio.py), in one sentence."""
+    try:
+        tools = os.path.join(root, "Management", "tools")
+        if tools not in sys.path:
+            sys.path.insert(0, tools)
+        import studio
+        return studio.pending_line(root, tool)
+    except Exception as ex:
+        return f" Không đọc được danh sách order ({ex})."
+
+
 def code_gate(root, feature):
     """Whether this Features/Services chat may code now (the gate guard.py applies), in one sentence."""
     try:
@@ -228,7 +240,10 @@ def context(data, root, store):
               "(gửi @CodeLead và @Manager) theo .claude/rules/report.md. unity-mcp: đọc (console, asset, scene), tự biên dịch "
               "(refresh_unity) rồi đọc console sửa lỗi của mình, tạo/sửa asset và prefab trong vùng mình; mở, sửa, lưu "
               "scene hay prefab stage thì guard giữ khoá Editor cho chat này tới hết lượt (lưu trước khi dừng); Play, "
-              "test, cài đặt project là việc của @CodeLead; code chỉ viết bằng Edit/Write (bảng ở .claude/rules/unity.md)."
+              "test, cài đặt project là việc của @CodeLead; code chỉ viết bằng Edit/Write (bảng ở .claude/rules/unity.md)." + (
+              " Cần ảnh hay model 3D: đặt order (Write mới Management/studio/<codex|blender>/orders/<feature của mình>/<id>/"
+              "order.md theo khung ở .claude/rules/studio.md), nhắn @Codex/@Blender; nhận hàng: python Management/tools/"
+              "studio.py take <F>/<id>; chưa đạt thì viết feedback-<n>.md rồi studio.py reject <F>/<id>.")
               + editor_status(store))
     if role in guard.ROLE_AREAS:
         area = guard.ROLE_AREAS[role]
@@ -246,6 +261,21 @@ def context(data, root, store):
                 "Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done> (xem bằng "
                 "python Management/tools/gd_status.py). Quy trình ở .claude/rules/codelead.md."
                 + editor_status(store) + unread_reports(root, store, role))
+    if role in guard.TOOL_ROLES:
+        tool = guard.TOOL_ROLES[role]
+        how = ("ảnh (kind image) và tham vấn GPT (kind consult). Gen ảnh: python Management/tools/studio.py codex "
+               "<F>/<id> <item> (tự thử Codex ghi trực tiếp, rồi chỉ đọc ảnh Codex sinh ra); không được thì đi gián tiếp "
+               "qua unity-mcp (execute_custom_tool, execute_menu_item). Tham vấn: studio.py consult <F>/<id> <item>."
+               if tool == "codex" else
+               "model 3D (kind model). Viết script vào work/<item>.py rồi chạy headless: python Management/tools/studio.py "
+               "blender <F>/<id> <item>; không được thì dùng blender MCP, rồi unity-mcp (execute_custom_tool, "
+               "execute_menu_item). Kết quả luôn để ở work/out/<item>.<đuôi>.")
+        return (f"guard: chat này gán FEATURE={role} (nhóm Tools): nhận order của các feature và làm {how} Không code, "
+                f"không sửa Assets. Chỉ ghi Management/studio/{tool}/lessons.md và work/ của các order. Đầu lượt: python "
+                f"Management/tools/studio.py status {tool}; đọc order.md, feedback và lessons.md trước khi gen. Gen ĐÚNG số "
+                f"lượng: mỗi item một kết quả, không tự gen thêm. Xong: studio.py deliver {tool} <F>/<id> rồi nhắn feature "
+                f"bằng SendMessage. Order bị trả: ghi bài học vào lessons.md (kèm đường dẫn feedback) rồi mới làm lại. "
+                f"Luật ở .claude/rules/studio.md." + studio_pending(root, tool) + editor_status(store))
     if role == "@GameDesigner":
         return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Chỉ đọc "
                 "Management/game-design, .claude/rules/gamedesigner.md và gamedesigner.round<1-4>.md; chỉ ghi trong Management/game-design/ai "
