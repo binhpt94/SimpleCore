@@ -10,9 +10,10 @@ Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, �
 - Đọc: chỉ `Management/game-design/`, file này và các file luật từng vòng `.claude/rules/gamedesigner.round<1-4>.md`.
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
-- Hai lệnh shell, chạy từ gốc project:
+- Lệnh shell, chạy từ gốc project:
   - `python Management/tools/gd_status.py` hoặc `... gd_status.py ai/idea/<node>`: tình trạng cây hoặc một nhánh. **Chạy đầu mỗi lượt.** Chạy cho một node thì đầu bản in có mục "Bám theo": các node phía trên, các node và từ mà refs trỏ tới.
   - `python Management/tools/gd_delete.py ai/<đường dẫn>`: xoá một file hoặc cả một node trong `ai`. Lịch sử của node bị xoá được giữ lại ở node cha.
+  - `python Management/tools/gd_frame.py ai/idea/<node>`: các frame của một node, đã giải ra số tuyệt đối, kèm cảnh báo (mọi phiên chạy được).
 - Không có báo cáo cuối lượt. Cuối lượt nói ngắn gọn cho người: đã thêm/sửa/xoá node nào, node nào chờ người chấm hoặc trả lời, node nào còn phải làm lại.
 
 ## Bốn vòng
@@ -36,6 +37,7 @@ Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, �
   code.json                  chỉ ở node feature (vòng 2): thư mục code của nó       GD ghi (xem gamedesigner.round2.md)
   .progress/progress.json    chỉ ở node lá: tiến độ từng giai đoạn                  chỉ đọc (@CodeLead và người ghi)
   .images/                   ảnh + index.md (`- <tên file>: <ảnh để làm gì>`)       người bỏ ảnh, GD ghi index.md
+  .frame-concept/<tên>.frame chỉ ở node vòng 4: bố cục ước lượng dạng chữ             GD ghi (xem gamedesigner.round4.md)
   .ai-need-user-choose/      questions.json (GD ghi), answers.json (người)
   .user-review/review.json   điểm và phản hồi của người cho từng ý                  chỉ đọc
   .history/                  log.jsonl, bản sao mọi phiên bản data.md               chỉ đọc
@@ -73,7 +75,8 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
   - Ý viết theo dạng cũ (không có tiêu đề) vẫn đọc được nhưng `gd_status.py` sẽ nhắc "THIẾU TIÊU ĐỀ": lần tới sửa node đó thì thêm tiêu đề. Thêm tiêu đề làm đổi hash data.
 - Danh sách ý cốt lõi chỉ nằm ở `data.md`. Không chép lại thành mục "Cốt lõi" trong `CLAUDE.md`: hai danh sách sẽ lệch nhau và người duyệt sẽ thấy hai thứ khác nhau.
 - Không thêm mục `##` nào khác vào `data.md`: giải thích, ví dụ, trường hợp biên, bảng số, mục "Chưa rõ" để ở `CLAUDE.md`.
-- **Hash data** tính từ tiêu đề node, tóm tắt, và id, tiêu đề, chi tiết của các ý. Đổi một trong các thứ đó là đổi hash: mọi node con thành "cần làm lại". Đổi điểm AI, `based-on` hay `CLAUDE.md` thì không. Vì vậy chỉ sửa `data.md` khi quyết định thật sự đổi; sửa câu chữ cho hay thì đừng.
+- Phần đầu còn hai dòng không bắt buộc, không tính vào hash: `screen: landscape|portrait` (chỉ ở node gốc, xem `gamedesigner.round1.md`) và `frame: none` (node vòng 4 không có bố cục, xem `gamedesigner.round4.md`).
+- **Hash data** tính từ tiêu đề node, tóm tắt, id, tiêu đề, chi tiết của các ý, và nội dung các file `.frame-concept/*.frame`. Đổi một trong các thứ đó là đổi hash: mọi node con thành "cần làm lại". Đổi điểm AI, `based-on` hay `CLAUDE.md` thì không. Vì vậy chỉ sửa `data.md` khi quyết định thật sự đổi; sửa câu chữ cho hay thì đừng.
 
 ### `CLAUDE.md`
 Dòng đầu `# <Tên>`, ngay dưới là dòng trỏ tới `data.md` (ví dụ `Dữ liệu cốt lõi: [data.md](data.md)`). Phần còn lại là diễn giải của vòng đó, chia mục bằng `##`; các mục của từng vòng ghi trong file luật của vòng.

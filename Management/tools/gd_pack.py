@@ -34,6 +34,11 @@ def full_lines(node, out, doc=True):
     if node["priority"].get("leaf"):
         names = {x["key"]: x["name"] for x in gd.PHASES}
         out.append("- Tiến độ: " + " · ".join(f"{names[k]} {c['state']}" for k, c in node["progress"].items()))
+    if node["frames"]:
+        out.append("")
+        out.append(f"### Frame (bố cục ước lượng; nguồn {LIVE}/{node['path']}/{gd.FRAME_DIR}/)")
+        for fr in node["frames"]:
+            out += gd.frame_brief(fr)
     body = node["body"].split("\n", 1)[1].strip() if "\n" in node["body"] else ""
     if doc and body:
         out.append("")

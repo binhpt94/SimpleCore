@@ -126,6 +126,12 @@
     ".gd-q label input { margin-top: 4px; flex: none; }",
     ".gd-q label small { display: block; color: var(--muted); font-size: 12.5px; }",
     ".gd-q.done h4::after { content: ' ✓'; color: var(--ok); }",
+    ".gd-frame { --fr-bg: var(--bg); --fr-ink: var(--text); --fr-line: var(--line); --fr-accent: var(--accent); max-width: 760px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }",
+    ".gd-frame-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }",
+    ".gd-frame-tabs .gd-btn.on { border-color: var(--accent); color: var(--accent); }",
+    ".gd-frame-warn { margin: 8px 0 0; padding-left: 20px; font-size: 13px; color: var(--bad); }",
+    ".gd-frame-src { margin-top: 6px; font-size: 13px; }",
+    ".gd-frame-src pre { white-space: pre; overflow-x: auto; font-size: 12.5px; }",
     ".gd-images { display: flex; flex-wrap: wrap; gap: 12px; }",
     ".gd-images figure { margin: 0; width: 220px; }",
     ".gd-images img { display: block; width: 100%; max-height: 180px; object-fit: contain; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }",
@@ -988,6 +994,45 @@
           pic.loading = "lazy";
           add(fig, el("figcaption", "", img.file + (img.note ? ": " + img.note : "")));
         });
+      }
+      // Frame: bố cục dạng chữ trong .frame-concept, đã được gamedesign.py giải số và vẽ sẵn thành SVG.
+      if (node.frames && node.frames.length || node.frameNotes && node.frameNotes.length || node.frameNone) {
+        add(body, el("h3", "", "Frame (bố cục ước lượng)"));
+        if (node.frameNone) add(body, el("p", "gd-note", "Node này không có bố cục (frame: none)."));
+        (node.frameNotes || []).forEach(function (t) { add(body, el("p", "gd-note", t)); });
+        if (node.frames && node.frames.length) {
+          var tabs = node.frames.length > 1 ? put(body, el("div", "gd-frame-tabs")) : null;
+          var shown = put(body, el("div"));
+          var show = function (i) {
+            var fr = node.frames[i];
+            shown.textContent = "";
+            if (tabs) Array.prototype.forEach.call(tabs.children, function (b, j) { b.className = "gd-btn" + (j === i ? " on" : ""); });
+            add(shown, el("p", "gd-note", fr.file + (fr.title ? ": " + fr.title : "") + " · " +
+              (fr.unit === "px" ? "màn " + fr.view[2] + "x" + fr.view[3] + " px" : "chiến trường, đơn vị u") +
+              ". Di chuột lên một hình để xem số."));
+            if (!document.getElementById("gd-frame-css")) {
+              var fs = document.createElement("style");
+              fs.id = "gd-frame-css";
+              fs.textContent = (window.CORESIMPLE_GAMEDESIGN || {}).frameCss || "";
+              document.head.appendChild(fs);
+            }
+            var box = put(shown, el("div", "gd-frame"));
+            box.innerHTML = fr.svg;
+            var notes = fr.warnings.concat(fr.errors);
+            if (notes.length) {
+              var ul = put(shown, el("ul", "gd-frame-warn"));
+              notes.forEach(function (w) { add(ul, el("li", "", w)); });
+            }
+            var src = put(shown, el("details", "gd-frame-src"));
+            add(src, el("summary", "", "Xem nguồn"), el("pre", "", fr.text));
+          };
+          if (tabs) node.frames.forEach(function (fr, i) {
+            var b = put(tabs, el("button", "gd-btn", fr.file));
+            b.type = "button";
+            b.onclick = function () { show(i); };
+          });
+          show(0);
+        }
       }
       // Lịch sử nằm ở node đề xuất; node live dùng lịch sử của node đề xuất cùng đường dẫn.
       var source = state.table === "idea" ? node : find(data.idea, node.path);

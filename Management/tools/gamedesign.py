@@ -18,7 +18,10 @@ Both tables have the same shape. A folder is a node; its depth is its round (ROU
     .ai-need-user-choose/      questions.json (by @GameDesigner), answers.json (by the page)
     .user-review/review.json   the human's score and feedback per idea (by the page)
     .history/                  log.jsonl and a copy of every version of data.md (by this code only)
-Folders starting with "." are not nodes. live holds only data.md, CLAUDE.md and .images.
+    .frame-concept/<name>.frame round-4 nodes: the layout as text (see parse_frame), in the data hash
+Folders starting with "." are not nodes. live holds only data.md, CLAUDE.md, code.json, .images and .frame-concept.
+The root's data.md also says `screen: landscape | portrait` (the screen frames are drawn on); a round-4 node with no
+layout says `frame: none`. Neither is in the data hash.
 
 data.md:
     ---
@@ -33,7 +36,7 @@ data.md:
 
     ### <idea-id> | AI <0-10> | <the idea in one short line: what the human reads and scores>
     <detail, optional: shown when the human opens the idea>
-The data hash covers title, summary and every idea's id, title and detail; not the scores, not based-on. A child whose
+The data hash covers title, summary, every idea's id, title and detail, and the frames; not the scores, not based-on. A child whose
 based-on differs from its parent's data hash is stale: it must be redone against the new data.
 refs: the nodes of OTHER branches a node builds on, each with the data hash it was checked against (a glossary term
 with the hash of its idea). Not in the data hash. A node must redo when a ref's hash differs from the node's
@@ -130,6 +133,22 @@ MENTION_PATH_RX = re.compile(rf"^{_SEG}(?:/{_SEG})+$")
 MENTION_TERM_RX = re.compile(rf"^{GLOSSARY_KEY}#({_SEG})$")
 DEFINITIONS_TITLE = "Định nghĩa"
 DEF_LINE_RX = re.compile(r"^\s*[-*]\s*\*\*(.+?)\*\*\s*:\s*(.*\S)?\s*$")
+# Frames: the layout of a round-4 node as text (.frame-concept/<name>.frame), drawn by the page, checked here.
+FRAME_DIR = ".frame-concept"
+ART_DIR = ".art-concept"          # generated art concepts (the next step; nothing reads it yet)
+FRAME_EXT = ".frame"
+FRAME_NONE = "none"               # `frame: none` in data.md: a round-4 node with no layout
+FRAME_ROUND = 4
+SCREENS = {"landscape": (1920, 1080), "portrait": (1080, 1920)}      # `screen:` of the root data.md, in px
+TAP_MIN = 96                      # px: the shortest side of a button (dự kiến)
+FRAME_KINDS = ("ui", "field")     # ui: px on the screen, y down · field: the battlefield in u, y up
+BOX_SHAPES = ("rect", "round-rect", "button", "label", "icon", "bar")
+ROUND_SHAPES = ("circle", "ring")
+LINE_SHAPES = ("line", "arrow")
+FRAME_SHAPES = BOX_SHAPES + ROUND_SHAPES + LINE_SHAPES + ("grid",)
+FRAME_NUM_RX = re.compile(r"^(-?\d+(?:\.\d+)?)(u?)$")
+FRAME_NAME_RX = re.compile(r"^[a-z][a-z0-9-]*$")
+FRAME_TOKEN_RX = re.compile(r'(\w[\w-]*)="([^"]*)"|(\w[\w-]*)=(\S+)|(\S+)')
 HISTORY_SHOWN = 30
 STATES = ("new", "changed", "same")      # an idea node against live
 
@@ -203,7 +222,7 @@ def write_mode(root, mode):
 # ---------------------------------------------------------------- data.md
 def parse_data(text):
     """{based_on, refs, title, summary, items: [{id, text, ai, hash}], hash, errors} of a data.md."""
-    errors, based_on, refs = [], "", []
+    errors, based_on, refs, screen, frame_mode = [], "", [], "", ""
     text = text.strip("\n")
     if text.startswith("---\n"):
         head, sep, rest = text[4:].partition("\n---")
@@ -213,6 +232,10 @@ def parse_data(text):
                 key, _, value = line.partition(":")
                 if key.strip() == "based-on":
                     based_on = (value.split() or [""])[0]
+                elif key.strip() == "screen":
+                    screen = value.strip()
+                elif key.strip() == "frame":
+                    frame_mode = value.strip()
                 elif key.strip() == "refs":
                     for entry in re.split(r"[,\s]+", value.strip().strip("[]")):
                         m = REF_RX.match(entry.strip("\"'`")) if entry else None
@@ -283,12 +306,34 @@ def parse_data(text):
                     "text": head + ("\n" + body if body else "") if titled else body,
                     "ai": it["ai"], "hash": short_hash(*parts), "parts": parts})
     data_hash = short_hash(title, summary, *[p for it in out for p in it.pop("parts")])
-    return {"based_on": based_on, "refs": refs, "title": title, "summary": summary, "items": out, "hash": data_hash, "errors": errors}
+    if screen and screen not in SCREENS:
+        errors.append(f"screen: '{screen}' phải là " + " hoặc ".join(SCREENS))
+    if frame_mode and frame_mode != FRAME_NONE:
+        errors.append(f"frame: chỉ nhận '{FRAME_NONE}' (node không có bố cục)")
+    return {"based_on": based_on, "refs": refs, "screen": screen, "frameMode": frame_mode, "title": title,
+            "summary": summary, "items": out, "hash": data_hash, "errors": errors}
+
+
+def frame_files(folder):
+    """[(name, text)] of the node's .frame-concept/*.frame, by name; text as it is hashed."""
+    d = Path(folder) / FRAME_DIR
+    if not d.is_dir():
+        return []
+    return [(p.name, tidy(read_text(p).replace("\r", ""))) for p in sorted(d.iterdir())
+            if p.is_file() and p.suffix == FRAME_EXT]
 
 
 def read_data(folder):
+    """parse_data of the node's data.md; the data hash also covers its frames (a node without frames keeps the
+    hash of its data.md alone)."""
     path = folder / DATA_FILE
-    return parse_data(read_text(path)) if path.is_file() else None
+    if not path.is_file():
+        return None
+    data = parse_data(read_text(path))
+    frames = frame_files(folder)
+    if frames:
+        data["hash"] = short_hash(data["hash"], *[part for name, text in frames for part in (name, text)])
+    return data
 
 
 def score_of(value):
@@ -562,6 +607,386 @@ def read_images(folder, where, problems):
         if name not in files:
             problems.append({"path": where, "text": f"{IMAGES_INDEX} nhắc tới ảnh {name} nhưng không có file"})
     return [{"file": name, "note": notes.get(name, "")} for name in files], text
+
+
+# ---------------------------------------------------------------- frames (.frame-concept/<name>.frame)
+# kind: ui | field                     ui: px on the screen of the root's `screen:` · field: the battlefield in u
+# title: <text>
+# view: x=-20u..20u y=-2u..8u          field only: the part of the battlefield drawn
+# let <name> = <number>[u]             a constant of this node, usable here and by other nodes (`use`)
+# use <name> = <node path>#<let>       a constant of another node's frames; that node goes into refs
+# - <id> <shape> key=value ... [overlap]
+#   box shapes (rect round-rect button label icon bar): x y w h        grid: x y cols rows cell|cw ch [gap]
+#   circle ring: cx cy r                line arrow: from=a,b to=c,d    any: label="..." parent=<id>; bar: fill=0..1
+# Positions are the lowest corner (ui: top-left, y down; field: bottom-left, y up), relative to `parent`'s.
+def frame_comment(line):
+    """The line without its '# comment' (a '#' after a space, outside quotes)."""
+    quoted = False
+    for i, ch in enumerate(line):
+        if ch == '"':
+            quoted = not quoted
+        elif ch == "#" and not quoted and (i == 0 or line[i - 1].isspace()):
+            return line[:i].rstrip()
+    return line.rstrip()
+
+
+def parse_frame(text):
+    """{kind, title, view, lets, uses, shapes, errors} of one .frame file, values still as written."""
+    f = {"kind": "", "title": "", "view": "", "lets": {}, "uses": {}, "shapes": [], "errors": []}
+    err = f["errors"].append
+    ids = set()
+    for n, raw in enumerate((text or "").split("\n"), 1):
+        line = frame_comment(raw).strip()
+        if not line:
+            continue
+        at = f"dòng {n}"
+        if line.startswith("- "):
+            params, bare = {}, []
+            for m in FRAME_TOKEN_RX.finditer(line[2:]):
+                if m.group(1):
+                    params[m.group(1)] = ("text", m.group(2))
+                elif m.group(3):
+                    params[m.group(3)] = ("raw", m.group(4))
+                else:
+                    bare.append(m.group(5))
+            if len(bare) < 2:
+                err(f"{at}: hình phải có dạng '- <id> <hình> key=value ...'")
+                continue
+            sid, shape, flags = bare[0], bare[1], bare[2:]
+            if not KEY_RX.match(sid) or sid in ids:
+                err(f"{at}: id '{sid}' phải là chữ thường, số, gạch nối và không trùng")
+                continue
+            if shape not in FRAME_SHAPES:
+                err(f"{at}: hình '{shape}' không có trong thư viện ({', '.join(FRAME_SHAPES)})")
+                continue
+            bad = [x for x in flags if x != "overlap"]
+            if bad:
+                err(f"{at}: không hiểu '{bad[0]}' (chỉ có cờ 'overlap')")
+            ids.add(sid)
+            f["shapes"].append({"id": sid, "shape": shape, "params": params, "overlap": "overlap" in flags,
+                                "line": n, "src": line})
+            continue
+        key, sep, value = line.partition(":")
+        word = line.split(None, 1)[0]
+        if word in ("let", "use"):
+            name, eq, val = line[len(word):].partition("=")
+            name, val = name.strip(), val.strip()
+            if not eq or not FRAME_NAME_RX.match(name) or not val:
+                err(f"{at}: phải có dạng '{word} <tên> = <giá trị>'")
+            elif name in f["lets"] or name in f["uses"]:
+                err(f"{at}: tên '{name}' đã khai")
+            elif word == "let":
+                if not FRAME_NUM_RX.match(val):
+                    err(f"{at}: let '{name}' phải là một số (thêm u với chiến trường)")
+                else:
+                    f["lets"][name] = val
+            else:
+                path, hash_, ref = val.partition("#")
+                if not hash_ or not MENTION_PATH_RX.match(path) or not FRAME_NAME_RX.match(ref):
+                    err(f"{at}: use '{name}' phải có dạng <đường dẫn node>#<tên let>")
+                else:
+                    f["uses"][name] = (path, ref)
+        elif sep and key.strip() in ("kind", "title", "view"):
+            f[key.strip()] = value.strip()
+        else:
+            err(f"{at}: không hiểu dòng '{line[:40]}'")
+    if f["kind"] not in FRAME_KINDS:
+        err(f"kind: phải là {' hoặc '.join(FRAME_KINDS)}")
+    if f["kind"] == "ui" and f["view"]:
+        err("view: chỉ dùng cho kind: field (ui vẽ theo màn chuẩn)")
+    return f
+
+
+def frame_lets(frames):
+    """{name: (number, kind)} of the `let`s of a node's parsed frames; a name given two values maps to None."""
+    out = {}
+    for f in frames:
+        for name, val in f["lets"].items():
+            num = float(FRAME_NUM_RX.match(val).group(1))
+            out[name] = (num, f["kind"]) if out.get(name, (num, f["kind"])) == (num, f["kind"]) else None
+    return out
+
+
+def resolve_frame(f, screen, lookup):
+    """The frame with every value as a number and every position absolute, plus what is measurably wrong:
+        {kind, title, unit, view: [x1, y1, x2, y2], values, shapes: [{id, shape, label, parent, overlap, bbox, ...}],
+         errors, warnings}
+    screen: (w, h) in px. lookup(path, name) -> ((number, kind) | None, reason)."""
+    out = {"kind": f["kind"], "title": f["title"], "unit": "u" if f["kind"] == "field" else "px", "values": {},
+           "shapes": [], "errors": list(f["errors"]), "warnings": []}
+    err, warn = out["errors"].append, out["warnings"].append
+    field = f["kind"] == "field"
+    names = {}
+    for name, val in f["lets"].items():
+        m = FRAME_NUM_RX.match(val)
+        if m.group(2) and not field:
+            err(f"let {name}: đơn vị u chỉ dùng cho kind: field")
+        names[name] = float(m.group(1))
+    for name, (path, ref) in f["uses"].items():
+        hit, reason = lookup(path, ref)
+        if hit is None:
+            err(f"use {name}: {reason}")
+        elif hit[1] != f["kind"]:
+            err(f"use {name}: '{path}#{ref}' là số của frame {hit[1]}, frame này là {f['kind']}")
+        else:
+            names[name] = hit[0]
+    out["values"] = dict(names)
+
+    def num(raw, label):
+        m = FRAME_NUM_RX.match(raw)
+        if m:
+            if m.group(2) and not field:
+                raise ValueError(f"{label}: đơn vị u chỉ dùng cho kind: field")
+            return float(m.group(1))
+        if raw in names:
+            return names[raw]
+        raise ValueError(f"{label}: '{raw}' không phải số hay tên let/use đã khai")
+
+    if field:
+        m = re.match(r"^x=(\S+)\.\.(\S+)\s+y=(\S+)\.\.(\S+)$", f["view"] or "")
+        try:
+            if not m:
+                raise ValueError("view: kind: field cần 'view: x=<từ>..<tới> y=<từ>..<tới>'")
+            view = [num(m.group(1), "view"), num(m.group(3), "view"), num(m.group(2), "view"), num(m.group(4), "view")]
+            if view[0] >= view[2] or view[1] >= view[3]:
+                raise ValueError("view: khoảng phải từ nhỏ tới lớn")
+        except ValueError as e:
+            err(str(e))
+            view = [0.0, 0.0, 1.0, 1.0]
+    else:
+        view = [0.0, 0.0, float(screen[0]), float(screen[1])]
+    out["view"] = view
+
+    placed = {}
+    for s in f["shapes"]:
+        p, label = s["params"], f"{s['id']}"
+        r = {"id": s["id"], "shape": s["shape"], "label": p.get("label", ("", ""))[1], "parent": "",
+             "overlap": s["overlap"], "src": s["src"]}
+
+        def get(key, need=True, default=None):
+            if key not in p:
+                if need:
+                    raise ValueError(f"{label}: hình {s['shape']} cần {key}=")
+                return default
+            kind_, raw = p[key]
+            if kind_ == "text":
+                raise ValueError(f"{label}: {key} phải là số, không có ngoặc kép")
+            return num(raw, f"{label} {key}")
+
+        def pair(key):
+            kind_, raw = p.get(key, ("raw", ""))
+            parts = raw.split(",")
+            if key not in p or len(parts) != 2:
+                raise ValueError(f"{label}: hình {s['shape']} cần {key}=<x>,<y>")
+            return num(parts[0], f"{label} {key}"), num(parts[1], f"{label} {key}")
+
+        try:
+            ox = oy = 0.0
+            if "parent" in p:
+                parent = placed.get(p["parent"][1])
+                if parent is None or parent["shape"] not in BOX_SHAPES + ("grid",):
+                    raise ValueError(f"{label}: parent '{p['parent'][1]}' phải là một hình hộp hoặc lưới khai ở trên")
+                r["parent"], ox, oy = parent["id"], parent["x"], parent["y"]
+            if s["shape"] in BOX_SHAPES:
+                r.update(x=get("x") + ox, y=get("y") + oy, w=get("w"), h=get("h"))
+                if s["shape"] == "bar":
+                    fill = get("fill", False, 1.0)
+                    if not 0 <= fill <= 1:
+                        raise ValueError(f"{label}: fill phải từ 0 tới 1")
+                    r["fill"] = fill
+                r["bbox"] = [r["x"], r["y"], r["x"] + r["w"], r["y"] + r["h"]]
+            elif s["shape"] == "grid":
+                cols, rows = get("cols"), get("rows")
+                if cols < 1 or rows < 1 or cols != int(cols) or rows != int(rows):
+                    raise ValueError(f"{label}: cols, rows phải là số nguyên dương")
+                cell = get("cell", False)
+                cw, ch = get("cw", cell is None, cell), get("ch", cell is None, cell)
+                gap = get("gap", False, 0.0)
+                r.update(x=get("x") + ox, y=get("y") + oy, cols=int(cols), rows=int(rows), cw=cw, ch=ch, gap=gap,
+                         w=cols * cw + (cols - 1) * gap, h=rows * ch + (rows - 1) * gap)
+                r["bbox"] = [r["x"], r["y"], r["x"] + r["w"], r["y"] + r["h"]]
+            elif s["shape"] in ROUND_SHAPES:
+                r.update(cx=get("cx") + ox, cy=get("cy") + oy, r=get("r"))
+                r["bbox"] = [r["cx"] - r["r"], r["cy"] - r["r"], r["cx"] + r["r"], r["cy"] + r["r"]]
+            else:
+                (x1, y1), (x2, y2) = pair("from"), pair("to")
+                r.update(x1=x1 + ox, y1=y1 + oy, x2=x2 + ox, y2=y2 + oy,
+                         length=round(((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5, 3))
+                r["bbox"] = [min(r["x1"], r["x2"]), min(r["y1"], r["y2"]), max(r["x1"], r["x2"]), max(r["y1"], r["y2"])]
+            for key in ("w", "h", "r", "cw", "ch"):
+                if key in r and r[key] <= 0:
+                    raise ValueError(f"{label}: {key} phải lớn hơn 0")
+        except ValueError as e:
+            err(f"dòng {s['line']}: {e}")
+            continue
+        placed[s["id"]] = r
+        out["shapes"].append(r)
+
+    def inside(a, b):
+        return a[0] >= b[0] - 1e-9 and a[1] >= b[1] - 1e-9 and a[2] <= b[2] + 1e-9 and a[3] <= b[3] + 1e-9
+
+    def fmt(v):
+        return f"{v:g}{out['unit'] if out['unit'] == 'u' else ''}"
+
+    for r in out["shapes"]:
+        if r["shape"] == "ring":
+            continue      # a reach is a measure, it may go past anything
+        if not inside(r["bbox"], view):
+            warn(f"{r['id']}: tràn ra ngoài {'khung nhìn' if field else 'màn hình'}")
+        elif r["parent"] and not inside(r["bbox"], placed[r["parent"]]["bbox"]):
+            warn(f"{r['id']}: tràn ra ngoài '{r['parent']}'")
+        if r["shape"] == "button" and not field and min(r["w"], r["h"]) < TAP_MIN:
+            warn(f"{r['id']}: nút {fmt(r['w'])}x{fmt(r['h'])} px, cạnh ngắn nhỏ hơn cỡ bấm tối thiểu {TAP_MIN} px")
+    solid = [r for r in out["shapes"] if r["shape"] not in ROUND_SHAPES[1:] + LINE_SHAPES]
+    for i, a in enumerate(solid):
+        for b in solid[i + 1:]:
+            if a["parent"] != b["parent"] or a["overlap"] or b["overlap"]:
+                continue
+            ba, bb = a["bbox"], b["bbox"]
+            if min(ba[2], bb[2]) - max(ba[0], bb[0]) > 1e-9 and min(ba[3], bb[3]) - max(ba[1], bb[1]) > 1e-9:
+                warn(f"{a['id']} và {b['id']} chồng lên nhau (thêm cờ overlap nếu cố ý)")
+    return out
+
+
+def read_frames(folder, where, problems, screen, lookup):
+    """[{file, text, ...resolve_frame}] of the node's frames. Syntax errors go to `problems` (they block Chốt like
+    any structure problem); measured warnings stay on each frame."""
+    out = []
+    for name, text in frame_files(folder):
+        f = parse_frame(text)
+        r = resolve_frame(f, screen or SCREENS["landscape"], lookup)
+        if f["kind"] == "ui" and not screen:
+            r["warnings"].insert(0, "node gốc chưa khai screen: nên vẽ theo màn ngang 1920x1080")
+        for e in r["errors"]:
+            problems.append({"path": where, "text": f"{FRAME_DIR}/{name}: {e}"})
+        r.update(file=name, text=text, uses=[f"{p}#{n}" for p, n in f["uses"].values()])
+        r["svg"] = frame_svg(r)
+        out.append(r)
+    return out
+
+
+def _esc(text):
+    return (str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;"))
+
+
+def frame_svg(fr):
+    """The resolved frame drawn as one <svg> (classes fr-*: the page and gd_frame.py --html give the colours).
+    ui is drawn in px, y down; field in u, y up, scaled to px here. Every shape carries a <title> with its numbers
+    and data-* attributes with them (in the frame's own unit)."""
+    x1, y1, x2, y2 = fr["view"]
+    field = fr["kind"] == "field"
+    k = 1920 / (x2 - x1) if field else 1.0      # px per unit of the frame
+    vw, vh = round((x2 - x1) * k, 3), round((y2 - y1) * k, 3)
+    u = "u" if field else ""
+
+    def X(x):
+        return round((x - x1) * k, 3)
+
+    def Y(y):
+        return round(((y2 - y) if field else (y - y1)) * k, 3)
+
+    def L(v):
+        return round(v * k, 3)
+
+    fs = 34      # px of the 1920-wide drawing: about 13 px on a panel 760 px wide
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" class="fr-svg" viewBox="0 0 {vw:g} {vh:g}" '
+             f'preserveAspectRatio="xMidYMid meet" data-kind="{fr["kind"]}">',
+             '<defs><marker id="fr-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" '
+             'orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="fr-head"/></marker></defs>',
+             f'<rect class="fr-screen" x="0" y="0" width="{vw:g}" height="{vh:g}"/>']
+    if field and y1 < 0 < y2:
+        parts.append(f'<line class="fr-ground" x1="0" y1="{Y(0)}" x2="{vw:g}" y2="{Y(0)}"/>')
+    parents = {r["parent"] for r in fr["shapes"]}
+    for r in fr["shapes"]:
+        tip = f"{r['id']} ({r['shape']})" + (f" {r['label']}" if r["label"] else "")
+        data = f'data-id="{_esc(r["id"])}" data-shape="{r["shape"]}"'
+        cls = "fr-" + r["shape"]
+        if "w" in r:
+            tip += f": x={r['x']:g}{u} y={r['y']:g}{u} w={r['w']:g}{u} h={r['h']:g}{u}"
+            left, top, w, h = X(r["x"]), Y(r["y"] + r["h"]) if field else Y(r["y"]), L(r["w"]), L(r["h"])
+            data += f' data-x="{r["x"]:g}" data-y="{r["y"]:g}" data-w="{r["w"]:g}" data-h="{r["h"]:g}"'
+            body = []
+            if r["shape"] == "grid":
+                tip += f" ({r['cols']}x{r['rows']} ô {r['cw']:g}x{r['ch']:g}, cách {r['gap']:g})"
+                for i in range(r["cols"]):
+                    for j in range(r["rows"]):
+                        cx, cy = left + L(i * (r["cw"] + r["gap"])), top + L(j * (r["ch"] + r["gap"]))
+                        body.append(f'<rect class="fr-cell" x="{cx:g}" y="{cy:g}" width="{L(r["cw"]):g}" height="{L(r["ch"]):g}"/>')
+            else:
+                rx = f' rx="{min(w, h) * 0.12:g}"' if r["shape"] in ("round-rect", "button") else ""
+                body.append(f'<rect class="{cls}" x="{left:g}" y="{top:g}" width="{w:g}" height="{h:g}"{rx}/>')
+                if r["shape"] == "bar":
+                    body.append(f'<rect class="fr-fill" x="{left:g}" y="{top:g}" width="{w * r["fill"]:g}" height="{h:g}"/>')
+                    tip += f" fill={r['fill']:g}"
+            text = (r["label"] + " · " if r["label"] else "") + f"{r['w']:g}x{r['h']:g}{u}"
+            tx, ty = left + w / 2, (top + fs if r["id"] in parents else top + h / 2)
+        elif "r" in r:
+            tip += f": cx={r['cx']:g}{u} cy={r['cy']:g}{u} r={r['r']:g}{u}"
+            data += f' data-cx="{r["cx"]:g}" data-cy="{r["cy"]:g}" data-r="{r["r"]:g}"'
+            body = [f'<circle class="{cls}" cx="{X(r["cx"])}" cy="{Y(r["cy"])}" r="{L(r["r"]):g}"/>']
+            ring = r["shape"] == "ring"
+            if ring:
+                body.append(f'<circle class="fr-dot" cx="{X(r["cx"])}" cy="{Y(r["cy"])}" r="5"/>')
+            text = (r["label"] + " · " if r["label"] else "") + f"r={r['r']:g}{u}"
+            tx, ty = X(r["cx"]), Y(r["cy"]) - (L(r["r"]) + fs * 0.6 if ring else 0)
+        else:
+            tip += f": {r['x1']:g},{r['y1']:g} → {r['x2']:g},{r['y2']:g} (dài {r['length']:g}{u})"
+            data += f' data-x1="{r["x1"]:g}" data-y1="{r["y1"]:g}" data-x2="{r["x2"]:g}" data-y2="{r["y2"]:g}"'
+            marker = ' marker-end="url(#fr-arrow)"' if r["shape"] == "arrow" else ""
+            body = [f'<line class="{cls}" x1="{X(r["x1"])}" y1="{Y(r["y1"])}" x2="{X(r["x2"])}" y2="{Y(r["y2"])}"{marker}/>']
+            text = (r["label"] + " · " if r["label"] else "") + f"{r['length']:g}{u}"
+            tx, ty = (X(r["x1"]) + X(r["x2"])) / 2, (Y(r["y1"]) + Y(r["y2"])) / 2 - fs * 0.7
+        parts.append(f'<g class="fr-shape" {data}><title>{_esc(tip)}</title>' + "".join(body)
+                     + f'<text class="fr-text" x="{tx:g}" y="{ty:g}" font-size="{fs:g}" text-anchor="middle" '
+                       f'dominant-baseline="middle">{_esc(text)}</text></g>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+FRAME_CSS = """.fr-svg { width: 100%; height: auto; display: block; }
+.fr-screen { fill: var(--fr-bg, #f6f7f9); stroke: var(--fr-line, #9aa3ad); stroke-width: 4; }
+.fr-ground { stroke: var(--fr-line, #9aa3ad); stroke-width: 4; stroke-dasharray: 20 12; }
+.fr-rect, .fr-round-rect, .fr-icon, .fr-label, .fr-bar, .fr-circle, .fr-cell { fill: var(--fr-box, rgba(80,110,160,.10)); stroke: var(--fr-ink, #44546a); stroke-width: 4; }
+.fr-label { fill: none; stroke-dasharray: 12 8; }
+.fr-icon { stroke-dasharray: 6 6; }
+.fr-button { fill: var(--fr-accent-soft, rgba(40,120,220,.18)); stroke: var(--fr-accent, #2878dc); stroke-width: 5; }
+.fr-fill { fill: var(--fr-accent, #2878dc); opacity: .5; }
+.fr-ring { fill: none; stroke: var(--fr-warn, #d07a18); stroke-width: 4; stroke-dasharray: 16 10; }
+.fr-dot, .fr-head { fill: var(--fr-warn, #d07a18); }
+.fr-line, .fr-arrow { stroke: var(--fr-ink, #44546a); stroke-width: 5; }
+.fr-text { fill: var(--fr-ink, #44546a); font-family: system-ui, sans-serif; pointer-events: none; }
+.fr-shape:hover > :not(text) { stroke-width: 8; }"""
+
+
+def frame_mentions(folder):
+    """The node paths the frames `use`, in backticks: ref_issues then asks for them in refs like any mention."""
+    return "\n".join(f"`{path}`" for _, text in frame_files(folder) for path, _ in parse_frame(text)["uses"].values())
+
+
+def frame_brief(fr):
+    """Lines of one resolved frame, for an AI to read: every shape absolute, with its unit."""
+    unit = fr["unit"]
+    head = f"frame {fr['file']} ({fr['kind']}, {unit}" + (f", màn {fr['view'][2]:g}x{fr['view'][3]:g}" if unit == "px" else
+                                                         f", khung x {fr['view'][0]:g}..{fr['view'][2]:g} y {fr['view'][1]:g}..{fr['view'][3]:g}") + ")"
+    lines = [head + (f": {fr['title']}" if fr["title"] else "")]
+    if fr["values"]:
+        lines.append("  số: " + ", ".join(f"{k}={v:g}" for k, v in fr["values"].items()))
+    for r in fr["shapes"]:
+        if "w" in r:
+            pos = f"x={r['x']:g} y={r['y']:g} w={r['w']:g} h={r['h']:g}"
+            if r["shape"] == "grid":
+                pos += f" ({r['cols']}x{r['rows']} ô {r['cw']:g}x{r['ch']:g}, cách {r['gap']:g})"
+            if r["shape"] == "bar":
+                pos += f" fill={r['fill']:g}"
+        elif "r" in r:
+            pos = f"cx={r['cx']:g} cy={r['cy']:g} r={r['r']:g}"
+        else:
+            pos = f"từ {r['x1']:g},{r['y1']:g} tới {r['x2']:g},{r['y2']:g} (dài {r['length']:g})"
+        extra = (f" trong {r['parent']}" if r["parent"] else "") + (f" \"{r['label']}\"" if r["label"] else "")
+        lines.append(f"  - {r['id']} {r['shape']} {pos}{extra}")
+    lines += [f"  ! {w}" for w in fr["warnings"]]
+    lines += [f"  LỖI {e}" for e in fr["errors"]]
+    return lines
 
 
 def read_questions(folder, where, problems):
@@ -864,12 +1289,14 @@ def ancestors(tree, path):
 
 # ---------------------------------------------------------------- one node
 def own_hash(folder):
-    """Hash of what belongs to the node itself (data.md, CLAUDE.md, .images): what promote copies into live."""
+    """Hash of what belongs to the node itself (data.md, CLAUDE.md, .images, .frame-concept): what promote copies
+    into live."""
     h = hashlib.sha1()
     items = [folder / name for name in NODE_FILES + (CODE_FILE,)]
-    images = folder / IMAGES_DIR
-    if images.is_dir():
-        items += sorted(p for p in images.iterdir() if p.is_file())
+    for extra in (IMAGES_DIR, FRAME_DIR):
+        d = folder / extra
+        if d.is_dir():
+            items += sorted(p for p in d.iterdir() if p.is_file())
     for p in items:
         h.update(p.name.encode("utf-8") + b"\0")
         if p.is_file():
@@ -908,7 +1335,37 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     stale = parent_hash is not None and data["based_on"] != parent_hash
     table = folder.parents[len(path.split("/")) - 1] if path else folder
     raw = read_text(folder / DATA_FILE) if (folder / DATA_FILE).is_file() else ""
-    refs = ref_issues(table, path, data, raw + "\n" + doc, cache)
+    screen_key = ("screen", str(table))
+    if screen_key not in cache:
+        top = data if not path else read_data(table)
+        cache[screen_key] = (top or {}).get("screen", "")
+    screen = SCREENS.get(cache[screen_key])
+
+    def lookup(p, name):
+        key = ("lets", str(table), p)
+        if key not in cache:
+            target_dir = Path(table).joinpath(*p.split("/"))
+            cache[key] = (frame_lets([parse_frame(t) for _, t in frame_files(target_dir)])
+                          if (target_dir / DATA_FILE).is_file() else None)
+        lets = cache[key]
+        if lets is None:
+            return None, f"không có node '{p}'"
+        if name not in lets:
+            return None, f"node '{p}' không có let '{name}' trong frame"
+        if lets[name] is None:
+            return None, f"node '{p}' khai let '{name}' hai giá trị khác nhau"
+        return lets[name], ""
+
+    frames = read_frames(folder, where, problems, screen, lookup)
+    refs = ref_issues(table, path, data, raw + "\n" + doc + "\n" + frame_mentions(folder), cache)
+    frame_notes = []
+    if not path and not data["screen"]:
+        frame_notes.append(f"chưa khai hướng màn hình: thêm 'screen: landscape' hoặc 'screen: portrait' vào phần đầu {DATA_FILE}")
+    if depth == FRAME_ROUND and not frames and data["frameMode"] != FRAME_NONE:
+        frame_notes.append(f"chưa có frame: node có bố cục (popup, màn hình, HUD, vị trí hay tầm trên chiến trường) "
+                           f"thì viết {FRAME_DIR}/<tên>{FRAME_EXT}; không có bố cục thì khai 'frame: {FRAME_NONE}'")
+    if depth != FRAME_ROUND and frames:
+        frame_notes.append(f"frame chỉ dùng ở node vòng {FRAME_ROUND}")
     for text in refs["unknown"]:
         problems.append({"path": where, "text": text})
     passed, reasons = verdict(items, pending, stale, mode, refs)
@@ -932,6 +1389,8 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "code": read_code(folder, where, depth, problems), "refs": refs["refs"],
             "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
+            "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE,
+            "screen": data["screen"],
             "refText": raw + "\n" + doc, "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
@@ -1009,7 +1468,8 @@ def node_approved(root, parts, mode, parent_hash):
     pending = sum(1 for q in read_questions(src, name, []) if not q["answered"])
     stale = parent_hash is not None and data["based_on"] != parent_hash
     doc = read_text(src / DOC_FILE) if (src / DOC_FILE).is_file() else ""
-    refs = ref_issues(table_dir(root, "idea"), "/".join(parts), data, read_text(src / DATA_FILE) + "\n" + doc)
+    refs = ref_issues(table_dir(root, "idea"), "/".join(parts), data,
+                      read_text(src / DATA_FILE) + "\n" + doc + "\n" + frame_mentions(src))
     passed, reasons = verdict(data["items"], pending, stale, mode, refs)
     if not passed:
         return False, f"node cha '{name}' chưa đạt: " + "; ".join(reasons[:4]), data["hash"]
@@ -1153,8 +1613,9 @@ def promote(root, path, deep, by="người"):
             shutil.copy2(src / name, tmp / name)
         if (src / CODE_FILE).is_file():
             shutil.copy2(src / CODE_FILE, tmp / CODE_FILE)
-        if (src / IMAGES_DIR).is_dir():
-            shutil.copytree(src / IMAGES_DIR, tmp / IMAGES_DIR)
+        for extra in (IMAGES_DIR, FRAME_DIR):
+            if (src / extra).is_dir():
+                shutil.copytree(src / extra, tmp / extra)
         if dst.is_dir():      # keep what live already has below this node
             for child in dst.iterdir():
                 if child.is_dir() and not child.name.startswith("."):
@@ -1289,6 +1750,6 @@ def snapshot(root):
         glossary[name], term_notes[name] = glossary_view(tree)
         for n in walk(tree):
             n.pop("refText", None)      # read by glossary_view only; the page does not need a second copy
-    return {"rounds": ROUNDS, "mode": mode, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
+    return {"rounds": ROUNDS, "mode": mode, "frameCss": FRAME_CSS, "screens": SCREENS, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
             "missingCode": missing_code(idea)}

@@ -44,6 +44,15 @@ def lines_for(root, node, out):
         out.append(f"- nhắc: {text}")
     if node["refMissing"] or node["refStale"]:
         out.append(f"- Sau khi đọc và rà, ghi dòng này vào phần đầu data.md: `{node['refLine']}`")
+    if not node["path"] and node["screen"]:
+        w, h = gd.SCREENS[node["screen"]]
+        out.append(f"- Màn hình: {node['screen']} ({w}x{h} px; frame ui vẽ theo màn này)")
+    for fr in node["frames"]:
+        out += ["- " + line.lstrip() if i == 0 else "  " + line for i, line in enumerate(gd.frame_brief(fr))]
+    if node["frameNone"]:
+        out.append(f"- Frame: không có bố cục (frame: {gd.FRAME_NONE})")
+    for text in node["frameNotes"]:
+        out.append(f"- Frame (nhắc, không chặn): {text}")
     p = node["priority"]
     if p.get("glossary"):
         out.append(f"- Bảng thuật ngữ chung: {len(node['terms'])} từ (không chấm độ quan trọng, không có tiến độ)")

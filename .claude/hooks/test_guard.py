@@ -625,6 +625,17 @@ def run_role_cases(payload):
         t(g, "Wallet", "deny", "Bash", sh(cmd))
     w(g, M, "deny", A + "/../UnityProject/Assets/Features/Hero/Scripts/Internal/.gitkeep")      # still no file edits
 
+    g = "any chat: design frame command"
+    FRAME = "python Management/tools/gd_frame.py"
+    for who in ("Wallet", "_Services/Popup", "@CodeLead", "@GameDesigner", M, "@Codex"):
+        for cmd in (FRAME + " ai/idea/feature-hero/hero-list/hero-roster-values", FRAME + " live/feature-popup-lose/lose-actions/actions-spec",
+                    "python3 Management/tools/gd_frame.py ai/idea/feature-hero"):
+            t(g, who, "allow", "Bash", sh(cmd))
+    for cmd in (FRAME, FRAME + " ai/idea", FRAME + " ai/idea/feature-hero --html x.html", FRAME + " ai/idea/../x",
+                FRAME + " ai/other/feature-hero", FRAME + " ai/idea/feature-hero && ls", FRAME + " ai/idea/Feature-Hero"):
+        t(g, "Wallet", "deny", "Bash", sh(cmd))
+    t(g + " (html)", "@human", "pass", "Bash", sh(FRAME + " ai/idea/feature-hero --html x.html"))
+
     g = "role spelling"
     e(g, "@core", "deny", A + "/Core/Old.cs")          # stored values are exact; bind_session stores "@Core"
     e(g, "@MANAGER", "deny", A + "/Core/Old.cs")
@@ -1013,8 +1024,10 @@ def run_designer_cases():
     node(hero_dir, based=new_hash)
     w(g + " (auto)", D, "allow", skills)
     w(g + " (auto)", D, "allow", hero_dir + "/skills/.images/index.md")
+    w(g + " (auto)", D, "allow", hero_dir + "/skills/.frame-concept/main.frame")
     node(hero_dir, based="")
     w(g + " (auto)", D, "deny", skills)                         # no based-on at all
+    w(g + " (auto)", D, "deny", hero_dir + "/skills/.frame-concept/main.frame")      # a frame follows its node's lock
     node(hero_dir, based=new_hash)
     os.remove(idea + "/data.md")
     w(g + " (auto)", D, "deny", hero)                           # the root has no data.md

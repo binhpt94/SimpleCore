@@ -10,7 +10,8 @@ unity-mcp theo tác động của lệnh (bảng ở `.claude/rules/unity.md`): 
 Lệnh shell được chạy (mọi phiên), từ gốc project:
 `python Management/tools/validate.py --feature <Tên>` — kiểm tra ranh giới feature (bỏ `--feature` là cả project); còn vi phạm thì chưa xong việc.
 `python Management/tools/studio.py check|status` — order ảnh/3D (feature đặt order, `take`/`reject` hàng của mình; @Codex, @Blender chạy tool và `deliver`; xem `.claude/rules/studio.md`).
-`python Management/tools/gd_pack.py <Tên>` — gói thiết kế đã chốt của một feature (node feature, node con, node nhánh khác mà refs trỏ tới, thuật ngữ): bám theo gói này khi code.
+`python Management/tools/gd_pack.py <Tên>` — gói thiết kế đã chốt của một feature (node feature, node con, node nhánh khác mà refs trỏ tới, thuật ngữ, frame bố cục): bám theo gói này khi code.
+`python Management/tools/gd_frame.py live/<node>` (hoặc `ai/idea/<node>`) — frame bố cục của một node vòng 4, đã giải ra toạ độ và kích thước tuyệt đối (px trên màn chuẩn, hoặc u trên chiến trường).
 @Manager có thêm `python Management/tools/scaffold.py [--dry-run]`: tạo thư mục feature, service, Core, `_Composition` còn thiếu theo các feature trong `live` (tên trong `code.json`, chưa có thì tên đề xuất theo key; chỉ thư mục và `.gitkeep`, không tạo code). @Manager vẫn không code.
 
 Feature nằm ở `UnityProject/Assets/Features/<Tên>/`, dịch vụ ở `Features/_Services/<Tên>/`. Không tạo `Shared/`. Phiên Features/Services chỉ sửa được code của mình khi thiết kế của nó đã tới vòng 4 trong `Management/game-design/live` (guard kiểm; dòng `guard:` đầu tin báo đang mở hay khoá); bị khoá thì dừng và báo người.

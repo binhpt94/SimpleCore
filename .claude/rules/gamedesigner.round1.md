@@ -19,6 +19,12 @@ Vòng 1 quyết định game là gì:
 
 Mỗi ý cốt lõi là một quyết định định hình cả game; mọi vòng sau đều bám theo nó.
 
+## Hướng màn hình (bắt buộc)
+Phần đầu `data.md` của node gốc có dòng `screen: landscape` (màn ngang, 1920x1080) hoặc `screen: portrait` (màn dọc, 1080x1920). Mọi frame giao diện ở vòng 4 vẽ trên màn này.
+- Dòng này không tính vào hash; đổi nó không bắt các node bên dưới làm lại, nhưng mọi frame giao diện phải rà lại theo màn mới.
+- Thiếu dòng này thì `gd_status.py` nhắc ở node gốc, và frame giao diện tạm vẽ theo màn ngang.
+- Chọn hướng màn khi chọn góc nhìn và người chơi; ghi lí do ở `CLAUDE.md` như mọi quyết định.
+
 ## Cụ thể tới mức nào
 - Đúng: "Thủ thành: hero tự đánh, người chơi chọn nâng cấp giữa các đợt quái."
 - Đúng: "Thua khi thành bị phá."

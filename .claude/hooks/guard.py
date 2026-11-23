@@ -69,6 +69,8 @@ ALLOWED_COMMANDS = [
     PY + r"Management/tools/validate\.py( --feature ((_Services/)?[A-Za-z][A-Za-z0-9]*|_Composition))?",
     # the fixed design of one code folder in one piece (reads Management/game-design/live only)
     PY + r"Management/tools/gd_pack\.py (_Services/)?[A-Za-z][A-Za-z0-9]*",
+    # the frames of one design node, resolved (reads only; --html writes a file, so it is left to the human)
+    PY + r"Management/tools/gd_frame\.py (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)+",
 ]
 
 # One more command, for @GameDesigner only: delete a file or a node inside Management/game-design/ai.

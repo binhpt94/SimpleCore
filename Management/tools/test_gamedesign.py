@@ -739,8 +739,143 @@ def run_pack(root):
           (gd_pack.main(["gd_pack.py", "Nope", "--root", root]), gd_pack.main(["gd_pack.py", "../x", "--root", root])), (1, 2))
 
 
+UI_FRAME = """kind: ui
+title: Popup thua   # chú thích
+let tap = 120
+- panel round-rect x=560 y=190 w=800 h=700 label="Thua # không phải chú thích"
+- replay button x=60 y=560 w=320 h=tap parent=panel label="Chơi lại"
+- home button x=420 y=560 w=320 h=80 parent=panel
+- slots grid x=40 y=100 cols=3 rows=2 cell=150 gap=20 parent=panel
+"""
+FIELD_FRAME = """kind: field
+view: x=-20u..20u y=-2u..8u
+use reach = feature-b/b1/b1x#archer-range
+- castle rect x=-1.5u y=0 w=3u h=4u
+- spawn arrow from=-17u,0 to=-2u,0
+- archer ring cx=-6u cy=1u r=reach
+"""
+
+
+def front(root, path, line, table="idea"):
+    """Adds `line` to the front matter of the node's data.md (creating it on the root)."""
+    p = folder(root, f"{table}/{path}/data.md" if path else f"{table}/data.md")
+    text = p.read_text(encoding="utf-8")
+    p.write_text(text.replace("---\n", f"---\n{line}\n", 1) if text.startswith("---\n") else f"---\n{line}\n---\n{text}",
+                 encoding="utf-8")
+
+
+def run_frames(root):
+    """Frames: parsed, resolved, checked, drawn, hashed, copied to live, printed by gd_frame and gd_pack."""
+    import gd_frame
+    f = gd.parse_frame(UI_FRAME)
+    check("frame: a good ui frame parses", (f["errors"], f["kind"], f["title"], len(f["shapes"])), ([], "ui", "Popup thua", 4))
+    check("frame: a quoted '#' is not a comment", f["shapes"][0]["params"]["label"][1], "Thua # không phải chú thích")
+    r = gd.resolve_frame(f, gd.SCREENS["landscape"], lambda p, n: (None, "x"))
+    by = {s["id"]: s for s in r["shapes"]}
+    check("frame: parent makes positions absolute", (by["replay"]["x"], by["replay"]["y"], by["replay"]["h"]), (620, 750, 120))
+    check("frame: a grid's size from its cells", (by["slots"]["w"], by["slots"]["h"]), (490, 320))
+    check("frame: a button under the tap size is a warning", any(w.startswith("home: nút") for w in r["warnings"]))
+    check("frame: a button at the tap size is not", any(w.startswith("replay") for w in r["warnings"]), False)
+    check("frame: no overlap warning between a parent and its children", any("chồng" in w for w in r["warnings"]), False)
+    bad = {
+        "unknown shape": "kind: ui\n- a star x=1 y=1 w=1 h=1",
+        "duplicate id": "kind: ui\n- a rect x=1 y=1 w=1 h=1\n- a rect x=1 y=1 w=1 h=1",
+        "no kind": "- a rect x=1 y=1 w=1 h=1",
+        "a let that is not a number": "kind: ui\nlet a = big",
+        "a bad use": "kind: ui\nuse a = nowhere",
+        "an unknown flag": "kind: ui\n- a rect x=1 y=1 w=1 h=1 sideways",
+        "an unknown line": "kind: ui\nwhat is this",
+    }
+    for label, text in bad.items():
+        check("frame error: " + label, bool(gd.parse_frame(text)["errors"]))
+    resolve_bad = {
+        "a missing parameter": "kind: ui\n- a rect x=1 y=1 w=1",
+        "u in a ui frame": "kind: ui\n- a rect x=1u y=1 w=1 h=1",
+        "an unknown name": "kind: ui\n- a rect x=gap y=1 w=1 h=1",
+        "a parent below it": "kind: ui\n- a rect x=1 y=1 w=1 h=1 parent=b\n- b rect x=1 y=1 w=5 h=5",
+        "a field without view": "kind: field\n- a rect x=1 y=1 w=1 h=1",
+        "a zero size": "kind: ui\n- a rect x=1 y=1 w=0 h=1",
+        "a fill above 1": "kind: ui\n- a bar x=1 y=1 w=10 h=1 fill=2",
+    }
+    for label, text in resolve_bad.items():
+        check("frame error: " + label, bool(gd.resolve_frame(gd.parse_frame(text), (1920, 1080), lambda p, n: (None, "x"))["errors"]))
+    warned = gd.resolve_frame(gd.parse_frame("kind: ui\n- a rect x=1800 y=1 w=200 h=10\n- b rect x=0 y=0 w=50 h=50\n"
+                                             "- c rect x=40 y=40 w=50 h=50\n- d rect x=40 y=40 w=50 h=50 overlap"), (1920, 1080), None)["warnings"]
+    check("frame: off the screen, overlap, and overlap allowed",
+          (any(w.startswith("a: tràn") for w in warned), any(w.startswith("b và c") for w in warned), any("d " in w for w in warned)),
+          (True, True, False))
+
+    # in a tree: the root's screen, a use through refs, the hash, the reminders
+    mk(root, "")
+    mk(root, "feature-a"), mk(root, "feature-a/a1"), mk(root, "feature-a/a1/a1x")
+    mk(root, "feature-b"), mk(root, "feature-b/b1"), mk(root, "feature-b/b1/b1x")
+    leaf = snap_node(root, "feature-a/a1/a1x")
+    check("frame: a round-4 node without frame is reminded", any("chưa có frame" in n for n in leaf["frameNotes"]))
+    check("frame: the root without screen is reminded", any("hướng màn hình" in n for n in snap_node(root)["frameNotes"]))
+    front(root, "", "screen: landscape")
+    check("frame: screen is read and not in the hash", (snap_node(root)["screen"], snap_node(root)["frameNotes"]), ("landscape", []))
+    check("frame: a wrong screen is a data.md error", bool(gd.parse_data("---\nscreen: square\n---\n# T\n")["errors"]))
+    front(root, "feature-b/b1/b1x", "frame: none")
+    b = snap_node(root, "feature-b/b1/b1x")
+    check("frame: 'frame: none' silences the reminder", (b["frameNone"], b["frameNotes"]), (True, []))
+    before = gd.read_data(folder(root, "idea/feature-b/b1/b1x"))["hash"]
+    put(root, "idea/feature-b/b1/b1x/.frame-concept/range.frame", "kind: field\nview: x=-20u..20u y=-2u..8u\nlet archer-range = 5u\n")
+    after = gd.read_data(folder(root, "idea/feature-b/b1/b1x"))["hash"]
+    check("frame: adding a frame changes the data hash", before != after)
+    check("frame: a node without frames keeps its hash", gd.read_data(folder(root, "idea/feature-a/a1/a1x"))["hash"],
+          gd.parse_data(folder(root, "idea/feature-a/a1/a1x/data.md").read_text(encoding="utf-8"))["hash"])
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/main.frame", UI_FRAME)
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/field.frame", FIELD_FRAME)
+    leaf = snap_node(root, "feature-a/a1/a1x")
+    check("frame: frames are read, by name", [fr["file"] for fr in leaf["frames"]], ["field.frame", "main.frame"])
+    field = leaf["frames"][0]
+    check("frame: a use reads the other node's let", field["values"].get("reach"), 5.0)
+    check("frame: a use asks for the node in refs", [m["label"] for m in leaf["refMissing"]], ["feature-b/b1/b1x"])
+    check("frame: so the node must redo", leaf["redo"])
+    add_refs(root, "feature-a/a1/a1x", f"feature-b/b1/b1x@{after}")
+    check("frame: declared, the use is fine", (snap_node(root, "feature-a/a1/a1x")["refMissing"], snap_node(root, "feature-a/a1/a1x")["redo"]), ([], False))
+    put(root, "idea/feature-b/b1/b1x/.frame-concept/range.frame", "kind: field\nview: x=-20u..20u y=-2u..8u\nlet archer-range = 6u\n")
+    check("frame: the other node's frame changed, the ref is stale", snap_node(root, "feature-a/a1/a1x")["refStale"], ["feature-b/b1/b1x"])
+    check("frame: a field frame is drawn y up, with numbers", ("<svg" in field["svg"] and 'data-id="archer"' in field["svg"]
+                                                              and "r=5u" in field["svg"]))
+    check("frame: labels are escaped in the drawing", "&lt;" in gd.frame_svg(gd.resolve_frame(
+        gd.parse_frame('kind: ui\n- a rect x=1 y=1 w=9 h=9 label="<b>"'), (1920, 1080), None)), True)
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/broken.frame", "kind: ui\n- a star")
+    tree, problems = gd.read_tree(root, "idea")
+    check("frame: a broken frame is a structure problem", any("broken.frame" in p["text"] for p in problems))
+    folder(root, "idea/feature-a/a1/a1x/.frame-concept/broken.frame").unlink()
+    put(root, "idea/feature-a/.frame-concept/x.frame", "kind: ui\n")
+    check("frame: only round 4 has frames", any("chỉ dùng ở node vòng" in n for n in snap_node(root, "feature-a")["frameNotes"]))
+    folder(root, "idea/feature-a/.frame-concept/x.frame").unlink()
+
+    # status, gd_frame, promote, pack
+    status = gd_status.report(root, "ai/idea/feature-a/a1/a1x")
+    check("frame: gd_status prints the resolved frame", "replay button x=620 y=750 w=320 h=120" in status and "Màn hình" not in status)
+    check("frame: gd_status prints the screen at the root", "- Màn hình: landscape (1920x1080" in gd_status.report(root))
+    table, node = gd_frame.find(root, "ai/idea/feature-a/a1/a1x")
+    text = gd_frame.text_report(table, node)
+    check("frame: gd_frame prints both frames and the warning", ("frame field.frame" in text, "frame main.frame" in text,
+                                                                 "! home: nút" in text), (True, True, True))
+    out = Path(root) / "f.html"
+    check("frame: gd_frame --html writes one page", (gd_frame.main(["gd_frame.py", "ai/idea/feature-a/a1/a1x", "--html", str(out),
+                                                                   "--root", root]), "<svg" in out.read_text(encoding="utf-8")), (0, True))
+    check("frame: gd_frame refuses a path outside the tables", gd_frame.main(["gd_frame.py", "ai/other/x", "--root", root]), 2)
+    d = folder(root, "idea/feature-a/a1/a1x/data.md")
+    d.write_text(d.read_text(encoding="utf-8").replace(after, gd.read_data(folder(root, "idea/feature-b/b1/b1x"))["hash"]), encoding="utf-8")
+    put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')
+    gd.promote(root, "", True)
+    check("frame: a deep Chốt copies frames", folder(root, "live/feature-a/a1/a1x/.frame-concept/main.frame").is_file())
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/main.frame", UI_FRAME.replace("w=320 h=80", "w=320 h=100"))
+    check("frame: a changed frame makes the node differ from live", snap_node(root, "feature-a/a1/a1x")["state"], "changed")
+    gd.promote(root, "feature-a/a1/a1x", False)
+    check("frame: a single Chốt copies frames", "h=100" in folder(root, "live/feature-a/a1/a1x/.frame-concept/main.frame").read_text(encoding="utf-8"))
+    pack = gd_pack.pack(root, "Alpha")
+    check("frame: gd_pack prints the frames of the branch", "### Frame (bố cục ước lượng" in pack and "home button x=980 y=750 w=320 h=100" in pack)
+    check("frame: the snapshot carries the frame CSS", "fr-button" in gd.snapshot(root)["frameCss"])
+
+
 def main():
-    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack):
+    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)
