@@ -10,7 +10,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#fighting-style`
-- `glossary#hero-power`
 - `glossary#counter`
 - `glossary#mono-team`
 

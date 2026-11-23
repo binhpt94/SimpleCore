@@ -9,9 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Một thành là điểm xuất phát và điểm hồi sinh của MỌI hero trong đội.
 
 ## Định nghĩa
-- **Máu thành**: lượng sức chịu đòn của thành. Máu tối đa là mức máu khi vào trận; máu hiện tại là phần còn lại.
-- **Thành bị phá**: máu hiện tại về 0.
-- **Tới thành**: quái đã đi tới khi thành nằm trong tầm đánh của quái (`feature-enemy/enemy-behavior`).
+- `glossary#reach-castle`
 
 ## Danh sách
 - Trạng thái của thành: còn đứng, bị phá.

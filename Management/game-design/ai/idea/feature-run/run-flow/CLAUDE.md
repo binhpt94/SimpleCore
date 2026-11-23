@@ -12,9 +12,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#run`
-- `glossary#battle`
-- `glossary#run-end`
-- `glossary#scene-game`
 
 ## Danh sách
 Các bước chuyển:

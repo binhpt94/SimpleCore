@@ -8,9 +8,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Popup hiện qua `feature-popup`; nút bấm ở `feature-popup-lose/lose-actions`.
 
 ## Định nghĩa
-- **Điểm**: số đợt đã dọn sạch của lượt vừa xong.
-- **Kỉ lục**: điểm cao nhất từng đạt, đã tính cả lượt vừa xong.
-- **Kỉ lục mới**: điểm lượt này vượt kỉ lục trước lượt.
+- `glossary#score` (của lượt vừa xong)
 
 ## Danh sách
 Trên popup, từ trên xuống:

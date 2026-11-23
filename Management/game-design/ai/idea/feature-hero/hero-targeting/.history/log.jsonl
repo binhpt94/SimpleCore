@@ -1,3 +1,4 @@
 {"at": "2026-11-23 02:20:17", "event": "data", "hash": "49b5ce7a72b8", "previous": "", "added": ["target-nearest", "move-then-attack", "retarget", "idle-at-castle", "no-player-control"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 02:27:24", "event": "promote", "by": "người", "hash": "49b5ce7a72b8"}
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "49b5ce7a72b8"}
+{"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "49b5ce7a72b8"}

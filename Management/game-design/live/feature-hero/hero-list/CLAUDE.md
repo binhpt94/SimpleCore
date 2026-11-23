@@ -9,12 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Chọn hero nào vào đội: `feature-team-select`. Giá trị chỉ số cụ thể: `feature-balance`.
 
 ## Định nghĩa
-- **Cách đánh**: nhóm (cận chiến hay bắn xa) cộng kiểu đòn.
-- **Cận chiến**: tầm đánh ngắn, phải đi sát quái.
-- **Bắn xa**: tầm đánh dài, đánh được từ phía sau hero cận chiến.
-- **Đòn một mục tiêu**: chỉ trúng quái đang bị nhắm.
-- **Chém vùng trước mặt**: trúng mọi quái trong một khoảng ngắn phía trước hero, cùng bên với mục tiêu.
-- **Nổ vùng quanh mục tiêu**: trúng quái bị nhắm và mọi quái đứng sát nó.
+- `glossary#fighting-style`
 
 ## Danh sách
 | Hero | Nhóm | Kiểu đòn | Vai so với các hero khác |

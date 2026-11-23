@@ -12,8 +12,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Định nghĩa
 - `glossary#wave-clear` (do `feature-wave` báo)
 - `glossary#score`
-- `glossary#record`
-- `glossary#new-record`
 
 ## Danh sách
 - Điểm của lượt.

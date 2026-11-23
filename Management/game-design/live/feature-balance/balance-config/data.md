@@ -1,6 +1,6 @@
 ---
 based-on: 700960590953
-refs: feature-balance/balance-difficulty-curve@f1f04ceb7020, feature-balance/balance-economy@5fe05cebab72, feature-balance/balance-team@4b7bbae60edf
+refs: feature-balance/balance-difficulty-curve@f1f04ceb7020, feature-balance/balance-economy@5fe05cebab72, feature-balance/balance-team@4b7bbae60edf, glossary#owner-feature@f87917e9ae04
 ---
 # Nơi đặt số liệu
 

@@ -1,3 +1,4 @@
 {"at": "2026-11-23 02:36:50", "event": "data", "hash": "3f8b1fde7f49", "previous": "", "added": ["table-hero", "table-castle", "table-enemy", "table-wave", "table-upgrade", "table-wallet", "table-links"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "3f8b1fde7f49"}
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "3f8b1fde7f49"}
+{"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "3f8b1fde7f49"}

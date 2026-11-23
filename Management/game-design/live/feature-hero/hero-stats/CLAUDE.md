@@ -9,12 +9,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Bộ chỉ số này cũng dùng cho quái (`feature-enemy/enemy-stats`) và thành (`feature-castle/castle-attack`, `feature-castle/castle-core`).
 
 ## Định nghĩa
-- **Máu**: sức chịu đòn. Máu tối đa là mức đầy; máu hiện tại về 0 thì gục (hero), bị hạ (quái), bị phá (thành).
-- **Sức đánh**: lượng máu một đòn trừ của mục tiêu.
-- **Tốc độ đánh**: đánh nhanh hay chậm; tốc độ đánh cao hơn thì khoảng cách giữa hai đòn ngắn hơn.
-- **Tầm đánh**: khoảng cách xa nhất tới mục tiêu mà vẫn đánh được. Cận chiến tầm ngắn, bắn xa tầm dài.
-- **Tốc độ di chuyển**: đi nhanh hay chậm trên dải đất.
-- **Cấp hero**: số lần hero đó đã được nâng trong lượt.
+- `glossary#range`
+- `glossary#level`
 
 ## Danh sách
 | Chỉ số | Hero | Quái | Thành | Cấp hero tăng |
@@ -37,7 +33,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Không có giáp, chí mạng, né.** Năm chỉ số là đủ để các cách đánh khác nhau; người chơi phổ thông đọc được. Đã loại: giáp trừ sát thương.
 - **Cấp hero tăng máu, sức đánh, tốc độ đánh; không tăng tầm và tốc độ di chuyển.** Tầm và tốc độ đi là thứ làm nên vai của hero (đứng trước hay đứng sau); tăng chúng làm hero bắn xa lấn vai cận chiến. Quyết định chung "tăng mọi chỉ số" hiểu là mọi chỉ số chiến đấu (sức chịu và sức gây sát thương). Đã loại: tăng cả năm.
 - **Lên cấp cộng phần máu tăng vào máu hiện tại.** Mua xong thấy ngay; giống luật của thành nên một luật cho cả game. Đã loại: hồi đầy máu khi lên cấp.
-- **Định nghĩa chỉ số chung đặt ở node này.** Hero là nơi có đủ năm chỉ số; quái và thành trỏ về đây thay vì chép lại.
+- **Định nghĩa chỉ số chung chuyển sang `glossary` (2026-11-23).** Trước đặt ở node này; giờ hero, quái, thành cùng trỏ về glossary.
 
 ## Chưa rõ
 - Không có điểm chặn. Lưu ý cho người: "cấp hero tăng mọi chỉ số" ở quyết định chung được hiểu là không tăng tầm và tốc độ di chuyển; nếu người muốn tăng cả năm thì chấm lại ý `hero-level`.

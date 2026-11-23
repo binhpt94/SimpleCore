@@ -12,8 +12,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Định nghĩa
 - `glossary#wave`
 - `glossary#active-wave`
-- `glossary#side` (bên ra: mép trái hoặc mép phải của dải chiến trường)
-- `glossary#spawn-interval`
 
 ## Danh sách
 Mỗi mục trong danh sách đợt gồm:

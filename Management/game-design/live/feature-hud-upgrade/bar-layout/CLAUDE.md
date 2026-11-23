@@ -8,11 +8,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Thanh chiếm mép dưới; phần HUD còn lại (`feature-hud`) dùng các chỗ khác ở mép màn hình.
 - Nội dung và trạng thái từng nút: `feature-hud-upgrade/button-state`.
 
-## Định nghĩa
-- **Thanh nâng cấp**: dải nút cố định ở mép dưới màn hình trận.
-- **Nhóm nút hero**: các nút "cấp hero", một nút cho mỗi hero trong đội.
-- **Nhóm nút thành**: ba nút máu, sức đánh, kĩ năng của thành.
-
 ## Danh sách
 - Nhóm hero: một nút cho mỗi hero, theo thứ tự đội.
 - Nhóm thành: máu, sức đánh, kĩ năng.

@@ -7,9 +7,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Bấm nút: báo `feature-run/run-pause`; bên đó chuyển trận sang tạm dừng và nhờ `feature-popup-pause` hiện popup.
 - Vị trí nút ở `feature-hud/hud-layout`.
 
-## Định nghĩa
-- **Nút tạm dừng**: nút có biểu tượng tạm dừng quen thuộc (hai vạch đứng).
-
 ## Danh sách
 - Nút tạm dừng.
 

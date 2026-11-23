@@ -1,6 +1,6 @@
 ---
 based-on: d8a90fd4adc0
-refs: feature-run/run-flow@db634f5dac0b, feature-wave/wave-clear@b7789c127bb4, glossary#wave-clear@89a01d398d04, glossary#score@6f4bf7c75284, glossary#record@d05567cd8426, glossary#new-record@526898f81890
+refs: feature-run/run-flow@db634f5dac0b, feature-wave/wave-clear@b7789c127bb4, glossary#wave-clear@89a01d398d04, glossary#score@6f4bf7c75284
 ---
 # Điểm và kỉ lục
 

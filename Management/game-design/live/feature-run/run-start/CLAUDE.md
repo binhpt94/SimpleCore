@@ -9,8 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-balance` chỉnh giá trị ban đầu; feature này không biết giá trị đó.
 
 ## Định nghĩa
-- **Trạng thái ban đầu**: trạng thái mỗi feature có khi chưa có gì xảy ra trong trận.
-- **Đội của lượt**: các hero người chơi đã chọn ở màn chọn đội ngay trước trận.
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 Thứ được đặt lại đầu lượt:

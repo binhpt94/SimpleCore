@@ -8,8 +8,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Đặt lại giữa hai lượt trong cùng scene Game: `feature-run` báo, các feature chơi (`feature-castle`, `feature-wallet`, `feature-upgrade`, `feature-wave`, `feature-hero`) tự đặt lại.
 
 ## Định nghĩa
-- `glossary#clean`
-- `glossary#clean-start`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 - Còn lại qua scene: kỉ lục.

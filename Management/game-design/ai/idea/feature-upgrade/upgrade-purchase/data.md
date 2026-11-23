@@ -1,6 +1,6 @@
 ---
 based-on: e712e2fbe1f0
-refs: feature-wallet/balance-spend@df494e209c1e, feature-upgrade/upgrade-effect@b9bcec737959, glossary#next-price@59695ee7e7f2, glossary#can-buy@6946c779744b
+refs: feature-wallet/balance-spend@df494e209c1e, feature-upgrade/upgrade-effect@b9bcec737959
 ---
 # Mua nâng cấp
 

@@ -1,6 +1,7 @@
 ---
 based-on: 24fd307bbdcd
-refs: feature-castle/castle-attack@639d373f52f2, feature-castle/castle-skills@8bc45d0edc8d, feature-castle/castle-core@e1440a2a0de0, glossary#level@43a706597ab9---
+refs: feature-castle/castle-attack@639d373f52f2, feature-castle/castle-skills@8bc45d0edc8d, feature-castle/castle-core@e1440a2a0de0, glossary#level@43a706597ab9
+---
 # Hiệu ứng nâng cấp thành
 
 Thành có ba mục nâng cấp: máu, sức đánh, kĩ năng. Mỗi mục có cấp riêng; mỗi lần mua lên một cấp và thành mạnh lên ngay. Node này nói mỗi mục làm thành mạnh lên thế nào; mua và giá là của `feature-upgrade`.

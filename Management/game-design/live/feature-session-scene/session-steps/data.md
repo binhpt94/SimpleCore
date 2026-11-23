@@ -1,5 +1,6 @@
 ---
 based-on: 43be0f08eadd
+refs: glossary#participant@418cacc16440
 ---
 # Ba bước của một scene và feature tham gia
 

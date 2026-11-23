@@ -1,3 +1,4 @@
 {"at": "2026-11-23 02:36:50", "event": "data", "hash": "7e08a91df0cf", "previous": "", "added": ["team-size", "knight-values", "axeman-values", "swordsman-values", "archer-values", "mage-values", "hero-feedback"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "7e08a91df0cf"}
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "7e08a91df0cf"}
+{"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "7e08a91df0cf"}

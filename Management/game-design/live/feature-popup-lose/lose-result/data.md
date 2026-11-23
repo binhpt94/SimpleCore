@@ -1,6 +1,6 @@
 ---
 based-on: 6230c29b8b00
-refs: feature-run/run-score@6f1909d90f98, feature-run/run-flow@db634f5dac0b, feature-popup-lose/lose-actions@664d10d83337
+refs: feature-run/run-score@6f1909d90f98, feature-run/run-flow@db634f5dac0b, feature-popup-lose/lose-actions@664d10d83337, glossary#score@6f4bf7c75284
 ---
 # Kết quả lượt
 

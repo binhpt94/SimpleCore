@@ -10,7 +10,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Đội lúc mở màn lấy từ `feature-team-select/team-memory`.
 
 ## Định nghĩa
-- `glossary#slot`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 Thứ trên màn chọn đội:

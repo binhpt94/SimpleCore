@@ -8,8 +8,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Số đợt đang đánh hiện ở `feature-hud`; báo đợt mới bằng hình hay chữ là việc của `feature-hud`.
 
 ## Định nghĩa
-- **Lúc thở**: khoảng thời gian từ lúc dọn sạch một đợt tới lúc đợt sau bắt đầu ra quái.
-- **Đợt sau bắt đầu**: lúc danh sách quái của đợt kế tiếp được lập và con đầu tiên bắt đầu ra theo nhịp thả.
+- `glossary#wave-gap`
 
 ## Danh sách
 Những gì thay đổi trong lúc thở:

@@ -9,9 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-upgrade` và `feature-castle` (kĩ năng) không nhận thao tác khi đang tạm dừng; `feature-hud-upgrade` và nút kĩ năng của `feature-hud` bị popup che (`feature-popup/popup-layer`).
 
 ## Định nghĩa
-- `glossary#playing`
 - `glossary#paused`
-- `glossary#run-end` (không quay lại đang đánh)
 - `glossary#leave-game`
 
 ## Danh sách

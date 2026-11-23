@@ -9,10 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Đòn trúng một hay nhiều quái là theo cách đánh của từng hero (`feature-hero/hero-list`).
 
 ## Định nghĩa
-- **Mục tiêu**: quái còn sống mà hero đang đi tới hoặc đang đánh.
-- **Gần nhất**: khoảng cách trên dải đất từ hero tới quái nhỏ nhất, không phân biệt bên trái hay bên phải.
-- **Trong tầm**: khoảng cách tới mục tiêu không quá tầm đánh của hero (`feature-hero/hero-stats`).
-- **Đứng chờ**: hero không có mục tiêu, đi về và đứng ở thành.
+- `glossary#target`
 
 ## Danh sách
 Trạng thái của hero trên chiến trường:

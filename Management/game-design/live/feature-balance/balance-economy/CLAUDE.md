@@ -8,9 +8,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Sức mạnh mua được từ tiền là đầu vào của `feature-balance/balance-difficulty-curve`.
 
 ## Định nghĩa
-- **Thu của một đợt**: tổng tiền hạ quái và thưởng dọn sạch trong đợt đó.
-- **Giá một lần nâng**: tiền phải trả để nâng một mục lên cấp kế tiếp.
-- **Lời của một lần nâng**: sức mạnh thêm vào so với giá phải trả.
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 Số liệu feature này đối chiếu (mỗi số nằm ở cấu hình của feature sở hữu):

@@ -10,11 +10,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Node này chỉ đưa quái vào trận; quái ra rồi thì đi, đánh, bị hạ theo luật của `feature-enemy`.
 
 ## Định nghĩa
-- **Đợt**: một danh sách quái ra trong một khoảng của trận; đợt đang đánh là đợt có quái đang ra hoặc còn sống.
-- **Bên ra**: mép trái hoặc mép phải của dải đất.
-- **Lúc ra**: thời điểm con quái xuất hiện, tính từ đầu đợt.
-- **Đã ra hết**: mọi con trong danh sách của đợt đã xuất hiện trong trận.
-- **Nhịp thả**: khoảng cách giữa hai lần ra quái liên tiếp.
+- `glossary#wave`
+- `glossary#active-wave`
 
 ## Danh sách
 Mỗi mục trong danh sách đợt gồm:

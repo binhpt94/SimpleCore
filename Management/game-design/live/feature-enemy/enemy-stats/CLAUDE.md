@@ -8,9 +8,9 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Mức tăng theo đợt (nếu có) do `feature-wave` quyết và áp lên quái khi nó ra; giá trị gốc do `feature-balance`.
 
 ## Định nghĩa
-- Máu, sức đánh, tốc độ đánh, tầm đánh, tốc độ di chuyển: như `feature-hero/hero-stats`.
-- **Bị hạ**: máu quái về 0.
-- **Chỉ số gốc**: giá trị chỉ số của một loại quái trước khi `feature-wave` làm mạnh lên theo đợt.
+- `glossary#range`
+- `glossary#defeated`
+- `glossary#base-stats`
 
 ## Danh sách
 - Năm chỉ số: máu, sức đánh, tốc độ đánh, tầm đánh, tốc độ di chuyển.
@@ -24,7 +24,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Máu về 0: quái bị hạ, biến mất, cho tiền (`feature-enemy/enemy-reward`).
 
 ## Đã tự quyết
-- **Dùng định nghĩa chỉ số của `feature-hero/hero-stats`, không viết lại.** Một bộ từ cho cả game.
+- **Dùng định nghĩa chỉ số chung ở `glossary`, không viết lại.** Một bộ từ cho cả game.
 - **Quái không có cấp.** Quái sống ngắn; cho quái lên cấp là thêm luật người chơi không thấy. Đã loại: lên cấp theo thời gian.
 - **Độ khó theo đợt để ở `feature-wave`.** Tránh hai feature cùng giữ việc làm quái mạnh lên.
 

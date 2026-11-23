@@ -9,7 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Tới từ: màn tải của `feature-scene-flow` khi mở game, bỏ lượt ở `feature-popup-pause`, nút về màn bắt đầu ở `feature-popup-lose`.
 
 ## Định nghĩa
-- `glossary#record`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 Thứ hiện trên màn bắt đầu:

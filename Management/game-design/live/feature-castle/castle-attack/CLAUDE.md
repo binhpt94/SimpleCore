@@ -8,10 +8,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - NHIỀU quái có thể ở trong tầm; thành chỉ chọn con gần thành nhất.
 
 ## Định nghĩa
-- **Đòn tự bắn**: đòn thường của thành, tự bắn theo nhịp tốc độ đánh, không cần thao tác.
-- **Tầm bắn**: khoảng cách tính từ thành ra mỗi bên; quái trong khoảng này mới bị bắn.
-- **Mục tiêu**: quái còn sống gần thành nhất trong tầm.
-- Sức đánh, tốc độ đánh, tầm đánh: theo định nghĩa chung ở `feature-hero/hero-stats`.
+- `glossary#range`
+- `glossary#target`
 
 ## Danh sách
 - Chỉ số của thành: máu (`feature-castle/castle-core`), sức đánh, tốc độ đánh, tầm đánh. Không có tốc độ di chuyển.

@@ -9,10 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Việc mở, đóng từng popup: `feature-popup/popup-request`.
 
 ## Định nghĩa
-- **Lớp popup**: tầng hiển thị cao nhất của scene, chỉ dành cho popup.
-- **Nền che**: tấm phủ toàn màn hình sau popup, làm tối và chặn bấm phía dưới.
-- **Popup trên cùng**: popup mở gần nhất còn đang mở.
-- **Xếp chồng**: popup mở sau đặt lên trên popup mở trước.
+- `glossary#backdrop`
 
 ## Danh sách
 - Thứ tự từ dưới lên: màn chơi → HUD → (nền che → popup) lặp lại theo số popup đang mở.

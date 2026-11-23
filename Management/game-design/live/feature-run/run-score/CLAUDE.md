@@ -10,10 +10,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Số đợt HUD hiện (`feature-hud`) là đợt đang đánh, lấy từ `feature-wave`; khác với điểm.
 
 ## Định nghĩa
-- **Đợt đã dọn sạch**: đợt mà `feature-wave` đã báo dọn sạch (`feature-wave/wave-clear`).
-- **Điểm**: số đợt đã dọn sạch trong lượt.
-- **Kỉ lục**: điểm cao nhất của mọi lượt từng chơi trên máy này.
-- **Phá kỉ lục**: điểm vừa chốt lớn hơn hẳn kỉ lục trước lượt đó.
+- `glossary#wave-clear` (do `feature-wave` báo)
+- `glossary#score`
 
 ## Danh sách
 - Điểm của lượt.

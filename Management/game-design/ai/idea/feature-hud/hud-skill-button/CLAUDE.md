@@ -11,7 +11,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#castle-skill`
-- `glossary#cooldown`
 
 ## Danh sách
 Trên mỗi nút:

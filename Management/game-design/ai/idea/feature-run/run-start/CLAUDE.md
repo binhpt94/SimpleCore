@@ -9,7 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-balance` chỉnh giá trị ban đầu; feature này không biết giá trị đó.
 
 ## Định nghĩa
-- `glossary#run-team`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 Thứ được đặt lại đầu lượt:

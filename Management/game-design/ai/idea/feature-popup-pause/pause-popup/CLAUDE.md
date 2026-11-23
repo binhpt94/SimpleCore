@@ -9,7 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Bỏ lượt dẫn tới `feature-home` qua `feature-run/run-flow`.
 
 ## Định nghĩa
-- `glossary#quit-run`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 Trên popup:

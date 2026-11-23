@@ -11,8 +11,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Định nghĩa
 - `glossary#scene`
 - `glossary#screen`
-- `glossary#scene-loading`
-- `glossary#scene-game`
 
 ## Danh sách
 - Scene Loading.

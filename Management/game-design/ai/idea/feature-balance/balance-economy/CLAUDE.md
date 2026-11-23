@@ -8,9 +8,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Sức mạnh mua được từ tiền là đầu vào của `feature-balance/balance-difficulty-curve`.
 
 ## Định nghĩa
-- `glossary#wave-income`
-- `glossary#next-price` (giá một lần nâng)
-- `glossary#upgrade-value`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 Số liệu feature này đối chiếu (mỗi số nằm ở cấu hình của feature sở hữu):

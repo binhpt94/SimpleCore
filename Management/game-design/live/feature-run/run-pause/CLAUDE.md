@@ -9,10 +9,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-upgrade` và `feature-castle` (kĩ năng) không nhận thao tác khi đang tạm dừng; `feature-hud-upgrade` và nút kĩ năng của `feature-hud` bị popup che (`feature-popup/popup-layer`).
 
 ## Định nghĩa
-- **Đang đánh**: trận chạy, người chơi mua nâng cấp và bấm kĩ năng được.
-- **Tạm dừng**: trận đứng yên, popup tạm dừng đang mở.
-- **Kết thúc**: lượt đã xong (`feature-run/run-flow`), không quay lại đang đánh.
-- **Rời khỏi game**: game không còn ở trên màn hình (chuyển ứng dụng, khoá máy, cuộc gọi).
+- `glossary#paused`
+- `glossary#leave-game`
 
 ## Danh sách
 Đứng yên khi tạm dừng:

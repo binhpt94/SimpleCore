@@ -11,10 +11,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-scene-flow` làm việc chuyển scene khi feature này xin.
 
 ## Định nghĩa
-- **Lượt**: từ lúc vào trận tới lúc trận kết thúc. Màn bắt đầu và màn chọn đội nằm ngoài lượt.
-- **Trận**: phần chơi trên dải chiến trường, có HUD (`feature-hud`) và thanh nâng cấp (`feature-hud-upgrade`).
-- **Kết thúc lượt**: lúc trận dừng hẳn và điểm của lượt được chốt (`feature-run/run-score`).
-- **Scene Game**: chứa màn bắt đầu, màn chọn đội, trận, popup tạm dừng, popup thua (`feature-scene-flow/scene-list`). Đổi màn không chuyển scene.
+- `glossary#run`
 
 ## Danh sách
 Các bước chuyển:

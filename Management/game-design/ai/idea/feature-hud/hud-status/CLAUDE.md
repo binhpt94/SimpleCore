@@ -8,7 +8,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Vị trí trên màn hình ở `feature-hud/hud-layout`.
 
 ## Định nghĩa
-- `glossary#hp` (máu thành; nâng cấp máu làm máu tối đa lớn hơn)
 - `glossary#active-wave`
 - `glossary#wave-gap`
 

@@ -11,9 +11,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Mức tăng mỗi cấp do `feature-balance` quyết.
 
 ## Định nghĩa
-- `glossary#hp`
-- `glossary#auto-shot`
-- `glossary#cooldown`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 - Cấp hero: tăng mọi chỉ số của hero đó.

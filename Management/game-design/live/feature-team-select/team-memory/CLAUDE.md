@@ -9,7 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Không liên quan tới `feature-run/run-start`: đặt lại đầu lượt không xoá đội được nhớ.
 
 ## Định nghĩa
-- **Đội được nhớ**: đội đã vào trận gần nhất trong lần mở game này.
+- `glossary#remembered-team`
 
 ## Danh sách
 - Đội được nhớ (các hero theo chỗ).

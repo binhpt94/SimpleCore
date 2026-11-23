@@ -11,9 +11,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Nút bấm cho từng mục: `feature-hud-upgrade`.
 
 ## Định nghĩa
-- **Mục nâng cấp**: một thứ mua được nhiều lần, mỗi lần làm một hero hoặc một mặt của thành mạnh hơn.
-- **Cấp**: số lần mục đó đã được mua trong lượt, tính từ cấp thấp nhất.
-- **Cấp hero**: mục nâng cấp của một hero, nâng mọi chỉ số của hero đó cùng lúc.
+- `glossary#level`
 
 ## Danh sách
 - Mục hero: "cấp hero" cho từng hero trong đội.

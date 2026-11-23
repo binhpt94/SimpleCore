@@ -8,7 +8,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-balance/balance-difficulty-curve`, `feature-balance/balance-economy`, `feature-balance/balance-team` dùng danh sách này để biết số nào cần đối chiếu.
 
 ## Định nghĩa
-- `glossary#number`
 - `glossary#owner-feature`
 
 ## Danh sách

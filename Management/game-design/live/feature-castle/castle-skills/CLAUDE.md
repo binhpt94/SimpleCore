@@ -9,11 +9,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Một nâng cấp "kĩ năng" của thành tác động CẢ BA kĩ năng (`feature-castle/castle-upgrade-effects`).
 
 ## Định nghĩa
-- **Kĩ năng thành**: đòn đặc biệt người chơi bấm, khác đòn tự bắn (`feature-castle/castle-attack`).
-- **Hồi chiêu**: thời gian chờ từ lúc dùng tới lúc dùng lại được.
-- **Sẵn sàng**: kĩ năng đã hồi xong, bấm được.
-- **Vùng quanh thành**: một khoảng ở cả hai bên tính từ thành; Sấm sét chỉ trúng quái trong khoảng này.
-- **Làm chậm**: quái đi chậm hơn và đánh chậm hơn trong một lúc, rồi trở lại như cũ.
+- `glossary#castle-skill`
+- `glossary#castle-zone` (Sấm sét chỉ trúng quái trong vùng này)
 
 ## Danh sách
 | Kĩ năng | Làm gì | Trúng ai | Hồi chiêu so với nhau |

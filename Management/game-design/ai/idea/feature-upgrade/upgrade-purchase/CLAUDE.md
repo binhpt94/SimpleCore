@@ -10,8 +10,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Giá theo cấp của từng mục do `feature-balance` quyết.
 
 ## Định nghĩa
-- `glossary#next-price`
-- `glossary#can-buy`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 - Điều kiện để mua thành công: đang trong trận, không tạm dừng, ví trừ được giá cấp sau.

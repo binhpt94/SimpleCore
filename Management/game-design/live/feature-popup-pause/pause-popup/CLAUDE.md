@@ -9,9 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Bỏ lượt dẫn tới `feature-home` qua `feature-run/run-flow`.
 
 ## Định nghĩa
-- **Tiếp tục**: đóng popup, trận về đang đánh.
-- **Bỏ lượt**: kết thúc lượt đang chơi, tính điểm như thua, về màn bắt đầu.
-- **Xác nhận bỏ lượt**: bước bấm thêm lần nữa trong popup để chắc người chơi muốn bỏ.
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 Trên popup:

@@ -8,9 +8,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Đội trong trận không thêm, không bớt hero; gục chỉ là tạm rời trận.
 
 ## Định nghĩa
-- **Gục**: hero máu về 0, tạm rời chiến trường.
-- **Thời gian chờ**: khoảng từ lúc gục tới lúc hồi sinh.
-- **Hồi sinh**: hero xuất hiện lại ở thành, đầy máu, cùng cấp như trước khi gục.
+- `glossary#down`
 
 ## Danh sách
 - Trạng thái vòng đời của hero trong trận: trên chiến trường, gục (đang chờ), hồi sinh (trở lại trên chiến trường).

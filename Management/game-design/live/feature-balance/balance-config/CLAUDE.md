@@ -8,9 +8,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-balance/balance-difficulty-curve`, `feature-balance/balance-economy`, `feature-balance/balance-team` dùng danh sách này để biết số nào cần đối chiếu.
 
 ## Định nghĩa
-- **Số liệu**: một giá trị chỉnh được ảnh hưởng tới độ khó, thu chi hay sức của hero, thành, quái.
-- **Cấu hình**: nơi một feature giữ số liệu của nó, đổi được mà không sửa code.
-- **Feature sở hữu**: feature duy nhất đọc và ghi số liệu đó.
+- `glossary#owner-feature`
 
 ## Danh sách
 Số liệu theo feature sở hữu:

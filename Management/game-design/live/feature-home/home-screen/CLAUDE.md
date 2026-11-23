@@ -9,9 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Tới từ: màn tải của `feature-scene-flow` khi mở game, bỏ lượt ở `feature-popup-pause`, nút về màn bắt đầu ở `feature-popup-lose`.
 
 ## Định nghĩa
-- **Tên game**: tên chính thức của game (còn là tên tạm, xem node gốc).
-- **Kỉ lục**: số đợt dọn sạch nhiều nhất từng đạt (`feature-run/run-score`).
-- **Nút chơi**: nút duy nhất bấm được trên màn này.
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 Thứ hiện trên màn bắt đầu:

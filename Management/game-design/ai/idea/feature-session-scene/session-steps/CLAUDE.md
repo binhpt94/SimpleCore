@@ -10,10 +10,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#participant`
-- `glossary#load-step`
-- `glossary#run-step`
-- `glossary#dispose-step`
-- `glossary#view`
 
 ## Danh sách
 - Ba bước: tải → chạy → huỷ.

@@ -9,10 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Máu thành không tự hồi, nên máu mất ở đợt trước cộng vào áp lực đợt sau.
 
 ## Định nghĩa
-- `glossary#enemy-power`
-- `glossary#team-power` (tính trên năm chỉ số chung)
 - `glossary#break-wave`
-- `glossary#pressure`
 
 ## Danh sách
 Thứ người chơi kéo đợt gãy ra muộn hơn:

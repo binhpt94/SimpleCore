@@ -1,6 +1,6 @@
 ---
 based-on: 43be0f08eadd
-refs: feature-session-scene/session-steps@70f3b17acc2e, glossary#clean@9dda30fc7fac, glossary#clean-start@9a724a9adc7a
+refs: feature-session-scene/session-steps@70f3b17acc2e
 ---
 # Dọn sạch và bắt đầu sạch
 

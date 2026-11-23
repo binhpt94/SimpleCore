@@ -1,6 +1,6 @@
 ---
 based-on: d8a90fd4adc0
-refs: feature-run/run-score@6f1909d90f98, feature-run/run-flow@db634f5dac0b, feature-scene-flow/scene-list@78ed2dcc0859, glossary#run-team@49417f2b6655
+refs: feature-run/run-score@6f1909d90f98, feature-run/run-flow@db634f5dac0b, feature-scene-flow/scene-list@78ed2dcc0859
 ---
 # Bắt đầu lượt
 

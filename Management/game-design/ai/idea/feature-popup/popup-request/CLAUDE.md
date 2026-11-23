@@ -9,7 +9,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Dịch vụ là một bên tham gia của scene Game (`feature-session-scene/session-steps`).
 
 ## Định nghĩa
-- `glossary#popup`
 - `glossary#caller`
 - `glossary#popup-id`
 

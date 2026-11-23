@@ -10,7 +10,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#base-stats` (nằm ở `feature-enemy`)
-- `glossary#unlocked-type`
 
 ## Danh sách
 Những thứ tăng theo số đợt:

@@ -9,8 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Thưởng dọn sạch đợt: `feature-wave`. Mức tiền cụ thể: `feature-balance`.
 
 ## Định nghĩa
-- **Tiền thưởng của quái**: số tiền người chơi nhận khi một quái loại đó bị hạ.
-- **Bên hạ**: hero, đòn tự bắn của thành, hoặc kĩ năng thành; không ảnh hưởng tiền thưởng.
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 So sánh tiền thưởng theo loại (`feature-enemy/enemy-list`):

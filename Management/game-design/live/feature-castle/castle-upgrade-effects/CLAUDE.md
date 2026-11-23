@@ -9,9 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Giá, việc trừ tiền, giá tăng dần: `feature-upgrade`. Nút mua: `feature-hud-upgrade`. Mức tăng mỗi cấp: `feature-balance`.
 
 ## Định nghĩa
-- **Cấp**: số lần mục đó đã được mua trong lượt. Vào trận mọi mục ở cấp ban đầu.
-- **Máu tối đa**: mức máu cao nhất của thành (`feature-castle/castle-core`).
-- **Hiệu quả kĩ năng**: phần "mạnh" của từng kĩ năng: lượng máu trừ (Sấm sét), thời gian làm chậm (Băng giá), lượng máu hồi (Cổ vũ).
+- `glossary#level`
 
 ## Danh sách
 | Mục | Tăng gì | Không đổi gì |

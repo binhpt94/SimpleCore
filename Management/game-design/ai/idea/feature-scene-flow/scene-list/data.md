@@ -1,6 +1,6 @@
 ---
 based-on: 9e167e1aa89f
-refs: glossary#scene@310c65c066dc, glossary#screen@309432e2cfc6, glossary#scene-loading@495ca114a194, glossary#scene-game@06d6e6c3e2c7
+refs: glossary#scene@c92d4e8713a9, glossary#screen@939e5a4868a2
 ---
 # Danh sách scene và đường đi
 

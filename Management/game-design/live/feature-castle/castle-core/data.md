@@ -1,6 +1,6 @@
 ---
 based-on: 24fd307bbdcd
-refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-respawn@2ae1008b33cd, feature-enemy/enemy-behavior@cf9290ce16e6
+refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-respawn@2ae1008b33cd, feature-enemy/enemy-behavior@cf9290ce16e6, glossary#reach-castle@7db7d78f37e0
 ---
 # Thân thành
 

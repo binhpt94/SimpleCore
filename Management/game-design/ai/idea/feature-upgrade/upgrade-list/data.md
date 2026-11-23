@@ -1,6 +1,6 @@
 ---
 based-on: e712e2fbe1f0
-refs: feature-upgrade/upgrade-effect@b9bcec737959, feature-upgrade/upgrade-purchase@c53d76edf8b3, glossary#upgrade-item@9e47ea6f6dbf, glossary#level@c32a49d0bd16, glossary#hero-level@58786657874d
+refs: feature-upgrade/upgrade-effect@b9bcec737959, feature-upgrade/upgrade-purchase@c53d76edf8b3, glossary#level@43a706597ab9
 ---
 # Danh sách nâng cấp
 

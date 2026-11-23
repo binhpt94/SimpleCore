@@ -10,9 +10,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Mức thưởng so với giá nâng cấp là của `feature-balance/balance-economy`.
 
 ## Định nghĩa
-- **Dọn sạch đợt**: quái của đợt đã ra hết (`feature-wave/spawning`) và không còn con quái nào của đợt còn sống.
-- **Thưởng dọn đợt**: tiền nhận một lần khi dọn sạch một đợt, ngoài tiền hạ từng con quái.
-- **Số đợt đã dọn sạch**: số lần dọn sạch trong lượt; là điểm của lượt.
+- `glossary#wave-clear`
+- `glossary#score` (số đợt đã dọn sạch)
 
 ## Danh sách
 Khi dọn sạch đợt, ba việc xảy ra:

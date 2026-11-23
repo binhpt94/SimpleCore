@@ -1,6 +1,6 @@
 ---
 based-on: d8a90fd4adc0
-refs: feature-run/run-score@6f1909d90f98, feature-run/run-flow@db634f5dac0b, feature-popup/popup-layer@91d4f017d2fb
+refs: feature-run/run-score@6f1909d90f98, feature-run/run-flow@db634f5dac0b, feature-popup/popup-layer@91d4f017d2fb, glossary#paused@89f75d658689, glossary#leave-game@fe2884e1a36a
 ---
 # Tạm dừng trận
 

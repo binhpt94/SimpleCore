@@ -11,9 +11,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Nút bấm cho từng mục: `feature-hud-upgrade`.
 
 ## Định nghĩa
-- `glossary#upgrade-item`
 - `glossary#level`
-- `glossary#hero-level`
 
 ## Danh sách
 - Mục hero: "cấp hero" cho từng hero trong đội.

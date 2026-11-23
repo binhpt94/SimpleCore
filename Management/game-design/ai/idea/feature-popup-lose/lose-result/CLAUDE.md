@@ -9,8 +9,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#score` (của lượt vừa xong)
-- `glossary#record` (đã tính cả lượt vừa xong)
-- `glossary#new-record`
 
 ## Danh sách
 Trên popup, từ trên xuống:

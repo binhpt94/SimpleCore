@@ -1,3 +1,4 @@
 {"at": "2026-11-23 02:20:17", "event": "data", "hash": "e1440a2a0de0", "previous": "", "added": ["castle-one", "castle-hp", "castle-no-regen", "castle-destroyed", "castle-hero-base"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 02:26:15", "event": "promote", "by": "người", "hash": "e1440a2a0de0"}
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "e1440a2a0de0"}
+{"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "e1440a2a0de0"}

@@ -9,11 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-popup` là một bên tham gia của scene Game: popup sống và chết theo scene.
 
 ## Định nghĩa
-- **Feature tham gia**: feature có mặt trong danh sách của một scene, nhận đủ ba bước tải, chạy, huỷ.
-- **Tải**: chuẩn bị thứ cần dùng (hình, prefab, cấu hình), chưa hiện gì.
-- **Chạy**: tạo view và bắt đầu hoạt động.
-- **Huỷ**: huỷ view, bỏ thứ đã tải, dừng mọi hoạt động của feature trong scene đó.
-- **View**: thứ người chơi thấy hoặc bấm được trên màn hình.
+- `glossary#participant`
 
 ## Danh sách
 - Ba bước: tải → chạy → huỷ.

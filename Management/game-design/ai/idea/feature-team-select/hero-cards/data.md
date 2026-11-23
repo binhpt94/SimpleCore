@@ -1,6 +1,6 @@
 ---
 based-on: fe94740dab29
-refs: feature-team-select/team-slots@c34032308bdd, feature-hero/hero-list@1bf8998ab5a4, glossary#fighting-style@9e1f75b68d79
+refs: feature-team-select/team-slots@c34032308bdd, feature-hero/hero-list@1bf8998ab5a4, glossary#fighting-style@448aeb6c385b
 ---
 # Thẻ hero
 

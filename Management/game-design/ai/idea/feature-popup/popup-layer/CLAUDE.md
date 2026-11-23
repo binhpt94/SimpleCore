@@ -9,9 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Việc mở, đóng từng popup: `feature-popup/popup-request`.
 
 ## Định nghĩa
-- `glossary#popup-layer`
 - `glossary#backdrop`
-- `glossary#top-popup`
 
 ## Danh sách
 - Thứ tự từ dưới lên: màn chơi → HUD → (nền che → popup) lặp lại theo số popup đang mở.

@@ -1,6 +1,6 @@
 ---
 based-on: 09ba60c454c5
-refs: feature-castle/castle-skills@8bc45d0edc8d, feature-run/run-pause@f8e9d49f5079, feature-hud/hud-layout@e541be0cca19, glossary#castle-skill@db172da8ce27, glossary#cooldown@66c87aeea6d6
+refs: feature-castle/castle-skills@8bc45d0edc8d, feature-run/run-pause@f8e9d49f5079, feature-hud/hud-layout@e541be0cca19, glossary#castle-skill@1c6e2774b71d
 ---
 # Nút kĩ năng thành
 

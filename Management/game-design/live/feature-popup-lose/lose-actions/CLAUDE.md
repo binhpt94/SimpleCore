@@ -8,10 +8,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Chơi lại dẫn tới `feature-team-select` (đội lượt trước đã xếp sẵn, `feature-team-select/team-memory`); về màn bắt đầu dẫn tới `feature-home`.
 - Popup che và chặn bấm phần bên dưới (`feature-popup`).
 
-## Định nghĩa
-- **Chơi lại**: bắt đầu một lượt mới, đi qua màn chọn đội.
-- **Về màn bắt đầu**: rời trận, về màn có tên game và kỉ lục.
-
 ## Danh sách
 - Nút chơi lại (nút chính).
 - Nút về màn bắt đầu.

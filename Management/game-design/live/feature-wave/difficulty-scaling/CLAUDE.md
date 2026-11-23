@@ -9,10 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Thưởng dọn sạch đợt là của `feature-wave/wave-clear`, không phải node này.
 
 ## Định nghĩa
-- **Số đợt**: thứ tự của đợt trong lượt, bắt đầu từ đợt đầu tiên.
-- **Mức độ khó của đợt**: các giá trị tính từ số đợt: số quái, nhịp thả, hệ số máu, hệ số sức đánh, các loại quái được ra.
-- **Chỉ số gốc**: chỉ số của một loại quái trước khi nhân theo đợt, nằm ở `feature-enemy`.
-- **Loại đã mở**: loại quái được phép có trong đợt từ một số đợt trở đi.
+- `glossary#base-stats` (nằm ở `feature-enemy`)
 
 ## Danh sách
 Những thứ tăng theo số đợt:
