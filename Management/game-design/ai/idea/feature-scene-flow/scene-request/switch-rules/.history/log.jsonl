@@ -1,1 +1,2 @@
 {"at": "2026-11-23 02:36:50", "event": "data", "hash": "a03ce5cb448d", "previous": "", "added": ["switch-steps", "cover-instant", "reject-unknown", "reject-busy", "reject-same", "switch-fail"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "a03ce5cb448d"}

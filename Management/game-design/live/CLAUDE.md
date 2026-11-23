@@ -40,5 +40,7 @@ Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc đi�
   - Bỏ chi tiết mức định nghĩa và danh sách: "0 máu" thành "thành bị phá"; "hero đánh quái gần nhất", "thành bắn quái trong tầm", danh sách nâng cấp của thành (máu, sức đánh, kĩ năng) chuyển xuống các vòng sau.
   - Không dùng chữ theo bản phát hành ("bản đầu"), theo yêu cầu của người.
 
+- **Game 2D nhìn ngang (quyết khi vào vòng 4, 2026-11-23).** Vòng 4 cần biết 2D hay 3D để ghi kích thước unit. 2D hợp góc nhìn ngang một dải đất, sprite gen bằng AI làm nhanh ở mức IDEA. Đã loại: 3D low poly (thêm việc dựng model mà góc nhìn ngang không cần chiều sâu).
+
 ## Chưa rõ
-- Tên chính thức và phong cách hình ảnh (2D hay 3D low poly): chưa có, không chặn việc chia feature.
+- Tên chính thức và phong cách hình ảnh: chưa có, không chặn việc thiết kế.

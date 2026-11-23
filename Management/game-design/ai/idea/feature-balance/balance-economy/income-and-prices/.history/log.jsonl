@@ -1,1 +1,2 @@
 {"at": "2026-11-23 02:37:41", "event": "data", "hash": "295cfe59ac28", "previous": "", "added": ["income-formula", "income-total", "kill-over-bonus", "price-ladder", "buy-each-wave", "never-max", "value-drop"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "295cfe59ac28"}

@@ -1,1 +1,2 @@
 {"at": "2026-11-23 02:36:50", "event": "data", "hash": "2d489af38e03", "previous": "", "added": ["distance-gap", "attack-interval", "damage-instant", "level-formula", "level-hp-gain", "decimal-stats"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "2d489af38e03"}

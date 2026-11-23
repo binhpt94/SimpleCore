@@ -1,1 +1,2 @@
 {"at": "2026-11-23 02:36:50", "event": "data", "hash": "54a8417a7ccd", "previous": "", "added": ["score-start-zero", "score-lock-once", "record-update", "record-default-zero", "record-save-now", "record-read-anytime"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "54a8417a7ccd"}

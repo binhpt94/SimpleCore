@@ -13,8 +13,8 @@ Chơi vô tận cần điểm kết thúc. Đã loại: hai bên tăng ngang nha
 ### curve-early-easy | AI 7 | Các đợt đầu đội đã chọn trụ được mà chưa cần nâng cấp nhiều; áp lực tăng dần sau đó
 Người chơi phổ thông làm quen trước khi phải tính chi tiền. Đã loại: khó ngay từ đợt đầu.
 
-### curve-smooth | AI 7 | Áp lực tăng đều qua các đợt, không có đợt nào khó vọt hẳn so với đợt trước
-Thua thì thấy được mình yếu dần ở đâu, không phải bị bất ngờ. Đã loại: đợt mốc khó vọt.
+### curve-smooth | AI 7 | Áp lực tăng đều qua các đợt; ngoại lệ có chủ đích duy nhất là đợt có Trùm theo chu kì khó vọt hơn, rồi đợt sau dịu lại
+Thua thì thấy được mình yếu dần ở đâu, không phải bị bất ngờ. Đợt Trùm là đỉnh căng thẳng người chơi biết trước (`feature-enemy/enemy-list`). Đã loại: đợt mốc khó vọt không báo trước, hay nhiều loại đợt đặc biệt khác.
 
 ### curve-skill-matters | AI 7 | Chọn đội, chọn nâng cấp và canh kĩ năng thành khéo thì đợt gãy tới muộn hơn rõ rệt
 Đây là lí do chơi lại để phá kỉ lục. Đã loại: điểm gãy gần như cố định dù chơi thế nào.

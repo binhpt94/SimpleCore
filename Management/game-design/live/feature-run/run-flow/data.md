@@ -19,5 +19,5 @@ Chơi lại không đi qua màn bắt đầu. Đã loại: chơi lại vào th�
 ### flow-quit | AI 7 | Bỏ lượt từ popup tạm dừng về thẳng màn bắt đầu
 Bỏ lượt kết thúc lượt giống như thua về mặt điểm (`feature-run/run-score`), nhưng không hiện popup thua. Đã loại: bỏ lượt rồi hiện popup thua (người chơi đã chủ động rời, xem kết quả là thừa).
 
-### flow-scenes | AI 6 | Màn bắt đầu và màn chọn đội chung một scene menu; trận và hai popup của trận ở scene trận
-Mỗi lần vào trận là tải mới scene trận, nên lượt mới luôn bắt đầu sạch (`feature-session-scene`). Chuyển scene đều xin qua `feature-scene-flow`. Đã loại: mọi màn chung một scene (phải tự dọn trận cũ bằng tay); mỗi màn một scene (chuyển nhiều, chậm).
+### flow-scenes | AI 7 | Mở game qua scene Loading rồi vào màn bắt đầu; màn bắt đầu, chọn đội, trận và hai popup đều trong scene Game
+Chuyển màn là đổi trong scene Game, không chuyển scene; chơi lại không tải lại scene. Lượt mới vẫn sạch vì trận được dựng mới và huỷ hết mỗi lần. Theo `feature-scene-flow/scene-list`. Đã loại: scene menu và scene trận riêng (thêm chờ tải giữa các lượt); mỗi màn một scene.

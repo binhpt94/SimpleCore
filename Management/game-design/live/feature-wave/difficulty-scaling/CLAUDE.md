@@ -26,8 +26,9 @@ Những thứ tăng theo số đợt:
 Những thứ không đổi theo số đợt (giữ theo loại quái): tốc độ đánh, tầm đánh, tốc độ di chuyển.
 
 ## Luật cơ bản
-- Số đợt lớn hơn thì mọi thứ trong danh sách tăng không giảm; không có đợt nào dễ hơn đợt trước.
+- Số đợt lớn hơn thì mọi thứ trong danh sách tăng không giảm; đợt sau khó hơn đợt trước.
 - Tăng đều, không có bước nhảy đột ngột giữa hai đợt liền nhau.
+- Ngoại lệ có chủ đích: đợt có Trùm (theo chu kì) khó vọt hơn đợt trước, rồi đợt sau dịu lại. Đây là đỉnh căng thẳng, không phải lỗi tăng.
 - Đợt đầu dễ, đủ để người chơi làm quen trước khi phải mua nâng cấp.
 - Loại quái đã mở thì giữ mở tới hết lượt.
 - Mọi quy tắc tăng dùng tham số trong cấu hình của `feature-wave`; giá trị do `feature-balance` quyết.
@@ -36,7 +37,7 @@ Những thứ không đổi theo số đợt (giữ theo loại quái): tốc đ
 - **Độ khó chỉ theo số đợt.** Dễ cân bằng, điểm (số đợt dọn sạch) so được giữa các lượt. Đã loại: độ khó thích ứng theo sức đội.
 - **Tốc độ, tầm không tăng theo đợt.** Giữ cách nhận ra loại quái bằng mắt. Đã loại: tăng mọi chỉ số.
 - **Tiền mỗi con tăng theo đợt, nằm ở đây.** Đây là nơi duy nhất biết số đợt khi quái ra; `feature-enemy` giữ tiền gốc. Đã loại: tiền cố định.
-- **Không có đợt đặc biệt (đợt trùm, đợt mốc).** Vòng 1 và `feature-enemy` chưa có trùm; giữ trong ý tưởng gốc.
+- **Đợt Trùm là ngoại lệ có chủ đích về độ khó (2026-11-23, quyết định đã chốt).** Thay cho mục cũ "không có đợt đặc biệt": `feature-enemy/enemy-list` đã có Trùm. Đợt sau khó hơn đợt trước, trừ đợt có Trùm theo chu kì khó vọt hơn rồi đợt sau dịu lại. Không có đợt đặc biệt nào khác. Đã loại: bỏ Trùm để giữ đường tăng phẳng.
 - **Viết lại theo luật vòng 3 mới (2026-11-23).** Bỏ công thức và con số (số quái gốc, phần trăm tăng, mốc đợt mở loại), bỏ trường hợp biên (chạm trần, làm tròn, đợt rất cao), bỏ dẫn tới màn nghỉ đã xoá.
 
 ## Chưa rõ

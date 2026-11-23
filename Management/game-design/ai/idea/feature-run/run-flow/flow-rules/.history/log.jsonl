@@ -1,1 +1,2 @@
 {"at": "2026-11-23 02:36:50", "event": "data", "hash": "5a872f474e5b", "previous": "", "added": ["boot-to-home", "fresh-battle", "lose-stop-same-moment", "lose-popup-delay", "replay-path", "quit-path", "transition-lock"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "5a872f474e5b"}

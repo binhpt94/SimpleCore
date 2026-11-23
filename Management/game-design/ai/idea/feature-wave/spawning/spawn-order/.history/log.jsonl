@@ -1,1 +1,2 @@
 {"at": "2026-11-23 02:36:50", "event": "data", "hash": "174375956ae8", "previous": "", "added": ["spawn-point", "half-split", "shuffle-order", "side-run", "spawn-timing", "alive-cap", "stop-on-end"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "174375956ae8"}

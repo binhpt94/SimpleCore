@@ -22,7 +22,7 @@ Số liệu feature này đối chiếu (mỗi số nằm ở cấu hình của 
 
 ## Luật cơ bản
 - Tiền hạ quái trong một đợt nhiều hơn thưởng dọn sạch đợt đó.
-- Thu của đợt sau không ít hơn đợt trước.
+- Thu của đợt sau không ít hơn đợt trước. Ngoại lệ có chủ đích: đợt ngay sau đợt có Trùm thu ít hơn đợt Trùm, vì tiền Trùm là phần thưởng riêng của đợt Trùm.
 - Giá một mục tăng theo cấp nhanh hơn thu tăng theo đợt.
 - Mục ở cấp thấp thì lời hơn chính mục đó ở cấp cao.
 - Tiền không dùng hết thì giữ lại trong lượt; lượt mới bắt đầu lại từ đầu (`feature-run`).
@@ -31,6 +31,7 @@ Số liệu feature này đối chiếu (mỗi số nằm ở cấu hình của 
 - **Tiền hạ quái là nguồn chính.** Hợp với "nâng cấp ngay trong trận" ở vòng 1. Đã loại: dồn thưởng vào cuối đợt.
 - **Giá tự hãm bằng tăng theo cấp, không có cấp tối đa.** Theo `feature-upgrade` (`upgrade-cost`).
 - **Lời giảm dần theo cấp.** Để rải tiền ra nhiều mục là cách chơi tốt, không phải dồn một mục.
+- **Thu giảm sau đợt Trùm là ngoại lệ có chủ đích (2026-11-23, quyết định đã chốt).** Thêm ngoại lệ vào luật "thu đợt sau không ít hơn đợt trước": Trùm là phần thưởng riêng. Đã loại: giảm tiền Trùm cho thu phẳng (mất cảm giác thưởng khi hạ Trùm).
 
 ## Chưa rõ
 - Không có điểm chặn.

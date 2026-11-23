@@ -14,13 +14,13 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Lượt**: từ lúc vào trận tới lúc trận kết thúc. Màn bắt đầu và màn chọn đội nằm ngoài lượt.
 - **Trận**: phần chơi trên dải chiến trường, có HUD (`feature-hud`) và thanh nâng cấp (`feature-hud-upgrade`).
 - **Kết thúc lượt**: lúc trận dừng hẳn và điểm của lượt được chốt (`feature-run/run-score`).
-- **Scene menu**: chứa màn bắt đầu và màn chọn đội. **Scene trận**: chứa trận, popup tạm dừng, popup thua.
+- **Scene Game**: chứa màn bắt đầu, màn chọn đội, trận, popup tạm dừng, popup thua (`feature-scene-flow/scene-list`). Đổi màn không chuyển scene.
 
 ## Danh sách
 Các bước chuyển:
 | Từ | Người chơi làm | Tới |
 |---|---|---|
-| Mở game (sau màn tải của `feature-scene-flow`) | | Màn bắt đầu |
+| Mở game (scene Loading tải xong, sang scene Game) | | Màn bắt đầu |
 | Màn bắt đầu | Bấm chơi | Màn chọn đội |
 | Màn chọn đội | Bấm vào trận (đội đủ chỗ) | Trận |
 | Trận | Thành bị phá | Popup thua |
@@ -38,9 +38,9 @@ Các bước chuyển:
 - Không có hồi sinh khi thua: từ popup thua chỉ có chơi lại hoặc về màn bắt đầu.
 
 ## Đã tự quyết
-- **Hai scene chơi: menu và trận.** Tải mới scene trận mỗi lượt khớp `feature-session-scene/session-clean` (rời scene là dọn sạch). Màn bắt đầu và chọn đội nhẹ, để chung cho chuyển nhanh. Đã loại: một scene cho tất cả; mỗi màn một scene.
+- **Mọi màn trong scene Game, theo `feature-scene-flow/scene-list` (2026-11-23).** Viết lại ý `flow-scenes`: trước ghi "scene menu và scene trận", lệch với scene-list là nơi quyết scene. Lượt mới vẫn sạch vì trận dựng mới, huỷ hết mỗi lần (`feature-run/run-flow/flow-rules`, ý `fresh-battle`). Đã loại: scene menu và scene trận riêng; mỗi màn một scene.
 - **Bỏ lượt về thẳng màn bắt đầu, không hiện popup thua.** Theo `feature-popup-pause/pause-actions`. Điểm vẫn chốt như thua (quyết định chung của game).
 - **Chơi lại về màn chọn đội.** Theo `feature-run/run-replay`.
 
 ## Chưa rõ
-- Cách chia scene (menu, trận) cần `feature-scene-flow` thống nhất; nếu bên đó chọn khác thì sửa ý `flow-scenes`.
+- Không có điểm chặn.

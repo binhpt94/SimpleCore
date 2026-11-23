@@ -1,1 +1,2 @@
 {"at": "2026-11-23 02:36:50", "event": "data", "hash": "0e76a8e0f351", "previous": "", "added": ["three-buttons-order", "ready-tap", "cooldown-seconds", "cooldown-overlay", "cooldown-tap-nothing", "ready-bounce", "buttons-locked-off-battle"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "0e76a8e0f351"}

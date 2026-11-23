@@ -1,1 +1,2 @@
 {"at": "2026-11-23 02:38:11", "event": "data", "hash": "558a0d06d13f", "previous": "", "added": ["step-main", "resume-tap", "quit-to-confirm", "confirm-yes", "confirm-no", "back-key", "no-backdrop-close", "one-report-per-choice"], "removed": [], "rewritten": []}
+{"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "558a0d06d13f"}
