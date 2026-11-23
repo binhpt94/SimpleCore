@@ -31,6 +31,7 @@ import sqlite3
 import subprocess
 import sys
 import time
+import urllib.parse
 import uuid
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -69,7 +70,6 @@ EFFORT_RX = re.compile(r'"effort"\s*:\s*"([a-z]+)"')
 # and a thread recorded only as "sdk-cli" ("unlisted") is skipped like an archived one.
 ENTRY_RX = re.compile(r'"entrypoint"\s*:\s*"([^"]+)"')
 VSCODE_ENTRY, HEADLESS_ENTRY = "claude-vscode", "sdk-cli"
-VSCODE_STATE = Path.home() / "AppData" / "Roaming" / "Code" / "User" / "globalStorage" / "state.vscdb"
 TITLE_RX = re.compile(r'"type"\s*:\s*"custom-title".*?"customTitle"\s*:\s*"((?:[^"\\]|\\.)*)"')
 MAX_BODY = 4096
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
@@ -83,10 +83,22 @@ def transcripts_dir():
     return Path.home() / ".claude" / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(ROOT))
 
 
+def vscode_state():
+    """The VS Code user state database (globalStorage/state.vscdb) where this OS keeps it."""
+    if os.name == "nt":
+        base = Path(os.environ.get("APPDATA") or Path.home() / "AppData" / "Roaming")
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library" / "Application Support"
+    else:
+        base = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+    return base / "Code" / "User" / "globalStorage" / "state.vscdb"
+
+
 def archived_ids():
     """Session ids hidden (archived) in the VS Code extension; empty when its state cannot be read."""
     try:
-        con = sqlite3.connect(f"file:{VSCODE_STATE.as_posix()}?mode=ro", uri=True)
+        # Percent-encoded: the macOS folder has a space, and '?' or '#' would end the path in a URI.
+        con = sqlite3.connect(f"file:{urllib.parse.quote(vscode_state().as_posix(), safe='/:')}?mode=ro", uri=True)
         try:
             row = con.execute("select value from ItemTable where key = 'Anthropic.claude-code'").fetchone()
         finally:
