@@ -5,7 +5,15 @@ use panel-y = feature-popup/popup-layer/stack-rules#panel-y
 use panel-w = feature-popup/popup-layer/stack-rules#panel-w
 use panel-h = feature-popup/popup-layer/stack-rules#panel-h
 use tap = feature-hud/hud-layout/layout-spec#tap
+let title-x = 50
+let title-y = 60
+let title-w = 700
+let title-h = 100
+let btn-y = 540
+let btn-w = 320
+let left-x = 60
+let right-x = 420
 - panel   round-rect x=panel-x y=panel-y w=panel-w h=panel-h label="Popup tạm dừng"
-- title   label      x=50  y=60  w=700 h=100 parent=panel label="Tạm dừng"
-- resume  button     x=60  y=540 w=320 h=tap parent=panel label="Tiếp tục (nút chính)"
-- quit    button     x=420 y=540 w=320 h=tap parent=panel label="Bỏ lượt"
+- title   label      x=title-x y=title-y w=title-w h=title-h parent=panel label="Tạm dừng"
+- resume  button     x=left-x y=btn-y w=btn-w h=tap parent=panel label="Tiếp tục (nút chính)"
+- quit    button     x=right-x y=btn-y w=btn-w h=tap parent=panel label="Bỏ lượt"

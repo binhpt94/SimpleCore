@@ -3,6 +3,7 @@ title: Nút tạm dừng ở góc trên bên trái
 use tap = feature-hud/hud-layout/layout-spec#tap
 use safe = feature-hud/hud-layout/layout-spec#safe
 use top-h = feature-hud/hud-layout/layout-spec#top-h
+let pause-y = 10
 - top    rect   x=0    y=0  w=1920 h=top-h label="Mép trên"
-- pause  button x=safe y=10 w=tap  h=tap   parent=top label="II (Tạm dừng)"
+- pause  button x=safe y=pause-y w=tap  h=tap   parent=top label="II (Tạm dừng)"
 - money  label  x=220  y=10 w=300  h=60    parent=top label="Tiền (ô kế bên)"

@@ -33,6 +33,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Đã tự quyết
 - **Khoá cả 2 nút sau lần chạm đầu.** Đổi màn có thể mất một khung hình; không để chuyển màn hai lần.
 - **Nút quay lại của máy không làm gì.** Không có lựa chọn thứ ba; tránh kẹt ở trận đã dừng.
+- **Frame vẽ cả popup (2026-11-23).** `main.frame` có nền che toàn màn, khung popup (`overlap` vì nằm trên nền che), ba dòng chữ lấy số từ `feature-popup-lose/lose-result/result-spec`, và hai nút. Node này sở hữu số của hai nút: `btn-y` = 540, `replay-x` = 50, `replay-w` = 400, `home-x` = 490, `home-w` = 260 (trong khung 800x700: cách mép 50, cách nhau 40, 50+400+40+260+50 = 800); cao bằng `tap` của `feature-hud/hud-layout/layout-spec`. Nút "Chơi lại" rộng hơn nút phụ theo ý `actions-replay-main` của node cha ("to và nổi hơn"); "Về màn bắt đầu" 260 px vẫn đủ chỗ cho chữ ở cỡ 1080p. Bố cục giống `main.frame` của result-spec; khi đặt ảnh concept chỉ cần order cho hai frame của result-spec. Đã loại: hộp giữ chỗ "Chữ kết quả".
 
 ## Chưa rõ
 - Không có điểm chặn.

@@ -4,3 +4,5 @@
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "9899b000bd73"}
 {"at": "2026-11-23 16:19:04", "event": "data", "hash": "a8c3a9a04e86", "previous": "9899b000bd73", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "a8c3a9a04e86"}
+{"at": "2026-11-23 17:30:54", "event": "data", "hash": "dce5f10fbfa2", "previous": "a8c3a9a04e86", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "dce5f10fbfa2"}

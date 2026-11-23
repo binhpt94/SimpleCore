@@ -1,0 +1,13 @@
+{
+ "hash": "a753acb213ee",
+ "items": {
+  "paused-main": {
+   "hash": "21ef6b9c4172",
+   "text": "Trận đang tạm dừng, popup tạm dừng mở ở bước chính\nÉp: trận đứng yên ở đợt 5, popup tạm dừng mở ở bước chính. Có tiêu đề \"Tạm dừng\", nút \"Tiếp tục\", nút \"Bỏ lượt\"."
+  },
+  "paused-confirm": {
+   "hash": "11f0ce600f2a",
+   "text": "Trận đang tạm dừng, popup tạm dừng ở bước hỏi xác nhận bỏ lượt\nÉp: trận đứng yên ở đợt 5, popup tạm dừng đã chuyển sang bước hỏi. Có câu hỏi \"Bỏ lượt này? Điểm tính theo số đợt đã dọn.\", nút \"Bỏ lượt\", nút \"Không\"."
+  }
+ }
+}

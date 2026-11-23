@@ -2,8 +2,17 @@ kind: ui
 title: Một nút nâng cấp: hình, cấp, giá
 use up-w = feature-hud/hud-layout/layout-spec#up-w
 use up-h = feature-hud/hud-layout/layout-spec#up-h
+let pic-x = 10
+let pic-y = 10
+let pic-w = 70
+let level-x = 90
+let level-w = 100
+let coin-y = 90
+let coin-w = 40
+let price-x = 60
+let price-w = 130
 - btn    button x=860 y=920 w=up-w h=up-h label="Nút nâng cấp (sáng hoặc mờ)"
-- pic    icon   x=10  y=10  w=70  h=70  parent=btn label="Hình mục"
-- level  label  x=90  y=10  w=100 h=70  parent=btn label="Cấp 3"
-- coin   icon   x=10  y=90  w=40  h=40  parent=btn label="xu"
-- price  label  x=60  y=90  w=130 h=40  parent=btn label="55"
+- pic    icon   x=pic-x y=pic-y w=pic-w h=pic-w parent=btn label="Hình mục"
+- level  label  x=level-x y=pic-y w=level-w h=pic-w parent=btn label="Cấp 3"
+- coin   icon   x=pic-x y=coin-y w=coin-w h=coin-w parent=btn label="xu"
+- price  label  x=price-x y=coin-y w=price-w h=coin-w parent=btn label="55"

@@ -1,0 +1,61 @@
+kind: ui
+title: Cheat thanh nâng cấp: tiền 120, năm nút sáng, một nút mờ
+use bottom-h = feature-hud/hud-layout/layout-spec#bottom-h
+use up-w = feature-hud/hud-layout/layout-spec#up-w
+use up-h = feature-hud/hud-layout/layout-spec#up-h
+use bottom-y = feature-hud-upgrade/bar-layout/bar-buttons#bottom-y
+use bar-x = feature-hud-upgrade/bar-layout/bar-buttons#bar-x
+use bar-y = feature-hud-upgrade/bar-layout/bar-buttons#bar-y
+use bar-w = feature-hud-upgrade/bar-layout/bar-buttons#bar-w
+use bar-h = feature-hud-upgrade/bar-layout/bar-buttons#bar-h
+use grp-y = feature-hud-upgrade/bar-layout/bar-buttons#grp-y
+use grp-w = feature-hud-upgrade/bar-layout/bar-buttons#grp-w
+use grp-h = feature-hud-upgrade/bar-layout/bar-buttons#grp-h
+use heroes-x = feature-hud-upgrade/bar-layout/bar-buttons#heroes-x
+use castle-x = feature-hud-upgrade/bar-layout/bar-buttons#castle-x
+use b1-x = feature-hud-upgrade/bar-layout/bar-buttons#b1-x
+use b2-x = feature-hud-upgrade/bar-layout/bar-buttons#b2-x
+use b3-x = feature-hud-upgrade/bar-layout/bar-buttons#b3-x
+use pic-x = feature-hud-upgrade/button-state/button-display#pic-x
+use pic-y = feature-hud-upgrade/button-state/button-display#pic-y
+use pic-w = feature-hud-upgrade/button-state/button-display#pic-w
+use level-x = feature-hud-upgrade/button-state/button-display#level-x
+use level-w = feature-hud-upgrade/button-state/button-display#level-w
+use coin-y = feature-hud-upgrade/button-state/button-display#coin-y
+use coin-w = feature-hud-upgrade/button-state/button-display#coin-w
+use price-x = feature-hud-upgrade/button-state/button-display#price-x
+use price-w = feature-hud-upgrade/button-state/button-display#price-w
+- bottom    rect   x=0 y=bottom-y w=1920 h=bottom-h label="Mép dưới (góc phải là cụm kĩ năng, feature-hud)"
+- bar       rect   x=bar-x y=bar-y w=bar-w h=bar-h parent=bottom label="Thanh nâng cấp"
+- heroes    rect   x=heroes-x y=grp-y w=grp-w h=grp-h parent=bar label="Nhóm hero"
+- castle    rect   x=castle-x y=grp-y w=grp-w h=grp-h parent=bar label="Nhóm thành"
+- hero-1    button x=b1-x y=0 w=up-w h=up-h parent=heroes label="Hero chỗ 1 (sáng)"
+- h1-pic    icon   x=pic-x y=pic-y w=pic-w h=pic-w parent=hero-1 label="Hiệp sĩ"
+- h1-lv     label  x=level-x y=pic-y w=level-w h=pic-w parent=hero-1 label="Cấp 3"
+- h1-coin   icon   x=pic-x y=coin-y w=coin-w h=coin-w parent=hero-1 label="xu"
+- h1-price  label  x=price-x y=coin-y w=price-w h=coin-w parent=hero-1 label="55"
+- hero-2    button x=b2-x y=0 w=up-w h=up-h parent=heroes label="Hero chỗ 2 (sáng)"
+- h2-pic    icon   x=pic-x y=pic-y w=pic-w h=pic-w parent=hero-2 label="Cung thủ"
+- h2-lv     label  x=level-x y=pic-y w=level-w h=pic-w parent=hero-2 label="Cấp 1"
+- h2-coin   icon   x=pic-x y=coin-y w=coin-w h=coin-w parent=hero-2 label="xu"
+- h2-price  label  x=price-x y=coin-y w=price-w h=coin-w parent=hero-2 label="30"
+- hero-3    button x=b3-x y=0 w=up-w h=up-h parent=heroes label="Hero chỗ 3 (sáng)"
+- h3-pic    icon   x=pic-x y=pic-y w=pic-w h=pic-w parent=hero-3 label="Pháp sư"
+- h3-lv     label  x=level-x y=pic-y w=level-w h=pic-w parent=hero-3 label="Cấp 5"
+- h3-coin   icon   x=pic-x y=coin-y w=coin-w h=coin-w parent=hero-3 label="xu"
+- h3-price  label  x=price-x y=coin-y w=price-w h=coin-w parent=hero-3 label="100"
+- c-hp      button x=b1-x y=0 w=up-w h=up-h parent=castle label="Máu thành (sáng)"
+- hp-pic    icon   x=pic-x y=pic-y w=pic-w h=pic-w parent=c-hp label="Máu"
+- hp-lv     label  x=level-x y=pic-y w=level-w h=pic-w parent=c-hp label="Cấp 2"
+- hp-coin   icon   x=pic-x y=coin-y w=coin-w h=coin-w parent=c-hp label="xu"
+- hp-price  label  x=price-x y=coin-y w=price-w h=coin-w parent=c-hp label="56"
+- c-atk     button x=b2-x y=0 w=up-w h=up-h parent=castle label="Sức đánh thành (sáng)"
+- atk-pic   icon   x=pic-x y=pic-y w=pic-w h=pic-w parent=c-atk label="Đòn tự bắn"
+- atk-lv    label  x=level-x y=pic-y w=level-w h=pic-w parent=c-atk label="Cấp 4"
+- atk-coin  icon   x=pic-x y=coin-y w=coin-w h=coin-w parent=c-atk label="xu"
+- atk-price label  x=price-x y=coin-y w=price-w h=coin-w parent=c-atk label="110"
+- c-skill   button x=b3-x y=0 w=up-w h=up-h parent=castle label="Kĩ năng thành (MỜ: thiếu tiền)"
+- sk-pic    icon   x=pic-x y=pic-y w=pic-w h=pic-w parent=c-skill label="Ba kĩ năng"
+- sk-lv     label  x=level-x y=pic-y w=level-w h=pic-w parent=c-skill label="Cấp 3"
+- sk-coin   icon   x=pic-x y=coin-y w=coin-w h=coin-w parent=c-skill label="xu"
+- sk-price  label  x=price-x y=coin-y w=price-w h=coin-w parent=c-skill label="135"

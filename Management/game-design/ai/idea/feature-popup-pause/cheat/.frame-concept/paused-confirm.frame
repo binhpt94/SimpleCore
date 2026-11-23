@@ -1,0 +1,20 @@
+kind: ui
+title: Cheat popup tạm dừng: bước hỏi xác nhận
+use panel-x = feature-popup/popup-layer/stack-rules#panel-x
+use panel-y = feature-popup/popup-layer/stack-rules#panel-y
+use panel-w = feature-popup/popup-layer/stack-rules#panel-w
+use panel-h = feature-popup/popup-layer/stack-rules#panel-h
+use tap = feature-hud/hud-layout/layout-spec#tap
+use question-x = feature-popup-pause/pause-popup/pause-popup-spec#question-x
+use question-y = feature-popup-pause/pause-popup/pause-popup-spec#question-y
+use question-w = feature-popup-pause/pause-popup/pause-popup-spec#question-w
+use question-h = feature-popup-pause/pause-popup/pause-popup-spec#question-h
+use btn-y = feature-popup-pause/pause-popup/pause-popup-spec#btn-y
+use btn-w = feature-popup-pause/pause-popup/pause-popup-spec#btn-w
+use left-x = feature-popup-pause/pause-popup/pause-popup-spec#left-x
+use right-x = feature-popup-pause/pause-popup/pause-popup-spec#right-x
+- backdrop  rect       x=0 y=0 w=1920 h=1080 label="Nền che (trận đứng yên phía sau)"
+- panel     round-rect x=panel-x y=panel-y w=panel-w h=panel-h overlap label="Popup tạm dừng (bước hỏi)"
+- question  label      x=question-x y=question-y w=question-w h=question-h parent=panel label="Bỏ lượt này? Điểm tính theo số đợt đã dọn."
+- quit      button     x=left-x y=btn-y w=btn-w h=tap parent=panel label="Bỏ lượt"
+- no        button     x=right-x y=btn-y w=btn-w h=tap parent=panel label="Không (nút chính)"

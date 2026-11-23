@@ -1,0 +1,9 @@
+{
+ "hash": "7399e0eaa3b6",
+ "items": {
+  "load-error": {
+   "hash": "0ce9e58c7a3b",
+   "text": "Màn Loading dừng vì một feature tải lỗi\nÉp: thanh tiến độ đứng ở 40%, dòng lỗi hiện \"Lỗi tải: Wallet\". Có đủ mọi thành phần của màn Loading: tên game, thanh tiến độ, dòng lỗi."
+  }
+ }
+}

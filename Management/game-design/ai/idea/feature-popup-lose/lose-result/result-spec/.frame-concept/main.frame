@@ -1,12 +1,29 @@
 kind: ui
-title: Popup thua: chữ kết quả
+title: Popup thua: không phá kỉ lục
 use panel-x = feature-popup/popup-layer/stack-rules#panel-x
 use panel-y = feature-popup/popup-layer/stack-rules#panel-y
 use panel-w = feature-popup/popup-layer/stack-rules#panel-w
 use panel-h = feature-popup/popup-layer/stack-rules#panel-h
-- panel       round-rect x=panel-x y=panel-y w=panel-w h=panel-h label="Popup thua"
-- title       label      x=50  y=40  w=700 h=90 parent=panel label="Thành đã bị phá"
-- score       label      x=50  y=160 w=700 h=70 parent=panel label="Trụ được N đợt"
-- record      label      x=50  y=250 w=700 h=70 parent=panel label="Kỉ lục: M đợt"
-- new-record  label      x=200 y=340 w=400 h=70 parent=panel label="Kỉ lục mới! (chỉ khi phá kỉ lục)"
-- buttons     rect       x=60  y=540 w=680 h=120 parent=panel label="Hai nút (actions-spec)"
+use tap = feature-hud/hud-layout/layout-spec#tap
+use btn-y = feature-popup-lose/lose-actions/actions-spec#btn-y
+use replay-x = feature-popup-lose/lose-actions/actions-spec#replay-x
+use replay-w = feature-popup-lose/lose-actions/actions-spec#replay-w
+use home-x = feature-popup-lose/lose-actions/actions-spec#home-x
+use home-w = feature-popup-lose/lose-actions/actions-spec#home-w
+let text-x = 50
+let text-w = 700
+let title-y = 40
+let title-h = 90
+let row-h = 70
+let score-y = 160
+let record-y = 250
+let newrec-x = 200
+let newrec-y = 340
+let newrec-w = 400
+- backdrop  rect       x=0 y=0 w=1920 h=1080 label="Nền che (trận đứng yên phía sau)"
+- panel     round-rect x=panel-x y=panel-y w=panel-w h=panel-h overlap label="Popup thua"
+- title     label      x=text-x y=title-y w=text-w h=title-h parent=panel label="Thành đã bị phá"
+- score     label      x=text-x y=score-y w=text-w h=row-h parent=panel label="Trụ được 12 đợt"
+- record    label      x=text-x y=record-y w=text-w h=row-h parent=panel label="Kỉ lục: 15 đợt"
+- replay    button     x=replay-x y=btn-y w=replay-w h=tap parent=panel label="Chơi lại (nút chính)"
+- home      button     x=home-x y=btn-y w=home-w h=tap parent=panel label="Về màn bắt đầu"

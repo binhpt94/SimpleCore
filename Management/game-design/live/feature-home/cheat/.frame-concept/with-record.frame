@@ -1,0 +1,17 @@
+kind: ui
+title: Cheat màn bắt đầu: có kỉ lục
+use tap = feature-hud/hud-layout/layout-spec#tap
+use title-x = feature-home/home-screen/home-screen-spec#title-x
+use title-y = feature-home/home-screen/home-screen-spec#title-y
+use title-w = feature-home/home-screen/home-screen-spec#title-w
+use title-h = feature-home/home-screen/home-screen-spec#title-h
+use record-x = feature-home/home-screen/home-screen-spec#record-x
+use record-y = feature-home/home-screen/home-screen-spec#record-y
+use record-w = feature-home/home-screen/home-screen-spec#record-w
+use record-h = feature-home/home-screen/home-screen-spec#record-h
+use play-x = feature-home/home-screen/home-screen-spec#play-x
+use play-y = feature-home/home-screen/home-screen-spec#play-y
+use play-w = feature-home/home-screen/home-screen-spec#play-w
+- title  label  x=title-x y=title-y w=title-w h=title-h label="Thủ thành anh hùng"
+- record label  x=record-x y=record-y w=record-w h=record-h label="Kỉ lục: 15 đợt"
+- play   button x=play-x y=play-y w=play-w h=tap label="Chơi"

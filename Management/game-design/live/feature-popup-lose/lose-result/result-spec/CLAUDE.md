@@ -34,6 +34,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Đã tự quyết
 - **Chữ "Trụ được N đợt" thay cho "Điểm: N".** Người chơi hiểu ngay điểm là số đợt. Đã loại: "Điểm: N" (phải giải thích thêm).
 - **Không câu động viên khi không phá kỉ lục.** Theo node cha.
+- **Frame vẽ cả popup, hai trạng thái (2026-11-23).** `main.frame`: không phá kỉ lục (số mẫu 12 đợt, kỉ lục 15). `new-record.frame`: phá kỉ lục (16/16, thêm dòng "Kỉ lục mới!"). Mỗi frame có nền che toàn màn (cờ `overlap` cho khung popup vì cố ý nằm trên nền che) và hai nút lấy số từ `feature-popup-lose/lose-actions/actions-spec` (`btn-y`, `replay-x`, `replay-w`, `home-x`, `home-w`). Node này sở hữu vị trí các dòng chữ (`text-x`, `text-w`, `title-y`, `title-h`, `row-h`, `score-y`, `record-y`, `newrec-*`); actions-spec `use` lại. Số mẫu chỉ để nhìn bố cục và gen ảnh concept, không phải thông số. Đã loại: mỗi node chỉ vẽ nửa của mình kèm hộp giữ chỗ (không thấy được popup thật, không dùng để gen ảnh được).
+- **Dòng "Kỉ lục mới!" nằm ở khoảng trống giữa kỉ lục và hai nút** (y 340–410 trong khung, nút bắt đầu ở 540). Không có dòng này thì khoảng trống để trống; bố cục hai trạng thái giữ nguyên, nút không nhảy chỗ.
 
 ## Chưa rõ
 - Không có điểm chặn.

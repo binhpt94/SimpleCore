@@ -1,6 +1,6 @@
 ---
 based-on: 91d4f017d2fb
-refs: feature-popup/popup-request@ff4b78bc4b2c, feature-popup/popup-request/request-rules@9e6b3fbcf68a, feature-run/run-pause@f8e9d49f5079, feature-popup-pause/pause-popup@25d160950007, feature-popup-pause/pause-popup/pause-popup-spec@e65c33624e19
+refs: feature-popup/popup-request@ff4b78bc4b2c, feature-popup/popup-request/request-rules@9e6b3fbcf68a, feature-run/run-pause@f8e9d49f5079, feature-popup-pause/pause-popup@25d160950007, feature-popup-pause/pause-popup/pause-popup-spec@4db8a9f181fd
 ---
 # Luật xếp chồng và chặn bấm
 
