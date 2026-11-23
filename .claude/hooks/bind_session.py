@@ -209,18 +209,23 @@ def context(data, root, store):
     if role == "@human":
         return ("guard: chat này gán FEATURE=@human (phiên của người): không giới hạn feature; sửa Core, "
                 "_Composition, .claude, CLAUDE.md gốc vẫn bị hỏi từng lần.")
-    worker = (" Đổi Contracts, .asmdef, InternalsVisibleTo: thống nhất với @CodeLead trước (gửi ngữ cảnh, file, đề "
-              "xuất). Xung đột code do @CodeLead giải quyết; lỗi @CodeLead báo về thì tự sửa. Lượt có sửa file phải "
-              "kết thúc bằng báo cáo (gửi @CodeLead và @Manager) theo .claude/rules/report.md.")
+    worker = (" Khung (Scripts/Contracts, Scripts/Internal/Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs; ở "
+              "Core/_Composition thêm các interface I*.cs) chỉ đọc: viết code mới trên lớp con ở phần còn lại của "
+              "Internal/View; muốn đổi khung thì nhắn @CodeLead (ngữ cảnh, file, đề xuất) và chờ. Xung đột code do "
+              "@CodeLead giải quyết; lỗi @CodeLead báo về thì tự sửa. Lượt có sửa file phải kết thúc bằng báo cáo "
+              "(gửi @CodeLead và @Manager) theo .claude/rules/report.md.")
     if role in guard.ROLE_AREAS:
         area = guard.ROLE_AREAS[role]
         return (f"guard: chat này gán FEATURE={role} (nhóm Basic). Chỉ sửa UnityProject/Assets/{area}/; đọc phần "
                 "công khai của feature." + worker)
     if role == "@CodeLead":
         return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders): kiểm code và giải quyết xung đột của nhóm "
-                "Basic, Features, Services. Không sửa bất kỳ file nào; đọc được toàn bộ source các nhóm đó; unity-mcp "
-                "chỉ để biên dịch, chạy test, Play và xem. Lỗi thì gửi yêu cầu sửa cụ thể cho phiên sở hữu. Thứ duy nhất "
-                "được ghi là tiến độ của node thiết kế lá, sau khi đã biên dịch và test qua: python "
+                "Basic, Features, Services, và quản cấu trúc khung. Chỉ sửa khung: Scripts/Contracts, Scripts/Internal/"
+                "Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs của feature đã mở khoá code; *.asmdef, "
+                "AssemblyInfo.cs, interface I*.cs của Core/_Composition. Ngoài khung không sửa gì: lỗi thì gửi yêu cầu "
+                "sửa cụ thể cho phiên sở hữu. Lượt có sửa file phải kết thúc bằng báo cáo theo .claude/rules/report.md. "
+                "Đọc được toàn bộ source các nhóm đó; unity-mcp để biên dịch, chạy test, Play, xem, và xoá file khung. "
+                "Ngoài khung, thứ được ghi là tiến độ của node thiết kế lá, sau khi đã biên dịch và test qua: python "
                 "Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done> (xem bằng "
                 "python Management/tools/gd_status.py). Quy trình ở .claude/rules/codelead.md."
                 + unread_reports(root, store, role))

@@ -126,8 +126,8 @@ def run_cases():
 
     g = "2 own Contracts"
     r(g, W, "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
-    e(g, W, "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")      # agreed with @CodeLead first (rules, not guard)
-    w(g, W, "allow", F + "/Wallet/Scripts/Contracts/New.cs")
+    e(g, W, "deny", F + "/Wallet/Scripts/Contracts/IWallet.cs")       # the skeleton: only @CodeLead edits it
+    w(g, W, "deny", F + "/Wallet/Scripts/Contracts/New.cs")
 
     g = "3 other public"
     r(g, W, "allow", F + "/Shop/Scripts/Contracts/IShop.cs")
@@ -203,7 +203,7 @@ def run_cases():
     # ---- FEATURE variants
     g, P = "service agent", "_Services/Popup"
     e(g, P, "allow", F + "/_Services/Popup/Scripts/Internal/P.cs")
-    e(g, P, "allow", F + "/_Services/Popup/Scripts/Contracts/IPopup.cs")
+    e(g, P, "deny", F + "/_Services/Popup/Scripts/Contracts/IPopup.cs")      # the skeleton
     r(g, P, "deny", F + "/Wallet/Scripts/Internal/W.cs")
     e(g, P, "deny", F + "/Wallet/Scripts/Internal/W.cs")
     r(g, P, "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
@@ -353,12 +353,12 @@ def run_cases():
     d(W, "deny", "Assets/../../Management/tools/rules.json")
     d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/*.cs")
     d(W, "deny", "Assets/Core/Base.cs")
-    d(W, "allow", "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")      # the skeleton
     d(W, "ask", "Assets/Features/Wallet/Scripts/Internal")
     d(W, "ask", "Assets/Features/Wallet")
     d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Missing.cs")
-    d(W, "allow", "Assets/Features/Wallet/Scripts/Internal/AssemblyInfo.cs")
-    d(W, "allow", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/AssemblyInfo.cs")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
     d(W, "allow", "Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
     d("", "deny", "Assets/Features/Wallet/Scripts/Internal/Old.cs")
     d("@human", "pass", "Assets/Features/Shop/Scripts/Internal/S.cs")
@@ -367,16 +367,17 @@ def run_cases():
     t(g, W, "deny", "mcp__unityMCP__execute_menu_item", {"menu_path": "Assets/Delete"})
 
     # ---- boundary files inside the agent's own feature
-    g = "boundary files"
-    w(g, W, "allow", F + "/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
-    e(g, W, "allow", F + "/Wallet/Tests/Game.Wallet.Tests.asmdef")
+    g = "boundary files (the skeleton: only @CodeLead)"
+    w(g, W, "deny", F + "/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
+    e(g, W, "deny", F + "/Wallet/Tests/Game.Wallet.Tests.asmdef")
+    e(g, W, "deny", F + "/Wallet/Scripts/Internal/game.wallet.internal.ASMDEF")      # any letter case
     w(g, W, "deny", F + "/Wallet/Scripts/Internal/x.asmref")
     w(g, W, "deny", F + "/Wallet/Scripts/Internal/X.ASMREF")
-    e(g, W, "allow", F + "/Wallet/Scripts/Internal/AssemblyInfo.cs")
+    e(g, W, "deny", F + "/Wallet/Scripts/Internal/AssemblyInfo.cs")
     other = F + "/Wallet/Scripts/Internal/Other.cs"
-    t(g, W, "allow", "Write", {"file_path": other, "content": '[assembly: InternalsVisibleTo("Game.Shop.Internal")]'})
-    t(g, W, "allow", "Edit", {"file_path": other, "old_string": "a", "new_string": 'InternalsVisibleTo("X")'})
-    t(g, W, "allow", "MultiEdit", {"file_path": other, "edits": [{"old_string": "a", "new_string": "InternalsVisibleTo"}]})
+    t(g, W, "deny", "Write", {"file_path": other, "content": '[assembly: InternalsVisibleTo("Game.Shop.Internal")]'})
+    t(g, W, "deny", "Edit", {"file_path": other, "old_string": "a", "new_string": 'InternalsVisibleTo("X")'})
+    t(g, W, "deny", "MultiEdit", {"file_path": other, "edits": [{"old_string": "a", "new_string": "InternalsVisibleTo"}]})
     t(g, W, "allow", "Write", {"file_path": other, "content": "internal class Other {}"})
     w(g, W, "deny", F + "/Shop/Scripts/Internal/Game.Shop.Internal.asmdef")
 
@@ -563,8 +564,11 @@ def run_role_cases(payload):
         e(g, role, "allow", A + own + "/Old.cs")
         w(g, role, "allow", A + own + "/New.cs")
         w(g, role, "allow", A + own + "/Tests/T.cs")
-        e(g, role, "allow", A + own + "/Game.Thing.asmdef")
-        w(g, role, "allow", A + own + "/AssemblyInfo.cs")
+        e(g, role, "deny", A + own + "/Game.Thing.asmdef")      # the skeleton: only @CodeLead
+        w(g, role, "deny", A + own + "/AssemblyInfo.cs")
+        w(g, role, "deny", A + own + "/IThing.cs")
+        w(g, role, "allow", A + own + "/Tests/IFake.cs")       # interfaces in tests are no skeleton
+        w(g, role, "allow", A + own + "/Thing.cs")
         w(g, role, "deny", A + own + "/x.asmref")
         e(g, role, "deny", A + other + "/Old.cs")
         e(g, role, "deny", own_w)
@@ -689,8 +693,10 @@ def run_report_cases():
     rep("pass, +1 report", "@Core with report", "rep-core", [human, edit, result, say_text(REPORT_OK)])
     rep("pass, +0 report", "@human is not asked", "rep-human", [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "@Manager is not asked", "rep-mgr", [human, edit, result, say_text("Xong.")])
-    rep("pass, +0 report", "@CodeLead is not asked (its edits are denied anyway)", "rep-lead",
+    rep("block, +0 report", "@CodeLead edited the skeleton without a report", "rep-lead",
         [human, edit, result, say_text("Xong.")])
+    rep("pass, +1 report", "@CodeLead with report", "rep-lead", [human, edit, result, say_text(REPORT_OK)])
+    rep("pass, +0 report", "@CodeLead turn without edits", "rep-lead", [human, say_text("Đã kiểm, không lỗi.")])
     rep("pass, +0 report", "@GameDesigner is not asked (its work is the design tree)", "rep-gd",
         [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "unbound chat is not asked", "rep-none", [human, edit, result, say_text("Xong.")])
@@ -716,16 +722,18 @@ def run_report_cases():
 
 
 def run_codelead_cases():
-    """@CodeLead edits nothing, reads every layer of Basic/Features/Services, and uses unity-mcp only to
-    compile, test, play and look. A feature session changes its own Contracts/asmdef (agreed with @CodeLead by
-    message first; the guard does not check that) but never Core or _Composition."""
+    """@CodeLead edits only the skeleton (Contracts, Base, asmdef, AssemblyInfo of unlocked features; asmdef,
+    AssemblyInfo and I*.cs of Core/_Composition), reads every layer of Basic/Features/Services, and uses unity-mcp to
+    compile, test, play, look and delete skeleton files. The owners only read their skeleton and code subclasses."""
     import bind_session
     W, L = "Wallet", "@CodeLead"
     internal = F + "/Wallet/Scripts/Internal/Old.cs"
     u = lambda name, **ti: t(g, L, ti.pop("expect"), "mcp__unityMCP__" + name, ti)      # noqa: E731
 
-    g = "codelead: edits nothing"
-    for p in (internal, F + "/Wallet/Scripts/Contracts/IWallet.cs", A + "/Core/Old.cs", A + "/_Composition/Old.cs",
+    g = "codelead: edits nothing outside the skeleton"
+    for p in (internal, F + "/Wallet/Scripts/View/V.cs", F + "/Wallet/Tests/T.cs", F + "/Wallet/FeatureAssets/Private/c.asset",
+              F + "/Wallet/FeatureAssets/Public/Icon.prefab", F + "/Wallet/CLAUDE.md", A + "/Core/Old.cs", A + "/_Composition/Old.cs",
+              A + "/Core/Tests/IFake.cs",
               FX + "/Management/proposals/decision.md", FX + "/Management/tools/rules.json",
               FX + "/Management/data/x.js", FX + "/.claude/settings.json", FX + "/CLAUDE.md"):
         w(g, L, "deny", p)
@@ -765,11 +773,51 @@ def run_codelead_cases():
     t(g + " (others)", W, "deny", "mcp__unityMCP__refresh_unity", {})
     t(g + " (others)", W, "deny", "ReadMcpResourceTool", {"server": "unityMCP", "uri": "x"})
 
-    g = "codelead: own boundary files, no gate"
-    for who, path in ((W, F + "/Wallet/Scripts/Contracts/IWallet.cs"),
-                      (W, F + "/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef"),
-                      ("@Core", A + "/Core/Game.Core.asmdef"), ("@Composition", A + "/_Composition/AssemblyInfo.cs")):
-        e(g, who, "allow", path)
+    g = "codelead: skeleton"
+    skeleton = (F + "/Wallet/Scripts/Contracts/IWallet.cs", F + "/Wallet/Scripts/Contracts/New.cs",
+                F + "/Wallet/Scripts/Internal/Base/HeroBase.cs", F + "/Wallet/Scripts/View/Base/ViewBase.cs",
+                F + "/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef", F + "/Wallet/Tests/Game.Wallet.Tests.asmdef",
+                F + "/Wallet/Scripts/Internal/AssemblyInfo.cs", F + "/_Services/Popup/Scripts/Contracts/IPopup.cs",
+                F + "/_Services/Popup/Scripts/Internal/Base/PopupBase.cs",
+                A + "/Core/Game.Core.asmdef", A + "/Core/AssemblyInfo.cs", A + "/Core/IServiceRegistry.cs",
+                A + "/Core/Tests/Game.Core.Tests.asmdef", A + "/_Composition/AssemblyInfo.cs", A + "/_Composition/IBoot.cs")
+    for p in skeleton:
+        e(g, L, "allow", p)
+    t(g, L, "allow", "Write", {"file_path": F + "/Wallet/Scripts/Internal/AssemblyInfo.cs",
+                               "content": '[assembly: InternalsVisibleTo("Game.Wallet.View")]'})
+    for p in (F + "/Shop/Scripts/Contracts/IShop.cs", F + "/Shop/Scripts/Internal/Base/B.cs",
+              F + "/Shop/Scripts/Internal/Game.Shop.Internal.asmdef"):
+        e(g + ": locked feature (code gate)", L, "deny", p)
+    for p in (F + "/Wallet/Scripts/Internal/Basement.cs", F + "/Wallet/Scripts/Internal/Sub/Base/X.cs",
+              F + "/Wallet/Scripts/Contracts.cs", A + "/Core/Icon.png", A + "/Core/ServiceRegistry.cs", A + "/Core/Ix.cs"):
+        e(g + ": not skeleton", L, "deny", p)
+    e(g, L, "deny", F + "/Wallet/Scripts/Internal/x.asmref")
+    if not WIN:
+        e(g + ": case-sensitive", L, "deny", F + "/Wallet/scripts/contracts/IWallet.cs")
+        e(g + ": case-sensitive", L, "deny", F + "/Wallet/Scripts/Internal/base/B.cs")
+    dl = lambda expect, path: t(g, L, expect, guard.UNITY_ASSET_TOOL, {"action": "delete", "path": path})  # noqa: E731
+    dl("allow", "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")
+    dl("allow", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
+    dl("deny", "Assets/Features/Wallet/Scripts/Internal/Old.cs")
+    dl("deny", "Assets/Features/Shop/Scripts/Internal/S.cs")
+    dl("ask", "Assets/Features/Wallet/Scripts/Contracts")              # a folder: the human decides
+    t(g, L, "deny", guard.UNITY_ASSET_TOOL, {"action": "modify", "path": "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs"})
+
+    g = "feature: skeleton read-only"
+    r(g, W, "allow", F + "/Wallet/Scripts/Internal/Base/HeroBase.cs")
+    e(g, W, "deny", F + "/Wallet/Scripts/Internal/Base/HeroBase.cs")
+    w(g, W, "deny", F + "/Wallet/Scripts/View/Base/New.cs")
+    w(g, W, "allow", F + "/Wallet/Scripts/Internal/HeroLogic.cs")          # the subclass
+    w(g, W, "allow", F + "/Wallet/Scripts/View/HeroView.cs")
+    r(g, "_Services/Popup", "deny", F + "/Wallet/Scripts/Internal/Base/HeroBase.cs")      # another feature's base is private
+    r(g, "_Services/Popup", "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
+    r(g, "@Core", "allow", A + "/Core/IServiceRegistry.cs")
+    e(g, "@Core", "deny", A + "/Core/IServiceRegistry.cs")
+    e(g, "@Core", "allow", A + "/Core/ServiceRegistry.cs")
+    for who in ("@Manager", "@GameDesigner", ""):
+        e(g + " (others)", who, "deny", F + "/Wallet/Scripts/Contracts/IWallet.cs")
+    e(g + " (human)", "@human", "pass", F + "/Wallet/Scripts/Contracts/IWallet.cs")
+    e(g + " (human)", "@human", "ask", A + "/Core/IServiceRegistry.cs")
     for p in (A + "/Core/Old.cs", A + "/_Composition/Old.cs"):
         e(g + ": a feature never edits Core/_Composition", W, "deny", p)
     e(g, W, "ask", FX + "/Management/tools/rules.json")

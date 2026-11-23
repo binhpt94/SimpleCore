@@ -1,5 +1,5 @@
 # Báo cáo cho @Manager
-Áp dụng cho nhóm Basic (@Core, @Composition), Features, Services. @human, @Manager, @CodeLead không phải báo.
+Áp dụng cho nhóm Basic (@Core, @Composition), Features, Services, và @CodeLead khi sửa khung. @human, @Manager, @GameDesigner không phải báo.
 Báo cáo đi tới cả @CodeLead (kiểm code, biên dịch, chạy test) và @Manager (điều phối).
 
 ## Khi nào

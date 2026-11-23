@@ -8,10 +8,12 @@ The value, by group:
     Master    @human                      no feature limits; still asks for .claude, _Composition, Core
     Leaders   @Manager                    coordinator: edits nothing but new files in Management/proposals; runs
                                           scaffold.py, which makes the folders the live design names (no code)
-              @CodeLead                   checks code and settles conflicts: edits NOTHING; reads all source of
-                                          Basic/Features/Services; compiles, tests and plays through a read-only
-                                          subset of unity-mcp (CODELEAD_UNITY); writes one thing, the progress
-                                          of a design leaf, through gd_progress.py
+              @CodeLead                   checks code, settles conflicts and owns the SKELETON: edits only the
+                                          skeleton (below), of a feature once its code gate is open, of Core and
+                                          _Composition always; reads all source of Basic/Features/Services; compiles,
+                                          tests and plays through a read-only subset of unity-mcp (CODELEAD_UNITY),
+                                          deletes skeleton files there; writes the progress of a design leaf through
+                                          gd_progress.py
               @GameDesigner               designs, never codes: reads only Management/game-design (and its own rules
                                           file), writes only in Management/game-design/ai, deletes there with
                                           gd_delete.py, reads its status with gd_status.py; live, mode.json, the
@@ -22,8 +24,11 @@ The value, by group:
     Services  _Services/<Name>            edits only its service
     unset / invalid                       every edit is denied
 Basic, Features and Services read the public parts of features, Core, _Composition, Management, .claude and
-the root CLAUDE.md. Changing their own Contracts, an .asmdef or InternalsVisibleTo is allowed here; the rules
-(.claude/rules/codelead.md) make them agree it with @CodeLead first. rules.json and deleting folders ask the human.
+the root CLAUDE.md. rules.json and deleting folders ask the human.
+The skeleton (the public gates and base classes; only @CodeLead edits it, the owner reads it and codes subclasses):
+    in a feature or service   Scripts/Contracts/**, Scripts/Internal/Base/**, Scripts/View/Base/**, every *.asmdef,
+                              AssemblyInfo.cs (the one place for InternalsVisibleTo: other files may not write it)
+    in Core, _Composition     every *.asmdef, AssemblyInfo.cs, the interface files I<Name>.cs outside Tests
 Features and Services may edit their own folder only once its design has reached round 4 in the live table
 (Management/tools/gamedesign.py, code_allowed); reading is not gated, and neither are @Core and @Composition.
 
@@ -125,6 +130,14 @@ SESSION_RX = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 WINDOWS = os.name == "nt"
 CASE = re.I if WINDOWS else 0                    # regex flag for zones that grant something
 DESIGNER_RULES_RX = re.compile(r"^gamedesigner(\.round[1-4])?\.md$", CASE)
+# The skeleton: the public gates and base classes of the code, edited by @CodeLead only.
+SKELETON_DIRS_RX = re.compile(r"^Scripts/(Contracts|Internal/Base|View/Base)(/|$)", CASE)
+SKELETON_INTERFACE_RX = re.compile(r"^I[A-Z][A-Za-z0-9]*\.cs$")      # an interface file of Core / _Composition
+SKELETON_ASSEMBLY_INFO = "assemblyinfo.cs"
+AREA_FOLDERS = ("_Composition", "Core")
+SKELETON_MSG = ("{name}: this file belongs to the skeleton (Contracts, *.asmdef, AssemblyInfo.cs, Scripts/Internal/Base, Scripts/View/Base; "
+                "in Core/_Composition also the I*.cs interfaces): only @CodeLead edits it. Write your code in a subclass in "
+                "the rest of Internal/View. To change the skeleton, send @CodeLead the context, the file and your proposal.")
 ILLEGAL_SEG_RX = re.compile(r'[*?"<>|]')
 
 
@@ -337,15 +350,15 @@ def zone(full, root, feature, area=None, read_all=False):
     if not exact(seg[:2], "UnityProject/Assets") or n < 3:
         return "unlisted", False, "deny"
 
-    # Only @Core / @Composition edit Core / _Composition; a feature session asks them.
-    if low[2] == "_composition":
-        if area == "_Composition" and same(seg[2], "_Composition"):
-            return "own _Composition", True, "allow"
-        return "_Composition", True, "deny"
-    if low[2] == "core":
-        if area == "Core" and same(seg[2], "Core"):
-            return "own Core", True, "allow"
-        return "Core", True, "deny"
+    # Only @Core / @Composition edit Core / _Composition; a feature session asks them. Their skeleton (asmdef,
+    # AssemblyInfo, interface files) is @CodeLead's; the zone keeps the area's name, so the human is still asked.
+    for folder in AREA_FOLDERS:
+        if low[2] == folder.lower():
+            if same(seg[2], folder) and area_skeleton(seg[3:]):
+                return folder, True, "skeleton"
+            if area == folder and same(seg[2], folder):
+                return "own " + folder, True, "allow"
+            return folder, True, "deny"
     if not same(seg[2], "Features") or n < 4:
         return "unlisted", False, "deny"
 
@@ -355,15 +368,52 @@ def zone(full, root, feature, area=None, read_all=False):
             return "unlisted", False, "deny"
         name, i = seg[3] + "/" + seg[4], 5      # keeps the spelling on disk; same() decides if it is ours
     rest = "/".join(seg[i:])
-
-    if feature and same(name, feature):
-        if re.match(r"^Scripts/Contracts(/|$)", rest, CASE):
-            return "own Contracts", True, "allow"
-        return "own feature", True, "allow"
+    own = bool(feature) and same(name, feature)
     # The CLAUDE.md at a feature's root describes it to the others: readable by all, like its Contracts.
-    if re.match(r"^(Scripts/Contracts|FeatureAssets/Public)(/|$)", rest, CASE) or same(rest, "CLAUDE.md"):
+    public = bool(re.match(r"^(Scripts/Contracts|FeatureAssets/Public)(/|$)", rest, CASE)) or same(rest, "CLAUDE.md")
+
+    # The skeleton (Contracts, asmdef, AssemblyInfo, Scripts/*/Base) is @CodeLead's, even in the session's own feature.
+    if rest and feature_skeleton(rest):
+        return f"skeleton of feature {name}", own or public or read_all, "skeleton"
+    if own:
+        return "own feature", True, "allow"
+    if public:
         return f"public part of feature {name}", True, "deny"
     return f"private part of feature {name}", read_all, "deny"
+
+
+def is_skeleton_file(name):
+    """asmdef and AssemblyInfo.cs, in any letter case: they draw the assembly boundary."""
+    low = name.lower()
+    return low.endswith(".asmdef") or low == SKELETON_ASSEMBLY_INFO
+
+
+def feature_skeleton(rest):
+    """True for the part of a feature (path below its folder, '/'-separated) that only @CodeLead edits."""
+    return bool(SKELETON_DIRS_RX.match(rest)) or is_skeleton_file(rest.split("/")[-1])
+
+
+def area_skeleton(sub):
+    """True for the part of Core / _Composition (segments below it) that only @CodeLead edits: asmdef, AssemblyInfo
+    and the interface files (I<Name>.cs), tests excepted."""
+    if not sub:
+        return False
+    if is_skeleton_file(sub[-1]):
+        return True
+    return bool(SKELETON_INTERFACE_RX.match(sub[-1])) and "tests" not in [s.lower() for s in sub[:-1]]
+
+
+def feature_of(full, root):
+    """The feature id ('Wallet', '_Services/Popup') a canonical path lies in, spelled as on disk; None outside
+    Assets/Features."""
+    if not inside(full, root):
+        return None
+    seg = rel_segments(full, root)
+    if len(seg) < 4 or not exact(seg[:3], "UnityProject/Assets/Features"):
+        return None
+    if seg[3].lower() == "_services":
+        return seg[3] + "/" + seg[4] if len(seg) >= 5 else None
+    return seg[3]
 
 
 def text_of(value):
@@ -375,12 +425,13 @@ def is_asmref(full):
 
 
 def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
-    """Deleting through unity-mcp: one existing file inside the session's own feature or area, nothing else."""
+    """Deleting through unity-mcp: one existing file inside the session's own feature or area, outside the skeleton;
+    for @CodeLead, one existing skeleton file (of an unlocked feature, or of Core/_Composition)."""
     if text_of(ti.get("action")) != "delete":
         return "deny", "unity-mcp manage_asset: a feature session may use only action 'delete'"
     if mode == "none":
         return "deny", "FEATURE is not set or is not an existing feature folder; deleting is blocked"
-    if mode in ("manager", "codelead", "gamedesigner"):
+    if mode in ("manager", "gamedesigner"):
         return "deny", f"{who} does not change the project; ask the session that owns the file"
     path = text_of(ti.get("path")).replace("\\", "/")      # a Unity asset path: '/' on every OS
     if not re.match(r"^Assets/[^/]", path):
@@ -390,9 +441,19 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         return "deny", "unity-mcp delete: the path leaves UnityProject/Assets"
     if goes_through_link(full, root):
         return "deny", "path goes through a link or junction"
-    name, _, edit = zone(full, root, feature, area)
-    if edit != "allow":
-        return "deny", f"FEATURE={who} may not delete in: {name}"
+    if mode == "codelead":
+        name, _, edit = zone(full, root, None, None, True)
+        if edit != "skeleton":
+            return "deny", f"@CodeLead deletes only skeleton files, not in: {name}. Ask the session that owns it."
+        locked = codelead_gate(full, root)
+        if locked:
+            return "deny", locked
+    else:
+        name, _, edit = zone(full, root, feature, area)
+        if edit == "skeleton":
+            return "deny", SKELETON_MSG.format(name=name)
+        if edit != "allow":
+            return "deny", f"FEATURE={who} may not delete in: {name}"
     if is_asmref(full):
         return "deny", ".asmref files are forbidden"
     if mode == "feature":
@@ -449,14 +510,36 @@ def design_gate(root, feature):
                             "is @GameDesigner's work and the human fixes it into live.")
 
 
-def decide_codelead_unity(tool, ti):
-    """@CodeLead in unity-mcp: compile, test, play and look; never change the project."""
+def codelead_gate(full, root):
+    """None when @CodeLead may change this skeleton file now, otherwise why not: a feature's skeleton follows the same
+    code gate as the feature (its design reached round 4 in live); Core and _Composition have no gate."""
+    fid = feature_of(full, root)
+    if not fid:
+        return None
+    ok, reason = gamedesign_module(root).code_allowed(root, fid)
+    return None if ok else (f"the skeleton of '{fid}' follows its code gate, which is locked: {reason}. Stop and tell "
+                            "the human; the design is @GameDesigner's work and the human fixes it into live.")
+
+
+def decide_codelead_unity(tool, ti, root):
+    """@CodeLead in unity-mcp: compile, test, play and look; the one change is deleting a skeleton file."""
     actions = CODELEAD_UNITY[tool]
     action = text_of(ti.get("action"))
+    if tool == UNITY_ASSET_TOOL and action == "delete":
+        return decide_unity_delete(ti, "codelead", None, root, None, "@CodeLead")
     if actions is None or action in actions:
         return "allow", f"@CodeLead may use {tool}" + (f" ({action})" if action else "")
-    return "deny", (f"@CodeLead may not use {tool} action '{action}': it compiles, tests, plays and reads, but "
-                    "changes nothing. Ask the session that owns the area to make the change.")
+    return "deny", (f"@CodeLead may not use {tool} action '{action}': it compiles, tests, plays and reads; the only "
+                    "thing it changes is the skeleton. Ask the session that owns the area to make the change.")
+
+
+def edit_texts(ti):
+    """Every piece of text an edit tool would write."""
+    texts = [text_of(ti.get("content")), text_of(ti.get("new_string")), text_of(ti.get("new_source"))]
+    edits = ti.get("edits")
+    if isinstance(edits, list):
+        texts += [text_of(e.get("new_string")) for e in edits if isinstance(e, dict)]
+    return texts
 
 
 def decide(data, session_value, root):
@@ -519,13 +602,20 @@ def decide(data, session_value, root):
         if mode == "none":
             return "deny", ("this chat has no valid FEATURE, so all edits are blocked. Only the human can set it "
                             "(by typing FEATURE=<name> <PIN> in the chat). Stop and tell the human.")
-        if mode == "codelead":
-            return "deny", ("@CodeLead edits nothing. Send the owning session exactly what to fix (file, change, "
-                            "why); it makes the change. See .claude/rules/codelead.md.")
-        name, _, edit = zone(full, root, feature, area)
         # Files that define the boundary itself.
         if is_asmref(full):
             return "deny", ".asmref files are forbidden: they put code into another assembly"
+        if mode == "codelead":
+            name, _, edit = zone(full, root, None, None, True)
+            if edit != "skeleton":
+                return "deny", (f"@CodeLead edits only the skeleton (Contracts, *.asmdef, AssemblyInfo.cs, Scripts/*/Base, "
+                                f"I*.cs of Core/_Composition), not {name}. Send the owning session exactly what to fix "
+                                "(file, change, why). See .claude/rules/codelead.md.")
+            locked = codelead_gate(full, root)
+            if locked:
+                return "deny", locked
+            return "allow", f"@CodeLead edits {name}"
+        name, _, edit = zone(full, root, feature, area)
         if mode == "gamedesigner":
             if edit == "design":
                 return decide_designer_edit(full, root, name)
@@ -537,6 +627,11 @@ def decide(data, session_value, root):
         if mode == "manager" and edit != "create":
             return "deny", ("@Manager does not edit code, assets or settings; it may only create new files in "
                             "Management/proposals. Ask the session that owns the area.")
+        if edit == "skeleton":
+            return "deny", SKELETON_MSG.format(name=name)
+        if edit == "allow" and any("InternalsVisibleTo" in s for s in edit_texts(ti)):
+            return "deny", ("InternalsVisibleTo belongs in AssemblyInfo.cs, which is the skeleton: only @CodeLead "
+                            "writes it. Ask @CodeLead.")
         if edit == "allow":
             if mode == "feature":
                 locked = design_gate(root, feature)
@@ -576,7 +671,7 @@ def decide(data, session_value, root):
         return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."
 
     if mode == "codelead" and tool in CODELEAD_UNITY:
-        return decide_codelead_unity(tool, ti)
+        return decide_codelead_unity(tool, ti, root)
 
     if tool == UNITY_ASSET_TOOL:
         return decide_unity_delete(ti, mode, feature, root, area, who)

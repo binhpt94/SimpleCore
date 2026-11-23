@@ -50,7 +50,7 @@ window.CORESIMPLE_SESSIONS = {
   features: [
     { id: "@human", group: "Master", label: "Phiên của người (tích hợp)", note: "Không giới hạn feature; vẫn bị hỏi khi sửa Core, _Composition, .claude. Biên dịch, chạy test, Play và sửa scene/prefab qua unity-mcp." },
     { id: "@Manager", group: "Leaders", label: "Phiên điều phối", note: "Không sửa code. Thấy báo cáo mới của các phiên ở đầu mỗi tin, nhắn các phiên bằng SendMessage, viết đề xuất trong Management/proposals. Tạo thư mục feature, service, Core, _Composition còn thiếu theo thiết kế live bằng python Management/tools/scaffold.py (chỉ thư mục, không code)." },
-    { id: "@CodeLead", group: "Leaders", label: "Phiên kiểm code", note: "Không sửa file nào. Đọc toàn bộ source nhóm Basic, Features, Services; biên dịch, chạy test, Play qua unity-mcp; giải quyết xung đột code và báo lỗi về phiên sở hữu (.claude/rules/codelead.md)." },
+    { id: "@CodeLead", group: "Leaders", label: "Phiên quản khung và kiểm code", note: "Chỉ sửa cấu trúc khung: Scripts/Contracts, Scripts/Internal/Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs của feature đã mở khoá code; *.asmdef, AssemblyInfo.cs, interface I*.cs của Core/_Composition. Ngoài khung không sửa gì; lượt có sửa file phải có báo cáo. Đọc toàn bộ source nhóm Basic, Features, Services; biên dịch, chạy test, Play qua unity-mcp; giải quyết xung đột code và báo lỗi về phiên sở hữu (.claude/rules/codelead.md)." },
     { id: "@GameDesigner", group: "Leaders", label: "Phiên thiết kế game", note: "Không code. Chỉ đọc Management/game-design và chỉ ghi trong Management/game-design/ai (cây đề xuất ở ai/idea), theo 4 vòng: ý tưởng, feature, quan hệ và định nghĩa, quyết định chi tiết (.claude/rules/gamedesigner.md). Mỗi node có data.md (các ý cốt lõi, mỗi ý có điểm AI) và CLAUDE.md (diễn giải). Ở tab Game design bạn chọn mode (Full Auto: AI tự quyết; User control: AI hỏi, bạn chấm), chấm điểm 0-10 và ghi phản hồi cho từng ý ở cả bảng đề xuất lẫn bảng đã chốt, trả lời câu hỏi, rồi bấm Sync (hoặc Chốt từng node) để chép node đạt sang live; không có gì tự sang live. Ý bị chấm dưới 5 hoặc data của node cha đổi thì node phải làm lại; lịch sử từng node nằm ở .history." },
     { id: "@Core", group: "Basic", label: "Phiên Core", note: "Chỉ sửa Assets/Core; đọc phần công khai của feature." },
     { id: "@Composition", group: "Basic", label: "Phiên Composition", note: "Chỉ sửa Assets/_Composition: Boot variant, scene, catalog asset; đọc phần công khai của feature. Việc cần Unity (scene, prefab) nhờ @human." },
@@ -85,7 +85,7 @@ window.CORESIMPLE_SESSIONS = {
     "1. <VIỆC 1>",
     "2. <VIỆC 2>",
     "",
-    "Trước khi sửa Scripts/Contracts của bạn, *.asmdef, AssemblyInfo.cs/InternalsVisibleTo: gửi @CodeLead ngữ cảnh, file, đề xuất và chờ thống nhất. Core, _Composition: nhờ @Core/@Composition. rules.json: dừng và hỏi người.",
+    "Khung chỉ đọc: Scripts/Contracts, Scripts/Internal/Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs (InternalsVisibleTo). Viết code mới trên lớp con ở phần còn lại của Internal/View. Cần đổi khung: gửi @CodeLead ngữ cảnh, file, đề xuất và chờ @CodeLead sửa. Core, _Composition: nhờ @Core/@Composition. rules.json: dừng và hỏi người.",
     "Xong thì báo @CodeLead (khối báo cáo); lỗi @CodeLead báo về thì tự sửa.",
     "Cần đổi thứ gì ở feature khác: viết đề xuất vào Management/proposals rồi dừng.",
     "Xoá file chỉ qua unity-mcp (manage_asset, action delete, path bắt đầu bằng Assets/).",

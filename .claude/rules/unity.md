@@ -1,6 +1,10 @@
 # Luật Unity mà validator không kiểm được
 Validator ép ranh giới. File này ghi phần còn lại; người duyệt sẽ soi theo từng mục.
 
+## Khung
+- Khung do @CodeLead viết và sửa; phiên sở hữu chỉ đọc (guard ép): `Scripts/Contracts`, `Scripts/Internal/Base`, `Scripts/View/Base`, mọi `*.asmdef`, `AssemblyInfo.cs`; ở Core/_Composition thêm các interface `I*.cs`. Bảng đầy đủ ở `.claude/rules/codelead.md`.
+- Code mới của feature là lớp con của lớp base, đặt ở phần còn lại của `Internal`/`View`. Thiếu chỗ móc trong lớp base thì nhờ @CodeLead thêm, không chép lớp base ra sửa.
+
 ## Contract
 - Chưa có feature khác cần thì để trong Internal. Không mở contract "phòng khi cần".
 - Contract chỉ gồm interface, enum, struct dữ liệu chỉ đọc. Không có logic, không có trạng thái sửa được.
