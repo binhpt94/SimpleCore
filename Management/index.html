@@ -488,6 +488,18 @@
     var status = put(form, el("p", "gap", ""));
     var resultBox = put(form, el("div", "gap"));
 
+    // Gom thread theo tầng trong danh sách chat của VS Code (Management/tools/vscode_groups.py).
+    var vsBox = put(pane, section("Nhóm trong VS Code"));
+    vsBox.style.marginTop = "16px";
+    add(vsBox, el("p", "muted", "Xếp mọi thread của Setup full vào 5 nhóm theo tầng (1 · Master … 5 · Features) trong danh sách chat của VS Code. " +
+      "VS Code đang chạy sẽ ghi đè thay đổi, nên phải tắt hẳn VS Code (mọi cửa sổ) rồi chạy lệnh dưới trong terminal ngoài VS Code; mở lại VS Code để thấy. " +
+      "Có sao lưu trước khi ghi; khôi phục bằng --restore. Nút bên dưới chỉ chạy được khi server này chạy ngoài VS Code."));
+    add(vsBox, commandBlock("python Management/tools/vscode_groups.py"));
+    var vsRow = put(vsBox, el("div", "gap"));
+    var vsBtn = put(vsRow, el("button", "copy", "Gom nhóm trong VS Code"));
+    vsBtn.type = "button";
+    var vsStatus = put(vsBox, el("p", "gap", ""));
+
     var listBox = put(pane, section("Thread hiện có"));
     listBox.style.marginTop = "16px";
     var listBody = put(listBox, el("div"));
@@ -529,22 +541,32 @@
         return (order.indexOf(tierOf(a)) - order.indexOf(tierOf(b))) || ((wanted[a.title] || 1e9) - (wanted[b.title] || 1e9))
           || a.title.localeCompare(b.title) || (a.modified < b.modified ? -1 : 1);
       });
+      var vs = data.vscode || { groups: {}, running: false, tierNames: {} };
+      vsBtn.disabled = !!vs.running;
+      if (!vsStatus.dataset.result) {
+        vsStatus.className = "gap " + (vs.running ? "muted" : "");
+        vsStatus.textContent = vs.running ? "VS Code đang chạy: tắt hẳn VS Code rồi chạy lệnh trên trong terminal ngoài." : "VS Code đang tắt: bấm nút để gom nhóm.";
+      }
       var table = put(listBody, el("table"));
-      add(table, headRow(["Tên", "Đang gán", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id"]));
+      add(table, headRow(["Tên", "Đang gán", "Nhóm VS Code", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id"]));
       var body = put(table, el("tbody")), lastTier = null;
       sorted.forEach(function (t) {
         var tier = tierOf(t);
         if (tier !== lastTier) {
           lastTier = tier;
           var head = el("tr"), cell = add(el("th", "", tier || "Ngoài các tầng"));
-          cell.colSpan = 7;
+          cell.colSpan = 8;
           add(body, add(head, cell));
         }
         var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")
           : t.unlisted ? el("span", "muted", "VS Code không hiện (tạo ngoài VS Code), bỏ qua")
           : (!wanted[t.title] ? el("span", "muted", "ngoài bộ setup")
           : (t.binding === t.title ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
-        add(body, row([t.title, t.binding || "—", (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
+        var inGroup = vs.groups[t.id] || "";
+        var wantGroup = tier && vs.tierNames ? vs.tierNames[tier] : "";
+        var vsCell = !wanted[t.title] || t.archived || t.unlisted ? el("span", "muted", inGroup || "—")
+          : (inGroup === wantGroup ? el("span", "ok-text", inGroup) : el("span", "bad-text", (inGroup || "chưa nhóm") + " → " + wantGroup));
+        add(body, row([t.title, t.binding || "—", vsCell, (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
           t.modified, state, el("code", "", t.id.slice(0, 8))]));
       });
       var made = {};
@@ -591,6 +613,21 @@
         refresh();
       });
     };
+    vsBtn.addEventListener("click", function () {
+      vsBtn.disabled = true;
+      vsStatus.className = "gap muted";
+      vsStatus.textContent = "Đang ghi…";
+      api("POST", "/api/vscode-groups", {}).then(function (res) {
+        vsStatus.dataset.result = "1";
+        if (!res.ok) { vsStatus.className = "gap bad-text"; vsStatus.textContent = res.error; return; }
+        vsStatus.className = "gap ok-text";
+        vsStatus.textContent = "Đã ghi: " + res.groups.map(function (g) { return g.name + " (" + g.count + ")"; }).join(", ") + ". Mở lại VS Code để thấy.";
+      }, function (e) {
+        vsStatus.dataset.result = "1";
+        vsStatus.className = "gap bad-text";
+        vsStatus.textContent = "Lỗi gọi server: " + e.message;
+      }).then(refresh);
+    });
     basicBtn.type = fullBtn.type = "button";
     basicBtn.addEventListener("click", function () { run("basic"); });
     fullBtn.addEventListener("click", function () { run("full"); });

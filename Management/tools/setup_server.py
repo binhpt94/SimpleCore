@@ -46,6 +46,8 @@ import gamedesign  # noqa: E402
 import guard  # noqa: E402
 import sync_page  # noqa: E402
 import validate  # noqa: E402
+import vscode_groups  # noqa: E402
+from vscode_groups import vscode_state  # noqa: E402
 
 BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Core", "@Composition"]
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
@@ -78,7 +80,7 @@ MAX_BODY = 4096
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
-              "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024}
+              "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY}
 
 
 def transcripts_dir():
@@ -86,15 +88,20 @@ def transcripts_dir():
     return Path.home() / ".claude" / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(ROOT))
 
 
-def vscode_state():
-    """The VS Code user state database (globalStorage/state.vscdb) where this OS keeps it."""
-    if os.name == "nt":
-        base = Path(os.environ.get("APPDATA") or Path.home() / "AppData" / "Roaming")
-    elif sys.platform == "darwin":
-        base = Path.home() / "Library" / "Application Support"
-    else:
-        base = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
-    return base / "Code" / "User" / "globalStorage" / "state.vscdb"
+def vscode_view():
+    """For the Setup page: each thread's group in the VS Code list, and whether VS Code runs (groups are then not
+    written; see vscode_groups.py)."""
+    return {"groups": vscode_groups.current_groups(ROOT), "running": vscode_groups.vscode_running(),
+            "tierNames": vscode_groups.TIER_NAMES}
+
+
+def group_in_vscode():
+    """Puts the threads of the full setup into the tier groups of the VS Code list (refused while VS Code runs)."""
+    try:
+        key, groups = vscode_groups.apply(ROOT, vscode_groups.setup_assignments())
+    except (ValueError, OSError, sqlite3.Error) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "groups": [{"name": g["name"], "count": len(g["sessionIds"])} for g in groups]}
 
 
 def archived_ids():
@@ -323,7 +330,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_error(403)
             if path == "/api/threads":
                 return self.send_json(200, {"threads": threads(), "sets": sets(), "models": MODELS, "efforts": EFFORTS,
-                                            "defaults": {"model": DEFAULT_MODEL, "effort": DEFAULT_EFFORT}})
+                                            "defaults": {"model": DEFAULT_MODEL, "effort": DEFAULT_EFFORT},
+                                            "vscode": vscode_view()})
             if path == "/api/gamedesign":
                 return self.send_json(200, sync_page.write_gamedesign(ROOT))
             return self.send_error(404)
@@ -364,6 +372,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, set_mode(str(data.get("pin") or ""), data.get("mode")))
             if self.path == "/api/gamedesign/answers":
                 return self.send_json(200, answer(data.get("path"), data.get("answers")))
+            if self.path == "/api/vscode-groups":
+                return self.send_json(200, group_in_vscode())
             pin, mode = str(data.get("pin") or ""), str(data.get("mode") or "")
             model = str(data.get("model") or DEFAULT_MODEL)
             effort = str(data.get("effort") or DEFAULT_EFFORT)

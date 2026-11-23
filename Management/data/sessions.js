@@ -31,6 +31,7 @@ window.CORESIMPLE_SESSIONS = {
       { title: "4. Trang quản lý và Setup", steps: [
         { text: "Mở trang qua server cục bộ để lưu được điểm, câu trả lời và tạo thread. Server chỉ nghe trên 127.0.0.1, cổng 8770.", command: "python Management/tools/setup_server.py" },
         { text: "Setup full gồm cả các feature mà thiết kế live đã khai trong code.json, kể cả khi chưa có thư mục trong Unity: thread được tạo và gán ngay, và sửa được sau khi @Manager tạo thư mục (lệnh dưới, có --dry-run để xem trước).", command: "python Management/tools/scaffold.py" },
+        { text: "Gom các thread theo tầng (1 · Master … 5 · Features) trong danh sách chat của VS Code: tắt hẳn VS Code (mọi cửa sổ), chạy lệnh trong terminal ngoài VS Code, rồi mở lại. VS Code đang chạy thì lệnh từ chối, vì nó sẽ ghi đè. Có sao lưu; khôi phục bằng --restore. Nơi extension lưu nhóm không có trong tài liệu; nếu bản cập nhật đổi cách lưu, lệnh dừng và báo, khi đó gom tay bằng chuột phải vào session.", command: "python Management/tools/vscode_groups.py" },
         { text: "Tạo thread cần lệnh claude (Claude Code CLI) có trong PATH. Thread đã lưu trữ trong VS Code được bỏ qua: server tự đọc trạng thái VS Code ở đúng chỗ của từng hệ (Windows: %APPDATA%\\Code, macOS: ~/Library/Application Support/Code, Linux: ~/.config/Code).", command: "claude --version" }
       ] },
       { title: "5. Git", steps: [
