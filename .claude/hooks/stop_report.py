@@ -12,14 +12,14 @@ hook's own message starts a new turn in the transcript); if it stops again witho
 is saved so the Manager still sees that the session changed files. A broken transcript lets the agent stop.
 """
 import json
-import ntpath
+import os.path
 import os
 import re
 import sys
 import time
 
 sys.dont_write_bytecode = True
-sys.path.insert(0, ntpath.dirname(ntpath.abspath(__file__)))      # `python -I` leaves the script folder out
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))      # `python -I` leaves the script folder out
 import guard  # noqa: E402
 
 CHANGE_TOOLS = guard.EDIT_TOOLS | {guard.UNITY_ASSET_TOOL}
@@ -88,14 +88,14 @@ def find_report(text):
 
 
 def save(root, role, body):
-    folder = ntpath.join(root, "Management", "reports")
+    folder = os.path.join(root, "Management", "reports")
     slug = re.sub(r"[^A-Za-z0-9]+", "-", role).strip("-") or "unknown"
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    path = ntpath.join(folder, f"{stamp}-{slug}.md")
+    path = os.path.join(folder, f"{stamp}-{slug}.md")
     n = 1
-    while ntpath.exists(path):
+    while os.path.exists(path):
         n += 1
-        path = ntpath.join(folder, f"{stamp}-{slug}-{n}.md")
+        path = os.path.join(folder, f"{stamp}-{slug}-{n}.md")
     os.makedirs(folder, exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         f.write(f"<!-- {time.strftime('%Y-%m-%d %H:%M:%S')} · FEATURE={role} · ghi bởi stop_report.py -->\n{body}\n")
@@ -105,7 +105,7 @@ def save(root, role, body):
 def pending_path(session_id, store):
     """Mark that this chat was sent back for a missing report; None when the session id is unusable."""
     p = guard.binding_path(session_id, store)
-    return ntpath.join(store, "reports-pending", ntpath.basename(p)) if p else None
+    return os.path.join(store, "reports-pending", os.path.basename(p)) if p else None
 
 
 def main(argv):
@@ -116,9 +116,9 @@ def main(argv):
             data = {}
         if not isinstance(data, dict):
             data = {}
-        root, store = ntpath.dirname(ntpath.dirname(ntpath.dirname(ntpath.abspath(__file__)))), guard.STORE_DIR
+        root, store = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), guard.STORE_DIR
         if len(argv) == 5 and argv[1] == "--root" and argv[3] == "--store":      # test-only override
-            root, store = ntpath.abspath(argv[2]), argv[4]
+            root, store = os.path.abspath(argv[2]), argv[4]
         raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
         role = guard.role_of(raw)
         if role in ("@human", "@Manager", "@CodeLead", "@GameDesigner") or not (role or guard.valid_feature(raw, root)):
@@ -152,7 +152,7 @@ def main(argv):
             done()
             return 0
         if pending:
-            os.makedirs(ntpath.dirname(pending), exist_ok=True)
+            os.makedirs(os.path.dirname(pending), exist_ok=True)
             with open(pending, "w", encoding="utf-8") as f:
                 f.write(time.strftime("%Y-%m-%d %H:%M:%S"))
         reason = (f"This turn changed files, so it must end with a report for @Manager ({problem}). "

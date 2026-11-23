@@ -22,7 +22,7 @@ import getpass
 import hashlib
 import hmac
 import json
-import ntpath
+import os.path
 import os
 import re
 import secrets
@@ -30,7 +30,7 @@ import sys
 import time
 
 sys.dont_write_bytecode = True
-sys.path.insert(0, ntpath.dirname(ntpath.abspath(__file__)))      # `python -I` leaves the script folder out
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))      # `python -I` leaves the script folder out
 import guard  # noqa: E402
 
 MAX_FAILURES = 5
@@ -49,7 +49,7 @@ def pin_hash(pin, salt):
 
 
 def write_json(path, value):
-    os.makedirs(ntpath.dirname(path), exist_ok=True)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(value, f)
@@ -67,16 +67,16 @@ def read_json(path, default):
 def write_pin(store, pin):
     """Stores the PIN as a salted hash and clears the wrong-PIN counter."""
     salt = secrets.token_bytes(16)
-    write_json(ntpath.join(store, "pin.json"), {"salt": salt.hex(), "hash": pin_hash(pin, salt)})
-    write_json(ntpath.join(store, "failures.json"), 0)
+    write_json(os.path.join(store, "pin.json"), {"salt": salt.hex(), "hash": pin_hash(pin, salt)})
+    write_json(os.path.join(store, "failures.json"), 0)
 
 
 def check_pin(store, pin):
     """None when the PIN is right, otherwise the message for the human."""
-    saved = read_json(ntpath.join(store, "pin.json"), None)
+    saved = read_json(os.path.join(store, "pin.json"), None)
     if not isinstance(saved, dict) or not saved.get("salt") or not saved.get("hash"):
         return "Chưa đặt PIN. Chạy trong terminal của bạn: python .claude/hooks/bind_session.py --set-pin"
-    failures_path = ntpath.join(store, "failures.json")
+    failures_path = os.path.join(store, "failures.json")
     failures = read_json(failures_path, 0)
     if not isinstance(failures, int) or failures >= MAX_FAILURES:
         return (f"Đã khoá vì sai PIN {MAX_FAILURES} lần. Đặt lại PIN trong terminal của bạn: "
@@ -146,12 +146,12 @@ def report_field(text, name):
 def unread_reports(root, store, reader):
     """Reports in Management/reports `reader` (@Manager or @CodeLead) has not been shown yet; marks them as shown.
     Each reader keeps its own list."""
-    folder = ntpath.join(root, "Management", "reports")
+    folder = os.path.join(root, "Management", "reports")
     try:
         names = sorted(n for n in os.listdir(folder) if n.endswith(".md"))
     except OSError:
         names = []
-    seen_path = ntpath.join(store, reader.strip("@").lower() + "-seen.json")
+    seen_path = os.path.join(store, reader.strip("@").lower() + "-seen.json")
     seen = read_json(seen_path, [])
     seen = set(seen) if isinstance(seen, list) else set()
     new = [n for n in names if n not in seen]
@@ -160,7 +160,7 @@ def unread_reports(root, store, reader):
     lines = []
     for n in new[-MAX_LISTED_REPORTS:]:
         try:
-            with open(ntpath.join(folder, n), encoding="utf-8") as f:
+            with open(os.path.join(folder, n), encoding="utf-8") as f:
                 text = f.read()
         except OSError:
             continue
@@ -174,7 +174,7 @@ def unread_reports(root, store, reader):
 def code_gate(root, feature):
     """Whether this Features/Services chat may code now (the gate guard.py applies), in one sentence."""
     try:
-        tools = ntpath.join(root, "Management", "tools")
+        tools = os.path.join(root, "Management", "tools")
         if tools not in sys.path:
             sys.path.insert(0, tools)
         import gamedesign
@@ -189,7 +189,7 @@ def code_gate(root, feature):
 
 def designer_mode(root):
     """What the mode in Management/game-design/mode.json asks of @GameDesigner; read on every prompt."""
-    mode = read_json(ntpath.join(root, "Management", "game-design", "mode.json"), None)
+    mode = read_json(os.path.join(root, "Management", "game-design", "mode.json"), None)
     if isinstance(mode, dict) and mode.get("mode") == "user":
         return ("Mode hiện tại: User control. Không tự quyết thay người: mọi điểm cần quyết ghi thành câu hỏi trong "
                 ".ai-need-user-choose/questions.json của node đó; câu trả lời của người nằm ở answers.json cùng thư "
@@ -277,10 +277,10 @@ def set_pin(store):
 
 
 def main(argv):
-    root = ntpath.dirname(ntpath.dirname(ntpath.dirname(ntpath.abspath(__file__))))
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     store = guard.STORE_DIR
     if len(argv) == 5 and argv[1] == "--root" and argv[3] == "--store":      # test-only override
-        root, store = ntpath.abspath(argv[2]), argv[4]
+        root, store = os.path.abspath(argv[2]), argv[4]
     elif len(argv) == 2 and argv[1] == "--set-pin":
         return set_pin(store)
     raw = b""

@@ -26,6 +26,15 @@ the root CLAUDE.md. Changing their own Contracts, an .asmdef or InternalsVisible
 Features and Services may edit their own folder only once its design has reached round 4 in the live table
 (Management/tools/gamedesign.py, code_allowed); reading is not gated, and neither are @Core and @Composition.
 
+Paths (Windows and Linux/macOS):
+    Every path is turned into one canonical form before any check: absolute, normalised, '/' as separator
+    ('D:/Proj/x' on Windows, '/home/u/Proj/x' elsewhere). resolve_target does it; nothing else splits paths.
+    Windows: case-insensitive; '/d/x' (Git Bash) means 'd:/x'; UNC, drive-relative, ADS, 8.3 names, trailing
+             dot/space are refused.
+    POSIX:   case-sensitive; a backslash is refused (it is a file-name character there, not a separator).
+    Zone names that only restrict (deny) match in any letter case; zones that grant (allow/create/design/ask)
+    match the exact spelling on a case-sensitive system, so 'assets/core' on Linux is not Assets/Core.
+
 Default is deny: unknown tools, unknown zones and any error in this script are blocked.
 Reads the hook JSON on stdin, writes the decision JSON on stdout. Standard library only.
 Tests: python .claude/hooks/test_guard.py
@@ -33,25 +42,27 @@ Tests: python .claude/hooks/test_guard.py
 import json
 import ntpath
 import os
+import posixpath
 import re
 import stat
 import sys
 
 # Shell commands an agent may run. Each entry is a regex that must match the WHOLE command.
-# The command must be run from the project root.
+# The command must be run from the project root. `python3` is accepted too (Linux/macOS).
+PY = r"python3? "
 ALLOWED_COMMANDS = [
-    r"python Management/tools/validate\.py( --feature ((_Services/)?[A-Za-z][A-Za-z0-9]*|_Composition))?",
+    PY + r"Management/tools/validate\.py( --feature ((_Services/)?[A-Za-z][A-Za-z0-9]*|_Composition))?",
 ]
 
 # One more command, for @GameDesigner only: delete a file or a node inside Management/game-design/ai.
 DESIGNER_COMMANDS = [
-    r"python Management/tools/gd_delete\.py ai(/[A-Za-z0-9._-]+)+",
-    r"python Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+    PY + r"Management/tools/gd_delete\.py ai(/[A-Za-z0-9._-]+)+",
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
 ]
 # For @CodeLead only: mark the progress of a design leaf after checking the code, and look at the design's status.
 CODELEAD_COMMANDS = [
-    r"python Management/tools/gd_progress\.py ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* (idea|prototype|full) (todo|doing|done)",
-    r"python Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+    PY + r"Management/tools/gd_progress\.py ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* (idea|prototype|full) (todo|doing|done)",
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
 ]
 
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
@@ -69,8 +80,7 @@ DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE}
 # only the page and the history code write (the human's scores, the node's history).
 DESIGN_TREE, DESIGN_CHOOSE, DESIGN_ANSWERS = "idea", ".ai-need-user-choose", "answers.json"
 DESIGN_KEPT = {".user-review", ".history", ".progress"}
-DESIGNER_RULES_DIR = ntpath.join(".claude", "rules")      # the shared rules and one file per round
-DESIGNER_RULES_RX = re.compile(r"^gamedesigner(\.round[1-4])?\.md$", re.I)
+DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per round
 HUMAN_ASK_ZONES = {".claude", "_Composition", "Core", DESIGN_LIVE}
 # FEATURE values that are not feature folders.
 ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead", "@GameDesigner")
@@ -102,15 +112,141 @@ CODELEAD_UNITY = {
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")
 SHELL_META_RX = re.compile(r"[;&|<>`$(){}\r\n]")
 # Per-chat bindings and the PIN. Outside the project, so no agent session can read or write it.
-STORE_DIR = ntpath.join(os.path.expanduser("~"), ".coresimple-guard")
+STORE_DIR = os.path.join(os.path.expanduser("~"), ".coresimple-guard")
 SESSION_RX = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
+# --- the file system this hook runs on
+WINDOWS = os.name == "nt"
+CASE = re.I if WINDOWS else 0                    # regex flag for zones that grant something
+DESIGNER_RULES_RX = re.compile(r"^gamedesigner(\.round[1-4])?\.md$", CASE)
+ILLEGAL_SEG_RX = re.compile(r'[*?"<>|]')
 
+
+# ---------------------------------------------------------------- paths
+def fold(s):
+    """Path text as the file system compares it."""
+    return s.lower() if WINDOWS else s
+
+
+def same(a, b):
+    return fold(a) == fold(b)
+
+
+def exact(segs, path):
+    """True when the path segments are exactly `path` ('A/B/C'), compared as the file system does."""
+    want = path.split("/")
+    return len(segs) == len(want) and all(same(a, b) for a, b in zip(segs, want))
+
+
+def under(base, *parts):
+    """Canonical path of parts below a canonical base."""
+    return "/".join([base] + [p.strip("/") for p in parts])
+
+
+def canonical_root(p):
+    """Canonical form of the project root (or any trusted absolute folder)."""
+    p = os.path.abspath(p)
+    if WINDOWS:
+        return ntpath.normpath(p).replace("\\", "/").rstrip("/")
+    p = posixpath.normpath(p)
+    if p.startswith("//"):
+        p = "/" + p.lstrip("/")
+    return p.rstrip("/")
+
+
+def _resolve_windows(p, cwd):
+    m = re.match(r"^/([a-zA-Z])(?:/(.*))?$", p)          # Git Bash: /d/x -> d:\x
+    if m:
+        p = m.group(1) + ":\\" + (m.group(2) or "")
+    p = p.replace("/", "\\")
+    if p.startswith("\\\\"):
+        raise ValueError(f"UNC or device path: {p}")
+    if not re.match(r"^[a-zA-Z]:\\", p):
+        if p.startswith("\\") or re.match(r"^[a-zA-Z]:", p):
+            raise ValueError(f"drive-relative path: {p}")
+        p = cwd.replace("/", "\\") + "\\" + p
+    if ":" in p[2:]:
+        raise ValueError(f"alternate data stream: {p}")
+    for seg in p[3:].split("\\"):
+        if seg in ("", ".", ".."):
+            continue
+        if seg[-1] in ". ":
+            raise ValueError(f"segment ends with dot or space: {p}")
+        if re.search(r"~\d", seg):
+            raise ValueError(f"8.3 short name: {p}")
+        if ILLEGAL_SEG_RX.search(seg):
+            raise ValueError(f"wildcard or illegal character: {p}")
+    return ntpath.normpath(p).replace("\\", "/").rstrip("/")
+
+
+def _resolve_posix(p, cwd):
+    if "\\" in p:
+        raise ValueError(f"backslash in path (not a separator on this system; use '/'): {p}")
+    if not p.startswith("/"):
+        p = cwd + "/" + p
+    for seg in p.split("/"):
+        if ILLEGAL_SEG_RX.search(seg):
+            raise ValueError(f"wildcard or illegal character: {p}")
+    p = posixpath.normpath(p)
+    if p.startswith("//"):
+        p = "/" + p.lstrip("/")
+    return p.rstrip("/")
+
+
+def resolve_target(p, cwd):
+    """Canonical path (absolute, normalised, '/' separators) of p, relative paths taken from the canonical cwd.
+    Raises ValueError on anything that could dodge the zone check."""
+    if not p or not p.strip():
+        return cwd
+    if "\0" in p:
+        raise ValueError("NUL character in path")
+    if p.startswith("~"):
+        raise ValueError(f"home-relative path: {p}")
+    return _resolve_windows(p, cwd) if WINDOWS else _resolve_posix(p, cwd)
+
+
+def inside(full, root):
+    return fold(full).startswith(fold(root) + "/")
+
+
+def rel_segments(full, root):
+    """Segments of a canonical path below root (call only when inside(full, root))."""
+    return full[len(root) + 1:].split("/")
+
+
+def is_link(path):
+    """True for a symlink (any OS) or a junction/reparse point (Windows); None when the path does not exist."""
+    try:
+        st = os.lstat(path)
+    except (FileNotFoundError, NotADirectoryError):
+        return None
+    if stat.S_ISLNK(st.st_mode):
+        return True
+    reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    return bool(getattr(st, "st_file_attributes", 0) & reparse)
+
+
+def goes_through_link(full, root):
+    """True when any existing folder/file between the root and the target is a link or junction."""
+    if not inside(full, root):
+        return False
+    cur = root
+    for seg in rel_segments(full, root):
+        cur = cur + "/" + seg
+        link = is_link(cur)
+        if link is None:
+            return False
+        if link:
+            return True
+    return False
+
+
+# ---------------------------------------------------------------- sessions
 def binding_path(session_id, store):
     """File that holds the binding of one chat, or None when the session id is not usable as a file name."""
     if not store or not isinstance(session_id, str) or not SESSION_RX.match(session_id):
         return None
-    return ntpath.join(store, "sessions", session_id + ".json")
+    return os.path.join(store, "sessions", session_id + ".json")
 
 
 def bound_feature(session_id, store):
@@ -134,7 +270,7 @@ def session_feature(session_id, store):
 def valid_feature(raw, root):
     """True when raw names an existing feature folder."""
     return bool(FEATURE_RX.match(raw)) and os.path.isdir(
-        ntpath.join(root, "UnityProject", "Assets", "Features", *raw.split("/")))
+        os.path.join(root, "UnityProject", "Assets", "Features", *raw.split("/")))
 
 
 def role_of(raw):
@@ -148,64 +284,18 @@ def canonical_role(typed):
     return next((r for r in ROLES if r.lower() == (typed or "").strip().lower()), None)
 
 
-def resolve_target(p, cwd):
-    """Absolute, normalised Windows path. Raises ValueError on anything that could dodge the zone check."""
-    if not p or not p.strip():
-        p = cwd
-    m = re.match(r"^/([a-zA-Z])(?:/(.*))?$", p)          # /d/x -> d:\x
-    if m:
-        p = m.group(1) + ":\\" + (m.group(2) or "")
-    p = p.replace("/", "\\")
-    if p.startswith("\\\\"):
-        raise ValueError(f"UNC or device path: {p}")
-    if not re.match(r"^[a-zA-Z]:\\", p):
-        if p.startswith("\\") or re.match(r"^[a-zA-Z]:", p):
-            raise ValueError(f"drive-relative path: {p}")
-        p = ntpath.join(cwd, p)
-    if ":" in p[2:]:
-        raise ValueError(f"alternate data stream: {p}")
-    for seg in p[3:].split("\\"):
-        if seg in ("", ".", ".."):
-            continue
-        if seg[-1] in ". ":
-            raise ValueError(f"segment ends with dot or space: {p}")
-        if re.search(r"~\d", seg):
-            raise ValueError(f"8.3 short name: {p}")
-        if re.search(r'[*?"<>|]', seg):
-            raise ValueError(f"wildcard or illegal character: {p}")
-    return ntpath.normpath(p).rstrip("\\")
-
-
-def inside(full, root):
-    return full.lower().startswith(root.lower() + "\\")
-
-
-def goes_through_link(full, root):
-    """True when any existing folder/file between the root and the target is a link or junction."""
-    if not inside(full, root):
-        return False
-    cur = root
-    for seg in full[len(root) + 1:].split("\\"):
-        cur = cur + "\\" + seg
-        try:
-            attrs = os.lstat(cur).st_file_attributes
-        except FileNotFoundError:
-            return False
-        if attrs & stat.FILE_ATTRIBUTE_REPARSE_POINT:
-            return True
-    return False
-
-
+# ---------------------------------------------------------------- zones
 def zone(full, root, feature, area=None, read_all=False):
-    """(name, readable, edit) for a path; edit is 'allow' | 'ask' | 'create' | 'design' | 'deny'.
+    """(name, readable, edit) for a canonical path; edit is 'allow' | 'ask' | 'create' | 'design' | 'deny'.
     'design': only @GameDesigner edits there.
     feature: the session's own feature; area: "Core" or "_Composition" for @Core / @Composition;
-    read_all: @CodeLead, who may read the private parts of every feature as well."""
-    if full.lower() == root.lower():
+    read_all: @CodeLead, who may read the private parts of every feature as well.
+    Checks that only deny match in any letter case; checks that grant match as the file system compares."""
+    if same(full, root):
         return "project root", False, "deny"
     if not inside(full, root):
         return "outside the project", False, "deny"
-    seg = full[len(root) + 1:].split("\\")
+    seg = rel_segments(full, root)
     low = [s.lower() for s in seg]
     n = len(seg)
 
@@ -214,16 +304,22 @@ def zone(full, root, feature, area=None, read_all=False):
     if low[0] == "claude.md" and n == 1:
         return "root CLAUDE.md", True, "deny"
     if low[0] == "management":
+        if not same(seg[0], "Management"):
+            return "Management", True, "deny"
         if n >= 2 and low[1] == "proposals":
-            return "Management/proposals", True, "create"
+            if exact(seg[:2], "Management/proposals"):
+                return "Management/proposals", True, "create"
+            return "Management", True, "deny"
         if n >= 2 and low[1] == "game-design":
-            if n >= 3 and low[2] == "ai":
+            if n >= 3 and low[2] == "ai" and exact(seg[:3], DESIGN_AI):
                 return DESIGN_AI, True, "design"
             if n >= 3 and low[2] == "live":
                 return DESIGN_LIVE, True, "deny"
             return DESIGN_BASE, True, "deny"
         if low[1:] == ["tools", "rules.json"]:
-            return "Management/tools/rules.json", True, "ask"
+            if exact(seg, "Management/tools/rules.json"):
+                return "Management/tools/rules.json", True, "ask"
+            return "Management", True, "deny"
         return "Management", True, "deny"
     if low[0] != "unityproject" or n < 2:
         return "unlisted", False, "deny"
@@ -232,36 +328,44 @@ def zone(full, root, feature, area=None, read_all=False):
         return seg[1], False, "deny"
     if low[1] in ("packages", "projectsettings"):
         return seg[1], True, "deny"
-    if low[1] != "assets" or n < 3:
+    if not exact(seg[:2], "UnityProject/Assets") or n < 3:
         return "unlisted", False, "deny"
 
     # Only @Core / @Composition edit Core / _Composition; a feature session asks them.
     if low[2] == "_composition":
-        return ("own _Composition", True, "allow") if area == "_Composition" else ("_Composition", True, "deny")
+        if area == "_Composition" and same(seg[2], "_Composition"):
+            return "own _Composition", True, "allow"
+        return "_Composition", True, "deny"
     if low[2] == "core":
-        return ("own Core", True, "allow") if area == "Core" else ("Core", True, "deny")
-    if low[2] != "features" or n < 4:
+        if area == "Core" and same(seg[2], "Core"):
+            return "own Core", True, "allow"
+        return "Core", True, "deny"
+    if not same(seg[2], "Features") or n < 4:
         return "unlisted", False, "deny"
 
     name, i = seg[3], 4
     if low[3] == "_services":
         if n < 5:
             return "unlisted", False, "deny"
-        name, i = "_Services/" + seg[4], 5
+        name, i = seg[3] + "/" + seg[4], 5      # keeps the spelling on disk; same() decides if it is ours
     rest = "/".join(seg[i:])
 
-    if feature and name.lower() == feature.lower():
-        if re.match(r"^Scripts/Contracts(/|$)", rest, re.I):
+    if feature and same(name, feature):
+        if re.match(r"^Scripts/Contracts(/|$)", rest, CASE):
             return "own Contracts", True, "allow"
         return "own feature", True, "allow"
     # The CLAUDE.md at a feature's root describes it to the others: readable by all, like its Contracts.
-    if re.match(r"^(Scripts/Contracts|FeatureAssets/Public)(/|$)", rest, re.I) or rest.lower() == "claude.md":
+    if re.match(r"^(Scripts/Contracts|FeatureAssets/Public)(/|$)", rest, CASE) or same(rest, "CLAUDE.md"):
         return f"public part of feature {name}", True, "deny"
     return f"private part of feature {name}", read_all, "deny"
 
 
 def text_of(value):
     return value if isinstance(value, str) else ""
+
+
+def is_asmref(full):
+    return full.lower().endswith(".asmref")
 
 
 def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
@@ -272,18 +376,18 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         return "deny", "FEATURE is not set or is not an existing feature folder; deleting is blocked"
     if mode in ("manager", "codelead", "gamedesigner"):
         return "deny", f"{who} does not change the project; ask the session that owns the file"
-    path = text_of(ti.get("path")).replace("\\", "/")
+    path = text_of(ti.get("path")).replace("\\", "/")      # a Unity asset path: '/' on every OS
     if not re.match(r"^Assets/[^/]", path):
         return "deny", "unity-mcp delete: write the path from the Unity project root, starting with 'Assets/'"
     full = resolve_target("UnityProject/" + path, root)
-    if not inside(full, ntpath.join(root, "UnityProject", "Assets")):
+    if not inside(full, under(root, "UnityProject", "Assets")):
         return "deny", "unity-mcp delete: the path leaves UnityProject/Assets"
     if goes_through_link(full, root):
         return "deny", "path goes through a link or junction"
     name, _, edit = zone(full, root, feature, area)
     if edit != "allow":
         return "deny", f"FEATURE={who} may not delete in: {name}"
-    if full.lower().endswith(".asmref"):
+    if is_asmref(full):
         return "deny", ".asmref files are forbidden"
     if mode == "feature":
         locked = design_gate(root, feature)
@@ -294,11 +398,19 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
     return "allow", f"delete inside {name}"
 
 
+def gamedesign_module(root):
+    tools = os.path.join(root, "Management", "tools")
+    if tools not in sys.path:
+        sys.path.insert(0, tools)
+    import gamedesign
+    return gamedesign
+
+
 def decide_designer_edit(full, root, name):
     """@GameDesigner writing inside Management/game-design/ai: never the human's answers or scores, never the
     history; and inside the proposed tree only where the write gate lets it (Management/tools/gamedesign.py, the
     same code the page uses)."""
-    seg = full[len(root) + 1:].split("\\")[3:]      # below Management\game-design\ai
+    seg = rel_segments(full, root)[3:]      # below Management/game-design/ai
     low = [s.lower() for s in seg]
     if low and low[-1] == DESIGN_ANSWERS and DESIGN_CHOOSE in low:
         return "deny", (f"{DESIGN_ANSWERS} holds the human's answers; only the management page writes it. "
@@ -307,32 +419,26 @@ def decide_designer_edit(full, root, name):
         return "deny", (".user-review (the human's scores and feedback), .history (the node's history) and "
                         ".progress (what is built) are written only by the management page and its tools. "
                         "Read them; do not write them.")
-    if low[:1] == [DESIGN_TREE]:
+    if seg[:1] and same(seg[0], DESIGN_TREE):
         keys = []
         for s in seg[1:-1]:      # the node folders between the tree root and the file
             if s.startswith("."):
                 break
             keys.append(s)
-        tools = ntpath.join(root, "Management", "tools")
-        if tools not in sys.path:
-            sys.path.insert(0, tools)
-        import gamedesign
-        ok, reason = gamedesign.can_write_node(root, keys)
+        ok, reason = gamedesign_module(root).can_write_node(root, keys)
         if not ok:
             return "deny", ("this node is locked because a node above it is not approved yet "
                             f"({reason}). Redo that node if it is yours to redo, otherwise stop and tell the human; "
                             "do not work on this round until then.")
+    elif low[:1] == [DESIGN_TREE]:      # 'Idea' on a case-sensitive system: not the tree, refuse
+        return "deny", f"'{seg[0]}' is not the design tree '{DESIGN_TREE}'"
     return "allow", f"edit inside {name}"
 
 
 def design_gate(root, feature):
     """None when the Features/Services session `feature` may code now, otherwise the reason it may not: its design
     must have reached round 4 in the live table (Management/tools/gamedesign.py, the same code the page uses)."""
-    tools = ntpath.join(root, "Management", "tools")
-    if tools not in sys.path:
-        sys.path.insert(0, tools)
-    import gamedesign
-    ok, reason = gamedesign.code_allowed(root, feature)
+    ok, reason = gamedesign_module(root).code_allowed(root, feature)
     return None if ok else ("this feature may not be coded yet: " + reason + ". Stop and tell the human; the design "
                             "is @GameDesigner's work and the human fixes it into live.")
 
@@ -355,7 +461,7 @@ def decide(data, session_value, root):
     ti = data.get("tool_input")
     if not isinstance(ti, dict):
         ti = {}
-    root = ntpath.normpath(root).rstrip("\\")
+    root = canonical_root(root)
     cwd = resolve_target(text_of(data.get("cwd")), root) if data.get("cwd") else root
 
     # --- who is this session?
@@ -412,7 +518,7 @@ def decide(data, session_value, root):
                             "why); it makes the change. See .claude/rules/codelead.md.")
         name, _, edit = zone(full, root, feature, area)
         # Files that define the boundary itself.
-        if full.lower().endswith(".asmref"):
+        if is_asmref(full):
             return "deny", ".asmref files are forbidden: they put code into another assembly"
         if mode == "gamedesigner":
             if edit == "design":
@@ -449,15 +555,16 @@ def decide(data, session_value, root):
             target = text_of(ti.get("path"))
             # Glob.pattern and Grep.glob are file globs; Grep.pattern is a regex and is not a path.
             glob = text_of(ti.get("pattern") if tool == "Glob" else ti.get("glob"))
-            if ".." in glob or re.match(r"^([a-zA-Z]:|[\\/])", glob):
+            if ".." in glob or re.match(r"^([a-zA-Z]:|[\\/~])", glob):
                 return "deny", 'glob may not be absolute or contain ".."; set the search folder with path instead'
         full = resolve_target(target, cwd)
         if goes_through_link(full, root):
             return "deny", "path goes through a link or junction"
         name, readable, _ = zone(full, root, feature, area, read_all)
         if mode == "gamedesigner":      # sees the design tree and its own rules, nothing else
-            readable = name in DESIGN_ZONES or (ntpath.dirname(full).lower() == ntpath.join(root, DESIGNER_RULES_DIR).lower()
-                                                and bool(DESIGNER_RULES_RX.match(ntpath.basename(full))))
+            readable = name in DESIGN_ZONES or (
+                same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
+                and bool(DESIGNER_RULES_RX.match(posixpath.basename(full))))
         if readable:
             return "allow", f"read inside {name}"
         return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."
@@ -474,10 +581,10 @@ def decide(data, session_value, root):
 def main(argv):
     try:
         try:
-            root = ntpath.dirname(ntpath.dirname(ntpath.dirname(ntpath.abspath(__file__))))
+            root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             store = STORE_DIR
             if len(argv) in (3, 5) and argv[1] == "--root":      # test-only override; the real hook never passes it
-                root = ntpath.abspath(argv[2])
+                root = os.path.abspath(argv[2])
                 store = argv[4] if len(argv) == 5 and argv[3] == "--store" else None
             data = json.loads(sys.stdin.buffer.read().decode("utf-8-sig"))
             if not isinstance(data, dict):
@@ -498,3 +605,4 @@ def main(argv):
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
+

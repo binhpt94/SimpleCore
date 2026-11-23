@@ -36,17 +36,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I \"D:/AI/CoreSimple/.claude/hooks/stop_validate.py\"",
+            "command": "python -I \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop_validate.py\"",
             "timeout": 60
           },
           {
             "type": "command",
-            "command": "python -I \"D:/AI/CoreSimple/.claude/hooks/stop_report.py\"",
+            "command": "python -I \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop_report.py\"",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "python -I \"D:/AI/CoreSimple/Management/tools/sync_page.py\"",
+            "command": "python -I \"$CLAUDE_PROJECT_DIR/Management/tools/sync_page.py\"",
             "timeout": 60
           }
         ]
@@ -57,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I \"D:/AI/CoreSimple/.claude/hooks/bind_session.py\"",
+            "command": "python -I \"$CLAUDE_PROJECT_DIR/.claude/hooks/bind_session.py\"",
             "timeout": 15
           }
         ]
@@ -69,7 +69,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -I \"D:/AI/CoreSimple/.claude/hooks/guard.py\"",
+            "command": "python -I \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard.py\"",
             "timeout": 15
           }
         ]
