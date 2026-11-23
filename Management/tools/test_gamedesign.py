@@ -573,6 +573,13 @@ def run_code_names(root):
           [("_Services/Popup", "feature-popup"), ("Hero", "feature-hero")])
     put(root, "live/feature-hero/skills/code.json", '{"unity": ["Skills"]}')
     check("code.json below round 2 does not count", [n for n, _ in gd.live_code_names(root)], ["_Services/Popup", "Hero"])
+    check("live features: declared names, and the suggested name of a node without code.json", gd.live_feature_names(root),
+          [("_Services/Popup", "feature-popup", True), ("Hero", "feature-hero", True), ("Wallet", "feature-wallet", False)])
+    put(root, "live/feature-wallet/code.json", "{ broken")
+    put(root, "live/feature-lost/code.json", '{"unity": ["Lost"]}')      # a folder without data.md is no node
+    check("a broken code.json suggests nothing; code.json without a node still declares",
+          [n for n, _, _ in gd.live_feature_names(root)], ["_Services/Popup", "Hero", "Lost"])
+    check("the code gate still needs code.json in live", gd.code_allowed(root, "Wallet")[0], False)
 
 
 def main():

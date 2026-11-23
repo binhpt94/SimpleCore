@@ -3,8 +3,10 @@
 
     python Management/tools/scaffold.py [--dry-run]          run from the project root
 
-Names come from the code.json of the round-2 nodes in Management/game-design/live (gamedesign.live_code_names),
-plus Assets/Core and Assets/_Composition. Each missing feature or service folder gets the standard layout:
+Names come from the feature nodes (round 2) of Management/game-design/live: the folder its code.json names, or the
+name GD will give it from its key while it has no code.json yet (gamedesign.live_feature_names), plus Assets/Core
+and Assets/_Composition. The code gate is unchanged: a folder made here is coded only once its node has code.json
+in live and has reached round 4. Each missing feature or service folder gets the standard layout:
     Scripts/Contracts  Scripts/Internal  Scripts/View  Tests  FeatureAssets/Public  FeatureAssets/Private
 with an empty .gitkeep in each of them (Unity skips hidden files; git keeps the empty folder, so the folder .meta
 Unity writes is never left without its folder). Core and _Composition get an empty folder with a .gitkeep.
@@ -46,9 +48,10 @@ def targets(root):
     owner: the live node that names the folder, or the area session."""
     assets = Path(root) / "UnityProject" / "Assets"
     out = [(area, assets / area, [""], "@" + area.strip("_")) for area in AREAS]
-    for name, node in gd.live_code_names(root):
+    for name, node, declared in gd.live_feature_names(root):
         check_name(name)
-        out.append((name, assets.joinpath("Features", *name.split("/")), list(FEATURE_LAYOUT), f"live/{node}"))
+        owner = f"live/{node}" + ("" if declared else ", tên đề xuất: node chưa có code.json")
+        out.append((name, assets.joinpath("Features", *name.split("/")), list(FEATURE_LAYOUT), owner))
     return out
 
 

@@ -79,6 +79,18 @@ def run_layout(root):
     check("running again changes nothing", (scaffold.scaffold(root)[0], tree(root)), ([], before))
 
 
+def run_suggested(root):
+    live = gd.table_dir(root, "live")
+    for key in ("feature-popup-lose", "feature-hero"):
+        (live / key).mkdir(parents=True)
+        (live / key / gd.DATA_FILE).write_text("# x\n", encoding="utf-8")
+    code(root, "feature-hero", "Hero")
+    created = scaffold.scaffold(root)[0]
+    check("a live feature without code.json gets its folder under the name GD will give it",
+          [(l, "tên đề xuất" in o) for l, o in created], [("Core", False), ("_Composition", False), ("Hero", False), ("PopupLose", True)])
+    check("with the standard layout", (Path(root) / "UnityProject/Assets/Features/PopupLose/Scripts/View/.gitkeep").is_file())
+
+
 def run_existing(root):
     own = Path(root) / "UnityProject/Assets/Features/Wallet"
     (own / "Scripts" / "Internal").mkdir(parents=True)
@@ -131,7 +143,7 @@ def run_cli(root):
 
 
 def main():
-    for case in (run_layout, run_existing, run_refusals, run_cli):
+    for case in (run_layout, run_suggested, run_existing, run_refusals, run_cli):
         root = tempfile.mkdtemp(prefix="scaffx-")
         try:
             case(root)

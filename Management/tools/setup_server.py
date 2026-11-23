@@ -50,6 +50,7 @@ import validate  # noqa: E402
 BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Core", "@Composition"]
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
                "@Core": "Basic", "@Composition": "Basic"}
+GROUP_ORDER = ["Master", "Leaders", "Basic", "Services", "Features"]      # the tiers of CLAUDE.md, top to bottom
 STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp")
 
 
@@ -59,7 +60,7 @@ def group_of(name):
         return ROLE_GROUPS[name]
     if name.startswith("@"):
         return ""
-    if not guard.valid_feature(name, str(ROOT)) and name not in dict(gamedesign.live_code_names(ROOT)):
+    if not guard.valid_feature(name, str(ROOT)) and name not in [n for n, _, _ in gamedesign.live_feature_names(ROOT)]:
         return ""      # neither a folder nor named by the fixed design
     return "Services" if name.startswith("_Services/") else "Features"
 # Model aliases the claude CLI takes, and its effort levels. New threads default to opus / medium.
@@ -149,20 +150,23 @@ def threads():
 
 
 def sets():
-    """The names of the basic and the full setup. The full one adds every service and feature folder, and every
-    code folder a feature of the fixed design (live code.json) names even before it exists: its chat is bound now
-    and may edit once @Manager has made the folder (scaffold.py). `missing`: those names without a folder yet."""
+    """The names of the basic and the full setup, in the order of the groups (Master, Leaders, Basic, Services,
+    Features). The full one adds every service and feature folder, and every feature of the fixed design (live):
+    the folder its code.json names, or the name GD will give it from its key when it has no code.json yet
+    (`suggested`). Their chats are made and bound now and may edit once @Manager has made the folder (scaffold.py)
+    and the design has reached round 4. `missing`: those names without a folder yet."""
     cfg = json.loads((HERE / "rules.json").read_text(encoding="utf-8-sig"))
     ids = validate.Scan(ROOT, cfg)
     ids.discover()
     folders = [f["id"] for f in ids.features]
-    designed = [name for name, _ in gamedesign.live_code_names(ROOT)]
-    features = folders + [n for n in designed if n not in folders]
-    services = sorted(f for f in features if f.startswith("_Services/"))
-    others = sorted(f for f in features if not f.startswith("_Services/"))
+    designed = gamedesign.live_feature_names(ROOT)
+    features = folders + [n for n, _, _ in designed if n not in folders]
+    services = sorted((f for f in features if f.startswith("_Services/")), key=str.lower)
+    others = sorted((f for f in features if not f.startswith("_Services/")), key=str.lower)
     full = BASIC + services + others
-    return {"basic": BASIC, "full": full, "groups": {n: group_of(n) for n in full},
-            "missing": [n for n in designed if n not in folders]}
+    return {"basic": BASIC, "full": full, "groups": {n: group_of(n) for n in full}, "order": GROUP_ORDER,
+            "missing": [n for n, _, _ in designed if n not in folders],
+            "suggested": [n for n, _, declared in designed if not declared]}
 
 
 def bind(session_id, value):
@@ -184,7 +188,7 @@ def create(name, model, effort):
 
 
 def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
-    names = sets().get(mode)
+    names = sets().get(mode) if mode in ("basic", "full") else None      # sets() also holds order, missing...
     if not names:
         return {"ok": False, "error": f"unknown mode '{mode}'"}
     if model not in MODELS or effort not in EFFORTS:      # checked before the PIN: a typo must not cost a try
@@ -207,6 +211,8 @@ def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
                 results.append({"name": name, "action": "created", "ids": [sid], "model": model, "effort": effort})
         except Exception as ex:
             results.append({"name": name, "action": "error", "detail": str(ex)})
+    for r in results:      # the page groups the results by tier; names already come in tier order
+        r["group"] = group_of(r["name"])
     return {"ok": True, "results": results}
 
 

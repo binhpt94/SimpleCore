@@ -1008,6 +1008,21 @@ def live_code_names(root):
     return sorted(seen.items(), key=lambda kv: kv[0].lower())
 
 
+def live_feature_names(root):
+    """[(folder, node key, declared)] for every feature node (round 2) of the LIVE table: the folders its code.json
+    names (declared=True), or, when it has none yet, the folder GD will name from its key (suggested_code_name,
+    declared=False). Used to prepare chats and folders ahead of time; the code gate still needs code.json."""
+    out = {name: (node, True) for name, node in live_code_names(root)}
+    live = table_dir(root, "live")
+    for node in sorted(c for c in live.iterdir() if c.is_dir() and not c.name.startswith(".")) if live.is_dir() else []:
+        if not (node / DATA_FILE).is_file() or read_code(node, node.name, CODE_ROUND, []) or (node / CODE_FILE).is_file():
+            continue      # not a node, already declared, or a broken code.json (a problem gd_status shows)
+        name = suggested_code_name(node.name)
+        if name and name not in out:
+            out[name] = (node.name, False)
+    return sorted(((n, k, d) for n, (k, d) in out.items()), key=lambda x: x[0].lower())
+
+
 def snapshot(root):
     """Everything the page shows: the mode, the score scale, both trees (idea marked against live) and their
     structure problems. Reads only."""

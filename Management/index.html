@@ -509,26 +509,48 @@
         ". Model và effort chỉ áp cho thread tạo mới (mặc định " + data.defaults.model + ", " + data.defaults.effort +
         "); thread đã có giữ nguyên.";
       listBody.textContent = "";
-      var missing = data.sets.missing || [];
+      var missing = data.sets.missing || [], suggested = data.sets.suggested || [];
       if (missing.length) {
-        add(listBody, el("p", "bad-text", "Chưa có thư mục (thiết kế live đã khai): " + missing.join(", ") +
-          ". Thread vẫn được tạo và gán; sửa được sau khi @Manager tạo thư mục:"));
+        add(listBody, el("p", "bad-text", "Chưa có thư mục (feature trong thiết kế live): " + missing.join(", ") +
+          ". Thread vẫn được tạo và gán; sửa được sau khi @Manager tạo thư mục và thiết kế tới vòng 4:"));
         add(listBody, commandBlock("python Management/tools/scaffold.py"));
       }
+      if (suggested.length) {
+        add(listBody, el("p", "muted", "Tên đề xuất theo key, node live chưa có code.json: " + suggested.join(", ") +
+          ". @GameDesigner ghi code.json đúng tên này rồi bạn chốt lại; chưa có code.json thì vẫn khoá code."));
+      }
       if (!data.threads.length) { add(listBody, el("p", "muted", "Chưa có thread nào có tên.")); return; }
-      var table = put(listBody, el("table"));
-      add(table, headRow(["Tên", "Nhóm", "Đang gán", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id"]));
-      var body = put(table, el("tbody"));
       var wanted = {};
-      data.sets.full.forEach(function (n) { wanted[n] = true; });
-      data.threads.forEach(function (t) {
+      data.sets.full.forEach(function (n, i) { wanted[n] = i + 1; });
+      // Gom theo tầng (Master, Leaders, Basic, Services, Features); trong một tầng theo thứ tự của bộ setup.
+      var order = (data.sets.order || []).concat([""]);
+      var tierOf = function (t) { var g = data.sets.groups[t.title] || t.group || ""; return order.indexOf(g) >= 0 ? g : ""; };
+      var sorted = data.threads.slice().sort(function (a, b) {
+        return (order.indexOf(tierOf(a)) - order.indexOf(tierOf(b))) || ((wanted[a.title] || 1e9) - (wanted[b.title] || 1e9))
+          || a.title.localeCompare(b.title) || (a.modified < b.modified ? -1 : 1);
+      });
+      var table = put(listBody, el("table"));
+      add(table, headRow(["Tên", "Đang gán", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id"]));
+      var body = put(table, el("tbody")), lastTier = null;
+      sorted.forEach(function (t) {
+        var tier = tierOf(t);
+        if (tier !== lastTier) {
+          lastTier = tier;
+          var head = el("tr"), cell = add(el("th", "", tier || "Ngoài các tầng"));
+          cell.colSpan = 7;
+          add(body, add(head, cell));
+        }
         var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")
           : t.unlisted ? el("span", "muted", "VS Code không hiện (tạo ngoài VS Code), bỏ qua")
           : (!wanted[t.title] ? el("span", "muted", "ngoài bộ setup")
           : (t.binding === t.title ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
-        add(body, row([t.title, t.group || "—", t.binding || "—", (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
+        add(body, row([t.title, t.binding || "—", (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
           t.modified, state, el("code", "", t.id.slice(0, 8))]));
       });
+      var made = {};
+      data.threads.forEach(function (t) { if (!t.archived && !t.unlisted) made[t.title] = true; });
+      var todo = data.sets.full.filter(function (n) { return !made[n]; });
+      if (todo.length) add(listBody, el("p", "muted", "Chưa có thread (Setup full sẽ tạo): " + todo.join(", ") + "."));
     };
     var refresh = function () {
       return api("GET", "/api/threads").then(renderThreads, function (e) {
@@ -548,8 +570,14 @@
         status.textContent = "Xong. Mở thread trong danh sách chat của VS Code (có thể phải tải lại danh sách).";
         var table = put(resultBox, el("table"));
         add(table, headRow(["Tên", "Kết quả"]));
-        var body = put(table, el("tbody"));
-        res.results.forEach(function (r) {
+        var body = put(table, el("tbody")), lastTier = null;
+        res.results.forEach(function (r) {      // server trả theo thứ tự tầng
+          if (r.group !== undefined && r.group !== lastTier) {
+            lastTier = r.group;
+            var cell = add(el("th", "", r.group || "Ngoài các tầng"));
+            cell.colSpan = 2;
+            add(body, add(el("tr"), cell));
+          }
           var text = r.action === "created" ? el("span", "ok-text", "tạo mới (" + r.model + ", " + r.effort + ") và gán")
             : r.action === "bound" ? el("span", "ok-text", "đã có, chỉ gán (" + r.ids.length + " thread)")
             : el("span", "bad-text", "lỗi: " + r.detail);
