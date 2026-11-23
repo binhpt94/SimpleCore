@@ -54,6 +54,7 @@ Vòng 2 luôn có ba node sau, với đúng key và `code.json` này (không c�
 - Mỗi thư mục code chỉ thuộc một node. `code.json` chỉ đặt ở vòng 2.
 - Guard chỉ cho phiên của một feature sửa code khi node khai nó **đã chốt trong `live`** và nhánh đó có ít nhất một node vòng 4.
 - Đổi `code.json` làm node "khác live" (phải chốt lại) nhưng không đổi hash data.
+- Node `glossary` (bảng thuật ngữ chung) cũng ở vòng 2 nhưng không phải feature: không `code.json`, không node con. Cách viết ở mục "Bảng thuật ngữ chung" của `gamedesigner.md`.
 
 ## `CLAUDE.md` của node
 Các mục: Người chơi được gì, Liên quan, Chưa rõ.

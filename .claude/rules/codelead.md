@@ -16,12 +16,12 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic 
 - Lượt có sửa file kết thúc bằng khối báo cáo theo `.claude/rules/report.md`, như mọi phiên code.
 - Đọc được toàn bộ source các nhóm Basic, Features, Services (cả Internal, View, Tests, FeatureAssets/Private).
 - unity-mcp để đọc, biên dịch (`refresh_unity`, `read_console`), chạy test (`run_tests`), Play/Pause/Stop, xem scene/asset/prefab, và xoá file khung (`manage_asset` action `delete`). Không tạo, sửa, lưu scene/prefab, không chạy code.
-- Shell: `validate.py` như mọi phiên, thêm hai lệnh về thiết kế:
+- Shell: `validate.py` và `gd_pack.py <Tên>` như mọi phiên, thêm hai lệnh về thiết kế:
   - `python Management/tools/gd_status.py [ai/idea/<node>]`: xem thiết kế, độ quan trọng, tiến độ, feature nào đang bị khoá code.
   - `python Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done>`: ghi tiến độ của một node lá.
 
 ## Dựng khung cho một feature
-1. Đọc thiết kế của feature trong `live` (node feature và các node vòng 3, 4 bên dưới), và Contracts của các feature nó dùng.
+1. Đọc thiết kế của feature: `python Management/tools/gd_pack.py <Tên>` (node feature, các node bên dưới, node nhánh khác mà refs trỏ tới, thuật ngữ), và Contracts của các feature nó dùng.
 2. Viết Contracts chỉ cho thứ feature khác đang cần (nêu tên), asmdef đúng ma trận của validator, `AssemblyInfo.cs` (View/Tests của chính nó).
 3. Lớp base trong `Scripts/Internal/Base` và `Scripts/View/Base`: `internal abstract`, giữ khuôn chung (vòng đời, cổng vào ra, chỗ để lớp con điền luật); không chứa luật game cụ thể của feature. Luật game nằm ở lớp con do phiên feature viết.
 4. Chạy `validate.py --feature <Tên>`, biên dịch; rồi báo cáo và nhắn phiên feature khung đã sẵn.

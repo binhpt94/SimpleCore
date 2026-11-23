@@ -182,7 +182,9 @@ def code_gate(root, feature):
     except Exception as ex:
         ok, reason = False, f"không đọc được thiết kế ({ex})"
     if ok:
-        return "Thiết kế của feature này đã tới vòng 4 trong live nên được code; bám theo Management/game-design/live."
+        return ("Thiết kế của feature này đã tới vòng 4 trong live nên được code; bám theo gói thiết kế: "
+                f"python Management/tools/gd_pack.py {feature} (node feature, các node con, node nhánh khác mà refs "
+                "trỏ tới, thuật ngữ).")
     return ("SỬA CODE ĐANG KHOÁ: " + reason + ". Đọc thì vẫn được. Dừng và báo người; thiết kế là việc của "
             "@GameDesigner, người chốt sang live.")
 

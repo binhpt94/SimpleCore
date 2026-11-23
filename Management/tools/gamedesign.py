@@ -23,6 +23,7 @@ Folders starting with "." are not nodes. live holds only data.md, CLAUDE.md and 
 data.md:
     ---
     based-on: <data hash of the parent it was written against>      (not on the root)
+    refs: <node path>@<data hash>, glossary#<term id>@<idea hash>    (other branches it builds on; optional)
     ---
     # <title>
 
@@ -34,6 +35,12 @@ data.md:
     <detail, optional: shown when the human opens the idea>
 The data hash covers title, summary and every idea's id, title and detail; not the scores, not based-on. A child whose
 based-on differs from its parent's data hash is stale: it must be redone against the new data.
+refs: the nodes of OTHER branches a node builds on, each with the data hash it was checked against (a glossary term
+with the hash of its idea). Not in the data hash. A node must redo when a ref's hash differs from the node's
+current one, or when it mentions in backticks a round-3/4 node path (or `glossary#<id>`) outside its own lineage
+without declaring it (ref_issues). Its own ancestors and descendants are never refs (based-on covers them).
+The glossary: the node `glossary` beside the features (round 2) is the one place terms are defined, one idea per
+term titled "<term>: <meaning>". It is not a feature: no code.json, no children, no importance, no progress.
 
 Scores: 8-10 good, 5-7 acceptable, 2-4 bad (redo), 0-1 off (avoid). A score passes when it is PASS_MIN or more.
 The human's score is absolute; the AI's counts only where the human has not scored. A human score belongs to the
@@ -115,6 +122,14 @@ ITEM_RX = re.compile(r"^###\s+(\S+)\s*\|\s*AI\s+(\d+)\s*(?:\|\s*(.*\S))?\s*$")
 FIRST_SENTENCE_RX = re.compile(r"^(.*?[.!?])(\s|$)", re.S)
 IMAGE_LINE_RX = re.compile(r"^\s*[-*]\s*`?([^\s`:]+)`?\s*:\s*(.*)$")
 HASH_LEN = 12
+GLOSSARY_KEY = "glossary"     # the round-2 node holding the shared terms (not a feature)
+_SEG = r"[a-z0-9]+(?:-[a-z0-9]+)*"
+REF_RX = re.compile(rf"^({_SEG}(?:/{_SEG})*)(?:#({_SEG}))?@([0-9a-f]{{{HASH_LEN}}})$")
+MENTION_RX = re.compile(r"`([^`\n]+)`")
+MENTION_PATH_RX = re.compile(rf"^{_SEG}(?:/{_SEG})+$")
+MENTION_TERM_RX = re.compile(rf"^{GLOSSARY_KEY}#({_SEG})$")
+DEFINITIONS_TITLE = "Định nghĩa"
+DEF_LINE_RX = re.compile(r"^\s*[-*]\s*\*\*(.+?)\*\*\s*:\s*(.*\S)?\s*$")
 HISTORY_SHOWN = 30
 STATES = ("new", "changed", "same")      # an idea node against live
 
@@ -187,8 +202,8 @@ def write_mode(root, mode):
 
 # ---------------------------------------------------------------- data.md
 def parse_data(text):
-    """{based_on, title, summary, items: [{id, text, ai, hash}], hash, errors} of a data.md."""
-    errors, based_on = [], ""
+    """{based_on, refs, title, summary, items: [{id, text, ai, hash}], hash, errors} of a data.md."""
+    errors, based_on, refs = [], "", []
     text = text.strip("\n")
     if text.startswith("---\n"):
         head, sep, rest = text[4:].partition("\n---")
@@ -198,6 +213,14 @@ def parse_data(text):
                 key, _, value = line.partition(":")
                 if key.strip() == "based-on":
                     based_on = (value.split() or [""])[0]
+                elif key.strip() == "refs":
+                    for entry in re.split(r"[,\s]+", value.strip().strip("[]")):
+                        m = REF_RX.match(entry.strip("\"'`")) if entry else None
+                        if m:
+                            refs.append({"path": m.group(1), "term": m.group(2) or "", "hash": m.group(3)})
+                        elif entry:
+                            errors.append(f"refs: '{entry}' phải có dạng <đường dẫn node>@<hash> hoặc "
+                                          f"{GLOSSARY_KEY}#<id>@<hash>")
         else:
             errors.append("phần đầu '---' chưa đóng")
     lines = text.strip("\n").split("\n")
@@ -260,7 +283,7 @@ def parse_data(text):
                     "text": head + ("\n" + body if body else "") if titled else body,
                     "ai": it["ai"], "hash": short_hash(*parts), "parts": parts})
     data_hash = short_hash(title, summary, *[p for it in out for p in it.pop("parts")])
-    return {"based_on": based_on, "title": title, "summary": summary, "items": out, "hash": data_hash, "errors": errors}
+    return {"based_on": based_on, "refs": refs, "title": title, "summary": summary, "items": out, "hash": data_hash, "errors": errors}
 
 
 def read_data(folder):
@@ -299,10 +322,20 @@ def mark_priority(tree):
     Up from the leaves: a leaf is worth the human's score, else the AI's; a parent's base is the highest worth below.
     Down from the root: a node the human scored has exactly that score, and the difference from its base is the
     offset its unscored descendants get on top of their own base (the nearest scored ancestor counts), within 0-10."""
+    def ranked(node):      # the glossary is not a piece of the game to build: it has no importance
+        return [c for c in node["children"] if not (c["round"] == CODE_ROUND and c["key"] == GLOSSARY_KEY)]
+
+    def unranked(node):
+        node["priority"].update({"leaf": False, "ignoredAi": False, "base": None, "done": False, "effective": None,
+                                 "offset": 0, "from": "", "phase": "", "glossary": True})
+
     def up(node):
         """(what the node is worth to its parent, or None when it is done or unranked; whether it is done)."""
         p = node["priority"]
-        below = [up(c) for c in node["children"]]
+        for c in node["children"]:
+            if c not in ranked(node):
+                unranked(c)
+        below = [up(c) for c in ranked(node)]
         p["leaf"] = not node["children"]
         p["ignoredAi"] = not p["leaf"] and p["ai"] is not None
         if p["leaf"]:
@@ -330,7 +363,7 @@ def mark_priority(tree):
             p["effective"] = max(0, min(10, p["base"] + offset))
             p["offset"], p["from"] = offset, source if offset else ""
         p["phase"] = phase_of(p["effective"])
-        for child in node["children"]:
+        for child in ranked(node):
             down(child, offset, source)
 
     if tree:
@@ -365,6 +398,8 @@ def save_progress(root, path, phase, state, by, note=None):
         raise ValueError(f"idea không có node '{path or '(gốc)'}'")
     if any(c.is_dir() and not c.name.startswith(".") for c in folder.iterdir()):
         raise ValueError(f"node '{path or '(gốc)'}' có node con: tiến độ chỉ ghi ở node lá")
+    if parts == [GLOSSARY_KEY]:
+        raise ValueError(f"node {GLOSSARY_KEY} là bảng thuật ngữ, không có tiến độ")
     if phase not in progress_phases():
         raise ValueError(f"giai đoạn phải là một trong {progress_phases()}")
     if state not in WORK_STATES:
@@ -396,6 +431,9 @@ def read_code(folder, where, depth, problems):
         return []
     if depth != CODE_ROUND:
         problems.append({"path": where, "text": f"{CODE_FILE} chỉ đặt ở node feature (vòng {CODE_ROUND})"})
+        return []
+    if folder.name == GLOSSARY_KEY:
+        problems.append({"path": where, "text": f"node {GLOSSARY_KEY} không phải feature: bỏ {CODE_FILE}"})
         return []
     return names
 
@@ -477,11 +515,17 @@ def merge_review(folder, items):
         it["effective"] = it["user"] if it["user"] is not None else it["ai"]
 
 
-def verdict(items, pending, stale, mode):
-    """(passed, reasons) of a node: see the module docstring."""
+def verdict(items, pending, stale, mode, refs=None):
+    """(passed, reasons) of a node: see the module docstring. refs: what ref_issues found, or None."""
     reasons = []
     if stale:
         reasons.append("data của node cha đã đổi: rà lại node theo data mới rồi ghi lại based-on")
+    for r in (refs or {}).get("refs", []):
+        if r["ok"] is False:
+            reasons.append(f"ref '{r['label']}' đã đổi (hash {r['hash']} -> {r['current']}): đọc lại node đó, "
+                           f"rà các ý dùng nó rồi ghi hash mới vào refs")
+    for r in (refs or {}).get("missing", []):
+        reasons.append(f"nhắc '{r['label']}' mà chưa khai trong refs: đọc node đó rồi khai '{r['label']}@{r['current']}'")
     if not items:
         reasons.append(f"chưa có ý nào trong '## {ITEMS_TITLE}'")
     for it in items:
@@ -637,6 +681,187 @@ def record_versions(root):
     return changed
 
 
+# ---------------------------------------------------------------- refs and the glossary
+def related(a, b):
+    """Whether node paths a and b are the same node, or one is above the other (based-on covers that)."""
+    return a == b or a.startswith(b + "/") or b.startswith(a + "/") or not a or not b
+
+
+def ref_label(path, term):
+    return f"{path}#{term}" if term else path
+
+
+def normalize_mention(text):
+    """(node path, term id) a backtick span names, or None. Accepts the table prefixes and a trailing file name."""
+    t = text.strip()
+    for prefix in ("Management/game-design/", "ai/idea/", "live/"):
+        if t.startswith(prefix):
+            t = t[len(prefix):]
+    for suffix in ("/" + DATA_FILE, "/" + DOC_FILE, "/"):
+        if t.endswith(suffix):
+            t = t[:-len(suffix)]
+    m = MENTION_TERM_RX.match(t)
+    if m:
+        return GLOSSARY_KEY, m.group(1)
+    return (t, "") if MENTION_PATH_RX.match(t) else None
+
+
+def glossary_terms(data):
+    """([{id, term, meaning, detail, hash}], errors) of the glossary node's data: one idea per term,
+    titled "<term>: <meaning>"."""
+    out, errors, seen = [], [], {}
+    for it in data["items"] if data else []:
+        term, sep, meaning = it["title"].partition(":")
+        term, meaning = term.strip(), meaning.strip()
+        if not it["titled"] or not sep or not term or not meaning:
+            errors.append(f"ý '{it['id']}': tiêu đề thuật ngữ phải có dạng '<từ>: <nghĩa>'")
+            continue
+        key = " ".join(term.lower().split())
+        if key in seen:
+            errors.append(f"từ '{term}' có ở cả ý '{seen[key]}' và ý '{it['id']}'")
+            continue
+        seen[key] = it["id"]
+        out.append({"id": it["id"], "term": term, "meaning": meaning, "detail": it["detail"], "hash": it["hash"]})
+    return out, errors
+
+
+def ref_issues(table, path, data, text, cache=None):
+    """What the refs of the node at `path` (data: its parsed data.md, text: data.md and CLAUDE.md as written)
+    say against the files of the same table (`table`: the table folder):
+        refs     [{path, term, label, hash, current, ok, title}]   ok None when the target does not exist
+        missing  [{path, term, label, current}]   mentioned in backticks, outside its lineage, not declared
+        unknown  [text]    a ref that names no node or term, or names its own lineage (a structure problem)
+        notes    [text]    a mention of a node that does not exist (a reminder)
+    cache: {path: data or None}, shared across calls."""
+    cache = {} if cache is None else cache
+
+    def target(p):
+        if p not in cache:
+            cache[p] = read_data(Path(table).joinpath(*p.split("/")))
+        return cache[p]
+
+    def current(p, term):
+        """(hash, title) the ref would point to now, or None."""
+        d = target(p)
+        if d is None:
+            return None
+        if not term:
+            return d["hash"], d["title"]
+        if p != GLOSSARY_KEY:
+            return None
+        hit = next((t for t in glossary_terms(d)[0] if t["id"] == term), None)
+        return (hit["hash"], hit["term"]) if hit else None
+
+    out = {"refs": [], "missing": [], "unknown": [], "notes": []}
+    declared = set()
+    for r in data.get("refs", []) if data else []:
+        label = ref_label(r["path"], r["term"])
+        declared.add((r["path"], r["term"]))
+        now_ = None if (related(r["path"], path) and not r["term"]) else current(r["path"], r["term"])
+        if now_ is None:
+            out["unknown"].append(f"refs: '{label}' " + ("là chính node này, tổ tiên hay con cháu của nó (based-on đã lo)"
+                                                       if related(r["path"], path) and not r["term"] else "không có node hay từ này"))
+        out["refs"].append({"path": r["path"], "term": r["term"], "label": label, "hash": r["hash"],
+                            "current": now_[0] if now_ else "", "title": now_[1] if now_ else "",
+                            "ok": None if now_ is None else now_[0] == r["hash"]})
+    seen = set()
+    for span in MENTION_RX.findall(text or ""):
+        hit = normalize_mention(span)
+        if not hit or hit in seen or hit in declared:
+            continue
+        seen.add(hit)
+        p, term = hit
+        if not term and (related(p, path) or p.split("/")[0] == GLOSSARY_KEY):
+            continue
+        now_ = current(p, term)
+        if now_ is None:
+            out["notes"].append(f"nhắc '{ref_label(p, term)}' nhưng không có node hay từ này")
+        else:
+            out["missing"].append({"path": p, "term": term, "label": ref_label(p, term), "current": now_[0]})
+    return out
+
+
+def ref_line(issues):
+    """The refs line to write, every declared or missing ref at its current hash."""
+    entries = [f"{r['label']}@{r['current']}" for r in issues["refs"] if r["ok"] is not None]
+    entries += [f"{r['label']}@{r['current']}" for r in issues["missing"]]
+    return "refs: " + ", ".join(entries) if entries else ""
+
+
+def definitions(doc):
+    """[(term, meaning)] of the '## Định nghĩa' section of a CLAUDE.md, lines '- **term**: meaning'."""
+    out, inside = [], False
+    for line in (doc or "").split("\n"):
+        if line.startswith("## "):
+            inside = line[3:].strip().lower() == DEFINITIONS_TITLE.lower()
+            continue
+        m = DEF_LINE_RX.match(line) if inside else None
+        if m:
+            out.append((m.group(1).strip(), (m.group(2) or "").strip()))
+    return out
+
+
+def glossary_view(tree):
+    """(glossary, notes) of a table: glossary is None or {path, terms: [{id, term, meaning, detail, hash,
+    usedBy: [node path]}]}; notes [{path, text}] are reminders that block nothing (no glossary node yet, a term
+    defined outside it or redefined, a term written out without a ref)."""
+    if not tree:
+        return None, []
+    gnode = next((c for c in tree["children"] if c["key"] == GLOSSARY_KEY), None)
+    notes = []
+    if gnode is None:
+        notes.append({"path": GLOSSARY_KEY, "text": "chưa có node glossary: thuật ngữ chung định nghĩa ở đó, "
+                                                    "mỗi từ một ý '### <id> | AI n | <từ>: <nghĩa>'"})
+    terms = [dict(t, usedBy=[]) for t in (gnode["terms"] if gnode else [])]
+    by_id = {t["id"]: t for t in terms}
+    by_word = {" ".join(t["term"].lower().split()): t for t in terms}
+    outside = {}
+    for n in walk(tree):
+        if n["path"] == GLOSSARY_KEY:
+            continue
+        used = {r["term"] for r in n.get("refs", []) if r["path"] == GLOSSARY_KEY and r["term"]}
+        for tid in used:
+            if tid in by_id:
+                by_id[tid]["usedBy"].append(n["path"] or "(gốc)")
+        for word, meaning in definitions(n["body"]):
+            key = " ".join(word.lower().split())
+            if key in by_word:
+                notes.append({"path": n["path"] or "(gốc)", "text": f"định nghĩa lại '{word}', từ đã có ở "
+                              f"`{GLOSSARY_KEY}#{by_word[key]['id']}`: bỏ định nghĩa, nhắc từ đó và khai refs"})
+            else:
+                outside.setdefault(key, []).append((n["path"] or "(gốc)", word, meaning))
+        text = n.get("refText", "")
+        for t in terms:
+            if t["id"] in used or not t["term"]:
+                continue
+            if re.search(r"(?<!\w)" + re.escape(t["term"]) + r"(?!\w)", text, re.I):
+                notes.append({"path": n["path"] or "(gốc)", "text": f"có dùng từ '{t['term']}' nhưng chưa khai "
+                              f"`{GLOSSARY_KEY}#{t['id']}` trong refs"})
+    for key, defs in sorted(outside.items(), key=lambda kv: (-len(kv[1]), kv[0])):      # duplicates first
+        where = ", ".join(p for p, _, _ in defs)
+        differ = len({" ".join(m.lower().split()) for _, _, m in defs}) > 1
+        notes.append({"path": defs[0][0], "text": f"'{defs[0][1]}' còn định nghĩa ngoài glossary ({where})"
+                      + (f": {len(defs)} nơi, nghĩa khác nhau, chọn một" if differ else "") + "; chuyển sang glossary"})
+    return ({"path": gnode["path"], "terms": terms} if gnode else None), notes
+
+
+def brief(node):
+    """Title, summary and idea titles of a node: the context a reader needs from it."""
+    return {"path": node["path"] or "(gốc)", "round": node["round"], "title": node["title"],
+            "summary": node["summary"], "items": [it["title"] for it in node["items"]]}
+
+
+def ancestors(tree, path):
+    """The nodes above `path`, from the root down to its parent; [] for the root or a path not in the tree."""
+    out, node = [], tree
+    for key in path.split("/") if path else []:
+        if node is None:
+            return []
+        out.append(node)
+        node = next((c for c in node["children"] if c["key"] == key), None)
+    return out if node is not None else []
+
+
 # ---------------------------------------------------------------- one node
 def own_hash(folder):
     """Hash of what belongs to the node itself (data.md, CLAUDE.md, .images): what promote copies into live."""
@@ -654,10 +879,11 @@ def own_hash(folder):
     return h.hexdigest()
 
 
-def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None, review=None):
+def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None, review=None, cache=None):
     """One node and everything below it. parent_hash: the data hash of the node above (None for the root).
     review: the folder holding the human's review of this node when it is not `folder` (a live node is reviewed
-    in the idea node of the same path)."""
+    in the idea node of the same path). cache: shared by ref_issues across the tree."""
+    cache = {} if cache is None else cache
     where = path or "(gốc)"
     data = read_data(folder)
     if data is None:
@@ -680,24 +906,39 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     items = data["items"]
     merge_review(review or folder, items)
     stale = parent_hash is not None and data["based_on"] != parent_hash
-    passed, reasons = verdict(items, pending, stale, mode)
+    table = folder.parents[len(path.split("/")) - 1] if path else folder
+    raw = read_text(folder / DATA_FILE) if (folder / DATA_FILE).is_file() else ""
+    refs = ref_issues(table, path, data, raw + "\n" + doc, cache)
+    for text in refs["unknown"]:
+        problems.append({"path": where, "text": text})
+    passed, reasons = verdict(items, pending, stale, mode, refs)
     # redo: @GameDesigner has work to do here. Not passing without it means the node only waits for the human.
     low = [it for it in items if (it["user"] if mode == "user" else it["effective"]) is not None
            and (it["user"] if mode == "user" else it["effective"]) < PASS_MIN]
-    redo = stale or not items or bool(low)
+    ref_redo = any(r["ok"] is False for r in refs["refs"]) or bool(refs["missing"])
+    redo = stale or not items or bool(low) or ref_redo
+    terms = []
+    if path == GLOSSARY_KEY:
+        terms, errors = glossary_terms(data)
+        problems.extend({"path": where, "text": f"{GLOSSARY_KEY}: {t}"} for t in errors)
+        if any(p.is_dir() and not p.name.startswith(".") for p in folder.iterdir()):
+            problems.append({"path": where, "text": f"node {GLOSSARY_KEY} không có node con"})
     node = {"key": folder.name if path else "", "redo": redo, "path": path, "round": depth, "title": data["title"] or (folder.name if path else ""),
             "summary": data["summary"], "body": doc, "items": items, "dataHash": data["hash"], "basedOn": data["based_on"],
             "parentHash": parent_hash or "", "stale": stale, "passed": passed, "reasons": reasons,
             "images": images, "imagesNote": images_note, "questions": questions, "pending": pending,
             "history": read_history(folder)[-HISTORY_SHOWN:][::-1], "hash": own_hash(folder),
             "priority": read_priority(folder), "progress": read_progress(folder),
-            "code": read_code(folder, where, depth, problems), "children": []}
+            "code": read_code(folder, where, depth, problems), "refs": refs["refs"],
+            "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
+            "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
+            "refText": raw + "\n" + doc, "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
         if not KEY_RX.match(child.name):
             problems.append({"path": child_path, "text": "tên thư mục phải là chữ thường, số, gạch nối (ví dụ feature-hero)"})
         node["children"].append(read_node(child, child_path, depth + 1, problems, mode, data["hash"],
-                                          review / child.name if review else None))
+                                          review / child.name if review else None, cache))
     return node
 
 
@@ -767,7 +1008,9 @@ def node_approved(root, parts, mode, parent_hash):
     merge_review(src, data["items"])
     pending = sum(1 for q in read_questions(src, name, []) if not q["answered"])
     stale = parent_hash is not None and data["based_on"] != parent_hash
-    passed, reasons = verdict(data["items"], pending, stale, mode)
+    doc = read_text(src / DOC_FILE) if (src / DOC_FILE).is_file() else ""
+    refs = ref_issues(table_dir(root, "idea"), "/".join(parts), data, read_text(src / DATA_FILE) + "\n" + doc)
+    passed, reasons = verdict(data["items"], pending, stale, mode, refs)
     if not passed:
         return False, f"node cha '{name}' chưa đạt: " + "; ".join(reasons[:4]), data["hash"]
     if mode == "user":
@@ -988,7 +1231,7 @@ def missing_code(idea):
         return []
     out = []
     for n in idea["children"]:
-        if n["code"] or n["key"] in INFRA_FEATURES:
+        if n["code"] or n["key"] in INFRA_FEATURES or n["key"] == GLOSSARY_KEY:
             continue
         name = suggested_code_name(n["key"])
         text = (f"ghi {CODE_FILE}: " + json.dumps({"unity": [name]}, ensure_ascii=False)) if name else (
@@ -1015,8 +1258,9 @@ def live_feature_names(root):
     out = {name: (node, True) for name, node in live_code_names(root)}
     live = table_dir(root, "live")
     for node in sorted(c for c in live.iterdir() if c.is_dir() and not c.name.startswith(".")) if live.is_dir() else []:
-        if not (node / DATA_FILE).is_file() or read_code(node, node.name, CODE_ROUND, []) or (node / CODE_FILE).is_file():
-            continue      # not a node, already declared, or a broken code.json (a problem gd_status shows)
+        if (not (node / DATA_FILE).is_file() or node.name == GLOSSARY_KEY
+                or read_code(node, node.name, CODE_ROUND, []) or (node / CODE_FILE).is_file()):
+            continue      # not a node, the glossary, already declared, or a broken code.json (a problem gd_status shows)
         name = suggested_code_name(node.name)
         if name and name not in out:
             out[name] = (node.name, False)
@@ -1040,6 +1284,11 @@ def snapshot(root):
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
     for n in walk(idea):
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
-    return {"rounds": ROUNDS, "mode": mode, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
+    glossary, term_notes = {}, {}
+    for name, tree in (("idea", idea), ("live", live)):
+        glossary[name], term_notes[name] = glossary_view(tree)
+        for n in walk(tree):
+            n.pop("refText", None)      # read by glossary_view only; the page does not need a second copy
+    return {"rounds": ROUNDS, "mode": mode, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
             "missingCode": missing_code(idea)}

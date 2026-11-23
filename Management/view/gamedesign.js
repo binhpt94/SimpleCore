@@ -154,6 +154,10 @@
     ".gd-gate { margin: 8px 0 0; font-size: 13.5px; }",
     ".gd-gate.ok { color: var(--ok); }",
     ".gd-gate.bad { color: var(--bad); }",
+    ".gd-context { margin: 10px 0 0; font-size: 13.5px; }",
+    ".gd-context summary { cursor: pointer; color: var(--accent); }",
+    ".gd-context ul, .gd-refs { margin: 4px 0 8px; padding-left: 20px; font-size: 13px; }",
+    ".gd-bad { color: var(--bad); }",
     ".gd-score .gd-link { margin-left: 10px; font-size: 12px; }",
     ".gd-score .gd-link:disabled { opacity: .4; cursor: default; }",
     ".gd-scale { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--muted); margin: 0 0 4px; }"
@@ -887,6 +891,61 @@
       });
     };
 
+    // Ngữ cảnh ghép lúc đọc: các node phía trên, các node và từ mà refs trỏ tới (node không chép lại nội dung cha).
+    var pick = function (path) { state.selected = path; render(); };
+    var renderContext = function (body, node, root) {
+      var above = [], cur = root, keys = node.path ? node.path.split("/") : [];
+      keys.forEach(function (k) {
+        if (!cur) return;
+        above.push(cur);
+        cur = cur.children.filter(function (c) { return c.key === k; })[0] || null;
+      });
+      if (above.length) {
+        var box = put(body, el("details", "gd-context"));
+        add(box, el("summary", "", "Bám theo: " + above.length + " node phía trên"));
+        above.forEach(function (a) {
+          var line = put(box, el("p", ""));
+          var link = put(line, button((a.path || "(gốc)") + " · vòng " + a.round + " · " + a.title, function () { pick(a.path); }, null, "gd-link"));
+          link.title = "Chọn node này";
+          if (a.summary) add(box, el("p", "gd-note", a.summary));
+          var ul = put(box, el("ul", ""));
+          a.items.forEach(function (it) { add(ul, el("li", "", it.title)); });
+        });
+      }
+      var refs = (node.refs || []).concat((node.refMissing || []).map(function (r) { return { label: r.label, path: r.path, term: r.term, ok: "missing" }; }));
+      if (refs.length) {
+        add(body, el("h3", "", "Tham chiếu (refs)"));
+        var list = put(body, el("ul", "gd-refs"));
+        refs.forEach(function (r) {
+          var li = put(list, el("li", ""));
+          var state_ = r.ok === true ? "khớp" : r.ok === false ? "LỆCH: node đích đã đổi, cần rà lại" : r.ok === "missing" ? "nhắc tới mà chưa khai" : "không có node hay từ này";
+          var target = r.term ? "glossary" : r.path;
+          if (find(root, target)) put(li, button(r.label, function () { pick(target); }, null, "gd-link"));
+          else add(li, el("code", "", r.label));
+          add(li, el("span", r.ok === true ? "muted" : "gd-bad", " " + (r.title ? r.title + " · " : "") + state_));
+        });
+      }
+      (node.refNotes || []).forEach(function (t) { add(body, el("p", "gd-note", t)); });
+      var gloss = data.glossary && data.glossary[state.table];
+      if (gloss && node.path === gloss.path) {
+        add(body, el("h3", "", "Các từ được dùng ở đâu"));
+        var ul2 = put(body, el("ul", "gd-refs"));
+        gloss.terms.forEach(function (t) {
+          add(ul2, el("li", "", t.term + ": " + (t.usedBy.length ? t.usedBy.join(", ") : "chưa node nào khai refs tới")));
+        });
+      }
+    };
+
+    // Dưới bản đồ: lời nhắc về thuật ngữ (không chặn gì): chưa có glossary, định nghĩa còn rải ở node khác, từ trùng.
+    var renderTerms = function () {
+      var notes = (data.termNotes && data.termNotes[state.table]) || [];
+      if (!notes.length) return;
+      var box = put(mapBox, el("details", "gd-context"));
+      add(box, el("summary", "", "Thuật ngữ: " + notes.length + " lời nhắc (node glossary là nơi duy nhất định nghĩa từ)"));
+      var ul = put(box, el("ul", ""));
+      notes.forEach(function (n) { add(ul, el("li", "", n.path + ": " + n.text)); });
+    };
+
     var renderDetail = function (root) {
       detailBox.textContent = "";
       var node = state.selected === null ? null : find(root, state.selected);
@@ -897,6 +956,7 @@
       add(body, el("p", "gd-path", "Vòng " + node.round + " · " + ((data.rounds || [])[node.round - 1] || "") + " · " +
         table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "") + " · hash data " + node.dataHash));
       if (node.summary) add(body, el("p", "", node.summary));
+      renderContext(body, node, root);
       renderPriority(body, node);
       renderProgress(body, node);
       renderCode(body, node);
@@ -957,6 +1017,7 @@
       }
       if (!root) { add(mapBox, el("p", "muted", table().empty)); return; }
       renderMap(root);
+      renderTerms();
       renderDetail(root);
     };
 

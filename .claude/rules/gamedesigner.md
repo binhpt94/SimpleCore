@@ -11,7 +11,7 @@ Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, �
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
 - Hai lệnh shell, chạy từ gốc project:
-  - `python Management/tools/gd_status.py` hoặc `... gd_status.py ai/idea/<node>`: tình trạng cây hoặc một nhánh. **Chạy đầu mỗi lượt.**
+  - `python Management/tools/gd_status.py` hoặc `... gd_status.py ai/idea/<node>`: tình trạng cây hoặc một nhánh. **Chạy đầu mỗi lượt.** Chạy cho một node thì đầu bản in có mục "Bám theo": các node phía trên, các node và từ mà refs trỏ tới.
   - `python Management/tools/gd_delete.py ai/<đường dẫn>`: xoá một file hoặc cả một node trong `ai`. Lịch sử của node bị xoá được giữ lại ở node cha.
 - Không có báo cáo cuối lượt. Cuối lượt nói ngắn gọn cho người: đã thêm/sửa/xoá node nào, node nào chờ người chấm hoặc trả lời, node nào còn phải làm lại.
 
@@ -21,7 +21,7 @@ Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, �
 | Vòng | Vị trí | Nội dung | Luật riêng của vòng |
 |---|---|---|---|
 | 1. Ý tưởng sơ khai | `ai/idea/` | Game là gì, cho ai, cảm giác chính, vòng lặp chơi cốt lõi | `gamedesigner.round1.md` |
-| 2. Feature (tóm tắt) | `ai/idea/<feature>/` | Chia vòng 1 thành các feature, mỗi feature chỉ ghi cốt lõi | `gamedesigner.round2.md` |
+| 2. Feature (tóm tắt) | `ai/idea/<feature>/` | Chia vòng 1 thành các feature, mỗi feature chỉ ghi cốt lõi; thêm node `glossary` (không phải feature, xem "Bảng thuật ngữ chung") | `gamedesigner.round2.md` |
 | 3. Quan hệ và định nghĩa | `ai/idea/<feature>/<detail>/` | Quan hệ, định nghĩa, danh sách, luật cơ bản; chưa có con số và trường hợp biên | `gamedesigner.round3.md` |
 | 4. Quyết định chi tiết | `ai/idea/<feature>/<detail>/<tech>/` | Làm gì, với thông số nào, thông số theo giai đoạn, trường hợp biên; đủ để chơi được ở mức IDEA | `gamedesigner.round4.md` |
 
@@ -47,6 +47,7 @@ Key (tên thư mục): tiếng Anh, chữ thường, số, gạch nối. Key đ�
 ```
 ---
 based-on: 3f9a1c2b7d10
+refs: feature-enemy/enemy-stats/enemy-stat-values@91c0e2aa4b17, glossary#wave@5d2f8e01c3a9
 ---
 # Hero
 
@@ -60,6 +61,10 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
 ### hero-spawn | AI 6 | Hero tự sinh theo thời gian, không cần bấm
 ```
 - `based-on`: hash data của node cha mà node này được viết dựa theo (lấy từ `gd_status.py`). Node gốc không có dòng này.
+- `refs`: các node ở **nhánh khác** mà node này dựa vào, mỗi cái kèm hash data lúc bạn đã đọc và rà theo nó; một từ của glossary ghi `glossary#<id>@<hash của ý>`. Không tính vào hash data.
+  - **Bắt buộc**: nhắc trong backtick tới một node vòng 3-4 không thuộc dòng dõi của mình (ví dụ `` `feature-enemy/enemy-stats` ``), hoặc tới một từ (`` `glossary#wave` ``), thì phải khai. Nhắc node vòng 2 (`` `feature-run` ``) thì không bắt.
+  - Tổ tiên, con cháu và chính nó không khai (based-on đã lo); khai thì là lỗi cấu trúc.
+  - Thiếu ref, hoặc node đích đã đổi hash, thì node phải làm lại. `gd_status.py` in sẵn dòng `refs:` đúng hash hiện tại; chỉ chép sau khi đã đọc node đích.
 - Tiêu đề tiếng Việt, rồi tóm tắt 1 đến 3 câu (trang hiện đoạn này trên bản đồ).
 - `## Ý cốt lõi`: mỗi ý một dòng `### <id> | AI <0-10> | <tiêu đề>`, dưới đó là chi tiết (không bắt buộc).
   - **Tiêu đề** là chính ý đó nói gọn trong một câu ngắn, đọc riêng vẫn hiểu và chấm điểm được. Trang quản lý hiện tiêu đề ở cả danh sách "Ý cốt lõi" lẫn panel duyệt; người chấm theo tiêu đề.
@@ -116,9 +121,16 @@ Node chưa đạt thì các node con bị guard khoá. Chính node đó vẫn s�
 1. **Ý bị chấm dưới 5** (người hoặc AI): đọc phản hồi của người, viết lại đúng ý đó trong `data.md` (giữ `id`), chấm lại điểm AI. Đừng đụng các ý đã đạt.
 2. **Lệch hash với cha** (data của cha đã đổi): đọc data mới của cha, rà từng ý của node, sửa ý nào không còn khớp, rồi ghi `based-on` bằng hash mới của cha. Nếu rà xong không phải sửa ý nào thì chỉ đổi `based-on`.
 3. **Chưa có ý nào**: viết các ý cốt lõi và chấm điểm.
+4. **Ref đã đổi hoặc thiếu ref**: đọc node đích (cả `CLAUDE.md`) hoặc từ trong glossary, rà các ý dùng nó, sửa ý nào không còn khớp (con số, tên, luật), rồi ghi hash mới vào `refs`. Rà xong không phải sửa gì thì chỉ đổi hash.
 
 Trước khi viết lại, **đọc lịch sử của node** (mục "Đã bị người loại" trong `gd_status.py`, hoặc `.history/log.jsonl`): không đề xuất lại ý đã bị loại hay một biến thể gần giống; nếu thấy vẫn cần ý đó thì hỏi người, nêu rõ nó đã bị loại lúc nào và vì sao lần này khác.
 Làm lại từ trên xuống: node cha đạt rồi mới tới node con.
+
+## Bảng thuật ngữ chung (`glossary`)
+- Node `ai/idea/glossary/` nằm ngang hàng các feature (vòng 2) và là nơi duy nhất định nghĩa thuật ngữ. Nó không phải feature: không `code.json`, không node con, không `priority.json`, không tiến độ.
+- Mỗi từ một ý: `### wave | AI 8 | Đợt: một nhóm quái vào cùng lúc`. Tiêu đề là `<từ>: <nghĩa>`; chi tiết là ví dụ, phân biệt với từ gần nghĩa. Không có hai ý cùng một từ.
+- Node dùng một từ thì nhắc `` `glossary#wave` `` và khai `glossary#wave@<hash>` trong refs. Đổi nghĩa một từ là đổi quyết định: mọi node khai từ đó thành "cần làm lại"; sửa từ khác thì không ảnh hưởng.
+- Chỉ thêm từ khi đã có node dùng. Thấy từ định nghĩa ở hai nơi, hoặc một node định nghĩa lại từ đã có, thì `gd_status.py` (cả cây) nhắc ở mục "Thuật ngữ": gom về glossary, nghĩa khác nhau thì quyết một (User control: hỏi người).
 
 ## Hai mode
 Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đầu mỗi tin báo mode hiện tại.
@@ -139,17 +151,19 @@ Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đ
 ## Cách viết
 - Ưu tiên để người đọc hiểu: câu ngắn, từ thường dùng, ví dụ cụ thể, một ý một dòng.
 - Nội dung tiếng Việt. Key, tên trường dữ liệu, mã có thể tiếng Anh; lần đầu dùng thì giải thích bằng tiếng Việt.
-- Mỗi node tự đứng được. Nhắc tới node khác thì ghi đường dẫn, ví dụ `feature-hero/skills`.
+- Mỗi node tự đứng được. Nhắc tới node khác thì ghi đường dẫn trong backtick, ví dụ `feature-hero/skills`, và khai refs (xem `data.md`).
+- Thuật ngữ chỉ định nghĩa ở `glossary`; node khác nhắc `` `glossary#<id>` ``, không định nghĩa lại.
 - Con số chỉ xuất hiện từ vòng 4, ghi kèm đơn vị và lí do; con số phỏng đoán ghi là "dự kiến".
-- Không lặp nội dung của node cha; node con chỉ thêm chi tiết.
+- Không lặp nội dung của node cha; node con chỉ thêm chi tiết. Ngữ cảnh phía trên do `gd_status.py` (mục "Bám theo") và `gd_pack.py` ghép lúc đọc.
 - Mỗi lần chỉ đi sâu một nhánh, theo yêu cầu của người. Không tự mở rộng game ngoài ý tưởng vòng 1.
 
 ## Quy trình một lượt
 1. Xem mode ở dòng `guard:`, rồi chạy `gd_status.py`.
 2. Đọc `live` trước (thứ đã chốt là nền, không cãi lại), rồi đọc `ai/idea` của nhánh đang làm.
+   **Bắt buộc** trước khi viết hay sửa một node: chạy `gd_status.py ai/idea/<node>`, đọc mục "Bám theo", và đọc `CLAUDE.md` của các node trong refs.
 3. Có node "cần làm lại" phía trên việc được giao thì làm lại nó trước, từ trên xuống.
 4. Viết hoặc sửa node. User control: điểm cần quyết thành câu hỏi, rồi dừng chờ. Full Auto: tự quyết và ghi lại.
-5. Chạy lại `gd_status.py` để chắc node vừa sửa không còn lỗi cấu trúc và `based-on` đã khớp.
+5. Chạy lại `gd_status.py` để chắc node vừa sửa không còn lỗi cấu trúc, `based-on` và `refs` đã khớp.
 6. Kết thúc: liệt kê node đã đổi, node chờ người chấm hoặc trả lời, node còn phải làm lại.
 
 ## Yêu cầu riêng của người

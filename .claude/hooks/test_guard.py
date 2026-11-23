@@ -611,6 +611,15 @@ def run_role_cases(payload):
     for who in ("Wallet", "@CodeLead", "@GameDesigner", "@Core", "@Composition", ""):
         t(g + " (others)", who, "deny", "Bash", sh(SCAFFOLD))
     t(g + " (others)", "@human", "pass", "Bash", sh(SCAFFOLD))
+
+    g = "any chat: design pack command"
+    PACK = "python Management/tools/gd_pack.py"
+    for who in ("Wallet", "_Services/Popup", "@CodeLead", "@GameDesigner", M, "@Core", "@Composition"):
+        for cmd in (PACK + " Hero", PACK + " _Services/Popup", "python3 Management/tools/gd_pack.py Wallet"):
+            t(g, who, "allow", "Bash", sh(cmd))
+    for cmd in (PACK, PACK + " ../x", PACK + " Hero; rm -rf UnityProject", PACK + " Hero && ls", PACK + " Hero --root /tmp",
+                PACK + " Hero Wallet", "python Management/tools/../tools/gd_pack.py Hero"):
+        t(g, "Wallet", "deny", "Bash", sh(cmd))
     w(g, M, "deny", A + "/../UnityProject/Assets/Features/Hero/Scripts/Internal/.gitkeep")      # still no file edits
 
     g = "role spelling"

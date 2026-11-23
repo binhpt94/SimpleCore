@@ -58,6 +58,8 @@ import sys
 PY = r"python3? "
 ALLOWED_COMMANDS = [
     PY + r"Management/tools/validate\.py( --feature ((_Services/)?[A-Za-z][A-Za-z0-9]*|_Composition))?",
+    # the fixed design of one code folder in one piece (reads Management/game-design/live only)
+    PY + r"Management/tools/gd_pack\.py (_Services/)?[A-Za-z][A-Za-z0-9]*",
 ]
 
 # One more command, for @GameDesigner only: delete a file or a node inside Management/game-design/ai.

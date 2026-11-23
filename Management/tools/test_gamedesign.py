@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for gamedesign.py, gd_delete.py and gd_status.py, on a throw-away tree in a temp folder.
+"""Tests for gamedesign.py, gd_delete.py, gd_status.py and gd_pack.py, on a throw-away tree in a temp folder.
 
     python Management/tools/test_gamedesign.py
 """
@@ -14,6 +14,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
 import gd_delete  # noqa: E402
+import gd_pack  # noqa: E402
 import gd_progress  # noqa: E402
 import gd_status  # noqa: E402
 
@@ -582,8 +583,164 @@ def run_code_names(root):
     check("the code gate still needs code.json in live", gd.code_allowed(root, "Wallet")[0], False)
 
 
+def add_refs(root, path, line, table="idea"):
+    """Puts `refs: <line>` into the front matter of the node's data.md."""
+    p = folder(root, f"{table}/{path}/data.md")
+    p.write_text(p.read_text(encoding="utf-8").replace("\n---\n", f"\nrefs: {line}\n---\n", 1), encoding="utf-8")
+
+
+def glossary_node(root, items, table="idea"):
+    """Writes the glossary node: items are (id, title, detail)."""
+    based = gd.read_data(folder(root, table))["hash"]
+    body = "".join(f"\n### {i} | AI 8 | {title}\n{detail}\n" for i, title, detail in items)
+    put(root, f"{table}/glossary/data.md", f"---\nbased-on: {based}\n---\n# Thuật ngữ\n\nTừ dùng chung.\n\n## {gd.ITEMS_TITLE}\n{body}")
+    put(root, f"{table}/glossary/CLAUDE.md", "# Thuật ngữ\n\nDữ liệu cốt lõi: data.md\n")
+
+
+def term_hash(root, tid, table="idea"):
+    return next(it["hash"] for it in gd.read_data(folder(root, f"{table}/glossary"))["items"] if it["id"] == tid)
+
+
+def run_refs(root):
+    """refs: nodes of other branches a node builds on, each with the hash it was checked against."""
+    text = data_text("T", [("a", 8, "B.")], "abc")
+    with_refs = text.replace("\n---\n", "\nrefs: [feature-x/y@0123456789ab, glossary#wave@abcdefabcdef]\n---\n", 1)
+    d = gd.parse_data(with_refs)
+    check("refs are read, with an optional term", d["refs"], [{"path": "feature-x/y", "term": "", "hash": "0123456789ab"},
+                                                            {"path": "glossary", "term": "wave", "hash": "abcdefabcdef"}])
+    check("refs are not in the data hash", (d["hash"] == gd.parse_data(text)["hash"], d["errors"]), (True, []))
+    check("refs separated by spaces too", len(gd.parse_data(text.replace("\n---\n", "\nrefs: a/b@0123456789ab c/d@0123456789ab\n---\n", 1))["refs"]), 2)
+    check("a malformed ref is an error", bool(gd.parse_data(text.replace("\n---\n", "\nrefs: a/b@zz\n---\n", 1))["errors"]))
+
+    mk(root, "")
+    for path in ("feature-a", "feature-a/a1", "feature-a/a1/a1x", "feature-b"):
+        mk(root, path)
+    mk(root, "feature-b/b1", doc="Dựa trên `feature-a/a1`, thuộc `feature-b`, chính nó `feature-b/b1`, feature `feature-a`.")
+    a1 = gd.read_data(folder(root, "idea/feature-a/a1"))["hash"]
+    n = snap_node(root, "feature-b/b1")
+    check("a round-3/4 node of another branch mentioned without a ref: redo",
+          (n["passed"], n["redo"], [r["label"] for r in n["refMissing"]]), (False, True, ["feature-a/a1"]))
+    check("its own lineage and round-2 nodes are not asked for", len(n["refMissing"]), 1)
+    check("the reason says what to declare", any(f"feature-a/a1@{a1}" in r for r in n["reasons"]))
+    check("the refs line to write", n["refLine"], f"refs: feature-a/a1@{a1}")
+    mk(root, "feature-b/b1/b1x")
+    check("its children are locked while the ref is missing", gd.can_write_node(root, ["feature-b", "b1", "b1x"])[0], False)
+    add_refs(root, "feature-b/b1", f"feature-a/a1@{a1}")
+    n = snap_node(root, "feature-b/b1")
+    check("a matching ref passes", (n["passed"], n["refs"][0]["ok"], n["refs"][0]["title"]), (True, True, "a1"))
+    check("children open again", gd.can_write_node(root, ["feature-b", "b1", "b1x"])[0], True)
+    check("declaring refs does not touch the data hash, so no child goes stale", snap_node(root, "feature-b/b1/b1x")["stale"], False)
+    mk(root, "feature-a/a1", items=[("core", 8, "Ý đã đổi.")])
+    n = snap_node(root, "feature-b/b1")
+    check("the target changed: the ref is stale, redo", (n["passed"], n["redo"], n["refStale"]), (False, True, ["feature-a/a1"]))
+    check("the stale reason names both hashes", any(a1 in r and "đã đổi" in r for r in n["reasons"]))
+    check("the write gate sees the stale ref", gd.can_write_node(root, ["feature-b", "b1", "b1x"])[0], False)
+
+    mk(root, "feature-b/b2", doc="Xem `ai/idea/feature-a/a1/` và `live/feature-a/a1/a1x/CLAUDE.md`.")
+    check("table prefixes and file names are normalized",
+          sorted(r["label"] for r in snap_node(root, "feature-b/b2")["refMissing"]), ["feature-a/a1", "feature-a/a1/a1x"])
+    mk(root, "feature-b/b3", doc="Xem `feature-a/none`.")
+    n = snap_node(root, "feature-b/b3")
+    check("a mention of a node that does not exist is only a reminder", (n["passed"], len(n["refNotes"])), (True, 1))
+    mk(root, "feature-b/b4")
+    add_refs(root, "feature-b/b4", "feature-z/q@0123456789ab, feature-b@0123456789ab")
+    probs = [p["text"] for p in gd.snapshot(root)["problems"]["idea"] if p["path"] == "feature-b/b4"]
+    check("a ref to no node, or to its own ancestor, is a structure problem", len(probs), 2)
+    check("ancestors from the root down", [a["path"] for a in gd.ancestors(gd.read_tree(root, "idea")[0], "feature-a/a1/a1x")],
+          ["", "feature-a", "feature-a/a1"])
+    check("no ancestors for the root", gd.ancestors(gd.read_tree(root, "idea")[0], ""), [])
+    report = gd_status.report(root, "ai/idea/feature-b/b1")
+    check("status of one node starts with what it builds on", "## Bám theo" in report and "- feature-a/a1 (vòng 3)" in report)
+    check("status prints the refs line to write", "ghi dòng này vào phần đầu data.md: `refs: feature-a/a1@" in report)
+    check("no glossary node yet: a reminder", any("chưa có node glossary" in t["text"] for t in gd.snapshot(root)["termNotes"]["idea"]))
+    check("the page gets no second copy of the text", "refText" in snap_node(root, "feature-b/b1"), False)
+
+
+def run_glossary(root):
+    """The glossary node: one idea per term, refs per term, not a feature."""
+    mk(root, "")
+    glossary_node(root, [("wave", "Đợt: một nhóm quái vào cùng lúc", "Ví dụ đợt 3."), ("hp", "Máu: lượng sát thương chịu được", "")])
+    snap = gd.snapshot(root)
+    check("terms are read from the ideas", [(t["id"], t["term"], t["meaning"]) for t in snap["glossary"]["idea"]["terms"]],
+          [("wave", "Đợt", "một nhóm quái vào cùng lúc"), ("hp", "Máu", "lượng sát thương chịu được")])
+    check("a clean glossary has no problem", snap["problems"]["idea"], [])
+    check("the glossary is not a feature: no code.json asked", snap["missingCode"], [])
+    g = snap_node(root, "glossary")
+    check("the glossary has no importance", (g["priority"].get("glossary"), g["priority"]["leaf"]), (True, False))
+    check("status does not ask the glossary for a priority", "BẠN CHƯA CHẤM" in gd_status.report(root, "ai/idea/glossary"), False)
+    check("the glossary has no progress", refused(gd.save_progress, root, "glossary", "idea", "done", "@CodeLead"))
+
+    mk(root, "feature-a")
+    mk(root, "feature-a/a1", doc="Dùng `glossary#wave`.")
+    n = snap_node(root, "feature-a/a1")
+    check("a term mentioned without a ref: redo", (n["passed"], [r["label"] for r in n["refMissing"]]), (False, ["glossary#wave"]))
+    add_refs(root, "feature-a/a1", f"glossary#wave@{term_hash(root, 'wave')}")
+    check("a matching term ref passes", snap_node(root, "feature-a/a1")["passed"], True)
+    check("the glossary lists who uses a term", gd.snapshot(root)["glossary"]["idea"]["terms"][0]["usedBy"], ["feature-a/a1"])
+    glossary_node(root, [("wave", "Đợt: một nhóm quái vào cùng lúc", "Ví dụ đợt 3."), ("hp", "Máu: phần máu còn lại", "")])
+    check("rewriting another term leaves the ref matching", snap_node(root, "feature-a/a1")["passed"], True)
+    glossary_node(root, [("wave", "Đợt: các quái vào trong một lượt gọi", ""), ("hp", "Máu: phần máu còn lại", "")])
+    check("rewriting the term makes the ref stale", snap_node(root, "feature-a/a1")["refStale"], ["glossary#wave"])
+    add_refs(root, "feature-a/a1", "glossary#nope@0123456789ab")
+    check("a ref to a term that does not exist is a structure problem",
+          any("glossary#nope" in p["text"] for p in gd.snapshot(root)["problems"]["idea"]))
+
+    mk(root, "feature-a/a2", doc="## Định nghĩa\n- **Đợt**: khác\n- **Tầm**: xa\n")
+    mk(root, "feature-a/a3", summary="Hero mất Máu khi bị đánh.", doc="## Định nghĩa\n- **Tầm**: gần\n")
+    notes = [t["text"] for t in gd.snapshot(root)["termNotes"]["idea"]]
+    check("redefining a glossary term is a reminder", any("định nghĩa lại 'Đợt'" in t for t in notes))
+    check("a term defined outside the glossary in two places with two meanings",
+          any("'Tầm' còn định nghĩa ngoài glossary" in t and "2 nơi" in t for t in notes))
+    check("a term written out without a ref", any("có dùng từ 'Máu'" in t for t in notes))
+    check("reminders block nothing", snap_node(root, "feature-a/a3")["passed"], True)
+    check("status lists the glossary reminders", "## Thuật ngữ" in gd_status.report(root))
+
+    glossary_node(root, [("wave", "Đợt không có dấu hai chấm", ""), ("w2", "Đợt: lặp lại", "")])
+    probs = [p["text"] for p in gd.snapshot(root)["problems"]["idea"] if p["path"] == "glossary"]
+    check("a term title without ':' is a problem", any("<từ>: <nghĩa>" in t for t in probs))
+    glossary_node(root, [("wave", "Đợt: a", ""), ("w2", "đợt : b", "")])
+    check("the same term twice is a problem", any("có ở cả ý" in p["text"] for p in gd.snapshot(root)["problems"]["idea"]))
+    glossary_node(root, [("wave", "Đợt: a", "")])
+    put(root, "idea/glossary/code.json", '{"unity": ["Glossary"]}')
+    mk(root, "glossary/child")
+    probs = [p["text"] for p in gd.snapshot(root)["problems"]["idea"] if p["path"] == "glossary"]
+    check("the glossary has no code.json and no children", (any("code.json" in t for t in probs), any("node con" in t for t in probs)), (True, True))
+    shutil.rmtree(folder(root, "idea/glossary/child"))
+    folder(root, "idea/glossary/code.json").unlink()
+    for path in ("", "glossary", "feature-a"):
+        gd.promote(root, path, False)
+    check("live features leave the glossary out", [k for _, k, _ in gd.live_feature_names(root)], ["feature-a"])
+    check("the glossary never opens a code folder", gd.code_allowed(root, "Glossary")[0], False)
+
+
+def run_pack(root):
+    """gd_pack prints the fixed design of one code folder: lineage, branch, refs, terms."""
+    mk(root, "")
+    glossary_node(root, [("wave", "Đợt: một nhóm quái vào cùng lúc", "Ví dụ đợt 3.")])
+    mk(root, "feature-b"), mk(root, "feature-b/b1", items=[("b-core", 8, "Ý của b1.\nChi tiết b1.")])
+    mk(root, "feature-a")
+    put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')
+    mk(root, "feature-a/a1", doc="## Thông số\nDựa trên `feature-b/b1` và `glossary#wave`.")
+    add_refs(root, "feature-a/a1", f"feature-b/b1@{gd.read_data(folder(root, 'idea/feature-b/b1'))['hash']}, glossary#wave@{term_hash(root, 'wave')}")
+    mk(root, "feature-a/a1/a1x")
+    gd.promote(root, "", True)
+    text = gd_pack.pack(root, "alpha")
+    check("pack: the code gate", "Code: ĐƯỢC CODE" in text)
+    check("pack: the root as context", "## Bối cảnh: node gốc" in text)
+    check("pack: every node of the branch, in full", all(f"## {p}  ·" in text for p in ("feature-a", "feature-a/a1", "feature-a/a1/a1x")))
+    check("pack: CLAUDE.md headings sit below the node heading", "#### Thông số" in text)
+    check("pack: the node a ref names, with its detail", "## feature-b/b1  ·" in text and "Chi tiết b1." in text
+          and "live/feature-b/b1/CLAUDE.md" in text)
+    check("pack: other nodes stay out", "## feature-b  ·" in text, False)
+    check("pack: the terms the branch uses", "**Đợt**: một nhóm quái vào cùng lúc (Ví dụ đợt 3.)" in text)
+    check("pack: no warning when refs match", "Cảnh báo" in text, False)
+    check("pack: a folder live does not name", refused(gd_pack.pack, root, "Nope"))
+    check("pack: exit 1 for an unknown folder, 2 for a bad name",
+          (gd_pack.main(["gd_pack.py", "Nope", "--root", root]), gd_pack.main(["gd_pack.py", "../x", "--root", root])), (1, 2))
+
+
 def main():
-    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow):
+    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

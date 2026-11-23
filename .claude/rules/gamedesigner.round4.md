@@ -29,6 +29,7 @@ Sau vòng 4, phiên code làm được game chơi được ở **mức IDEA** m�
 - **Balance**: dự đoán và đưa ra bộ chỉ số cùng cách tính.
 
 Con số ghi kèm đơn vị và lí do; con số phỏng đoán ghi là "dự kiến".
+Con số dựa trên node khác (chỉ số quái, giá, sát thương của thành...) thì nêu đường dẫn node đó trong backtick và khai trong refs: nhánh kia đổi số thì node này phải làm lại, nhờ vậy số giữa các nhánh không lệch nhau.
 
 ## Không cụ thể tới mức này (có chuyên gia riêng)
 - Giao diện tương tác: màu, vị trí, kích thước. Sai: "Nút có màu xanh".

@@ -5,8 +5,11 @@
     python Management/tools/gd_status.py ai/idea/<path>      one branch
 
 For every node: its round, whether it passes and why not, its data hash and the hash to write into the
-children's based-on, every idea with the AI's and the human's score and feedback, unanswered questions, whether
-it is the same as live, and what the human turned down here before (from .history).
+children's based-on, its refs (matching, changed, mentioned but not declared, and the refs line to write), every
+idea with the AI's and the human's score and feedback, unanswered questions, whether it is the same as live, and
+what the human turned down here before (from .history).
+For one branch it starts with "Bám theo": the nodes above it and the nodes and terms its refs name, read before
+writing. For the whole tree it ends with the glossary reminders.
 """
 import sys
 from pathlib import Path
@@ -32,9 +35,20 @@ def lines_for(root, node, out):
                    + (" -> LỆCH, rà lại node rồi ghi hash mới" if node["stale"] else " -> khớp"))
     out.append(f"- So với live: {dict(new='chưa có trong live', changed='khác live', same='giống live')[node['state']]}"
                + ("; các node con đang mở cho bạn ghi" if node["approved"] else "; các node con đang bị khoá"))
+    for r in node["refs"]:
+        state = "khớp" if r["ok"] else ("LỆCH, hash hiện tại " + r["current"] if r["ok"] is False else "KHÔNG CÓ")
+        out.append(f"- ref {r['label']}@{r['hash']}" + (f" ({r['title']})" if r["title"] else "") + f": {state}")
+    for r in node["refMissing"]:
+        out.append(f"- nhắc {r['label']} mà CHƯA KHAI refs")
+    for text in node["refNotes"]:
+        out.append(f"- nhắc: {text}")
+    if node["refMissing"] or node["refStale"]:
+        out.append(f"- Sau khi đọc và rà, ghi dòng này vào phần đầu data.md: `{node['refLine']}`")
     p = node["priority"]
+    if p.get("glossary"):
+        out.append(f"- Bảng thuật ngữ chung: {len(node['terms'])} từ (không chấm độ quan trọng, không có tiến độ)")
     phase = next((x["name"] for x in gd.PHASES if x["key"] == p["phase"]), "chưa xếp")
-    line = f"- Độ quan trọng: {'chưa có' if p['effective'] is None else p['effective']} ({phase})"
+    line = "" if p.get("glossary") else f"- Độ quan trọng: {'chưa có' if p['effective'] is None else p['effective']} ({phase})"
     if p["user"] is not None:
         line += f"; người chấm {p['user']}"
     elif p["offset"]:
@@ -45,7 +59,8 @@ def lines_for(root, node, out):
         line += f"; {gd.PRIORITY_FILE} ở node này bị bỏ qua vì nó có node con (chỉ chấm ở node lá)"
     if p["done"]:
         line += "; ĐÃ XONG" + ("" if p["leaf"] else " (mọi node lá bên dưới đã xong)")
-    out.append(line)
+    if line:
+        out.append(line)
     if p["leaf"]:
         names = {x["key"]: x["name"] for x in gd.PHASES}
         cells = [f"{names[k]} {c['state']}" + (f" ({c['by']} {c['at']})" if c["by"] else "") for k, c in node["progress"].items()]
@@ -78,6 +93,32 @@ def lines_for(root, node, out):
         lines_for(root, child, out)
 
 
+def brief_lines(b, out, indent=""):
+    out.append(f"{indent}- {b['path']} (vòng {b['round']}): {b['title']}" + (f". {b['summary']}" if b["summary"] else ""))
+    for title in b["items"]:
+        out.append(f"{indent}    · {title}")
+
+
+def context_lines(snap, node):
+    """The "Bám theo" section: what a node builds on, read before writing it."""
+    out = ["", "## Bám theo (đọc trước khi viết node này)", "Chuỗi node phía trên:"]
+    for a in gd.ancestors(snap["idea"], node["path"]):
+        brief_lines(gd.brief(a), out)
+    nodes = {n["path"]: n for n in gd.walk(snap["idea"])}
+    terms = {t["id"]: t for t in (snap["glossary"]["idea"] or {}).get("terms", [])}
+    listed = [r for r in node["refs"] if r["ok"] is not None] + node["refMissing"]
+    if listed:
+        out.append("Node và từ mà refs trỏ tới (đọc cả CLAUDE.md của node):")
+    for r in listed:
+        if r["term"]:
+            t = terms.get(r["term"])
+            if t:
+                out.append(f"- {r['label']}: {t['term']}: {t['meaning']}" + (f" ({t['detail']})" if t["detail"] else ""))
+        elif r["path"] in nodes:
+            brief_lines(gd.brief(nodes[r["path"]]), out)
+    return out
+
+
 def report(root, arg=""):
     """The text to print; raises ValueError for a path that is not a node of the idea table."""
     path = ""
@@ -95,6 +136,8 @@ def report(root, arg=""):
     out = [f"# Game design: {mode % gd.PASS_MIN}",
            "Thang điểm: " + " · ".join(f"{b['min']}-{b['max']} {b['label']}" for b in gd.BANDS),
            "Độ quan trọng (chỉ chấm ở node lá): " + " · ".join(f"{x['min']}-{x['max']} {x['name']}: {x['label']}" for x in gd.PHASES)]
+    if path:
+        out += context_lines(snap, node)
     lines_for(root, node, out)
     problems = [p for p in snap["problems"]["idea"] if not path or p["path"] == path or p["path"].startswith(path + "/")]
     if problems:
@@ -104,6 +147,9 @@ def report(root, arg=""):
     if not path and snap["missingCode"]:
         out += ["", "## Thiếu code.json (vòng 2: tự đặt theo key, không cần hỏi người)"] + [
             f"- {p['path']}: {p['text']}" for p in snap["missingCode"]]
+    if not path and snap["termNotes"]["idea"]:
+        out += ["", f"## Thuật ngữ (node {gd.GLOSSARY_KEY}; nhắc, không chặn)"] + [
+            f"- {p['path']}: {p['text']}" for p in snap["termNotes"]["idea"]]
     return "\n".join(out)
 
 
