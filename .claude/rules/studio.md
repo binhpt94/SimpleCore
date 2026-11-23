@@ -73,7 +73,7 @@ design: feature-hero/hero-list/hero-roster-values                (không bắt b
 - Tab Studio của trang hiện mọi order, lượt đã dùng, item chưa chuẩn và phiếu nợ; ảnh art chưa chuẩn có nhãn ngay trên ảnh ở tab Game design.
 
 ## Ảnh art-concept của node thiết kế (`kind: art`)
-@GameDesigner đặt order cho một node vòng 4 đã ở `live`: `orders/_design/<node, '/' thay bằng '.'>/<id>/`. Mỗi item là tên một frame của node; `style:` là các style của vòng 1; `deliver: concept`.
+@GameDesigner đặt order chỉ cho node `cheat` của một feature (`<feature>/cheat`, đã ở `live`); `check` từ chối node khác. Đường dẫn: `orders/_design/<feature>.cheat/<id>/`. Mỗi item là id một state của node cheat (cũng là tên frame của state đó), mỗi feature tối đa 3 ảnh; `style:` là các style của vòng 1; `deliver: concept`.
 - **Cổng duyệt:** order chờ người bấm "Duyệt gen" (nhập PIN) trên tab Game design. Trang ghi `approval.json`; không phiên nào ghi được file này.
   - Approval gắn với đúng nội dung `order.md` và hash của node trong live; một trong hai đổi thì phải duyệt lại.
   - Mỗi item được chạy tối đa 2 lần cho một lần duyệt (một lần thử lại khi tự kiểm chưa đạt). Toàn project tối đa 20 lần chạy art mỗi ngày.

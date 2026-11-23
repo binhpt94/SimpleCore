@@ -59,6 +59,7 @@ view: x=-20u..20u y=-2u..8u  # phần chiến trường được vẽ; y=0 là m
 - Một con số đã có ở frame node khác thì `use`, không chép lại. Node có `use` phải khai node kia trong refs; node kia đổi thì node này phải làm lại.
 - Cảnh báo tự động: hình tràn màn hoặc tràn khung nhìn; hình con tràn hình cha; hai hình cùng cấp chồng nhau mà không có `overlap`; nút có cạnh ngắn dưới 96 px. Vòng tầm (`ring`) không bị kiểm tràn. Cảnh báo không chặn chốt nhưng phải xử lý hoặc giải thích ở `CLAUDE.md`. Lỗi cú pháp là lỗi cấu trúc: phải sửa.
 - Frame chỉ ghi kích thước và vị trí ước lượng. Màu, hình dáng, phong cách vẫn không ghi.
+- Ảnh art không đặt cho node vòng 4. Feature có frame `kind: ui` phải có node `cheat` (tối đa 3 state, mỗi state một frame `use` số từ các node vòng 4 này); ảnh art chỉ đặt ở đó. Xem mục "Node cheat" bên dưới.
 
 ## Không cụ thể tới mức này (có chuyên gia riêng)
 - Giao diện tương tác: màu, kiểu dáng. Vị trí và kích thước chỉ ở mức ước lượng, và chỉ nằm trong frame. Sai: "Nút có màu xanh".
@@ -83,3 +84,17 @@ Guard chỉ cho phiên feature sửa code khi nhánh của nó có ít nhất m�
 
 ## `CLAUDE.md` của node
 Các mục: Làm gì, Thông số, Thông số theo giai đoạn, Trường hợp biên, Chưa rõ.
+
+## Node cheat (`<feature>/cheat/`)
+Mỗi feature một node `cheat`. Nó vừa là bộ state để phiên code dựng ngay khi test và Play (không phải chơi tới nơi), vừa là **chỗ duy nhất đặt ảnh art** của feature. Vì vậy mỗi feature tối đa 3 ảnh màu, còn các node vòng 4 cứ vẽ frame thoải mái.
+- **Vị trí:** ngay dưới node feature, ở chỗ của vòng 3, không có node con. Luật vòng 3 không áp cho nó.
+- **Bắt buộc** khi feature có ít nhất một frame giao diện (`kind: ui`), kể cả feature hạ tầng. Thiếu thì mọi node vòng 4 có frame `ui` của feature mang lỗi cấu trúc, không chốt được. Feature chỉ có frame chiến trường (`kind: field`) không cần.
+- **`data.md`:** mỗi ý là một state, tối đa 3 ý.
+  - Tiêu đề nói state đó là gì.
+  - Chi tiết ghi giá trị cần ép, ví dụ "điểm 16, kỉ lục 16, cờ kỉ lục mới bật".
+- **`.frame-concept/`:** đúng một frame cho mỗi state, tên `<id của ý>.frame`. Thiếu frame, hay frame không trùng id nào, là lỗi; không khai được `frame: none`.
+- **Chọn state:** mỗi state chứa nhiều thành phần nhất có thể. State chỉ ẩn bớt phần so với state khác thì không thành state riêng.
+- **Không lặp số:** frame cheat `use` mọi số từ node vòng 4 sở hữu bố cục và khai node đó trong `refs` (kèm hash). Node gốc đổi thì cheat thành "cần làm lại", không lệch được. Frame chưa `use` số nào thì `gd_status.py` nhắc.
+- **State gộp nhiều feature** (ví dụ "đợt 10 có trùm, thành còn 30% máu, 3 hero") đặt ở cheat của feature chủ trận (`feature-run`), `use` số từ các feature kia.
+- **`priority.json`:** chấm theo mức cần để review, thường là IDEA (không có ảnh thì không review nhanh được).
+- **Cheat chỉ chạy ở bản dev.** Code cheat nằm trong thư mục của chính feature, sau cờ dev; không lọt vào bản phát hành.

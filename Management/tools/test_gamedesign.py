@@ -863,6 +863,16 @@ def run_frames(root):
     d = folder(root, "idea/feature-a/a1/a1x/data.md")
     d.write_text(d.read_text(encoding="utf-8").replace(after, gd.read_data(folder(root, "idea/feature-b/b1/b1x"))["hash"]), encoding="utf-8")
     put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')
+    try:
+        gd.promote(root, "", True)
+        refused = ""
+    except ValueError as ex:
+        refused = str(ex)
+    check("cheat: a ui frame without the feature's cheat node blocks Chốt", "chưa có node cheat" in refused)
+    check("cheat: a field-only node does not ask for it",
+          any("chưa có node cheat" in p["text"] for p in gd.read_tree(root, "idea")[1] if p["path"] == "feature-b/b1/b1x"), False)
+    mk(root, "feature-a/cheat")
+    put(root, "idea/feature-a/cheat/.frame-concept/core.frame", "kind: ui\n- panel rect x=560 y=190 w=800 h=700\n")
     gd.promote(root, "", True)
     check("frame: a deep Chốt copies frames", folder(root, "live/feature-a/a1/a1x/.frame-concept/main.frame").is_file())
     put(root, "idea/feature-a/a1/a1x/.frame-concept/main.frame", UI_FRAME.replace("w=320 h=80", "w=320 h=100"))
@@ -872,6 +882,41 @@ def run_frames(root):
     pack = gd_pack.pack(root, "Alpha")
     check("frame: gd_pack prints the frames of the branch", "### Frame (bố cục ước lượng" in pack and "home button x=980 y=750 w=320 h=100" in pack)
     check("frame: the snapshot carries the frame CSS", "fr-button" in gd.snapshot(root)["frameCss"])
+
+
+def run_cheat(root):
+    """The cheat node: right under a feature, no children, at most 3 states, one frame per state named after it."""
+    mk(root, "")
+    mk(root, "feature-a")
+    states = (("lose", 8, "Thua."), ("record", 8, "Kỉ lục."))
+    mk(root, "feature-a/cheat", items=states)
+    put(root, "idea/feature-a/cheat/.frame-concept/lose.frame", "kind: ui\n- a rect x=1 y=1 w=9 h=9\n")
+
+    def errs():
+        return [p["text"] for p in gd.read_tree(root, "idea")[1] if p["path"].endswith("cheat")]
+    check("cheat: a state without its frame is a problem", any("'record' chưa có frame" in t for t in errs()))
+    put(root, "idea/feature-a/cheat/.frame-concept/record.frame", "kind: ui\n- a rect x=1 y=1 w=9 h=9\n")
+    check("cheat: one frame per state is fine", errs(), [])
+    n = snap_node(root, "feature-a/cheat")
+    check("cheat: flagged, frames allowed off round 4, a frame without use reminded",
+          (n["cheat"], any("chỉ dùng ở node vòng" in t for t in n["frameNotes"]), any("chưa use" in t for t in n["frameNotes"])),
+          (True, False, True))
+    put(root, "idea/feature-a/cheat/.frame-concept/extra.frame", "kind: ui\n")
+    check("cheat: a frame that is no state is a problem", any("'extra.frame' không trùng" in t for t in errs()))
+    folder(root, "idea/feature-a/cheat/.frame-concept/extra.frame").unlink()
+    mk(root, "feature-a/cheat", items=states + (("c", 8, "C."), ("d", 8, "D.")))
+    check("cheat: more than 3 states is a problem", any("tối đa 3 state" in t for t in errs()))
+    mk(root, "feature-a/cheat", items=states)
+    front(root, "feature-a/cheat", "frame: none")
+    check("cheat: 'frame: none' is a problem", any("frame: none" in t for t in errs()))
+    mk(root, "feature-a/cheat", items=states)
+    mk(root, "feature-a/cheat/sub")
+    check("cheat: a child node is a problem", any("không có node con" in t for t in errs()))
+    shutil.rmtree(folder(root, "idea/feature-a/cheat/sub"))
+    mk(root, "feature-a/a1")
+    mk(root, "feature-a/a1/cheat")
+    check("cheat: only right under a feature", any(p["path"] == "feature-a/a1/cheat" and "ngay dưới node feature" in p["text"]
+                                                   for p in gd.read_tree(root, "idea")[1]))
 
 
 def run_styles(root):
@@ -910,7 +955,7 @@ def run_styles(root):
 
 
 def main():
-    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_styles):
+    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_cheat, run_styles):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

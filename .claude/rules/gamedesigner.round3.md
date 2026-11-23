@@ -5,6 +5,7 @@ paths:
 ---
 # GD vòng 3: Quan hệ và định nghĩa
 Luật chung: `.claude/rules/gamedesigner.md`. File này chỉ thêm phần riêng của vòng 3 (`ai/idea/<feature>/<detail>/`).
+Node `<feature>/cheat/` nằm ở chỗ của vòng 3 nhưng không theo file này: xem mục "Node cheat" trong `gamedesigner.round4.md`.
 
 ## Viết gì
 Vòng 3 là nơi quyết định các quan hệ và định nghĩa, hiện thực hoá dần các ý của vòng 2. Ví dụ:

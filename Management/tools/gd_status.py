@@ -54,6 +54,9 @@ def lines_for(root, node, out):
         if a["frame"] not in seen_art:
             seen_art.add(a["frame"])
             out.append(f"- Art {a['frame']}: {a['label']} (v{a['version']}, {a['ref']})")
+    if node.get("cheat"):
+        out.append(f"- Node cheat: {len(node['items'])}/{gd.CHEAT_MAX} state, mỗi state một frame trùng id; "
+                   "state dựng nhanh ở bản dev, và là node duy nhất đặt order art (mỗi state một ảnh)")
     for fr in node["frames"]:
         out += ["- " + line.lstrip() if i == 0 else "  " + line for i, line in enumerate(gd.frame_brief(fr))]
     if node["frameNone"]:

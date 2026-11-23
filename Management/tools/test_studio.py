@@ -285,17 +285,18 @@ Popup thua trên nền trận.
 ## Tiêu chí nhận
 Giữ bố cục frame.
 """
-NODE = "feature-pop/pop-lose/lose-spec"
+NODE = "feature-pop/cheat"
 
 
 def design_tree(root, frame="kind: ui\n- panel round-rect x=560 y=190 w=800 h=700\n", style="Phẳng, màu tươi, viền dày."):
-    """A live table: the root with one style and a picture, a branch down to a round-4 node with one frame."""
+    """A live table: the root with one style and a picture, a feature with its cheat node: one state, one frame."""
     live = Path(root) / "Management/game-design/live"
-    for i, part in enumerate(["", "feature-pop", "feature-pop/pop-lose", NODE]):
+    for i, part in enumerate(["", "feature-pop", NODE]):
         d = live / part if part else live
         d.mkdir(parents=True, exist_ok=True)
         head = "---\nscreen: landscape\n---\n" if not part else ""
-        (d / "data.md").write_text(f"{head}# N{i}\n\nTóm tắt.\n\n## Ý cốt lõi\n\n### a | AI 8 | Ý\n", encoding="utf-8")
+        item = "main" if part == NODE else "a"
+        (d / "data.md").write_text(f"{head}# N{i}\n\nTóm tắt.\n\n## Ý cốt lõi\n\n### {item} | AI 8 | Ý\n", encoding="utf-8")
         (d / "CLAUDE.md").write_text(f"# N{i}\n\nDữ liệu cốt lõi: data.md\n", encoding="utf-8")
     (live / ".art-style").mkdir(exist_ok=True)
     (live / ".art-style/ui-flat.md").write_text(f"# UI phẳng\n\n{style}\n", encoding="utf-8")
@@ -330,12 +331,19 @@ def run_art(root):
     design_tree(root)
     check("art: a good order passes check", studio.check_order(root, "codex", studio.gd.design_owner(NODE), "lose-art", folder)[1], [])
     _, bad = art_order(root, oid="bad-frame", items=("other",))
-    check("art: an item must be a frame", any("tên một frame" in p for p in
+    check("art: an item must be a state", any("id một state" in p for p in
                                               studio.check_order(root, "codex", studio.gd.design_owner(NODE), "bad-frame", bad)[1]))
     _, bad = art_order(root, oid="bad-style", style="paint")
     check("art: a style must exist in round 1", any("style 'paint'" in p for p in
                                                     studio.check_order(root, "codex", studio.gd.design_owner(NODE), "bad-style", bad)[1]))
     shutil.rmtree(bad.parent / "bad-frame"), shutil.rmtree(bad)
+    other = studio.gd.design_owner("feature-pop/pop-lose/lose-spec")
+    odir = studio.order_dir(root, "codex", other, "not-cheat")
+    odir.mkdir(parents=True, exist_ok=True)
+    (odir / "order.md").write_text((folder / "order.md").read_text(encoding="utf-8"), encoding="utf-8")
+    check("art: only for a cheat node", any("chỉ đặt cho node cheat" in p for p in
+                                            studio.check_order(root, "codex", other, "not-cheat", odir)[1]))
+    shutil.rmtree(odir.parent)
     plain = order(root, oid="art-in-feature", kind="art", items=("x",))
     check("art: only for design nodes", any("chỉ dành cho order của node thiết kế" in p for p in
                                             studio.check_order(root, "codex", "Wallet", "art-in-feature", plain)[1]))

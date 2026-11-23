@@ -26,7 +26,7 @@ Feature nằm ở `UnityProject/Assets/Features/<Tên>/`, dịch vụ ở `Featu
 | `Assets/_Composition`, `Assets/Core` | được | `@Composition` / `@Core`: vùng của mình được; phiên khác: cấm, nhờ phiên đó |
 | `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json` | được | hỏi người, từng lần |
 | `Management/proposals` | được | chỉ tạo file mới |
-| `Management/studio` (order, lịch sử, bài học của @Codex/@Blender) | được (mọi phiên) | feature: chỉ tạo mới `order.md`, `feedback-<n>.md` trong `orders/<mình>/<id>/`; @GameDesigner: tương tự trong `codex/orders/_design/` (ảnh art-concept của node thiết kế, người duyệt gen trên trang); @Codex/@Blender: `lessons.md` và `work/` của order; còn lại studio.py và trang |
+| `Management/studio` (order, lịch sử, bài học của @Codex/@Blender) | được (mọi phiên) | feature: chỉ tạo mới `order.md`, `feedback-<n>.md` trong `orders/<mình>/<id>/`; @GameDesigner: tương tự trong `codex/orders/_design/` (ảnh art-concept, chỉ cho node `<feature>/cheat`, tối đa 3 ảnh mỗi feature; người duyệt gen trên trang); @Codex/@Blender: `lessons.md` và `work/` của order; còn lại studio.py và trang |
 | `Resources` (hàng đã giao) | được (mọi phiên) | cấm: chỉ studio.py ghi |
 | Phần còn lại của `Management` (`game-design/live` là thiết kế đã chốt, bám theo nó) | được | cấm; `game-design/ai`: chỉ `@GameDesigner` |
 | `.claude/**`, file này | được | cấm |

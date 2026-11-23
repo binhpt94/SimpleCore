@@ -170,6 +170,7 @@
     ".gd-history .out { color: var(--bad); }",
     ".gd-card.dim, .gd-chips.dim { opacity: .28; }",
     ".gd-tag.ph { font-weight: 600; }",
+    ".gd-tag.cheat { border-color: var(--warn-text); color: var(--warn-text); font-weight: 600; }",
     ".gd-tag.ph-idea { border-color: var(--accent); background: var(--accent); color: var(--panel); }",
     ".gd-tag.ph-prototype { border-color: var(--accent); color: var(--accent); }",
     ".gd-tag.ph-full { border-color: var(--muted); color: var(--muted); }",
@@ -723,6 +724,7 @@
         card.addEventListener("click", function () { select(n); });
         map.appendChild(card);
         var chips = chipsFor(n);
+        if (n.cheat) chips.push(el("span", "gd-tag cheat", "cheat"));
         if (item.hidden > 0) chips.push(el("span", "gd-tag", "+" + item.hidden + (n.round === FOCUS_ROUND - 1 ? " feature ẩn" : " node con")));
         if (!chips.length) return;
         var row = el("div", needed(n) ? "gd-chips" : "gd-chips dim");
@@ -1095,6 +1097,8 @@
       add(body, el("p", "gd-path", "Vòng " + node.round + " · " + ((data.rounds || [])[node.round - 1] || "") + " · " +
         table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "")));
       if (node.summary) add(body, el("p", "", node.summary));
+      if (node.cheat) add(body, el("p", "gd-gate ok", "Node cheat: mỗi ý là một state dựng nhanh ở bản dev để test và review. " +
+        "Đây là nơi duy nhất đặt ảnh art của feature (tối đa 3 state, mỗi state một frame và một ảnh)."));
       renderPriority(body, node);
       renderProgress(body, node);
       renderCode(body, node);
@@ -1205,6 +1209,7 @@
       if (node.frames && node.frames.length || node.frameNotes && node.frameNotes.length || node.frameNone) {
         add(body, el("h3", "", "Frame (bố cục ước lượng)"));
         if (node.frameNone) add(body, el("p", "gd-note", "Node này không có bố cục (frame: none)."));
+        if (node.frames && node.frames.length && !node.cheat) add(body, el("p", "gd-note", "Ảnh art không đặt ở đây: order art chỉ đặt ở node cheat của feature."));
         (node.frameNotes || []).forEach(function (t) { add(body, el("p", "gd-note", t)); });
         if (node.frames && node.frames.length) {
           var tabs = node.frames.length > 1 ? put(body, el("div", "gd-frame-tabs")) : null;

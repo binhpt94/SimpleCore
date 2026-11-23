@@ -274,7 +274,7 @@ def order_styles(data):
 
 
 def check_art(root, feature, oid, folder, data):
-    """The problems of an art order: its node in live with frames, one item per frame, known styles, and no frame
+    """The problems of an art order: a cheat node in live with frames, one item per state (its frame), known styles, and no frame
     that already has a picture still good (unless this order is the one that made it)."""
     problems = []
     if data["fields"].get("tool") not in ("", "codex") or data["fields"].get("kind") not in ("", "art"):
@@ -282,15 +282,18 @@ def check_art(root, feature, oid, folder, data):
     if data["fields"].get("deliver") and data["fields"]["deliver"] != ART_DELIVER:
         problems.append(f"order art ghi deliver: {ART_DELIVER} (ảnh không vào Assets)")
     path = node_of(feature)
+    parts = path.split("/")
+    if len(parts) != gd.CHEAT_ROUND - 1 or parts[-1] != gd.CHEAT_KEY:
+        return problems + [f"order art chỉ đặt cho node cheat (<feature>/{gd.CHEAT_KEY}) đã ở live, không cho '{path}'"]
     node, top = live_node(root, path)
     if node is None:
         return problems + [f"node '{path}' chưa có trong live: chỉ gen art cho node đã chốt"]
     frames = {Path(fr["file"]).stem for fr in node["frames"]}
     if not frames:
-        problems.append(f"node '{path}' trong live chưa có frame: viết frame và chốt trước")
+        problems.append(f"node '{path}' trong live chưa có frame: viết frame cho từng state và chốt trước")
     for item, _ in data["items"]:
         if frames and item not in frames:
-            problems.append(f"item '{item}' phải là tên một frame của node ({', '.join(sorted(frames))})")
+            problems.append(f"item '{item}' phải là id một state của node cheat ({', '.join(sorted(frames))})")
     known = {s["id"] for s in (top or {}).get("styles", [])}
     wanted = order_styles(data)
     if not known:

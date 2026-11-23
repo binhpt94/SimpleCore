@@ -19,6 +19,7 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 - Không static giữ trạng thái, không singleton, kể cả trong nội bộ feature. View không tự đi tìm logic.
 - Feature có view hoặc cần tải thì tham gia `ISessionScene`: tải trong `LoadAsync`, tạo view trong `Run`, huỷ trong `DisposeAsync`. Không đặt sẵn view trong scene.
 - Số liệu cân bằng (giá, số xu ban đầu...) nằm trong asset cấu hình ở `FeatureAssets/Private`, không viết cứng trong code.
+- Cheat: dựng đúng các state của node `<feature>/cheat` trong thiết kế (`gd_pack.py` in mục CHEAT), để test và Play mà không phải chơi tới nơi. Code cheat nằm trong thư mục của chính feature và chỉ chạy ở bản dev (`#if UNITY_EDITOR || DEVELOPMENT_BUILD`); không lọt vào bản phát hành. State gộp nhiều feature do feature chủ trận dựng, gọi feature khác qua Contracts.
 
 ## Nối giữa các feature
 - Lấy dịch vụ của feature khác chỉ qua `IServiceRegistry`, và chỉ trong `Install`. Không static, không singleton dùng chung.

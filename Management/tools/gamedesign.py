@@ -139,6 +139,12 @@ ART_DIR = ".art-concept"          # generated art concepts (the next step; nothi
 FRAME_EXT = ".frame"
 FRAME_NONE = "none"               # `frame: none` in data.md: a round-4 node with no layout
 FRAME_ROUND = 4
+# The cheat node: <feature>/cheat, one per feature, at the round-3 place with no children. Each idea is one state
+# to build at once in a dev build (the values to force in its detail), with exactly one frame named after the idea;
+# the only node art may be ordered for, one picture per state. Required by a feature with a `kind: ui` frame.
+CHEAT_KEY = "cheat"
+CHEAT_MAX = 3
+CHEAT_ROUND = 3
 SCREENS = {"landscape": (1920, 1080), "portrait": (1080, 1920)}      # `screen:` of the root data.md, in px
 TAP_MIN = 96                      # px: the shortest side of a button (dự kiến)
 FRAME_KINDS = ("ui", "field")     # ui: px on the screen, y down · field: the battlefield in u, y up
@@ -1363,6 +1369,32 @@ def own_hash(folder):
     return h.hexdigest()
 
 
+def cheat_problems(folder, where, depth, data, items, frames, problems, notes):
+    """The rules of a cheat node: right under a feature, no children, at most CHEAT_MAX states, one frame per state
+    named after it; a frame with no `use` gets a reminder."""
+    def bad(text):
+        problems.append({"path": where, "text": f"{CHEAT_KEY}: {text}"})
+    if depth != CHEAT_ROUND:
+        bad("chỉ đặt ngay dưới node feature (vòng 2)")
+    if any(p.is_dir() and not p.name.startswith(".") for p in folder.iterdir()):
+        bad("không có node con")
+    if len(items) > CHEAT_MAX:
+        bad(f"tối đa {CHEAT_MAX} state (ý), đang có {len(items)}")
+    if data["frameMode"] == FRAME_NONE:
+        bad(f"không khai 'frame: {FRAME_NONE}': mỗi state cần một frame")
+    names = {Path(fr["file"]).stem: fr for fr in frames}
+    ids = [it["id"] for it in items]
+    for i in ids:
+        if i not in names:
+            bad(f"state '{i}' chưa có frame {FRAME_DIR}/{i}{FRAME_EXT}")
+    for n in names:
+        if n not in ids:
+            bad(f"frame '{n}{FRAME_EXT}' không trùng id của state nào ({', '.join(ids) or 'chưa có state'})")
+    for n, fr in names.items():
+        if not fr["uses"]:
+            notes.append(f"frame cheat '{n}' chưa use số nào: use số từ node sở hữu (kèm refs) để không lệch")
+
+
 def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None, review=None, cache=None):
     """One node and everything below it. parent_hash: the data hash of the node above (None for the root).
     review: the folder holding the human's review of this node when it is not `folder` (a live node is reviewed
@@ -1421,8 +1453,16 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     if depth == FRAME_ROUND and not frames and data["frameMode"] != FRAME_NONE:
         frame_notes.append(f"chưa có frame: node có bố cục (popup, màn hình, HUD, vị trí hay tầm trên chiến trường) "
                            f"thì viết {FRAME_DIR}/<tên>{FRAME_EXT}; không có bố cục thì khai 'frame: {FRAME_NONE}'")
-    if depth != FRAME_ROUND and frames:
-        frame_notes.append(f"frame chỉ dùng ở node vòng {FRAME_ROUND}")
+    cheat = bool(path) and folder.name == CHEAT_KEY
+    if depth != FRAME_ROUND and frames and not cheat:
+        frame_notes.append(f"frame chỉ dùng ở node vòng {FRAME_ROUND} và node {CHEAT_KEY}")
+    if cheat:
+        cheat_problems(folder, where, depth, data, items, frames, problems, frame_notes)
+    elif depth == FRAME_ROUND and any(fr["kind"] == "ui" for fr in frames) \
+            and not (folder.parent.parent / CHEAT_KEY / DATA_FILE).is_file():
+        feature = path.split("/")[0]
+        problems.append({"path": where, "text": f"feature '{feature}' có frame giao diện mà chưa có node {CHEAT_KEY}: "
+                                                f"thêm {feature}/{CHEAT_KEY}/ (tối đa {CHEAT_MAX} state, mỗi state một frame)"})
     styles, style_errors = read_styles(folder)
     if path and (folder / STYLE_DIR).is_dir():
         problems.append({"path": where, "text": f"{STYLE_DIR} chỉ đặt ở node gốc (style là quyết định của vòng 1)"})
@@ -1450,7 +1490,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "code": read_code(folder, where, depth, problems), "refs": refs["refs"],
             "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
-            "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE,
+            "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
             "screen": data["screen"], "styles": styles,
             "refText": raw + "\n" + doc, "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):

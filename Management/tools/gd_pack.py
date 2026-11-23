@@ -22,7 +22,12 @@ LIVE = "Management/game-design/live"
 
 def full_lines(node, out, doc=True):
     out.append("")
-    out.append(f"## {node['path'] or '(gốc)'}  ·  vòng {node['round']}  ·  {node['title']}")
+    if node.get("cheat"):
+        out.append(f"## {node['path']}  ·  CHEAT (chỉ bản dev)  ·  {node['title']}")
+        out.append("Mỗi ý là một state để dựng ngay khi test và Play: ép đúng các giá trị ghi trong chi tiết. "
+                   "Code cheat nằm trong thư mục của feature, chỉ chạy ở bản dev (UNITY_EDITOR || DEVELOPMENT_BUILD).")
+    else:
+        out.append(f"## {node['path'] or '(gốc)'}  ·  vòng {node['round']}  ·  {node['title']}")
     if node["summary"]:
         out.append(node["summary"])
     out.append("")
