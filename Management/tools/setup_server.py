@@ -22,7 +22,8 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   (gamedesign.sync_live), /mode switches Full Auto / User control. Nothing reaches live without promote or sync.
 - Art concepts (studio.py): with the PIN, POST /api/studio/approve lets one art order run (it spends Codex). Without
   it: /accept takes the delivered pictures, /reject writes the human's feedback-<n>.md and sends the order back,
-  /anchor marks an accepted picture as a style anchor. GET /Resources/<...> serves the delivered pictures (images
+  /anchor marks an accepted picture as a style anchor, /debt-close accepts an art debt as it is (GET /api/studio
+  re-reads the studio for the Studio tab). GET /Resources/<...> serves the delivered pictures (images
   only, read only) so the page can show them.
 """
 import argparse
@@ -87,7 +88,7 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY,
               "/api/studio/approve": MAX_BODY, "/api/studio/accept": MAX_BODY, "/api/studio/reject": 64 * 1024,
-              "/api/studio/anchor": MAX_BODY}
+              "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY}
 
 
 def transcripts_dir():
@@ -313,7 +314,8 @@ def studio_call(fn, *args):
             fn(ROOT, *args)
     except (ValueError, OSError) as ex:
         return {"ok": False, "error": str(ex)}
-    return {"ok": True, "message": out.getvalue().strip(), "data": sync_page.write_gamedesign(ROOT)}
+    return {"ok": True, "message": out.getvalue().strip(), "data": sync_page.write_gamedesign(ROOT),
+            "studio": sync_page.write_studio(ROOT)}
 
 
 def art_approve(pin, ref):
@@ -378,6 +380,8 @@ class Handler(SimpleHTTPRequestHandler):
                                             "vscode": vscode_view()})
             if path == "/api/gamedesign":
                 return self.send_json(200, sync_page.write_gamedesign(ROOT))
+            if path == "/api/studio":
+                return self.send_json(200, sync_page.write_studio(ROOT))
             return self.send_error(404)
         if path in ("/", "/index.html"):
             sync_page.main()      # fresh project data each time the page is opened
@@ -440,6 +444,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, studio_call(studio.cmd_accept, str(data.get("ref") or "")))
             if self.path == "/api/studio/reject":
                 return self.send_json(200, art_reject(data.get("ref"), data.get("text")))
+            if self.path == "/api/studio/debt-close":
+                return self.send_json(200, studio_call(studio.cmd_debt_close, str(data.get("id") or "")))
             if self.path == "/api/studio/anchor":
                 return self.send_json(200, studio_call(studio.cmd_anchor, str(data.get("ref") or ""), str(data.get("item") or "")))
             pin, mode = str(data.get("pin") or ""), str(data.get("mode") or "")

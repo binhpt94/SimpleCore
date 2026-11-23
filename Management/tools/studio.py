@@ -13,6 +13,8 @@ way Codex and Blender are run. Every run, delivery and refusal is kept, so a mis
     python Management/tools/studio.py approve <_design/...>/<id>      the human: let an art order run (spends Codex)
     python Management/tools/studio.py accept <_design/...>/<id>       the human: the art delivered is what the node shows
     python Management/tools/studio.py anchor <_design/...>/<id> <item> the human: an accepted art guides its style (toggle)
+    python Management/tools/studio.py pick <F>/<id> <item> <n>         the tool chat: take run n of an item as its result
+    python Management/tools/studio.py debt close <n-k>                 the human: accept an art debt as it is
 
 Layout (see .claude/rules/studio.md):
     Management/studio/<tool>/lessons.md                    mistakes met and how to avoid them; put before every prompt
@@ -24,6 +26,12 @@ Layout (see .claude/rules/studio.md):
                                           work/            prompts, Blender scripts; work/out/<item>.<ext> the results
     Resources/<F>/<tool>/<id>/v<n>/<item>.<ext>            every delivery, never overwritten
 <F> is the code folder of the feature that ordered (Hero, _Services/Popup); <id> and <item>: lower case, digits, '-'.
+Runs are counted (log.jsonl, event attempt): an item has RUNS_FIRST runs, one more (RUNS_REDO) after each time the order
+is sent back, and the order is sent back at most MAX_REDOS times; the next reject closes it ("closed") with art
+debts. Every run's result is kept in work/attempts/<item>-<n>.<ext>; `pick` puts one back into work/out. The tool
+chat writes work/<item>.check.md (first line "đạt" or "chưa đạt: <why>"); deliver marks the other items "chưa
+chuẩn" in quality.json and opens an art debt for each (Management/studio/debt.json), which a later delivery that
+passes the same owner and item closes, or the human. A feature may take what is "chưa chuẩn": take writes QUALITY.md.
 Exactly one result per item: a run that makes more takes none of them. A rejected order is run again only after
 lessons.md names its feedback file. Standard library only; Windows and Linux.
 
@@ -31,7 +39,8 @@ Art concepts (kind: art, @Codex): the owner is a design node, `_design/<node pat
 @GameDesigner writes the order. One item per frame of the node in live; style: names styles of the root's
 .art-style/. Nothing runs until the human approves the order (approval.json, written by the page through
 setup_server.py, or by `approve`); the approval holds the order's text and the node's live hash, so changing either
-asks again. Each approved item runs at most ART_RUNS_PER_ITEM times, all art at most ART_DAILY_MAX times a day.
+asks again; each round of an art order (the first, and each after a reject) needs it. All art runs at most
+ART_DAILY_MAX times a day.
 The prompt carries the styles; the images handed to Codex are the frame drawn as PNG, the styles' pictures and up to
 ART_ANCHORS accepted pictures marked as anchors. Delivered to Resources/_design/<node>/codex/<id>/v<n>/ with
 meta.json (node hash, frame hashes, style hashes), which the page uses to label a picture stale.
@@ -54,7 +63,12 @@ TOOLS = {"codex": ("image", "consult", "art"), "blender": ("model",)}
 DELIVER_TO = ("Private", "Public")
 ART_DELIVER = "concept"          # an art order is never copied into Assets
 APPROVAL_FILE = "approval.json"
-ART_RUNS_PER_ITEM = 2
+RUNS_FIRST = 2                   # runs of an item before the first delivery
+RUNS_REDO = 1                    # more runs after each time the order is sent back
+MAX_REDOS = 2                    # times an order may be sent back and made again; the next reject closes it
+DEBT_FILE = "debt.json"          # Management/studio/debt.json: the art debts (this code and the page only)
+QUALITY_FILE = "quality.json"    # beside a delivery: which items pass their own check
+CHECK_PASS = "đạt"
 ART_DAILY_MAX = 20
 ART_ANCHORS = 3
 DESIGN_RX = re.compile(r"^_design/[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)*$")
@@ -317,6 +331,42 @@ def attempts(root, since="", day=""):
     return out
 
 
+def events(folder):
+    out = []
+    for line in read_text(folder / LOG_FILE).split("\n") if (folder / LOG_FILE).is_file() else []:
+        try:
+            e = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(e, dict):
+            out.append(e)
+    return out
+
+
+def budget(folder, item):
+    """{used, allowed, left, round} of one item: RUNS_FIRST, plus RUNS_REDO for every time the order was sent back."""
+    log_ = events(folder)
+    rounds = sum(1 for e in log_ if e.get("event") == "reject")
+    used = sum(1 for e in log_ if e.get("event") == "attempt" and e.get("item") == item)
+    allowed = RUNS_FIRST + RUNS_REDO * min(rounds, MAX_REDOS)
+    return {"used": used, "allowed": allowed, "left": max(0, allowed - used), "round": rounds}
+
+
+def start_attempt(folder, item, **extra):
+    """Logs one run before the tool starts; returns its number for the item (1, 2, ...)."""
+    n = budget(folder, item)["used"] + 1
+    log(folder, "attempt", item=item, n=n, **extra)
+    return n
+
+
+def keep_attempt(work, item, n):
+    """Copies the result now in work/out into work/attempts/<item>-<n>.<ext>."""
+    for p in (work / "out").glob(f"{item}.*"):
+        dest = work / "attempts" / f"{item}-{n}{p.suffix}"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(p, dest)
+
+
 def runs_since_approval(folder, item):
     """The art runs of `item` logged after the order's last approval (the log keeps their order)."""
     events = []
@@ -348,9 +398,6 @@ def art_gate(root, feature, oid, folder, item):
         raise ValueError("node trong live đã đổi sau khi người duyệt: chờ người duyệt lại")
     if item not in (approval.get("items") or []):
         raise ValueError(f"item '{item}' không nằm trong phần người đã duyệt")
-    used = runs_since_approval(folder, item)
-    if len(used) >= ART_RUNS_PER_ITEM:
-        raise ValueError(f"item '{item}' đã chạy {len(used)}/{ART_RUNS_PER_ITEM} lần cho lần duyệt này: xin người duyệt lại")
     today = attempts(root, day=time.strftime("%Y-%m-%d"))
     if len(today) >= ART_DAILY_MAX:
         raise ValueError(f"đã chạy {len(today)}/{ART_DAILY_MAX} lần gen art hôm nay (trần chung): để mai, hoặc người nâng trần")
@@ -545,12 +592,17 @@ def prepare(root, tool, ref, item, kinds):
     if item not in items:
         raise ValueError(f"order không có item '{item}'. Có: {', '.join(items)}")
     status = read_status(folder)
-    if status["state"] in ("taken", "accepted"):
-        raise ValueError("order đã được nhận; việc mới thì đặt order mới")
+    if status["state"] in ("taken", "accepted", "closed"):
+        raise ValueError("order đã được nhận hoặc đã đóng; việc mới thì đặt order mới")
     missing = unlearnt(root, tool, feature, oid, folder)
     if missing:
         raise ValueError(f"order đã bị trả: ghi bài học vào Management/studio/{tool}/{LESSONS} trước, mỗi mục ghi "
                          f"đường dẫn phản hồi: " + ", ".join(feedback_key(tool, feature, oid, f) for f in missing))
+    b = budget(folder, item)
+    if b["left"] <= 0:
+        raise ValueError(f"item '{item}' hết lượt ({b['used']}/{b['allowed']}, vòng {b['round']}): không chạy thêm. Chọn bản "
+                         f"gần order nhất bằng `studio.py pick {feature}/{oid} {item} <n>` (các bản ở work/attempts/), ghi "
+                         f"work/{item}.check.md ('chưa đạt: <lý do>') rồi deliver; item sẽ mang nhãn chưa chuẩn kèm phiếu nợ")
     if DESIGN_RX.match(feature):
         art_gate(root, feature, oid, folder, item)
     work = folder / "work"
@@ -612,7 +664,7 @@ def cmd_codex(root, ref, item):
             extra = "\n\n".join(x for x in (style_text, ONE_ART, extra) if x)
             for n in notes:
                 print(f"Lưu ý: {n}", file=sys.stderr)
-            log(folder, "attempt", item=item, images=[Path(r).name for r in refs])
+        attempt = start_attempt(folder, item, images=[Path(r).name for r in refs])
         prompt = prompt_for(root, "codex", data, item, text, work, extra)
         stamp = time.strftime("%Y%m%d-%H%M%S")
         (work / "_log" / f"{item}-{stamp}.prompt.md").write_text(prompt, encoding="utf-8")
@@ -629,7 +681,8 @@ def cmd_codex(root, ref, item):
         log(folder, "run", tool="codex", item=item, mode="workspace-write", exit=code, result=msg, files=names,
             error=err if not ok else "")
         if ok:
-            print(f"Codex (ghi trực tiếp): {msg}")
+            keep_attempt(work, item, attempt)
+            print(f"Codex (ghi trực tiếp, lượt {attempt}): {msg}")
             return 0
         if made:      # it made too many: running again in another mode would only hide it
             print(f"Codex (ghi trực tiếp): {msg}. Chạy lại item này.", file=sys.stderr)
@@ -645,7 +698,8 @@ def cmd_codex(root, ref, item):
         log(folder, "run", tool="codex", item=item, mode="read-only", exit=code2, result=msg, files=names,
             error=err2 if not ok else "")
         if ok:
-            print(f"Codex (chỉ đọc, lấy ảnh ở {gen}): {msg}")
+            keep_attempt(work, item, attempt)
+            print(f"Codex (chỉ đọc, lấy ảnh ở {gen}, lượt {attempt}): {msg}")
             return 0
         print(f"Codex không tạo được ảnh ({msg}). Đi gián tiếp qua unity-mcp theo .claude/rules/studio.md, rồi để "
               f"kết quả ở work/out/{item}.png và chạy deliver.", file=sys.stderr)
@@ -660,10 +714,13 @@ def cmd_consult(root, ref, item):
                             "Trả lời đúng câu hỏi trên, bằng tiếng Việt, ngắn gọn và cụ thể. Không tạo ảnh hay file nào.")
         out = work / "out" / f"{item}.md"
         set_aside([out] if out.exists() else [], work, "_old")
+        attempt = start_attempt(folder, item)
         images = [a for r in refs for a in ("-i", str(r))]
         code, err = run(exe + ["exec", "-C", str(work), "-s", "read-only", "--skip-git-repo-check", "-o", str(out)]
                         + images + ["-"], prompt)
         ok = out.is_file() and read_text(out).strip() != ""
+        if ok:
+            keep_attempt(work, item, attempt)
         log(folder, "run", tool="codex", item=item, mode="consult", exit=code, result="có câu trả lời" if ok else
             "không có câu trả lời", files=[out.name] if ok else [], error=err if not ok else "")
         print(f"Câu trả lời: work/out/{out.name}" if ok else "Codex không trả lời được; xem log.jsonl", file=sys.stdout if ok else sys.stderr)
@@ -680,12 +737,15 @@ def cmd_blender(root, ref, item):
         exe = tool_exe("blender")
         out = work / "out"
         before = {p: p.stat().st_mtime for p in out.glob(f"{item}.*")}
+        attempt = start_attempt(folder, item)
         code, err = run(exe + ["-b", "--factory-startup", "--python-exit-code", "1", "-P", str(script), "--", str(out), item])
         made = [p for p in out.glob(f"{item}.*") if before.get(p) != p.stat().st_mtime]
         others = [p for p in out.iterdir() if p.is_file() and not any(p.name.startswith(i + ".") for i in
                                                                       dict(data["items"]))]
         if len(made) == 1 and code == 0:
-            ok, msg = True, f"đã có work/out/{made[0].name}"
+            ok, msg = True, f"đã có work/out/{made[0].name} (lượt {attempt})"
+            set_aside([p for p in out.glob(f"{item}.*") if p != made[0]], work, "_old")
+            keep_attempt(work, item, attempt)
         elif len(made) > 1:
             set_aside(made, work, "_rejected")
             ok, msg = False, f"gen thừa: {len(made)} file cho item {item}, không lấy file nào"
@@ -737,16 +797,46 @@ def cmd_deliver(root, tool, ref):
         shutil.copy2(by_item[i][0], dest / by_item[i][0].name)
     if meta:
         write_json(dest / gd.ART_META, meta)
+    quality = {}
+    for i in ids:
+        ok, note = self_check(folder / "work", i)
+        b = budget(folder, i)
+        quality[i] = {"ok": ok, "note": note, "runs": b["used"], "round": b["round"], "file": by_item[i][0].name}
+    write_json(dest / QUALITY_FILE, quality)
+    debts = read_debts(root)
+    rel_dest = dest.relative_to(Path(root)).as_posix()
+    opened, closed = [], []
+    for i, q in quality.items():
+        if q["ok"]:
+            for d in debts:
+                if d["state"] == "open" and d["owner"] == feature and d["item"] == i:
+                    d.update(state="closed", closedBy=f"tự đóng: {feature}/{oid} v{version} đạt", closedAt=now())
+                    closed.append(d["id"])
+        else:
+            opened.append(open_debt(debts, tool, f"{feature}/{oid}", feature, i, version, f"{rel_dest}/{q['file']}",
+                                    q["note"], "chưa chuẩn")["id"])
+    if opened or closed:
+        write_debts(root, debts)
     save_status(folder, state="delivered", version=version)
-    log(folder, "deliver", version=version, files=sorted(p.name for p in dest.iterdir()))
+    log(folder, "deliver", version=version, files=sorted(p.name for p in dest.iterdir()),
+        below=[i for i, q in quality.items() if not q["ok"]])
+    for i, q in quality.items():
+        if not q["ok"]:
+            print(f"CHƯA CHUẨN: {i}: {q['note']}")
+    if opened:
+        print(f"Đã mở phiếu nợ {', '.join(opened)} (tab Studio).")
+    if closed:
+        print(f"Đã đóng phiếu nợ {', '.join(closed)}: bản này đạt.")
     rel = dest.relative_to(Path(root)).as_posix()
     if meta:
         print(f"Đã giao bản v{version}: {rel} ({len(ids)} ảnh). Ảnh hiện ở tab Game design (node {meta['node']}) với nhãn "
               f"'chờ nhận'; người nhận hoặc trả ở đó. Nhắn @GameDesigner bằng SendMessage rằng order {feature}/{oid} đã giao.")
         return 0
+    below = "; ".join(f"{i}: {q['note']}" for i, q in quality.items() if not q["ok"])
+    below_text = f" Chưa chuẩn (hết lượt, có phiếu nợ): {below}." if below else ""
     print(f"Đã giao bản v{version}: {rel} ({len(ids)} file).\nNhắn phiên {feature} bằng SendMessage: "
           f"\"Order {feature}/{oid} đã giao bản v{version} ở {rel}. Nhận: python Management/tools/studio.py take "
-          f"{feature}/{oid}; chưa đạt thì viết feedback-<n>.md trong thư mục order rồi chạy reject.\"")
+          f"{feature}/{oid}; chưa đạt thì viết feedback-<n>.md trong thư mục order rồi chạy reject." + below_text + "\"")
     return 0
 
 
@@ -767,10 +857,22 @@ def cmd_take(root, ref):
     names = {p.name for p in src.iterdir() if p.is_file()}
     for p in dest.iterdir():      # what an earlier version had and this one does not (the .meta goes with it)
         base = p.name[:-5] if p.name.endswith(".meta") else p.name
-        if p.is_file() and base not in names:
+        if p.is_file() and base not in names and base != "QUALITY.md":
             p.unlink()
+    quality = gd._json(src / QUALITY_FILE) or {}
+    below = {i: q for i, q in quality.items() if isinstance(q, dict) and not q.get("ok")}
+    names.discard(QUALITY_FILE)
     for name in sorted(names):
         shutil.copy2(src / name, dest / name)      # same name: Unity keeps the .meta and its GUID
+    note = dest / "QUALITY.md"
+    if below:
+        ids = {d["item"]: d["id"] for d in read_debts(root) if d["state"] == "open" and d["ref"] == f"{feature}/{oid}"}
+        note.write_text(f"# Hàng chưa chuẩn của order {feature}/{oid} v{status['version']}\n\n" + "".join(
+            f"- {i}: {q.get('note')} (phiếu nợ {ids.get(i, '?')})\n" for i, q in below.items()), encoding="utf-8")
+        print(f"Lưu ý: {len(below)} item chưa chuẩn ({', '.join(below)}), xem {note.relative_to(Path(root)).as_posix()}; "
+              f"phiếu nợ ở tab Studio.")
+    elif note.is_file():
+        note.unlink()
     save_status(folder, state="taken")
     log(folder, "take", version=status["version"], to=dest.relative_to(Path(root)).as_posix())
     print(f"Đã chép bản v{status['version']} vào {dest.relative_to(Path(root)).as_posix()}; refresh Unity để có .meta.")
@@ -786,6 +888,28 @@ def cmd_reject(root, ref):
                    key=lambda n: int(FEEDBACK_RX.match(n).group(1)))
     if not fresh:
         raise ValueError("viết feedback-<n>.md mới trong thư mục order trước: sai ở đâu, item nào, cần thế nào")
+    rejects = sum(1 for e in events(folder) if e.get("event") == "reject")
+    if rejects >= MAX_REDOS:      # sent back once more than allowed: close it, owe what it should have been
+        data = parse_order(read_text(folder / ORDER_FILE))
+        vdir = Path(root) / RESOURCES / Path(*feature.split("/")) / tool / oid / f"v{status['version']}"
+        reason = " ".join(read_text(folder / fresh[-1]).split())[:300]
+        debts = read_debts(root)
+        opened = []
+        for i, _ in data["items"]:
+            hit = next((p for p in vdir.iterdir() if p.stem == i), None) if vdir.is_dir() else None
+            for d in debts:
+                if d["state"] == "open" and d["ref"] == f"{feature}/{oid}" and d["item"] == i:
+                    d.update(state="closed", closedBy="thay bằng phiếu trả quá số lần", closedAt=now())
+            opened.append(open_debt(debts, tool, f"{feature}/{oid}", feature, i, status["version"],
+                                    hit.relative_to(Path(root)).as_posix() if hit else "", reason, "trả quá số lần")["id"])
+        write_debts(root, debts)
+        save_status(folder, state="closed", feedback=status["feedback"] + fresh)
+        log(folder, "close", version=status["version"], feedback=fresh, debts=opened)
+        if (folder / APPROVAL_FILE).is_file():
+            os.replace(folder / APPROVAL_FILE, folder / f"approval-v{status['version']}.json")
+        print(f"Order {ref} đã bị trả {rejects + 1} lần (tối đa {MAX_REDOS} lần làm lại): đóng, không chạy thêm. Mở phiếu nợ "
+              f"{', '.join(opened)} (tab Studio). Vẫn ghi bài học từ {', '.join(fresh)}; cần thì đặt order mới.")
+        return 0
     save_status(folder, state="rejected", feedback=status["feedback"] + fresh)
     log(folder, "reject", version=status["version"], feedback=fresh)
     if (folder / APPROVAL_FILE).is_file():      # the next run needs the human again
@@ -797,6 +921,65 @@ def cmd_reject(root, ref):
         if len(kept) != len(anchors):
             write_json(path, kept)
     print(f"Đã trả order {ref} ({', '.join(fresh)}). Nhắn @{tool.capitalize()} bằng SendMessage để làm lại.")
+    return 0
+
+
+# ---------------------------------------------------------------- quality and art debts
+def self_check(work, item):
+    """(ok, note) from work/<item>.check.md: first line 'đạt' or 'chưa đạt: <why>'; no file is not passing."""
+    f = work / f"{item}.check.md"
+    if not f.is_file() or not read_text(f).strip():
+        return False, "chưa tự kiểm (thiếu work/" + f.name + ")"
+    first = read_text(f).strip().split("\n")[0].strip()
+    if first.lower() == CHECK_PASS:
+        return True, ""
+    return False, first.split(":", 1)[1].strip() if ":" in first else first
+
+
+def read_debts(root):
+    value = gd._json(studio_dir(root) / DEBT_FILE)
+    return [d for d in value if isinstance(d, dict)] if isinstance(value, list) else []
+
+
+def write_debts(root, debts):
+    write_json(studio_dir(root) / DEBT_FILE, debts)
+
+
+def open_debt(debts, tool, ref, owner, item, version, file, reason, kind):
+    n = 1 + max([int(str(d.get("id", "n-0"))[2:] or 0) for d in debts if str(d.get("id", "")).startswith("n-")] or [0])
+    debt = {"id": f"n-{n}", "tool": tool, "ref": ref, "owner": owner, "item": item, "version": version, "file": file,
+            "reason": reason, "kind": kind, "state": "open", "at": now(), "closedBy": "", "closedAt": ""}
+    debts.append(debt)
+    return debt
+
+
+def cmd_debt_close(root, did):
+    debts = read_debts(root)
+    hit = next((d for d in debts if d.get("id") == did), None)
+    if hit is None:
+        raise ValueError(f"không có phiếu nợ {did}")
+    if hit["state"] != "open":
+        raise ValueError(f"phiếu {did} đã đóng ({hit.get('closedBy')})")
+    hit.update(state="closed", closedBy="người chấp nhận nợ", closedAt=now())
+    write_debts(root, debts)
+    print(f"Đã đóng phiếu nợ {did} ({hit['owner']} · {hit['item']}).")
+    return 0
+
+
+def cmd_pick(root, ref, item, n):
+    """Puts run n of an item back into work/out: no tool runs, no run is spent."""
+    _, feature, oid, folder = find_order(root, ref)
+    work = folder / "work"
+    hits = sorted((work / "attempts").glob(f"{item}-{n}.*")) if n.isdigit() else []
+    if not hits:
+        have = sorted(p.name for p in (work / "attempts").glob(f"{item}-*")) if (work / "attempts").is_dir() else []
+        raise ValueError(f"không có lượt {n} của item '{item}'. Có: {', '.join(have) or 'chưa có lượt nào'}")
+    (work / "out").mkdir(parents=True, exist_ok=True)
+    set_aside([p for p in (work / "out").glob(f"{item}.*")], work, "_old")
+    dest = work / "out" / f"{item}{hits[0].suffix}"
+    shutil.copy2(hits[0], dest)
+    log(folder, "pick", item=item, n=int(n))
+    print(f"Đã chọn lượt {n}: work/out/{dest.name}. Ghi work/{item}.check.md rồi deliver.")
     return 0
 
 
@@ -822,11 +1005,11 @@ def cmd_approve(root, ref):
         raise ValueError("@Codex chưa ghi bài học cho phản hồi: " + ", ".join(missing))
     node, _ = live_node(root, node_of(feature))
     approval = {"order": order_hash(folder), "node": node["dataHash"], "items": [i for i, _ in data["items"]],
-                "runsPerItem": ART_RUNS_PER_ITEM, "at": now(), "by": "người"}
+                "runs": {i: budget(folder, i)["left"] for i, _ in data["items"]}, "at": now(), "by": "người"}
     write_json(folder / APPROVAL_FILE, approval)
     save_status(folder, state="approved")
     log(folder, "approve", items=approval["items"], node=approval["node"])
-    print(f"Đã duyệt gen {ref}: {len(approval['items'])} ảnh, mỗi ảnh tối đa {ART_RUNS_PER_ITEM} lần chạy. "
+    print(f"Đã duyệt gen {ref}: {len(approval['items'])} ảnh, mỗi ảnh còn {max(approval['runs'].values() or [0])} lượt. "
           f"Nhắn @Codex bằng SendMessage để làm.")
     return 0
 
@@ -894,6 +1077,36 @@ def pending_line(root, tool):
     return f" {len(rows)} order đang chờ: " + "; ".join(f"{r[0]} ({r[2]}, {r[4]} item)" for r in rows[:8])
 
 
+def snapshot(root):
+    """Everything the Studio tab shows: every order (state, round, runs per item, quality of its last delivery) and
+    the art debts. Reads only."""
+    orders = []
+    for tool, feature, oid, folder in all_orders(root):
+        try:
+            data, problems = check_order(root, tool, feature, oid, folder)
+        except (OSError, ValueError) as ex:
+            data, problems = {"items": [], "title": oid, "fields": {}}, [str(ex)]
+        status = read_status(folder)
+        vdir = Path(root) / RESOURCES / Path(*feature.split("/")) / tool / oid / f"v{status['version']}"
+        quality = gd._json(vdir / QUALITY_FILE) or {} if status["version"] else {}
+        items = []
+        for i, text in data["items"]:
+            b = budget(folder, i)
+            q = quality.get(i) if isinstance(quality.get(i), dict) else None
+            items.append({"id": i, "text": text, "used": b["used"], "allowed": b["allowed"], "left": b["left"],
+                          "ok": q.get("ok") if q else None, "note": q.get("note", "") if q else "",
+                          "file": f"{vdir.relative_to(Path(root)).as_posix()}/{q['file']}" if q and q.get("file") else ""})
+        design = bool(DESIGN_RX.match(feature))
+        orders.append({"ref": f"{feature}/{oid}", "tool": tool, "kind": data["fields"].get("kind", ""), "title": data["title"],
+                       "owner": feature, "design": design, "node": node_of(feature) if design else "",
+                       "state": status["state"], "version": status["version"], "round": budget(folder, "")["round"],
+                       "maxRedos": MAX_REDOS, "items": items, "problems": problems,
+                       "waitsHuman": design and status["state"] in ("new", "rejected") and not (folder / APPROVAL_FILE).is_file(),
+                       "unlearnt": unlearnt(root, tool, feature, oid, folder), "at": status["at"]})
+    return {"orders": orders, "debts": read_debts(root), "limits": {"first": RUNS_FIRST, "redo": RUNS_REDO,
+            "maxRedos": MAX_REDOS, "artDaily": ART_DAILY_MAX}, "generatedAt": now()}
+
+
 def cmd_status(root, arg=""):
     if arg and arg not in TOOLS:
         tool, feature, oid, folder = find_order(root, arg)
@@ -902,9 +1115,21 @@ def cmd_status(root, arg=""):
         rows = summary(root, arg or None)
     if not rows:
         print("Chưa có order nào.")
+    debts = [d for d in read_debts(root) if d["state"] == "open"]
+    if debts and not (arg and arg not in TOOLS):
+        print(f"Phiếu nợ đang mở ({len(debts)}):")
+        for d in debts:
+            print(f"- {d['id']} {d['tool']} {d['owner']} · {d['item']} (v{d['version']}): {d['kind']}: {d['reason']}")
     for ref, tool, state, version, count, title, problems, missing in rows:
         print(f"- {tool} {ref}: {state}" + (f", đã giao v{version}" if version else "") + f", {count} item · {title}"
               + (" · CHỜ NGƯỜI DUYỆT GEN" if DESIGN_RX.match(ref.rsplit("/", 1)[0]) and state in ("new", "rejected") else ""))
+        try:
+            _, f_, o_, folder_ = find_order(root, ref, tool)
+            for item_id, _ in parse_order(read_text(folder_ / ORDER_FILE))["items"]:
+                b = budget(folder_, item_id)
+                print(f"    {item_id}: {b['used']}/{b['allowed']} lượt (còn {b['left']}), vòng {b['round']}/{MAX_REDOS}")
+        except (ValueError, OSError):
+            pass
         for p in problems:
             print(f"    LỖI ORDER: {p}")
         for m in missing:
@@ -941,6 +1166,10 @@ def main(argv):
             return {"take": cmd_take, "reject": cmd_reject, "approve": cmd_approve, "accept": cmd_accept}[args[0]](root, args[1])
         if len(args) == 3 and args[0] == "anchor":
             return cmd_anchor(root, args[1], args[2])
+        if len(args) == 4 and args[0] == "pick":
+            return cmd_pick(root, args[1], args[2], args[3])
+        if len(args) == 3 and args[:2] == ["debt", "close"]:
+            return cmd_debt_close(root, args[2])
         print("Cách dùng:\n" + usage, file=sys.stderr)
         return 2
     except (ValueError, OSError) as ex:

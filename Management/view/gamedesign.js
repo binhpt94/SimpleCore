@@ -148,6 +148,7 @@
     ".gd-art .gd-art-label.ok { background: var(--ok); color: #fff; border-color: var(--ok); }",
     ".gd-art .gd-art-anchor { position: absolute; top: 6px; right: 6px; padding: 2px 8px; border-radius: 10px; font-size: 12px; background: var(--accent); color: var(--panel); }",
     ".gd-art figcaption { font-size: 12.5px; color: var(--muted); margin-top: 4px; }",
+    ".gd-art .gd-art-below { position: absolute; bottom: 6px; left: 6px; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; background: var(--bad); color: #fff; }",
     ".gd-art .gd-inline { margin: 6px 0 0; }",
     ".gd-art textarea { width: 100%; min-height: 54px; font: inherit; font-size: 13px; }",
     ".gd-styles { display: grid; gap: 12px; }",
@@ -1125,7 +1126,9 @@
           var kind = a.stale.length ? "stale" : a.state === "chờ nhận" ? "wait" : a.state === "đang dùng" ? "ok" : "";
           add(holder, el("span", "gd-art-label " + kind, a.label));
           if (a.anchor) add(holder, el("span", "gd-art-anchor", "mốc"));
-          add(fig, el("figcaption", "", frame + " · v" + a.version + " · " + a.ref + (a.styles.length ? " · style " + a.styles.join(", ") : "")));
+          if (a.below) add(holder, el("span", "gd-art-below", "chưa chuẩn"));
+          add(fig, el("figcaption", "", frame + " · v" + a.version + " · " + a.ref + (a.styles.length ? " · style " + a.styles.join(", ") : "") +
+            (a.below ? " · chưa chuẩn: " + a.below : "")));
           if (!ctx.setup) return;
           var acts = put(fig, el("div", "gd-inline"));
           if (a.state === "chờ nhận") {
@@ -1151,6 +1154,11 @@
             }));
           }
         });
+        var owed = ((window.CORESIMPLE_STUDIO || {}).debts || []).filter(function (d) {
+          return d.state === "open" && d.owner === "_design/" + node.path.split("/").join(".");
+        });
+        if (owed.length) add(body, el("p", "bad-text", owed.length + " phiếu nợ art đang mở cho node này (" +
+          owed.map(function (d) { return d.id + " " + d.item; }).join(", ") + "): xem tab Studio."));
         var older = (node.art || []).filter(function (a) { return latest[a.frame] !== a; });
         if (older.length) add(body, el("p", "gd-note", older.length + " bản cũ hơn vẫn giữ trong Resources (không ghi đè)."));
         if (!ctx.setup) add(body, el("p", "gd-note", "Nhận, trả, đặt mốc và duyệt gen cần mở trang qua server Setup (python Management/tools/setup_server.py)."));
@@ -1232,4 +1240,5 @@
 
   window.CORESIMPLE_VIEWS = window.CORESIMPLE_VIEWS || {};
   window.CORESIMPLE_VIEWS.gamedesign = build;
+  window.CORESIMPLE_VIEWS.lightbox = lightbox;      // dùng chung với tab Studio
 })();

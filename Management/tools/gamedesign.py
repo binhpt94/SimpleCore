@@ -1848,19 +1848,23 @@ def read_art(root, live):
             if v < version:
                 label_state = "cũ hơn"
             else:
-                label_state = {"delivered": "chờ nhận", "accepted": "đang dùng", "rejected": "đã trả"}.get(state, state)
+                label_state = {"delivered": "chờ nhận", "accepted": "đang dùng", "rejected": "đã trả",
+                               "closed": "đã trả"}.get(state, state)
             stale = []
             if not node or meta.get("nodeHash") != node["dataHash"]:
                 stale.append("node đã đổi")
             if any(styles.get(sid) != h for sid, h in (meta.get("styles") or {}).items()):
                 stale.append("style đã đổi")
-            for name in sorted(x.name for x in vdir.iterdir() if x.is_file() and x.name != ART_META):
+            quality = _json(vdir / "quality.json") or {}
+            for name in sorted(x.name for x in vdir.iterdir() if x.is_file() and x.name not in (ART_META, "quality.json")):
                 item = Path(name).stem
                 label = label_state if label_state in ("đã trả", "cũ hơn") or not stale else "CŨ · " + stale[0]
                 entry = {"frame": item, "file": (vdir / name).relative_to(Path(root)).as_posix(), "ref": ref,
                          "version": v, "state": label_state, "label": label, "stale": stale,
                          "anchor": (ref, v, item) in anchored, "at": meta.get("at", ""), "stamp": meta.get("stamp", 0),
                          "styles": sorted(meta.get("styles") or {})}
+                q = quality.get(item) if isinstance(quality.get(item), dict) else None
+                entry["below"] = (q.get("note") or "chưa đạt") if q and not q.get("ok") else ""
                 art.setdefault(path, []).append(entry)
     for path, entries in art.items():      # newest delivery of each frame first, the older ones after it
         entries.sort(key=lambda e: (e["frame"], e["at"], e["stamp"]))

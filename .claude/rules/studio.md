@@ -49,11 +49,28 @@ design: feature-hero/hero-list/hero-roster-values                (không bắt b
    - @Codex, ảnh: viết `work/<item>.md` (prompt chi tiết của item), rồi `studio.py codex <F>/<id> <item>`.
    - @Codex, tham vấn: `studio.py consult <F>/<id> <item>`.
    - @Blender: viết `work/<item>.py` (script bpy; `sys.argv` sau `--` là `<thư mục out> <item>`; lưu đúng một file `<out>/<item>.<đuôi>`), rồi `studio.py blender <F>/<id> <item>`.
-3. **Tự kiểm** kết quả theo Tiêu chí nhận. Chưa đạt thì sửa prompt hoặc script rồi chạy lại item đó. Bản cũ được dời vào `work/_old/`, không mất.
-4. **Giao**: `studio.py deliver <tool> <F>/<id>`. Nó chỉ chấp nhận đúng một file cho mỗi item. Sau đó nhắn feature bằng câu mà lệnh in ra.
+3. **Tự kiểm** kết quả theo Tiêu chí nhận, ghi vào `work/<item>.check.md`: dòng đầu `đạt`, hoặc `chưa đạt: <lý do theo Tiêu chí nhận>`; dòng sau so sánh các lượt nếu có.
+   - Chưa đạt và **còn lượt** thì sửa prompt hoặc script rồi chạy lại item đó.
+   - **Hết lượt**: studio.py từ chối chạy. Không tìm đường vòng (shell, MCP, unity-mcp). Chọn bản gần order nhất bằng `studio.py pick <F>/<id> <item> <n>` (mọi lượt nằm ở `work/attempts/<item>-<n>.<đuôi>`; pick không tốn lượt), ghi `chưa đạt: <lý do>`, rồi giao.
+4. **Giao**: `studio.py deliver <tool> <F>/<id>`. Nó chỉ chấp nhận đúng một file cho mỗi item. Item ghi `chưa đạt` hoặc thiếu tự kiểm được giao với nhãn **chưa chuẩn** (`quality.json`) và mở một phiếu nợ art. Sau đó nhắn feature bằng câu mà lệnh in ra, nói rõ item nào chưa chuẩn.
 5. **Feature nhận**: `studio.py take <F>/<id>`, chép vào `FeatureAssets/<deliver>/Generated/<id>/`; refresh Unity để có `.meta`. Order tham vấn thì đọc câu trả lời ở `Resources/`.
 6. **Feature trả**: viết `feedback-<n>.md` (item nào, sai gì, cần thế nào), rồi `studio.py reject <F>/<id>`, rồi nhắn tool.
-7. **Tool làm lại**: trước hết thêm một mục vào `lessons.md`. Thiếu mục này thì studio.py không cho chạy lại.
+7. **Tool làm lại**: trước hết thêm một mục vào `lessons.md`. Thiếu mục này thì studio.py không cho chạy lại. Mỗi lần bị trả chỉ thêm 1 lượt cho mỗi item.
+
+## Trần lượt gen (studio.py ép, mọi order: ảnh, art, model, tham vấn)
+| | Lượt mỗi item |
+|---|---|
+| Lần đầu | 2 (một lần thử lại khi tự kiểm chưa đạt) |
+| Mỗi lần bị trả | thêm 1 |
+| Tối đa | 2 lần làm lại, tức 4 lượt |
+- Lần trả thứ 3 không mở vòng mới: order **đóng** (`closed`), mỗi item một phiếu nợ "trả quá số lần". Vẫn ghi bài học từ feedback đó. Cần làm lại thì đặt order mới.
+- `studio.py status` in số lượt đã dùng và còn lại của từng item.
+
+## Phiếu nợ art (`Management/studio/debt.json`, chỉ studio.py và trang ghi)
+- Mở khi giao item chưa chuẩn, hoặc khi order bị đóng vì trả quá số lần.
+- Tự đóng khi về sau một bản giao **đạt** cho cùng owner (feature hay node thiết kế) và cùng item. Người đóng tay bằng nút "Chấp nhận nợ" ở tab Studio của trang quản lý.
+- Feature vẫn dùng hàng chưa chuẩn: `take` chép như thường và ghi `Generated/<id>/QUALITY.md` (item nào, vì sao, mã phiếu). Code tiếp; khi cần ảnh tốt hơn thì đặt order mới cho đúng item đó.
+- Tab Studio của trang hiện mọi order, lượt đã dùng, item chưa chuẩn và phiếu nợ; ảnh art chưa chuẩn có nhãn ngay trên ảnh ở tab Game design.
 
 ## Ảnh art-concept của node thiết kế (`kind: art`)
 @GameDesigner đặt order cho một node vòng 4 đã ở `live`: `orders/_design/<node, '/' thay bằng '.'>/<id>/`. Mỗi item là tên một frame của node; `style:` là các style của vòng 1; `deliver: concept`.

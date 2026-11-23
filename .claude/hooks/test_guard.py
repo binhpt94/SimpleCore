@@ -1257,6 +1257,19 @@ def run_tool_cases():
         t(g, X, "deny", "Bash", {"command": cmd})
         t(g, B, "deny", "Bash", {"command": cmd})
 
+    g = "tools: limits and art debts"
+    for who in (X, B):
+        t(g, who, "allow", "Bash", {"command": P + " pick Wallet/coin-icons coin 2"})
+    for cmd in (P + " pick Wallet/coin-icons coin 0", P + " pick Wallet/coin-icons coin x", P + " pick Wallet/coin-icons coin 1 2"):
+        t(g, X, "deny", "Bash", {"command": cmd})
+    for who in (W, X, B, "@GameDesigner", "@Manager"):
+        t(g, who, "deny", "Bash", {"command": P + " pick Wallet/coin-icons coin 1"} if who not in (X, B) else
+          {"command": P + " debt close n-1"})
+        t(g, who, "deny", "Bash", {"command": P + " debt close n-1"})
+        w(g, who, "deny", studio + "/debt.json")
+        w(g, who, "deny", res + "/Wallet/codex/coin-icons/v1/quality.json")
+    t(g, "@human", "pass", "Bash", {"command": P + " debt close n-1"})
+
     g = "tools: MCP"
     t(g, B, "allow", "mcp__blender__execute_blender_code", {"code": "import bpy"})
     t(g, B, "allow", "mcp__blender__get_scene_info", {})

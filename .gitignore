@@ -37,6 +37,8 @@ Thumbs.db
 /Management/data/project.js.tmp
 /Management/data/gamedesign.js
 /Management/data/gamedesign.js.tmp
+/Management/data/studio.js
+/Management/data/studio.js.tmp
 /Management/game-design/.promote-*/
 
 # Báo cáo cho @Manager: Stop hook stop_report.py ghi, nhật ký điều phối trên máy này

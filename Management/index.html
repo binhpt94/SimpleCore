@@ -141,8 +141,10 @@
 <script src="data/sessions.js"></script>
 <script src="data/project.js"></script>
 <script src="data/gamedesign.js"></script>
+<script src="data/studio.js"></script>
 <!-- Mỗi tab lớn một file trong view/, đăng ký vào window.CORESIMPLE_VIEWS. -->
 <script src="view/gamedesign.js"></script>
+<script src="view/studio.js"></script>
 <script>
 (function () {
   var idea = window.CORESIMPLE_IDEA || null;
@@ -425,6 +427,13 @@
   if (views.gamedesign) {
     tab("game-design", "Game design", "", function (pane) {
       views.gamedesign(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
+    });
+  }
+
+  // ---------------------------------------------------------------- studio: order ảnh, art, model; phiếu nợ (view/studio.js)
+  if (views.studio) {
+    tab("studio", "Studio", "", function (pane) {
+      views.studio(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
     });
   }
 

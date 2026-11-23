@@ -274,7 +274,9 @@ def context(data, root, store):
                 f"không sửa Assets. Chỉ ghi Management/studio/{tool}/lessons.md và work/ của các order. Đầu lượt: python "
                 f"Management/tools/studio.py status {tool}; đọc order.md, feedback và lessons.md trước khi gen. Gen ĐÚNG số "
                 f"lượng: mỗi item một kết quả, không tự gen thêm. Xong: studio.py deliver {tool} <F>/<id> rồi nhắn feature "
-                f"bằng SendMessage. Order bị trả: ghi bài học vào lessons.md (kèm đường dẫn feedback) rồi mới làm lại. "
+                f"bằng SendMessage. Lượt gen có trần (mỗi item 2 lượt, +1 mỗi lần bị trả, tối đa 2 lần làm lại): ghi tự kiểm "
+                f"work/<item>.check.md; hết lượt thì pick bản gần nhất và giao với nhãn chưa chuẩn, không tìm đường vòng. "
+                f"Order bị trả: ghi bài học vào lessons.md (kèm đường dẫn feedback) rồi mới làm lại. "
                 f"Luật ở .claude/rules/studio.md." + studio_pending(root, tool) + editor_status(store))
     if role == "@GameDesigner":
         return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Chỉ đọc "

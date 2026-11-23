@@ -123,8 +123,10 @@ STUDIO_REF = r"((_Services/)?[A-Za-z][A-Za-z0-9]*|_design/[a-z0-9]+(-[a-z0-9]+)*
 STUDIO = PY + r"Management/tools/studio\.py "
 ALLOWED_COMMANDS.append(STUDIO + r"(check|status( (codex|blender|" + STUDIO_REF + "))?)")
 TOOL_COMMANDS = {
-    "codex": [STUDIO + r"(codex|consult) " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver codex " + STUDIO_REF],
-    "blender": [STUDIO + r"blender " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver blender " + STUDIO_REF],
+    "codex": [STUDIO + r"(codex|consult) " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver codex " + STUDIO_REF,
+              STUDIO + r"pick " + STUDIO_REF + " " + STUDIO_ID + r" [1-9][0-9]*"],
+    "blender": [STUDIO + r"blender " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver blender " + STUDIO_REF,
+                STUDIO + r"pick " + STUDIO_REF + " " + STUDIO_ID + r" [1-9][0-9]*"],
 }
 FEATURE_STUDIO_RX = re.compile(r"^python3? Management/tools/studio\.py (take|reject) (" + STUDIO_REF + r")$")
 ROLE_AREAS = {"@Core": "Core", "@Composition": "_Composition"}

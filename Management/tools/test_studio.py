@@ -205,13 +205,13 @@ def run_deliver(root):
     code, out = call(root, "deliver", "codex", "Wallet/coin-icons")
     v1 = Path(root) / "Resources/Wallet/codex/coin-icons/v1"
     check("deliver copies exactly the items into Resources/<F>/<tool>/<id>/v1",
-          (code, sorted(p.name for p in v1.iterdir())), (0, ["coin.png", "gem.png"]))
+          (code, sorted(p.name for p in v1.iterdir())), (0, ["coin.png", "gem.png", "quality.json"]))
     check("deliver tells the tool chat what to send", "SendMessage" in out and "take Wallet/coin-icons" in out)
     check("a blender chat cannot deliver a codex order", call(root, "deliver", "blender", "Wallet/coin-icons")[0], 1)
 
     code, out = call(root, "take", "Wallet/coin-icons")
     gen = Path(root) / "UnityProject/Assets/Features/Wallet/FeatureAssets/Private/Generated/coin-icons"
-    check("take copies the delivery into the feature's assets", (code, sorted(p.name for p in gen.iterdir())), (0, ["coin.png", "gem.png"]))
+    check("take copies the delivery into the feature's assets", (code, sorted(p.name for p in gen.iterdir() if p.name != "QUALITY.md")), (0, ["coin.png", "gem.png"]))
     check("take marks the order taken", studio.read_status(folder)["state"], "taken")
 
     check("reject needs a new feedback file", "feedback-<n>.md" in call(root, "reject", "Wallet/coin-icons")[1])
@@ -234,7 +234,7 @@ def run_deliver(root):
     check("v2 exists", (Path(root) / "Resources/Wallet/codex/coin-icons/v2/gem.png").is_file())
     call(root, "take", "Wallet/coin-icons")
     check("take again keeps the .meta of a file still delivered and drops what is gone",
-          sorted(p.name for p in gen.iterdir()), ["coin.png", "coin.png.meta", "gem.png"])
+          sorted(p.name for p in gen.iterdir() if p.name != "QUALITY.md"), ["coin.png", "coin.png.meta", "gem.png"])
     check("a consult is read in Resources, not copied into Assets", (call(root, "deliver", "codex", "Wallet/ask")[0],
                                                                     "không chép vào Assets" in call(root, "take", "Wallet/ask")[1]), (0, True))
 
@@ -357,7 +357,8 @@ def run_art(root):
     check("art: Codex sees the frame first, then the style picture", attempt["images"][:2], ["main.frame.png", "ui-flat-ref.png"])
     call(root, "codex", ref, "main")
     code, out = call(root, "codex", ref, "main")
-    check("art: at most 2 runs per item and approval", (code, "2/2" in out), (1, True))
+    check("art: at most 2 runs per item in the first round", (code, "2/2" in out), (1, True))
+    studio.RUNS_FIRST = 99      # the rest checks the other gates
     call(root, "approve", ref)
     old_daily = studio.ART_DAILY_MAX
     studio.ART_DAILY_MAX = 2      # two runs already today
@@ -381,6 +382,7 @@ def run_art(root):
     check("art: delivered with meta", (code, (vdir / "main.png").is_file(), sorted(meta["styles"]), "main" in meta["frames"]),
           (0, True, ["ui-flat"], True))
     check("art: the page labels it waiting", art_of(root)[0]["label"], "chờ nhận")
+    check("art: no self-check, so the page marks it below standard", art_of(root)[0]["below"].startswith("chưa tự kiểm"))
     check("art: anchor needs an accepted picture", call(root, "anchor", ref, "main")[0], 1)
     check("art: accept", call(root, "accept", ref)[0], 0)
     check("art: in use", art_of(root)[0]["label"], "đang dùng")
@@ -412,10 +414,87 @@ def run_art(root):
         f"- Màu đủ sáng (codex/orders/{studio.gd.design_owner(NODE)}/again/feedback-1.md)\n", encoding="utf-8")
     check("art: approved again after the lesson", call(root, "approve", ref2)[0], 0)
     check("art: pending_line hides orders waiting for the human", "again" in studio.pending_line(root, "codex"), True)
+    studio.RUNS_FIRST = 2
     (folder / "feedback-1.md").write_text("Không đúng style mới.", encoding="utf-8")
     call(root, "reject", ref)
     check("art: a picture sent back is no anchor any more",
           json.loads((studio.studio_dir(root, "codex") / "anchors.json").read_text(encoding="utf-8")), [])
+
+
+def run_budget(root):
+    """Runs are limited: 2 per item, +1 after each reject, at most 2 redos; the closest result is delivered as
+    'chưa chuẩn' with an art debt, which a later passing delivery or the human closes."""
+    os.environ["STUDIO_CODEX"] = str(Path(root) / "fake_codex.py")
+    os.environ["FAKE_MODE"] = "write1"
+    folder = order(root, oid="limits", items=("star",))
+    ref = "Wallet/limits"
+    check("budget: first run", call(root, "codex", ref, "star")[0], 0)
+    check("budget: second run", call(root, "codex", ref, "star")[0], 0)
+    code, out = call(root, "codex", ref, "star")
+    check("budget: the third run is refused, pointing to pick", (code, "hết lượt (2/2" in out, "pick" in out), (1, True, True))
+    check("budget: every run is kept", sorted(p.name for p in (folder / "work/attempts").iterdir()), ["star-1.png", "star-2.png"])
+    check("budget: attempts are logged with their number", [e["n"] for e in log_of(folder) if e["event"] == "attempt"], [1, 2])
+    (folder / "work/attempts/star-1.png").write_bytes(b"first")
+    code, out = call(root, "pick", ref, "star", "1")
+    check("budget: pick puts run 1 back, no run spent",
+          (code, (folder / "work/out/star.png").read_bytes(), studio.budget(folder, "star")["used"]), (0, b"first", 2))
+    check("budget: pick of a run that does not exist", call(root, "pick", ref, "star", "7")[0], 1)
+    (folder / "work/star.check.md").write_text("chưa đạt: viền còn mỏng ở 64px\nLượt 1 gần hơn lượt 2.", encoding="utf-8")
+    code, out = call(root, "deliver", "codex", ref)
+    quality = json.loads((Path(root) / "Resources/Wallet/codex/limits/v1/quality.json").read_text(encoding="utf-8"))
+    check("budget: delivered below standard, said so", (code, "CHƯA CHUẨN: star: viền còn mỏng" in out, quality["star"]["ok"],
+                                                        quality["star"]["runs"]), (0, True, False, 2))
+    debts = [d for d in studio.read_debts(root) if d["ref"] == ref]
+    check("budget: an art debt is opened", [(d["owner"], d["item"], d["kind"], d["state"]) for d in debts],
+          [("Wallet", "star", "chưa chuẩn", "open")])
+    code, out = call(root, "take", ref)
+    note = Path(root) / "UnityProject/Assets/Features/Wallet/FeatureAssets/Private/Generated/limits/QUALITY.md"
+    check("budget: take still copies, with QUALITY.md", (code, note.is_file() and debts[0]["id"] in note.read_text(encoding="utf-8"),
+                                                         (note.parent / "quality.json").exists()), (0, True, False))
+    snap = studio.snapshot(root)
+    o = next(x for x in snap["orders"] if x["ref"] == ref)
+    check("budget: snapshot", (o["items"][0]["used"], o["items"][0]["allowed"], o["items"][0]["ok"],
+                               len([d for d in snap["debts"] if d["ref"] == ref])), (2, 2, False, 1))
+    for n in (1, 2):
+        (folder / f"feedback-{n}.md").write_text(f"Lần {n}: chưa đạt.", encoding="utf-8")
+        (studio.studio_dir(root, "codex") / "lessons.md").write_text(
+            "".join(f"- bài {k} (codex/orders/Wallet/limits/feedback-{k}.md)\n" for k in range(1, n + 1)), encoding="utf-8")
+        call(root, "reject", ref)
+        check(f"budget: after reject {n}, one more run", (studio.budget(folder, "star")["allowed"], call(root, "codex", ref, "star")[0],
+                                                         call(root, "codex", ref, "star")[0]), (2 + n, 0, 1))
+        (folder / "work/star.check.md").write_text("chưa đạt: vẫn mỏng", encoding="utf-8")
+        call(root, "deliver", "codex", ref)
+    (folder / "feedback-3.md").write_text("Lần 3: vẫn mỏng.", encoding="utf-8")
+    code, out = call(root, "reject", ref)
+    check("budget: the third reject closes the order", (code, studio.read_status(folder)["state"], "đóng" in out), (0, "closed", True))
+    open_ = [d for d in studio.read_debts(root) if d["state"] == "open" and d["ref"] == ref]
+    check("budget: closed with one debt per item, the earlier ones replaced",
+          [(d["item"], d["kind"], "Lần 3" in d["reason"]) for d in open_], [("star", "trả quá số lần", True)])
+    (studio.studio_dir(root, "codex") / "lessons.md").write_text("- x (codex/orders/Wallet/limits/feedback-3.md)\n", encoding="utf-8")
+    check("budget: a closed order never runs again", call(root, "codex", ref, "star")[0], 1)
+    folder2 = order(root, oid="limits-2", items=("star",))
+    call(root, "codex", "Wallet/limits-2", "star")
+    (folder2 / "work/star.check.md").write_text("đạt", encoding="utf-8")
+    code, out = call(root, "deliver", "codex", "Wallet/limits-2")
+    closed = [d for d in studio.read_debts(root) if d["state"] == "closed" and d["kind"] == "trả quá số lần"]
+    check("budget: a later passing delivery closes the debt", (code, len(closed), "tự đóng" in closed[0]["closedBy"] if closed else ""),
+          (0, 1, True))
+    folder3 = order(root, oid="limits-3", items=("moon",))
+    call(root, "codex", "Wallet/limits-3", "moon")
+    call(root, "deliver", "codex", "Wallet/limits-3")
+    debt = next(d for d in studio.read_debts(root) if d["item"] == "moon")
+    check("budget: no self-check is below standard", debt["reason"].startswith("chưa tự kiểm"))
+    check("budget: the human closes a debt", (call(root, "debt", "close", debt["id"])[0],
+                                              next(d for d in studio.read_debts(root) if d["id"] == debt["id"])["state"]), (0, "closed"))
+    check("budget: closing twice is refused", call(root, "debt", "close", debt["id"])[0], 1)
+    os.environ["STUDIO_BLENDER"] = str(Path(root) / "fake_blender.py")
+    os.environ["FAKE_MODE"] = "one"
+    bf = order(root, tool="blender", oid="limits-model", kind="model", items=("rock",))
+    (bf / "work").mkdir(exist_ok=True)
+    (bf / "work/rock.py").write_text("# s", encoding="utf-8")
+    runs = [call(root, "blender", "Wallet/limits-model", "rock")[0] for _ in range(3)]
+    check("budget: blender has the same limit", (runs, sorted(p.name for p in (bf / "work/attempts").iterdir())),
+          ([0, 0, 1], ["rock-1.fbx", "rock-2.fbx"]))
 
 
 def main():
@@ -425,7 +504,11 @@ def main():
         (root / "UnityProject/Assets/Features/Shop/FeatureAssets/Private").mkdir(parents=True)
         (root / "fake_codex.py").write_text(FAKE_CODEX, encoding="utf-8")
         (root / "fake_blender.py").write_text(FAKE_BLENDER, encoding="utf-8")
-        for case in (run_check, run_codex, run_deliver, run_blender, run_art):
+        studio.RUNS_FIRST = 99      # the older cases run an item many times; run_budget checks the real limits
+        for case in (run_check, run_codex, run_deliver, run_blender):
+            case(root)
+        studio.RUNS_FIRST = 2
+        for case in (run_art, run_budget):
             case(root)
     finally:
         shutil.rmtree(root, ignore_errors=True)
