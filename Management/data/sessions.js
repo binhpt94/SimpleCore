@@ -30,6 +30,7 @@ window.CORESIMPLE_SESSIONS = {
       ] },
       { title: "4. Trang quản lý và Setup", steps: [
         { text: "Mở trang qua server cục bộ để lưu được điểm, câu trả lời và tạo thread. Server chỉ nghe trên 127.0.0.1, cổng 8770.", command: "python Management/tools/setup_server.py" },
+        { text: "Setup full gồm cả các feature mà thiết kế live đã khai trong code.json, kể cả khi chưa có thư mục trong Unity: thread được tạo và gán ngay, và sửa được sau khi @Manager tạo thư mục (lệnh dưới, có --dry-run để xem trước).", command: "python Management/tools/scaffold.py" },
         { text: "Tạo thread cần lệnh claude (Claude Code CLI) có trong PATH. Thread đã lưu trữ trong VS Code được bỏ qua: server tự đọc trạng thái VS Code ở đúng chỗ của từng hệ (Windows: %APPDATA%\\Code, macOS: ~/Library/Application Support/Code, Linux: ~/.config/Code).", command: "claude --version" }
       ] },
       { title: "5. Git", steps: [
@@ -47,7 +48,7 @@ window.CORESIMPLE_SESSIONS = {
   // `copy`: chữ được chép, khi khác "FEATURE=<id> ".
   features: [
     { id: "@human", group: "Master", label: "Phiên của người (tích hợp)", note: "Không giới hạn feature; vẫn bị hỏi khi sửa Core, _Composition, .claude. Biên dịch, chạy test, Play và sửa scene/prefab qua unity-mcp." },
-    { id: "@Manager", group: "Leaders", label: "Phiên điều phối", note: "Không sửa code. Thấy báo cáo mới của các phiên ở đầu mỗi tin, nhắn các phiên bằng SendMessage, viết đề xuất trong Management/proposals." },
+    { id: "@Manager", group: "Leaders", label: "Phiên điều phối", note: "Không sửa code. Thấy báo cáo mới của các phiên ở đầu mỗi tin, nhắn các phiên bằng SendMessage, viết đề xuất trong Management/proposals. Tạo thư mục feature, service, Core, _Composition còn thiếu theo thiết kế live bằng python Management/tools/scaffold.py (chỉ thư mục, không code)." },
     { id: "@CodeLead", group: "Leaders", label: "Phiên kiểm code", note: "Không sửa file nào. Đọc toàn bộ source nhóm Basic, Features, Services; biên dịch, chạy test, Play qua unity-mcp; giải quyết xung đột code và báo lỗi về phiên sở hữu (.claude/rules/codelead.md)." },
     { id: "@GameDesigner", group: "Leaders", label: "Phiên thiết kế game", note: "Không code. Chỉ đọc Management/game-design và chỉ ghi trong Management/game-design/ai (cây đề xuất ở ai/idea), theo 4 vòng: ý tưởng, feature, quan hệ và định nghĩa, quyết định chi tiết (.claude/rules/gamedesigner.md). Mỗi node có data.md (các ý cốt lõi, mỗi ý có điểm AI) và CLAUDE.md (diễn giải). Ở tab Game design bạn chọn mode (Full Auto: AI tự quyết; User control: AI hỏi, bạn chấm), chấm điểm 0-10 và ghi phản hồi cho từng ý ở cả bảng đề xuất lẫn bảng đã chốt, trả lời câu hỏi, rồi bấm Sync (hoặc Chốt từng node) để chép node đạt sang live; không có gì tự sang live. Ý bị chấm dưới 5 hoặc data của node cha đổi thì node phải làm lại; lịch sử từng node nằm ở .history." },
     { id: "@Core", group: "Basic", label: "Phiên Core", note: "Chỉ sửa Assets/Core; đọc phần công khai của feature." },

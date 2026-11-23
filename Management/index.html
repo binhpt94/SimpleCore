@@ -509,6 +509,12 @@
         ". Model và effort chỉ áp cho thread tạo mới (mặc định " + data.defaults.model + ", " + data.defaults.effort +
         "); thread đã có giữ nguyên.";
       listBody.textContent = "";
+      var missing = data.sets.missing || [];
+      if (missing.length) {
+        add(listBody, el("p", "bad-text", "Chưa có thư mục (thiết kế live đã khai): " + missing.join(", ") +
+          ". Thread vẫn được tạo và gán; sửa được sau khi @Manager tạo thư mục:"));
+        add(listBody, commandBlock("python Management/tools/scaffold.py"));
+      }
       if (!data.threads.length) { add(listBody, el("p", "muted", "Chưa có thread nào có tên.")); return; }
       var table = put(listBody, el("table"));
       add(table, headRow(["Tên", "Nhóm", "Đang gán", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id"]));

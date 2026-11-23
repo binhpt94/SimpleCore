@@ -480,6 +480,12 @@
         var owed = put(noticeBox, el("ul", "gd-problems"));
         missing.forEach(function (p) { add(owed, el("li", "", p.path + ": " + p.text)); });
       }
+      var noCode = data && state.table === "idea" ? data.missingCode || [] : [];
+      if (noCode.length) {
+        add(noticeBox, el("p", "", noCode.length + " feature chưa có code.json nên chưa code được (việc của @GameDesigner, tên tự đặt theo key; chốt lại sang live sau khi ghi):"));
+        var nc = put(noticeBox, el("ul", "gd-problems"));
+        noCode.forEach(function (p) { add(nc, el("li", "", p.path + ": " + p.text)); });
+      }
       var list = data && data.problems ? data.problems[state.table] || [] : [];
       if (!list.length) return;
       add(noticeBox, el("p", "bad-text", list.length + " lỗi cấu trúc trong bảng " + state.table + ":"));

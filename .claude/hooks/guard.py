@@ -6,7 +6,8 @@ made when the human types `FEATURE=<value> <PIN>` in the chat; see bind_session.
 PIN live outside the project, in STORE_DIR. The FEATURE environment variable is not used.
 The value, by group:
     Master    @human                      no feature limits; still asks for .claude, _Composition, Core
-    Leaders   @Manager                    coordinator: edits nothing but new files in Management/proposals
+    Leaders   @Manager                    coordinator: edits nothing but new files in Management/proposals; runs
+                                          scaffold.py, which makes the folders the live design names (no code)
               @CodeLead                   checks code and settles conflicts: edits NOTHING; reads all source of
                                           Basic/Features/Services; compiles, tests and plays through a read-only
                                           subset of unity-mcp (CODELEAD_UNITY); writes one thing, the progress
@@ -63,6 +64,11 @@ DESIGNER_COMMANDS = [
 CODELEAD_COMMANDS = [
     PY + r"Management/tools/gd_progress\.py ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* (idea|prototype|full) (todo|doing|done)",
     PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+]
+# For @Manager only: create the feature, service, Core and _Composition folders the live design asks for and that
+# are missing (folders and .gitkeep only, never code; see scaffold.py).
+MANAGER_COMMANDS = [
+    PY + r"Management/tools/scaffold\.py( --dry-run)?",
 ]
 
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
@@ -499,7 +505,7 @@ def decide(data, session_value, root):
     if tool in SHELL_TOOLS:
         cmd = text_of(ti.get("command")).strip()
         commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else []) + (
-            CODELEAD_COMMANDS if mode == "codelead" else [])
+            CODELEAD_COMMANDS if mode == "codelead" else []) + (MANAGER_COMMANDS if mode == "manager" else [])
         if any(re.fullmatch(rx, cmd) for rx in commands) and not SHELL_META_RX.search(cmd) and ".." not in cmd:
             return "allow", "shell command is on the allow-list"
         return "deny", "shell command is not on the allow-list in guard.py. Stop and tell the human."

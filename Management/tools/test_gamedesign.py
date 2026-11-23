@@ -548,8 +548,35 @@ def run_flow(root):
     check("no work folders left", sorted(p.name for p in Path(root).joinpath(*gd.BASE).iterdir()), ["ai", "live", "outside.md"])
 
 
+def run_code_names(root):
+    """GD names the code folder from the key; setup and scaffold read the names from the live table."""
+    for key, want in (("feature-hero", "Hero"), ("feature-popup-lose", "PopupLose"), ("feature-team-select", "TeamSelect"),
+                      ("feature-popup", "_Services/Popup"), ("feature-session-scene", "_Services/SessionScene"),
+                      ("hud", "Hud"), ("feature-2d", None), ("feature-", None)):
+        check(f"code name from key {key}", gd.suggested_code_name(key), want)
+    owed = lambda: [(m["path"], m["text"]) for m in gd.snapshot(root)["missingCode"]]      # noqa: E731
+    mk(root, "", items=[("one", 3, "Ý kém.")])
+    mk(root, "feature-hero")
+    check("nothing is suggested while round 1 does not pass", owed(), [])
+    mk(root, "")
+    mk(root, "feature-hero"), mk(root, "feature-wallet"), mk(root, "feature-popup")
+    check("round-2 nodes without code.json get the code.json to write; infra is left to its own reminder", owed(),
+          [("feature-hero", 'ghi code.json: {"unity": ["Hero"]}'), ("feature-wallet", 'ghi code.json: {"unity": ["Wallet"]}')])
+    check("status lists them", "Thiếu code.json" in gd_status.report(root) and '{"unity": ["Hero"]}' in gd_status.report(root))
+    put(root, "idea/feature-hero/code.json", '{"unity": ["Hero"]}')
+    put(root, "idea/feature-popup/code.json", '{"unity": ["_Services/Popup"]}')
+    check("written code.json is no longer suggested", [p for p, _ in owed()], ["feature-wallet"])
+    check("the reminder blocks nothing", gd.snapshot(root)["problems"]["idea"], [])
+    check("live names nothing before the human promotes", gd.live_code_names(root), [])
+    gd.promote(root, "", True)
+    check("live names each code folder with its node, sorted", gd.live_code_names(root),
+          [("_Services/Popup", "feature-popup"), ("Hero", "feature-hero")])
+    put(root, "live/feature-hero/skills/code.json", '{"unity": ["Skills"]}')
+    check("code.json below round 2 does not count", [n for n, _ in gd.live_code_names(root)], ["_Services/Popup", "Hero"])
+
+
 def main():
-    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_flow):
+    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

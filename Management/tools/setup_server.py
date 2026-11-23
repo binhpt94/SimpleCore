@@ -57,8 +57,10 @@ def group_of(name):
     """Master, Leaders, Basic, Services or Features for a session name; "" for a name outside the setup."""
     if name in ROLE_GROUPS:
         return ROLE_GROUPS[name]
-    if name.startswith("@") or not guard.valid_feature(name, str(ROOT)):
+    if name.startswith("@"):
         return ""
+    if not guard.valid_feature(name, str(ROOT)) and name not in dict(gamedesign.live_code_names(ROOT)):
+        return ""      # neither a folder nor named by the fixed design
     return "Services" if name.startswith("_Services/") else "Features"
 # Model aliases the claude CLI takes, and its effort levels. New threads default to opus / medium.
 MODELS = ["opus", "sonnet", "haiku", "fable"]
@@ -147,15 +149,20 @@ def threads():
 
 
 def sets():
-    """The names of the basic and the full setup; the full one adds every service and feature folder."""
+    """The names of the basic and the full setup. The full one adds every service and feature folder, and every
+    code folder a feature of the fixed design (live code.json) names even before it exists: its chat is bound now
+    and may edit once @Manager has made the folder (scaffold.py). `missing`: those names without a folder yet."""
     cfg = json.loads((HERE / "rules.json").read_text(encoding="utf-8-sig"))
     ids = validate.Scan(ROOT, cfg)
     ids.discover()
-    features = [f["id"] for f in ids.features]
+    folders = [f["id"] for f in ids.features]
+    designed = [name for name, _ in gamedesign.live_code_names(ROOT)]
+    features = folders + [n for n in designed if n not in folders]
     services = sorted(f for f in features if f.startswith("_Services/"))
     others = sorted(f for f in features if not f.startswith("_Services/"))
     full = BASIC + services + others
-    return {"basic": BASIC, "full": full, "groups": {n: group_of(n) for n in full}}
+    return {"basic": BASIC, "full": full, "groups": {n: group_of(n) for n in full},
+            "missing": [n for n in designed if n not in folders]}
 
 
 def bind(session_id, value):

@@ -47,7 +47,10 @@ Vòng 2 luôn có ba node sau, với đúng key và `code.json` này (không c�
 - Chúng bị khoá code như mọi feature cho tới khi nhánh của chúng có vòng 4 đã chốt trong `live`.
 
 ## Nối thiết kế với code (`code.json`)
-- Node feature khai thư mục code thực hiện nó: `{"unity": ["Wallet"]}`, dịch vụ thì `{"unity": ["_Services/Popup"]}`. Tên đúng như thư mục trong `UnityProject/Assets/Features`; GD không đọc được thư mục đó nên hỏi người tên chính xác, không đoán (trừ ba feature hạ tầng ở trên).
+- Mọi node feature đều có `code.json` khai thư mục code thực hiện nó: `{"unity": ["Wallet"]}`, dịch vụ thì `{"unity": ["_Services/Popup"]}`. Không có `code.json` thì feature không bao giờ được code.
+- **GD tự đặt tên, không hỏi người**: bỏ `feature-` ở đầu key, mỗi từ viết hoa chữ đầu rồi ghép lại (`feature-hero` → `Hero`, `feature-popup-lose` → `PopupLose`). Feature của game nằm trong `Features/` (không có `_Services/`); chỉ ba feature hạ tầng ở trên là dịch vụ. `gd_status.py` in mục "Thiếu code.json" kèm đúng nội dung cần ghi.
+- Chỉ hỏi người khi tên suy ra trùng với node khác, không hợp lệ (gd_status báo), hoặc người đã muốn tên khác.
+- Thư mục chưa có trong Unity cũng không sao: sau khi node chốt sang `live`, @Manager chạy `scaffold.py` để tạo thư mục, và trang Setup tạo thread cho feature đó.
 - Mỗi thư mục code chỉ thuộc một node. `code.json` chỉ đặt ở vòng 2.
 - Guard chỉ cho phiên của một feature sửa code khi node khai nó **đã chốt trong `live`** và nhánh đó có ít nhất một node vòng 4.
 - Đổi `code.json` làm node "khác live" (phải chốt lại) nhưng không đổi hash data.

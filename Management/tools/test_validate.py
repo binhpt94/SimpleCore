@@ -124,7 +124,7 @@ SHOP_IDS_TEXT = '''namespace Game.Shop
 
 
 def build_clean(r):
-    put(r, "CLAUDE.md", "# root\n")
+    put(r, "CLAUDE.md", "# root\n" + "line\n" * 199)  # exactly at the 200-line limit: must stay clean
     put(r, ".claude/rules/unity.md", "line\n" * 40)  # exactly at the limit: must stay clean
     # Core
     put_asmdef(r, f"{A}/Core", "Game.Core", [])
@@ -210,7 +210,7 @@ CASES = [
     ("STR-07", "unexpected folder in a feature", lambda d: put(d, f"{F}/Wallet/Extra/a.txt", "x")),
     ("STR-07", "unexpected folder under Scripts", lambda d: put(d, f"{F}/Wallet/Scripts/Utils/a.txt", "x")),
     ("DOC-01", "feature CLAUDE.md over 200 lines", lambda d: put(d, f"{F}/Wallet/CLAUDE.md", "line\n" * 201)),
-    ("DOC-01", "root CLAUDE.md over 30 lines", lambda d: put(d, "CLAUDE.md", "line\n" * 31)),
+    ("DOC-01", "root CLAUDE.md over 200 lines", lambda d: put(d, "CLAUDE.md", "line\n" * 201)),
     ("DOC-01", ".claude/rules md over 200 lines", lambda d: put(d, ".claude/rules/unity.md", "line\n" * 201), "*unity.md*"),
 
     ("ASM-00", "asmdef is not JSON", lambda d: put(d, WI_ASM, "{ broken")),

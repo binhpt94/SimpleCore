@@ -968,6 +968,46 @@ def missing_infra(idea):
     return out
 
 
+FOLDER_NAME_RX = re.compile(r"^(_Services/)?[A-Z][A-Za-z0-9]*$")      # a feature folder validate.py accepts
+
+
+def suggested_code_name(key):
+    """The code folder a round-2 node names in code.json, made from its key: 'feature-popup-lose' -> 'PopupLose'.
+    The infrastructure features keep their fixed folders. None when the key gives no usable folder name."""
+    if key in INFRA_FEATURES:
+        return INFRA_FEATURES[key]
+    words = key[len("feature-"):] if key.startswith("feature-") else key
+    name = "".join(w[:1].upper() + w[1:] for w in words.split("-") if w)
+    return name if FOLDER_NAME_RX.match(name) else None
+
+
+def missing_code(idea):
+    """Round-2 nodes of the proposal without a (valid) code.json, with the code.json to write, as [{"path", "text"}].
+    A reminder: it blocks nothing. The infrastructure features are reported by missing_infra."""
+    if not idea or not idea["passed"]:
+        return []
+    out = []
+    for n in idea["children"]:
+        if n["code"] or n["key"] in INFRA_FEATURES:
+            continue
+        name = suggested_code_name(n["key"])
+        text = (f"ghi {CODE_FILE}: " + json.dumps({"unity": [name]}, ensure_ascii=False)) if name else (
+            f"key không cho ra tên thư mục hợp lệ; hỏi người tên thư mục rồi ghi {CODE_FILE}")
+        out.append({"path": n["path"], "text": text})
+    return out
+
+
+def live_code_names(root):
+    """[(folder, node key)] for every code folder a round-2 node of the LIVE table names in code.json, sorted by
+    folder; a folder named twice keeps its first node. Read straight from the files, like code_allowed."""
+    live = table_dir(root, "live")
+    seen = {}
+    for node in sorted(c for c in live.iterdir() if c.is_dir() and not c.name.startswith(".")) if live.is_dir() else []:
+        for name in read_code(node, node.name, CODE_ROUND, []):
+            seen.setdefault(name, node.name)
+    return sorted(seen.items(), key=lambda kv: kv[0].lower())
+
+
 def snapshot(root):
     """Everything the page shows: the mode, the score scale, both trees (idea marked against live) and their
     structure problems. Reads only."""
@@ -986,4 +1026,5 @@ def snapshot(root):
     for n in walk(idea):
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
     return {"rounds": ROUNDS, "mode": mode, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
-            "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea)}
+            "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
+            "missingCode": missing_code(idea)}

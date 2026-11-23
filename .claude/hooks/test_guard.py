@@ -597,6 +597,18 @@ def run_role_cases(payload):
     t(g, M, "pass", "SendMessage", {"to": "Shop", "message": "x"})
     t(g, M, "pass", "ListAgents", {})
 
+    g = "manager: scaffold command"
+    SCAFFOLD = "python Management/tools/scaffold.py"
+    for cmd in (SCAFFOLD, SCAFFOLD + " --dry-run", "python3 Management/tools/scaffold.py"):
+        t(g, M, "allow", "Bash", sh(cmd))
+    for cmd in (SCAFFOLD + " --root /tmp/x", SCAFFOLD + " Hero", SCAFFOLD + "; rm -rf UnityProject",
+                SCAFFOLD + " --dry-run && ls", "python Management/tools/../tools/scaffold.py", SCAFFOLD + " --dry-run --dry-run"):
+        t(g, M, "deny", "Bash", sh(cmd))
+    for who in ("Wallet", "@CodeLead", "@GameDesigner", "@Core", "@Composition", ""):
+        t(g + " (others)", who, "deny", "Bash", sh(SCAFFOLD))
+    t(g + " (others)", "@human", "pass", "Bash", sh(SCAFFOLD))
+    w(g, M, "deny", A + "/../UnityProject/Assets/Features/Hero/Scripts/Internal/.gitkeep")      # still no file edits
+
     g = "role spelling"
     e(g, "@core", "deny", A + "/Core/Old.cs")          # stored values are exact; bind_session stores "@Core"
     e(g, "@MANAGER", "deny", A + "/Core/Old.cs")

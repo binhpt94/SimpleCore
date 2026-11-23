@@ -101,6 +101,9 @@ def report(root, arg=""):
         out += ["", "## Lỗi cấu trúc (phải sửa trước)"] + [f"- {p['path']}: {p['text']}" for p in problems]
     if not path and snap["missing"]:
         out += ["", "## Thiếu feature hạ tầng (vòng 2 luôn phải có)"] + [f"- {p['path']}: {p['text']}" for p in snap["missing"]]
+    if not path and snap["missingCode"]:
+        out += ["", "## Thiếu code.json (vòng 2: tự đặt theo key, không cần hỏi người)"] + [
+            f"- {p['path']}: {p['text']}" for p in snap["missingCode"]]
     return "\n".join(out)
 
 
