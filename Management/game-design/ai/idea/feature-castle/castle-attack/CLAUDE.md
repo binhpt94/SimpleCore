@@ -8,11 +8,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - NHIỀU quái có thể ở trong tầm; thành chỉ chọn con gần thành nhất.
 
 ## Định nghĩa
-- `glossary#auto-shot`
 - `glossary#range`
 - `glossary#target`
-- `glossary#attack`
-- `glossary#attack-speed`
 
 ## Danh sách
 - Chỉ số của thành: máu (`feature-castle/castle-core`), sức đánh, tốc độ đánh, tầm đánh. Không có tốc độ di chuyển.

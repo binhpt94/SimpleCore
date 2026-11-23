@@ -1,6 +1,6 @@
 ---
 based-on: c5b904d13f66
-refs: feature-hero/hero-list@1bf8998ab5a4, feature-hero/hero-respawn@2ae1008b33cd, feature-enemy/enemy-stats@504e5ffe01a8, feature-castle/castle-attack@639d373f52f2, feature-castle/castle-core@e1440a2a0de0, feature-castle/castle-upgrade-effects@2c1e443d0ced, glossary#hp@5433e9791fe3, glossary#attack@8196b706c38a, glossary#attack-speed@e3b0f90feef6, glossary#range@e47b0e576df3, glossary#hero-level@58786657874d
+refs: feature-hero/hero-list@1bf8998ab5a4, feature-hero/hero-respawn@2ae1008b33cd, feature-enemy/enemy-stats@504e5ffe01a8, feature-castle/castle-attack@639d373f52f2, feature-castle/castle-core@e1440a2a0de0, feature-castle/castle-upgrade-effects@2c1e443d0ced, glossary#range@f6d3cd6778ab, glossary#level@43a706597ab9
 ---
 # Chỉ số và cấp hero
 

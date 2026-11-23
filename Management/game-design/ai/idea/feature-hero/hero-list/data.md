@@ -1,6 +1,6 @@
 ---
 based-on: c5b904d13f66
-refs: feature-hero/hero-targeting@49b5ce7a72b8, feature-castle/castle-skills@8bc45d0edc8d, glossary#fighting-style@9e1f75b68d79, glossary#melee@b7c5d1d95f25, glossary#ranged@849a367f7047
+refs: feature-hero/hero-targeting@49b5ce7a72b8, feature-castle/castle-skills@8bc45d0edc8d, glossary#fighting-style@448aeb6c385b
 ---
 # Danh sách hero
 

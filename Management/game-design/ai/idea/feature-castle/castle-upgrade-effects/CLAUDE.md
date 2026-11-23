@@ -10,7 +10,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#level`
-- `glossary#hp`
 
 ## Danh sách
 | Mục | Tăng gì | Không đổi gì |

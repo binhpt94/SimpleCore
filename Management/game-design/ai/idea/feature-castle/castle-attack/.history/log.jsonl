@@ -1,3 +1,4 @@
 {"at": "2026-11-23 02:20:17", "event": "data", "hash": "639d373f52f2", "previous": "", "added": ["castle-shoot-nearest", "castle-single-target", "castle-attack-stats", "castle-short-range"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 02:26:10", "event": "promote", "by": "người", "hash": "639d373f52f2"}
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "639d373f52f2"}
+{"at": "2026-11-23 15:22:33", "event": "data", "hash": "97a86f93d77a", "previous": "639d373f52f2", "added": [], "removed": [], "rewritten": []}

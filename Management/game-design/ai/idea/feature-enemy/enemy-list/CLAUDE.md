@@ -9,8 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Loại nào ra ở đợt nào, bên nào: `feature-wave`. Giá trị chỉ số: `feature-balance`.
 
 ## Định nghĩa
-- `glossary#melee`
-- `glossary#ranged`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 | Loại | Đánh | Máu | Tốc độ đi | Sức đánh | Hero hợp để đối phó |

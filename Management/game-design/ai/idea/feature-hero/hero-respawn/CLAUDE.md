@@ -9,7 +9,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#down`
-- `glossary#respawn-wait`
 
 ## Danh sách
 - Trạng thái vòng đời của hero trong trận: trên chiến trường, gục (đang chờ), hồi sinh (trở lại trên chiến trường).

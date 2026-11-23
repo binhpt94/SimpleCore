@@ -9,11 +9,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Bộ chỉ số này cũng dùng cho quái (`feature-enemy/enemy-stats`) và thành (`feature-castle/castle-attack`, `feature-castle/castle-core`).
 
 ## Định nghĩa
-- `glossary#hp`
-- `glossary#attack`
-- `glossary#attack-speed`
 - `glossary#range`
-- `glossary#hero-level`
+- `glossary#level`
 
 ## Danh sách
 | Chỉ số | Hero | Quái | Thành | Cấp hero tăng |

@@ -1,7 +1,6 @@
 ---
 based-on: b74c0b7d272a
-refs: feature-enemy/enemy-list@10b291cde6dc, glossary#killer@7156ca2d53fe
----
+refs: feature-enemy/enemy-list@10b291cde6dc---
 # Tiền khi hạ quái
 
 Mỗi quái bị hạ cho người chơi tiền, vào thẳng ví mà không cần nhặt, bất kể ai hạ. Loại quái trâu hơn cho nhiều tiền hơn. Thưởng dọn sạch đợt là việc của `feature-wave`.

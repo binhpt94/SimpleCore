@@ -8,9 +8,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Mức tăng theo đợt (nếu có) do `feature-wave` quyết và áp lên quái khi nó ra; giá trị gốc do `feature-balance`.
 
 ## Định nghĩa
-- `glossary#hp`
-- `glossary#attack`
-- `glossary#attack-speed`
 - `glossary#range`
 - `glossary#defeated`
 - `glossary#base-stats`

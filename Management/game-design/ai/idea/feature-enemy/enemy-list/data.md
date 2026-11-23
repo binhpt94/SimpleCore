@@ -1,7 +1,6 @@
 ---
 based-on: b74c0b7d272a
-refs: feature-enemy/enemy-stats@504e5ffe01a8, feature-enemy/enemy-reward@1fbbced31e0f, feature-enemy/enemy-behavior@cf9290ce16e6, glossary#melee@b7c5d1d95f25, glossary#ranged@849a367f7047
----
+refs: feature-enemy/enemy-stats@504e5ffe01a8, feature-enemy/enemy-reward@1fbbced31e0f, feature-enemy/enemy-behavior@cf9290ce16e6---
 # Danh sách quái
 
 Các loại quái khác nhau ở cách đi và sức chịu, để đợt sau khác đợt trước và mỗi kiểu hero có chỗ mạnh. Có năm loại: Lính, Sói, Khổng lồ, Cung thủ quái và Trùm.

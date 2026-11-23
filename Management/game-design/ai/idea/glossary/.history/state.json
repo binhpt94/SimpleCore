@@ -1,297 +1,125 @@
 {
- "hash": "fefc204f3cbf",
+ "hash": "1d3ef58a6e65",
  "items": {
   "run": {
-   "hash": "238b2719236c",
-   "text": "Lượt: từ lúc vào trận tới lúc trận kết thúc\nMàn bắt đầu và màn chọn đội nằm ngoài lượt. Một lượt có đúng một trận."
-  },
-  "battle": {
-   "hash": "35cfb9e9dab0",
-   "text": "Trận: phần chơi trên dải chiến trường, có HUD và thanh nâng cấp"
-  },
-  "run-end": {
-   "hash": "f98a1a4ee909",
-   "text": "Kết thúc lượt: lúc trận dừng hẳn và điểm của lượt được chốt"
-  },
-  "playing": {
-   "hash": "8674c93c7438",
-   "text": "Đang đánh: trận đang chạy, người chơi mua nâng cấp và bấm kĩ năng được"
+   "hash": "721a2b6e316e",
+   "text": "Lượt: một lần chơi, từ lúc vào trận tới lúc trận kết thúc\nKhác trận: trận là phần chơi trên dải chiến trường bên trong lượt. Màn bắt đầu và màn chọn đội nằm ngoài lượt."
   },
   "paused": {
-   "hash": "b2d902ca8945",
-   "text": "Tạm dừng: trận đứng yên hoàn toàn, popup tạm dừng đang mở\nKhác lúc thở: lúc thở trận vẫn chạy, chỉ không có quái mới ra."
+   "hash": "89f75d658689",
+   "text": "Tạm dừng: trận đứng yên hoàn toàn\nKhác lúc thở: lúc thở trận vẫn chạy."
   },
   "leave-game": {
    "hash": "fe2884e1a36a",
    "text": "Rời khỏi game: game không còn ở trên màn hình\nVí dụ chuyển ứng dụng, khoá máy, có cuộc gọi."
   },
-  "quit-run": {
-   "hash": "acd53f4924cf",
-   "text": "Bỏ lượt: người chơi tự kết thúc lượt đang chơi"
-  },
   "battlefield": {
-   "hash": "14344b45d161",
-   "text": "Dải chiến trường: dải đất chạy ngang qua thành ở giữa màn hình, nơi hero, quái và thành đứng"
-  },
-  "side": {
-   "hash": "e55018ae4b24",
-   "text": "Bên: nửa dải chiến trường giữa một mép màn hình (trái hoặc phải) và thành"
-  },
-  "slot": {
-   "hash": "c7763cdfd5c6",
-   "text": "Chỗ: một ô trong đội, chứa được một hero"
-  },
-  "run-team": {
-   "hash": "49417f2b6655",
-   "text": "Đội của lượt: các hero người chơi đã chọn ở màn chọn đội ngay trước trận"
+   "hash": "565b01770cea",
+   "text": "Dải chiến trường: dải đất chạy ngang qua thành, nơi hero, quái và thành đứng"
   },
   "remembered-team": {
-   "hash": "dc4dec3f936a",
-   "text": "Đội được nhớ: đội đã vào trận gần nhất trong lần mở game này"
+   "hash": "a5f218ba8ce3",
+   "text": "Đội được nhớ: đội đã vào trận ở lượt gần nhất\nKhác đội của lượt đang chơi: đội được nhớ là đội cũ, dùng để điền sẵn màn chọn đội."
   },
   "fighting-style": {
-   "hash": "9e1f75b68d79",
-   "text": "Cách đánh: nhóm (cận chiến hoặc bắn xa) cộng kiểu đòn của một hero\nCách đánh quyết hero đứng chắn ở trước hay đánh từ phía sau. Mỗi hero một cách đánh, không đổi trong trận."
-  },
-  "melee": {
-   "hash": "b7c5d1d95f25",
-   "text": "Cận chiến: tầm đánh ngắn, phải đi sát mục tiêu mới đánh được\nDùng cho cả hero và quái."
-  },
-  "ranged": {
-   "hash": "849a367f7047",
-   "text": "Bắn xa: tầm đánh dài, đánh được từ xa"
-  },
-  "hp": {
-   "hash": "5433e9791fe3",
-   "text": "Máu: sức chịu đòn; máu tối đa là mức đầy, máu hiện tại là phần còn lại"
-  },
-  "attack": {
-   "hash": "8196b706c38a",
-   "text": "Sức đánh: lượng máu một đòn trừ của mục tiêu"
-  },
-  "attack-speed": {
-   "hash": "e3b0f90feef6",
-   "text": "Tốc độ đánh: đánh nhanh hay chậm; cao hơn thì khoảng cách giữa hai đòn ngắn hơn"
+   "hash": "448aeb6c385b",
+   "text": "Cách đánh: nhóm (cận chiến hoặc bắn xa) cộng kiểu đòn của một hero\nKhác chỉ số: hai hero cùng cách đánh vẫn có thể khác máu, sức đánh, tầm đánh."
   },
   "range": {
-   "hash": "e47b0e576df3",
-   "text": "Tầm đánh: khoảng cách xa nhất tới mục tiêu mà vẫn đánh được\nVới thành, tầm đánh (còn gọi tầm bắn) tính từ thành ra mỗi bên."
+   "hash": "f6d3cd6778ab",
+   "text": "Tầm đánh: khoảng cách xa nhất tới mục tiêu mà vẫn đánh được\nVới thành còn gọi là tầm bắn."
   },
   "base-stats": {
-   "hash": "ff57fd5cfca7",
-   "text": "Chỉ số gốc: chỉ số của một loại quái trước khi làm mạnh lên theo đợt"
+   "hash": "5b93f172d5e9",
+   "text": "Chỉ số gốc: chỉ số của một loại quái trước khi được làm mạnh lên theo đợt"
   },
   "down": {
-   "hash": "49fa95285a48",
-   "text": "Gục: hero máu về 0, tạm rời chiến trường\nGục không làm thua và không mất cấp."
-  },
-  "respawn-wait": {
-   "hash": "88f6746cbb8f",
-   "text": "Thời gian chờ: khoảng từ lúc hero gục tới lúc hồi sinh"
+   "hash": "bf2146a84029",
+   "text": "Gục: hero hết máu và tạm rời chiến trường\nKhác bị hạ: gục là của hero và hero sẽ quay lại; bị hạ là của quái."
   },
   "defeated": {
-   "hash": "8f3d5bbe33d3",
-   "text": "Bị hạ: quái máu về 0 và rời trận hẳn"
+   "hash": "7f764615289d",
+   "text": "Bị hạ: quái hết máu và rời trận hẳn\nKhác gục của hero."
   },
   "reach-castle": {
-   "hash": "7b6b2afb4691",
-   "text": "Tới thành: thành nằm trong tầm đánh của quái"
+   "hash": "7db7d78f37e0",
+   "text": "Tới thành: thành nằm trong tầm đánh của quái\nKhác chạm thành: quái bắn xa tới thành khi còn đứng ở xa."
   },
   "target": {
-   "hash": "33c4400385ff",
-   "text": "Mục tiêu: quái còn sống mà một hero hoặc thành đang nhắm để đánh"
-  },
-  "nearest": {
-   "hash": "ba68001e982d",
-   "text": "Gần nhất: khoảng cách trên dải chiến trường nhỏ nhất, không phân biệt bên trái hay bên phải"
-  },
-  "auto-shot": {
-   "hash": "6fe3ccbe44e9",
-   "text": "Đòn tự bắn: đòn thường của thành, tự bắn theo tốc độ đánh, không cần thao tác"
+   "hash": "f51ab44b30ff",
+   "text": "Mục tiêu: quái mà một hero hoặc thành đang nhắm để đánh\nDùng chung cho hero và thành."
   },
   "castle-skill": {
-   "hash": "db172da8ce27",
-   "text": "Kĩ năng thành: đòn đặc biệt người chơi bấm để thành dùng, có hồi chiêu\nKhác đòn tự bắn."
-  },
-  "cooldown": {
-   "hash": "66c87aeea6d6",
-   "text": "Hồi chiêu: thời gian chờ từ lúc dùng một kĩ năng tới lúc dùng lại được"
+   "hash": "1c6e2774b71d",
+   "text": "Kĩ năng thành: đòn đặc biệt mà người chơi bấm để thành dùng\nKhác đòn tự bắn: đòn tự bắn là đòn thường thành tự đánh, không cần bấm."
   },
   "castle-zone": {
-   "hash": "12bbf2c7457b",
-   "text": "Vùng quanh thành: một khoảng ở cả hai bên tính từ thành"
-  },
-  "killer": {
-   "hash": "7156ca2d53fe",
-   "text": "Bên hạ: thứ làm quái bị hạ (hero, đòn tự bắn của thành, kĩ năng thành)"
+   "hash": "dbff38bfeb23",
+   "text": "Vùng quanh thành: một khoảng ở cả hai bên, tính từ thành ra"
   },
   "wave": {
    "hash": "7184fb6d0668",
    "text": "Đợt: một danh sách quái ra trong một khoảng của trận"
   },
   "active-wave": {
-   "hash": "ec4e1e5b7480",
-   "text": "Đợt đang đánh: đợt có quái đang ra hoặc còn sống; mỗi lúc chỉ có một"
-  },
-  "unlocked-type": {
-   "hash": "269318c26c8a",
-   "text": "Loại đã mở: loại quái được phép có trong đợt từ một số đợt trở đi"
-  },
-  "spawn-interval": {
-   "hash": "43e5ca3f1e79",
-   "text": "Nhịp thả: khoảng cách giữa hai lần ra quái liên tiếp"
+   "hash": "cc772cb923dd",
+   "text": "Đợt đang đánh: đợt có quái đang ra hoặc còn sống\nKhác lúc thở: trong lúc thở không có đợt đang đánh."
   },
   "wave-clear": {
    "hash": "89a01d398d04",
    "text": "Dọn sạch đợt: quái của đợt đã ra hết và không còn con nào còn sống"
   },
   "wave-gap": {
-   "hash": "499ad340130b",
-   "text": "Lúc thở: khoảng từ lúc dọn sạch một đợt tới lúc đợt sau bắt đầu ra quái\nTrận vẫn chạy, chỉ không có quái mới. Khác tạm dừng."
+   "hash": "8ee5484a4f32",
+   "text": "Lúc thở: khoảng từ lúc dọn sạch một đợt tới lúc đợt sau bắt đầu ra quái\nKhác tạm dừng: lúc thở trận vẫn chạy."
   },
   "score": {
    "hash": "6f4bf7c75284",
    "text": "Điểm: số đợt đã dọn sạch trong lượt\nKhác số đợt đang đánh mà HUD hiện."
   },
-  "record": {
-   "hash": "d05567cd8426",
-   "text": "Kỉ lục: điểm cao nhất của mọi lượt từng chơi trên máy này"
-  },
-  "new-record": {
-   "hash": "526898f81890",
-   "text": "Phá kỉ lục: điểm vừa chốt lớn hơn hẳn kỉ lục trước lượt đó\nBằng kỉ lục không tính."
-  },
-  "upgrade-item": {
-   "hash": "9e47ea6f6dbf",
-   "text": "Mục nâng cấp: một thứ mua được nhiều lần, mỗi lần làm một hero hoặc một mặt của thành mạnh hơn"
-  },
   "level": {
-   "hash": "c32a49d0bd16",
-   "text": "Cấp: số lần một mục nâng cấp đã được mua trong lượt, tính từ cấp thấp nhất"
-  },
-  "hero-level": {
-   "hash": "58786657874d",
-   "text": "Cấp hero: cấp của mục nâng cấp của một hero"
-  },
-  "next-price": {
-   "hash": "59695ee7e7f2",
-   "text": "Giá cấp sau: số tiền phải trả để một mục lên thêm một cấp từ cấp hiện tại"
-  },
-  "can-buy": {
-   "hash": "6946c779744b",
-   "text": "Mua được: đang đánh và số dư lớn hơn hoặc bằng giá cấp sau"
-  },
-  "upgrade-value": {
-   "hash": "3a22a3084298",
-   "text": "Lời của một lần nâng: sức mạnh thêm vào so với giá phải trả"
-  },
-  "wave-income": {
-   "hash": "d5bcb396e787",
-   "text": "Thu của một đợt: tổng tiền hạ quái và thưởng dọn đợt trong đợt đó"
-  },
-  "number": {
-   "hash": "2f1eb7916a2d",
-   "text": "Số liệu: một giá trị chỉnh được ảnh hưởng tới độ khó, thu chi hay sức của hero, thành, quái"
+   "hash": "43a706597ab9",
+   "text": "Cấp: mức hiện tại của một mục nâng cấp\nCấp hero là cấp của mục nâng cấp của hero đó."
   },
   "owner-feature": {
    "hash": "f87917e9ae04",
    "text": "Feature sở hữu: feature duy nhất đọc và ghi một số liệu, hoặc sở hữu một popup"
   },
-  "enemy-power": {
-   "hash": "6379e186a911",
-   "text": "Sức quái của đợt: tổng sức gây hại và sức chịu đòn của mọi quái trong đợt"
-  },
-  "team-power": {
-   "hash": "dd4b4691fda9",
-   "text": "Sức đội: tổng sức đánh và sức chịu đòn của hero và thành ở một thời điểm"
-  },
   "break-wave": {
-   "hash": "15d5d1af4350",
-   "text": "Đợt gãy: đợt mà sức quái vượt sức đội tới mức thành bị phá"
-  },
-  "pressure": {
-   "hash": "547149b356c5",
-   "text": "Áp lực: sức quái của đợt chia cho sức đội; càng gần đợt gãy càng lớn"
-  },
-  "hero-power": {
-   "hash": "92427b9ec147",
-   "text": "Sức tổng của hero: giá trị chung của năm chỉ số, dùng để so các hero ở cùng cấp"
+   "hash": "5e6edbfc4988",
+   "text": "Đợt gãy: đợt mà quái mạnh hơn đội hero và thành tới mức thành bị phá"
   },
   "counter": {
-   "hash": "39e5f9fc7875",
-   "text": "Hợp với loại quái: hero hạ loại quái đó nhanh hơn, hoặc chịu được nó lâu hơn so với hero khác"
+   "hash": "ae6cbc8a6e2a",
+   "text": "Hợp với loại quái: hero hạ một loại quái nhanh hơn, hoặc chịu được nó lâu hơn so với hero khác"
   },
   "mono-team": {
    "hash": "f7b83c3ef1e4",
    "text": "Đội lệch: đội mà mọi hero cùng một cách đánh"
   },
   "scene": {
-   "hash": "310c65c066dc",
-   "text": "Scene: một khung lớn của game; chuyển scene là huỷ khung cũ và tải khung mới"
+   "hash": "c92d4e8713a9",
+   "text": "Scene: một khung lớn của game, được tải và huỷ riêng\nKhác màn: đổi màn không đổi scene."
   },
   "screen": {
-   "hash": "309432e2cfc6",
-   "text": "Màn: một màn hình người chơi thấy bên trong một scene; đổi màn không chuyển scene"
-  },
-  "scene-loading": {
-   "hash": "495ca114a194",
-   "text": "Scene Loading: scene đầu tiên khi mở game, lo tải những thứ scene Game cần"
-  },
-  "scene-game": {
-   "hash": "06d6e6c3e2c7",
-   "text": "Scene Game: scene chơi, chứa mọi màn người chơi thao tác"
+   "hash": "939e5a4868a2",
+   "text": "Màn: một màn hình người chơi thấy bên trong một scene\nVí dụ màn bắt đầu, màn chọn đội, màn trận."
   },
   "participant": {
-   "hash": "0630839c2a38",
-   "text": "Feature tham gia: feature có mặt trong danh sách của một scene, nhận đủ ba bước tải, chạy, huỷ"
-  },
-  "load-step": {
-   "hash": "4b517bdb7c92",
-   "text": "Tải: bước chuẩn bị thứ cần dùng (hình, prefab, cấu hình), chưa hiện gì"
-  },
-  "run-step": {
-   "hash": "a790d9cd4ba4",
-   "text": "Chạy: bước tạo view và bắt đầu hoạt động"
-  },
-  "dispose-step": {
-   "hash": "c82a8e250e4f",
-   "text": "Huỷ: bước huỷ view, bỏ thứ đã tải, dừng mọi hoạt động trong scene"
-  },
-  "view": {
-   "hash": "c0cbfa55562e",
-   "text": "View: thứ người chơi thấy hoặc bấm được trên màn hình"
-  },
-  "clean": {
-   "hash": "9dda30fc7fac",
-   "text": "Dọn sạch scene: sau khi huỷ, scene không còn view, không còn việc đang chạy, không còn trạng thái của trận"
-  },
-  "clean-start": {
-   "hash": "9a724a9adc7a",
-   "text": "Bắt đầu sạch: lượt mới không mang theo trạng thái của lượt trước"
-  },
-  "popup": {
-   "hash": "f2de4916ef5c",
-   "text": "Popup: một bảng hiện đè lên màn đang chơi, có nút để người chơi chọn"
+   "hash": "418cacc16440",
+   "text": "Feature tham gia: feature có mặt trong danh sách của một scene"
   },
   "caller": {
-   "hash": "11e57b764ddb",
-   "text": "Feature gọi: feature sở hữu popup và nhờ dịch vụ popup hiện nó"
+   "hash": "71914587fe09",
+   "text": "Feature gọi: feature sở hữu một popup và nhờ dịch vụ popup hiện nó"
   },
   "popup-id": {
-   "hash": "4efd0c9c8143",
-   "text": "Id popup: tên dạng Owner/Name, Owner là feature gọi, Name là tên popup trong feature đó\nVí dụ PopupLose/Main."
-  },
-  "popup-layer": {
-   "hash": "0f1e7314b06f",
-   "text": "Lớp popup: tầng hiển thị cao nhất của scene, chỉ dành cho popup"
+   "hash": "6773c11a645d",
+   "text": "Id popup: tên của một popup, dạng Owner/Name\nOwner là feature gọi, Name là tên popup trong feature đó. Ví dụ PopupLose/Main."
   },
   "backdrop": {
-   "hash": "3c9968d158fd",
-   "text": "Nền che: tấm phủ toàn màn hình ngay sau một popup, làm tối và chặn bấm phía dưới"
-  },
-  "top-popup": {
-   "hash": "29d3728c94a1",
-   "text": "Popup trên cùng: popup mở gần nhất còn đang mở; chỉ nó nhận bấm"
+   "hash": "e3182111f30b",
+   "text": "Nền che: tấm phủ toàn màn hình ngay sau một popup"
   }
  }
 }

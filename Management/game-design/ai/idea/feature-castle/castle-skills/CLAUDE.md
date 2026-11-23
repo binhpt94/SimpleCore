@@ -10,7 +10,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#castle-skill`
-- `glossary#cooldown`
 - `glossary#castle-zone` (Sấm sét chỉ trúng quái trong vùng này)
 
 ## Danh sách

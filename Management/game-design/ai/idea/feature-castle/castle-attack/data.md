@@ -1,7 +1,6 @@
 ---
 based-on: 24fd307bbdcd
-refs: feature-castle/castle-skills@8bc45d0edc8d, feature-hero/hero-stats@2748621645f8, feature-castle/castle-core@e1440a2a0de0, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-targeting@49b5ce7a72b8, glossary#auto-shot@6fe3ccbe44e9, glossary#range@e47b0e576df3, glossary#target@33c4400385ff, glossary#attack@8196b706c38a, glossary#attack-speed@e3b0f90feef6
----
+refs: feature-castle/castle-skills@8bc45d0edc8d, feature-hero/hero-stats@2748621645f8, feature-castle/castle-core@e1440a2a0de0, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-targeting@49b5ce7a72b8, glossary#range@f6d3cd6778ab, glossary#target@f51ab44b30ff---
 # Thành tự bắn
 
 Thành tự bắn quái gần nhất trong tầm ở cả hai bên, không cần người chơi bấm. Đòn tự bắn dùng chung bộ chỉ số chiến đấu của game, trừ tốc độ di chuyển vì thành đứng yên.

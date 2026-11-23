@@ -10,7 +10,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#target`
-- `glossary#nearest`
 
 ## Danh sách
 Trạng thái của hero trên chiến trường:

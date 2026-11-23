@@ -10,8 +10,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Định nghĩa
 - `glossary#fighting-style`
-- `glossary#melee`
-- `glossary#ranged`
 
 ## Danh sách
 | Hero | Nhóm | Kiểu đòn | Vai so với các hero khác |

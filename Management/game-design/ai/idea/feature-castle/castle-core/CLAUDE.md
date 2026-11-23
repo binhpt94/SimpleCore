@@ -9,7 +9,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Một thành là điểm xuất phát và điểm hồi sinh của MỌI hero trong đội.
 
 ## Định nghĩa
-- `glossary#hp` (máu thành vào trận ở mức tối đa)
 - `glossary#reach-castle`
 
 ## Danh sách

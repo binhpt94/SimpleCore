@@ -9,7 +9,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Quái chỉ gặp hero đang đứng ở bên của nó.
 
 ## Định nghĩa
-- `glossary#side` (bên của quái là bên có mép nó ra)
 - `glossary#reach-castle`
 
 ## Danh sách

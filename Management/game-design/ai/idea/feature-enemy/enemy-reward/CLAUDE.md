@@ -9,7 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Thưởng dọn sạch đợt: `feature-wave`. Mức tiền cụ thể: `feature-balance`.
 
 ## Định nghĩa
-- `glossary#killer`
+- Không dùng thuật ngữ riêng.
 
 ## Danh sách
 So sánh tiền thưởng theo loại (`feature-enemy/enemy-list`):

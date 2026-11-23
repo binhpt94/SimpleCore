@@ -1,6 +1,6 @@
 ---
 based-on: c5b904d13f66
-refs: feature-hero/hero-list@1bf8998ab5a4, feature-hero/hero-stats@2748621645f8, feature-hero/hero-respawn@2ae1008b33cd, feature-enemy/enemy-reward@1fbbced31e0f, feature-enemy/enemy-behavior@cf9290ce16e6, glossary#target@33c4400385ff, glossary#nearest@ba68001e982d
+refs: feature-hero/hero-list@1bf8998ab5a4, feature-hero/hero-stats@2748621645f8, feature-hero/hero-respawn@2ae1008b33cd, feature-enemy/enemy-reward@1fbbced31e0f, feature-enemy/enemy-behavior@cf9290ce16e6, glossary#target@f51ab44b30ff
 ---
 # Hero tự nhắm và tự đánh
 
