@@ -563,6 +563,24 @@
     refresh();
   });
 
+  // Cài đặt máy (Windows, Linux, macOS): nội dung ở data/sessions.js, mục config
+  var config = sessions && sessions.config;
+  if (config && Array.isArray(config.sections)) {
+    tab("cai-dat", "Cài đặt", "", function (pane) {
+      add(pane, el("h1", "", config.title || "Cài đặt máy"));
+      if (config.intro) add(pane, el("p", "", config.intro));
+      config.sections.forEach(function (sec) {
+        var s = put(pane, section(sec.title || ""));
+        (Array.isArray(sec.steps) ? sec.steps : []).forEach(function (step) {
+          var box = put(s, el("div", "session"));
+          if (step.os) add(box, el("h3", "", step.os));
+          if (step.text) add(box, el("p", step.os ? "muted" : "", step.text));
+          if (step.command) add(box, commandBlock(step.command, step.command.indexOf("\n") >= 0));
+        });
+      });
+    });
+  }
+
   // Gán chat
   if (sessions) {
     tab("gan-chat", "Gán chat", "", function (pane) {

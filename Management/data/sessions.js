@@ -7,6 +7,43 @@ window.CORESIMPLE_SESSIONS = {
   pinHint: "Chạy trong terminal của VS Code ở gốc project, tự tay gõ, không nhờ AI. Gõ PIN hai lần. Sai PIN 5 lần thì bị khoá cho tới khi chạy lại lệnh này.",
   pinCommand: "python .claude/hooks/bind_session.py --set-pin",
 
+  // Tab Cài đặt: chuẩn bị một máy (Windows, Linux, macOS) để chạy project. Mỗi bước: `text`, tuỳ chọn `os`
+  // (chỉ áp dụng cho hệ đó) và `command` (khối có nút Chép). Mọi lệnh chạy ở gốc project.
+  config: {
+    title: "Cài đặt máy",
+    intro: "Làm một lần trên mỗi máy, Windows, Linux hay macOS đều được. Các hook và công cụ trong Management/tools tự tìm thư mục project ($CLAUDE_PROJECT_DIR), không có đường dẫn ổ đĩa viết cứng, nên clone project vào thư mục nào cũng chạy.",
+    sections: [
+      { title: "1. Python 3 với lệnh python", steps: [
+        { text: "Mọi hook trong .claude/settings.json gọi lệnh python. Thiếu lệnh này thì hook lỗi mà không chặn gì: guard bị bỏ qua mà không báo. Kiểm tra trước tiên:", command: "python --version" },
+        { os: "Windows", text: "Cài Python 3 từ python.org, tick \"Add python.exe to PATH\". Tắt alias của Microsoft Store nếu python mở Store: Settings > Apps > Advanced app settings > App execution aliases." },
+        { os: "Linux (Ubuntu/Debian)", text: "Thường chỉ có python3. Cài gói để có lệnh python:", command: "sudo apt install python-is-python3" },
+        { os: "Linux khác, macOS", text: "Tạo lệnh python trỏ tới python3 (ví dụ một symlink trong ~/.local/bin, thư mục này phải có trong PATH):", command: "mkdir -p ~/.local/bin && ln -s \"$(command -v python3)\" ~/.local/bin/python" }
+      ] },
+      { title: "2. Kiểm tra guard và công cụ", steps: [
+        { text: "Chạy sau khi clone, đổi máy hoặc sửa hook. Mỗi lệnh phải kết thúc bằng TOTAL: ... 0 failed.", command: "python .claude/hooks/test_guard.py" },
+        { text: "Công cụ kiểm ranh giới và thiết kế:", command: "python Management/tools/test_validate.py" },
+        { command: "python Management/tools/test_gamedesign.py" },
+        { text: "Mở một chat chưa gán rồi nhờ AI đọc một file bất kỳ. Guard phải trả lời (đọc được, hoặc chặn kèm lý do bắt đầu bằng guard:). Nếu báo lỗi đường dẫn thì dừng lại, đừng gán chat, chạy lại test_guard.py." }
+      ] },
+      { title: "3. PIN và gán chat", steps: [
+        { text: "PIN và các chat đã gán nằm ngoài project, trong ~/.coresimple-guard (Windows: C:\\Users\\<bạn>\\.coresimple-guard). Mỗi máy đặt PIN riêng, ở tab Gán chat hoặc bằng lệnh:", command: "python .claude/hooks/bind_session.py --set-pin" }
+      ] },
+      { title: "4. Trang quản lý và Setup", steps: [
+        { text: "Mở trang qua server cục bộ để lưu được điểm, câu trả lời và tạo thread. Server chỉ nghe trên 127.0.0.1, cổng 8770.", command: "python Management/tools/setup_server.py" },
+        { text: "Tạo thread cần lệnh claude (Claude Code CLI) có trong PATH. Thread đã lưu trữ trong VS Code được bỏ qua: server tự đọc trạng thái VS Code ở đúng chỗ của từng hệ (Windows: %APPDATA%\\Code, macOS: ~/Library/Application Support/Code, Linux: ~/.config/Code).", command: "claude --version" }
+      ] },
+      { title: "5. Git", steps: [
+        { text: "Đặt tên và email tác giả cho riêng repo này (không thêm --global nếu không muốn đổi cả máy):", command: "git config user.name \"<tên>\"\ngit config user.email \"<email>\"" },
+        { text: ".gitattributes ép xuống dòng LF cho mọi file văn bản, nên sửa trên Windows hay Linux đều cho cùng một diff." }
+      ] },
+      { title: "6. Khác nhau giữa Windows và Linux", steps: [
+        { text: "Linux và macOS phân biệt chữ hoa thường. FEATURE=, đường dẫn và tên thư mục phải đúng chính tả: FEATURE=Wallet được, FEATURE=wallet thì không; Assets/core không phải Assets/Core. Windows không phân biệt." },
+        { text: "Trên Linux và macOS, đường dẫn dùng /. Dấu \\ là một ký tự trong tên file, nên guard chặn mọi đường dẫn có \\. Windows nhận cả / lẫn \\." },
+        { text: "Symlink (Linux, macOS) hay junction (Windows) bên trong project đều bị guard chặn khi đi qua. Đừng dùng link để chia sẻ thư mục giữa các feature." }
+      ] }
+    ]
+  },
+
   // `copy`: chữ được chép, khi khác "FEATURE=<id> ".
   features: [
     { id: "@human", group: "Master", label: "Phiên của người (tích hợp)", note: "Không giới hạn feature; vẫn bị hỏi khi sửa Core, _Composition, .claude. Biên dịch, chạy test, Play và sửa scene/prefab qua unity-mcp." },
