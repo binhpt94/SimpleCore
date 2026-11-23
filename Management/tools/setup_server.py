@@ -11,7 +11,7 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
 - A thread is a Claude Code session of this project; its name is its custom title. Archived threads (hidden in
   the VS Code extension) are ignored.
 - For each name of the chosen set: every non-archived thread with that name is bound; when there is none, a
-  new one is created with `claude -n <name> --session-id <id> --model <m> --effort <e> -p ...` (the page picks
+  new one is created with `claude -n <name without a role's @> --session-id <id> --model <m> --effort <e> -p ...` (the page picks
   model and effort; default opus / medium) and then bound. Binding writes the same
   file bind_session.py writes, so the PIN never goes through a chat (a bind command typed as the first message
   of a chat can end up in the thread's generated title).
@@ -60,6 +60,17 @@ ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders"
                "@Codex": "Tools", "@Blender": "Tools", "@Core": "Basic", "@Composition": "Basic"}
 GROUP_ORDER = ["Master", "Leaders", "Tools", "Basic", "Services", "Features"]      # the tiers of CLAUDE.md, top to bottom
 STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp")
+
+
+def thread_name(value):
+    """The chat name for a FEATURE value: a role without its '@' (SendMessage reads 'name@team' as a team address,
+    so a session named '@Codex' cannot receive messages); a feature keeps its name."""
+    return value[1:] if value in ROLE_GROUPS else value
+
+
+def feature_of(title):
+    """The FEATURE value a chat name stands for: 'Codex' and the older '@Codex' are both '@Codex'."""
+    return "@" + title if "@" + title in ROLE_GROUPS else title
 
 
 def group_of(name):
@@ -129,7 +140,8 @@ def archived_ids():
 
 
 def threads():
-    """[{id, title, group, archived, binding, model, effort, modified}] for this project's sessions that have a name.
+    """[{id, title, feature, group, legacy, archived, binding, model, effort, modified}] for this project's sessions
+    that have a name. feature: the FEATURE value the name stands for; legacy: a role named with its '@' (rename it).
     model: of the last answer; effort: of the last request (both as the transcript recorded them)."""
     hidden = archived_ids()
     out = []
@@ -156,7 +168,8 @@ def threads():
                         pass
         if title:
             sid = p.stem
-            out.append({"id": sid, "title": title, "group": group_of(title), "archived": sid in hidden,
+            out.append({"id": sid, "title": title, "feature": feature_of(title), "group": group_of(feature_of(title)),
+                        "legacy": title in ROLE_GROUPS, "archived": sid in hidden,
                         "unlisted": entries == {HEADLESS_ENTRY},
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
                         "binding": guard.bound_feature(sid, guard.STORE_DIR) or "",
@@ -214,14 +227,14 @@ def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
     current = [t for t in threads() if not t["archived"] and not t["unlisted"]]
     results = []
     for name in names:
-        same = [t for t in current if t["title"] == name]
+        same = [t for t in current if t["feature"] == name]
         try:
             if same:
                 for t in same:
                     bind(t["id"], name)
                 results.append({"name": name, "action": "bound", "ids": [t["id"] for t in same]})
             else:
-                sid = create(name, model, effort)
+                sid = create(thread_name(name), model, effort)
                 bind(sid, name)
                 results.append({"name": name, "action": "created", "ids": [sid], "model": model, "effort": effort})
         except Exception as ex:

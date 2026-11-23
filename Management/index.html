@@ -545,9 +545,10 @@
       data.sets.full.forEach(function (n, i) { wanted[n] = i + 1; });
       // Gom theo tầng (Master, Leaders, Tools, Basic, Services, Features); trong một tầng theo thứ tự của bộ setup.
       var order = (data.sets.order || []).concat([""]);
-      var tierOf = function (t) { var g = data.sets.groups[t.title] || t.group || ""; return order.indexOf(g) >= 0 ? g : ""; };
+      var key = function (t) { return t.feature || t.title; };      // tên chat "Codex" là FEATURE "@Codex"
+      var tierOf = function (t) { var g = data.sets.groups[key(t)] || t.group || ""; return order.indexOf(g) >= 0 ? g : ""; };
       var sorted = data.threads.slice().sort(function (a, b) {
-        return (order.indexOf(tierOf(a)) - order.indexOf(tierOf(b))) || ((wanted[a.title] || 1e9) - (wanted[b.title] || 1e9))
+        return (order.indexOf(tierOf(a)) - order.indexOf(tierOf(b))) || ((wanted[key(a)] || 1e9) - (wanted[key(b)] || 1e9))
           || a.title.localeCompare(b.title) || (a.modified < b.modified ? -1 : 1);
       });
       var vs = data.vscode || { groups: {}, running: false, tierNames: {} };
@@ -569,17 +570,18 @@
         }
         var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")
           : t.unlisted ? el("span", "muted", "VS Code không hiện (tạo ngoài VS Code), bỏ qua")
-          : (!wanted[t.title] ? el("span", "muted", "ngoài bộ setup")
-          : (t.binding === t.title ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
+          : (!wanted[key(t)] ? el("span", "muted", "ngoài bộ setup")
+          : t.legacy ? el("span", "bad-text", "tên có @ nên không nhận được tin SendMessage: gõ /rename " + t.title.slice(1) + " trong chat này")
+          : (t.binding === key(t) ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
         var inGroup = vs.groups[t.id] || "";
         var wantGroup = tier && vs.tierNames ? vs.tierNames[tier] : "";
-        var vsCell = !wanted[t.title] || t.archived || t.unlisted ? el("span", "muted", inGroup || "—")
+        var vsCell = !wanted[key(t)] || t.archived || t.unlisted ? el("span", "muted", inGroup || "—")
           : (inGroup === wantGroup ? el("span", "ok-text", inGroup) : el("span", "bad-text", (inGroup || "chưa nhóm") + " → " + wantGroup));
         add(body, row([t.title, t.binding || "—", vsCell, (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
           t.modified, state, el("code", "", t.id.slice(0, 8))]));
       });
       var made = {};
-      data.threads.forEach(function (t) { if (!t.archived && !t.unlisted) made[t.title] = true; });
+      data.threads.forEach(function (t) { if (!t.archived && !t.unlisted) made[key(t)] = true; });
       var todo = data.sets.full.filter(function (n) { return !made[n]; });
       if (todo.length) add(listBody, el("p", "muted", "Chưa có thread (Setup full sẽ tạo): " + todo.join(", ") + "."));
     };

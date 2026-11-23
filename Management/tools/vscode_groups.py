@@ -212,9 +212,9 @@ def setup_assignments():
     import setup_server
     sets = setup_server.sets()
     order = {name: i for i, name in enumerate(sets["full"])}
-    threads = [t for t in setup_server.threads() if t["title"] in order and not t["archived"] and not t["unlisted"]]
-    threads.sort(key=lambda t: (order[t["title"]], t["modified"]))
-    return [(t["id"], sets["groups"][t["title"]]) for t in threads if sets["groups"].get(t["title"]) in TIERS]
+    threads = [t for t in setup_server.threads() if t["feature"] in order and not t["archived"] and not t["unlisted"]]
+    threads.sort(key=lambda t: (order[t["feature"]], t["modified"]))
+    return [(t["id"], sets["groups"][t["feature"]]) for t in threads if sets["groups"].get(t["feature"]) in TIERS]
 
 
 def describe(groups, titles):

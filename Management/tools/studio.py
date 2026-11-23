@@ -833,7 +833,7 @@ def cmd_deliver(root, tool, ref):
     rel = dest.relative_to(Path(root)).as_posix()
     if meta:
         print(f"Đã giao bản v{version}: {rel} ({len(ids)} ảnh). Ảnh hiện ở tab Game design (node {meta['node']}) với nhãn "
-              f"'chờ nhận'; người nhận hoặc trả ở đó. Nhắn @GameDesigner bằng SendMessage rằng order {feature}/{oid} đã giao.")
+              f"'chờ nhận'; người nhận hoặc trả ở đó. Nhắn @GameDesigner bằng SendMessage (to: \"GameDesigner\") rằng order {feature}/{oid} đã giao.")
         return 0
     below = "; ".join(f"{i}: {q['note']}" for i, q in quality.items() if not q["ok"])
     below_text = f" Chưa chuẩn (hết lượt, có phiếu nợ): {below}." if below else ""
@@ -923,7 +923,7 @@ def cmd_reject(root, ref):
         kept = [x for x in anchors if not (x.get("ref") == ref.strip("/") and x.get("version") == status["version"])]
         if len(kept) != len(anchors):
             write_json(path, kept)
-    print(f"Đã trả order {ref} ({', '.join(fresh)}). Nhắn @{tool.capitalize()} bằng SendMessage để làm lại.")
+    print(f"Đã trả order {ref} ({', '.join(fresh)}). Nhắn @{tool.capitalize()} bằng SendMessage (to: \"{tool.capitalize()}\") để làm lại.")
     return 0
 
 
@@ -1013,7 +1013,7 @@ def cmd_approve(root, ref):
     save_status(folder, state="approved")
     log(folder, "approve", items=approval["items"], node=approval["node"])
     print(f"Đã duyệt gen {ref}: {len(approval['items'])} ảnh, mỗi ảnh còn {max(approval['runs'].values() or [0])} lượt. "
-          f"Nhắn @Codex bằng SendMessage để làm.")
+          f"Nhắn @Codex bằng SendMessage (to: \"Codex\") để làm.")
     return 0
 
 
