@@ -38,6 +38,20 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 - Không đổi GUID trong `.meta` đã có. Xoá hay đổi tên asset ở `FeatureAssets/Public` là đổi contract: thống nhất với @CodeLead trước.
 - Asset giao cho dịch vụ (ví dụ prefab popup) là của feature gọi, đặt ở `FeatureAssets/Public` của nó, và đi qua id `<Owner>/<Name>` (ví dụ `Shop/Purchased`), không qua object Unity. Id khai báo một lần, `static readonly` (giá trị bất biến, không phải trạng thái), trong Internal của chủ; validator SRC-05 kiểm.
 
+## unity-mcp (guard ép theo tác động của lệnh)
+| Loại | Lệnh | Ai |
+|---|---|---|
+| Đọc | `read_console get`, `find_gameobjects`, `manage_scene get_*`, `manage_asset search/get_info/get_components`, `manage_prefabs get_info/get_hierarchy`, `manage_material get_material_info`, `manage_ui read/get_visual_tree`, `find_in_file`, `get_sha`, `validate_script`, docs, resource | mọi phiên code; path phải đọc được, `search` phải có `path` |
+| Ghi asset | `manage_asset create/create_folder/duplicate/move/rename/modify/import/delete`, `manage_prefabs modify_contents`, `manage_material create/set_*`, `manage_texture`, `manage_ui create/update/create_panel_settings` | phiên sở hữu, mọi path trong vùng mình, ngoài khung; không `.cs`, `.asmdef` |
+| Biên dịch | `refresh_unity` | mọi phiên code, khi không chat khác giữ Editor |
+| Scene, prefab stage | `manage_scene create/load/save`, `manage_gameobject`, `manage_components`, `manage_prefabs create_from_gameobject`, `manage_material` gán cho renderer, `manage_ui attach_ui_document`, `manage_editor *_prefab_stage`, `read_console clear` | phiên code, scene/prefab trong vùng mình; giữ khoá Editor |
+| Play, test, cài đặt | `manage_editor play/pause/stop`, `run_tests`, `execute_menu_item`, tag/layer, package, camera, graphics, physics, ProBuilder, profiler | chỉ @CodeLead; giữ khoá Editor |
+| Viết code | `create_script`, `script_apply_edits`, `apply_text_edits`, `delete_script`, `manage_script` | không ai: dùng Edit/Write |
+- **Khoá Editor**: một chat một lúc, guard giữ cho chat đó tới hết lượt (Stop hook trả khoá) hoặc 10 phút không dùng. Chat khác đang giữ thì chờ; không tìm đường vòng. Người gỡ bằng `python .claude/hooks/stop_unlock.py --release`.
+- Sửa object trong scene chỉ sau khi đã mở (`load`) hoặc tạo (`create`) scene của vùng mình trong lượt đó; guard chỉ cho lưu đúng scene đó. Trước khi kết thúc lượt: lưu scene hoặc prefab stage đã mở, không để scene dở dang.
+- Prefab của feature thì sửa headless (`manage_prefabs modify_contents`), không cần scene và không cần khoá.
+- Biên dịch xong thì đọc console (`read_console`), sửa hết lỗi của mình rồi mới báo xong. Lỗi của feature khác thì báo @CodeLead, không sửa hộ.
+
 ## Không lách
 - Không viết code để né regex của validator (tách chuỗi, gọi gián tiếp API cấm).
 - Validator báo sai thì dừng và báo người; sửa `rules.json` chỉ sau khi hỏi và được người đồng ý, từng lần.

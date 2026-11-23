@@ -53,7 +53,7 @@ window.CORESIMPLE_SESSIONS = {
     { id: "@CodeLead", group: "Leaders", label: "Phiên quản khung và kiểm code", note: "Chỉ sửa cấu trúc khung: Scripts/Contracts, Scripts/Internal/Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs của feature đã mở khoá code; *.asmdef, AssemblyInfo.cs, interface I*.cs của Core/_Composition. Ngoài khung không sửa gì; lượt có sửa file phải có báo cáo. Đọc toàn bộ source nhóm Basic, Features, Services; biên dịch, chạy test, Play qua unity-mcp; giải quyết xung đột code và báo lỗi về phiên sở hữu (.claude/rules/codelead.md)." },
     { id: "@GameDesigner", group: "Leaders", label: "Phiên thiết kế game", note: "Không code. Chỉ đọc Management/game-design và chỉ ghi trong Management/game-design/ai (cây đề xuất ở ai/idea), theo 4 vòng: ý tưởng, feature, quan hệ và định nghĩa, quyết định chi tiết (.claude/rules/gamedesigner.md). Mỗi node có data.md (các ý cốt lõi, mỗi ý có điểm AI) và CLAUDE.md (diễn giải). Ở tab Game design bạn chọn mode (Full Auto: AI tự quyết; User control: AI hỏi, bạn chấm), chấm điểm 0-10 và ghi phản hồi cho từng ý ở cả bảng đề xuất lẫn bảng đã chốt, trả lời câu hỏi, rồi bấm Sync (hoặc Chốt từng node) để chép node đạt sang live; không có gì tự sang live. Ý bị chấm dưới 5, data của node cha đổi, hoặc node ở nhánh khác mà nó khai trong refs đã đổi (hay nhắc tới mà chưa khai) thì node phải làm lại; thuật ngữ chung nằm ở node glossary; lịch sử từng node nằm ở .history." },
     { id: "@Core", group: "Basic", label: "Phiên Core", note: "Chỉ sửa Assets/Core; đọc phần công khai của feature." },
-    { id: "@Composition", group: "Basic", label: "Phiên Composition", note: "Chỉ sửa Assets/_Composition: Boot variant, scene, catalog asset; đọc phần công khai của feature. Việc cần Unity (scene, prefab) nhờ @human." },
+    { id: "@Composition", group: "Basic", label: "Phiên Composition", note: "Chỉ sửa Assets/_Composition: Boot variant, scene, catalog asset; đọc phần công khai của feature. Mở, sửa, lưu scene và Boot prefab của mình qua unity-mcp (giữ khoá Editor tới hết lượt); Play và test nhờ @CodeLead." },
     { id: "<Tên>", group: "Features / Services", label: "Phiên feature", copy: "FEATURE=", note: "Tên thư mục trong Assets/Features, ví dụ Wallet (nhóm Features); dịch vụ thì thêm _Services/, ví dụ _Services/Popup (nhóm Services)." }
   ],
 
@@ -64,7 +64,8 @@ window.CORESIMPLE_SESSIONS = {
     "Chat chưa gán thì không sửa được gì. Chat mới, /clear hoặc chat tách nhánh phải gán lại.",
     "Phiên feature chỉ sửa được code khi thiết kế của nó đã tới vòng 4 trong Management/game-design/live (node feature khai thư mục code trong code.json). Bị khoá thì việc tiếp theo là của @GameDesigner và bạn (tab Game design). Mở rồi thì phiên đọc thiết kế bằng python Management/tools/gd_pack.py <Tên>.",
     "Tiến độ: @CodeLead đánh dấu từng node lá xong tới giai đoạn nào sau khi biên dịch và test; bạn sửa lại được ở tab Game design.",
-    "Phiên feature không biên dịch hay chạy test được. Khi nó báo xong, @CodeLead biên dịch và chạy test (hoặc bạn chạy trong Unity).",
+    "Phiên code tự biên dịch (refresh_unity) và đọc console qua unity-mcp, tạo và sửa asset, prefab trong vùng của nó; chạy test, Play, menu và cài đặt project là việc của @CodeLead (hoặc bạn chạy trong Unity). Bảng lệnh ở .claude/rules/unity.md.",
+    "Mở, sửa, lưu scene hay prefab stage: guard giữ khoá Editor cho một chat tới hết lượt; chat khác chờ. Khoá kẹt thì bạn gỡ bằng: python .claude/hooks/stop_unlock.py --release",
     "Phiên feature chỉ nên báo xong khi code của nó biên dịch được: cả project dùng chung một Unity Editor, lỗi biên dịch của một feature chặn test của mọi feature.",
     "Việc phụ thuộc nhau thì làm nối tiếp: feature cần contract mới của feature khác phải chờ feature kia xong.",
     "Thử lại guard sau khi sửa nó: python .claude/hooks/test_guard.py"
@@ -89,7 +90,7 @@ window.CORESIMPLE_SESSIONS = {
     "Khung chỉ đọc: Scripts/Contracts, Scripts/Internal/Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs (InternalsVisibleTo). Viết code mới trên lớp con ở phần còn lại của Internal/View. Cần đổi khung: gửi @CodeLead ngữ cảnh, file, đề xuất và chờ @CodeLead sửa. Core, _Composition: nhờ @Core/@Composition. rules.json: dừng và hỏi người.",
     "Xong thì báo @CodeLead (khối báo cáo); lỗi @CodeLead báo về thì tự sửa.",
     "Cần đổi thứ gì ở feature khác: viết đề xuất vào Management/proposals rồi dừng.",
-    "Xoá file chỉ qua unity-mcp (manage_asset, action delete, path bắt đầu bằng Assets/).",
+    "Xoá file chỉ qua unity-mcp (manage_asset, action delete, path bắt đầu bằng Assets/). Asset, prefab trong vùng mình: tạo, sửa qua unity-mcp; code chỉ bằng Edit/Write. Biên dịch (refresh_unity) rồi đọc console, sửa hết lỗi của mình.",
     "",
     "Xong khi: python Management/tools/validate.py báo 0 vi phạm, code của bạn biên dịch được, và bạn đã nêu rõ test nào cần người chạy."
   ].join("\n")

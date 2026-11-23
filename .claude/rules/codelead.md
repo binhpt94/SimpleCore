@@ -15,7 +15,8 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic 
 - Ngoài khung không sửa gì, kể cả `Management/proposals`: lỗi trong code của phiên khác thì nhắn phiên sở hữu.
 - Lượt có sửa file kết thúc bằng khối báo cáo theo `.claude/rules/report.md`, như mọi phiên code.
 - Đọc được toàn bộ source các nhóm Basic, Features, Services (cả Internal, View, Tests, FeatureAssets/Private).
-- unity-mcp để đọc, biên dịch (`refresh_unity`, `read_console`), chạy test (`run_tests`), Play/Pause/Stop, xem scene/asset/prefab, và xoá file khung (`manage_asset` action `delete`). Không tạo, sửa, lưu scene/prefab, không chạy code.
+- unity-mcp (bảng ở `.claude/rules/unity.md`): đọc, biên dịch, chạy test (`run_tests`), Play/Pause/Stop, mở scene/prefab để xem, sửa object trong scene khi thử, menu (`execute_menu_item`), tag/layer, package, camera, graphics, physics, ProBuilder, profiler; và xoá file khung (`manage_asset` action `delete`). Test, Play, menu, cài đặt và scene đều giữ khoá Editor tới hết lượt: phiên khác đang giữ thì chờ. Không tạo hay sửa asset, không lưu scene hay prefab, không viết code qua unity-mcp.
+- Mọi phiên code tự biên dịch và đọc console; @CodeLead vẫn biên dịch lại, chạy test và Play khi nhận báo cáo xong.
 - Shell: `validate.py` và `gd_pack.py <Tên>` như mọi phiên, thêm hai lệnh về thiết kế:
   - `python Management/tools/gd_status.py [ai/idea/<node>]`: xem thiết kế, độ quan trọng, tiến độ, feature nào đang bị khoá code.
   - `python Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done>`: ghi tiến độ của một node lá.

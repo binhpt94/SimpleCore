@@ -36,11 +36,12 @@ def check(group, feature, expect, label, got):
     results.append((got == expect, group, feature or "(unset)", expect, got, label.replace(FX, "")))
 
 
-def t(group, feature, expect, tool, ti, cwd=None):
-    """In-process: calls guard.decide exactly as main() does, including fail-closed on errors."""
-    data = {"tool_name": tool, "tool_input": ti, "cwd": cwd or FX}
+def t(group, feature, expect, tool, ti, cwd=None, session="test-session"):
+    """In-process: calls guard.decide exactly as main() does, including fail-closed on errors. The Editor lock
+    lives in STORE, never in the real store."""
+    data = {"tool_name": tool, "tool_input": ti, "cwd": cwd or FX, "session_id": session}
     try:
-        result = guard.decide(data, feature, FX)
+        result = guard.decide(data, feature, FX, STORE)
     except Exception:
         result = ("deny", "error")
     got = result[0] if result else "pass"
@@ -419,6 +420,7 @@ def run_cases():
     run_codelead_cases()
     run_designer_cases()
     run_progress_cases()
+    run_unity_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + "/x.txt"}, "cwd": real}), root=None)
@@ -765,22 +767,35 @@ def run_codelead_cases():
     r(g + " (others still may not)", "@Manager", "deny", internal)
 
     g = "codelead: unity-mcp"
-    for name in ("refresh_unity", "read_console", "run_tests", "get_test_job", "find_gameobjects", "validate_script"):
+    for name in ("refresh_unity", "read_console", "get_test_job", "find_gameobjects"):
         u(name, expect="allow")
+    u("validate_script", expect="allow", uri="mcpforunity://path/Assets/Features/Shop/Scripts/Internal/S.cs")
+    u("validate_script", expect="deny")      # needs a uri
     for action in ("play", "pause", "stop"):
         u("manage_editor", expect="allow", action=action)
+    u("run_tests", expect="allow", mode="EditMode")
     u("manage_scene", expect="allow", action="get_hierarchy")
     u("manage_asset", expect="allow", action="search", path="Assets")
-    u("manage_prefabs", expect="allow", action="get_info")
+    u("manage_asset", expect="allow", action="get_info", path="Assets/Features/Shop/FeatureAssets/Private/c.asset")
+    u("manage_prefabs", expect="allow", action="get_info", prefab_path="Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
     t(g, L, "allow", "ReadMcpResourceTool", {"server": "unityMCP", "uri": "mcpforunity://editor/state"})
-    for name, action in (("manage_editor", "add_tag"), ("manage_editor", "deploy_package"), ("manage_scene", "save"),
-                         ("manage_scene", "create"), ("manage_asset", "delete"), ("manage_asset", "modify"),
-                         ("manage_prefabs", "modify_contents"), ("manage_gameobject", "create"),
-                         ("create_script", ""), ("apply_text_edits", ""), ("execute_code", "execute"),
-                         ("script_apply_edits", ""), ("manage_components", "add")):
+    t(g, L, "deny", "ReadMcpResourceTool", {"server": "other", "uri": "x"})
+    for name, action in (("manage_editor", "add_tag"), ("manage_editor", "deploy_package"), ("execute_menu_item", ""),
+                         ("manage_packages", "add"), ("manage_camera", "screenshot"), ("manage_gameobject", "create"),
+                         ("manage_components", "add"), ("read_console", "clear")):
+        u(name, expect="allow", action=action)      # project settings, menus and the scene: @CodeLead, holding the lock
+    u("manage_scene", expect="allow", action="load", path="Assets/_Composition/Scenes/Game.unity")
+    for name, action in (("manage_scene", "save"), ("manage_scene", "create"), ("manage_asset", "modify"),
+                         ("manage_asset", "create"), ("manage_prefabs", "modify_contents"), ("create_script", ""),
+                         ("apply_text_edits", ""), ("execute_code", "execute"), ("script_apply_edits", ""),
+                         ("manage_editor", "nonsense"), ("manage_scene", "")):
         u(name, expect="deny", action=action)
-    t(g + " (others)", W, "deny", "mcp__unityMCP__refresh_unity", {})
-    t(g + " (others)", W, "deny", "ReadMcpResourceTool", {"server": "unityMCP", "uri": "x"})
+    u("manage_asset", expect="deny", action="create", path="Assets/Features/Wallet/FeatureAssets/Private/n.asset")
+    t(g + " (others)", W, "allow", "mcp__unityMCP__refresh_unity", {})
+    t(g + " (others)", W, "allow", "ReadMcpResourceTool", {"server": "unityMCP", "uri": "x"})
+    for who in ("@Manager", "@GameDesigner", ""):
+        t(g + " (others)", who, "deny", "mcp__unityMCP__read_console", {"action": "get"})
+    guard.release_lock(STORE)
 
     g = "codelead: skeleton"
     skeleton = (F + "/Wallet/Scripts/Contracts/IWallet.cs", F + "/Wallet/Scripts/Contracts/New.cs",
@@ -1122,6 +1137,152 @@ def run_progress_cases():
     for who in (W, "@Manager", "@GameDesigner", "@Core", ""):
         t(g + " (others)", who, "deny", "Bash", {"command": PROGRESS + "ai/idea/feature-hero idea done"})
     w(g, L, "deny", FX + "/Management/game-design/ai/idea/feature-hero/.progress/progress.json")      # only through the command
+
+
+
+def run_unity_cases():
+    """unity-mcp by what each command touches: read, write (own assets), shared (compile), state (the open scene,
+    with the Editor lock), play and lead (@CodeLead), script (never)."""
+    W, S, C, L = "Wallet", "Shop", "@Composition", "@CodeLead"
+    os.makedirs(F + "/Wallet/FeatureAssets/Private", exist_ok=True)
+    os.makedirs(F + "/Shop/FeatureAssets/Private", exist_ok=True)
+    os.makedirs(A + "/_Composition/Scenes", exist_ok=True)
+    os.makedirs(F + "/Wallet/Scripts/Internal/Base", exist_ok=True)
+    Path(F + "/Shop/FeatureAssets/Private/s.asset").write_text("x")
+    own = "Assets/Features/Wallet/FeatureAssets/Private"
+    guard.release_lock(STORE)
+
+    def u(g, who, expect, tool_, session="a", **ti):
+        t(g, who, expect, "mcp__unityMCP__" + tool_, ti, session=session)
+
+    g = "unity: read"
+    u(g, W, "allow", "read_console", action="get", types=["error"])
+    u(g, W, "allow", "read_console")
+    u(g, W, "allow", "find_gameobjects", search_term="Coin")
+    u(g, W, "allow", "manage_scene", action="get_hierarchy")
+    u(g, W, "allow", "manage_asset", action="get_info", path=own + "/c.asset")
+    u(g, W, "allow", "manage_asset", action="search", path="Assets/Features/Wallet", search_pattern="*.prefab")
+    u(g, W, "allow", "manage_asset", action="get_info", path="Assets/Features/Shop/FeatureAssets/Public/x.prefab")
+    u(g, W, "deny", "manage_asset", action="get_info", path="Assets/Features/Shop/FeatureAssets/Private/s.asset")
+    u(g, W, "deny", "manage_asset", action="search", search_pattern="*.asset")      # no scope: the whole project
+    u(g, W, "deny", "manage_asset", action="search", path="Assets")
+    u(g, W, "deny", "manage_asset", action="get_info", path="Assets/../../Management/tools/rules.json")
+    u(g, W, "deny", "manage_asset", action="get_info", path="Assets/Features/Wallet/link/S.cs")
+    u(g, W, "allow", "find_in_file", uri="mcpforunity://path/Assets/Features/Wallet/Scripts/Internal/Old.cs", pattern="x")
+    u(g, W, "deny", "find_in_file", uri="mcpforunity://path/Assets/Features/Shop/Scripts/Internal/S.cs", pattern="x")
+    u(g, W, "deny", "find_in_file", uri="mcpforunity://path/Library/x", pattern="x")
+    u(g, W, "allow", "get_sha", uri="mcpforunity://path/Assets/Core/Old.cs")
+    u(g, W, "allow", "manage_prefabs", action="get_hierarchy", prefab_path="Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
+    u(g, W, "deny", "manage_prefabs", action="get_info")
+    u(g, W, "allow", "unity_docs", query="Rigidbody")
+    u(g, W, "deny", "manage_asset", action="frobnicate", path=own + "/c.asset")
+    u(g, W, "deny", "no_such_tool")
+
+    g = "unity: write (own assets)"
+    u(g, W, "allow", "manage_asset", action="create", path=own + "/Config.asset", asset_type="ScriptableObject")
+    u(g, W, "allow", "manage_asset", action="create_folder", path=own + "/Prefabs")
+    u(g, W, "allow", "manage_prefabs", action="modify_contents", prefab_path="Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
+    u(g, W, "allow", "manage_material", action="create", material_path=own + "/Coin.mat")
+    u(g, W, "allow", "manage_texture", action="create", path=own + "/Coin.png")
+    u(g, W, "allow", "manage_ui", action="create", path=own + "/Hud.uxml", contents="<ui:UXML/>")
+    u(g, W, "allow", "manage_asset", action="move", path=own + "/a.asset", destination=own + "/Prefabs/a.asset")
+    u(g, W, "deny", "manage_asset", action="move", path=own + "/a.asset", destination="Assets/Features/Shop/FeatureAssets/Private/a.asset")
+    u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Shop/FeatureAssets/Private/n.asset")
+    u(g, W, "deny", "manage_asset", action="create", path="Assets/Core/n.asset")
+    u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Wallet/Scripts/Contracts/n.asset")      # skeleton
+    u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Wallet/Scripts/Internal/N.cs")
+    u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Wallet/Scripts/Internal/W.asmdef")
+    u(g, W, "deny", "manage_asset", action="rename", path=own + "/a.asset", destination=own + "/A.cs")
+    u(g, W, "deny", "manage_asset", action="create")
+    u(g, S, "deny", "manage_asset", action="create", path="Assets/Features/Shop/FeatureAssets/Private/n.asset")      # code gate
+    u(g, C, "allow", "manage_asset", action="create", path="Assets/_Composition/Catalog.asset")
+    u(g, C, "deny", "manage_asset", action="create", path=own + "/x.asset")
+    u(g, W, "allow", "manage_asset", action="delete", path="Assets/Features/Wallet/Scripts/Internal/Old.cs")      # unchanged
+    u(g, W, "deny", "manage_asset", action="delete", path="Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")
+    u(g, L, "deny", "manage_asset", action="create", path=own + "/x.asset")
+    for name in ("create_script", "script_apply_edits", "apply_text_edits", "delete_script", "manage_script"):
+        u(g + " (code only through Edit/Write)", W, "deny", name, uri="mcpforunity://path/Assets/Features/Wallet/Scripts/Internal/Old.cs")
+        u(g + " (code only through Edit/Write)", L, "deny", name, uri="mcpforunity://path/Assets/Features/Wallet/Scripts/Internal/Old.cs")
+    t(g, "@human", "pass", "mcp__unityMCP__create_script", {"path": "Assets/x.cs"})
+
+    g = "unity: play and lead are @CodeLead's"
+    for name, ti in (("run_tests", {"mode": "EditMode"}), ("manage_editor", {"action": "play"}),
+                     ("manage_editor", {"action": "add_tag", "tag_name": "x"}), ("execute_menu_item", {"menu_path": "File/Save"}),
+                     ("manage_packages", {"action": "add"}), ("manage_camera", {"action": "screenshot"})):
+        u(g, W, "deny", name, **ti)
+        u(g, C, "deny", name, **ti)
+    for who in ("@Manager", "@GameDesigner", ""):
+        u(g + " (leaders without code, unset)", who, "deny", "read_console", action="get")
+        u(g + " (leaders without code, unset)", who, "deny", "refresh_unity")
+
+    g = "unity: the Editor lock"
+    guard.release_lock(STORE)
+    u(g, W, "allow", "refresh_unity", session="a")
+    u(g, W, "deny", "manage_gameobject", session="a", action="create", name="X")      # no scene of its own open
+    u(g, W, "allow", "manage_scene", session="a", action="create", path=own + "/Scenes", name="WalletTest")
+    lock = guard.read_lock(STORE)
+    check(g, W, True, "the lock names the chat, its role and the scene it opened",
+          (lock["session"], lock["who"], lock["scene"]) == ("a", W, own + "/Scenes/WalletTest.unity"))
+    u(g, W, "allow", "manage_gameobject", session="a", action="create", name="Coin")
+    u(g, W, "allow", "manage_scene", session="a", action="save")
+    u(g, C, "deny", "manage_scene", session="b", action="load", path="Assets/_Composition/Scenes/Game.unity")
+    u(g, C, "deny", "refresh_unity", session="b")      # compiling waits too
+    u(g, C, "allow", "manage_asset", session="b", action="create", path="Assets/_Composition/Catalog.asset")      # assets do not
+    u(g, C, "allow", "read_console", session="b", action="get")
+    u(g, L, "deny", "manage_editor", session="c", action="play")
+    u(g, W, "deny", "manage_scene", session="a", action="load", path="Assets/_Composition/Scenes/Game.unity")      # not its scene
+    check(g, "", True, "Stop of another chat keeps the lock", guard.release_lock(STORE, "b") is False and guard.read_lock(STORE) is not None)
+    p = subprocess.run([sys.executable, "-I", str(HERE / "stop_unlock.py"), "--store", STORE],
+                       input=json.dumps({"session_id": "a"}).encode(), capture_output=True)
+    check(g, "", True, "Stop of the holder frees it", p.returncode == 0 and guard.read_lock(STORE) is None)
+    u(g, C, "allow", "manage_scene", session="b", action="load", path="Assets/_Composition/Scenes/Game.unity")
+    u(g, C, "allow", "manage_scene", session="b", action="save")
+    u(g, C, "allow", "manage_editor", session="b", action="open_prefab_stage", prefab_path="Assets/_Composition/Boot.prefab")
+    u(g, C, "allow", "manage_editor", session="b", action="save_prefab_stage")
+    u(g, C, "allow", "manage_editor", session="b", action="close_prefab_stage")
+    u(g, C, "deny", "manage_editor", session="b", action="save_prefab_stage")      # nothing open any more
+    stale = guard.read_lock(STORE)
+    stale["until"] = 1
+    guard.write_lock(STORE, stale)
+    u(g, L, "allow", "manage_editor", session="c", action="play")      # an expired lock is free
+    u(g, L, "allow", "manage_scene", session="c", action="load", path="Assets/Features/Shop/Scenes/S.unity")
+    u(g, L, "deny", "manage_scene", session="c", action="save")      # @CodeLead looks and plays, saves no scene
+    u(g, L, "allow", "execute_menu_item", session="c", menu_path="Assets/Refresh")
+    u(g, W, "deny", "read_console", session="a", action="clear")      # clearing the console needs the lock too
+    p = subprocess.run([sys.executable, "-I", str(HERE / "stop_unlock.py"), "--release", "--store", STORE], capture_output=True)
+    check(g, "", True, "the human frees any lock", p.returncode == 0 and guard.read_lock(STORE) is None)
+    Path(guard.lock_path(STORE)).write_text("{ broken")
+    u(g, W, "allow", "read_console", session="a", action="clear")      # a broken lock file is no lock
+
+    g = "unity: batch_execute"
+    guard.release_lock(STORE)
+    B = "batch_execute"
+    u(g, W, "allow", B, commands=[{"tool": "read_console", "params": {"action": "get"}},
+                                  {"tool": "manage_asset", "params": {"action": "get_info", "path": own + "/c.asset"}}])
+    check(g, W, True, "a batch of reads takes no lock", guard.read_lock(STORE) is None)
+    u(g, W, "deny", B, commands=[{"tool": "read_console", "params": {"action": "get"}},
+                                 {"tool": "manage_asset", "params": {"action": "create", "path": "Assets/Core/x.asset"}}])
+    u(g, W, "allow", B, commands=[{"tool": "manage_scene", "params": {"action": "load", "path": own + "/Scenes/W.unity"}},
+                                  {"tool": "mcp__unityMCP__manage_gameobject", "params": {"action": "create", "name": "Coin"}},
+                                  {"tool": "manage_scene", "params": {"action": "save"}}])
+    check(g, W, True, "a batch that opens a scene takes the lock", (guard.read_lock(STORE) or {}).get("session") == "a")
+    u(g, C, "deny", B, session="b", commands=[{"tool": "refresh_unity", "params": {}}])
+    u(g, W, "deny", B, commands=[{"tool": "batch_execute", "params": {"commands": []}}])
+    u(g, W, "deny", B, commands=[])
+    u(g, W, "deny", B, commands=[{"tool": "read_console", "params": {"action": "get"}}] * 26)
+    u(g, W, "deny", B, commands="x")
+    u(g, W, "deny", B, commands=[{"tool": "create_script", "params": {"path": own + "/a.cs"}}])
+    guard.release_lock(STORE)
+
+    g = "unity: what needs a report"
+    for name, ti, want in (("manage_asset", {"action": "create", "path": "Assets/x"}, True),
+                           ("manage_scene", {"action": "save"}, True), ("execute_menu_item", {"menu_path": "x"}, True),
+                           ("read_console", {"action": "get"}, False), ("refresh_unity", {}, False),
+                           ("manage_editor", {"action": "play"}, False), ("manage_asset", {"action": "search"}, False),
+                           ("batch_execute", {"commands": [{"tool": "read_console", "params": {}},
+                                                           {"tool": "manage_asset", "params": {"action": "delete"}}]}, True),
+                           ("batch_execute", {"commands": [{"tool": "read_console", "params": {}}]}, False)):
+        check(g, "", want, f"{name} {ti}", guard.unity_changes("mcp__unityMCP__" + name, ti))
 
 
 def main():

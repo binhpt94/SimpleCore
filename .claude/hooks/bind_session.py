@@ -171,6 +171,16 @@ def unread_reports(root, store, reader):
     return f" {len(new)} báo cáo mới{more}, đọc file để xem đủ:\n" + "\n".join(lines)
 
 
+def editor_status(store):
+    """Who holds the Unity Editor lock now (guard.py), in one sentence."""
+    lock = guard.read_lock(store)
+    if not lock:
+        return " Editor Unity: đang rảnh."
+    until = time.strftime("%H:%M", time.localtime(lock["until"]))
+    return f" Editor Unity: đang do {lock.get('who') or 'một chat khác'} giữ tới {until}" + (
+        f" (scene {lock['scene']})" if lock.get("scene") else "") + "."
+
+
 def code_gate(root, feature):
     """Whether this Features/Services chat may code now (the gate guard.py applies), in one sentence."""
     try:
@@ -215,7 +225,11 @@ def context(data, root, store):
               "Core/_Composition thêm các interface I*.cs) chỉ đọc: viết code mới trên lớp con ở phần còn lại của "
               "Internal/View; muốn đổi khung thì nhắn @CodeLead (ngữ cảnh, file, đề xuất) và chờ. Xung đột code do "
               "@CodeLead giải quyết; lỗi @CodeLead báo về thì tự sửa. Lượt có sửa file phải kết thúc bằng báo cáo "
-              "(gửi @CodeLead và @Manager) theo .claude/rules/report.md.")
+              "(gửi @CodeLead và @Manager) theo .claude/rules/report.md. unity-mcp: đọc (console, asset, scene), tự biên dịch "
+              "(refresh_unity) rồi đọc console sửa lỗi của mình, tạo/sửa asset và prefab trong vùng mình; mở, sửa, lưu "
+              "scene hay prefab stage thì guard giữ khoá Editor cho chat này tới hết lượt (lưu trước khi dừng); Play, "
+              "test, cài đặt project là việc của @CodeLead; code chỉ viết bằng Edit/Write (bảng ở .claude/rules/unity.md)."
+              + editor_status(store))
     if role in guard.ROLE_AREAS:
         area = guard.ROLE_AREAS[role]
         return (f"guard: chat này gán FEATURE={role} (nhóm Basic). Chỉ sửa UnityProject/Assets/{area}/; đọc phần "
@@ -226,11 +240,12 @@ def context(data, root, store):
                 "Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs của feature đã mở khoá code; *.asmdef, "
                 "AssemblyInfo.cs, interface I*.cs của Core/_Composition. Ngoài khung không sửa gì: lỗi thì gửi yêu cầu "
                 "sửa cụ thể cho phiên sở hữu. Lượt có sửa file phải kết thúc bằng báo cáo theo .claude/rules/report.md. "
-                "Đọc được toàn bộ source các nhóm đó; unity-mcp để biên dịch, chạy test, Play, xem, và xoá file khung. "
+                "Đọc được toàn bộ source các nhóm đó; unity-mcp để biên dịch, chạy test, Play, xem, dùng menu và cài đặt "
+                "project (giữ khoá Editor tới hết lượt), và xoá file khung; không sửa asset hay lưu scene. "
                 "Ngoài khung, thứ được ghi là tiến độ của node thiết kế lá, sau khi đã biên dịch và test qua: python "
                 "Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done> (xem bằng "
                 "python Management/tools/gd_status.py). Quy trình ở .claude/rules/codelead.md."
-                + unread_reports(root, store, role))
+                + editor_status(store) + unread_reports(root, store, role))
     if role == "@GameDesigner":
         return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Chỉ đọc "
                 "Management/game-design, .claude/rules/gamedesigner.md và gamedesigner.round<1-4>.md; chỉ ghi trong Management/game-design/ai "

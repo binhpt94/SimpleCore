@@ -11,7 +11,7 @@ The value, by group:
               @CodeLead                   checks code, settles conflicts and owns the SKELETON: edits only the
                                           skeleton (below), of a feature once its code gate is open, of Core and
                                           _Composition always; reads all source of Basic/Features/Services; compiles,
-                                          tests and plays through a read-only subset of unity-mcp (CODELEAD_UNITY),
+                                          tests and plays through unity-mcp (UNITY_RULES; holds the Editor lock),
                                           deletes skeleton files there; writes the progress of a design leaf through
                                           gd_progress.py
               @GameDesigner               designs, never codes: reads only Management/game-design (and its own rules
@@ -25,6 +25,10 @@ The value, by group:
     unset / invalid                       every edit is denied
 Basic, Features and Services read the public parts of features, Core, _Composition, Management, .claude and
 the root CLAUDE.md. rules.json and deleting folders ask the human.
+unity-mcp (UNITY_RULES): code sessions read through it, change assets of their own area (write), compile
+(shared) and change the open scene or a prefab stage (state); play, tests and project settings are @CodeLead's.
+state/play/lead take the Editor lock (LOCK_FILE in STORE_DIR): one chat at a time, renewed on every call, freed
+by the Stop hook (stop_unlock.py) or after LOCK_SECONDS. Writing code through unity-mcp is denied: Edit/Write.
 The skeleton (the public gates and base classes; only @CodeLead edits it, the owner reads it and codes subclasses):
     in a feature or service   Scripts/Contracts/**, Scripts/Internal/Base/**, Scripts/View/Base/**, every *.asmdef,
                               AssemblyInfo.cs (the one place for InternalsVisibleTo: other files may not write it)
@@ -51,6 +55,7 @@ import os
 import posixpath
 import re
 import stat
+import time
 import sys
 
 # Shell commands an agent may run. Each entry is a regex that must match the WHOLE command.
@@ -98,30 +103,74 @@ HUMAN_ASK_ZONES = {".claude", "_Composition", "Core", DESIGN_LIVE}
 # FEATURE values that are not feature folders.
 ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead", "@GameDesigner")
 ROLE_AREAS = {"@Core": "Core", "@Composition": "_Composition"}
-# The one unity-mcp call a Basic/Features/Services session may make: manage_asset with action "delete".
-UNITY_ASSET_TOOL = "mcp__unityMCP__manage_asset"
-# What @CodeLead may call in unity-mcp: compile, test, play and look. None = every action of that tool.
-CODELEAD_UNITY = {
-    "mcp__unityMCP__refresh_unity": None,
-    "mcp__unityMCP__read_console": None,
-    "mcp__unityMCP__run_tests": None,
-    "mcp__unityMCP__get_test_job": None,
-    "mcp__unityMCP__find_gameobjects": None,
-    "mcp__unityMCP__find_in_file": None,
-    "mcp__unityMCP__get_sha": None,
-    "mcp__unityMCP__validate_script": None,
-    "mcp__unityMCP__unity_docs": None,
-    "mcp__unityMCP__unity_reflect": None,
-    "mcp__unityMCP__manage_script_capabilities": None,
-    "mcp__unityMCP__debug_request_context": None,
-    "mcp__unityMCP__manage_editor": {"play", "pause", "stop", "telemetry_status", "telemetry_ping"},
-    "mcp__unityMCP__manage_scene": {"get_hierarchy", "get_active", "get_loaded_scenes", "get_build_settings"},
-    "mcp__unityMCP__manage_asset": {"search", "get_info", "get_components"},
-    "mcp__unityMCP__manage_prefabs": {"get_info", "get_hierarchy"},
-    "ReadMcpResourceTool": None,
-    "ListMcpResourcesTool": None,
-    "ReadMcpResourceDirTool": None,
+# unity-mcp: every tool and action, by what it touches (kind). A tool or action missing here is denied.
+#   read    looks only; any path it names must be readable by the session           every code session, @CodeLead
+#   write   changes asset files; every path it names must be the session's own       the owner (delete: also @CodeLead, skeleton)
+#   shared  compiles; touches the one Editor but holds nothing                       every code session, @CodeLead; not while
+#                                                                                    another session holds the Editor lock
+#   state   changes the open scene, a prefab stage or the console                    every code session, @CodeLead; takes the lock
+#   play    play mode and tests                                                      @CodeLead; takes the lock
+#   lead    project-wide settings, packages, menus, cameras, graphics...             @CodeLead; takes the lock
+#   script  writes code: code is written with Edit/Write only                        nobody (@human passes)
+# "Code session": Basic, Features, Services. @human passes everything; @Manager, @GameDesigner and an unset chat get nothing.
+UNITY_PREFIX = "mcp__unityMCP__"
+UNITY_ASSET_TOOL = UNITY_PREFIX + "manage_asset"
+UNITY_SERVER = "unityMCP"
+UNITY_RESOURCE_TOOLS = {"ReadMcpResourceTool", "ListMcpResourcesTool", "ReadMcpResourceDirTool"}
+ANY = "*"
+_READ_ONLY = ("find_gameobjects", "get_test_job", "unity_docs", "unity_reflect", "manage_script_capabilities",
+              "debug_request_context")
+_LEAD_TOOLS = ("execute_menu_item", "execute_custom_tool", "set_active_instance", "manage_packages", "manage_camera",
+               "manage_graphics", "manage_physics", "manage_probuilder", "manage_profiler")
+_SCRIPT_TOOLS = ("create_script", "script_apply_edits", "apply_text_edits", "delete_script", "manage_script")
+UNITY_RULES = {
+    **{t: {ANY: "read"} for t in _READ_ONLY},
+    **{t: {ANY: "read"} for t in ("find_in_file", "get_sha", "validate_script")},      # need a readable uri
+    **{t: {ANY: "lead"} for t in _LEAD_TOOLS},
+    **{t: {ANY: "script"} for t in _SCRIPT_TOOLS},
+    "read_console": {"": "read", "get": "read", "clear": "state"},
+    "refresh_unity": {ANY: "shared"},
+    "run_tests": {ANY: "play"},
+    "manage_scene": {"get_hierarchy": "read", "get_active": "read", "get_loaded_scenes": "read",
+                     "get_build_settings": "read", "create": "state", "load": "state", "save": "state",
+                     "scene_view_frame": "lead"},
+    "manage_asset": {"search": "read", "get_info": "read", "get_components": "read", "create": "write",
+                     "create_folder": "write", "duplicate": "write", "move": "write", "rename": "write",
+                     "modify": "write", "import": "write", "delete": "write"},
+    "manage_prefabs": {"get_info": "read", "get_hierarchy": "read", "modify_contents": "write",
+                       "create_from_gameobject": "state"},
+    "manage_material": {"get_material_info": "read", "create": "write", "set_material_shader_property": "write",
+                        "set_material_color": "write", "assign_material_to_renderer": "state", "set_renderer_color": "state"},
+    "manage_texture": {"create": "write", "apply_pattern": "write", "apply_gradient": "write"},
+    "manage_ui": {"read": "read", "get_visual_tree": "read", "create": "write", "update": "write",
+                  "create_panel_settings": "write", "attach_ui_document": "state"},
+    "manage_gameobject": {ANY: "state"},
+    "manage_components": {ANY: "state"},
+    "manage_editor": {"play": "play", "pause": "play", "stop": "play", "open_prefab_stage": "state",
+                      "save_prefab_stage": "state", "close_prefab_stage": "state", "add_tag": "lead", "remove_tag": "lead",
+                      "add_layer": "lead", "remove_layer": "lead", "set_active_tool": "lead", "deploy_package": "lead",
+                      "restore_package": "lead", "telemetry_status": "lead", "telemetry_ping": "lead"},
 }
+UNITY_CHANGE_KINDS = {"write", "state", "lead"}      # what stop_report counts as a change that needs a report
+# Parameters that name an asset; each one present is checked. The pairs below must be present.
+UNITY_PATH_KEYS = ("path", "destination", "prefab_path", "material_path", "source_asset", "panel_settings", "uri")
+UNITY_NEEDS_PATH = {("manage_asset", ANY): "path", ("manage_prefabs", "get_info"): "prefab_path",
+                    ("manage_prefabs", "get_hierarchy"): "prefab_path", ("manage_prefabs", "modify_contents"): "prefab_path",
+                    ("manage_prefabs", "create_from_gameobject"): "prefab_path",
+                    ("manage_material", "get_material_info"): "material_path", ("manage_material", "create"): "material_path",
+                    ("manage_material", "set_material_shader_property"): "material_path",
+                    ("manage_material", "set_material_color"): "material_path",
+                    ("manage_texture", ANY): "path", ("manage_ui", "read"): "path", ("manage_ui", "create"): "path",
+                    ("manage_ui", "update"): "path", ("manage_ui", "create_panel_settings"): "path",
+                    ("find_in_file", ANY): "uri", ("get_sha", ANY): "uri", ("validate_script", ANY): "uri",
+                    ("manage_scene", "load"): "path", ("manage_scene", "create"): "path",
+                    ("manage_editor", "open_prefab_stage"): "prefab_path"}
+UNITY_CODE_EXT = (".cs", ".asmdef", ".asmref")      # code and assembly files are written with Edit/Write only
+URI_PREFIX = "mcpforunity://path/"
+BATCH_MAX = 25
+# The Editor lock: one session at a time changes the shared Editor (scene, prefab stage, play, tests, settings).
+LOCK_FILE = "editor-lock.json"
+LOCK_SECONDS = 600
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")
 SHELL_META_RX = re.compile(r"[;&|<>`$(){}\r\n]")
 # Per-chat bindings and the PIN. Outside the project, so no agent session can read or write it.
@@ -523,16 +572,235 @@ def codelead_gate(full, root):
                             "the human; the design is @GameDesigner's work and the human fixes it into live.")
 
 
-def decide_codelead_unity(tool, ti, root):
-    """@CodeLead in unity-mcp: compile, test, play and look; the one change is deleting a skeleton file."""
-    actions = CODELEAD_UNITY[tool]
+# ---------------------------------------------------------------- unity-mcp
+def lock_path(store):
+    return os.path.join(store or STORE_DIR, LOCK_FILE)
+
+
+def read_lock(store):
+    """The Editor lock as stored, or None when nobody holds it (missing, broken or expired)."""
+    try:
+        with open(lock_path(store), encoding="utf-8") as f:
+            lock = json.load(f)
+    except (OSError, ValueError):
+        return None
+    if not isinstance(lock, dict) or not isinstance(lock.get("until"), (int, float)) or lock["until"] < time.time():
+        return None
+    return lock
+
+
+def write_lock(store, lock):
+    path = lock_path(store)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + f".{os.getpid()}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(lock, f)
+    os.replace(tmp, path)
+
+
+def release_lock(store, session=None):
+    """Drops the Editor lock: the one this session holds, or any lock when session is None. True when dropped."""
+    lock = read_lock(store)
+    if lock is None or (session is not None and lock.get("session") != session):
+        return False
+    try:
+        os.remove(lock_path(store))
+    except OSError:
+        return False
+    return True
+
+
+def unity_kind(tool, ti):
+    """(short tool name, action, kind) of a unity-mcp call; kind None when the guard does not know it."""
+    short = tool[len(UNITY_PREFIX):] if tool.startswith(UNITY_PREFIX) else tool
     action = text_of(ti.get("action"))
-    if tool == UNITY_ASSET_TOOL and action == "delete":
-        return decide_unity_delete(ti, "codelead", None, root, None, "@CodeLead")
-    if actions is None or action in actions:
-        return "allow", f"@CodeLead may use {tool}" + (f" ({action})" if action else "")
-    return "deny", (f"@CodeLead may not use {tool} action '{action}': it compiles, tests, plays and reads; the only "
-                    "thing it changes is the skeleton. Ask the session that owns the area to make the change.")
+    actions = UNITY_RULES.get(short)
+    if actions is None:
+        return short, action, None
+    return short, action, actions.get(action, actions.get(ANY))
+
+
+def unity_commands(tool, ti):
+    """[(tool, params)] a unity-mcp call runs: itself, or the commands of a batch_execute."""
+    if tool != UNITY_PREFIX + "batch_execute":
+        return [(tool, ti)]
+    cmds = ti.get("commands")
+    if not isinstance(cmds, list):
+        raise ValueError("batch_execute without a list of commands")
+    out = []
+    for c in cmds:
+        name = text_of(c.get("tool")) if isinstance(c, dict) else ""
+        params = c.get("params") if isinstance(c, dict) else None
+        out.append((name if name.startswith(UNITY_PREFIX) else UNITY_PREFIX + name, params if isinstance(params, dict) else {}))
+    return out
+
+
+def unity_changes(tool, ti):
+    """True when a unity-mcp call changes something (write, state or lead), so the turn needs a report."""
+    try:
+        return any(unity_kind(t, p)[2] in UNITY_CHANGE_KINDS for t, p in unity_commands(tool, ti))
+    except ValueError:
+        return False
+
+
+def unity_full(value, root, allow_assets_root=False):
+    """(canonical path, None) of a Unity asset path ('Assets/...', or a mcpforunity://path/ uri), or (None, reason)."""
+    path = text_of(value).replace("\\", "/")
+    if path.startswith(URI_PREFIX):
+        path = path[len(URI_PREFIX):]
+    if not (re.match(r"^Assets/[^/]", path) or (allow_assets_root and path.rstrip("/") == "Assets")):
+        return None, f"unity-mcp: write '{path}' from the Unity project root, starting with 'Assets/'"
+    full = resolve_target("UnityProject/" + path, root)
+    if not (inside(full, under(root, "UnityProject", "Assets")) or same(full, under(root, "UnityProject", "Assets"))):
+        return None, "unity-mcp: the path leaves UnityProject/Assets"
+    if goes_through_link(full, root):
+        return None, "path goes through a link or junction"
+    return full, None
+
+
+def unity_paths(short, action, ti):
+    """[(key, value)] of the asset paths a call names; raises ValueError when a needed one is missing."""
+    need = UNITY_NEEDS_PATH.get((short, action)) or UNITY_NEEDS_PATH.get((short, ANY))
+    if need and not text_of(ti.get(need)):
+        raise ValueError(f"unity-mcp {short} {action}: give '{need}' (an asset path starting with 'Assets/')")
+    return [(k, ti.get(k)) for k in UNITY_PATH_KEYS if text_of(ti.get(k))]
+
+
+def unity_own(full, root, mode, feature, area, who):
+    """None when the session may change the asset at `full` (its own area, not the skeleton, past its code gate),
+    otherwise the reason it may not."""
+    name, _, edit = zone(full, root, feature, area)
+    if edit == "skeleton":
+        return SKELETON_MSG.format(name=name)
+    if edit != "allow":
+        return f"FEATURE={who} may not change assets in: {name}"
+    if full.lower().endswith(UNITY_CODE_EXT):
+        return "unity-mcp does not write code or assembly files: use Edit/Write (the guard checks them there)"
+    if mode == "feature":
+        return design_gate(root, feature)
+    return None
+
+
+def decide_unity_one(tool, ti, ctx, work):
+    """(decision, reason, needs lock) of one unity-mcp command. work: the lock this session would hold after the
+    commands before it ({scene, prefab}); updated in place."""
+    mode, feature, area, who, root = ctx["mode"], ctx["feature"], ctx["area"], ctx["who"], ctx["root"]
+    short, action, kind = unity_kind(tool, ti)
+    lead = mode == "codelead"
+    if kind is None:
+        return "deny", f"unity-mcp {short} {action or ''}: not on the guard's list (guard.py UNITY_RULES); ask the human", False
+    if kind == "script":
+        return "deny", f"unity-mcp {short}: code is written with Edit/Write only, where the guard checks it", False
+    if kind in ("play", "lead") and not lead:
+        return "deny", f"unity-mcp {short} {action}: only @CodeLead (play, tests, project settings); ask @CodeLead", False
+    paths = unity_paths(short, action, ti)
+    if kind == "read":
+        for key, value in paths:
+            full, why = unity_full(value, root, allow_assets_root=lead)
+            if why:
+                return "deny", why, False
+            name, readable, _ = zone(full, root, feature, area, ctx["read_all"])
+            if lead and same(full, under(root, "UnityProject", "Assets")):
+                readable = True      # @CodeLead may search the whole project
+            if not readable:
+                return "deny", f"unity-mcp {short}: may not read {key} in: {name}", False
+        return "allow", f"unity-mcp {short} {action}: reads", False
+    if kind == "shared":
+        return "allow", f"unity-mcp {short}: compiles (not while another session holds the Editor)", False
+    if short == "manage_asset" and action == "delete":
+        return (*decide_unity_delete(ti, mode, feature, root, area, who), False)
+    if kind == "write":
+        if lead:
+            return "deny", "@CodeLead changes only the skeleton (and deletes skeleton files); ask the owner", False
+        for key, value in paths:
+            full, why = unity_full(value, root)
+            if why:
+                return "deny", why, False
+            why = unity_own(full, root, mode, feature, area, who)
+            if why:
+                return "deny", f"unity-mcp {short} {action} ({key}): {why}", False
+        return "allow", f"unity-mcp {short} {action}: inside {who}'s area", False
+    # state, play, lead: the Editor lock, plus what the scene or prefab stage may be
+    for key, value in paths:
+        full, why = unity_full(value, root)
+        if why:
+            return "deny", why, False
+        opens = (short, action) in (("manage_scene", "load"), ("manage_editor", "open_prefab_stage"))
+        if lead and opens:
+            name, readable, _ = zone(full, root, None, None, True)
+            if not readable:
+                return "deny", f"unity-mcp {short}: may not open {name}", False
+        else:
+            why = unity_own(full, root, mode, feature, area, who)
+            if why:
+                return "deny", f"unity-mcp {short} {action} ({key}): {why}", False
+        if short == "manage_scene" and action in ("load", "save") and key == "path":
+            work["scene"] = text_of(value)
+        if short == "manage_scene" and action == "create" and key == "path":      # path is the folder, name the scene
+            name = text_of(ti.get("name"))
+            if not re.match(r"^[A-Za-z0-9_. -]+$", name) or ".." in name:
+                return "deny", "unity-mcp manage_scene create: give the scene 'name' (letters, digits, _ . - space)", False
+            work["scene"] = text_of(value).replace("\\", "/").rstrip("/") + "/" + name + ".unity"
+        if short == "manage_editor" and action == "open_prefab_stage":
+            work["prefab"] = text_of(value)
+    if (short, action) in (("manage_scene", "save"), ("manage_editor", "save_prefab_stage")):
+        held = work.get("scene" if short == "manage_scene" else "prefab")
+        if not held:
+            return "deny", (f"unity-mcp {short} {action}: open the {'scene' if short == 'manage_scene' else 'prefab'} "
+                            "through unity-mcp first (load/create, open_prefab_stage), so the guard knows what is saved"), True
+        full, why = unity_full(held, root)
+        why = why or unity_own(full, root, mode, feature, area, who)
+        if why:
+            return "deny", f"unity-mcp {short} {action}: the open one is '{held}': {why}", True
+    if short == "manage_editor" and action == "close_prefab_stage":
+        work["prefab"] = ""
+    if kind == "state" and not lead and short in ("manage_gameobject", "manage_components", "manage_material", "manage_ui",
+                                                     "manage_prefabs") and not (work.get("scene") or work.get("prefab")):
+        return "deny", (f"unity-mcp {short} {action}: changes the open scene; load or create a scene of your own area "
+                        "first (manage_scene), or edit the prefab headless (manage_prefabs modify_contents)"), True
+    return "allow", f"unity-mcp {short} {action}: holds the Editor", True
+
+
+def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
+    """unity-mcp for every session but @human: see UNITY_RULES. The Editor lock is taken only when every command
+    of the call is allowed."""
+    if mode in ("none", "manager", "gamedesigner"):
+        return "deny", (f"{who or 'this chat'} does not use unity-mcp" if mode != "none"
+                        else "FEATURE is not set or is not an existing feature folder; unity-mcp is blocked")
+    if tool in UNITY_RESOURCE_TOOLS:
+        if text_of(ti.get("server")) not in ("", UNITY_SERVER):
+            return "deny", f"tool '{tool}' is allowed only for the {UNITY_SERVER} server"
+        return "allow", "reads a unity-mcp resource"
+    cmds = unity_commands(tool, ti)
+    if not cmds or len(cmds) > BATCH_MAX:
+        return "deny", f"batch_execute takes 1 to {BATCH_MAX} commands"
+    session = session if isinstance(session, str) else ""
+    held = read_lock(store)
+    other = held if held and held.get("session") != session else None
+    mine = held if held and not other else {}
+    work = {"scene": text_of(mine.get("scene")), "prefab": text_of(mine.get("prefab"))}
+    ctx = {"mode": mode, "feature": feature, "area": area, "who": who, "root": root, "read_all": mode == "codelead"}
+    decisions, reasons, needs_lock, shared = [], [], False, False
+    for t, p in cmds:
+        if t == UNITY_PREFIX + "batch_execute":
+            return "deny", "batch_execute may not hold another batch_execute"
+        d, why, lock = decide_unity_one(t, p, ctx, work)
+        decisions.append(d)
+        reasons.append(why)
+        needs_lock = needs_lock or lock
+        shared = shared or unity_kind(t, p)[2] == "shared"
+    if "deny" in decisions:
+        return "deny", reasons[decisions.index("deny")]
+    if (needs_lock or shared) and other:
+        until = time.strftime("%H:%M", time.localtime(other["until"]))
+        return "deny", (f"the Unity Editor is held by {other.get('who') or 'another chat'} until {until} (scene, play, "
+                        "tests or settings); wait until that chat is done. The human can free it: "
+                        "python .claude/hooks/stop_unlock.py --release")
+    if needs_lock:
+        write_lock(store, {"session": session, "who": who, "until": time.time() + LOCK_SECONDS, **work})
+    if "ask" in decisions:
+        return "ask", reasons[decisions.index("ask")]
+    return "allow", reasons[0] if len(reasons) == 1 else f"batch of {len(reasons)} unity-mcp commands"
 
 
 def edit_texts(ti):
@@ -544,7 +812,7 @@ def edit_texts(ti):
     return texts
 
 
-def decide(data, session_value, root):
+def decide(data, session_value, root, store=None):
     """Returns (decision, reason), or None to leave the call to the normal permission flow."""
     tool = text_of(data.get("tool_name"))
     if not tool:
@@ -672,11 +940,8 @@ def decide(data, session_value, root):
             return "allow", f"read inside {name}"
         return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."
 
-    if mode == "codelead" and tool in CODELEAD_UNITY:
-        return decide_codelead_unity(tool, ti, root)
-
-    if tool == UNITY_ASSET_TOOL:
-        return decide_unity_delete(ti, mode, feature, root, area, who)
+    if tool.startswith(UNITY_PREFIX) or tool in UNITY_RESOURCE_TOOLS:
+        return decide_unity(tool, ti, mode, feature, area, who, root, data.get("session_id"), store)
 
     return "deny", f"tool '{tool}' is not on the guard's list of known tools"
 
@@ -692,7 +957,7 @@ def main(argv):
             data = json.loads(sys.stdin.buffer.read().decode("utf-8-sig"))
             if not isinstance(data, dict):
                 raise ValueError("hook input is not a JSON object")
-            result = decide(data, session_feature(data.get("session_id"), store), root)
+            result = decide(data, session_feature(data.get("session_id"), store), root, store)
         except Exception as ex:      # fail closed
             result = ("deny", f"blocked on error: {ex}")
         if result:

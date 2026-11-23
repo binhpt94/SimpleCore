@@ -4,7 +4,8 @@
 Applies to the groups Basic (@Core, @Composition), Features and Services, and to @CodeLead (it edits the skeleton).
 Not to @human, @Manager (it only creates proposals), @GameDesigner (its work is the design tree) or unbound chats.
 @CodeLead and @Manager are both shown new reports (bind_session.py).
-"Changed files" = an Edit/Write/MultiEdit/NotebookEdit or a unity-mcp delete after the human's last prompt,
+"Changed files" = an Edit/Write/MultiEdit/NotebookEdit, or a unity-mcp call that changes something (an asset, the
+open scene, a prefab stage, project settings: guard.unity_changes; also inside batch_execute), after the human's last prompt,
 read from the transcript. The agent's last message must hold the block in REPORT_FORMAT (see
 .claude/rules/report.md). The hook saves it to Management/reports/<time>-<role>.md, where @Manager is told
 about it on its next prompt (bind_session.py) and the management page lists it.
@@ -23,7 +24,7 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))      # `python -I` leaves the script folder out
 import guard  # noqa: E402
 
-CHANGE_TOOLS = guard.EDIT_TOOLS | {guard.UNITY_ASSET_TOOL}
+CHANGE_TOOLS = guard.EDIT_TOOLS
 HEADER = "## Báo cáo cho @Manager"
 FIELDS = ("Phiên", "Việc", "Trạng thái", "Đã đổi", "Công khai đổi", "Cần bên khác", "Kiểm tra", "Ghi chú")
 STATES = ("xong", "dở", "bị chặn")
@@ -64,9 +65,10 @@ def read_turn(path):
         for x in content if isinstance(content, list) else []:
             if not isinstance(x, dict):
                 continue
-            if x.get("type") == "tool_use" and x.get("name") in CHANGE_TOOLS:
+            if x.get("type") == "tool_use":
+                name = x.get("name") if isinstance(x.get("name"), str) else ""
                 ti = x.get("input") if isinstance(x.get("input"), dict) else {}
-                if x.get("name") != guard.UNITY_ASSET_TOOL or ti.get("action") == "delete":
+                if name in CHANGE_TOOLS or (name.startswith(guard.UNITY_PREFIX) and guard.unity_changes(name, ti)):
                     changed = True
             elif x.get("type") == "text":
                 texts.append(x.get("text") or "")
