@@ -1,5 +1,6 @@
 ---
 based-on: dda5759077eb
+refs: feature-castle/castle-skills@8bc45d0edc8d, feature-run/run-start/start-values@ecc0af822edd
 ---
 # Ba nút kĩ năng thành
 

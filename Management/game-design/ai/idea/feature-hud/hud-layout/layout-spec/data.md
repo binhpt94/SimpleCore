@@ -1,5 +1,6 @@
 ---
 based-on: e541be0cca19
+refs: feature-hud-upgrade/bar-layout@4a9d06c74198, feature-popup/popup-layer@91d4f017d2fb, feature-hud/hud-status/status-spec@9899b000bd73
 ---
 # Chỗ của từng phần HUD
 

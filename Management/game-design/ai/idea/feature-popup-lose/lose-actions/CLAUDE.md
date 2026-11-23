@@ -6,11 +6,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Một popup thua, hai nút.
 - Nút báo lựa chọn cho `feature-run/run-flow`; chuyển scene do `feature-scene-flow` khi `feature-run` xin.
 - Chơi lại dẫn tới `feature-team-select` (đội lượt trước đã xếp sẵn, `feature-team-select/team-memory`); về màn bắt đầu dẫn tới `feature-home`.
-- Popup che và chặn bấm phần bên dưới (`feature-popup/popup-block`).
-
-## Định nghĩa
-- **Chơi lại**: bắt đầu một lượt mới, đi qua màn chọn đội.
-- **Về màn bắt đầu**: rời trận, về màn có tên game và kỉ lục.
+- Popup che và chặn bấm phần bên dưới (`feature-popup`).
 
 ## Danh sách
 - Nút chơi lại (nút chính).

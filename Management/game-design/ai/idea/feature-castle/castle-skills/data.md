@@ -1,5 +1,6 @@
 ---
 based-on: 24fd307bbdcd
+refs: feature-castle/castle-core@e1440a2a0de0, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-castle/castle-attack@639d373f52f2, feature-enemy/enemy-reward@1fbbced31e0f, glossary#castle-skill@db172da8ce27, glossary#cooldown@66c87aeea6d6, glossary#castle-zone@12bbf2c7457b
 ---
 # Kĩ năng thành
 

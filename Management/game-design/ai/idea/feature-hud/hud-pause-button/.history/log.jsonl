@@ -1,2 +1,4 @@
 {"at": "2026-11-23 02:21:08", "event": "data", "hash": "2bff93601e7d", "previous": "", "added": ["pause-button-one", "pause-button-apart", "pause-button-active"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 02:27:27", "event": "promote", "by": "người", "hash": "2bff93601e7d"}
+{"at": "2026-11-23 14:47:22", "event": "data", "hash": "4ab96ef15d1f", "previous": "2bff93601e7d", "added": [], "removed": [], "rewritten": [{"id": "pause-button-active", "old": "Nút tạm dừng chỉ bấm được khi trận đang đánh\nĐang tạm dừng thì popup che nút (`feature-popup/popup-block`); lượt đã kết thúc thì nút không còn tác dụng.", "new": "Nút tạm dừng chỉ bấm được khi trận đang đánh\nĐang tạm dừng thì popup che nút (`feature-popup/popup-layer`); lượt đã kết thúc thì nút không còn tác dụng."}]}
+{"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "4ab96ef15d1f"}

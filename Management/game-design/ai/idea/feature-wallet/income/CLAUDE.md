@@ -8,11 +8,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Mọi lần cộng đi vào cùng một số dư (`feature-wallet/balance-spend`).
 - Mức tiền cụ thể do `feature-balance` quyết cùng giá nâng cấp.
 
-## Định nghĩa
-- **Tiền hạ quái**: khoản tiền được cộng khi một quái bị hạ; mỗi loại quái một mức.
-- **Thưởng dọn đợt**: khoản tiền được cộng khi đợt đang đánh không còn quái nào.
-- **Nguồn thu**: sự kiện trong trận làm số dư tăng.
-
 ## Danh sách
 - Nguồn thu: hạ quái, dọn sạch đợt.
 - Thứ hạ được quái (đều cho tiền như nhau): hero, đòn tự bắn của thành, kĩ năng của thành.

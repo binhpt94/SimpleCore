@@ -9,10 +9,10 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Thứ tự các màn trong scene Game do `feature-run` lo, không phải feature này.
 
 ## Định nghĩa
-- **Scene**: một khung lớn của game, chuyển scene là huỷ khung cũ và tải khung mới.
-- **Màn**: một màn hình người chơi thấy bên trong một scene; đổi màn không chuyển scene.
-- **Scene Loading**: scene đầu tiên khi mở game, lo tải những thứ scene Game cần.
-- **Scene Game**: scene chơi, chứa mọi màn người chơi thao tác.
+- `glossary#scene`
+- `glossary#screen`
+- `glossary#scene-loading`
+- `glossary#scene-game`
 
 ## Danh sách
 - Scene Loading.

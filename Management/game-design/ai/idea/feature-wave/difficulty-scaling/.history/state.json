@@ -1,5 +1,5 @@
 {
- "hash": "0a1f233f1919",
+ "hash": "fed0ac86d57c",
  "items": {
   "scale-by-number": {
    "hash": "b491c9d976f5",
@@ -18,8 +18,8 @@
    "text": "Loại quái mở dần theo đợt; đợt đầu chỉ có loại đơn giản, càng về sau càng trộn nhiều loại\nNgười chơi gặp từng loại mới khi đã quen loại cũ. Danh sách loại là của `feature-enemy`. Đã loại: mọi loại có ngay từ đợt đầu."
   },
   "scale-reward": {
-   "hash": "1cfca878e161",
-   "text": "Tiền khi hạ một con quái tăng theo đợt\nĐể thu nhập theo kịp giá nâng cấp tăng theo cấp; mức tăng chậm hơn sức quái (`feature-balance`). Đã loại: tiền mỗi con cố định."
+   "hash": "0ebcafddb0de",
+   "text": "Tiền khi hạ một con quái giữ nguyên qua các đợt; đợt sau cho nhiều tiền hơn vì đông quái hơn\nTiền mỗi con chỉ theo loại quái (`feature-enemy`). Thu nhập theo kịp giá nâng cấp nhờ số quái và loại quái đắt hơn mở dần (`feature-balance`). Đã loại: tiền mỗi con nhân theo đợt (hai nơi cùng tăng tiền, khó cân bằng)."
   }
  }
 }

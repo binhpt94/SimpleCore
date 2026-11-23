@@ -1,5 +1,6 @@
 ---
 based-on: d8a90fd4adc0
+refs: feature-run/run-score@6f1909d90f98, feature-scene-flow/scene-list@78ed2dcc0859, feature-run/run-start@31cb7598b529, glossary#run@238b2719236c, glossary#battle@35cfb9e9dab0, glossary#run-end@f98a1a4ee909, glossary#scene-game@06d6e6c3e2c7
 ---
 # Luồng màn hình của lượt
 

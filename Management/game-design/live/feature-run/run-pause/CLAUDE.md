@@ -6,7 +6,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Nút tạm dừng ở `feature-hud`; bấm thì feature này chuyển sang tạm dừng và nhờ `feature-popup-pause` hiện popup.
 - `feature-popup-pause` báo người chơi chọn tiếp tục hay bỏ lượt; feature này đổi trạng thái theo.
 - Lúc tạm dừng, feature này báo cho các feature trong trận dừng lại: `feature-wave`, `feature-enemy`, `feature-hero`, `feature-castle`.
-- `feature-upgrade` và `feature-castle` (kĩ năng) không nhận thao tác khi đang tạm dừng; `feature-hud-upgrade` và nút kĩ năng của `feature-hud` bị popup che (`feature-popup/popup-block`).
+- `feature-upgrade` và `feature-castle` (kĩ năng) không nhận thao tác khi đang tạm dừng; `feature-hud-upgrade` và nút kĩ năng của `feature-hud` bị popup che (`feature-popup/popup-layer`).
 
 ## Định nghĩa
 - **Đang đánh**: trận chạy, người chơi mua nâng cấp và bấm kĩ năng được.

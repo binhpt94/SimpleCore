@@ -1,5 +1,6 @@
 ---
 based-on: cdb98c5c2b2c
+refs: feature-upgrade/upgrade-list@7294a54c79df, feature-hud-upgrade/button-state@f1aa8b544f79
 ---
 # Bố cục thanh nâng cấp
 

@@ -1,5 +1,6 @@
 ---
 based-on: 24fd307bbdcd
+refs: feature-castle/castle-attack@639d373f52f2, feature-castle/castle-skills@8bc45d0edc8d, feature-castle/castle-core@e1440a2a0de0, glossary#level@c32a49d0bd16, glossary#hp@5433e9791fe3
 ---
 # Hiệu ứng nâng cấp thành
 

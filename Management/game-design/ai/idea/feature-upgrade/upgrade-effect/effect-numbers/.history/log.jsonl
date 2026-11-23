@@ -1,2 +1,3 @@
 {"at": "2026-11-23 02:36:50", "event": "data", "hash": "8e92f84a02aa", "previous": "", "added": ["hero-plus-15", "hero-speed-3", "hero-hp-gain", "hero-fallen", "castle-hp-150", "castle-attack-20", "castle-skill-20"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "8e92f84a02aa"}
+{"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "8e92f84a02aa"}

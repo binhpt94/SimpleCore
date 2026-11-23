@@ -3,7 +3,7 @@
 Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Quan hệ
-- Danh sách hero (toàn bộ hero của game) lấy từ `feature-hero`; mọi hero chọn được ngay (`feature-hero/hero-roster`).
+- Danh sách hero (toàn bộ hero của game) lấy từ `feature-hero`; mọi hero chọn được ngay (`feature-hero`).
 - Một đội có nhiều chỗ; mỗi chỗ có một hero hoặc để trống.
 - Một hero ở nhiều nhất một chỗ.
 - Bấm vào trận thì đưa đội cho `feature-run/run-start`; chuyển màn do `feature-run/run-flow`.

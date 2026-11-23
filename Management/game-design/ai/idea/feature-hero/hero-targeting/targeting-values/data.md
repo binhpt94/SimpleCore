@@ -1,5 +1,6 @@
 ---
 based-on: 49b5ce7a72b8
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-hero/hero-list/hero-roster-values@7e08a91df0cf
 ---
 # Thông số nhắm và di chuyển của hero
 

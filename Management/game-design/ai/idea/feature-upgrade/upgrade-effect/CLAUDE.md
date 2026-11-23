@@ -11,11 +11,9 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Mức tăng mỗi cấp do `feature-balance` quyết.
 
 ## Định nghĩa
-- **Hiệu lực**: thay đổi chỉ số mà người chơi thấy được sau khi mua.
-- **Máu tối đa**: mức máu cao nhất của thành.
-- **Máu hiện tại**: máu thành đang có.
-- **Đòn tự bắn**: đòn thành tự đánh quái, không cần bấm.
-- **Hồi chiêu**: thời gian chờ sau khi dùng một kĩ năng mới dùng lại được.
+- `glossary#hp`
+- `glossary#auto-shot`
+- `glossary#cooldown`
 
 ## Danh sách
 - Cấp hero: tăng mọi chỉ số của hero đó.

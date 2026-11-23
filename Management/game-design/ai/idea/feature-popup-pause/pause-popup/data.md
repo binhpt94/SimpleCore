@@ -1,5 +1,6 @@
 ---
 based-on: 27ce83b88e6d
+refs: feature-run/run-pause@f8e9d49f5079, feature-hud/hud-pause-button@4ab96ef15d1f, feature-run/run-score@6f1909d90f98, feature-run/run-flow@db634f5dac0b, feature-popup/popup-layer@91d4f017d2fb, glossary#quit-run@acd53f4924cf
 ---
 # Nội dung popup tạm dừng
 

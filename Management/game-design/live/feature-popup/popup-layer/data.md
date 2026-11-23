@@ -1,5 +1,6 @@
 ---
 based-on: 04fa62031f0e
+refs: feature-popup/popup-request@ff4b78bc4b2c
 ---
 # Lớp popup: che, chặn bấm và xếp chồng
 

@@ -9,9 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Popup (`feature-popup`) che lên trên HUD khi mở.
 
 ## Định nghĩa
-- **Mép trên**: dải mỏng sát cạnh trên màn hình.
-- **Mép dưới**: dải mỏng sát cạnh dưới màn hình.
-- **Dải chiến trường**: phần giữa màn hình nơi hero, quái và thành đứng.
+- `glossary#battlefield`
 
 ## Danh sách
 | Phần | Chỗ |

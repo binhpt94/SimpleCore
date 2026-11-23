@@ -1,9 +1,9 @@
 {
- "hash": "e8ebf9c8d709",
+ "hash": "5fe7af230b3e",
  "items": {
   "card-content": {
-   "hash": "9b2273c59542",
-   "text": "Thẻ hero có hình, tên và cách đánh của hero\nCách đánh là vai trò của hero (ví dụ cận chiến chắn quái, bắn xa đứng sau) lấy từ `feature-hero/hero-roles`. Đã loại: bảng chỉ số chi tiết (nặng với người chơi phổ thông)."
+   "hash": "594ee30100b2",
+   "text": "Thẻ hero có hình, tên và cách đánh của hero\nCách đánh là vai trò của hero (ví dụ cận chiến chắn quái, bắn xa đứng sau) lấy từ `feature-hero/hero-list`. Đã loại: bảng chỉ số chi tiết (nặng với người chơi phổ thông)."
   },
   "card-role-mark": {
    "hash": "4c72e87ac020",

@@ -10,9 +10,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Vị trí nút ở `feature-hud/hud-layout`.
 
 ## Định nghĩa
-- **Kĩ năng thành**: đòn người chơi bấm để thành dùng, có hồi chiêu (`feature-castle/castle-skills`).
-- **Hồi chiêu**: khoảng chờ sau khi dùng, hết mới dùng lại được.
-- **Sẵn sàng**: không còn hồi chiêu, bấm là dùng.
+- `glossary#castle-skill`
+- `glossary#cooldown`
 
 ## Danh sách
 Trên mỗi nút:

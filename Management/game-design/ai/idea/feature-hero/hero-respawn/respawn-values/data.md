@@ -1,5 +1,6 @@
 ---
 based-on: 2ae1008b33cd
+refs: feature-castle/castle-core/castle-body-values@13107fd51941, feature-hero/hero-targeting@49b5ce7a72b8
 ---
 # Thông số vào trận, gục và hồi sinh
 

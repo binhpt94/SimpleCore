@@ -1,5 +1,6 @@
 ---
 based-on: b74c0b7d272a
+refs: feature-enemy/enemy-stats@504e5ffe01a8, feature-enemy/enemy-reward@1fbbced31e0f, feature-enemy/enemy-behavior@cf9290ce16e6
 ---
 # Danh sách quái
 

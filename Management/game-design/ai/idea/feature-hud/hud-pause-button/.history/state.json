@@ -1,5 +1,5 @@
 {
- "hash": "2bff93601e7d",
+ "hash": "4ab96ef15d1f",
  "items": {
   "pause-button-one": {
    "hash": "1041e42a631a",
@@ -10,8 +10,8 @@
    "text": "Nút tạm dừng nằm xa nút kĩ năng và thanh nâng cấp\nTránh chạm nhầm giữa lúc đang vội bấm kĩ năng hay mua nâng cấp. Đã loại: đặt cạnh nút kĩ năng."
   },
   "pause-button-active": {
-   "hash": "3639baa8ec1b",
-   "text": "Nút tạm dừng chỉ bấm được khi trận đang đánh\nĐang tạm dừng thì popup che nút (`feature-popup/popup-block`); lượt đã kết thúc thì nút không còn tác dụng."
+   "hash": "73af596eb53b",
+   "text": "Nút tạm dừng chỉ bấm được khi trận đang đánh\nĐang tạm dừng thì popup che nút (`feature-popup/popup-layer`); lượt đã kết thúc thì nút không còn tác dụng."
   }
  }
 }

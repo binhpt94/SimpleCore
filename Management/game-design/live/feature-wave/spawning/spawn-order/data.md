@@ -1,5 +1,6 @@
 ---
 based-on: 8c9e1c247bf1
+refs: feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-wave/wave-gap@d9d4c35f6907, feature-enemy/enemy-list/enemy-type-values@a91bdaba8708, feature-enemy/enemy-behavior/enemy-move-values@f5adc15dbc17
 ---
 # Thứ tự và cách thả quái
 
@@ -8,13 +9,13 @@ based-on: 8c9e1c247bf1
 ## Ý cốt lõi
 
 ### spawn-point | AI 8 | Quái ra trên mặt đất ở x = −17u (bên trái) hoặc x = +17u (bên phải), ngoài mép màn hình 1u
-Ra xong tự đi vào thành theo `feature-enemy`. Lính đi 1.5 u/s cần khoảng 10 s để tới mép thành (x = ±1.5u), nên người chơi thấy quái đi vào chứ không hiện sát thành.
+Ra xong tự đi vào thành theo `feature-enemy`. Lính cần khoảng 9.3 s để tới mép thành (x = ±1.5u), nên người chơi thấy quái đi vào chứ không hiện sát thành.
 
 ### half-split | AI 8 | Mỗi bên đúng một nửa số quái của đợt (đợt 1: 4 trái, 4 phải)
 Số quái luôn chẵn. Trùm, nếu có, ra ở bên được bốc ngẫu nhiên và tính vào nửa của bên đó.
 
-### shuffle-order | AI 7 | Thứ tự loại quái xáo ngẫu nhiên, trừ Trùm luôn là con thứ (số quái ÷ 2 + 1)
-Đợt 10 có 26 con: Trùm là con thứ 14, ra giữa đợt để thành đỉnh căng thẳng chứ không phải lúc đầu khi đội còn rảnh hay lúc cuối khi đã yếu.
+### shuffle-order | AI 7 | Thứ tự loại quái xáo ngẫu nhiên, trừ Trùm luôn là con cuối cùng của đợt
+Đợt 10 có 26 con: Trùm là con thứ 26. Người chơi dọn bớt quái thường rồi mới gặp Trùm, đỉnh căng thẳng ở cuối đợt (khớp `feature-enemy/enemy-list/enemy-type-values`).
 
 ### side-run | AI 7 | Không có quá 3 con liên tiếp ra cùng một bên
 Giữ cảm giác bị kẹp liên tục; không có lúc một bên bỏ trống lâu. Bên ra vẫn ngẫu nhiên trong giới hạn này.

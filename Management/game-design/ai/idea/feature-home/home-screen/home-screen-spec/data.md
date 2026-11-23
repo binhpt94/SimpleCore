@@ -1,5 +1,6 @@
 ---
 based-on: e8c7b20b31fd
+refs: feature-run/run-flow/flow-rules@5a872f474e5b, feature-run/run-score/score-rules@54a8417a7ccd
 ---
 # Thành phần màn bắt đầu
 

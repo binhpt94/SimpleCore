@@ -3,19 +3,19 @@
 Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Quan hệ
-- Thu gồm HAI nguồn: tiền hạ quái (`feature-enemy`, tăng theo đợt ở `feature-wave/difficulty-scaling`) và thưởng dọn sạch đợt (`feature-wave/wave-clear`). Cả hai vào `feature-wallet`.
+- Thu gồm HAI nguồn: tiền hạ quái (`feature-enemy`, mỗi con cố định; tổng tăng theo đợt vì `feature-wave/difficulty-scaling` cho đông quái và loại đắt hơn) và thưởng dọn sạch đợt (`feature-wave/wave-clear`). Cả hai vào `feature-wallet`.
 - Chi chỉ có MỘT chỗ: mua nâng cấp (`feature-upgrade`). Mỗi hero một mục cấp; thành ba mục (máu, sức đánh, kĩ năng). Giá mỗi mục tăng theo cấp của chính mục đó.
 - Sức mạnh mua được từ tiền là đầu vào của `feature-balance/balance-difficulty-curve`.
 
 ## Định nghĩa
-- **Thu của một đợt**: tổng tiền hạ quái và thưởng dọn sạch trong đợt đó.
-- **Giá một lần nâng**: tiền phải trả để nâng một mục lên cấp kế tiếp.
-- **Lời của một lần nâng**: sức mạnh thêm vào so với giá phải trả.
+- `glossary#wave-income`
+- `glossary#next-price` (giá một lần nâng)
+- `glossary#upgrade-value`
 
 ## Danh sách
 Số liệu feature này đối chiếu (mỗi số nằm ở cấu hình của feature sở hữu):
 - Tiền gốc khi hạ từng loại quái (`feature-enemy`).
-- Mức tăng tiền mỗi con theo đợt (`feature-wave`).
+- Số quái và phần từng loại theo đợt (`feature-wave`); tiền mỗi con không nhân theo đợt.
 - Thưởng dọn sạch đợt và mức tăng theo đợt (`feature-wave`).
 - Giá ban đầu và mức tăng giá theo cấp của từng mục (`feature-upgrade`).
 - Sức thêm vào mỗi cấp của từng mục (`feature-upgrade`, `feature-hero`, `feature-castle`).

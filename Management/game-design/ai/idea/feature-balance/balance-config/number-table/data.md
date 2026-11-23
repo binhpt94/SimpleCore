@@ -1,5 +1,6 @@
 ---
 based-on: 6934878b1b70
+refs: feature-balance/balance-team/hero-compare@d356532cffe9, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-balance/balance-economy/income-and-prices@295cfe59ac28, feature-balance/balance-difficulty-curve/break-forecast@38dc08b97bc3, feature-castle/castle-skills/skill-values@6240af7903a9, feature-castle/castle-upgrade-effects/upgrade-effect-values@b16439440823, feature-upgrade/upgrade-effect/effect-numbers@8e92f84a02aa
 ---
 # Bảng số chuẩn và nơi đặt
 

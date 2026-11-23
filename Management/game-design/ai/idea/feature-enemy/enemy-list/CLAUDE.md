@@ -9,9 +9,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Loại nào ra ở đợt nào, bên nào: `feature-wave`. Giá trị chỉ số: `feature-balance`.
 
 ## Định nghĩa
-- **Loại quái**: một bộ chỉ số gốc (`feature-enemy/enemy-stats`) cộng tiền thưởng khi bị hạ (`feature-enemy/enemy-reward`).
-- **Quái cận chiến**: tầm đánh ngắn, phải đi sát hero hay thành.
-- **Quái bắn xa**: tầm đánh dài, dừng lại đánh từ xa.
+- `glossary#melee`
+- `glossary#ranged`
 
 ## Danh sách
 | Loại | Đánh | Máu | Tốc độ đi | Sức đánh | Hero hợp để đối phó |

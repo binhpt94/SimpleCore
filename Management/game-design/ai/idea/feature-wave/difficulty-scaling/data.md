@@ -1,5 +1,6 @@
 ---
 based-on: 1a74f8c24f86
+refs: feature-wave/spawning@8c9e1c247bf1, feature-balance/balance-difficulty-curve@f1f04ceb7020, feature-wave/wave-clear@b7789c127bb4, feature-enemy/enemy-list@10b291cde6dc, glossary#base-stats@ff57fd5cfca7, glossary#unlocked-type@269318c26c8a
 ---
 # Độ khó theo đợt
 
@@ -19,5 +20,5 @@ Giữ "quái nào trông ra quái nấy": quái nhanh vẫn nhanh, quái trâu v
 ### scale-types | AI 7 | Loại quái mở dần theo đợt; đợt đầu chỉ có loại đơn giản, càng về sau càng trộn nhiều loại
 Người chơi gặp từng loại mới khi đã quen loại cũ. Danh sách loại là của `feature-enemy`. Đã loại: mọi loại có ngay từ đợt đầu.
 
-### scale-reward | AI 6 | Tiền khi hạ một con quái tăng theo đợt
-Để thu nhập theo kịp giá nâng cấp tăng theo cấp; mức tăng chậm hơn sức quái (`feature-balance`). Đã loại: tiền mỗi con cố định.
+### scale-reward | AI 7 | Tiền khi hạ một con quái giữ nguyên qua các đợt; đợt sau cho nhiều tiền hơn vì đông quái hơn
+Tiền mỗi con chỉ theo loại quái (`feature-enemy`). Thu nhập theo kịp giá nâng cấp nhờ số quái và loại quái đắt hơn mở dần (`feature-balance`). Đã loại: tiền mỗi con nhân theo đợt (hai nơi cùng tăng tiền, khó cân bằng).

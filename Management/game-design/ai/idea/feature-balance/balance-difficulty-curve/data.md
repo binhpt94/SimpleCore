@@ -1,5 +1,6 @@
 ---
 based-on: 700960590953
+refs: feature-enemy/enemy-list@10b291cde6dc, feature-wave/difficulty-scaling@fed0ac86d57c, feature-balance/balance-economy@5fe05cebab72, glossary#enemy-power@6379e186a911, glossary#team-power@dd4b4691fda9, glossary#break-wave@15d5d1af4350, glossary#pressure@547149b356c5
 ---
 # Đường độ khó
 

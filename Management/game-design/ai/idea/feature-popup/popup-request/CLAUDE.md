@@ -9,10 +9,9 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Dịch vụ là một bên tham gia của scene Game (`feature-session-scene/session-steps`).
 
 ## Định nghĩa
-- **Popup**: một bảng hiện đè lên màn đang chơi, có nút để người chơi chọn.
-- **Feature gọi**: feature sở hữu popup và nhờ dịch vụ hiện nó.
-- **Id popup**: tên dạng `<Owner>/<Name>`, `Owner` là feature gọi, `Name` là tên popup trong feature đó.
-- **Mở / đóng**: popup xuất hiện trên màn hình / biến mất và bị huỷ.
+- `glossary#popup`
+- `glossary#caller`
+- `glossary#popup-id`
 
 ## Danh sách
 - Việc của dịch vụ: nhận id, dựng popup, đặt lên trên, đóng khi được yêu cầu, huỷ khi rời scene.

@@ -1,5 +1,6 @@
 ---
 based-on: e712e2fbe1f0
+refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-upgrade/upgrade-list@7294a54c79df, glossary#hp@5433e9791fe3, glossary#auto-shot@6fe3ccbe44e9, glossary#cooldown@66c87aeea6d6
 ---
 # Hiệu lực nâng cấp
 

@@ -7,10 +7,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Một lần chuyển gồm một lần huỷ scene cũ và một lần tải scene mới, cả hai do `feature-session-scene` thực hiện.
 - Lần chuyển duy nhất trong luồng hiện tại là Loading sang Game (`feature-scene-flow/scene-list`); người xin là chính scene Loading khi tải xong.
 
-## Định nghĩa
-- **Xin chuyển**: một feature nói tên scene đích; feature này lo phần còn lại.
-- **Lớp che**: một màn che toàn màn hình, thuộc feature này, hiện từ lúc bắt đầu chuyển tới lúc scene mới bắt đầu chạy.
-
 ## Danh sách
 - Các bước một lần chuyển: hiện lớp che → huỷ scene cũ → tải scene mới → scene mới chạy → bỏ lớp che.
 

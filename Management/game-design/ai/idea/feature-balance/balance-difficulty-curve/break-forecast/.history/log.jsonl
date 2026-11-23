@@ -1,3 +1,4 @@
 {"at": "2026-11-23 02:39:45", "event": "data", "hash": "e08257c5c359", "previous": "", "added": ["pressure-formula", "team-dps", "early-easy-check", "mid-pressure", "normal-break", "skill-gap"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 02:48:36", "event": "data", "hash": "38dc08b97bc3", "previous": "e08257c5c359", "added": [], "removed": [], "rewritten": [{"id": "normal-break", "old": "Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–9 phút\nĐợt 20 (Trùm, P khoảng 3.4) gần như chắc gãy với cách chơi này.", "new": "Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–9 phút\nĐợt 20 (Trùm, P khoảng 2.9) gần như chắc gãy với cách chơi này."}]}
 {"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "38dc08b97bc3"}
+{"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "38dc08b97bc3"}

@@ -1,5 +1,6 @@
 ---
 based-on: 24fd307bbdcd
+refs: feature-castle/castle-skills@8bc45d0edc8d, feature-hero/hero-stats@2748621645f8, feature-castle/castle-core@e1440a2a0de0, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-targeting@49b5ce7a72b8
 ---
 # Thành tự bắn
 

@@ -8,16 +8,15 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-balance/balance-difficulty-curve`, `feature-balance/balance-economy`, `feature-balance/balance-team` dùng danh sách này để biết số nào cần đối chiếu.
 
 ## Định nghĩa
-- **Số liệu**: một giá trị chỉnh được ảnh hưởng tới độ khó, thu chi hay sức của hero, thành, quái.
-- **Cấu hình**: nơi một feature giữ số liệu của nó, đổi được mà không sửa code.
-- **Feature sở hữu**: feature duy nhất đọc và ghi số liệu đó.
+- `glossary#number`
+- `glossary#owner-feature`
 
 ## Danh sách
 Số liệu theo feature sở hữu:
 - `feature-hero`: năm chỉ số chung của từng hero, thời gian hồi sinh, sức thêm mỗi cấp.
 - `feature-castle`: máu, sức đánh, tầm đánh, tốc độ đánh của thành; sức và thời gian hồi của từng kĩ năng; sức thêm mỗi cấp của ba mục.
 - `feature-enemy`: năm chỉ số chung và tiền gốc của từng loại quái.
-- `feature-wave`: số quái, nhịp thả, hệ số máu, sức đánh, tiền theo đợt; đợt mở từng loại quái; thưởng dọn sạch; độ dài lúc thở.
+- `feature-wave`: số quái, nhịp thả, hệ số máu, sức đánh theo đợt; đợt mở từng loại quái; thưởng dọn sạch; độ dài lúc thở. (Tiền mỗi con không nhân theo đợt; tiền gốc ở `feature-enemy`.)
 - `feature-upgrade`: giá ban đầu và mức tăng giá theo cấp của từng mục.
 - `feature-wallet`: tiền lúc bắt đầu lượt.
 

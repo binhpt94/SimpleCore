@@ -9,9 +9,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Quái chỉ gặp hero đang đứng ở bên của nó.
 
 ## Định nghĩa
-- **Bên của quái**: nửa dải đất giữa mép nó ra và thành.
-- **Hero trong tầm**: hero còn trên chiến trường, cách quái không quá tầm đánh của quái.
-- **Tới thành**: thành nằm trong tầm đánh của quái. Quái bắn xa tới thành từ xa hơn quái cận chiến.
+- `glossary#side` (bên của quái là bên có mép nó ra)
+- `glossary#reach-castle`
 
 ## Danh sách
 Trạng thái của quái:
@@ -22,6 +21,7 @@ Trạng thái của quái:
 
 ## Luật cơ bản
 - Quái ra ở mép bên mình rồi đi về phía thành.
+- Hero trong tầm: hero còn trên chiến trường và nằm trong tầm đánh của quái.
 - Có hero trong tầm: dừng lại, đánh hero gần nhất cho tới khi hero đó gục hoặc ra khỏi tầm.
 - Hero trong tầm và thành trong tầm cùng lúc: đánh hero.
 - Không còn hero trong tầm: đi tiếp, hoặc đánh thành nếu đã tới thành.

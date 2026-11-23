@@ -1,5 +1,6 @@
 ---
 based-on: 1bf8998ab5a4
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-reward@1fbbced31e0f
 ---
 # Năm hero: chỉ số, kích thước, kiểu đòn
 

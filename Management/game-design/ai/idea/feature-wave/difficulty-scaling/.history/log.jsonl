@@ -2,3 +2,5 @@
 {"at": "2026-11-23 02:20:17", "event": "data", "hash": "0a1f233f1919", "previous": "2b192fa4ee7c", "added": ["scale-by-number", "scale-count", "scale-stats", "scale-types", "scale-reward"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 02:28:22", "event": "promote", "by": "người", "hash": "0a1f233f1919"}
 {"at": "2026-11-23 11:12:30", "event": "promote", "by": "người (Sync)", "hash": "0a1f233f1919"}
+{"at": "2026-11-23 14:42:18", "event": "data", "hash": "fed0ac86d57c", "previous": "0a1f233f1919", "added": [], "removed": [], "rewritten": [{"id": "scale-reward", "old": "Tiền khi hạ một con quái tăng theo đợt\nĐể thu nhập theo kịp giá nâng cấp tăng theo cấp; mức tăng chậm hơn sức quái (`feature-balance`). Đã loại: tiền mỗi con cố định.", "new": "Tiền khi hạ một con quái giữ nguyên qua các đợt; đợt sau cho nhiều tiền hơn vì đông quái hơn\nTiền mỗi con chỉ theo loại quái (`feature-enemy`). Thu nhập theo kịp giá nâng cấp nhờ số quái và loại quái đắt hơn mở dần (`feature-balance`). Đã loại: tiền mỗi con nhân theo đợt (hai nơi cùng tăng tiền, khó cân bằng)."}]}
+{"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "fed0ac86d57c"}

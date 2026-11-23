@@ -8,9 +8,9 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Vị trí trên màn hình ở `feature-hud/hud-layout`.
 
 ## Định nghĩa
-- **Máu thành**: độ bền còn lại của thành (`feature-castle/castle-health`); về không là thành bị phá.
-- **Máu tối đa**: máu khi thành đầy; nâng cấp độ bền làm nó lớn hơn (`feature-castle/castle-upgrades`).
-- **Đợt đang đánh**: đợt quái hiện tại của lượt, tính cả lúc thở giữa hai đợt là đợt sắp tới.
+- `glossary#hp` (máu thành; nâng cấp máu làm máu tối đa lớn hơn)
+- `glossary#active-wave`
+- `glossary#wave-gap`
 
 ## Danh sách
 - Thanh máu thành.
@@ -18,6 +18,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Số thứ tự đợt đang đánh.
 
 ## Luật cơ bản
+- Ô số đợt hiện đợt đang đánh; trong lúc thở thì hiện đợt sắp tới.
 - Thanh máu dài theo tỉ lệ máu hiện tại trên máu tối đa.
 - Thông tin đổi ngay khi feature chủ báo đổi.
 - HUD không nhận thao tác trên ba thông tin này.

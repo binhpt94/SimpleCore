@@ -1,5 +1,6 @@
 ---
 based-on: c5b904d13f66
+refs: feature-castle/castle-skills@8bc45d0edc8d, feature-hero/hero-targeting@49b5ce7a72b8, feature-castle/castle-core@e1440a2a0de0
 ---
 # Hero vào trận, gục và hồi sinh
 

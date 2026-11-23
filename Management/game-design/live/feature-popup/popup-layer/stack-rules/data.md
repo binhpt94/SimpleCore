@@ -1,5 +1,6 @@
 ---
 based-on: 91d4f017d2fb
+refs: feature-popup/popup-request@ff4b78bc4b2c, feature-popup/popup-request/request-rules@9e6b3fbcf68a, feature-run/run-pause@f8e9d49f5079, feature-popup-pause/pause-popup@25d160950007, feature-popup-pause/pause-popup/pause-popup-spec@558a0d06d13f
 ---
 # Luật xếp chồng và chặn bấm
 
@@ -8,18 +9,18 @@ Chốt số popup chồng tối đa, độ tối nền che, việc bấm vào n�
 ## Ý cốt lõi
 
 ### stack-max | AI 7 | Tối đa 3 popup chồng cùng lúc; mở cái thứ 4 thì bị từ chối và ghi lỗi nêu id
-Game cần nhiều nhất 2 (popup tạm dừng và hộp xác nhận bỏ lượt chồng lên). Đã loại: không giới hạn (lỗi mở lặp không bị phát hiện).
+Game hiện chỉ mở một popup mỗi lúc (popup tạm dừng hoặc popup thua; xác nhận bỏ lượt nằm trong popup tạm dừng); dư chỗ cho popup sau này. Đã loại: không giới hạn (lỗi mở lặp không bị phát hiện).
 
 ### same-id-once | AI 8 | Một id popup chỉ mở một bản mỗi lúc; xin mở id đang mở thì bị từ chối, popup đang mở giữ nguyên
 Bấm nút tạm dừng hai lần nhanh không ra hai popup.
 
 ### backdrop-dim | AI 7 | Nền che làm tối phần bên dưới 60% (dự kiến); mỗi popup một nền, nền chồng thì tối thêm
-Hộp xác nhận chồng lên popup tạm dừng thì popup tạm dừng cũng bị tối đi, người chơi biết đang ở hộp nào.
+Khi có popup chồng lên, popup bên dưới cũng bị tối đi, người chơi biết đang ở popup nào.
 
 ### backdrop-tap-nothing | AI 8 | Bấm vào nền che không làm gì: không đóng popup, không xuống phần bên dưới
 
-### back-key-nothing | AI 6 | Nút quay lại của điện thoại không đóng popup và không xuống phần bên dưới khi có popup mở
-Popup chỉ đóng khi feature gọi yêu cầu (`feature-popup/popup-request`).
+### back-key-nothing | AI 7 | Khi có popup mở, nút quay lại của điện thoại chỉ chuyển cho feature của popup trên cùng; dịch vụ không tự đóng popup và không chuyển xuống phần bên dưới
+Feature của popup tự quyết nút quay lại làm gì (ví dụ `feature-popup-pause/pause-popup/pause-popup-spec`); không khai thì nút không có tác dụng. Popup vẫn chỉ đóng khi feature gọi yêu cầu (`feature-popup/popup-request`).
 
 ### input-instant | AI 7 | Popup hiện và đóng tức thì; popup trên cùng nhận bấm ngay khung hình nó hiện
 

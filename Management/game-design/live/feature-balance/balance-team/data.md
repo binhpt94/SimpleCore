@@ -1,5 +1,6 @@
 ---
 based-on: 700960590953
+refs: feature-wave/difficulty-scaling@fed0ac86d57c
 ---
 # Đội hero cân nhau
 

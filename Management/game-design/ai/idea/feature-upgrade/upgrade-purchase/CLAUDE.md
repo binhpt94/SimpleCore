@@ -10,9 +10,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Giá theo cấp của từng mục do `feature-balance` quyết.
 
 ## Định nghĩa
-- **Giá cấp sau**: số tiền phải trả để mục lên thêm một cấp từ cấp hiện tại.
-- **Mua được**: đang trong trận, không tạm dừng, và số dư lớn hơn hoặc bằng giá cấp sau.
-- **Lần mua**: một yêu cầu mua; kết quả là thành công (trừ tiền, lên cấp) hoặc không (không đổi gì).
+- `glossary#next-price`
+- `glossary#can-buy`
 
 ## Danh sách
 - Điều kiện để mua thành công: đang trong trận, không tạm dừng, ví trừ được giá cấp sau.

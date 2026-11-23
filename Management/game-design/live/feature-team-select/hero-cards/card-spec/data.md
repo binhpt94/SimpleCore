@@ -1,5 +1,6 @@
 ---
-based-on: e8ebf9c8d709
+based-on: 5fe7af230b3e
+refs: feature-team-select/team-slots/slots-spec@14fc91ea0d47, feature-hero/hero-list@1bf8998ab5a4
 ---
 # Nội dung 5 thẻ hero
 

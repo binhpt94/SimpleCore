@@ -1,5 +1,6 @@
 ---
 based-on: 2748621645f8
+refs: feature-enemy/enemy-stats/enemy-stat-values@213bae407954, feature-castle/castle-attack/auto-shot-values@d966de66a0b5, feature-hero/hero-list/hero-roster-values@7e08a91df0cf, feature-hero/hero-respawn/respawn-values@80189bf3419e
 ---
 # Cách tính chỉ số và cấp hero
 

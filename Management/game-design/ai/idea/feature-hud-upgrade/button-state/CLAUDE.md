@@ -8,11 +8,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - MỘT chạm vào nút sáng là MỘT yêu cầu mua gửi tới `feature-upgrade/upgrade-purchase`.
 - Vị trí nút trên thanh: `feature-hud-upgrade/bar-layout`.
 
-## Định nghĩa
-- **Nút sáng**: mục đó đang mua được.
-- **Nút mờ**: mục đó đang không mua được (không đủ tiền hoặc đang tạm dừng).
-- **Hình của mục**: chân dung hero với nút hero; biểu tượng máu, sức đánh, kĩ năng với nút thành.
-
 ## Danh sách
 - Thứ mỗi nút hiện: hình của mục, cấp hiện tại, giá cấp sau, sáng hoặc mờ.
 - Hai trạng thái của nút: sáng, mờ.

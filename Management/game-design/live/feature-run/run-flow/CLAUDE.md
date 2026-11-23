@@ -39,8 +39,8 @@ Các bước chuyển:
 
 ## Đã tự quyết
 - **Mọi màn trong scene Game, theo `feature-scene-flow/scene-list` (2026-11-23).** Viết lại ý `flow-scenes`: trước ghi "scene menu và scene trận", lệch với scene-list là nơi quyết scene. Lượt mới vẫn sạch vì trận dựng mới, huỷ hết mỗi lần (`feature-run/run-flow/flow-rules`, ý `fresh-battle`). Đã loại: scene menu và scene trận riêng; mỗi màn một scene.
-- **Bỏ lượt về thẳng màn bắt đầu, không hiện popup thua.** Theo `feature-popup-pause/pause-actions`. Điểm vẫn chốt như thua (quyết định chung của game).
-- **Chơi lại về màn chọn đội.** Theo `feature-run/run-replay`.
+- **Bỏ lượt về thẳng màn bắt đầu, không hiện popup thua.** Theo ý pause-actions của `feature-popup-pause`. Điểm vẫn chốt như thua (quyết định chung của game).
+- **Chơi lại về màn chọn đội.** Theo ý run-replay của `feature-run`.
 
 ## Chưa rõ
 - Không có điểm chặn.

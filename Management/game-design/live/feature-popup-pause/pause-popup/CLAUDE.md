@@ -5,7 +5,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Quan hệ
 - Một lần tạm dừng, một popup tạm dừng.
 - `feature-run/run-pause` nhờ hiện popup khi trận vào tạm dừng; popup báo lại người chơi chọn gì.
-- Popup hiện qua `feature-popup`, che và chặn bấm HUD, thanh nâng cấp và chiến trường (`feature-popup/popup-block`).
+- Popup hiện qua `feature-popup`, che và chặn bấm HUD, thanh nâng cấp và chiến trường (`feature-popup/popup-layer`).
 - Bỏ lượt dẫn tới `feature-home` qua `feature-run/run-flow`.
 
 ## Định nghĩa
@@ -28,7 +28,7 @@ Trên popup:
 ## Đã tự quyết
 - **Có bước xác nhận bỏ lượt.** Mất lượt vì chạm nhầm là phạt nặng với người chơi phổ thông.
 - **Xác nhận nằm trong cùng popup.** Tránh hai popup chồng nhau (`feature-popup` còn chưa rõ cách xử lí hai popup).
-- **Không có nút chơi lại.** Giữ đúng hai lựa chọn của `feature-popup-pause/pause-actions`.
+- **Không có nút chơi lại.** Giữ đúng hai lựa chọn của ý pause-actions ở `feature-popup-pause`.
 - **Tự mở khi rời khỏi game giữa trận.** Luật ở `feature-run/run-pause`.
 
 ## Chưa rõ

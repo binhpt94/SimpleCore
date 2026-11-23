@@ -1,5 +1,6 @@
 ---
 based-on: 09ba60c454c5
+refs: feature-run/run-pause@f8e9d49f5079, feature-hud/hud-layout@e541be0cca19, feature-popup/popup-layer@91d4f017d2fb
 ---
 # Nút tạm dừng
 
@@ -14,4 +15,4 @@ Nút chỉ báo "đã bấm" cho `feature-run/run-pause`; trận dừng và popu
 Tránh chạm nhầm giữa lúc đang vội bấm kĩ năng hay mua nâng cấp. Đã loại: đặt cạnh nút kĩ năng.
 
 ### pause-button-active | AI 6 | Nút tạm dừng chỉ bấm được khi trận đang đánh
-Đang tạm dừng thì popup che nút (`feature-popup/popup-block`); lượt đã kết thúc thì nút không còn tác dụng.
+Đang tạm dừng thì popup che nút (`feature-popup/popup-layer`); lượt đã kết thúc thì nút không còn tác dụng.

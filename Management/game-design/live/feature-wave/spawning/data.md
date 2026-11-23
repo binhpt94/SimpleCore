@@ -1,5 +1,6 @@
 ---
 based-on: 1a74f8c24f86
+refs: feature-wave/difficulty-scaling@fed0ac86d57c, feature-wave/wave-clear@b7789c127bb4
 ---
 # Thả quái
 

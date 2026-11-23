@@ -9,10 +9,10 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Máu thành không tự hồi, nên máu mất ở đợt trước cộng vào áp lực đợt sau.
 
 ## Định nghĩa
-- **Sức quái của đợt**: tổng sức gây hại và sức chịu đòn của mọi quái trong đợt.
-- **Sức đội**: tổng sức đánh và sức chịu đòn của hero và thành ở một thời điểm, tính trên năm chỉ số chung: máu, sức đánh, tốc độ đánh, tầm đánh, tốc độ di chuyển.
-- **Đợt gãy**: đợt mà sức quái vượt sức đội tới mức thành bị phá.
-- **Áp lực**: sức quái chia cho sức đội; càng gần đợt gãy thì càng lớn.
+- `glossary#enemy-power`
+- `glossary#team-power` (tính trên năm chỉ số chung)
+- `glossary#break-wave`
+- `glossary#pressure`
 
 ## Danh sách
 Thứ người chơi kéo đợt gãy ra muộn hơn:

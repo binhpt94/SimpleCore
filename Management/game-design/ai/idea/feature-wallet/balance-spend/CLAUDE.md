@@ -9,11 +9,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-run` ra lệnh đặt lại số dư khi bắt đầu lượt.
 - `feature-hud`, `feature-hud-upgrade` theo dõi số dư để hiển thị.
 
-## Định nghĩa
-- **Số dư**: số tiền người chơi đang có, số nguyên, không âm.
-- **Số tiền ban đầu**: số dư lúc lượt bắt đầu; là số cấu hình của ví.
-- **Trừ tiền**: một yêu cầu kèm giá; kết quả là "được" (đã trừ) hoặc "không đủ" (không đổi gì).
-
 ## Danh sách
 - Thao tác lên số dư: cộng, trừ (khi đủ), đặt lại về số tiền ban đầu.
 

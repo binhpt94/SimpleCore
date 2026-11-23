@@ -1,5 +1,6 @@
 ---
 based-on: 700960590953
+refs: feature-wave/difficulty-scaling@fed0ac86d57c, glossary#fighting-style@9e1f75b68d79, glossary#hero-power@92427b9ec147, glossary#counter@39e5f9fc7875, glossary#mono-team@f7b83c3ef1e4
 ---
 # Đội hero cân nhau
 

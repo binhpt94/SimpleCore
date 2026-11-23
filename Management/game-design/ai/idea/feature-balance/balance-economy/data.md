@@ -1,5 +1,6 @@
 ---
 based-on: 700960590953
+refs: feature-wave/difficulty-scaling@fed0ac86d57c, feature-wave/wave-clear@b7789c127bb4, feature-balance/balance-difficulty-curve@f1f04ceb7020, glossary#wave-income@d5bcb396e787, glossary#next-price@59695ee7e7f2, glossary#upgrade-value@3a22a3084298
 ---
 # Thu và chi
 

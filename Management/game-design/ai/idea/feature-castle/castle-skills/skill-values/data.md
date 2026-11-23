@@ -1,5 +1,6 @@
 ---
 based-on: 8bc45d0edc8d
+refs: feature-enemy/enemy-behavior/enemy-move-values@f5adc15dbc17, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-enemy/enemy-reward@1fbbced31e0f
 ---
 # Thông số ba kĩ năng thành
 

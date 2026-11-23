@@ -1,5 +1,6 @@
 ---
 based-on: 10b291cde6dc
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-behavior@cf9290ce16e6, feature-enemy/enemy-stats/enemy-stat-values@213bae407954, feature-enemy/enemy-reward/reward-values@30a4a6c88e50, feature-enemy/enemy-behavior/enemy-move-values@f5adc15dbc17
 ---
 # Năm loại quái: hộp, kiểu đánh, đợt xuất hiện
 

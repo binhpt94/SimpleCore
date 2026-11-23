@@ -1,5 +1,6 @@
 ---
 based-on: 4b9f46cc241a
+refs: feature-run/run-score@6f1909d90f98, feature-run/run-score/score-rules@54a8417a7ccd, feature-popup-lose/lose-actions/actions-spec@0b7bee05c524
 ---
 # Chữ kết quả trên popup thua
 

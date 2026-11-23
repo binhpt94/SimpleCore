@@ -1,5 +1,6 @@
 ---
 based-on: 5fe05cebab72
+refs: feature-balance/balance-config/number-table@3f8b1fde7f49, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/difficulty-scaling@fed0ac86d57c
 ---
 # Thu theo đợt và giá nâng cấp
 

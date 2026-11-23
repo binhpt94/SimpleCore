@@ -1,5 +1,6 @@
 ---
 based-on: 7294a54c79df
+refs: feature-upgrade/upgrade-effect@b9bcec737959, feature-hud-upgrade/bar-layout@4a9d06c74198
 ---
 # Bộ mục nâng cấp của lượt
 

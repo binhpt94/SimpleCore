@@ -9,10 +9,10 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Giá nâng cấp hero ở `feature-upgrade`; mỗi hero một mục cấp.
 
 ## Định nghĩa
-- **Cách đánh**: tổ hợp năm chỉ số chung của một hero (máu, sức đánh, tốc độ đánh, tầm đánh, tốc độ di chuyển) cùng chỗ đứng (chắn trước hay đứng sau).
-- **Sức tổng của hero**: giá trị chung của năm chỉ số, dùng để so các hero với nhau ở cùng cấp.
-- **Hợp với loại quái**: hero đó hạ loại quái đó nhanh hơn, hoặc chịu được nó lâu hơn so với hero khác.
-- **Đội lệch**: đội mà mọi hero cùng một cách đánh.
+- `glossary#fighting-style`
+- `glossary#hero-power`
+- `glossary#counter`
+- `glossary#mono-team`
 
 ## Danh sách
 Cặp mạnh và yếu đối chiếu cho mỗi hero:
@@ -29,6 +29,7 @@ Cặp mạnh và yếu đối chiếu cho mỗi hero:
 
 ## Đã tự quyết
 - **Cân bằng bằng đánh đổi chỉ số, không bằng giá.** Mọi hero chọn được ngay, không mở khoá (vòng 1), nên không thể dùng giá để cân. Đã loại: hero mạnh hơn thì nâng đắt hơn.
+- **Cách đánh theo nghĩa chung ở glossary (2026-11-23).** Trước node này định nghĩa cách đánh là tổ hợp năm chỉ số và chỗ đứng; glossary chọn nghĩa của danh sách hero (nhóm cộng kiểu đòn). Các luật ở đây không đổi: so sánh chỉ số vẫn dùng sức tổng của hero.
 - **Đội lệch vẫn chơi được.** Người chơi phổ thông thử đội lạ không bị phạt nặng.
 
 ## Chưa rõ

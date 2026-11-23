@@ -11,10 +11,10 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-scene-flow` làm việc chuyển scene khi feature này xin.
 
 ## Định nghĩa
-- **Lượt**: từ lúc vào trận tới lúc trận kết thúc. Màn bắt đầu và màn chọn đội nằm ngoài lượt.
-- **Trận**: phần chơi trên dải chiến trường, có HUD (`feature-hud`) và thanh nâng cấp (`feature-hud-upgrade`).
-- **Kết thúc lượt**: lúc trận dừng hẳn và điểm của lượt được chốt (`feature-run/run-score`).
-- **Scene Game**: chứa màn bắt đầu, màn chọn đội, trận, popup tạm dừng, popup thua (`feature-scene-flow/scene-list`). Đổi màn không chuyển scene.
+- `glossary#run`
+- `glossary#battle`
+- `glossary#run-end`
+- `glossary#scene-game`
 
 ## Danh sách
 Các bước chuyển:
@@ -39,8 +39,8 @@ Các bước chuyển:
 
 ## Đã tự quyết
 - **Mọi màn trong scene Game, theo `feature-scene-flow/scene-list` (2026-11-23).** Viết lại ý `flow-scenes`: trước ghi "scene menu và scene trận", lệch với scene-list là nơi quyết scene. Lượt mới vẫn sạch vì trận dựng mới, huỷ hết mỗi lần (`feature-run/run-flow/flow-rules`, ý `fresh-battle`). Đã loại: scene menu và scene trận riêng; mỗi màn một scene.
-- **Bỏ lượt về thẳng màn bắt đầu, không hiện popup thua.** Theo `feature-popup-pause/pause-actions`. Điểm vẫn chốt như thua (quyết định chung của game).
-- **Chơi lại về màn chọn đội.** Theo `feature-run/run-replay`.
+- **Bỏ lượt về thẳng màn bắt đầu, không hiện popup thua.** Theo ý pause-actions của `feature-popup-pause`. Điểm vẫn chốt như thua (quyết định chung của game).
+- **Chơi lại về màn chọn đội.** Theo ý run-replay của `feature-run`.
 
 ## Chưa rõ
 - Không có điểm chặn.

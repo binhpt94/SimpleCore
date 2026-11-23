@@ -1,5 +1,6 @@
 ---
 based-on: a5b77a934bc1
+refs: feature-run/run-flow@db634f5dac0b, feature-run/run-score@6f1909d90f98, feature-scene-flow/scene-list@78ed2dcc0859, glossary#record@d05567cd8426
 ---
 # Nội dung màn bắt đầu
 

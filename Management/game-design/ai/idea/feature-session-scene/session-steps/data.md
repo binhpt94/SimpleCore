@@ -1,5 +1,6 @@
 ---
 based-on: 43be0f08eadd
+refs: glossary#participant@0630839c2a38, glossary#load-step@4b517bdb7c92, glossary#run-step@a790d9cd4ba4, glossary#dispose-step@c82a8e250e4f, glossary#view@c0cbfa55562e
 ---
 # Ba bước của một scene và feature tham gia
 

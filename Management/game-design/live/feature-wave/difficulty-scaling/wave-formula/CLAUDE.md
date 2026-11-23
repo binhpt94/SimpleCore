@@ -36,7 +36,7 @@ Ví dụ kết quả (dự kiến, tính theo công thức trên):
 | Số quái | 6 + 2×w | 6 + 2×w, chỉnh sau chơi thử | chốt sau chơi thử |
 | Nhịp thả | max(0.3, 1.0 − 0.05×(w−1)) s | như IDEA, chỉnh sau chơi thử | chốt sau chơi thử |
 | Hệ số máu, sức đánh | 1 + 0.10×(w−1) | như IDEA, chỉnh sau chơi thử | chốt sau chơi thử |
-| Loại quái dùng | đủ 5 loại theo mốc | đủ 5 loại | đủ 5 loại |
+| Loại quái dùng | Lính, Sói, Khổng lồ theo mốc; không Trùm, không Cung thủ quái (chỗ của chúng dồn cho Lính) | đủ 5 loại | đủ 5 loại |
 | Bảng phần trăm | đủ 6 bậc | đủ 6 bậc, chỉnh sau chơi thử | chốt sau chơi thử |
 | Tham số đặt trong cấu hình | có | có | có |
 
@@ -45,14 +45,15 @@ Ví dụ kết quả (dự kiến, tính theo công thức trên):
 - **Phần trăm làm tròn ra 0 cho loại đã mở:** nâng lên 1, bớt 1 Lính.
 - **Phần nguyên các loại khó cộng lại vượt số chỗ:** không xảy ra với bảng hiện tại (tổng loại khó tối đa 65%); nếu cấu hình đổi làm xảy ra thì bớt từ loại có phần trăm thấp nhất cho tới khi Lính còn ít nhất 1. Cấu hình sai (tổng phần trăm khác 100%) thì báo lỗi lúc nạp cấu hình, nêu tên bậc sai.
 - **Đợt Trùm:** Trùm chiếm 1 chỗ; phần trăm các loại khác tính trên số chỗ còn lại (đợt 10: 25 chỗ).
-- **Chỉ số sau nhân ra số lẻ:** máu và sức đánh làm tròn lên số nguyên (Lính đợt 2: 44 máu, 5.5 → 6 sức đánh).
+- **Chỉ số sau nhân ra số lẻ:** máu và sức đánh giữ số thực, chỉ làm tròn khi hiện ra, theo luật chung ở `feature-hero/hero-stats/hero-level-values` (Lính đợt 2: 44 máu, 5.5 sức đánh).
 
 ## Đã tự quyết
 - **Bảng phần trăm theo bậc, không công thức liên tục.** Dễ đọc, dễ chỉnh, kiểm bằng ví dụ được. Đã loại: phần trăm tăng từng đợt theo công thức (khó đoán số con).
-- **Tiền mỗi con không nhân theo đợt (theo bộ số chuẩn).** Ý `scale-reward` của node cha ("tiền khi hạ một con tăng theo đợt") được hiểu là tiền trung bình mỗi con tăng nhờ phần quái trâu tăng: 40/8 = 5 xu ở đợt 1, 413/46 ≈ 9 xu ở đợt 20. Đã loại: thêm hệ số tiền theo đợt (khác bộ số chuẩn).
+- **Tiền mỗi con không nhân theo đợt (theo bộ số chuẩn, khớp ý `scale-reward` của node cha).** Tiền trung bình mỗi con tăng nhờ phần quái trâu tăng: 40/8 = 5 xu ở đợt 1, 413/46 ≈ 9 xu ở đợt 20. Đã loại: thêm hệ số tiền theo đợt.
 - **Có Trùm ở đợt chia hết cho 10 (theo bộ số chuẩn và `feature-enemy/enemy-list`).** Mục "Đã tự quyết" của node cha ghi "không có đợt trùm"; bộ số chuẩn và `feature-enemy/enemy-list` (Trùm, "khi nào trùm ra là việc của `feature-wave`") quyết khác, node này theo bộ số chuẩn.
-- **Làm tròn chỉ số lên.** Quái không bao giờ yếu hơn công thức.
+- **Chỉ số giữ số thực, làm tròn khi hiện (2026-11-23, sửa lệch).** Bản cũ làm tròn lên số nguyên, trái với ý `decimal-stats` của `feature-hero/hero-stats/hero-level-values` và với `feature-enemy/enemy-stats/enemy-stat-values` (Lính đợt 10: 9.5 sát thương). Một luật cho hero, quái và thành. Đã loại: làm tròn lên lúc nhân.
+- **Mức IDEA chỉ có Lính, Sói, Khổng lồ, không có Trùm (2026-11-23, sửa lệch).** Theo bảng giai đoạn của `feature-enemy/enemy-list/enemy-type-values`. Công thức giữ nguyên; ở IDEA, chỗ của Cung thủ quái và Trùm dồn cho Lính.
 - **Thu giảm sau đợt Trùm là ngoại lệ có chủ đích (2026-11-23).** Sửa chi tiết ý `reward-by-mix` (trước ghi "thu vẫn tăng không giảm", sai với bảng ví dụ: đợt 11 thu 187 < đợt 10 thu 272). Máu Trùm gốc đổi 800 → 400 (`feature-enemy/enemy-stats/enemy-stat-values`) không đổi số nào trong node này vì node chỉ ghi hệ số, không ghi máu.
 
 ## Chưa rõ
-- Ý `scale-reward` của node cha `feature-wave/difficulty-scaling` lệch với bộ số chuẩn (tiền mỗi con không nhân theo đợt). Cần người hoặc agent chính sửa node cha cho khớp, hoặc đổi bộ số chuẩn. (Mục "không có đợt đặc biệt" của node cha đã sửa thành ngoại lệ đợt Trùm, 2026-11-23.)
+- Không có điểm chặn. (Ý `scale-reward` của node cha đã sửa cho khớp: tiền mỗi con giữ nguyên, 2026-11-23.)

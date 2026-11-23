@@ -9,8 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-balance` chỉnh giá trị ban đầu; feature này không biết giá trị đó.
 
 ## Định nghĩa
-- **Trạng thái ban đầu**: trạng thái mỗi feature có khi chưa có gì xảy ra trong trận.
-- **Đội của lượt**: các hero người chơi đã chọn ở màn chọn đội ngay trước trận.
+- `glossary#run-team`
 
 ## Danh sách
 Thứ được đặt lại đầu lượt:
@@ -31,7 +30,7 @@ Thứ không đặt lại:
 ## Đã tự quyết
 - **Kĩ năng thành cũng về ban đầu.** Quyết định chung chỉ nêu máu, tiền, cấp, số đợt; thêm kĩ năng cho trọn ý "bắt đầu lại từ đầu". Có sẵn hay phải chờ hồi lúc đầu lượt là việc của `feature-castle`.
 - **Mỗi feature tự giữ trạng thái ban đầu.** Tránh trùng việc; khớp `feature-upgrade` (đã bỏ `upgrade-reset`, để việc đặt lại cho feature này ra lệnh).
-- **Scene trận tải mới mỗi lượt** (`feature-run/run-flow`), nên đặt lại phần lớn đến từ việc dọn scene của `feature-session-scene`; lệnh "lượt mới" vẫn có để luật không phụ thuộc vào cách chia scene.
+- **Chơi lại không tải lại scene; đặt lại bằng lệnh "lượt mới" (2026-11-23, sửa lệch).** Bản cũ ghi scene trận tải mới mỗi lượt, trái với `feature-scene-flow/scene-list` (mọi màn trong scene Game, không chuyển scene giữa các lượt) và `feature-run/run-flow`. Trận dựng mới và huỷ hết mỗi lượt bên trong scene Game; mọi feature tự đặt lại khi nhận lệnh "lượt mới". Đã loại: tải lại scene mỗi lượt.
 
 ## Chưa rõ
 - Không có điểm chặn.

@@ -1,5 +1,6 @@
 ---
 based-on: b9bcec737959
+refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09, feature-castle/castle-skills/skill-values@6240af7903a9
 ---
 # Mức tăng mỗi cấp
 

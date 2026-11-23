@@ -1,5 +1,6 @@
 ---
 based-on: b7789c127bb4
+refs: feature-wave/spawning/spawn-order@d71ff27687b4, feature-wave/wave-gap/gap-timer@6bd8e5861fbd
 ---
 # Luật dọn sạch và thưởng đợt
 

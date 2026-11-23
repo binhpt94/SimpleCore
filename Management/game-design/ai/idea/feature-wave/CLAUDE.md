@@ -18,7 +18,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Bỏ ý `wave-number` và `wave-stop-on-lose`.** Hiện số đợt là việc của `feature-hud`; dừng khi thua là luật nối với `feature-run`, để vòng 3.
 - **Vẫn có lúc thở ngắn giữa hai đợt, không phải màn nghỉ để nâng cấp.** Nâng cấp mua được mọi lúc (vòng 1).
 - **Bỏ "dự kiến 5 giây" và nút vào sớm.** Con số để vòng 4; nút vào sớm là chi tiết, xét lại ở vòng 3.
-- **Node con `feature-wave/break-phase` (màn nghỉ để nâng cấp) không còn khớp.** Khi làm lại vòng 3 sẽ xoá hoặc viết lại thành lúc thở ngắn.
+- **Màn nghỉ để nâng cấp đã bỏ.** Node con cũ về màn nghỉ đã được thay bằng `feature-wave/wave-gap` (lúc thở ngắn).
 
 ## Chưa rõ
 - Không có điểm chặn.

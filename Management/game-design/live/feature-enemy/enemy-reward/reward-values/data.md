@@ -1,5 +1,6 @@
 ---
 based-on: 1fbbced31e0f
+refs: feature-enemy/enemy-stats/enemy-stat-values@213bae407954
 ---
 # Mức tiền khi hạ quái
 

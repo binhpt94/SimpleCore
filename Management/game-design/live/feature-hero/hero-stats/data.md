@@ -1,5 +1,6 @@
 ---
 based-on: c5b904d13f66
+refs: feature-hero/hero-list@1bf8998ab5a4, feature-hero/hero-respawn@2ae1008b33cd, feature-enemy/enemy-stats@504e5ffe01a8, feature-castle/castle-attack@639d373f52f2, feature-castle/castle-core@e1440a2a0de0, feature-castle/castle-upgrade-effects@2c1e443d0ced
 ---
 # Chỉ số và cấp hero
 

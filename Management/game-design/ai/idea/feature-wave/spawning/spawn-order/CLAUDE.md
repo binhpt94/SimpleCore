@@ -6,7 +6,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 1. Đầu đợt nhận từ `feature-wave/difficulty-scaling/wave-formula`: số quái N, nhịp thả, hệ số chỉ số, số con từng loại.
 2. Lập danh sách N mục (loại, bên, lúc ra):
    - Xáo thứ tự các loại không phải Trùm.
-   - Nếu đợt có Trùm: chèn Trùm vào vị trí N/2 + 1.
+   - Nếu đợt có Trùm: đặt Trùm ở vị trí cuối (thứ N).
    - Gán bên: đúng N/2 trái, N/2 phải, ngẫu nhiên, không có chuỗi quá 3 mục liên tiếp cùng bên.
    - Lúc ra dự kiến của mục thứ i (đếm từ 1) là (i − 1) × nhịp thả, tính từ đầu đợt, cộng thời gian bị hoãn.
 3. Thả lần lượt theo danh sách. Mỗi con mới ra mang chỉ số đã nhân hệ số của đợt đang đánh.
@@ -17,7 +17,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 |---|---|---|---|
 | Điểm ra bên trái / phải | x = −17 / +17, trên mặt đất của làn | u | Ngoài mép màn hình (±16u) 1u, quái đi vào khung hình |
 | Số quái mỗi bên | N/2 | con | Kẹp đều hai phía |
-| Vị trí Trùm | N/2 + 1 | thứ tự | Giữa đợt |
+| Vị trí Trùm | N (con cuối) | thứ tự | Cuối đợt, khớp `feature-enemy/enemy-list/enemy-type-values` |
 | Chuỗi cùng bên tối đa | 3 | con | Không bỏ trống một bên lâu |
 | Con đầu tiên ra | 0 | s từ đầu đợt | Đợt bắt đầu là thấy quái ngay |
 | Giới hạn quái sống | 40 | con | Màn hình điện thoại vẫn đọc được |
@@ -31,7 +31,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Điểm ra | x = ±17u | x = ±17u | x = ±17u |
 | Chia bên | N/2 mỗi bên | N/2 mỗi bên | N/2 mỗi bên |
 | Chuỗi cùng bên tối đa | 3 con | 3 con | chỉnh sau chơi thử |
-| Vị trí Trùm | N/2 + 1 | N/2 + 1 | chỉnh sau chơi thử |
+| Vị trí Trùm | không có Trùm | con cuối (N) | chỉnh sau chơi thử |
 | Giới hạn quái sống | 40 con | 40 con | chỉnh theo hiệu năng máy thật |
 | Xáo thứ tự, bên | có | có | có |
 
@@ -41,12 +41,13 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Tạm dừng giữa lúc thả:** đồng hồ nhịp đứng yên; bỏ tạm dừng thì đếm tiếp phần còn lại của nhịp, không thả bù.
 - **Hai con ra cùng chỗ** (con trước còn đứng ở x = ±17u): vẫn ra, cho chồng lên nhau; `feature-enemy` lo việc tách khi đi.
 - **Không xếp được bên để chuỗi ≤ 3:** với N/2 trái, N/2 phải luôn xếp được; nếu bước ngẫu nhiên ra chuỗi 4 thì đổi bên mục thứ 4 với mục gần nhất phía sau thuộc bên kia.
-- **Trùm và giới hạn 40:** Trùm cũng phải chờ dưới 40 như mọi con; tới lượt thì ra, không chen trước.
+- **Trùm và giới hạn 40:** Trùm cũng phải chờ dưới 40 như mọi con; vẫn là con cuối của đợt.
 - **Mua nâng cấp, dùng kĩ năng thành giữa lúc thả:** không ảnh hưởng danh sách hay nhịp.
-- **Đợt 1:** bắt đầu ngay lúc `feature-run` báo trận bắt đầu, con đầu ra ở 0 s; quãng đi khoảng 10 s của Lính đủ để đội hero ra khỏi thành.
+- **Đợt 1:** bắt đầu ngay lúc `feature-run` báo trận bắt đầu, con đầu ra ở 0 s; quãng đi khoảng 9.3 s của Lính (`feature-enemy/enemy-behavior/enemy-move-values`) đủ để đội hero ra khỏi thành.
 
 ## Đã tự quyết
-- **Trùm ở giữa đợt, vị trí cố định.** Kiểm được, không phụ thuộc ngẫu nhiên. Đã loại: Trùm ra cuối đợt (dồn với quái tồn), Trùm ngẫu nhiên.
+- **Trùm là con cuối của đợt, vị trí cố định (2026-11-23, sửa lệch).** Bản cũ đặt Trùm ở giữa đợt, trái với `feature-enemy/enemy-list/enemy-type-values` (ý `boss-single`: ra cuối đợt). Theo node của enemy: người chơi dọn bớt quái thường rồi mới gặp Trùm, đợt dồn lên một đỉnh rõ. Mức IDEA không có Trùm (theo node enemy). Đã loại: Trùm giữa đợt, Trùm ngẫu nhiên.
+- **Lính đi khoảng 9.3 s tới mép thành (2026-11-23).** Lấy theo `feature-enemy/enemy-behavior/enemy-move-values`; bản cũ ghi khoảng 10 s.
 - **Chuỗi cùng bên tối đa 3.** Ý `spawn-both-sides` cần cả hai bên luôn có áp lực. Đã loại: xen kẽ trái phải tuyệt đối (dễ đoán), ngẫu nhiên hoàn toàn (có lúc 6 con cùng bên).
 - **Hoãn khi đủ 40 rồi thả ngay khi bớt.** Không mất quái nào của đợt, đợt vẫn đủ số. Đã loại: bỏ con thừa (đợt nhẹ đi khi đội yếu, thưởng người chơi kém).
 - **Không có đếm ngược trước đợt 1.** Node `feature-wave/wave-gap` chỉ có lúc thở sau dọn sạch; quãng đi của quái đã đủ làm lúc chuẩn bị.

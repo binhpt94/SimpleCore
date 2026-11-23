@@ -8,9 +8,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Đặt lại giữa hai lượt trong cùng scene Game: `feature-run` báo, các feature chơi (`feature-castle`, `feature-wallet`, `feature-upgrade`, `feature-wave`, `feature-hero`) tự đặt lại.
 
 ## Định nghĩa
-- **Dọn sạch**: sau khi huỷ, scene không còn view, không còn việc đang chạy, không còn trạng thái của trận.
-- **Dữ liệu đã lưu**: thứ được ghi lại để còn sau khi tắt game; hiện chỉ có kỉ lục.
-- **Bắt đầu sạch**: lượt mới thấy mọi thứ về như ban đầu, không mang theo gì từ lượt trước ngoài kỉ lục và đội đã nhớ (`feature-team-select`).
+- `glossary#clean`
+- `glossary#clean-start`
 
 ## Danh sách
 - Còn lại qua scene: kỉ lục.

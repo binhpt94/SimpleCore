@@ -1,5 +1,6 @@
 ---
 based-on: 4a9d06c74198
+refs: feature-upgrade/upgrade-list/item-set@fd6c29c2b1b5, feature-hud-upgrade/button-state/button-display@5c40022a4eb9
 ---
 # Nút trên thanh nâng cấp
 

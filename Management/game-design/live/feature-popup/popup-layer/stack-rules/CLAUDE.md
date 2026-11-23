@@ -6,27 +6,25 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Lớp popup của scene Game giữ một chồng popup, từ 0 tới 3 cái.
 - Mở popup: kiểm id chưa mở và chồng chưa đủ 3; đặt nền che rồi popup lên trên cùng; popup cũ trên cùng thôi nhận bấm.
 - Đóng popup: bỏ popup và nền che của nó; popup ngay dưới (nếu có) nhận bấm lại; không còn popup thì lớp popup không chặn gì.
-- Khi có popup mở: HUD, màn chơi và các popup không ở trên cùng không nhận bấm, kể cả nút quay lại của điện thoại.
+- Khi có popup mở: HUD, màn chơi và các popup không ở trên cùng không nhận bấm. Nút quay lại của điện thoại chỉ được chuyển cho feature của popup trên cùng.
 
 Các tình huống trong game hiện tại:
 
 | Tình huống | Chồng popup (dưới → trên) | Nhận bấm |
 |---|---|---|
 | Đang đánh | (trống) | HUD, màn chơi |
-| Tạm dừng | popup tạm dừng | popup tạm dừng |
-| Bấm bỏ lượt | popup tạm dừng → hộp xác nhận | hộp xác nhận |
-| Huỷ xác nhận | popup tạm dừng | popup tạm dừng |
+| Tạm dừng (cả bước hỏi xác nhận bỏ lượt) | popup tạm dừng | popup tạm dừng |
 | Thua | popup thua | popup thua |
 
 ## Thông số
 | Thông số | Giá trị | Đơn vị | Lí do |
 |---|---|---|---|
-| Số popup chồng tối đa | 3 | popup | Game cần 2; dư 1 cho popup sau này, quá 3 là dấu hiệu lỗi |
+| Số popup chồng tối đa | 3 | popup | Game hiện cần 1; dư cho popup sau này, quá 3 là dấu hiệu lỗi |
 | Số bản mỗi id cùng lúc | 1 | bản | Chặn mở trùng do bấm nhanh |
 | Độ tối của một nền che | 60 (dự kiến) | % | Đủ thấy đang có popup mà vẫn nhận ra trận phía sau |
 | Thời gian hiện, đóng popup | 0 | giây | Tức thì, nhận bấm ngay |
 | Tác dụng khi bấm nền che | không | — | Tránh bấm nhầm mất popup thua |
-| Tác dụng nút quay lại của điện thoại khi có popup | không | — | Như trên |
+| Tác dụng nút quay lại của điện thoại khi có popup | chuyển cho feature của popup trên cùng; dịch vụ không tự làm gì | — | Mỗi popup tự quyết (popup tạm dừng: như "Tiếp tục"/"Không"; popup thua: không tác dụng) |
 
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
@@ -36,7 +34,7 @@ Các tình huống trong game hiện tại:
 | Nhận bấm trong lúc hiệu ứng mở | Không có hiệu ứng | Chặn bấm tới khi hiệu ứng xong | Như PROTOTYPE |
 | Độ tối nền che | 60% (dự kiến) | 60% | Chỉnh theo art |
 | Số popup chồng tối đa | 3 | 3 | 3 |
-| Nút quay lại của điện thoại | Không tác dụng | Không tác dụng | Xét cho đóng hộp xác nhận (như bấm huỷ) |
+| Nút quay lại của điện thoại | Chuyển cho popup trên cùng | Chuyển cho popup trên cùng | Chuyển cho popup trên cùng |
 
 ## Trường hợp biên
 - **Mở popup thứ 4**: từ chối, ghi lỗi nêu id; ba popup đang mở giữ nguyên.
@@ -48,10 +46,11 @@ Các tình huống trong game hiện tại:
 - **Không có popup**: lớp popup không chặn bấm, không làm tối gì.
 
 ## Đã tự quyết
-- **Giới hạn 3.** Đủ cho 2 cần thiết, bắt được lỗi mở lặp. Đã loại: không giới hạn; giới hạn 2 (không dư cho popup mới).
+- **Giới hạn 3.** Dư chỗ cho popup sau này, bắt được lỗi mở lặp. Đã loại: không giới hạn; giới hạn 1 (không chồng được popup mới).
+- **Không còn hộp xác nhận chồng lên popup tạm dừng (2026-11-23, sửa lệch).** Theo `feature-popup-pause/pause-popup`: xác nhận bỏ lượt là bước trong cùng popup. Sửa chi tiết ý `stack-max` và `backdrop-dim`, bảng tình huống.
 - **Một bản mỗi id.** Đơn giản nhất để chặn bấm đúp. Đã loại: cho mở trùng.
 - **Nền chồng thì tối thêm.** Mỗi popup một nền theo vòng 3; tối thêm giúp thấy popup nào đang hoạt động. Đã loại: chỉ nền trên cùng làm tối.
-- **Nút quay lại không tác dụng.** Giữ luật "popup chỉ đóng khi feature gọi yêu cầu". Đã loại: nút quay lại đóng popup trên cùng.
+- **Nút quay lại chuyển cho feature của popup trên cùng (2026-11-23, sửa lệch với `feature-popup-pause/pause-popup/pause-popup-spec` ý `back-key`).** Dịch vụ vẫn không tự đóng popup, giữ luật "popup chỉ đóng khi feature gọi yêu cầu"; mỗi popup tự quyết nút quay lại làm gì. Đã loại: nút quay lại đóng popup trên cùng (dịch vụ quyết thay feature); nút quay lại không tác dụng với mọi popup (trái thói quen trên điện thoại ở popup tạm dừng).
 - **Hiện tức thì.** Hiệu ứng không cần để thấy gameplay.
 
 ## Chưa rõ

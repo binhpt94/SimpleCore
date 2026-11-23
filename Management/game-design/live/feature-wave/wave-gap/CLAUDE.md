@@ -31,7 +31,7 @@ Những gì giữ như mọi lúc:
 - **Có lúc thở ngắn.** Để thấy rõ đã qua một đợt và có cảm giác nhẹ nhõm (vòng 1, cảm giác chính). Đã loại: nối liền đợt.
 - **Không có nút gọi đợt sớm.** Thêm một thao tác và một luật thưởng ngoài vòng 1. Đã loại: gọi sớm lấy thêm tiền.
 - **Thành không hồi máu trong lúc thở.** Theo quyết định chung: thành không tự hồi; máu mất kéo áp lực sang đợt sau.
-- **Node mới thay `feature-wave/break-phase` đã xoá (2026-11-23).** Màn nghỉ để nâng cấp mâu thuẫn với "nâng cấp ngay trong trận" của vòng 1.
+- **Node mới thay node "màn nghỉ để nâng cấp" (break-phase) đã xoá (2026-11-23).** Màn nghỉ để nâng cấp mâu thuẫn với "nâng cấp ngay trong trận" của vòng 1.
 
 ## Chưa rõ
 - Không có điểm chặn.

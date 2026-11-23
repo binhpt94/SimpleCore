@@ -1,5 +1,6 @@
 ---
 based-on: fe94740dab29
+refs: feature-run/run-start@31cb7598b529, feature-run/run-flow@db634f5dac0b, feature-team-select/team-memory@4a24db16dcc6, feature-team-select/hero-cards@5fe7af230b3e
 ---
 # Chỗ trong đội và luật chọn
 

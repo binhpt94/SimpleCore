@@ -1,5 +1,6 @@
 ---
 based-on: 700960590953
+refs: feature-wave/difficulty-scaling@fed0ac86d57c, feature-wave/wave-clear@b7789c127bb4, feature-balance/balance-difficulty-curve@f1f04ceb7020
 ---
 # Thu và chi
 

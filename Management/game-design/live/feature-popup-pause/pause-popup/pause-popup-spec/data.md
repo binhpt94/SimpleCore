@@ -1,5 +1,6 @@
 ---
 based-on: 25d160950007
+refs: feature-run/run-pause@f8e9d49f5079, feature-run/run-pause/pause-rules@2f184465270c
 ---
 # Hai bước của popup tạm dừng
 

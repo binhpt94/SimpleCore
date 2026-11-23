@@ -85,4 +85,4 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Chưa rõ
 - **Thu giảm sau đợt Trùm** (đợt 10 → 11: 342 → 262 xu): đã quyết theo phương án (a) (2026-11-23): ngoại lệ có chủ đích, Trùm là phần thưởng riêng; luật node cha `feature-balance/balance-economy` đã thêm ngoại lệ. Tiền Trùm giữ 100 xu. Đã loại: (b) giảm tiền Trùm xuống 20 xu.
 - **Sức đánh thành yếu dần nhanh:** mỗi cấp chỉ +2 sát thương/giây trong khi giá ×1.4; từ cấp 5 lời chỉ còn 0.018, gần như không ai mua. Đề xuất: giữ +20% lv1 mỗi cấp nhưng đổi hệ số giá sức đánh thành từ 1.4 xuống 1.3, hoặc tăng mức thêm lên +30% lv1 mỗi cấp.
-- **Ý `scale-reward` của `feature-wave/difficulty-scaling`** (tiền mỗi con tăng theo đợt) lệch bộ số chuẩn (tiền không nhân). Tiền trung bình mỗi con vẫn tăng từ 5 lên khoảng 7 xu nhờ loại trâu; nếu muốn bám đúng ý node cha thì thêm hệ số tiền 1 + 0.03×(w−1) (đợt 20 thu khoảng 650 xu thay vì 533).
+- **Ý `scale-reward` của `feature-wave/difficulty-scaling`:** đã sửa cho khớp bộ số chuẩn (2026-11-23): tiền mỗi con không nhân theo đợt.

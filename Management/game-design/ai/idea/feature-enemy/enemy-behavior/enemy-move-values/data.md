@@ -1,5 +1,6 @@
 ---
 based-on: cf9290ce16e6
+refs: feature-hero/hero-list/hero-roster-values@7e08a91df0cf, feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-stats/enemy-stat-values@213bae407954, feature-castle/castle-skills/skill-values@6240af7903a9
 ---
 # Thông số đi và đánh của quái
 

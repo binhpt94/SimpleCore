@@ -1,5 +1,6 @@
 ---
 based-on: b74c0b7d272a
+refs: feature-hero/hero-stats@2748621645f8, feature-enemy/enemy-list@10b291cde6dc, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-skills@8bc45d0edc8d, glossary#hp@5433e9791fe3, glossary#attack@8196b706c38a, glossary#attack-speed@e3b0f90feef6, glossary#range@e47b0e576df3, glossary#defeated@8f3d5bbe33d3, glossary#base-stats@ff57fd5cfca7
 ---
 # Chỉ số quái
 

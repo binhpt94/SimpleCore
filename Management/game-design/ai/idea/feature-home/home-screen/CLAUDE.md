@@ -3,15 +3,13 @@
 Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Quan hệ
-- Một màn bắt đầu cho cả game; nằm ở scene menu chung với màn chọn đội (`feature-run/run-flow`).
+- Một màn bắt đầu cho cả game; nằm trong scene Game cùng mọi màn khác (`feature-scene-flow/scene-list`), là màn đầu tiên khi vào scene Game.
 - Đọc kỉ lục từ `feature-run/run-score`.
 - Báo bấm chơi cho `feature-run/run-flow`; màn tiếp theo là `feature-team-select`.
 - Tới từ: màn tải của `feature-scene-flow` khi mở game, bỏ lượt ở `feature-popup-pause`, nút về màn bắt đầu ở `feature-popup-lose`.
 
 ## Định nghĩa
-- **Tên game**: tên chính thức của game (còn là tên tạm, xem node gốc).
-- **Kỉ lục**: số đợt dọn sạch nhiều nhất từng đạt (`feature-run/run-score`).
-- **Nút chơi**: nút duy nhất bấm được trên màn này.
+- `glossary#record`
 
 ## Danh sách
 Thứ hiện trên màn bắt đầu:
@@ -26,6 +24,7 @@ Thứ hiện trên màn bắt đầu:
 
 ## Đã tự quyết
 - **Ghép bốn ý thành một node.** Feature nhỏ, hai ý vòng 2 (`home-start`, `home-record`) đều nằm trên một màn.
+- **Màn bắt đầu ở scene Game (2026-11-23, sửa lệch).** Bản cũ ghi "scene menu", trái với `feature-scene-flow/scene-list`. Đã loại: scene menu riêng.
 - **Không có nút thoát game.** Điện thoại tự có cách thoát. Đã loại: nút thoát.
 
 ## Chưa rõ

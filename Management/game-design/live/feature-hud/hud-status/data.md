@@ -1,5 +1,6 @@
 ---
 based-on: 09ba60c454c5
+refs: feature-run/run-score@6f1909d90f98, feature-hud/hud-layout@e541be0cca19
 ---
 # Thông tin trận
 

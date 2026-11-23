@@ -4,13 +4,11 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Quan hệ
 - Một hero trong danh sách có đúng một thẻ.
-- Mỗi hero có một cách đánh (`feature-hero/hero-roles`); nhiều hero có thể chung một cách đánh.
+- Mỗi hero có một cách đánh (`feature-hero`); nhiều hero có thể chung một cách đánh.
 - Chạm thẻ là chọn hoặc bỏ hero (`feature-team-select/team-slots`).
 
 ## Định nghĩa
-- **Thẻ hero**: ô hiện một hero trong danh sách.
-- **Cách đánh**: vai trò của hero trong trận, như chắn quái ở trước hay bắn xa ở sau.
-- **Dấu hiệu vai trò**: biểu tượng hoặc màu chung cho các hero cùng cách đánh.
+- `glossary#fighting-style`
 
 ## Danh sách
 Trên mỗi thẻ:
@@ -25,6 +23,7 @@ Trên mỗi thẻ:
 
 ## Đã tự quyết
 - **Không hiện bảng chỉ số.** Người chơi phổ thông chọn theo vai trò là đủ; chỉ số để `feature-hero` và `feature-balance`. Đã loại: hiện máu, sức đánh, tầm đánh trên thẻ.
+- **Cách đánh lấy từ `feature-hero/hero-list` (2026-11-23).** Ý `card-content` trỏ tới node không có (`hero-roles` là một ý của `feature-hero`, không phải node); danh sách hero và vai nằm ở `feature-hero/hero-list`.
 - **Không có màn xem chi tiết hero.** Một màn, ít thao tác. Đã loại: chạm giữ để mở thông tin.
 
 ## Chưa rõ

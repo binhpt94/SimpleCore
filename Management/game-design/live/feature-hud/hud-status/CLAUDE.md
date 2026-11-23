@@ -8,8 +8,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Vị trí trên màn hình ở `feature-hud/hud-layout`.
 
 ## Định nghĩa
-- **Máu thành**: độ bền còn lại của thành (`feature-castle/castle-health`); về không là thành bị phá.
-- **Máu tối đa**: máu khi thành đầy; nâng cấp độ bền làm nó lớn hơn (`feature-castle/castle-upgrades`).
+- **Máu thành**: độ bền còn lại của thành (ý castle-health của `feature-castle`); về không là thành bị phá.
+- **Máu tối đa**: máu khi thành đầy; nâng cấp độ bền làm nó lớn hơn (ý castle-upgrades của `feature-castle`).
 - **Đợt đang đánh**: đợt quái hiện tại của lượt, tính cả lúc thở giữa hai đợt là đợt sắp tới.
 
 ## Danh sách

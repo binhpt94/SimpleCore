@@ -20,6 +20,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Đã tự quyết
 - **Biểu tượng hai vạch đứng.** Người chơi điện thoại đã quen. Đã loại: chữ "Dừng".
 - **Nút xa vùng bấm nhiều.** Bấm nhầm tạm dừng làm đứt nhịp trận.
+- **Popup che nút theo `feature-popup/popup-layer` (2026-11-23).** Ý `pause-button-active` trước trỏ tới node không có (`popup-block`); luật che và chặn bấm nằm ở `feature-popup/popup-layer`.
 
 ## Chưa rõ
 - Không có điểm chặn.
