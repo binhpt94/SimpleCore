@@ -9,7 +9,7 @@
   "use strict";
 
   // ---------------------------------------------------------------- cấu hình
-  var OVERVIEW_LAST_ROUND = 3;   // bản đồ chung hiện tới vòng này
+  var OVERVIEW_LAST_ROUND = 2;   // bản đồ chung ("Tất cả feature") hiện tới vòng này
   var FOCUS_ROUND = 2;           // bấm node ở vòng này thì chỉ còn nhánh của nó, hiện tới vòng cuối
   var CARD_W = 240, CARD_H = 112, GAP_X = 64, GAP_Y = 14, HEAD_H = 40;
   // `dir`: thư mục của bảng, tính từ Management/ (để nạp ảnh và ghi đường dẫn).
@@ -95,7 +95,12 @@
     ".gd-head:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }",
     ".gd-item .text { flex: 1; min-width: 0; margin: 0; font-size: 15px; line-height: 1.5; color: var(--text); }",
     ".gd-marks { flex: none; display: flex; gap: 6px; align-items: center; max-width: 55%; }",
-    ".gd-more { white-space: pre-wrap; margin: 0 0 10px; max-width: 72ch; font-size: 14.5px; line-height: 1.6; color: var(--muted); }",
+    ".gd-table { overflow-x: auto; margin: 0 0 12px; }",
+    ".gd-table table { border-collapse: collapse; font-size: 13.5px; }",
+    ".gd-table th, .gd-table td { border: 1px solid var(--line); padding: 5px 10px; text-align: left; vertical-align: top; }",
+    ".gd-table th { background: var(--bg); font-weight: 600; }",
+    ".gd-more p { margin: 0 0 8px; }",
+    ".gd-more { margin: 0 0 10px; max-width: 72ch; font-size: 14.5px; line-height: 1.6; color: var(--muted); }",
     ".gd-id { margin: 0 0 8px; font-size: 11.5px; color: var(--muted); }",
     ".gd-id code { font-size: 11.5px; }",
     ".gd-mark { padding: 1px 8px; border: 1px solid var(--line); border-radius: 4px; font-size: 11.5px; line-height: 1.5; color: var(--muted); white-space: nowrap; }",
@@ -183,6 +188,10 @@
     ".gd-gate { margin: 8px 0 0; font-size: 13.5px; }",
     ".gd-gate.ok { color: var(--ok); }",
     ".gd-gate.bad { color: var(--bad); }",
+    ".gd-fold { margin: 18px 0 0; border-top: 1px solid var(--line); padding-top: 10px; }",
+    ".gd-fold > summary { cursor: pointer; font-weight: 600; font-size: 15px; }",
+    ".gd-fold.gd-debug > summary { color: var(--muted); font-weight: 400; font-size: 13px; }",
+    ".gd-fold[open] > summary { margin-bottom: 8px; }",
     ".gd-context { margin: 10px 0 0; font-size: 13.5px; }",
     ".gd-context summary { cursor: pointer; color: var(--accent); }",
     ".gd-context ul, .gd-refs { margin: 4px 0 8px; padding-left: 20px; font-size: 13px; }",
@@ -280,10 +289,39 @@
   };
 
   // ---------------------------------------------------------------- markdown tối thiểu (chỉ để đọc)
+  // Chữ trong dòng: `code` và **đậm**; còn lại là chữ thường (không chèn HTML).
+  var inline = function (ctx, node, text) {
+    var rx = /`([^`]+)`|\*\*(.+?)\*\*|\[([^\]]+)\]\([^)]*\)/g, at = 0, m;
+    while ((m = rx.exec(text))) {
+      if (m.index > at) node.appendChild(document.createTextNode(text.slice(at, m.index)));
+      if (m[1] !== undefined) node.appendChild(ctx.el("code", "", m[1]));
+      else if (m[2] !== undefined) node.appendChild(inline(ctx, ctx.el("strong"), m[2]));
+      else node.appendChild(document.createTextNode(m[3]));     // link: chỉ giữ chữ
+      at = rx.lastIndex;
+    }
+    if (at < text.length) node.appendChild(document.createTextNode(text.slice(at)));
+    return node;
+  };
+  var cells = function (line) {
+    return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(function (c) { return c.trim(); });
+  };
   var renderText = function (ctx, box, text) {
-    var lines = (text || "").split("\n"), para = [], list = null, code = null;
+    var lines = (text || "").split("\n"), para = [], list = null, code = null, rows = null;
+    var flushTable = function () {
+      if (!rows) return;
+      var wrap = ctx.put(box, ctx.el("div", "gd-table"));
+      var tbl = ctx.put(wrap, ctx.el("table"));
+      var sep = rows.length > 1 && /^[\s|:-]+$/.test(rows[1]);
+      rows.forEach(function (r, i) {
+        if (sep && i === 1) return;
+        var tr = ctx.put(tbl, ctx.el("tr"));
+        cells(r).forEach(function (c) { ctx.put(tr, inline(ctx, ctx.el(sep && i === 0 ? "th" : "td"), c)); });
+      });
+      rows = null;
+    };
     var flush = function () {
-      if (para.length) ctx.add(box, ctx.el("p", "", para.join(" ")));
+      flushTable();
+      if (para.length) ctx.add(box, inline(ctx, ctx.el("p"), para.join(" ")));
       para = [];
       list = null;
     };
@@ -296,12 +334,18 @@
       var head = /^(#{1,6})\s+(.*)$/.exec(line), bullet = /^\s*[-*]\s+(.*)$/.exec(line);
       if (head) { flush(); ctx.add(box, ctx.el("h4", "", head[2])); return; }
       if (bullet) {
+        flushTable();
         if (para.length) flush();
         if (!list) list = ctx.put(box, ctx.el("ul"));
-        ctx.add(list, ctx.el("li", "", bullet[1]));
+        ctx.add(list, inline(ctx, ctx.el("li"), bullet[1]));
         return;
       }
-      if (/^\s*\|/.test(line)) { flush(); ctx.add(box, ctx.el("pre", "", line)); return; }
+      if (/^\s*\|/.test(line)) {
+        if (!rows) { flush(); rows = []; }
+        rows.push(line);
+        return;
+      }
+      flushTable();
       if (!line.trim()) { flush(); return; }
       if (list) list = null;
       para.push(line.trim());
@@ -722,7 +766,7 @@
         head.setAttribute("role", "button");
         head.setAttribute("aria-expanded", "false");
         // Một hàng: tiêu đề bên trái, rồi ý kiến đã ghi (rút gọn) và hai khung điểm bên phải.
-        add(head, el("p", "text", it.title));
+        add(head, inline(ctx, el("p", "text"), it.title));
         var marks = put(head, el("div", "gd-marks"));
         var aiMark = put(marks, el("span", "gd-mark " + band(it.ai).key, "AI: " + it.ai));
         aiMark.title = "AI chấm " + it.ai + " · " + band(it.ai).label;
@@ -737,7 +781,7 @@
         };
         var editor = put(block, el("div", "gd-edit"));
         editor.hidden = true;
-        if (it.detail) add(editor, el("p", "gd-more", it.detail));      // chi tiết của ý chỉ hiện khi đã bấm mở
+        if (it.detail) renderText(ctx, put(editor, el("div", "gd-more")), it.detail);      // chi tiết của ý chỉ hiện khi đã bấm mở
         var code = put(editor, el("p", "gd-id", "Mã của ý: "));      // mã chỉ hiện khi đã bấm mở
         add(code, el("code", "", it.id));
         var row = put(editor, el("div", "gd-score"));
@@ -979,6 +1023,13 @@
       });
     };
 
+    // Mục phụ (tham chiếu, hướng dẫn, diễn giải): gập sẵn, tiêu đề như h3, bấm để mở.
+    var fold = function (body, title) {
+      var box = put(body, el("details", "gd-fold"));
+      add(box, el("summary", "", title));
+      return box;
+    };
+
     // Ngữ cảnh ghép lúc đọc: các node phía trên, các node và từ mà refs trỏ tới (node không chép lại nội dung cha).
     var pick = function (path) { state.selected = path; render(); };
     var renderContext = function (body, node, root) {
@@ -989,8 +1040,7 @@
         cur = cur.children.filter(function (c) { return c.key === k; })[0] || null;
       });
       if (above.length) {
-        var box = put(body, el("details", "gd-context"));
-        add(box, el("summary", "", "Bám theo: " + above.length + " node phía trên"));
+        var box = fold(body, "Bám theo: " + above.length + " node phía trên");
         above.forEach(function (a) {
           var line = put(box, el("p", ""));
           var link = put(line, button((a.path || "(gốc)") + " · vòng " + a.round + " · " + a.title, function () { pick(a.path); }, null, "gd-link"));
@@ -1001,9 +1051,11 @@
         });
       }
       var refs = (node.refs || []).concat((node.refMissing || []).map(function (r) { return { label: r.label, path: r.path, term: r.term, ok: "missing" }; }));
-      if (refs.length) {
-        add(body, el("h3", "", "Tham chiếu (refs)"));
-        var list = put(body, el("ul", "gd-refs"));
+      var notes = node.refNotes || [];
+      var bad = refs.filter(function (r) { return r.ok !== true; }).length;
+      if (refs.length || notes.length) {
+        var refBox = fold(body, "Tham chiếu (refs): " + refs.length + (bad ? ", " + bad + " cần rà" : ""));
+        var list = put(refBox, el("ul", "gd-refs"));
         refs.forEach(function (r) {
           var li = put(list, el("li", ""));
           var state_ = r.ok === true ? "khớp" : r.ok === false ? "LỆCH: node đích đã đổi, cần rà lại" : r.ok === "missing" ? "nhắc tới mà chưa khai" : "không có node hay từ này";
@@ -1012,12 +1064,11 @@
           else add(li, el("code", "", r.label));
           add(li, el("span", r.ok === true ? "muted" : "gd-bad", " " + (r.title ? r.title + " · " : "") + state_));
         });
+        notes.forEach(function (t) { add(refBox, el("p", "gd-note", t)); });
       }
-      (node.refNotes || []).forEach(function (t) { add(body, el("p", "gd-note", t)); });
       var gloss = data.glossary && data.glossary[state.table];
       if (gloss && node.path === gloss.path) {
-        add(body, el("h3", "", "Các từ được dùng ở đâu"));
-        var ul2 = put(body, el("ul", "gd-refs"));
+        var ul2 = put(fold(body, "Các từ được dùng ở đâu (" + gloss.terms.length + " từ)"), el("ul", "gd-refs"));
         gloss.terms.forEach(function (t) {
           add(ul2, el("li", "", t.term + ": " + (t.usedBy.length ? t.usedBy.join(", ") : "chưa node nào khai refs tới")));
         });
@@ -1042,9 +1093,8 @@
       body.className = "gd-detail";
       add(body, el("h2", "", node.title || "(chưa đặt tên)"));
       add(body, el("p", "gd-path", "Vòng " + node.round + " · " + ((data.rounds || [])[node.round - 1] || "") + " · " +
-        table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "") + " · hash data " + node.dataHash));
+        table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "")));
       if (node.summary) add(body, el("p", "", node.summary));
-      renderContext(body, node, root);
       renderPriority(body, node);
       renderProgress(body, node);
       renderCode(body, node);
@@ -1053,18 +1103,6 @@
       renderItems(body, node);
       renderQuestions(body, node);
       renderPromote(body, node);
-      add(body, el("h3", "", "Độ quan trọng và giai đoạn"));
-      var stages = put(body, el("div", "gd-scale"));
-      phases().forEach(function (p) { add(stages, el("span", "", p.min + "–" + p.max + " " + p.name + ": " + p.label)); });
-      add(body, el("p", "gd-note", "AI chỉ chấm ở node lá; node cha lấy điểm cao nhất bên dưới. Điểm bạn chấm cho một node là tuyệt đối, " +
-        "và các node con bạn chưa chấm dời theo cùng khoảng cách. Độ quan trọng không làm đổi hash, không ảnh hưởng việc đạt hay chốt."));
-      add(body, el("h3", "", "Thang điểm"));
-      var scale = put(body, el("div", "gd-scale"));
-      (data.bands || []).forEach(function (b) { add(scale, el("span", "", b.min + "–" + b.max + ": " + b.label)); });
-      add(body, el("p", "gd-note", MODES.filter(function (m) { return m.key === mode(); })[0].hint.replace("mức đạt", passMin()) +
-        " Điểm của bạn là tuyệt đối và dùng chung cho bảng đề xuất và bảng đã chốt."));
-      add(body, el("h3", "", "Diễn giải (CLAUDE.md)"));
-      renderText(ctx, body, node.body.replace(/^# .*\n?/, "") || "Chưa có diễn giải.");
       if (node.images.length) {
         add(body, el("h3", "", "Ảnh"));
         var figs = put(body, el("div", "gd-images"));
@@ -1203,12 +1241,29 @@
           show(0);
         }
       }
+      // Thông tin phụ: gập sẵn, cuối danh sách.
+      renderContext(body, node, root);
+      var guide = fold(body, "Hướng dẫn: độ quan trọng, giai đoạn, thang điểm");
+      add(guide, el("h4", "", "Độ quan trọng và giai đoạn"));
+      var stages = put(guide, el("div", "gd-scale"));
+      phases().forEach(function (p) { add(stages, el("span", "", p.min + "–" + p.max + " " + p.name + ": " + p.label)); });
+      add(guide, el("p", "gd-note", "AI chỉ chấm ở node lá; node cha lấy điểm cao nhất bên dưới. Điểm bạn chấm cho một node là tuyệt đối, " +
+        "và các node con bạn chưa chấm dời theo cùng khoảng cách. Độ quan trọng không làm đổi hash, không ảnh hưởng việc đạt hay chốt."));
+      add(guide, el("h4", "", "Thang điểm"));
+      var scale = put(guide, el("div", "gd-scale"));
+      (data.bands || []).forEach(function (b) { add(scale, el("span", "", b.min + "–" + b.max + ": " + b.label)); });
+      add(guide, el("p", "gd-note", MODES.filter(function (m) { return m.key === mode(); })[0].hint.replace("mức đạt", passMin()) +
+        " Điểm của bạn là tuyệt đối và dùng chung cho bảng đề xuất và bảng đã chốt."));
+      renderText(ctx, fold(body, "Diễn giải (CLAUDE.md)"), node.body.replace(/^# .*\n?/, "") || "Chưa có diễn giải.");
       // Lịch sử nằm ở node đề xuất; node live dùng lịch sử của node đề xuất cùng đường dẫn.
       var source = state.table === "idea" ? node : find(data.idea, node.path);
       var history = source ? source.history : [];
+      // Hash và lịch sử chỉ để debug: gập sẵn, người không cần đọc.
+      var debug = put(body, el("details", "gd-fold gd-debug"));
+      add(debug, el("summary", "", "Debug: hash, lịch sử cập nhật"));
+      add(debug, el("p", "gd-note", "Hash data " + node.dataHash));
       if (history.length) {
-        add(body, el("h3", "", "Lịch sử (mới nhất trước)"));
-        var list = put(body, el("ul", "gd-history"));
+        var list = put(debug, el("ul", "gd-history"));
         history.forEach(function (e) {
           var t = eventText(e), li = put(list, el("li", t.out ? "out" : ""));
           add(li, el("time", "", e.at || ""), el("span", "", t.text));
