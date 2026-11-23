@@ -1,6 +1,7 @@
 ---
 based-on: 31cb7598b529
 refs: feature-run/run-score@6f1909d90f98, feature-castle/castle-skills@8bc45d0edc8d, feature-team-select/team-memory/memory-rules@e36a9ec522a1
+frame: none
 ---
 # Giá trị đầu lượt
 

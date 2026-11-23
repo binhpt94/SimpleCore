@@ -1,0 +1,12 @@
+kind: ui
+title: Popup thua: chữ kết quả
+use panel-x = feature-popup/popup-layer/stack-rules#panel-x
+use panel-y = feature-popup/popup-layer/stack-rules#panel-y
+use panel-w = feature-popup/popup-layer/stack-rules#panel-w
+use panel-h = feature-popup/popup-layer/stack-rules#panel-h
+- panel       round-rect x=panel-x y=panel-y w=panel-w h=panel-h label="Popup thua"
+- title       label      x=50  y=40  w=700 h=90 parent=panel label="Thành đã bị phá"
+- score       label      x=50  y=160 w=700 h=70 parent=panel label="Trụ được N đợt"
+- record      label      x=50  y=250 w=700 h=70 parent=panel label="Kỉ lục: M đợt"
+- new-record  label      x=200 y=340 w=400 h=70 parent=panel label="Kỉ lục mới! (chỉ khi phá kỉ lục)"
+- buttons     rect       x=60  y=540 w=680 h=120 parent=panel label="Hai nút (actions-spec)"

@@ -1,5 +1,6 @@
 ---
 based-on: 6f1909d90f98
+frame: none
 ---
 # Cách đếm điểm và lưu kỉ lục
 

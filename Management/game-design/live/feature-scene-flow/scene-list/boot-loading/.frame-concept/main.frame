@@ -1,0 +1,5 @@
+kind: ui
+title: Màn Loading
+- title  label x=360 y=320 w=1200 h=160 label="Thủ thành anh hùng"
+- bar    bar   x=460 y=600 w=1000 h=48 fill=0.4 label="Tiến độ 0-100%"
+- error  label x=360 y=700 w=1200 h=60 label="Lỗi tải: <tên feature> (chỉ khi lỗi)"

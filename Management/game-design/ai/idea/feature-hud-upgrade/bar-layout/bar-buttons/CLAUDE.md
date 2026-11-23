@@ -47,7 +47,7 @@ Mỗi nút đại diện cho:
 ## Đã tự quyết
 - **6 nút, không thêm nút phụ.** Đủ cho mọi mục, một chạm là mua. Đã loại: nút thu gọn thanh.
 - **Hero trước, thành sau.** Khớp thứ tự `item-set`. Đã loại: thành trước.
-- **Không ghi vị trí và cỡ nút chính xác.** Việc của người làm giao diện; chỉ ghi ràng buộc kiểm được (không che chiến trường, có khoảng trống).
+- **Vị trí và cỡ nút chỉ ước lượng, trong frame `main.frame` (2026-11-23, luật frame mới).** Thanh x 40–1380 px ở dải dưới, cách cụm kĩ năng (x 1420) 40 px; nút 200x140 px (`use` từ `feature-hud/hud-layout/layout-spec`); nút cùng nhóm cách 10 px, hai nhóm cách 70 px nên `group-gap` thoả. Cỡ cuối cùng do người làm giao diện chỉnh.
 
 ## Chưa rõ
 - `feature-hud` cần biết mép dưới đã do thanh nâng cấp giữ.

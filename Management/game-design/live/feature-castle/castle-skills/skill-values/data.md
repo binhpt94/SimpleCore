@@ -1,6 +1,6 @@
 ---
 based-on: 8bc45d0edc8d
-refs: feature-enemy/enemy-behavior/enemy-move-values@f5adc15dbc17, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-enemy/enemy-reward@1fbbced31e0f
+refs: feature-enemy/enemy-behavior/enemy-move-values@820f944e332f, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-attack/auto-shot-values@73b7dbaf8425, feature-castle/castle-core/castle-body-values@a89edb2f03ba
 ---
 # Thông số ba kĩ năng thành
 

@@ -43,5 +43,7 @@ Cân bằng dự kiến: đợt 10 có 26 quái, Lính 40×1.9=76 máu, 5×1.9=9
 - **Hiển thị máu làm tròn lên.** Người chơi không thấy "0" mà thành vẫn đứng.
 - **Bị phá chỉ báo 1 lần.** Tránh `feature-run` nhận hai lần thua.
 
+- **Frame `castle.frame` (2026-11-23).** Node này giữ các hằng chung của chiến trường: `castle-left`, `castle-right`, `castle-w`, `castle-h`, `screen-left`, `screen-right`; node khác `use` lại. Số tính ra trong frame: hộp hero ở chỗ 1/3 có x=-2u = tâm -1.5u − nửa rộng 0.5u; chỗ 2 có x=1u = +1.5u − 0.5u. Hộp hero chồng lên thành (cờ `overlap`) là đúng ý: điểm xuất phát nằm ở mép thành.
+
 ## Chưa rõ
 - 1000 máu có thể dư ở đợt đầu (Lính đợt 1 cần 200s một mình): giữ theo bộ số chung, đề xuất chỉnh sau chơi thử xuống 600-800 nếu đợt 1-5 không thấy áp lực.

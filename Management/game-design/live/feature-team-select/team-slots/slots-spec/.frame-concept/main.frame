@@ -1,0 +1,7 @@
+kind: ui
+title: Màn chọn đội
+use tap = feature-hud/hud-layout/layout-spec#tap
+- title   label  x=560 y=40  w=800 h=80 label="Chọn đội"
+- cards   grid   x=130 y=150 cols=5 rows=1 cw=300 ch=400 gap=40 label="5 thẻ hero"
+- slots   grid   x=560 y=600 cols=3 rows=1 cell=240 gap=40 label="3 chỗ trong đội"
+- start   button x=760 y=890 w=400 h=tap label="Vào trận"

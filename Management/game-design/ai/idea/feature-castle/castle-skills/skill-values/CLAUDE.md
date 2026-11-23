@@ -52,5 +52,7 @@ Cân bằng dự kiến: Sấm sét dùng được 3 lần mỗi phút, mỗi l�
 - **Bấm khi không có mục tiêu vẫn mất hồi chiêu.** Giữ luật "bấm là dùng", không cần nút biết trạng thái chiến trường.
 - **Làm mới, không cộng dồn Băng giá.** Một mức chậm, dễ đọc.
 
+- **Frame `thunder-zone.frame` (2026-11-23).** Vùng Sấm sét `use` tầm tự bắn (`feature-castle/castle-attack/auto-shot-values#shot-range`), đúng quyết định "vùng Sấm sét bằng tầm tự bắn". Số tính ra: vùng trái bắt đầu ở x=-7.5u = -1.5u − 6u. Vùng chồng lên thành (`overlap`) chỉ ở cạnh chung, cố ý.
+
 ## Chưa rõ
 - Sấm sét 80 sát thương có thể quá mạnh đợt 1-10 (hạ ngay mọi Lính, Sói): giữ theo bộ số chung; đề xuất xem lại sau chơi thử, có thể 50.

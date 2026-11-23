@@ -1,6 +1,7 @@
 ---
 based-on: b9bcec737959
-refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09, feature-castle/castle-skills/skill-values@6240af7903a9
+refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09, feature-castle/castle-skills/skill-values@ad45ef4fdcc9, feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-stats/enemy-stat-values@213bae407954, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed
+frame: none
 ---
 # Mức tăng mỗi cấp
 

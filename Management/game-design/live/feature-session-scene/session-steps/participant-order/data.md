@@ -1,6 +1,7 @@
 ---
 based-on: 70f3b17acc2e
-refs: feature-scene-flow/scene-list/boot-loading@77148b90014b, feature-run/run-start@31cb7598b529, feature-balance/balance-config@6934878b1b70
+refs: feature-scene-flow/scene-list/boot-loading@7b814b262753, feature-run/run-start@31cb7598b529, feature-balance/balance-config@6934878b1b70
+frame: none
 ---
 # Danh sách tham gia và xử lí lỗi từng bước
 

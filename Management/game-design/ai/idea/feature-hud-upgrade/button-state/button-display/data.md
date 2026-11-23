@@ -1,6 +1,6 @@
 ---
 based-on: f1aa8b544f79
-refs: feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09
+refs: feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09, feature-hud/hud-layout/layout-spec@ebefd7f8b116
 ---
 # Hiển thị và chạm nút nâng cấp
 

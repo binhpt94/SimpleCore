@@ -1,6 +1,7 @@
 ---
 based-on: c53d76edf8b3
-refs: feature-upgrade/upgrade-list/item-set@fd6c29c2b1b5, feature-wallet/balance-spend/wallet-rules@1367fdb78322, feature-upgrade/upgrade-effect/effect-numbers@8e92f84a02aa, feature-hud-upgrade/button-state/button-display@5c40022a4eb9
+refs: feature-upgrade/upgrade-list/item-set@fd6c29c2b1b5, feature-wallet/balance-spend/wallet-rules@1367fdb78322, feature-upgrade/upgrade-effect/effect-numbers@8e92f84a02aa, feature-hud-upgrade/button-state/button-display@dbe53b4ec4c5
+frame: none
 ---
 # Giá và luật mua
 

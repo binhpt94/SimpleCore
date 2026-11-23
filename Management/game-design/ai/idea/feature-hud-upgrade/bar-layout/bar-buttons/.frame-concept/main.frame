@@ -1,0 +1,16 @@
+kind: ui
+title: Thanh nâng cấp: 6 nút, hai nhóm
+use bottom-h = feature-hud/hud-layout/layout-spec#bottom-h
+use up-w = feature-hud/hud-layout/layout-spec#up-w
+use up-h = feature-hud/hud-layout/layout-spec#up-h
+- bottom   rect   x=0   y=900 w=1920 h=bottom-h label="Mép dưới"
+- bar      rect   x=40  y=15  w=1340 h=150 parent=bottom label="Thanh nâng cấp"
+- heroes   rect   x=10  y=5   w=620  h=140 parent=bar label="Nhóm hero"
+- castle   rect   x=700 y=5   w=620  h=140 parent=bar label="Nhóm thành"
+- hero-1   button x=0   y=0   w=up-w h=up-h parent=heroes label="Hero chỗ 1"
+- hero-2   button x=210 y=0   w=up-w h=up-h parent=heroes label="Hero chỗ 2"
+- hero-3   button x=420 y=0   w=up-w h=up-h parent=heroes label="Hero chỗ 3"
+- c-hp     button x=0   y=0   w=up-w h=up-h parent=castle label="Máu"
+- c-atk    button x=210 y=0   w=up-w h=up-h parent=castle label="Sức đánh"
+- c-skill  button x=420 y=0   w=up-w h=up-h parent=castle label="Kĩ năng"
+- skills   rect   x=1420 y=20 w=460  h=140 parent=bottom label="Cụm kĩ năng (feature-hud, không thuộc thanh)"

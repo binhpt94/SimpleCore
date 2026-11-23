@@ -1,0 +1,37 @@
+kind: field
+title: Chỗ quái dừng đánh thành (bên phải; bên trái đối xứng). Mỗi hàng một loại, hàng chỉ để minh hoạ
+view: x=-2u..18u y=-1u..16u
+use castle-left = feature-castle/castle-core/castle-body-values#castle-left
+use castle-right = feature-castle/castle-core/castle-body-values#castle-right
+use castle-w = feature-castle/castle-core/castle-body-values#castle-w
+use castle-h = feature-castle/castle-core/castle-body-values#castle-h
+use shot-range = feature-castle/castle-attack/auto-shot-values#shot-range
+use spawn-right = feature-wave/spawning/spawn-order#spawn-right
+use soldier-w = feature-enemy/enemy-list/enemy-type-values#soldier-w
+use soldier-h = feature-enemy/enemy-list/enemy-type-values#soldier-h
+use soldier-range = feature-enemy/enemy-list/enemy-type-values#soldier-range
+use wolf-w = feature-enemy/enemy-list/enemy-type-values#wolf-w
+use wolf-h = feature-enemy/enemy-list/enemy-type-values#wolf-h
+use wolf-range = feature-enemy/enemy-list/enemy-type-values#wolf-range
+use giant-w = feature-enemy/enemy-list/enemy-type-values#giant-w
+use giant-h = feature-enemy/enemy-list/enemy-type-values#giant-h
+use giant-range = feature-enemy/enemy-list/enemy-type-values#giant-range
+use archer-w = feature-enemy/enemy-list/enemy-type-values#archer-w
+use archer-h = feature-enemy/enemy-list/enemy-type-values#archer-h
+use archer-range = feature-enemy/enemy-list/enemy-type-values#archer-range
+use boss-w = feature-enemy/enemy-list/enemy-type-values#boss-w
+use boss-h = feature-enemy/enemy-list/enemy-type-values#boss-h
+use boss-range = feature-enemy/enemy-list/enemy-type-values#boss-range
+- castle      rect  x=castle-left y=0 w=castle-w h=castle-h label="Thành (mép phải 1.5u)"
+- shot        rect  x=castle-right y=15u w=shot-range h=0.3u label="tầm tự bắn và Sấm sét tới 7.5u"
+- soldier-gap rect  x=castle-right y=0.5u w=soldier-range h=0.2u label="tầm Lính 1.0u"
+- soldier     rect  x=2.5u y=0 w=soldier-w h=soldier-h label="Lính dừng, tâm 3.0u"
+- wolf-gap    rect  x=castle-right y=3.3u w=wolf-range h=0.2u label="tầm Sói 1.0u"
+- wolf        rect  x=2.5u y=3u w=wolf-w h=wolf-h label="Sói dừng, tâm 3.1u"
+- giant-gap   rect  x=castle-right y=5.5u w=giant-range h=0.2u label="tầm Khổng lồ 1.2u"
+- giant       rect  x=2.7u y=5u w=giant-w h=giant-h label="Khổng lồ dừng, tâm 3.7u"
+- archer-gap  rect  x=castle-right y=8.5u w=archer-range h=0.2u label="tầm Cung thủ quái 5u"
+- archer      rect  x=6.5u y=8u w=archer-w h=archer-h label="Cung thủ quái dừng, tâm 7.0u"
+- boss-gap    rect  x=castle-right y=11u w=boss-range h=0.2u label="tầm Trùm 1.5u"
+- boss        rect  x=3u y=10.5u w=boss-w h=boss-h label="Trùm dừng, tâm 4.5u"
+- walk-in     arrow from=spawn-right,14u to=9u,14u label="quái ra ở x=17u, đi vào"

@@ -1,6 +1,7 @@
 ---
 based-on: 504e5ffe01a8
 refs: feature-enemy/enemy-reward@1fbbced31e0f, feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-balance/balance-difficulty-curve/break-forecast@38dc08b97bc3
+frame: none
 ---
 # Chỉ số gốc và hệ số đợt của quái
 

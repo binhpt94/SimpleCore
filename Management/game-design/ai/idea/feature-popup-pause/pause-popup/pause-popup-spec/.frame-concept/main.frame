@@ -1,0 +1,11 @@
+kind: ui
+title: Popup tạm dừng: bước chính
+use panel-x = feature-popup/popup-layer/stack-rules#panel-x
+use panel-y = feature-popup/popup-layer/stack-rules#panel-y
+use panel-w = feature-popup/popup-layer/stack-rules#panel-w
+use panel-h = feature-popup/popup-layer/stack-rules#panel-h
+use tap = feature-hud/hud-layout/layout-spec#tap
+- panel   round-rect x=panel-x y=panel-y w=panel-w h=panel-h label="Popup tạm dừng"
+- title   label      x=50  y=60  w=700 h=100 parent=panel label="Tạm dừng"
+- resume  button     x=60  y=540 w=320 h=tap parent=panel label="Tiếp tục (nút chính)"
+- quit    button     x=420 y=540 w=320 h=tap parent=panel label="Bỏ lượt"

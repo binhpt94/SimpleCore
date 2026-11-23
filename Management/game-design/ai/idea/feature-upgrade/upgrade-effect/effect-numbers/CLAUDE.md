@@ -21,7 +21,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Cổ vũ: lượng hồi | 30% × (1 + 0,2 × (L − 1)) máu tối đa mỗi hero | 30% / 36% / 54% / 84% | Hiệu lực = lượng hồi (dự kiến) |
 | Hồi chiêu mọi kĩ năng | không đổi theo cấp | | Quyết định vòng 3 |
 
-- Sát thương lẻ (ví dụ hero cấp 1 đánh 15 thì cấp 2 là 17,25): làm tròn xuống số nguyên khi trừ máu quái, tối thiểu 1. Máu lẻ: làm tròn xuống.
+- Sát thương và máu lẻ (ví dụ hero cấp 1 đánh 15 thì cấp 2 là 17,25): giữ số thực khi tính và khi trừ máu; chỉ làm tròn lúc hiện (máu làm tròn lên, sát thương làm tròn xuống), theo ý `decimal-stats` của `feature-hero/hero-stats/hero-level-values`.
 - Chỉ số cấp 1 của hero do `feature-hero` giữ; con số bảng trên là tỉ lệ.
 - Mức tăng mỗi cấp nằm trong asset cấu hình (`feature-balance`), không viết cứng.
 
@@ -49,7 +49,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Cộng theo cấp 1, không nhân dồn.** Dễ đọc, dễ kiểm, không bùng nổ. Đã loại: mỗi cấp nhân 1,15 (cấp 20 gấp 14 lần).
 - **Hero sống được cộng máu hiện tại.** Đồng bộ với máu thành; mua lúc nguy có tác dụng ngay. Đã loại: chỉ tăng máu tối đa cho hero.
 - **Hiệu lực Băng giá là thời gian chậm, mức chậm giữ 50%.** Theo `feature-castle/castle-upgrade-effects` ("làm chậm lâu hơn"); nếu tăng mức chậm thì cấp 4 đã gần đứng yên. Đã loại: tăng phần trăm chậm.
-- **Làm tròn xuống, tối thiểu 1.** Máu quái là số nguyên. Đã loại: giữ số lẻ.
+- **Giữ số thực, chỉ làm tròn khi hiện (2026-11-23, sửa lệch).** Thống nhất với ý `decimal-stats` của `feature-hero/hero-stats/hero-level-values`, `feature-enemy/enemy-stats/enemy-stat-values` và `feature-wave/difficulty-scaling/wave-formula`: một luật làm tròn cho cả game. Đã loại: làm tròn xuống khi trừ máu, tối thiểu 1 (bản cũ, lệch với hero và quái).
 - **Đối chiếu nghĩa hiệu lực kĩ năng (2026-11-23).** Khớp nghĩa đã chốt: Sấm sét +16 sát thương, Băng giá +1 giây chậm (giữ 50%), Cổ vũ +6% máu tối đa mỗi cấp, hồi chiêu không đổi. Chỉ sửa ghi chú Băng giá ở "Chưa rõ" (hồi chiêu 35 giây đã biết).
 
 ## Chưa rõ

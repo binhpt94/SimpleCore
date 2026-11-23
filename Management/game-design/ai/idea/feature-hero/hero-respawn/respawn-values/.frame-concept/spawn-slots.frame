@@ -1,0 +1,13 @@
+kind: field
+title: Chỗ sinh và hồi sinh của 3 hero ở mép thành (chỗ 1 và 3 cùng điểm, vẽ lệch hàng để thấy)
+view: x=-5u..5u y=-1u..6u
+use castle-left = feature-castle/castle-core/castle-body-values#castle-left
+use castle-w = feature-castle/castle-core/castle-body-values#castle-w
+use castle-h = feature-castle/castle-core/castle-body-values#castle-h
+use hero-w = feature-hero/hero-list/hero-roster-values#hero-w
+use hero-h = feature-hero/hero-list/hero-roster-values#hero-h
+- ground  line from=-5u,0 to=5u,0 label="mặt đất"
+- castle  rect x=castle-left y=0 w=castle-w h=castle-h label="Thành"
+- slot1   rect x=-2u y=0 w=hero-w h=hero-h label="chỗ 1 (tâm -1.5u)" overlap
+- slot3   rect x=-2u y=4.2u w=hero-w h=hero-h label="chỗ 3 (cùng điểm chỗ 1, vẽ lệch hàng)"
+- slot2   rect x=1u y=0 w=hero-w h=hero-h label="chỗ 2 (tâm +1.5u)" overlap

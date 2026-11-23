@@ -54,5 +54,7 @@ Mọi điểm dừng nằm trong tầm tự bắn và vùng Sấm sét (mép tro
 - **Dừng ngay mép tầm trước thành.** Một luật cho cả quái cận chiến và bắn xa.
 - **Trúng chậm giữa nhịp đánh thì giãn phần còn lại.** Tác dụng chậm thấy ngay, không đợi tới đòn sau.
 
+- **Frame `stop-points.frame` (2026-11-23).** Hộp, tầm của từng loại `use` từ `feature-enemy/enemy-list/enemy-type-values`; điểm ra `use` từ `feature-wave/spawning/spawn-order`; thành và tầm tự bắn `use` từ `feature-castle`. Số tính ra: mép trong của quái dừng = mép thành 1.5u + tầm (Lính, Sói 2.5u; Khổng lồ 2.7u; Cung thủ quái 6.5u; Trùm 3.0u); tâm = mép trong + nửa rộng, khớp bảng "Điểm dừng trước thành". Mỗi loại vẽ một hàng chỉ để dễ đọc.
+
 ## Chưa rõ
 - Không có điểm chặn.

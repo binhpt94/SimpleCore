@@ -1,6 +1,6 @@
 ---
 based-on: e1440a2a0de0
-refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-respawn@2ae1008b33cd
+refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-respawn@2ae1008b33cd, feature-hero/hero-list/hero-roster-values@8a2346250094
 ---
 # Thông số thân thành
 

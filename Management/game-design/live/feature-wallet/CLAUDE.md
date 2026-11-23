@@ -15,8 +15,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Đã tự quyết
 - **Một loại tiền.** Đủ cho vòng lặp vòng 1, dễ hiểu.
-- **Key `feature-wallet`.** Có thể khớp với thư mục code `Wallet` đã có trong project; tên thư mục chính xác chờ người xác nhận trước khi ghi `code.json`.
+- **Key `feature-wallet`, `code.json` là `Wallet` (2026-11-23).** Tên theo luật vòng 2 (bỏ `feature-`, viết hoa chữ đầu), trùng thư mục code `Wallet` đã có trong project.
 - **Bỏ "luôn hiện trên màn hình" khỏi ý.** Hiển thị là việc của `feature-hud`.
 
 ## Chưa rõ
-- Tên thư mục code để ghi `code.json`: chờ người xác nhận.
+- Không có điểm chặn.

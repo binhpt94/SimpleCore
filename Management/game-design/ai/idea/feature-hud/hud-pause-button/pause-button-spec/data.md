@@ -1,6 +1,6 @@
 ---
 based-on: 4ab96ef15d1f
-refs: feature-run/run-pause@f8e9d49f5079, feature-hud/hud-layout/layout-spec@80fd04c1bb2b
+refs: feature-run/run-pause@f8e9d49f5079, feature-hud/hud-layout/layout-spec@ebefd7f8b116
 ---
 # Nút tạm dừng trên HUD
 

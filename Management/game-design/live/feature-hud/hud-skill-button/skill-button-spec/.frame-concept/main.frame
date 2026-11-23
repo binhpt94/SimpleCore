@@ -1,0 +1,11 @@
+kind: ui
+title: Ba nút kĩ năng thành ở góc dưới bên phải
+use skill = feature-hud/hud-layout/layout-spec#skill
+use bottom-h = feature-hud/hud-layout/layout-spec#bottom-h
+- bottom   rect   x=0    y=900 w=1920 h=bottom-h label="Mép dưới"
+- cluster  rect   x=1420 y=20  w=460  h=140 parent=bottom label="Cụm kĩ năng"
+- thunder  button x=0    y=0   w=skill h=skill parent=cluster label="Sấm sét (sẵn sàng)"
+- frost    button x=160  y=0   w=skill h=skill parent=cluster label="Băng giá (đang hồi)"
+- rally    button x=320  y=0   w=skill h=skill parent=cluster label="Cổ vũ (sẵn sàng)"
+- cover    bar    x=0    y=0   w=skill h=skill fill=0.6 parent=frost label="Lớp phủ: phần hồi chiêu còn lại"
+- seconds  label  x=30   y=40  w=80   h=60  parent=frost overlap label="21"

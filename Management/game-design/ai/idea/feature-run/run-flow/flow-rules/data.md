@@ -1,6 +1,7 @@
 ---
 based-on: db634f5dac0b
-refs: feature-run/run-start@31cb7598b529, feature-run/run-score@6f1909d90f98, feature-scene-flow/scene-list@78ed2dcc0859, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-run/run-pause@f8e9d49f5079, feature-popup-pause/pause-popup/pause-popup-spec@558a0d06d13f
+refs: feature-run/run-start@31cb7598b529, feature-run/run-score@6f1909d90f98, feature-scene-flow/scene-list@78ed2dcc0859, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-run/run-pause@f8e9d49f5079, feature-popup-pause/pause-popup/pause-popup-spec@e65c33624e19
+frame: none
 ---
 # Luật chuyển màn của lượt
 

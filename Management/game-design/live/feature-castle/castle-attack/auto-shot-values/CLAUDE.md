@@ -42,5 +42,7 @@ Cân bằng dự kiến: 10 sát thương/s ở lv1. Đợt 10, Lính 76 máu c�
 - **Sát thương tức thì.** Một luật cho mọi đòn đánh xa trong game (`feature-hero/hero-stats/hero-level-values`).
 - **Không bắn quái ngoài màn.** Người chơi không thấy thì không nên bị bắn.
 
+- **Frame `shot-range.frame` (2026-11-23).** Giữ hằng `shot-range` = 6u (Sấm sét `use` lại). Số tính ra: tầm trái bắt đầu ở x=-7.5u = mép trái -1.5u − 6u.
+
 ## Chưa rõ
 - Không có điểm chặn.

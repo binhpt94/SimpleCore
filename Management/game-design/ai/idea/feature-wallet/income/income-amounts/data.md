@@ -1,6 +1,7 @@
 ---
 based-on: d2e78e0c80dc
 refs: feature-wallet/balance-spend/wallet-rules@1367fdb78322
+frame: none
 ---
 # Mức tiền thu
 

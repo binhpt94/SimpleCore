@@ -42,5 +42,7 @@ Cân bằng dự kiến: đợt 1 có 8 Lính thả mỗi 1.0s, đi 14.5u ở 1.
 - **Hồi sinh ở đúng điểm xuất phát của chỗ mình.** Một quy tắc cố định. Đã loại: hồi sinh về phía có quái gần nhất (thêm luật, không khác nhiều vì hero tự đi ra ngay).
 - **0.3s không đánh, không bị đánh khi hồi sinh.** Thêm vì quái đánh thành đứng ngay mép thành, trùng điểm hồi sinh. Đã loại: không có thời gian an toàn.
 
+- **Frame `spawn-slots.frame` (2026-11-23).** Thành và hộp hero `use` từ `feature-castle/castle-core/castle-body-values` và `feature-hero/hero-list/hero-roster-values`. Số tính ra: hộp chỗ 1/3 ở x=-2u, chỗ 2 ở x=1u (tâm ∓ nửa rộng 0.5u). Chỗ 3 cùng điểm với chỗ 1, vẽ lệch hàng (y=4.2u) chỉ để thấy cả hai.
+
 ## Chưa rõ
 - Không có điểm chặn.

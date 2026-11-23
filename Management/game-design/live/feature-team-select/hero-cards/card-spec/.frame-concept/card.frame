@@ -1,0 +1,8 @@
+kind: ui
+title: Một thẻ hero (thẻ đầu tiên, Hiệp sĩ)
+- card     round-rect x=130 y=150 w=300 h=400 label="Thẻ hero"
+- portrait rect       x=30  y=20  w=240 h=200 parent=card label="Hình hero"
+- name     label      x=20  y=235 w=260 h=50  parent=card label="Hiệp sĩ"
+- style    label      x=20  y=290 w=260 h=40  parent=card label="Cận chiến · Chắn"
+- role     icon       x=20  y=340 w=48  h=48  parent=card label="Dấu vai trò"
+- picked   icon       x=232 y=12  w=56  h=56  parent=card overlap label="Đã chọn"

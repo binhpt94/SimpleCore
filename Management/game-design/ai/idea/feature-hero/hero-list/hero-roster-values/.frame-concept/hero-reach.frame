@@ -1,0 +1,28 @@
+kind: field
+title: Hộp hero và tầm đánh (mỗi hàng một hero, đứng bên phải thành; hàng chỉ để minh hoạ, mọi hero đều đứng trên mặt đất)
+view: x=-2u..12u y=-1u..11u
+let hero-w = 1u
+let hero-h = 1.5u
+let knight-range = 1.2u
+let axe-range = 1.3u
+let sword-range = 1.2u
+let archer-range = 7u
+let mage-range = 6u
+let cleave-len = 1.5u
+let splash-r = 1.5u
+use castle-left = feature-castle/castle-core/castle-body-values#castle-left
+use castle-w = feature-castle/castle-core/castle-body-values#castle-w
+use castle-h = feature-castle/castle-core/castle-body-values#castle-h
+- castle     rect x=castle-left y=0 w=castle-w h=castle-h label="Thành (mép phải x=1.5u)"
+- knight     rect x=2u y=0 w=hero-w h=hero-h label="Hiệp sĩ"
+- knight-rg  rect x=3u y=0.6u w=knight-range h=0.2u label="tầm 1.2u từ mép hộp"
+- axe        rect x=2u y=2u w=hero-w h=hero-h label="Đấu sĩ rìu"
+- axe-rg     rect x=3u y=2.6u w=axe-range h=0.2u label="tầm 1.3u"
+- axe-cleave rect x=3u y=3.1u w=cleave-len h=0.2u label="vệt chém 1.5u từ mép trước"
+- sword      rect x=2u y=4u w=hero-w h=hero-h label="Kiếm khách"
+- sword-rg   rect x=3u y=4.6u w=sword-range h=0.2u label="tầm 1.2u"
+- archer     rect x=2u y=6u w=hero-w h=hero-h label="Cung thủ"
+- archer-rg  rect x=3u y=6.6u w=archer-range h=0.2u label="tầm 7u"
+- mage       rect x=2u y=8u w=hero-w h=hero-h label="Pháp sư"
+- mage-rg    rect x=3u y=8.6u w=mage-range h=0.2u label="tầm 6u"
+- mage-blast ring cx=9.5u cy=8.75u r=splash-r label="nổ 1.5u quanh tâm mục tiêu"

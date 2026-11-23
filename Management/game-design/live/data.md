@@ -1,3 +1,6 @@
+---
+screen: landscape
+---
 # Thủ thành anh hùng (tên tạm)
 
 Game thủ thành nhìn ngang: một tòa thành đứng giữa màn hình, đội hero chọn trước sinh ra từ thành và tự đánh quái kéo tới theo từng đợt từ hai bên. Người chơi bấm kĩ năng của thành và nâng cấp hero, thành ngay trong trận để trụ lâu nhất có thể; thành bị phá là thua. Khác game thủ thành thường gặp: thành bị kẹp từ hai phía, và người chơi không điều khiển hero hay xây tháp mà chỉ chọn đội, canh kĩ năng thành và mua nâng cấp giữa trận.

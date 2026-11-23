@@ -42,5 +42,9 @@ Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc đi�
 
 - **Game 2D nhìn ngang (quyết khi vào vòng 4, 2026-11-23).** Vòng 4 cần biết 2D hay 3D để ghi kích thước unit. 2D hợp góc nhìn ngang một dải đất, sprite gen bằng AI làm nhanh ở mức IDEA. Đã loại: 3D low poly (thêm việc dựng model mà góc nhìn ngang không cần chiều sâu).
 
+- **Màn ngang (`screen: landscape`, 1920x1080).** Game nhìn ngang, thành ở giữa, quái tới từ mép trái và mép phải: dải chiến trường cần chiều ngang; người chơi cầm điện thoại ngang. Đã loại: màn dọc (dải đất hai bên thành quá hẹp, quái ra gần thành).
+- **Hai style hình ảnh (2026-11-23).** `ui-flat` cho giao diện (HUD, popup, nút, icon): phẳng, màu đặc, viền dày, đọc rõ trên điện thoại. `world-cartoon` cho thế giới trận (hero, quái, thành, nền, hiệu ứng): hoạt hình 2D nhìn ngang, viền tối, đổ bóng 2 bậc; mỗi nhân vật một hình đứng yên, chuyển động do game tạo bằng scale, move, rotate, đổi màu, hợp mức IDEA với sprite gen bằng AI. Tách hai style vì giao diện cần phẳng và tương phản cao, còn thế giới cần khối và phân biệt phe. Đã loại: một style chung cho tất cả (UI dễ chìm vào chiến trường); pixel art (khó gen đều tay bằng AI); 3D low poly (đã chọn game 2D). Chưa có ảnh tham chiếu; người bỏ ảnh `<id>-<tên>` vào `.art-style/` khi có.
+
 ## Chưa rõ
-- Tên chính thức và phong cách hình ảnh: chưa có, không chặn việc thiết kế.
+- Tên chính thức: chưa có, không chặn việc thiết kế.
+- Ảnh tham chiếu cho hai style: chờ người bỏ vào.

@@ -1,6 +1,7 @@
 ---
 based-on: fed0ac86d57c
-refs: feature-wave/spawning/spawn-order@d71ff27687b4, feature-enemy/enemy-list@10b291cde6dc, feature-enemy/enemy-stats/enemy-stat-values@213bae407954, feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-list/enemy-type-values@a91bdaba8708
+refs: feature-wave/spawning/spawn-order@5884f63cfa93, feature-enemy/enemy-list@10b291cde6dc, feature-enemy/enemy-stats/enemy-stat-values@213bae407954, feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-list/enemy-type-values@1782de2d557d
+frame: none
 ---
 # Công thức độ khó theo đợt
 

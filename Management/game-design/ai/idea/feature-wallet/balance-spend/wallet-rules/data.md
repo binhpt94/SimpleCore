@@ -1,5 +1,6 @@
 ---
 based-on: df494e209c1e
+frame: none
 ---
 # Luật số dư
 
