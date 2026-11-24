@@ -1,0 +1,32 @@
+{
+ "frame": "load-error",
+ "parts": [
+  {
+   "id": "1-bar",
+   "w": 1000,
+   "h": 48,
+   "slice": [
+    20,
+    20,
+    20,
+    20
+   ],
+   "shapes": [
+    "bar"
+   ],
+   "from": {
+    "node": "feature-scene-flow/scene-list/boot-loading",
+    "frame": "main",
+    "part": "bar",
+    "ref": "_design/feature-scene-flow.scene-list.boot-loading/loading-claude",
+    "version": 1
+   },
+   "text": true
+  }
+ ],
+ "kept": [
+  "title",
+  "error"
+ ],
+ "skipped": []
+}

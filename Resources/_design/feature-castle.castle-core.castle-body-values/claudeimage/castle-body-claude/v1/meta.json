@@ -1,0 +1,15 @@
+{
+ "node": "feature-castle/castle-core/castle-body-values",
+ "nodeHash": "a89edb2f03ba",
+ "frames": {
+  "castle": "3bd5b2ec6ff0"
+ },
+ "styles": {
+  "world-cartoon": "68043f5eceb1"
+ },
+ "order": "_design/feature-castle.castle-core.castle-body-values/castle-body-claude",
+ "version": 1,
+ "at": "2026-11-24 13:42:06",
+ "stamp": 1795502526.733581,
+ "sources": []
+}

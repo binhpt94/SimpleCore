@@ -1,0 +1,25 @@
+{
+ "node": "feature-popup-pause/cheat",
+ "nodeHash": "a753acb213ee",
+ "frames": {
+  "paused-confirm": "10e2045ef598",
+  "paused-main": "a6074329bd21"
+ },
+ "styles": {
+  "ui-flat": "5a6989e6f1f5"
+ },
+ "order": "_design/feature-popup-pause.cheat/pause-cheat-claude",
+ "version": 1,
+ "at": "2026-11-24 13:45:53",
+ "stamp": 1795502753.164714,
+ "sources": [
+  [
+   "_design/feature-popup-pause.pause-popup.pause-popup-spec/pause-popup-claude",
+   1
+  ],
+  [
+   "_design/feature-popup.popup-layer.stack-rules/popup-panel-claude",
+   1
+  ]
+ ]
+}

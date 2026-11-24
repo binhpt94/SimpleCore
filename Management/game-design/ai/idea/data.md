@@ -1,5 +1,6 @@
 ---
 screen: landscape
+by: player-commander=gpt@root-r1#nguoi-chi-huy, castle-damage-carries=gpt@root-r1#ton-that-qua-dot, main-feel=gpt@root-r1#cam-giac-chu-dao
 ---
 # Thủ thành anh hùng (tên tạm)
 
@@ -9,6 +10,12 @@ Game thủ thành nhìn ngang: một tòa thành đứng giữa màn hình, đ�
 
 ### target-player | AI 7 | Người chơi phổ thông, điện thoại cầm ngang, lượt chơi ngắn
 Thao tác trong trận ít: bấm kĩ năng của thành và mua nâng cấp. Cái hay nằm ở chọn đội hero, chọn nâng cấp và canh lúc dùng kĩ năng. Đã loại: game nặng tính toán, thao tác nhanh tay.
+
+### player-commander | AI 6 | Người chơi là người chỉ huy phòng thủ tòa thành
+Chọn đội, mua nâng cấp và bấm kĩ năng thành gắn vào cùng một trách nhiệm: giữ thành.
+
+### main-feel | AI 7 | Cảm giác chủ đạo là tự xoay chuyển thế thủ khi thành đang bị dồn ép
+Sức ép phải đủ rõ để người chơi thấy quyết định của mình vừa giúp đội giành lại thế thủ.
 
 ### layout | AI 8 | Nhìn ngang từ bên cạnh, thành đứng yên giữa màn hình, chiến trường là dải đất hai bên
 Mọi trận đánh diễn ra trên một dải đất chạy ngang qua thành. Đã loại: nhìn từ trên xuống, thành ở một mép màn hình.
@@ -34,6 +41,9 @@ Mua lúc nào cũng được, kể cả đang đánh; mạnh lên liền. Đã l
 ### upgrade-targets | AI 7 | Nâng cấp được từng hero trong đội và nâng cấp được thành
 
 ### lose-condition | AI 9 | Thua khi thành bị phá
+
+### castle-damage-carries | AI 7 | Sang đợt kế tiếp, thành giữ nguyên mức hư hại
+Trụ qua một đợt mà ít tổn thất thì trụ được lâu hơn; giữ thành trong đợt này còn có giá trị sau khi đợt kết thúc.
 
 ### endless-score | AI 6 | Không có màn thắng: chơi vô tận, trụ càng nhiều đợt càng cao điểm, lưu kỉ lục
 Đợt sau khó hơn đợt trước. Đã loại: thắng khi qua đủ một số đợt.

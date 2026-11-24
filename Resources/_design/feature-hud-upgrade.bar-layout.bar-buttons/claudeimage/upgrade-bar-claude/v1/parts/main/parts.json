@@ -1,0 +1,106 @@
+{
+ "frame": "main",
+ "parts": [
+  {
+   "id": "band",
+   "w": 1920,
+   "h": 140,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "bottom"
+   ],
+   "from": {
+    "node": "feature-hud/hud-layout/layout-spec",
+    "frame": "main",
+    "part": "band",
+    "ref": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+    "version": 1
+   },
+   "text": true
+  },
+  {
+   "id": "upgrade",
+   "w": 1340,
+   "h": 150,
+   "slice": [
+    32,
+    32,
+    32,
+    40
+   ],
+   "shapes": [
+    "bar"
+   ],
+   "from": {
+    "node": "feature-hud/hud-layout/layout-spec",
+    "frame": "main",
+    "part": "upgrade",
+    "ref": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+    "version": 1
+   },
+   "text": true
+  },
+  {
+   "id": "tray",
+   "w": 460,
+   "h": 140,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "skills"
+   ],
+   "from": {
+    "node": "feature-hud/hud-skill-button/skill-button-spec",
+    "frame": "main",
+    "part": "tray",
+    "ref": "_design/feature-hud.hud-skill-button.skill-button-spec/skill-buttons-claude",
+    "version": 1
+   },
+   "text": true
+  },
+  {
+   "id": "group",
+   "w": 620,
+   "h": 140,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "heroes",
+    "castle"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "btn",
+   "w": 200,
+   "h": 140,
+   "slice": null,
+   "shapes": [
+    "hero-1",
+    "hero-2",
+    "hero-3",
+    "c-hp",
+    "c-atk",
+    "c-skill"
+   ],
+   "from": null,
+   "text": true
+  }
+ ],
+ "kept": [],
+ "skipped": []
+}

@@ -1,0 +1,20 @@
+{
+ "node": "feature-hud/hud-skill-button/skill-button-spec",
+ "nodeHash": "693755b379ea",
+ "frames": {
+  "main": "417d62aba268"
+ },
+ "styles": {
+  "ui-flat": "5a6989e6f1f5"
+ },
+ "order": "_design/feature-hud.hud-skill-button.skill-button-spec/skill-buttons-claude",
+ "version": 1,
+ "at": "2026-11-24 13:46:49",
+ "stamp": 1795502809.8736231,
+ "sources": [
+  [
+   "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+   1
+  ]
+ ]
+}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" width="140" height="140">
+  <!-- nen nut chung: bong cung lech xuong 8 px, mau dac, vien den 6 px, bo 20 -->
+  <rect x="3" y="11" width="134" height="126" rx="20" fill="#000000"/>
+  <rect x="3" y="3" width="134" height="126" rx="20" fill="#F4A261" stroke="#000000" stroke-width="6"/>
+  <!-- bieu tuong bong tuyet o nua tren: vien den day, long xanh nhat -->
+  <g stroke-linecap="round" transform="translate(70 42)">
+    <g stroke="#000000" stroke-width="13">
+      <line x1="0" y1="-30" x2="0" y2="30"/>
+      <line x1="-26" y1="-15" x2="26" y2="15"/>
+      <line x1="-26" y1="15" x2="26" y2="-15"/>
+    </g>
+    <g stroke="#8ED6FF" stroke-width="6">
+      <line x1="0" y1="-30" x2="0" y2="30"/>
+      <line x1="-26" y1="-15" x2="26" y2="15"/>
+      <line x1="-26" y1="15" x2="26" y2="-15"/>
+    </g>
+    <circle cx="0" cy="0" r="9" fill="#8ED6FF" stroke="#000000" stroke-width="4"/>
+  </g>
+</svg>

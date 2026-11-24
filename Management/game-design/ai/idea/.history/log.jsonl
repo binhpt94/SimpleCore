@@ -15,3 +15,4 @@
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "c266fb040742"}
 {"at": "2026-11-23 16:17:19", "event": "data", "hash": "469d9009792c", "previous": "c266fb040742", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "469d9009792c"}
+{"at": "2026-11-24 15:25:26", "event": "data", "hash": "07ccc86d3b9f", "previous": "469d9009792c", "added": ["player-commander", "main-feel", "castle-damage-carries"], "removed": [], "rewritten": []}

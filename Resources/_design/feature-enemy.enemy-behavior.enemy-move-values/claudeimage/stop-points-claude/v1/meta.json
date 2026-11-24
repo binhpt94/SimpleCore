@@ -1,0 +1,15 @@
+{
+ "node": "feature-enemy/enemy-behavior/enemy-move-values",
+ "nodeHash": "820f944e332f",
+ "frames": {
+  "stop-points": "ad9e08c7289f"
+ },
+ "styles": {
+  "world-cartoon": "68043f5eceb1"
+ },
+ "order": "_design/feature-enemy.enemy-behavior.enemy-move-values/stop-points-claude",
+ "version": 1,
+ "at": "2026-11-24 13:45:37",
+ "stamp": 1795502737.3655875,
+ "sources": []
+}

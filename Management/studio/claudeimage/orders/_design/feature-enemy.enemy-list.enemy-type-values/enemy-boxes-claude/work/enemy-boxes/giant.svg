@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="400" height="500">
+  <g stroke="#1a1a2e" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+    <!-- tay sau -->
+    <rect x="40" y="230" width="56" height="150" rx="26" fill="#4a7470"/>
+    <!-- chân -->
+    <rect x="110" y="400" width="70" height="94" rx="16" fill="#4a7470"/>
+    <rect x="220" y="400" width="70" height="94" rx="16" fill="#4a7470"/>
+    <!-- thân -->
+    <rect x="80" y="210" width="240" height="220" rx="70" fill="#5f8f8a"/>
+    <rect x="240" y="226" width="70" height="190" rx="34" fill="#4a7470" stroke="none"/>
+    <rect x="80" y="210" width="240" height="220" rx="70" fill="none"/>
+    <!-- khố -->
+    <path d="M100 360 L300 360 L280 430 L120 430 Z" fill="#7a5532"/>
+    <!-- đầu -->
+    <circle cx="205" cy="135" r="100" fill="#6fa39d"/>
+    <path d="M292 85 A100 100 0 0 1 118 185 A118 118 0 0 0 292 85 Z" fill="#558a84" stroke="none"/>
+    <circle cx="205" cy="135" r="100" fill="none"/>
+    <!-- lông mày, mắt, miệng, nanh -->
+    <path d="M210 110 L262 100" fill="none" stroke-width="10"/>
+    <circle cx="240" cy="132" r="12" fill="#1a1a2e"/>
+    <path d="M200 188 Q245 200 285 180" fill="none"/>
+    <path d="M222 192 L228 170 L236 194" fill="#ffffff" stroke-width="4"/>
+    <path d="M262 190 L270 168 L276 186" fill="#ffffff" stroke-width="4"/>
+    <!-- chuỳ -->
+    <path d="M318 420 L338 230" fill="none" stroke="#1a1a2e" stroke-width="30"/>
+    <path d="M318 420 L338 230" fill="none" stroke="#8a5e34" stroke-width="16"/>
+    <path d="M336 250 Q300 180 320 70 Q350 30 380 70 Q396 180 360 250 Z" fill="#8a5e34"/>
+    <circle cx="340" cy="120" r="7" fill="#c9d3dd" stroke-width="4"/>
+    <circle cx="362" cy="170" r="7" fill="#c9d3dd" stroke-width="4"/>
+    <!-- tay trước cầm chuỳ -->
+    <rect x="270" y="250" width="60" height="130" rx="28" fill="#5f8f8a"/>
+    <circle cx="322" cy="372" r="30" fill="#6fa39d"/>
+  </g>
+</svg>

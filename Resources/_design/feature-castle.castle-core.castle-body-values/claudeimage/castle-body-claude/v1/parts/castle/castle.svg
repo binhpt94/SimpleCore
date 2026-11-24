@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <g stroke="#2a2233" stroke-width="7" stroke-linejoin="round">
+    <!-- side towers -->
+    <path d="M6 394 L6 70 L18 70 L18 50 L40 50 L40 70 L54 70 L54 50 L76 50 L76 70 L88 70 L88 394 Z" fill="#b9a98f"/>
+    <path d="M212 394 L212 70 L224 70 L224 50 L246 50 L246 70 L260 70 L260 50 L282 50 L282 70 L294 70 L294 394 Z" fill="#b9a98f"/>
+    <!-- main keep -->
+    <path d="M70 394 L70 150 L84 150 L84 124 L110 124 L110 150 L137 150 L137 124 L163 124 L163 150 L190 150 L190 124 L216 124 L216 150 L230 150 L230 394 Z" fill="#c9b99c"/>
+    <!-- tower roofs -->
+    <path d="M0 52 L47 6 L94 52 Z" fill="#c8463c"/>
+    <path d="M206 52 L253 6 L300 52 Z" fill="#c8463c"/>
+  </g>
+  <!-- shadow side (light from top-left): right halves darker -->
+  <g fill="#9a8a70">
+    <rect x="58" y="74" width="26" height="316"/>
+    <rect x="264" y="74" width="26" height="316"/>
+    <rect x="196" y="154" width="30" height="236"/>
+  </g>
+  <g fill="#9e352d">
+    <path d="M47 10 L90 50 L47 50 Z"/>
+    <path d="M253 10 L296 50 L253 50 Z"/>
+  </g>
+  <!-- re-stroke outlines on top of shading -->
+  <g fill="none" stroke="#2a2233" stroke-width="7" stroke-linejoin="round">
+    <path d="M6 394 L6 70 L18 70 L18 50 L40 50 L40 70 L54 70 L54 50 L76 50 L76 70 L88 70 L88 394 Z"/>
+    <path d="M212 394 L212 70 L224 70 L224 50 L246 50 L246 70 L260 70 L260 50 L282 50 L282 70 L294 70 L294 394 Z"/>
+    <path d="M70 394 L70 150 L84 150 L84 124 L110 124 L110 150 L137 150 L137 124 L163 124 L163 150 L190 150 L190 124 L216 124 L216 150 L230 150 L230 394 Z" fill="#c9b99c"/>
+    <path d="M0 52 L47 6 L94 52 Z"/>
+    <path d="M206 52 L253 6 L300 52 Z"/>
+  </g>
+  <rect x="196" y="154" width="30" height="236" fill="#9a8a70"/>
+  <path d="M70 394 L70 150 L84 150 L84 124 L110 124 L110 150 L137 150 L137 124 L163 124 L163 150 L190 150 L190 124 L216 124 L216 150 L230 150 L230 394 Z" fill="none" stroke="#2a2233" stroke-width="7" stroke-linejoin="round"/>
+  <!-- stone lines -->
+  <g stroke="#7c6d56" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M14 130 H80 M14 200 H80 M14 270 H80 M14 340 H80"/>
+    <path d="M220 130 H286 M220 200 H286 M220 270 H286 M220 340 H286"/>
+    <path d="M78 200 H222 M78 250 H105 M195 250 H222 M78 300 H95 M205 300 H222"/>
+    <path d="M44 130 V200 M30 200 V270 M54 270 V340 M250 130 V200 M266 200 V270 M244 270 V340"/>
+  </g>
+  <!-- tower windows -->
+  <g fill="#2a2233">
+    <rect x="37" y="100" width="20" height="34" rx="10"/>
+    <rect x="243" y="100" width="20" height="34" rx="10"/>
+    <rect x="137" y="168" width="26" height="22" rx="4"/>
+  </g>
+  <!-- gate -->
+  <path d="M105 394 L105 300 Q150 244 195 300 L195 394 Z" fill="#6b4226" stroke="#2a2233" stroke-width="7" stroke-linejoin="round"/>
+  <g stroke="#3d2716" stroke-width="3">
+    <path d="M128 280 V394 M150 268 V394 M172 280 V394"/>
+    <path d="M108 330 H192 M108 362 H192"/>
+  </g>
+  <!-- emblem -->
+  <path d="M136 210 H164 V230 Q150 246 136 230 Z" fill="#e6b93a" stroke="#2a2233" stroke-width="4" stroke-linejoin="round"/>
+</svg>

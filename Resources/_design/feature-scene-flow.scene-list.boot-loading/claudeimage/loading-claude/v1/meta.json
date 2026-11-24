@@ -1,0 +1,15 @@
+{
+ "node": "feature-scene-flow/scene-list/boot-loading",
+ "nodeHash": "76aeeee9bf6f",
+ "frames": {
+  "main": "d6c401d0e885"
+ },
+ "styles": {
+  "ui-flat": "5a6989e6f1f5"
+ },
+ "order": "_design/feature-scene-flow.scene-list.boot-loading/loading-claude",
+ "version": 1,
+ "at": "2026-11-24 13:49:04",
+ "stamp": 1795502944.6399713,
+ "sources": []
+}

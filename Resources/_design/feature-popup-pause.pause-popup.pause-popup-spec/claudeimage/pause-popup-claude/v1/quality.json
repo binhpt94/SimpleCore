@@ -1,0 +1,16 @@
+{
+ "main": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "main.png"
+ },
+ "confirm": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "confirm.png"
+ }
+}

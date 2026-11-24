@@ -1,0 +1,12 @@
+{
+ "frame": "spawn-slots",
+ "parts": [],
+ "kept": [
+  "ground",
+  "castle",
+  "slot1",
+  "slot3",
+  "slot2"
+ ],
+ "skipped": []
+}

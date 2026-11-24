@@ -1,0 +1,16 @@
+{
+ "paused-main": {
+  "ok": true,
+  "note": "",
+  "runs": 0,
+  "round": 0,
+  "file": "paused-main.png"
+ },
+ "paused-confirm": {
+  "ok": true,
+  "note": "",
+  "runs": 0,
+  "round": 0,
+  "file": "paused-confirm.png"
+ }
+}

@@ -1,9 +1,17 @@
 {
- "hash": "469d9009792c",
+ "hash": "07ccc86d3b9f",
  "items": {
   "target-player": {
    "hash": "27c4f0c553f0",
    "text": "Người chơi phổ thông, điện thoại cầm ngang, lượt chơi ngắn\nThao tác trong trận ít: bấm kĩ năng của thành và mua nâng cấp. Cái hay nằm ở chọn đội hero, chọn nâng cấp và canh lúc dùng kĩ năng. Đã loại: game nặng tính toán, thao tác nhanh tay."
+  },
+  "player-commander": {
+   "hash": "ba2deae2813f",
+   "text": "Người chơi là người chỉ huy phòng thủ tòa thành\nChọn đội, mua nâng cấp và bấm kĩ năng thành gắn vào cùng một trách nhiệm: giữ thành."
+  },
+  "main-feel": {
+   "hash": "824f54cc600a",
+   "text": "Cảm giác chủ đạo là tự xoay chuyển thế thủ khi thành đang bị dồn ép\nSức ép phải đủ rõ để người chơi thấy quyết định của mình vừa giúp đội giành lại thế thủ."
   },
   "layout": {
    "hash": "55c903a8843e",
@@ -40,6 +48,10 @@
   "lose-condition": {
    "hash": "6564b55b86f1",
    "text": "Thua khi thành bị phá"
+  },
+  "castle-damage-carries": {
+   "hash": "0ba827481b84",
+   "text": "Sang đợt kế tiếp, thành giữ nguyên mức hư hại\nTrụ qua một đợt mà ít tổn thất thì trụ được lâu hơn; giữ thành trong đợt này còn có giá trị sau khi đợt kết thúc."
   },
   "endless-score": {
    "hash": "5a890645fb1d",

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+  <g stroke="#2b1a0e" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- gậy phép -->
+    <rect x="160" y="80" width="12" height="214" rx="5" fill="#8a5a2b"/>
+    <!-- áo choàng dài -->
+    <path d="M56 160 L132 160 L148 294 L40 294 Z" fill="#d6408c"/>
+    <path d="M104 160 L132 160 L148 294 L112 294 Z" fill="#b02f72" stroke="none"/>
+    <path d="M56 160 L132 160 L148 294 L40 294 Z" fill="none"/>
+    <path d="M70 240 L76 228 L82 240 L76 252 Z M110 200 L115 190 L120 200 L115 210 Z" fill="#f6c933" stroke-width="3"/>
+    <!-- tay cầm gậy -->
+    <circle cx="166" cy="196" r="15" fill="#f5c99b"/>
+    <!-- đầu -->
+    <circle cx="92" cy="118" r="50" fill="#f5c99b"/>
+    <path d="M136 98 A50 50 0 0 1 46 140 A58 58 0 0 0 136 98 Z" fill="#d9a173" stroke="none"/>
+    <circle cx="92" cy="118" r="50" fill="none"/>
+    <!-- râu trắng -->
+    <path d="M70 140 C76 196 136 190 140 128 C118 144 94 146 70 140 Z" fill="#fff4dc"/>
+    <circle cx="120" cy="116" r="6" fill="#2b1a0e" stroke="none"/>
+    <!-- mũ nhọn -->
+    <path d="M28 104 L156 104 L104 6 C96 30 70 60 28 104 Z" fill="#d6408c"/>
+    <rect x="28" y="94" width="128" height="16" rx="6" fill="#f6c933"/>
+    <!-- quả cầu lửa -->
+    <circle cx="166" cy="64" r="26" fill="#ff8a1e"/>
+    <circle cx="160" cy="58" r="11" fill="#ffd96b" stroke="none"/>
+  </g>
+</svg>

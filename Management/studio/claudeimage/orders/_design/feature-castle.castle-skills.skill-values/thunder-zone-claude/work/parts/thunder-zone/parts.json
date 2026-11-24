@@ -1,0 +1,11 @@
+{
+ "frame": "thunder-zone",
+ "parts": [],
+ "kept": [
+  "ground",
+  "castle",
+  "zone-r",
+  "zone-l"
+ ],
+ "skipped": []
+}

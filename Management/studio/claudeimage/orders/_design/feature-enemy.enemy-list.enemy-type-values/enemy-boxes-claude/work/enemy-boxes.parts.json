@@ -1,0 +1,7 @@
+{"parts": [
+  {"id": "soldier", "w": 250, "h": 300, "slice": null, "shapes": ["soldier"]},
+  {"id": "wolf", "w": 300, "h": 200, "slice": null, "shapes": ["wolf"]},
+  {"id": "giant", "w": 400, "h": 500, "slice": null, "shapes": ["giant"]},
+  {"id": "archer", "w": 250, "h": 300, "slice": null, "shapes": ["archer"]},
+  {"id": "boss", "w": 360, "h": 420, "slice": null, "shapes": ["boss"]}
+]}

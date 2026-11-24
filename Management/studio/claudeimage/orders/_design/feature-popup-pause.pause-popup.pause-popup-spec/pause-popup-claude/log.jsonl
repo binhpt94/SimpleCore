@@ -1,0 +1,5 @@
+{"at": "2026-11-24 13:39:55", "event": "attempt", "item": "main", "n": 1}
+{"at": "2026-11-24 13:39:56", "event": "run", "tool": "claudeimage", "item": "main", "mode": "browser", "exit": 0, "parts": ["btn-main", "btn-sub"], "result": "đã có work/out/main.png", "files": ["main.png"]}
+{"at": "2026-11-24 13:43:56", "event": "attempt", "item": "confirm", "n": 1}
+{"at": "2026-11-24 13:43:57", "event": "run", "tool": "claudeimage", "item": "confirm", "mode": "browser", "exit": 0, "parts": [], "result": "đã có work/out/confirm.png", "files": ["confirm.png"]}
+{"at": "2026-11-24 13:45:34", "event": "deliver", "version": 1, "files": ["confirm.png", "main.png", "meta.json", "parts", "quality.json"], "below": []}

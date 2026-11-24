@@ -1,0 +1,4 @@
+{"parts": [
+  {"id": "btn-main", "same-as": "feature-popup-lose/lose-actions/actions-spec#btn-main", "shapes": ["resume"]},
+  {"id": "btn-sub", "same-as": "feature-popup-lose/lose-actions/actions-spec#btn-sub", "shapes": ["quit"]}
+]}

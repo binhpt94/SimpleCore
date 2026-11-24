@@ -1,0 +1,3 @@
+{"at": "2026-11-24 13:46:52", "event": "attempt", "item": "shot-range", "n": 1}
+{"at": "2026-11-24 13:46:54", "event": "run", "tool": "claudeimage", "item": "shot-range", "mode": "browser", "exit": 0, "parts": ["range-band"], "result": "đã có work/out/shot-range.png", "files": ["shot-range.png"]}
+{"at": "2026-11-24 13:48:06", "event": "deliver", "version": 1, "files": ["meta.json", "parts", "quality.json", "shot-range.png"], "below": []}

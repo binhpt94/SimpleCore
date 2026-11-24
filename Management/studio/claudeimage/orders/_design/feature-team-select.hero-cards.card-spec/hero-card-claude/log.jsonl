@@ -1,0 +1,3 @@
+{"at": "2026-11-24 13:49:40", "event": "attempt", "item": "card", "n": 1}
+{"at": "2026-11-24 13:49:42", "event": "run", "tool": "claudeimage", "item": "card", "mode": "browser", "exit": 0, "parts": ["portrait", "role", "picked"], "result": "đã có work/out/card.png", "files": ["card.png"]}
+{"at": "2026-11-24 13:51:00", "event": "deliver", "version": 1, "files": ["card.png", "meta.json", "parts", "quality.json"], "below": []}

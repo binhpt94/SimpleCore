@@ -1,0 +1,9 @@
+{"parts": [
+  {"id": "knight", "w": 200, "h": 300, "slice": null, "shapes": ["knight"]},
+  {"id": "axe", "w": 200, "h": 300, "slice": null, "shapes": ["axe"]},
+  {"id": "sword", "w": 200, "h": 300, "slice": null, "shapes": ["sword"]},
+  {"id": "archer", "w": 200, "h": 300, "slice": null, "shapes": ["archer"]},
+  {"id": "mage", "w": 200, "h": 300, "slice": null, "shapes": ["mage"]},
+  {"id": "reach", "w": 240, "h": 28, "slice": [12, 12, 12, 12], "shapes": ["knight-rg", "axe-rg", "sword-rg", "archer-rg", "mage-rg"]},
+  {"id": "cleave", "w": 240, "h": 28, "slice": [12, 12, 12, 12], "shapes": ["axe-cleave"]}
+]}

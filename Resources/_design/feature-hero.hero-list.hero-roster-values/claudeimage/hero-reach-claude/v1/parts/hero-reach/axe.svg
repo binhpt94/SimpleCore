@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+  <g stroke="#2b1a0e" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <!-- cán rìu -->
+    <rect x="150" y="40" width="14" height="210" rx="5" fill="#8a5a2b"/>
+    <!-- lưỡi rìu đôi -->
+    <path d="M157 50 C190 40 198 70 196 96 C190 112 172 108 157 104 Z" fill="#dfe5ea"/>
+    <path d="M157 50 C126 40 118 70 120 96 C126 112 142 108 157 104 Z" fill="#c7ced6"/>
+    <!-- chân -->
+    <rect x="44" y="250" width="34" height="44" rx="8" fill="#7a4a24"/>
+    <rect x="92" y="250" width="34" height="44" rx="8" fill="#7a4a24"/>
+    <!-- thân to, áo cam -->
+    <rect x="26" y="152" width="122" height="108" rx="26" fill="#f0892a"/>
+    <rect x="106" y="158" width="36" height="96" rx="14" fill="#cf6a16" stroke="none"/>
+    <rect x="26" y="152" width="122" height="108" rx="26" fill="none"/>
+    <path d="M40 160 L130 250" fill="none" stroke="#6b3d1a" stroke-width="12"/>
+    <!-- tay nắm cán -->
+    <circle cx="157" cy="190" r="18" fill="#f5c99b"/>
+    <!-- đầu -->
+    <circle cx="84" cy="100" r="58" fill="#f5c99b"/>
+    <path d="M136 76 A58 58 0 0 1 30 124 A68 68 0 0 0 136 76 Z" fill="#d9a173" stroke="none"/>
+    <circle cx="84" cy="100" r="58" fill="none"/>
+    <!-- râu đỏ -->
+    <path d="M70 128 C80 168 128 166 140 120 C120 132 96 134 70 128 Z" fill="#b8461c"/>
+    <!-- mũ sừng -->
+    <path d="M28 92 A56 56 0 0 1 140 92 Z" fill="#a9b2bc"/>
+    <path d="M36 70 C14 60 10 36 22 20 C26 44 40 52 52 58 Z" fill="#fff4dc"/>
+    <path d="M132 70 C154 60 158 36 146 20 C142 44 128 52 116 58 Z" fill="#fff4dc"/>
+    <!-- mắt -->
+    <circle cx="116" cy="108" r="7" fill="#2b1a0e" stroke="none"/>
+    <path d="M104 96 L128 100" fill="none" stroke-width="5"/>
+  </g>
+</svg>

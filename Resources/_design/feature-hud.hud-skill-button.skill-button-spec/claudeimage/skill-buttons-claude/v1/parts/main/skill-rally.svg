@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" width="140" height="140">
+  <!-- nen nut chung: bong cung lech xuong 8 px, mau dac, vien den 6 px, bo 20 -->
+  <rect x="3" y="11" width="134" height="126" rx="20" fill="#000000"/>
+  <rect x="3" y="3" width="134" height="126" rx="20" fill="#F4A261" stroke="#000000" stroke-width="6"/>
+  <!-- bieu tuong co co vu o nua tren: can co va la co do -->
+  <rect x="44" y="12" width="9" height="66" rx="3" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+  <polygon points="53,14 98,24 80,34 98,46 53,50" fill="#E63946" stroke="#000000" stroke-width="4" stroke-linejoin="round"/>
+</svg>

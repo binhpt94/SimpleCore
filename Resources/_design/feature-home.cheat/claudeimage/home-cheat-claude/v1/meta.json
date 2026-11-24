@@ -1,0 +1,20 @@
+{
+ "node": "feature-home/cheat",
+ "nodeHash": "1881bd47e941",
+ "frames": {
+  "with-record": "1af15af05d2b"
+ },
+ "styles": {
+  "ui-flat": "5a6989e6f1f5"
+ },
+ "order": "_design/feature-home.cheat/home-cheat-claude",
+ "version": 1,
+ "at": "2026-11-24 13:43:43",
+ "stamp": 1795502623.2484035,
+ "sources": [
+  [
+   "_design/feature-home.home-screen.home-screen-spec/home-screen-claude",
+   1
+  ]
+ ]
+}

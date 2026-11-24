@@ -1,0 +1,15 @@
+{
+ "node": "feature-hud/hud-pause-button/pause-button-spec",
+ "nodeHash": "0b9219193214",
+ "frames": {
+  "main": "41881ef8ffcc"
+ },
+ "styles": {
+  "ui-flat": "5a6989e6f1f5"
+ },
+ "order": "_design/feature-hud.hud-pause-button.pause-button-spec/pause-button-claude",
+ "version": 1,
+ "at": "2026-11-24 13:45:43",
+ "stamp": 1795502743.5520566,
+ "sources": []
+}

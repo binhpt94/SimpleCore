@@ -1,0 +1,20 @@
+{
+ "node": "feature-hud-upgrade/button-state/button-display",
+ "nodeHash": "79f973592f0d",
+ "frames": {
+  "main": "09162c1de0b9"
+ },
+ "styles": {
+  "ui-flat": "5a6989e6f1f5"
+ },
+ "order": "_design/feature-hud-upgrade.button-state.button-display/upgrade-button-claude",
+ "version": 1,
+ "at": "2026-11-24 13:48:24",
+ "stamp": 1795502904.6167786,
+ "sources": [
+  [
+   "_design/feature-hud.hud-status.status-spec/hud-status-claude",
+   1
+  ]
+ ]
+}

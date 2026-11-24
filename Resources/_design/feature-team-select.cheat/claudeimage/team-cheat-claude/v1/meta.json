@@ -1,0 +1,24 @@
+{
+ "node": "feature-team-select/cheat",
+ "nodeHash": "0d6c3fdff45d",
+ "frames": {
+  "full-team": "24611978b675"
+ },
+ "styles": {
+  "ui-flat": "5a6989e6f1f5"
+ },
+ "order": "_design/feature-team-select.cheat/team-cheat-claude",
+ "version": 1,
+ "at": "2026-11-24 13:53:34",
+ "stamp": 1795503214.0936468,
+ "sources": [
+  [
+   "_design/feature-team-select.hero-cards.card-spec/hero-card-claude",
+   1
+  ],
+  [
+   "_design/feature-team-select.team-slots.slots-spec/team-slots-claude",
+   1
+  ]
+ ]
+}

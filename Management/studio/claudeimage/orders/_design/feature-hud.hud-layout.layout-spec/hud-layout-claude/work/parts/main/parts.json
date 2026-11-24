@@ -1,0 +1,88 @@
+{
+ "frame": "main",
+ "parts": [
+  {
+   "id": "band",
+   "w": 1920,
+   "h": 140,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "top",
+    "bottom"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "strip",
+   "w": 1920,
+   "h": 760,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "strip"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "btn",
+   "w": 140,
+   "h": 140,
+   "slice": null,
+   "shapes": [
+    "pause",
+    "skills"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "hp",
+   "w": 600,
+   "h": 60,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "hp"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "upgrade",
+   "w": 1340,
+   "h": 150,
+   "slice": [
+    32,
+    32,
+    32,
+    40
+   ],
+   "shapes": [
+    "upgrade"
+   ],
+   "from": null,
+   "text": true
+  }
+ ],
+ "kept": [
+  "money",
+  "wave",
+  "banner"
+ ],
+ "skipped": []
+}

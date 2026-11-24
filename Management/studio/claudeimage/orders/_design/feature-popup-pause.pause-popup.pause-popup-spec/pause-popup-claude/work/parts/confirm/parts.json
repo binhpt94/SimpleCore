@@ -1,0 +1,11 @@
+{
+ "frame": "confirm",
+ "parts": [],
+ "kept": [
+  "panel",
+  "question",
+  "quit",
+  "no"
+ ],
+ "skipped": []
+}
