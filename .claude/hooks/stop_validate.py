@@ -2,7 +2,7 @@
 """Stop hook. An agent bound to a feature may not finish while its feature has boundary violations.
 
 Human sessions (FEATURE=@human), @Manager and sessions without FEATURE are not checked;
-@Core and @Composition are checked on Core and _Composition.
+@Core is checked on Core, @CodeLead on _Composition (the area it codes).
 FEATURE is the chat's binding (see bind_session.py); the environment variable is not used.
 The agent is sent back once; if it stops again with violations left, it is let go and the
 violations stay visible to validate.py / the management page.
@@ -31,8 +31,8 @@ def main(argv):
             root, store = Path(argv[2]), None
         # Same source as guard.py: the chat's binding.
         feature = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
-        # @Core and @Composition are checked like a feature, on the owner names validate.py uses.
-        feature = {"@Core": "Core", "@Composition": "_Composition"}.get(guard.role_of(feature), feature)
+        # @Core and @CodeLead are checked like a feature, on the owner names validate.py uses.
+        feature = {"@Core": "Core", "@CodeLead": guard.LEAD_AREA}.get(guard.role_of(feature), feature)
         if not re.fullmatch(r"(_Services/)?[A-Za-z][A-Za-z0-9]*|_Composition", feature):
             return 0
         if data.get("stop_hook_active"):

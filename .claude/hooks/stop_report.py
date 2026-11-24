@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Stop hook. A turn that changed files must end with a report for @Manager.
 
-Applies to the groups Basic (@Core, @Composition), Features and Services, and to @CodeLead (it edits the skeleton).
+Applies to the groups Basic (@Core), Features and Services, and to @CodeLead (it edits the skeleton and _Composition).
 Not to @human, @Manager (it only creates proposals), @GameDesigner (its work is the design tree), the tool chats
 @Codex and @Blender (studio.py keeps their history) or unbound chats.
 @CodeLead and @Manager are both shown new reports (bind_session.py).

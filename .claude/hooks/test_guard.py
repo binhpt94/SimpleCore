@@ -554,15 +554,14 @@ def run_binding_cases(payload):
 
 
 def run_role_cases(payload):
-    """@Core, @Composition: like a feature session whose feature is Core / _Composition. @Manager: edits nothing."""
+    """@Core: like a feature session whose feature is Core. @Manager: edits nothing."""
     Path(A + "/Core/Old.cs").write_text("x")
     Path(A + "/_Composition/Old.cs").write_text("x")
     own_w = F + "/Wallet/Scripts/Internal/Old.cs"
     delete = lambda p: {"action": "delete", "path": p}       # noqa: E731
     sh = lambda c: {"command": c}                            # noqa: E731
 
-    for role, own, other, owner in (("@Core", "/Core", "/_Composition", "Core"),
-                                    ("@Composition", "/_Composition", "/Core", "_Composition")):
+    for role, own, other, owner in (("@Core", "/Core", "/_Composition", "Core"),):
         g = "role " + role
         e(g, role, "allow", A + own + "/Old.cs")
         w(g, role, "allow", A + own + "/New.cs")
@@ -611,13 +610,13 @@ def run_role_cases(payload):
     for cmd in (SCAFFOLD + " --root /tmp/x", SCAFFOLD + " Hero", SCAFFOLD + "; rm -rf UnityProject",
                 SCAFFOLD + " --dry-run && ls", "python Management/tools/../tools/scaffold.py", SCAFFOLD + " --dry-run --dry-run"):
         t(g, M, "deny", "Bash", sh(cmd))
-    for who in ("Wallet", "@CodeLead", "@GameDesigner", "@Core", "@Composition", ""):
+    for who in ("Wallet", "@CodeLead", "@GameDesigner", "@Core", ""):
         t(g + " (others)", who, "deny", "Bash", sh(SCAFFOLD))
     t(g + " (others)", "@human", "pass", "Bash", sh(SCAFFOLD))
 
     g = "any chat: design pack command"
     PACK = "python Management/tools/gd_pack.py"
-    for who in ("Wallet", "_Services/Popup", "@CodeLead", "@GameDesigner", M, "@Core", "@Composition"):
+    for who in ("Wallet", "_Services/Popup", "@CodeLead", "@GameDesigner", M, "@Core"):
         for cmd in (PACK + " Hero", PACK + " _Services/Popup", "python3 Management/tools/gd_pack.py Wallet"):
             t(g, who, "allow", "Bash", sh(cmd))
     for cmd in (PACK, PACK + " ../x", PACK + " Hero; rm -rf UnityProject", PACK + " Hero && ls", PACK + " Hero --root /tmp",
@@ -646,7 +645,7 @@ def run_role_cases(payload):
     g = "bind: roles"
     say(g, "block, bound=@Core", "bind @Core", f"FEATURE=@Core {PIN}", session="role-core")
     say(g, "pass, bound=@Core", "@Core is told its area", "làm đi", session="role-core")
-    say(g, "block, bound=@Composition", "bind @composition, any case", f"FEATURE=@composition {PIN}", session="role-comp")
+    say(g, "block, bound=None", "@Composition is no role any more", f"FEATURE=@Composition {PIN}", session="role-comp")
     say(g, "block, bound=@Manager", "bind @Manager", f"FEATURE=@Manager {PIN}", session="role-mgr")
     say(g, "block, bound=None", "unknown role", f"FEATURE=@Boss {PIN}", session="role-x")
 
@@ -746,8 +745,9 @@ def run_report_cases():
 
 def run_codelead_cases():
     """@CodeLead edits only the skeleton (Contracts, Base, asmdef, AssemblyInfo of unlocked features; asmdef,
-    AssemblyInfo and I*.cs of Core/_Composition), reads every layer of Basic/Features/Services, and uses unity-mcp to
-    compile, test, play, look and delete skeleton files. The owners only read their skeleton and code subclasses."""
+    AssemblyInfo and I*.cs of Core) and all of _Composition, reads every layer of Basic/Features/Services, and uses
+    unity-mcp to compile, test, play, look, delete skeleton files and change the assets and scenes of _Composition.
+    The owners only read their skeleton and code subclasses."""
     import bind_session
     W, L = "Wallet", "@CodeLead"
     internal = F + "/Wallet/Scripts/Internal/Old.cs"
@@ -755,7 +755,7 @@ def run_codelead_cases():
 
     g = "codelead: edits nothing outside the skeleton"
     for p in (internal, F + "/Wallet/Scripts/View/V.cs", F + "/Wallet/Tests/T.cs", F + "/Wallet/FeatureAssets/Private/c.asset",
-              F + "/Wallet/FeatureAssets/Public/Icon.prefab", F + "/Wallet/CLAUDE.md", A + "/Core/Old.cs", A + "/_Composition/Old.cs",
+              F + "/Wallet/FeatureAssets/Public/Icon.prefab", F + "/Wallet/CLAUDE.md", A + "/Core/Old.cs",
               A + "/Core/Tests/IFake.cs",
               FX + "/Management/proposals/decision.md", FX + "/Management/tools/rules.json",
               FX + "/Management/data/x.js", FX + "/.claude/settings.json", FX + "/CLAUDE.md"):
@@ -766,6 +766,24 @@ def run_codelead_cases():
     t(g, L, "allow", "Bash", {"command": VALIDATE})
     t(g, L, "deny", "Bash", {"command": "dotnet build"})
     t(g, L, "pass", "SendMessage", {"to": W, "message": "Sửa giúp ..."})
+
+    g = "codelead: owns _Composition (the wiring)"
+    for p in ("/Old.cs", "/Boot.cs", "/Tests/BootTests.cs", "/Tests/IFake.cs", "/Game.Popups.asset",
+              "/Game.Composition.asmdef", "/AssemblyInfo.cs", "/IBoot.cs"):
+        w(g, L, "allow", A + "/_Composition" + p)
+    e(g, L, "allow", A + "/_Composition/Old.cs")
+    w(g, L, "deny", A + "/_Composition/x.asmref")
+    t(g, L, "deny", "Write", {"file_path": A + "/_Composition/Boot.cs",
+                              "content": '[assembly: InternalsVisibleTo("Game.Wallet.View")]'})
+    t(g, L, "allow", "Write", {"file_path": A + "/_Composition/AssemblyInfo.cs",
+                               "content": '[assembly: InternalsVisibleTo("Game.Composition.Tests")]'})
+    t(g, L, "allow", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/_Composition/Old.cs"})
+    t(g, L, "ask", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/_Composition"})
+    if not WIN:
+        w(g + ": case-sensitive", L, "deny", A + "/_composition/Boot.cs")
+    for who in ("Wallet", "@Core", "@Manager", "@GameDesigner", "@Codex", ""):
+        w(g + " (others)", who, "deny", A + "/_Composition/Boot.cs")
+    e(g + " (others)", "@human", "ask", A + "/_Composition/Old.cs")
 
     g = "codelead: reads every layer of Basic, Features, Services"
     for p in (internal, F + "/Shop/Scripts/View/V.cs", F + "/Wallet/Tests/T.cs", F + "/Wallet/FeatureAssets/Private/c.asset",
@@ -797,7 +815,14 @@ def run_codelead_cases():
                          ("manage_components", "add"), ("read_console", "clear")):
         u(name, expect="allow", action=action)      # project settings, menus and the scene: @CodeLead, holding the lock
     u("manage_scene", expect="allow", action="load", path="Assets/_Composition/Scenes/Game.unity")
-    for name, action in (("manage_scene", "save"), ("manage_scene", "create"), ("manage_asset", "modify"),
+    u("manage_scene", expect="allow", action="save")      # a scene of _Composition: its own
+    u("manage_asset", expect="allow", action="create", path="Assets/_Composition/Catalog.asset")
+    u("manage_prefabs", expect="allow", action="modify_contents", prefab_path="Assets/_Composition/Boot.Game.prefab")
+    u("manage_asset", expect="deny", action="create", path="Assets/_Composition/N.cs")      # code: Edit/Write
+    u("manage_asset", expect="deny", action="create", path="Assets/Core/n.asset")
+    u("manage_scene", expect="allow", action="load", path="Assets/Features/Wallet/FeatureAssets/Private/T.unity")
+    u("manage_scene", expect="deny", action="save")      # looks at a feature's scene, never saves it
+    for name, action in (("manage_scene", "create"), ("manage_asset", "modify"),
                          ("manage_asset", "create"), ("manage_prefabs", "modify_contents"), ("create_script", ""),
                          ("apply_text_edits", ""), ("execute_code", "execute"), ("script_apply_edits", ""),
                          ("manage_editor", "nonsense"), ("manage_scene", "")):
@@ -1117,7 +1142,7 @@ def run_progress_cases():
     e(g + " (unreadable code.json)", S, "deny", own)
     Path(live + "/feature-shop/code.json").write_text('{"unity": ["Shop"]}')
     e(g + ": others", "@Core", "allow", A + "/Core/Old.cs")
-    e(g + ": others", "@Composition", "allow", A + "/_Composition/Old.cs")
+    e(g + ": others", "@CodeLead", "allow", A + "/_Composition/Old.cs")
     e(g + ": others", "@human", "pass", F + "/Shop/Scripts/Internal/S.cs")
     cli(g + " (real process)", S, "allow", "Edit own code once the design reached round 4",
         json.dumps({"tool_name": "Edit", "tool_input": {"file_path": own}, "cwd": FX}))
@@ -1309,7 +1334,7 @@ def run_tool_cases():
 def run_unity_cases():
     """unity-mcp by what each command touches: read, write (own assets), shared (compile), state (the open scene,
     with the Editor lock), play and lead (@CodeLead), script (never)."""
-    W, S, C, L = "Wallet", "Shop", "@Composition", "@CodeLead"
+    W, S, C, L = "Wallet", "Shop", "@CodeLead", "@CodeLead"      # C: @CodeLead as the owner of _Composition
     os.makedirs(F + "/Wallet/FeatureAssets/Private", exist_ok=True)
     os.makedirs(F + "/Shop/FeatureAssets/Private", exist_ok=True)
     os.makedirs(A + "/_Composition/Scenes", exist_ok=True)
@@ -1376,7 +1401,7 @@ def run_unity_cases():
                      ("manage_editor", {"action": "add_tag", "tag_name": "x"}), ("execute_menu_item", {"menu_path": "File/Save"}),
                      ("manage_packages", {"action": "add"}), ("manage_camera", {"action": "screenshot"})):
         u(g, W, "deny", name, **ti)
-        u(g, C, "deny", name, **ti)
+        u(g, "@Core", "deny", name, **ti)
     for who in ("@Manager", "@GameDesigner", ""):
         u(g + " (leaders without code, unset)", who, "deny", "read_console", action="get")
         u(g + " (leaders without code, unset)", who, "deny", "refresh_unity")

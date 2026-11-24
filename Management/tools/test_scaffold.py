@@ -57,7 +57,7 @@ def run_layout(root):
     code(root, "feature-popup", "_Services/Popup")
     (gd.table_dir(root, "live") / ".history").mkdir()      # hidden folders of the table are no nodes
     check("dry run creates nothing", (scaffold.scaffold(root, True), tree(root)),
-          (([("Core", "@Core"), ("_Composition", "@Composition"), ("_Services/Popup", "live/feature-popup"),
+          (([("Core", "@Core"), ("_Composition", "@CodeLead"), ("_Services/Popup", "live/feature-popup"),
              ("Hero", "live/feature-hero")], []), []))
     created, existing = scaffold.scaffold(root)
     check("creates Core, _Composition and every feature the live design names",

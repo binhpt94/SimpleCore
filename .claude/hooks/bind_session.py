@@ -39,7 +39,7 @@ ITERATIONS = 200_000
 # Anything that starts like the command is handled here and never passed on: it may carry the PIN.
 COMMAND_RX = re.compile(r"feature\s*(\?|=(.*))?", re.I)
 CONTEXT_BLOCK_RX = re.compile(r"<([A-Za-z][\w-]*)\b[^>]*>.*?</\1>", re.S)
-USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Composition, @Manager, @CodeLead, @GameDesigner hoặc @human> <PIN>. "
+USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Manager, @CodeLead, @GameDesigner hoặc @human> <PIN>. "
          "Xem chat đang gán gì: FEATURE?")
 MAX_LISTED_REPORTS = 20
 
@@ -253,11 +253,13 @@ def context(data, root, store):
         return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders): kiểm code và giải quyết xung đột của nhóm "
                 "Basic, Features, Services, và quản cấu trúc khung. Chỉ sửa khung: Scripts/Contracts, Scripts/Internal/"
                 "Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs của feature đã mở khoá code; *.asmdef, "
-                "AssemblyInfo.cs, interface I*.cs của Core/_Composition. Ngoài khung không sửa gì: lỗi thì gửi yêu cầu "
-                "sửa cụ thể cho phiên sở hữu. Lượt có sửa file phải kết thúc bằng báo cáo theo .claude/rules/report.md. "
-                "Đọc được toàn bộ source các nhóm đó; unity-mcp để biên dịch, chạy test, Play, xem, dùng menu và cài đặt "
-                "project (giữ khoá Editor tới hết lượt), và xoá file khung; không sửa asset hay lưu scene. "
-                "Ngoài khung, thứ được ghi là tiến độ của node thiết kế lá, sau khi đã biên dịch và test qua: python "
+                "AssemblyInfo.cs, interface I*.cs của Core. Thêm toàn bộ UnityProject/Assets/_Composition (nối dây: Boot, "
+                "scene, catalog asset; không có vai trò @Composition nữa). Ngoài hai thứ đó không sửa gì: lỗi thì gửi "
+                "yêu cầu sửa cụ thể cho phiên sở hữu. Lượt có sửa file phải kết thúc bằng báo cáo theo "
+                ".claude/rules/report.md. Đọc được toàn bộ source các nhóm đó; unity-mcp để biên dịch, chạy test, Play, "
+                "xem, dùng menu và cài đặt project (giữ khoá Editor tới hết lượt), xoá file khung; tạo, sửa, xoá asset "
+                "và lưu scene hay prefab chỉ trong Assets/_Composition. "
+                "Thứ còn lại được ghi là tiến độ của node thiết kế lá, sau khi đã biên dịch và test qua: python "
                 "Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done> (xem bằng "
                 "python Management/tools/gd_status.py). Quy trình ở .claude/rules/codelead.md."
                 + editor_status(store) + unread_reports(root, store, role))

@@ -2,7 +2,7 @@
 Validator ép ranh giới. File này ghi phần còn lại; người duyệt sẽ soi theo từng mục.
 
 ## Khung
-- Khung do @CodeLead viết và sửa; phiên sở hữu chỉ đọc (guard ép): `Scripts/Contracts`, `Scripts/Internal/Base`, `Scripts/View/Base`, mọi `*.asmdef`, `AssemblyInfo.cs`; ở Core/_Composition thêm các interface `I*.cs`. Bảng đầy đủ ở `.claude/rules/codelead.md`.
+- Khung do @CodeLead viết và sửa; phiên sở hữu chỉ đọc (guard ép): `Scripts/Contracts`, `Scripts/Internal/Base`, `Scripts/View/Base`, mọi `*.asmdef`, `AssemblyInfo.cs`; ở Core thêm các interface `I*.cs`. `Assets/_Composition` (nối dây) là của @CodeLead cả vùng. Bảng đầy đủ ở `.claude/rules/codelead.md`.
 - Code mới của feature là lớp con của lớp base, đặt ở phần còn lại của `Internal`/`View`. Thiếu chỗ móc trong lớp base thì nhờ @CodeLead thêm, không chép lớp base ra sửa.
 
 ## Contract
@@ -43,9 +43,9 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 | Loại | Lệnh | Ai |
 |---|---|---|
 | Đọc | `read_console get`, `find_gameobjects`, `manage_scene get_*`, `manage_asset search/get_info/get_components`, `manage_prefabs get_info/get_hierarchy`, `manage_material get_material_info`, `manage_ui read/get_visual_tree`, `find_in_file`, `get_sha`, `validate_script`, docs, resource | mọi phiên code; path phải đọc được, `search` phải có `path` |
-| Ghi asset | `manage_asset create/create_folder/duplicate/move/rename/modify/import/delete`, `manage_prefabs modify_contents`, `manage_material create/set_*`, `manage_texture`, `manage_ui create/update/create_panel_settings` | phiên sở hữu, mọi path trong vùng mình, ngoài khung; không `.cs`, `.asmdef` |
+| Ghi asset | `manage_asset create/create_folder/duplicate/move/rename/modify/import/delete`, `manage_prefabs modify_contents`, `manage_material create/set_*`, `manage_texture`, `manage_ui create/update/create_panel_settings` | phiên sở hữu, mọi path trong vùng mình, ngoài khung; không `.cs`, `.asmdef`. @CodeLead: trong `Assets/_Composition` |
 | Biên dịch | `refresh_unity` | mọi phiên code, khi không chat khác giữ Editor |
-| Scene, prefab stage | `manage_scene create/load/save`, `manage_gameobject`, `manage_components`, `manage_prefabs create_from_gameobject`, `manage_material` gán cho renderer, `manage_ui attach_ui_document`, `manage_editor *_prefab_stage`, `read_console clear` | phiên code, scene/prefab trong vùng mình; giữ khoá Editor |
+| Scene, prefab stage | `manage_scene create/load/save`, `manage_gameobject`, `manage_components`, `manage_prefabs create_from_gameobject`, `manage_material` gán cho renderer, `manage_ui attach_ui_document`, `manage_editor *_prefab_stage`, `read_console clear` | phiên code, scene/prefab trong vùng mình (@CodeLead: lưu chỉ trong `Assets/_Composition`, vùng khác chỉ mở xem); giữ khoá Editor |
 | Play, test, cài đặt | `manage_editor play/pause/stop`, `run_tests`, `execute_menu_item`, tag/layer, package, camera, graphics, physics, ProBuilder, profiler | chỉ @CodeLead; giữ khoá Editor |
 | Viết code | `create_script`, `script_apply_edits`, `apply_text_edits`, `delete_script`, `manage_script` | không ai: dùng Edit/Write |
 - **Khoá Editor**: một chat một lúc, guard giữ cho chat đó tới hết lượt (Stop hook trả khoá) hoặc 10 phút không dùng. Chat khác đang giữ thì chờ; không tìm đường vòng. Người gỡ bằng `python .claude/hooks/stop_unlock.py --release`.

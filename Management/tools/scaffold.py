@@ -29,7 +29,7 @@ from gd_delete import is_link  # noqa: E402      symlink (any OS) or junction (W
 FEATURE_LAYOUT = ("Scripts/Contracts", "Scripts/Internal", "Scripts/View", "Tests",
                   "FeatureAssets/Public", "FeatureAssets/Private")
 KEEP = ".gitkeep"
-AREAS = ("Core", "_Composition")      # Assets/<area>: owned by @Core / @Composition
+AREAS = {"Core": "@Core", "_Composition": "@CodeLead"}      # Assets/<area>: the role that owns it
 
 
 def check_name(name):
@@ -47,7 +47,7 @@ def targets(root):
     """[(label, folder, [subfolders], owner)] of what the design asks for, in the order it is created.
     owner: the live node that names the folder, or the area session."""
     assets = Path(root) / "UnityProject" / "Assets"
-    out = [(area, assets / area, [""], "@" + area.strip("_")) for area in AREAS]
+    out = [(area, assets / area, [""], owner) for area, owner in AREAS.items()]
     for name, node, declared in gd.live_feature_names(root):
         check_name(name)
         owner = f"live/{node}" + ("" if declared else ", tên đề xuất: node chưa có code.json")

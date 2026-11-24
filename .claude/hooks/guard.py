@@ -9,8 +9,9 @@ The value, by group:
     Leaders   @Manager                    coordinator: edits nothing but new files in Management/proposals; runs
                                           scaffold.py, which makes the folders the live design names (no code)
               @CodeLead                   checks code, settles conflicts and owns the SKELETON: edits only the
-                                          skeleton (below), of a feature once its code gate is open, of Core and
-                                          _Composition always; reads all source of Basic/Features/Services; compiles,
+                                          skeleton (below), of a feature once its code gate is open, of Core always; and
+                                          all of Assets/_Composition (the wiring: Boot, scenes, catalogs; LEAD_AREA), its
+                                          assets and scenes through unity-mcp too; reads all source of Basic/Features/Services; compiles,
                                           tests and plays through unity-mcp (UNITY_RULES; holds the Editor lock),
                                           deletes skeleton files there; writes the progress of a design leaf through
                                           gd_progress.py
@@ -22,7 +23,7 @@ The value, by group:
     Tools     @Codex / @Blender           take orders from the features (Management/studio, studio.py): write only their
                                           lessons.md and the work folder of an order; run Codex / Blender through
                                           studio.py; blender MCP (@Blender) and unity-mcp custom tools are a soft gate
-    Basic     @Core / @Composition        edits only Assets/Core / Assets/_Composition
+    Basic     @Core                       edits only Assets/Core
     Features  <Name>                      edits only its feature
     Services  _Services/<Name>            edits only its service
     unset / invalid                       every edit is denied
@@ -37,8 +38,9 @@ The skeleton (the public gates and base classes; only @CodeLead edits it, the ow
     in a feature or service   Scripts/Contracts/**, Scripts/Internal/Base/**, Scripts/View/Base/**, every *.asmdef,
                               AssemblyInfo.cs (the one place for InternalsVisibleTo: other files may not write it)
     in Core, _Composition     every *.asmdef, AssemblyInfo.cs, the interface files I<Name>.cs outside Tests
+                              (_Composition is @CodeLead's as a whole, so the split matters only for Core)
 Features and Services may edit their own folder only once its design has reached round 4 in the live table
-(Management/tools/gamedesign.py, code_allowed); reading is not gated, and neither are @Core and @Composition.
+(Management/tools/gamedesign.py, code_allowed); reading is not gated, and neither are @Core and @CodeLead's _Composition.
 
 Paths (Windows and Linux/macOS):
     Every path is turned into one canonical form before any check: absolute, normalised, '/' as separator
@@ -108,7 +110,7 @@ DESIGN_KEPT = {".user-review", ".history", ".progress"}
 DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per round
 HUMAN_ASK_ZONES = {".claude", "_Composition", "Core", DESIGN_LIVE}
 # FEATURE values that are not feature folders.
-ROLES = ("@human", "@Core", "@Composition", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender")
+ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender")
 # Tools: they take orders from the features and make images (Codex) or 3D models (Blender); they never code.
 TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender"}
 STUDIO_ZONE, RESOURCES_ZONE = "Management/studio", "Resources"
@@ -129,10 +131,12 @@ TOOL_COMMANDS = {
                 STUDIO + r"pick " + STUDIO_REF + " " + STUDIO_ID + r" [1-9][0-9]*"],
 }
 FEATURE_STUDIO_RX = re.compile(r"^python3? Management/tools/studio\.py (take|reject) (" + STUDIO_REF + r")$")
-ROLE_AREAS = {"@Core": "Core", "@Composition": "_Composition"}
+ROLE_AREAS = {"@Core": "Core"}
+# The wiring (Boot, scenes, asset catalogs): @CodeLead edits all of it, not only its skeleton; no code gate.
+LEAD_AREA = "_Composition"
 # unity-mcp: every tool and action, by what it touches (kind). A tool or action missing here is denied.
 #   read    looks only; any path it names must be readable by the session           every code session, @CodeLead
-#   write   changes asset files; every path it names must be the session's own       the owner (delete: also @CodeLead, skeleton)
+#   write   changes asset files; every path it names must be the session's own       the owner (@CodeLead: _Composition; delete: also skeleton files)
 #   shared  compiles; touches the one Editor but holds nothing                       every code session, @CodeLead; not while
 #                                                                                    another session holds the Editor lock
 #   state   changes the open scene, a prefab stage or the console                    every code session, @CodeLead; takes the lock
@@ -387,7 +391,7 @@ def canonical_role(typed):
 def zone(full, root, feature, area=None, read_all=False):
     """(name, readable, edit) for a canonical path; edit is 'allow' | 'ask' | 'create' | 'design' | 'deny'.
     'design': only @GameDesigner edits there.
-    feature: the session's own feature; area: "Core" or "_Composition" for @Core / @Composition;
+    feature: the session's own feature; area: "Core" for @Core, "_Composition" for @CodeLead;
     read_all: @CodeLead, who may read the private parts of every feature as well.
     Checks that only deny match in any letter case; checks that grant match as the file system compares."""
     if same(full, root):
@@ -436,8 +440,8 @@ def zone(full, root, feature, area=None, read_all=False):
     if not exact(seg[:2], "UnityProject/Assets") or n < 3:
         return "unlisted", False, "deny"
 
-    # Only @Core / @Composition edit Core / _Composition; a feature session asks them. Their skeleton (asmdef,
-    # AssemblyInfo, interface files) is @CodeLead's; the zone keeps the area's name, so the human is still asked.
+    # Only @Core edits Core and only @CodeLead edits _Composition; a feature session asks them. The skeleton
+    # (asmdef, AssemblyInfo, interface files) is @CodeLead's; the zone keeps the area's name, so the human is still asked.
     for folder in AREA_FOLDERS:
         if low[2] == folder.lower():
             if same(seg[2], folder) and area_skeleton(seg[3:]):
@@ -512,7 +516,7 @@ def is_asmref(full):
 
 def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
     """Deleting through unity-mcp: one existing file inside the session's own feature or area, outside the skeleton;
-    for @CodeLead, one existing skeleton file (of an unlocked feature, or of Core/_Composition)."""
+    for @CodeLead, one existing skeleton file (of an unlocked feature, or of Core) or a file of _Composition."""
     if text_of(ti.get("action")) != "delete":
         return "deny", "unity-mcp manage_asset: a feature session may use only action 'delete'"
     if mode == "none":
@@ -528,9 +532,10 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
     if goes_through_link(full, root):
         return "deny", "path goes through a link or junction"
     if mode == "codelead":
-        name, _, edit = zone(full, root, None, None, True)
-        if edit != "skeleton":
-            return "deny", f"@CodeLead deletes only skeleton files, not in: {name}. Ask the session that owns it."
+        name, _, edit = zone(full, root, None, LEAD_AREA, True)
+        if edit not in ("skeleton", "allow"):
+            return "deny", (f"@CodeLead deletes only skeleton files and files of {LEAD_AREA}, not in: {name}. "
+                            "Ask the session that owns it.")
         locked = codelead_gate(full, root)
         if locked:
             return "deny", locked
@@ -789,9 +794,7 @@ def decide_unity_one(tool, ti, ctx, work):
         return "allow", f"unity-mcp {short}: compiles (not while another session holds the Editor)", False
     if short == "manage_asset" and action == "delete":
         return (*decide_unity_delete(ti, mode, feature, root, area, who), False)
-    if kind == "write":
-        if lead:
-            return "deny", "@CodeLead changes only the skeleton (and deletes skeleton files); ask the owner", False
+    if kind == "write":      # @CodeLead: its area is _Composition, so everything else is refused below
         for key, value in paths:
             full, why = unity_full(value, root)
             if why:
@@ -912,7 +915,7 @@ def decide(data, session_value, root, store=None):
     elif role == "@Manager":
         mode = "manager"
     elif role == "@CodeLead":
-        mode = "codelead"
+        mode, area = "codelead", LEAD_AREA
     elif role == "@GameDesigner":
         mode = "gamedesigner"
     elif role in ROLE_AREAS:
@@ -965,11 +968,15 @@ def decide(data, session_value, root, store=None):
         if is_asmref(full):
             return "deny", ".asmref files are forbidden: they put code into another assembly"
         if mode == "codelead":
-            name, _, edit = zone(full, root, None, None, True)
+            name, _, edit = zone(full, root, None, LEAD_AREA, True)
+            if edit == "allow":      # Assets/_Composition, outside its skeleton
+                if any("InternalsVisibleTo" in s for s in edit_texts(ti)):
+                    return "deny", "InternalsVisibleTo belongs in AssemblyInfo.cs only"
+                return "allow", f"@CodeLead edits {name}"
             if edit != "skeleton":
                 return "deny", (f"@CodeLead edits only the skeleton (Contracts, *.asmdef, AssemblyInfo.cs, Scripts/*/Base, "
-                                f"I*.cs of Core/_Composition), not {name}. Send the owning session exactly what to fix "
-                                "(file, change, why). See .claude/rules/codelead.md.")
+                                f"I*.cs of Core) and Assets/{LEAD_AREA}, not {name}. Send the owning session exactly "
+                                "what to fix (file, change, why). See .claude/rules/codelead.md.")
             locked = codelead_gate(full, root)
             if locked:
                 return "deny", locked

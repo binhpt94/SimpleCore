@@ -1,21 +1,23 @@
-# @CodeLead: quản khung, kiểm code và giải quyết xung đột
-Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic (@Core, @Composition) · Features · Services (`_Services/*`).
-@CodeLead lo code của Basic, Features, Services: dựng và giữ **cấu trúc khung**, kiểm khi họ báo xong, giải quyết mọi xung đột code giữa họ.
+# @CodeLead: quản khung, nối dây, kiểm code và giải quyết xung đột
+Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic (@Core) · Features · Services (`_Services/*`).
+@CodeLead lo code của Basic, Features, Services: dựng và giữ **cấu trúc khung**, **nối dây** các feature trong `Assets/_Composition`, kiểm khi họ báo xong, giải quyết mọi xung đột code giữa họ.
 
 ## Cấu trúc khung (chỉ @CodeLead sửa)
 | Ở đâu | Gồm |
 |---|---|
 | Mỗi feature và service | `Scripts/Contracts/**`, `Scripts/Internal/Base/**`, `Scripts/View/Base/**`, mọi `*.asmdef`, `AssemblyInfo.cs` |
-| `Assets/Core`, `Assets/_Composition` | mọi `*.asmdef`, `AssemblyInfo.cs`, các file interface `I<Tên>.cs` (trừ trong `Tests/`) |
-- Phiên sở hữu chỉ đọc khung và viết code mới trên lớp con ở phần còn lại của `Internal`/`View` (Core/_Composition: lớp hiện thực interface). Muốn đổi khung thì nhắn @CodeLead.
+| `Assets/Core` | mọi `*.asmdef`, `AssemblyInfo.cs`, các file interface `I<Tên>.cs` (trừ trong `Tests/`) |
+| `Assets/_Composition` | toàn bộ vùng (khung và phần còn lại): xem mục Nối dây |
+- Phiên sở hữu chỉ đọc khung và viết code mới trên lớp con ở phần còn lại của `Internal`/`View` (Core: lớp hiện thực interface). Muốn đổi khung thì nhắn @CodeLead.
 - `InternalsVisibleTo` chỉ được nằm trong `AssemblyInfo.cs`; file khác có chữ này thì guard chặn phiên sở hữu.
 
 ## Quyền (guard ép)
 - Sửa được khung (bảng trên). Khung của một feature chỉ sửa được khi feature đó đã mở khoá code (thiết kế tới vòng 4 trong `live`, cùng cổng với phiên feature); Core, _Composition không có cổng.
-- Ngoài khung không sửa gì, kể cả `Management/proposals`: lỗi trong code của phiên khác thì nhắn phiên sở hữu.
+- Sửa được mọi file trong `Assets/_Composition` (không còn vai trò @Composition). `InternalsVisibleTo` vẫn chỉ nằm trong `AssemblyInfo.cs`.
+- Ngoài khung và `_Composition` không sửa gì, kể cả `Management/proposals`: lỗi trong code của phiên khác thì nhắn phiên sở hữu.
 - Lượt có sửa file kết thúc bằng khối báo cáo theo `.claude/rules/report.md`, như mọi phiên code.
 - Đọc được toàn bộ source các nhóm Basic, Features, Services (cả Internal, View, Tests, FeatureAssets/Private).
-- unity-mcp (bảng ở `.claude/rules/unity.md`): đọc, biên dịch, chạy test (`run_tests`), Play/Pause/Stop, mở scene/prefab để xem, sửa object trong scene khi thử, menu (`execute_menu_item`), tag/layer, package, camera, graphics, physics, ProBuilder, profiler; và xoá file khung (`manage_asset` action `delete`). Test, Play, menu, cài đặt và scene đều giữ khoá Editor tới hết lượt: phiên khác đang giữ thì chờ. Không tạo hay sửa asset, không lưu scene hay prefab, không viết code qua unity-mcp.
+- unity-mcp (bảng ở `.claude/rules/unity.md`): đọc, biên dịch, chạy test (`run_tests`), Play/Pause/Stop, mở scene/prefab để xem, sửa object trong scene khi thử, menu (`execute_menu_item`), tag/layer, package, camera, graphics, physics, ProBuilder, profiler; và xoá file khung (`manage_asset` action `delete`). Test, Play, menu, cài đặt và scene đều giữ khoá Editor tới hết lượt: phiên khác đang giữ thì chờ. Tạo, sửa, xoá asset và lưu scene hay prefab chỉ trong `Assets/_Composition`; ở vùng khác chỉ mở để xem. Không viết code qua unity-mcp.
 - Mọi phiên code tự biên dịch và đọc console; @CodeLead vẫn biên dịch lại, chạy test và Play khi nhận báo cáo xong.
 - Shell: `validate.py` và `gd_pack.py <Tên>` như mọi phiên, thêm hai lệnh về thiết kế:
   - `python Management/tools/gd_status.py [ai/idea/<node>]`: xem thiết kế, độ quan trọng, tiến độ, feature nào đang bị khoá code.
@@ -26,6 +28,12 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic 
 2. Viết Contracts chỉ cho thứ feature khác đang cần (nêu tên), asmdef đúng ma trận của validator, `AssemblyInfo.cs` (View/Tests của chính nó).
 3. Lớp base trong `Scripts/Internal/Base` và `Scripts/View/Base`: `internal abstract`, giữ khuôn chung (vòng đời, cổng vào ra, chỗ để lớp con điền luật); không chứa luật game cụ thể của feature. Luật game nằm ở lớp con do phiên feature viết.
 4. Chạy `validate.py --feature <Tên>`, biên dịch; rồi báo cáo và nhắn phiên feature khung đã sẵn.
+
+## Nối dây (`Assets/_Composition`)
+- Vùng này chỉ nối dây: `Boot.cs`, các variant của `Boot.prefab` (danh sách installer theo thứ tự cài, catalog asset id → asset), scene. Không chứa luật game.
+- Feature báo xong và đã kiểm qua: thêm installer của nó vào Boot variant của scene dùng nó, thêm id asset công khai vào catalog. Thứ tự cài và luật installer ở `.claude/rules/unity.md`.
+- Sửa xong: `validate.py --feature _Composition`, biên dịch, chạy `BootTests`, Play; lưu scene và prefab đã mở trước khi hết lượt.
+- Đây là code @CodeLead tự viết và tự kiểm: báo cáo ghi rõ đã đổi gì trong `_Composition` để người soi.
 
 ## Tiến độ
 - Chỉ đánh `done` cho một giai đoạn của node lá sau khi code ứng với node đó đã biên dịch, test qua và Play không lỗi ở mức giai đoạn đó (PROTOTYPE: đủ tính năng quan trọng; FULL: đủ tính năng, đủ art).
