@@ -1,0 +1,57 @@
+{
+ "hash": "345954ac135f",
+ "items": {
+  "flow-owns-screens": {
+   "hash": "9cec7c542968",
+   "text": "Điều hướng màn là nơi duy nhất đổi màn chính đang hiện giữa màn bắt đầu, màn chọn đội và màn trận\nHai popup vẫn do feature sở hữu nhờ dịch vụ popup hiện và đóng."
+  },
+  "flow-only-picks-target": {
+   "hash": "7eb6c7daa5d5",
+   "text": "Điều hướng màn là nơi duy nhất chọn màn đích cho mọi yêu cầu đổi màn hợp lệ trong scene Game\nLượt chơi chỉ bàn giao lựa chọn đã xử lí, không tự chọn đích."
+  },
+  "flow-from-scene-ready": {
+   "hash": "f800e795ef3e",
+   "text": "Mỗi lần scene Game được tải, điều hướng màn hiện màn bắt đầu khi chuyển scene báo Game đã sẵn sàng\nTín hiệu sẵn sàng chỉ mở màn bắt đầu một lần cho mỗi lần tải Game."
+  },
+  "leave-choice-after-dispose": {
+   "hash": "c808ae2a9853",
+   "text": "Điều hướng màn nhận lựa chọn rời trận từ lượt chơi sau khi lượt chơi báo đã dọn trận xong\nNút Chơi và Vào trận gửi thẳng cho điều hướng màn; lựa chọn rời trận đi qua lượt chơi trước."
+  },
+  "play-opens-team": {
+   "hash": "08de9d9c0d29",
+   "text": "Nút Chơi trên màn bắt đầu xin điều hướng màn mở màn chọn đội"
+  },
+  "start-hands-team": {
+   "hash": "7b5bec6911b7",
+   "text": "Điều hướng màn chuyển nguyên đội đã xác nhận cho lượt chơi khi nhận yêu cầu Vào trận\nLượt chơi giữ đội đã chốt và cấp cho hero khi dựng trận."
+  },
+  "show-battle-when-ready": {
+   "hash": "9a3967542362",
+   "text": "Điều hướng màn chỉ hiện màn trận sau khi lượt chơi báo trạng thái đầu lượt đã sẵn"
+  },
+  "replay-to-team": {
+   "hash": "e65cb18367c7",
+   "text": "Chọn Chơi lại trên popup thua thì về màn chọn đội\nNgười chơi đổi đội hoặc xác nhận lại đội được điền sẵn."
+  },
+  "lose-to-home": {
+   "hash": "5fad2e6c13c3",
+   "text": "Chọn Về màn bắt đầu trên popup thua thì về màn bắt đầu"
+  },
+  "bo-luot-ve-man-bat-dau": {
+   "hash": "72c0cd337430",
+   "text": "Chọn Bỏ lượt trên popup tạm dừng thì về màn bắt đầu\nLượt chơi xác nhận và kết thúc lượt, dọn trận; điều hướng màn sở hữu đích đến."
+  },
+  "back-from-team": {
+   "hash": "52d2f51ad0c9",
+   "text": "Nút Quay lại trên màn chọn đội đưa người chơi về màn bắt đầu\nĐường rời màn chọn đội trước khi vào trận; đội được nhớ không đổi."
+  },
+  "flow-lock": {
+   "hash": "725e4ee21de5",
+   "text": "Điều hướng màn bỏ qua yêu cầu đổi màn mới trong lúc đang xử lí một lần đổi màn\nKhoá tới khi màn đích sẵn sàng, hoặc tới khi đã khôi phục màn nguồn sau lỗi; hai lần bấm Vào trận chỉ dựng một trận."
+  },
+  "retry-on-build-fail": {
+   "hash": "8a3f1d0b8b8a",
+   "text": "Dựng trận thất bại thì màn chọn đội cho thử lại với đội vừa xác nhận\nLượt chưa bắt đầu nên đội được nhớ chưa đổi. Gần mức trường hợp biên của vòng sau."
+  }
+ }
+}

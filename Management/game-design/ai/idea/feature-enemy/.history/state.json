@@ -1,17 +1,21 @@
 {
- "hash": "b74c0b7d272a",
+ "hash": "e41a7b75e5a6",
  "items": {
   "enemy-path": {
    "hash": "7714220ced86",
    "text": "Quái đi từ hai mép màn hình vào thành, đánh hero chắn đường và đánh thành khi tới nơi\nCho hero cận chiến có vai trò chắn. Đã loại: quái bỏ qua hero, chỉ nhắm thành."
   },
-  "enemy-types": {
-   "hash": "52326dc1c6c4",
-   "text": "Có nhiều loại quái với cách đi và sức chịu khác nhau\nĐể đợt sau khác đợt trước và mỗi kiểu hero có chỗ mạnh. Đã loại: một loại quái chỉ tăng chỉ số."
+  "enemy-type-threats": {
+   "hash": "f75a28aa4548",
+   "text": "Các loại quái tạo ra những mối đe doạ cần cách ứng phó khác nhau\nGiá trị của nhiều loại quái là làm đổi quyết định giữ thành, ví dụ lúc bấm kĩ năng. Cách đi và sức chịu từng loại để vòng 3."
   },
   "enemy-reward": {
    "hash": "03cd594c0b36",
    "text": "Hạ quái thì được tiền, dù hạ bằng hero hay bằng thành\nTiền vào thẳng `feature-wallet`, không cần nhặt."
+  },
+  "enemy-wave-clear": {
+   "hash": "2600e56f167b",
+   "text": "Quái báo khi bị hạ để `feature-wave` biết lúc đợt được dọn sạch\n`feature-wave` quyết quái nào ra và lúc nào; nó còn cần kết quả giao chiến để kết thúc đợt và trao thưởng."
   }
  }
 }

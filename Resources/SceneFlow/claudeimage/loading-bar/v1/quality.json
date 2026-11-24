@@ -1,0 +1,16 @@
+{
+ "bar-track": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "bar-track.png"
+ },
+ "bar-fill": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "bar-fill.png"
+ }
+}

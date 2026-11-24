@@ -1,0 +1,3 @@
+{"at": "2026-11-25 01:15:24", "event": "attempt", "item": "layers", "n": 1}
+{"at": "2026-11-25 01:15:27", "event": "run", "tool": "claudeimage", "item": "layers", "mode": "browser", "exit": 0, "parts": ["sky", "far", "ground", "grass", "stone"], "result": "đã có work/out/layers.png", "files": ["layers.png"]}
+{"at": "2026-11-25 01:15:36", "event": "deliver", "version": 1, "files": ["layers.png", "meta.json", "parts", "quality.json"], "below": []}

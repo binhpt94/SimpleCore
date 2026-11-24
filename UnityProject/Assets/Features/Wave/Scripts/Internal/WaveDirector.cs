@@ -12,6 +12,9 @@ namespace Game.Wave
     /// Driven by <see cref="Tick"/>; knows nothing of Unity.
     /// </summary>
     internal sealed class WaveDirector : IWaveProgress
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        , IWaveCheat
+#endif
     {
         private enum Phase
         {
@@ -97,9 +100,28 @@ namespace Game.Wave
             else if (_phase == Phase.Break)
             {
                 _breakLeft -= deltaSeconds;
-                if (_breakLeft <= 0f) StartWave(CurrentWave);
+                if (_breakLeft <= 0f) BeginWave(CurrentWave, 0);
             }
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>
+        /// Dev cheat: drops the rest of the current wave (or the break) and starts <paramref name="wave"/> at once.
+        /// Enemies still on the field stay and keep counting as alive, so the clear of the new wave still waits for them.
+        /// Skipped waves give no reward and no score. Ignored outside a running battle.
+        /// </summary>
+        public void StartWave(int wave)
+        {
+            if (wave < 1) throw new ArgumentOutOfRangeException(nameof(wave), wave, "Waves start at 1.");
+            if (_phase != Phase.Sending && _phase != Phase.Break) return;
+
+            var stillOnField = _phase == Phase.Sending ? _alive : 0;
+            _clearPending = false;
+            CurrentWave = wave;
+            CurrentWaveChanged?.Invoke(CurrentWave);
+            BeginWave(wave, stillOnField);
+        }
+#endif
 
         private void OnRunStarted(RunTeam team)
         {
@@ -115,7 +137,7 @@ namespace Game.Wave
         private void OnBattleStarted()
         {
             if (_phase != Phase.Idle) return;
-            StartWave(CurrentWave);
+            BeginWave(CurrentWave, 0);
         }
 
         private void OnBattleStopped()
@@ -133,12 +155,13 @@ namespace Game.Wave
             if (_alive == 0 && _nextIndex >= _list.Count) _clearPending = true;
         }
 
-        private void StartWave(int wave)
+        /// <param name="alreadyAlive">Enemies already on the field that the clear of this wave must also wait for.</param>
+        private void BeginWave(int wave, int alreadyAlive)
         {
             _plan = _formula.Plan(wave);
             _list = _order.Build(_plan);
             _nextIndex = 0;
-            _alive = 0;
+            _alive = alreadyAlive;
             _untilNext = 0f;
             _held = false;
             _phase = Phase.Sending;

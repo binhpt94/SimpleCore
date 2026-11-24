@@ -1,2 +1,4 @@
 {"at": "2026-11-23 17:30:54", "event": "data", "hash": "1881bd47e941", "previous": "", "added": ["with-record"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "1881bd47e941"}
+{"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "1881bd47e941"}
+{"at": "2026-11-25 00:11:10", "event": "promote", "by": "người (Sync)", "hash": "1881bd47e941"}

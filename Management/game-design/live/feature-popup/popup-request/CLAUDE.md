@@ -5,7 +5,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Quan hệ
 - Một dịch vụ popup phục vụ nhiều feature gọi.
 - Một feature gọi có thể có một hoặc nhiều popup, mỗi popup một id.
-- Feature gọi hiện tại: `feature-popup-lose`, `feature-popup-pause`.
+- Feature gọi hiện tại: `feature-popup-lose`, `feature-popup-pause`, `feature-popup-revive`.
 - Dịch vụ là một bên tham gia của scene Game (`feature-session-scene/session-steps`).
 
 ## Định nghĩa

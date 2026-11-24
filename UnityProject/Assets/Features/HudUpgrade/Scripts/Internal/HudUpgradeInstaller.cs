@@ -36,7 +36,7 @@ namespace Game.HudUpgrade
             if (config.CheatState != HudUpgradeCheatState.None)
                 cheat = new HudUpgradeParticipant.CheatSetup(config.CheatState, config.MixedButtonsCoins,
                     config.MixedButtonsLevels, registry.Resolve<IWalletBalance>(), registry.Resolve<IWalletIncome>(),
-                    registry.Resolve<IWalletService>());
+                    registry.Resolve<IWalletService>(), config.MixedButtonsTeam);
 #endif
 
             session.Join(new HudUpgradeParticipant(shop, roster, run, new PrefabBarViewFactory(barPrefab), cheat));

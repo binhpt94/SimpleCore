@@ -1,5 +1,5 @@
 ---
-based-on: e712e2fbe1f0
+based-on: 112626ed0626
 refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-upgrade/upgrade-list@7294a54c79df
 ---
 # Hiệu lực nâng cấp

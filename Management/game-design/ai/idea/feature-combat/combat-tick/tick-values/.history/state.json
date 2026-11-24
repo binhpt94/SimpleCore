@@ -1,0 +1,29 @@
+{
+ "hash": "9b193c130653",
+ "items": {
+  "fixed-step": {
+   "hash": "75320b992a48",
+   "text": "Trận cập nhật theo bước cố định 0.02 giây (50 bước mỗi giây); mỗi bước một nhịp giao chiến\nBước cố định cho kết quả giống nhau trên máy nhanh và máy chậm. Khung hình chậm thì chạy nhiều bước trong một khung, tối đa 5 bước."
+  },
+  "tick-order": {
+   "hash": "1dde4e7de6ac",
+   "text": "Trong một nhịp: đi và nhắm, ra đòn, gom đòn, lọc, cộng, chủ trừ máu, báo hết máu, báo nhịp xong\nMọi bên ra đòn trong bước dựa trên vị trí và trạng thái đầu bước."
+  },
+  "damage-real": {
+   "hash": "7743bc8fd4bd",
+   "text": "Sát thương giữ số thực khi cộng và trừ, không làm tròn trong nhịp\nHiện số do HUD (máu thành làm tròn xuống)."
+  },
+  "skill-is-hit": {
+   "hash": "c8989f72e67b",
+   "text": "Sấm sét tạo một đòn trúng cho mỗi quái trong vùng, ở nhịp người chơi bấm\nBên ra đòn ghi là thành."
+  },
+  "kill-credit": {
+   "hash": "e4f502bdddd6",
+   "text": "Quái hết máu do tổng của nhiều bên thì vẫn cho tiền đúng một lần, không chia theo bên\nTiền vào ví như mọi lần hạ quái."
+  },
+  "pause-no-tick": {
+   "hash": "13c3b605b658",
+   "text": "Lúc tạm dừng, lúc chờ hồi sinh và sau khi lượt kết thúc không có nhịp nào chạy"
+  }
+ }
+}

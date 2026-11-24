@@ -1,0 +1,4 @@
+UpgradeBarCheat.Apply(120, [3,5,1,2,4,3]) called at runtime on the live shop and wallet (asset config not touched)
+teamMismatch=
+Apply ok=True coins=120
+bar [Cấp 3|55|a=1.00][Cấp 5|100|a=1.00][Cấp 1|30|a=1.00][Cấp 2|56|a=1.00][Cấp 4|110|a=1.00][Cấp 3|135|a=0.40]

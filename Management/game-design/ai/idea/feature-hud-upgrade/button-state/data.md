@@ -1,5 +1,5 @@
 ---
-based-on: cdb98c5c2b2c
+based-on: 72f1cb81f16b
 refs: feature-upgrade/upgrade-purchase@c53d76edf8b3, feature-upgrade/upgrade-list@7294a54c79df, feature-hud-upgrade/bar-layout@4a9d06c74198
 ---
 # Trạng thái nút nâng cấp

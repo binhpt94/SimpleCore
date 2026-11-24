@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 48" width="1000" height="48">
+  <!-- nen thanh tai: long xam xanh dam, vien den 6 px, bo goc nam gon trong 20 px (9-slice [20,20,20,20]) -->
+  <rect x="3" y="3" width="994" height="42" rx="17" fill="#3D4160" stroke="#000000" stroke-width="6"/>
+</svg>

@@ -32,13 +32,10 @@ namespace Game.Services.Popup
             }
         }
 
-        public GameObject Get(PopupId id)
+        public bool TryGet(PopupId id, out GameObject prefab)
         {
-            if (id.Value == null)
-                throw new ArgumentException("No popup id given (default PopupId).", nameof(id));
-            if (catalog.TryGet(id.Value, out var asset) && asset is GameObject prefab) return prefab;
-            throw new InvalidOperationException(
-                $"Popup '{id}' is not in popup catalog '{catalog.name}' of this scene. Add it in _Composition.");
+            prefab = id.Value != null && catalog.TryGet(id.Value, out var asset) ? asset as GameObject : null;
+            return prefab != null;
         }
     }
 }

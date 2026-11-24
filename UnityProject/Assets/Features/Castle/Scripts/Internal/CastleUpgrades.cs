@@ -17,6 +17,9 @@ namespace Game.Castle
         /// <summary>Attack level; the auto shot reads it when it fires.</summary>
         public int AttackLevel { get; private set; } = 1;
 
+        /// <summary>A level was applied to a standing castle; the view answers with a short pop.</summary>
+        public event Action LevelApplied;
+
         public void ApplyLevel(CastleUpgrade item, int level)
         {
             if (level < 1) return;
@@ -25,7 +28,9 @@ namespace Game.Castle
                 case CastleUpgrade.Health: _body.ApplyHealthLevel(level); break;
                 case CastleUpgrade.Attack: AttackLevel = level; break;
                 case CastleUpgrade.Skills: _skills.ApplyLevel(level); break;
+                default: return;
             }
+            if (!_body.IsDestroyed) LevelApplied?.Invoke();
         }
 
         /// <summary>A new run: every item back to level 1.</summary>

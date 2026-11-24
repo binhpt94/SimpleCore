@@ -1,5 +1,6 @@
 ---
-based-on: 469d9009792c
+based-on: 53af9956f851
+by: home-return-from-loss=gpt@r2-1#home-return-from-loss, home-record=gpt@r2-1#home-score-record
 ---
 # Màn bắt đầu
 
@@ -9,5 +10,8 @@ Màn hình đầu tiên khi mở game: cho thấy tên game và kỉ lục, và 
 
 ### home-start | AI 7 | Màn đầu tiên khi mở game có nút chơi, bấm là sang màn chọn đội
 
-### home-record | AI 7 | Màn bắt đầu cho thấy kỉ lục hiện tại
-Cho người chơi một mục tiêu để vượt ngay khi mở game.
+### home-record | AI 7 | Màn bắt đầu hiện kỉ lục điểm do `feature-run` lưu
+Người chơi biết thành tích cần vượt ngay khi mở game.
+
+### home-return-from-loss | AI 7 | Màn bắt đầu là đích đến khi người chơi chọn về từ `feature-popup-lose`
+Rời màn kết quả thì xem kỉ lục và tự chọn lúc bắt đầu lượt tiếp theo.

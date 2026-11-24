@@ -345,6 +345,86 @@ namespace Game.Services.SessionScene.Tests
             Assert.That(reported, Is.EqualTo(new[] { "1:", "1:SessionScene" }));
         }
 
+        // clean-checks: after the dispose step nothing of the session is still waiting, and everyone it
+        // reached is cleaned up exactly once, whichever way the session ended.
+        [TestCase("ended while running")]
+        [TestCase("ended while loading")]
+        [TestCase("ended before it began")]
+        [TestCase("failed to load")]
+        [TestCase("load took too long")]
+        [TestCase("failed to run")]
+        public void AfterTheSessionEnds_EveryoneReachedIsCleanedUpOnce_AndNoLoadTimerIsLeftWaiting(string ending)
+        {
+            var first = Join("first");
+            var second = Join("second");
+            var reached = new[] { "first", "second" };
+            switch (ending)
+            {
+                case "ended while loading":
+                    second.Load = new UniTaskCompletionSource();
+                    break;
+                case "failed to load":
+                    second.LoadError = new InvalidOperationException("no save");
+                    break;
+                case "load took too long":
+                    second.Load = new UniTaskCompletionSource();
+                    break;
+                case "failed to run":
+                    first.RunError = new InvalidOperationException("prefab missing");
+                    break;
+            }
+
+            if (ending != "ended before it began") session.BeginAsync().Forget();
+            if (ending == "load took too long") timer.Expire();
+            var end = session.EndAsync();
+
+            Assert.That(end.Status, Is.EqualTo(UniTaskStatus.Succeeded));
+            Assert.That(session.State, Is.EqualTo(SessionState.Disposed).Or.EqualTo(SessionState.Failed));
+            foreach (var name in reached)
+            {
+                Assert.That(log.FindAll(entry => entry == "dispose " + name), Has.Count.EqualTo(1),
+                    $"{name} should be cleaned up exactly once");
+            }
+
+            Assert.That(timer.StillWaiting, Is.EqualTo(0), "a load timer of the ended session is still waiting");
+        }
+
+        [Test]
+        public void ALoadThatFinishesInTime_StopsItsTimer()
+        {
+            var slow = Join("slow");
+            slow.Load = new UniTaskCompletionSource();
+            session.BeginAsync().Forget();
+            Assert.That(timer.StillWaiting, Is.EqualTo(1));
+
+            slow.Load.TrySetResult();
+
+            Assert.That(timer.StillWaiting, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void TheNextScenesSession_StartsClean_AndNeverTouchesTheParticipantsOfTheSceneBefore()
+        {
+            Join("loading-screen");
+            session.BeginAsync().Forget();
+            session.EndAsync().Forget();
+            log.Clear();
+
+            var next = new SessionSceneLogic(errors.Add, timer, Limit);
+            next.Join(new FakeParticipant("game", log));
+
+            Assert.That(next.State, Is.EqualTo(SessionState.Init));
+            Assert.That(next.ParticipantCount, Is.EqualTo(1));
+            Assert.That(next.LoadedCount, Is.EqualTo(0));
+            Assert.That(next.FailedParticipant, Is.Null);
+
+            next.BeginAsync().Forget();
+            next.EndAsync().Forget();
+
+            Assert.That(log, Is.EqualTo(new[] { "load game", "run game", "dispose game" }));
+            Assert.That(errors, Is.Empty);
+        }
+
         [TestCase("Game.Wallet", "WalletParticipant", ExpectedResult = "Wallet")]
         [TestCase("Game.Services.Popup", "PopupParticipant", ExpectedResult = "Popup")]
         [TestCase("Game.Wallet.Internal", "WalletParticipant", ExpectedResult = "Wallet")]
@@ -382,8 +462,12 @@ namespace Game.Services.SessionScene.Tests
         private sealed class FakeTimer : ILoadTimer
         {
             private readonly List<UniTaskCompletionSource> pending = new List<UniTaskCompletionSource>();
+            private readonly List<UniTaskCompletionSource> all = new List<UniTaskCompletionSource>();
 
             public List<TimeSpan> Requested { get; } = new List<TimeSpan>();
+
+            /// <summary>Waits neither finished nor cancelled: work the session would leave running.</summary>
+            public int StillWaiting => all.FindAll(wait => wait.Task.Status == UniTaskStatus.Pending).Count;
 
             public UniTask WaitAsync(TimeSpan limit, CancellationToken cancellation)
             {
@@ -391,6 +475,7 @@ namespace Game.Services.SessionScene.Tests
                 var wait = new UniTaskCompletionSource();
                 cancellation.Register(() => wait.TrySetCanceled(cancellation));
                 pending.Add(wait);
+                all.Add(wait);
                 return wait.Task;
             }
 

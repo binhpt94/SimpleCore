@@ -6,13 +6,18 @@ namespace Game.Castle
 {
     /// <summary>
     /// Draws the castle, its shots and the Thunder effect in world units (1 world unit = 1 battlefield unit,
-    /// ground at y = 0). Sprites left empty are drawn as plain coloured boxes until the generated art arrives.
+    /// ground at y = 0). Sizes from the design apply to the drawn part of each sprite (its content rect), so the
+    /// transparent margin of the generated art does not shrink it. Sprites left empty are drawn as plain coloured boxes.
     /// </summary>
     internal sealed class CastleView : MonoBehaviour, ICastleView
     {
         [SerializeField] private Sprite castleSprite;
         [SerializeField] private Sprite shotSprite;
         [SerializeField] private Sprite thunderSprite;
+        [Tooltip("Drawn part of each sprite as a fraction of the image (x, y from bottom left, width, height); sizes apply to this part, not to the transparent margin.")]
+        [SerializeField] private Rect castleContent = new Rect(70f / 512f, 0f, 372f / 512f, 496f / 512f);
+        [SerializeField] private Rect shotContent = new Rect(106f / 512f, 106f / 512f, 300f / 512f, 300f / 512f);
+        [SerializeField] private Rect thunderContent = new Rect(137f / 512f, 52f / 512f, 238f / 512f, 410f / 512f);
         [SerializeField] private Color castleColor = new Color(0.55f, 0.5f, 0.45f);
         [SerializeField] private Color flashColor = new Color(1f, 0.35f, 0.35f);
         [SerializeField] private Color shotColor = new Color(1f, 0.9f, 0.3f);
@@ -28,6 +33,9 @@ namespace Game.Castle
         private SpriteRenderer _body;
         private Vector3 _bodyScale = Vector3.one;
         private float _flashLeft;
+        private float _popLeft;
+        private float _popTotal;
+        private float _popScale = 1f;
         private float _collapseLeft;
         private float _collapseTotal;
         private bool _collapsed;
@@ -53,9 +61,9 @@ namespace Game.Castle
         public void Place(float halfWidth, float height)
         {
             transform.position = Vector3.zero;
-            var size = _body.sprite.bounds.size;
-            _bodyScale = new Vector3(2f * halfWidth / Mathf.Max(size.x, 1e-4f), height / Mathf.Max(size.y, 1e-4f), 1f);
-            _body.transform.localPosition = new Vector3(0f, -_body.sprite.bounds.min.y * _bodyScale.y, 0f);
+            var drawn = Drawn(_body.sprite, castleSprite ? castleContent : FullImage);
+            _bodyScale = new Vector3(2f * halfWidth / Mathf.Max(drawn.width, 1e-4f), height / Mathf.Max(drawn.height, 1e-4f), 1f);
+            _body.transform.localPosition = new Vector3(-drawn.center.x * _bodyScale.x, -drawn.yMin * _bodyScale.y, 0f);
             _body.transform.localScale = _bodyScale;
         }
 
@@ -64,6 +72,7 @@ namespace Game.Castle
         public void ResetBody()
         {
             _flashLeft = 0f;
+            _popLeft = 0f;
             _collapseLeft = 0f;
             _collapsed = false;
             _body.transform.localScale = _bodyScale;
@@ -77,10 +86,19 @@ namespace Game.Castle
             _body.color = castleSprite ? flashColor : Color.Lerp(castleColor, flashColor, 0.8f);
         }
 
+        public void PopLevelUp(float scale, float seconds)
+        {
+            if (_collapsed) return;
+            _popScale = scale;
+            _popTotal = Mathf.Max(seconds, 1e-4f);
+            _popLeft = _popTotal;
+        }
+
         public void Collapse(float seconds)
         {
             _collapsed = true;
             _flashLeft = 0f;
+            _popLeft = 0f;
             _body.color = BodyColor;
             _collapseTotal = Mathf.Max(seconds, 1e-4f);
             _collapseLeft = _collapseTotal;
@@ -88,7 +106,7 @@ namespace Game.Castle
 
         public void ShowShot(int targetHandle, float fromX, float toX, float seconds)
         {
-            var renderer = MakeEffect("Shot", shotSprite, shotColor, shotSize);
+            var renderer = MakeEffect("Shot", shotSprite, shotContent, shotColor, shotSize);
             renderer.transform.position = new Vector3(fromX, shotHeight, 0f);
             _shots.Add(new Shot
             {
@@ -109,7 +127,7 @@ namespace Game.Castle
 
         public void ShowThunder(float x, float seconds)
         {
-            var renderer = MakeEffect("Thunder", thunderSprite, thunderColor, thunderSize * 0.5f);
+            var renderer = MakeEffect("Thunder", thunderSprite, thunderContent, thunderColor, thunderSize * 0.5f);
             renderer.transform.position = new Vector3(x, thunderHeight, 0f);
             _thunders.Add(new Effect { Renderer = renderer, Total = Mathf.Max(seconds, 1e-4f) });
         }
@@ -120,6 +138,15 @@ namespace Game.Castle
             {
                 _flashLeft -= seconds;
                 if (_flashLeft <= 0f) _body.color = BodyColor;
+            }
+
+            if (_popLeft > 0f)
+            {
+                _popLeft = Mathf.Max(0f, _popLeft - seconds);
+                // Up to the full pop at half time, then back to normal size.
+                var t = 1f - _popLeft / _popTotal;
+                var grow = 1f - Mathf.Abs(2f * t - 1f);
+                _body.transform.localScale = _bodyScale * Mathf.Lerp(1f, _popScale, grow);
             }
 
             if (_collapseLeft > 0f)
@@ -154,7 +181,7 @@ namespace Game.Castle
                     continue;
                 }
                 var size = Mathf.Lerp(thunderSize * 0.5f, thunderSize, effect.Elapsed / effect.Total);
-                effect.Renderer.transform.localScale = Scale(effect.Renderer.sprite, size);
+                effect.Renderer.transform.localScale = Scale(effect.Renderer.sprite, thunderSprite ? thunderContent : FullImage, size);
                 _thunders[i] = effect;
             }
         }
@@ -169,7 +196,9 @@ namespace Game.Castle
 
         private Color BodyColor => castleSprite ? Color.white : castleColor;
 
-        private SpriteRenderer MakeEffect(string effectName, Sprite sprite, Color placeholderColor, float size)
+        private static readonly Rect FullImage = new Rect(0f, 0f, 1f, 1f);
+
+        private SpriteRenderer MakeEffect(string effectName, Sprite sprite, Rect content, Color placeholderColor, float size)
         {
             var effectObject = new GameObject(effectName);
             effectObject.transform.SetParent(transform, false);
@@ -177,15 +206,26 @@ namespace Game.Castle
             renderer.sprite = sprite ? sprite : Placeholder();
             renderer.color = sprite ? Color.white : placeholderColor;
             renderer.sortingOrder = 10;
-            renderer.transform.localScale = Scale(renderer.sprite, size);
+            renderer.transform.localScale = Scale(renderer.sprite, sprite ? content : FullImage, size);
             return renderer;
         }
 
-        private static Vector3 Scale(Sprite sprite, float size)
+        /// <summary>Uniform scale that makes the drawn part's longer side <paramref name="size"/> units.</summary>
+        private static Vector3 Scale(Sprite sprite, Rect content, float size)
         {
-            var bounds = sprite.bounds.size;
-            var largest = Mathf.Max(bounds.x, bounds.y, 1e-4f);
+            var drawn = Drawn(sprite, content);
+            var largest = Mathf.Max(drawn.width, drawn.height, 1e-4f);
             return Vector3.one * (size / largest);
+        }
+
+        /// <summary>The drawn part of the sprite in its local units (before scaling).</summary>
+        private static Rect Drawn(Sprite sprite, Rect content)
+        {
+            var bounds = sprite.bounds;
+            var size = bounds.size;
+            return new Rect(
+                bounds.min.x + content.x * size.x, bounds.min.y + content.y * size.y,
+                content.width * size.x, content.height * size.y);
         }
 
         private Sprite Placeholder()

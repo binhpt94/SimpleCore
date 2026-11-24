@@ -13,6 +13,8 @@ namespace Game.SceneFlow
         [SerializeField] private SceneFlowConfig config;
         [SerializeField] private GameObject loadingScreenPrefab;
         [SerializeField] private GameObject gateCarrierPrefab;
+        [Tooltip("Dev builds only (editor, development build): show a cheat state instead of the real flow. Loading side.")]
+        [SerializeField] private SceneFlowCheatState cheat;
 
         public override void Install(IServiceRegistry registry)
         {
@@ -33,8 +35,18 @@ namespace Game.SceneFlow
                 throw new InvalidOperationException($"{name}: SceneFlowConfig must name both the loading and the game scene.");
             }
 
-            session.Join(new LoadingToGameFlow(session, new UnitySceneLoader(),
-                new PrefabLoadingScreenSource(loadingScreenPrefab), new UnityTimer(), settings, Debug.LogException));
+            var screens = new PrefabLoadingScreenSource(loadingScreenPrefab);
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (cheat == SceneFlowCheatState.LoadError)
+            {
+                session.Join(new LoadErrorCheat(screens, settings));
+                return;
+            }
+#endif
+
+            session.Join(new LoadingToGameFlow(session, new UnitySceneLoader(), screens, new UnityTimer(), settings,
+                Debug.LogException));
         }
 
         private void InstallGameSide(ISessionScene session, IServiceRegistry registry)

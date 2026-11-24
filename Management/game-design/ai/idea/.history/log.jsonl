@@ -16,3 +16,7 @@
 {"at": "2026-11-23 16:17:19", "event": "data", "hash": "469d9009792c", "previous": "c266fb040742", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "469d9009792c"}
 {"at": "2026-11-24 15:25:26", "event": "data", "hash": "07ccc86d3b9f", "previous": "469d9009792c", "added": ["player-commander", "main-feel", "castle-damage-carries"], "removed": [], "rewritten": []}
+{"at": "2026-11-24 22:09:19", "event": "promote", "by": "người (Sync)", "hash": "07ccc86d3b9f"}
+{"at": "2026-11-24 23:22:35", "event": "data", "hash": "53af9956f851", "previous": "07ccc86d3b9f", "added": ["ad-revive"], "removed": [], "rewritten": []}
+{"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "53af9956f851"}
+{"at": "2026-11-25 01:10:47", "event": "promote", "by": "người", "hash": "53af9956f851"}

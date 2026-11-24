@@ -38,6 +38,9 @@ namespace Game.Castle
         [SerializeField] private float collapseSeconds = 0.5f;
         [SerializeField] private float shotFlightSeconds = 0.15f;
         [SerializeField] private float thunderEffectSeconds = 0.3f;
+        [Tooltip("Level-up pop (feature-upgrade/upgrade-effect/effect-numbers, IDEA: grow then back in 0.3s).")]
+        [SerializeField] private float levelUpPopScale = 1.1f;
+        [SerializeField] private float levelUpPopSeconds = 0.3f;
 
         public float MaxHealth => maxHealth;
         public float HalfWidth => halfWidth;
@@ -65,5 +68,7 @@ namespace Game.Castle
         public float CollapseSeconds => collapseSeconds;
         public float ShotFlightSeconds => shotFlightSeconds;
         public float ThunderEffectSeconds => thunderEffectSeconds;
+        public float LevelUpPopScale => levelUpPopScale;
+        public float LevelUpPopSeconds => levelUpPopSeconds;
     }
 }

@@ -50,19 +50,19 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   heroPortraits:
   - heroCode: knight
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 7b430170871432e429f5c85e992ffa44, type: 3}
   - heroCode: axeman
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 33ad94a06102f4249888ce4d4a378b28, type: 3}
   - heroCode: swordsman
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: b7810726aee153647bf992ebb4d3f5cb, type: 3}
   - heroCode: archer
-    sprite: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 12ae81186cda38844b030cd9c40d6654, type: 3}
   - heroCode: mage
-    sprite: {fileID: 0}
-  castleHealthIcon: {fileID: 0}
-  castleAttackIcon: {fileID: 0}
-  castleSkillIcon: {fileID: 0}
-  coinIcon: {fileID: 0}
+    sprite: {fileID: 21300000, guid: 87c9fd15c01ea9549baac1a153cac10d, type: 3}
+  castleHealthIcon: {fileID: 21300000, guid: c47f7a61b12d2b241966b0c5f7899421, type: 3}
+  castleAttackIcon: {fileID: 21300000, guid: 21be4ef7639060846ba84a653f2d3299, type: 3}
+  castleSkillIcon: {fileID: 21300000, guid: 3e1474b876fb856408d20b2b3e1592f8, type: 3}
+  coinIcon: {fileID: 21300000, guid: 6f47354186662d24aa4f9376b17cc230, type: 3}
   referenceResolution: {x: 1920, y: 1080}
   barLeft: 50
   barBottom: 20

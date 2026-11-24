@@ -11,7 +11,7 @@ namespace Game.Services.Popup
         /// </summary>
         void Prepare();
 
-        /// <summary>Throws, naming the id, when the scene has no prefab for it.</summary>
-        GameObject Get(PopupId id);
+        /// <summary>False when the scene has no prefab for <paramref name="id"/>. Never called with the default id.</summary>
+        bool TryGet(PopupId id, out GameObject prefab);
     }
 }

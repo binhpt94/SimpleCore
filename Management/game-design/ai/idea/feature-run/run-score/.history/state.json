@@ -1,5 +1,5 @@
 {
- "hash": "6f1909d90f98",
+ "hash": "5869f69301eb",
  "items": {
   "score-def": {
    "hash": "fc3ad70594ba",
@@ -8,6 +8,10 @@
   "score-final": {
    "hash": "d15dc17af8be",
    "text": "Điểm được chốt lúc lượt kết thúc, dù thua hay bỏ lượt\nHai cách kết thúc tính điểm giống nhau. Đã loại: bỏ lượt thì mất điểm."
+  },
+  "score-across-revive": {
+   "hash": "65aec4b4a7e4",
+   "text": "Hồi sinh thành không đặt lại điểm; điểm của lượt gồm cả các đợt dọn trước và sau khi hồi sinh\nKỉ lục chỉ xét lúc lượt đã chốt thua hoặc bỏ lượt, không xét lúc thành bị phá lần đầu."
   },
   "record-def": {
    "hash": "57fcbd5d552e",

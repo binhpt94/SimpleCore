@@ -1,6 +1,6 @@
 ---
-based-on: d8a90fd4adc0
-refs: feature-run/run-score@6f1909d90f98, feature-run/run-flow@db634f5dac0b, feature-popup/popup-layer@91d4f017d2fb, glossary#paused@89f75d658689, glossary#leave-game@fe2884e1a36a
+based-on: 7150875035ad
+refs: feature-run/run-score@5869f69301eb, feature-run/run-flow@8db5f61d9f6e, feature-popup/popup-layer@91d4f017d2fb, glossary#paused@89f75d658689, glossary#leave-game@fe2884e1a36a
 ---
 # Tạm dừng trận
 
@@ -16,6 +16,9 @@ Không thứ gì trong trận trôi theo thời gian khi đang tạm dừng. Đ�
 
 ### pause-no-actions | AI 7 | Lúc tạm dừng không mua nâng cấp và không bấm kĩ năng được
 Giữ áp lực quyết định ngay giữa trận. Đã loại: dừng để mua thoải mái (gần với "chỉ nâng cấp giữa hai đợt" người đã loại ở vòng 1).
+
+### pause-not-during-revive | AI 6 | Lúc chờ hồi sinh trận đứng yên nhưng không phải tạm dừng; không mở được popup tạm dừng
+Popup hồi sinh che nút tạm dừng; rời game lúc đó thì quay lại vẫn ở popup hồi sinh.
 
 ### pause-on-leave | AI 6 | Rời khỏi game giữa trận thì trận tự tạm dừng
 Người chơi điện thoại bị ngắt (cuộc gọi, chuyển ứng dụng); quay lại thấy popup tạm dừng chứ không thấy thành đã bị phá.

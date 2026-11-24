@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -42,7 +43,13 @@ namespace Game.Services.Popup
 
         public PopupHandle Show(PopupId id)
         {
-            var prefab = prefabs.Get(id);   // throws for an unknown or default id: a typo must not pass silently
+            if (id.Value == null)   // a programming error, not a missing popup: fail loudly
+                throw new ArgumentException("No popup id given (default PopupId).", nameof(id));
+            if (!prefabs.TryGet(id, out var prefab))
+            {
+                log.Error($"Popup '{id}' refused: it is not in this scene's popup list. Add it in _Composition.");
+                return default;
+            }
 
             if (!running)
             {

@@ -1,0 +1,45 @@
+{
+ "hash": "ac9f64988525",
+ "items": {
+  "field-backdrop": {
+   "hash": "5704f0fc694f",
+   "text": "Trận có một phông nền gồm trời, cảnh xa, dải đất chạy ngang qua thành và decor\nNgười chơi thấy ngay đây là một bãi chiến hai bên thành, không phải khoảng trống. Thiếu nền thì thành, hero, quái lơ lửng trên màn trống."
+  },
+  "field-ground-line": {
+   "hash": "d1ee0519c957",
+   "text": "Mép trên dải đất trùng đường mặt đất do nhánh thân thành cấp, từ mép màn trái tới mép màn phải\nDải đất liền qua dưới chân thành tới cả hai nơi quái xuất hiện. `feature-castle` cấp mốc, nền vẽ theo mốc; hero và quái tự đặt nhân vật của mình trên đó."
+  },
+  "field-look-only": {
+   "hash": "cfd89653b0fe",
+   "text": "Nền chỉ để nhìn: không chặn, không đổi đường đi, không ảnh hưởng trận\nVị trí và luật của thành, hero, quái giữ ở feature của chúng; nền vẽ theo các mốc đó."
+  },
+  "field-behind-all": {
+   "hash": "2bec705d7788",
+   "text": "Nền nằm dưới mọi thứ khác của trận, HUD và popup che lên trên nền\nNền không bao giờ che unit, hiệu ứng hay HUD."
+  },
+  "field-layer-order": {
+   "hash": "e8c1b809fd37",
+   "text": "Thứ tự vẽ các lớp nền từ sau ra trước là trời, cảnh xa, dải đất, decor\nCả bốn lớp cùng nằm sau thành, hero, quái và hiệu ứng."
+  },
+  "field-decor-flat": {
+   "hash": "0f2ddaffe168",
+   "text": "Trên dải hero và quái đi, decor chỉ là hoạ tiết phẳng trên mặt đất\nNgười chơi không nhầm vật trang trí với vật cản hay lối vào; đường quái tiến vào thành vẫn đọc rõ."
+  },
+  "field-fill-frame": {
+   "hash": "599f9b6e9cfc",
+   "text": "Nền phủ kín khung hình trận ở mọi tỉ lệ màn hỗ trợ, kể cả phần sau HUD và thanh nâng cấp\nKhông có dải trống khi màn rộng hơn. Vùng dành cho nút vẫn do `feature-hud` và `feature-hud-upgrade` quy định."
+  },
+  "field-touch-through": {
+   "hash": "90e8cab89862",
+   "text": "Mọi lớp nền cho thao tác chạm đi xuyên qua\nNút kĩ năng, nút nâng cấp và việc chặn chạm của popup chạy như không có nền."
+  },
+  "field-battle-only": {
+   "hash": "80af570a35fd",
+   "text": "Nền hiện ở mọi khung hình của màn trận và chỉ ở màn trận\nKhung hình đầu khi vào trận đã có nền; nền vẫn hiện dưới popup. Rời màn trận thì nền mất cùng trận."
+  },
+  "field-one-map": {
+   "hash": "cc52c1c2421a",
+   "text": "Chỉ có một nền, giống nhau ở mọi lượt\nKhớp \"một bản đồ duy nhất\" ở vòng 1. Đã loại: đổi nền theo đợt."
+  }
+ }
+}

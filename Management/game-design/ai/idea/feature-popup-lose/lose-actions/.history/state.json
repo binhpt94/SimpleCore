@@ -1,17 +1,17 @@
 {
- "hash": "664d10d83337",
+ "hash": "bddc499985f8",
  "items": {
   "actions-two": {
-   "hash": "b3a76fe52d31",
-   "text": "Popup thua có đúng hai nút: chơi lại và về màn bắt đầu\nĐã loại: hồi sinh thành, xem quảng cáo để chơi tiếp (không có quảng cáo hay tiền lâu dài)."
+   "hash": "7d4c8721aef8",
+   "text": "Popup thua có đúng hai nút: chơi lại và về màn bắt đầu\nHồi sinh thành bằng quảng cáo nằm ở `feature-popup-revive`, trước popup thua; popup thua không có nút hồi sinh."
   },
   "actions-replay-main": {
    "hash": "0b4da219cd1f",
    "text": "Nút chơi lại là nút chính, to và nổi hơn nút về màn bắt đầu\nVòng lặp vòng 1 là thua rồi chơi lại ngay với đội khác."
   },
   "actions-relay": {
-   "hash": "6c690e226898",
-   "text": "Bấm nút thì popup đóng và `feature-run/run-flow` chuyển màn\nChơi lại sang màn chọn đội; về màn bắt đầu sang màn bắt đầu. Popup không tự chuyển màn."
+   "hash": "e93b5b47e048",
+   "text": "Bấm nút thì popup đóng rồi báo lựa chọn; `feature-game-flow` chuyển màn\nChơi lại sang màn chọn đội; về màn bắt đầu sang màn bắt đầu. Popup không tự chuyển màn."
   },
   "actions-only-exit": {
    "hash": "0ccf7b1303c3",

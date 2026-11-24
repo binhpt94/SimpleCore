@@ -33,6 +33,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Ghi xuống máy thất bại:** kỉ lục trong lúc game mở vẫn đúng; không báo lỗi cho người chơi.
 - **Báo dọn sạch tới hai lần cho cùng một đợt:** chỉ cộng một lần (đợt sau phải có số lớn hơn đợt đã tính).
 - **Bỏ lượt ngay khi vào trận:** điểm 0, như thua ở đợt 1.
+- **Thành bị phá lần đầu rồi hồi sinh:** điểm không chốt, không đặt lại; cộng tiếp từ số đang có. Kỉ lục chỉ so khi lượt kết thúc thật.
+- **Đợt dọn sạch cùng khung hình thành bị phá lần đầu:** giữ chờ: hồi sinh thành công thì cộng; chốt thua thì không cộng, theo luật "thua trước" (ý `same-tick-clear` của `feature-popup-revive`; sửa 2026-11-25).
 
 ## Đã tự quyết
 - **Kỉ lục hỏng coi là 0.** Không chặn người chơi vì lỗi lưu. Đã loại: hiện thông báo lỗi.

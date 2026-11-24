@@ -36,6 +36,14 @@ namespace Game.Hud.Tests
         private HudSession NewSession(HudCheat cheat = null) =>
             new HudSession(_spawner, _clock, _castle, _skills, _wallet, _waves, _run, HudTestTimings.Default, cheat);
 
+        private FakeCastleCheat _castleCheat;
+
+        private HudCheat NewCheat()
+        {
+            _castleCheat = new FakeCastleCheat(_castle, _skills);
+            return new HudCheat(_run, _wallet, _wallet, _wallet, _skills, _castleCheat, _waves);
+        }
+
         [Test]
         public void NoHudExistsBeforeTheSessionRuns()
         {
@@ -101,26 +109,72 @@ namespace Game.Hud.Tests
         }
 
         [Test]
-        public void CheatButtonSetsTheMidBattleCoinsThroughTheWallet()
+        public void CheatButtonShowsTheWholeMidBattleState()
         {
-            var cheat = new HudCheat(_run, _wallet, _wallet, _wallet);
-            NewSession(cheat).Run();
+            NewSession(NewCheat()).Run();
             Assert.IsNotNull(_spawner.View.CheatLabel);
 
-            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("Hud cheat"));
             _spawner.View.PressCheat();
+            _clock.Tick(0.016f);
 
-            Assert.AreEqual(HudCheat.MidBattleCoins, _wallet.Coins);
+            Assert.AreEqual("300/1000", _spawner.View.Health);
+            Assert.AreEqual(0.3f, _spawner.View.HealthFill, 1e-5f);
             Assert.AreEqual("245", _spawner.View.Coins);
+            Assert.AreEqual("Đợt 7", _spawner.View.Wave);
+            Assert.IsTrue(_spawner.View.BannerShown);
+            Assert.AreEqual("Đợt 7", _spawner.View.Banner);
+            Assert.IsTrue(_spawner.View.Skills[0].Ready);
+            Assert.IsFalse(_spawner.View.Skills[1].Ready);
+            Assert.AreEqual("12", _spawner.View.Skills[1].Seconds);
+            Assert.AreEqual(12f / 35f, _spawner.View.Skills[1].Cover, 1e-5f);
+            Assert.IsTrue(_spawner.View.Skills[2].Ready);
+        }
+
+        [Test]
+        public void CheatStartsTheWaveBeforeSettingHealthAndCooldowns()
+        {
+            var cheat = NewCheat();
+            var log = new System.Collections.Generic.List<string>();
+            _waves.Calls = log;
+            _castleCheat.Calls = log;
+
+            cheat.ApplyMidBattle();
+
+            CollectionAssert.AreEqual(
+                new[] { "wave 7", "health", "cooldown Thunder", "cooldown Frost", "cooldown Rally" }, log);
+        }
+
+        [Test]
+        public void CheatReportsSkillsTheBattleDoesNotHaveInsteadOfSettingThem()
+        {
+            _skills.Skills = new[] { CastleSkill.Thunder };
+            var cheat = NewCheat();
+
+            var missing = cheat.ApplyMidBattle();
+
+            CollectionAssert.AreEqual(new[] { "cooldown Thunder" },
+                _castleCheat.Calls.FindAll(c => c.StartsWith("cooldown")));
+            Assert.AreEqual(2, missing.Count);
+            StringAssert.Contains("Frost", missing[0]);
+            StringAssert.Contains("Rally", missing[1]);
+        }
+
+        [Test]
+        public void CheatWarnsAboutSkippedPartsWhenPressed()
+        {
+            _skills.Skills = new[] { CastleSkill.Thunder };
+            NewSession(NewCheat()).Run();
+
+            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("Hud cheat.*Frost"));
+            _spawner.View.PressCheat();
         }
 
         [Test]
         public void CheatBringsCoinsDownThroughSpendingWhenThereAreMore()
         {
             _wallet.Set(400);
-            var cheat = new HudCheat(_run, _wallet, _wallet, _wallet);
 
-            cheat.ApplyMidBattle();
+            NewCheat().ApplyMidBattle();
 
             Assert.AreEqual(HudCheat.MidBattleCoins, _wallet.Coins);
         }
@@ -129,11 +183,13 @@ namespace Game.Hud.Tests
         public void CheatDoesNothingOutsideARunningBattle()
         {
             _run.SetStep(RunStep.Home);
-            var cheat = new HudCheat(_run, _wallet, _wallet, _wallet);
+            var cheat = NewCheat();
 
             cheat.ApplyMidBattle();
 
             Assert.AreEqual(50, _wallet.Coins);
+            Assert.AreEqual(1000f, _castle.Health);
+            Assert.IsEmpty(_waves.Calls);
         }
 
         [Test]
@@ -173,6 +229,8 @@ namespace Game.Hud.Tests
             registry.Register<Game.Wallet.IWalletIncome>(_wallet);
             registry.Register<Game.Wallet.IWalletService>(_wallet);
             registry.Register<Game.Wave.IWaveProgress>(_waves);
+            registry.Register<ICastleCheat>(new FakeCastleCheat(_castle, _skills));
+            registry.Register<Game.Wave.IWaveCheat>(_waves);
             return registry;
         }
     }

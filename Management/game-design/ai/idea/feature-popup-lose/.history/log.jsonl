@@ -3,3 +3,9 @@
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "6230c29b8b00"}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "6230c29b8b00"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "6230c29b8b00"}
+{"at": "2026-11-24 22:43:49", "event": "data", "hash": "0847134bf696", "previous": "6230c29b8b00", "added": ["lose-score-consistency"], "removed": [], "rewritten": []}
+{"at": "2026-11-24 23:22:35", "event": "data", "hash": "bbba810d005e", "previous": "0847134bf696", "added": [], "removed": [], "rewritten": [{"id": "lose-actions", "old": "Popup thua cho chơi lại (về màn chọn đội) hoặc về màn bắt đầu\nĐã loại: hồi sinh thành một lần (không có quảng cáo hay tiền lâu dài).", "new": "Popup thua cho chơi lại (về màn chọn đội) hoặc về màn bắt đầu\nHồi sinh thành bằng quảng cáo đã được đề nghị trước đó ở `feature-popup-revive`; popup thua chỉ hiện khi lượt đã thật sự thua."}]}
+{"at": "2026-11-24 23:38:54", "event": "review", "table": "idea", "item": "lose-result", "text": "Popup thua báo số đợt trụ được, kỉ lục, và cho biết khi vừa phá kỉ lục", "ai": 8, "score": 2, "feedback": "", "rejected": true}
+{"at": "2026-11-24 23:38:54", "event": "review", "table": "idea", "item": "lose-score-consistency", "text": "Popup thua hiện điểm lượt và kỉ lục do `feature-run` cấp, và báo khi phá kỉ lục\nĐiểm và kỉ lục cùng một thước đo, đúng thứ `feature-run` dùng để xét kỉ lục.", "ai": 7, "score": 8, "feedback": "", "rejected": false}
+{"at": "2026-11-24 23:43:16", "event": "data", "hash": "aa89ff39c089", "previous": "bbba810d005e", "added": [], "removed": [{"id": "lose-result", "text": "Popup thua báo số đợt trụ được, kỉ lục, và cho biết khi vừa phá kỉ lục"}], "rewritten": []}
+{"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "aa89ff39c089"}

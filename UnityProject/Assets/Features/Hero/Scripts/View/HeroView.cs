@@ -25,9 +25,6 @@ namespace Game.Hero
         [SerializeField] private float projectileSeconds = 0.15f;
         [SerializeField] private float projectileSize = 0.25f;
         [SerializeField] private Color effectColor = new Color(1f, 0.95f, 0.6f, 0.8f);
-        [Header("Level up pop")]
-        [SerializeField] private float levelUpScale = 1.2f;
-        [SerializeField] private float levelUpSeconds = 0.3f;
         [Header("Drawing")]
         [SerializeField] private int sortingOrder = 10;
 
@@ -49,7 +46,7 @@ namespace Game.Hero
         private float _lungeLeft;
         private int _lungeFacing = 1;
         private float _flashLeft;
-        private float _popLeft;
+        private float _popLeft, _popSeconds, _popScale = 1f;
         private float _fallLeft, _fallTotal;
         private float _growLeft, _growTotal;
         private bool _hidden;
@@ -157,9 +154,11 @@ namespace Game.Hero
             ApplyLook();
         }
 
-        public void PlayLevelUp()
+        public void PlayLevelUp(float peakScale, float seconds)
         {
-            _popLeft = levelUpSeconds;
+            _popScale = peakScale;
+            _popSeconds = seconds;
+            _popLeft = seconds;
             ApplyLook();
         }
 
@@ -182,8 +181,7 @@ namespace Game.Hero
             if (_hidden) scale = 0f;
             else if (_fallLeft > 0f) scale = _fallLeft / _fallTotal;
             else if (_growLeft > 0f) scale = 1f - _growLeft / _growTotal;
-            if (_popLeft > 0f && levelUpSeconds > 0f)
-                scale *= 1f + (levelUpScale - 1f) * Mathf.Sin(Mathf.PI * (1f - _popLeft / levelUpSeconds));
+            scale *= HeroLevelUpPop.ScaleAt(_popLeft, _popScale, _popSeconds);
 
             var body = _body.transform;
             body.localScale = new Vector3(_bodySize.x * scale, _bodySize.y * scale, 1f);

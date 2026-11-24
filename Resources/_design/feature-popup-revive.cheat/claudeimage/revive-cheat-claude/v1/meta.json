@@ -1,0 +1,24 @@
+{
+ "node": "feature-popup-revive/cheat",
+ "nodeHash": "a076c31ac325",
+ "frames": {
+  "waiting-ad": "8e6335791821"
+ },
+ "styles": {
+  "ui-flat": "5a6989e6f1f5"
+ },
+ "order": "_design/feature-popup-revive.cheat/revive-cheat-claude",
+ "version": 1,
+ "at": "2026-11-25 01:25:27",
+ "stamp": 1795544727.6610296,
+ "sources": [
+  [
+   "_design/feature-popup-revive.revive-popup.revive-spec/revive-spec-claude",
+   1
+  ],
+  [
+   "_design/feature-popup.popup-layer.stack-rules/popup-panel-claude",
+   1
+  ]
+ ]
+}

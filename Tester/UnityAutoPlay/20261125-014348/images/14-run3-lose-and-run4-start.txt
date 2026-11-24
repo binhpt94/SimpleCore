@@ -1,0 +1,5 @@
+t=491.8852 forcing castle 1 (was 994.5) score=2
+destroyed at +28.03 step=Ending
+popup delay=0.502 Title='Thành đã bị phá'(True) Score='Trụ được 3 đợt'(True) Best='Kỉ lục: 7 đợt'(True) Label='Chơi lại'(True) NewRecord='Kỉ lục mới!'(False)  score=3 best=7
+before replay: roots=12 totalTransforms=83 popupChildren=2 enemies=42 heroes=3
+run4 start frame2: roots=12 totalTransforms=67 popupChildren=0 enemies=1 heroes=3 coins=50 wave=Đợt 1

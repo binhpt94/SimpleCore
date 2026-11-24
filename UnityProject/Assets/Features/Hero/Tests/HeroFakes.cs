@@ -164,7 +164,14 @@ namespace Game.Hero.Tests
             public void PlayHurt() => Hurts++;
             public void PlayFall(float seconds) => Falls++;
             public void PlayRespawn(float seconds) => Respawns++;
-            public void PlayLevelUp() => LevelUps++;
+            public float PopScale, PopSeconds;
+
+            public void PlayLevelUp(float peakScale, float seconds)
+            {
+                LevelUps++;
+                PopScale = peakScale;
+                PopSeconds = seconds;
+            }
             public void Remove() => Removed = true;
         }
 

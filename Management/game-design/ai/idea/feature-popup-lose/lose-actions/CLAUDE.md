@@ -18,7 +18,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Luật cơ bản
 - Bấm một nút: popup đóng, chuyển màn theo nút đó.
 - Không bấm nút nào thì popup vẫn mở.
-- Không có hồi sinh hay chơi tiếp lượt cũ.
+- Popup thua không có nút hồi sinh; đề nghị hồi sinh đã đi trước nó ở `feature-popup-revive`.
 
 ## Đã tự quyết
 - **Chơi lại là nút chính.** Khớp vòng lặp "thua thì chơi lại ngay".

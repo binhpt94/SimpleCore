@@ -1,5 +1,5 @@
 {
- "hash": "ecc0af822edd",
+ "hash": "04f1a45bba47",
  "items": {
   "start-castle-1000": {
    "hash": "d02313462acb",
@@ -24,6 +24,10 @@
   "start-team-3": {
    "hash": "80d35ad1c760",
    "text": "Đầu lượt cả 3 hero của đội đã chọn sinh ra ở thành cùng lúc, đủ máu\nĐội 3 hero không trùng; trong trận không đổi đội."
+  },
+  "start-revive-1": {
+   "hash": "024f224d4b06",
+   "text": "Đầu lượt còn đúng 1 lần hồi sinh thành, kể cả khi lượt trước đã dùng"
   },
   "start-before-wave": {
    "hash": "3fde595b840b",

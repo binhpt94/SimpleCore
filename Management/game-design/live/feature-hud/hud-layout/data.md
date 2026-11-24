@@ -1,5 +1,5 @@
 ---
-based-on: 09ba60c454c5
+based-on: 628a4bda5a29
 refs: feature-hud/hud-status@5e6dc1e8532e, feature-hud/hud-skill-button@dda5759077eb, feature-hud/hud-pause-button@4ab96ef15d1f, glossary#battlefield@565b01770cea
 ---
 # Bố cục HUD

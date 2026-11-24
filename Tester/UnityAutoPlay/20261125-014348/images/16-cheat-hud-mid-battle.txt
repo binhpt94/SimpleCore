@@ -1,0 +1,3 @@
+run5 before cheat: Coins='50'(True) Health/Number='1000/1000'(True) Wave='Đợt 1'(True) Banner='Đợt 1'(True) thunderSeconds=False skills=9 fillW=588 fillScaleX=1.00 anchorMaxX=1.00
+run5 after cheat (same frame): Coins='245'(True) Health/Number='300/1000'(True) Wave='Đợt 7'(True) Banner='Đợt 7'(True) thunderSeconds=False skills=9 fillW=168 fillScaleX=1.00 anchorMaxX=0.30
+run5 after cheat +2 frames: Coins='245'(True) Health/Number='300/1000'(True) Wave='Đợt 7'(True) Banner='Đợt 7'(True) thunderSeconds=False skills=9 fillW=168 fillScaleX=1.00 anchorMaxX=0.30

@@ -113,6 +113,19 @@ namespace Game.Hero.Tests
             _squad.ApplyLevel(0, 2);
 
             Assert.That(_displays.Made[0].LevelUps, Is.EqualTo(1));
+            Assert.That(_displays.Made[0].PopScale, Is.EqualTo(1.2f).Within(1e-4f));
+            Assert.That(_displays.Made[0].PopSeconds, Is.EqualTo(0.3f).Within(1e-4f));
+        }
+
+        [Test]
+        public void Buying_two_levels_in_one_frame_pops_once_per_level()
+        {
+            _run.StartRun("knight");
+
+            _squad.ApplyLevel(0, 2);
+            _squad.ApplyLevel(0, 3);
+
+            Assert.That(_displays.Made[0].LevelUps, Is.EqualTo(2));
         }
 
         [Test]

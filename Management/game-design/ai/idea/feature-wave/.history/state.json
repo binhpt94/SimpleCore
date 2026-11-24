@@ -1,17 +1,77 @@
 {
- "hash": "1a74f8c24f86",
+ "hash": "34c92f9b0c18",
  "items": {
   "wave-scaling": {
-   "hash": "39d77abf3eba",
-   "text": "Quái tới theo đợt, đợt sau khó hơn đợt trước, không có đợt cuối\nĐộ khó tính theo số đợt chứ không viết tay từng đợt, để chơi vô tận. Đã loại: bảng đợt viết tay."
+   "hash": "4d62dff93a52",
+   "text": "Quái tới theo đợt, đợt sau khó hơn đợt trước, không có đợt cuối; độ khó chỉ tính từ số đợt\nHai lượt tới cùng số đợt dùng cùng độ khó dù thành hư hại khác nhau. Đã loại: bảng đợt viết tay."
   },
   "wave-content": {
-   "hash": "38cf792d72f5",
-   "text": "Mỗi đợt quyết định quái nào ra, ra ở bên nào và ra lúc nào\nQuái của một đợt chia cho cả hai bên trái và phải."
+   "hash": "d6064b094898",
+   "text": "Mỗi đợt đưa quái vào trận từ cả hai phía\nKhông phải mỗi đợt chọn một phía: người chơi luôn bị kẹp. Đợt quyết quái nào ra, ra lúc nào; hành vi của quái trên chiến trường là của `feature-enemy`."
+  },
+  "enemy-creates-spawn": {
+   "hash": "c715aedb3c89",
+   "text": "`feature-enemy` tạo từng con quái theo loại và bên ra khi đợt gửi yêu cầu thả\nĐợt giữ lịch và gửi yêu cầu đúng lúc; quái tạo con và bắt đầu hành vi của nó."
+  },
+  "wave-rhythm-owner": {
+   "hash": "23c424b095a7",
+   "text": "Đợt mở đợt đầu khi trận bắt đầu và tự mở đợt kế tiếp khi hết lúc thở\n`feature-run` quyết lúc vào trận; đồng hồ giữa các đợt thuộc feature này."
+  },
+  "alive-cap-owner": {
+   "hash": "18770a42069c",
+   "text": "Đợt kiểm trần số quái sống bằng số con đã thả mà chưa nhận tin bị hạ\nCùng danh sách dùng cho cả việc thả con kế tiếp lẫn việc dọn sạch đợt."
+  },
+  "defeat-per-spawn": {
+   "hash": "7f084c411d8b",
+   "text": "`feature-enemy` báo bị hạ đúng một lần cho mỗi con trong danh sách thả của đợt\nTin báo mang mã con để đợt nhận đúng con vừa bị hạ, kể cả khi nhiều con cùng loại bị hạ cùng lúc."
+  },
+  "castle-damage-to-enemy": {
+   "hash": "8ec982783182",
+   "text": "`feature-castle` gửi sát thương lên quái cho `feature-enemy` áp vào máu quái\nĐòn tự đánh và kĩ năng đi qua cùng nơi xác nhận quái hết máu, nên một con chỉ phát một tin bị hạ."
+  },
+  "wave-clear-owner": {
+   "hash": "f819e59a4d20",
+   "text": "Đợt chốt dọn sạch từ danh sách thả của đợt và tin quái bị hạ của `feature-enemy`\nChiến trường tạm trống mà còn quái chờ thả thì chưa phải dọn sạch."
+  },
+  "wave-follows-run": {
+   "hash": "5831e127b39a",
+   "text": "Đợt dùng trạng thái lượt do `feature-run` cấp để biết nhịp đợt còn được chạy tiếp\nKể cả khi thành vỡ cùng lúc quái cuối bị hạ."
+  },
+  "lose-before-clear": {
+   "hash": "a60e6a16933a",
+   "text": "Đợt chỉ xét dọn sạch sau khi `feature-run` đã xử lí tin thành bị phá ở cùng mốc\nQuái cuối bị hạ cùng lúc thành vỡ thì không cộng điểm, không thưởng dọn đợt (luật thua trước)."
+  },
+  "balance-sets-growth": {
+   "hash": "c8e0bc3dce4a",
+   "text": "`feature-balance` quyết mức tăng độ khó dùng trong cấu hình của đợt\nĐợt giữ cấu hình và áp công thức khi chạy trận."
+  },
+  "enemy-stats-by-wave": {
+   "hash": "351262480812",
+   "text": "`feature-enemy` tính chỉ số từng quái từ chỉ số gốc và hệ số đợt do đợt cấp\nCùng một quy tắc áp cho mọi con lúc nó xuất hiện."
+  },
+  "balance-sets-kill-reward": {
+   "hash": "9d31dbf40b1a",
+   "text": "`feature-balance` định mức tiền hạ từng loại quái trong cấu hình của `feature-enemy`\nCân cùng giá nâng cấp; tiền mỗi con giữ theo loại qua mọi đợt."
+  },
+  "enemy-computes-reward": {
+   "hash": "8b61fd830cdd",
+   "text": "`feature-enemy` tra tiền thưởng theo loại quái bị hạ rồi gửi số tiền cho `feature-wallet`\nCùng một loại cho cùng số tiền dù hạ bằng hero hay bằng thành."
   },
   "wave-clear": {
    "hash": "5a44ab2792a7",
    "text": "Dọn sạch một đợt thì được thưởng tiền và điểm của lượt tăng\nĐiểm nằm ở `feature-run`, tiền thưởng vào `feature-wallet`. Đã loại: chỉ có tiền từ quái."
+  },
+  "wave-computes-reward": {
+   "hash": "b5daf8ddb26b",
+   "text": "Đợt tính tiền thưởng từ số đợt vừa dọn sạch rồi gửi số tiền cho `feature-wallet`\nVí ghi khoản thưởng trước khi `feature-run` ghi điểm dọn đợt."
+  },
+  "balance-sets-clear-reward": {
+   "hash": "0a4a9781a554",
+   "text": "`feature-balance` định các hệ số thưởng dọn đợt trong cấu hình của đợt\nCân cùng tiền hạ quái và giá nâng cấp."
+  },
+  "balance-scope": {
+   "hash": "6b84cbc97563",
+   "text": "`feature-balance` là nơi thiết kế số liệu; mỗi feature giữ cấu hình dùng khi chạy trận\nĐợt chạy công thức đợt, quái áp chỉ số và mức thưởng từng loại, thành áp chỉ số của thành."
   },
   "wave-gap": {
    "hash": "933343f3b723",

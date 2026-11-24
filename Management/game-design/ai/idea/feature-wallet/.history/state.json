@@ -1,21 +1,29 @@
 {
- "hash": "5ba24132c4d3",
+ "hash": "78eabd30bbbe",
  "items": {
   "single-currency": {
    "hash": "2c08549729b5",
    "text": "Game chỉ có một loại tiền\nĐã loại: đá quý hay tiền lâu dài (game không có tiến trình lâu dài)."
   },
+  "wallet-balance": {
+   "hash": "ac1a575294c8",
+   "text": "Ví giữ số dư tiền người chơi đang có, dùng để nhận thưởng và mua nâng cấp\nQuái và đợt quyết thưởng bao nhiêu, nâng cấp quyết món và giá; ví chỉ giữ số tiền."
+  },
   "earn": {
    "hash": "e93c4745e765",
    "text": "Nhận tiền khi hạ quái và khi dọn sạch một đợt"
+  },
+  "wallet-records-rewards": {
+   "hash": "c6e645b9e3f3",
+   "text": "Ví là nơi duy nhất ghi khoản thưởng tiền khi quái bị hạ hoặc đợt được dọn sạch\n`feature-enemy` xác nhận quái bị hạ, `feature-wave` xác nhận đợt đã dọn; ví ghi khoản thưởng vào số dư. Theo câu hỏi chung vòng 2 (`chu-so-huu-thuong-tien`)."
   },
   "spend": {
    "hash": "3472ea0a4ba9",
    "text": "Tiêu tiền để mua nâng cấp; không đủ tiền thì không mua được"
   },
   "run-scoped": {
-   "hash": "2ed399700d65",
-   "text": "Tiền chỉ dùng trong một lượt, lượt mới bắt đầu lại"
+   "hash": "7a70e5ad8e02",
+   "text": "Mỗi lượt có số dư riêng, dùng chung qua các đợt trong lượt; lượt mới bắt đầu lại\nĐể dành tiền từ đợt trước để nâng cấp khi bị dồn ép ở đợt sau được."
   }
  }
 }

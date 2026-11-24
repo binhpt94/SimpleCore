@@ -1,7 +1,9 @@
 # SceneFlow
 
 Đưa người chơi từ scene Loading sang scene Game. Không feature nào khác được nạp hay gỡ scene.
-Thiết kế: `live/feature-scene-flow/scene-list/boot-loading` (màn Loading), cheat ở `feature-scene-flow/cheat` (chưa làm).
+Thiết kế: `live/feature-scene-flow/scene-list/boot-loading` (màn Loading), cheat ở `feature-scene-flow/cheat`.
+- Cheat (`LoadingCheat.cs`, chỉ chạy ở `UNITY_EDITOR || DEVELOPMENT_BUILD`): chọn trường `cheat` = `LoadError` trên `SceneFlowLoadingInstaller.asset` thì màn Loading đứng ở 40% với dòng "Lỗi tải: Wallet", không nạp scene Game. Asset dùng chung phải để `None` (có test kiểm).
+- Sprite thanh tiến độ: order `claudeimage/orders/SceneFlow/loading-bar` (bar-track, bar-fill); chưa giao thì thanh vẫn là ô màu tạm.
 
 - Dùng `ISessionScene` của `Game.Core`: tham gia phiên của cả hai scene, và gọi `EndAsync` của phiên Loading.
 - Dùng `ISessionLoadProgress` (contract của SessionScene) của scene Game cho thanh tiến độ và tên feature tải lỗi.

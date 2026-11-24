@@ -1,5 +1,5 @@
 ---
-based-on: 04fa62031f0e
+based-on: d46873561735
 refs: feature-session-scene/session-steps@70f3b17acc2e, glossary#caller@71914587fe09, glossary#popup-id@6773c11a645d
 ---
 # Nhờ hiện và đóng popup

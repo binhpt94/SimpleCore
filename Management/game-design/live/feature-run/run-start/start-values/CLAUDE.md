@@ -26,6 +26,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Đội vào trận | Đội mặc định cố định (Hiệp sĩ, Đấu sĩ rìu, Cung thủ) | Đội vừa chọn ở màn chọn đội | Đội vừa chọn ở màn chọn đội |
 | Máu thành đầu lượt | 1000 | 1000 (chỉnh theo thử) | Theo `feature-balance` |
 | Tiền đầu lượt | 50 | 50 (chỉnh theo thử) | Theo `feature-balance` |
+| Lần hồi sinh thành đầu lượt | Không có (chưa có hồi sinh) | 1 | 1 |
 
 ## Trường hợp biên
 - **Đội nhận được không đủ 3 hero hoặc có hero trùng:** không vào trận; đây là lỗi của màn chọn đội, báo lỗi rõ cho phiên code (người chơi không gặp vì nút vào trận bị khoá).

@@ -1,0 +1,2 @@
+{"at": "2026-11-25 01:22:29", "event": "data", "hash": "d5baa8be95f9", "previous": "", "added": ["title-text", "gain-text", "watch-button", "wait-state", "one-tap-each", "back-key-nothing", "popup-id"], "removed": [], "rewritten": []}
+{"at": "2026-11-25 01:23:28", "event": "promote", "by": "người (Sync)", "hash": "d5baa8be95f9"}

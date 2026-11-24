@@ -1,5 +1,5 @@
 ---
-based-on: 1a74f8c24f86
+based-on: 34c92f9b0c18
 refs: feature-wave/wave-gap@d9d4c35f6907, feature-balance/balance-economy@5fe05cebab72, feature-wave/spawning@8c9e1c247bf1, glossary#wave-clear@89a01d398d04, glossary#score@6f4bf7c75284
 ---
 # Dọn sạch đợt

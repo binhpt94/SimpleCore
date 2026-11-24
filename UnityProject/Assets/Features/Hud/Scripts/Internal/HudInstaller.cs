@@ -11,6 +11,7 @@ namespace Game.Hud
     /// <summary>
     /// Wires the battle HUD: reads Castle, Wallet, Wave and Run through their contracts and joins the scene session.
     /// Install after SessionScene, Run, Castle, Wallet and Wave. Registers nothing (Hud has no contracts).
+    /// Dev builds also need IWalletIncome, IWalletService, ICastleCheat and IWaveCheat for the mid-battle cheat.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Hud/Installer", fileName = "HudInstaller")]
     public sealed class HudInstaller : InstallerAsset
@@ -34,7 +35,8 @@ namespace Game.Hud
             var waves = registry.Resolve<IWaveProgress>();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            var cheat = new HudCheat(run, wallet, registry.Resolve<IWalletIncome>(), registry.Resolve<IWalletService>());
+            var cheat = new HudCheat(run, wallet, registry.Resolve<IWalletIncome>(), registry.Resolve<IWalletService>(),
+                skills, registry.Resolve<ICastleCheat>(), registry.Resolve<IWaveCheat>());
             session.Join(new HudSession(new PrefabHudViewSpawner(viewPrefab), new UnityHudClock(),
                 castle, skills, wallet, waves, run, config.Timings, cheat));
 #else

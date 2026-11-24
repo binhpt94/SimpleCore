@@ -5,3 +5,4 @@
 {"at": "2026-11-23 15:23:29", "event": "data", "hash": "2c1e443d0ced", "previous": "e14272c3e383", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "2c1e443d0ced"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "2c1e443d0ced"}
+{"at": "2026-11-25 00:11:10", "event": "promote", "by": "người (Sync)", "hash": "2c1e443d0ced"}

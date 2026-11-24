@@ -1,6 +1,6 @@
 ---
 based-on: 70f3b17acc2e
-refs: feature-scene-flow/scene-list/boot-loading@76aeeee9bf6f, feature-run/run-start@31cb7598b529, feature-balance/balance-config@6934878b1b70
+refs: feature-scene-flow/scene-list/boot-loading@76aeeee9bf6f, feature-run/run-start@d386ccae4d88, feature-balance/balance-config@6934878b1b70
 frame: none
 ---
 # Danh sách tham gia và xử lí lỗi từng bước
@@ -11,7 +11,7 @@ Chốt danh sách và thứ tự feature tham gia của scene Loading và scene 
 
 ### loading-list | AI 8 | Scene Loading chỉ có một feature tham gia: `feature-scene-flow` (màn Loading)
 
-### game-list | AI 8 | Scene Game có 14 feature tham gia theo thứ tự: popup, run, wallet, castle, hero, enemy, wave, upgrade, home, team-select, hud, hud-upgrade, popup-lose, popup-pause
+### game-list | AI 8 | Scene Game có 15 feature tham gia theo thứ tự: popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, home, team-select, hud, hud-upgrade, popup-lose, popup-pause
 Dịch vụ và luật trận đứng trước, màn hình và popup đứng sau, để feature đứng sau dùng được thứ feature đứng trước đã chuẩn bị. `feature-balance` không tham gia: nó chỉ là số liệu nằm trong cấu hình của từng feature.
 
 ### load-timeout | AI 7 | Mỗi feature tải tối đa 10 giây (dự kiến); quá thì coi là tải lỗi

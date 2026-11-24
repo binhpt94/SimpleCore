@@ -1,5 +1,5 @@
 ---
-based-on: e712e2fbe1f0
+based-on: 112626ed0626
 refs: feature-upgrade/upgrade-effect@b9bcec737959, feature-upgrade/upgrade-purchase@c53d76edf8b3, glossary#level@43a706597ab9
 ---
 # Danh sách nâng cấp

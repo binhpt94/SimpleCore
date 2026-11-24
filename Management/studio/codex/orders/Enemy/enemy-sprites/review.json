@@ -1,1 +1,32 @@
-{}
+{
+ "enemy-soldier": {
+  "level": 3,
+  "text": "Dat: dung kich thuoc, nen trong suot, quay phai, ro dang linh dich",
+  "version": 1,
+  "at": "2026-11-24 23:54:46"
+ },
+ "enemy-wolf": {
+  "level": 3,
+  "text": "Dat: dung ti le hop thap dai, nanh va mat do ro",
+  "version": 1,
+  "at": "2026-11-24 23:54:49"
+ },
+ "enemy-giant": {
+  "level": 3,
+  "text": "Dat: to be, da xanh reu, chuy go, dung kich thuoc",
+  "version": 1,
+  "at": "2026-11-24 23:54:50"
+ },
+ "enemy-archer": {
+  "level": 3,
+  "text": "Dat: ao trum tim, cung den huong phai, doc ro o co nho",
+  "version": 1,
+  "at": "2026-11-24 23:54:51"
+ },
+ "enemy-boss": {
+  "level": 3,
+  "text": "Dat: giap den vien do, sung lon, riu khong bi cat",
+  "version": 1,
+  "at": "2026-11-24 23:54:52"
+ }
+}

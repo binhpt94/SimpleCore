@@ -10,6 +10,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Đã tự quyết
 - **Một state: có kỉ lục.** Kỉ lục 0 chỉ là cùng thành phần với số khác, không thêm phần nào, nên không tách state. Đã loại: thêm state "kỉ lục 0".
 - **Frame `use` toàn bộ số** từ `home-screen-spec` (vị trí tên game, kỉ lục, nút) và `feature-hud/hud-layout/layout-spec` (cao nút). Để `use` được, `home-screen-spec/main.frame` đã chuyển các số sang `let` (cùng giá trị, đổi hash node đó).
+- **Không dùng ở IDEA (2026-11-25).** IDEA chưa có màn bắt đầu (`feature-home/home-screen/home-screen-spec`); cheat có từ PROTOTYPE. Ảnh claude-concept vẫn dùng làm tham chiếu.
 - **Ảnh art-concept của màn bắt đầu chỉ đặt ở node này**, một ảnh cho state `with-record`, style `ui-flat`.
 
 ## Chưa rõ

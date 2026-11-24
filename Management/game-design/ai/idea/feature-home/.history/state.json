@@ -1,13 +1,17 @@
 {
- "hash": "a5b77a934bc1",
+ "hash": "39e910418294",
  "items": {
   "home-start": {
    "hash": "64e66b7e8cf7",
    "text": "Màn đầu tiên khi mở game có nút chơi, bấm là sang màn chọn đội"
   },
   "home-record": {
-   "hash": "91b15f81b506",
-   "text": "Màn bắt đầu cho thấy kỉ lục hiện tại\nCho người chơi một mục tiêu để vượt ngay khi mở game."
+   "hash": "697afe30592c",
+   "text": "Màn bắt đầu hiện kỉ lục điểm do `feature-run` lưu\nNgười chơi biết thành tích cần vượt ngay khi mở game."
+  },
+  "home-return-from-loss": {
+   "hash": "619dac1be453",
+   "text": "Màn bắt đầu là đích đến khi người chơi chọn về từ `feature-popup-lose`\nRời màn kết quả thì xem kỉ lục và tự chọn lúc bắt đầu lượt tiếp theo."
   }
  }
 }

@@ -1,6 +1,6 @@
 ---
 based-on: 2ae1008b33cd
-refs: feature-castle/castle-core/castle-body-values@a89edb2f03ba, feature-hero/hero-targeting@49b5ce7a72b8, feature-hero/hero-list/hero-roster-values@8a2346250094
+refs: feature-castle/castle-core/castle-body-values@b648ec300023, feature-hero/hero-targeting@49b5ce7a72b8, feature-hero/hero-list/hero-roster-values@8a2346250094
 ---
 # Thông số vào trận, gục và hồi sinh
 

@@ -23,7 +23,8 @@ namespace Game.Hero
 
         void PlayRespawn(float seconds);
 
-        void PlayLevelUp();
+        /// <summary>Grow to <paramref name="peakScale"/> and back within <paramref name="seconds"/> (<see cref="HeroLevelUpPop"/>).</summary>
+        void PlayLevelUp(float peakScale, float seconds);
 
         void Remove();
     }

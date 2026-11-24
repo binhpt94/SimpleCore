@@ -42,6 +42,9 @@ Mua lúc nào cũng được, kể cả đang đánh; mạnh lên liền. Đã l
 
 ### lose-condition | AI 9 | Thua khi thành bị phá
 
+### ad-revive | AI 7 | Thành bị phá lần đầu trong lượt thì người chơi được chọn xem quảng cáo để hồi sinh thành và chơi tiếp
+Mỗi lượt một lần; thành hồi sinh với một phần máu, quái và đợt giữ nguyên. Không xem thì thua như thường. Người yêu cầu (2026-11-24).
+
 ### castle-damage-carries | AI 7 | Sang đợt kế tiếp, thành giữ nguyên mức hư hại
 Trụ qua một đợt mà ít tổn thất thì trụ được lâu hơn; giữ thành trong đợt này còn có giá trị sau khi đợt kết thúc.
 

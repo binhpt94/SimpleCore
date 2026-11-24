@@ -2,3 +2,5 @@
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "0d6c3fdff45d"}
 {"at": "2026-11-24 13:55:27", "event": "data", "hash": "de6ad7ed2169", "previous": "0d6c3fdff45d", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-24 14:01:12", "event": "promote", "by": "người (Sync)", "hash": "de6ad7ed2169"}
+{"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "de6ad7ed2169"}
+{"at": "2026-11-25 00:11:11", "event": "promote", "by": "người (Sync)", "hash": "de6ad7ed2169"}

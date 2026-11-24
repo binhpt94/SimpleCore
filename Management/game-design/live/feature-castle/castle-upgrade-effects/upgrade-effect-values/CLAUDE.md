@@ -27,11 +27,11 @@ Cân bằng dự kiến: Băng giá cấp 31 thì chậm 35s bằng hồi chiêu
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
-| Mục mua được | không có (chỉ nâng cấp hero) | Máu, Sức đánh, Kĩ năng | cả ba |
-| Máu mỗi cấp | không có | +150 | theo số đã chỉnh sau chơi thử |
-| Sức đánh mỗi cấp | không có | +20% lv1 | theo số đã chỉnh |
-| Kĩ năng mỗi cấp | không có | +20% hiệu lực lv1 | theo số đã chỉnh |
-| Phản hồi khi lên cấp | không có | thành phóng to 1.1 lần rồi về trong 0.2s | hiệu ứng riêng mỗi mục, âm thanh |
+| Mục mua được | Máu, Sức đánh, Kĩ năng | như IDEA | cả ba |
+| Máu mỗi cấp | +150 | như IDEA | theo số đã chỉnh sau chơi thử |
+| Sức đánh mỗi cấp | +20% lv1 | như IDEA | theo số đã chỉnh |
+| Kĩ năng mỗi cấp | +20% hiệu lực lv1 | như IDEA | theo số đã chỉnh |
+| Phản hồi khi lên cấp | thành phóng to 1.1 lần rồi về cỡ cũ trong 0.3s | như IDEA | hiệu ứng riêng mỗi mục, âm thanh |
 
 ## Trường hợp biên
 - Mua nâng kĩ năng khi Băng giá đang làm chậm quái: quái đang chậm giữ thời gian cũ; lần bấm sau mới dùng thời gian mới.
@@ -45,7 +45,7 @@ Cân bằng dự kiến: Băng giá cấp 31 thì chậm 35s bằng hồi chiêu
 ## Đã tự quyết
 - **Cộng tuyến tính theo giá trị lv1.** Người chơi tính được trong đầu; giá tăng theo hàm mũ đã đủ hãm. Đã loại: nhân theo phần trăm của cấp trước (tăng quá nhanh).
 - **Nâng kĩ năng không đổi hiệu lực đang chạy.** Tránh kéo dài hiệu ứng giữa chừng khó đọc.
-- **IDEA chưa có nâng thành.** Nâng cấp hero đủ để thấy vòng lặp tiền đổi sức mạnh; khớp độ quan trọng PROTOTYPE của node cha. Đã loại: IDEA có Máu và Sức đánh (thêm nút khi gameplay chưa kiểm xong).
+- **IDEA có đủ ba mục nâng thành, phản hồi phóng to 1.1 lần trong 0.3s (2026-11-24, sửa lệch).** Bản trước ghi IDEA chưa có nâng thành và phản hồi 0.2s chỉ từ PROTOTYPE, lệch với bảng mức tăng mỗi cấp của nhánh nâng cấp (ba mục thành có từ IDEA, phản hồi 0.3s) và với danh sách mục (3 mục thành ở IDEA). Phiên Castle đã code theo 1.1 lần, 0.3s. Thống nhất một số cho cả game: thời lượng 0.3s như phản hồi lên cấp của hero; thành phóng 1.1 lần (nhỏ hơn hero 1.2 lần vì thành to, phóng nhiều sẽ che chiến trường). Đã loại: giữ 0.2s và chỉ từ PROTOTYPE (lệch với các node khác và code đã có).
 
 ## Chưa rõ
 - Không có điểm chặn.

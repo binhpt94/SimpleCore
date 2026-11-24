@@ -1,2 +1,7 @@
 {"at": "2026-11-23 17:31:25", "event": "data", "hash": "ee2d940ba4d0", "previous": "", "added": ["mixed-buttons"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "ee2d940ba4d0"}
+{"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "ee2d940ba4d0"}
+{"at": "2026-11-25 00:08:39", "event": "data", "hash": "dc8f2bc06f7b", "previous": "ee2d940ba4d0", "added": [], "removed": [], "rewritten": [{"id": "mixed-buttons", "old": "Giữa trận, đủ tiền mua năm mục, thiếu tiền cho một mục\nÉp: tiền 120; đội Hiệp sĩ cấp 3 (giá 55), Cung thủ cấp 1 (giá 30), Pháp sư cấp 5 (giá 100); máu thành cấp 2 (giá 56), sức đánh thành cấp 4 (giá 110), kĩ năng thành cấp 3 (giá 135). Năm nút sáng, nút kĩ năng mờ vì 120 < 135. Có đủ mọi thành phần của nút: hình, cấp, xu, giá, sáng và mờ.", "new": "Giữa trận, đủ tiền mua năm mục, thiếu tiền cho một mục\nÉp: tiền 120; đội Hiệp sĩ cấp 3 (giá 55), Đấu sĩ rìu cấp 5 (giá 100), Cung thủ cấp 1 (giá 30); máu thành cấp 2 (giá 56), sức đánh thành cấp 4 (giá 110), kĩ năng thành cấp 3 (giá 135). Năm nút sáng, nút kĩ năng mờ vì 120 < 135. Có đủ mọi thành phần của nút: hình, cấp, xu, giá, sáng và mờ."}]}
+{"at": "2026-11-25 00:11:10", "event": "promote", "by": "người (Sync)", "hash": "dc8f2bc06f7b"}
+{"at": "2026-11-25 00:37:42", "event": "data", "hash": "9808341af164", "previous": "dc8f2bc06f7b", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-25 00:50:40", "event": "promote", "by": "người", "hash": "9808341af164"}

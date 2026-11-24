@@ -15,7 +15,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Nút phụ | "Về màn bắt đầu" | | |
 | Số lần báo mỗi lần popup mở | 1 | lần | `first-tap-only` |
 | Cách đóng khác | không có | | `actions-only-exit` |
-| Nút hồi sinh | không có | | Bộ số chung |
+| Nút hồi sinh | không có | | Hồi sinh nằm ở popup hồi sinh, hiện trước popup thua |
 
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |

@@ -1,0 +1,17 @@
+{
+  "name": "Game.Battlefield.View",
+  "rootNamespace": "Game.Battlefield",
+  "references": [
+    "Game.Core",
+    "Game.Battlefield.Internal"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

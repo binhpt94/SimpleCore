@@ -1,6 +1,6 @@
 ---
 based-on: e541be0cca19
-refs: feature-hud-upgrade/bar-layout@4a9d06c74198, feature-popup/popup-layer@91d4f017d2fb, feature-hud/hud-status/status-spec@dce5f10fbfa2
+refs: feature-hud-upgrade/bar-layout@4a9d06c74198, feature-popup/popup-layer@91d4f017d2fb, feature-hud/hud-status/status-spec@dce5f10fbfa2, feature-hud/hud-skill-button/skill-button-spec@693755b379ea
 ---
 # Chỗ của từng phần HUD
 

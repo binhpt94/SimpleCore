@@ -12,5 +12,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Đã tự quyết
 - **Feature hạ tầng mặc định, `code.json` theo luật vòng 2.**
 
+## Đã tự quyết (thêm)
+- **Người chấm `cleanup-scope` 2 (2026-11-24).** Loại ý đó của GPT (khai `gpt-dropped`); giữ `session-clean`.
+
 ## Chưa rõ
 - Không có điểm chặn.

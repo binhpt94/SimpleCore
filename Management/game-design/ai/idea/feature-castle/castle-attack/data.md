@@ -1,6 +1,6 @@
 ---
-based-on: 24fd307bbdcd
-refs: feature-castle/castle-skills@8bc45d0edc8d, feature-hero/hero-stats@2748621645f8, feature-castle/castle-core@e1440a2a0de0, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-targeting@49b5ce7a72b8, glossary#range@f6d3cd6778ab, glossary#target@f51ab44b30ff
+based-on: 7100f997d2a8
+refs: feature-castle/castle-skills@8bc45d0edc8d, feature-hero/hero-stats@2748621645f8, feature-castle/castle-core@54dc235e583a, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-targeting@49b5ce7a72b8, glossary#range@f6d3cd6778ab, glossary#target@f51ab44b30ff
 ---
 # Thành tự bắn
 

@@ -1,6 +1,6 @@
 ---
 based-on: dda5759077eb
-refs: feature-castle/castle-skills@8bc45d0edc8d, feature-run/run-start/start-values@ecc0af822edd, feature-hud/hud-layout/layout-spec@ebefd7f8b116
+refs: feature-castle/castle-skills@8bc45d0edc8d, feature-run/run-start/start-values@04f1a45bba47, feature-hud/hud-layout/layout-spec@ebefd7f8b116
 ---
 # Ba nút kĩ năng thành
 

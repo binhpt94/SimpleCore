@@ -20,7 +20,10 @@ Các bước chuyển:
 | Mở game (scene Loading tải xong, sang scene Game) | | Màn bắt đầu |
 | Màn bắt đầu | Bấm chơi | Màn chọn đội |
 | Màn chọn đội | Bấm vào trận (đội đủ chỗ) | Trận |
-| Trận | Thành bị phá | Popup thua |
+| Trận | Thành bị phá lần đầu trong lượt | Popup hồi sinh |
+| Popup hồi sinh | Xem xong quảng cáo | Trận (chạy tiếp) |
+| Popup hồi sinh | Bỏ qua, hoặc quảng cáo không xem được | Popup thua |
+| Trận | Thành bị phá lần hai | Popup thua |
 | Trận | Bấm tạm dừng | Popup tạm dừng |
 | Popup tạm dừng | Tiếp tục | Trận |
 | Popup tạm dừng | Bỏ lượt | Màn bắt đầu |
@@ -29,10 +32,16 @@ Các bước chuyển:
 
 ## Luật cơ bản
 - Vào trận thì bắt đầu lượt mới (`feature-run/run-start`).
-- Thành bị phá thì kết thúc lượt, rồi hiện popup thua.
+- Thành bị phá thì trận dừng; lần đầu trong lượt thì đề nghị hồi sinh, không hồi sinh thì kết thúc lượt rồi hiện popup thua.
 - Bỏ lượt thì kết thúc lượt, rồi về màn bắt đầu.
 - Đã kết thúc lượt thì trận không chạy tiếp, kể cả khi popup thua đang mở.
-- Không có hồi sinh khi thua: từ popup thua chỉ có chơi lại hoặc về màn bắt đầu.
+- Hồi sinh chỉ có ở popup hồi sinh (`feature-popup-revive`), mỗi lượt một lần; từ popup thua chỉ có chơi lại hoặc về màn bắt đầu.
+
+## Đã tự quyết (thêm, 2026-11-25)
+- **Từ PROTOTYPE, bảng đường đi giữa các màn chính chuyển sang `feature-game-flow`** (nhánh đường đi của nó). Ở IDEA chỉ có màn trận nên node này giữ nguyên. Khi vào PROTOTYPE, ý "bên duy nhất quyết định sang màn nào" của node này sẽ được sửa thành "dọn trận rồi chuyển lựa chọn cho điều hướng màn" (đổi hash, phiên Run sửa code).
+
+## Đã tự quyết (thêm, 2026-11-24)
+- **Bước hồi sinh đứng trước popup thua** (ý `flow-revive-step`, người yêu cầu thêm hồi sinh bằng quảng cáo). Thay luật cũ "không có hồi sinh khi thua".
 
 ## Đã tự quyết
 - **Mọi màn trong scene Game, theo `feature-scene-flow/scene-list` (2026-11-23).** Viết lại ý `flow-scenes`: trước ghi "scene menu và scene trận", lệch với scene-list là nơi quyết scene. Lượt mới vẫn sạch vì trận dựng mới, huỷ hết mỗi lần (`feature-run/run-flow/flow-rules`, ý `fresh-battle`). Đã loại: scene menu và scene trận riêng; mỗi màn một scene.

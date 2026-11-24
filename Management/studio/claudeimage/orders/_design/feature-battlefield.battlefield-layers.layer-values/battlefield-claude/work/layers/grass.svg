@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" width="160" height="60">
+  <!-- bui co thap, phang, day bang mat dat; vien toi 4 px; sang tren trai hai bac -->
+  <path d="M6 58 L20 22 L34 44 L52 8 L70 40 L84 16 L100 42 L118 10 L132 40 L146 22 L154 58 Z" fill="#4FA53A" stroke="#1E3A14" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M24 34 L34 50 L52 22 L58 48 Z" fill="#7CCB5A"/>
+</svg>

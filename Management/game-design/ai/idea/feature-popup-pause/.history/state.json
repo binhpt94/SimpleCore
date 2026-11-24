@@ -1,13 +1,13 @@
 {
- "hash": "27ce83b88e6d",
+ "hash": "aebbf6890808",
  "items": {
   "pause-freeze": {
-   "hash": "5139a535906c",
-   "text": "Khi popup tạm dừng mở, trận đứng yên hoàn toàn"
+   "hash": "98858d13c573",
+   "text": "Tạm dừng giữ nguyên trạng thái trận cho tới khi người chơi tiếp tục hoặc bỏ lượt\nRời mắt rồi quay lại vẫn đúng thế trận lúc bấm dừng; popup vẫn nhận lựa chọn."
   },
-  "pause-actions": {
-   "hash": "548f99855f79",
-   "text": "Popup tạm dừng cho tiếp tục trận hoặc bỏ lượt về màn bắt đầu\nBỏ lượt thì không tính kỉ lục cho đợt đang đánh dở."
+  "pause-run-ownership": {
+   "hash": "c1bdc45f8505",
+   "text": "Popup chuyển lựa chọn tiếp tục hoặc bỏ lượt cho `feature-run` xử lí\nPopup là nơi người chơi chọn; kết thúc lượt, tính điểm và xét kỉ lục thuộc `feature-run`."
   }
  }
 }

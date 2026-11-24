@@ -15,3 +15,4 @@ MonoBehaviour:
   maxOpen: 3
   layerPrefab: {fileID: 1100000000000001, guid: 8a1f3c5e7b9d4f20a1c3e5f7092b4d61, type: 3}
   backdropPrefab: {fileID: 1200000000000001, guid: 3e7a9c1b5d2f4e6081a3c5e7f9b1d302, type: 3}
+  devSamplePrefab: {fileID: 1300000000000001, guid: bfb428fb369cd774cbfdf5d8c53112da, type: 3}

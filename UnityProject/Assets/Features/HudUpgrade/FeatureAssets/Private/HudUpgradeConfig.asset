@@ -14,4 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.HudUpgrade.Internal::Game.HudUpgrade.HudUpgradeConfig
   cheatState: 0
   mixedButtonsCoins: 120
-  mixedButtonsLevels: 030000000100000005000000020000000400000003000000
+  mixedButtonsLevels: 030000000500000001000000020000000400000003000000
+  mixedButtonsTeam:
+  - knight
+  - axeman
+  - archer

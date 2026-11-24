@@ -17,6 +17,7 @@ namespace Game.Castle.Tests
             public void SetVisible(bool visible) => Visible = visible;
             public void ResetBody() => Calls.Add("reset");
             public void FlashHit(float seconds) => Calls.Add("flash");
+            public void PopLevelUp(float scale, float seconds) => Calls.Add($"pop {scale} {seconds}");
             public void Collapse(float seconds) => Calls.Add("collapse");
             public void ShowShot(int targetHandle, float fromX, float toX, float seconds) => Calls.Add($"shot {targetHandle}");
             public void DropShotsAt(int targetHandle) => Calls.Add($"drop {targetHandle}");
@@ -38,6 +39,7 @@ namespace Game.Castle.Tests
         private FakeEnemyField _enemies;
         private CastleBody _body;
         private CastleSkills _skills;
+        private CastleUpgrades _upgrades;
         private FakeSpawner _spawner;
         private CastleSession _session;
 
@@ -49,10 +51,10 @@ namespace Game.Castle.Tests
             _enemies = new FakeEnemyField();
             _body = new CastleBody(_config, _run);
             _skills = new CastleSkills(_config, _body, _run, _enemies, new FakeHeroSquad());
-            var upgrades = new CastleUpgrades(_body, _skills);
-            var autoShot = new CastleAutoShot(_config, _body, _enemies, upgrades);
+            _upgrades = new CastleUpgrades(_body, _skills);
+            var autoShot = new CastleAutoShot(_config, _body, _enemies, _upgrades);
             _spawner = new FakeSpawner();
-            _session = new CastleSession(_config, _run, _enemies, _body, _skills, upgrades, autoShot, _spawner);
+            _session = new CastleSession(_config, _run, _enemies, _body, _skills, _upgrades, autoShot, _spawner);
             _session.Run();
         }
 
@@ -174,6 +176,28 @@ namespace Game.Castle.Tests
 
             Assert.That(_body.IsDestroyed, Is.False);
             Assert.That(_body.Health, Is.EqualTo(1000f));
+        }
+
+        [Test]
+        public void Buying_a_castle_level_pops_the_castle_for_a_moment()
+        {
+            StartBattle();
+
+            _upgrades.ApplyLevel(CastleUpgrade.Attack, 2);
+
+            Assert.That(_spawner.View.Calls, Does.Contain("pop 1.1 0.3"));
+        }
+
+        [Test]
+        public void Fallen_castle_does_not_pop_on_a_level()
+        {
+            StartBattle();
+            _body.Hit(0, 5000f);
+            _spawner.View.Calls.Clear();
+
+            _upgrades.ApplyLevel(CastleUpgrade.Health, 2);
+
+            Assert.That(_spawner.View.Calls, Has.None.StartsWith("pop"));
         }
 
         [Test]

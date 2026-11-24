@@ -1,0 +1,10 @@
+{"at": "2026-11-24 16:23:38", "event": "attempt", "item": "skill-thunder", "n": 1}
+{"at": "2026-11-24 16:23:39", "event": "run", "tool": "claudeimage", "item": "skill-thunder", "mode": "browser", "exit": 0, "result": "đã có work/out/skill-thunder.png", "files": ["skill-thunder.png"]}
+{"at": "2026-11-24 16:23:40", "event": "attempt", "item": "skill-frost", "n": 1}
+{"at": "2026-11-24 16:23:41", "event": "run", "tool": "claudeimage", "item": "skill-frost", "mode": "browser", "exit": 0, "result": "đã có work/out/skill-frost.png", "files": ["skill-frost.png"]}
+{"at": "2026-11-24 16:23:42", "event": "attempt", "item": "skill-rally", "n": 1}
+{"at": "2026-11-24 16:23:43", "event": "run", "tool": "claudeimage", "item": "skill-rally", "mode": "browser", "exit": 0, "result": "đã có work/out/skill-rally.png", "files": ["skill-rally.png"]}
+{"at": "2026-11-24 16:24:01", "event": "deliver", "version": 1, "files": ["quality.json", "skill-frost.png", "skill-rally.png", "skill-thunder.png"], "below": []}
+{"at": "2026-11-24 16:24:39", "event": "review", "item": "skill-thunder", "level": 3, "version": 1}
+{"at": "2026-11-24 16:24:48", "event": "review", "item": "skill-frost", "level": 3, "version": 1}
+{"at": "2026-11-24 16:24:49", "event": "review", "item": "skill-rally", "level": 3, "version": 1}

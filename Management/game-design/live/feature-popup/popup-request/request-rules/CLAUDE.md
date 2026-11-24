@@ -28,7 +28,7 @@ Nội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
-| Số id popup scene Game | 2 | 2 (thêm nếu có popup mới) | Theo danh sách popup lúc đó |
+| Số id popup scene Game | 2 | 3: thêm `PopupRevive/Main` (`feature-popup-revive`, 2 nút: Xem quảng cáo; Kết thúc lượt) | Theo danh sách popup lúc đó |
 | Thời gian từ xin mở tới hiện | 1 khung hình | 1 khung hình (hiệu ứng mở chạy sau đó) | Như PROTOTYPE |
 
 ## Trường hợp biên

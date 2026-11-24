@@ -39,7 +39,7 @@ namespace Game.Hud.Tests
             foreach (var skill in Skills) _states[skill] = new CastleSkillState(skill, true, 0f, Cooldown(skill));
         }
 
-        public IReadOnlyList<CastleSkill> Skills { get; } = new[] { CastleSkill.Thunder, CastleSkill.Frost, CastleSkill.Rally };
+        public IReadOnlyList<CastleSkill> Skills { get; set; } = new[] { CastleSkill.Thunder, CastleSkill.Frost, CastleSkill.Rally };
 
         public CastleSkillState GetState(CastleSkill skill) => _states[skill];
 
@@ -58,6 +58,34 @@ namespace Game.Hud.Tests
         public void SetRaw(CastleSkill skill, bool ready, float left, float total) => _states[skill] = new CastleSkillState(skill, ready, left, total);
 
         private static float Cooldown(CastleSkill skill) => skill == CastleSkill.Thunder ? 20f : skill == CastleSkill.Frost ? 35f : 25f;
+    }
+
+    /// <summary>Castle's dev cheat: writes straight into the fake castle and skills, as the real one would.</summary>
+    internal sealed class FakeCastleCheat : ICastleCheat
+    {
+        private readonly FakeCastle _castle;
+        private readonly FakeSkills _skills;
+        public List<string> Calls = new List<string>();
+
+        public FakeCastleCheat(FakeCastle castle, FakeSkills skills)
+        {
+            _castle = castle;
+            _skills = skills;
+        }
+
+        public void SetHealth(float health)
+        {
+            Calls.Add("health");
+            _castle.Set(health, _castle.MaxHealth);
+        }
+
+        public void SetCooldownLeft(CastleSkill skill, float secondsLeft)
+        {
+            Calls.Add("cooldown " + skill);
+            var total = _skills.GetState(skill).Cooldown;
+            if (secondsLeft <= 0f) _skills.SetReady(skill);
+            else _skills.SetCooling(skill, secondsLeft, total);
+        }
     }
 
     internal sealed class FakeWallet : IWalletBalance, IWalletIncome, IWalletService
@@ -85,8 +113,17 @@ namespace Game.Hud.Tests
         }
     }
 
-    internal sealed class FakeWaves : IWaveProgress
+    internal sealed class FakeWaves : IWaveProgress, IWaveCheat
     {
+        public List<string> Calls = new List<string>();
+
+        public void StartWave(int wave)
+        {
+            Calls.Add("wave " + wave);
+            SetCurrent(wave);
+            Start(wave);
+        }
+
         public int CurrentWave { get; private set; } = 1;
         public event Action<int> CurrentWaveChanged;
         public event Action<int> WaveStarted;
@@ -141,6 +178,7 @@ namespace Game.Hud.Tests
         public string Banner;
         public bool BannerShown;
         public readonly List<string> SkillNames = new List<string>();
+        public readonly List<int> SkillSlots = new List<int>();
         public readonly List<SkillShown> Skills = new List<SkillShown>();
         public bool Destroyed;
         public string CheatLabel;
@@ -167,10 +205,12 @@ namespace Game.Hud.Tests
 
         public void HideBanner() => BannerShown = false;
 
-        public void CreateSkillButtons(IReadOnlyList<string> names)
+        public void CreateSkillButtons(IReadOnlyList<string> names, IReadOnlyList<int> slots)
         {
             SkillNames.Clear();
             SkillNames.AddRange(names);
+            SkillSlots.Clear();
+            SkillSlots.AddRange(slots);
             Skills.Clear();
             foreach (var _ in names) Skills.Add(default);
         }

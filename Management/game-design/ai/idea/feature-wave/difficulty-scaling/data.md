@@ -1,5 +1,5 @@
 ---
-based-on: 1a74f8c24f86
+based-on: 34c92f9b0c18
 refs: feature-wave/spawning@8c9e1c247bf1, feature-balance/balance-difficulty-curve@f1f04ceb7020, feature-wave/wave-clear@b7789c127bb4, feature-enemy/enemy-list@10b291cde6dc, glossary#base-stats@5b93f172d5e9
 ---
 # Độ khó theo đợt

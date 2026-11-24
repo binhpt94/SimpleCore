@@ -43,6 +43,8 @@ namespace Game.HudUpgrade
             var cheat = new UpgradeBarCheat(_shop, _cheat.Balance, _cheat.Income, _cheat.Wallet);
             Action apply = () =>
             {
+                var mismatch = cheat.FindTeamMismatch(_cheat.Team);
+                if (mismatch != null) UnityEngine.Debug.LogWarning("HudUpgrade cheat mixed-buttons: " + mismatch);
                 if (!cheat.Apply(_cheat.Coins, _cheat.Levels))
                     UnityEngine.Debug.LogWarning("HudUpgrade cheat mixed-buttons: cửa hàng từ chối mua, state chưa dựng đủ.");
             };
@@ -55,11 +57,12 @@ namespace Game.HudUpgrade
         internal readonly struct CheatSetup
         {
             public CheatSetup(HudUpgradeCheatState state, int coins, int[] levels,
-                IWalletBalance balance, IWalletIncome income, IWalletService wallet)
+                IWalletBalance balance, IWalletIncome income, IWalletService wallet, string[] team = null)
             {
                 State = state;
                 Coins = coins;
                 Levels = levels ?? Array.Empty<int>();
+                Team = team ?? Array.Empty<string>();
                 Balance = balance;
                 Income = income;
                 Wallet = wallet;
@@ -68,6 +71,7 @@ namespace Game.HudUpgrade
             public HudUpgradeCheatState State { get; }
             public int Coins { get; }
             public int[] Levels { get; }
+            public string[] Team { get; }
             public IWalletBalance Balance { get; }
             public IWalletIncome Income { get; }
             public IWalletService Wallet { get; }

@@ -1,13 +1,21 @@
 {
- "hash": "24fd307bbdcd",
+ "hash": "7100f997d2a8",
  "items": {
   "castle-health": {
    "hash": "eaa0aaec6ac8",
    "text": "Thành là thứ phải giữ: quái tới được thì đánh thành, thành bị phá là thua\nBáo cho `feature-run` khi thành bị phá."
   },
+  "castle-revive": {
+   "hash": "38c378ab57ab",
+   "text": "Được hồi sinh thì thành đứng lại với một phần máu tối đa, cấp nâng cấp giữ nguyên\nHồi sinh là việc lượt chơi quyết sau khi người chơi xem xong quảng cáo; thành chỉ lấy lại máu."
+  },
+  "castle-damage-between-waves": {
+   "hash": "1d7ac450b250",
+   "text": "Thành giữ nguyên mức hư hại khi sang đợt quái kế tiếp\nGiữ thành ít hư hại trong đợt này thì đợt sau chống đỡ tốt hơn."
+  },
   "castle-auto-attack": {
-   "hash": "380bab35cff8",
-   "text": "Thành tự đánh quái ở cả hai bên, không cần người chơi bấm\nĐánh quái lọt qua hàng hero. Đã loại: người chơi chạm vào quái để thành bắn."
+   "hash": "d6bb6759e15f",
+   "text": "Thành tự đánh quái áp sát từ cả hai phía, không cần người chơi bấm\nVai trò của đòn tự đánh là phòng thủ quanh thành; quái không cần vượt qua hero thì thành mới đánh. Đã loại: người chơi chạm vào quái để thành bắn."
   },
   "castle-skills": {
    "hash": "309d0ee7cd8e",

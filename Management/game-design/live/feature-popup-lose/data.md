@@ -1,5 +1,6 @@
 ---
-based-on: 469d9009792c
+based-on: 53af9956f851
+by: lose-score-consistency=gpt@r2-1#lose-score-consistency
 ---
 # Popup thua
 
@@ -7,7 +8,8 @@ Popup hiện khi thành bị phá: báo kết quả lượt chơi và cho chơi 
 
 ## Ý cốt lõi
 
-### lose-result | AI 8 | Popup thua báo số đợt trụ được, kỉ lục, và cho biết khi vừa phá kỉ lục
+### lose-score-consistency | AI 7 | Popup thua hiện điểm lượt và kỉ lục do `feature-run` cấp, và báo khi phá kỉ lục
+Điểm và kỉ lục cùng một thước đo, đúng thứ `feature-run` dùng để xét kỉ lục.
 
 ### lose-actions | AI 8 | Popup thua cho chơi lại (về màn chọn đội) hoặc về màn bắt đầu
-Đã loại: hồi sinh thành một lần (không có quảng cáo hay tiền lâu dài).
+Hồi sinh thành bằng quảng cáo đã được đề nghị trước đó ở `feature-popup-revive`; popup thua chỉ hiện khi lượt đã thật sự thua.

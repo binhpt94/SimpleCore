@@ -14,8 +14,7 @@ namespace Game.Hud
     {
         private const float RefWidth = 1920f;
         private const float RefHeight = 1080f;
-        private const float SkillSize = 140f;
-        private const float SkillGap = 20f;
+        private const float SkillSize = HudSkillSlots.Size;
         private const int SortingOrder = 10;
 
         private static readonly Color PanelColor = new Color(0f, 0f, 0f, 0.45f);
@@ -25,6 +24,17 @@ namespace Game.Hud
         private static readonly Color SkillReady = new Color(0.25f, 0.45f, 0.85f, 1f);
         private static readonly Color SkillCooling = new Color(0.25f, 0.28f, 0.35f, 1f);
         private static readonly Color CoverColor = new Color(0f, 0f, 0f, 0.55f);
+        private static readonly Color SpriteCooling = new Color(0.55f, 0.55f, 0.6f, 1f);
+        private const float HealthBorder = 6f;
+
+        // Sprites from the claude-concept parts (orders Hud/hud-band, hud-hp, hud-coin, skill-tray, skill-buttons).
+        // Any left empty falls back to the flat colour box it replaces.
+        [SerializeField] private Sprite bandSprite;
+        [SerializeField] private Sprite healthFrameSprite;
+        [SerializeField] private Sprite coinSprite;
+        [SerializeField] private Sprite skillTraySprite;
+        [Tooltip("One per cluster slot, left to right: Thunder, Frost, Rally.")]
+        [SerializeField] private Sprite[] skillSprites = new Sprite[0];
 
         private readonly List<SkillButton> _skills = new List<SkillButton>();
         private Canvas _canvas;
@@ -84,23 +94,23 @@ namespace Game.Hud
             _banner.gameObject.SetActive(false);
         }
 
-        public void CreateSkillButtons(IReadOnlyList<string> names)
+        public void CreateSkillButtons(IReadOnlyList<string> names, IReadOnlyList<int> slots)
         {
             Build();
             foreach (var old in _skills) Destroy(old.Root.gameObject);
             _skills.Clear();
 
-            // Cluster in the bottom-right corner: x 1420..1880, y 920..1060 on the reference screen, right to left from the edge.
-            var count = names.Count;
-            var clusterWidth = count * SkillSize + Math.Max(0, count - 1) * SkillGap;
-            var left = RefWidth - 40f - clusterWidth;
-            for (var i = 0; i < count; i++)
+            // Cluster in the bottom-right corner, x 1420..1880, y 920..1060: each button in its skill's fixed slot.
+            for (var i = 0; i < names.Count; i++)
             {
                 var index = i;
+                var slot = slots[i];
                 var button = new SkillButton();
-                button.Root = Rect("Skill " + names[i], _root, new Vector2(1f, 0f), left + i * (SkillSize + SkillGap), 920f, SkillSize, SkillSize);
+                button.Root = Rect("Skill " + names[i], _root, new Vector2(1f, 0f), HudSkillSlots.Left(slot), HudSkillSlots.ClusterTop, SkillSize, SkillSize);
                 button.Back = button.Root.gameObject.AddComponent<Image>();
-                button.Back.color = SkillReady;
+                button.Sprite = slot >= 0 && slot < skillSprites.Length ? skillSprites[slot] : null;
+                if (button.Sprite != null) button.Back.sprite = button.Sprite;
+                button.Back.color = button.Sprite != null ? Color.white : SkillReady;
                 var press = button.Root.gameObject.AddComponent<Button>();
                 press.transition = Selectable.Transition.None;
                 press.onClick.AddListener(() => SkillPressed?.Invoke(index));
@@ -126,7 +136,8 @@ namespace Game.Hud
         {
             if (index < 0 || index >= _skills.Count) return;
             var button = _skills[index];
-            button.Back.color = ready ? SkillReady : SkillCooling;
+            if (button.Sprite != null) button.Back.color = ready ? Color.white : SpriteCooling;
+            else button.Back.color = ready ? SkillReady : SkillCooling;
             button.Seconds.text = seconds;
             button.Seconds.gameObject.SetActive(!string.IsNullOrEmpty(seconds));
             var share = Mathf.Clamp01(cover);
@@ -175,29 +186,47 @@ namespace Game.Hud
             if (gameObject.GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
             _root = (RectTransform)transform;
 
+            // Top band behind money, health and wave: stretched across the top 140 px of the screen (9-slice).
+            if (bandSprite != null)
+            {
+                var band = Rect("Band", _root, new Vector2(0f, 1f), 0f, 0f, RefWidth, 140f);
+                band.anchorMax = new Vector2(1f, 1f);
+                band.offsetMin = new Vector2(0f, band.offsetMin.y);
+                band.offsetMax = new Vector2(0f, band.offsetMax.y);
+                Picture(band, bandSprite, Color.white);
+            }
+
+            // Tray under the 3 skill buttons, bottom-right corner (x 1420..1880, y 920..1060); buttons are added on top.
+            if (skillTraySprite != null)
+                Picture(Rect("Skill tray", _root, new Vector2(1f, 0f), HudSkillSlots.ClusterLeft, HudSkillSlots.ClusterTop,
+                    HudSkillSlots.ClusterWidth, SkillSize), skillTraySprite, Color.white);
+
             // Money: coin icon + number, top band, left of the health bar.
             var coin = Rect("Coin", _root, new Vector2(0f, 1f), 220f, 10f, 60f, 60f);
-            var coinImage = coin.gameObject.AddComponent<Image>();
-            coinImage.color = CoinColor;
-            coinImage.raycastTarget = false;
-            var coinMark = Label("Mark", coin, 0f, 0f, 60f, 60f, 26, TextAnchor.MiddleCenter);
-            coinMark.text = "xu";
-            coinMark.color = new Color(0.35f, 0.22f, 0f, 1f);
+            if (coinSprite != null)
+            {
+                Picture(coin, coinSprite, Color.white).preserveAspect = true;
+            }
+            else
+            {
+                Picture(coin, null, CoinColor);
+                var coinMark = Label("Mark", coin, 0f, 0f, 60f, 60f, 26, TextAnchor.MiddleCenter);
+                coinMark.text = "xu";
+                coinMark.color = new Color(0.35f, 0.22f, 0f, 1f);
+            }
             _coins = Label("Coins", _root, new Vector2(0f, 1f), 290f, 10f, 230f, 60f, 44, TextAnchor.MiddleLeft);
 
-            // Castle health: centre of the top band, right above the castle.
+            // Castle health: centre of the top band, right above the castle. With the frame sprite the red fill
+            // sits inside its border so the frame stays visible.
             var bar = Rect("Health", _root, new Vector2(0.5f, 1f), 660f, 10f, 600f, 60f);
-            var back = bar.gameObject.AddComponent<Image>();
-            back.color = HealthBack;
-            back.raycastTarget = false;
+            Picture(bar, healthFrameSprite, healthFrameSprite != null ? Color.white : HealthBack);
+            var inset = healthFrameSprite != null ? HealthBorder : 0f;
             _healthFill = Rect("Fill", bar, Vector2.zero, 0f, 0f, 0f, 0f);
             _healthFill.anchorMin = Vector2.zero;
             _healthFill.anchorMax = Vector2.one;
-            _healthFill.offsetMin = Vector2.zero;
-            _healthFill.offsetMax = Vector2.zero;
-            var fill = _healthFill.gameObject.AddComponent<Image>();
-            fill.color = HealthFill;
-            fill.raycastTarget = false;
+            _healthFill.offsetMin = new Vector2(inset, inset);
+            _healthFill.offsetMax = new Vector2(-inset, -inset);
+            Picture(_healthFill, null, HealthFill);
             _health = Label("Number", bar, 180f, 5f, 240f, 50f, 38, TextAnchor.MiddleCenter);
 
             // Wave number: right end of the top band.
@@ -230,6 +259,20 @@ namespace Game.Hud
             return rect;
         }
 
+        /// <summary>
+        /// An image that never takes taps. A sprite with borders (9-slice) is drawn sliced so it stretches to any size;
+        /// without a sprite it is a flat colour box.
+        /// </summary>
+        private static Image Picture(RectTransform rect, Sprite sprite, Color color)
+        {
+            var image = rect.gameObject.AddComponent<Image>();
+            image.sprite = sprite;
+            image.type = sprite != null && sprite.border != Vector4.zero ? Image.Type.Sliced : Image.Type.Simple;
+            image.color = color;
+            image.raycastTarget = false;
+            return image;
+        }
+
         private Text Label(string name, RectTransform parent, float x, float y, float width, float height, int size, TextAnchor align)
         {
             return Label(name, parent, new Vector2(0f, 1f), x, y, width, height, size, align);
@@ -256,6 +299,7 @@ namespace Game.Hud
         {
             public RectTransform Root;
             public Image Back;
+            public Sprite Sprite;
             public RectTransform Cover;
             public Text Seconds;
         }

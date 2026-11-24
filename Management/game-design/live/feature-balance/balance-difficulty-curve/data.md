@@ -1,5 +1,5 @@
 ---
-based-on: 700960590953
+based-on: 33792179d7fe
 refs: feature-enemy/enemy-list@10b291cde6dc, feature-wave/difficulty-scaling@fed0ac86d57c, feature-balance/balance-economy@5fe05cebab72, glossary#break-wave@5e6edbfc4988
 ---
 # Đường độ khó

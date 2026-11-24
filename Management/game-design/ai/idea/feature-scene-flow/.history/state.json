@@ -1,13 +1,13 @@
 {
- "hash": "9e167e1aa89f",
+ "hash": "47e9a9467dc9",
  "items": {
   "scene-boot": {
-   "hash": "a9fa44404f79",
-   "text": "Mở game thì đi qua màn tải rồi vào scene chơi"
+   "hash": "f62fa0032803",
+   "text": "Mở game thì người chơi qua màn tải rồi tới màn bắt đầu\nKhông vào thẳng trận: màn bắt đầu là nơi xem kỉ lục và bấm Chơi để sang màn chọn đội."
   },
   "scene-switch": {
-   "hash": "2862b84a8b75",
-   "text": "Các feature khác xin chuyển scene qua feature này, không tự tải scene"
+   "hash": "d3857849ca98",
+   "text": "Feature khác xin chuyển scene qua feature này; tải, chạy, huỷ từng scene thuộc `feature-session-scene`\nKhông feature nào tự tải scene, và việc tải không bị giao cho cả hai feature."
   }
  }
 }

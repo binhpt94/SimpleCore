@@ -1,6 +1,6 @@
 ---
 based-on: cf9290ce16e6
-refs: feature-hero/hero-list/hero-roster-values@8a2346250094, feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-stats/enemy-stat-values@7016e0fe183b, feature-castle/castle-skills/skill-values@ad45ef4fdcc9, feature-castle/castle-core/castle-body-values@a89edb2f03ba, feature-castle/castle-attack/auto-shot-values@73b7dbaf8425, feature-wave/spawning/spawn-order@5884f63cfa93, feature-enemy/enemy-list/enemy-type-values@1782de2d557d
+refs: feature-hero/hero-list/hero-roster-values@8a2346250094, feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-stats/enemy-stat-values@7016e0fe183b, feature-castle/castle-skills/skill-values@ad45ef4fdcc9, feature-castle/castle-core/castle-body-values@b648ec300023, feature-castle/castle-attack/auto-shot-values@73b7dbaf8425, feature-wave/spawning/spawn-order@5884f63cfa93, feature-enemy/enemy-list/enemy-type-values@1782de2d557d
 ---
 # Thông số đi và đánh của quái
 

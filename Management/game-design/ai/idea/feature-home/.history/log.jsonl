@@ -3,3 +3,5 @@
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "a5b77a934bc1"}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "a5b77a934bc1"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "a5b77a934bc1"}
+{"at": "2026-11-24 22:43:34", "event": "data", "hash": "39e910418294", "previous": "a5b77a934bc1", "added": ["home-return-from-loss"], "removed": [], "rewritten": [{"id": "home-record", "old": "Màn bắt đầu cho thấy kỉ lục hiện tại\nCho người chơi một mục tiêu để vượt ngay khi mở game.", "new": "Màn bắt đầu hiện kỉ lục điểm do `feature-run` lưu\nNgười chơi biết thành tích cần vượt ngay khi mở game."}]}
+{"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "39e910418294"}

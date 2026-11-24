@@ -1,5 +1,5 @@
 {
- "hash": "4b9f46cc241a",
+ "hash": "e06499689b32",
  "items": {
   "result-score": {
    "hash": "77639e55cb51",
@@ -16,6 +16,10 @@
   "result-title": {
    "hash": "339dbd22161d",
    "text": "Popup có tiêu đề cho biết thành đã bị phá\nNgười chơi hiểu ngay vì sao lượt kết thúc."
+  },
+  "result-ad-failed": {
+   "hash": "fbad9eaa018d",
+   "text": "Thua sau khi xem quảng cáo hồi sinh không thành thì popup có thêm một dòng báo quảng cáo chưa hoàn tất\nNgười chơi biết vì sao không được hồi sinh. Bỏ qua đề nghị hồi sinh thì không có dòng này."
   }
  }
 }

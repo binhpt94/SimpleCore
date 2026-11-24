@@ -1,5 +1,5 @@
 ---
-based-on: b74c0b7d272a
+based-on: e41a7b75e5a6
 refs: feature-enemy/enemy-list@10b291cde6dc
 ---
 # Tiền khi hạ quái

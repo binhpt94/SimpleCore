@@ -1,0 +1,14 @@
+t=400.7957 castle=983.5001 step=Playing score=5 best=7 -> forced castle=1 (cheat CastleCheat.SetHealth(1) at runtime, nothing saved)
+time,event,castleHp,destroyed,step,score,best,loseShown
+0.000,step->Playing ,1,False,Playing,5,7,False
+27.441,DESTROYED step->Ending ,0,True,Ending,6,7,False
+27.542,,0,True,Ending,6,7,False
+27.643,,0,True,Ending,6,7,False
+27.743,,0,True,Ending,6,7,False
+27.842,,0,True,Ending,6,7,False
+27.941,,0,True,Ending,6,7,False
+28.041,,0,True,Ending,6,7,False
+28.141,,0,True,Ending,6,7,False
+28.243,,0,True,Ending,6,7,False
+28.343,,0,True,Ending,6,7,False
+28.441,step->Lost POPUP delay=1.000 ,0,True,Lost,6,7,True

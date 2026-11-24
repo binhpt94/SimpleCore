@@ -1,0 +1,29 @@
+{
+ "hash": "d2cbf130c039",
+ "items": {
+  "open-limit": {
+   "hash": "ecf49ad6e1bc",
+   "text": "Hạn chờ mở quảng cáo là 8 giây (dự kiến); quá hạn là \"không xem được\"\nĐủ cho mạng chậm tải một quảng cáo; người chơi đang nhìn popup chờ nên không để lâu hơn."
+  },
+  "confirm-limit": {
+   "hash": "26617bd58532",
+   "text": "Hạn chờ xác nhận thưởng sau khi quảng cáo đóng là 5 giây (dự kiến); quá hạn là \"không xem được\""
+  },
+  "return-wait": {
+   "hash": "f530e33fcea9",
+   "text": "Kết quả trả về ở khung hình đầu tiên sau khi game trở lại màn hình\nGame chưa trở lại (người chơi còn ở ngoài) thì kết quả chờ, không có hạn."
+  },
+  "busy-reply": {
+   "hash": "b6f40624edca",
+   "text": "Yêu cầu chen vào khi đang có yêu cầu nhận \"không xem được\" ngay trong khung hình đó"
+  },
+  "test-provider": {
+   "hash": "0c4b9211d260",
+   "text": "Bản dev có nhà cung cấp giả: chọn trước kết quả \"đã xem đủ\", \"không xem được\" hay \"quá hạn\" để thử luồng hồi sinh\nNhà cung cấp giả hiện một màn chờ 2 giây thay cho quảng cáo; chỉ chạy ở bản dev."
+  },
+  "log-reason": {
+   "hash": "0e82eb42a876",
+   "text": "Mỗi kết quả \"không xem được\" ghi lí do vào log (hết quảng cáo, mất mạng, đóng sớm, quá hạn, đang bận)\nNgười chơi không thấy lí do; log để phiên code và người dò lỗi."
+  }
+ }
+}

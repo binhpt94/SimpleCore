@@ -74,6 +74,12 @@ namespace Game.Hero
         [Tooltip("Highest total attack speed gain from levels.")]
         [SerializeField] private float levelAttackSpeedCap;
 
+        [Tooltip("Level-up pop: the hero grows to this scale and back.")]
+        [SerializeField] private float levelUpPopScale;
+
+        [Tooltip("Level-up pop: seconds from start back to normal size.")]
+        [SerializeField] private float levelUpPopSeconds;
+
         public IReadOnlyList<HeroEntry> Heroes => heroes;
         public GameObject HeroPrefab => heroPrefab;
         public float TargetHalfRange => targetHalfRange;
@@ -87,6 +93,8 @@ namespace Game.Hero
         public float LevelStatStep => levelStatStep;
         public float LevelAttackSpeedStep => levelAttackSpeedStep;
         public float LevelAttackSpeedCap => levelAttackSpeedCap;
+        public float LevelUpPopScale => levelUpPopScale;
+        public float LevelUpPopSeconds => levelUpPopSeconds;
 
         public HeroEntry Find(string code)
         {
@@ -120,6 +128,7 @@ namespace Game.Hero
             if (targetHalfRange <= 0f || walkHalfRange <= 0f) return "no target or walk range";
             if (respawnSeconds < 0f || fallSeconds < 0f || respawnGrowSeconds < 0f) return "negative respawn timing";
             if (levelStatStep < 0f || levelAttackSpeedStep < 0f || levelAttackSpeedCap < 0f) return "negative level step";
+            if (levelUpPopScale < 1f || levelUpPopSeconds <= 0f) return "no level-up pop scale or seconds";
             return null;
         }
     }

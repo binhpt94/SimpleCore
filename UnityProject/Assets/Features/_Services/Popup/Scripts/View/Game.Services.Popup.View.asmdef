@@ -1,0 +1,19 @@
+{
+  "name": "Game.Services.Popup.View",
+  "rootNamespace": "Game.Services.Popup",
+  "references": [
+    "Game.Core",
+    "Game.Services.Popup.Internal",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

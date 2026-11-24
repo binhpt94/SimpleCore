@@ -1,5 +1,5 @@
 ---
-based-on: e1440a2a0de0
+based-on: 54dc235e583a
 refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-hero/hero-respawn@2ae1008b33cd, feature-hero/hero-list/hero-roster-values@8a2346250094
 ---
 # Thông số thân thành
@@ -15,7 +15,10 @@ Mọi khoảng cách tới thành (tầm quái, tầm tự bắn, vùng Sấm s�
 Một con Lính đợt 1 (5 sát thương/1.0s) phải đứng đánh 200s mới phá được thành; áp lực đến từ số đông và các đợt sau. Không tự hồi; chỉ nâng cấp máu (`feature-castle/castle-upgrade-effects`) làm máu tăng.
 
 ### castle-destroyed-once | AI 9 | Máu hiện tại nhỏ hơn hoặc bằng 0 thì thành bị phá, báo `feature-run` đúng 1 lần
-Sau khi bị phá, thành không nhận thêm sát thương, không tự bắn, không cho dùng kĩ năng. Nhiều đòn cùng lúc đưa máu xuống dưới 0 vẫn chỉ báo 1 lần; máu hiện ra là 0, không âm.
+Sau khi bị phá, thành không nhận thêm sát thương, không tự bắn, không cho dùng kĩ năng, cho tới khi được hồi sinh. Nhiều đòn cùng lúc đưa máu xuống dưới 0 vẫn chỉ báo 1 lần; máu hiện ra là 0, không âm. Hồi sinh rồi bị phá lần nữa thì báo thêm 1 lần.
+
+### castle-revive-30 | AI 7 | Hồi sinh thì máu hiện tại đặt bằng 30% máu tối đa lúc đó; máu tối đa và cấp nâng cấp giữ nguyên
+Máu tối đa 1000 thì hồi sinh có 300 máu; đã nâng lên 1400 thì có 420. Số lẻ làm tròn lên. Hồi sinh xong thành lại nhận sát thương, tự bắn và cho dùng kĩ năng ngay khi trận chạy tiếp. Mức 30% do người chọn. Đã loại: hồi đầy máu (thua mất nghĩa), 30% của máu tối đa lúc vào trận (người đã nâng máu thấy phí).
 
 ### castle-hero-points | AI 7 | Hero xuất phát và hồi sinh ở mép thành: chỗ 1 và 3 ở x=-1.5u, chỗ 2 ở x=+1.5u
 Chỗ theo thứ tự hero trong đội đã chọn ở `feature-team-select`. Hai hero ở bên trái, một bên phải; hero sẽ tự đi theo quái gần nhất nên chỗ đứng ban đầu chỉ để đội không chồng lên nhau. Đã loại: cả đội ở x=0 (chồng hình, khó đếm hero).

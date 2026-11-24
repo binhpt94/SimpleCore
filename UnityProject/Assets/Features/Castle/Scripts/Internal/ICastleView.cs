@@ -21,6 +21,9 @@ namespace Game.Castle
         /// <summary>Flashes the castle for <paramref name="seconds"/>; a new flash starts over.</summary>
         void FlashHit(float seconds);
 
+        /// <summary>Grows the castle to <paramref name="scale"/> and back over <paramref name="seconds"/>; a new pop starts over.</summary>
+        void PopLevelUp(float scale, float seconds);
+
         /// <summary>Shrinks the castle to nothing over <paramref name="seconds"/>.</summary>
         void Collapse(float seconds);
 

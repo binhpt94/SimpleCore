@@ -8,7 +8,8 @@ using UnityEngine;
 namespace Game.Wave
 {
     /// <summary>
-    /// Wires Wave: builds the director from the config, publishes <see cref="IWaveProgress"/> and joins the session.
+    /// Wires Wave: builds the director from the config, publishes <see cref="IWaveProgress"/> (and, in dev builds,
+    /// IWaveCheat) and joins the session.
     /// Install after SessionScene, Run, Wallet and Enemy.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Wave/Wave Installer", fileName = "WaveInstaller")]
@@ -28,6 +29,9 @@ namespace Game.Wave
 
             var director = new WaveDirector(config.ToRules(), run, enemies, income, new SystemWaveRandom());
             registry.Register<IWaveProgress>(director);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            registry.Register<IWaveCheat>(director);
+#endif
             session.Join(new WaveParticipant(director, new UnityWaveClock()));
         }
     }

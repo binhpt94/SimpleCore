@@ -80,6 +80,16 @@ namespace Game.Castle
             if (level >= 1) _level = level;
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>Cheat: cooldown left set to 0..full cooldown (0 is ready); the skill is not used.</summary>
+        public void ForceCooldownLeft(CastleSkill skill, float secondsLeft)
+        {
+            var index = IndexOf(skill);
+            if (index < 0 || float.IsNaN(secondsLeft)) return;
+            _cooldownLeft[index] = Math.Max(0f, Math.Min(CooldownOf(skill), secondsLeft));
+        }
+#endif
+
         private bool CanAct() => !_castle.IsDestroyed && !_runFlow.IsPaused;
 
         private float Bonus => 1f + _config.SkillBonusPerLevel * (_level - 1);

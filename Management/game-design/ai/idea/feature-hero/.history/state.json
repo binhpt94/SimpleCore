@@ -1,13 +1,21 @@
 {
- "hash": "c5b904d13f66",
+ "hash": "8cd1bf682940",
  "items": {
   "hero-auto-combat": {
    "hash": "a06ca8a02eac",
    "text": "Hero tự đánh quái để giữ thành, người chơi không điều khiển hero\nĐã loại: kéo thả hero, chọn mục tiêu."
   },
+  "doi-hinh-xuyen-luot": {
+   "hash": "fa7aabf98d9e",
+   "text": "Đội hero giữ nguyên theo lựa chọn của người chơi trước khi vào lượt, suốt cả lượt\nNối quyết định đã chốt ở vòng 1 với phần hero trong trận."
+  },
+  "hero-spawn-team": {
+   "hash": "5dc428289e59",
+   "text": "Hero tạo cả đội khi trận bắt đầu, ở điểm xuất phát do `feature-castle` cấp\n`feature-run` giao đội đã chốt; hero dùng cùng điểm đó khi hồi sinh. Theo câu hỏi chung vòng 2 (`sinh-doi-dau-tran`)."
+  },
   "hero-roles": {
-   "hash": "ebf16ca3cb39",
-   "text": "Mỗi hero có một cách đánh riêng\nVí dụ cận chiến đứng trước chắn quái, bắn xa đứng sau. Cách ghép đội là lựa chọn chính trước trận."
+   "hash": "41e0b525b91f",
+   "text": "Mỗi hero tự chiến đấu theo cách riêng, làm đổi cách cả đội giữ thành\nKhác nhau ở cách đội giữ thành khi đổi hero, không chỉ ở chỉ số hay hoạt ảnh. Ví dụ cận chiến đứng trước chắn quái, bắn xa đứng sau."
   },
   "hero-roster": {
    "hash": "b5a5bcaadef7",
@@ -20,6 +28,54 @@
   "hero-upgrade": {
    "hash": "bdcdb3ab0c7c",
    "text": "Mỗi hero trong đội mạnh lên riêng qua nâng cấp trong lượt\nMua qua `feature-upgrade`. Đã loại: nâng theo loại hero."
+  },
+  "enemy-picks-target": {
+   "hash": "e873e5ff8805",
+   "text": "`feature-enemy` chọn mục tiêu cho từng đòn của quái\nHero và thành chỉ cấp trạng thái của mình cho việc chọn."
+  },
+  "enemy-prefers-blocker": {
+   "hash": "b3393900bb01",
+   "text": "Quái ưu tiên hero chắn đường khi cả hero đó và thành cùng trong tầm đánh\nGiữ vai trò chắn của hero cận chiến ngay sát thành."
+  },
+  "castle-picks-target": {
+   "hash": "35bcda99c481",
+   "text": "`feature-castle` chọn mục tiêu cho mọi đòn và kĩ năng tấn công của thành"
+  },
+  "attacker-picks-hits": {
+   "hash": "bd4a64582174",
+   "text": "Bên ra đòn xác định danh sách bên trúng theo kiểu đòn của mình\nHero chọn mục tiêu chính rồi xác định mọi quái trúng chém hay trúng nổ."
+  },
+  "attacker-sets-damage": {
+   "hash": "3efb05fd06e1",
+   "text": "Bên ra đòn xác định sát thương của đòn tại lúc ra đòn\nHero, quái và thành mỗi bên đã giữ chỉ số của mình."
+  },
+  "combat-arbiter": {
+   "hash": "f9ad605bed92",
+   "text": "Đòn của nhiều bên ra cùng một lúc được phân xử ở `feature-combat`\nNếu mỗi bên tự áp đòn theo thứ tự cập nhật, bên xử lí trước có thể làm mất đòn ra cùng lúc của bên kia."
+  },
+  "same-tick-snapshot": {
+   "hash": "1d9a53cde6ae",
+   "text": "Mọi đòn cùng nhịp được xét theo trạng thái ngay trước khi trừ máu của nhịp đó\nHai bên cùng đủ điều kiện ra đòn thì vẫn hạ được nhau; hero đang gục hay đang hiện hình khi hồi sinh không bị trúng."
+  },
+  "same-tick-sum": {
+   "hash": "fb41215dbc8e",
+   "text": "Sát thương của các đòn hợp lệ cùng nhịp cộng thành một khoản cho mỗi bên trúng\nHero và thành cùng đánh một con quái thì quái nhận tổng một lần."
+  },
+  "owner-applies-hp": {
+   "hash": "c2429e2040e0",
+   "text": "Máu hiện tại của hero, quái và thành chỉ do feature sở hữu bên đó cập nhật"
+  },
+  "owner-reports-zero": {
+   "hash": "36a0e7778a44",
+   "text": "Feature sở hữu bên hết máu báo đúng một lần khi bên đó gục, bị hạ hoặc bị phá\nHai đòn chí tử cùng nhịp chỉ tạo một lần báo."
+  },
+  "report-after-hp": {
+   "hash": "c3cfc4a6da01",
+   "text": "Kết quả của một nhịp chỉ được báo sau khi mọi bên trúng đã trừ máu xong\nChốt lượt hay đợt dựa trên trạng thái đã cập nhật đủ."
+  },
+  "shared-target-word": {
+   "hash": "4ec1acdaf40f",
+   "text": "Mục tiêu là hero, quái hoặc thành mà đối phương đang nhắm để đánh\nDùng chung một từ cho quái nhắm hero, thành và hero nhắm quái."
   }
  }
 }

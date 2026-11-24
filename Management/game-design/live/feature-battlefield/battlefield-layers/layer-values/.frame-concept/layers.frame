@@ -1,0 +1,35 @@
+kind: field
+title: Các lớp nền chiến trường (khung phủ tới màn 21:9)
+view: x=-21u..21u y=-4u..14u
+let cover-left = -21u
+let cover-w = 42u
+let sky-h = 14u
+let far-h = 2.5u
+let ground-y = -4u
+let ground-h = 4u
+let grass-w = 0.8u
+let stone-w = 0.6u
+let decor-h = 0.3u
+use castle-left = feature-castle/castle-core/castle-body-values#castle-left
+use castle-w = feature-castle/castle-core/castle-body-values#castle-w
+use castle-h = feature-castle/castle-core/castle-body-values#castle-h
+use screen-left = feature-castle/castle-core/castle-body-values#screen-left
+use screen-right = feature-castle/castle-core/castle-body-values#screen-right
+- sky      rect  x=cover-left y=0 w=cover-w h=sky-h label="Trời"
+- far      rect  x=cover-left y=0 w=cover-w h=far-h overlap label="Cảnh xa (đồi, núi, rừng)"
+- ground   rect  x=cover-left y=ground-y w=cover-w h=ground-h label="Dải đất"
+- castle   rect  x=castle-left y=0 w=castle-w h=castle-h overlap label="Thành (của feature-castle)"
+- grass-l1 rect  x=-4.4u y=0 w=grass-w h=decor-h overlap label="Cỏ"
+- stone-l1 rect  x=-6.8u y=0 w=stone-w h=decor-h overlap label="Đá"
+- grass-l2 rect  x=-9.4u y=0 w=grass-w h=decor-h overlap label="Cỏ"
+- stone-l2 rect  x=-11.8u y=0 w=stone-w h=decor-h overlap label="Đá"
+- grass-l3 rect  x=-14.4u y=0 w=grass-w h=decor-h overlap label="Cỏ"
+- grass-r1 rect  x=3.6u y=0 w=grass-w h=decor-h overlap label="Cỏ"
+- stone-r1 rect  x=6.2u y=0 w=stone-w h=decor-h overlap label="Đá"
+- grass-r2 rect  x=8.6u y=0 w=grass-w h=decor-h overlap label="Cỏ"
+- stone-r2 rect  x=11.2u y=0 w=stone-w h=decor-h overlap label="Đá"
+- grass-r3 rect  x=13.6u y=0 w=grass-w h=decor-h overlap label="Cỏ"
+- scr-l    line  from=screen-left,-4u to=screen-left,14u overlap label="mép màn trái ở 16:9"
+- scr-r    line  from=screen-right,-4u to=screen-right,14u overlap label="mép màn phải ở 16:9"
+- hud-top  line  from=-21u,11.7u to=21u,11.7u overlap label="mép dưới dải HUD trên (px 140)"
+- hud-bot  line  from=-21u,-1.3u to=21u,-1.3u overlap label="mép trên thanh nâng cấp (px 920)"

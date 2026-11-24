@@ -3,3 +3,8 @@
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "27ce83b88e6d"}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "27ce83b88e6d"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "27ce83b88e6d"}
+{"at": "2026-11-24 22:43:49", "event": "data", "hash": "924311121b2f", "previous": "27ce83b88e6d", "added": ["pause-run-ownership"], "removed": [], "rewritten": [{"id": "pause-freeze", "old": "Khi popup tạm dừng mở, trận đứng yên hoàn toàn", "new": "Tạm dừng giữ nguyên trạng thái trận cho tới khi người chơi tiếp tục hoặc bỏ lượt\nRời mắt rồi quay lại vẫn đúng thế trận lúc bấm dừng; popup vẫn nhận lựa chọn."}]}
+{"at": "2026-11-24 23:39:13", "event": "review", "table": "idea", "item": "pause-actions", "text": "Popup tạm dừng cho tiếp tục trận hoặc bỏ lượt về màn bắt đầu\nBỏ lượt thì không tính kỉ lục cho đợt đang đánh dở.", "ai": 7, "score": 2, "feedback": "", "rejected": true}
+{"at": "2026-11-24 23:39:13", "event": "review", "table": "idea", "item": "pause-run-ownership", "text": "Popup chuyển lựa chọn tiếp tục hoặc bỏ lượt cho `feature-run` xử lí\nPopup là nơi người chơi chọn; kết thúc lượt, tính điểm và xét kỉ lục thuộc `feature-run`.", "ai": 7, "score": 8, "feedback": "", "rejected": false}
+{"at": "2026-11-24 23:43:16", "event": "data", "hash": "aebbf6890808", "previous": "924311121b2f", "added": [], "removed": [{"id": "pause-actions", "text": "Popup tạm dừng cho tiếp tục trận hoặc bỏ lượt về màn bắt đầu\nBỏ lượt thì không tính kỉ lục cho đợt đang đánh dở."}], "rewritten": []}
+{"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "aebbf6890808"}

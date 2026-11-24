@@ -23,6 +23,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Chỉ nhớ trong lúc game mở.** Giữ đúng quyết định chung "kỉ lục là thứ duy nhất giữ qua khi tắt game". Đã loại: lưu đội vào máy.
 - **Cập nhật lúc vào trận, không cập nhật lúc chọn dở.** Đội được nhớ luôn là một đội đủ đã từng đánh.
 - **Màn chọn đội không có nút quay lại màn bắt đầu.** Luồng ở `feature-run/run-flow` chỉ đi tới trận. Đã loại: nút quay lại (thêm một đường chuyển màn không cần cho vòng lặp).
+  **Lệch đã ghi (2026-11-25):** `feature-game-flow` (vòng 2, ý `back-from-team`) thêm nút "Quay lại" từ PROTOTYPE, không đổi đội được nhớ. Khi vào PROTOTYPE sẽ sửa quyết định này và frame của nhánh chỗ trong đội.
 
 ## Chưa rõ
 - Mở game lần đầu, chưa có đội được nhớ, thì các chỗ trống hay xếp sẵn một đội: vòng 4.

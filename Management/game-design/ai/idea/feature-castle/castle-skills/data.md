@@ -1,6 +1,6 @@
 ---
-based-on: 24fd307bbdcd
-refs: feature-castle/castle-core@e1440a2a0de0, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-castle/castle-attack@639d373f52f2, feature-enemy/enemy-reward@1fbbced31e0f, glossary#castle-skill@1c6e2774b71d, glossary#castle-zone@dbff38bfeb23
+based-on: 7100f997d2a8
+refs: feature-castle/castle-core@54dc235e583a, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-castle/castle-attack@639d373f52f2, feature-enemy/enemy-reward@1fbbced31e0f, glossary#castle-skill@1c6e2774b71d, glossary#castle-zone@dbff38bfeb23
 ---
 # Kĩ năng thành
 

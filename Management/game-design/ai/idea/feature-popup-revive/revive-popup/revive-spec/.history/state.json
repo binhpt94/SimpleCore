@@ -1,0 +1,33 @@
+{
+ "hash": "d5baa8be95f9",
+ "items": {
+  "title-text": {
+   "hash": "455333fb241a",
+   "text": "Tiêu đề là \"Thành đã bị phá\"\nGiống tiêu đề popup thua: người chơi biết ngay chuyện gì vừa xảy ra."
+  },
+  "gain-text": {
+   "hash": "ee510edeab7d",
+   "text": "Dòng hồi sinh ghi \"Xem quảng cáo để thành hồi 30% máu và chơi tiếp\"\nSố 30% lấy từ nhánh thân thành; đổi số ở đó thì sửa chữ ở đây."
+  },
+  "watch-button": {
+   "hash": "ff04831806cd",
+   "text": "Nút chính \"Xem quảng cáo\" rộng 400 px; nút \"Kết thúc lượt\" rộng 260 px; cùng hàng y=540 trong khung\nCùng chỗ với hai nút của popup thua nên tay người chơi quen vị trí."
+  },
+  "wait-state": {
+   "hash": "01762b318848",
+   "text": "Chờ quảng cáo: hiện dòng \"Đang chờ quảng cáo...\" ở y=340 trong khung, hai nút mờ và không nhận chạm\nHết chờ (có kết quả) thì popup đóng ngay, không quay về trạng thái chờ chọn."
+  },
+  "one-tap-each": {
+   "hash": "1be99b7e5dbb",
+   "text": "Mỗi lần popup mở, chỉ lần chạm nút đầu tiên có tác dụng\nChạm \"Xem quảng cáo\" sang trạng thái chờ; chạm \"Kết thúc lượt\" đóng popup."
+  },
+  "back-key-nothing": {
+   "hash": "a9d058b47302",
+   "text": "Nút quay lại của máy không làm gì khi popup hồi sinh mở\nKhông có lối thoát thứ ba; tránh thua vì bấm nhầm."
+  },
+  "popup-id": {
+   "hash": "bb5977f9855e",
+   "text": "Id popup là `PopupRevive/Main`, hiện qua dịch vụ popup"
+  }
+ }
+}

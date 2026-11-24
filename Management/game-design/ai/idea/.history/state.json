@@ -1,5 +1,5 @@
 {
- "hash": "07ccc86d3b9f",
+ "hash": "53af9956f851",
  "items": {
   "target-player": {
    "hash": "27c4f0c553f0",
@@ -48,6 +48,10 @@
   "lose-condition": {
    "hash": "6564b55b86f1",
    "text": "Thua khi thành bị phá"
+  },
+  "ad-revive": {
+   "hash": "4cb8fecd1ccb",
+   "text": "Thành bị phá lần đầu trong lượt thì người chơi được chọn xem quảng cáo để hồi sinh thành và chơi tiếp\nMỗi lượt một lần; thành hồi sinh với một phần máu, quái và đợt giữ nguyên. Không xem thì thua như thường. Người yêu cầu (2026-11-24)."
   },
   "castle-damage-carries": {
    "hash": "0ba827481b84",

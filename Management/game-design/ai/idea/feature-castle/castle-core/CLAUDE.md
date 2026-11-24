@@ -18,7 +18,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Vào trận: thành có đầy máu.
 - Quái đánh thành thì máu thành giảm theo sức đánh của quái.
 - Máu thành không tự tăng. Chỉ nâng cấp máu (`feature-castle/castle-upgrade-effects`) làm máu tăng.
-- Máu về 0: thành bị phá, báo `feature-run`, lượt thua.
+- Máu về 0: thành bị phá, báo `feature-run`; `feature-run` đề nghị hồi sinh (lần đầu trong lượt) hoặc báo thua.
+- Hồi sinh: thành đứng lại với một phần máu tối đa (mức cụ thể ở vòng 4); máu tối đa, cấp giữ nguyên.
 - Hero và đòn của chính thành không trừ máu thành.
 - Hero xuất phát từ thành khi vào trận và hồi sinh tại thành (`feature-hero/hero-respawn`).
 - Phạt: để quái lọt tới thành là mất máu vĩnh viễn trong lượt.

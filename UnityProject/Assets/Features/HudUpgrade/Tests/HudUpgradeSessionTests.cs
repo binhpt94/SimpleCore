@@ -11,6 +11,7 @@ namespace Game.HudUpgrade.Tests
     public sealed class HudUpgradeSessionTests
     {
         private const string InstallerPath = "Assets/Features/HudUpgrade/FeatureAssets/Public/HudUpgradeInstaller.asset";
+        private const string ConfigPath = "Assets/Features/HudUpgrade/FeatureAssets/Private/HudUpgradeConfig.asset";
 
         [Test]
         public void Bar_opens_when_session_runs_and_is_removed_when_session_ends()
@@ -94,11 +95,11 @@ namespace Game.HudUpgrade.Tests
         {
             var wallet = new FakeWallet { Coins = 50 };
             var shop = new FakeShop(wallet);
-            shop.SetTeam("knight", "archer", "mage");
+            shop.SetTeam("knight", "axeman", "archer");
             var run = new FakeRun();
             var views = new FakeViewFactory();
             var cheat = new HudUpgradeParticipant.CheatSetup(HudUpgradeCheatState.MixedButtons, 120,
-                new[] { 3, 1, 5, 2, 4, 3 }, wallet, wallet, wallet);
+                new[] { 3, 5, 1, 2, 4, 3 }, wallet, wallet, wallet, new[] { "knight", "axeman", "archer" });
             var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views, cheat);
 
             participant.Run();
@@ -107,13 +108,49 @@ namespace Game.HudUpgrade.Tests
             Assert.AreEqual(120, wallet.Coins);
             var levels = new int[6];
             for (var i = 0; i < 6; i++) levels[i] = shop.Get(i).Level;
-            CollectionAssert.AreEqual(new[] { 3, 1, 5, 2, 4, 3 }, levels);
+            CollectionAssert.AreEqual(new[] { 3, 5, 1, 2, 4, 3 }, levels);
             // FakeShop has its own simple prices; with the real price table the skill button (135) is the dim one.
             // Here: lit/dim follows the shop's CanBuy after the cheat.
             for (var i = 0; i < 6; i++) Assert.AreEqual(shop.Get(i).CanBuy, views.View.Looks[i].Lit);
 
             participant.DisposeAsync().GetAwaiter().GetResult();
             Assert.AreEqual(0, run.BattleStartedListeners);
+        }
+
+        [Test]
+        public void Mixed_buttons_cheat_accepts_the_knight_axeman_archer_team()
+        {
+            var wallet = new FakeWallet();
+            var shop = new FakeShop(wallet);
+            shop.SetTeam("knight", "axeman", "archer");
+            var cheat = new UpgradeBarCheat(shop, wallet, wallet, wallet);
+
+            Assert.IsNull(cheat.FindTeamMismatch(new[] { "knight", "axeman", "archer" }));
+        }
+
+        [Test]
+        public void Config_asset_holds_the_mixed_buttons_state_of_the_design()
+        {
+            var config = AssetDatabase.LoadAssetAtPath<HudUpgradeConfig>(ConfigPath);
+            Assert.IsNotNull(config, "missing " + ConfigPath);
+
+            Assert.AreEqual(120, config.MixedButtonsCoins);
+            CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, config.MixedButtonsTeam);
+            CollectionAssert.AreEqual(new[] { 3, 5, 1, 2, 4, 3 }, config.MixedButtonsLevels);
+        }
+
+        [Test]
+        public void Mixed_buttons_cheat_names_both_teams_when_another_team_was_picked()
+        {
+            var wallet = new FakeWallet();
+            var shop = new FakeShop(wallet);
+            shop.SetTeam("knight", "archer", "mage");
+            var cheat = new UpgradeBarCheat(shop, wallet, wallet, wallet);
+
+            var message = cheat.FindTeamMismatch(new[] { "knight", "axeman", "archer" });
+
+            StringAssert.Contains("knight, archer, mage", message);
+            StringAssert.Contains("knight, axeman, archer", message);
         }
 
         [Test]

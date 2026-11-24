@@ -1,9 +1,9 @@
 {
- "hash": "43be0f08eadd",
+ "hash": "2f0485d8eda5",
  "items": {
   "session-lifecycle": {
-   "hash": "9da410213ac4",
-   "text": "Mỗi scene đi qua ba bước: tải, chạy, huỷ"
+   "hash": "b796a901cec9",
+   "text": "Điều phối việc chuẩn bị, chạy và kết thúc phần của các feature gắn với một scene\nBa bước: tải, chạy, huỷ. Chuyển giữa các scene là việc của `feature-scene-flow`."
   },
   "session-clean": {
    "hash": "52aade670657",

@@ -44,3 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00fed8c328e979e4081439643a0c35ce, type: 3}
   m_Name:
   m_EditorClassIdentifier:
+  castleSprite: {fileID: 21300000, guid: fd20f182da6695941aa6455955022b94, type: 3}
+  shotSprite: {fileID: 21300000, guid: 9d510c2247940144793ada8d77645bbe, type: 3}
+  thunderSprite: {fileID: 21300000, guid: 6e3ef11aeb4ae54409d4b6d08c3d9428, type: 3}

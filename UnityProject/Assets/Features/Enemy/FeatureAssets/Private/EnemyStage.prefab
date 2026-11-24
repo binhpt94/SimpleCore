@@ -46,19 +46,19 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   _looks:
   - Type: 0
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: 2895595838965e747b43045ff381833a, type: 3}
     BoxColor: {r: 0.8, g: 0.35, b: 0.25, a: 1}
   - Type: 1
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: 8ad557321db5e5849a7c8e19b33ba8f1, type: 3}
     BoxColor: {r: 0.55, g: 0.55, b: 0.6, a: 1}
   - Type: 2
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: a76519f7ac1ee1f4d8f8b67ea36ff68a, type: 3}
     BoxColor: {r: 0.35, g: 0.6, b: 0.3, a: 1}
   - Type: 3
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: 0b49a7a728a40384eb4f5407dcc6a265, type: 3}
     BoxColor: {r: 0.6, g: 0.35, b: 0.75, a: 1}
   - Type: 4
-    Sprite: {fileID: 0}
+    Sprite: {fileID: 21300000, guid: 92eed772145258742b56a14216dd58d9, type: 3}
     BoxColor: {r: 0.45, g: 0.1, b: 0.15, a: 1}
   _flashColor: {r: 1, g: 0.35, b: 0.35, a: 1}
   _slowTint: {r: 0.6, g: 0.8, b: 1, a: 1}

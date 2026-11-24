@@ -177,6 +177,77 @@ namespace Game.Wave.Tests
         }
 
         [Test]
+        public void CheatMidWave_StartsTheChosenWaveAtOnce_WithoutRewardOrScore()
+        {
+            _run.StartBattle();
+            _director.Tick(2.5f);
+            _log.Clear();
+
+            _director.StartWave(7);
+
+            Assert.That(_log, Is.EqualTo(new[] { "current 7", "started 7" }));
+            Assert.That(_director.CurrentWave, Is.EqualTo(7));
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(4), "3 of wave 1, then the first of wave 7 at once");
+            Assert.That(_enemies.Spawned[3].StatScale, Is.EqualTo(1.6f).Within(1e-4));
+        }
+
+        [Test]
+        public void CheatMidWave_EnemiesLeftOnTheField_MustFallBeforeTheNewWaveClears()
+        {
+            _run.StartBattle();
+            _director.Tick(2.5f);
+            var leftOver = _enemies.AliveCount;
+            _director.StartWave(2);
+            _director.Tick(20f);
+            var sentInWaveTwo = _enemies.Spawned.Count - leftOver;
+
+            _enemies.Defeat(sentInWaveTwo);
+            _director.Tick(0.01f);
+            Assert.That(_log, Has.No.Member("cleared 2"), "the left-over enemies are still on the field");
+
+            _enemies.Defeat(leftOver);
+            _director.Tick(0.01f);
+            Assert.That(_log, Has.Member("cleared 2"));
+            Assert.That(_log, Has.Member("coins 30"));
+            Assert.That(_log, Has.No.Member("cleared 1"));
+        }
+
+        [Test]
+        public void CheatDuringTheBreak_StartsTheChosenWaveAtOnce_AndEndsTheBreak()
+        {
+            _run.StartBattle();
+            ClearWaveOne();
+            _director.Tick(1f);
+            var before = _enemies.Spawned.Count;
+            _log.Clear();
+
+            _director.StartWave(5);
+            _director.Tick(3f);
+
+            Assert.That(_log, Is.EqualTo(new[] { "current 5", "started 5" }));
+            Assert.That(_director.InBreak, Is.False);
+            Assert.That(_enemies.Spawned.Count, Is.GreaterThan(before));
+        }
+
+        [Test]
+        public void CheatOutsideARunningBattle_DoesNothing()
+        {
+            _director.StartWave(3);
+            Assert.That(_enemies.Spawned, Is.Empty);
+            Assert.That(_log, Is.Empty);
+
+            _run.StartBattle();
+            _run.StopBattle();
+            var sent = _enemies.Spawned.Count;
+            _log.Clear();
+
+            _director.StartWave(3);
+
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(sent));
+            Assert.That(_log, Is.Empty);
+        }
+
+        [Test]
         public void NewRun_StartsAgainFromWaveOne()
         {
             _run.StartBattle();

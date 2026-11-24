@@ -3,3 +3,8 @@
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "43be0f08eadd"}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "43be0f08eadd"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "43be0f08eadd"}
+{"at": "2026-11-24 22:44:58", "event": "data", "hash": "ab015c62a7ce", "previous": "43be0f08eadd", "added": ["cleanup-scope"], "removed": [], "rewritten": [{"id": "session-lifecycle", "old": "Mỗi scene đi qua ba bước: tải, chạy, huỷ", "new": "Điều phối việc chuẩn bị, chạy và kết thúc phần của các feature gắn với một scene\nBa bước: tải, chạy, huỷ. Chuyển giữa các scene là việc của `feature-scene-flow`."}]}
+{"at": "2026-11-24 23:35:24", "event": "review", "table": "idea", "item": "session-clean", "text": "Rời scene thì mọi thứ của scene đó được dọn sạch, lượt sau bắt đầu sạch sẽ\nKhớp với việc mỗi lượt chơi bắt đầu lại từ đầu (vòng 1).", "ai": 7, "score": 8, "feedback": "", "rejected": false}
+{"at": "2026-11-24 23:35:24", "event": "review", "table": "idea", "item": "cleanup-scope", "text": "Rời scene thì chỉ dọn trạng thái và tài nguyên thuộc riêng scene vừa rời\nDữ liệu đi qua các màn trong cùng lượt (như đội đã chọn) do `feature-run` giữ và đặt lại khi lượt mới bắt đầu.", "ai": 7, "score": 2, "feedback": "", "rejected": true}
+{"at": "2026-11-24 23:43:16", "event": "data", "hash": "2f0485d8eda5", "previous": "ab015c62a7ce", "added": [], "removed": [{"id": "cleanup-scope", "text": "Rời scene thì chỉ dọn trạng thái và tài nguyên thuộc riêng scene vừa rời\nDữ liệu đi qua các màn trong cùng lượt (như đội đã chọn) do `feature-run` giữ và đặt lại khi lượt mới bắt đầu."}], "rewritten": []}
+{"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "2f0485d8eda5"}

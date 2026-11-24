@@ -1,0 +1,2 @@
+{"at": "2026-11-25 01:06:46", "event": "data", "hash": "5c2132462329", "previous": "", "added": ["layers-four", "sky-above-ground", "far-on-horizon", "ground-below-line", "layers-full-width", "decor-two-sides", "draw-order", "layers-static"], "removed": [], "rewritten": []}
+{"at": "2026-11-25 01:10:39", "event": "promote", "by": "người", "hash": "5c2132462329"}

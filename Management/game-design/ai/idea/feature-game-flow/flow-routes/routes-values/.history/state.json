@@ -1,0 +1,29 @@
+{
+ "hash": "66f0417d12da",
+ "items": {
+  "switch-instant": {
+   "hash": "26720a874124",
+   "text": "Đổi giữa hai màn chính là tức thì: màn cũ ẩn và màn mới hiện trong cùng một khung hình\nRiêng vào trận: màn chọn đội ở lại tới khi trận dựng xong rồi mới đổi."
+  },
+  "lock-until-shown": {
+   "hash": "a2f3955cb048",
+   "text": "Khoá yêu cầu đổi màn từ lúc nhận yêu cầu tới khung hình màn đích hiện\nYêu cầu tới trong lúc khoá bị bỏ, ghi cảnh báo."
+  },
+  "build-limit": {
+   "hash": "76514b7a2ba9",
+   "text": "Dựng trận quá 3 giây (dự kiến) hoặc báo lỗi thì ở lại màn chọn đội, hiện dòng \"Không vào được trận, thử lại\" và mở lại nút \"Vào trận\"\nĐội vừa xác nhận vẫn trong các chỗ; đội được nhớ chưa đổi."
+  },
+  "back-button": {
+   "hash": "93320692bad1",
+   "text": "Màn chọn đội có nút \"Quay lại\" ở góc trên trái, cạnh tối thiểu 120 px; chạm thì về màn bắt đầu\nĐội được nhớ không đổi; các chỗ đang chọn dở bị bỏ."
+  },
+  "home-first-once": {
+   "hash": "7fad34e0d2af",
+   "text": "Mỗi lần scene Game sẵn sàng, màn bắt đầu hiện đúng một lần; báo sẵn sàng lặp lại bị bỏ"
+  },
+  "back-key-map": {
+   "hash": "4fc6dba6549c",
+   "text": "Nút quay lại của máy: ở màn chọn đội như \"Quay lại\"; ở màn bắt đầu không làm gì\nTrong màn trận giữ luật của `feature-run` (như bấm tạm dừng)."
+  }
+ }
+}

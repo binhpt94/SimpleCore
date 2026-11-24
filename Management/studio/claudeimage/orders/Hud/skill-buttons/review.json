@@ -1,0 +1,20 @@
+{
+ "skill-thunder": {
+  "level": 3,
+  "text": "Dat: dung 140, tia set ro, nam nua tren",
+  "version": 1,
+  "at": "2026-11-24 16:24:39"
+ },
+ "skill-frost": {
+  "level": 3,
+  "text": "Dat: cung khung, bong tuyet doc ro",
+  "version": 1,
+  "at": "2026-11-24 16:24:48"
+ },
+ "skill-rally": {
+  "level": 3,
+  "text": "Dat: cung khung, co do doc ro",
+  "version": 1,
+  "at": "2026-11-24 16:24:49"
+ }
+}

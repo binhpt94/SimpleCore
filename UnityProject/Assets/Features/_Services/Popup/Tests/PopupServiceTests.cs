@@ -143,9 +143,22 @@ namespace Game.Services.Popup.Tests
         }
 
         [Test]
-        public void Show_IdTheSceneDoesNotHave_FailsAndShowsNothing()
+        public void Show_IdTheSceneDoesNotHave_ShowsNothingAndLogsAnErrorNamingTheId()
         {
-            Assert.Throws<InvalidOperationException>(() => service.Show(new PopupId("Test/Missing")));
+            var open = service.Show(IdA);
+
+            var missing = service.Show(new PopupId("Test/Missing"));
+
+            Assert.That(missing.IsValid, Is.False);
+            Assert.That(presenter.Open, Has.Count.EqualTo(1));
+            Assert.That(service.IsOnTop(open), Is.True);
+            Assert.That(log.Errors, Has.Count.EqualTo(1).And.Some.Contains("Test/Missing"));
+        }
+
+        [Test]
+        public void Show_DefaultId_IsAProgrammingErrorAndThrows()
+        {
+            Assert.Throws<ArgumentException>(() => service.Show(default));
             Assert.That(presenter.Open, Is.Empty);
         }
 
@@ -217,14 +230,14 @@ namespace Game.Services.Popup.Tests
         // ---- catalog
 
         [Test]
-        public void CatalogPrefabs_DefaultOrUnknownId_FailsNamingIdAndCatalog()
+        public void CatalogPrefabs_FindsListedIds_AndNotUnknownOrDefaultOnes()
         {
             var lookup = new CatalogPopupPrefabs(Catalog("GamePopups", ("Test/A", prefabs[IdA])));
 
-            Assert.That(lookup.Get(IdA), Is.SameAs(prefabs[IdA]));
-            Assert.Throws<ArgumentException>(() => lookup.Get(default));
-            var error = Assert.Throws<InvalidOperationException>(() => lookup.Get(IdB));
-            Assert.That(error.Message, Does.Contain("Test/B").And.Contain("GamePopups"));
+            Assert.That(lookup.TryGet(IdA, out var found), Is.True);
+            Assert.That(found, Is.SameAs(prefabs[IdA]));
+            Assert.That(lookup.TryGet(IdB, out _), Is.False);
+            Assert.That(lookup.TryGet(default, out _), Is.False);
         }
 
         [Test]
@@ -348,11 +361,7 @@ namespace Game.Services.Popup.Tests
 
             public void Prepare() => Prepared = true;
 
-            public GameObject Get(PopupId id)
-            {
-                if (TryGetValue(id, out var prefab)) return prefab;
-                throw new InvalidOperationException($"no prefab for {id}");
-            }
+            public bool TryGet(PopupId id, out GameObject prefab) => TryGetValue(id, out prefab);
         }
 
         /// <summary>Clones the prefab so the test can look for components on the "instance".</summary>

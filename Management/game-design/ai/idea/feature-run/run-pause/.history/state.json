@@ -1,5 +1,5 @@
 {
- "hash": "f8e9d49f5079",
+ "hash": "331cbd30e30e",
  "items": {
   "pause-states": {
    "hash": "683a9d9a6ef0",
@@ -12,6 +12,10 @@
   "pause-no-actions": {
    "hash": "f33c097c1409",
    "text": "Lúc tạm dừng không mua nâng cấp và không bấm kĩ năng được\nGiữ áp lực quyết định ngay giữa trận. Đã loại: dừng để mua thoải mái (gần với \"chỉ nâng cấp giữa hai đợt\" người đã loại ở vòng 1)."
+  },
+  "pause-not-during-revive": {
+   "hash": "aae55bf6b978",
+   "text": "Lúc chờ hồi sinh trận đứng yên nhưng không phải tạm dừng; không mở được popup tạm dừng\nPopup hồi sinh che nút tạm dừng; rời game lúc đó thì quay lại vẫn ở popup hồi sinh."
   },
   "pause-on-leave": {
    "hash": "e0cda021c136",

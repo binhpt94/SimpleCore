@@ -1,0 +1,37 @@
+{
+ "hash": "a2ebbbaf3ca9",
+ "items": {
+  "hit-record": {
+   "hash": "1cc66d29e703",
+   "text": "Một đòn trúng gồm: bên ra đòn, bên trúng, sát thương đã chốt lúc ra đòn\nBên ra đòn tự chọn ai trúng (một con hay nhiều con) theo luật đòn của mình."
+  },
+  "what-is-a-hit": {
+   "hash": "0e9aa5be0410",
+   "text": "Đòn tự đánh của hero, quái, thành và kĩ năng gây sát thương (Sấm sét) đều là đòn trúng\nBăng giá và Cổ vũ không gây sát thương nên không đi qua giao chiến."
+  },
+  "tick-gather": {
+   "hash": "9c565045cefa",
+   "text": "Mọi đòn trúng trong cùng một bước cập nhật của trận được gom chung một nhịp"
+  },
+  "tick-filter": {
+   "hash": "82187fa7bb70",
+   "text": "Đòn vào bên đã gục, đang hiện hình khi hồi sinh, đã bị hạ hay đã bị phá ở đầu nhịp thì bị bỏ"
+  },
+  "tick-sum": {
+   "hash": "818eb0166b5a",
+   "text": "Các đòn còn lại được cộng thành một tổng cho từng bên trúng"
+  },
+  "owner-applies": {
+   "hash": "8f16604e1284",
+   "text": "Feature sở hữu bên trúng trừ máu một lần theo tổng, rồi tự báo gục, bị hạ hay bị phá đúng một lần\nHero, quái, thành mỗi bên lo máu của mình."
+  },
+  "tick-done": {
+   "hash": "d4af67c9a224",
+   "text": "Khi mọi bên đã trừ máu và báo xong, giao chiến báo nhịp đã xong\nĐợt quái xét dọn sạch, lượt chơi xét thành bị phá sau tin này; thành bị phá xét trước dọn sạch."
+  },
+  "no-extra-stats": {
+   "hash": "edf8dac498ee",
+   "text": "Giao chiến không có giáp, né, chí mạng; sát thương nhận đúng bằng tổng đã cộng"
+  }
+ }
+}

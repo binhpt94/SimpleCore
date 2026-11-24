@@ -262,6 +262,40 @@ namespace Game.SceneFlow.Tests
         }
 
         [Test]
+        public void CheatLoadError_ShowsTheLoadingScreenStoppedAt40Percent_WithTheErrorNamingWallet()
+        {
+            var cheat = new LoadErrorCheat(screens,
+                new SceneFlowSettings("Loading", "Game", FailedMessage, "Lỗi tải: {0}", TimeSpan.FromSeconds(1)));
+
+            cheat.Run();
+
+            Assert.That(screens.Screen.Progress, Is.EqualTo(0.4f));
+            Assert.That(screens.Screen.Error, Is.EqualTo("Lỗi tải: Wallet"));
+            Assert.That(log, Is.EqualTo(new[] { "screen shown" }), "the cheat must not load the Game scene");
+        }
+
+        [Test]
+        public void CheatLoadError_ClosesItsScreen_WhenTheLoadingSessionEnds()
+        {
+            var cheat = new LoadErrorCheat(screens,
+                new SceneFlowSettings("Loading", "Game", FailedMessage, "Lỗi tải: {0}", TimeSpan.FromSeconds(1)));
+            cheat.Run();
+
+            cheat.DisposeAsync().Forget();
+
+            Assert.That(screens.Screen.Closed, Is.True);
+        }
+
+        [Test]
+        public void LoadingInstallerAsset_RunsTheRealFlow_NotACheatState()
+        {
+            // The shared asset must not ship with a cheat switched on: Play would stop on the error screen.
+            var installer = new SerializedObject(LoadInstaller("SceneFlowLoadingInstaller"));
+
+            Assert.That(installer.FindProperty("cheat").intValue, Is.EqualTo((int)SceneFlowCheatState.None));
+        }
+
+        [Test]
         public void LoadingScreenPrefab_WhenAnErrorIsShown_KeepsTheGameNameAndBar_AndShowsTheError()
         {
             var instance = InstantiateLoadingScreen();

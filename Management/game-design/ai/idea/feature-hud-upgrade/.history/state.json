@@ -1,13 +1,21 @@
 {
- "hash": "cdb98c5c2b2c",
+ "hash": "72f1cb81f16b",
  "items": {
   "upgrade-bar-always": {
    "hash": "d4291adc7112",
    "text": "Thanh nút nâng cấp luôn hiện trên màn hình trận, một chạm là mua\nĐã loại: bảng nâng cấp bật lên (che trận, phải dừng)."
   },
+  "hien-doi-tuong-nang-cap": {
+   "hash": "5d90ba3d1f62",
+   "text": "Mỗi nút cho biết nó nâng thành hay nâng hero nào trong đội\nGiữa lúc giao tranh người chơi phải nhận ra ngay nút dành cho ai trước khi chạm."
+  },
+  "hien-gia-nang-cap": {
+   "hash": "263e443a210a",
+   "text": "Mỗi nút cho biết giá của lần nâng cấp kế tiếp\nBiết giá thì cân nhắc được mua ngay hay để tiền cho mục khác."
+  },
   "upgrade-bar-state": {
-   "hash": "b55cb7cc68c1",
-   "text": "Mỗi nút cho thấy mua được hay chưa và đang nâng tới đâu"
+   "hash": "a581fa548a4a",
+   "text": "Mỗi nút cho thấy mua được hay chưa, và cấp mà mục đó đã đạt trong lượt\nHiện cấp đã đạt, không phải cấp sắp mua, để người chơi thấy mình đã đầu tư vào thành và từng hero tới đâu."
   },
   "upgrade-bar-edge": {
    "hash": "651d0280d25b",

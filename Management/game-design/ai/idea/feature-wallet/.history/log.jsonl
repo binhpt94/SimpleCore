@@ -6,3 +6,6 @@
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "5ba24132c4d3"}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "5ba24132c4d3"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "5ba24132c4d3"}
+{"at": "2026-11-24 22:44:58", "event": "data", "hash": "ac0d5a47d6da", "previous": "5ba24132c4d3", "added": ["wallet-balance"], "removed": [], "rewritten": [{"id": "run-scoped", "old": "Tiền chỉ dùng trong một lượt, lượt mới bắt đầu lại", "new": "Mỗi lượt có số dư riêng, dùng chung qua các đợt trong lượt; lượt mới bắt đầu lại\nĐể dành tiền từ đợt trước để nâng cấp khi bị dồn ép ở đợt sau được."}]}
+{"at": "2026-11-24 22:56:39", "event": "data", "hash": "78eabd30bbbe", "previous": "ac0d5a47d6da", "added": ["wallet-records-rewards"], "removed": [], "rewritten": []}
+{"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "78eabd30bbbe"}

@@ -36,6 +36,9 @@ namespace Game.Castle
             registry.Register<ICastle>(body);
             registry.Register<ICastleSkills>(skills);
             registry.Register<ICastleUpgrades>(upgrades);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            registry.Register<ICastleCheat>(new CastleCheat(body, skills));
+#endif
 
             enemyField.AddFoes(body);
             session.Join(new CastleSession(

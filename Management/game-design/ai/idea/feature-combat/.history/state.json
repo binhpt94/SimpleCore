@@ -1,0 +1,49 @@
+{
+ "hash": "728b65c526fa",
+ "items": {
+  "combat-own-code": {
+   "hash": "15fd1b54bba1",
+   "text": "Giao chiến có code riêng, điều phối việc nhận đòn, phân xử và chốt từng nhịp\nGiữ thứ tự xử lí chung giữa hero, quái và thành, để hai đòn kết liễu cùng nhịp đều có hiệu lực."
+  },
+  "combat-every-hit": {
+   "hash": "beb0f321e707",
+   "text": "Mọi đòn trúng đều đi qua giao chiến, kể cả khi nhịp chỉ có một đòn\nCùng một đường cho đòn tự đánh và kĩ năng gây sát thương; quái vẫn tự cập nhật máu."
+  },
+  "combat-same-moment": {
+   "hash": "579a24bc89ad",
+   "text": "Các đòn trúng trong cùng một bước của trận được phân xử chung\nMỗi đòn thuộc bước mà nó trúng; hero và quái cùng kết liễu nhau trong một bước thì cả hai đều hết máu."
+  },
+  "attacker-picks": {
+   "hash": "d9274dc137e2",
+   "text": "Bên ra đòn tự chọn đối tượng nhắm và xác định ai trúng theo luật của đòn\nĐòn chém nhắm một con mà trúng được nhiều con."
+  },
+  "attacker-locks-damage": {
+   "hash": "4f3c70f3ba4e",
+   "text": "Bên ra đòn chốt sát thương cho từng bên trúng theo chỉ số lúc ra đòn\nĐòn đã ra giữ mức đã chốt nếu nó trúng sau lúc người chơi vừa nâng cấp."
+  },
+  "state-before-hp": {
+   "hash": "e0450bd755a6",
+   "text": "Giao chiến xét bên nào nhận được đòn theo trạng thái ngay trước khi trừ máu của nhịp\nHero đã gục hay đang hiện hình khi hồi sinh bỏ qua đòn của nhịp đó; hero còn đánh thì nhận mọi đòn hợp lệ cùng nhịp."
+  },
+  "sum-per-target": {
+   "hash": "18463152e6c6",
+   "text": "Giao chiến cộng sát thương các đòn hợp lệ cùng nhịp thành một tổng cho từng bên trúng\nHero và thành cùng đánh một con thì quái nhận một tổng."
+  },
+  "combat-sides-own-hp": {
+   "hash": "ddafa2487568",
+   "text": "Chỉ feature sở hữu bên trúng mới cập nhật máu của bên đó, một lần theo tổng của nhịp\nGiao chiến không giữ máu hay chỉ số; nó chuyển tổng sát thương tới từng bên sở hữu."
+  },
+  "owner-reports-once": {
+   "hash": "c0294d9f50f1",
+   "text": "Feature sở hữu phát đúng một tin gục, bị hạ hoặc bị phá mỗi khi máu bên mình từ dương về 0\nHai đòn chí tử cùng nhịp tạo một tin; hero hồi sinh rồi gục lần nữa tạo tin mới."
+  },
+  "combat-report-after": {
+   "hash": "607fd7777e76",
+   "text": "Giao chiến chỉ mở bước báo kết quả sau khi mọi bên trúng đã cập nhật máu của nhịp\nThành và quái cuối cùng hết máu thì các bên nhận tin đều thấy trạng thái đã cập nhật đủ; quyền chốt thua vẫn của `feature-run`."
+  },
+  "combat-tick-done": {
+   "hash": "54af6d24df8e",
+   "text": "Giao chiến báo nhịp đã xong khi các feature sở hữu đã phát mọi tin hết máu của nhịp\nĐợt quái biết đã đủ tin bị hạ để xét dọn sạch; luật thua trước vẫn giữ."
+  }
+ }
+}

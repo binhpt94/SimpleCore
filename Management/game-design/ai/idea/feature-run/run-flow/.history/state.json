@@ -1,13 +1,17 @@
 {
- "hash": "db634f5dac0b",
+ "hash": "8db5f61d9f6e",
  "items": {
   "flow-order": {
    "hash": "9173492f94d3",
    "text": "Một lượt đi đúng một đường: màn bắt đầu, màn chọn đội, trận, popup thua\nMở game là tới màn bắt đầu (`feature-home`); bấm chơi sang màn chọn đội (`feature-team-select`); đủ đội bấm vào trận; thua thì hiện popup thua (`feature-popup-lose`). Không có lối tắt bỏ qua màn chọn đội. Đã loại: vào thẳng trận khi bấm chơi."
   },
   "flow-end-trigger": {
-   "hash": "92fc2bdb51c9",
-   "text": "Lượt kết thúc khi thành báo bị phá; lúc đó cả trận dừng lại\nChỉ `feature-castle` báo thua; feature này nhận báo, dừng trận (quái thôi tới, hero và quái thôi đánh, không mua nâng cấp, không bấm kĩ năng) rồi mới hiện popup thua. Đã loại: trận vẫn chạy phía sau popup thua."
+   "hash": "b7abf8fc00ec",
+   "text": "Lượt kết thúc khi thành bị phá mà không hồi sinh; lúc đó cả trận dừng lại\nChỉ `feature-castle` báo thành bị phá; feature này nhận báo, dừng trận (quái thôi tới, hero và quái thôi đánh, không mua nâng cấp, không bấm kĩ năng) rồi mới hiện popup thua. Đã loại: trận vẫn chạy phía sau popup thua."
+  },
+  "flow-revive-step": {
+   "hash": "e7c39548f57a",
+   "text": "Thành bị phá lần đầu trong lượt thì trận dừng và hiện popup hồi sinh trước popup thua\nXem xong quảng cáo thì trận chạy tiếp từ chỗ dừng; bỏ qua hay quảng cáo không xem được thì sang popup thua. Lần bị phá thứ hai vào thẳng popup thua (`feature-popup-revive`)."
   },
   "flow-after-lose": {
    "hash": "61357c8c9420",

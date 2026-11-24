@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: PopupInstaller
   m_EditorClassIdentifier:
   config: {fileID: 11400000, guid: 5c2e8a4f6b1d4397a0e2c4f6b8d0a1e3, type: 2}
+  cheat: 0

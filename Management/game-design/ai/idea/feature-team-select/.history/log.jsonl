@@ -3,3 +3,7 @@
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "fe94740dab29"}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "fe94740dab29"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "fe94740dab29"}
+{"at": "2026-11-24 22:44:58", "event": "data", "hash": "40435eb1a61f", "previous": "fe94740dab29", "added": [], "removed": [], "rewritten": [{"id": "team-compare", "old": "Màn chọn đội cho thấy cách đánh của từng hero để người chơi so sánh\nNgười chơi phổ thông cần biết hero nào chắn, hero nào bắn xa trước khi chọn.", "new": "Màn chọn đội hiện vai trò phòng thủ của từng hero để người chơi so sánh trước khi chọn\nVai trò cho biết hero giúp giữ thành bằng cách nào, để chọn những hero bổ trợ cho nhau."}]}
+{"at": "2026-11-24 22:56:39", "event": "data", "hash": "f88fd51d3a36", "previous": "40435eb1a61f", "added": ["team-memory-prefill"], "removed": [], "rewritten": []}
+{"at": "2026-11-24 23:10:02", "event": "data", "hash": "6da99ea96860", "previous": "f88fd51d3a36", "added": ["team-valid-before-start"], "removed": [], "rewritten": []}
+{"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "6da99ea96860"}

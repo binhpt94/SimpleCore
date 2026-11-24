@@ -1,0 +1,26 @@
+kind: ui
+title: Popup hồi sinh (đang chờ quảng cáo: có dòng chờ, hai nút khoá)
+use panel-x = feature-popup/popup-layer/stack-rules#panel-x
+use panel-y = feature-popup/popup-layer/stack-rules#panel-y
+use panel-w = feature-popup/popup-layer/stack-rules#panel-w
+use panel-h = feature-popup/popup-layer/stack-rules#panel-h
+use tap = feature-hud/hud-layout/layout-spec#tap
+let text-x = 50
+let text-w = 700
+let title-y = 40
+let title-h = 90
+let row-h = 70
+let gain-y = 160
+let wait-y = 340
+let btn-y = 540
+let watch-x = 50
+let watch-w = 400
+let end-x = 490
+let end-w = 260
+- backdrop  rect       x=0 y=0 w=1920 h=1080 label="Nền che (trận đứng yên phía sau)"
+- panel     round-rect x=panel-x y=panel-y w=panel-w h=panel-h overlap label="Popup hồi sinh"
+- title     label      x=text-x y=title-y w=text-w h=title-h parent=panel label="Thành đã bị phá"
+- gain      label      x=text-x y=gain-y w=text-w h=row-h parent=panel label="Xem quảng cáo để thành hồi 30% máu và chơi tiếp"
+- wait      label      x=text-x y=wait-y w=text-w h=row-h parent=panel label="Đang chờ quảng cáo... (chỉ khi chờ)"
+- watch     button     x=watch-x y=btn-y w=watch-w h=tap parent=panel label="Xem quảng cáo (nút chính)"
+- end       button     x=end-x y=btn-y w=end-w h=tap parent=panel label="Kết thúc lượt"

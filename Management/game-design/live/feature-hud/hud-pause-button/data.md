@@ -1,6 +1,6 @@
 ---
-based-on: 09ba60c454c5
-refs: feature-run/run-pause@f8e9d49f5079, feature-hud/hud-layout@e541be0cca19, feature-popup/popup-layer@91d4f017d2fb
+based-on: 628a4bda5a29
+refs: feature-run/run-pause@331cbd30e30e, feature-hud/hud-layout@e541be0cca19, feature-popup/popup-layer@91d4f017d2fb
 ---
 # Nút tạm dừng
 

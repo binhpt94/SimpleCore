@@ -24,7 +24,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
-| Số nút | 3 | 3 | 3 |
+| Số nút | 1 (Sấm sét; chỉ kĩ năng có trong trận ở giai đoạn này, theo `feature-castle/castle-skills`) | 3 | 3 |
 | Số giây còn lại | Có | Có | Có |
 | Lớp phủ vơi dần | Không bắt buộc | Có | Có |
 | Hiệu ứng nảy khi hồi xong | Không bắt buộc | Có | Có, kèm âm thanh ngắn |
@@ -42,6 +42,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Làm tròn lên.** Hiện "0" mà bấm không được gây khó hiểu.
 - **Nảy bằng phóng to 1.2 lần.** Anim scale đơn giản, kiểm được. Đã loại: nhấp nháy liên tục tới khi bấm (rối mắt khi cả 3 cùng sẵn sàng).
 - **HUD không tự đếm giờ.** Theo node cha; thời gian chỉ có một nguồn ở `feature-castle`.
+- **IDEA chỉ hiện nút của kĩ năng có trong trận (2026-11-24, sửa lệch, theo @CodeLead qua @Manager).** Nhánh kĩ năng thành ghi IDEA chỉ có Sấm sét; bảng này trước ghi 3 nút ở IDEA. Nút đọc danh sách kĩ năng `feature-castle` báo, nên IDEA có 1 nút Sấm sét ở đúng chỗ của nó trong cụm, hai chỗ còn lại để trống. Cheat `mid-battle` ép Băng giá đang hồi: ở IDEA phần đó bỏ qua; từ PROTOTYPE dựng đủ. Đã loại: hiện 3 nút ở IDEA, hai nút khoá (nút không bấm được mà không có kĩ năng sau nó).
 
 ## Chưa rõ
 - `feature-castle` cần cấp cho mỗi kĩ năng: tên, biểu tượng, trạng thái, thời gian còn lại, tổng hồi chiêu.

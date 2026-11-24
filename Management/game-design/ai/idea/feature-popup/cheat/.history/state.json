@@ -1,9 +1,9 @@
 {
- "hash": "f2a2605c001d",
+ "hash": "961abdd115a3",
  "items": {
   "sample-popup": {
-   "hash": "839cf79a5044",
-   "text": "Popup mẫu của dịch vụ đang mở trên scene đang chạy: phần bên dưới không nhận bấm, nền che, khung popup trống trên cùng\nÉp: mở id `Popup/DevSample` do chính dịch vụ sở hữu, chỉ có ở bản dev; khung trống cỡ khung chuẩn của `stack-rules`, một nút \"Đóng\" để thử đóng. Không đụng trận: không dừng trận, không cần biết đang ở màn nào. Không mở id của feature khác."
+   "hash": "5fc766ba6a8c",
+   "text": "Popup mẫu của dịch vụ đang mở trên scene đang chạy: phần bên dưới không nhận bấm, nền che, khung popup trống trên cùng\nÉp: mở id `_Services/Popup/DevSample` do chính dịch vụ sở hữu, chỉ có ở bản dev; khung trống cỡ khung chuẩn của `stack-rules`, một nút \"Đóng\" để thử đóng. Không đụng trận: không dừng trận, không cần biết đang ở màn nào. Không mở id của feature khác."
   }
  }
 }

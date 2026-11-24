@@ -33,6 +33,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Tạm dừng khi kĩ năng vừa bấm trong cùng khung hình:** kĩ năng đã dùng trước thì giữ hiệu quả, hiệu ứng (ví dụ làm chậm của Băng giá) đứng yên cùng trận và chạy tiếp khi tiếp tục.
 - **Tạm dừng giữa lúc nghỉ 3 giây:** phần giây còn lại giữ nguyên; tiếp tục thì đếm tiếp phần còn lại.
 - **Bỏ lượt khi chưa dọn đợt nào:** điểm 0, kỉ lục không đổi.
+- **Rời game lúc popup hồi sinh đang mở hoặc quảng cáo đang chạy:** không tạm dừng, không mở popup tạm dừng; trận đã đứng yên từ lúc thành bị phá (`pause-not-during-revive` ở node cha).
+- **Hồi sinh xong:** trận về trạng thái đang đánh; nút tạm dừng có tác dụng lại.
 
 ## Đã tự quyết
 - **Không đếm ngược khi tiếp tục.** Trận đứng đúng chỗ, người chơi đã thấy tình hình trên nền che. Đã loại: đếm 3-2-1.

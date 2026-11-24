@@ -7,7 +7,10 @@ namespace Game.HudUpgrade
     {
         None,
 
-        /// <summary>Mid battle: coins 120, levels 3, 1, 5, 2, 4, 3; five buttons lit, the skill button dim.</summary>
+        /// <summary>
+        /// Mid battle: coins 120, team knight, axeman, archer; levels 3, 5, 1, 2, 4, 3;
+        /// five buttons lit, the skill button dim.
+        /// </summary>
         MixedButtons,
     }
 
@@ -21,9 +24,14 @@ namespace Game.HudUpgrade
         [SerializeField] private int mixedButtonsCoins = 120;
 
         [Tooltip("mixed-buttons: cấp của từng mục theo thứ tự thanh (hero 1, 2, 3, máu, sức đánh, kĩ năng).")]
-        [SerializeField] private int[] mixedButtonsLevels = { 3, 1, 5, 2, 4, 3 };
+        [SerializeField] private int[] mixedButtonsLevels = { 3, 5, 1, 2, 4, 3 };
+
+        [Tooltip("mixed-buttons: đội phải chọn ở màn chọn đội, mã hero theo chỗ 1, 2, 3. Cheat chỉ kiểm, không tự chọn.")]
+        [SerializeField] private string[] mixedButtonsTeam = { "knight", "axeman", "archer" };
 
         public HudUpgradeCheatState CheatState => cheatState;
+
+        public string[] MixedButtonsTeam => mixedButtonsTeam;
 
         public int MixedButtonsCoins => mixedButtonsCoins;
 

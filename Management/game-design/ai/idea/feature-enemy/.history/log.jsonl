@@ -6,3 +6,8 @@
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "b74c0b7d272a"}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "b74c0b7d272a"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "b74c0b7d272a"}
+{"at": "2026-11-24 22:43:34", "event": "data", "hash": "490cd6f7d7a6", "previous": "b74c0b7d272a", "added": ["enemy-type-threats", "enemy-wave-clear"], "removed": [], "rewritten": []}
+{"at": "2026-11-24 23:36:32", "event": "review", "table": "idea", "item": "enemy-types", "text": "Có nhiều loại quái với cách đi và sức chịu khác nhau\nĐể đợt sau khác đợt trước và mỗi kiểu hero có chỗ mạnh. Đã loại: một loại quái chỉ tăng chỉ số.", "ai": 6, "score": 2, "feedback": "", "rejected": true}
+{"at": "2026-11-24 23:36:32", "event": "review", "table": "idea", "item": "enemy-type-threats", "text": "Các loại quái tạo ra những mối đe doạ cần cách ứng phó khác nhau\nGiá trị của nhiều loại quái là làm đổi quyết định giữ thành, ví dụ lúc bấm kĩ năng. Cách đi và sức chịu từng loại để vòng 3.", "ai": 7, "score": 8, "feedback": "", "rejected": false}
+{"at": "2026-11-24 23:43:16", "event": "data", "hash": "e41a7b75e5a6", "previous": "490cd6f7d7a6", "added": [], "removed": [{"id": "enemy-types", "text": "Có nhiều loại quái với cách đi và sức chịu khác nhau\nĐể đợt sau khác đợt trước và mỗi kiểu hero có chỗ mạnh. Đã loại: một loại quái chỉ tăng chỉ số."}], "rewritten": []}
+{"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "e41a7b75e5a6"}

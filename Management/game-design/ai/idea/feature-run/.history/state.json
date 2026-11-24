@@ -1,29 +1,101 @@
 {
- "hash": "d8a90fd4adc0",
+ "hash": "7150875035ad",
  "items": {
   "run-flow": {
-   "hash": "33352ab07630",
-   "text": "Một lượt đi theo thứ tự: màn bắt đầu, chọn đội, trận, báo thua\nCác màn là `feature-home`, `feature-team-select`, trận, `feature-popup-lose`."
+   "hash": "796c50faa74f",
+   "text": "Luồng màn đi theo thứ tự: màn bắt đầu, chọn đội, trận, báo thua\nCác màn là `feature-home`, `feature-team-select`, trận, `feature-popup-lose`."
+  },
+  "run-scope": {
+   "hash": "f6f7bc6f7f31",
+   "text": "Lượt bắt đầu khi người chơi vào trận, kết thúc khi thành bị phá hoặc người chơi bỏ lượt\nMàn bắt đầu và chọn đội diễn ra trước lượt; khớp nghĩa từ \"Lượt\" trong bảng thuật ngữ."
+  },
+  "run-start-confirm": {
+   "hash": "27ca5b661ffe",
+   "text": "Lượt chơi xác nhận lượt đã bắt đầu khi màn trận đã hiện và trạng thái đầu lượt đã sẵn\nMốc này sau khi dựng trận và HUD đã hiện đúng; `feature-wave` dùng nó để mở đợt đầu."
+  },
+  "split-game-flow": {
+   "hash": "25b1722b8fa5",
+   "text": "Điều hướng màn trong scene Game tách sang `feature-game-flow`\nLượt chơi giữ vòng đời trận, đội đã chốt, trạng thái tạm dừng, điểm và kỉ lục."
+  },
+  "flow-switches-screens": {
+   "hash": "373390eca750",
+   "text": "`feature-game-flow` đổi màn trong scene Game, và hiện màn bắt đầu khi scene Game sẵn sàng\nHai popup vẫn do feature sở hữu nhờ dịch vụ popup hiện."
+  },
+  "flow-locks-switch": {
+   "hash": "4bd072f81259",
+   "text": "Từ yêu cầu đổi màn hợp lệ đầu tiên tới khi màn đích sẵn sàng, mọi yêu cầu đổi màn khác bị khoá\nHai lần bấm Vào trận liền nhau chỉ tạo một lần dựng trận."
   },
   "run-reset": {
    "hash": "387f572906a4",
    "text": "Mỗi lượt bắt đầu lại từ đầu: thành, tiền, nâng cấp, đợt đều về ban đầu"
+  },
+  "run-reset-owner": {
+   "hash": "6f470e358a9d",
+   "text": "Lượt chơi điều phối việc đặt lại lượt mới ở từng feature, kể cả khi trận dùng lại scene\nMỗi feature tự đặt lại dữ liệu lượt mình sở hữu khi lượt chơi báo bắt đầu lượt mới. Theo câu hỏi chung vòng 2 (`khoi-tao-luot-moi`)."
+  },
+  "run-disposes-battle": {
+   "hash": "01763c2bad47",
+   "text": "Lượt chơi điều phối việc huỷ trận khi người chơi rời màn trận\nĐường chơi lại và bỏ lượt cần huỷ trận ngay trong scene Game, không chờ rời scene."
+  },
+  "flow-waits-dispose": {
+   "hash": "000ac5d0af2b",
+   "text": "Màn đích chỉ hiện sau khi lượt chơi báo đã huỷ trận xong\nChơi lại, về màn bắt đầu sau khi thua và bỏ lượt đều chờ cùng tín hiệu."
+  },
+  "team-handoff-via-flow": {
+   "hash": "d990387c1f03",
+   "text": "`feature-team-select` gửi đội đã xác nhận qua `feature-game-flow` để lượt chơi dựng trận\nLượt chơi giữ đội này cho hero trong lượt; màn chọn đội giữ đội điền sẵn cho lần sau."
+  },
+  "run-gives-team": {
+   "hash": "231416709682",
+   "text": "Lượt chơi cấp đội đã chốt cho `feature-hero` khi dựng trận\nHero đọc đội từ một nguồn để sinh đúng hero và giữ nguyên đội suốt trận."
+  },
+  "memory-on-start": {
+   "hash": "01bf7995a741",
+   "text": "Màn chọn đội chỉ cập nhật đội được nhớ khi lượt chơi xác nhận lượt đã bắt đầu\nChỉnh đội rồi rời màn mà không vào trận thì vẫn giữ đội của lượt gần nhất."
+  },
+  "memory-session": {
+   "hash": "a0f44809725b",
+   "text": "Màn chọn đội giữ đội được nhớ trong lần mở game hiện tại\nMở lại game thì chỉ còn kỉ lục."
+  },
+  "run-end-owner": {
+   "hash": "2bbbf4d91cad",
+   "text": "Lượt chơi là nơi duy nhất chốt lượt đã kết thúc khi thành bị phá mà không hồi sinh\nChốt ở một nơi kể cả khi thành bị phá sát lúc đợt được dọn sạch. Theo câu hỏi chung vòng 2 (`quyen-chot-luot`)."
+  },
+  "run-revive-offer": {
+   "hash": "f417082cce50",
+   "text": "Thành bị phá lần đầu trong lượt thì lượt chơi dừng trận và nhờ `feature-popup-revive` đề nghị hồi sinh\nNgười chơi xem hết quảng cáo thì trận chạy tiếp; bỏ qua, hoặc quảng cáo không xem được, thì lượt thua như thường."
+  },
+  "run-revive-once": {
+   "hash": "bfab522ee360",
+   "text": "Mỗi lượt chỉ được hồi sinh thành một lần; thành bị phá lần hai là thua ngay\nLượt chơi giữ cờ đã hồi sinh và đặt lại khi lượt mới bắt đầu."
   },
   "run-score": {
    "hash": "bc3c5ea98549",
    "text": "Điểm của lượt là số đợt đã dọn sạch\nĐã loại: điểm theo số quái hạ."
   },
   "run-record": {
-   "hash": "015b15938d95",
-   "text": "Kỉ lục được giữ lại cả khi tắt game; đây là thứ duy nhất giữ qua các lượt"
+   "hash": "46e8c6d9ffce",
+   "text": "Lượt chơi chỉ giữ kỉ lục qua các lượt, và lưu kỉ lục cả khi tắt game\nMàn bắt đầu và popup thua nhận kỉ lục từ cùng nguồn này. Đội được nhớ là của `feature-team-select`, không phải dữ liệu của lượt."
   },
   "run-replay": {
    "hash": "ebd34d732319",
    "text": "Chơi lại thì về màn chọn đội để đổi đội nếu muốn\nĐã loại: vào thẳng trận với đội cũ."
   },
   "run-pause": {
-   "hash": "a1916f2070ae",
-   "text": "Người chơi tạm dừng được trận đang đánh\nChơi trên điện thoại hay bị ngắt. Popup là `feature-popup-pause`."
+   "hash": "d6c2457e5e0f",
+   "text": "Lượt chơi giữ trạng thái tạm dừng của trận để mọi feature trong trận cùng theo\nHUD nhận thao tác tạm dừng, popup nhận thao tác tiếp tục. Chơi trên điện thoại hay bị ngắt. Popup là `feature-popup-pause`."
+  },
+  "run-pause-request": {
+   "hash": "8b3baedd05ba",
+   "text": "Lượt chơi nhận yêu cầu tạm dừng từ nút tạm dừng trên HUD\nYêu cầu dừng và lựa chọn tiếp tục đi qua cùng nơi giữ trạng thái trận. Theo câu hỏi chung vòng 2 (`yeu-cau-tam-dung`)."
+  },
+  "run-pause-background": {
+   "hash": "223333d6fc6a",
+   "text": "Lượt chơi tự tạm dừng trận đang chạy khi game chuyển xuống nền\nMở lại thì popup tạm dừng cho người chơi chủ động tiếp tục hoặc bỏ lượt. Theo câu hỏi chung vòng 2 (`tam-dung-khi-ra-nen`)."
+  },
+  "bo-luot-ve-man-bat-dau": {
+   "hash": "63a1d4f8a084",
+   "text": "Bỏ lượt từ popup tạm dừng thì người chơi về màn bắt đầu\nLượt chơi sở hữu đường rời trận này."
   }
  }
 }

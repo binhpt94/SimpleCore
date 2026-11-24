@@ -1,5 +1,5 @@
 {
- "hash": "92e28a5acae5",
+ "hash": "a7d56f47797b",
  "items": {
   "result-title-text": {
    "hash": "88eee1ad94d8",
@@ -16,6 +16,10 @@
   "result-new-record-line": {
    "hash": "a8f2886db1cd",
    "text": "Cờ kỉ lục mới bật thì có thêm dòng \"Kỉ lục mới!\" và dòng này phóng to 1.0 → 1.15 → 1.0 lặp lại mỗi 1 giây\nDòng này nằm trên một dải nền nổi bật cùng cỡ (400x70 px), để lượt phá kỉ lục trông vui hơn hẳn. Cờ tắt thì không có cả dòng lẫn dải nền, không có câu nào thay vào."
+  },
+  "result-ad-failed-text": {
+   "hash": "0a53a77f77b6",
+   "text": "Quảng cáo hồi sinh không xem hết hoặc không tải được thì có dòng \"Quảng cáo chưa hoàn tất\" ở chỗ dòng \"Kỉ lục mới!\"\nChữ trơn, không dải nền. Phá kỉ lục thì chỉ hiện \"Kỉ lục mới!\"."
   },
   "result-read-only": {
    "hash": "857df7485153",

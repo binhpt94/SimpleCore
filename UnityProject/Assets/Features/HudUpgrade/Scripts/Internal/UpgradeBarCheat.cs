@@ -56,6 +56,27 @@ namespace Game.HudUpgrade
             else if (diff < 0) _wallet.TrySpend(-diff);
             return ok;
         }
+
+        /// <summary>
+        /// Compares the shop's hero items, in bar order, with the team the state wants.
+        /// Returns null when they match, otherwise a message naming both teams.
+        /// </summary>
+        public string FindTeamMismatch(IReadOnlyList<string> wantedTeam)
+        {
+            if (wantedTeam == null || wantedTeam.Count == 0) return null;
+            var actual = new List<string>();
+            for (var i = 0; i < _shop.Count; i++)
+            {
+                var item = _shop.Get(i);
+                if (item.Kind == UpgradeKind.Hero) actual.Add(item.HeroCode);
+            }
+
+            var same = actual.Count == wantedTeam.Count;
+            for (var i = 0; same && i < actual.Count; i++) same = actual[i] == wantedTeam[i];
+            return same
+                ? null
+                : $"đội đang là [{string.Join(", ", actual)}], state cần [{string.Join(", ", wantedTeam)}]: chọn đúng đội ở màn chọn đội.";
+        }
     }
 }
 #endif

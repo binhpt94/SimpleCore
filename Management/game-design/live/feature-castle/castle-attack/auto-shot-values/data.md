@@ -1,6 +1,6 @@
 ---
 based-on: 639d373f52f2
-refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-core/castle-body-values@a89edb2f03ba
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-core/castle-body-values@b648ec300023
 ---
 # Thông số đòn tự bắn
 

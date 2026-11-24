@@ -20,5 +20,11 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Bỏ chi tiết chỉ số (máu, sức đánh, tầm đánh...) và cách tìm mục tiêu.** Đó là định nghĩa, để vòng 3.
 - **Bỏ chữ "bản đầu dự kiến 6 hero" và "dự kiến 4".** Con số để vòng 4, không ghi theo bản phát hành.
 
+- **Đưa góp ý GPT lần hỏi `r2-3` (cụm giao chiến, 2026-11-24).** 13 góp ý "thêm". Chia việc giao chiến: bên ra đòn chọn mục tiêu, bên trúng và sát thương; bên trúng tự trừ máu và báo hết máu đúng một lần (AI 7).
+  - Ba ý cần `feature-combat` (`combat-arbiter`, `same-tick-snapshot`, `same-tick-sum`, `report-after-hp`) AI 5: hợp lí cho kết quả nhất quán, nhưng thêm một nơi ba feature cùng đi qua; xem `feature-combat`.
+  - `shared-target-word` (AI 6): mở rộng nghĩa từ "Mục tiêu" trong bảng thuật ngữ cho cả hero và thành bị nhắm; chưa sửa bảng thuật ngữ, xét khi rà vòng 3.
+  - **Loại `tinh-dot-cuoi-khi-thanh-vo`, AI 4:** tính đợt dọn sạch cùng lúc thành vỡ, trái luật "thua trước" đã chốt. Khai `gpt-dropped`.
+- `hero-spawn-team` lấy từ câu hỏi chung vòng 2 (`sinh-doi-dau-tran`), không nhãn `by:`.
+
 ## Chưa rõ
 - Danh sách hero cụ thể và cách đánh của từng hero: vòng 3.

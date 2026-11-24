@@ -129,6 +129,67 @@ namespace Game.Hero.Tests
         }
 
         [Test]
+        public void Level_10_archer_has_the_designed_stats_and_range_and_speed_stay()
+        {
+            Start("archer");
+
+            _squad.ApplyLevel(0, 10);
+
+            Assert.That(Hero(0).Stats.MaxHealth, Is.EqualTo(282f).Within(1e-3f));
+            Assert.That(Hero(0).Stats.Damage, Is.EqualTo(32.9f).Within(1e-3f));
+            Assert.That(Hero(0).Stats.SecondsPerAttack, Is.EqualTo(0.630f).Within(1e-3f));
+            Assert.That(Hero(0).Hero.range, Is.EqualTo(7f));
+            Assert.That(Hero(0).Hero.moveSpeed, Is.EqualTo(2.5f));
+        }
+
+        [Test]
+        public void Attack_speed_stops_rising_at_level_21_while_health_and_damage_keep_rising()
+        {
+            Start("knight");
+
+            _squad.ApplyLevel(0, 21);
+            var at21 = Hero(0).Stats;
+            _squad.ApplyLevel(0, 30);
+            var at30 = Hero(0).Stats;
+
+            Assert.That(at21.SecondsPerAttack, Is.EqualTo(1f / 1.6f).Within(1e-4f));
+            Assert.That(at30.SecondsPerAttack, Is.EqualTo(at21.SecondsPerAttack).Within(1e-6f));
+            Assert.That(at30.MaxHealth, Is.GreaterThan(at21.MaxHealth));
+            Assert.That(at30.Damage, Is.GreaterThan(at21.Damage));
+        }
+
+        [Test]
+        public void Buying_levels_one_by_one_ends_the_same_as_one_jump()
+        {
+            Start("knight", "axeman");
+            _squad.Hit(0, 200f);
+            _squad.Hit(1, 140f);
+
+            _squad.ApplyLevel(0, 2);
+            _squad.ApplyLevel(0, 3);
+            _squad.ApplyLevel(1, 3);
+
+            Assert.That(Hero(0).Stats.MaxHealth, Is.EqualTo(390f).Within(1e-3f));
+            Assert.That(Hero(0).Health, Is.EqualTo(190f).Within(1e-3f));
+            Assert.That(Hero(1).Health, Is.EqualTo(100f + 72f).Within(1e-3f));
+        }
+
+        [Test]
+        public void The_level_up_pop_grows_to_1_2_then_returns_within_0_3_seconds()
+        {
+            var config = HeroFakes.LoadConfig();
+            var peak = config.LevelUpPopScale;
+            var seconds = config.LevelUpPopSeconds;
+
+            Assert.That(peak, Is.EqualTo(1.2f).Within(1e-4f));
+            Assert.That(seconds, Is.EqualTo(0.3f).Within(1e-4f));
+            Assert.That(HeroLevelUpPop.ScaleAt(seconds, peak, seconds), Is.EqualTo(1f));
+            Assert.That(HeroLevelUpPop.ScaleAt(seconds * 0.5f, peak, seconds), Is.EqualTo(1.2f).Within(1e-4f));
+            Assert.That(HeroLevelUpPop.ScaleAt(seconds * 0.25f, peak, seconds), Is.InRange(1f, 1.2f));
+            Assert.That(HeroLevelUpPop.ScaleAt(0f, peak, seconds), Is.EqualTo(1f));
+        }
+
+        [Test]
         public void A_hero_levelled_while_fallen_respawns_at_the_new_full_health()
         {
             Start("knight");

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 70" width="400" height="70">
+  <!-- duoi ruy bang do hai ben, vien den 4 px -->
+  <path d="M4 12 L52 12 L52 60 L4 60 L20 36 Z" fill="#E04A4A" stroke="#000000" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M396 12 L348 12 L348 60 L396 60 L380 36 Z" fill="#E04A4A" stroke="#000000" stroke-width="4" stroke-linejoin="round"/>
+  <!-- bong do cung lech xuong 6 px -->
+  <rect x="36" y="9" width="328" height="58" rx="18" fill="#000000"/>
+  <!-- dai vang chinh, vien den 5 px -->
+  <rect x="36" y="3" width="328" height="58" rx="18" fill="#FFC633" stroke="#000000" stroke-width="5"/>
+  <!-- hai ngoi sao trang o hai dau (x 49-83 va 317-351); giua x 85-315 vang phang, rong 230 px -->
+  <path d="M66 16 L71 27 L83 28 L74 36 L77 48 L66 41 L55 48 L58 36 L49 28 L61 27 Z" fill="#FFFFFF" stroke="#000000" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M334 16 L339 27 L351 28 L342 36 L345 48 L334 41 L323 48 L326 36 L317 28 L329 27 Z" fill="#FFFFFF" stroke="#000000" stroke-width="3" stroke-linejoin="round"/>
+</svg>

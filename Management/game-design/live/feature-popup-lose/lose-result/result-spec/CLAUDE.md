@@ -29,6 +29,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Điểm 0, kỉ lục 0:** "Trụ được 0 đợt", "Kỉ lục: 0 đợt", không có dòng kỉ lục mới.
 - **Phá kỉ lục:** N = M, có dòng kỉ lục mới.
 - **Bằng kỉ lục cũ:** N = M nhưng không có dòng kỉ lục mới.
+- **Quảng cáo hồi sinh không xem hết hoặc không tải được:** dòng "Quảng cáo chưa hoàn tất" ở chỗ dòng "Kỉ lục mới!"; phá kỉ lục thì chỉ hiện "Kỉ lục mới!". Không thêm frame: chung chỗ, chung cỡ với dòng kỉ lục mới.
 - **Ghi kỉ lục xuống máy thất bại:** popup vẫn hiện đúng kỉ lục trong lúc game mở, không báo lỗi.
 
 ## Đã tự quyết

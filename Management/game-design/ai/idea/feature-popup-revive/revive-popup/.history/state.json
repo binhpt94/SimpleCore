@@ -1,0 +1,37 @@
+{
+ "hash": "9564590ae47a",
+ "items": {
+  "popup-parts": {
+   "hash": "5835fb62835c",
+   "text": "Popup có tiêu đề, một dòng nói thành có lại một phần máu, nút \"Xem quảng cáo\" và nút \"Kết thúc lượt\"\n\"Xem quảng cáo\" là nút chính."
+  },
+  "popup-two-states": {
+   "hash": "b61612b4c9d4",
+   "text": "Popup có hai trạng thái: chờ chọn, và chờ quảng cáo\nTrạng thái chờ quảng cáo khoá cả hai nút và hiện dòng đang chờ."
+  },
+  "tap-watch": {
+   "hash": "5797bbb8e3a2",
+   "text": "Chạm \"Xem quảng cáo\" thì gửi đúng một yêu cầu tới `feature-ads` và sang trạng thái chờ quảng cáo\nChạm thêm khi đang chờ không gửi gì."
+  },
+  "tap-end": {
+   "hash": "283ee62879ce",
+   "text": "Chạm \"Kết thúc lượt\" thì popup đóng rồi báo `feature-run` là không hồi sinh"
+  },
+  "ad-ok": {
+   "hash": "334f8db4405a",
+   "text": "Quảng cáo báo đã xem đủ thì popup đóng rồi báo `feature-run` là hồi sinh"
+  },
+  "ad-fail": {
+   "hash": "5bc09063a897",
+   "text": "Quảng cáo báo không xem được thì popup đóng rồi báo `feature-run` là quảng cáo không xem được\n`feature-run` chốt thua; popup thua có dòng \"Quảng cáo chưa hoàn tất\"."
+  },
+  "close-only-by-choice": {
+   "hash": "73d157c71139",
+   "text": "Popup chỉ đóng sau một lựa chọn hoặc một kết quả; chạm ngoài, chạm nền che, nút quay lại của máy không đóng\nĐóng mà không chọn thì người chơi kẹt ở trận đã dừng."
+  },
+  "shown-by-service": {
+   "hash": "f1b7274c5c28",
+   "text": "Popup hiện qua `feature-popup` bằng id riêng, mở do `feature-run` nhờ\nFeature này điền chữ và xử lí nút; dịch vụ popup lo hiện, che, đóng."
+  }
+ }
+}

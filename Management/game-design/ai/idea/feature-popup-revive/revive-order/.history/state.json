@@ -1,0 +1,29 @@
+{
+ "hash": "46d96a55a205",
+ "items": {
+  "order-steps": {
+   "hash": "5b195c359374",
+   "text": "Thứ tự: thành bị phá, trận dừng, popup hồi sinh mở, người chơi chọn, popup đóng, lượt chơi xử lí lựa chọn\nHồi sinh: thành có lại máu rồi trận chạy tiếp. Không hồi sinh hay quảng cáo lỗi: chốt điểm, popup thua hiện."
+  },
+  "frozen-throughout": {
+   "hash": "0eda4dcb7939",
+   "text": "Từ lúc trận dừng tới lúc chơi tiếp, mọi thứ của trận đứng yên như lúc tạm dừng\nQuái, hero, đợt, hồi chiêu, đồng hồ hồi sinh hero giữ nguyên; không mua, không bấm kĩ năng."
+  },
+  "before-pause": {
+   "hash": "7e3619f0c912",
+   "text": "Thành bị phá lần đầu cùng lúc có yêu cầu tạm dừng thì popup hồi sinh mở, yêu cầu tạm dừng bị bỏ\nLúc popup hồi sinh mở, rời game không mở popup tạm dừng."
+  },
+  "once-per-run": {
+   "hash": "2995143f38bc",
+   "text": "Mỗi lượt chỉ một lần đề nghị; thành bị phá lần hai vào thẳng popup thua\nChỉ có lần hai khi lần đầu đã hồi sinh; chọn \"Kết thúc lượt\" hay quảng cáo lỗi thì lượt đã kết thúc."
+  },
+  "same-tick-clear": {
+   "hash": "30113369d918",
+   "text": "Đợt dọn sạch cùng lúc thành bị phá được giữ chờ: hồi sinh thành công thì tính, không thì bỏ\nKhớp luật \"thua trước\": lượt chốt thua thì điểm dừng ở các đợt đã dọn trước lúc thành bị phá."
+  },
+  "score-carries": {
+   "hash": "231cbc99f7c3",
+   "text": "Hồi sinh không đặt lại điểm; kỉ lục chỉ xét khi lượt chốt thua\nTheo nhánh điểm và kỉ lục của `feature-run`."
+  }
+ }
+}

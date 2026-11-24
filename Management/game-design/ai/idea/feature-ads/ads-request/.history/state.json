@@ -1,0 +1,37 @@
+{
+ "hash": "fb0adae32557",
+ "items": {
+  "one-request-at-a-time": {
+   "hash": "38949b74724e",
+   "text": "Mỗi lúc chỉ có một yêu cầu quảng cáo đang chạy\nYêu cầu mới tới khi đang có yêu cầu thì nhận ngay kết quả \"không xem được\", yêu cầu đang chạy không bị ảnh hưởng."
+  },
+  "request-tagged": {
+   "hash": "5864f45f0cec",
+   "text": "Mỗi yêu cầu mang mã của lần đề nghị đã sinh ra nó; kết quả trả về kèm đúng mã đó\nBên gọi dùng mã để biết kết quả có còn thuộc đề nghị đang chờ không."
+  },
+  "result-two-values": {
+   "hash": "8282893dafb8",
+   "text": "Kết quả chỉ có hai giá trị: đã xem đủ để nhận thưởng, hoặc không xem được\nHết quảng cáo, mất mạng, đóng sớm, quá hạn chờ đều là \"không xem được\"; bên gọi không phải phân biệt."
+  },
+  "request-steps": {
+   "hash": "8b7beb43e9a5",
+   "text": "Một yêu cầu đi qua bốn bước: chờ mở, đang phát, chờ xác nhận thưởng, có kết quả\nMỗi bước chỉ đi tới, không quay lại."
+  },
+  "wait-limits": {
+   "hash": "69efeae57cae",
+   "text": "Bước chờ mở và bước chờ xác nhận thưởng mỗi bước có hạn chờ riêng; quá hạn là \"không xem được\"\nThời gian quảng cáo đang phát không tính vào hạn chờ."
+  },
+  "result-after-return": {
+   "hash": "1cf832a8e217",
+   "text": "Kết quả chỉ trả về sau khi quảng cáo đã đóng và game đã trở lại màn hình\nBên gọi nhận kết quả lúc người chơi đã nhìn thấy game."
+  },
+  "caller-cancel": {
+   "hash": "3b56a2b6bdf6",
+   "text": "Bên gọi huỷ yêu cầu (rời trận, đề nghị đã xử lí) thì kết quả tới sau bị bỏ, không trả cho ai\nKhông có thưởng rơi vào lượt sau."
+  },
+  "no-reward-logic": {
+   "hash": "9cc69c98d0d3",
+   "text": "Feature này không biết thưởng là gì và không ra lệnh thưởng\nHồi sinh thành do `feature-run` ra lệnh sau khi popup hồi sinh nhận kết quả."
+  }
+ }
+}

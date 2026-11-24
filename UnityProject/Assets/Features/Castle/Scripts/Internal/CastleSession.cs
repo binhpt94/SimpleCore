@@ -68,6 +68,8 @@ namespace Game.Castle
             WhenDisposed(() => _autoShot.Fired -= OnFired);
             _skills.ThunderStruck += OnThunderStruck;
             WhenDisposed(() => _skills.ThunderStruck -= OnThunderStruck);
+            _upgrades.LevelApplied += OnLevelApplied;
+            WhenDisposed(() => _upgrades.LevelApplied -= OnLevelApplied);
         }
 
         /// <summary>One frame of <paramref name="seconds"/>. Nothing moves while paused.</summary>
@@ -116,5 +118,7 @@ namespace Game.Castle
         private void OnFired(int handle, float fromX, float toX) => _view?.ShowShot(handle, fromX, toX, _config.ShotFlightSeconds);
 
         private void OnThunderStruck(float x) => _view?.ShowThunder(x, _config.ThunderEffectSeconds);
+
+        private void OnLevelApplied() => _view?.PopLevelUp(_config.LevelUpPopScale, _config.LevelUpPopSeconds);
     }
 }

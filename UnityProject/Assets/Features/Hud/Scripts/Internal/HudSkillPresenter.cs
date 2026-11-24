@@ -6,7 +6,8 @@ using Game.Run;
 namespace Game.Hud
 {
     /// <summary>
-    /// One button per castle skill (feature-hud/hud-skill-button/skill-button-spec). Every frame it shows the state the
+    /// One button per castle skill (feature-hud/hud-skill-button/skill-button-spec), each in its fixed slot
+    /// (<see cref="HudSkillSlots"/>); slots of skills the battle lacks stay empty. Every frame it shows the state the
     /// castle reports; a tap on a ready button during play asks the castle once. The castle keeps every cooldown.
     /// </summary>
     internal sealed class HudSkillPresenter
@@ -34,15 +35,19 @@ namespace Game.Hud
             _started = true;
 
             var names = new List<string>();
+            var slots = new List<int>();
             foreach (var skill in _skills.Skills)
             {
+                var slot = HudSkillSlots.SlotOf(skill);
+                if (slot < 0 || slots.Contains(slot)) continue;
                 _order.Add(skill);
                 _wasReady.Add(_skills.GetState(skill).Ready);
                 _bounceTime.Add(-1f);
                 names.Add(HudText.SkillName(skill));
+                slots.Add(slot);
             }
 
-            _view.CreateSkillButtons(names);
+            _view.CreateSkillButtons(names, slots);
             _view.SkillPressed += OnPressed;
             Refresh();
         }

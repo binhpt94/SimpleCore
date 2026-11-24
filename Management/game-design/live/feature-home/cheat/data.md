@@ -1,5 +1,5 @@
 ---
-based-on: a5b77a934bc1
+based-on: 39e910418294
 refs: feature-hud/hud-layout/layout-spec@ebefd7f8b116, feature-home/home-screen/home-screen-spec@eecc5b73afde, feature-run/run-score/score-rules@54a8417a7ccd
 ---
 # Cheat: màn bắt đầu

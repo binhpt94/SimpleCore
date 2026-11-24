@@ -1,21 +1,73 @@
 {
- "hash": "e712e2fbe1f0",
+ "hash": "112626ed0626",
  "items": {
   "upgrade-anytime": {
    "hash": "7a8a0670e3ab",
    "text": "Mua nâng cấp lúc nào cũng được, trận không dừng\nKể cả lúc đang đánh. Đã loại (người loại ở vòng 1): chỉ nâng cấp giữa hai đợt."
+  },
+  "buy-needs-running-run": {
+   "hash": "1e2c80432d53",
+   "text": "Nâng cấp chỉ nhận lần mua khi `feature-run` xác nhận lượt của yêu cầu đang chạy lúc xét\nYêu cầu còn chờ bị từ chối nếu lượt đã tạm dừng, đã kết thúc hay đã thay bằng lượt mới; lúc thở vẫn mua được."
   },
   "upgrade-instant": {
    "hash": "84faad5d065d",
    "text": "Mua xong là mạnh lên ngay\nKể cả với hero đang gục chờ hồi sinh."
   },
   "upgrade-items": {
-   "hash": "84de2d60928a",
-   "text": "Nâng được từng hero trong đội và nâng được thành, danh sách cố định\nĐã loại: bốc thẻ nâng cấp ngẫu nhiên (khó nắm với người chơi phổ thông)."
+   "hash": "8bb0d298e246",
+   "text": "Người chơi chọn nâng thành hoặc một hero cụ thể trong đội đã chọn cho lượt\nMục nâng cấp gắn với đội của lượt; người chơi quyết đầu tư vào ai. Đã loại: bốc thẻ nâng cấp ngẫu nhiên (khó nắm với người chơi phổ thông)."
+  },
+  "shared-team-slots": {
+   "hash": "0d617b351110",
+   "text": "`feature-run` cấp cùng một bảng chỗ trong đội cho `feature-hero` và nâng cấp\nChỗ trong đội là định danh của hero trong lượt; nút của chỗ 2 vẫn nâng đúng hero ở chỗ đó khi hero gục hay hồi sinh."
+  },
+  "upgrade-owns-levels": {
+   "hash": "4944939c7f60",
+   "text": "Nâng cấp giữ cấp đã mua của từng hero và của thành trong lượt\nMọi nút trên thanh đọc cấp từ cùng một nguồn. Theo câu hỏi chung vòng 2 (`_general/r2-all`, góp ý `chu-so-huu-cap-nang`)."
   },
   "upgrade-cost": {
-   "hash": "d8ea7af9c3e9",
-   "text": "Càng nâng nhiều thì lần nâng sau càng đắt\nGiá tăng dần tự hãm, nên không cần cấp tối đa. Đã loại: giá cố định."
+   "hash": "528c5eb262c9",
+   "text": "Giá lần mua kế tiếp tính theo cấp hiện tại của chính mục đó, càng nâng càng đắt\nThông số chỉnh giá do `feature-balance` giữ; nâng cấp tính ra giá cụ thể và gửi số tiền cần trừ cho ví. Giá tăng dần tự hãm, nên không cần cấp tối đa. Đã loại: giá cố định."
+  },
+  "buy-transaction": {
+   "hash": "82a21667fd24",
+   "text": "Một lần mua là trừ tiền, tăng cấp và áp hiệu lực cùng xong trong một lần xử lí\nĐòn phá thành chỉ có thể xảy ra trước hoặc sau trọn lần mua, không chen giữa."
+  },
+  "buy-one-level": {
+   "hash": "0b7a56536620",
+   "text": "Mỗi lần mua trừ đúng giá của lần đó và tăng đúng một cấp, các lần chạm liền nhau xử lí lần lượt\nHai lần chạm có thể cùng thấy một giá; lần sau tính theo cấp mới. Theo câu hỏi chung vòng 2 (`mua-nang-cap-tron-ven`)."
+  },
+  "hero-applies-level": {
+   "hash": "fdcb1c5a0de9",
+   "text": "`feature-hero` áp chỉ số theo cấp do nâng cấp cấp, khi hero lên cấp hoặc hồi sinh\nNâng cấp giữ cấp; hero tự cập nhật chỉ số chiến đấu. Hero mua cấp lúc đang gục thì hồi sinh với chỉ số theo cấp mới."
+  },
+  "castle-applies-level": {
+   "hash": "cd7f4fc3bdab",
+   "text": "`feature-castle` áp ngay hiệu lực của mục thành vừa lên cấp, theo cấp mới nâng cấp báo\nChỉ một bên áp hiệu lực: nâng cấp báo cấp, thành ghi thay đổi vào chỉ số của mình."
+  },
+  "wallet-checks-money": {
+   "hash": "a155a6a02aba",
+   "text": "`feature-wallet` trả lời đủ tiền hay chưa cho mức giá được hỏi\nKhi mua thật, ví kiểm lại bằng số dư lúc xử lí và chỉ trừ tiền nếu đủ."
+  },
+  "wallet-notifies-balance": {
+   "hash": "91b389a5a12d",
+   "text": "`feature-wallet` báo số dư mới cho nâng cấp sau mỗi lần số dư đổi\nThưởng, mua hay lượt mới đều có thể đổi trạng thái nhiều nút cùng lúc."
+  },
+  "upgrade-buyable": {
+   "hash": "2977fe8e6ea6",
+   "text": "Nâng cấp quyết mục có mua được hay chưa, từ trạng thái trận và câu trả lời của ví\nVí chỉ trả lời về tiền; nâng cấp ghép thêm điều kiện trận đang chạy và báo lại cho thanh khi giá, số dư hay trạng thái trận đổi."
+  },
+  "bar-reads-upgrade": {
+   "hash": "9f02531a60dd",
+   "text": "`feature-hud-upgrade` đọc danh sách mục, cấp đã mua, giá kế tiếp và mua được hay chưa từ nâng cấp\nLấy theo từng mục để nút hiện đúng cấp đã mua và đúng giá lần mua kế tiếp."
+  },
+  "bar-one-snapshot": {
+   "hash": "7b58ef88be0e",
+   "text": "Thanh nâng cấp hiện mọi mục từ cùng một bản cập nhật của nâng cấp\nMua xong thì giá mới của mục vừa mua và trạng thái mọi nút đổi theo cùng số dư."
+  },
+  "bar-sends-item": {
+   "hash": "7ee7f82b62e3",
+   "text": "`feature-hud-upgrade` gửi định danh mục được chạm cho nâng cấp để xin mua\nĐịnh danh giữ đúng đối tượng người chơi chạm, kể cả khi cách xếp nút đổi."
   }
  }
 }

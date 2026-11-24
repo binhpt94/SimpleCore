@@ -32,8 +32,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Mức tăng tốc độ đánh hero | +3%/cấp, trần +60% | như IDEA | Chốt theo `feature-balance` |
 | Máu thành mỗi cấp | +150 | như IDEA | Chốt |
 | Sát thương tự bắn mỗi cấp | +20% cấp 1 | như IDEA | Chốt |
-| Hiệu lực kĩ năng mỗi cấp | +20% cấp 1, cả ba kĩ năng | như IDEA | Chốt, có thể có trần cho Băng giá và Cổ vũ |
-| Phản hồi thấy được khi lên cấp | hero/thành phóng to rồi về cỡ cũ trong 0,3 giây | thêm hiệu ứng lên cấp | đủ art |
+| Hiệu lực kĩ năng mỗi cấp | +20% cấp 1, mọi kĩ năng có trong trận (IDEA chỉ có Sấm sét) | +20% cấp 1, cả ba kĩ năng | Chốt, có thể có trần cho Băng giá và Cổ vũ |
+| Phản hồi thấy được khi lên cấp | hero phóng to 1,2 lần, thành phóng to 1,1 lần, rồi về cỡ cũ trong 0,3 giây | thêm hiệu ứng lên cấp | đủ art |
 
 ## Trường hợp biên
 - **Hero đang gục**: chỉ đổi cấp; hồi sinh với máu đầy theo cấp mới; thời gian chờ hồi sinh không đổi.
@@ -51,6 +51,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Hiệu lực Băng giá là thời gian chậm, mức chậm giữ 50%.** Theo `feature-castle/castle-upgrade-effects` ("làm chậm lâu hơn"); nếu tăng mức chậm thì cấp 4 đã gần đứng yên. Đã loại: tăng phần trăm chậm.
 - **Giữ số thực, chỉ làm tròn khi hiện (2026-11-23, sửa lệch).** Thống nhất với ý `decimal-stats` của `feature-hero/hero-stats/hero-level-values`, `feature-enemy/enemy-stats/enemy-stat-values` và `feature-wave/difficulty-scaling/wave-formula`: một luật làm tròn cho cả game. Đã loại: làm tròn xuống khi trừ máu, tối thiểu 1 (bản cũ, lệch với hero và quái).
 - **Đối chiếu nghĩa hiệu lực kĩ năng (2026-11-23).** Khớp nghĩa đã chốt: Sấm sét +16 sát thương, Băng giá +1 giây chậm (giữ 50%), Cổ vũ +6% máu tối đa mỗi cấp, hồi chiêu không đổi. Chỉ sửa ghi chú Băng giá ở "Chưa rõ" (hồi chiêu 35 giây đã biết).
+
+- **Mức phóng của phản hồi lên cấp (2026-11-24, sửa lệch).** Hero 1,2 lần theo `feature-hero/hero-stats/hero-level-values`; thành 1,1 lần theo node mức tăng của thành ở nhánh `feature-castle`; cả hai 0,3 giây, có từ IDEA. Bản trước chỉ ghi "phóng to" không có mức, và node thành ghi 0,2 giây từ PROTOTYPE; đã sửa node thành cho khớp.
 
 ## Chưa rõ
 - Đề xuất cho người: Băng giá không có trần, cấp 11 làm chậm 15 giây. Hồi chiêu Băng giá là 35 giây (`feature-castle/castle-skills/skill-values`), nên chỉ từ cấp 31 quái mới bị chậm liên tục; giá cấp đó không đạt được trong một lượt bình thường. Hiện vẫn dùng công thức không trần.

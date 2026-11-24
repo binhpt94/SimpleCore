@@ -1,32 +1,32 @@
 {
  "hero-knight": {
   "level": 3,
-  "text": "Dat: dung Hiep si, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "text": "Dung order, quay phai, khien va kiem ro, doc duoc o co nho",
   "version": 1,
-  "at": "2026-11-24 12:35:47"
+  "at": "2026-11-24 23:54:42"
  },
  "hero-axeman": {
   "level": 3,
-  "text": "Dat: dung Dau si riu, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "text": "Dung order, rau ram, rui hai luoi, mau cam nau ro",
   "version": 1,
-  "at": "2026-11-24 12:35:48"
+  "at": "2026-11-24 23:54:45"
  },
  "hero-swordsman": {
-  "level": 3,
-  "text": "Dat: dung Kiem khach, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "level": 2,
+  "text": "Dung order va quay phai, nhung dau nho va than cao hon 4 hero kia, ti le dau than chua dong bo",
   "version": 1,
-  "at": "2026-11-24 12:35:50"
+  "at": "2026-11-24 23:54:47"
  },
  "hero-archer": {
   "level": 3,
-  "text": "Dat: dung Cung thu, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "text": "Dung order, cung giuong ve phai, ong ten sau lung, xanh la ro",
   "version": 1,
-  "at": "2026-11-24 12:35:51"
+  "at": "2026-11-24 23:54:48"
  },
  "hero-mage": {
   "level": 3,
-  "text": "Dat: dung Phap su, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "text": "Dung order, mu nhon ao tim, gay phep da vang giuong ve phai",
   "version": 1,
-  "at": "2026-11-24 12:35:52"
+  "at": "2026-11-24 23:54:49"
  }
 }

@@ -27,7 +27,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
-| Phần có mặt | Máu, tiền, đợt, 3 nút kĩ năng | Thêm thông báo đợt (nút tạm dừng không bắt buộc) | Đủ, có nút tạm dừng |
+| Phần có mặt | Máu, tiền, đợt, cụm kĩ năng giữ đủ 3 chỗ nhưng chỉ có nút Sấm sét (`feature-hud/hud-skill-button/skill-button-spec`) | Thêm thông báo đợt (nút tạm dừng không bắt buộc) | Đủ, có nút tạm dừng |
 | Tỉ lệ màn hình phải kiểm | 16:9 | 16:9 và 20:9 | 16:9 tới 21:9 |
 | Vùng an toàn | Không bắt buộc | Có | Có |
 

@@ -15,10 +15,16 @@ namespace Game.Services.Popup
         [SerializeField] private GameObject layerPrefab;
         [Tooltip("Full-screen dark image that takes every touch, placed right behind each popup.")]
         [SerializeField] private GameObject backdropPrefab;
+        // Always serialized so editor and player share one layout; read only in dev builds (feature-popup/cheat).
+        [Tooltip("Dev only: the service's own sample popup Popup/DevSample (empty panel, one Close button).")]
+        [SerializeField] private GameObject devSamplePrefab;
 
         internal int MaxOpen => maxOpen;
         internal GameObject LayerPrefab => layerPrefab;
         internal GameObject BackdropPrefab => backdropPrefab;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        internal GameObject DevSamplePrefab => devSamplePrefab;
+#endif
 
         /// <summary>Throws, naming the missing field, when the config cannot drive the layer.</summary>
         internal void Check()

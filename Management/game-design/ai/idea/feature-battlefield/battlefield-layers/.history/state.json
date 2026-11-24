@@ -1,0 +1,37 @@
+{
+ "hash": "5c2132462329",
+ "items": {
+  "layers-four": {
+   "hash": "6caa9fdeb3de",
+   "text": "Nền có đúng bốn lớp: trời, cảnh xa, dải đất, decor\nMỗi lớp một việc: trời làm phông, cảnh xa cho chiều sâu, dải đất là chỗ đứng, decor làm hai bên thành bớt trống."
+  },
+  "sky-above-ground": {
+   "hash": "c59265d0254c",
+   "text": "Trời phủ từ mặt đất lên tới mép trên khung hình\nTrời luôn nằm sau mọi lớp khác; phần trời sau dải HUD trên vẫn được vẽ."
+  },
+  "far-on-horizon": {
+   "hash": "d213df232d86",
+   "text": "Cảnh xa (đồi, núi, rừng) đứng trên đường mặt đất, thấp hơn thành nhiều\nCảnh xa không cao tới dải HUD trên và không lấn sự chú ý khỏi thành, hero, quái."
+  },
+  "ground-below-line": {
+   "hash": "b077c7024e4c",
+   "text": "Dải đất phủ từ mặt đất xuống tới mép dưới khung hình, liền một dải qua dưới thành\nDải đất là mặt đứng của thành, hero, quái (`feature-castle/castle-core`); phần dưới bị thanh nâng cấp che vẫn được vẽ."
+  },
+  "layers-full-width": {
+   "hash": "b822a648b9fe",
+   "text": "Trời, cảnh xa và dải đất rộng hơn mép màn để không hở ở màn rộng\nMép màn của thành là khung ở màn chuẩn; màn rộng hơn thấy thêm hai bên, nền phải phủ cả phần đó."
+  },
+  "decor-two-sides": {
+   "hash": "7b512ccd9f23",
+   "text": "Decor (cỏ, đá, cờ, hàng rào) đặt dọc hai bên thành, đối xứng gần đúng\nHai bên trông như nhau để không bên nào trông \"nguy\" hơn chỉ vì decor. Decor không đặt trùng thân thành."
+  },
+  "draw-order": {
+   "hash": "4a150f999770",
+   "text": "Cả trận vẽ từ sau ra trước: trời, cảnh xa, dải đất, decor, thành, quái và hero, hiệu ứng, HUD, popup\nNền luôn dưới thành; thành dưới quái và hero để thấy được unit đứng ở mép thành; HUD và popup trên cùng."
+  },
+  "layers-static": {
+   "hash": "3e2c0e4f966a",
+   "text": "Các lớp nền đứng yên trong trận, không đổi theo đợt, máu thành hay tạm dừng\nNền không báo tin gì cho người chơi; thông tin trận nằm ở `feature-hud`."
+  }
+ }
+}

@@ -1,17 +1,25 @@
 {
- "hash": "fe94740dab29",
+ "hash": "6da99ea96860",
  "items": {
   "team-pick": {
    "hash": "412e93789e41",
    "text": "Trước mỗi trận, người chơi chọn đội hero từ toàn bộ danh sách hero\nĐội đủ người mới vào trận được. Đã loại (người loại ở vòng 1): thành tự sinh hero."
   },
+  "team-valid-before-start": {
+   "hash": "3113e47515b1",
+   "text": "Màn chọn đội kiểm đội hợp lệ trước khi gửi yêu cầu vào trận\nDùng danh sách hero của `feature-hero` để kiểm quân số và luật chọn đội. Theo câu hỏi chung vòng 2 (`_general/r2-all-2`, góp ý `kiem-tra-doi-hinh`)."
+  },
   "team-compare": {
-   "hash": "12fe1e570335",
-   "text": "Màn chọn đội cho thấy cách đánh của từng hero để người chơi so sánh\nNgười chơi phổ thông cần biết hero nào chắn, hero nào bắn xa trước khi chọn."
+   "hash": "734e53c49a40",
+   "text": "Màn chọn đội hiện vai trò phòng thủ của từng hero để người chơi so sánh trước khi chọn\nVai trò cho biết hero giúp giữ thành bằng cách nào, để chọn những hero bổ trợ cho nhau."
   },
   "team-remember": {
    "hash": "52cdc698399a",
    "text": "Màn chọn đội nhớ đội của lượt trước\nAi muốn giữ nguyên đội thì chỉ cần bấm vào trận. Đã loại: lần nào cũng chọn lại từ đầu."
+  },
+  "team-memory-prefill": {
+   "hash": "d05b428869a9",
+   "text": "Đội được nhớ do màn chọn đội giữ, chỉ là lựa chọn điền sẵn, không phải tiến trình\nNgười chơi vẫn xác nhận đội trước khi vào trận; đội nhớ không làm hero mạnh hơn. Theo câu hỏi chung vòng 2 (`_general/r2-all`, góp ý `chu-so-huu-doi-duoc-nho`)."
   }
  }
 }

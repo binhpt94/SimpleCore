@@ -24,7 +24,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 |---|---|---|---|
 | Nội dung màn Loading | Tên game dạng chữ + thanh tiến độ | Như IDEA | Có hình nền và logo game |
 | Thời gian hiện ít nhất | 1 giây | 1 giây | 1 giây |
-| Thời gian tối đa tới màn bắt đầu | 5 giây (dự kiến) | 5 giây | 3 giây (dự kiến, sau khi tối ưu) |
+| Thời gian tối đa tới màn đầu tiên của scene Game | 5 giây (dự kiến); ở IDEA màn đầu là trận, chưa có màn bắt đầu (`feature-run/run-flow/flow-rules`) | 5 giây (màn bắt đầu) | 3 giây (dự kiến, sau khi tối ưu) |
 | Thanh tiến độ | Nhảy theo từng feature | Chạy mượt giữa các mốc | Như PROTOTYPE |
 | Màn lỗi tải | Dòng chữ nêu tên feature lỗi | Như IDEA | Chữ thân thiện cho người chơi, tên feature chỉ ghi vào log |
 

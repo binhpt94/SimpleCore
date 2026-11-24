@@ -58,6 +58,16 @@ namespace Game.Castle
             HealthChanged?.Invoke();
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>Cheat: health set to 1..MaxHealth, never destroys; ignored once destroyed.</summary>
+        public void ForceHealth(float health)
+        {
+            if (IsDestroyed || float.IsNaN(health)) return;
+            Health = Math.Max(1f, Math.Min(MaxHealth, health));
+            HealthChanged?.Invoke();
+        }
+#endif
+
         public void GetFoes(List<EnemyFoe> into)
         {
             into.Clear();

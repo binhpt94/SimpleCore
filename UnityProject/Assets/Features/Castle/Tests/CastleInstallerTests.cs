@@ -39,6 +39,7 @@ namespace Game.Castle.Tests
             Assert.That(registry.TryResolve<ICastleSkills>(out var skills), Is.True);
             Assert.That(skills.Skills, Is.EqualTo(new[] { CastleSkill.Thunder }), "IDEA: Thunder only");
             Assert.That(registry.TryResolve<ICastleUpgrades>(out _), Is.True);
+            Assert.That(registry.TryResolve<ICastleCheat>(out _), Is.True, "dev builds publish the cheat");
             Assert.That(enemies.Foes, Has.Count.EqualTo(1));
             Assert.That(session.Joined, Has.Count.EqualTo(1));
         }

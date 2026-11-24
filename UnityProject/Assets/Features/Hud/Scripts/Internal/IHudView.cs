@@ -18,8 +18,11 @@ namespace Game.Hud
 
         void HideBanner();
 
-        /// <summary>One button per name, left to right in this order.</summary>
-        void CreateSkillButtons(IReadOnlyList<string> names);
+        /// <summary>
+        /// One button per name, placed in the cluster slot at the same position in <paramref name="slots"/>
+        /// (0 = leftmost of <see cref="HudSkillSlots.Count"/>). Slots nobody takes stay empty.
+        /// </summary>
+        void CreateSkillButtons(IReadOnlyList<string> names, IReadOnlyList<int> slots);
 
         /// <param name="index">Button index from <see cref="CreateSkillButtons"/>.</param>
         /// <param name="ready">Bright and pressable when true, dimmed otherwise.</param>

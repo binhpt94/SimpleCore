@@ -7,3 +7,7 @@
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "24fd307bbdcd"}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "24fd307bbdcd"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "24fd307bbdcd"}
+{"at": "2026-11-24 22:09:19", "event": "promote", "by": "người (Sync)", "hash": "24fd307bbdcd"}
+{"at": "2026-11-24 22:43:34", "event": "data", "hash": "411319037ef3", "previous": "24fd307bbdcd", "added": ["castle-damage-between-waves"], "removed": [], "rewritten": [{"id": "castle-auto-attack", "old": "Thành tự đánh quái ở cả hai bên, không cần người chơi bấm\nĐánh quái lọt qua hàng hero. Đã loại: người chơi chạm vào quái để thành bắn.", "new": "Thành tự đánh quái áp sát từ cả hai phía, không cần người chơi bấm\nVai trò của đòn tự đánh là phòng thủ quanh thành; quái không cần vượt qua hero thì thành mới đánh. Đã loại: người chơi chạm vào quái để thành bắn."}]}
+{"at": "2026-11-24 23:22:35", "event": "data", "hash": "7100f997d2a8", "previous": "411319037ef3", "added": ["castle-revive"], "removed": [], "rewritten": []}
+{"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "7100f997d2a8"}

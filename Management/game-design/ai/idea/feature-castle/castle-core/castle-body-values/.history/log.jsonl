@@ -4,3 +4,6 @@
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "13107fd51941"}
 {"at": "2026-11-23 16:18:06", "event": "data", "hash": "a89edb2f03ba", "previous": "13107fd51941", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "a89edb2f03ba"}
+{"at": "2026-11-24 23:51:57", "event": "data", "hash": "b648ec300023", "previous": "a89edb2f03ba", "added": ["castle-revive-30"], "removed": [], "rewritten": [{"id": "castle-destroyed-once", "old": "Máu hiện tại nhỏ hơn hoặc bằng 0 thì thành bị phá, báo `feature-run` đúng 1 lần\nSau khi bị phá, thành không nhận thêm sát thương, không tự bắn, không cho dùng kĩ năng. Nhiều đòn cùng lúc đưa máu xuống dưới 0 vẫn chỉ báo 1 lần; máu hiện ra là 0, không âm.", "new": "Máu hiện tại nhỏ hơn hoặc bằng 0 thì thành bị phá, báo `feature-run` đúng 1 lần\nSau khi bị phá, thành không nhận thêm sát thương, không tự bắn, không cho dùng kĩ năng, cho tới khi được hồi sinh. Nhiều đòn cùng lúc đưa máu xuống dưới 0 vẫn chỉ báo 1 lần; máu hiện ra là 0, không âm. Hồi sinh rồi bị phá lần nữa thì báo thêm 1 lần."}]}
+{"at": "2026-11-25 00:11:10", "event": "promote", "by": "người (Sync)", "hash": "b648ec300023"}
+{"at": "2026-11-25 00:50:04", "event": "promote", "by": "người", "hash": "b648ec300023"}

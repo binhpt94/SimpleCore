@@ -54,6 +54,23 @@ Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc đi�
   - `castle-damage-carries` (AI 7): khớp với thứ đã chốt ở `feature-castle` (thành không tự hồi máu giữa các đợt); đưa lên gốc để mọi nhánh bám theo.
   - Không góp ý nào đi ngược ba ý người đã chấm lại.
 
+- **Câu hỏi chung vòng 2 với GPT (2026-11-24, `advice/_general/r2-all.md`, 7 góp ý "thêm").** Sáu góp ý đã thành ý của feature đích: `chu-so-huu-doi-duoc-nho` vào `feature-team-select` (`team-memory-prefill`), `chu-so-huu-thuong-tien` vào `feature-wallet` (`wallet-records-rewards`), `chu-so-huu-cap-nang` vào `feature-upgrade` (`upgrade-owns-levels`), `khoi-tao-luot-moi`, `quyen-chot-luot`, `yeu-cau-tam-dung` vào `feature-run` (`run-reset-owner`, `run-end-owner`, `run-pause-request`).
+  - **Không dùng `chu-so-huu-ban-do` (thêm feature mới `feature-battlefield` giữ bố cục bản đồ trận).** Các mốc không gian chung (mép thành, mép màn, mặt đất) đã có một nơi giữ ở nhánh thân thành của `feature-castle`, các node khác dùng lại số đó. Thêm feature mới phải dựng cả nhánh vòng 3-4 và chuyển mọi frame đang dùng số của thành mà không đổi quyết định nào. Xét lại nếu bản đồ có thêm thứ ngoài thành và hai mép quái vào. **Cập nhật 2026-11-25:** người yêu cầu thêm `feature-battlefield` (nền chiến trường: trời, cảnh xa, dải đất, decor), chỉ để nhìn; các mốc không gian vẫn ở nhánh thân thành, nền dùng lại.
+  - **Không sửa `run-reset` của gốc** dù GPT đề nghị hai lần (`chu-so-huu-doi-duoc-nho`, và `pham-vi-giu-ki-luc` ở `feature-run`). "Chỉ giữ kỉ lục" nói về tiến trình chơi; đội được nhớ chỉ là lựa chọn điền sẵn, mất khi tắt game, và đã ghi rõ ở `feature-team-select` (`team-memory-prefill`) và `feature-run` (`run-record`). Sửa gốc làm cả cây phải làm lại mà không đổi quyết định.
+
+- **Câu hỏi chung vòng 2 lần hai, không rào (2026-11-24, `advice/_general/r2-all-2.md`, 9 góp ý "thêm").** Lần hỏi trước có rào do GameDesigner tự thêm; lần này bỏ hết.
+  - Thành feature mới: `phan-xu-sat-thuong` → `feature-combat`; `tach-dieu-huong-man` → `feature-game-flow` (khai `node-by`).
+  - Thành ý của feature đích: `kiem-tra-doi-hinh` → `feature-team-select` (`team-valid-before-start`); `sinh-doi-dau-tran` → `feature-hero` (`hero-spawn-team`); `mua-nang-cap-tron-ven` → `feature-upgrade` (`buy-one-level`); `tam-dung-khi-ra-nen` → `feature-run` (`run-pause-background`).
+  - **Không dùng `gop-giao-dien-tran` (gộp `feature-hud-upgrade` vào `feature-hud`).** Trái luật vòng 2 của project ("HUD lớn thì tách cụm lớn"); cụm `feature-hud/r2-3` của chính GPT lại đề nghị giữ tách (`keep-upgrade-bar-apart`).
+  - **Không dùng `tinh-so-tien-thuong` (ví tính số tiền thưởng).** Mức tiền hạ quái và thưởng dọn đợt đã chốt ở nhánh của `feature-enemy` và `feature-wave`; cụm `feature-wave/r2-3` của GPT giao việc tính cho quái và đợt, ví chỉ ghi (`enemy-computes-reward`, `wave-computes-reward`, và `wallet-records-rewards` ở `feature-wallet`).
+  - **Không dùng `moc-chot-diem-luot` (tính điểm đợt dọn sạch cùng lúc thành bị phá).** Trái luật đã chốt "thua trước" ở nhánh luồng màn của `feature-run` và nhánh dọn đợt của `feature-wave`; giữ góp ý cùng chỗ `thu-tu-chot-thua` (`lose-before-clear` ở `feature-wave`).
+
+- **Thêm quảng cáo hồi sinh thành (2026-11-24, người yêu cầu: "xem quảng cáo nhận hồi sinh thành với 30% hp").** Ý `ad-revive`. Thay cho quyết định cũ "không có hồi sinh khi thua" ở `feature-run` và `feature-popup-lose` (lí do cũ: không có quảng cáo; nay có). Tự quyết trong Full Auto:
+  - **Mỗi lượt một lần.** Hồi sinh nhiều lần thì thua mất nghĩa và điểm kỉ lục không còn so được. Đã loại: không giới hạn.
+  - **Quái, đợt, tiền, nâng cấp giữ nguyên khi hồi sinh;** chỉ thành có lại máu. Chơi tiếp đúng thế trận.
+  - Mức 30% máu là thông số, ghi ở vòng 4 của nhánh thành.
+  - Hai feature mới ở vòng 2: dịch vụ quảng cáo (`feature-ads`) và popup đề nghị hồi sinh (`feature-popup-revive`), theo luật mỗi popup một feature.
+
 ## Chưa rõ
 - Tên chính thức: chưa có, không chặn việc thiết kế.
 - Ảnh tham chiếu cho hai style: chờ người bỏ vào.

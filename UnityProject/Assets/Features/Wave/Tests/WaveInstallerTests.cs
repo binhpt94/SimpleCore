@@ -35,6 +35,7 @@ namespace Game.Wave.Tests
             installer.Install(registry);
 
             Assert.That(registry.Resolve<IWaveProgress>().CurrentWave, Is.EqualTo(1));
+            Assert.That(registry.Resolve<IWaveCheat>(), Is.SameAs(registry.Resolve<IWaveProgress>()), "dev builds publish the cheat");
             Assert.That(session.Joined.Count, Is.EqualTo(1));
         }
 

@@ -1,21 +1,65 @@
 {
- "hash": "09ba60c454c5",
+ "hash": "628a4bda5a29",
  "items": {
   "hud-status": {
-   "hash": "97ff7ae4a6f3",
-   "text": "Màn hình trận luôn cho thấy tình trạng thành, số tiền và đợt đang đánh"
+   "hash": "f34b94e0a670",
+   "text": "HUD luôn cho thấy mức hư hại hiện tại của thành, số tiền đang có và đợt đang đánh\nThành giữ nguyên hư hại sang đợt mới; nhìn mức hư hại là biết thành còn trụ được tới đâu để canh lúc cứu nguy."
+  },
+  "hud-reads-castle-hp": {
+   "hash": "8c9ac5b59ba0",
+   "text": "HUD đọc máu hiện tại và máu tối đa của thành từ `feature-castle`\nMột nguồn cho cả thanh máu và số, kể cả khi thành nâng độ bền giữa trận."
+  },
+  "hud-reads-money": {
+   "hash": "e2153e360e67",
+   "text": "HUD đọc số dư hiện tại của lượt từ `feature-wallet`"
+  },
+  "hud-reads-wave": {
+   "hash": "41e215db2b17",
+   "text": "HUD đọc số đợt cần hiện từ `feature-wave`"
+  },
+  "hud-wave-banner-event": {
+   "hash": "b58c71c82467",
+   "text": "HUD hiện thông báo đầu đợt khi `feature-wave` báo đợt mới đã bắt đầu\nThông báo xuất hiện đúng lúc đợt thật sự bắt đầu, không phải lúc ô đợt đổi số trong lúc thở."
+  },
+  "hud-reads-cooldown": {
+   "hash": "e2bdaeec2440",
+   "text": "HUD đọc trạng thái sẵn sàng, thời gian hồi còn lại và tổng hồi chiêu từng kĩ năng từ `feature-castle`\nThành giữ bộ đếm; HUD chỉ định dạng để hiện."
   },
   "hud-skills": {
    "hash": "d4a511c7510d",
    "text": "Nút kĩ năng của thành luôn trên màn hình, cho thấy lúc nào dùng được lại"
   },
+  "hud-sends-skill-id": {
+   "hash": "503f58aa6bf3",
+   "text": "Chạm nút sẵn sàng thì HUD gửi mã của kĩ năng tương ứng do `feature-castle` cấp\nMỗi nút gọi đúng kĩ năng của nó dù thành đổi thứ tự danh sách."
+  },
+  "castle-checks-skill": {
+   "hash": "b0100669418f",
+   "text": "`feature-castle` kiểm kĩ năng có dùng được ngay lúc nhận từng yêu cầu từ HUD\nNút có thể còn hiện sẵn sàng khi lần bấm trước vừa bắt đầu hồi chiêu; quyết dựa trên trạng thái của thành."
+  },
+  "castle-runs-skill": {
+   "hash": "6dbc4a4315a4",
+   "text": "`feature-castle` thực hiện ngay kĩ năng khi chấp nhận yêu cầu từ HUD\nBên chấp nhận yêu cầu cũng là bên tạo hiệu ứng trong trận."
+  },
   "hud-pause": {
-   "hash": "53ec821aabbc",
-   "text": "Có nút tạm dừng trên màn hình trận\nBấm thì mở `feature-popup-pause`."
+   "hash": "3f7b1a0839c8",
+   "text": "Nút tạm dừng trên HUD gửi yêu cầu tạm dừng cho `feature-run`\nPopup tạm dừng mở sau khi `feature-run` xác nhận trận đã dừng."
+  },
+  "hud-locks-by-run": {
+   "hash": "03a0550ef469",
+   "text": "HUD dùng trạng thái từ `feature-run` để khoá nút kĩ năng và nút tạm dừng khi trận dừng hay lượt đã kết thúc\nNút ngừng nhận chạm ngay khi trạng thái lượt đổi, kể cả trước lúc popup hiện."
   },
   "hud-clear-view": {
-   "hash": "2f25badefa66",
-   "text": "HUD nằm ở mép màn hình, không che dải chiến trường\nMàn hình điện thoại cầm ngang thấp; chiến trường hai bên thành phải luôn nhìn rõ."
+   "hash": "175655ec0227",
+   "text": "HUD chia mép màn cho chính nó và `feature-hud-upgrade`, ngoài dải chiến trường\nCách chia mép chốt ở nhánh bố cục HUD; thanh nâng cấp xếp nút trong vùng được cấp. Màn ngang thấp nên chiến trường hai bên thành phải luôn nhìn rõ."
+  },
+  "hud-resizes-bar-area": {
+   "hash": "cedd0e77af25",
+   "text": "HUD cập nhật vùng dành cho `feature-hud-upgrade` khi cỡ màn hay vùng an toàn đổi\nThanh nâng cấp xếp nút và giới hạn vùng chạm theo vùng nhận được."
+  },
+  "keep-upgrade-bar-apart": {
+   "hash": "46e5baeb4e5b",
+   "text": "Giữ `feature-hud-upgrade` là feature riêng lo các nút mua nâng cấp trong trận\nHUD giữ bố cục chung; hai bên chỉ cần thống nhất vùng đặt thanh."
   }
  }
 }

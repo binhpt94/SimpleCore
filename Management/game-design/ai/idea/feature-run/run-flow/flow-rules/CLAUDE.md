@@ -26,6 +26,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Về màn bắt đầu ở popup thua | Không có (chưa có màn bắt đầu) | Có | Có |
 | Bỏ lượt | Không có (chưa có tạm dừng) | Không bắt buộc | Có |
 | Độ trễ trước popup thua | 1 giây | 1 giây | 1 giây |
+| Bước hồi sinh (popup hồi sinh, quảng cáo) | Không có: thành bị phá lần đầu vào thẳng popup thua sau 1 giây | Có, mỗi lượt 1 lần | Có, mỗi lượt 1 lần |
 | Hiệu ứng đổi màn | Không | Không | Mờ dần ra rồi vào, 0.3 giây mỗi chiều (dự kiến) |
 
 ## Trường hợp biên
