@@ -521,7 +521,7 @@
       renew: { label: "Renew", path: "/api/sessions/renew", done: "đã làm mới", pin: true }
     };
     var ACTION_KEYS = ["reread", "compact", "renew"];
-    var BATCH = 5;      // số thread chạy cùng lúc của các nút "tất cả"
+    var BATCH = 10;     // số thread chạy cùng lúc của các nút "tất cả"
     var rereadRow = put(listBox, el("div", "gap"));
     var allBtns = {};
     ACTION_KEYS.forEach(function (k) {
@@ -578,15 +578,17 @@
           (end ? ". Mở lại chat đang mở trong VS Code để thấy lượt mới." : "");
       };
       show(false);
-      var next = function () {
-        var id = stopped ? null : queue.shift();
-        if (!id) return Promise.resolve();
+      var step = function (id) {      // đúng một thread, không tự chạy tiếp
         return runOne(kind, id).then(function (r) {
           done++; if (r.ok) good++;
           if (r.pin) stopped = true;      // PIN sai: không thử tiếp, mỗi lần sai đều bị đếm
           show(false);
-          return next();
         });
+      };
+      var next = function () {      // một làn: chạy lần lượt tới khi hết hàng đợi
+        var id = stopped ? null : queue.shift();
+        if (!id) return Promise.resolve();
+        return step(id).then(next);
       };
       // Mỗi đợt tối đa BATCH thread cùng lúc. Thao tác cần PIN chạy thread đầu một mình trước (PIN sai thì dừng
       // ngay ở đó, chỉ bị đếm một lần sai), PIN qua rồi mới chạy song song phần còn lại.
@@ -595,7 +597,7 @@
         for (var i = 0; i < BATCH; i++) all.push(next());
         return Promise.all(all);
       };
-      (act.pin ? next().then(lanes) : lanes()).then(function () {
+      (act.pin ? step(queue.shift()).then(lanes) : lanes()).then(function () {
         show(true);
         ACTION_KEYS.forEach(function (k) { allBtns[k].disabled = false; });
       });
