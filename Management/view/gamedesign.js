@@ -11,7 +11,7 @@
   // ---------------------------------------------------------------- cấu hình
   var OVERVIEW_LAST_ROUND = 2;   // bản đồ chung ("Tất cả feature") hiện tới vòng này
   var FOCUS_ROUND = 2;           // bấm node ở vòng này thì chỉ còn nhánh của nó, hiện tới vòng cuối
-  var CARD_W = 312, CARD_H = 112, GAP_X = 64, GAP_Y = 14, HEAD_H = 40;
+  var CARD_W = 312, CARD_H = 140, GAP_X = 64, GAP_Y = 14, HEAD_H = 40;
   // `dir`: thư mục của bảng, tính từ Management/ (để nạp ảnh và ghi đường dẫn).
   var TABLES = [
     { key: "live", label: "Đã chốt (live)", dir: "game-design/live/", empty: "Chưa có gì được chốt. Chốt node từ bảng Đề xuất (idea)." },
@@ -56,20 +56,30 @@
     ".gd-map path { fill: none; stroke: var(--line); stroke-width: 2; }",
     ".gd-map path.on { stroke: var(--accent); }",
     ".gd-col { position: absolute; top: 0; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }",
-    ".gd-card { position: absolute; display: block; text-align: left; padding: 9px 12px; border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; cursor: pointer; overflow: hidden; }",
+    ".gd-card { position: absolute; display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; text-align: left; padding: 9px 12px; border: 1px solid var(--line); border-left: 6px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; cursor: pointer; overflow: hidden; }",
     // Viền theo chốt: node giống live viền đủ đậm, node chưa chốt viền cùng màu nhưng trong. Thanh trái là trạng thái.
     ".gd-card.fixed { border-color: var(--muted); }",
     ".gd-card.loose { border-color: color-mix(in srgb, var(--muted) 30%, transparent); }",
     ".gd-card.by-gpt strong { color: var(--gpt); }",
     ".gd-card:hover { border-color: var(--accent); }",
     ".gd-card.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }",
-    ".gd-card.redo { border-left-color: var(--bad); }",
-    ".gd-card.wait { border-left-color: var(--warn-text); }",
+    // Màu của thẻ theo trạng thái xấu nhất của node cộng cả nhánh bên dưới (chỉ là hiển thị, không lưu ở đâu).
+    ".gd-card.redo { border-left-color: var(--bad); background: color-mix(in srgb, var(--bad) 7%, var(--bg)); }",
+    ".gd-card.wait { border-left-color: var(--clash); background: color-mix(in srgb, var(--clash) 8%, var(--bg)); }",
     ".gd-card.done { border-left-color: var(--ok); }",
     ".gd-card strong { display: block; font-size: 14px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 30px; }",
     ".gd-card span.sum { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 12.5px; line-height: 1.35; color: var(--muted); margin-top: 3px; }",
     ".gd-card span.low { position: absolute; right: 8px; top: 7px; }",
-    ".gd-chips { position: absolute; display: flex; gap: 4px; overflow: hidden; }",
+    ".gd-chips { position: absolute; display: flex; gap: 4px; overflow: hidden; align-items: center; }",
+    ".gd-chips.info .gd-tag { font-size: 11px; padding: 3px 7px; }",
+    ".gd-tag.branch { font-weight: 600; }",
+    ".gd-chip.branch { border-color: var(--bad); color: var(--bad); font-weight: 600; text-decoration: none; }",
+    ".gd-chip.branch.redo { background: color-mix(in srgb, var(--bad) 10%, var(--panel)); }",
+    ".gd-wait-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 8px 0; font-size: 13px; }",
+    ".gd-wait-list b { font-weight: 600; margin-right: 2px; }",
+    ".gd-wait-list .gd-chip { text-decoration: none; }",
+    ".gd-map-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 10px; font-size: 12px; color: var(--muted); }",
+    ".gd-map-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }",
     ".gd-chip, .gd-tag { flex: none; font: inherit; font-size: 12px; line-height: 1; padding: 4px 8px; border-radius: 10px; white-space: nowrap; border: 1px solid var(--line); background: var(--panel); color: var(--muted); }",
     ".gd-chip { cursor: pointer; color: var(--text); text-decoration: underline; }",
     ".gd-chip:hover { border-color: var(--accent); }",
@@ -494,6 +504,39 @@
       });
       return open;
     };
+    // Trạng thái duyệt, chỉ để hiển thị (tính lại mỗi lần vẽ, không lưu, không ảnh hưởng tới khoá hay Sync).
+    // Của node: "ok" (đạt và giống live), "redo" (việc của @GameDesigner), "todo" (chờ bạn chấm, trả lời hoặc chốt).
+    var own = function (n) { return !n.passed ? (n.redo ? "redo" : "todo") : n.state === "same" ? "ok" : "todo"; };
+    // Của nhánh: đếm mọi node bên dưới (kể cả node đang ẩn trên bản đồ) theo trạng thái của chúng.
+    var branch = function (n) {
+      var out = { total: 0, todo: 0, redo: 0 };
+      var visit = function (c) {
+        out.total++;
+        var st = own(c);
+        if (st !== "ok") out[st]++;
+        c.children.forEach(visit);
+      };
+      n.children.forEach(visit);
+      return out;
+    };
+    // Tên đầy đủ của một node: "Feature › Node con › Lá".
+    var trail = function (n) {
+      var names = [], at = data ? data.idea : null, parts = n.path ? n.path.split("/") : [];
+      parts.forEach(function (key) {
+        at = at ? at.children.filter(function (c) { return c.key === key; })[0] : null;
+        names.push(at ? at.title || key : key);
+      });
+      return names.length ? names.join(" › ") : (n.title || "(gốc)");
+    };
+    // Tới một node của bảng đề xuất: mở nhánh feature của nó rồi chọn nó.
+    var goTo = function (n) {
+      state.table = "idea";
+      state.focus = n.path ? n.path.split("/")[0] : null;
+      state.selected = n.path;
+      state.message = null;
+      state.ask = null;
+      render();
+    };
     var failingBelow = function (node) { var n = 0; each(node, function (x) { if (!x.passed) n++; }); return n; };
     // Độ quan trọng: giai đoạn của một điểm, nhãn "IDEA 9", và node có cần cho giai đoạn đang lọc không.
     var phases = function () { return data && data.phases || []; };
@@ -518,16 +561,17 @@
     // Ý bạn đã chấm dưới mức đạt (dùng cho thẻ ở bảng live).
     var turnedDown = function (node) { return node.items.filter(function (i) { return i.user !== null && i.user < passMin(); }).length; };
     // Node đề xuất đang đạt mà khác live: thứ nút Sync sẽ chép, đi từ gốc xuống và dừng ở node chưa đạt.
-    var syncable = function () {
-      var n = 0;
+    var syncList = function () {
+      var out = [];
       var visit = function (node) {
         if (!node.passed) return;
-        if (node.state !== "same") n++;
+        if (node.state !== "same") out.push(node);
         node.children.forEach(visit);
       };
       if (data && data.idea) visit(data.idea);
-      return n;
+      return out;
     };
+    var syncable = function () { return syncList().length; };
     // Ô nhập ẩn sau một chữ gạch dưới; bấm mới hiện. Trả về textarea (đã gắn tự giãn).
     var hiddenInput = function (box, label, value, placeholder, onInput, line) {
       line = line || put(box, el("div"));
@@ -630,7 +674,8 @@
         // Một khung xác nhận dùng chung cho mọi nút cần PIN: nói rõ sẽ làm gì, rồi mới hỏi PIN.
         var target = state.ask.kind === "mode" ? MODES.filter(function (m) { return m.key === state.ask.key; })[0] : null;
         var what = target ? "Đổi sang " + target.label + ": " + target.hint
-          : "Sync: chép " + syncable() + " node đang đạt sang live (bảng đã chốt), ghi đè bản cũ của các node đó.";
+          : "Sync: chép " + syncable() + " node đang đạt sang live (bảng đã chốt), ghi đè bản cũ của các node đó: " +
+            syncList().map(trail).join(" · ") + ".";
         var confirmBox = put(noticeBox, el("div", "gd-confirm gd-inline"));
         add(confirmBox, el("span", "", what));
         var pin = put(confirmBox, el("input"));
@@ -657,6 +702,14 @@
         add(confirmBox, button(target ? "Đổi mode" : "Sync", go, null, "gd-btn main"), button("Thôi", function () { state.ask = null; render(); }));
       }
       if (state.message) add(noticeBox, el("p", state.message.bad ? "bad-text" : "ok-text", state.message.text));
+      if (state.table === "idea" && data && data.idea && syncable()) {
+        var waitBox = put(noticeBox, el("div", "gd-wait-list"));
+        add(waitBox, el("b", "", "Chờ bạn chốt (" + syncable() + "):"));
+        syncList().forEach(function (n) {
+          var link = put(waitBox, button(trail(n), function () { goTo(n); }, null, "gd-chip todo"));
+          link.title = "Tới node này (mở nhánh của nó trên bản đồ)";
+        });
+      }
       if (state.table === "live" && data && data.idea) {
         var waiting = 0;
         each(data.idea, function (n) { if (n.pending || (mode() === "user" && unscored(n)) || openClashes(n) || (n.passed && n.state !== "same")) waiting++; });
@@ -715,19 +768,10 @@
       render();
     };
 
-    // Các nút nhỏ ở đáy thẻ (bảng đề xuất): việc cần bạn làm tại node đó, và trạng thái của node.
-    var chipsFor = function (n) {
-      var out = [phaseTag(n)];
+    // Hàng trạng thái ở đáy thẻ (bảng đề xuất): việc cần bạn làm tại node, trạng thái duyệt của node, rồi của nhánh.
+    var statusChips = function (n) {
+      var out = [];
       var open = function () { state.selected = n.path; state.message = null; render(); };
-      if (state.table === "live") {      // bản đã chốt: vẫn chấm được; ý bị chấm thấp thì cảnh báo
-        var down = turnedDown(n);
-        if (down) {
-          var warn = el("span", "gd-tag bad", down + " ý dưới " + passMin());
-          warn.title = "Bạn đã chấm " + down + " ý của bản đã chốt dưới mức đạt; node đề xuất tương ứng cần làm lại.";
-          out.push(warn);
-        }
-        return out;
-      }
       if (n.pending) {
         var ask = button(n.pending + " câu hỏi", open, null, "gd-chip ask");
         ask.title = "Mở node để trả lời " + n.pending + " câu hỏi của @GameDesigner";
@@ -740,14 +784,16 @@
         b.title = why;
         return b;
       };
-      if (!n.passed && n.redo) {
-        var redo = el("span", "gd-tag bad", "cần làm lại");
+      if (own(n) === "redo") {
+        var redo = el("span", "gd-tag bad", "Cần làm lại");
         redo.title = n.reasons.join("\n");
         out.push(redo);
       } else if (!n.passed) {
         out.push(todo("Đang chờ bạn chấm hoặc trả lời; bấm để mở node.\n" + n.reasons.join("\n")));
       } else if (n.state === "same") {
-        out.push(el("span", "gd-tag ok", "đã chốt"));
+        var done = el("span", "gd-tag ok", "✓ Đã duyệt");
+        done.title = "Node này đạt và giống bản đã chốt (live)";
+        out.push(done);
       } else {
         out.push(todo("Node đạt nhưng chưa chốt sang live" + (ctx.setup ? ": bấm ✓ để duyệt nhanh, hoặc bấm đây để mở node." : ". " + SERVER_HINT)));
         if (ctx.setup) {
@@ -757,7 +803,27 @@
           out.push(go);
         }
       }
+      // Nhánh: mọi node bên dưới. Chỉ là hiển thị; node cha "đã duyệt" mà nhánh còn việc thì thấy ngay ở đây.
+      var b = branch(n);
+      if (b.total && !b.todo && !b.redo) {
+        var all = el("span", "gd-tag ok branch", "Nhánh ✓");
+        all.title = "Cả " + b.total + " node bên dưới đã duyệt";
+        out.push(all);
+      } else if (b.total) {
+        var text = "Nhánh: " + [b.redo ? b.redo + " cần làm lại" : "", b.todo ? b.todo + " chưa duyệt" : ""].filter(Boolean).join(", ");
+        var more = button(text, function () { goTo(n); }, null, "gd-chip branch" + (b.redo ? " redo" : ""));
+        more.title = "Trong " + b.total + " node bên dưới: " + b.todo + " chưa duyệt, " + b.redo + " cần làm lại. Bấm để mở nhánh.";
+        out.push(more);
+      }
       return out;
+    };
+    // Bảng đã chốt: không có khái niệm duyệt; chỉ cảnh báo ý bạn đã chấm thấp.
+    var liveChips = function (n) {
+      var down = turnedDown(n);
+      if (!down) return [];
+      var warn = el("span", "gd-tag bad", down + " ý dưới " + passMin());
+      warn.title = "Bạn đã chấm " + down + " ý của bản đã chốt dưới mức đạt; node đề xuất tương ứng cần làm lại.";
+      return [warn];
     };
 
     var renderMap = function (root) {
@@ -770,6 +836,17 @@
       var width = colX(lastRound) + CARD_W, height = rowY(plan.rows) - GAP_Y;
       var idea = state.table === "idea";
 
+      if (idea) {      // chú giải: màu của thẻ là trạng thái xấu nhất của node cộng nhánh bên dưới
+        var legend = put(mapBox, el("div", "gd-map-legend"));
+        [["var(--ok)", "Đã duyệt cả node và nhánh"], ["var(--clash)", "Còn node chưa duyệt (ở node này hoặc bên dưới)"],
+         ["var(--bad)", "Có node cần @GameDesigner làm lại"]].forEach(function (x) {
+          var item = put(legend, el("span"));
+          var dot = put(item, el("i"));
+          dot.style.background = x[0];
+          item.appendChild(document.createTextNode(x[1]));
+        });
+        add(legend, el("span", "", "Nhãn \"Nhánh\" đếm mọi node bên dưới, kể cả node đang ẩn."));
+      }
       var map = put(put(mapBox, el("div", "gd-scroll")), el("div", "gd-map"));
       map.style.width = width + "px";
       map.style.height = height + "px";
@@ -795,7 +872,8 @@
           svg.appendChild(line);
         }
         var nodeFixed = !idea || n.state === "same";      // bảng live: mọi node đã chốt
-        var kind = (!idea ? "" : n.redo ? " redo" : n.passed && n.state === "same" ? " done" : " wait") + (needed(n) ? "" : " dim") +
+        var below = idea ? branch(n) : null;
+        var kind = (!idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || below.todo ? " wait" : " done") + (needed(n) ? "" : " dim") +
           (nodeFixed ? " fixed" : " loose") + (n.nodeBy && !nodeFixed ? " by-gpt" : "");
         var card = el("button", "gd-card" + (n.path === state.selected ? " sel" : "") + kind);
         card.type = "button";
@@ -812,7 +890,8 @@
         }
         card.addEventListener("click", function () { select(n); });
         map.appendChild(card);
-        var chips = chipsFor(n);
+        var status = idea ? statusChips(n) : liveChips(n);
+        var chips = [phaseTag(n)];
         if (n.cheat) chips.push(el("span", "gd-tag cheat", "cheat"));
         if (n.by && n.by.gpt) {
           var gptTag = el("span", "gd-tag gpt", "GPT " + n.by.gpt);
@@ -836,13 +915,16 @@
           chips.push(askTag);
         }
         if (item.hidden > 0) chips.push(el("span", "gd-tag", "+" + item.hidden + (n.round === FOCUS_ROUND - 1 ? " feature ẩn" : " node con")));
-        if (!chips.length) return;
-        var row = el("div", needed(n) ? "gd-chips" : "gd-chips dim");
-        row.style.left = (x + 10) + "px";
-        row.style.top = (y + CARD_H - 30) + "px";
-        row.style.width = (CARD_W - 20) + "px";
-        chips.forEach(function (c) { add(row, c); });
-        map.appendChild(row);
+        // Hai hàng ở đáy thẻ: trạng thái (nhìn trước) ở trên, thông tin ở dưới.
+        [[status, "gd-chips", 60], [chips, "gd-chips info", 30]].forEach(function (r) {
+          if (!r[0].length) return;
+          var row = el("div", r[1] + (needed(n) ? "" : " dim"));
+          row.style.left = (x + 12) + "px";
+          row.style.top = (y + CARD_H - r[2]) + "px";
+          row.style.width = (CARD_W - 22) + "px";
+          r[0].forEach(function (c) { add(row, c); });
+          map.appendChild(row);
+        });
       });
     };
 
