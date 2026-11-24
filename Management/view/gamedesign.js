@@ -11,7 +11,7 @@
   // ---------------------------------------------------------------- cấu hình
   var OVERVIEW_LAST_ROUND = 2;   // bản đồ chung ("Tất cả feature") hiện tới vòng này
   var FOCUS_ROUND = 2;           // bấm node ở vòng này thì chỉ còn nhánh của nó, hiện tới vòng cuối
-  var CARD_W = 240, CARD_H = 112, GAP_X = 64, GAP_Y = 14, HEAD_H = 40;
+  var CARD_W = 312, CARD_H = 112, GAP_X = 64, GAP_Y = 14, HEAD_H = 40;
   // `dir`: thư mục của bảng, tính từ Management/ (để nạp ảnh và ghi đường dẫn).
   var TABLES = [
     { key: "live", label: "Đã chốt (live)", dir: "game-design/live/", empty: "Chưa có gì được chốt. Chốt node từ bảng Đề xuất (idea)." },
@@ -132,6 +132,8 @@
     ".gd-source b { display: block; font-size: 12px; color: var(--gpt); margin-bottom: 2px; }",
     ".gd-source p { margin: 0; white-space: pre-wrap; font-size: 13.5px; line-height: 1.5; }",
     ".gd-tag.gpt { border-color: var(--gpt); color: var(--gpt); }",
+    ".gd-tag.clash { border-color: var(--clash); color: var(--clash); font-weight: 600; }",
+    ".gd-clash-text { color: var(--clash); font-weight: 600; }",
     ".gd-mark.good { border-color: var(--ok); background: var(--ok); color: var(--panel); }",
     ".gd-mark.fine { border-color: var(--ok); color: var(--ok); }",
     ".gd-mark.bad { border-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); }",
@@ -468,6 +470,28 @@
     var lowest = function (node) {
       return node.items.length ? Math.min.apply(null, node.items.map(function (i) { return i.effective; })) : null;
     };
+    // Số nhóm ý trái nhau (các ý nối nhau qua it.clash) mà người chưa giải quyết. Một nhóm xong khi người đã chấm
+    // mọi ý của nó và nhiều nhất một ý đạt; chưa chấm đủ, hoặc từ hai ý cùng đạt, là còn xung đột.
+    var openClashes = function (node) {
+      var byId = {}, seen = {}, open = 0;
+      node.items.forEach(function (it) { byId[it.id] = it; });
+      node.items.forEach(function (it) {
+        if (!(it.clash && it.clash.length) || seen[it.id]) return;
+        var ids = [], stack = [it.id];
+        while (stack.length) {
+          var id = stack.pop();
+          if (seen[id] || !byId[id]) continue;
+          seen[id] = true;
+          ids.push(id);
+          (byId[id].clash || []).forEach(function (x) { stack.push(x); });
+        }
+        if (ids.length < 2) return;
+        var scored = ids.filter(function (x) { return byId[x].user !== null; }).length;
+        var kept = ids.filter(function (x) { return byId[x].user !== null && byId[x].user >= passMin(); }).length;
+        if (scored < ids.length || kept > 1) open++;
+      });
+      return open;
+    };
     var failingBelow = function (node) { var n = 0; each(node, function (x) { if (!x.passed) n++; }); return n; };
     // Độ quan trọng: giai đoạn của một điểm, nhãn "IDEA 9", và node có cần cho giai đoạn đang lọc không.
     var phases = function () { return data && data.phases || []; };
@@ -633,7 +657,7 @@
       if (state.message) add(noticeBox, el("p", state.message.bad ? "bad-text" : "ok-text", state.message.text));
       if (state.table === "live" && data && data.idea) {
         var waiting = 0;
-        each(data.idea, function (n) { if (n.pending || (mode() === "user" && unscored(n)) || (n.passed && n.state !== "same")) waiting++; });
+        each(data.idea, function (n) { if (n.pending || (mode() === "user" && unscored(n)) || openClashes(n) || (n.passed && n.state !== "same")) waiting++; });
         if (waiting) {
           add(put(noticeBox, el("div", "gd-inline")), button(waiting + " node ở bảng Đề xuất đang chờ bạn", function () {
             state.table = "idea"; state.message = null; render();
@@ -787,6 +811,12 @@
           var owedTag = el("span", "gd-tag bad", "GPT thiếu " + n.gpt.missing.length);
           owedTag.title = "GPT đã góp " + n.gpt.missing.length + " ý mà node chưa có; @GameDesigner phải đưa vào, không được bỏ";
           chips.push(owedTag);
+        }
+        var clashes = idea ? openClashes(n) : 0;
+        if (clashes) {
+          var clashTag = el("span", "gd-tag clash", "xung đột " + clashes);
+          clashTag.title = clashes + " nhóm ý trái nhau chưa chọn: bấm node, chọn 1 ý trong mỗi nhóm. Vòng sau của node này bị khoá tới khi chọn xong";
+          chips.push(clashTag);
         }
         if (idea && n.gptOwed) {
           var askTag = el("span", "gd-tag bad", "chưa hỏi GPT");
@@ -1241,6 +1271,9 @@
         table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "")));
       if (node.summary) add(body, el("p", "", node.summary));
       // Ý của node do AI nào đề xuất, ý GPT bị loại, và góp ý của GPT chưa được đưa vào node.
+      var clashes = state.table === "idea" ? openClashes(node) : 0;
+      if (clashes) add(body, el("p", "gd-clash-text", "Xung đột chưa giải quyết: " + clashes + " nhóm ý trái nhau. Trong mỗi khung \"Chọn 1\" bên dưới, " +
+        "chấm để chỉ còn một ý đạt (từ " + passMin() + " trở lên), rồi Lưu chấm điểm. Các node con bị khoá với @GameDesigner cho tới khi hết xung đột."));
       if (node.gptOwed) add(body, el("p", "bad-text", "Chưa hỏi GPT: node vòng 1 và 2 bắt buộc có ít nhất một lần hỏi GPT. " +
         "@GameDesigner nhắn @DesignAdvisor hỏi về node này."));
       var byCount = node.by || {}, gptSide = node.gpt || { dropped: [], missing: [], clarified: 0 };

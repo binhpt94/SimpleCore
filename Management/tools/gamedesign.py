@@ -51,7 +51,8 @@ exact text it was given to: when the idea is rewritten it becomes "previous" and
 A node PASSES when it has ideas, is not stale, and
     mode auto: every idea's effective score passes;
     mode user: the human scored every idea, every score passes, and no question is unanswered.
-A node may be written only when every node above it is approved: it passes and, in mode user, is the same in live.
+A node may be written only when every node above it is approved: it passes, the human has settled its ideas that
+stand against each other (open_clashes), and, in mode user, it is the same in live.
 Nothing reaches live by itself: the human presses Chốt on a node, or Sync for every passing node (sync_live).
 The human may score an idea in either table; the score belongs to the idea's text, so one low score on a
 fixed idea makes the proposed node fail wherever the text is still the same.
@@ -1751,7 +1752,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
             "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
-            "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "gptOwed": gpt_owed, "nodeBy": data.get("nodeBy"),
+            "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "gptOwed": gpt_owed, "clashOpen": open_clashes(items), "nodeBy": data.get("nodeBy"),
             "refText": raw + "\n" + doc, "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
@@ -1810,6 +1811,28 @@ def advice_points(path):
         detail = tidy("\n".join(p.pop("lines")))
         p["detail"], p["text"] = detail, p["title"] + ("\n" + detail if detail else "")
     return points, errors
+
+
+def open_clashes(items):
+    """How many groups of ideas that stand against each other (joined by `clash`, set by mark_sources) the human has
+    not settled. A group is settled when the human scored every idea of it and at most one passes. While a node has
+    an open group the nodes below it stay locked (mark_changes, node_approved)."""
+    by_id = {it["id"]: it for it in items}
+    seen, count = set(), 0
+    for it in items:
+        if not it.get("clash") or it["id"] in seen:
+            continue
+        group, stack = [], [it["id"]]
+        while stack:
+            i = stack.pop()
+            if i in seen or i not in by_id:
+                continue
+            seen.add(i)
+            group.append(by_id[i])
+            stack.extend(by_id[i].get("clash") or [])
+        if len(group) > 1 and (any(g["user"] is None for g in group) or sum(1 for g in group if g["user"] >= PASS_MIN) > 1):
+            count += 1
+    return count
 
 
 def read_advice(folder):
@@ -1932,7 +1955,7 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
         fixed = {it["id"]: it["hash"] for it in other["items"]} if other else {}
         for it in node["items"]:      # an idea is fixed when live holds it with this very content
             it["fixed"] = fixed.get(it["id"]) == it["hash"]
-        node["approved"] = node["passed"] and (mode != "user" or node["state"] == "same")
+        node["approved"] = node["passed"] and not node.get("clashOpen") and (mode != "user" or node["state"] == "same")
         below = [visit(c) for c in node["children"]]
         live_keys = {c["key"] for c in other["children"]} if other else set()
         gone = bool(live_keys - {c["key"] for c in node["children"]})      # live has a child that idea dropped
@@ -1970,6 +1993,11 @@ def node_approved(root, parts, mode, parent_hash):
     passed, reasons = verdict(data["items"], pending, stale, mode, refs)
     if not passed:
         return False, f"node cha '{name}' chưa đạt: " + "; ".join(reasons[:4]), data["hash"]
+    mark_sources(src, table_dir(root, "idea"), "/".join(parts), data, data["items"], mode, [], name)
+    clashes = open_clashes(data["items"])
+    if clashes:
+        return False, (f"node cha '{name}' còn {clashes} nhóm ý trái nhau người chưa chọn (xung đột): chờ người chấm để mỗi nhóm "
+                       f"chỉ còn một ý đạt, rồi bỏ ý bị loại"), data["hash"]
     if mode == "user":
         dst = table_dir(root, "live").joinpath(*parts)
         if not (dst / DATA_FILE).is_file():

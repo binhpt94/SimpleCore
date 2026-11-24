@@ -261,6 +261,18 @@ def label_cases(root):
     check("an idea carries GPT's own words", items["hero-bench"]["sources"][0]["text"], "Có ghế dự bị 2 hero\nĐổi hero giữa trận.")
     check("the idea that replaces another and the one it replaces stand against each other",
           {k: v["clash"] for k, v in items.items()}, {"hero-count": ["hero-four"], "hero-speed": [], "hero-bench": [], "hero-four": ["hero-count"]})
+    review = lambda scores: gd.save_review(root, "feature-hero", {k: {"score": v, "feedback": ""} for k, v in scores.items()})  # noqa: E731
+    gate = lambda: gd.node_approved(root, ["feature-hero"], "auto", None)[:2]      # noqa: E731
+    seen = [hero(root)[0]["clashOpen"]]
+    review({"hero-count": 8, "hero-four": 8, "hero-speed": 8, "hero-bench": 8})
+    seen += [hero(root)[0]["clashOpen"], gate()[0], "nhóm ý trái nhau" in gate()[1]]
+    check("gd_status says the clash is open and the nodes below are locked",
+          "XUNG ĐỘT CHƯA GIẢI QUYẾT: 1 nhóm" in gd_status.report(root, "ai/idea/feature-hero"), True)
+    review({"hero-four": 2})
+    seen += [hero(root)[0]["clashOpen"], "nhóm ý trái nhau" in gate()[1]]
+    check("ideas that stand against each other lock the nodes below until the human scored them all and at most one passes",
+          seen, [1, 1, False, True, 0, False])
+    shutil.rmtree(gd.table_dir(root, "idea") / "feature-hero" / gd.REVIEW_DIR, ignore_errors=True)
     hero_node(root, ("", full))
     check("labels do not change the hash of the data or of an idea",
           ([it["hash"] for it in hero(root)[0]["items"]][:2], hero(root)[0]["dataHash"] == n["dataHash"]), (plain_hash[1], True))

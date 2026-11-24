@@ -117,7 +117,7 @@ Node **đạt** khi có ít nhất một ý, `based-on` khớp hash data của c
 - **Full Auto**: mọi ý có điểm hiệu lực từ 5 trở lên (điểm của người nếu đã chấm, chưa thì điểm AI). Node đạt chỉ sang `live` khi người bấm Sync hoặc Chốt; node con của node đạt thì mở ngay, không cần chờ.
 - **User control**: người đã chấm mọi ý, mọi điểm từ 5 trở lên, và không còn câu hỏi chưa trả lời. Người bấm Chốt; node con chỉ mở sau khi node cha đã chốt giống `live`.
 
-Node chưa đạt thì các node con bị guard khoá. Chính node đó vẫn sửa được.
+Node chưa đạt thì các node con bị guard khoá. Chính node đó vẫn sửa được. Node còn ý trái nhau mà người chưa chọn ("XUNG ĐỘT CHƯA GIẢI QUYẾT" trong `gd_status.py`) cũng khoá node con, ở cả hai mode: không tự chọn thay người, báo người rồi chờ.
 
 ## Làm lại một node
 `gd_status.py` ghi rõ node nào "bạn cần làm lại" và vì sao. Có ba lí do:

@@ -39,6 +39,9 @@ def lines_for(root, node, out):
                    + (" -> LỆCH, rà lại node rồi ghi hash mới" if node["stale"] else " -> khớp"))
     out.append(f"- So với live: {dict(new='chưa có trong live', changed='khác live', same='giống live')[node['state']]}"
                + ("; các node con đang mở cho bạn ghi" if node["approved"] else "; các node con đang bị khoá"))
+    if node.get("clashOpen"):
+        out.append(f"- XUNG ĐỘT CHƯA GIẢI QUYẾT: {node['clashOpen']} nhóm ý trái nhau người chưa chọn. Các node con bị khoá tới khi "
+                   "người chấm để mỗi nhóm chỉ còn một ý đạt; không tự chọn thay người, không viết vòng sau. Báo người rồi chờ.")
     for r in node["refs"]:
         state = "khớp" if r["ok"] else ("LỆCH, hash hiện tại " + r["current"] if r["ok"] is False else "KHÔNG CÓ")
         out.append(f"- ref {r['label']}@{r['hash']}" + (f" ({r['title']})" if r["title"] else "") + f": {state}")
