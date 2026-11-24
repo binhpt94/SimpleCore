@@ -20,9 +20,11 @@ The value, by group:
                                           gd_delete.py, reads its status with gd_status.py; live, mode.json, the
                                           answers, the scores and the history are not its to write. A node is
                                           writable only when every node above it is approved (gamedesign.py)
-    Tools     @Codex / @Blender           take orders from the features (Management/studio, studio.py): write only their
-                                          lessons.md and the work folder of an order; run Codex / Blender through
-                                          studio.py; blender MCP (@Blender) and unity-mcp custom tools are a soft gate
+    Tools     @Codex / @Blender /         take orders from the features (Management/studio, studio.py): write only their
+              @ClaudeImage                lessons.md and the work folder of an order; run Codex / Blender through
+                                          studio.py; blender MCP (@Blender) and unity-mcp custom tools are a soft gate.
+                                          @ClaudeImage draws each picture itself as an SVG in the work folder and
+                                          studio.py makes the PNG
     Basic     @Core                       edits only Assets/Core
     Features  <Name>                      edits only its feature
     Services  _Services/<Name>            edits only its service
@@ -113,9 +115,11 @@ DESIGN_KEPT = {".user-review", ".history", ".progress"}
 DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per round
 HUMAN_ASK_ZONES = set()      # zone names where the human chat is still asked before an edit; the human emptied it
 # FEATURE values that are not feature folders.
-ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender")
-# Tools: they take orders from the features and make images (Codex) or 3D models (Blender); they never code.
-TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender"}
+ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender", "@ClaudeImage")
+# Tools: they take orders from the features and make images (Codex; ClaudeImage draws them itself as SVG) or 3D
+# models (Blender); they never code.
+TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender", "@ClaudeImage": "claudeimage"}
+ART_ORDER_TOOLS = ("codex", "claudeimage")      # whose orders/_design/ @GameDesigner writes art orders into
 STUDIO_ZONE, RESOURCES_ZONE = "Management/studio", "Resources"
 # What studio.py alone writes in an order folder; the one who orders writes order.md, once.
 STUDIO_SCRIPT_FILES = {"status.json", "log.jsonl", ".run.lock", "review.json", "anchors.json"}
@@ -126,8 +130,12 @@ DESIGN_OWNER_RX = re.compile(r"^_design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z
 STUDIO_REF = r"((_Services/)?[A-Za-z][A-Za-z0-9]*|_design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*)/" + STUDIO_ID
 # The studio (orders to the tool chats; see studio.py). Reading it: any chat. Running a tool: that tool's chat.
 STUDIO = PY + r"Management/tools/studio\.py "
-ALLOWED_COMMANDS.append(STUDIO + r"(check|status( (codex|blender|" + STUDIO_REF + "))?)")
+ALLOWED_COMMANDS.append(STUDIO + r"measure " + STUDIO_REF + "( " + STUDIO_ID + ")?")
+ALLOWED_COMMANDS.append(STUDIO + r"(check|status( (codex|blender|claudeimage|" + STUDIO_REF + "))?)")
 TOOL_COMMANDS = {
+    # @ClaudeImage writes work/<item>.svg itself; `claude` checks it and makes the PNG (no outside tool is run).
+    "claudeimage": [STUDIO + r"claude " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver claudeimage " + STUDIO_REF,
+                    STUDIO + r"pick " + STUDIO_REF + " " + STUDIO_ID + r" [1-9][0-9]*"],
     "codex": [STUDIO + r"(codex|consult) " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver codex " + STUDIO_REF,
               STUDIO + r"pick " + STUDIO_REF + " " + STUDIO_ID + r" [1-9][0-9]*"],
     "blender": [STUDIO + r"blender " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver blender " + STUDIO_REF,
@@ -153,6 +161,7 @@ LEAD_AREA = "_Composition"
 UNITY_PREFIX = "mcp__unityMCP__"
 BLENDER_PREFIX = "mcp__blender__"
 TOOL_UNITY = {"execute_custom_tool", "execute_menu_item"}      # the indirect way of a tool chat (soft gate), with the lock
+UNITY_TOOL_ROLES = ("@Codex", "@Blender")      # the tool chats that have an outside tool to run that way
 UNITY_ASSET_TOOL = UNITY_PREFIX + "manage_asset"
 UNITY_SERVER = "unityMCP"
 UNITY_RESOURCE_TOOLS = {"ReadMcpResourceTool", "ListMcpResourcesTool", "ReadMcpResourceDirTool"}
@@ -584,7 +593,7 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
     seg = rel_segments(full, under(root, "Management", "studio"))
     if mode == "tool":
         if len(seg) == 2 and seg[0] == tool_name and seg[1] == "lessons.md":
-            return "allow", f"lessons of @{tool_name.capitalize()}"
+            return "allow", f"lessons of the {tool_name} chat"
         if len(seg) >= 5 and seg[0] == tool_name and seg[1] == "orders" and "work" in seg[3:-1]:
             at = seg.index("work", 3)
             owner = "/".join(seg[2:at - 1])
@@ -606,16 +615,17 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
         if locked:
             return "deny", locked
         return "allow", f"new {name} for {seg[0]}"
-    if mode == "gamedesigner" and len(seg) == 6 and seg[:3] == ["codex", "orders", "_design"]:
+    if mode == "gamedesigner" and len(seg) == 6 and seg[0] in ART_ORDER_TOOLS and seg[1:3] == ["orders", "_design"]:
         owner, oid, name = "/".join(seg[2:4]), seg[4], seg[5]
         if not DESIGN_OWNER_RX.match(owner) or not re.fullmatch(STUDIO_ID, oid) or not STUDIO_FEATURE_FILE_RX.match(name):
-            return "deny", ("an art order lives in codex/orders/_design/<node path with '.' for '/'>/<id>/ and holds "
-                            "only order.md from you; the human judges the pictures on the management page")
+            return "deny", ("an art order lives in <codex|claudeimage>/orders/_design/<node path with '.' for '/'>/<id>/ and "
+                            "holds only order.md from you; the human judges the pictures on the management page")
         if tool != "Write" or os.path.lexists(full):
             return "deny", "order.md is written once: a change is a new order"
         return "allow", f"new {name} of an art order"
     return "deny", ("Management/studio: the tool chats write their lessons and work, the features their orders, "
-                    "@GameDesigner the art orders (codex/orders/_design), studio.py and the page the rest")
+                    "@GameDesigner the art orders (codex/orders/_design, claudeimage/orders/_design), studio.py and "
+                    "the page the rest")
 
 
 def decide_designer_edit(full, root, name):
@@ -799,8 +809,10 @@ def decide_unity_one(tool, ti, ctx, work):
     if kind == "script":
         return "deny", f"unity-mcp {short}: code is written with Edit/Write only, where the guard checks it", False
     if mode == "tool":
-        if kind == "read" or (kind == "lead" and short in TOOL_UNITY):
+        if kind == "read" or (kind == "lead" and short in TOOL_UNITY and who in UNITY_TOOL_ROLES):
             pass      # reads, and the indirect way to run Codex or Blender (it takes the Editor lock below)
+        elif kind == "lead" and short in TOOL_UNITY:
+            return "deny", f"unity-mcp {short}: {who} draws its pictures itself and runs no outside tool; it only reads", False
         else:
             return "deny", (f"unity-mcp {short} {action}: a tool chat only reads and, when its tool cannot run, "
                             f"calls {' or '.join(sorted(TOOL_UNITY))}"), False

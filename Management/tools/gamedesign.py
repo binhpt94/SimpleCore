@@ -160,7 +160,10 @@ STYLE_DIR = ".art-style"
 STYLE_IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp")
 # Art concepts: images @Codex makes from a round-4 node's frames (orders of the owner _design, see studio.py).
 DESIGN_OWNER = "_design"
-ART_TOOL = "codex"
+ART_TOOL = "codex"                 # art concepts: pictures made by Codex; the style anchors are kept with it
+CLAUDE_TOOL = "claudeimage"        # claude concepts: pictures drawn by the @ClaudeImage chat (SVG made into PNG)
+ART_TOOLS = (ART_TOOL, CLAUDE_TOOL)
+ART_NAMES = {ART_TOOL: "Art concept", CLAUDE_TOOL: "Claude concept"}
 # The human's judgement of one delivered picture (index = level; the same list as studio.py REVIEW_LEVELS, which
 # cannot be imported here: studio imports this module).
 ART_LEVELS = ("Làm lại ngay", "Lỗi nhưng chưa cần làm ngay", "Đúng phần lớn chi tiết", "Đạt")
@@ -1882,8 +1885,8 @@ def design_owner(path):
     return f"{DESIGN_OWNER}/{path.replace('/', '.')}"
 
 
-def art_orders_dir(root):
-    return Path(root) / "Management" / "studio" / ART_TOOL / "orders" / DESIGN_OWNER
+def art_orders_dir(root, tool=ART_TOOL):
+    return Path(root) / "Management" / "studio" / tool / "orders" / DESIGN_OWNER
 
 
 def _json(path):
@@ -1905,16 +1908,17 @@ def read_art(root, live):
     the newest delivery (0-3, None for "Chưa duyệt"; review.json of the order, studio.py). state: "mới nhất" or "cũ
     hơn". label: the level's name | CŨ · node đã đổi | CŨ · style đã đổi (stale wins). usable: newest, not stale and
     not judged "Làm lại ngay".
-    live: the live tree (read_tree), for the node hashes and the styles they are checked against."""
-    base = art_orders_dir(root)
+    live: the live tree (read_tree), for the node hashes and the styles they are checked against.
+    Every entry and pending order has tool: ART_TOOL (art concept) or CLAUDE_TOOL (claude concept). The two are
+    apart: each has its own newest picture of a frame."""
     nodes = {n["path"]: n for n in walk(live)} if live else {}
     styles = {s["id"]: s["hash"] for s in (nodes.get("", {}) or {}).get("styles", [])}
     anchors = _json(Path(root) / "Management" / "studio" / ART_TOOL / ANCHORS_FILE) or []
     anchored = {(a.get("ref"), a.get("version"), a.get("item")) for a in anchors if isinstance(a, dict)}
     art, pending = {}, []
-    if not base.is_dir():
-        return art, pending
-    for order in sorted(base.glob("*/*/order.md")):
+    orders = [(tool, order) for tool in ART_TOOLS for order in
+              (sorted(art_orders_dir(root, tool).glob("*/*/order.md")) if art_orders_dir(root, tool).is_dir() else [])]
+    for tool, order in orders:
         folder = order.parent
         dotted, oid = folder.parent.name, folder.name
         path = dotted.replace(".", "/")
@@ -1930,10 +1934,10 @@ def read_art(root, live):
             title = next((l[2:].strip() for l in text.split("\n") if l.startswith("# ")), oid)
             items = [m.group(1) for m in re.finditer(r"(?m)^\s*-\s*`?([a-z0-9]+(?:-[a-z0-9]+)*)`?\s*:", text)]
             style = next((l.split(":", 1)[1].strip() for l in text.split("\n") if l.startswith("style:")), "")
-            pending.append({"ref": ref, "node": path, "title": title, "items": items, "style": style,
+            pending.append({"ref": ref, "tool": tool, "node": path, "title": title, "items": items, "style": style,
                             "state": "doing" if state == "doing" else "new", "version": version})
         for v in range(1, version + 1):
-            vdir = Path(root) / "Resources" / DESIGN_OWNER / dotted / ART_TOOL / oid / f"v{v}"
+            vdir = Path(root) / "Resources" / DESIGN_OWNER / dotted / tool / oid / f"v{v}"
             meta = _json(vdir / ART_META)
             if not isinstance(meta, dict):
                 continue
@@ -1950,24 +1954,25 @@ def read_art(root, live):
                 r = reviews.get(item) if v == version and isinstance(reviews.get(item), dict) else {}
                 level = r.get("level")
                 level = level if isinstance(level, int) and not isinstance(level, bool) and 0 <= level < len(ART_LEVELS) else None
-                redoing = v == version and state == "doing"     # @Codex is remaking it: nothing to judge until the next delivery
+                redoing = v == version and state == "doing"     # the tool chat is remaking it: nothing to judge until the next delivery
                 label = ("cũ hơn" if v < version else "CŨ · " + stale[0] if stale else "đang làm lại" if redoing
                          else (ART_LEVEL_NONE if level is None else ART_LEVELS[level]))
-                entry = {"frame": item, "file": (vdir / name).relative_to(Path(root)).as_posix(), "ref": ref,
+                entry = {"frame": item, "tool": tool, "file": (vdir / name).relative_to(Path(root)).as_posix(), "ref": ref,
                          "version": v, "state": label_state, "label": label, "stale": stale,
                          "level": level, "feedback": str(r.get("text") or ""), "reviewable": v == version and state == "delivered", "redoing": redoing,
                          "usable": v == version and not stale and level != 0,
-                         "anchor": (ref, v, item) in anchored, "at": meta.get("at", ""), "stamp": meta.get("stamp", 0),
+                         "anchor": tool == ART_TOOL and (ref, v, item) in anchored, "at": meta.get("at", ""), "stamp": meta.get("stamp", 0),
                          "styles": sorted(meta.get("styles") or {})}
                 q = quality.get(item) if isinstance(quality.get(item), dict) else None
                 entry["below"] = (q.get("note") or "chưa đạt") if q and not q.get("ok") else ""
                 art.setdefault(path, []).append(entry)
     for path, entries in art.items():      # newest delivery of each frame first, the older ones after it
-        entries.sort(key=lambda e: (e["frame"], e["at"], e["stamp"]))
+        entries.sort(key=lambda e: (ART_TOOLS.index(e["tool"]), e["frame"], e["at"], e["stamp"]))
         newest = {}
         for e in entries:
-            newest[e["frame"]] = e
-        art[path] = sorted(newest.values(), key=lambda e: e["frame"]) + [e for e in entries if newest[e["frame"]] is not e]
+            newest[(e["tool"], e["frame"])] = e
+        art[path] = (sorted(newest.values(), key=lambda e: (ART_TOOLS.index(e["tool"]), e["frame"]))
+                     + [e for e in entries if newest[(e["tool"], e["frame"])] is not e])
     return art, pending
 
 

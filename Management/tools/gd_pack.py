@@ -48,12 +48,17 @@ def full_lines(node, out, doc=True):
         out.append(f"### Frame (bố cục ước lượng; nguồn {LIVE}/{node['path']}/{gd.FRAME_DIR}/)")
         for fr in node["frames"]:
             out += gd.frame_brief(fr)
-    latest = {}
-    for a in node.get("art", []):
-        latest.setdefault(a["frame"], a)
-    if latest:
+    for tool, head in ((gd.ART_TOOL, "### Art concept (ảnh @Codex gen theo frame; xem phong cách, không đo kích thước từ ảnh)"),
+                       (gd.CLAUDE_TOOL, "### Claude concept (ảnh @ClaudeImage vẽ theo frame; đủ dùng ở giai đoạn IDEA; không đo "
+                                        "kích thước từ ảnh)")):
+        latest = {}
+        for a in node.get("art", []):
+            if a.get("tool", gd.ART_TOOL) == tool:
+                latest.setdefault(a["frame"], a)
+        if not latest:
+            continue
         out.append("")
-        out.append("### Art concept (ảnh @Codex gen theo frame; xem phong cách, không đo kích thước từ ảnh)")
+        out.append(head)
         for frame, a in sorted(latest.items()):
             use = "dùng làm mẫu" if a.get("level") in (2, 3) and not a["stale"] else "chỉ để tham khảo"
             out.append(f"- {frame}: {a['file']} ({a['label']}; {use}" + (f"; CHƯA CHUẨN: {a['below']}" if a.get("below") else "") + ")")

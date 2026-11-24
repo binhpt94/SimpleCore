@@ -12,9 +12,13 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   the VS Code extension) are ignored.
 - For each name of the chosen set: every non-archived thread with that name is bound; when there is none, a
   new one is created with `claude -n <name without a role's @> --session-id <id> --model <m> --effort <e> -p ...` (the page picks
-  model and effort; default opus / medium) and then bound. Binding writes the same
+  model and effort; default opus / medium). It is bound before that first turn, which tells it to read the rules
+  of its role (REREAD_PROMPT). Binding writes the same
   file bind_session.py writes, so the PIN never goes through a chat (a bind command typed as the first message
   of a chat can end up in the thread's generated title).
+- POST /api/sessions/reread {id} (page token, no PIN): one headless turn in an existing bound thread,
+  `claude --resume <id> -p <REREAD_PROMPT>`, so it reads the rules again after they changed. The page's
+  "Đọc lại quy trình" buttons (one thread, or all of them a few at a time) call it. It binds nothing.
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
   enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
@@ -55,9 +59,9 @@ import validate  # noqa: E402
 import vscode_groups  # noqa: E402
 from vscode_groups import vscode_state  # noqa: E402
 
-BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender", "@Core"]
+BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender", "@ClaudeImage", "@Core"]
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
-               "@Codex": "Tools", "@Blender": "Tools", "@Core": "Basic"}
+               "@Codex": "Tools", "@Blender": "Tools", "@ClaudeImage": "Tools", "@Core": "Basic"}
 GROUP_ORDER = ["Master", "Leaders", "Tools", "Basic", "Services", "Features"]      # the tiers of CLAUDE.md, top to bottom
 STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp")
 
@@ -94,11 +98,16 @@ ENTRY_RX = re.compile(r'"entrypoint"\s*:\s*"([^"]+)"')
 VSCODE_ENTRY, HEADLESS_ENTRY = "claude-vscode", "sdk-cli"
 TITLE_RX = re.compile(r'"type"\s*:\s*"custom-title".*?"customTitle"\s*:\s*"((?:[^"\\]|\\.)*)"')
 MAX_BODY = 4096
+# What a thread is told when it is created and when the page's "Đọc lại quy trình" button is pressed.
+REREAD_PROMPT = ("Đọc lại quy trình: đọc lại CLAUDE.md gốc và các file luật của vai trò này (dòng guard: ở đầu tin nêu "
+                 "vai trò và file luật). Chưa làm việc gì khác. Trả lời ngắn: đã đọc những file nào.")
+CLAUDE_SECONDS = 300      # one headless turn that reads the rules
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY,
-              "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY}
+              "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
+              "/api/sessions/reread": MAX_BODY}
 
 
 def transcripts_dir():
@@ -201,17 +210,53 @@ def bind(session_id, value):
                             {"feature": value, "bound_at": time.strftime("%Y-%m-%d %H:%M:%S"), "by": "setup_server"})
 
 
-def create(name, model, effort):
-    """New named thread on that model and effort; returns its session id. Costs one short answer."""
-    sid = str(uuid.uuid4())
-    prompt = f"Thread {name} được tạo bởi trang Setup. Chỉ trả lời đúng một chữ: Sẵn sàng."
-    p = subprocess.run(["claude", "-n", name, "--session-id", sid, "--model", model, "--effort", effort, "-p", prompt],
-                       cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace",
+def run_claude(args):
+    """Runs the claude CLI in the project (one headless turn) and returns what it printed; raises with its error."""
+    p = subprocess.run(["claude"] + args, cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace",
                        env=dict(os.environ, CLAUDE_CODE_ENTRYPOINT=VSCODE_ENTRY),
-                       timeout=180, shell=(os.name == "nt"))
+                       timeout=CLAUDE_SECONDS, shell=(os.name == "nt"))
     if p.returncode != 0:
         raise RuntimeError((p.stderr or p.stdout or f"exit {p.returncode}").strip()[:300])
+    return (p.stdout or "").strip()
+
+
+def create(name, feature, model, effort):
+    """New named thread on that model and effort, bound to `feature` BEFORE its first turn, so that turn already
+    knows its role and reads the right rules; returns its session id. Costs one turn."""
+    sid = str(uuid.uuid4())
+    bind(sid, feature)
+    try:
+        run_claude(["-n", name, "--session-id", sid, "--model", model, "--effort", effort,
+                    "-p", f"Thread {name} được tạo bởi trang Setup. {REREAD_PROMPT}"])
+    except Exception:
+        try:
+            os.remove(guard.binding_path(sid, guard.STORE_DIR))      # no thread: leave no binding behind
+        except OSError:
+            pass
+        raise
     return sid
+
+
+def reread(session_id):
+    """Tells one existing, bound thread to read the rules again: one headless turn (`claude --resume <id> -p ...`).
+    A chat that is open in VS Code may not show this turn until it is opened again."""
+    t = next((t for t in threads() if t["id"] == session_id), None) if isinstance(session_id, str) else None
+    if t is None:
+        return {"ok": False, "error": "không có thread này"}
+    why = ("thread đã archive" if t["archived"] else "VS Code không hiện thread này" if t["unlisted"]
+           else "thread chưa gán FEATURE: chạy Setup trước" if not t["binding"] else "")
+    if why:
+        return {"ok": False, "id": t["id"], "title": t["title"], "error": why}
+    args = ["--resume", t["id"]]
+    if t["model"]:
+        args += ["--model", t["model"]]
+    if t["effort"] in EFFORTS:
+        args += ["--effort", t["effort"]]
+    try:
+        answer = run_claude(args + ["-p", REREAD_PROMPT])
+    except Exception as ex:
+        return {"ok": False, "id": t["id"], "title": t["title"], "error": str(ex)[:300]}
+    return {"ok": True, "id": t["id"], "title": t["title"], "answer": answer[:300]}
 
 
 def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
@@ -233,8 +278,7 @@ def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
                     bind(t["id"], name)
                 results.append({"name": name, "action": "bound", "ids": [t["id"] for t in same]})
             else:
-                sid = create(thread_name(name), model, effort)
-                bind(sid, name)
+                sid = create(thread_name(name), name, model, effort)
                 results.append({"name": name, "action": "created", "ids": [sid], "model": model, "effort": effort})
         except Exception as ex:
             results.append({"name": name, "action": "error", "detail": str(ex)})
@@ -439,6 +483,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, set_mode(str(data.get("pin") or ""), data.get("mode")))
             if self.path == "/api/gamedesign/answers":
                 return self.send_json(200, answer(data.get("path"), data.get("answers")))
+            if self.path == "/api/sessions/reread":
+                return self.send_json(200, reread(data.get("id")))
             if self.path == "/api/vscode-groups":
                 return self.send_json(200, group_in_vscode())
             if self.path == "/api/studio/review":

@@ -530,6 +530,216 @@ def run_budget(root):
           ([0, 0, 1], ["rock-1.fbx", "rock-2.fbx"]))
 
 
+def real_png(path, width, height, pixel, colour=6, depth=8, filters=(0, 1, 2, 3, 4)):
+    """Writes a real PNG; pixel(x, y) gives the samples of one pixel. Rows use the filters in turn."""
+    import struct
+    import zlib
+    step = {2: 3, 6: 4, 4: 2}[colour] * (depth // 8)
+    rows = [bytearray(b"".join(v.to_bytes(depth // 8, "big") for x in range(width) for v in pixel(x, y)))
+            for y in range(height)]
+    raw, prev = bytearray(), bytearray(width * step)
+    for y, row in enumerate(rows):
+        kind = filters[y % len(filters)]
+        out = bytearray(len(row))
+        for i, v in enumerate(row):
+            a = row[i - step] if i >= step else 0
+            b, c = prev[i], (prev[i - step] if i >= step else 0)
+            p = a + b - c
+            paeth = a if abs(p - a) <= abs(p - b) and abs(p - a) <= abs(p - c) else b if abs(p - b) <= abs(p - c) else c
+            out[i] = (v - (0, a, b, (a + b) >> 1, paeth)[kind]) & 255
+        raw += bytes([kind]) + out
+        prev = row
+
+    def chunk(name, body):
+        return struct.pack(">I", len(body)) + name + body + struct.pack(">I", zlib.crc32(name + body))
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    Path(path).write_bytes(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, depth, colour, 0, 0, 0))
+                           + chunk(b"IDAT", zlib.compress(bytes(raw))) + chunk(b"IEND", b""))
+
+
+def run_measure(root):
+    folder = order(root, oid="measured", items=("coin", "gem", "flat", "junk", "none"))
+    out = folder / "work/out"
+    # a 32x16 picture: only x 8..23, y 2..13 shows (16x12), in colours that change so every filter has work to do
+    shape = lambda x, y: (x * 7 % 256, y * 13 % 256, (x + y) * 5 % 256, 200 if 8 <= x <= 23 and 2 <= y <= 13 else 0)
+    real_png(out / "coin.png", 32, 16, shape)
+    m = studio.measure_png(out / "coin.png")
+    check("measure: size, kind and depth of a PNG", (m["width"], m["height"], m["kind"], m["depth"]), (32, 16, "RGBA", 8))
+    check("measure: the box of what shows, whatever the row filter", m["alpha"]["box"], (8, 2, 23, 13))
+    check("measure: share of clear pixels and clear corners",
+          (round(m["alpha"]["clear"], 4), m["alpha"]["corners"]), (round(1 - 16 * 12 / (32 * 16), 4), True))
+    real_png(out / "gem.png", 256, 256, lambda x, y: (9, 9, 9, 0 if (x, y) == (0, 0) else 65535), depth=16)
+    m = studio.measure_png(out / "gem.png")
+    check("measure: 16 bit, one clear pixel, three corners not clear",
+          (m["depth"], m["alpha"]["corners"], m["alpha"]["box"], round(m["alpha"]["clear"] * 256 * 256)), (16, False, (0, 0, 255, 255), 1))
+    real_png(out / "flat.png", 8, 8, lambda x, y: (1, 2, 3), colour=2)
+    check("measure: no alpha channel", studio.measure_png(out / "flat.png")["alpha"], None)
+    (out / "junk.png").write_bytes(b"\x89PNG fake")
+    code, text = call(root, "measure", "Wallet/measured")
+    check("measure: the whole order, one line set per item", code, 0)
+    check("measure: size against the order's format",
+          ("coin.png (work/out): 32x16 px, PNG RGBA 8 bit" in text, "kích thước LỆCH (256x256)" in text,
+           "- gem.png (work/out): 256x256 px, PNG RGBA 16 bit" in text, "kích thước khớp (256x256)" in text), (True,) * 4)
+    check("measure: what shows, as a share of the frame and its offset",
+          "hình (điểm có alpha trên 0): 16x12 px = 50% x 75% khung; tâm lệch ngang +0 px, dọc +0 px; "
+          "cách mép trái 8, trên 2, phải 8, dưới 2 px" in text)
+    check("measure: a background that is not transparent is said so",
+          ("nền: không có kênh alpha, nền KHÔNG trong suốt" in text, "4 góc KHÔNG trong suốt" in text,
+           text.count("nền trong suốt: KHÔNG ĐẠT hoặc không đo được"), text.count("nền trong suốt: 4 góc trong suốt")),
+          (True, True, 2, 1))
+    check("measure: a broken file and a missing result are reported, the rest still measured",
+          ("- junk.png (work/out): không đo được: không phải file PNG" in text, "- none: chưa có kết quả" in text), (True, True))
+    code, text = call(root, "measure", "Wallet/measured", "coin")
+    check("measure: one item only", (code, "coin.png" in text, "gem.png" in text), (0, True, False))
+    check("measure: an item the order does not have", call(root, "measure", "Wallet/measured", "ghost")[0], 1)
+    check("measure: an order that does not exist", call(root, "measure", "Wallet/ghost")[0], 1)
+    before = sorted(p.name for p in folder.iterdir())
+    check("measure writes nothing", (sorted(p.name for p in folder.iterdir()), (folder / "log.jsonl").exists()), (before, False))
+    for name in ("junk.png", "flat.png"):
+        (out / name).unlink()
+    for item in ("coin", "gem"):
+        (folder / "work" / f"{item}.check.md").write_text("đạt\n", encoding="utf-8")
+    (out / "flat.png").write_bytes((out / "coin.png").read_bytes())
+    (out / "junk.png").write_bytes((out / "coin.png").read_bytes())
+    (out / "none.png").write_bytes((out / "coin.png").read_bytes())
+    check("measure: delivered", call(root, "deliver", "codex", "Wallet/measured")[0], 0)
+    shutil.rmtree(out)
+    code, text = call(root, "measure", "Wallet/measured", "gem")
+    check("measure: nothing waits in work/out: the last delivery", (code, "- gem.png (bản giao v1): 256x256 px" in text), (0, True))
+
+
+FAKE_SVG2PNG_SIZED = r'''
+import struct, sys, zlib
+w, h = int(sys.argv[3]), int(sys.argv[4])
+def chunk(name, body):
+    return struct.pack(">I", len(body)) + name + body + struct.pack(">I", zlib.crc32(name + body))
+row = b"\0" + b"\0\0\0\0" * (w // 4) + b"\x10\x20\x30\xff" * (w - 2 * (w // 4)) + b"\0\0\0\0" * (w // 4)
+open(sys.argv[2], "wb").write(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 6, 0, 0, 0))
+                              + chunk(b"IDAT", zlib.compress(row * h)) + chunk(b"IEND", b""))
+'''
+SVG = ('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100">'
+       '<defs><linearGradient id="g"><stop offset="0" stop-color="#fc0"/></linearGradient></defs>{body}</svg>')
+GOOD_SVG = SVG.format(body='<circle cx="50" cy="50" r="40" fill="url(#g)"/><use xlink:href="#g"/>'
+                           '<image href="data:image/png;base64,AAAA" width="1" height="1"/>')
+BAD_SVGS = {
+    "a script": SVG.format(body="<script>1</script>"),
+    "an event attribute": SVG.format(body='<rect width="1" height="1" onclick="x()"/>'),
+    "a file outside": SVG.format(body='<image href="https://example.com/a.png" width="1" height="1"/>'),
+    "a local file": SVG.format(body='<use xlink:href="other.svg#a"/>'),
+    "a url() outside": SVG.format(body='<rect width="1" height="1" fill="url(http://example.com/x)"/>'),
+    "an import in style": SVG.format(body="<style>@import 'a.css';</style>"),
+    "foreignObject": SVG.format(body="<foreignObject><p>x</p></foreignObject>"),
+    "no viewBox": '<svg xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1"/></svg>',
+    "not an SVG": '<html xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"/>',
+    "no namespace": '<svg viewBox="0 0 1 1"/>',
+    "broken XML": "<svg",
+    "a DOCTYPE": '<!DOCTYPE svg [<!ENTITY a "b">]>' + SVG.format(body=""),
+}
+
+
+def run_claude(root):
+    C = studio.CLAUDE
+    studio.RUNS_FIRST = 2
+    os.environ["STUDIO_SVG2PNG"] = str(Path(root) / "fake_svg2png_sized.py")
+    os.environ["STUDIO_BROWSER"] = ""
+    (Path(root) / "fake_svg2png_sized.py").write_text(FAKE_SVG2PNG_SIZED, encoding="utf-8")
+    check("claude: a drawing that needs nothing outside its file passes", studio.check_svg(GOOD_SVG), [])
+    for label, text in BAD_SVGS.items():
+        check(f"claude: an SVG with {label} is refused", bool(studio.check_svg(text)))
+    folder = order(root, tool=C, oid="claude-icons", items=("coin", "gem"))
+    ref = "Wallet/claude-icons"
+    attempts = lambda: [e["item"] for e in log_of(folder) if e["event"] == "attempt"] if (folder / "log.jsonl").is_file() else []  # noqa: E731
+    check("claude: the order is well formed and waits for @ClaudeImage",
+          (studio.check_order(root, C, "Wallet", "claude-icons", folder)[1], "Wallet/claude-icons" in studio.pending_line(root, C),
+           "claude-icons" in studio.pending_line(root, "codex")), ([], True, False))
+    code, out = call(root, "claude", ref, "coin")
+    check("claude: no SVG written yet: refused, no run counted", (code, "chưa có work/coin.svg" in out, attempts()), (1, True, []))
+    (folder / "work").mkdir(exist_ok=True)
+    (folder / "work/coin.svg").write_text(BAD_SVGS["a script"], encoding="utf-8")
+    code, out = call(root, "claude", ref, "coin")
+    check("claude: a refused SVG counts no run", (code, "không dùng thẻ <script>" in out, attempts()), (1, True, []))
+    (folder / "work/coin.svg").write_text(GOOD_SVG, encoding="utf-8")
+    real = studio.svg_converters
+    studio.svg_converters = lambda: []
+    code, out = call(root, "claude", ref, "coin")
+    studio.svg_converters = real
+    check("claude: a machine that cannot draw SVG counts no run", (code, "không đổi được SVG sang PNG" in out, attempts()), (1, True, []))
+    code, out = call(root, "claude", ref, "coin")
+    m = studio.measure_png(folder / "work/out/coin.png")
+    check("claude: the SVG becomes a PNG of the order's size, one run", (code, m["width"], m["height"], attempts()), (0, 256, 256, ["coin"]))
+    check("claude: the run prints what it measured",
+          ("256x256 px, PNG RGBA 8 bit" in out, "kích thước khớp (256x256)" in out, "nền trong suốt: 4 góc trong suốt" in out), (True,) * 3)
+    check("claude: the result and the SVG of the run are kept",
+          ((folder / "work/attempts/coin-1.png").is_file(), len(list((folder / "work/_log").glob("coin-1-*.svg")))), (True, 1))
+    call(root, "claude", ref, "coin")
+    code, out = call(root, "claude", ref, "coin")
+    check("claude: the same run limit as the other tools", (code, "hết 2 lượt đầu" in out, attempts()), (1, True, ["coin", "coin"]))
+    check("claude: the previous draft is set aside, one file in out",
+          (sorted(p.name for p in (folder / "work/out").iterdir()), any((folder / "work/_old").rglob("coin.png"))), (["coin.png"], True))
+    check("claude: Codex does not run an order of @ClaudeImage", call(root, "codex", ref, "coin")[0], 1)
+    check("claude: it does not run an order of Codex", call(root, "claude", "Wallet/coin-icons", "coin")[0], 1)
+    bad = order(root, tool=C, oid="claude-ask", kind="consult", items=("q",))
+    check("claude: takes image and art only", any("nhận kind" in p for p in studio.check_order(root, C, "Wallet", "claude-ask", bad)[1]))
+    shutil.rmtree(bad)
+    (folder / "work/gem.svg").write_text(GOOD_SVG, encoding="utf-8")
+    call(root, "claude", ref, "gem")
+    for item in ("coin", "gem"):
+        (folder / "work" / f"{item}.check.md").write_text("đạt\n", encoding="utf-8")
+    code, out = call(root, "deliver", C, ref)
+    v1 = Path(root) / "Resources/Wallet" / C / "claude-icons/v1"
+    check("claude: delivered like any order", (code, sorted(p.name for p in v1.iterdir())), (0, ["coin.png", "gem.png", "quality.json"]))
+    code, out = call(root, "review", ref, "coin", "3")
+    check("claude: the feature judges it and gets the file",
+          (code, (Path(root) / "UnityProject/Assets/Features/Wallet/FeatureAssets/Private/Generated/claude-icons/coin.png").is_file()), (0, True))
+    # the claude concept of a cheat node
+    design_tree(root)
+    owner = studio.gd.design_owner(NODE)
+    cfolder = studio.order_dir(root, C, owner, "pop-claude")
+    cfolder.mkdir(parents=True, exist_ok=True)
+    text = ART_ORDER.format(count=1, style="ui-flat", items="- main: cảnh main").replace("tool: codex", f"tool: {C}")
+    (cfolder / "order.md").write_text(text, encoding="utf-8")
+    cref = f"{owner}/pop-claude"
+    check("claude concept: a good order passes, whatever art Codex already made for the frame",
+          studio.check_order(root, C, owner, "pop-claude", cfolder)[1], [])
+    check("claude concept: @GameDesigner is reminded to tell @ClaudeImage", "đã nhắn @ClaudeImage chưa" in studio.art_line(root))
+    old_daily, studio.ART_DAILY_MAX = studio.ART_DAILY_MAX, 0
+    (cfolder / "work").mkdir(exist_ok=True)
+    (cfolder / "work/main.svg").write_text(GOOD_SVG, encoding="utf-8")
+    code, out = call(root, "claude", cref, "main")
+    studio.ART_DAILY_MAX = old_daily
+    m = studio.measure_png(cfolder / "work/out/main.png")
+    check("claude concept: drawn at the size of the order, no daily limit", (code, m["width"], m["height"]), (0, 1920, 1080))
+    (cfolder / "work/main.check.md").write_text("đạt\n", encoding="utf-8")
+    code, out = call(root, "deliver", C, cref)
+    vdir = Path(root) / "Resources" / owner / C / "pop-claude/v1"
+    meta = json.loads((vdir / "meta.json").read_text(encoding="utf-8"))
+    check("claude concept: delivered beside the art concepts, with the hashes of the node",
+          (code, (vdir / "main.png").is_file(), meta["node"], sorted(meta["styles"]), "GameDesigner" in out), (0, True, NODE, ["ui-flat"], True))
+    tree, _ = studio.gd.read_tree(root, "live")
+    art, pending = studio.gd.read_art(root, tree)
+    mine = [a for a in art.get(NODE, []) if a["tool"] == C]
+    check("claude concept: the page gets it as its own kind, not judged yet",
+          [(a["frame"], a["ref"], a["label"], a["usable"], a["anchor"]) for a in mine], [("main", cref, "Chưa duyệt", True, False)])
+    check("claude concept: every entry and waiting order says which tool made it",
+          ({a["tool"] for a in art.get(NODE, [])} <= set(studio.gd.ART_TOOLS), all(o.get("tool") in studio.gd.ART_TOOLS for o in pending)),
+          (True, True))
+    again = studio.order_dir(root, C, owner, "pop-claude-2")
+    again.mkdir(parents=True, exist_ok=True)
+    (again / "order.md").write_text(text, encoding="utf-8")
+    check("claude concept: no second order while its own picture is still good",
+          any("đã có ảnh còn dùng được" in p for p in studio.check_order(root, C, owner, "pop-claude-2", again)[1]))
+    shutil.rmtree(again)
+    _, cx = art_order(root, oid="codex-after-claude")
+    check("claude concept: it does not stand in the way of an art concept of Codex",
+          not any(cref in p for p in studio.check_order(root, "codex", owner, "codex-after-claude", cx)[1]))
+    shutil.rmtree(cx)
+    studio.save_review(root, cref, "main", 3, "")
+    check("claude concept: the human's judgement is stored the same way",
+          next(a["label"] for a in studio.gd.read_art(root, tree)[0][NODE] if a["tool"] == C), "Đạt")
+    check("claude concept: only Codex pictures are style anchors", call(root, "anchor", cref, "main")[0], 1)
+    del os.environ["STUDIO_BROWSER"]
+
+
 def main():
     root = Path(tempfile.mkdtemp(prefix="studiofx-"))
     try:
@@ -541,7 +751,7 @@ def main():
         for case in (run_check, run_codex, run_deliver, run_blender):
             case(root)
         studio.RUNS_FIRST = 2
-        for case in (run_art, run_budget):
+        for case in (run_art, run_budget, run_measure, run_claude):
             case(root)
     finally:
         shutil.rmtree(root, ignore_errors=True)

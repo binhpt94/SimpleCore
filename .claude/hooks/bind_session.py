@@ -243,8 +243,9 @@ def context(data, root, store):
               "(refresh_unity) rồi đọc console sửa lỗi của mình, tạo/sửa asset và prefab trong vùng mình; mở, sửa, lưu "
               "scene hay prefab stage thì guard giữ khoá Editor cho chat này tới hết lượt (lưu trước khi dừng); Play, "
               "test, cài đặt project là việc của @CodeLead; code chỉ viết bằng Edit/Write (bảng ở .claude/rules/unity.md)." + (
-              " Cần ảnh hay model 3D: đặt order (Write mới Management/studio/<codex|blender>/orders/<feature của mình>/<id>/"
-              "order.md theo khung ở .claude/rules/studio.md), nhắn @Codex/@Blender. Hàng giao rồi thì chấm từng item: "
+              " Cần ảnh hay model 3D: đặt order (Write mới Management/studio/<claudeimage|codex|blender>/orders/<feature của mình>/<id>/"
+              "order.md theo khung ở .claude/rules/studio.md), nhắn @ClaudeImage/@Codex/@Blender. Giai đoạn IDEA: ảnh đặt "
+              "@ClaudeImage (tool: claudeimage) là đủ, chưa cần @Codex. Hàng giao rồi thì chấm từng item: "
               "python Management/tools/studio.py review <F>/<id> <item> <0-3> \"<phản hồi>\" (0 làm lại ngay: phải có "
               "phản hồi, tool chạy lại 1 lượt; 1 lỗi nhưng chưa cần làm ngay; 2 đúng phần lớn; 3 đạt). Mức 1-3 được chép "
               "vào FeatureAssets; có item mức 0 thì nhắn tool làm lại.")
@@ -274,16 +275,26 @@ def context(data, root, store):
                "<F>/<id> <item> (tự thử Codex ghi trực tiếp, rồi chỉ đọc ảnh Codex sinh ra); không được thì đi gián tiếp "
                "qua unity-mcp (execute_custom_tool, execute_menu_item). Tham vấn: studio.py consult <F>/<id> <item>."
                if tool == "codex" else
+               "ảnh do chính mình vẽ (kind image cho feature, đủ dùng ở giai đoạn IDEA; kind art là claude-concept của node "
+               "cheat). Mỗi item: viết hình thành SVG vào work/<item>.svg bằng Write (một file tự đủ: có viewBox cùng tỉ lệ "
+               "với format của order, không script, không ảnh hay font ngoài file; nền để trống khi order đòi trong suốt), "
+               "rồi python Management/tools/studio.py claude <F>/<id> <item>: lệnh kiểm SVG, đổi ra work/out/<item>.png "
+               "đúng kích thước và in số đo; đọc ảnh PNG bằng Read để tự xem. Order art: đọc bố cục bằng python "
+               "Management/tools/gd_frame.py live/<node> và style trong Management/game-design/live/.art-style, giữ đúng vị "
+               "trí và tỉ lệ của frame. Không chạy công cụ nào khác, không dùng unity-mcp để gen."
+               if tool == "claudeimage" else
                "model 3D (kind model). Viết script vào work/<item>.py rồi chạy headless: python Management/tools/studio.py "
                "blender <F>/<id> <item>; không được thì dùng blender MCP, rồi unity-mcp (execute_custom_tool, "
                "execute_menu_item). Kết quả luôn để ở work/out/<item>.<đuôi>.")
         return (f"guard: chat này gán FEATURE={role} (nhóm Tools): nhận order của các feature và làm {how} Không code, "
                 f"không sửa Assets. Chỉ ghi Management/studio/{tool}/lessons.md và work/ của các order. Đầu lượt: python "
-                f"Management/tools/studio.py status {tool}; đọc order.md và lessons.md trước khi gen. Gen ĐÚNG số "
+                f"Management/tools/studio.py status {tool}; đọc order.md và lessons.md trước khi gen. Bên đặt order nhắn "
+                f"tới thì trả lời ngay một tin ngắn: đã nhận, đang xếp sau order nào, sẽ nhắn khi giao. Gen ĐÚNG số "
                 f"lượng: mỗi item một kết quả, không tự gen thêm. Xong: studio.py deliver {tool} <F>/<id> rồi nhắn feature "
                 f"bằng SendMessage (order art: nhắn @GameDesigner). Lượt gen có trần: mỗi item 2 lượt đầu; sau khi giao chỉ "
-                f"chạy lại item bị chấm 'Làm lại ngay' có phản hồi, 1 lượt mỗi lần, tối đa 2 lần (phản hồi tự vào prompt). Ghi tự kiểm "
-                f"work/<item>.check.md; hết lượt thì pick bản gần nhất và giao với nhãn chưa chuẩn, không tìm đường vòng. "
+                f"chạy lại item bị chấm 'Làm lại ngay' có phản hồi, 1 lượt mỗi lần, tối đa 2 lần ({'đọc phản hồi ở studio.py status rồi sửa SVG theo đó' if tool == 'claudeimage' else 'phản hồi tự vào prompt'}). Ghi tự kiểm "
+                f"work/<item>.check.md (kích thước, nền trong suốt, % khung: đo bằng studio.py measure <F>/<id> <item>, "
+                f"không ước bằng mắt); hết lượt thì pick bản gần nhất và giao với nhãn chưa chuẩn, không tìm đường vòng. "
                 f"Phản hồi là một luật chung thì thêm một mục vào lessons.md. "
                 f"Luật ở .claude/rules/studio.md." + studio_pending(root, tool) + editor_status(store))
     if role == "@GameDesigner":
@@ -296,10 +307,13 @@ def context(data, root, store):
                 "đọc phần cần bằng Read offset/limit hoặc Grep). Độ quan trọng "
                 "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
                 + designer_mode(root) +
-                " Ảnh concept: viết order xong và python Management/tools/studio.py check qua thì nhắn ngay @Codex bằng "
-                "SendMessage (to: \"Codex\"), không chờ duyệt. Người chấm từng ảnh trên trang; trang chỉ lưu. Khi người bảo "
-                "cho làm lại: chạy python Management/tools/studio.py status codex, nhắn @Codex các item 'Làm lại ngay' có "
-                "phản hồi, báo người các item thiếu phản hồi; không tự chấm thay người." + studio_pending(root, None) +
+                " Ảnh concept của node cheat có hai loại: claude-concept (order ở claudeimage/orders/_design, tool: "
+                "claudeimage, nhắn @ClaudeImage, to: \"ClaudeImage\"; đủ cho giai đoạn IDEA) và art-concept (codex/orders/_design, "
+                "tool: codex, nhắn @Codex, to: \"Codex\"; cho PROTOTYPE/FULL). Viết order xong và python "
+                "Management/tools/studio.py check qua thì nhắn ngay phiên tool đó, không chờ duyệt. Người chấm từng ảnh trên "
+                "trang; trang chỉ lưu. Khi người bảo cho làm lại: chạy python Management/tools/studio.py status "
+                "<codex|claudeimage>, nhắn phiên tool các item 'Làm lại ngay' có phản hồi, báo người các item thiếu phản "
+                "hồi; không tự chấm thay người." + studio_pending(root, None) +
                 " Làm theo .claude/rules/gamedesigner.md; trước khi viết node vòng N đọc .claude/rules/gamedesigner.round<N>.md.")
     if role == "@Manager":
         return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "

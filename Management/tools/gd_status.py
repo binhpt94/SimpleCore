@@ -55,9 +55,10 @@ def lines_for(root, node, out):
         out.append(f"- Style {s['id']}: {s['title']}" + (f" ({len(s['images'])} ảnh tham chiếu)" if s["images"] else ""))
     seen_art = set()
     for a in node.get("art", []):
-        if a["frame"] not in seen_art:
-            seen_art.add(a["frame"])
-            out.append(f"- Art {a['frame']}: {a['label']} (v{a['version']}, {a['ref']})")
+        tool = a.get("tool", gd.ART_TOOL)
+        if (tool, a["frame"]) not in seen_art:
+            seen_art.add((tool, a["frame"]))
+            out.append(f"- {'Claude concept' if tool == gd.CLAUDE_TOOL else 'Art'} {a['frame']}: {a['label']} (v{a['version']}, {a['ref']})")
     if node.get("cheat"):
         out.append(f"- Node cheat: {len(node['items'])}/{gd.CHEAT_MAX} state, mỗi state một frame trùng id; "
                    "state dựng nhanh ở bản dev, và là node duy nhất đặt order art (mỗi state một ảnh)")

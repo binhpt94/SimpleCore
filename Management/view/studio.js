@@ -77,7 +77,7 @@
     var render = function () {
       pane.textContent = "";
       add(pane, el("h1", "", "Studio"));
-      add(pane, el("p", "sub", "Order ảnh, art và model 3D cho @Codex và @Blender. Lượt gen có trần; hết lượt thì tool giao bản gần order nhất với nhãn chưa chuẩn và mở phiếu nợ art."));
+      add(pane, el("p", "sub", "Order ảnh, art và model 3D cho @Codex, @Blender và @ClaudeImage (ảnh Claude tự vẽ, đủ cho giai đoạn IDEA). Lượt gen có trần; hết lượt thì tool giao bản gần order nhất với nhãn chưa chuẩn và mở phiếu nợ art."));
       if (!data) {
         add(pane, el("p", "", "Chưa có dữ liệu studio. Chạy: python Management/tools/sync_page.py"));
         return;

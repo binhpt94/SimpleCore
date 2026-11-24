@@ -142,23 +142,23 @@ Làm lại từ trên xuống: node cha đạt rồi mới tới node con.
 - Node dùng một từ thì nhắc `` `glossary#wave` `` và khai `glossary#wave@<hash>` trong refs. Đổi nghĩa một từ là đổi quyết định: mọi node khai từ đó thành "cần làm lại"; sửa từ khác thì không ảnh hưởng.
 - Chỉ thêm từ khi đã có node dùng. Thấy từ định nghĩa ở hai nơi, hoặc một node định nghĩa lại từ đã có, thì `gd_status.py` (cả cây) nhắc ở mục "Thuật ngữ": gom về glossary, nghĩa khác nhau thì quyết một (User control: hỏi người).
 
-## Ảnh art-concept (order cho @Codex) và node cheat
-Frame rẻ, sửa thoải mái theo vòng 4. Ảnh art tốn lượt Codex, nên chỉ đặt ở node `<feature>/cheat` (tối đa 3 state dựng nhanh ở bản dev, bắt buộc khi feature có frame giao diện; luật đầy đủ ở mục "Node cheat" của `gamedesigner.round4.md`). Cổng:
+## Ảnh concept (claude-concept của @ClaudeImage, art-concept của @Codex) và node cheat
+Frame rẻ, sửa thoải mái theo vòng 4. Ảnh concept có hai loại, cùng cổng và cùng cách chấm, độc lập nhau: **claude-concept** (@ClaudeImage tự vẽ SVG, `studio.py` đổi ra PNG; không tốn lượt Codex; **giai đoạn IDEA chỉ cần loại này**) và **art-concept** (@Codex gen, tốn lượt, dành cho PROTOTYPE/FULL). Cả hai chỉ đặt ở node `<feature>/cheat` (tối đa 3 state dựng nhanh ở bản dev, bắt buộc khi feature có frame giao diện; luật đầy đủ ở mục "Node cheat" của `gamedesigner.round4.md`). Cổng:
 - **Chỉ đặt cho node `cheat` đã ở `live`, có frame**, khi vòng 1 trong `live` đã có style. `studio.py check` từ chối order cho node khác. Mỗi dòng Danh sách là id một state (cũng là tên frame của nó), mỗi state đúng một ảnh.
-- Order nằm ở `Management/studio/codex/orders/_design/<đường dẫn node, '/' thay bằng '.'>/<id>/order.md`, theo khung của `.claude/rules/studio.md` với phần đầu:
+- Order nằm ở `Management/studio/<claudeimage|codex>/orders/_design/<đường dẫn node, '/' thay bằng '.'>/<id>/order.md` (id không trùng giữa hai tool; dòng `tool:` ghi đúng tên thư mục đó, `claudeimage` hoặc `codex`), theo khung của `.claude/rules/studio.md` với phần đầu:
   ```
-  tool: codex
+  tool: claudeimage
   kind: art
   count: 1
   deliver: concept
   format: png 1920x1080
   style: ui-flat            # một hay nhiều id style của vòng 1, cách nhau dấu phẩy
   ```
-- Viết xong chạy `python Management/tools/studio.py check`. Qua thì **nhắn ngay @Codex** bằng `SendMessage` (`to: "Codex"`), nêu order; không có bước duyệt gen, không chờ người.
-- Không xin ảnh mới cho frame còn ảnh dùng được: `check` từ chối. Ảnh mang nhãn "CŨ" (node hay style đã đổi) hoặc bị chấm "Làm lại ngay" thì mới đặt order mới, và chỉ khi thật cần; frame đổi nhỏ không đáng một lần gen.
+- Viết xong chạy `python Management/tools/studio.py check`. Qua thì **nhắn ngay phiên tool** bằng `SendMessage` (`to: "ClaudeImage"` hoặc `to: "Codex"`), nêu order; không có bước duyệt gen, không chờ người.
+- Không xin ảnh mới cho frame còn ảnh dùng được của cùng loại: `check` từ chối. Ảnh mang nhãn "CŨ" (node hay style đã đổi) hoặc bị chấm "Làm lại ngay" thì mới đặt order mới, và chỉ khi thật cần; frame đổi nhỏ không đáng một lần gen.
 - **Người chấm từng ảnh trên trang**: Chưa duyệt (mặc định), Làm lại ngay, Lỗi nhưng chưa cần làm ngay, Đúng phần lớn chi tiết, Đạt; kèm một ô phản hồi. Trang chỉ lưu, không nhắn ai. Bạn không chấm thay người và không ghi được `review.json`.
-- **Khi người bảo cho làm lại** (không tự làm khi chưa được bảo): chạy `python Management/tools/studio.py status codex` (dòng `Order art:` ở đầu mỗi tin tóm tắt sẵn). Item ghi `LÀM LẠI ĐƯỢC` ("Làm lại ngay" có phản hồi): nhắn @Codex danh sách `<order> · <item>`; mỗi item chạy lại 1 lượt, phản hồi tự vào prompt. Item ghi `CHƯA LÀM LẠI ĐƯỢC` (thiếu phản hồi, hoặc đã làm lại đủ 2 lần): không nhắn @Codex, báo người item nào và vì sao.
-- Ảnh "Đạt" người đặt được làm mốc style trên trang; ảnh mốc được đưa cho Codex ở các lần gen sau cùng style.
+- **Khi người bảo cho làm lại** (không tự làm khi chưa được bảo): chạy `python Management/tools/studio.py status <claudeimage|codex>` (dòng `Order art:` ở đầu mỗi tin tóm tắt sẵn). Item ghi `LÀM LẠI ĐƯỢC` ("Làm lại ngay" có phản hồi): nhắn phiên tool của order đó danh sách `<order> · <item>` kèm phản hồi; mỗi item làm lại 1 lượt. Item ghi `CHƯA LÀM LẠI ĐƯỢC` (thiếu phản hồi, hoặc đã làm lại đủ 2 lần): không nhắn phiên tool, báo người item nào và vì sao.
+- Ảnh "Đạt" người đặt được làm mốc style trên trang; ảnh mốc được đưa cho Codex ở các lần gen sau cùng style (chỉ ảnh art-concept làm mốc được).
 
 ## Hai mode
 Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đầu mỗi tin báo mode hiện tại.

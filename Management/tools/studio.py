@@ -4,10 +4,12 @@ way Codex and Blender are run. Every run, delivery and refusal is kept, so a mis
 
     python Management/tools/studio.py check                          every order is well formed (any chat)
     python Management/tools/studio.py status [codex|blender|<F>/<id>] what waits, what is done (any chat)
+    python Management/tools/studio.py measure <F>/<id> [<item>]       size and transparency of the results (any chat)
     python Management/tools/studio.py codex <F>/<id> <item>           @Codex: one image for one item
     python Management/tools/studio.py consult <F>/<id> <item>         @Codex: ask GPT one question
     python Management/tools/studio.py blender <F>/<id> <item>         @Blender: run work/<item>.py headless
-    python Management/tools/studio.py deliver <codex|blender> <F>/<id>  the tool chat: hand the order over
+    python Management/tools/studio.py claude <F>/<id> <item>          @ClaudeImage: work/<item>.svg (written by the chat) into a PNG
+    python Management/tools/studio.py deliver <codex|blender|claudeimage> <F>/<id>  the tool chat: hand the order over
     python Management/tools/studio.py review <F>/<id> <item> <0-3> ["<feedback>"]   the one who ordered: judge one item
     python Management/tools/studio.py anchor <_design/...>/<id> <item> the human: an art that passed guides its style (toggle)
     python Management/tools/studio.py pick <F>/<id> <item> <n>         the tool chat: take run n of an item as its result
@@ -44,6 +46,12 @@ root's .art-style/. No approval step: the run limits above and ART_DAILY_MAX art
 The prompt carries the styles; the images handed to Codex are the frame drawn as PNG, the styles' pictures and up to
 ART_ANCHORS accepted pictures marked as anchors. Delivered to Resources/_design/<node>/codex/<id>/v<n>/ with
 meta.json (node hash, frame hashes, style hashes), which the page uses to label a picture stale.
+
+Claude concepts and Claude's images (tool: claudeimage, the @ClaudeImage chat): the chat draws each item as an SVG in
+work/<item>.svg; `claude` checks it (one drawing, nothing outside its file, no script), counts one run and makes
+work/out/<item>.png at the size of the order's format line, background transparent (svg_to_png). kind: image for a
+feature (enough for the IDEA phase), kind: art for a cheat node (the claude concept: same gates, same judging and
+meta.json as an art concept, kept apart from it under .../claudeimage/...; no daily limit, no anchors).
 """
 import json
 import os
@@ -59,7 +67,17 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
 
-TOOLS = {"codex": ("image", "consult", "art"), "blender": ("model",)}
+CLAUDE = gd.CLAUDE_TOOL            # "claudeimage": the @ClaudeImage chat draws an SVG, this code makes the PNG
+TOOLS = {"codex": ("image", "consult", "art"), "blender": ("model",), CLAUDE: ("image", "art")}
+TOOL_CHATS = {"codex": "Codex", "blender": "Blender", CLAUDE: "ClaudeImage"}      # the chat that works for a tool
+SVG_MAX = 2 * 1024 * 1024
+SVG_BANNED = ("script", "foreignObject", "iframe", "object", "embed", "audio", "video")
+BROWSERS = ("chrome", "google-chrome", "chromium", "chromium-browser", "msedge")
+BROWSER_PATHS = (r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                 r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                 r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                 r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+                 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")
 DELIVER_TO = ("Private", "Public")
 ART_DELIVER = "concept"          # an art order is never copied into Assets
 REVIEW_FILE = "review.json"      # beside the order: {item: {level, text, version, at}} of what was delivered last
@@ -244,7 +262,7 @@ def check_order(root, tool, feature, oid, folder):
     design = bool(DESIGN_RX.match(feature))
     kind = data["fields"].get("kind", "")
     if design:
-        problems += check_art(root, feature, oid, folder, data)
+        problems += check_art(root, tool, feature, oid, folder, data)
     elif not FEATURE_RX.match(feature) or not ID_RX.match(oid):
         problems.append("thư mục order phải là orders/<Feature>/<id> (id: chữ thường, số, gạch nối)")
     elif not (Path(root) / "UnityProject" / "Assets" / "Features" / Path(*feature.split("/"))).is_dir():
@@ -278,12 +296,13 @@ def order_styles(data):
     return [s.strip() for s in re.split(r"[,\s]+", data["fields"].get("style", "")) if s.strip()]
 
 
-def check_art(root, feature, oid, folder, data):
+def check_art(root, tool, feature, oid, folder, data):
     """The problems of an art order: a cheat node in live with frames, one item per state (its frame), known styles, and no frame
-    that already has a picture still good (unless this order is the one that made it)."""
+    that already has a picture still good from the same tool (unless this order is the one that made it). Art
+    concepts (codex) and claude concepts (claudeimage) are apart: one does not stand in the other's way."""
     problems = []
-    if data["fields"].get("tool") not in ("", "codex") or data["fields"].get("kind") not in ("", "art"):
-        problems.append("order của node thiết kế chỉ là tool: codex, kind: art")
+    if tool not in gd.ART_TOOLS or data["fields"].get("kind") not in ("", "art"):
+        problems.append(f"order của node thiết kế chỉ là kind: art, tool: {' hoặc '.join(gd.ART_TOOLS)}")
     if data["fields"].get("deliver") and data["fields"]["deliver"] != ART_DELIVER:
         problems.append(f"order art ghi deliver: {ART_DELIVER} (ảnh không vào Assets)")
     path = node_of(feature)
@@ -311,7 +330,7 @@ def check_art(root, feature, oid, folder, data):
     if read_status(folder)["version"] == 0:
         tree, _ = gd.read_tree(root, "live")
         art, _ = gd.read_art(root, tree)
-        good = {e["frame"]: e["ref"] for e in art.get(path, []) if e["usable"]}
+        good = {e["frame"]: e["ref"] for e in art.get(path, []) if e["usable"] and e["tool"] == tool}
         mine = f"{feature}/{oid}"
         for item, _ in data["items"]:
             if good.get(item) and good[item] != mine:
@@ -429,26 +448,111 @@ def art_gate(root):
         raise ValueError(f"đã chạy {len(today)}/{ART_DAILY_MAX} lần gen art hôm nay (trần chung): để mai, hoặc người nâng trần")
 
 
-def svg_to_png(svg_path, png_path):
-    """Draws an SVG into a PNG with whatever the machine has (STUDIO_SVG2PNG overrides: a command or a .py taking
-    <in> <out>). Returns the converter used, or '' when none worked."""
+def browser_exe():
+    """A Chrome or Edge that can draw a page without a window (STUDIO_BROWSER overrides), or ''."""
+    override = os.environ.get("STUDIO_BROWSER")
+    if override is not None:
+        return override
+    return next((shutil.which(n) for n in BROWSERS if shutil.which(n)), "") or next((p for p in BROWSER_PATHS if Path(p).is_file()), "")
+
+
+def svg_box(text):
+    """(width, height) of an SVG's viewBox, or None."""
+    m = re.search(r"<svg\b[^>]*?\bviewBox\s*=\s*[\"']\s*([-+.\deE]+)[\s,]+([-+.\deE]+)[\s,]+([-+.\deE]+)[\s,]+([-+.\deE]+)\s*[\"']", text)
+    try:
+        w, h = float(m.group(3)), float(m.group(4))
+    except (AttributeError, ValueError):
+        return None
+    return (w, h) if w > 0 and h > 0 else None
+
+
+def svg_converters():
+    """The names of the ways this machine has to draw an SVG into a PNG, in the order svg_to_png tries them."""
+    return ([n for n, ok in (("STUDIO_SVG2PNG", os.environ.get("STUDIO_SVG2PNG")), ("rsvg-convert", shutil.which("rsvg-convert")),
+                             ("inkscape", shutil.which("inkscape")), ("magick", shutil.which("magick"))) if ok]
+            + (["browser"] if browser_exe() else []))
+
+
+def svg_to_png(svg_path, png_path, size=None):
+    """Draws an SVG into a PNG with whatever the machine has: STUDIO_SVG2PNG (a command or a .py taking <in> <out>
+    [<width> <height>]), rsvg-convert, inkscape, magick, then Chrome or Edge without a window. size: (width, height)
+    in px; without it the PNG is 1920 px wide and keeps the shape of the viewBox. The background stays
+    transparent. Returns the converter used, or '' when none worked."""
+    svg_path, png_path = Path(svg_path), Path(png_path)
+    box = svg_box(read_text(svg_path)) or (16, 9)
+    w, h = size or (1920, max(1, round(1920 * box[1] / box[0])))
     override = os.environ.get("STUDIO_SVG2PNG")
     tries = []
     if override:
-        tries.append(([sys.executable, override] if override.endswith(".py") else [override]) + [str(svg_path), str(png_path)])
+        tries.append(([sys.executable, override] if override.endswith(".py") else [override]) + [str(svg_path), str(png_path)]
+                     + ([str(w), str(h)] if size else []))
     if shutil.which("rsvg-convert"):
-        tries.append(["rsvg-convert", "-w", "1920", "-o", str(png_path), str(svg_path)])
+        tries.append(["rsvg-convert", "-w", str(w), "-h", str(h), "-b", "none", "-o", str(png_path), str(svg_path)])
     if shutil.which("inkscape"):
-        tries.append(["inkscape", str(svg_path), "-o", str(png_path), "-w", "1920"])
-    for magick in ("magick", "convert"):
-        if shutil.which(magick):
-            tries.append([magick, str(svg_path), str(png_path)])
-            break
+        tries.append(["inkscape", str(svg_path), "-o", str(png_path), "-w", str(w), "-h", str(h)])
+    if shutil.which("magick"):      # not `convert`: on Windows that name is a system command
+        tries.append(["magick", "-background", "none", str(svg_path), "-resize", f"{w}x{h}!", str(png_path)])
     for cmd in tries:
         code, _ = run(cmd)
-        if code == 0 and Path(png_path).is_file():
+        if code == 0 and png_path.is_file():
             return cmd[0]
+    browser = browser_exe()
+    if browser:
+        # The SVG is shown as a picture (scripts and outside files are not loaded), at a fixed size at the top left.
+        page = png_path.with_name(png_path.name + ".page.html")
+        page.write_text("<!doctype html><html><head><meta charset=\"utf-8\"><style>html,body{margin:0;padding:0;"
+                        f"background:transparent;overflow:hidden}}img{{display:block;width:{w}px;height:{h}px}}</style></head>"
+                        f"<body><img src=\"{svg_path.resolve().as_uri()}\"></body></html>", encoding="utf-8")
+        try:
+            if png_path.exists():
+                png_path.unlink()
+            code, _ = run(([sys.executable, browser] if browser.endswith(".py") else [browser])
+                          + ["--headless", "--disable-gpu", "--hide-scrollbars", "--no-first-run", "--force-device-scale-factor=1",
+                             f"--window-size={w},{h}", "--default-background-color=00000000",
+                             f"--screenshot={png_path.resolve()}", page.resolve().as_uri()])
+        finally:
+            try:
+                page.unlink()
+            except OSError:
+                pass
+        if png_path.is_file():
+            return "browser"
     return ""
+
+
+def check_svg(text):
+    """The problems of an SVG the @ClaudeImage chat wrote: it must be one drawing that needs nothing outside its
+    file and runs nothing."""
+    import xml.etree.ElementTree as ET
+    if len(text.encode("utf-8")) > SVG_MAX:
+        return [f"file SVG lớn quá {SVG_MAX // 1024} KB"]
+    if re.search(r"<!(DOCTYPE|ENTITY)", text, re.I):
+        return ["SVG không được có DOCTYPE hay ENTITY"]
+    try:
+        top = ET.fromstring(text)
+    except ET.ParseError as ex:
+        return [f"SVG không phải XML hợp lệ ({ex})"]
+    name = lambda tag: tag.rsplit("}", 1)[-1] if isinstance(tag, str) else ""      # noqa: E731
+    if name(top.tag) != "svg" or not top.tag.startswith("{http://www.w3.org/2000/svg}"):
+        return ["gốc phải là <svg xmlns=\"http://www.w3.org/2000/svg\" ...>"]
+    problems = []
+    if not svg_box(text):
+        problems.append("thẻ <svg> thiếu viewBox=\"0 0 <rộng> <cao>\" (rộng, cao lớn hơn 0)")
+    for el in top.iter():
+        tag = name(el.tag)
+        if tag in SVG_BANNED:
+            problems.append(f"không dùng thẻ <{tag}>")
+        if tag == "style" and re.search(r"@import|url\(\s*[\"']?(?!#)", el.text or "", re.I):
+            problems.append("<style> không được @import hay url() trỏ ra ngoài file")
+        for key, value in el.attrib.items():
+            attr, value = name(key), str(value).strip()
+            if attr.lower().startswith("on"):
+                problems.append(f"không dùng thuộc tính sự kiện {attr}")
+            elif attr == "href" and not (value.startswith("#") or value.startswith("data:image/")):
+                problems.append(f"<{tag}> href trỏ ra ngoài file ({value[:40]}): chỉ '#id' hoặc data:image/")
+            elif re.search(r"url\(\s*[\"']?(?!#)", value, re.I) or re.match(r"(?i)\s*javascript:", value):
+                problems.append(f"<{tag}> {attr} trỏ ra ngoài file: chỉ url(#id)")
+    return list(dict.fromkeys(problems))[:8]
 
 
 def frame_png(root, path, frame, dest):
@@ -477,7 +581,7 @@ def art_inputs(root, feature, data, item, work):
     if png:
         images.append(png)
     else:
-        notes.append("không đổi được frame sang PNG (cần rsvg-convert, inkscape hoặc magick): ảnh sẽ không bám bố cục")
+        notes.append("không đổi được frame sang PNG (cần rsvg-convert, inkscape, magick, Chrome hoặc Edge): ảnh sẽ không bám bố cục")
     live_root = gd.table_dir(root, "live")
     for s in wanted:
         images += [live_root / gd.STYLE_DIR / n for n in s["images"]]
@@ -626,7 +730,7 @@ def prepare(root, tool, ref, item, kinds):
                          f"{b['round']}/{MAX_REDOS} lần). Đang làm dở thì chọn bản gần order nhất bằng `studio.py pick "
                          f"{feature}/{oid} {item} <n>` (các bản ở work/attempts/), ghi work/{item}.check.md ('chưa đạt: "
                          f"<lý do>') rồi deliver; item sẽ mang nhãn chưa chuẩn kèm phiếu nợ")
-    if DESIGN_RX.match(feature):
+    if DESIGN_RX.match(feature) and tool == gd.ART_TOOL:      # the daily limit is on Codex runs; a claude concept has none
         art_gate(root)
     work = folder / "work"
     (work / "out").mkdir(parents=True, exist_ok=True)
@@ -731,6 +835,52 @@ def cmd_codex(root, ref, item):
         print(f"Codex không tạo được ảnh ({msg}). Đi gián tiếp qua unity-mcp theo .claude/rules/studio.md, rồi để "
               f"kết quả ở work/out/{item}.png và chạy deliver.", file=sys.stderr)
         return 1
+
+
+def order_size(data):
+    """(width, height) in px written in the order's format line, or None."""
+    m = re.search(r"(\d+)\s*x\s*(\d+)", data["fields"].get("format", ""))
+    return (int(m.group(1)), int(m.group(2))) if m and 0 < int(m.group(1)) <= 8192 and 0 < int(m.group(2)) <= 8192 else None
+
+
+def cmd_claude(root, ref, item):
+    """@ClaudeImage: makes work/out/<item>.png from the SVG the chat wrote in work/<item>.svg. One run of the item.
+    Nothing is counted when the SVG is refused or the machine cannot draw it."""
+    with RunLock(root, CLAUDE):
+        _, _, _, folder = find_order(root, ref, CLAUDE)
+        src = folder / "work" / f"{item}.svg"
+        size = order_size(parse_order(read_text(folder / ORDER_FILE)))
+        if not size:
+            raise ValueError("order không ghi kích thước trong format (ví dụ 'png 256x256, nền trong suốt'): bên đặt order phải ghi")
+        if not src.is_file():
+            raise ValueError(f"chưa có work/{item}.svg: viết hình SVG của item này trước (Write), rồi chạy lại")
+        problems = check_svg(read_text(src))
+        if problems:
+            raise ValueError(f"work/{item}.svg chưa dùng được (không tính lượt): " + "; ".join(problems))
+        if not svg_converters():
+            raise ValueError("máy này không đổi được SVG sang PNG: cần rsvg-convert, inkscape, magick, Chrome hoặc Edge "
+                             "(hoặc đặt STUDIO_SVG2PNG). Dừng và báo người")
+        feature, oid, folder, data, text, work, refs = prepare(root, CLAUDE, ref, item, ("image", "art"))
+        attempt = start_attempt(folder, item)
+        stamp = time.strftime("%Y%m%d-%H%M%S")
+        shutil.copy2(src, work / "_log" / f"{item}-{attempt}-{stamp}.svg")      # what this run drew
+        set_aside(list((work / "out").glob(f"{item}.*")), work, "_old")      # the previous draft
+        dest = work / "out" / f"{item}.png"
+        used = svg_to_png(src, dest, size)
+        log(folder, "run", tool=CLAUDE, item=item, mode=used or "none", exit=0 if used else 1,
+            result=f"đã có work/out/{dest.name}" if used else "không đổi được SVG sang PNG", files=[dest.name] if used else [])
+        if not used:
+            print(f"Không đổi được work/{item}.svg sang PNG (lượt {attempt} đã tính). Dừng và báo người.", file=sys.stderr)
+            return 1
+        keep_attempt(work, item, attempt)
+        print(f"ClaudeImage (SVG → PNG bằng {used}, lượt {attempt}): đã có work/out/{dest.name}")
+        try:
+            for line in measure_lines(dest, data["fields"].get("format", "")):
+                print(f"    {line}")
+        except ValueError as ex:
+            print(f"    không đo được: {ex}")
+        print(f"Xem ảnh (Read work/out/{dest.name}), tự kiểm theo Tiêu chí nhận, ghi work/{item}.check.md.")
+        return 0
 
 
 def cmd_consult(root, ref, item):
@@ -1013,6 +1163,159 @@ def cmd_review(root, ref, item, level, text=""):
     return 0
 
 
+# ---------------------------------------------------------------- measuring a result
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+PNG_KINDS = {0: ("xám", 1), 2: ("RGB", 3), 3: ("bảng màu", 1), 4: ("xám + alpha", 2), 6: ("RGBA", 4)}
+
+
+def png_rows(raw, stride, height, step):
+    """The scanlines of a PNG that is not interlaced, with their filters undone."""
+    if len(raw) < (stride + 1) * height:
+        raise ValueError("file PNG thiếu dữ liệu điểm ảnh")
+    prev, pos = bytearray(stride), 0
+    for _ in range(height):
+        kind, row = raw[pos], bytearray(raw[pos + 1:pos + 1 + stride])
+        pos += 1 + stride
+        if kind == 1:
+            for i in range(step, stride):
+                row[i] = (row[i] + row[i - step]) & 255
+        elif kind == 2:
+            for i in range(stride):
+                row[i] = (row[i] + prev[i]) & 255
+        elif kind == 3:
+            for i in range(stride):
+                row[i] = (row[i] + (((row[i - step] if i >= step else 0) + prev[i]) >> 1)) & 255
+        elif kind == 4:
+            for i in range(stride):
+                a, b, c = (row[i - step], prev[i], prev[i - step]) if i >= step else (0, prev[i], 0)
+                pa, pb, pc = abs(b - c), abs(a - c), abs(a + b - c - c)
+                row[i] = (row[i] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
+        elif kind:
+            raise ValueError("file PNG hỏng (bộ lọc dòng lạ)")
+        yield row
+        prev = row
+
+
+def measure_png(path):
+    """Size and transparency of a PNG, read with the standard library: {width, height, kind, depth, alpha}.
+    alpha is None when the file has no alpha channel, a text when it cannot be measured, else {clear: share of the
+    pixels with alpha 0, corners: the four corner pixels have alpha 0, box: (left, top, right, bottom) of the
+    pixels with alpha above 0, or None when there are none}. Raises ValueError for a file that is no PNG."""
+    import zlib
+    blob = Path(path).read_bytes()
+    if blob[:8] != PNG_SIGNATURE:
+        raise ValueError("không phải file PNG (chỉ đo được PNG)")
+    pos, head, data, palette_alpha = 8, None, [], False
+    while pos + 8 <= len(blob):
+        size, name = int.from_bytes(blob[pos:pos + 4], "big"), blob[pos + 4:pos + 8]
+        body = blob[pos + 8:pos + 8 + size]
+        pos += 12 + size
+        if name == b"IHDR" and len(body) >= 13:
+            head = (int.from_bytes(body[0:4], "big"), int.from_bytes(body[4:8], "big"), body[8], body[9], body[12])
+        elif name == b"IDAT":
+            data.append(body)
+        elif name == b"tRNS":
+            palette_alpha = True
+        elif name == b"IEND":
+            break
+    if not head or head[3] not in PNG_KINDS or not head[0] or not head[1]:
+        raise ValueError("file PNG hỏng (thiếu phần đầu)")
+    width, height, depth, colour, interlace = head
+    out = {"width": width, "height": height, "kind": PNG_KINDS[colour][0], "depth": depth, "alpha": None}
+    if colour not in (4, 6):
+        out["alpha"] = "có màu trong suốt khai theo bảng màu, không đo từng điểm" if palette_alpha else None
+        return out
+    if interlace or depth not in (8, 16):
+        out["alpha"] = "có kênh alpha nhưng file lưu kiểu interlace, không đo từng điểm"
+        return out
+    try:
+        raw = zlib.decompress(b"".join(data))
+    except zlib.error:
+        raise ValueError("file PNG hỏng (không giải nén được)")
+    size = depth // 8
+    step = PNG_KINDS[colour][1] * size
+    clear, box, corners = 0, None, []
+    for y, row in enumerate(png_rows(raw, width * step, height, step)):
+        alpha = bytes(row[step - size::step])
+        if size == 2:      # 16 bit: zero only when both bytes are
+            alpha = bytes(a | b for a, b in zip(alpha, row[step - 1::step]))
+        clear += alpha.count(0)
+        if y in (0, height - 1):
+            corners += [alpha[0], alpha[-1]]
+        if any(alpha):
+            left, right = width - len(alpha.lstrip(b"\0")), len(alpha.rstrip(b"\0")) - 1
+            box = (left, y, right, y) if box is None else (min(box[0], left), box[1], max(box[2], right), y)
+    out["alpha"] = {"clear": clear / (width * height), "corners": not any(corners), "box": box}
+    return out
+
+
+def measure_lines(path, wanted=""):
+    """What `measure` prints about one result; wanted is the order's format line."""
+    size = f"{max(1, round(path.stat().st_size / 1024))} KB"
+    if path.suffix.lower() != ".png":
+        return [f"file {path.suffix.lower()}, {size}: chỉ đo được PNG"]
+    m = measure_png(path)
+    w, h, alpha = m["width"], m["height"], m["alpha"]
+    lines = [f"{w}x{h} px, PNG {m['kind']} {m['depth']} bit, {size}"]
+    clear_corners = isinstance(alpha, dict) and alpha["corners"]
+    if alpha is None:
+        lines.append("nền: không có kênh alpha, nền KHÔNG trong suốt")
+    elif isinstance(alpha, str):
+        lines.append(f"nền: {alpha}")
+    else:
+        lines.append(f"nền: {alpha['clear'] * 100:.0f}% điểm trong suốt hoàn toàn; 4 góc "
+                     + ("trong suốt" if alpha["corners"] else "KHÔNG trong suốt"))
+        if alpha["box"]:
+            l, t, r, b = alpha["box"]
+            bw, bh = r - l + 1, b - t + 1
+            dx, dy = (l + r + 1) / 2 - w / 2, (t + b + 1) / 2 - h / 2
+            lines.append(f"hình (điểm có alpha trên 0): {bw}x{bh} px = {bw * 100 / w:.0f}% x {bh * 100 / h:.0f}% khung; "
+                         f"tâm lệch ngang {dx:+.0f} px, dọc {dy:+.0f} px; cách mép trái {l}, trên {t}, phải {w - 1 - r}, dưới {h - 1 - b} px")
+        else:
+            lines.append("hình: không có điểm nào hiện (ảnh trong suốt toàn bộ)")
+    verdict = []
+    want = re.search(r"(\d+)\s*x\s*(\d+)", wanted or "")
+    if want:
+        ok = (w, h) == (int(want.group(1)), int(want.group(2)))
+        verdict.append(f"kích thước {'khớp' if ok else 'LỆCH'} ({want.group(1)}x{want.group(2)})")
+    if "trong suốt" in (wanted or "").lower():
+        verdict.append("nền trong suốt: " + ("4 góc trong suốt" if clear_corners else "KHÔNG ĐẠT hoặc không đo được"))
+    if verdict:
+        lines.append(f"so với format của order: {'; '.join(verdict)}")
+    return lines
+
+
+def cmd_measure(root, ref, item=""):
+    """Prints size and transparency of an order's results: those waiting in work/out, else the last delivery.
+    It only reads; what it prints is for the tool chat's own check and for the one who judges."""
+    tool, feature, oid, folder = find_order(root, ref)
+    data = parse_order(read_text(folder / ORDER_FILE))
+    items = [i for i, _ in data["items"]]
+    if item and item not in items:
+        raise ValueError(f"order không có item '{item}'. Có: {', '.join(items)}")
+    version = read_status(folder)["version"]
+    wanted = data["fields"].get("format", "")
+    print(f"{tool} {feature}/{oid} · format của order: {wanted or '(không ghi)'}")
+    for i in ([item] if item else items):
+        hits = sorted(p for p in (folder / "work" / "out").glob(f"{i}.*") if p.is_file())
+        where = "work/out"
+        if not hits and version:
+            delivered = item_file(version_dir(root, tool, feature, oid, version), i)
+            hits, where = ([delivered] if delivered else []), f"bản giao v{version}"
+        if not hits:
+            print(f"- {i}: chưa có kết quả")
+            continue
+        for p in hits:
+            try:
+                lines = measure_lines(p, wanted)
+            except ValueError as ex:
+                lines = [f"không đo được: {ex}"]
+            print(f"- {p.name} ({where}): {lines[0]}")
+            for line in lines[1:]:
+                print(f"    {line}")
+    return 0
+
+
 # ---------------------------------------------------------------- quality and art debts
 def self_check(work, item):
     """(ok, note) from work/<item>.check.md: first line 'đạt' or 'chưa đạt: <why>'; no file is not passing."""
@@ -1152,20 +1455,22 @@ def pending_line(root, tool):
 
 
 def art_line(root):
-    """One line for @GameDesigner's prompt: where its art orders stand, and what it should tell @Codex or the human."""
+    """One line for @GameDesigner's prompt: where its art orders stand (art concepts of @Codex, claude concepts of
+    @ClaudeImage), and what it should tell the tool chat or the human."""
     try:
-        rows = [r for r in summary(root, "codex") if DESIGN_RX.match(r[0].rsplit("/", 1)[0])]
+        rows = [r for r in summary(root) if r[1] in gd.ART_TOOLS and DESIGN_RX.match(r[0].rsplit("/", 1)[0])]
     except OSError:
         return ""
     parts = []
-    for ref, _, state, version, _, _, _, items in rows:
+    for ref, tool, state, version, _, _, _, items in rows:
+        chat = "@" + TOOL_CHATS[tool]
         redo = [i["id"] for i in items if i["redo"]]
         mute = [i["id"] for i in items if version and i["level"] == REDO and not i["feedback"]]
         stuck = [i["id"] for i in items if version and state == "redo" and i["level"] == REDO and i["feedback"] and not i["redo"]]
         if state in ("new", "doing") and not version:
-            parts.append(f"{ref}: chưa giao (đã nhắn @Codex chưa?)")
+            parts.append(f"{ref}: chưa giao (đã nhắn {chat} chưa?)")
         elif state == "doing":
-            parts.append(f"{ref}: @Codex đang làm lại")
+            parts.append(f"{ref}: {chat} đang làm lại")
         elif redo or mute or stuck:
             parts.append(f"{ref}: " + "; ".join(([f"làm lại được: {', '.join(redo)}"] if redo else [])
                                                 + ([f"'{REVIEW_LEVELS[REDO]}' nhưng THIẾU PHẢN HỒI: {', '.join(mute)}"] if mute else [])
@@ -1254,8 +1559,10 @@ def main(argv):
             return cmd_check(root)
         if args[:1] == ["status"] and len(args) <= 2:
             return cmd_status(root, args[1] if len(args) == 2 else "")
-        if len(args) == 3 and args[0] in ("codex", "consult", "blender"):
-            return {"codex": cmd_codex, "consult": cmd_consult, "blender": cmd_blender}[args[0]](root, args[1], args[2])
+        if args[:1] == ["measure"] and len(args) in (2, 3):
+            return cmd_measure(root, args[1], args[2] if len(args) == 3 else "")
+        if len(args) == 3 and args[0] in ("codex", "consult", "blender", "claude"):
+            return {"codex": cmd_codex, "consult": cmd_consult, "blender": cmd_blender, "claude": cmd_claude}[args[0]](root, args[1], args[2])
         if len(args) == 3 and args[0] == "deliver" and args[1] in TOOLS:
             return cmd_deliver(root, args[1], args[2])
         if len(args) in (4, 5) and args[0] == "review":

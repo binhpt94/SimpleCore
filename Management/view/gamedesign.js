@@ -614,8 +614,9 @@
         each(data.live, function (n) {
           var seen = {};
           (n.art || []).forEach(function (a) {
-            if (seen[a.frame]) return;
-            seen[a.frame] = true;
+            var seenKey = (a.tool || "codex") + "/" + a.frame;
+            if (seen[seenKey]) return;
+            seen[seenKey] = true;
             if (a.reviewable && a.level === null && !a.stale.length) unjudged[n.path] = (unjudged[n.path] || 0) + 1;
           });
         });
@@ -1159,19 +1160,23 @@
           }
         });
       }
-      // Art: ảnh @Codex gen theo frame của node (order _design), nhãn tính từ hash node và hash style.
-      var artPending = (data.artPending || []).filter(function (o) { return o.node === node.path; });
-      if ((node.art && node.art.length) || artPending.length) {
-        add(body, el("h3", "", "Art (ảnh concept)"));
+      // Art và Claude concept: ảnh theo frame của node (order _design), nhãn tính từ hash node và hash style.
+      // Art: @Codex gen. Claude concept: @ClaudeImage tự vẽ SVG, studio.py đổi ra PNG (đủ cho giai đoạn IDEA).
+      [["codex", "Art (ảnh concept)", "@Codex"], ["claudeimage", "Claude concept (ảnh Claude vẽ, đủ cho giai đoạn IDEA)", "@ClaudeImage"]].forEach(function (kind) {
+      var artTool = kind[0], artChat = kind[2];
+      var arts = (node.art || []).filter(function (a) { return (a.tool || "codex") === artTool; });
+      var artPending = (data.artPending || []).filter(function (o) { return o.node === node.path && (o.tool || "codex") === artTool; });
+      if (arts.length || artPending.length) {
+        add(body, el("h3", "", kind[1]));
         artPending.forEach(function (o) {
           var line = put(body, el("div", "gd-inline"));
           add(line, el("span", "", "Order " + o.ref + ": " + o.title + " · " + o.items.length + " ảnh · style " + (o.style || "?") +
-            (o.version ? " · @Codex đang làm lại (bản đang hiện là v" + o.version + ", chấm sau khi có bản mới)" : " · chờ @Codex gen")));
+            (o.version ? " · " + artChat + " đang làm lại (bản đang hiện là v" + o.version + ", chấm sau khi có bản mới)" : " · chờ " + artChat + (artTool === "codex" ? " gen" : " vẽ"))));
         });
         var levels = data.artLevels || [];
         var levelText = function (v) { return v === null ? (data.artLevelNone || "Chưa duyệt") : levels[v]; };
         var latest = {};
-        (node.art || []).forEach(function (a) { if (!latest[a.frame]) latest[a.frame] = a; });
+        arts.forEach(function (a) { if (!latest[a.frame]) latest[a.frame] = a; });
         var gallery = put(body, el("div", "gd-art"));
         Object.keys(latest).forEach(function (frame) {
           var a = latest[frame];
@@ -1187,9 +1192,9 @@
           if (a.anchor) add(holder, el("span", "gd-art-anchor", "mốc"));
           if (a.below) add(holder, el("span", "gd-art-below", "chưa chuẩn"));
           add(fig, el("figcaption", "", frame + " · v" + a.version + " · " + a.ref + (a.styles.length ? " · style " + a.styles.join(", ") : "") +
-            (a.below ? " · @Codex tự kiểm chưa đạt: " + a.below : "")));
+            (a.below ? " · " + artChat + " tự kiểm chưa đạt: " + a.below : "")));
           if (!a.reviewable) {
-            if (a.redoing) add(fig, el("p", "gd-note", "@Codex đang làm lại ảnh này và chưa giao bản mới. Thanh chấm hiện khi có bản giao mới."));
+            if (a.redoing) add(fig, el("p", "gd-note", artChat + " đang làm lại ảnh này và chưa giao bản mới. Thanh chấm hiện khi có bản giao mới."));
             if (a.feedback) add(fig, el("p", "gd-note", "Phản hồi đã ghi: " + a.feedback));
             return;
           }
@@ -1229,11 +1234,11 @@
             tickEls.forEach(function (t, i) { t.className = "gd-art-tick" + (String(i) === slider.value ? " on" : ""); });
             tag.textContent = a.stale.length ? a.label : levelText(v);
             tag.className = "gd-art-label " + kindOf(v);
-            hint.textContent = v === 0 && !note.value.trim() ? "Cần phản hồi thì @Codex mới gen lại được ảnh này." :
-              v === 0 ? "Bảo @GameDesigner cho làm lại: @Codex chạy lại ảnh này 1 lượt theo phản hồi." :
+            hint.textContent = v === 0 && !note.value.trim() ? "Cần phản hồi thì " + artChat + " mới làm lại được ảnh này." :
+              v === 0 ? "Bảo @GameDesigner cho làm lại: " + artChat + " làm lại ảnh này 1 lượt theo phản hồi." :
               v === 1 ? "Dùng tạm, ghi vào nợ art (tab Studio)." : "";
             anchorBox.textContent = "";
-            if (v === 3 && a.level === 3 && !a.stale.length) {
+            if (artTool === "codex" && v === 3 && a.level === 3 && !a.stale.length) {
               add(anchorBox, button(a.anchor ? "Bỏ mốc" : "Đặt làm mốc style", function () {
                 send("/api/studio/anchor", { ref: a.ref, item: a.frame }, function (res) { return res.message || "Đã đổi mốc."; });
               }));
@@ -1269,14 +1274,15 @@
           paint();
         });
         var owed = ((window.CORESIMPLE_STUDIO || {}).debts || []).filter(function (d) {
-          return d.state === "open" && d.owner === "_design/" + node.path.split("/").join(".");
+          return d.state === "open" && (d.tool || "codex") === artTool && d.owner === "_design/" + node.path.split("/").join(".");
         });
         if (owed.length) add(body, el("p", "bad-text", owed.length + " phiếu nợ art đang mở cho node này (" +
           owed.map(function (d) { return d.id + " " + d.item; }).join(", ") + "): xem tab Studio."));
-        var older = (node.art || []).filter(function (a) { return latest[a.frame] !== a; });
+        var older = arts.filter(function (a) { return latest[a.frame] !== a; });
         if (older.length) add(body, el("p", "gd-note", older.length + " bản cũ hơn vẫn giữ trong Resources (không ghi đè)."));
         if (!ctx.setup) add(body, el("p", "gd-note", "Chấm ảnh và đặt mốc cần mở trang qua server Setup (python Management/tools/setup_server.py)."));
       }
+      });
       // Frame: bố cục dạng chữ trong .frame-concept, đã được gamedesign.py giải số và vẽ sẵn thành SVG.
       if (node.frames && node.frames.length || node.frameNotes && node.frameNotes.length || node.frameNone) {
         add(body, el("h3", "", "Frame (bố cục ước lượng)"));

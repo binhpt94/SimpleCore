@@ -1,10 +1,10 @@
-# Studio: order ảnh và 3D cho @Codex, @Blender
-Nhóm Tools: `@Codex` (ảnh, tham vấn GPT) và `@Blender` (model 3D). Không code, không sửa `Assets/`. Chỉ nhận order của feature và làm đúng order đó.
+# Studio: order ảnh và 3D cho @Codex, @Blender, @ClaudeImage
+Nhóm Tools: `@Codex` (ảnh, tham vấn GPT), `@Blender` (model 3D) và `@ClaudeImage` (ảnh Claude tự vẽ bằng SVG; thư mục và tên tool là `claudeimage`). Không code, không sửa `Assets/`. Chỉ nhận order của feature và làm đúng order đó.
 Lệnh duy nhất chạy tool: `python Management/tools/studio.py` (bảng lệnh ở đầu file). Guard ép ai được chạy lệnh nào.
 
 ## Thư mục
 ```
-Management/studio/<codex|blender>/
+Management/studio/<codex|blender|claudeimage>/
   lessons.md                       bài học từ lỗi đã gặp; studio.py chèn vào đầu mọi prompt      phiên tool ghi
   orders/<Feature>/<id>/
     order.md                       đơn hàng                                                       feature tạo, một lần
@@ -20,8 +20,8 @@ Mọi phiên đã gán đọc được `Management/studio` và `Resources`. `<Fe
 ## Khung order (feature viết)
 ```
 ---
-tool: codex | blender
-kind: image | consult | model          codex: image, consult; blender: model (art: chỉ order của node thiết kế, xem dưới)
+tool: codex | blender | claudeimage
+kind: image | consult | model          codex: image, consult; blender: model; claudeimage: image (art: chỉ order của node thiết kế, xem dưới)
 count: 3                               đúng bằng số dòng của Danh sách
 deliver: Private | Public              FeatureAssets nào sẽ nhận hàng
 format: png 512x512, nền trong suốt
@@ -42,14 +42,18 @@ design: feature-hero/hero-list/hero-roster-values                (không bắt b
 - Không mơ hồ: viết điều kiện đo được trong Tiêu chí nhận. Phong cách thì đưa ảnh tham chiếu.
 - Viết xong: `python Management/tools/studio.py check`, rồi nhắn @Codex hoặc @Blender bằng SendMessage.
 - Đặt order chỉ khi feature đã mở khoá code (cùng cổng thiết kế).
+- **Giai đoạn IDEA: ảnh đặt @ClaudeImage** (`tool: claudeimage`, `kind: image`) là đủ, không cần ảnh @Codex. Hình Claude vẽ là hình phẳng, rõ nghĩa, đúng kích thước; cần ảnh đẹp hơn (PROTOTYPE, FULL) thì đặt order mới cho @Codex.
 
 ## Quy trình
 1. **Tool nhận**: `studio.py status <tool>` (in mức chấm và phản hồi của từng item). Đọc `order.md`, `refs/`, và **toàn bộ `lessons.md`** trước khi làm.
+   - **Báo đã nhận**: bên đặt order nhắn tới thì trả lời ngay một tin ngắn bằng SendMessage: đã nhận order nào, đang xếp sau order nào, sẽ nhắn lại khi giao. Đang gen dở thì trả lời ở đầu lượt kế tiếp, trước khi gen item tiếp theo. Làm theo thứ tự order tới; order làm lại (mức 0) chen lên trước.
 2. **Làm từng item**, mỗi lần một item:
    - @Codex, ảnh: viết `work/<item>.md` (prompt chi tiết của item), rồi `studio.py codex <F>/<id> <item>`.
    - @Codex, tham vấn: `studio.py consult <F>/<id> <item>`.
+   - @ClaudeImage: tự vẽ item thành SVG, ghi `work/<item>.svg` bằng Write, rồi `studio.py claude <F>/<id> <item>`. Lệnh kiểm SVG, đổi ra `work/out/<item>.png` đúng kích thước ghi ở `format` (nền trong suốt) và in số đo; xem lại ảnh PNG bằng Read. Luật của file SVG ở mục "@ClaudeImage" bên dưới.
    - @Blender: viết `work/<item>.py` (script bpy; `sys.argv` sau `--` là `<thư mục out> <item>`; lưu đúng một file `<out>/<item>.<đuôi>`), rồi `studio.py blender <F>/<id> <item>`.
 3. **Tự kiểm** kết quả theo Tiêu chí nhận, ghi vào `work/<item>.check.md`: dòng đầu `đạt`, hoặc `chưa đạt: <lý do theo Tiêu chí nhận>`; dòng sau so sánh các lượt nếu có.
+   - Thứ đo được thì đo, không ước bằng mắt: `studio.py measure <F>/<id> [<item>]` (mọi phiên chạy được, chỉ đọc) in kích thước px, nền có trong suốt không (4 góc, % điểm trong suốt), hình chiếm bao nhiêu % khung và lệch tâm bao nhiêu, và so với dòng `format` của order. Chép các số đó vào `check.md`. Chỉ đo PNG; nội dung hình (đúng đối tượng, phong cách, đọc được khi thu nhỏ) vẫn tự xem ảnh.
    - Chưa đạt và **còn lượt** thì sửa prompt hoặc script rồi chạy lại item đó.
    - **Hết lượt**: studio.py từ chối chạy. Không tìm đường vòng (shell, MCP, unity-mcp). Chọn bản gần order nhất bằng `studio.py pick <F>/<id> <item> <n>` (mọi lượt nằm ở `work/attempts/<item>-<n>.<đuôi>`; pick không tốn lượt), ghi `chưa đạt: <lý do>`, rồi giao.
 4. **Giao**: `studio.py deliver <tool> <F>/<id>`. Nó chỉ chấp nhận đúng một file cho mỗi item. Item ghi `chưa đạt` hoặc thiếu tự kiểm được giao với nhãn **chưa chuẩn** (`quality.json`) và mở một phiếu nợ art. Sau đó nhắn feature bằng câu mà lệnh in ra, nói rõ item nào chưa chuẩn.
@@ -83,6 +87,13 @@ design: feature-hero/hero-list/hero-roster-values                (không bắt b
 - Item bên đặt order đã chấm thì bản giao sau không mở thêm phiếu "chưa chuẩn" cho nó: mức chấm đứng trên tự kiểm của tool.
 - Feature vẫn dùng hàng mức 1, 2: `review` chép như thường và ghi `Generated/<id>/QUALITY.md`. Code tiếp; khi cần ảnh tốt hơn thì chấm mức 0 kèm phản hồi (còn lượt) hoặc đặt order mới cho đúng item đó.
 - Tab Studio của trang hiện mọi order, lượt đã dùng, mức chấm, item chưa chuẩn và phiếu nợ; ảnh art chưa chuẩn có nhãn ngay trên ảnh ở tab Game design.
+
+## @ClaudeImage: ảnh Claude tự vẽ
+- **File SVG** (`work/<item>.svg`): một hình tự đủ trong một file. Gốc `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 <rộng> <cao>">`, viewBox cùng tỉ lệ với kích thước ở `format` của order. Cấm `<script>`, `<foreignObject>`, thuộc tính sự kiện, DOCTYPE, và mọi thứ trỏ ra ngoài file (`href`, `url()`, `@import`; chỉ `#id` và `data:image/`). Order đòi nền trong suốt thì không vẽ hình phủ kín nền.
+- `studio.py claude` từ chối SVG sai luật mà **không tính lượt**; SVG hợp lệ thì tính một lượt, cùng trần như mọi tool (2 lượt đầu mỗi item, 1 lượt mỗi lần bị chấm mức 0 có phản hồi). Không có trần 20 lượt mỗi ngày của art Codex.
+- Máy đổi SVG ra PNG bằng `STUDIO_SVG2PNG`, `rsvg-convert`, `inkscape`, `magick`, hoặc Chrome/Edge chạy không cửa sổ. Không có cái nào thì lệnh dừng: báo người, không tìm đường vòng (không tự chạy trình duyệt hay công cụ khác bằng shell, không dùng unity-mcp).
+- Phản hồi của item bị chấm mức 0 không tự vào đâu cả: đọc ở `studio.py status claudeimage` rồi sửa SVG theo đó. Đọc toàn bộ `claudeimage/lessons.md` trước khi vẽ.
+- **Claude-concept** (`kind: art`, do @GameDesigner đặt ở `claudeimage/orders/_design/<feature>.cheat/<id>/`): cùng cổng, cùng cách chấm và cùng `meta.json` như art-concept bên dưới, giao vào `Resources/_design/<node>/claudeimage/<id>/v<n>/`. Đọc bố cục bằng `python Management/tools/gd_frame.py live/<node>` và style trong `Management/game-design/live/.art-style/`; giữ đúng vị trí, kích thước và tỉ lệ của frame, chỉ thay hình cơ bản bằng hình vẽ theo style; không chép chữ chú thích hay số đo của frame vào ảnh. Hai loại độc lập: frame đã có claude-concept vẫn đặt được art-concept, và ngược lại; ảnh mốc style chỉ lấy từ ảnh Codex. Giai đoạn IDEA chỉ cần claude-concept.
 
 ## Ảnh art-concept của node thiết kế (`kind: art`)
 @GameDesigner đặt order chỉ cho node `cheat` của một feature (`<feature>/cheat`, đã ở `live`); `check` từ chối node khác. Đường dẫn: `orders/_design/<feature>.cheat/<id>/`. Mỗi item là id một state của node cheat (cũng là tên frame của state đó), mỗi feature tối đa 3 ảnh; `style:` là các style của vòng 1; `deliver: concept`.
@@ -135,5 +146,5 @@ Mỗi mục một dòng, ghi lỗi dưới dạng luật làm được, kèm ngu
 ## Không làm
 - Không viết code game, không sửa `Assets/`, `Resources/`, `order.md`, `review.json` hay `status.json`.
 - Không gen thứ order không có, không đổi item hay số lượng.
-- Không chạy `codex` hay `blender` bằng shell trực tiếp, chỉ qua studio.py.
+- Không chạy `codex`, `blender` hay công cụ đổi ảnh bằng shell trực tiếp, chỉ qua studio.py.
 - Bị guard chặn thì dừng và báo người.

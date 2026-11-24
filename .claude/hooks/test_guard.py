@@ -1298,8 +1298,13 @@ def run_tool_cases():
 
     g = "tools: studio commands"
     for who in (W, X, B, "@Manager", "@GameDesigner", "@CodeLead"):
-        for cmd in (P + " check", P + " status", P + " status codex", P + " status Wallet/coin-icons"):
+        for cmd in (P + " check", P + " status", P + " status codex", P + " status Wallet/coin-icons",
+                    P + " measure Wallet/coin-icons", P + " measure Wallet/coin-icons coin",
+                    P + " measure _design/feature-a.a1/lose-art main"):
             t(g, who, "allow", "Bash", {"command": cmd})
+        for cmd in (P + " measure", P + " measure Wallet/coin-icons coin extra", P + " measure ../x coin",
+                    P + " measure Wallet/coin-icons coin; rm x"):
+            t(g + " (measure: an order and at most one item)", who, "deny", "Bash", {"command": cmd})
     for cmd in (P + " codex Wallet/coin-icons coin", P + " consult Wallet/coin-icons coin", P + " deliver codex Wallet/coin-icons"):
         t(g, X, "allow", "Bash", {"command": cmd})
         t(g, B, "deny", "Bash", {"command": cmd})
@@ -1359,9 +1364,58 @@ def run_tool_cases():
     guard.release_lock(STORE)
     t(g, W, "deny", "mcp__unityMCP__execute_custom_tool", {"tool_name": "codex_exec"})
 
+    g = "tools: @ClaudeImage draws SVG and runs only its own studio commands"
+    CI = "@ClaudeImage"
+    corder = studio + "/claudeimage/orders/Wallet/coin-icons"
+    cart = studio + "/claudeimage/orders/_design/feature-a.cheat/a-claude"
+    for p in (studio + "/claudeimage/lessons.md", corder + "/work/coin.svg", corder + "/work/coin.check.md",
+              cart + "/work/main.svg"):
+        w(g, CI, "allow", p)
+    for p in (corder + "/order.md", corder + "/status.json", corder + "/review.json", corder + "/log.jsonl",
+              studio + "/codex/lessons.md", order + "/work/coin.md", studio + "/blender/orders/Wallet/m/work/a.py",
+              res + "/Wallet/claudeimage/coin-icons/v1/coin.png", F + "/Wallet/FeatureAssets/Private/x.png",
+              F + "/Wallet/Scripts/Internal/Old.cs", FX + "/CLAUDE.md"):
+        w(g, CI, "deny", p)
+    w(g, X, "deny", corder + "/work/coin.svg")
+    w(g, B, "deny", studio + "/claudeimage/lessons.md")
+    r(g, CI, "allow", order + "/order.md")
+    r(g, CI, "allow", res + "/Wallet/codex/coin-icons/v1/coin.png")
+    for cmd in (P + " claude Wallet/coin-icons coin", P + " claude _design/feature-a.cheat/a-claude main",
+                P + " deliver claudeimage Wallet/coin-icons", P + " pick Wallet/coin-icons coin 2", P + " status claudeimage",
+                P + " measure Wallet/coin-icons coin", P + " check"):
+        t(g, CI, "allow", "Bash", {"command": cmd})
+    for cmd in (P + " codex Wallet/coin-icons coin", P + " consult Wallet/coin-icons coin", P + " blender Wallet/coin-model coin",
+                P + " deliver codex Wallet/coin-icons", P + " deliver blender Wallet/coin-model",
+                P + " review Wallet/coin-icons coin 3", P + " anchor _design/feature-a.cheat/a-claude main",
+                P + " claude Wallet/coin-icons coin extra", P + " claude Wallet/coin-icons coin; rm x",
+                "python Management/studio/claudeimage/orders/Wallet/coin-icons/work/x.py", "chrome --headless x.svg"):
+        t(g, CI, "deny", "Bash", {"command": cmd})
+    for who in (X, B, W, "@GameDesigner", "@CodeLead", "@Manager"):
+        t(g + " (only @ClaudeImage)", who, "deny", "Bash", {"command": P + " claude Wallet/coin-icons coin"})
+        t(g + " (only @ClaudeImage)", who, "deny", "Bash", {"command": P + " deliver claudeimage Wallet/coin-icons"})
+        t(g + " (status for all)", who, "allow", "Bash", {"command": P + " status claudeimage"})
+    w(g + " (a feature orders from it)", W, "allow", studio + "/claudeimage/orders/Wallet/new-claude/order.md")
+    w(g + " (a feature orders from it)", W, "deny", studio + "/claudeimage/orders/Shop/x/order.md")
+    w(g + " (a feature orders from it)", W, "deny", studio + "/claudeimage/orders/Wallet/new-claude/work/a.svg")
+    w(g + " (@GameDesigner orders a claude concept)", "@GameDesigner", "allow", cart + "/order.md")
+    for p in (cart + "/work/main.svg", cart + "/review.json", studio + "/claudeimage/orders/Wallet/x/order.md",
+              studio + "/claudeimage/lessons.md", studio + "/claudeimage/orders/_design/Feature.A/x/order.md"):
+        w(g + " (@GameDesigner orders a claude concept)", "@GameDesigner", "deny", p)
+    t(g, CI, "deny", "mcp__blender__execute_blender_code", {"code": "import bpy"})
+    guard.release_lock(STORE)
+    t(g, CI, "allow", "mcp__unityMCP__read_console", {"action": "get"}, session="t-ci")
+    for tool_, ti_ in (("mcp__unityMCP__execute_custom_tool", {"tool_name": "codex_exec"}),
+                       ("mcp__unityMCP__execute_menu_item", {"menu_path": "Tools/Codex"}),
+                       ("mcp__unityMCP__manage_asset", {"action": "create", "path": "Assets/Features/Wallet/FeatureAssets/Private/x.png"}),
+                       ("mcp__unityMCP__run_tests", {"mode": "EditMode"})):
+        t(g + " (no outside tool through unity-mcp)", CI, "deny", tool_, ti_, session="t-ci")
+    guard.release_lock(STORE)
+    check(g, CI, True, "the role is known and names its studio folder",
+          guard.role_of(CI) == CI and guard.TOOL_ROLES[CI] == "claudeimage")
+
     g = "tools: no report needed"
     os.makedirs(STORE + "/sessions", exist_ok=True)
-    for who, sid in ((X, "rep-codex"), (B, "rep-blender")):
+    for who, sid in ((X, "rep-codex"), (B, "rep-blender"), (CI, "rep-claudeimage")):
         Path(guard.binding_path(sid, STORE)).write_text(json.dumps({"feature": who}))
         tr = FX + f"/{sid}.jsonl"
         entries = [{"type": "user", "message": {"content": "làm order"}},
