@@ -17,3 +17,12 @@
 {"at": "2026-11-24 10:49:00", "event": "attempt", "item": "coin", "n": 1, "images": []}
 {"at": "2026-11-24 10:49:58", "event": "run", "tool": "codex", "item": "coin", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/coin.png", "files": ["coin.png"], "error": ""}
 {"at": "2026-11-24 10:50:44", "event": "deliver", "version": 1, "files": ["castle-attack.png", "castle-health.png", "castle-skill.png", "coin.png", "hero-archer.png", "hero-axeman.png", "hero-knight.png", "hero-mage.png", "hero-swordsman.png", "quality.json"], "below": []}
+{"at": "2026-11-24 12:35:47", "event": "review", "item": "hero-knight", "level": 2, "version": 1}
+{"at": "2026-11-24 12:35:48", "event": "review", "item": "hero-axeman", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:49", "event": "review", "item": "hero-swordsman", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:50", "event": "review", "item": "hero-archer", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:51", "event": "review", "item": "hero-mage", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:52", "event": "review", "item": "castle-health", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:53", "event": "review", "item": "castle-attack", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:53", "event": "review", "item": "castle-skill", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:54", "event": "review", "item": "coin", "level": 3, "version": 1}

@@ -1,0 +1,3 @@
+{"at": "2026-11-24 12:12:12", "event": "attempt", "item": "main", "n": 1}
+{"at": "2026-11-24 12:12:13", "event": "run", "tool": "claudeimage", "item": "main", "mode": "browser", "exit": 0, "parts": ["btn-main", "btn-sub"], "result": "đã có work/out/main.png", "files": ["main.png"]}
+{"at": "2026-11-24 12:12:27", "event": "deliver", "version": 1, "files": ["main.png", "meta.json", "parts", "quality.json"], "below": []}

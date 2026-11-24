@@ -6,3 +6,5 @@
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "aeb39516d60c"}
 {"at": "2026-11-23 16:32:05", "event": "data", "hash": "a6b5a02909a8", "previous": "aeb39516d60c", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "a6b5a02909a8"}
+{"at": "2026-11-24 12:46:14", "event": "promote", "by": "người (Sync)", "hash": "a6b5a02909a8"}
+{"at": "2026-11-24 13:00:19", "event": "promote", "by": "người (Sync)", "hash": "a6b5a02909a8"}

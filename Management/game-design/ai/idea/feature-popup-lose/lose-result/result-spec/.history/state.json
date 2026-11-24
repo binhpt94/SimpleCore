@@ -1,5 +1,5 @@
 {
- "hash": "ab3959627bd6",
+ "hash": "92e28a5acae5",
  "items": {
   "result-title-text": {
    "hash": "88eee1ad94d8",
@@ -14,8 +14,8 @@
    "text": "Dòng kỉ lục hiện \"Kỉ lục: M đợt\", M là kỉ lục đã cập nhật với lượt vừa xong"
   },
   "result-new-record-line": {
-   "hash": "e6c9b2843fd4",
-   "text": "Cờ kỉ lục mới bật thì có thêm dòng \"Kỉ lục mới!\" và dòng này phóng to 1.0 → 1.15 → 1.0 lặp lại mỗi 1 giây\nCờ tắt thì không có dòng này, không có câu nào thay vào."
+   "hash": "a8f2886db1cd",
+   "text": "Cờ kỉ lục mới bật thì có thêm dòng \"Kỉ lục mới!\" và dòng này phóng to 1.0 → 1.15 → 1.0 lặp lại mỗi 1 giây\nDòng này nằm trên một dải nền nổi bật cùng cỡ (400x70 px), để lượt phá kỉ lục trông vui hơn hẳn. Cờ tắt thì không có cả dòng lẫn dải nền, không có câu nào thay vào."
   },
   "result-read-only": {
    "hash": "857df7485153",

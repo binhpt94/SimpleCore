@@ -6,3 +6,7 @@
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "67eb2db9badf"}
 {"at": "2026-11-23 16:32:05", "event": "data", "hash": "ab3959627bd6", "previous": "67eb2db9badf", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "ab3959627bd6"}
+{"at": "2026-11-24 12:11:38", "event": "data", "hash": "34a8cb5c60b6", "previous": "ab3959627bd6", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-24 12:46:14", "event": "promote", "by": "người (Sync)", "hash": "34a8cb5c60b6"}
+{"at": "2026-11-24 12:59:45", "event": "data", "hash": "92e28a5acae5", "previous": "34a8cb5c60b6", "added": [], "removed": [], "rewritten": [{"id": "result-new-record-line", "old": "Cờ kỉ lục mới bật thì có thêm dòng \"Kỉ lục mới!\" và dòng này phóng to 1.0 → 1.15 → 1.0 lặp lại mỗi 1 giây\nCờ tắt thì không có dòng này, không có câu nào thay vào.", "new": "Cờ kỉ lục mới bật thì có thêm dòng \"Kỉ lục mới!\" và dòng này phóng to 1.0 → 1.15 → 1.0 lặp lại mỗi 1 giây\nDòng này nằm trên một dải nền nổi bật cùng cỡ (400x70 px), để lượt phá kỉ lục trông vui hơn hẳn. Cờ tắt thì không có cả dòng lẫn dải nền, không có câu nào thay vào."}]}
+{"at": "2026-11-24 13:00:19", "event": "promote", "by": "người (Sync)", "hash": "92e28a5acae5"}

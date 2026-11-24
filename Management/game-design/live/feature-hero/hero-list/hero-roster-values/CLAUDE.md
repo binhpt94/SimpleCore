@@ -37,9 +37,9 @@ Hiệu ứng (mức tối thiểu):
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
-| Số hero trong danh sách | 3 (Hiệp sĩ, Cung thủ, Pháp sư) | 5 | 5 |
-| Số chỗ trong đội | 3 (cả 3 hero, không cần chọn) | 3 chọn từ 5 | 3 chọn từ 5 |
-| Kiểu đòn có | Một mục tiêu, Nổ quanh mục tiêu | cả ba | cả ba |
+| Số hero trong danh sách | 3 (Hiệp sĩ, Đấu sĩ rìu, Cung thủ) | 5 | 5 |
+| Số chỗ trong đội | 3 (cả 3 hero, không cần chọn; đúng đội mặc định của `feature-team-select/team-memory/memory-rules`) | 3 chọn từ 5 | 3 chọn từ 5 |
+| Kiểu đòn có | Một mục tiêu, Chém phía trước | cả ba | cả ba |
 | Chỉ số | như bảng | như bảng | theo số đã chỉnh sau chơi thử |
 | Hình | 1 sprite mỗi hero, anim bằng move/scale/nháy | như IDEA, thêm sprite khi đánh | đủ anim đi, đánh, gục; âm thanh |
 
@@ -51,7 +51,7 @@ Hiệu ứng (mức tối thiểu):
 - Đội chưa đủ 3 hero (lỗi từ màn chọn): không vào trận; `feature-team-select` phải bảo đảm đủ 3.
 
 ## Đã tự quyết
-- **IDEA dùng Hiệp sĩ, Cung thủ, Pháp sư.** Đủ cận chiến chắn, bắn xa một mục tiêu và đòn vùng để thấy gameplay. Đã loại: Đấu sĩ rìu thay Pháp sư (cùng là đòn vùng nhưng Pháp sư cho thấy vai bắn xa rõ hơn).
+- **IDEA dùng Hiệp sĩ, Đấu sĩ rìu, Cung thủ (2026-11-24, sửa lệch theo @Manager và @CodeLead).** Bản trước ghi Hiệp sĩ, Cung thủ, Pháp sư, trái với đội mặc định cố định ở IDEA (`feature-team-select/team-memory/memory-rules`, `feature-run/run-start/start-values`, cheat của `feature-team-select`: Hiệp sĩ, Đấu sĩ rìu, Cung thủ). IDEA không có màn chọn đội nên danh sách phải đúng bằng đội đó. Vẫn đủ chắn, đòn vùng (chém) và bắn xa một mục tiêu. Đã loại: đổi đội mặc định sang Pháp sư (phải sửa data ba node đã chốt và cheat có ảnh); thêm Đấu sĩ rìu thành 4 hero (Pháp sư không bao giờ vào trận ở IDEA).
 - **Mọi hero cùng hộp 1×1.5u.** Bộ số chung; khác nhau ở chỉ số, không ở kích thước.
 - **Vùng chém đo từ mép trước hero.** Hợp với tầm đánh 1.3u: quái đứng sau mục tiêu tới 1.5u vẫn bị chém.
 

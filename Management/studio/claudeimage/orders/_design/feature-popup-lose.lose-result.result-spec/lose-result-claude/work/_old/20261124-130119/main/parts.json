@@ -1,0 +1,15 @@
+{
+ "frame": "main",
+ "parts": [],
+ "kept": [
+  "panel",
+  "title",
+  "score",
+  "record",
+  "replay",
+  "home"
+ ],
+ "skipped": [
+  "backdrop"
+ ]
+}

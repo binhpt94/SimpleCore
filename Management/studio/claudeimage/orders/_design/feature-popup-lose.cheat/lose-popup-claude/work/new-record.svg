@@ -25,14 +25,14 @@
       <path d="M960 384 L1010 400 L960 416 Z" fill="#E8C33A"/>
     </g>
     <!-- hero tong am, quay ra hai phia -->
-    <g id="hero-left" stroke-width="4">
+    <g id="hero-left" stroke-width="4" transform="translate(-190 0)">
       <ellipse cx="700" cy="784" rx="34" ry="8" fill="#3A2A1C" stroke="none"/>
       <rect x="680" y="720" width="40" height="60" rx="10" fill="#E2873A"/>
       <circle cx="700" cy="696" r="30" fill="#F4C9A0"/>
       <path d="M672 690 Q700 650 728 690 Z" fill="#D8B13A"/>
       <rect x="652" y="724" width="26" height="40" rx="6" fill="#D8B13A"/>
     </g>
-    <g id="hero-right" stroke-width="4">
+    <g id="hero-right" stroke-width="4" transform="translate(200 0)">
       <ellipse cx="1220" cy="784" rx="34" ry="8" fill="#3A2A1C" stroke="none"/>
       <rect x="1200" y="720" width="40" height="60" rx="10" fill="#F0B23C"/>
       <circle cx="1220" cy="696" r="30" fill="#F4C9A0"/>
@@ -40,7 +40,7 @@
       <path d="M1252 700 Q1282 740 1252 780" fill="none" stroke-width="6"/>
     </g>
     <!-- quai tong lanh, tu hai ben -->
-    <g id="enemies" stroke-width="4">
+    <g id="enemies-left" stroke-width="4" transform="translate(-110 0)">
       <ellipse cx="180" cy="784" rx="40" ry="9" fill="#3A2A1C" stroke="none"/>
       <path d="M140 780 Q140 700 180 690 Q220 700 220 780 Z" fill="#5B5FC7"/>
       <circle cx="168" cy="726" r="7" fill="#FFFFFF"/>
@@ -54,6 +54,8 @@
       <ellipse cx="520" cy="784" rx="34" ry="8" fill="#3A2A1C" stroke="none"/>
       <path d="M488 780 Q488 716 520 708 Q552 716 552 780 Z" fill="#3F7FA8"/>
       <circle cx="512" cy="738" r="6" fill="#FFFFFF"/>
+    </g>
+    <g id="enemies-right" stroke-width="4" transform="translate(110 0)">
       <ellipse cx="1420" cy="784" rx="34" ry="8" fill="#3A2A1C" stroke="none"/>
       <path d="M1388 780 Q1388 716 1420 708 Q1452 716 1452 780 Z" fill="#3F7FA8"/>
       <circle cx="1428" cy="738" r="6" fill="#FFFFFF"/>

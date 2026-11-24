@@ -1,1 +1,56 @@
-{}
+{
+ "hero-knight": {
+  "level": 2,
+  "text": "Dung hiep si, mu sat giap bac, ro o 70px. Khien tron sau vai gan nhu khong thay, chi lo mot mep vang.",
+  "version": 1,
+  "at": "2026-11-24 12:35:47"
+ },
+ "hero-axeman": {
+  "level": 3,
+  "text": "Dat: rau, vam vo, riu vac vai, mau do chu dao.",
+  "version": 1,
+  "at": "2026-11-24 12:35:48"
+ },
+ "hero-swordsman": {
+  "level": 3,
+  "text": "Dat: khan buoc dau cam, kiem manh sau vai.",
+  "version": 1,
+  "at": "2026-11-24 12:35:49"
+ },
+ "hero-archer": {
+  "level": 3,
+  "text": "Dat: mu trum xanh la, cung va mui ten sau vai.",
+  "version": 1,
+  "at": "2026-11-24 12:35:50"
+ },
+ "hero-mage": {
+  "level": 3,
+  "text": "Dat: mu nhon tim, gay phep co da sang.",
+  "version": 1,
+  "at": "2026-11-24 12:35:51"
+ },
+ "castle-health": {
+  "level": 3,
+  "text": "Dat: tim do truoc thap thanh.",
+  "version": 1,
+  "at": "2026-11-24 12:35:52"
+ },
+ "castle-attack": {
+  "level": 3,
+  "text": "Dat: mui ten lua bay cheo len tu chau mai.",
+  "version": 1,
+  "at": "2026-11-24 12:35:53"
+ },
+ "castle-skill": {
+  "level": 3,
+  "text": "Dat: set, bong tuyet, co co vu gop mot hinh.",
+  "version": 1,
+  "at": "2026-11-24 12:35:53"
+ },
+ "coin": {
+  "level": 3,
+  "text": "Dat: dong xu vang ro o 40px.",
+  "version": 1,
+  "at": "2026-11-24 12:35:54"
+ }
+}

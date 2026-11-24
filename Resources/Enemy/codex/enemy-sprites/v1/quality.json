@@ -1,0 +1,37 @@
+{
+ "enemy-soldier": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "enemy-soldier.png"
+ },
+ "enemy-wolf": {
+  "ok": true,
+  "note": "",
+  "runs": 2,
+  "round": 0,
+  "file": "enemy-wolf.png"
+ },
+ "enemy-giant": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "enemy-giant.png"
+ },
+ "enemy-archer": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "enemy-archer.png"
+ },
+ "enemy-boss": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "enemy-boss.png"
+ }
+}

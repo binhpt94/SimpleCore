@@ -8,6 +8,9 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Chơi lại dẫn tới `feature-team-select` (đội lượt trước đã xếp sẵn, `feature-team-select/team-memory`); về màn bắt đầu dẫn tới `feature-home`.
 - Popup che và chặn bấm phần bên dưới (`feature-popup`).
 
+## Định nghĩa
+- Không dùng thuật ngữ riêng.
+
 ## Danh sách
 - Nút chơi lại (nút chính).
 - Nút về màn bắt đầu.

@@ -16,6 +16,6 @@ Thua ở đợt 1 thì "Trụ được 0 đợt".
 ### result-record-text | AI 7 | Dòng kỉ lục hiện "Kỉ lục: M đợt", M là kỉ lục đã cập nhật với lượt vừa xong
 
 ### result-new-record-line | AI 7 | Cờ kỉ lục mới bật thì có thêm dòng "Kỉ lục mới!" và dòng này phóng to 1.0 → 1.15 → 1.0 lặp lại mỗi 1 giây
-Cờ tắt thì không có dòng này, không có câu nào thay vào.
+Dòng này nằm trên một dải nền nổi bật cùng cỡ (400x70 px), để lượt phá kỉ lục trông vui hơn hẳn. Cờ tắt thì không có cả dòng lẫn dải nền, không có câu nào thay vào.
 
 ### result-read-only | AI 8 | Popup chỉ đọc điểm, kỉ lục, cờ một lần lúc mở; không đổi số nào

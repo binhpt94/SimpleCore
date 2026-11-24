@@ -1,0 +1,3 @@
+Đã lưu [out/enemy-boss.png](D:/AI/CoreSimple/Management/studio/codex/orders/Enemy/enemy-sprites/work/out/enemy-boss.png). PNG **439 × 512 px**, nền alpha 0. Lề trái 14 px, phải 13 px, trên 17 px và dưới chân 3 px.
+
+Mình xoay sprite 4° và thu đều để vừa khung. Viền tối lệch mã `#1B2330`, và một vài mảng màu còn chuyển sắc nhẹ.

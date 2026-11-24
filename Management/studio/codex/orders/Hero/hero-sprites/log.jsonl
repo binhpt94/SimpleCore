@@ -11,3 +11,8 @@
 {"at": "2026-11-24 11:13:03", "event": "attempt", "item": "hero-swordsman", "n": 2, "images": []}
 {"at": "2026-11-24 11:20:08", "event": "run", "tool": "codex", "item": "hero-swordsman", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-swordsman.png", "files": ["hero-swordsman.png"], "error": ""}
 {"at": "2026-11-24 11:20:29", "event": "deliver", "version": 1, "files": ["hero-archer.png", "hero-axeman.png", "hero-knight.png", "hero-mage.png", "hero-swordsman.png", "quality.json"], "below": []}
+{"at": "2026-11-24 12:35:47", "event": "review", "item": "hero-knight", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:48", "event": "review", "item": "hero-axeman", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:50", "event": "review", "item": "hero-swordsman", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:51", "event": "review", "item": "hero-archer", "level": 3, "version": 1}
+{"at": "2026-11-24 12:35:52", "event": "review", "item": "hero-mage", "level": 3, "version": 1}

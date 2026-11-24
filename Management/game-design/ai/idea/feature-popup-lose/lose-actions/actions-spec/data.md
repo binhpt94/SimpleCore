@@ -1,6 +1,6 @@
 ---
 based-on: 664d10d83337
-refs: feature-popup-lose/lose-result/result-spec@ab3959627bd6, feature-run/run-flow/flow-rules@5a872f474e5b, feature-run/run-score/score-rules@54a8417a7ccd, feature-popup/popup-layer@91d4f017d2fb, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@ebefd7f8b116
+refs: feature-popup-lose/lose-result/result-spec@92e28a5acae5, feature-run/run-flow/flow-rules@5a872f474e5b, feature-run/run-score/score-rules@54a8417a7ccd, feature-popup/popup-layer@91d4f017d2fb, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@ebefd7f8b116
 ---
 # Hai nút của popup thua
 

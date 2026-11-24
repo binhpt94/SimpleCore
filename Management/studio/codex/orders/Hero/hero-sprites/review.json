@@ -1,1 +1,32 @@
-{}
+{
+ "hero-knight": {
+  "level": 3,
+  "text": "Dat: dung Hiep si, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "version": 1,
+  "at": "2026-11-24 12:35:47"
+ },
+ "hero-axeman": {
+  "level": 3,
+  "text": "Dat: dung Dau si riu, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "version": 1,
+  "at": "2026-11-24 12:35:48"
+ },
+ "hero-swordsman": {
+  "level": 3,
+  "text": "Dat: dung Kiem khach, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "version": 1,
+  "at": "2026-11-24 12:35:50"
+ },
+ "hero-archer": {
+  "level": 3,
+  "text": "Dat: dung Cung thu, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "version": 1,
+  "at": "2026-11-24 12:35:51"
+ },
+ "hero-mage": {
+  "level": 3,
+  "text": "Dat: dung Phap su, nhin ngang quay phai, nen trong suot, chan sat mep duoi, cung phong cach va ti le voi 4 hero con lai",
+  "version": 1,
+  "at": "2026-11-24 12:35:52"
+ }
+}

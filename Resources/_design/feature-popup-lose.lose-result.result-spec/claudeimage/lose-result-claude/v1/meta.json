@@ -1,0 +1,15 @@
+{
+ "node": "feature-popup-lose/lose-result/result-spec",
+ "nodeHash": "34a8cb5c60b6",
+ "frames": {
+  "main": "116306e3ae6a"
+ },
+ "styles": {
+  "ui-flat": "5a6989e6f1f5"
+ },
+ "order": "_design/feature-popup-lose.lose-result.result-spec/lose-result-claude",
+ "version": 1,
+ "at": "2026-11-24 12:46:18",
+ "stamp": 1795499178.7968519,
+ "sources": []
+}

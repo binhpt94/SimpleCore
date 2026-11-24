@@ -25,6 +25,7 @@ use home-w = feature-popup-lose/lose-actions/actions-spec#home-w
 - title       label      x=text-x y=title-y w=text-w h=title-h parent=panel label="Thành đã bị phá"
 - score       label      x=text-x y=score-y w=text-w h=row-h parent=panel label="Trụ được 16 đợt"
 - record      label      x=text-x y=record-y w=text-w h=row-h parent=panel label="Kỉ lục: 16 đợt"
-- new-record  label      x=newrec-x y=newrec-y w=newrec-w h=row-h parent=panel label="Kỉ lục mới!"
+- new-record-bg round-rect x=newrec-x y=newrec-y w=newrec-w h=row-h parent=panel label="Dải nền nổi bật của dòng kỉ lục mới"
+- new-record  label      overlap x=newrec-x y=newrec-y w=newrec-w h=row-h parent=panel label="Kỉ lục mới!"
 - replay      button     x=replay-x y=btn-y w=replay-w h=tap parent=panel label="Chơi lại (nút chính)"
 - home        button     x=home-x y=btn-y w=home-w h=tap parent=panel label="Về màn bắt đầu"

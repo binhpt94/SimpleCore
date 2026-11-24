@@ -2,3 +2,5 @@
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "87729fab7a06"}
 {"at": "2026-11-24 10:13:35", "event": "data", "hash": "fa12150e4303", "previous": "87729fab7a06", "added": ["sample-popup"], "removed": [{"id": "popup-over-battle", "text": "Một popup đang mở trên trận: màn chơi và HUD bên dưới, nền che, khung popup trên cùng\nÉp: mở popup `PopupPause/Main` giữa trận (trận đứng yên). Thấy đủ ba lớp của dịch vụ: màn chơi và HUD không nhận bấm, nền che tối, khung popup chuẩn nhận chạm. Nội dung trong khung là của feature gọi, không vẽ ở đây."}], "rewritten": []}
 {"at": "2026-11-24 10:13:54", "event": "data", "hash": "f2a2605c001d", "previous": "fa12150e4303", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-24 12:46:14", "event": "promote", "by": "người (Sync)", "hash": "f2a2605c001d"}
+{"at": "2026-11-24 13:00:19", "event": "promote", "by": "người (Sync)", "hash": "f2a2605c001d"}

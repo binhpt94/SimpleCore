@@ -1,0 +1,4 @@
+{"parts": [
+  {"id": "btn-main", "w": 400, "h": 120, "slice": [40, 36, 40, 40], "shapes": ["replay"]},
+  {"id": "btn-sub", "w": 260, "h": 120, "slice": [40, 36, 40, 40], "shapes": ["home"]}
+]}

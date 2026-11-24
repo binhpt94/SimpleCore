@@ -1,2 +1,5 @@
 {"at": "2026-11-23 17:29:11", "event": "data", "hash": "245b7cf306aa", "previous": "", "added": ["new-record"], "removed": [], "rewritten": []}
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "245b7cf306aa"}
+{"at": "2026-11-24 12:46:14", "event": "promote", "by": "người (Sync)", "hash": "245b7cf306aa"}
+{"at": "2026-11-24 12:59:45", "event": "data", "hash": "683571cd6600", "previous": "245b7cf306aa", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-24 13:00:19", "event": "promote", "by": "người (Sync)", "hash": "683571cd6600"}
