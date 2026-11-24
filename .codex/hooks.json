@@ -1,0 +1,48 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I 'd:\\AI\\CoreSimple\\.codex\\hooks\\guard.py'",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I 'd:\\AI\\CoreSimple\\.codex\\hooks\\bind_session.py'",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I 'd:\\AI\\CoreSimple\\.codex\\hooks\\stop_validate.py'",
+            "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "python -I 'd:\\AI\\CoreSimple\\.codex\\hooks\\stop_report.py'",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "python -I \"D:/AI/CoreSimple/Management/tools/sync_page.py\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
