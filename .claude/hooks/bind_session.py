@@ -265,7 +265,9 @@ def context(data, root, store):
         return (f"guard: chat này gán FEATURE={role} (nhóm Basic). Chỉ sửa UnityProject/Assets/{area}/; đọc phần "
                 "công khai của feature." + worker)
     if role == "@CodeLead":
-        return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders): kiểm code và giải quyết xung đột của nhóm "
+        return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders). Gặp lỗi không tự gỡ được hoặc phải dừng chờ người: "
+                "trước khi kết thúc lượt nhắn Manager (SendMessage) một tin BÁO CHẶN theo khuôn ở .claude/rules/codelead.md, "
+                "hết chặn thì nhắn HẾT CHẶN. Việc của vai trò: kiểm code và giải quyết xung đột của nhóm "
                 "Basic, Features, Services, và quản cấu trúc khung. Chỉ sửa khung: Scripts/Contracts, Scripts/Internal/"
                 "Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs của feature đã mở khoá code; *.asmdef, "
                 "AssemblyInfo.cs, interface I*.cs và lớp base *Base.cs của Core. Thêm toàn bộ UnityProject/Assets/_Composition (nối dây: Boot, "
@@ -319,7 +321,9 @@ def context(data, root, store):
     if role == "@GameDesigner":
         return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Lượt có sửa file "
                 "phải kết thúc bằng khối '## Báo cáo cho @Manager' (8 dòng, xem gamedesigner.md; Stop hook ép): @Manager "
-                "dựa vào đó để biết việc đã xong và đang chờ ai. Chỉ đọc "
+                "dựa vào đó để biết việc đã xong và đang chờ ai. Gặp lỗi không tự gỡ được hoặc phải dừng chờ người (chấm, "
+                "trả lời, chọn ý trái nhau, chốt), kể cả lượt không sửa file: trước khi kết thúc lượt nhắn Manager "
+                "(SendMessage) một tin BÁO CHẶN theo khuôn ở gamedesigner.md, hết chặn thì nhắn HẾT CHẶN. Chỉ đọc "
                 "Management/game-design, .claude/rules/gamedesigner.md, gamedesigner.round<1-4>.md và designadvisor.md; chỉ ghi trong Management/game-design/ai "
                 "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
                 "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
@@ -377,7 +381,8 @@ def context(data, root, store):
                 "mới tới Tools, Basic, Services, Features; (4) tổng hợp cho người. Điều phối: một feature chỉ được code khi "
                 "thiết kế của nó tới vòng 4 trong live (mục 'Cổng code theo feature' ở đầu bản in gd_status.py); feature ĐANG "
                 "KHOÁ thì việc thuộc @GameDesigner và người, không giao code hay khung. Việc không phụ thuộc nhau thì nhắn các "
-                "phiên CÙNG LÚC trong một lượt, không tuần tự từng phiên." + unread_reports(root, store, role))
+                "phiên CÙNG LÚC trong một lượt, không tuần tự từng phiên. Nhận tin BÁO CHẶN của một Leader: điều phối lại ngay "
+                "(dừng việc phụ thuộc, giao việc không phụ thuộc, gom việc chờ người thành một danh sách cho người)." + unread_reports(root, store, role))
     if raw and guard.valid_feature(raw, root):
         group = "Services" if raw.startswith("_Services/") else "Features"
         return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "

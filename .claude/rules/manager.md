@@ -68,6 +68,16 @@ Mặc định là song song; chỉ nối tiếp khi việc thuộc danh sách "p
 4. Báo người bảng đó và các việc đang chờ người (chấm, chọn xung đột, chốt): đây thường là thứ đang chặn nhiều feature nhất.
 5. Có báo cáo mới thì lập lại bảng và giao đợt tiếp.
 
+## Khi một Leader báo chặn
+@CodeLead và @GameDesigner nhắn tin `BÁO CHẶN · <lỗi | chờ người> · …` khi gặp lỗi không tự gỡ được hoặc phải dừng chờ người, và `HẾT CHẶN · <việc>` khi đi tiếp được. Nhận tin thì điều phối lại ngay, không đợi báo cáo cuối lượt:
+1. Ghi vào bảng theo feature: feature nào, đang đứng ở bước nào của chuỗi, chờ ai.
+2. **Dừng giao các việc phụ thuộc** vào thứ đang bị chặn. Ví dụ @CodeLead kẹt ở khung của A: không giục phiên A và các feature dùng contract của A. @GameDesigner chờ người chốt node cha: không nhờ hỏi GPT hay đặt order cho node con của nó.
+3. **Giao ngay đợt mới cho các việc không phụ thuộc**: feature khác đã mở khoá, order ảnh, thiết kế của feature còn khoá. Một Leader đứng không phải là cả project đứng.
+4. **Chờ người**: gom mọi việc đang chờ người thành một danh sách ngắn trong câu trả lời cho người: việc gì, làm ở đâu (tab, node), đang chặn những feature nào; việc chặn nhiều feature nhất xếp trước. Không để từng Leader hỏi người lẻ tẻ.
+5. **Lỗi mà phiên khác gỡ được**: nhắn đúng phiên đó, kèm file và câu lỗi. Lỗi chỉ người gỡ được (guard, quyền, công cụ, hạn mức): báo người, nêu rõ lệnh và câu lỗi.
+6. Nhận `HẾT CHẶN`: lập lại bảng và giao đợt tiếp theo "Giao việc theo đợt".
+Leader im lặng lâu mà bảng cho thấy nó đang giữ việc: hỏi thẳng nó trước khi coi là bị chặn.
+
 ## Điều phối hằng ngày
 - Hỏi Leader trước khi hỏi phiên bên dưới về phần Leader đó quản.
 - "Cần bên khác" trong báo cáo: nhắn đúng phiên được nêu, kèm file và việc cần làm; không làm hộ.

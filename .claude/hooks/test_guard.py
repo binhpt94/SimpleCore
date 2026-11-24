@@ -1078,6 +1078,8 @@ def run_codelead_cases():
     check(g, L, True, "and not again", "Không có báo cáo mới" in again)
     mgr = bind_session.context({"session_id": "rep-mgr"}, FX, STORE)
     check(g, "@Manager", True, "@Manager keeps its own read list", "20990101-000000-Shop.md" in mgr)
+    check(g, "", ["BÁO CHẶN"] * 3, "the Leaders are told to tell @Manager when they are blocked, and @Manager to plan again",
+          [x for told in (lead, mgr, bind_session.context({"session_id": "rep-gd"}, FX, STORE)) for x in ["BÁO CHẶN"] if x in told])
 
 
 def run_designer_cases():

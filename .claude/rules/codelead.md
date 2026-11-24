@@ -49,6 +49,13 @@ Gửi @CodeLead bằng SendMessage, đủ 3 mục:
 - Đề xuất: đổi gì, vì sao không làm được trong vùng của mình.
 Bắt buộc gửi khi cần đổi khung (bảng trên) hoặc xoá, đổi tên asset `FeatureAssets/Public`. Phiên đó không tự sửa khung: guard chặn.
 
+## Báo chặn cho @Manager
+@Manager chỉ điều phối lại được khi biết bạn đang đứng. Khối báo cáo cuối lượt chỉ có ở lượt có sửa file, nên lượt bị chặn thường không tới được nó.
+- **Khi nào**: (a) gặp lỗi không tự gỡ được trong vùng của mình: guard chặn, biên dịch hoặc test hỏng do code của phiên khác, unity-mcp hay công cụ không chạy, khoá Editor bị phiên khác giữ lâu; (b) phải dừng chờ người: duyệt đề xuất, quyết `rules.json`, `Packages`, `ProjectSettings`, hay một lựa chọn chỉ người quyết được.
+- **Làm gì**: trước khi kết thúc lượt, nhắn `Manager` bằng SendMessage một tin theo khuôn `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … (file, node, lệnh, câu lỗi) · Ai gỡ được: … · Việc của mình vẫn chạy tiếp được: … · Việc của phiên khác bị kéo theo: …`. Vẫn báo người trong câu trả lời như cũ; tin cho Manager là thêm, không thay.
+- Hết bị chặn: nhắn `Manager` một dòng `HẾT CHẶN · <việc>`.
+- Một tin cho mỗi lần bị chặn; nhắn lại khi tình trạng đổi. Lượt có sửa file thì khối báo cáo vẫn phải có, với `Trạng thái: bị chặn` và "Cần bên khác" ghi đúng bên gỡ được.
+
 ## Quy trình
 1. Nhận vấn đề hoặc báo cáo xong việc (thấy ở đầu mỗi tin).
 2. Xét phạm vi ảnh hưởng: đọc code các bên liên quan, ai dùng contract, asset id, asmdef nào.
