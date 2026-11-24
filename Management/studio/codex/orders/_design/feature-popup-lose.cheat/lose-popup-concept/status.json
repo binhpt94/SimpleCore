@@ -1,8 +1,5 @@
 {
- "state": "doing",
- "version": 1,
- "feedback": [
-  "feedback-1.md"
- ],
- "at": "2026-11-23 18:01:03"
+ "state": "delivered",
+ "version": 2,
+ "at": "2026-11-24 08:12:40"
 }
