@@ -5,12 +5,9 @@
     "disableBypassPermissionsMode": "disable",
     "allow": [
       "mcp__unityMCP",
-      "Edit(/Management/studio/**)"
+      "Edit(/Management/**)"
     ],
     "ask": [
-      "Edit(/Management/data/**)",
-      "Edit(/Management/tools/**)",
-      "Edit(/Management/index.html)",
       "Edit(/UnityProject/Packages/**)",
       "Edit(/UnityProject/ProjectSettings/**)"
     ],
