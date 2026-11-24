@@ -434,6 +434,12 @@ def run_progress(root):
     check("a folder no node names is locked", gate("Shop")[0], False)
     mk(root, "feature-wallet/coins"), gd.sync_live(root)
     check("round 3 is not enough", (gate("Wallet")[0], "tới vòng 3" in gate("Wallet")[1]), (False, True))
+    table = [x for x in gd_status.report(root).split("\n") if x.startswith("- ") and ("ĐƯỢC CODE" in x or "ĐANG KHOÁ" in x)
+             and "(feature-" in x]
+    check("the whole status lists the code gate of every feature: open at round 4 in live, locked below it",
+          ([x.split(":")[0] + ":" + x.split(":")[1].split(",")[0].split(" ·")[0] for x in table if x.startswith(("- Hero (", "- Wallet ("))],
+           "## Cổng code theo feature" in gd_status.report(root), "## Cổng code theo feature" in gd_status.report(root, "ai/idea/feature-hero")),
+          (["- Hero (feature-hero): ĐƯỢC CODE", "- Wallet (feature-wallet): ĐANG KHOÁ"], True, False))
     mk(root, "feature-wallet/coins/cap")
     check("round 4 only in the proposal is not enough", gate("Wallet")[0], False)
     gd.sync_live(root)

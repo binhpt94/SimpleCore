@@ -374,7 +374,10 @@ def context(data, root, store):
                 "Management/reports/. Làm theo .claude/rules/manager.md. Lượt làm việc đầu tiên sau khi được tạo mới hoặc "
                 "renew: kiểm tra đầu phiên trước mọi việc khác, đúng thứ tự: (1) ListAgents, thiếu CodeLead hoặc GameDesigner "
                 "thì báo lỗi cho người và DỪNG; (2) tiến độ của hai Leader (gd_status.py, báo cáo, hỏi từng Leader); (3) rồi "
-                "mới tới Tools, Basic, Services, Features; (4) tổng hợp cho người." + unread_reports(root, store, role))
+                "mới tới Tools, Basic, Services, Features; (4) tổng hợp cho người. Điều phối: một feature chỉ được code khi "
+                "thiết kế của nó tới vòng 4 trong live (mục 'Cổng code theo feature' ở đầu bản in gd_status.py); feature ĐANG "
+                "KHOÁ thì việc thuộc @GameDesigner và người, không giao code hay khung. Việc không phụ thuộc nhau thì nhắn các "
+                "phiên CÙNG LÚC trong một lượt, không tuần tự từng phiên." + unread_reports(root, store, role))
     if raw and guard.valid_feature(raw, root):
         group = "Services" if raw.startswith("_Services/") else "Features"
         return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "

@@ -189,6 +189,8 @@ def report(root, arg=""):
            "Độ quan trọng (chỉ chấm ở node lá): " + " · ".join(f"{x['min']}-{x['max']} {x['name']}: {x['label']}" for x in gd.PHASES)]
     if path:
         out += context_lines(snap, node)
+    else:
+        out += ["", f"## Cổng code theo feature (chỉ code khi thiết kế tới vòng {len(gd.ROUNDS)} trong live)"] + gate_lines(snap) + [""]
     lines_for(root, node, out)
     problems = [p for p in snap["problems"]["idea"] if not path or p["path"] == path or p["path"].startswith(path + "/")]
     if problems:
@@ -206,6 +208,27 @@ def report(root, arg=""):
         out += ["", f"## Thuật ngữ (node {gd.GLOSSARY_KEY}; nhắc, không chặn)"] + [
             f"- {p['path']}: {p['text']}" for p in snap["termNotes"]["idea"]]
     return "\n".join(out)
+
+
+def gate_lines(snap):
+    """The code gate of every feature, one line each: what @Manager reads before it hands out work. A feature may be
+    coded only when its branch reached the last round in live (gamedesign.code_allowed)."""
+    out = []
+    idea_key = gd.PHASES[0]["key"]
+    for node in (snap["idea"] or {}).get("children", []):
+        design = ("cần làm lại (@GameDesigner)" if node["redo"] else "chờ người chấm hoặc trả lời" if not node["passed"]
+                  else "đạt, chờ người chốt" if node["dirty"] else "đã chốt")
+        below = [n for n in gd.walk(node)]
+        clash = sum(n.get("clashOpen") or 0 for n in below)
+        leaves = [n for n in below if n["priority"]["leaf"] and n["round"] == len(gd.ROUNDS)]
+        done = sum(1 for n in leaves if n["progress"][idea_key]["state"] == "done")
+        tail = (f" · thiết kế đề xuất: {design}" + (f", {clash} nhóm ý trái nhau chờ người chọn" if clash else "")
+                + (f" · {gd.PHASES[0]['name']}: {done}/{len(leaves)} node lá done" if leaves else ""))
+        for gate in node["codeGate"]:
+            out.append(f"- {gate['unity']} ({node['path']}): " + ("ĐƯỢC CODE" if gate["ok"] else "ĐANG KHOÁ, " + gate["reason"]) + tail)
+        if not node["codeGate"]:
+            out.append(f"- (chưa khai thư mục code) ({node['path']}): ĐANG KHOÁ" + tail)
+    return out
 
 
 def main(argv):

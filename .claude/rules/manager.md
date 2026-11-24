@@ -23,20 +23,53 @@ Chạy ở **lượt làm việc đầu tiên sau khi phiên được tạo mớ
 
 ### Bước 2. Tiến độ của các Leader
 Chỉ làm khi bước 1 qua. Xong cả hai Leader rồi mới sang bước 3.
-- **@GameDesigner**: chạy `gd_status.py` (cả cây). Ghi lại: mode, vòng đang làm, node chưa đạt, node chưa hỏi GPT, node có xung đột chưa giải quyết (khoá vòng sau), feature còn khoá code. Đọc các báo cáo mới của @GameDesigner ở `Management/reports/` (nó báo cáo sau mỗi lượt có sửa thiết kế, như các phiên code). Rồi nhắn `GameDesigner`: đang làm gì, đang chờ người việc gì.
+- **@GameDesigner**: chạy `gd_status.py` (cả cây). Ghi lại: mode, vòng đang làm, node chưa đạt, node chưa hỏi GPT, node có xung đột chưa giải quyết (khoá vòng sau), và mục "Cổng code theo feature" ở đầu bản in (feature nào ĐƯỢC CODE, feature nào ĐANG KHOÁ và vì sao). Đọc các báo cáo mới của @GameDesigner ở `Management/reports/` (nó báo cáo sau mỗi lượt có sửa thiết kế, như các phiên code). Rồi nhắn `GameDesigner`: đang làm gì, đang chờ người việc gì.
 - **@CodeLead**: đọc các báo cáo mới ở `Management/reports/`. Rồi nhắn `CodeLead`: khung, nối dây, test đang ở đâu; đang chờ phiên nào sửa gì.
 - Leader chưa trả lời trong lượt đó: ghi "chưa trả lời" vào bản tổng hợp. Không coi là xong, không tự suy ra tiến độ thay Leader, và không giao việc cho tầng dưới thuộc phần của Leader đó (thiết kế: @GameDesigner; code: @CodeLead) cho tới khi có trả lời.
 
 ### Bước 3. Các tầng nhỏ hơn, từ trên xuống
 Tools → Basic → Services → Features. Chỉ nhắn phiên có trong `ListAgents`; phiên tầng dưới không live thì ghi lại, không dừng.
 - **Tools**: `studio.py status` (order đang chờ, item bị chấm làm lại, phiếu nợ art); lần hỏi GPT còn nợ thì thấy ở `gd_status.py`.
-- **Basic, Services, Features**: báo cáo mới của từng phiên (trạng thái dở, bị chặn, "Cần bên khác"), `validate.py` (vi phạm), feature đã mở khoá code mà chưa có phiên làm, thư mục còn thiếu (`scaffold.py --dry-run`).
+- **Basic, Services, Features**: báo cáo mới của từng phiên (trạng thái dở, bị chặn, "Cần bên khác"), `validate.py` (vi phạm), feature ĐƯỢC CODE mà chưa có phiên làm (feature ĐANG KHOÁ thì không giao code, xem "Chuỗi của một feature"), thư mục còn thiếu (`scaffold.py --dry-run`).
 
 ### Bước 4. Bản tổng hợp cho người
-Một tin, theo thứ tự tầng: Leader (live, tiến độ, đang chờ gì) → Tools → Basic → Services → Features → việc bị chặn và ai gỡ được → đề xuất bước tiếp. Sau tin này mới làm việc người giao và điều phối tiếp.
+Một tin, theo thứ tự tầng: Leader (live, tiến độ, đang chờ gì) → Tools → Basic → Services → Features → việc bị chặn và ai gỡ được → đề xuất bước tiếp. Sau tin này mới làm việc người giao và điều phối tiếp, theo "Giao việc theo đợt".
+
+## Chuỗi của một feature (thứ tự cứng, xét riêng từng feature)
+1. **Thiết kế**: @GameDesigner viết từ vòng 1 tới vòng 4; người chấm, chọn ý trái nhau, chốt vào `live`.
+2. **Cổng vòng 4**: một feature chỉ được code khi nhánh của nó trong `live` đã có node vòng 4 (quyết định chi tiết). Guard ép điều này với phiên feature và với @CodeLead. Xem ở đầu bản in `gd_status.py` (cả cây), mục **"Cổng code theo feature"**: mỗi feature một dòng `ĐƯỢC CODE` hoặc `ĐANG KHOÁ, <lí do>`, kèm tình trạng thiết kế đề xuất và tiến độ.
+   - Feature **ĐANG KHOÁ**: việc của nó thuộc @GameDesigner và người (chấm, chọn xung đột, chốt). Không giao code, không giục phiên feature, không bảo @CodeLead dựng khung, không đặt order sprite cho nó. Việc đúng là báo người đang thiếu gì, hoặc nhắn `GameDesigner` làm tiếp vòng còn thiếu.
+   - Thiết kế đề xuất đã tới vòng 4 nhưng `live` chưa có: vẫn khoá, đang chờ người chốt. Báo người, không coi là đã mở.
+3. **Khung**: @CodeLead dựng Contracts, asmdef, lớp base cho feature đã mở khoá.
+4. **Code**: phiên feature code trong vùng của mình, bám `gd_pack.py <Tên>`.
+5. **Kiểm và nối dây**: @CodeLead biên dịch, test, nối vào `_Composition`, đánh tiến độ.
+
+Chưa qua bước trước thì không giao bước sau. Một feature còn khoá không chặn feature khác đã mở.
+
+## Chạy song song
+Mặc định là song song; chỉ nối tiếp khi việc thuộc danh sách "phải nối tiếp".
+- **Song song được**:
+  - các feature đã mở khoá code với nhau (mỗi phiên chỉ sửa vùng của mình);
+  - @GameDesigner làm tiếp thiết kế của feature còn khoá trong lúc các feature đã mở đang code;
+  - order ảnh, 3D cho @ClaudeImage, @Codex, @Blender song song với code;
+  - @DesignAdvisor hỏi GPT song song với việc @GameDesigner viết node khác;
+  - @Core làm việc của Core song song với các feature không chờ nó.
+- **Phải nối tiếp**:
+  - hai phiên cùng cần đổi một khung hay một contract: qua @CodeLead, từng cái một;
+  - Play, test, scene, prefab stage: một khoá Editor, một phiên một lúc;
+  - feature B dùng contract của feature A: khung của A trước, rồi mới tới B;
+  - node con chỉ sau khi node cha đạt và hết xung đột;
+  - phiên đang chờ @CodeLead sửa khung thì không giao thêm việc đụng khung đó.
+
+## Giao việc theo đợt
+1. Lập bảng theo feature: `live` tới vòng mấy, ĐƯỢC CODE hay ĐANG KHOÁ, đang ở bước nào của chuỗi, phiên nào đang làm, đang chờ ai.
+2. Với mỗi feature, lấy đúng một việc kế tiếp theo chuỗi.
+3. Bỏ các việc vướng danh sách "phải nối tiếp". **Nhắn cùng lúc** mọi phiên còn lại: nhiều `SendMessage` trong một lượt. Không chờ phiên này trả lời rồi mới nhắn phiên kia.
+4. Báo người bảng đó và các việc đang chờ người (chấm, chọn xung đột, chốt): đây thường là thứ đang chặn nhiều feature nhất.
+5. Có báo cáo mới thì lập lại bảng và giao đợt tiếp.
 
 ## Điều phối hằng ngày
-- Việc đi từ trên xuống: thiết kế chưa chốt thì không giục code; khung chưa có thì không giục feature. Hỏi Leader trước khi hỏi phiên bên dưới về phần Leader đó quản.
+- Hỏi Leader trước khi hỏi phiên bên dưới về phần Leader đó quản.
 - "Cần bên khác" trong báo cáo: nhắn đúng phiên được nêu, kèm file và việc cần làm; không làm hộ.
 - Xung đột code: chuyển @CodeLead. Điểm cần quyết về thiết kế: chuyển @GameDesigner hoặc người. Đổi luật, `rules.json`, ranh giới: viết đề xuất trong `Management/proposals`, chờ người.
 - Trong lúc làm, một Leader không còn trong `ListAgents`: báo người ngay, dừng các việc thuộc phần của Leader đó.
