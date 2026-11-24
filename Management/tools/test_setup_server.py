@@ -27,6 +27,47 @@ def thread(sid, title, binding="", archived=False, unlisted=False, model="claude
             "unlisted": unlisted, "model": model, "effort": effort, "binding": binding, "modified": ""}
 
 
+def page_cases(check):
+    """Opening the page builds no data; each tab's data has its own path, built when asked for."""
+    import threading
+    import urllib.error
+    import urllib.request
+    from http.server import ThreadingHTTPServer
+    built = []
+    names = ("main", "write_project", "write_gamedesign", "write_studio")
+    real = [getattr(ss.sync_page, n) for n in names]
+    for n in names:
+        setattr(ss.sync_page, n, lambda *a, n=n: built.append(n) or {"kind": n})
+    server = ThreadingHTTPServer(("127.0.0.1", 0), ss.Handler)
+    old = ss.Handler.token, ss.Handler.port
+    ss.Handler.token, ss.Handler.port = "tok", server.server_address[1]
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+
+    def get(path, token=None):
+        req = urllib.request.Request(f"http://127.0.0.1:{ss.Handler.port}{path}", headers={"X-Setup-Token": token} if token else {})
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return r.status, r.read().decode("utf-8")
+        except urllib.error.HTTPError as ex:
+            return ex.code, ""
+    try:
+        code, page = get("/")
+        check("opening the page builds no data", (code, "CORESIMPLE_SETUP" in page, built), (200, True, []))
+        check("the page does not load the large data files up front",
+              [f for f in ("data/project.js", "data/gamedesign.js", "data/studio.js") if f'src="{f}"' in page], [])
+        check("each tab's data is built when asked for, and only that one",
+              [(get(f"/api/{k}", "tok")[1], list(built), built.clear())[:2] for k in ("project", "gamedesign", "studio")],
+              [('{"kind": "write_project"}', ["write_project"]), ('{"kind": "write_gamedesign"}', ["write_gamedesign"]),
+               ('{"kind": "write_studio"}', ["write_studio"])])
+        check("the data paths need the token", (get("/api/project")[0], get("/api/project", "no")[0], built), (403, 403, []))
+    finally:
+        server.shutdown()
+        server.server_close()
+        ss.Handler.token, ss.Handler.port = old
+        for n, f in zip(names, real):
+            setattr(ss.sync_page, n, f)
+
+
 def main():
     store = tempfile.mkdtemp(prefix="setup-store-")
     real = (ss.run_claude, ss.threads, ss.guard.STORE_DIR)
@@ -158,6 +199,7 @@ def main():
     finally:
         ss.run_claude, ss.threads, ss.guard.STORE_DIR = real
         shutil.rmtree(store, ignore_errors=True)
+    page_cases(check)
     failed = [r for r in results if not r[0]]
     for _, label, expect, got in failed:
         print(f"FAIL  {label}: expected {expect!r}, got {got!r}")

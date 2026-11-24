@@ -138,12 +138,10 @@
   </main>
 </div>
 
-<!-- Trang này chỉ là vỏ. Mọi nội dung nằm trong data/. project.js do tools/sync_page.py sinh ra. -->
+<!-- Trang này chỉ là vỏ. Mọi nội dung nằm trong data/. Dữ liệu lớn (project, gamedesign, studio) không nạp ở đây:
+     tab nào cần thì tab đó nạp khi được mở lần đầu (hàm load bên dưới). -->
 <script src="data/idea.js"></script>
 <script src="data/sessions.js"></script>
-<script src="data/project.js"></script>
-<script src="data/gamedesign.js"></script>
-<script src="data/studio.js"></script>
 <!-- Mỗi tab lớn một file trong view/, đăng ký vào window.CORESIMPLE_VIEWS. -->
 <script src="view/gamedesign.js"></script>
 <script src="view/studio.js"></script>
@@ -151,7 +149,8 @@
 (function () {
   var idea = window.CORESIMPLE_IDEA || null;
   var sessions = window.CORESIMPLE_SESSIONS || null;
-  var project = window.CORESIMPLE_PROJECT || null;
+  var project = null;      // có sau load("project")
+  var setupInfo = window.CORESIMPLE_SETUP || null;
   var $ = function (id) { return document.getElementById(id); };
   var el = function (tag, className, text) {
     var node = document.createElement(tag);
@@ -208,8 +207,38 @@
   };
 
   // ---------------------------------------------------------------- tabs
-  var tabs = [];   // {key, label, group, bad, build}
-  var tab = function (key, label, group, build, bad) { tabs.push({ key: key, label: label, group: group, build: build, bad: bad }); };
+  // needs: các bộ dữ liệu tab cần (khoá của KINDS); tab chỉ được dựng sau khi chúng nạp xong.
+  var tabs = [], adding = tabs;   // {key, label, group, bad, build, needs}
+  var tab = function (key, label, group, build, bad, needs) {
+    adding.push({ key: key, label: label, group: group, build: build, bad: bad, needs: needs || [] });
+  };
+
+  // Dữ liệu lớn, mỗi bộ nạp một lần khi có tab cần tới. Mở qua setup_server.py: server dựng mới đúng bộ đó.
+  // Mở thẳng từ file: đọc file trong data/ (Stop hook sinh lại sau mỗi lượt chat); thiếu file thì trả null.
+  var KINDS = { project: "CORESIMPLE_PROJECT", gamedesign: "CORESIMPLE_GAMEDESIGN", studio: "CORESIMPLE_STUDIO" };
+  var loads = {};
+  var load = function (kind) {
+    if (loads[kind]) return loads[kind];
+    var name = KINDS[kind];
+    var p = setupInfo ? fetch("/api/" + kind, { headers: { "X-Setup-Token": setupInfo.token }, cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }) : new Promise(function (resolve) {
+      var tag = document.createElement("script");
+      tag.src = "data/" + kind + ".js";
+      tag.onload = function () { resolve(window[name] || null); };
+      tag.onerror = function () { resolve(null); };
+      document.head.appendChild(tag);
+    });
+    p = p.then(function (data) {
+      window[name] = data;
+      if (kind === "project") gotProject(data);
+      return data;
+    });
+    loads[kind] = p;
+    p.then(null, function () { delete loads[kind]; });      // lỗi thì lần sau thử lại
+    return p;
+  };
 
   // Tổng quan
   tab("tong-quan", "Tổng quan", "", function (pane) {
@@ -258,7 +287,7 @@
     if (project.otherViolations.length) {
       add(fs, el("p", "gap bad-text", project.otherViolations.length + " vi phạm ngoài feature (Core, _Composition, rules.json): chạy python Management/tools/validate.py để xem."));
     }
-  });
+  }, false, ["project"]);
 
   // ---------------------------------------------------------------- scene, Boot, catalog
   var fileName = function (path) { return path ? path.split("/").pop().replace(/\.[^.]+$/, "") : "(trống)"; };
@@ -277,6 +306,8 @@
     return add(el("thead"), add.apply(null, [el("tr")].concat(names.map(function (n) { return el("th", "", n); }))));
   };
 
+  // Các tab sinh ra từ dữ liệu project (Scene, Báo cáo, mỗi feature một tab): đăng ký khi project nạp xong.
+  var projectTabs = function () {
   // Id khai báo trong code (Contracts/Internal của chủ): value -> feature.
   var declared = {};
   (project ? project.features : []).forEach(function (f) {
@@ -423,25 +454,25 @@
       }, f.violations.length > 0);
     });
   }
+  };
 
   // ---------------------------------------------------------------- game design: code vẽ nằm ở view/gamedesign.js
   var views = window.CORESIMPLE_VIEWS || {};
   if (views.gamedesign) {
     tab("game-design", "Game design", "", function (pane) {
       views.gamedesign(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
-    });
+    }, false, ["gamedesign", "studio"]);      // studio: phiếu nợ art hiện ở node
   }
 
   // ---------------------------------------------------------------- studio: order ảnh, art, model; phiếu nợ (view/studio.js)
   if (views.studio) {
     tab("studio", "Studio", "", function (pane) {
       views.studio(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
-    });
+    }, false, ["studio"]);
   }
 
   // ---------------------------------------------------------------- setup: tạo và gán đủ bộ thread
   // Chạy qua Management/tools/setup_server.py (127.0.0.1). Tên thread = giá trị FEATURE.
-  var setupInfo = window.CORESIMPLE_SETUP || null;
   tab("setup", "Setup", "", function (pane) {
     add(pane, el("h1", "", "Setup thread"));
     add(pane, el("p", "sub", "Mỗi thread là một chat Claude Code của project, tên đúng bằng giá trị FEATURE. " +
@@ -817,20 +848,45 @@
   // ---------------------------------------------------------------- render
   // Tab không có group (dữ liệu chung) nằm trên thanh ngang; tab feature nằm ở cột trái.
   var nav = $("nav"), topnav = $("topnav"), panes = $("panes"), links = {}, built = {};
-  var lastGroup = null;
-  tabs.forEach(function (t) {
-    var a = add(el("a"), el("span", "", t.label));
-    a.href = "#" + t.key;
-    links[t.key] = a;
-    if (!t.group) { add(topnav, a); return; }
-    if (t.group !== lastGroup) add(nav, el("div", "group", t.group));
-    lastGroup = t.group;
-    add(a, el("span", t.bad ? "dot bad" : "dot"));
-    add(nav, a);
-  });
-  if (!nav.children.length) { nav.hidden = true; document.querySelector(".app").style.display = "block"; }
+  var renderNav = function () {
+    var lastGroup = null;
+    nav.textContent = "";
+    topnav.textContent = "";
+    tabs.forEach(function (t) {
+      var a = add(el("a"), el("span", "", t.label));
+      a.href = "#" + t.key;
+      links[t.key] = a;
+      if (!t.group) { add(topnav, a); return; }
+      if (t.group !== lastGroup) add(nav, el("div", "group", t.group));
+      lastGroup = t.group;
+      add(a, el("span", t.bad ? "dot bad" : "dot"));
+      add(nav, a);
+    });
+    nav.hidden = !nav.children.length;
+    document.querySelector(".app").style.display = nav.hidden ? "block" : "";
+  };
 
-  var show = function () {
+  // Dựng tab đang mở. Tab cần dữ liệu thì hiện "Đang tải…" rồi dựng khi dữ liệu về; tab khác vẫn bấm được trong lúc chờ.
+  var fill = function (t) {
+    var pane = built[t.key];
+    if (!t.needs.length) { t.state = "done"; t.build(pane); return; }
+    t.state = "loading";
+    pane.textContent = "";
+    add(pane, el("p", "muted", "Đang tải dữ liệu…"));
+    Promise.all(t.needs.map(load)).then(function () {
+      pane.textContent = "";
+      t.state = "done";
+      t.build(pane);
+    }, function (e) {
+      t.state = "";
+      pane.textContent = "";
+      add(pane, el("p", "bad-text", "Không tải được dữ liệu của tab này: " + e.message));
+      var again = put(pane, el("button", "", "Thử lại"));
+      again.type = "button";
+      again.addEventListener("click", function () { fill(t); });
+    });
+  };
+  var show = function (stay) {
     var key = decodeURIComponent(location.hash.slice(1));
     var t = tabs.filter(function (x) { return x.key === key; })[0] || tabs[0];
     tabs.forEach(function (x) {
@@ -838,17 +894,36 @@
       if (built[x.key]) built[x.key].hidden = true;
     });
     links[t.key].setAttribute("aria-current", "page");
-    if (!built[t.key]) { built[t.key] = put(panes, el("div")); t.build(built[t.key]); }
+    if (!built[t.key]) built[t.key] = put(panes, el("div"));
+    if (!t.state) fill(t);
     built[t.key].hidden = false;
     document.title = t.label + " — CoreSimple";
-    window.scrollTo(0, 0);
+    if (stay !== true) window.scrollTo(0, 0);
   };
+
+  var notice = function (text) {
+    notices.push(text);
+    $("notice").textContent = notices.join(" ");
+    $("notice").hidden = false;
+  };
+  // Project nạp nền: trang hiện ngay, các tab Scene, Báo cáo và tab feature thêm vào thanh khi dữ liệu về.
+  var gotProject = function (data) {
+    project = data;
+    if (!project) { notice("Chưa có data/project.js. Chạy: python Management/tools/sync_page.py (Stop hook tự chạy sau mỗi lượt chat)."); return; }
+    adding = [];
+    projectTabs();
+    tabs.splice.apply(tabs, [1, 0].concat(adding));
+    adding = tabs;
+    renderNav();
+    show(true);      // thanh tab vừa dựng lại; trang mở thẳng vào một tab vừa thêm (ví dụ #Wallet) thì mở tab đó
+  };
+  load("project").then(null, function (e) { notice("Không tải được dữ liệu project: " + e.message); });
+
+  renderNav();
   window.addEventListener("hashchange", show);
   show();
 
-  if (!project) notices.push("Chưa có data/project.js. Chạy: python Management/tools/sync_page.py (Stop hook tự chạy sau mỗi lượt chat).");
-  if (!idea) notices.push("Không đọc được data/idea.js.");
-  if (notices.length) { $("notice").textContent = notices.join(" "); $("notice").hidden = false; }
+  if (!idea) notice("Không đọc được data/idea.js.");
   $("footer").textContent = idea && idea.approvedAt ? "Ý tưởng duyệt ngày " + idea.approvedAt : "Ý tưởng chưa được duyệt.";
 })();
 </script>

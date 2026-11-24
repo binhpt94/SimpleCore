@@ -495,7 +495,13 @@ def run_budget(root):
           (0, True, True, False))
     open_ = lambda: sorted((d["kind"], d["reason"]) for d in studio.read_debts(root) if d["state"] == "open" and d["ref"] == ref)  # noqa: E731
     check("budget: the judgement owes it too", [k for k, _ in open_()], ["chưa chuẩn", "người chấm"])
-    snap = studio.snapshot(root)
+    reads, real_tree = [], studio.gd.read_tree
+    studio.gd.read_tree = lambda *a, **k: reads.append(a[1:]) or real_tree(*a, **k)
+    try:
+        snap = studio.snapshot(root)
+    finally:
+        studio.gd.read_tree = real_tree
+    check("snapshot reads the live tree once, however many orders there are", reads, [("live",)])
     o = next(x for x in snap["orders"] if x["ref"] == ref)
     check("budget: snapshot", (o["state"], o["items"][0]["used"], o["items"][0]["allowed"], o["items"][0]["ok"], o["items"][0]["level"],
                                o["items"][0]["levelName"], len([d for d in snap["debts"] if d["ref"] == ref])),

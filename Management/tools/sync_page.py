@@ -196,7 +196,7 @@ def write_js(out, name, data):
     """Writes `window.<name> = <data>;` whole or not at all."""
     tmp = out.with_suffix(".js.tmp")
     tmp.write_text("// Sinh tự động bởi Management/tools/sync_page.py. Không sửa tay.\n"
-                   f"window.{name} = " + json.dumps(data, ensure_ascii=False, indent=1) + ";\n", encoding="utf-8")
+                   f"window.{name} = " + json.dumps(data, ensure_ascii=False) + ";\n", encoding="utf-8")
     os.replace(tmp, out)
 
 
@@ -220,6 +220,14 @@ def write_studio(root=None):
     return data
 
 
+def write_project(root=None):
+    """Writes Management/data/project.js (features, scenes, reports, boundary violations) and returns the data."""
+    root = Path(root) if root else HERE.parent.parent
+    data = build(root, json.loads((HERE / "rules.json").read_text(encoding="utf-8-sig")))
+    write_js(root / "Management" / "data" / "project.js", "CORESIMPLE_PROJECT", data)
+    return data
+
+
 def main():
     root = HERE.parent.parent
     try:      # its own file and its own try: a broken design tree must not stop the project data, nor the reverse
@@ -231,9 +239,7 @@ def main():
     except Exception as ex:
         print(f"sync_page.py: studio failed: {type(ex).__name__}: {ex}", file=sys.stderr)
     try:
-        cfg = json.loads((HERE / "rules.json").read_text(encoding="utf-8-sig"))
-        data = build(root, cfg)
-        write_js(root / "Management" / "data" / "project.js", "CORESIMPLE_PROJECT", data)
+        write_project(root)
     except Exception as ex:   # keep the old file; never write half a page
         print(f"sync_page.py failed: {type(ex).__name__}: {ex}", file=sys.stderr)
         return 2

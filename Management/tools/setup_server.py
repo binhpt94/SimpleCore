@@ -487,13 +487,15 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, {"threads": threads(), "sets": sets(), "models": MODELS, "efforts": EFFORTS,
                                             "defaults": {"model": DEFAULT_MODEL, "effort": DEFAULT_EFFORT},
                                             "vscode": vscode_view()})
+            # Each tab of the page asks for its own data when it is first opened: nothing is built when the page is.
+            if path == "/api/project":
+                return self.send_json(200, sync_page.write_project(ROOT))
             if path == "/api/gamedesign":
                 return self.send_json(200, sync_page.write_gamedesign(ROOT))
             if path == "/api/studio":
                 return self.send_json(200, sync_page.write_studio(ROOT))
             return self.send_error(404)
         if path in ("/", "/index.html"):
-            sync_page.main()      # fresh project data each time the page is opened
             page = (ROOT / "Management" / "index.html").read_text(encoding="utf-8")
             inject = f'<script>window.CORESIMPLE_SETUP = {{ token: "{html.escape(self.token)}" }};</script>\n</head>'
             body = page.replace("</head>", inject, 1).encode("utf-8")

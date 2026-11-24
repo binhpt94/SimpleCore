@@ -255,8 +255,9 @@ def ref_source(root, feature, ref):
     return path
 
 
-def check_order(root, tool, feature, oid, folder):
-    """The problems of one order (folder, front matter, content)."""
+def check_order(root, tool, feature, oid, folder, live=None):
+    """The problems of one order (folder, front matter, content). `live`: the live tree already read (live_tree), for a
+    caller that checks many orders; without it the tree is read here."""
     data = parse_order(read_text(folder / ORDER_FILE))
     problems = list(data["errors"])
     if data["fields"].get("tool") and data["fields"]["tool"] != tool:
@@ -264,7 +265,7 @@ def check_order(root, tool, feature, oid, folder):
     design = bool(DESIGN_RX.match(feature))
     kind = data["fields"].get("kind", "")
     if design:
-        problems += check_art(root, tool, feature, oid, folder, data)
+        problems += check_art(root, tool, feature, oid, folder, data, live)
     elif not FEATURE_RX.match(feature) or not ID_RX.match(oid):
         problems.append("thư mục order phải là orders/<Feature>/<id> (id: chữ thường, số, gạch nối)")
     elif not (Path(root) / "UnityProject" / "Assets" / "Features" / Path(*feature.split("/"))).is_dir():
@@ -287,10 +288,15 @@ def node_of(feature):
     return feature[len(gd.DESIGN_OWNER) + 1:].replace(".", "/")
 
 
-def live_node(root, path):
-    """(node, root node) of the live tree, read the way the page reads it; node None when live lacks it."""
+def live_tree(root):
+    """The live tree, read the way the page reads it: (root node or None, {path: node})."""
     tree, _ = gd.read_tree(root, "live")
-    nodes = {n["path"]: n for n in gd.walk(tree)} if tree else {}
+    return tree, ({n["path"]: n for n in gd.walk(tree)} if tree else {})
+
+
+def live_node(root, path, live=None):
+    """(node, root node) of the live tree; node None when live lacks it. `live`: a tree already read (live_tree)."""
+    _, nodes = live or live_tree(root)
     return nodes.get(path), nodes.get("")
 
 
@@ -298,7 +304,7 @@ def order_styles(data):
     return [s.strip() for s in re.split(r"[,\s]+", data["fields"].get("style", "")) if s.strip()]
 
 
-def check_art(root, tool, feature, oid, folder, data):
+def check_art(root, tool, feature, oid, folder, data, live=None):
     """The problems of an art order: a cheat node in live with frames, one item per state (its frame), known styles, and no frame
     that already has a picture still good from the same tool (unless this order is the one that made it). Art
     concepts (codex) and claude concepts (claudeimage) are apart: one does not stand in the other's way."""
@@ -311,7 +317,7 @@ def check_art(root, tool, feature, oid, folder, data):
     cheat = is_cheat(path)
     if not cheat and tool != CLAUDE:      # an art concept of Codex: the cheat node only; a claude concept: any frame
         return problems + [f"order art chỉ đặt cho node cheat (<feature>/{gd.CHEAT_KEY}) đã ở live, không cho '{path}'"]
-    node, top = live_node(root, path)
+    node, top = live_node(root, path, live)
     if node is None:
         return problems + [f"node '{path}' chưa có trong live: chỉ gen art cho node đã chốt"]
     frames = {Path(fr["file"]).stem for fr in node["frames"]}
@@ -332,7 +338,7 @@ def check_art(root, tool, feature, oid, folder, data):
         if known and s not in known:
             problems.append(f"style '{s}' không có ở vòng 1 ({', '.join(sorted(known))})")
     if read_status(folder)["version"] == 0:
-        tree, _ = gd.read_tree(root, "live")
+        tree = (live or live_tree(root))[0]
         art, _ = gd.read_art(root, tree)
         good = {e["frame"]: e["ref"] for e in art.get(path, []) if e["usable"] and e["tool"] == tool}
         mine = f"{feature}/{oid}"
@@ -1981,10 +1987,11 @@ def summary(root, tool=None):
     """[(ref, tool, state, version, count, title, problems, items)] of the orders; state as view_state gives it,
     items as item_rows gives them."""
     out = []
+    live = live_tree(root)      # once for all orders
     for t, feature, oid, folder in all_orders(root):
         if tool and t != tool:
             continue
-        data, problems = check_order(root, t, feature, oid, folder)
+        data, problems = check_order(root, t, feature, oid, folder, live)
         status = read_status(folder)
         state = view_state(status, [i for i, _ in data["items"]], read_reviews(folder), no_judging(t, feature))
         out.append((f"{feature}/{oid}", t, state, status["version"], len(data["items"]), data["title"],
@@ -2045,9 +2052,10 @@ def snapshot(root):
     """Everything the Studio tab shows: every order (state, round, runs per item, quality of its last delivery) and
     the art debts. Reads only."""
     orders = []
+    live = live_tree(root)      # once for all orders: reading it again for each art order took seconds
     for tool, feature, oid, folder in all_orders(root):
         try:
-            data, problems = check_order(root, tool, feature, oid, folder)
+            data, problems = check_order(root, tool, feature, oid, folder, live)
         except (OSError, ValueError) as ex:
             data, problems = {"items": [], "title": oid, "fields": {}}, [str(ex)]
         status = read_status(folder)
