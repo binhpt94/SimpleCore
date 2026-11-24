@@ -2,7 +2,7 @@
 Validator ép ranh giới. File này ghi phần còn lại; người duyệt sẽ soi theo từng mục.
 
 ## Khung
-- Khung do @CodeLead viết và sửa; phiên sở hữu chỉ đọc (guard ép): `Scripts/Contracts`, `Scripts/Internal/Base`, `Scripts/View/Base`, mọi `*.asmdef`, `AssemblyInfo.cs`; ở Core thêm các interface `I*.cs`. `Assets/_Composition` (nối dây) là của @CodeLead cả vùng. Bảng đầy đủ ở `.claude/rules/codelead.md`.
+- Khung do @CodeLead viết và sửa; phiên sở hữu chỉ đọc (guard ép): `Scripts/Contracts`, `Scripts/Internal/Base`, `Scripts/View/Base`, mọi `*.asmdef`, `AssemblyInfo.cs`; ở Core thêm các interface `I*.cs` và lớp base `*Base.cs`. `Assets/_Composition` (nối dây) là của @CodeLead cả vùng. Bảng đầy đủ ở `.claude/rules/codelead.md`.
 - Code mới của feature là lớp con của lớp base, đặt ở phần còn lại của `Internal`/`View`. Thiếu chỗ móc trong lớp base thì nhờ @CodeLead thêm, không chép lớp base ra sửa.
 
 ## Contract
@@ -17,7 +17,7 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 - View chỉ hiển thị và chuyển thao tác người chơi xuống Internal. Không tính toán, không quyết định kết quả.
 - View không biết lớp logic: một presenter trong Internal đẩy dữ liệu xuống view qua interface internal (ví dụ `ICoinsDisplay`).
 - Không static giữ trạng thái, không singleton, kể cả trong nội bộ feature. View không tự đi tìm logic.
-- Feature có view hoặc cần tải thì tham gia `ISessionScene`: tải trong `LoadAsync`, tạo view trong `Run`, huỷ trong `DisposeAsync`. Không đặt sẵn view trong scene.
+- Feature có view hoặc cần tải thì tham gia `ISessionScene` (hợp đồng vòng đời phiên nằm ở `Game.Core`; lớp tham gia kế thừa `SessionParticipantBase` của Core, không tự viết lại): tải trong `LoadAsync`, tạo view trong `Run`, huỷ trong `DisposeAsync`. Không đặt sẵn view trong scene.
 - Số liệu cân bằng (giá, số xu ban đầu...) nằm trong asset cấu hình ở `FeatureAssets/Private`, không viết cứng trong code.
 - Cheat: dựng đúng các state của node `<feature>/cheat` trong thiết kế (`gd_pack.py` in mục CHEAT), để test và Play mà không phải chơi tới nơi. Code cheat nằm trong thư mục của chính feature và chỉ chạy ở bản dev (`#if UNITY_EDITOR || DEVELOPMENT_BUILD`); không lọt vào bản phát hành. State gộp nhiều feature do feature chủ trận dựng, gọi feature khác qua Contracts.
 
@@ -43,7 +43,7 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 | Loại | Lệnh | Ai |
 |---|---|---|
 | Đọc | `read_console get`, `find_gameobjects`, `manage_scene get_*`, `manage_asset search/get_info/get_components`, `manage_prefabs get_info/get_hierarchy`, `manage_material get_material_info`, `manage_ui read/get_visual_tree`, `find_in_file`, `get_sha`, `validate_script`, docs, resource | mọi phiên code; path phải đọc được, `search` phải có `path` |
-| Ghi asset | `manage_asset create/create_folder/duplicate/move/rename/modify/import/delete`, `manage_prefabs modify_contents`, `manage_material create/set_*`, `manage_texture`, `manage_ui create/update/create_panel_settings` | phiên sở hữu, mọi path trong vùng mình, ngoài khung; không `.cs`, `.asmdef`. @CodeLead: trong `Assets/_Composition` |
+| Ghi asset | `manage_asset create/create_folder/duplicate/move/rename/modify/import/delete`, `manage_prefabs modify_contents`, `manage_scriptable_object create/modify` (asset config, installer; `create`: `folder_path` + `asset_name`; `modify`: `target` chỉ là `{"path": "Assets/..."}`, không guid), `manage_material create/set_*`, `manage_texture`, `manage_ui create/update/create_panel_settings` | phiên sở hữu, mọi path trong vùng mình, ngoài khung; không `.cs`, `.asmdef`. @CodeLead: trong `Assets/_Composition` |
 | Biên dịch | `refresh_unity` | mọi phiên code, khi không chat khác giữ Editor |
 | Scene, prefab stage | `manage_scene create/load/save`, `manage_gameobject`, `manage_components`, `manage_prefabs create_from_gameobject`, `manage_material` gán cho renderer, `manage_ui attach_ui_document`, `manage_editor *_prefab_stage`, `read_console clear` | phiên code, scene/prefab trong vùng mình (@CodeLead: lưu chỉ trong `Assets/_Composition`, vùng khác chỉ mở xem); giữ khoá Editor |
 | Play, test, cài đặt | `manage_editor play/pause/stop`, `run_tests`, `execute_menu_item`, tag/layer, package, camera, graphics, physics, ProBuilder, profiler | chỉ @CodeLead; giữ khoá Editor |

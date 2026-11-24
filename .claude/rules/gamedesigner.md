@@ -11,7 +11,7 @@ Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, �
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
 - Lệnh shell, chạy từ gốc project:
-  - `python Management/tools/gd_status.py` hoặc `... gd_status.py ai/idea/<node>`: tình trạng cây hoặc một nhánh. **Chạy đầu mỗi lượt.** Chạy cho một node thì đầu bản in có mục "Bám theo": các node phía trên, các node và từ mà refs trỏ tới.
+  - `python Management/tools/gd_status.py` hoặc `... gd_status.py ai/idea/<node>`: tình trạng cây hoặc một nhánh. **Chạy đầu mỗi lượt.** Bản in dài (cả cây) được ghi ra `Management/game-design/.pack/`; lệnh in đường dẫn và mục lục có số dòng kèm Kết luận từng node: đọc phần cần bằng Read (offset, limit) hoặc Grep. Chạy cho một node thì đầu bản in có mục "Bám theo": các node phía trên, các node và từ mà refs trỏ tới.
   - `python Management/tools/gd_delete.py ai/<đường dẫn>`: xoá một file hoặc cả một node trong `ai`. Lịch sử của node bị xoá được giữ lại ở node cha.
   - `python Management/tools/gd_frame.py ai/idea/<node>`: các frame của một node, đã giải ra số tuyệt đối, kèm cảnh báo (mọi phiên chạy được).
 - Không có báo cáo cuối lượt. Cuối lượt nói ngắn gọn cho người: đã thêm/sửa/xoá node nào, node nào chờ người chấm hoặc trả lời, node nào còn phải làm lại.

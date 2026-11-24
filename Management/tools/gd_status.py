@@ -10,6 +10,8 @@ idea with the AI's and the human's score and feedback, unanswered questions, whe
 what the human turned down here before (from .history).
 For one branch it starts with "Bám theo": the nodes above it and the nodes and terms its refs name, read before
 writing. For the whole tree it ends with the glossary reminders.
+A long report (the whole tree, a big branch) is written to Management/game-design/.pack/ and the command prints that
+file's path and a table of contents with line ranges (gamedesign.emit); a short one is printed as it is.
 """
 import sys
 from pathlib import Path
@@ -20,6 +22,8 @@ sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
 
 PREFIX = "/".join(gd.TABLES["idea"])
+STATUS_NOTE = ("Đọc trước: các node mà mục lục ghi Kết luận CHƯA ĐẠT, và các mục cuối file (Lỗi cấu trúc, Thiếu..., "
+               "Thuật ngữ). Trước khi viết hay sửa một node vẫn chạy lệnh này cho riêng node đó.")
 
 
 def lines_for(root, node, out):
@@ -180,7 +184,9 @@ def main(argv):
         print(f"Cách dùng: python Management/tools/gd_status.py [{PREFIX}/<node>]", file=sys.stderr)
         return 2
     try:
-        print(report(root, argv[1] if len(argv) == 2 else ""))
+        arg = argv[1] if len(argv) == 2 else ""
+        name = arg.replace("\\", "/").rstrip("/")[len(PREFIX) + 1:]
+        print(gd.emit(root, "status", name or "all", report(root, arg), STATUS_NOTE))
         return 0
     except (ValueError, OSError) as ex:
         print(f"Không đọc được: {ex}", file=sys.stderr)

@@ -40,6 +40,8 @@ Thumbs.db
 /Management/data/studio.js
 /Management/data/studio.js.tmp
 /Management/game-design/.promote-*/
+# Gói thiết kế và báo cáo status dài: gd_pack.py, gd_status.py ghi, tên kèm hash nội dung
+/Management/game-design/.pack/
 
 # Báo cáo cho @Manager: Stop hook stop_report.py ghi, nhật ký điều phối trên máy này
 /Management/reports/

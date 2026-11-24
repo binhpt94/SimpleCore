@@ -206,7 +206,8 @@ def code_gate(root, feature):
     if ok:
         return ("Thiết kế của feature này đã tới vòng 4 trong live nên được code; bám theo gói thiết kế: "
                 f"python Management/tools/gd_pack.py {feature} (node feature, các node con, node nhánh khác mà refs "
-                "trỏ tới, thuật ngữ).")
+                "trỏ tới, thuật ngữ). Lệnh in đường dẫn file gói và mục lục có số dòng: đọc bằng Read (offset, limit) "
+                "hoặc Grep; trước khi code một phần, đọc đủ node vòng 4 và mục CHEAT của phần đó.")
     return ("SỬA CODE ĐANG KHOÁ: " + reason + ". Đọc thì vẫn được. Dừng và báo người; thiết kế là việc của "
             "@GameDesigner, người chốt sang live.")
 
@@ -235,7 +236,7 @@ def context(data, root, store):
                 "vùng nào (cả Core, _Composition, .claude, CLAUDE.md gốc, thiết kế live, toàn bộ Management). "
                 ".claude/settings.json chỉ còn hỏi khi sửa Packages, ProjectSettings.")
     worker = (" Khung (Scripts/Contracts, Scripts/Internal/Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs; ở "
-              "Core/_Composition thêm các interface I*.cs) chỉ đọc: viết code mới trên lớp con ở phần còn lại của "
+              "Core/_Composition thêm các interface I*.cs và lớp base *Base.cs) chỉ đọc: viết code mới trên lớp con ở phần còn lại của "
               "Internal/View; muốn đổi khung thì nhắn @CodeLead (ngữ cảnh, file, đề xuất) và chờ. Xung đột code do "
               "@CodeLead giải quyết; lỗi @CodeLead báo về thì tự sửa. Lượt có sửa file phải kết thúc bằng báo cáo "
               "(gửi @CodeLead và @Manager) theo .claude/rules/report.md. unity-mcp: đọc (console, asset, scene), tự biên dịch "
@@ -256,7 +257,7 @@ def context(data, root, store):
         return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders): kiểm code và giải quyết xung đột của nhóm "
                 "Basic, Features, Services, và quản cấu trúc khung. Chỉ sửa khung: Scripts/Contracts, Scripts/Internal/"
                 "Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs của feature đã mở khoá code; *.asmdef, "
-                "AssemblyInfo.cs, interface I*.cs của Core. Thêm toàn bộ UnityProject/Assets/_Composition (nối dây: Boot, "
+                "AssemblyInfo.cs, interface I*.cs và lớp base *Base.cs của Core. Thêm toàn bộ UnityProject/Assets/_Composition (nối dây: Boot, "
                 "scene, catalog asset; không có vai trò @Composition nữa). Ngoài hai thứ đó không sửa gì: lỗi thì gửi "
                 "yêu cầu sửa cụ thể cho phiên sở hữu. Lượt có sửa file phải kết thúc bằng báo cáo theo "
                 ".claude/rules/report.md. Đọc được toàn bộ source các nhóm đó; unity-mcp để biên dịch, chạy test, Play, "
@@ -264,7 +265,8 @@ def context(data, root, store):
                 "và lưu scene hay prefab chỉ trong Assets/_Composition. "
                 "Thứ còn lại được ghi là tiến độ của node thiết kế lá, sau khi đã biên dịch và test qua: python "
                 "Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done> (xem bằng "
-                "python Management/tools/gd_status.py). Quy trình ở .claude/rules/codelead.md."
+                "python Management/tools/gd_status.py). gd_status.py và gd_pack.py in đường dẫn file và mục lục có số "
+                "dòng khi bản in dài: đọc phần cần bằng Read (offset, limit) hoặc Grep. Quy trình ở .claude/rules/codelead.md."
                 + editor_status(store) + unread_reports(root, store, role))
     if role in guard.TOOL_ROLES:
         tool = guard.TOOL_ROLES[role]
@@ -289,7 +291,9 @@ def context(data, root, store):
                 "Management/game-design, .claude/rules/gamedesigner.md và gamedesigner.round<1-4>.md; chỉ ghi trong Management/game-design/ai "
                 "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
                 "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
-                "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on. Độ quan trọng "
+                "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on (cả cây thì lệnh "
+                "in đường dẫn file trong Management/game-design/.pack và mục lục có số dòng kèm Kết luận từng node: "
+                "đọc phần cần bằng Read offset/limit hoặc Grep). Độ quan trọng "
                 "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
                 + designer_mode(root) +
                 " Ảnh concept: viết order xong và python Management/tools/studio.py check qua thì nhắn ngay @Codex bằng "

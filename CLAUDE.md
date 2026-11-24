@@ -10,7 +10,7 @@ unity-mcp theo tác động của lệnh (bảng ở `.claude/rules/unity.md`): 
 Lệnh shell được chạy (mọi phiên), từ gốc project:
 `python Management/tools/validate.py --feature <Tên>` — kiểm tra ranh giới feature (bỏ `--feature` là cả project); còn vi phạm thì chưa xong việc.
 `python Management/tools/studio.py check|status` — order ảnh/3D (feature đặt order, chấm từng item đã giao bằng `review <F>/<id> <item> <0-3> "<phản hồi>"`: 0 làm lại ngay, 1 lỗi nhưng chưa cần làm ngay, 2 đúng phần lớn, 3 đạt; @Codex, @Blender chạy tool, `pick`, `deliver`; lượt gen có trần, hết lượt thì giao "chưa chuẩn" kèm phiếu nợ art, xem tab Studio; luật ở `.claude/rules/studio.md`).
-`python Management/tools/gd_pack.py <Tên>` — gói thiết kế đã chốt của một feature (node feature, node con, node nhánh khác mà refs trỏ tới, thuật ngữ, frame bố cục): bám theo gói này khi code.
+`python Management/tools/gd_pack.py <Tên>` — gói thiết kế đã chốt của một feature (node feature, node con, node nhánh khác mà refs trỏ tới, thuật ngữ, frame bố cục): bám theo gói này khi code. Gói dài nên lệnh ghi ra `Management/game-design/.pack/` rồi in đường dẫn và mục lục có số dòng: đọc bằng Read (offset, limit) hoặc Grep; trước khi code một phần, đọc đủ node vòng 4 và mục CHEAT của phần đó.
 `python Management/tools/gd_frame.py live/<node>` (hoặc `ai/idea/<node>`) — frame bố cục của một node vòng 4, đã giải ra toạ độ và kích thước tuyệt đối (px trên màn chuẩn, hoặc u trên chiến trường).
 @Manager có thêm `python Management/tools/scaffold.py [--dry-run]`: tạo thư mục feature, service, Core, `_Composition` còn thiếu theo các feature trong `live` (tên trong `code.json`, chưa có thì tên đề xuất theo key; chỉ thư mục và `.gitkeep`, không tạo code). @Manager vẫn không code.
 
@@ -20,7 +20,7 @@ Feature nằm ở `UnityProject/Assets/Features/<Tên>/`, dịch vụ ở `Featu
 |---|---|---|
 | Feature của mình | được | được |
 | Khung của feature mình: `Scripts/Contracts`, `Scripts/Internal/Base`, `Scripts/View/Base`, `*.asmdef`, `AssemblyInfo.cs` | được | cấm: chỉ @CodeLead (khi feature đã mở khoá code); code mới viết trên lớp con |
-| Khung của Core: `*.asmdef`, `AssemblyInfo.cs`, interface `I*.cs` (ngoài `Tests/`) | được | chỉ @CodeLead |
+| Khung của Core: `*.asmdef`, `AssemblyInfo.cs`, interface `I*.cs`, lớp base `*Base.cs` (ngoài `Tests/`) | được | chỉ @CodeLead |
 | `Scripts/Contracts`, `FeatureAssets/Public`, `CLAUDE.md` gốc của feature khác | được | cấm |
 | `Scripts/Internal`, `Scripts/View`, `FeatureAssets/Private` của feature khác | cấm | cấm |
 | `Assets/Core` | được | `@Core`: được (trừ khung); phiên khác: cấm, nhờ @Core |

@@ -571,6 +571,11 @@ def run_role_cases(payload):
         w(g, role, "deny", A + own + "/AssemblyInfo.cs")
         w(g, role, "deny", A + own + "/IThing.cs")
         w(g, role, "allow", A + own + "/Tests/IFake.cs")       # interfaces in tests are no skeleton
+        w(g, role, "deny", A + own + "/SessionParticipantBase.cs")      # a base class is skeleton, as in a feature
+        e(g, role, "deny", A + own + "/Sub/ThingBase.cs")
+        w(g, role, "allow", A + own + "/Tests/FakeBase.cs")
+        w(g, role, "allow", A + own + "/Database.cs")      # the name must end in an upper-case Base
+        w(g, role, "allow", A + own + "/Base.cs")
         w(g, role, "allow", A + own + "/Thing.cs")
         w(g, role, "deny", A + own + "/x.asmref")
         e(g, role, "deny", A + other + "/Old.cs")
@@ -792,6 +797,20 @@ def run_codelead_cases():
               FX + "/Management/reports/r.md"):
         r(g, L, "allow", p)
     t(g, L, "allow", "Grep", {"pattern": "x", "path": F + "/Shop/Scripts/Internal"})
+    pack = FX + "/Management/game-design/.pack/pack-Wallet-0123456789ab.md"      # written by gd_pack.py / gd_status.py
+    for who in (W, L, "@Core", "_Services/Popup", "@GameDesigner", "@Manager"):
+        r("design packs: read by line range", who, "allow", pack)
+        t("design packs: read by line range", who, "allow", "Grep", {"pattern": "vòng 4", "path": os.path.dirname(pack)})
+        w("design packs: only the tools write them", who, "deny", pack)
+        e("design packs: only the tools write them", who, "deny", pack)
+    for p in (F, F + "/_Services"):      # one search across every feature, e.g. who uses a contract
+        t(g, L, "allow", "Grep", {"pattern": "IPopupService", "path": p})
+        t(g, L, "allow", "Glob", {"pattern": "**/*.cs", "path": p})
+        for who in (W, "@Core", "_Services/Popup", "@Manager", "@GameDesigner", "@Codex", ""):
+            t(g + " (others still may not)", who, "deny", "Grep", {"pattern": "x", "path": p})
+    for p in (A, FX + "/UnityProject", FX):
+        t(g, L, "deny", "Grep", {"pattern": "x", "path": p})
+    e(g, L, "deny", F + "/New.cs")
     for p in (FX + "/UnityProject/Library/x", FX + "/UnityProject/Temp/x", FX + "/secret.txt", r"C:\Windows\x"):
         r(g, L, "deny", p)
     r(g + " (others still may not)", W, "deny", F + "/Shop/Scripts/Internal/S.cs")
@@ -842,6 +861,7 @@ def run_codelead_cases():
                 F + "/Wallet/Scripts/Internal/AssemblyInfo.cs", F + "/_Services/Popup/Scripts/Contracts/IPopup.cs",
                 F + "/_Services/Popup/Scripts/Internal/Base/PopupBase.cs",
                 A + "/Core/Game.Core.asmdef", A + "/Core/AssemblyInfo.cs", A + "/Core/IServiceRegistry.cs",
+                A + "/Core/SessionParticipantBase.cs", A + "/Core/ISessionScene.cs",
                 A + "/Core/Tests/Game.Core.Tests.asmdef", A + "/_Composition/AssemblyInfo.cs", A + "/_Composition/IBoot.cs")
     for p in skeleton:
         e(g, L, "allow", p)
@@ -862,7 +882,17 @@ def run_codelead_cases():
     dl("allow", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
     dl("deny", "Assets/Features/Wallet/Scripts/Internal/Old.cs")
     dl("deny", "Assets/Features/Shop/Scripts/Internal/S.cs")
-    dl("ask", "Assets/Features/Wallet/Scripts/Contracts")              # a folder: the human decides
+    dl("allow", "Assets/Features/Wallet/Scripts/Contracts")            # a skeleton folder is @CodeLead's own: no question
+    os.makedirs(F + "/Wallet/Scripts/Internal/Base", exist_ok=True)
+    os.makedirs(A + "/_Composition/Scenes", exist_ok=True)
+    dl("allow", "Assets/Features/Wallet/Scripts/Internal/Base")
+    dl("allow", "Assets/_Composition/Scenes")
+    dl("ask", "Assets/_Composition")                                   # the whole wiring area: the human decides
+    dl("ask", "Assets/Features/Wallet/Scripts/Contracts/Missing")      # nothing there: not a folder it can be sure of
+    dl("deny", "Assets/Features/Wallet/Scripts/Internal")              # not skeleton: the owner's
+    dl("deny", "Assets/Features/Wallet")
+    dl("deny", "Assets/Features/Shop/Scripts/Internal/Base")           # Shop's code gate is closed
+    dl("deny", "Assets/Core")
     t(g, L, "deny", guard.UNITY_ASSET_TOOL, {"action": "modify", "path": "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs"})
 
     g = "feature: skeleton read-only"
@@ -1393,6 +1423,26 @@ def run_unity_cases():
     u(g, W, "deny", "manage_asset", action="move", path=own + "/a.asset", destination="Assets/Features/Shop/FeatureAssets/Private/a.asset")
     u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Shop/FeatureAssets/Private/n.asset")
     u(g, W, "deny", "manage_asset", action="create", path="Assets/Core/n.asset")
+    SO = "manage_scriptable_object"      # config and installer assets: the owner, inside its own area
+    u(g, W, "allow", SO, action="create", type_name="Game.Wallet.WalletConfig", folder_path=own, asset_name="WalletConfig")
+    u(g, W, "allow", SO, action="create", type_name="Game.Wallet.WalletInstaller", asset_name="WalletInstaller",
+      folder_path="Assets/Features/Wallet/FeatureAssets/Public/")
+    u(g, W, "allow", SO, action="modify", target={"path": own + "/c.asset"}, patches=[])
+    u(g, W, "deny", SO, action="create", type_name="X", folder_path="Assets/Features/Shop/FeatureAssets/Private", asset_name="n")
+    u(g, W, "deny", SO, action="create", type_name="X", folder_path="Assets/Core", asset_name="n")
+    u(g, W, "deny", SO, action="create", type_name="X", folder_path=own, asset_name="../../Shop/FeatureAssets/Private/n")
+    u(g, W, "deny", SO, action="create", type_name="X", folder_path=own + "/../../../Shop/FeatureAssets/Private", asset_name="n")
+    u(g, W, "deny", SO, action="create", type_name="X", folder_path=own)                       # no name
+    u(g, W, "deny", SO, action="create", type_name="X", asset_name="n")                        # no folder
+    u(g, W, "deny", SO, action="modify", target={"path": "Assets/Features/Shop/FeatureAssets/Private/s.asset"})
+    u(g, W, "deny", SO, action="modify", target={"guid": "0123456789abcdef0123456789abcdef"})      # cannot be checked
+    u(g, W, "deny", SO, action="modify", target={"path": own + "/c.asset", "guid": "0123456789abcdef0123456789abcdef"})
+    u(g, W, "deny", SO, action="modify", target=own + "/c.asset")
+    u(g, W, "deny", SO, action="delete", target={"path": own + "/c.asset"})
+    for who in ("@Manager", "@GameDesigner", "@Codex", ""):
+        u(g, who, "deny", SO, action="create", type_name="X", folder_path=own, asset_name="n")
+    u(g, "@CodeLead", "deny", SO, action="create", type_name="X", folder_path=own, asset_name="n")      # not its area
+    u(g, "@CodeLead", "allow", SO, action="create", type_name="X", folder_path="Assets/_Composition", asset_name="Catalog")
     u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Wallet/Scripts/Contracts/n.asset")      # skeleton
     u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Wallet/Scripts/Internal/N.cs")
     u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Wallet/Scripts/Internal/W.asmdef")

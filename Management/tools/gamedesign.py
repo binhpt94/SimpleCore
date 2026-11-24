@@ -171,6 +171,49 @@ HISTORY_SHOWN = 30
 STATES = ("new", "changed", "same")      # an idea node against live
 
 
+PACK_DIR = ".pack"          # under BASE: long reports of gd_pack.py and gd_status.py, read by line range
+PACK_INLINE_MAX = 20000     # characters; a longer report is cut off by the agent's shell, so it goes to a file
+PACK_KEEP = 3               # files kept per report (a session may still be reading the one before)
+
+
+def emit(root, kind, name, text, note=""):
+    """What a report tool prints. A short text is printed as it is. A long one is written to
+    Management/game-design/.pack/<kind>-<name>-<hash of the text>.md and the tool prints the file's path and a table
+    of contents with line ranges instead, so a session reads only the part it needs (Read offset/limit, or Grep).
+    The name carries the hash: the same text is the same file, a changed design is a new file."""
+    if len(text) <= PACK_INLINE_MAX:
+        return text
+    lines = text.split("\n")
+    stem = f"{kind}-{re.sub(r'[^A-Za-z0-9_-]+', '.', name).strip('.') or 'all'}"
+    folder = Path(root).joinpath(*BASE, PACK_DIR)
+    path = folder / f"{stem}-{hashlib.sha1(text.encode('utf-8')).hexdigest()[:12]}.md"
+    if not path.exists():
+        folder.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")      # its own name: two sessions may write at once
+        tmp.write_text(text + "\n", encoding="utf-8", newline="\n")
+        os.replace(tmp, path)
+        old = sorted((p for p in folder.glob(stem + "-*.md") if re.fullmatch(re.escape(stem) + r"-[0-9a-f]{12}\.md", p.name)
+                      and p != path), key=lambda p: p.stat().st_mtime, reverse=True)
+        for p in old[PACK_KEEP - 1:]:
+            try:
+                p.unlink()
+            except OSError:
+                pass      # another session has it open: the next run removes it
+    heads = [i for i, line in enumerate(lines) if re.match(r"^#{1,2} ", line)]
+    out = lines[:lines.index("")] if "" in lines else lines[:1]
+    out += ["", f"File đầy đủ ({len(lines)} dòng, {len(text) // 1000}K kí tự): {'/'.join(BASE)}/{PACK_DIR}/{path.name}",
+            "Lệnh chỉ in mục lục. Đọc phần cần bằng Read (offset = dòng đầu, limit = số dòng) hoặc Grep trong file đó. "
+            "Tên file đổi khi thiết kế đổi: chạy lại lệnh để lấy bản mới."]
+    if note:
+        out.append(note)
+    out += ["", "Mục lục (dòng đầu-dòng cuối):"]
+    for n, i in enumerate(heads):
+        end = heads[n + 1] if n + 1 < len(heads) else len(lines)
+        first = next((x.strip() for x in lines[i + 1:end] if x.strip()), "")
+        out.append(f"{i + 1}-{end}  {lines[i]}" + (f"  —  {first[:100]}" if first else ""))
+    return "\n".join(out)
+
+
 def table_dir(root, table):
     if table not in TABLES:
         raise ValueError(f"unknown table '{table}'")

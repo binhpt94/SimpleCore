@@ -4,6 +4,8 @@
     python Management/tools/test_gamedesign.py
 """
 import json
+import os
+import re
 import shutil
 import sys
 import tempfile
@@ -737,6 +739,38 @@ def run_pack(root):
     check("pack: a folder live does not name", refused(gd_pack.pack, root, "Nope"))
     check("pack: exit 1 for an unknown folder, 2 for a bad name",
           (gd_pack.main(["gd_pack.py", "Nope", "--root", root]), gd_pack.main(["gd_pack.py", "../x", "--root", root])), (1, 2))
+
+    # A long report goes to a file named by its hash; the tool prints the path and a table of contents.
+    store = Path(root, "Management", "game-design", gd.PACK_DIR)
+    files = lambda: sorted(p.name for p in store.glob("*")) if store.exists() else []
+    check("emit: a short text is printed as it is, no file", (gd.emit(root, "pack", "Alpha", text, "note"), files()), (text, []))
+    long = "# Gói\nCode: ĐƯỢC CODE\n\n## a  ·  vòng 3  ·  A\nTóm tắt a\n" + "x\n" * 12000 + "## a/b  ·  vòng 4  ·  B\n\nTóm tắt b\ny"
+    shown = gd.emit(root, "pack", "_Services/Popup", long, "NHẮC")
+    name = files()[0] if files() else ""
+    check("emit: a long text is written once, under the name of its hash",
+          (len(files()), bool(re.fullmatch(r"pack-_Services\.Popup-[0-9a-f]{12}\.md", name))), (1, True))
+    check("emit: the file holds the text", gd.read_text(store / name), long + "\n")
+    check("emit: prints the head, the path and the note, not the text",
+          (shown.startswith("# Gói\nCode: ĐƯỢC CODE\n\n"), f"Management/game-design/{gd.PACK_DIR}/{name}" in shown, "NHẮC" in shown,
+           len(shown) < 1500), (True, True, True, True))
+    body = long.split("\n")
+    toc = [m for m in re.finditer(r"^(\d+)-(\d+)  (#{1,2} [^\n]*?)(?:  —  ([^\n]*))?$", shown, re.M)]
+    check("emit: each contents line points at its heading in the file",
+          [(body[int(m.group(1)) - 1] == m.group(3), m.group(4)) for m in toc],
+          [(True, "Code: ĐƯỢC CODE"), (True, "Tóm tắt a"), (True, "Tóm tắt b")])
+    check("emit: the ranges cover the file without gaps",
+          [(int(m.group(1)), int(m.group(2))) for m in toc], [(1, 3), (4, 12005), (12006, 12009)])
+    stamp = (store / name).stat().st_mtime_ns
+    check("emit: the same text is the same file, not written again",
+          (gd.emit(root, "pack", "_Services/Popup", long, "NHẮC") == shown, files(), (store / name).stat().st_mtime_ns), (True, [name], stamp))
+    for i in range(4):
+        os.utime(store / sorted(files())[-1], (1000 + i, 1000 + i))      # older than the next one
+        gd.emit(root, "pack", "_Services/Popup", long + f"\n{i}", "")
+    gd.emit(root, "status", "all", long, "")
+    check("emit: a changed text is a new file; only the newest few of one report are kept",
+          (len([f for f in files() if f.startswith("pack-")]), name in files(), len([f for f in files() if f.startswith("status-all-")])),
+          (gd.PACK_KEEP, False, 1))
+    check("emit: no temp file is left", [f for f in files() if f.endswith(".tmp")], [])
 
 
 UI_FRAME = """kind: ui

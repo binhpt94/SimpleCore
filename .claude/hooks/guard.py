@@ -30,7 +30,8 @@ The value, by group:
 Basic, Features, Services and Tools read the public parts of features, Core, _Composition, Management, .claude and
 the root CLAUDE.md. Every bound chat (@GameDesigner too) reads Management/studio and Resources; a feature creates
 the order.md of its own orders there, once, and judges what was delivered (studio.py review; art concepts are
-judged by the human on the management page). rules.json and deleting folders ask the human.
+judged by the human on the management page). rules.json and deleting folders ask the human
+(@CodeLead deletes its own folders itself: skeleton folders, and folders inside _Composition).
 unity-mcp (UNITY_RULES): code sessions read through it, change assets of their own area (write), compile
 (shared) and change the open scene or a prefab stage (state); play, tests and project settings are @CodeLead's.
 state/play/lead take the Editor lock (LOCK_FILE in STORE_DIR): one chat at a time, renewed on every call, freed
@@ -70,7 +71,8 @@ import sys
 PY = r"python3? "
 ALLOWED_COMMANDS = [
     PY + r"Management/tools/validate\.py( --feature ((_Services/)?[A-Za-z][A-Za-z0-9]*|_Composition))?",
-    # the fixed design of one code folder in one piece (reads Management/game-design/live only)
+    # the fixed design of one code folder (reads Management/game-design/live; a long pack is written to
+    # Management/game-design/.pack/, which every session that reads the design may read, and the command prints its path)
     PY + r"Management/tools/gd_pack\.py (_Services/)?[A-Za-z][A-Za-z0-9]*",
     # the frames of one design node, resolved (reads only; --html writes a file, so it is left to the human)
     PY + r"Management/tools/gd_frame\.py (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)+",
@@ -178,6 +180,7 @@ UNITY_RULES = {
                        "create_from_gameobject": "state"},
     "manage_material": {"get_material_info": "read", "create": "write", "set_material_shader_property": "write",
                         "set_material_color": "write", "assign_material_to_renderer": "state", "set_renderer_color": "state"},
+    "manage_scriptable_object": {"create": "write", "modify": "write"},      # config and installer assets of a feature
     "manage_texture": {"create": "write", "apply_pattern": "write", "apply_gradient": "write"},
     "manage_ui": {"read": "read", "get_visual_tree": "read", "create": "write", "update": "write",
                   "create_panel_settings": "write", "attach_ui_document": "state"},
@@ -220,11 +223,12 @@ CASE = re.I if WINDOWS else 0                    # regex flag for zones that gra
 DESIGNER_RULES_RX = re.compile(r"^gamedesigner(\.round[1-4])?\.md$", CASE)
 # The skeleton: the public gates and base classes of the code, edited by @CodeLead only.
 SKELETON_DIRS_RX = re.compile(r"^Scripts/(Contracts|Internal/Base|View/Base)(/|$)", CASE)
-SKELETON_INTERFACE_RX = re.compile(r"^I[A-Z][A-Za-z0-9]*\.cs$")      # an interface file of Core / _Composition
+# An interface file (I<Name>.cs) or a base class file (<Name>Base.cs) of Core / _Composition.
+SKELETON_INTERFACE_RX = re.compile(r"^(I[A-Z][A-Za-z0-9]*|[A-Z][A-Za-z0-9]*Base)\.cs$")
 SKELETON_ASSEMBLY_INFO = "assemblyinfo.cs"
 AREA_FOLDERS = ("_Composition", "Core")
 SKELETON_MSG = ("{name}: this file belongs to the skeleton (Contracts, *.asmdef, AssemblyInfo.cs, Scripts/Internal/Base, Scripts/View/Base; "
-                "in Core/_Composition also the I*.cs interfaces): only @CodeLead edits it. Write your code in a subclass in "
+                "in Core/_Composition also the I*.cs interfaces and the *Base.cs base classes): only @CodeLead edits it. Write your code in a subclass in "
                 "the rest of Internal/View. To change the skeleton, send @CodeLead the context, the file and your proposal.")
 ILLEGAL_SEG_RX = re.compile(r'[*?"<>|]')
 
@@ -453,13 +457,15 @@ def zone(full, root, feature, area=None, read_all=False):
             if area == folder and same(seg[2], folder):
                 return "own " + folder, True, "allow"
             return folder, True, "deny"
-    if not same(seg[2], "Features") or n < 4:
+    if not same(seg[2], "Features"):
         return "unlisted", False, "deny"
+    if n < 4:      # the folder of all features: only @CodeLead searches across them (it reads every layer anyway)
+        return "Features", read_all, "deny"
 
     name, i = seg[3], 4
     if low[3] == "_services":
         if n < 5:
-            return "unlisted", False, "deny"
+            return "Features/_Services", read_all and same(seg[3], "_Services"), "deny"
         name, i = seg[3] + "/" + seg[4], 5      # keeps the spelling on disk; same() decides if it is ours
     rest = "/".join(seg[i:])
     own = bool(feature) and same(name, feature)
@@ -489,7 +495,7 @@ def feature_skeleton(rest):
 
 def area_skeleton(sub):
     """True for the part of Core / _Composition (segments below it) that only @CodeLead edits: asmdef, AssemblyInfo
-    and the interface files (I<Name>.cs), tests excepted."""
+    the interface files (I<Name>.cs) and the base class files (<Name>Base.cs), tests excepted."""
     if not sub:
         return False
     if is_skeleton_file(sub[-1]):
@@ -556,6 +562,9 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         if locked:
             return "deny", locked
     if not os.path.isfile(full):
+        # @CodeLead owns the skeleton folders and everything below _Composition: it deletes a folder there itself.
+        if mode == "codelead" and os.path.isdir(full) and not same(full, under(root, "UnityProject", "Assets", LEAD_AREA)):
+            return "allow", f"@CodeLead deletes a folder of its own inside {name}"
         return "ask", "deleting a folder (or a path that is not a file) needs human approval"
     return "allow", f"delete inside {name}"
 
@@ -745,6 +754,19 @@ def unity_full(value, root, allow_assets_root=False):
 
 def unity_paths(short, action, ti):
     """[(key, value)] of the asset paths a call names; raises ValueError when a needed one is missing."""
+    if short == "manage_scriptable_object":      # names its asset in its own way: folder + name, or target {path}
+        if action == "create":
+            folder, name = text_of(ti.get("folder_path")).replace("\\", "/").rstrip("/"), text_of(ti.get("asset_name"))
+            if not folder or not re.match(r"^[A-Za-z0-9_. -]+$", name) or ".." in name:
+                raise ValueError("unity-mcp manage_scriptable_object create: give 'folder_path' (starting with 'Assets/') "
+                                 "and 'asset_name' (letters, digits, _ . - space)")
+            return [("folder_path", folder + "/" + name + ".asset")]
+        target = ti.get("target")
+        path = text_of(target.get("path")) if isinstance(target, dict) else ""
+        if not path or len(target) != 1:      # a guid cannot be checked against the session's area
+            raise ValueError("unity-mcp manage_scriptable_object modify: give 'target' as {\"path\": \"Assets/...\"} only, "
+                             "not a guid")
+        return [("target", path)]
     need = UNITY_NEEDS_PATH.get((short, action)) or UNITY_NEEDS_PATH.get((short, ANY))
     if need and not text_of(ti.get(need)):
         raise ValueError(f"unity-mcp {short} {action}: give '{need}' (an asset path starting with 'Assets/')")

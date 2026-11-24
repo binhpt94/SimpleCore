@@ -8,6 +8,8 @@ In order: whether the folder may be coded now; the nodes above its feature node 
 feature node and every node below it in full (ideas with detail, CLAUDE.md, progress of the leaves); the nodes
 of other branches their refs name (ideas with detail; their CLAUDE.md is named, not printed); the glossary terms
 those nodes declare.
+The pack is long, so it is written to Management/game-design/.pack/ and the command prints that file's path and a
+table of contents with line ranges (gamedesign.emit); a pack short enough is printed as it is.
 """
 import sys
 from pathlib import Path
@@ -18,6 +20,8 @@ sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
 
 LIVE = "Management/game-design/live"
+PACK_NOTE = ("Trước khi code một phần: đọc đủ các node vòng 4 và mục CHEAT của phần đó, cùng các node refs mà nó nhắc "
+             "(mục 'Node ở nhánh khác') và mục Thuật ngữ. Không code chỉ từ mục lục.")
 
 
 def full_lines(node, out, doc=True):
@@ -125,7 +129,7 @@ def main(argv):
         print("Cách dùng: python Management/tools/gd_pack.py <Tên thư mục code, ví dụ Hero hoặc _Services/Popup>", file=sys.stderr)
         return 2
     try:
-        print(pack(root, argv[1]))
+        print(gd.emit(root, "pack", argv[1], pack(root, argv[1]), PACK_NOTE))
         return 0
     except (ValueError, OSError) as ex:
         print(f"Không đọc được: {ex}", file=sys.stderr)
