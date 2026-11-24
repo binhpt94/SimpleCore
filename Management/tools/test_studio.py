@@ -127,7 +127,7 @@ def run_check(root):
     probs = studio.check_order(root, "codex", "Wallet", "bad-ref", bad)[1]
     check("missing front matter and sections", any("phần đầu" in p for p in probs) and any("Danh sách" in p for p in probs))
     check("check fails while an order is broken", call(root, "check")[0], 1)
-    check("status lists the orders", "codex Wallet/coin-icons: new" in call(root, "status")[1])
+    check("status lists the orders", "codex Wallet/coin-icons: mới" in call(root, "status")[1])
     for name in ("bad-count", "dup", "wrong-kind", "bad-ref"):
         shutil.rmtree(studio.order_dir(root, "codex", "Wallet", name))
     shutil.rmtree(studio.order_dir(root, "codex", "Nope", "no-feature"))
@@ -206,37 +206,66 @@ def run_deliver(root):
     v1 = Path(root) / "Resources/Wallet/codex/coin-icons/v1"
     check("deliver copies exactly the items into Resources/<F>/<tool>/<id>/v1",
           (code, sorted(p.name for p in v1.iterdir())), (0, ["coin.png", "gem.png", "quality.json"]))
-    check("deliver tells the tool chat what to send", "SendMessage" in out and "take Wallet/coin-icons" in out)
+    check("deliver tells the tool chat what to send", "SendMessage" in out and "review Wallet/coin-icons" in out)
     check("a blender chat cannot deliver a codex order", call(root, "deliver", "blender", "Wallet/coin-icons")[0], 1)
 
-    code, out = call(root, "take", "Wallet/coin-icons")
+    ref = "Wallet/coin-icons"
     gen = Path(root) / "UnityProject/Assets/Features/Wallet/FeatureAssets/Private/Generated/coin-icons"
-    check("take copies the delivery into the feature's assets", (code, sorted(p.name for p in gen.iterdir() if p.name != "QUALITY.md")), (0, ["coin.png", "gem.png"]))
-    check("take marks the order taken", studio.read_status(folder)["state"], "taken")
-
-    check("reject needs a new feedback file", "feedback-<n>.md" in call(root, "reject", "Wallet/coin-icons")[1])
-    (folder / "feedback-1.md").write_text("gem bị mờ ở 64px", encoding="utf-8")
-    check("reject with feedback", call(root, "reject", "Wallet/coin-icons")[0], 0)
-    check("a rejected order is not taken again", call(root, "take", "Wallet/coin-icons")[0], 1)
+    state = lambda: studio.view_state(studio.read_status(folder), ["coin", "gem"], studio.read_reviews(folder))  # noqa: E731
+    level = lambda item: (studio.read_reviews(folder).get(item) or {}).get("level")                              # noqa: E731
+    copied = lambda: sorted(p.name for p in gen.iterdir() if p.name != "QUALITY.md") if gen.is_dir() else []     # noqa: E731
+    check("review: the old commands are gone and point to review",
+          (call(root, "take", ref)[0], "review" in call(root, "reject", ref)[1], call(root, "approve", ref)[0]), (1, True, 1))
+    check("review: a delivery starts unjudged", (state(), level("coin"), level("gem")), ("review", None, None))
+    check("review: the level is 0-3", call(root, "review", ref, "coin", "7")[0], 1)
+    check("review: an item the order does not have", call(root, "review", ref, "ruby", "3")[0], 1)
+    code, out = call(root, "review", ref, "coin", "3")
+    check("review: level 3 copies that item into the feature's assets", (code, copied(), "Còn chưa chấm: gem" in out),
+          (0, ["coin.png"], True))
+    code, out = call(root, "review", ref, "gem", "0")
+    check("review: 'Làm lại ngay' is stored without feedback, but cannot run yet",
+          (code, level("gem"), "CHƯA làm lại được" in out, copied(), state()), (0, 0, True, ["coin.png"], "redo"))
     os.environ["FAKE_MODE"] = "write1"
-    code, out = call(root, "codex", "Wallet/coin-icons", "gem")
-    check("no new run until lessons.md names the feedback", (code, "codex/orders/Wallet/coin-icons/feedback-1.md" in out), (1, True))
-    lessons = studio.studio_dir(root, "codex") / "lessons.md"
-    lessons.write_text(lessons.read_text(encoding="utf-8") + "- Icon phải nét ở 64px (codex/orders/Wallet/coin-icons/feedback-1.md).\n",
-                       encoding="utf-8")
-    check("after the lesson the item is made again", call(root, "codex", "Wallet/coin-icons", "gem")[0], 0)
-    check("status shows no unlearnt feedback", "CHƯA RÚT BÀI HỌC" in call(root, "status", "Wallet/coin-icons")[1], False)
+    code, out = call(root, "codex", ref, "gem")
+    check("review: no run while the feedback is missing", (code, "chưa có phản hồi" in out), (1, True))
+    code, out = call(root, "codex", ref, "coin")
+    check("review: an item that was not sent back does not run again", (code, "không phải 'Làm lại ngay'" in out), (1, True))
+    code, out = call(root, "review", ref, "gem", "0", "gem bị mờ ở 64px")
+    check("review: with feedback it may be made again, and says whom to tell", (code, "Nhắn @Codex" in out), (0, True))
+    check("review: the tool chat sees what to make again", "làm lại: gem" in studio.pending_line(root, "codex"))
+    Path(os.environ["FAKE_PROMPT"]).write_text("", encoding="utf-8")
+    check("review: the item is made again", call(root, "codex", ref, "gem")[0], 0)
+    check("review: the feedback is in the prompt", "gem bị mờ ở 64px" in Path(os.environ["FAKE_PROMPT"]).read_text(encoding="utf-8"))
+    check("review: one run for each time it is sent back", call(root, "codex", ref, "gem")[0], 1)
+    redo = [e for e in log_of(folder) if e["event"] == "redo"]
+    check("review: the round is logged with its feedback", [(e["item"], e["round"], e["text"]) for e in redo], [("gem", 1, "gem bị mờ ở 64px")])
+    check("review: nothing is judged while the order is being made again", call(root, "review", ref, "coin", "2")[0], 1)
     (gen / "coin.png.meta").write_text("guid: 1", encoding="utf-8")
-    (gen / "old.png").write_bytes(b"x")
-    (gen / "old.png.meta").write_text("guid: 2", encoding="utf-8")
-    check("deliver again makes v2, v1 untouched", (call(root, "deliver", "codex", "Wallet/coin-icons")[0],
-                                                  (v1 / "gem.png").read_bytes()), (0, b"gem"))
+    check("deliver again makes v2, v1 untouched", (call(root, "deliver", "codex", ref)[0], (v1 / "gem.png").read_bytes()), (0, b"gem"))
     check("v2 exists", (Path(root) / "Resources/Wallet/codex/coin-icons/v2/gem.png").is_file())
-    call(root, "take", "Wallet/coin-icons")
-    check("take again keeps the .meta of a file still delivered and drops what is gone",
-          sorted(p.name for p in gen.iterdir() if p.name != "QUALITY.md"), ["coin.png", "coin.png.meta", "gem.png"])
-    check("a consult is read in Resources, not copied into Assets", (call(root, "deliver", "codex", "Wallet/ask")[0],
-                                                                    "không chép vào Assets" in call(root, "take", "Wallet/ask")[1]), (0, True))
+    check("review: the item made again is unjudged, the other keeps its level", (level("coin"), level("gem"), state()), (3, None, "review"))
+    code, out = call(root, "review", ref, "gem", "2", "hơi tối")
+    note = gen / "QUALITY.md"
+    check("review: level 2 copies it and notes the flaw; the .meta of what is there stays",
+          (code, copied(), "hơi tối" in note.read_text(encoding="utf-8"), state()), (0, ["coin.png", "coin.png.meta", "gem.png"], True, "done"))
+    call(root, "review", ref, "gem", "1", "cần nét hơn")
+    debts = lambda: [(d["item"], d["kind"], d["state"], d["reason"]) for d in studio.read_debts(root)      # noqa: E731
+                     if d["ref"] == ref and d["kind"] == "người chấm"]
+    check("deliver: an item already judged gets no new debt from the tool's own check",
+          [d["item"] for d in studio.read_debts(root) if d["ref"] == ref and d["version"] == 2 and d["kind"] == "chưa chuẩn"], ["gem"])
+    check("review: level 1 owes the item", debts(), [("gem", "người chấm", "open", "cần nét hơn")])
+    call(root, "review", ref, "gem", "1", "cần nét hơn nữa")
+    check("review: judging again keeps one debt", debts(), [("gem", "người chấm", "open", "cần nét hơn nữa")])
+    call(root, "review", ref, "gem", "3")
+    check("review: level 3 closes the debt and drops the note", ([d[2] for d in debts()], note.exists()), (["closed"], False))
+    studio.save_review(root, ref, "gem", None, "")
+    check("review: back to unjudged (the page's leftmost stop)", (level("gem"), state()), (None, "review"))
+    studio.save_review(root, ref, "gem", None, "xem lại sau")
+    check("review: a feedback text is kept even before a level is chosen", studio.read_reviews(folder)["gem"]["text"], "xem lại sau")
+    call(root, "review", ref, "gem", "3")
+    check("a consult is judged but never copied into Assets",
+          (call(root, "deliver", "codex", "Wallet/ask")[0], call(root, "review", "Wallet/ask", "palette", "3")[0],
+           (gen.parent / "ask").exists()), (0, 0, False))
 
 
 def run_blender(root):
@@ -349,51 +378,43 @@ def run_art(root):
                                             studio.check_order(root, "codex", "Wallet", "art-in-feature", plain)[1]))
     shutil.rmtree(plain)
     code, out = call(root, "status", ref)
-    check("art: status says it waits for the human", "CHỜ NGƯỜI DUYỆT GEN" in out)
-    check("art: the page lists it as waiting", [o["ref"] for o in art_of(root)[1] if not o["approved"]], [ref])
-    code, out = call(root, "codex", ref, "main")
-    check("art: no approval, no run", (code, "chưa được người duyệt" in out, (folder / "log.jsonl").is_file()), (1, True, False))
-    check("art: approve", call(root, "approve", ref)[0], 0)
-    approval = json.loads((folder / "approval.json").read_text(encoding="utf-8"))
-    check("art: the approval holds the order and the node", (approval["items"], approval["order"] == studio.order_hash(folder)), (["main"], True))
+    check("art: status lists it as new", f"{ref}: mới" in out)
+    check("art: the page lists it as not delivered", [(o["ref"], o["state"]) for o in art_of(root)[1]], [(ref, "new")])
+    check("art: the tool chat sees it at once (no approval step)", "lose-art" in studio.pending_line(root, "codex"))
+    check("art: @GameDesigner is reminded to tell @Codex", "chưa giao" in studio.art_line(root))
     Path(os.environ["FAKE_PROMPT"]).write_text("", encoding="utf-8")
     code, out = call(root, "codex", ref, "main")
-    check("art: approved, it runs", (code, (folder / "work/out/main.png").is_file()), (0, True))
+    check("art: it runs without any approval", (code, (folder / "work/out/main.png").is_file(), (folder / "approval.json").exists()),
+          (0, True, False))
     prompt = Path(os.environ["FAKE_PROMPT"]).read_text(encoding="utf-8")
     check("art: the prompt carries the style and the frame rule", ("Phẳng, màu tươi" in prompt, "Giữ đúng bố cục" in prompt), (True, True))
     attempt = [e for e in log_of(folder) if e["event"] == "attempt"][-1]
     check("art: Codex sees the frame first, then the style picture", attempt["images"][:2], ["main.frame.png", "ui-flat-ref.png"])
     call(root, "codex", ref, "main")
     code, out = call(root, "codex", ref, "main")
-    check("art: at most 2 runs per item in the first round", (code, "2/2" in out), (1, True))
+    check("art: at most 2 runs per item before the first delivery", (code, "hết 2 lượt đầu" in out), (1, True))
     studio.RUNS_FIRST = 99      # the rest checks the other gates
-    call(root, "approve", ref)
     old_daily = studio.ART_DAILY_MAX
     studio.ART_DAILY_MAX = 2      # two runs already today
     code, out = call(root, "codex", ref, "main")
     check("art: the daily cap", (code, "trần chung" in out), (1, True))
     studio.ART_DAILY_MAX = old_daily
-    (folder / "order.md").write_text((folder / "order.md").read_text(encoding="utf-8") + "\nThêm.\n", encoding="utf-8")
-    code, out = call(root, "codex", ref, "main")
-    check("art: the order changed after approval", (code, "order.md đã đổi" in out), (1, True))
-    call(root, "approve", ref)
-    frame_file = Path(root) / "Management/game-design/live" / NODE / ".frame-concept/main.frame"
-    frame_file.write_text("kind: ui\n- panel round-rect x=500 y=190 w=800 h=700\n", encoding="utf-8")
-    code, out = call(root, "codex", ref, "main")
-    check("art: the node changed after approval", (code, "node trong live đã đổi" in out), (1, True))
-    design_tree(root)
-    code, out = call(root, "take", ref)
-    check("art: take is for features, not art", code, 1)
     code, out = call(root, "deliver", "codex", ref)
     vdir = Path(root) / "Resources/_design" / NODE.replace("/", ".") / "codex/lose-art/v1"
     meta = json.loads((vdir / "meta.json").read_text(encoding="utf-8"))
     check("art: delivered with meta", (code, (vdir / "main.png").is_file(), sorted(meta["styles"]), "main" in meta["frames"]),
           (0, True, ["ui-flat"], True))
-    check("art: the page labels it waiting", art_of(root)[0]["label"], "chờ nhận")
+    check("art: the page labels it not judged", (art_of(root)[0]["label"], art_of(root)[0]["level"], art_of(root)[0]["reviewable"]),
+          ("Chưa duyệt", None, True))
     check("art: no self-check, so the page marks it below standard", art_of(root)[0]["below"].startswith("chưa tự kiểm"))
-    check("art: anchor needs an accepted picture", call(root, "anchor", ref, "main")[0], 1)
-    check("art: accept", call(root, "accept", ref)[0], 0)
-    check("art: in use", art_of(root)[0]["label"], "đang dùng")
+    check("art: @GameDesigner sees it waits for the human", "chờ người chấm" in studio.art_line(root))
+    check("art: anchor needs a picture that passed", call(root, "anchor", ref, "main")[0], 1)
+    studio.save_review(root, ref, "main", 2, "nút hơi nhỏ")      # what the page does when the slider moves
+    check("art: the page shows the level and the feedback", (art_of(root)[0]["label"], art_of(root)[0]["feedback"]),
+          ("Đúng phần lớn chi tiết", "nút hơi nhỏ"))
+    check("art: level 2 is no anchor", call(root, "anchor", ref, "main")[0], 1)
+    studio.save_review(root, ref, "main", 3, "")
+    check("art: passed", (art_of(root)[0]["label"], art_of(root)[0]["usable"]), ("Đạt", True))
     check("art: anchor", (call(root, "anchor", ref, "main")[0], art_of(root)[0]["anchor"]), (0, True))
     ref2, folder2 = art_order(root, oid="again")
     check("art: no second order for a frame whose picture is still good",
@@ -403,35 +424,38 @@ def run_art(root):
     design_tree(root, frame="kind: ui\n- panel round-rect x=400 y=190 w=800 h=700\n", style="Vẽ tay, màu trầm.")
     check("art: the node changed", art_of(root)[0]["label"], "CŨ · node đã đổi")
     check("art: a stale picture lets a new order in", studio.check_order(root, "codex", studio.gd.design_owner(NODE), "again", folder2)[1], [])
-    call(root, "approve", ref2)
     Path(os.environ["FAKE_PROMPT"]).write_text("", encoding="utf-8")
     call(root, "codex", ref2, "main")
     attempt = [e for e in log_of(folder2) if e["event"] == "attempt"][-1]
     check("art: the anchor of the style is handed to Codex", "main.png" in attempt["images"][2:])
     call(root, "deliver", "codex", ref2)
-    (folder2 / "feedback-1.md").write_text("Màu quá tối.", encoding="utf-8")
-    code, out = call(root, "reject", ref2)
+    studio.save_review(root, ref2, "main", 0, "")
+    check("art: 'Làm lại ngay' without feedback: the page stores it, nothing may run, @GameDesigner is told",
+          (art_of(root)[0]["label"], art_of(root)[0]["usable"], "THIẾU PHẢN HỒI: main" in studio.art_line(root),
+           "again" in studio.pending_line(root, "codex"), call(root, "codex", ref2, "main")[0]),
+          ("Làm lại ngay", False, True, False, 1))
+    studio.save_review(root, ref2, "main", 0, "Màu quá tối.")
+    check("art: with feedback it may be made again", ("làm lại được: main" in studio.art_line(root),
+                                                       "again" in studio.pending_line(root, "codex")), (True, True))
     ref1_anchor = json.loads((studio.studio_dir(root, "codex") / "anchors.json").read_text(encoding="utf-8"))
     check("art: the first picture is still an anchor", [x["ref"] for x in ref1_anchor], [ref])
-    check("art: reject sets the approval aside", (code, (folder2 / "approval.json").is_file(), (folder2 / "approval-v1.json").is_file()),
-          (0, False, True))
-    check("art: rejected shows as such", art_of(root)[0]["label"], "đã trả")
-    code, out = call(root, "approve", ref2)
-    check("art: no new approval before the lesson", (code, "bài học" in out), (1, True))
-    (studio.studio_dir(root, "codex") / "lessons.md").write_text(
-        f"- Màu đủ sáng (codex/orders/{studio.gd.design_owner(NODE)}/again/feedback-1.md)\n", encoding="utf-8")
-    check("art: approved again after the lesson", call(root, "approve", ref2)[0], 0)
-    check("art: pending_line hides orders waiting for the human", "again" in studio.pending_line(root, "codex"), True)
+    Path(os.environ["FAKE_PROMPT"]).write_text("", encoding="utf-8")
+    check("art: one run, with the human's feedback in the prompt",
+          (call(root, "codex", ref2, "main")[0], "Màu quá tối." in Path(os.environ["FAKE_PROMPT"]).read_text(encoding="utf-8"),
+           call(root, "codex", ref2, "main")[0]), (0, True, 1))
+    check("art: the page lists an order being made again", [(o["ref"], o["state"]) for o in art_of(root)[1]], [(ref2, "doing")])
     studio.RUNS_FIRST = 2
-    (folder / "feedback-1.md").write_text("Không đúng style mới.", encoding="utf-8")
-    call(root, "reject", ref)
-    check("art: a picture sent back is no anchor any more",
+    studio.save_review(root, ref, "main", 1, "Không đúng style mới.")
+    check("art: a picture that no longer passes is no anchor any more",
           json.loads((studio.studio_dir(root, "codex") / "anchors.json").read_text(encoding="utf-8")), [])
+    check("art: level 1 owes the picture to its node",
+          [(d["owner"], d["item"], d["kind"]) for d in studio.read_debts(root) if d["state"] == "open" and d["ref"] == ref],
+          [(studio.gd.design_owner(NODE), "main", "người chấm")])
 
 
 def run_budget(root):
-    """Runs are limited: 2 per item, +1 after each reject, at most 2 redos; the closest result is delivered as
-    'chưa chuẩn' with an art debt, which a later passing delivery or the human closes."""
+    """Runs are limited: 2 per item, 1 more each time it is judged "Làm lại ngay", at most 2 such rounds; the closest
+    result is delivered as 'chưa chuẩn' with an art debt, which a later passing delivery or the human closes."""
     os.environ["STUDIO_CODEX"] = str(Path(root) / "fake_codex.py")
     os.environ["FAKE_MODE"] = "write1"
     folder = order(root, oid="limits", items=("star",))
@@ -439,7 +463,7 @@ def run_budget(root):
     check("budget: first run", call(root, "codex", ref, "star")[0], 0)
     check("budget: second run", call(root, "codex", ref, "star")[0], 0)
     code, out = call(root, "codex", ref, "star")
-    check("budget: the third run is refused, pointing to pick", (code, "hết lượt (2/2" in out, "pick" in out), (1, True, True))
+    check("budget: the third run is refused, pointing to pick", (code, "hết 2 lượt đầu" in out, "pick" in out), (1, True, True))
     check("budget: every run is kept", sorted(p.name for p in (folder / "work/attempts").iterdir()), ["star-1.png", "star-2.png"])
     check("budget: attempts are logged with their number", [e["n"] for e in log_of(folder) if e["event"] == "attempt"], [1, 2])
     (folder / "work/attempts/star-1.png").write_bytes(b"first")
@@ -455,38 +479,39 @@ def run_budget(root):
     debts = [d for d in studio.read_debts(root) if d["ref"] == ref]
     check("budget: an art debt is opened", [(d["owner"], d["item"], d["kind"], d["state"]) for d in debts],
           [("Wallet", "star", "chưa chuẩn", "open")])
-    code, out = call(root, "take", ref)
+    code, out = call(root, "review", ref, "star", "1", "viền mỏng, dùng tạm")
     note = Path(root) / "UnityProject/Assets/Features/Wallet/FeatureAssets/Private/Generated/limits/QUALITY.md"
-    check("budget: take still copies, with QUALITY.md", (code, note.is_file() and debts[0]["id"] in note.read_text(encoding="utf-8"),
-                                                         (note.parent / "quality.json").exists()), (0, True, False))
+    text = note.read_text(encoding="utf-8") if note.is_file() else ""
+    check("budget: what is below standard is still used, with QUALITY.md",
+          (code, "viền mỏng, dùng tạm" in text, "tool tự kiểm chưa đạt" in text, (note.parent / "quality.json").exists()),
+          (0, True, True, False))
+    open_ = lambda: sorted((d["kind"], d["reason"]) for d in studio.read_debts(root) if d["state"] == "open" and d["ref"] == ref)  # noqa: E731
+    check("budget: the judgement owes it too", [k for k, _ in open_()], ["chưa chuẩn", "người chấm"])
     snap = studio.snapshot(root)
     o = next(x for x in snap["orders"] if x["ref"] == ref)
-    check("budget: snapshot", (o["items"][0]["used"], o["items"][0]["allowed"], o["items"][0]["ok"],
-                               len([d for d in snap["debts"] if d["ref"] == ref])), (2, 2, False, 1))
+    check("budget: snapshot", (o["state"], o["items"][0]["used"], o["items"][0]["allowed"], o["items"][0]["ok"], o["items"][0]["level"],
+                               o["items"][0]["levelName"], len([d for d in snap["debts"] if d["ref"] == ref])),
+          ("done", 2, 2, False, 1, "Lỗi nhưng chưa cần làm ngay", 2))
     for n in (1, 2):
-        (folder / f"feedback-{n}.md").write_text(f"Lần {n}: chưa đạt.", encoding="utf-8")
-        (studio.studio_dir(root, "codex") / "lessons.md").write_text(
-            "".join(f"- bài {k} (codex/orders/Wallet/limits/feedback-{k}.md)\n" for k in range(1, n + 1)), encoding="utf-8")
-        call(root, "reject", ref)
-        check(f"budget: after reject {n}, one more run", (studio.budget(folder, "star")["allowed"], call(root, "codex", ref, "star")[0],
-                                                         call(root, "codex", ref, "star")[0]), (2 + n, 0, 1))
+        call(root, "review", ref, "star", "0", f"Lần {n}: chưa đạt.")
+        check(f"budget: sent back {n}, one more run", (studio.budget(folder, "star")["left"], call(root, "codex", ref, "star")[0],
+                                                      call(root, "codex", ref, "star")[0]), (1, 0, 1))
         (folder / "work/star.check.md").write_text("chưa đạt: vẫn mỏng", encoding="utf-8")
         call(root, "deliver", "codex", ref)
-    (folder / "feedback-3.md").write_text("Lần 3: vẫn mỏng.", encoding="utf-8")
-    code, out = call(root, "reject", ref)
-    check("budget: the third reject closes the order", (code, studio.read_status(folder)["state"], "đóng" in out), (0, "closed", True))
-    open_ = [d for d in studio.read_debts(root) if d["state"] == "open" and d["ref"] == ref]
-    check("budget: closed with one debt per item, the earlier ones replaced",
-          [(d["item"], d["kind"], "Lần 3" in d["reason"]) for d in open_], [("star", "trả quá số lần", True)])
-    (studio.studio_dir(root, "codex") / "lessons.md").write_text("- x (codex/orders/Wallet/limits/feedback-3.md)\n", encoding="utf-8")
-    check("budget: a closed order never runs again", call(root, "codex", ref, "star")[0], 1)
+    check("budget: sending it back closed the judgement's own debt", [k for k, _ in open_()], ["chưa chuẩn", "chưa chuẩn", "chưa chuẩn"])
+    code, out = call(root, "review", ref, "star", "0", "Lần 3: vẫn mỏng.")
+    check("budget: a third time is stored but runs nothing", (code, "CHƯA làm lại được" in out, "2/2" in out,
+                                                             call(root, "codex", ref, "star")[0]), (0, True, True, 1))
+    check("budget: status says why", "CHƯA LÀM LẠI ĐƯỢC" in call(root, "status", ref)[1])
+    call(root, "review", ref, "star", "1", "Lần 3: vẫn mỏng, ghi nợ.")
+    check("budget: so it is owed instead", [r for k, r in open_() if k == "người chấm"], ["Lần 3: vẫn mỏng, ghi nợ."])
     folder2 = order(root, oid="limits-2", items=("star",))
     call(root, "codex", "Wallet/limits-2", "star")
     (folder2 / "work/star.check.md").write_text("đạt", encoding="utf-8")
     code, out = call(root, "deliver", "codex", "Wallet/limits-2")
-    closed = [d for d in studio.read_debts(root) if d["state"] == "closed" and d["kind"] == "trả quá số lần"]
-    check("budget: a later passing delivery closes the debt", (code, len(closed), "tự đóng" in closed[0]["closedBy"] if closed else ""),
-          (0, 1, True))
+    left = [d for d in studio.read_debts(root) if d["state"] == "open" and d["owner"] == "Wallet" and d["item"] == "star"]
+    closed = [d for d in studio.read_debts(root) if d["state"] == "closed" and d["ref"] == ref and "tự đóng" in d["closedBy"]]
+    check("budget: a later passing delivery closes every debt of the item", (code, left, len(closed)), (0, [], 4))
     folder3 = order(root, oid="limits-3", items=("moon",))
     call(root, "codex", "Wallet/limits-3", "moon")
     call(root, "deliver", "codex", "Wallet/limits-3")

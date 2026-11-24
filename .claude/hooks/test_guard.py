@@ -1221,7 +1221,7 @@ def run_tool_cases():
     g = "tools: a feature orders for itself"
     w(g, W, "allow", studio + "/codex/orders/Wallet/new-icons/order.md")
     w(g, W, "allow", studio + "/blender/orders/Wallet/coin-model/order.md")
-    w(g, W, "allow", order + "/feedback-1.md")
+    w(g, W, "deny", order + "/feedback-1.md")      # no feedback files any more: studio.py review
     w(g, W, "deny", order + "/order.md")      # exists: written once
     e(g, W, "deny", studio + "/codex/orders/Wallet/new-icons/order.md")
     w(g, W, "deny", studio + "/codex/orders/Shop/x/order.md")
@@ -1241,7 +1241,7 @@ def run_tool_cases():
     art = studio + "/codex/orders/_design/feature-popup-lose.lose-actions.actions-spec/lose-art"
     D = "@GameDesigner"
     w(g, D, "allow", art + "/order.md")
-    w(g, D, "allow", art + "/feedback-1.md")
+    w(g, D, "deny", art + "/feedback-1.md")      # the human judges the pictures on the page
     for p_ in (art + "/approval.json", art + "/status.json", art + "/work/main.md", studio + "/codex/anchors.json",
                studio + "/codex/orders/Wallet/x/order.md", studio + "/blender/orders/_design/feature-a/x/order.md",
                studio + "/codex/orders/_design/Feature.A/x/order.md", studio + "/codex/lessons.md",
@@ -1253,7 +1253,7 @@ def run_tool_cases():
     w(g, W, "deny", art + "/feedback-2.md")
     w(g, X, "allow", art + "/work/main.md")
     for who in (X, W, "@human"):
-        w(g + " (the page writes approvals)", who, "deny" if who != "@human" else "pass", art + "/approval.json")
+        w(g + " (the page writes the judgement)", who, "deny" if who != "@human" else "pass", art + "/review.json")
     for cmd in (P + " codex _design/feature-popup-lose.lose-actions.actions-spec/lose-art main",
                 P + " deliver codex _design/feature-popup-lose.lose-actions.actions-spec/lose-art"):
         t(g, X, "allow", "Bash", {"command": cmd})
@@ -1261,8 +1261,10 @@ def run_tool_cases():
     for who in (D, X, W):
         t(g + " (status for all)", who, "allow", "Bash", {"command": P + " status _design/feature-a.a1/lose-art"})
         for cmd in (P + " approve _design/feature-a.a1/lose-art", P + " accept _design/feature-a.a1/lose-art",
-                    P + " anchor _design/feature-a.a1/lose-art main", P + " take _design/feature-a.a1/lose-art"):
-            t(g + " (the human approves, accepts, anchors)", who, "deny", "Bash", {"command": cmd})
+                    P + " anchor _design/feature-a.a1/lose-art main", P + " take _design/feature-a.a1/lose-art",
+                    P + " review _design/feature-a.a1/lose-art main 3",
+                    P + ' review _design/feature-a.a1/lose-art main 0 "làm lại"'):
+            t(g + " (the human judges and anchors, on the page)", who, "deny", "Bash", {"command": cmd})
 
     g = "tools: studio commands"
     for who in (W, X, B, "@Manager", "@GameDesigner", "@CodeLead"):
@@ -1275,12 +1277,21 @@ def run_tool_cases():
     for cmd in (P + " blender Wallet/coin-model coin", P + " deliver blender Wallet/coin-model"):
         t(g, B, "allow", "Bash", {"command": cmd})
         t(g, X, "deny", "Bash", {"command": cmd})
-    for cmd in (P + " take Wallet/coin-icons", P + " reject Wallet/coin-icons", P + " take _Services/Popup/pop-bg"):
+    for cmd in (P + " review Wallet/coin-icons coin 3", P + ' review Wallet/coin-icons gem 0 "gem bị mờ ở 64px... làm nét hơn, viền 2px"',
+                P + ' review Wallet/coin-icons gem 1 ""', P + ' review _Services/Popup/pop-bg bg 2 "tạm được"'):
         t(g, W if "Wallet" in cmd else "_Services/Popup", "allow", "Bash", {"command": cmd})
         t(g, "Shop", "deny", "Bash", {"command": cmd})
         t(g, X, "deny", "Bash", {"command": cmd})
+        t(g, "@GameDesigner", "deny", "Bash", {"command": cmd})
+    for cmd in (P + " review Wallet/coin-icons coin 4", P + " review Wallet/coin-icons coin", P + " review Wallet/coin-icons coin 0 mờ quá",
+                P + ' review Wallet/coin-icons coin 0 "a" "b"', P + ' review Wallet/coin-icons coin 0 "x"; rm -rf y',
+                P + ' review Wallet/coin-icons coin 0 "$(whoami)"', P + ' review Wallet/coin-icons coin 0 "a`b`"',
+                P + ' review Wallet/coin-icons coin 0 "a | b"', P + ' review Wallet/../Shop/x coin 3',
+                P + ' review Wallet/coin-icons coin 0 "a\\"', P + ' review Wallet/coin-icons Coin 3',
+                P + " take Wallet/coin-icons", P + " reject Wallet/coin-icons"):
+        t(g + " (review: refused forms)", W, "deny", "Bash", {"command": cmd})
     for cmd in (P + " codex Wallet/coin-icons coin; rm -rf x", P + " codex ../x coin", P + " codex Wallet/coin-icons",
-                P + " take Wallet/coin-icons --root /tmp", "codex exec -s danger-full-access x", "blender -b -P x.py"):
+                P + " review Wallet/coin-icons coin 3 --root /tmp", "codex exec -s danger-full-access x", "blender -b -P x.py"):
         t(g, X, "deny", "Bash", {"command": cmd})
         t(g, B, "deny", "Bash", {"command": cmd})
 

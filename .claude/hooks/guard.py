@@ -29,7 +29,8 @@ The value, by group:
     unset / invalid                       every edit is denied
 Basic, Features, Services and Tools read the public parts of features, Core, _Composition, Management, .claude and
 the root CLAUDE.md. Every bound chat (@GameDesigner too) reads Management/studio and Resources; a feature creates
-the order.md and feedback-<n>.md of its own orders there, once. rules.json and deleting folders ask the human.
+the order.md of its own orders there, once, and judges what was delivered (studio.py review; art concepts are
+judged by the human on the management page). rules.json and deleting folders ask the human.
 unity-mcp (UNITY_RULES): code sessions read through it, change assets of their own area (write), compile
 (shared) and change the open scene or a prefab stage (state); play, tests and project settings are @CodeLead's.
 state/play/lead take the Editor lock (LOCK_FILE in STORE_DIR): one chat at a time, renewed on every call, freed
@@ -114,9 +115,9 @@ ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", 
 # Tools: they take orders from the features and make images (Codex) or 3D models (Blender); they never code.
 TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender"}
 STUDIO_ZONE, RESOURCES_ZONE = "Management/studio", "Resources"
-# What studio.py alone writes in an order folder; the feature writes order.md and feedback-<n>.md once.
-STUDIO_SCRIPT_FILES = {"status.json", "log.jsonl", ".run.lock", "approval.json", "anchors.json"}
-STUDIO_FEATURE_FILE_RX = re.compile(r"^(order\.md|feedback-[1-9][0-9]*\.md)$")
+# What studio.py alone writes in an order folder; the one who orders writes order.md, once.
+STUDIO_SCRIPT_FILES = {"status.json", "log.jsonl", ".run.lock", "review.json", "anchors.json"}
+STUDIO_FEATURE_FILE_RX = re.compile(r"^order\.md$")
 STUDIO_ID = r"[a-z0-9]+(-[a-z0-9]+)*"
 # An order's owner: a feature folder, or a design node (art concepts, ordered by @GameDesigner: _design/<a.b.c>).
 DESIGN_OWNER_RX = re.compile(r"^_design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*$")
@@ -130,7 +131,10 @@ TOOL_COMMANDS = {
     "blender": [STUDIO + r"blender " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver blender " + STUDIO_REF,
                 STUDIO + r"pick " + STUDIO_REF + " " + STUDIO_ID + r" [1-9][0-9]*"],
 }
-FEATURE_STUDIO_RX = re.compile(r"^python3? Management/tools/studio\.py (take|reject) (" + STUDIO_REF + r")$")
+# The one who ordered judges one delivered item: a level 0-3 and an optional feedback in double quotes (no quote
+# and no backslash inside; SHELL_META_RX refuses the shell characters). Only the feature that ordered runs it.
+FEATURE_STUDIO_RX = re.compile(r"^python3? Management/tools/studio\.py (review) (" + STUDIO_REF + r") " + STUDIO_ID
+                               + r' [0-3]( "[^"\\]*")?$')
 ROLE_AREAS = {"@Core": "Core"}
 # The wiring (Boot, scenes, asset catalogs): @CodeLead edits all of it, not only its skeleton; no code gate.
 LEAD_AREA = "_Composition"
@@ -566,7 +570,8 @@ def gamedesign_module(root):
 
 def decide_studio_edit(tool, full, root, mode, feature, tool_name):
     """Edits inside Management/studio. The tool chat: its own lessons.md and the work folder of its orders.
-    A feature: creates order.md or feedback-<n>.md of its own order, once. studio.py writes the rest."""
+    A feature (and @GameDesigner for an art order): creates the order.md of its own order, once. studio.py and the
+    page write the rest (the judgement of a delivery too: studio.py review)."""
     seg = rel_segments(full, under(root, "Management", "studio"))
     if mode == "tool":
         if len(seg) == 2 and seg[0] == tool_name and seg[1] == "lessons.md":
@@ -577,16 +582,17 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
             if at >= 4 and (FEATURE_RX.match(owner) or DESIGN_OWNER_RX.match(owner)) and re.fullmatch(STUDIO_ID, seg[at - 1]):
                 return "allow", "the work folder of an order"
         return "deny", (f"in Management/studio a tool chat writes only {tool_name}/lessons.md and "
-                        f"{tool_name}/orders/<F>/<id>/work/**; order.md, feedback, status.json, log.jsonl and refs are "
+                        f"{tool_name}/orders/<F>/<id>/work/**; order.md, review.json, status.json, log.jsonl and refs are "
                         "not its to write")
     if mode == "feature" and len(seg) in (5, 6) and seg[0] in TOOL_ROLES.values() and seg[1] == "orders":
         ordered, oid, name = "/".join(seg[2:-2]), seg[-2], seg[-1]
         if not same(ordered, feature):
             return "deny", f"FEATURE={feature} orders only for itself (orders/{feature}/<id>/)"
         if not re.fullmatch(STUDIO_ID, oid) or not STUDIO_FEATURE_FILE_RX.match(name):
-            return "deny", "an order folder holds order.md and feedback-<n>.md; the id: lower case, digits, '-'"
+            return "deny", ("a feature writes only order.md in an order folder (id: lower case, digits, '-'); it judges "
+                            "a delivery with: python Management/tools/studio.py review <F>/<id> <item> <0-3> \"<feedback>\"")
         if tool != "Write" or os.path.lexists(full):
-            return "deny", "order.md and feedback-<n>.md are written once: a change is a new feedback file or a new order"
+            return "deny", "order.md is written once: a change is a new order"
         locked = design_gate(root, feature)
         if locked:
             return "deny", locked
@@ -595,12 +601,12 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
         owner, oid, name = "/".join(seg[2:4]), seg[4], seg[5]
         if not DESIGN_OWNER_RX.match(owner) or not re.fullmatch(STUDIO_ID, oid) or not STUDIO_FEATURE_FILE_RX.match(name):
             return "deny", ("an art order lives in codex/orders/_design/<node path with '.' for '/'>/<id>/ and holds "
-                            "order.md and feedback-<n>.md")
+                            "only order.md from you; the human judges the pictures on the management page")
         if tool != "Write" or os.path.lexists(full):
-            return "deny", "order.md and feedback-<n>.md are written once: a change is a new order"
+            return "deny", "order.md is written once: a change is a new order"
         return "allow", f"new {name} of an art order"
-    return "deny", ("Management/studio: the tool chats write their lessons and work, the features their orders and "
-                    "feedback, @GameDesigner the art orders (codex/orders/_design), studio.py and the page the rest")
+    return "deny", ("Management/studio: the tool chats write their lessons and work, the features their orders, "
+                    "@GameDesigner the art orders (codex/orders/_design), studio.py and the page the rest")
 
 
 def decide_designer_edit(full, root, name):
@@ -946,11 +952,14 @@ def decide(data, session_value, root, store=None):
             CODELEAD_COMMANDS if mode == "codelead" else []) + (MANAGER_COMMANDS if mode == "manager" else []) + (
             TOOL_COMMANDS[TOOL_ROLES[role]] if mode == "tool" else [])
         m = FEATURE_STUDIO_RX.match(cmd)
-        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd:      # take or reject: only the feature that ordered
+        # review: only the feature that ordered. The feedback text may hold "..", the part before it may not.
+        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
             ordered = m.group(2).rpartition("/")[0]
             if mode == "feature" and ordered == feature:
                 return "allow", f"studio: {m.group(1)} an order of {feature}"
-            return "deny", f"only the chat of {ordered} takes or rejects its own orders"
+            if ordered.startswith("_design/"):
+                return "deny", "art concepts are judged by the human on the management page (tab Game design)"
+            return "deny", f"only the chat of {ordered} judges its own orders"
         if any(re.fullmatch(rx, cmd) for rx in commands) and not SHELL_META_RX.search(cmd) and ".." not in cmd:
             return "allow", "shell command is on the allow-list"
         return "deny", "shell command is not on the allow-list in guard.py. Stop and tell the human."

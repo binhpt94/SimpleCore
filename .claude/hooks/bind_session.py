@@ -182,13 +182,13 @@ def editor_status(store):
 
 
 def studio_pending(root, tool):
-    """What waits for a tool chat (studio.py), in one sentence."""
+    """What waits for a tool chat (studio.py), in one sentence; with no tool, where @GameDesigner's art orders stand."""
     try:
         tools = os.path.join(root, "Management", "tools")
         if tools not in sys.path:
             sys.path.insert(0, tools)
         import studio
-        return studio.pending_line(root, tool)
+        return studio.pending_line(root, tool) if tool else studio.art_line(root)
     except Exception as ex:
         return f" Không đọc được danh sách order ({ex})."
 
@@ -243,8 +243,10 @@ def context(data, root, store):
               "scene hay prefab stage thì guard giữ khoá Editor cho chat này tới hết lượt (lưu trước khi dừng); Play, "
               "test, cài đặt project là việc của @CodeLead; code chỉ viết bằng Edit/Write (bảng ở .claude/rules/unity.md)." + (
               " Cần ảnh hay model 3D: đặt order (Write mới Management/studio/<codex|blender>/orders/<feature của mình>/<id>/"
-              "order.md theo khung ở .claude/rules/studio.md), nhắn @Codex/@Blender; nhận hàng: python Management/tools/"
-              "studio.py take <F>/<id>; chưa đạt thì viết feedback-<n>.md rồi studio.py reject <F>/<id>.")
+              "order.md theo khung ở .claude/rules/studio.md), nhắn @Codex/@Blender. Hàng giao rồi thì chấm từng item: "
+              "python Management/tools/studio.py review <F>/<id> <item> <0-3> \"<phản hồi>\" (0 làm lại ngay: phải có "
+              "phản hồi, tool chạy lại 1 lượt; 1 lỗi nhưng chưa cần làm ngay; 2 đúng phần lớn; 3 đạt). Mức 1-3 được chép "
+              "vào FeatureAssets; có item mức 0 thì nhắn tool làm lại.")
               + editor_status(store))
     if role in guard.ROLE_AREAS:
         area = guard.ROLE_AREAS[role]
@@ -275,11 +277,12 @@ def context(data, root, store):
                "execute_menu_item). Kết quả luôn để ở work/out/<item>.<đuôi>.")
         return (f"guard: chat này gán FEATURE={role} (nhóm Tools): nhận order của các feature và làm {how} Không code, "
                 f"không sửa Assets. Chỉ ghi Management/studio/{tool}/lessons.md và work/ của các order. Đầu lượt: python "
-                f"Management/tools/studio.py status {tool}; đọc order.md, feedback và lessons.md trước khi gen. Gen ĐÚNG số "
+                f"Management/tools/studio.py status {tool}; đọc order.md và lessons.md trước khi gen. Gen ĐÚNG số "
                 f"lượng: mỗi item một kết quả, không tự gen thêm. Xong: studio.py deliver {tool} <F>/<id> rồi nhắn feature "
-                f"bằng SendMessage. Lượt gen có trần (mỗi item 2 lượt, +1 mỗi lần bị trả, tối đa 2 lần làm lại): ghi tự kiểm "
+                f"bằng SendMessage (order art: nhắn @GameDesigner). Lượt gen có trần: mỗi item 2 lượt đầu; sau khi giao chỉ "
+                f"chạy lại item bị chấm 'Làm lại ngay' có phản hồi, 1 lượt mỗi lần, tối đa 2 lần (phản hồi tự vào prompt). Ghi tự kiểm "
                 f"work/<item>.check.md; hết lượt thì pick bản gần nhất và giao với nhãn chưa chuẩn, không tìm đường vòng. "
-                f"Order bị trả: ghi bài học vào lessons.md (kèm đường dẫn feedback) rồi mới làm lại. "
+                f"Phản hồi là một luật chung thì thêm một mục vào lessons.md. "
                 f"Luật ở .claude/rules/studio.md." + studio_pending(root, tool) + editor_status(store))
     if role == "@GameDesigner":
         return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Chỉ đọc "
@@ -289,6 +292,10 @@ def context(data, root, store):
                 "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on. Độ quan trọng "
                 "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
                 + designer_mode(root) +
+                " Ảnh concept: viết order xong và python Management/tools/studio.py check qua thì nhắn ngay @Codex bằng "
+                "SendMessage (to: \"Codex\"), không chờ duyệt. Người chấm từng ảnh trên trang; trang chỉ lưu. Khi người bảo "
+                "cho làm lại: chạy python Management/tools/studio.py status codex, nhắn @Codex các item 'Làm lại ngay' có "
+                "phản hồi, báo người các item thiếu phản hồi; không tự chấm thay người." + studio_pending(root, None) +
                 " Làm theo .claude/rules/gamedesigner.md; trước khi viết node vòng N đọc .claude/rules/gamedesigner.round<N>.md.")
     if role == "@Manager":
         return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "

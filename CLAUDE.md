@@ -9,7 +9,7 @@ Bị guard chặn thì dừng và báo người, không tìm đường vòng. Xo
 unity-mcp theo tác động của lệnh (bảng ở `.claude/rules/unity.md`): đọc thì path phải đọc được; tạo, sửa asset và prefab chỉ trong vùng mình; mọi phiên code được biên dịch (`refresh_unity`) và đọc console. Mở, sửa, lưu scene hay prefab stage thì guard giữ khoá Editor cho một chat tới hết lượt. Play, test, menu, cài đặt project: @CodeLead. Code chỉ viết bằng Edit/Write, không qua unity-mcp.
 Lệnh shell được chạy (mọi phiên), từ gốc project:
 `python Management/tools/validate.py --feature <Tên>` — kiểm tra ranh giới feature (bỏ `--feature` là cả project); còn vi phạm thì chưa xong việc.
-`python Management/tools/studio.py check|status` — order ảnh/3D (feature đặt order, `take`/`reject` hàng của mình; @Codex, @Blender chạy tool, `pick`, `deliver`; lượt gen có trần, hết lượt thì giao "chưa chuẩn" kèm phiếu nợ art, xem tab Studio; luật ở `.claude/rules/studio.md`).
+`python Management/tools/studio.py check|status` — order ảnh/3D (feature đặt order, chấm từng item đã giao bằng `review <F>/<id> <item> <0-3> "<phản hồi>"`: 0 làm lại ngay, 1 lỗi nhưng chưa cần làm ngay, 2 đúng phần lớn, 3 đạt; @Codex, @Blender chạy tool, `pick`, `deliver`; lượt gen có trần, hết lượt thì giao "chưa chuẩn" kèm phiếu nợ art, xem tab Studio; luật ở `.claude/rules/studio.md`).
 `python Management/tools/gd_pack.py <Tên>` — gói thiết kế đã chốt của một feature (node feature, node con, node nhánh khác mà refs trỏ tới, thuật ngữ, frame bố cục): bám theo gói này khi code.
 `python Management/tools/gd_frame.py live/<node>` (hoặc `ai/idea/<node>`) — frame bố cục của một node vòng 4, đã giải ra toạ độ và kích thước tuyệt đối (px trên màn chuẩn, hoặc u trên chiến trường).
 @Manager có thêm `python Management/tools/scaffold.py [--dry-run]`: tạo thư mục feature, service, Core, `_Composition` còn thiếu theo các feature trong `live` (tên trong `code.json`, chưa có thì tên đề xuất theo key; chỉ thư mục và `.gitkeep`, không tạo code). @Manager vẫn không code.
@@ -27,7 +27,7 @@ Feature nằm ở `UnityProject/Assets/Features/<Tên>/`, dịch vụ ở `Featu
 | `Assets/_Composition` (nối dây: Boot, scene, catalog asset) | được | chỉ @CodeLead (cả vùng); phiên khác: cấm, nhờ @CodeLead |
 | `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json` | được | hỏi người, từng lần |
 | `Management/proposals` | được | chỉ tạo file mới |
-| `Management/studio` (order, lịch sử, bài học của @Codex/@Blender) | được (mọi phiên) | feature: chỉ tạo mới `order.md`, `feedback-<n>.md` trong `orders/<mình>/<id>/`; @GameDesigner: tương tự trong `codex/orders/_design/` (ảnh art-concept, chỉ cho node `<feature>/cheat`, tối đa 3 ảnh mỗi feature; người duyệt gen trên trang); @Codex/@Blender: `lessons.md` và `work/` của order; còn lại studio.py và trang |
+| `Management/studio` (order, lịch sử, bài học của @Codex/@Blender) | được (mọi phiên) | feature: chỉ tạo mới `order.md` trong `orders/<mình>/<id>/`; @GameDesigner: tương tự trong `codex/orders/_design/` (ảnh art-concept, chỉ cho node `<feature>/cheat`, tối đa 3 ảnh mỗi feature; đặt xong tự nhắn @Codex, người chấm từng ảnh trên trang); @Codex/@Blender: `lessons.md` và `work/` của order; còn lại studio.py và trang |
 | `Resources` (hàng đã giao) | được (mọi phiên) | cấm: chỉ studio.py ghi |
 | Phần còn lại của `Management` (`game-design/live` là thiết kế đã chốt, bám theo nó) | được | cấm; `game-design/ai`: chỉ `@GameDesigner` |
 | `.claude/**`, file này | được | cấm |

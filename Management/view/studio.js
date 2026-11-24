@@ -31,13 +31,10 @@
 
   var STATES = [
     { key: "new", label: "Mới, chưa làm" },
-    { key: "approved", label: "Đã duyệt gen, chờ tool làm" },
-    { key: "doing", label: "Đang làm" },
-    { key: "delivered", label: "Đã giao, chờ nhận" },
-    { key: "rejected", label: "Bị trả, chờ làm lại" },
-    { key: "taken", label: "Feature đã nhận" },
-    { key: "accepted", label: "Đã nhận (art)" },
-    { key: "closed", label: "Đóng vì trả quá số lần, còn nợ" }
+    { key: "doing", label: "Tool đang làm" },
+    { key: "review", label: "Đã giao, còn ảnh chưa duyệt" },
+    { key: "redo", label: "Có item bị chấm Làm lại ngay" },
+    { key: "done", label: "Xong: mọi item đã chấm, không item nào phải làm lại" }
   ];
   var IMAGE = /\.(png|jpe?g|webp)$/i;
 
@@ -86,9 +83,9 @@
         return;
       }
       var lim = data.limits || {};
-      add(pane, el("p", "st-limits", "Trần: mỗi item " + lim.first + " lượt, mỗi lần bị trả thêm " + lim.redo +
-        " lượt, làm lại tối đa " + lim.maxRedos + " lần (lần trả kế tiếp đóng order và mở phiếu nợ). Art: thêm cổng duyệt gen, tối đa " +
-        lim.artDaily + " lượt mỗi ngày. Đọc lúc " + (data.generatedAt || "") + "."));
+      add(pane, el("p", "st-limits", "Trần: mỗi item " + lim.first + " lượt đầu; mỗi lần bị chấm \"Làm lại ngay\" kèm phản hồi được thêm " +
+        lim.redo + " lượt, tối đa " + lim.maxRedos + " lần mỗi item. Art: tối đa " + lim.artDaily +
+        " lượt gen mỗi ngày. Ảnh concept chấm ở tab Game design; feature chấm bằng studio.py review. Đọc lúc " + (data.generatedAt || "") + "."));
       if (message) add(pane, el("p", message.bad ? "bad-text" : "ok-text", message.text));
       if (ctx.setup) {
         var reload = put(pane, el("button", "st-btn", "Tải lại"));
@@ -144,16 +141,17 @@
           var meta = put(row, el("p", "st-meta"));
           add(meta, el("span", "st-tag", o.tool + " · " + o.kind));
           if (o.version) add(meta, el("span", "st-tag", "đã giao v" + o.version));
-          add(meta, el("span", "st-tag" + (o.round >= o.maxRedos ? " bad" : ""), "làm lại " + o.round + "/" + o.maxRedos));
-          if (o.waitsHuman) add(meta, el("span", "st-tag wait", "chờ bạn duyệt gen (tab Game design, node " + o.node + ")"));
-          if (o.unlearnt.length) add(meta, el("span", "st-tag bad", "chưa rút bài học: " + o.unlearnt.join(", ")));
+          if (o.design && o.state === "review") add(meta, el("span", "st-tag wait", "chờ bạn chấm (tab Game design, node " + o.node + ")"));
           var ul = put(row, el("ul", "st-items"));
           o.items.forEach(function (it) {
             var li = put(ul, el("li"));
             if (it.file && IMAGE.test(it.file)) add(li, picture(it.file, o.ref + " · " + it.id));
-            add(li, el("span", "", it.id + ": " + it.used + "/" + it.allowed + " lượt" + (it.left ? " (còn " + it.left + ")" : " (hết lượt)") + " "));
-            if (it.ok === true) add(li, el("span", "st-tag ok", "đạt"));
-            if (it.ok === false) add(li, el("span", "st-tag bad", "chưa chuẩn: " + it.note));
+            add(li, el("span", "", it.id + ": đã chạy " + it.used + " lượt" + (it.left ? ", còn " + it.left : "") +
+              ", làm lại " + it.round + "/" + o.maxRedos + " "));
+            if (o.version) add(li, el("span", "st-tag" + (it.level === 3 ? " ok" : it.level === 0 ? " bad" : it.level === null ? " wait" : ""), it.levelName));
+            if (it.feedback) add(li, el("span", "", " phản hồi: " + it.feedback + " "));
+            if (it.level === 0 && !it.redo && it.why) add(li, el("span", "st-tag bad", "chưa làm lại được: " + it.why));
+            if (it.ok === false) add(li, el("span", "st-tag bad", "tool tự kiểm chưa đạt: " + it.note));
           });
           o.problems.forEach(function (p) { add(row, el("p", "bad-text", "Lỗi order: " + p)); });
         });

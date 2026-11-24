@@ -161,6 +161,10 @@ STYLE_IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp")
 # Art concepts: images @Codex makes from a round-4 node's frames (orders of the owner _design, see studio.py).
 DESIGN_OWNER = "_design"
 ART_TOOL = "codex"
+# The human's judgement of one delivered picture (index = level; the same list as studio.py REVIEW_LEVELS, which
+# cannot be imported here: studio imports this module).
+ART_LEVELS = ("Làm lại ngay", "Lỗi nhưng chưa cần làm ngay", "Đúng phần lớn chi tiết", "Đạt")
+ART_LEVEL_NONE = "Chưa duyệt"
 ART_META = "meta.json"
 ANCHORS_FILE = "anchors.json"
 HISTORY_SHOWN = 30
@@ -1852,10 +1856,12 @@ def frame_text_hash(text):
 
 
 def read_art(root, live):
-    """What art each design node has, and the orders that wait for the human's approval:
-        ({node path: [{frame, file, ref, version, state, label, stale, anchor, at}]}, [pending order])
-    file is relative to the project root. One entry per frame: its newest delivery. label:
-        chờ nhận | đang dùng | đã trả | CŨ · node đã đổi | CŨ · style đã đổi   (stale wins over waiting and in use)
+    """What art each design node has, and the orders not delivered yet:
+        ({node path: [{frame, file, ref, version, state, level, feedback, label, stale, usable, anchor, at}]}, [pending order])
+    file is relative to the project root. One entry per frame: its newest delivery. level: the human's judgement of
+    the newest delivery (0-3, None for "Chưa duyệt"; review.json of the order, studio.py). state: "mới nhất" or "cũ
+    hơn". label: the level's name | CŨ · node đã đổi | CŨ · style đã đổi (stale wins). usable: newest, not stale and
+    not judged "Làm lại ngay".
     live: the live tree (read_tree), for the node hashes and the styles they are checked against."""
     base = art_orders_dir(root)
     nodes = {n["path"]: n for n in walk(live)} if live else {}
@@ -1872,24 +1878,24 @@ def read_art(root, live):
         ref = f"{DESIGN_OWNER}/{dotted}/{oid}"
         status = _json(folder / "status.json") or {}
         state, version = status.get("state") or "new", int(status.get("version") or 0)
-        if state in ("new", "rejected", "approved", "doing"):
+        if state not in ("new", "doing", "delivered"):      # a status written before judging replaced accept/reject
+            state = "delivered" if version else "new"
+        reviews = _json(folder / "review.json")
+        reviews = reviews if isinstance(reviews, dict) else {}
+        if state in ("new", "doing") or not version:      # being made (the first time, or again)
             text = read_text(order)
             title = next((l[2:].strip() for l in text.split("\n") if l.startswith("# ")), oid)
             items = [m.group(1) for m in re.finditer(r"(?m)^\s*-\s*`?([a-z0-9]+(?:-[a-z0-9]+)*)`?\s*:", text)]
             style = next((l.split(":", 1)[1].strip() for l in text.split("\n") if l.startswith("style:")), "")
-            pending.append({"ref": ref, "node": path, "title": title, "items": items, "style": style, "state": state,
-                            "approved": (folder / "approval.json").is_file()})
+            pending.append({"ref": ref, "node": path, "title": title, "items": items, "style": style,
+                            "state": "doing" if state == "doing" else "new", "version": version})
         for v in range(1, version + 1):
             vdir = Path(root) / "Resources" / DESIGN_OWNER / dotted / ART_TOOL / oid / f"v{v}"
             meta = _json(vdir / ART_META)
             if not isinstance(meta, dict):
                 continue
             node = nodes.get(path)
-            if v < version:
-                label_state = "cũ hơn"
-            else:
-                label_state = {"delivered": "chờ nhận", "accepted": "đang dùng", "rejected": "đã trả",
-                               "closed": "đã trả"}.get(state, state)
+            label_state = "cũ hơn" if v < version else "mới nhất"
             stale = []
             if not node or meta.get("nodeHash") != node["dataHash"]:
                 stale.append("node đã đổi")
@@ -1898,9 +1904,16 @@ def read_art(root, live):
             quality = _json(vdir / "quality.json") or {}
             for name in sorted(x.name for x in vdir.iterdir() if x.is_file() and x.name not in (ART_META, "quality.json")):
                 item = Path(name).stem
-                label = label_state if label_state in ("đã trả", "cũ hơn") or not stale else "CŨ · " + stale[0]
+                r = reviews.get(item) if v == version and isinstance(reviews.get(item), dict) else {}
+                level = r.get("level")
+                level = level if isinstance(level, int) and not isinstance(level, bool) and 0 <= level < len(ART_LEVELS) else None
+                redoing = v == version and state == "doing"     # @Codex is remaking it: nothing to judge until the next delivery
+                label = ("cũ hơn" if v < version else "CŨ · " + stale[0] if stale else "đang làm lại" if redoing
+                         else (ART_LEVEL_NONE if level is None else ART_LEVELS[level]))
                 entry = {"frame": item, "file": (vdir / name).relative_to(Path(root)).as_posix(), "ref": ref,
                          "version": v, "state": label_state, "label": label, "stale": stale,
+                         "level": level, "feedback": str(r.get("text") or ""), "reviewable": v == version and state == "delivered", "redoing": redoing,
+                         "usable": v == version and not stale and level != 0,
                          "anchor": (ref, v, item) in anchored, "at": meta.get("at", ""), "stamp": meta.get("stamp", 0),
                          "styles": sorted(meta.get("styles") or {})}
                 q = quality.get(item) if isinstance(quality.get(item), dict) else None
@@ -1941,6 +1954,6 @@ def snapshot(root):
         glossary[name], term_notes[name] = glossary_view(tree)
         for n in walk(tree):
             n.pop("refText", None)      # read by glossary_view only; the page does not need a second copy
-    return {"rounds": ROUNDS, "mode": mode, "frameCss": FRAME_CSS, "screens": SCREENS, "artPending": art_pending, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
+    return {"rounds": ROUNDS, "mode": mode, "frameCss": FRAME_CSS, "screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
             "missingCode": missing_code(idea)}

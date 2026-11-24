@@ -20,9 +20,9 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
   human's importance score of a node, /progress the progress of a leaf. With the PIN: /sync copies every passing node into live at once
   (gamedesign.sync_live), /mode switches Full Auto / User control. Nothing reaches live without promote or sync.
-- Art concepts (studio.py): with the PIN, POST /api/studio/approve lets one art order run (it spends Codex). Without
-  it: /accept takes the delivered pictures, /reject writes the human's feedback-<n>.md and sends the order back,
-  /anchor marks an accepted picture as a style anchor, /debt-close accepts an art debt as it is (GET /api/studio
+- Art concepts (studio.py), all without the PIN: POST /api/studio/review stores the human's judgement of one
+  delivered picture (level 0-3 or null, and a feedback text; studio.save_review) and tells nobody,
+  /anchor marks a picture judged "Đạt" as a style anchor, /debt-close accepts an art debt as it is (GET /api/studio
   re-reads the studio for the Studio tab). GET /Resources/<...> serves the delivered pictures (images
   only, read only) so the page can show them.
 """
@@ -98,8 +98,7 @@ MAX_BODY = 4096
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY,
-              "/api/studio/approve": MAX_BODY, "/api/studio/accept": MAX_BODY, "/api/studio/reject": 64 * 1024,
-              "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY}
+              "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY}
 
 
 def transcripts_dir():
@@ -331,28 +330,19 @@ def studio_call(fn, *args):
             "studio": sync_page.write_studio(ROOT)}
 
 
-def art_approve(pin, ref):
-    """Duyệt gen: lets an art order run. Needs the PIN: it spends Codex."""
-    if not isinstance(ref, str) or not ref.startswith("_design/"):
-        return {"ok": False, "error": "không phải order art"}
-    error = bind_session.check_pin(guard.STORE_DIR, pin)
-    if error:
-        return {"ok": False, "error": error}
-    return studio_call(studio.cmd_approve, ref)
-
-
-def art_reject(ref, text):
-    """Trả: writes the next feedback-<n>.md of the order with the human's words, then studio.py reject."""
-    if not isinstance(ref, str) or not ref.startswith("_design/") or not isinstance(text, str) or not text.strip():
-        return {"ok": False, "error": "ghi phản hồi: ảnh nào sai, cần thế nào"}
+def art_review(ref, item, level, text):
+    """The slider and the feedback box under an art concept: stores the human's judgement of one picture (level
+    0-3, or None for "Chưa duyệt") and its feedback. No PIN, and it tells nobody: @GameDesigner reads it when the
+    human asks for the pictures to be made again."""
+    if not isinstance(ref, str) or not ref.startswith("_design/") or not isinstance(item, str):
+        return {"ok": False, "error": "không phải ảnh của order art"}
+    if level is not None and (not isinstance(level, int) or isinstance(level, bool)):
+        return {"ok": False, "error": "mức chấm không hợp lệ"}
     try:
-        _, feature, oid, folder = studio.find_order(ROOT, ref, "codex")
-    except ValueError as ex:
+        studio.save_review(ROOT, ref, item, level, text if isinstance(text, str) else "")
+    except (ValueError, OSError) as ex:
         return {"ok": False, "error": str(ex)}
-    n = 1 + max([int(m.group(1)) for m in (studio.FEEDBACK_RX.match(p.name) for p in folder.iterdir()) if m] or [0])
-    (folder / f"feedback-{n}.md").write_text(f"# Phản hồi {n} của người\n\n{text.strip()[:gamedesign.MAX_TEXT]}\n",
-                                            encoding="utf-8")
-    return studio_call(studio.cmd_reject, ref)
+    return {"ok": True, "data": sync_page.write_gamedesign(ROOT), "studio": sync_page.write_studio(ROOT)}
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -451,12 +441,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, answer(data.get("path"), data.get("answers")))
             if self.path == "/api/vscode-groups":
                 return self.send_json(200, group_in_vscode())
-            if self.path == "/api/studio/approve":
-                return self.send_json(200, art_approve(str(data.get("pin") or ""), data.get("ref")))
-            if self.path == "/api/studio/accept":
-                return self.send_json(200, studio_call(studio.cmd_accept, str(data.get("ref") or "")))
-            if self.path == "/api/studio/reject":
-                return self.send_json(200, art_reject(data.get("ref"), data.get("text")))
+            if self.path == "/api/studio/review":
+                return self.send_json(200, art_review(data.get("ref"), data.get("item"), data.get("level"), data.get("text")))
             if self.path == "/api/studio/debt-close":
                 return self.send_json(200, studio_call(studio.cmd_debt_close, str(data.get("id") or "")))
             if self.path == "/api/studio/anchor":

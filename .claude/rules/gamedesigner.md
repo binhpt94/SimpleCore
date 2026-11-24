@@ -154,9 +154,11 @@ Frame rẻ, sửa thoải mái theo vòng 4. Ảnh art tốn lượt Codex, nên
   format: png 1920x1080
   style: ui-flat            # một hay nhiều id style của vòng 1, cách nhau dấu phẩy
   ```
-- Viết xong chạy `python Management/tools/studio.py check`. Order **chờ người duyệt gen** trên tab Game design; chưa duyệt thì @Codex không chạy được. Không nhắn @Codex trước khi người duyệt.
-- Không xin ảnh mới cho frame còn ảnh dùng được (nhãn "chờ nhận" hay "đang dùng"): `check` từ chối. Ảnh mang nhãn "CŨ" (node hay style đã đổi) hoặc "đã trả" thì mới đặt order mới, và chỉ khi thật cần; frame đổi nhỏ không đáng một lần gen.
-- Người nhận, trả (kèm phản hồi) và đặt ảnh làm mốc style trên trang. Ảnh mốc được đưa cho Codex ở các lần gen sau cùng style.
+- Viết xong chạy `python Management/tools/studio.py check`. Qua thì **nhắn ngay @Codex** bằng `SendMessage` (`to: "Codex"`), nêu order; không có bước duyệt gen, không chờ người.
+- Không xin ảnh mới cho frame còn ảnh dùng được: `check` từ chối. Ảnh mang nhãn "CŨ" (node hay style đã đổi) hoặc bị chấm "Làm lại ngay" thì mới đặt order mới, và chỉ khi thật cần; frame đổi nhỏ không đáng một lần gen.
+- **Người chấm từng ảnh trên trang**: Chưa duyệt (mặc định), Làm lại ngay, Lỗi nhưng chưa cần làm ngay, Đúng phần lớn chi tiết, Đạt; kèm một ô phản hồi. Trang chỉ lưu, không nhắn ai. Bạn không chấm thay người và không ghi được `review.json`.
+- **Khi người bảo cho làm lại** (không tự làm khi chưa được bảo): chạy `python Management/tools/studio.py status codex` (dòng `Order art:` ở đầu mỗi tin tóm tắt sẵn). Item ghi `LÀM LẠI ĐƯỢC` ("Làm lại ngay" có phản hồi): nhắn @Codex danh sách `<order> · <item>`; mỗi item chạy lại 1 lượt, phản hồi tự vào prompt. Item ghi `CHƯA LÀM LẠI ĐƯỢC` (thiếu phản hồi, hoặc đã làm lại đủ 2 lần): không nhắn @Codex, báo người item nào và vì sao.
+- Ảnh "Đạt" người đặt được làm mốc style trên trang; ảnh mốc được đưa cho Codex ở các lần gen sau cùng style.
 
 ## Hai mode
 Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đầu mỗi tin báo mode hiện tại.

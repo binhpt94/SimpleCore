@@ -51,7 +51,7 @@ def full_lines(node, out, doc=True):
         out.append("")
         out.append("### Art concept (ảnh @Codex gen theo frame; xem phong cách, không đo kích thước từ ảnh)")
         for frame, a in sorted(latest.items()):
-            use = "dùng làm mẫu" if a["state"] == "đang dùng" and not a["stale"] else "chỉ để tham khảo"
+            use = "dùng làm mẫu" if a.get("level") in (2, 3) and not a["stale"] else "chỉ để tham khảo"
             out.append(f"- {frame}: {a['file']} ({a['label']}; {use}" + (f"; CHƯA CHUẨN: {a['below']}" if a.get("below") else "") + ")")
     body = node["body"].split("\n", 1)[1].strip() if "\n" in node["body"] else ""
     if doc and body:
