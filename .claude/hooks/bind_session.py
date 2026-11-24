@@ -326,7 +326,8 @@ def context(data, root, store):
                 "đọc phần cần bằng Read offset/limit hoặc Grep). Độ quan trọng "
                 "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
                 + designer_mode(root) +
-                " GPT cùng thiết kế qua @DesignAdvisor (to: \"DesignAdvisor\"): nhắn node nào, hỏi gì; câu trả lời nằm ở "
+                " GPT cùng thiết kế qua @DesignAdvisor (to: \"DesignAdvisor\"): BẮT BUỘC hỏi GPT cho node gốc (vòng 1) và mọi node "
+                "feature (vòng 2), ít nhất một lần mỗi node, node cũ chưa hỏi thì hỏi bù (gd_status.py: CHƯA HỎI GPT); nhắn node nào, hỏi gì; câu trả lời nằm ở "
                 "Management/game-design/advice/<node>/<id>.md (chỉ đọc; gd_status.py liệt kê ở từng node). Ý của GPT NGANG HÀNG ý "
                 "của bạn: MỖI góp ý phải thành một ý trong '## Ý cốt lõi' (thêm: ý mới; thay <ý>: ý mới đặt cạnh ý cũ, không xoá "
                 "ý cũ; làm rõ <ý>: viết lại chính ý đó), chỉ được tóm gọn câu chữ, KHÔNG ĐƯỢC BỎ; khai nguồn ở phần đầu data.md: "

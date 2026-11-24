@@ -779,6 +779,11 @@
           owedTag.title = "GPT đã góp " + n.gpt.missing.length + " ý mà node chưa có; @GameDesigner phải đưa vào, không được bỏ";
           chips.push(owedTag);
         }
+        if (idea && n.gptOwed) {
+          var askTag = el("span", "gd-tag bad", "chưa hỏi GPT");
+          askTag.title = "Node vòng 1 và 2 bắt buộc có ít nhất một lần hỏi GPT (qua @DesignAdvisor); node này chưa có";
+          chips.push(askTag);
+        }
         if (item.hidden > 0) chips.push(el("span", "gd-tag", "+" + item.hidden + (n.round === FOCUS_ROUND - 1 ? " feature ẩn" : " node con")));
         if (!chips.length) return;
         var row = el("div", needed(n) ? "gd-chips" : "gd-chips dim");
@@ -1180,6 +1185,8 @@
         table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "")));
       if (node.summary) add(body, el("p", "", node.summary));
       // Ý của node do AI nào đề xuất, ý GPT bị loại, và góp ý của GPT chưa được đưa vào node.
+      if (node.gptOwed) add(body, el("p", "bad-text", "Chưa hỏi GPT: node vòng 1 và 2 bắt buộc có ít nhất một lần hỏi GPT. " +
+        "@GameDesigner nhắn @DesignAdvisor hỏi về node này."));
       var byCount = node.by || {}, gptSide = node.gpt || { dropped: [], missing: [], clarified: 0 };
       if (byCount.gpt || gptSide.clarified || gptSide.dropped.length || gptSide.missing.length || node.nodeBy) {
         var byParts = ["Claude " + (byCount.claude || 0), "GPT " + (byCount.gpt || 0)];

@@ -54,6 +54,7 @@ Vòng 2 luôn có ba node sau, với đúng key và `code.json` này (không c�
 - Mỗi thư mục code chỉ thuộc một node. `code.json` chỉ đặt ở vòng 2.
 - Guard chỉ cho phiên của một feature sửa code khi node khai nó **đã chốt trong `live`** và nhánh đó có ít nhất một node vòng 4.
 - Đổi `code.json` làm node "khác live" (phải chốt lại) nhưng không đổi hash data.
+- **Bắt buộc hỏi GPT** về từng node feature trước khi báo node đó xong: nhắn `DesignAdvisor`, rồi đưa mọi góp ý vào node (`.claude/rules/designadvisor.md`, mục "Bên @GameDesigner"). Không tự quyết bỏ qua; feature cũ chưa hỏi thì hỏi bù. `glossary` được miễn.
 - Node `glossary` (bảng thuật ngữ chung) cũng ở vòng 2 nhưng không phải feature: không `code.json`, không node con. Cách viết ở mục "Bảng thuật ngữ chung" của `gamedesigner.md`.
 
 ## `CLAUDE.md` của node

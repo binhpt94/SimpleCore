@@ -22,7 +22,7 @@ sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
 
 PREFIX = "/".join(gd.TABLES["idea"])
-STATUS_NOTE = ("Đọc trước: các node mà mục lục ghi Kết luận CHƯA ĐẠT, và các mục cuối file (Lỗi cấu trúc, Thiếu..., "
+STATUS_NOTE = ("Đọc trước: các node mà mục lục ghi Kết luận CHƯA ĐẠT, và các mục cuối file (Lỗi cấu trúc, Chưa hỏi GPT, Thiếu..., "
                "Thuật ngữ). Trước khi viết hay sửa một node vẫn chạy lệnh này cho riêng node đó.")
 
 
@@ -101,6 +101,9 @@ def lines_for(root, node, out):
     if asked:
         out.append("- Góp ý của GPT (ngang hàng ý của bạn: mỗi góp ý phải thành một ý, không được bỏ; xem mục "
                    "'Bên @GameDesigner' của .claude/rules/designadvisor.md): " + ", ".join(f"{where}/{a}.md" for a in asked))
+    if node.get("gptOwed"):
+        out.append(f"- CHƯA HỎI GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}): nhắn DesignAdvisor "
+                   f"(SendMessage, to: DesignAdvisor) hỏi GPT về node này; câu trả lời sẽ nằm ở {where}/<id>.md")
     gpt = node.get("gpt") or {}
     for m in gpt.get("missing", []):
         out.append(f"- GÓP Ý CHƯA VÀO NODE: {m['advice']}#{m['point']}: {m['title']} "
@@ -185,6 +188,10 @@ def report(root, arg=""):
     problems = [p for p in snap["problems"]["idea"] if not path or p["path"] == path or p["path"].startswith(path + "/")]
     if problems:
         out += ["", "## Lỗi cấu trúc (phải sửa trước)"] + [f"- {p['path']}: {p['text']}" for p in problems]
+    owed = [n for n in gd.walk(node) if n.get("gptOwed")]
+    if owed:
+        out += ["", f"## Chưa hỏi GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}; nhắn DesignAdvisor, kể cả node đã chốt)"] + [
+            f"- {n['path'] or '(gốc)'}: {n['title']}" for n in owed]
     if not path and snap["missing"]:
         out += ["", "## Thiếu feature hạ tầng (vòng 2 luôn phải có)"] + [f"- {p['path']}: {p['text']}" for p in snap["missing"]]
     if not path and snap["missingCode"]:

@@ -7,7 +7,7 @@ Nhóm Leaders. GD không code, không đụng Unity. GD biến ý tưởng từ 
 Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, để các phiên khác (Manager, CodeLead, Basic, Features, Services) bám theo.
 
 ## Quyền (guard ép)
-- Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, các file luật từng vòng `.claude/rules/gamedesigner.round<1-4>.md` và `.claude/rules/designadvisor.md` (GPT cùng thiết kế qua `DesignAdvisor`: ý của GPT ngang hàng ý của bạn, mỗi góp ý phải thành một ý của node, chỉ được tóm gọn câu chữ, không được bỏ; mục "Bên @GameDesigner" của file đó ghi cách đưa vào và cách khai nguồn: đọc trước khi viết một node đã có góp ý).
+- Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, các file luật từng vòng `.claude/rules/gamedesigner.round<1-4>.md` và `.claude/rules/designadvisor.md` (GPT cùng thiết kế qua `DesignAdvisor`: **vòng 1 và 2 bắt buộc hỏi GPT**, mỗi node ít nhất một lần, node cũ chưa hỏi thì hỏi bù; ý của GPT ngang hàng ý của bạn, mỗi góp ý phải thành một ý của node, chỉ được tóm gọn câu chữ, không được bỏ; mục "Bên @GameDesigner" của file đó ghi cách đưa vào và cách khai nguồn: đọc trước khi viết một node đã có góp ý).
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
 - Lệnh shell, chạy từ gốc project:

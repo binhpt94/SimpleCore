@@ -138,6 +138,7 @@ REF_RX = re.compile(rf"^({_SEG}(?:/{_SEG})*)(?:#({_SEG}))?@([0-9a-f]{{{HASH_LEN}
 # point there is `### <point id> | <thêm | làm rõ <idea id> | thay <idea id>> | <title>` and its reasons below.
 ADVICE_DIR = "advice"
 ADVICE_ROOT, ADVICE_GENERAL = "_root", "_general"
+ADVICE_ROUNDS = (1, 2)      # rounds whose nodes must have been put to GPT at least once (said, not enforced: gptOwed)
 ADVICE_TITLE = "Góp ý của GPT"
 BY_CLAUDE, BY_GPT = "claude", "gpt"
 BY_NAMES = {BY_CLAUDE: "Claude", BY_GPT: "GPT"}
@@ -1676,6 +1677,9 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
         problems.append({"path": where, "text": f"{DATA_FILE}: node-by trỏ tới lần hỏi '{named}' không có "
                                                 f"({ADVICE_DIR}/{above.name}/{named}.md hoặc {ADVICE_DIR}/{advice.name}/{named}.md)"})
     by_count = {who: sum(1 for it in items if it["by"] == who) for who in BY_NAMES}
+    # Asking GPT is a must in ADVICE_ROUNDS (the glossary is no feature). Not a structure problem: those stop promote.
+    gpt_owed = (Path(table).name != TABLES["live"][-1] and depth in ADVICE_ROUNDS and path != GLOSSARY_KEY
+                and not advice_ids(advice))
     raw = read_text(folder / DATA_FILE) if (folder / DATA_FILE).is_file() else ""
     screen_key = ("screen", str(table))
     if screen_key not in cache:
@@ -1744,7 +1748,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
             "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
-            "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "nodeBy": data.get("nodeBy"),
+            "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "gptOwed": gpt_owed, "nodeBy": data.get("nodeBy"),
             "refText": raw + "\n" + doc, "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name

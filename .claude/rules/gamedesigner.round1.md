@@ -51,5 +51,6 @@ Mỗi ý phải là một quyết định, không phải lời khen. Sai: "Game 
 Các mục: Người chơi, Cảm giác chính, Vòng lặp chơi, Chưa rõ.
 
 ## Lưu ý
+- **Bắt buộc hỏi GPT** về node gốc trước khi báo xong vòng 1: nhắn `DesignAdvisor`, rồi đưa mọi góp ý vào node (`.claude/rules/designadvisor.md`, mục "Bên @GameDesigner").
 - Đổi `data.md` của node gốc làm mọi node bên dưới thành "cần làm lại". Chỉ sửa khi quyết định thật sự đổi.
 - Không tự mở rộng game ngoài điều người đã nêu; thiếu thông tin thì hỏi (User control) hoặc ghi ở "Chưa rõ" và "Đã tự quyết" (Full Auto).

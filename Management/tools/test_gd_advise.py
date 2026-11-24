@@ -235,6 +235,7 @@ def label_cases(root):
     check("an idea is fixed when live holds it with the same content",
           {it["id"]: it["fixed"] for it in n["items"]}, {"hero-count": True, "hero-speed": False, "hero-bench": False, "hero-four": False})
     check("the live table has no advice owed", [x["gpt"]["missing"] for x in gd.walk(snap["live"])], [[], []])
+    owed_cases(root)
     check("gd_pack labels GPT's ideas", "GPT (góp ý q1#add-bench)" in "\n".join(gd_pack_lines(n)))
     long = PLAIN + f"\n### hero-long | AI 6 | {'d' * (gd.IDEA_TITLE_MAX + 1)}\nx\n"
     hero_node(root, ("", long))
@@ -248,6 +249,32 @@ def label_cases(root):
     problems = []
     qs = gd.read_questions(qdir.parent, "feature-hero", problems)
     check("an option of a question says which AI proposed it", ([o["by"] for o in qs[0]["options"]], problems), (["gpt", "claude", ""], []))
+
+
+def owed_cases(root):
+    """Asking GPT is a must in rounds 1 and 2: said on the node, never a structure problem."""
+    idea = gd.table_dir(root, "idea")
+    advice = idea.parent.parent / gd.ADVICE_DIR
+    top = f"---\nbased-on: {gd.read_data(idea)['hash']}\n---\n"
+    under = f"---\nbased-on: {gd.read_data(idea / 'feature-hero')['hash']}\n---\n"
+    node(root, "idea", "feature-shop", PLAIN.replace("hero-", "shop-"), top)
+    node(root, "idea", "feature-hero/hero-list", PLAIN.replace("hero-", "list-"), under)
+    node(root, "idea", gd.GLOSSARY_KEY, "\n### term-a | AI 8 | Một từ\nNghĩa.\n", top)
+    for a in gd.advice_ids(advice / gd.ADVICE_ROOT):
+        (advice / gd.ADVICE_ROOT / f"{a}.md").unlink()
+    (advice / "feature-shop").mkdir(parents=True, exist_ok=True)
+    (advice / "feature-shop" / "s1.q.md").write_text("Hỏi gì đó", encoding="utf-8")
+    snap = gd.snapshot(root)
+    owed = {x["path"]: x["gptOwed"] for x in gd.walk(snap["idea"])}
+    check("rounds 1 and 2 owe GPT a question until an answer is filed (a question alone is none); round 3 and the glossary owe none",
+          owed, {"": True, "feature-hero": False, "feature-shop": True, "feature-hero/hero-list": False, gd.GLOSSARY_KEY: False})
+    check("the live table owes no question", [x["gptOwed"] for x in gd.walk(snap["live"])], [False, False])
+    check("not asking is no structure problem", [p for p in snap["problems"]["idea"] if "GPT" in p["text"] and "hỏi" in p["text"]], [])
+    text = gd_status.report(root, "")
+    check("gd_status says which nodes still owe the question",
+          ("- CHƯA HỎI GPT" in text, text.split("## Chưa hỏi GPT")[1].split("\n##")[0].count("\n- ")), (True, 2))
+    (advice / "feature-shop" / "s1.md").write_text("## Góp ý của GPT\n", encoding="utf-8")
+    check("an answer settles it", next(x for x in gd.walk(gd.snapshot(root)["idea"]) if x["path"] == "feature-shop")["gptOwed"], False)
 
 
 def gd_pack_lines(n):
