@@ -146,6 +146,10 @@
     ".gd-art { display: flex; flex-wrap: wrap; gap: 14px; }",
     ".gd-art figure { margin: 0; width: 280px; }",
     ".gd-art .gd-art-pic { position: relative; }",
+    ".gd-parts { margin: 6px 0; font-size: 12px; }",
+    ".gd-parts summary { cursor: pointer; color: var(--muted, inherit); }",
+    ".gd-part { display: flex; align-items: center; gap: 8px; margin: 4px 0; }",
+    ".gd-art .gd-part img { width: 56px; height: 40px; max-height: 40px; flex: none; }",
     ".gd-art img { display: block; width: 100%; max-height: 200px; object-fit: contain; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }",
     ".gd-art .gd-art-label { position: absolute; top: 6px; left: 6px; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; background: var(--panel); color: var(--text); border: 1px solid var(--line); }",
     ".gd-art .gd-art-label.stale { background: var(--bad); color: #fff; border-color: var(--bad); }",
@@ -1187,14 +1191,39 @@
           pic.alt = frame;
           pic.loading = "lazy";
           zoomable(pic, null, frame + " · v" + a.version + " · " + a.label);
-          var kindOf = function (v) { return a.stale.length ? "stale" : v === null ? "wait" : v === 0 ? "stale" : v === 3 ? "ok" : ""; };
+          // Claude concept không ai chấm: nhãn chỉ nói đã giao, chờ ghép lại, hay cần vẽ lại.
+          var kindOf = function (v) {
+            if (artTool === "claudeimage") return a.stale.length ? "stale" : a.reglue ? "wait" : "ok";
+            return a.stale.length ? "stale" : v === null ? "wait" : v === 0 ? "stale" : v === 3 ? "ok" : "";
+          };
           var tag = put(holder, el("span", "gd-art-label " + kindOf(a.level), a.label));
           if (a.anchor) add(holder, el("span", "gd-art-anchor", "mốc"));
           if (a.below) add(holder, el("span", "gd-art-below", "chưa chuẩn"));
           add(fig, el("figcaption", "", frame + " · v" + a.version + " · " + a.ref + (a.styles.length ? " · style " + a.styles.join(", ") : "") +
             (a.below ? " · " + artChat + " tự kiểm chưa đạt: " + a.below : "")));
+          // Claude concept: bảng phần (hình) của frame: kích thước, 9-slice, dùng ở mấy hình, lấy lại từ node nào.
+          if (a.parts && a.parts.length) {
+            var partBox = put(fig, el("details", "gd-parts"));
+            var sliced = a.parts.filter(function (p) { return p.slice; }).length;
+            var shared = a.parts.filter(function (p) { return p.shapes.length > 1; }).length;
+            add(partBox, el("summary", "", a.parts.length + " phần · 9-slice: " + sliced + " · dùng nhiều chỗ: " + shared));
+            a.parts.forEach(function (p) {
+              var row = put(partBox, el("div", "gd-part"));
+              var thumb = put(row, el("img"));
+              thumb.src = "../" + p.file.split("/").map(encodeURIComponent).join("/");
+              thumb.alt = p.id;
+              thumb.loading = "lazy";
+              zoomable(thumb, null, p.id + " · " + p.w + "x" + p.h + "px");
+              add(row, el("span", "", p.id + " · " + p.w + "x" + p.h + "px · " +
+                (p.slice ? "9-slice viền " + p.slice.join("/") : "không 9-slice") + " · " + p.shapes.length + " hình (" + p.shapes.join(", ") + ")" +
+                (p.from ? " · lấy lại từ " + p.from.node + "#" + p.from.part : "")));
+            });
+          } else if (a.parts) {
+            add(fig, el("p", "gd-note", "Frame này không có phần nào phải vẽ (chỉ có chữ, nét đo hoặc hình của node khác)."));
+          }
           if (!a.reviewable) {
-            if (a.redoing) add(fig, el("p", "gd-note", artChat + " đang làm lại ảnh này và chưa giao bản mới. Thanh chấm hiện khi có bản giao mới."));
+            if (a.redoing) add(fig, el("p", "gd-note", artChat + " đang làm lại ảnh này và chưa giao bản mới." +
+              (artTool === "claudeimage" ? "" : " Thanh chấm hiện khi có bản giao mới.")));
             if (a.feedback) add(fig, el("p", "gd-note", "Phản hồi đã ghi: " + a.feedback));
             return;
           }
@@ -1280,7 +1309,8 @@
           owed.map(function (d) { return d.id + " " + d.item; }).join(", ") + "): xem tab Studio."));
         var older = arts.filter(function (a) { return latest[a.frame] !== a; });
         if (older.length) add(body, el("p", "gd-note", older.length + " bản cũ hơn vẫn giữ trong Resources (không ghi đè)."));
-        if (!ctx.setup) add(body, el("p", "gd-note", "Chấm ảnh và đặt mốc cần mở trang qua server Setup (python Management/tools/setup_server.py)."));
+        if (artTool === "claudeimage") add(body, el("p", "gd-note", "Claude concept không cần duyệt. Frame đổi mà phần còn vừa thì chỉ chờ ghép lại; chỉ khi phải vẽ hình mới nó mới mang nhãn CẦN LÀM LẠI, và vẽ lại cần lệnh của một Leader (studio.py redo)."));
+        else if (!ctx.setup) add(body, el("p", "gd-note", "Chấm ảnh và đặt mốc cần mở trang qua server Setup (python Management/tools/setup_server.py)."));
       }
       });
       // Frame: bố cục dạng chữ trong .frame-concept, đã được gamedesign.py giải số và vẽ sẵn thành SVG.

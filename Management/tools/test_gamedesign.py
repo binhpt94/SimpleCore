@@ -810,6 +810,21 @@ def run_frames(root):
     check("frame: a grid's size from its cells", (by["slots"]["w"], by["slots"]["h"]), (490, 320))
     check("frame: a button under the tap size is a warning", any(w.startswith("home: nút") for w in r["warnings"]))
     check("frame: a button at the tap size is not", any(w.startswith("replay") for w in r["warnings"]), False)
+    shown = lambda shape, label: gd.display_text({"shape": shape, "label": label})      # noqa: E731
+    check("text: what the player reads is the label of a label or a button, without the note in brackets",
+          (shown("button", "Chơi lại (nút chính)"), shown("label", "Kỉ lục: 15 đợt"), shown("label", "A (b) (c)"), shown("rect", "Nhóm hero"),
+           shown("icon", "xu"), shown("button", "")), ("Chơi lại", "Kỉ lục: 15 đợt", "A", "", "", ""))
+    texts = lambda svg: re.findall(r"<text[^>]*>([^<]*)</text>", svg)      # noqa: E731
+    plain, concept = texts(gd.frame_svg(r)), texts(gd.frame_svg(r, concept=True))
+    wanted = [gd._esc(t) for t in (gd.display_text(s) for s in r["shapes"]) if t]
+    check("text: the frame view keeps every label with its numbers", (len(plain), all("x" in t or "=" in t for t in plain)), (len(r["shapes"]), True))
+    check("text: a concept shows only what the player reads, no numbers and no notes", concept, wanted)
+    check("text: the font of frames and concepts is Roboto, carried inside what is drawn",
+          ("font-family: Roboto" in gd.FRAME_CSS, "font-family: 'Roboto'" in gd.font_css(), "data:font/ttf;base64," in gd.font_css(),
+           "url(view/fonts/Roboto-Regular.ttf)" in gd.font_css(embed=False)), (True, True, True, True))
+    kept, gd.FONT_DIR = gd.FONT_DIR, Path(root) / "no-fonts"
+    check("text: without the font files nothing is added (the system font is used)", gd.font_css(), "")
+    gd.FONT_DIR = kept
     check("frame: no overlap warning between a parent and its children", any("chồng" in w for w in r["warnings"]), False)
     bad = {
         "unknown shape": "kind: ui\n- a star x=1 y=1 w=1 h=1",

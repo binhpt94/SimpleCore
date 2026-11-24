@@ -132,6 +132,12 @@ STUDIO_REF = r"((_Services/)?[A-Za-z][A-Za-z0-9]*|_design/[a-z0-9]+(-[a-z0-9]+)*
 STUDIO = PY + r"Management/tools/studio\.py "
 ALLOWED_COMMANDS.append(STUDIO + r"measure " + STUDIO_REF + "( " + STUDIO_ID + ")?")
 ALLOWED_COMMANDS.append(STUDIO + r"(check|status( (codex|blender|claudeimage|" + STUDIO_REF + "))?)")
+# A Leader lets @ClaudeImage draw one frame of a delivered claude concept again (one run, with the reason in double
+# quotes). Drawing after a delivery is never the tool chat's own decision; the human runs it too.
+LEADER_REDO = (STUDIO + r"redo _design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*/" + STUDIO_ID + " " + STUDIO_ID
+               + r' "[^"\\]+"')
+for _commands in (DESIGNER_COMMANDS, CODELEAD_COMMANDS, MANAGER_COMMANDS):
+    _commands.append(LEADER_REDO)
 TOOL_COMMANDS = {
     # @ClaudeImage writes work/<item>.svg itself; `claude` checks it and makes the PNG (no outside tool is run).
     "claudeimage": [STUDIO + r"claude " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver claudeimage " + STUDIO_REF,

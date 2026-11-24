@@ -42,6 +42,7 @@ def text_report(table, node):
     for fr in node["frames"]:
         out.append("")
         out += gd.frame_brief(fr)
+        out += gd.frame_roles_brief(fr)
     out += [f"- nhắc: {t}" for t in node["frameNotes"]]
     return "\n".join(out)
 
@@ -54,7 +55,8 @@ def html_page(table, node):
         blocks.append(f"<section><h2>{html.escape(fr['file'])}" + (f" · {html.escape(fr['title'])}" if fr["title"] else "")
                       + f"</h2>{fr['svg']}" + (f"<ul class='warn'>{notes}</ul>" if notes else "")
                       + f"<details><summary>Nguồn</summary><pre>{html.escape(fr['text'])}</pre></details></section>")
-    style = ("body{font-family:system-ui,sans-serif;margin:16px;max-width:1100px;background:#fff;color:#222}"
+    style = (gd.font_css(embed=True, weights=(400,)) + "\n" +      # the page stands alone: the font goes inside it
+             "body{font-family:system-ui,sans-serif;margin:16px;max-width:1100px;background:#fff;color:#222}"
              "section{margin:0 0 28px}h2{font-size:16px}.warn{color:#a0520c}pre{background:#f3f4f6;padding:8px;overflow:auto}"
              "@media (prefers-color-scheme: dark){body{background:#16181c;color:#ddd}pre{background:#22252b}"
              ":root{--fr-bg:#1e2126;--fr-ink:#c9d1db;--fr-line:#5c6570;--fr-box:#262a31;--fr-accent-soft:#1f2d40}}\n" + gd.FRAME_CSS)
@@ -92,4 +94,7 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    for stream in (sys.stdout, sys.stderr):      # a Windows console is not UTF-8 by itself
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     sys.exit(main(sys.argv))

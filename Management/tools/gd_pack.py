@@ -24,6 +24,45 @@ PACK_NOTE = ("Trước khi code một phần: đọc đủ các node vòng 4 và
              "(mục 'Node ở nhánh khác') và mục Thuật ngữ. Không code chỉ từ mục lục.")
 
 
+def part_lines(a):
+    """One line per part (picture) of a claude concept: its size, whether it is 9-sliced, the shapes it stands for."""
+    out = []
+    for p in a.get("parts") or []:
+        src = p.get("from")
+        out.append(f"phần {p['id']}: {p['w']}x{p['h']}px, " + (f"9-slice viền trái/trên/phải/dưới {p['slice']}" if p.get("slice") else "không 9-slice")
+                   + f", dùng cho {len(p['shapes'])} hình ({', '.join(p['shapes'])})"
+                   + (f", lấy lại từ {src['node']}#{src['part']}" if src else "") + f"; {p['file']}")
+    return out
+
+
+def parts_total(branch):
+    """Lines that sum up the pictures a feature needs, from the claude concepts of its nodes (the cheat node only
+    puts their parts together, so it is left out)."""
+    rows, taken = [], 0
+    for n in branch:
+        if n.get("cheat"):
+            continue
+        seen = set()
+        for a in n.get("art", []):
+            if a.get("tool") != gd.CLAUDE_TOOL or a["frame"] in seen or a.get("state") != "mới nhất":
+                continue
+            seen.add(a["frame"])
+            for p in a.get("parts") or []:
+                if p.get("from"):
+                    taken += 1
+                else:
+                    rows.append((n["path"], a["frame"], p))
+    if not rows and not taken:
+        return []
+    out = ["", "# Các hình feature này cần (theo claude-concept; tham chiếu để đặt order sprite, không chép vào Assets)",
+           f"- {len(rows)} hình riêng" + (f", {taken} hình lấy lại từ node khác (dùng chung, không tính lại)" if taken else "")
+           + f"; 9-slice được: {sum(1 for r in rows if r[2].get('slice'))}; một hình dùng nhiều chỗ: {sum(1 for r in rows if len(r[2]['shapes']) > 1)}"]
+    for path, frame, p in rows:
+        out.append(f"- {p['id']} ({path}, frame {frame}): {p['w']}x{p['h']}px, "
+                   + (f"9-slice viền {p['slice']}" if p.get("slice") else "không 9-slice") + f", {len(p['shapes'])} hình dùng")
+    return out
+
+
 def full_lines(node, out, doc=True):
     out.append("")
     if node.get("cheat"):
@@ -49,8 +88,8 @@ def full_lines(node, out, doc=True):
         for fr in node["frames"]:
             out += gd.frame_brief(fr)
     for tool, head in ((gd.ART_TOOL, "### Art concept (ảnh @Codex gen theo frame; xem phong cách, không đo kích thước từ ảnh)"),
-                       (gd.CLAUDE_TOOL, "### Claude concept (ảnh @ClaudeImage vẽ theo frame; đủ dùng ở giai đoạn IDEA; không đo "
-                                        "kích thước từ ảnh)")):
+                       (gd.CLAUDE_TOOL, "### Claude concept (ảnh ghép của frame và các phần @ClaudeImage vẽ; đủ dùng ở giai đoạn "
+                                        "IDEA; kích thước lấy ở frame và ở dòng của từng phần)")):
         latest = {}
         for a in node.get("art", []):
             if a.get("tool", gd.ART_TOOL) == tool:
@@ -62,6 +101,8 @@ def full_lines(node, out, doc=True):
         for frame, a in sorted(latest.items()):
             use = "dùng làm mẫu" if a.get("level") in (2, 3) and not a["stale"] else "chỉ để tham khảo"
             out.append(f"- {frame}: {a['file']} ({a['label']}; {use}" + (f"; CHƯA CHUẨN: {a['below']}" if a.get("below") else "") + ")")
+            for line in part_lines(a):
+                out.append(f"    {line}")
     body = node["body"].split("\n", 1)[1].strip() if "\n" in node["body"] else ""
     if doc and body:
         out.append("")
@@ -97,6 +138,7 @@ def pack(root, name):
             branch += list(gd.walk(top))
     for n in branch:
         full_lines(n, out)
+    out += parts_total(branch)
     inside = {n["path"] for n in branch}
     refs, terms = [], []
     for n in branch:

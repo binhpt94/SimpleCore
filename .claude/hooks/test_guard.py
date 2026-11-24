@@ -1410,6 +1410,17 @@ def run_tool_cases():
                        ("mcp__unityMCP__run_tests", {"mode": "EditMode"})):
         t(g + " (no outside tool through unity-mcp)", CI, "deny", tool_, ti_, session="t-ci")
     guard.release_lock(STORE)
+    for p in (studio + "/claudeimage/.run-1.lock", studio + "/claudeimage/.run-5.lock", corder + "/.coin.lock", cart + "/.main.lock"):
+        w(g + " (the run locks are studio.py's)", CI, "deny", p)
+    redo = P + ' redo _design/feature-a.a1.a-spec/a-claude main "nút chưa rõ, vẽ lại viền"'
+    for who in ("@GameDesigner", "@CodeLead", "@Manager"):
+        t(g + " (a Leader lets it draw again)", who, "allow", "Bash", {"command": redo})
+    for who in (CI, X, B, W, "@Core"):
+        t(g + " (drawing again is not the tool chat's decision)", who, "deny", "Bash", {"command": redo})
+    for cmd in (P + " redo _design/feature-a.a1.a-spec/a-claude main", P + ' redo Wallet/coin-icons coin "x"',
+                P + ' redo _design/feature-a.a1.a-spec/a-claude main "x"; rm y', P + ' redo _design/feature-a.a1.a-spec/a-claude main ""',
+                P + ' redo _design/feature-a.a1.a-spec/a-claude main "a" "b"'):
+        t(g + " (redo: a design order, a frame, a reason)", "@GameDesigner", "deny", "Bash", {"command": cmd})
     check(g, CI, True, "the role is known and names its studio folder",
           guard.role_of(CI) == CI and guard.TOOL_ROLES[CI] == "claudeimage")
 

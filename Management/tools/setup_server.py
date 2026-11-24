@@ -63,7 +63,7 @@ BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
                "@Codex": "Tools", "@Blender": "Tools", "@ClaudeImage": "Tools", "@Core": "Basic"}
 GROUP_ORDER = ["Master", "Leaders", "Tools", "Basic", "Services", "Features"]      # the tiers of CLAUDE.md, top to bottom
-STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp")
+STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp", ".ttf")
 
 
 def thread_name(value):

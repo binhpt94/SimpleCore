@@ -9,6 +9,7 @@ way Codex and Blender are run. Every run, delivery and refusal is kept, so a mis
     python Management/tools/studio.py consult <F>/<id> <item>         @Codex: ask GPT one question
     python Management/tools/studio.py blender <F>/<id> <item>         @Blender: run work/<item>.py headless
     python Management/tools/studio.py claude <F>/<id> <item>          @ClaudeImage: work/<item>.svg (written by the chat) into a PNG
+    python Management/tools/studio.py redo <_design/...>/<id> <frame> "<why>"   a Leader: one more drawing run of a delivered claude concept
     python Management/tools/studio.py deliver <codex|blender|claudeimage> <F>/<id>  the tool chat: hand the order over
     python Management/tools/studio.py review <F>/<id> <item> <0-3> ["<feedback>"]   the one who ordered: judge one item
     python Management/tools/studio.py anchor <_design/...>/<id> <item> the human: an art that passed guides its style (toggle)
@@ -96,8 +97,9 @@ ART_DAILY_MAX = 20
 ART_ANCHORS = 3
 DESIGN_RX = re.compile(r"^_design/[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)*$")
 ONE_ART = ("Ảnh đầu tiên được đính kèm là frame của màn này: các hình cơ bản mang kích thước thật. Giữ đúng bố cục, "
-           "vị trí và tỉ lệ của frame, khung hình và hướng màn; chỉ thay hình cơ bản bằng art theo style. Không thêm "
-           "chữ chú thích, số đo hay đường kẻ của frame vào ảnh.")
+           "vị trí và tỉ lệ của frame, khung hình và hướng màn; chỉ thay hình cơ bản bằng art theo style. Giữ nguyên "
+           "các chữ hiển thị trong frame: đúng từng chữ và dấu tiếng Việt, đúng vị trí, kiểu chữ không chân gọn như "
+           "Roboto, màu chữ theo style. Không thêm chữ nào khác, không thêm số đo hay đường kẻ.")
 STUDIO = ("Management", "studio")
 RESOURCES = "Resources"
 LESSONS = "lessons.md"
@@ -126,7 +128,7 @@ def read_text(path):
 
 def write_json(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + ".tmp")
+    tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp")      # its own name: several runs may write at once
     tmp.write_text(json.dumps(value, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     os.replace(tmp, path)
 
@@ -306,18 +308,20 @@ def check_art(root, tool, feature, oid, folder, data):
     if data["fields"].get("deliver") and data["fields"]["deliver"] != ART_DELIVER:
         problems.append(f"order art ghi deliver: {ART_DELIVER} (ảnh không vào Assets)")
     path = node_of(feature)
-    parts = path.split("/")
-    if len(parts) != gd.CHEAT_ROUND - 1 or parts[-1] != gd.CHEAT_KEY:
+    cheat = is_cheat(path)
+    if not cheat and tool != CLAUDE:      # an art concept of Codex: the cheat node only; a claude concept: any frame
         return problems + [f"order art chỉ đặt cho node cheat (<feature>/{gd.CHEAT_KEY}) đã ở live, không cho '{path}'"]
     node, top = live_node(root, path)
     if node is None:
         return problems + [f"node '{path}' chưa có trong live: chỉ gen art cho node đã chốt"]
     frames = {Path(fr["file"]).stem for fr in node["frames"]}
     if not frames:
-        problems.append(f"node '{path}' trong live chưa có frame: viết frame cho từng state và chốt trước")
+        problems.append(f"node '{path}' trong live chưa có frame: " + ("viết frame cho từng state và chốt trước" if cheat else
+                                                                    "claude-concept chỉ đặt cho node có frame"))
     for item, _ in data["items"]:
         if frames and item not in frames:
-            problems.append(f"item '{item}' phải là id một state của node cheat ({', '.join(sorted(frames))})")
+            problems.append((f"item '{item}' phải là id một state của node cheat" if cheat else f"item '{item}' phải là tên một frame của node")
+                            + f" ({', '.join(sorted(frames))})")
     known = {s["id"] for s in (top or {}).get("styles", [])}
     wanted = order_styles(data)
     if not known:
@@ -406,7 +410,8 @@ def budget(folder, item):
         left = max(0, RUNS_FIRST - since)
         why = "" if left else f"hết {RUNS_FIRST} lượt đầu"
     elif any(mine(e, "redo") or e.get("event") == "reject" for e in log_[last + 1:]):      # a round already open
-        left = max(0, RUNS_REDO - since)
+        opened = sum(1 for e in log_[last + 1:] if mine(e, "redo") or e.get("event") == "reject")      # a Leader may open more than one
+        left = max(0, opened * RUNS_REDO - since)
         why = "" if left else f"đã chạy {RUNS_REDO} lượt của lần làm lại này"
     else:
         review = read_reviews(folder).get(item) or {"level": None, "text": ""}
@@ -555,14 +560,36 @@ def check_svg(text):
     return list(dict.fromkeys(problems))[:8]
 
 
+def frame_css():
+    """The colours of a drawn frame without the page's variables, with the font inside (a picture loads no file)."""
+    return gd.font_css(embed=True) + "\n" + re.sub(r"var\(--[\w-]+, ((?:[^()]|\([^()]*\))*)\)", r"\1", gd.FRAME_CSS).split("\n", 1)[1]
+
+
+def with_font(svg_path, dest):
+    """The SVG to draw: itself, or a copy at dest with the project's font put inside when its text asks for it."""
+    text = read_text(svg_path)
+    css = gd.font_css(embed=True) if gd.FONT_NAME in text else ""
+    m = re.search(r"<svg\b[^>]*>", text) if css else None
+    if not m:
+        return Path(svg_path)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(text[:m.end()] + f"<style>{css}</style>" + text[m.end():], encoding="utf-8")
+    return dest
+
+
+def frame_texts(fr):
+    """The texts the player reads in a frame, in the order of its shapes."""
+    return [t for t in (gd.display_text(r) for r in fr["shapes"]) if t]
+
+
 def frame_png(root, path, frame, dest):
     """The frame of the live node drawn into dest/<frame>.frame.png (colours fixed, no page variables)."""
     node, _ = live_node(root, path)
     fr = next((f for f in (node or {}).get("frames", []) if Path(f["file"]).stem == frame), None)
     if fr is None:
         return None
-    css = re.sub(r"var\(--[\w-]+, ((?:[^()]|\([^()]*\))*)\)", r"\1", gd.FRAME_CSS)
-    svg = fr["svg"].replace("</defs>", f"</defs><style>{css}</style>", 1)
+    # As a concept shows it: the texts the player reads in the project's font, no numbers and no notes to copy.
+    svg = gd.frame_svg(fr, concept=True).replace("</defs>", f"</defs><style>{frame_css()}</style>", 1)
     dest.mkdir(parents=True, exist_ok=True)
     svg_path, png_path = dest / f"{frame}.frame.svg", dest / f"{frame}.frame.png"
     svg_path.write_text(svg, encoding="utf-8")
@@ -594,6 +621,10 @@ def art_inputs(root, feature, data, item, work):
         if f.is_file():
             images.append(f)
             picked += 1
+    node, _ = live_node(root, path)
+    shown = frame_texts(frame_named(node, item) or {"shapes": []})
+    if shown:      # written out, so the model does not have to read them off the picture
+        text += ("\n\n" if text else "") + "Chữ phải hiện trong ảnh, đúng từng chữ và dấu, ở đúng chỗ của frame: " + "; ".join(f"\"{t}\"" for t in shown)
     return ("Phong cách (vòng 1, bắt buộc theo):\n" + text if text else ""), images, notes
 
 
@@ -611,13 +642,20 @@ def read_status(folder):
     return {"state": state, "version": version, "at": value.get("at") or ""}
 
 
-def view_state(status, items, reviews):
+def view_state(status, items, reviews, unjudged=False):
     """What an order waits for, from its status and the judgement of its items:
     new | doing | review (an item is not judged yet) | redo (an item is judged REDO) | done."""
     if status["state"] != "delivered":
         return status["state"]
+    if unjudged:      # a claude concept: nobody judges it, a delivery is the end
+        return "done"
     levels = [(reviews.get(i) or {}).get("level") for i in items]
     return "redo" if REDO in levels else "review" if None in levels else "done"
+
+
+def no_judging(tool, feature):
+    """A claude concept (an order of a design node made by the @ClaudeImage chat) is not judged by anybody."""
+    return tool == CLAUDE and bool(DESIGN_RX.match(feature))
 
 
 VIEW_STATES = {"new": "mới", "doing": "đang làm", "review": "chờ duyệt", "redo": "cần làm lại", "done": "xong"}
@@ -673,6 +711,50 @@ class RunLock:
             self.path.unlink()
         except OSError:
             pass
+
+
+CLAUDE_RUNS = 5      # runs of `claude` at the same time: the @ClaudeImage chat may work with that many agents
+
+
+def take_lock(path):
+    """True when this process now holds the lock file (one left by a run that died is dropped after RUN_LOCK_HOURS)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        if path.exists() and time.time() - path.stat().st_mtime > RUN_LOCK_HOURS * 3600:
+            path.unlink()
+        fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except OSError:
+        return False
+    os.write(fd, str(os.getpid()).encode())
+    os.close(fd)
+    return True
+
+
+class ClaudeLock:
+    """A run of `claude`: one of CLAUDE_RUNS places of the tool, and the item itself (no two runs of one item)."""
+    def __init__(self, root, folder, item):
+        self.slots = [studio_dir(root, CLAUDE) / f".run-{n}.lock" for n in range(1, CLAUDE_RUNS + 1)]
+        self.item = folder / f".{item}.lock"      # beside order.md: not a file the tool chat writes
+        self.held = []
+
+    def __enter__(self):
+        if not take_lock(self.item):
+            raise ValueError("item này đang được một lần chạy khác làm; mỗi agent một frame hoặc một item")
+        self.held.append(self.item)
+        slot = next((s for s in self.slots if take_lock(s)), None)
+        if slot is None:
+            self.__exit__()
+            raise ValueError(f"đang có {CLAUDE_RUNS} lần chạy của ClaudeImage (tối đa {CLAUDE_RUNS} cùng lúc); chờ một lần xong rồi chạy lại")
+        self.held.append(slot)
+        return self
+
+    def __exit__(self, *exc):
+        for p in self.held:
+            try:
+                p.unlink()
+            except OSError:
+                pass
+        self.held = []
 
 
 def run(cmd, stdin_text=None, cwd=None):
@@ -837,6 +919,453 @@ def cmd_codex(root, ref, item):
         return 1
 
 
+# ---------------------------------------------------------------- claude concepts: parts of a frame
+PARTS_DIR, PARTS_FILE = "parts", "parts.json"
+PART_RATIO = 0.02      # how far the shape of a picture that is not 9-sliced may be from the shape it stands for
+PART_MAX = 4096
+
+
+def frame_named(node, name):
+    return next((f for f in (node or {}).get("frames", []) if Path(f["file"]).stem == name), None)
+
+
+def is_cheat(path):
+    parts = path.split("/")
+    return len(parts) == gd.CHEAT_ROUND - 1 and parts[-1] == gd.CHEAT_KEY
+
+
+def delivered_parts(root, tree, path):
+    """{frame: {ref, version, dir, parts}} of the claude concepts of a node that are still good (newest delivery,
+    not stale, not judged "Làm lại ngay"); dir holds <part>.png and <part>.svg."""
+    art, _ = gd.read_art(root, tree)
+    out = {}
+    for e in art.get(path, []):
+        if e["tool"] == CLAUDE and e["usable"] and e["frame"] not in out:
+            folder = (Path(root) / e["file"]).parent / PARTS_DIR / e["frame"]
+            table = gd._json(folder / PARTS_FILE)
+            if isinstance(table, dict) and isinstance(table.get("parts"), list):
+                out[e["frame"]] = {"ref": e["ref"], "version": e["version"], "dir": folder, "parts": table["parts"]}
+    return out
+
+
+fits = gd.part_fits      # '' when a picture can stand in a place, else why not (the page's reading uses the same rule)
+
+
+def read_parts(root, tree, node, fr, frame, work):
+    """(parts, problems) of work/<frame>.parts.json, the table of pictures the @ClaudeImage chat draws for a frame:
+        {"parts": [{"id", "w", "h", "slice": [left, top, right, bottom] | null, "shapes": [shape ids]},
+                   {"id", "same-as": "<node path>#<part id>", "shapes": [...]}]}
+    Every shape the node itself talks about (role own) that a picture can stand for is in exactly one part; a part
+    with several shapes is one picture used in several places. Each part comes back with svg and png (paths; png
+    None for a part still to be made) and `from` (where a same-as part was taken)."""
+    raw = gd._json(work / f"{frame}.parts.json")
+    if not isinstance(raw, dict) or not isinstance(raw.get("parts"), list):
+        return [], [f"thiếu work/{frame}.parts.json, hoặc nó không có dạng {{\"parts\": [...]}} (bảng phần của frame; xem "
+                    ".claude/rules/studio.md)"]
+    shapes = {r["id"]: r for r in fr["shapes"]}
+    need = [r["id"] for r in fr["shapes"] if r["role"] == gd.ROLE_OWN and r["shape"] in gd.PART_SHAPES]
+    parts, problems, taken, cache = [], [], {}, {}
+    for n, p in enumerate(raw["parts"], 1):
+        if not isinstance(p, dict) or not ID_RX.match(str(p.get("id") or "")):
+            problems.append(f"phần thứ {n}: thiếu id (chữ thường, số, gạch nối)")
+            continue
+        pid = p["id"]
+        if any(x["id"] == pid for x in parts):
+            problems.append(f"phần '{pid}' khai hai lần")
+            continue
+        part = {"id": pid, "w": 0, "h": 0, "slice": None, "shapes": [], "svg": None, "png": None, "from": None,
+                "text": p.get("text") is not False}      # false: the picture has its text drawn in, the tool adds none
+        ids = p.get("shapes") if isinstance(p.get("shapes"), list) else []
+        if not ids:
+            problems.append(f"phần '{pid}': 'shapes' phải nêu ít nhất một hình của frame")
+        if p.get("same-as"):
+            path, _, other = str(p["same-as"]).partition("#")
+            if path not in cache:
+                cache[path] = delivered_parts(root, tree, path)
+            hit = next(((fname, d, q) for fname, d in sorted(cache[path].items()) for q in d["parts"] if q.get("id") == other), None)
+            if not hit or path == node["path"]:
+                problems.append(f"phần '{pid}': same-as '{p['same-as']}' không trỏ tới phần nào trong claude-concept còn dùng "
+                                "được của node khác (dạng <đường dẫn node>#<id phần>)")
+                continue
+            fname, d, q = hit
+            part.update(w=q["w"], h=q["h"], slice=q.get("slice"), svg=d["dir"] / f"{other}.svg", png=d["dir"] / f"{other}.png",
+                        **{"from": {"node": path, "frame": fname, "part": other, "ref": d["ref"], "version": d["version"]}})
+        else:
+            w, h, sl = p.get("w"), p.get("h"), p.get("slice")
+            whole = lambda v: isinstance(v, int) and not isinstance(v, bool)      # noqa: E731
+            if not (whole(w) and whole(h) and 0 < w <= PART_MAX and 0 < h <= PART_MAX):
+                problems.append(f"phần '{pid}': w, h là số nguyên px từ 1 tới {PART_MAX}")
+                continue
+            if sl is not None and not (isinstance(sl, list) and len(sl) == 4 and all(whole(v) and v >= 0 for v in sl)
+                                       and sl[0] + sl[2] < w and sl[1] + sl[3] < h):
+                problems.append(f"phần '{pid}': slice là null hoặc [trái, trên, phải, dưới] (px, trái + phải nhỏ hơn w, trên + dưới nhỏ hơn h)")
+                continue
+            src = work / frame / f"{pid}.svg"
+            part.update(w=w, h=h, slice=sl, svg=src)
+            if not src.is_file():
+                problems.append(f"phần '{pid}': chưa có work/{frame}/{pid}.svg")
+            else:
+                problems += [f"phần '{pid}': {x}" for x in check_svg(read_text(src))]
+        for sid in ids:
+            r = shapes.get(sid)
+            if r is None:
+                problems.append(f"phần '{pid}': frame không có hình '{sid}'")
+            elif r["role"] != gd.ROLE_OWN:
+                problems.append(f"phần '{pid}': hình '{sid}' là {gd.ROLE_NAMES[r['role']]} của frame này, không vẽ ở đây")
+            elif not gd.shape_slots(fr, r):
+                problems.append(f"phần '{pid}': hình '{sid}' ({r['shape']}) là nét đo, không có ảnh thay")
+            elif sid in taken:
+                problems.append(f"hình '{sid}' nằm trong hai phần ('{taken[sid]}' và '{pid}')")
+            else:
+                taken[sid] = pid
+                part["shapes"].append(sid)
+                why = next((x for x in (fits(part, s) for s in gd.shape_slots(fr, r)) if x), "")
+                if why:
+                    problems.append(f"phần '{pid}' cho hình '{sid}': {why}")
+        parts.append(part)
+    left = [sid for sid in need if sid not in taken]
+    if left:
+        problems.append("các hình của node chưa có phần: " + ", ".join(
+            f"{sid} ({gd.shape_slots(fr, shapes[sid])[0][2]:g}x{gd.shape_slots(fr, shapes[sid])[0][3]:g}px)" for sid in left))
+    return parts, problems[:12]
+
+
+def compose_frame(fr, placed):
+    """(svg text, (width, height)) of the picture of a whole frame: every shape in `placed` ({shape id: part with
+    png}) is its picture at the place and size the frame gives (a 9-sliced one keeps its corners, edges and middle
+    stretch), the backdrop is left out, every other shape stays the basic shape of the frame."""
+    import base64
+    k = gd.frame_scale(fr)
+    vw, vh = round((fr["view"][2] - fr["view"][0]) * k, 3), round((fr["view"][3] - fr["view"][1]) * k, 3)
+    css = frame_css()
+    defs, body, seen = [], [], {}
+    for r in fr["shapes"]:
+        if r["role"] == gd.ROLE_BACKDROP:
+            continue
+        part = placed.get(r["id"])
+        if part is None:      # kept as the frame has it: its basic shape, and the text the player reads
+            layer = gd.frame_svg(fr, only={r["id"]}, bare=True, concept=True)
+            body.append(layer.replace('class="fr-svg"', f'x="0" y="0" width="{vw:g}" height="{vh:g}"', 1))
+            continue
+        key = str(part["png"])
+        if key not in seen:
+            seen[key] = f"part-{len(seen) + 1}"
+            data = base64.b64encode(Path(part["png"]).read_bytes()).decode("ascii")
+            defs.append(f'<image id="{seen[key]}" width="{part["w"]}" height="{part["h"]}" preserveAspectRatio="none" '
+                        f'href="data:image/png;base64,{data}"/>')
+        pw, ph = part["w"], part["h"]
+        for x, y, w, h in gd.shape_slots(fr, r):
+            if part["slice"]:
+                l, t, rr, b = part["slice"]
+                cols = [(0, l, x, l), (l, pw - l - rr, x + l, w - l - rr), (pw - rr, rr, x + w - rr, rr)]
+                rows = [(0, t, y, t), (t, ph - t - b, y + t, h - t - b), (ph - b, b, y + h - b, b)]
+            else:
+                cols, rows = [(0, pw, x, w)], [(0, ph, y, h)]
+            for sx, sw, dx, dw in cols:
+                for sy, sh, dy, dh in rows:
+                    if sw > 0 and sh > 0 and dw > 0 and dh > 0:
+                        body.append(f'<svg x="{dx:g}" y="{dy:g}" width="{dw:g}" height="{dh:g}" viewBox="{sx:g} {sy:g} {sw:g} {sh:g}" '
+                                    f'preserveAspectRatio="none"><use href="#{seen[key]}"/></svg>')
+            text = gd.display_text(r) if part.get("text", True) else ""
+            if text:      # the text the player reads, over the picture: readable on any colour
+                size = gd.fit_text(text, w, h)
+                body.append(f'<text class="pt-text{" fr-strong" if r["shape"] == "button" else ""}" data-over="{r["id"]}" x="{x + w / 2:g}" '
+                            f'y="{y + h / 2:g}" font-size="{size:g}" stroke-width="{size * 0.14:g}" text-anchor="middle" '
+                            f'dominant-baseline="middle">{gd._esc(text)}</text>')
+    css += ("\n.pt-text { font-family: Roboto, system-ui, sans-serif; fill: #1f2a37; stroke: #ffffff; paint-order: stroke; "
+            "stroke-linejoin: round; }")
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {vw:g} {vh:g}"><style>{css}</style><defs>{"".join(defs)}</defs>'
+            + "".join(body) + "</svg>"), (max(1, round(vw)), max(1, round(vh)))
+
+
+def parts_summary(parts, fr):
+    """Lines about a frame's parts: how many pictures, which are 9-sliced, which are used in several places."""
+    shapes = {r["id"]: r for r in fr["shapes"]}
+    lines = [f"{len(parts)} phần (vẽ mới {sum(1 for p in parts if not p['from'])}, lấy lại {sum(1 for p in parts if p['from'])})"]
+    for p in parts:
+        places = sum(len(gd.shape_slots(fr, shapes[s])) for s in p["shapes"] if s in shapes)
+        lines.append(f"- {p['id']}: {p['w']}x{p['h']}px, " + (f"9-slice viền {p['slice']}" if p["slice"] else "không 9-slice")
+                     + f", dùng ở {places} chỗ ({', '.join(p['shapes'])})"
+                     + (f", lấy lại từ {p['from']['node']}#{p['from']['part']} ({p['from']['ref']} v{p['from']['version']})" if p["from"] else ""))
+    return lines
+
+
+def write_parts(work, frame, parts, fr, extra=None):
+    """Puts every part's png and svg and the table into work/parts/<frame>/ (what deliver hands over)."""
+    dest = work / PARTS_DIR / frame
+    if dest.exists():
+        set_aside([dest], work, "_old")
+    dest.mkdir(parents=True, exist_ok=True)
+    table = []
+    for p in parts:
+        for ext in ("png", "svg"):
+            src = p[ext]
+            if src and Path(src).is_file() and Path(src) != dest / f"{p['id']}.{ext}":
+                shutil.copy2(src, dest / f"{p['id']}.{ext}")
+        p["png"] = dest / f"{p['id']}.png"
+        table.append({"id": p["id"], "w": p["w"], "h": p["h"], "slice": p["slice"], "shapes": p["shapes"], "from": p["from"],
+                      "text": p.get("text", True)})
+    kept = [r["id"] for r in fr["shapes"] if r["role"] != gd.ROLE_BACKDROP and not any(r["id"] in p["shapes"] for p in parts)]
+    write_json(dest / PARTS_FILE, dict({"frame": frame, "parts": table, "kept": kept,
+                                        "skipped": [r["id"] for r in fr["shapes"] if r["role"] == gd.ROLE_BACKDROP]}, **(extra or {})))
+    return dest
+
+
+def claude_frame(root, ref, item, folder, feature):
+    """One frame of a node as a claude concept: the chat's parts become pictures and the whole frame is put together."""
+    path = node_of(feature)
+    tree, _ = gd.read_tree(root, "live")
+    node = next((n for n in gd.walk(tree) if n["path"] == path), None) if tree else None
+    fr = frame_named(node, item)
+    if fr is None:
+        raise ValueError(f"node '{path}' trong live không có frame '{item}'")
+    work = folder / "work"
+    parts, problems = read_parts(root, tree, node, fr, item, work)
+    if problems:
+        raise ValueError(f"bảng phần của frame '{item}' chưa dùng được (không tính lượt): " + "; ".join(problems))
+    if not svg_converters():
+        raise ValueError("máy này không đổi được SVG sang PNG: cần rsvg-convert, inkscape, magick, Chrome hoặc Edge "
+                         "(hoặc đặt STUDIO_SVG2PNG). Dừng và báo người")
+    oid = folder.name
+    version = read_status(folder)["version"]
+    fresh = fresh_parts(version_dir(root, CLAUDE, feature, oid, version) / PARTS_DIR / item, parts) if version else [p["id"] for p in parts]
+    if version and not fresh:
+        # Only the layout changed (or nothing): the delivered parts are put together again. Nothing is drawn, so no
+        # run is counted and nobody has to order it.
+        data, problems = check_order(root, CLAUDE, feature, oid, folder)
+        if problems:
+            raise ValueError("order chưa hợp lệ: " + "; ".join(problems[:4]))
+        if item not in dict(data["items"]):
+            raise ValueError(f"order không có item '{item}'. Có: {', '.join(i for i, _ in data['items'])}")
+        save_status(folder, state="doing")
+        attempt, event = 0, "build"
+    else:
+        if version and budget(folder, item)["left"] <= 0:
+            raise ValueError(f"frame '{item}' đã giao (v{version}); vẽ mới sau khi giao cần lệnh của Leader (@GameDesigner, @CodeLead, "
+                             f"@Manager hoặc người): python Management/tools/studio.py redo {ref} {item} \"<lí do>\". Phần mới hoặc đã "
+                             f"đổi: {', '.join(fresh)}. Ghép lại từ các phần đã giao (bảng phần và SVG giữ nguyên) thì không cần lệnh")
+        feature, oid, folder, data, text, work, refs = prepare(root, CLAUDE, ref, item, ("art",))
+        attempt, event = start_attempt(folder, item), "run"
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    made = work / "_made" / item
+    if made.exists():
+        shutil.rmtree(made)
+    made.mkdir(parents=True)
+    for p in parts:
+        if p["from"]:
+            continue
+        p["png"] = made / f"{p['id']}.png"
+        if not svg_to_png(with_font(p["svg"], made / f"{p['id']}.font.svg"), p["png"], (p["w"], p["h"])):
+            log(folder, "run", tool=CLAUDE, item=item, mode="none", exit=1, result=f"không đổi được phần {p['id']} sang PNG", files=[])
+            print(f"Không đổi được work/{item}/{p['id']}.svg sang PNG (lượt {attempt} đã tính). Dừng và báo người.", file=sys.stderr)
+            return 1
+    write_parts(work, item, parts, fr)
+    code = finish_frame(folder, work, item, fr, parts, attempt, stamp, event=event, ref=ref)
+    if code == 0 and not attempt:
+        print("Ghép lại từ các phần đã giao: không vẽ gì mới, không tính lượt. Deliver để có bản mới.")
+    return code
+
+
+def fresh_parts(delivered, parts):
+    """The ids of the parts that are not what was delivered last: a new one, another size or border, or another
+    drawing. A part taken over from another node is never new here."""
+    table = gd._json(delivered / PARTS_FILE)
+    old = {p.get("id"): p for p in (table or {}).get("parts", []) if isinstance(p, dict)} if isinstance(table, dict) else {}
+    out = []
+    for p in parts:
+        if p["from"]:
+            continue
+        d, was = old.get(p["id"]), delivered / f"{p['id']}.svg"
+        same = (d is not None and not d.get("from") and (d.get("w"), d.get("h"), d.get("slice")) == (p["w"], p["h"], p["slice"])
+                and was.is_file() and was.read_bytes() == Path(p["svg"]).read_bytes())
+        if not same:
+            out.append(p["id"])
+    return out
+
+
+def cmd_redo(root, ref, item, text):
+    """A Leader (or the human) lets the @ClaudeImage chat draw one frame of a delivered claude concept again: one
+    run. Drawing after a delivery is never the tool chat's own decision."""
+    tool, feature, oid, folder = find_order(root, ref, CLAUDE)
+    if not DESIGN_RX.match(feature) or is_cheat(node_of(feature)):
+        raise ValueError("redo chỉ dùng cho claude-concept của một node có frame (node cheat do tool dựng lại, không vẽ)")
+    data = parse_order(read_text(folder / ORDER_FILE))
+    if item not in dict(data["items"]):
+        raise ValueError(f"order không có item '{item}'. Có: {', '.join(i for i, _ in data['items'])}")
+    text = str(text or "").replace("\r", "").strip()
+    if not text or len(text) > REVIEW_TEXT_MAX:
+        raise ValueError(f"cần lí do (cần sửa gì), tối đa {REVIEW_TEXT_MAX} kí tự")
+    status = read_status(folder)
+    if status["version"] < 1:
+        raise ValueError(f"order {ref} chưa giao lần nào: @ClaudeImage còn lượt đầu, không cần redo")
+    b = budget(folder, item)
+    if b["left"] > 0:
+        raise ValueError(f"frame '{item}' đang có một lượt làm lại chưa dùng")
+    log(folder, "redo", item=item, round=b["round"] + 1, text=text, version=status["version"])
+    save_status(folder, state="doing")
+    print(f"Đã mở 1 lượt vẽ lại cho frame '{item}' của {ref}. Nhắn @ClaudeImage bằng SendMessage (to: \"ClaudeImage\"): "
+          f"\"Order {ref}, frame {item}: được vẽ lại 1 lượt. Lí do: {text}\"")
+    return 0
+
+
+def write_check(work, item, ref, what, sizes):
+    """The tool's own check of what `claude` made, written to work/<item>.check.md (deliver reads its first line):
+    every PNG has the size asked for, and the file says which order, item and shapes it is, so nothing is taken for
+    another order's. The content of the pictures is not looked at. sizes: [(name, path, (w, h))]. True when it passes."""
+    bad, lines = [], []
+    for name, path, want in sizes:
+        try:
+            m = measure_png(path)
+            got = (m["width"], m["height"])
+        except (ValueError, OSError):
+            got = None
+        ok = got == tuple(want)
+        lines.append(f"- {name}: " + (f"{got[0]}x{got[1]}px" if got else "không đọc được PNG") + f", cần {want[0]}x{want[1]}px" + ("" if ok else ": LỆCH"))
+        if not ok:
+            bad.append(name)
+    head = CHECK_PASS if not bad else f"chưa đạt: sai kích thước hoặc không đọc được: {', '.join(bad)}"
+    (work / f"{item}.check.md").write_text("\n".join(
+        [head, f"Tự kiểm bằng script (studio.py claude), không xem nội dung ảnh. Order {ref}, item {item}."] + list(what) + lines) + "\n",
+        encoding="utf-8")
+    print(f"    tự kiểm: {head} (work/{item}.check.md)")
+    return not bad
+
+
+def finish_frame(folder, work, item, fr, parts, attempt, stamp, event="run", ref=""):
+    """Puts the frame together into work/out/<item>.png and prints what was made."""
+    placed = {sid: p for p in parts for sid in p["shapes"]}
+    svg, size = compose_frame(fr, placed)
+    (work / "_log").mkdir(parents=True, exist_ok=True)
+    (work / "out").mkdir(parents=True, exist_ok=True)
+    whole = work / "_log" / f"{item}-{stamp}.compose.svg"
+    whole.write_text(svg, encoding="utf-8")
+    set_aside(list((work / "out").glob(f"{item}.*")), work, "_old")
+    dest = work / "out" / f"{item}.png"
+    used = svg_to_png(whole, dest, size)
+    log(folder, event, tool=CLAUDE, item=item, mode=used or "none", exit=0 if used else 1, parts=[p["id"] for p in parts],
+        result=f"đã có work/out/{dest.name}" if used else "không ghép được ảnh", files=[dest.name] if used else [])
+    if not used:
+        print(f"Không ghép được ảnh của frame '{item}'. Dừng và báo người.", file=sys.stderr)
+        return 1
+    if attempt:
+        keep_attempt(work, item, attempt)
+    print(f"ClaudeImage: đã ghép work/out/{dest.name} ({size[0]}x{size[1]}px, bằng {used}" + (f", lượt {attempt}" if attempt else "") + ")")
+    for line in parts_summary(parts, fr):
+        print(f"    {line}")
+    kept = [r["id"] for r in fr["shapes"] if r["role"] != gd.ROLE_BACKDROP and r["id"] not in placed]
+    if kept:
+        print(f"    giữ hình cơ bản của frame: {', '.join(kept)}")
+    write_check(work, item, ref, [f"Claude-concept của frame '{item}'" + (f" ({fr['title']})" if fr["title"] else "") + ".",
+                                  "Hình đã thay bằng phần: " + (", ".join(sorted(placed)) or "không có") + ".",
+                                  "Hình giữ như frame (hình cơ bản, không thuộc tiêu chí của order): " + (", ".join(kept) or "không có") + ".",
+                                  "Chữ tool in (font Roboto): " + ("; ".join(frame_texts(fr)) or "không có") + "."],
+                [(f"phần {p['id']}", p["png"], (p["w"], p["h"])) for p in parts] + [(dest.name, dest, size)])
+    return 0
+
+
+def cheat_owner(nodes, fr, r):
+    """(node path, frame name, shape) of the shape of a node that a cheat shape stands for: among the nodes whose
+    numbers it uses, a shape the node itself talks about with the same id, else of the same kind and size."""
+    slot = gd.shape_slots(fr, r)[0]
+    same_id, same_size = [], []
+    for path in r["sources"]:
+        for f in (nodes.get(path) or {}).get("frames", []):
+            for s in f["shapes"]:
+                if s["role"] != gd.ROLE_OWN or s["shape"] != r["shape"]:
+                    continue
+                hit = (path, Path(f["file"]).stem, s)
+                o = gd.shape_slots(f, s)[0]
+                if s["id"] == r["id"]:
+                    same_id.append(hit)
+                elif abs(o[2] - slot[2]) <= 0.51 and abs(o[3] - slot[3]) <= 0.51:
+                    same_size.append(hit)
+    pool = same_id or [h for h in same_size if h[2]["label"] == r["label"]] or same_size
+    return pool[0] if pool else None
+
+
+def cheat_plan(root, tree, fr):
+    """(parts, missing, notes) to put a cheat frame together from the claude concepts of the nodes it borrows from.
+    missing: [{shape, w, h, node, frame, of, why}]: a shape whose node has no good claude concept yet."""
+    nodes = {n["path"]: n for n in gd.walk(tree)} if tree else {}
+    _, pending = gd.read_art(root, tree)
+    waiting = {o["node"]: o["ref"] for o in pending if o.get("tool") == CLAUDE}
+    cache, parts, missing, notes = {}, {}, [], []
+    for r in fr["shapes"]:
+        if r["role"] == gd.ROLE_BACKDROP or r["shape"] not in gd.PART_SHAPES:
+            continue
+        if not r["sources"]:
+            notes.append(f"{r['id']}: không `use` số của node nào nên không biết lấy phần ở đâu (giữ hình cơ bản; @GameDesigner sửa frame cheat)")
+            continue
+        owner = cheat_owner(nodes, fr, r)
+        if owner is None:
+            notes.append(f"{r['id']}: các node nguồn ({', '.join(r['sources'])}) không có hình nào cùng id hoặc cùng loại và cỡ "
+                         "(giữ hình cơ bản; @GameDesigner xem lại frame)")
+            continue
+        path, fname, shape = owner
+        if path not in cache:
+            cache[path] = delivered_parts(root, tree, path)
+        have = cache[path].get(fname)
+        q = next((q for q in have["parts"] if shape["id"] in q.get("shapes", [])), None) if have else None
+        if q is None:
+            slot = gd.shape_slots(fr, r)[0]
+            why = (f"order {waiting[path]} chưa giao: làm và giao order đó trước" if path in waiting else
+                   "node chưa có claude-concept còn dùng được: nhắn @GameDesigner đặt order claude-concept cho node này")
+            missing.append({"shape": r["id"], "w": slot[2], "h": slot[3], "node": path, "frame": fname, "of": shape["id"], "why": why})
+            continue
+        key = (path, fname, q["id"])
+        if key not in parts:
+            parts[key] = {"id": f"{len(parts) + 1}-{q['id']}", "w": q["w"], "h": q["h"], "slice": q.get("slice"), "shapes": [],
+                          "svg": have["dir"] / f"{q['id']}.svg", "png": have["dir"] / f"{q['id']}.png", "text": q.get("text", True),
+                          "from": {"node": path, "frame": fname, "part": q["id"], "ref": have["ref"], "version": have["version"]}}
+        why = next((x for x in (fits(parts[key], s) for s in gd.shape_slots(fr, r)) if x), "")
+        if why:
+            notes.append(f"{r['id']}: phần {path}#{q['id']} không vừa ({why}); giữ hình cơ bản")
+        else:
+            parts[key]["shapes"].append(r["id"])
+    return [p for p in parts.values() if p["shapes"]], missing, notes
+
+
+def needs_file(folder, item):
+    return folder / "work" / f"{item}.needs.json"
+
+
+def claude_cheat(root, ref, item, folder, feature, oid):
+    """A state of a cheat node: nothing is drawn. The frame is put together from the parts of the nodes it borrows
+    its numbers from; when one of them has no claude concept yet, nothing is made and the command says which."""
+    data, problems = check_order(root, CLAUDE, feature, oid, folder)
+    if problems:
+        raise ValueError("order chưa hợp lệ: " + "; ".join(problems[:4]))
+    if item not in dict(data["items"]):
+        raise ValueError(f"order không có item '{item}'. Có: {', '.join(i for i, _ in data['items'])}")
+    if not svg_converters():
+        raise ValueError("máy này không đổi được SVG sang PNG: cần rsvg-convert, inkscape, magick, Chrome hoặc Edge "
+                         "(hoặc đặt STUDIO_SVG2PNG). Dừng và báo người")
+    tree, _ = gd.read_tree(root, "live")
+    fr = frame_named(next((n for n in gd.walk(tree) if n["path"] == node_of(feature)), None), item)
+    parts, missing, notes = cheat_plan(root, tree, fr)
+    work = folder / "work"
+    work.mkdir(parents=True, exist_ok=True)
+    if missing:
+        write_json(needs_file(folder, item), missing)
+        log(folder, "wait", item=item, needs=[f"{m['node']}:{m['frame']}:{m['of']}" for m in missing])
+        print(f"Chưa dựng được state '{item}': còn {len(missing)} hình thiếu phần. Cheat không tự vẽ; các frame sau phải có "
+              "claude-concept trước:", file=sys.stderr)
+        for m in missing:
+            print(f"- hình {m['shape']} ({m['w']:g}x{m['h']:g}px) cần phần của hình '{m['of']}' ở {m['node']} (frame {m['frame']}): {m['why']}",
+                  file=sys.stderr)
+        return 1
+    if needs_file(folder, item).exists():
+        needs_file(folder, item).unlink()
+    save_status(folder, state="doing")
+    write_parts(work, item, parts, fr)
+    code = finish_frame(folder, work, item, fr, parts, 0, time.strftime("%Y%m%d-%H%M%S"), event="build", ref=ref)
+    for n in notes:
+        print(f"    lưu ý: {n}")
+    if code == 0:
+        print("Tool tự dựng, không tính lượt. Đủ mọi state của order thì deliver.")
+    return code
+
+
 def order_size(data):
     """(width, height) in px written in the order's format line, or None."""
     m = re.search(r"(\d+)\s*x\s*(\d+)", data["fields"].get("format", ""))
@@ -846,8 +1375,14 @@ def order_size(data):
 def cmd_claude(root, ref, item):
     """@ClaudeImage: makes work/out/<item>.png from the SVG the chat wrote in work/<item>.svg. One run of the item.
     Nothing is counted when the SVG is refused or the machine cannot draw it."""
-    with RunLock(root, CLAUDE):
-        _, _, _, folder = find_order(root, ref, CLAUDE)
+    _, owner, oid, folder = find_order(root, ref, CLAUDE)
+    if not ID_RX.match(item):
+        raise ValueError(f"item '{item}' phải là chữ thường, số, gạch nối")
+    with ClaudeLock(root, folder, item):
+        if DESIGN_RX.match(owner):      # a claude concept: the parts of a frame, or a cheat state put together
+            if is_cheat(node_of(owner)):
+                return claude_cheat(root, ref, item, folder, owner, oid)
+            return claude_frame(root, ref, item, folder, owner)
         src = folder / "work" / f"{item}.svg"
         size = order_size(parse_order(read_text(folder / ORDER_FILE)))
         if not size:
@@ -860,13 +1395,13 @@ def cmd_claude(root, ref, item):
         if not svg_converters():
             raise ValueError("máy này không đổi được SVG sang PNG: cần rsvg-convert, inkscape, magick, Chrome hoặc Edge "
                              "(hoặc đặt STUDIO_SVG2PNG). Dừng và báo người")
-        feature, oid, folder, data, text, work, refs = prepare(root, CLAUDE, ref, item, ("image", "art"))
+        feature, oid, folder, data, text, work, refs = prepare(root, CLAUDE, ref, item, ("image",))
         attempt = start_attempt(folder, item)
         stamp = time.strftime("%Y%m%d-%H%M%S")
         shutil.copy2(src, work / "_log" / f"{item}-{attempt}-{stamp}.svg")      # what this run drew
         set_aside(list((work / "out").glob(f"{item}.*")), work, "_old")      # the previous draft
         dest = work / "out" / f"{item}.png"
-        used = svg_to_png(src, dest, size)
+        used = svg_to_png(with_font(src, work / "_log" / f"{item}-{attempt}-{stamp}.font.svg"), dest, size)
         log(folder, "run", tool=CLAUDE, item=item, mode=used or "none", exit=0 if used else 1,
             result=f"đã có work/out/{dest.name}" if used else "không đổi được SVG sang PNG", files=[dest.name] if used else [])
         if not used:
@@ -879,7 +1414,7 @@ def cmd_claude(root, ref, item):
                 print(f"    {line}")
         except ValueError as ex:
             print(f"    không đo được: {ex}")
-        print(f"Xem ảnh (Read work/out/{dest.name}), tự kiểm theo Tiêu chí nhận, ghi work/{item}.check.md.")
+        write_check(work, item, f"{feature}/{oid}", [f"Order của feature {feature}: một ảnh cho item '{item}'."], [(dest.name, dest, size)])
         return 0
 
 
@@ -969,9 +1504,22 @@ def cmd_deliver(root, tool, ref):
                 "frames": {Path(f["file"]).stem: gd.frame_text_hash(f["text"]) for f in node["frames"]},
                 "styles": {s: styles.get(s, "") for s in order_styles(data)}, "order": f"{feature}/{oid}",
                 "version": version, "at": now(), "stamp": time.time()}
+    part_dirs = {}
+    if meta and tool == CLAUDE:      # a claude concept hands over its parts too; a cheat state must have been put together
+        waiting = [i for i in ids if needs_file(folder, i).exists()]
+        part_dirs = {i: folder / "work" / PARTS_DIR / i for i in ids}
+        lacking = [i for i in ids if not (part_dirs[i] / PARTS_FILE).is_file()]
+        if waiting or lacking:
+            raise ValueError("chưa giao được: " + "; ".join(
+                ([f"state còn thiếu phần từ node khác: {', '.join(waiting)}"] if waiting else [])
+                + ([f"chưa có bảng phần (chạy `studio.py claude {feature}/{oid} <item>` trước): {', '.join(lacking)}"] if lacking else [])))
+        tables = {i: gd._json(part_dirs[i] / PARTS_FILE) or {} for i in ids}
+        meta["sources"] = sorted({(p["from"]["ref"], p["from"]["version"]) for t in tables.values() for p in t.get("parts", []) if p.get("from")})
     dest.mkdir(parents=True)
     for i in ids:
         shutil.copy2(by_item[i][0], dest / by_item[i][0].name)
+    for i, src in part_dirs.items():
+        shutil.copytree(src, dest / PARTS_DIR / i)
     if meta:
         write_json(dest / gd.ART_META, meta)
     quality = {}
@@ -983,7 +1531,7 @@ def cmd_deliver(root, tool, ref):
     # A made-again item is "Chưa duyệt" again; the items left alone keep their judgement.
     log_ = events(folder)
     last = max([n for n, e in enumerate(log_) if e.get("event") == "deliver"] or [-1])
-    remade = {e.get("item") for e in log_[last + 1:] if e.get("event") in ("attempt", "pick")}
+    remade = {e.get("item") for e in log_[last + 1:] if e.get("event") in ("attempt", "pick", "build")}
     reviews = {i: r for i, r in read_reviews(folder).items() if i in ids and (last >= 0 and i not in remade)}
     debts = read_debts(root)
     rel_dest = dest.relative_to(Path(root)).as_posix()
@@ -1066,6 +1614,8 @@ def save_review(root, ref, item, level, text=""):
     Used by `review` and by the management page; it only stores, it tells nobody. Returns (tool, feature, id,
     folder, entry or None); raises ValueError."""
     tool, feature, oid, folder = find_order(root, ref)
+    if no_judging(tool, feature):
+        raise ValueError("claude-concept không chấm: muốn vẽ lại một frame thì Leader chạy `studio.py redo <ref> <frame> \"<lí do>\"`")
     data = parse_order(read_text(folder / ORDER_FILE))
     if item not in dict(data["items"]):
         raise ValueError(f"order không có item '{item}'. Có: {', '.join(i for i, _ in data['items'])}")
@@ -1418,6 +1968,9 @@ def item_rows(folder, data):
     for i, text in data["items"]:
         b = budget(folder, i)
         r = reviews.get(i) or {"level": None, "text": ""}
+        if delivered and not r["text"] and b["left"] > 0:      # a Leader opened the round (redo): its reason is the feedback
+            said = [e.get("text", "") for e in events(folder) if e.get("event") == "redo" and e.get("item") == i]
+            r = dict(r, text=said[-1] if said else "")
         rows.append({"id": i, "text": text, "level": r["level"] if delivered else None, "feedback": r["text"] if delivered else "",
                      "used": b["used"], "allowed": b["allowed"], "left": b["left"], "round": b["round"], "why": b["why"],
                      "redo": delivered and b["left"] > 0})
@@ -1433,7 +1986,7 @@ def summary(root, tool=None):
             continue
         data, problems = check_order(root, t, feature, oid, folder)
         status = read_status(folder)
-        state = view_state(status, [i for i, _ in data["items"]], read_reviews(folder))
+        state = view_state(status, [i for i, _ in data["items"]], read_reviews(folder), no_judging(t, feature))
         out.append((f"{feature}/{oid}", t, state, status["version"], len(data["items"]), data["title"],
                     problems, item_rows(folder, data)))
     return out
@@ -1464,6 +2017,14 @@ def art_line(root):
     parts = []
     for ref, tool, state, version, _, _, _, items in rows:
         chat = "@" + TOOL_CHATS[tool]
+        try:
+            folder = find_order(root, ref, tool)[3]
+            needs = sorted({m["node"] for i in items for m in (gd._json(needs_file(folder, i["id"])) or []) if isinstance(m, dict)})
+        except (ValueError, OSError, KeyError):
+            needs = []
+        if needs:
+            parts.append(f"{ref}: cheat đang chờ claude-concept của: {', '.join(needs)} (đặt order cho các node đó)")
+            continue
         redo = [i["id"] for i in items if i["redo"]]
         mute = [i["id"] for i in items if version and i["level"] == REDO and not i["feedback"]]
         stuck = [i["id"] for i in items if version and state == "redo" and i["level"] == REDO and i["feedback"] and not i["redo"]]
@@ -1499,7 +2060,7 @@ def snapshot(root):
                           "ok": q.get("ok") if q else None, "note": q.get("note", "") if q else "",
                           "file": f"{vdir.relative_to(Path(root)).as_posix()}/{q['file']}" if q and q.get("file") else ""})
         design = bool(DESIGN_RX.match(feature))
-        state = view_state(status, [i["id"] for i in items], read_reviews(folder))
+        state = view_state(status, [i["id"] for i in items], read_reviews(folder), no_judging(tool, feature))
         orders.append({"ref": f"{feature}/{oid}", "tool": tool, "kind": data["fields"].get("kind", ""), "title": data["title"],
                        "owner": feature, "design": design, "node": node_of(feature) if design else "",
                        "state": state, "stateName": VIEW_STATES[state], "version": status["version"],
@@ -1527,7 +2088,8 @@ def cmd_status(root, arg=""):
         for i in items:
             line = f"    {i['id']}: đã chạy {i['used']} lượt, còn {i['left']}, làm lại {i['round']}/{MAX_REDOS}"
             if version:
-                line += f" · {level_name(i['level'])}" + (f" · phản hồi: {i['feedback']}" if i["feedback"] else "")
+                line += (" · đã giao, không chấm" if no_judging(tool, ref.rsplit("/", 1)[0]) else f" · {level_name(i['level'])}") + (
+                    f" · phản hồi: {i['feedback']}" if i["feedback"] else "")
                 if i["redo"]:
                     line += " · LÀM LẠI ĐƯỢC (1 lượt)"
                 elif i["level"] == REDO:
@@ -1559,6 +2121,8 @@ def main(argv):
             return cmd_check(root)
         if args[:1] == ["status"] and len(args) <= 2:
             return cmd_status(root, args[1] if len(args) == 2 else "")
+        if len(args) == 4 and args[0] == "redo":
+            return cmd_redo(root, args[1], args[2], args[3])
         if args[:1] == ["measure"] and len(args) in (2, 3):
             return cmd_measure(root, args[1], args[2] if len(args) == 3 else "")
         if len(args) == 3 and args[0] in ("codex", "consult", "blender", "claude"):

@@ -53,13 +53,13 @@ view: x=-20u..20u y=-2u..8u  # phần chiến trường được vẽ; y=0 là m
 - spawn-l arrow from=-17u,0 to=-2u,0 label="quái ra trái"
 - archer  ring  cx=-6u cy=1u r=reach label="tầm cung thủ"
 ```
-- Hình có sẵn: `rect`, `round-rect`, `button`, `label`, `icon`, `bar` (x y w h; `bar` thêm `fill=0..1`), `grid` (x y cols rows, `cell` hoặc `cw` `ch`, `gap`), `circle`, `ring` (cx cy r), `line`, `arrow` (`from=x,y to=x,y`). Thêm được `label="..."`, `parent=<id>` (toạ độ tính từ góc của hình cha) và cờ `overlap` (cố ý chồng lên hình khác).
+- Hình có sẵn: `rect`, `round-rect`, `button`, `label`, `icon`, `bar` (x y w h; `bar` thêm `fill=0..1`), `grid` (x y cols rows, `cell` hoặc `cw` `ch`, `gap`), `circle`, `ring` (cx cy r), `line`, `arrow` (`from=x,y to=x,y`). Thêm được `label="..."`, `parent=<id>` (toạ độ tính từ góc của hình cha) và cờ `overlap` (cố ý chồng lên hình khác). Label của hình `label` và `button` là **chữ người chơi đọc**, được in lên ảnh concept bằng font Roboto: viết đúng chữ trong game, ghi chú thì để trong ngoặc đơn ở cuối (`label="Chơi lại (nút chính)"` hiện "Chơi lại"). Label của hình khác là chú thích, không lên ảnh concept.
 - Toạ độ là góc thấp nhất của hình: ui là góc trên trái, field là góc dưới trái.
 - Giá trị là số, `<số>u` (chỉ field), hoặc tên `let`/`use`. Không có phép tính: số tính ra thì ghi kết quả và cách tính ở `CLAUDE.md`.
 - Một con số đã có ở frame node khác thì `use`, không chép lại. Node có `use` phải khai node kia trong refs; node kia đổi thì node này phải làm lại.
 - Cảnh báo tự động: hình tràn màn hoặc tràn khung nhìn; hình con tràn hình cha; hai hình cùng cấp chồng nhau mà không có `overlap`; nút có cạnh ngắn dưới 96 px. Vòng tầm (`ring`) không bị kiểm tràn. Cảnh báo không chặn chốt nhưng phải xử lý hoặc giải thích ở `CLAUDE.md`. Lỗi cú pháp là lỗi cấu trúc: phải sửa.
 - Frame chỉ ghi kích thước và vị trí ước lượng. Màu, hình dáng, phong cách vẫn không ghi.
-- Ảnh art không đặt cho node vòng 4. Feature có frame `kind: ui` phải có node `cheat` (tối đa 3 state, mỗi state một frame `use` số từ các node vòng 4 này); ảnh art chỉ đặt ở đó. Xem mục "Node cheat" bên dưới.
+- Ảnh art-concept (Codex) không đặt cho node vòng 4; claude-concept thì mỗi frame của node vòng 4 có một ảnh (xem `gamedesigner.md`): hình nào dùng `let` của chính frame là hình node tự định và được @ClaudeImage vẽ thành phần, hình chỉ `use` số node khác giữ nguyên, nên số nào thuộc node nào phải khai đúng `let`/`use`. Feature có frame `kind: ui` phải có node `cheat` (tối đa 3 state, mỗi state một frame `use` số từ các node vòng 4 này); ảnh art chỉ đặt ở đó. Xem mục "Node cheat" bên dưới.
 
 ## Không cụ thể tới mức này (có chuyên gia riêng)
 - Giao diện tương tác: màu, kiểu dáng. Vị trí và kích thước chỉ ở mức ước lượng, và chỉ nằm trong frame. Sai: "Nút có màu xanh".
@@ -76,7 +76,7 @@ Vòng 4 là vòng duy nhất được ghi dữ liệu theo giai đoạn, và ch�
 
 ## Mức IDEA là gì
 - Các tính năng đủ để thấy được gameplay.
-- Unit 2D: hiển thị được hình, sprite có nghĩa (ảnh gen bằng AI); anim đơn giản bằng scale, move, rotate hoặc đổi màu.
+- Unit 2D: hiển thị được hình, sprite có nghĩa (ảnh @ClaudeImage vẽ là đủ); anim đơn giản bằng scale, move, rotate hoặc đổi màu.
 - Unit 3D: model low poly (làm qua blender mcp); anim cơ bản bằng scale, move, rotate, đổi màu.
 
 ## Mở khoá code

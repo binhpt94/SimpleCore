@@ -961,6 +961,94 @@ def resolve_frame(f, screen, lookup):
     return out
 
 
+# What a claude concept does with each shape of a frame (see frame_roles).
+ROLE_OWN, ROLE_OTHER, ROLE_BACKDROP = "own", "other", "backdrop"
+ROLE_NAMES = {ROLE_OWN: "của node", ROLE_OTHER: "phụ", ROLE_BACKDROP: "nền phụ"}
+PART_SHAPES = ("rect", "round-rect", "button", "icon", "bar", "circle", "grid")      # shapes a picture can stand for
+BACKDROP_SHARE = 0.9
+
+
+def frame_roles(f, resolved):
+    """{shape id: (role, [source node paths])} of one parsed frame: what the node itself talks about.
+    own: the shape's place or size uses a `let` of this frame, or only plain numbers; a claude concept draws it.
+    other: it only uses numbers of other nodes (`use`): kept as the basic shape of the frame.
+    backdrop: plain numbers only and at least BACKDROP_SHARE of the screen or view: left out.
+    The sources are the nodes whose numbers the shape uses."""
+    view = resolved["view"]
+    area = max(1e-9, (view[2] - view[0]) * (view[3] - view[1]))
+    boxes = {r["id"]: r["bbox"] for r in resolved["shapes"]}
+    out = {}
+    for s in f["shapes"]:
+        names = set()
+        for key, (kind, raw) in s["params"].items():
+            if kind == "raw" and key != "parent":
+                names |= {t for t in raw.split(",") if t and not FRAME_NUM_RX.match(t)}
+        sources = sorted({f["uses"][n][0] for n in names if n in f["uses"]})
+        box = boxes.get(s["id"])
+        if names & set(f["lets"]):
+            role = ROLE_OWN
+        elif sources:
+            role = ROLE_OTHER
+        elif box and (box[2] - box[0]) * (box[3] - box[1]) >= BACKDROP_SHARE * area:
+            role = ROLE_BACKDROP
+        else:
+            role = ROLE_OWN
+        out[s["id"]] = (role, sources)
+    return out
+
+
+def frame_scale(fr):
+    """px of the 1920-wide drawing for one unit of the frame (1 for a ui frame)."""
+    return 1920 / (fr["view"][2] - fr["view"][0]) if fr["kind"] == "field" else 1.0
+
+
+def shape_slots(fr, r):
+    """Where a picture standing for a shape goes, in px of the drawing: [(left, top, width, height)]; one per cell
+    of a grid; [] for a shape no picture stands for (text, rings, lines)."""
+    if r["shape"] not in PART_SHAPES + ("label",):      # a text has a box too: a picture may stand for it, none has to
+        return []
+    k, (x1, y1, x2, y2), field = frame_scale(fr), fr["view"], fr["kind"] == "field"
+    def at(x, y, w, h):      # the top left corner in px (a field frame has y up)
+        return (round((x - x1) * k, 3), round(((y2 - y - h) if field else (y - y1)) * k, 3), round(w * k, 3), round(h * k, 3))
+    if r["shape"] == "circle":
+        return [at(r["cx"] - r["r"], r["cy"] - r["r"], 2 * r["r"], 2 * r["r"])]
+    if r["shape"] == "grid":
+        step_x, step_y = r["cw"] + r["gap"], r["ch"] + r["gap"]
+        return [at(r["x"] + i * step_x, (r["y"] + (r["rows"] - 1 - j) * step_y) if field else (r["y"] + j * step_y), r["cw"], r["ch"])
+                for j in range(r["rows"]) for i in range(r["cols"])]
+    return [at(r["x"], r["y"], r["w"], r["h"])]
+
+
+CLAUDE_DONE = "Đã giao"      # the label of a claude concept: nobody judges it
+PART_RATIO = 0.02            # how far the shape of a picture that is not 9-sliced may be from the place it stands in
+
+
+def part_fits(part, slot):
+    """'' when a picture ({w, h, slice}) can stand in a place (left, top, width, height) px, else why not."""
+    w, h = slot[2], slot[3]
+    if part.get("slice"):
+        l, t, r, b = part["slice"]
+        return "" if w >= l + r and h >= t + b else f"chỗ {w:g}x{h:g} nhỏ hơn viền 9-slice ({l + r}x{t + b})"
+    off = abs(part["w"] / part["h"] - w / h) / (w / h)
+    return "" if off <= PART_RATIO else (f"tỉ lệ {part['w']}x{part['h']} lệch {off * 100:.0f}% so với chỗ {w:g}x{h:g} "
+                                         "(khai slice nếu 9-slice được, hoặc tách thành phần riêng)")
+
+
+def frame_roles_brief(fr):
+    """Lines for an AI: which shapes of the frame a claude concept draws, keeps as they are, or leaves out."""
+    groups = {ROLE_OWN: [], ROLE_OTHER: [], ROLE_BACKDROP: []}
+    for r in fr["shapes"]:
+        slots = shape_slots(fr, r) if r["shape"] in PART_SHAPES else []
+        size =f" {slots[0][2]:g}x{slots[0][3]:g}px" + (f" x{len(slots)}" if len(slots) > 1 else "") if slots else " (chữ hoặc nét: tool tự vẽ)"
+        groups[r.get("role", ROLE_OWN)].append(r["id"] + (size if r.get("role") == ROLE_OWN else ""))
+    lines = [f"  claude-concept của {fr['file']}:"]
+    lines.append("    của node (vẽ thành phần): " + (", ".join(groups[ROLE_OWN]) or "không có"))
+    lines.append("    phụ (giữ hình cơ bản): " + (", ".join(groups[ROLE_OTHER]) or "không có"))
+    if groups[ROLE_BACKDROP]:
+        lines.append("    nền phụ (bỏ qua): " + ", ".join(groups[ROLE_BACKDROP]))
+    return lines
+
+
 def read_frames(folder, where, problems, screen, lookup):
     """[{file, text, ...resolve_frame}] of the node's frames. Syntax errors go to `problems` (they block Chốt like
     any structure problem); measured warnings stay on each frame."""
@@ -973,6 +1061,9 @@ def read_frames(folder, where, problems, screen, lookup):
         for e in r["errors"]:
             problems.append({"path": where, "text": f"{FRAME_DIR}/{name}: {e}"})
         r.update(file=name, text=text, uses=[f"{p}#{n}" for p, n in f["uses"].values()])
+        roles = frame_roles(f, r)
+        for shape in r["shapes"]:
+            shape["role"], shape["sources"] = roles.get(shape["id"], (ROLE_OWN, []))
         r["svg"] = frame_svg(r)
         out.append(r)
     return out
@@ -982,10 +1073,51 @@ def _esc(text):
     return (str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;"))
 
 
-def frame_svg(fr):
+TEXT_SHAPES = ("label", "button")      # the shapes whose label is what the player reads; any other label is a note
+FONT_NAME = "Roboto"
+FONT_DIR = Path(__file__).resolve().parent.parent / "view" / "fonts"
+FONT_FILES = {400: "Roboto-Regular.ttf", 700: "Roboto-Bold.ttf"}
+_font_cache = {}
+
+
+def display_text(r):
+    """What a shape shows to the player: the label of a `label` or a `button`, without a note in brackets at its
+    end ("Chơi lại (nút chính)" shows "Chơi lại"). '' for any other shape: its label is the designer's note."""
+    if r.get("shape") not in TEXT_SHAPES:
+        return ""
+    return re.sub(r"(\s*\([^()]*\))+\s*$", "", r.get("label") or "").strip()
+
+
+def fit_text(text, w, h):
+    """A font size in px for a text on one line inside a box of w x h px."""
+    return round(max(10.0, min(h * 0.5, w * 1.7 / max(1, len(text)))), 1)
+
+
+def font_css(embed=True, prefix="view/fonts/", weights=(400, 700)):
+    """@font-face rules for the font of frames and concepts. embed: the font files inside the CSS as data (an SVG
+    drawn as a picture cannot load a file); else by path. '' when the files are not there: the system font is used."""
+    rules = []
+    for weight in weights:
+        f = FONT_DIR / FONT_FILES[weight]
+        if not f.is_file():
+            continue
+        if embed:
+            if weight not in _font_cache:
+                import base64
+                _font_cache[weight] = base64.b64encode(f.read_bytes()).decode("ascii")
+            src = "data:font/ttf;base64," + _font_cache[weight]
+        else:
+            src = prefix + FONT_FILES[weight]
+        rules.append(f"@font-face {{ font-family: '{FONT_NAME}'; font-weight: {weight}; src: url({src}) format('truetype'); }}")
+    return "\n".join(rules)
+
+
+def frame_svg(fr, only=None, bare=False, concept=False):
     """The resolved frame drawn as one <svg> (classes fr-*: the page and gd_frame.py --html give the colours).
     ui is drawn in px, y down; field in u, y up, scaled to px here. Every shape carries a <title> with its numbers
-    and data-* attributes with them (in the frame's own unit)."""
+    and data-* attributes with them (in the frame's own unit).
+    only: draw just the shapes with these ids. bare: no screen, no ground line (a layer to put over a picture).
+    concept: the frame as a concept shows it: only the texts the player reads (display_text), no numbers, no notes."""
     x1, y1, x2, y2 = fr["view"]
     field = fr["kind"] == "field"
     k = 1920 / (x2 - x1) if field else 1.0      # px per unit of the frame
@@ -1007,10 +1139,14 @@ def frame_svg(fr):
              '<defs><marker id="fr-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" '
              'orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="fr-head"/></marker></defs>',
              f'<rect class="fr-screen" x="0" y="0" width="{vw:g}" height="{vh:g}"/>']
-    if field and y1 < 0 < y2:
+    if bare:
+        parts.pop()
+    elif field and y1 < 0 < y2:
         parts.append(f'<line class="fr-ground" x1="0" y1="{Y(0)}" x2="{vw:g}" y2="{Y(0)}"/>')
     parents = {r["parent"] for r in fr["shapes"]}
     for r in fr["shapes"]:
+        if only is not None and r["id"] not in only:
+            continue
         tip = f"{r['id']} ({r['shape']})" + (f" {r['label']}" if r["label"] else "")
         data = f'data-id="{_esc(r["id"])}" data-shape="{r["shape"]}"'
         cls = "fr-" + r["shape"]
@@ -1049,9 +1185,15 @@ def frame_svg(fr):
             body = [f'<line class="{cls}" x1="{X(r["x1"])}" y1="{Y(r["y1"])}" x2="{X(r["x2"])}" y2="{Y(r["y2"])}"{marker}/>']
             text = (r["label"] + " · " if r["label"] else "") + f"{r['length']:g}{u}"
             tx, ty = (X(r["x1"]) + X(r["x2"])) / 2, (Y(r["y1"]) + Y(r["y2"])) / 2 - fs * 0.7
-        parts.append(f'<g class="fr-shape" {data}><title>{_esc(tip)}</title>' + "".join(body)
-                     + f'<text class="fr-text" x="{tx:g}" y="{ty:g}" font-size="{fs:g}" text-anchor="middle" '
-                       f'dominant-baseline="middle">{_esc(text)}</text></g>')
+        size, tcls = fs, "fr-text"
+        if concept:      # only what the player reads, at a size that fits its box
+            text = display_text(r)
+            if text and "w" in r:
+                tx, ty, size = left + w / 2, top + h / 2, fit_text(text, w, h)
+                tcls += " fr-strong" if r["shape"] == "button" else ""
+        label = (f'<text class="{tcls}" x="{tx:g}" y="{ty:g}" font-size="{size:g}" text-anchor="middle" '
+                 f'dominant-baseline="middle">{_esc(text)}</text>') if text else ""
+        parts.append(f'<g class="fr-shape" {data}><title>{_esc(tip)}</title>' + "".join(body) + label + "</g>")
     parts.append("</svg>")
     return "".join(parts)
 
@@ -1067,7 +1209,8 @@ FRAME_CSS = """.fr-svg { width: 100%; height: auto; display: block; }
 .fr-ring { fill: none; stroke: var(--fr-warn, #d07a18); stroke-width: 4; stroke-dasharray: 16 10; }
 .fr-dot, .fr-head { fill: var(--fr-warn, #d07a18); }
 .fr-line, .fr-arrow { stroke: var(--fr-ink, #44546a); stroke-width: 5; }
-.fr-text { fill: var(--fr-ink, #44546a); font-family: system-ui, sans-serif; pointer-events: none; }
+.fr-text { fill: var(--fr-ink, #44546a); font-family: Roboto, system-ui, sans-serif; pointer-events: none; }
+.fr-strong { font-weight: 700; }
 .fr-shape:hover > :not(text) { stroke-width: 8; }"""
 
 
@@ -1943,28 +2086,65 @@ def read_art(root, live):
                 continue
             node = nodes.get(path)
             label_state = "cũ hơn" if v < version else "mới nhất"
-            stale = []
-            if not node or meta.get("nodeHash") != node["dataHash"]:
-                stale.append("node đã đổi")
-            if any(styles.get(sid) != h for sid, h in (meta.get("styles") or {}).items()):
-                stale.append("style đã đổi")
+            claude = tool == CLAUDE_TOOL
+            style_changed = any(styles.get(sid) != h for sid, h in (meta.get("styles") or {}).items())
+            source_newer = False
+            for src in meta.get("sources") or []:      # parts taken from another node's claude concept
+                if isinstance(src, list) and len(src) == 2 and str(src[0]).startswith(DESIGN_OWNER + "/"):
+                    now_ = _json(Path(root) / "Management" / "studio" / tool / "orders" / Path(*str(src[0]).split("/")) / "status.json") or {}
+                    source_newer = source_newer or int(now_.get("version") or 0) != src[1]
+            whole = []      # what makes an art concept of Codex stale: it is one picture of the whole node
+            if not claude and (not node or meta.get("nodeHash") != node["dataHash"]):
+                whole.append("node đã đổi")
+            if not claude and style_changed:
+                whole.append("style đã đổi")
             quality = _json(vdir / "quality.json") or {}
             for name in sorted(x.name for x in vdir.iterdir() if x.is_file() and x.name not in (ART_META, "quality.json")):
                 item = Path(name).stem
-                r = reviews.get(item) if v == version and isinstance(reviews.get(item), dict) else {}
-                level = r.get("level")
-                level = level if isinstance(level, int) and not isinstance(level, bool) and 0 <= level < len(ART_LEVELS) else None
                 redoing = v == version and state == "doing"     # the tool chat is remaking it: nothing to judge until the next delivery
-                label = ("cũ hơn" if v < version else "CŨ · " + stale[0] if stale else "đang làm lại" if redoing
-                         else (ART_LEVEL_NONE if level is None else ART_LEVELS[level]))
+                table = _json(vdir / "parts" / item / "parts.json") if claude else None
+                parts = [{"id": p.get("id"), "w": p.get("w"), "h": p.get("h"), "slice": p.get("slice"),
+                          "shapes": p.get("shapes") or [], "from": p.get("from"),
+                          "file": (vdir / "parts" / item / f"{p.get('id')}.png").relative_to(Path(root)).as_posix()}
+                         for p in (table or {}).get("parts", []) if isinstance(p, dict)] if isinstance(table, dict) else None
+                if claude:
+                    # Nobody judges a claude concept, and a changed node does not make it stale by itself: the parts
+                    # that still stand for the shapes of the frame are kept. It has to be made again only when
+                    # something new must be drawn; when only the layout moved it waits to be put together again.
+                    level, feedback, stale, reglue = None, "", [], ""
+                    fr = next((f for f in (node or {}).get("frames", []) if Path(f["file"]).stem == item), None)
+                    if fr is None:
+                        stale.append("frame không còn trong live")
+                    else:
+                        cover = {sid: p for p in parts or [] for sid in p["shapes"]}
+                        # a cheat state is never drawn: it is put together from the parts of other nodes
+                        draw = [s["id"] for s in fr["shapes"] if not node.get("cheat") and s.get("role") == ROLE_OWN and s["shape"] in PART_SHAPES
+                                and (s["id"] not in cover or any(part_fits(cover[s["id"]], slot) for slot in shape_slots(fr, s)))]
+                        if draw:
+                            stale.append("cần vẽ: " + ", ".join(draw))
+                        if style_changed:
+                            stale.append("style đã đổi")
+                        if not stale:
+                            reglue = ("bố cục đổi" if (meta.get("frames") or {}).get(item) != frame_text_hash(fr["text"]) else
+                                      "phần nguồn có bản mới" if source_newer else "bản kiểu cũ chưa có bảng phần" if parts is None else "")
+                    label = ("cũ hơn" if v < version else "CẦN LÀM LẠI · " + stale[0] if stale else "đang làm lại" if redoing
+                             else f"{CLAUDE_DONE} · {reglue}, chờ ghép lại" if reglue else CLAUDE_DONE)
+                else:
+                    r = reviews.get(item) if v == version and isinstance(reviews.get(item), dict) else {}
+                    level = r.get("level")
+                    level = level if isinstance(level, int) and not isinstance(level, bool) and 0 <= level < len(ART_LEVELS) else None
+                    feedback, stale, reglue = str(r.get("text") or ""), whole, ""
+                    label = ("cũ hơn" if v < version else "CŨ · " + stale[0] if stale else "đang làm lại" if redoing
+                             else (ART_LEVEL_NONE if level is None else ART_LEVELS[level]))
                 entry = {"frame": item, "tool": tool, "file": (vdir / name).relative_to(Path(root)).as_posix(), "ref": ref,
-                         "version": v, "state": label_state, "label": label, "stale": stale,
-                         "level": level, "feedback": str(r.get("text") or ""), "reviewable": v == version and state == "delivered", "redoing": redoing,
-                         "usable": v == version and not stale and level != 0,
+                         "version": v, "state": label_state, "label": label, "stale": stale, "reglue": reglue,
+                         "level": level, "feedback": feedback, "reviewable": not claude and v == version and state == "delivered",
+                         "redoing": redoing, "usable": v == version and not stale and level != 0,
                          "anchor": tool == ART_TOOL and (ref, v, item) in anchored, "at": meta.get("at", ""), "stamp": meta.get("stamp", 0),
                          "styles": sorted(meta.get("styles") or {})}
                 q = quality.get(item) if isinstance(quality.get(item), dict) else None
                 entry["below"] = (q.get("note") or "chưa đạt") if q and not q.get("ok") else ""
+                entry["parts"] = parts
                 art.setdefault(path, []).append(entry)
     for path, entries in art.items():      # newest delivery of each frame first, the older ones after it
         entries.sort(key=lambda e: (ART_TOOLS.index(e["tool"]), e["frame"], e["at"], e["stamp"]))
@@ -2002,6 +2182,6 @@ def snapshot(root):
         glossary[name], term_notes[name] = glossary_view(tree)
         for n in walk(tree):
             n.pop("refText", None)      # read by glossary_view only; the page does not need a second copy
-    return {"rounds": ROUNDS, "mode": mode, "frameCss": FRAME_CSS, "screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
+    return {"rounds": ROUNDS, "mode": mode, "frameCss": font_css(embed=False) + "\n" + FRAME_CSS,"screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
             "missingCode": missing_code(idea)}

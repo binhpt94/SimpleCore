@@ -58,10 +58,12 @@ def lines_for(root, node, out):
         tool = a.get("tool", gd.ART_TOOL)
         if (tool, a["frame"]) not in seen_art:
             seen_art.add((tool, a["frame"]))
-            out.append(f"- {'Claude concept' if tool == gd.CLAUDE_TOOL else 'Art'} {a['frame']}: {a['label']} (v{a['version']}, {a['ref']})")
+            out.append(f"- {'Claude concept' if tool == gd.CLAUDE_TOOL else 'Art'} {a['frame']}: {a['label']} (v{a['version']}, {a['ref']})"
+                       + (f", {len(a['parts'])} phần" if a.get("parts") else ""))
     if node.get("cheat"):
         out.append(f"- Node cheat: {len(node['items'])}/{gd.CHEAT_MAX} state, mỗi state một frame trùng id; "
-                   "state dựng nhanh ở bản dev, và là node duy nhất đặt order art (mỗi state một ảnh)")
+                   "state dựng nhanh ở bản dev, và là node duy nhất đặt order art-concept của Codex (mỗi state một ảnh); "
+                   "claude-concept của nó do tool dựng từ phần của các node vòng 4")
     for fr in node["frames"]:
         out += ["- " + line.lstrip() if i == 0 else "  " + line for i, line in enumerate(gd.frame_brief(fr))]
     if node["frameNone"]:
