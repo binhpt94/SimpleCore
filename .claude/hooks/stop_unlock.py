@@ -18,6 +18,8 @@ def main(argv):
     if len(argv) >= 3 and argv[-2] == "--store":      # test-only override
         store, argv = argv[-1], argv[:-2]
     if len(argv) == 2 and argv[1] == "--release":
+        if hasattr(sys.stdout, "reconfigure"):      # the message is Vietnamese; a cp1252 console or pipe cannot encode it
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
         lock = guard.read_lock(store)
         dropped = guard.release_lock(store)
         print(f"Đã gỡ khoá Editor của {lock.get('who')}." if dropped and lock else "Không có khoá Editor nào đang giữ.")

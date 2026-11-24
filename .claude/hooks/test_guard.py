@@ -254,7 +254,8 @@ def run_cases():
     t(g, W, "deny", "Read", {"file_path": F + "/Wallet/Scripts/Internal/W\x00.cs"})                # NUL
     if WIN:      # case-insensitive file system; backslash, drive, UNC, ADS, trailing dot/space, Git Bash paths
         e(g, W, "allow", F + "/WALLET/scripts/internal/W.cs")
-        e(g, W, "allow", F + "/wallet/SCRIPTS/CONTRACTS/I.cs")
+        e(g, W, "allow", F + "/wallet/SCRIPTS/VIEW/V.cs")
+        e(g, W, "deny", F + "/wallet/SCRIPTS/CONTRACTS/I.cs")      # still the skeleton, in any letter case
         t(g, W, "allow", "Edit", {"file_path": r"Scripts\Internal\W.cs"}, F + "/Wallet")
         t(g, W, "deny", "Edit", {"file_path": r"..\Shop\Scripts\Internal\S.cs"}, F + "/Wallet")
         msys = "/" + FX[0].lower() + FX[2:].replace("\\", "/")
@@ -1092,6 +1093,7 @@ def run_designer_cases():
     w(g + " (gate code missing: closed)", D, "deny", skills)
     w(g + " (gate code missing: closed)", D, "deny", idea + "/data.md")
     os.rename(FX + "/Management/tools/gamedesign.off", FX + "/Management/tools/gamedesign.py")
+    importlib.invalidate_caches()      # this process just failed to import it; a real hook is a new process each time
     score(idea, 1)
     cli(g + " (real process)", D, "deny", "Write a round-2 node while the root fails",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": hero}, "cwd": FX}))
