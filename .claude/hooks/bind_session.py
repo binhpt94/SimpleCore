@@ -227,13 +227,13 @@ def designer_mode(root):
 
 
 def advice_mode(root):
-    """How GPT's advice is used under the mode in mode.json: who filters it and who decides."""
+    """How GPT's points are scored under the mode in mode.json. In both modes every point becomes an idea."""
     mode = read_json(os.path.join(root, "Management", "game-design", "mode.json"), None)
     if isinstance(mode, dict) and mode.get("mode") == "user":
-        return ("Góp ý của GPT ở mode User control (người ở giữa): @GameDesigner không tự nhận hay bỏ góp ý nào; mỗi góp ý "
-                "thành một câu hỏi cho người, mỗi đề xuất ghi 'by' là gpt hoặc claude; người chọn.")
-    return ("Góp ý của GPT ở mode Full Auto (AI tự lọc và chốt): @GameDesigner xét từng góp ý (dùng, sửa, bỏ); góp ý nó "
-            "định bỏ hoặc sửa được gửi lại GPT một lượt phản biện qua @DesignAdvisor, rồi @GameDesigner quyết.")
+        return ("Mode User control: ý của GPT do người chấm như mọi ý; @GameDesigner không tự chọn bên nào thắng, và chỉ "
+                "loại một ý của GPT sau khi người chấm nó dưới 5.")
+    return ("Mode Full Auto: @GameDesigner chấm điểm AI thật cho ý của GPT như cho ý của mình; chỉ ý dưới 5 mới bị viết lại "
+            "hoặc loại, và phải khai.")
 
 
 def context(data, root, store):
@@ -326,11 +326,13 @@ def context(data, root, store):
                 "đọc phần cần bằng Read offset/limit hoặc Grep). Độ quan trọng "
                 "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
                 + designer_mode(root) +
-                " Cần ý kiến thứ hai về thiết kế: nhắn @DesignAdvisor (to: \"DesignAdvisor\") node nào, hỏi gì; nó hỏi GPT và "
-                "ghi câu trả lời vào Management/game-design/advice/<node>/<id>.md (chỉ đọc; gd_status.py liệt kê ở từng node). "
-                + advice_mode(root) + " Ý lấy từ góp ý thì ghi nhãn ở phần đầu data.md: by: <id ý>=gpt@<id góp ý> (nhận nguyên) "
-                "hoặc <id ý>=claude+gpt@<id góp ý> (bạn sửa theo góp ý); node tạo theo đề xuất của GPT: node-by: gpt@<id góp ý>. "
-                "Xem mục 'Bên @GameDesigner' của .claude/rules/designadvisor.md."
+                " GPT cùng thiết kế qua @DesignAdvisor (to: \"DesignAdvisor\"): nhắn node nào, hỏi gì; câu trả lời nằm ở "
+                "Management/game-design/advice/<node>/<id>.md (chỉ đọc; gd_status.py liệt kê ở từng node). Ý của GPT NGANG HÀNG ý "
+                "của bạn: MỖI góp ý phải thành một ý trong '## Ý cốt lõi' (thêm: ý mới; thay <ý>: ý mới đặt cạnh ý cũ, không xoá "
+                "ý cũ; làm rõ <ý>: viết lại chính ý đó), chỉ được tóm gọn câu chữ, KHÔNG ĐƯỢC BỎ; khai nguồn ở phần đầu data.md: "
+                "by: <id ý>=gpt@<id lần hỏi>#<id góp ý>. Loại một ý của GPT chỉ khi nó bị chấm dưới 5, và khai gpt-dropped: "
+                "<id lần hỏi>#<id góp ý>=<id ý>. Node do GPT đề xuất: node-by: gpt@<id lần hỏi>. Mỗi ý một quyết định, không gộp dài. "
+                + advice_mode(root) + " Xem mục 'Bên @GameDesigner' của .claude/rules/designadvisor.md."
                 " Ảnh concept có hai loại: claude-concept (order ở claudeimage/orders/_design, tool: claudeimage, nhắn "
                 "@ClaudeImage, to: \"ClaudeImage\"; đủ cho giai đoạn IDEA; đặt cho mọi node vòng 4 có frame, mỗi frame một "
                 "ảnh, node vòng 4 trước rồi mới tới cheat vì cheat do tool dựng từ phần của chúng) và art-concept "
@@ -345,17 +347,18 @@ def context(data, root, store):
                 "khi giao luôn cần lệnh này của một Leader)." + studio_pending(root, None) +
                 " Làm theo .claude/rules/gamedesigner.md; trước khi viết node vòng N đọc .claude/rules/gamedesigner.round<N>.md.")
     if role == "@DesignAdvisor":
-        return ("guard: chat này gán FEATURE=@DesignAdvisor (nhóm Tools): cố vấn thiết kế game, hỏi GPT (Codex CLI) giúp "
+        return ("guard: chat này gán FEATURE=@DesignAdvisor (nhóm Tools): đưa GPT (Codex CLI) vào thiết kế game, theo yêu cầu của "
                 "người và @GameDesigner. Không code, không viết thiết kế. CHỈ nhận việc khi người hoặc @GameDesigner nhắn; "
                 "không tự rà, phiên khác nhờ thì từ chối và bảo họ nhờ @GameDesigner. Đọc: Management/game-design (ai/idea là "
                 "bảng đề xuất, live là bảng đã chốt), CLAUDE.md gốc, .claude/rules/designadvisor.md và gamedesigner*.md. Ghi: "
                 "chỉ Management/game-design/advice/<node, '/' thay bằng '.'; node gốc _root; không gắn node _general>/<id>.q.md "
                 "(câu hỏi gửi GPT) và <id>.note.md (nhận xét của mình). Hỏi GPT: viết <id>.q.md rồi chạy python "
-                "Management/tools/gd_advise.py <node> <id>; lệnh ghi câu trả lời vào <id>.md cùng thư mục (các góp ý rời, mỗi "
-                "góp ý '### <id> | <tiêu đề>'), không trần lượt. Xem thiết kế: python Management/tools/gd_status.py "
-                "[ai/idea/<node>]. Xong thì nhắn bên hỏi (SendMessage, to: \"GameDesigner\") đường dẫn file. Góp ý không ràng "
-                "buộc: @GameDesigner lọc, người chốt. " + advice_mode(root) +
-                " Làm theo .claude/rules/designadvisor.md.")
+                "Management/tools/gd_advise.py <node> <id>; lệnh gửi kèm node với điểm NGƯỜI chấm và nghĩa của điểm (không gửi "
+                "điểm AI, đừng chép điểm AI vào câu hỏi), ghi câu trả lời vào <id>.md: các góp ý rời, mỗi góp ý một ý đơn "
+                "'### <id> | <thêm | làm rõ <id ý> | thay <id ý>> | <ý>'; không trần lượt. Xem thiết kế: python "
+                "Management/tools/gd_status.py [ai/idea/<node>]. Xong thì nhắn bên hỏi (SendMessage, to: \"GameDesigner\") đường "
+                "dẫn file. Ý của GPT ngang hàng ý của Claude: @GameDesigner phải đưa mọi góp ý vào node, không được bỏ; người "
+                "chốt lên live. " + advice_mode(root) + " Làm theo .claude/rules/designadvisor.md.")
     if role == "@Manager":
         return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "
                 "file mới trong Management/proposals và nhắn các phiên bằng SendMessage. Báo cáo của các phiên ở "

@@ -503,11 +503,12 @@ def run_advisor_cases():
     told = bind_session.context({"session_id": "role-adv"}, FX, STORE)
     check(g, V, True, "the context names the advice folder, the command, who may ask and the rules",
           all(s in told for s in ("FEATURE=@DesignAdvisor", "game-design/advice", "gd_advise.py", "người hoặc @GameDesigner",
-                                  ".claude/rules/designadvisor.md", "Full Auto")))
+                                  ".claude/rules/designadvisor.md", "Full Auto", "điểm NGƯỜI chấm", "không được bỏ")))
     check(g, V, False, "the context never has the PIN", PIN in told)
     told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
     check(g, D, True, "@GameDesigner is told about the advisor and the labels",
-          all(s in told for s in ("DesignAdvisor", "game-design/advice", "by: <id ý>=gpt@<id góp ý>", "node-by:")))
+          all(s in told for s in ("DesignAdvisor", "game-design/advice", "by: <id ý>=gpt@<id lần hỏi>#<id góp ý>", "gpt-dropped:",
+                                  "node-by:", "KHÔNG ĐƯỢC BỎ", "NGANG HÀNG")))
 
 
 def say(group, expect, label, prompt, session="chat1", store=None):

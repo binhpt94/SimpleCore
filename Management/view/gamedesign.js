@@ -22,7 +22,7 @@
     { key: "user", label: "User control", hint: "AI hỏi, bạn quyết. Node đạt khi bạn chấm mọi ý từ mức đạt trở lên và trả lời hết câu hỏi; bạn bấm Sync hoặc Chốt; vòng sau bị khoá tới khi vòng trước được chốt." }
   ];
   var STATES = { "new": "chưa có trong live", "changed": "khác live", "same": "giống live" };
-  var BY_NAMES = { "claude": "Claude", "gpt": "GPT", "claude+gpt": "Claude + GPT" };   // AI nào đề xuất một ý
+  var BY_NAMES = { "claude": "Claude", "gpt": "GPT" };   // AI nào đề xuất một ý
   var DATA_FILE = "data/gamedesign.js";
   var SERVER_HINT = "Mở trang qua python Management/tools/setup_server.py để lưu.";
   // Ô nhập cao theo nội dung, để người gõ thấy hết phần mình gõ.
@@ -56,6 +56,10 @@
     ".gd-map path.on { stroke: var(--accent); }",
     ".gd-col { position: absolute; top: 0; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }",
     ".gd-card { position: absolute; display: block; text-align: left; padding: 9px 12px; border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; cursor: pointer; overflow: hidden; }",
+    // Viền theo chốt: node giống live viền đủ đậm, node chưa chốt viền cùng màu nhưng trong. Thanh trái là trạng thái.
+    ".gd-card.fixed { border-color: var(--muted); }",
+    ".gd-card.loose { border-color: color-mix(in srgb, var(--muted) 30%, transparent); }",
+    ".gd-card.by-gpt strong { color: var(--gpt); }",
     ".gd-card:hover { border-color: var(--accent); }",
     ".gd-card.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }",
     ".gd-card.redo { border-left-color: var(--bad); }",
@@ -105,7 +109,20 @@
     ".gd-id { margin: 0 0 8px; font-size: 11.5px; color: var(--muted); }",
     ".gd-id code { font-size: 11.5px; }",
     ".gd-mark { padding: 1px 8px; border: 1px solid var(--line); border-radius: 4px; font-size: 11.5px; line-height: 1.5; color: var(--muted); white-space: nowrap; }",
-    ".gd-mark.by { border-color: var(--accent, var(--line)); color: var(--accent, var(--muted)); }",
+    // Chữ của ý: đã chốt dùng màu chữ chính (trắng ở giao diện tối); chưa chốt mang màu của AI viết ra nó; trái nhau màu cam.
+    ".gd-item .text.claude { color: var(--claude); }",
+    ".gd-item .text.gpt { color: var(--gpt); }",
+    ".gd-item .text.clash { color: var(--clash); }",
+    ".gd-mark.by.claude { border-color: var(--claude); color: var(--claude); }",
+    ".gd-mark.by.gpt { border-color: var(--gpt); color: var(--gpt); }",
+    ".gd-mark.by.clash { border-color: var(--clash); color: var(--clash); }",
+    ".gd-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 6px; font-size: 12.5px; color: var(--muted); }",
+    ".gd-legend b { font-weight: 600; }",
+    ".gd-legend .fixed { color: var(--text); } .gd-legend .claude { color: var(--claude); } .gd-legend .gpt { color: var(--gpt); } .gd-legend .clash { color: var(--clash); }",
+    ".gd-source { margin: 8px 0; padding: 8px 10px; border-left: 3px solid var(--gpt); background: var(--panel); border-radius: 0 6px 6px 0; }",
+    ".gd-source b { display: block; font-size: 12px; color: var(--gpt); margin-bottom: 2px; }",
+    ".gd-source p { margin: 0; white-space: pre-wrap; font-size: 13.5px; line-height: 1.5; }",
+    ".gd-tag.gpt { border-color: var(--gpt); color: var(--gpt); }",
     ".gd-mark.good { border-color: var(--ok); background: var(--ok); color: var(--panel); }",
     ".gd-mark.fine { border-color: var(--ok); color: var(--ok); }",
     ".gd-mark.bad { border-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); }",
@@ -732,7 +749,9 @@
           if (n.path === state.selected) line.setAttribute("class", "on");
           svg.appendChild(line);
         }
-        var kind = (!idea ? "" : n.redo ? " redo" : n.passed && n.state === "same" ? " done" : " wait") + (needed(n) ? "" : " dim");
+        var nodeFixed = !idea || n.state === "same";      // bảng live: mọi node đã chốt
+        var kind = (!idea ? "" : n.redo ? " redo" : n.passed && n.state === "same" ? " done" : " wait") + (needed(n) ? "" : " dim") +
+          (nodeFixed ? " fixed" : " loose") + (n.nodeBy && !nodeFixed ? " by-gpt" : "");
         var card = el("button", "gd-card" + (n.path === state.selected ? " sel" : "") + kind);
         card.type = "button";
         card.style.left = x + "px";
@@ -750,6 +769,16 @@
         map.appendChild(card);
         var chips = chipsFor(n);
         if (n.cheat) chips.push(el("span", "gd-tag cheat", "cheat"));
+        if (n.by && n.by.gpt) {
+          var gptTag = el("span", "gd-tag gpt", "GPT " + n.by.gpt);
+          gptTag.title = n.by.gpt + " ý của node do GPT đề xuất";
+          chips.push(gptTag);
+        }
+        if (idea && n.gpt && n.gpt.missing.length) {
+          var owedTag = el("span", "gd-tag bad", "GPT thiếu " + n.gpt.missing.length);
+          owedTag.title = "GPT đã góp " + n.gpt.missing.length + " ý mà node chưa có; @GameDesigner phải đưa vào, không được bỏ";
+          chips.push(owedTag);
+        }
         if (item.hidden > 0) chips.push(el("span", "gd-tag", "+" + item.hidden + (n.round === FOCUS_ROUND - 1 ? " feature ẩn" : " node con")));
         if (!chips.length) return;
         var row = el("div", needed(n) ? "gd-chips" : "gd-chips dim");
@@ -775,6 +804,11 @@
     var renderItems = function (body, node) {
       add(body, el("h3", "", "Ý cốt lõi"));
       if (!node.items.length) { add(body, el("p", "muted", "Node chưa có ý nào trong data.md.")); return; }
+      // Chú giải màu chữ: ý đã chốt (có trong live, đúng nội dung) và ý còn là đề xuất của từng AI.
+      var legend = put(body, el("p", "gd-legend"));
+      [["fixed", "Đã chốt"], ["claude", "Claude đề xuất"], ["gpt", "GPT đề xuất"], ["clash", "Hai ý trái nhau"]].forEach(function (x) {
+        add(legend, el("b", x[0], x[1]));
+      });
       var drafts = [];
       var saveBtn = null, saveNote = null;
       var refresh = function () {
@@ -793,13 +827,23 @@
         head.setAttribute("role", "button");
         head.setAttribute("aria-expanded", "false");
         // Một hàng: tiêu đề bên trái, rồi ý kiến đã ghi (rút gọn) và hai khung điểm bên phải.
-        add(head, inline(ctx, el("p", "text"), it.title));
+        // Màu chữ: đã chốt (bảng live, hoặc live có ý này đúng nội dung) dùng màu chữ chính; hai ý trái nhau màu cam;
+        // còn lại mang màu của AI viết ra nó.
+        var who = it.by === "gpt" ? "gpt" : "claude";
+        var clash = it.clash && it.clash.length;
+        var itemFixed = state.table === "live" || it.fixed;
+        add(head, inline(ctx, el("p", "text" + (clash ? " clash" : itemFixed ? "" : " " + who)), it.title));
         var marks = put(head, el("div", "gd-marks"));
-        // Nhãn AI nào đề xuất ý này (dòng by: của data.md); ý của Claude không cần nhãn.
-        if (it.by && it.by !== "claude") {
-          var byMark = put(marks, el("span", "gd-mark by", BY_NAMES[it.by] || it.by));
-          byMark.title = (it.by === "gpt" ? "GPT đề xuất, Claude nhận" : "Claude sửa theo góp ý của GPT") +
-            (it.advice ? " · góp ý " + it.advice + " (Management/game-design/advice)" : "");
+        var sources = (it.sources || []).map(function (x) { return x.advice + "#" + x.point; }).join(", ");
+        var byMark = put(marks, el("span", "gd-mark by " + who, BY_NAMES[who]));
+        byMark.title = who === "gpt" ? "GPT đề xuất (góp ý " + sources + "); Claude chỉ rút gọn câu chữ" : "Claude (@GameDesigner) đề xuất";
+        if (it.clarified) {
+          var clearMark = put(marks, el("span", "gd-mark by gpt", "GPT làm rõ"));
+          clearMark.title = "Ý của Claude, GPT viết lại cho rõ (góp ý " + sources + ")";
+        }
+        if (clash) {
+          var clashMark = put(marks, el("span", "gd-mark by clash", "trái nhau"));
+          clashMark.title = "Trái với ý: " + it.clash.join(", ") + ". Hai ý không cùng đúng: chấm điểm để loại một bên.";
         }
         var aiMark = put(marks, el("span", "gd-mark " + band(it.ai).key, "AI: " + it.ai));
         aiMark.title = "AI chấm " + it.ai + " · " + band(it.ai).label;
@@ -815,6 +859,12 @@
         var editor = put(block, el("div", "gd-edit"));
         editor.hidden = true;
         if (it.detail) renderText(ctx, put(editor, el("div", "gd-more")), it.detail);      // chi tiết của ý chỉ hiện khi đã bấm mở
+        (it.sources || []).forEach(function (src) {      // lời của chính GPT, không qua tóm gọn của Claude
+          if (!src.text) return;
+          var box = put(editor, el("div", "gd-source"));
+          var kindText = src.kind + (src.target ? " " + src.target : "");
+          add(box, el("b", "", "Nguyên văn GPT · " + kindText + " · góp ý " + src.advice + "#" + src.point), el("p", "", src.text));
+        });
         var code = put(editor, el("p", "gd-id", "Mã của ý: "));      // mã chỉ hiện khi đã bấm mở
         add(code, el("code", "", it.id));
         var row = put(editor, el("div", "gd-score"));
@@ -1129,13 +1179,20 @@
       add(body, el("p", "gd-path", "Vòng " + node.round + " · " + ((data.rounds || [])[node.round - 1] || "") + " · " +
         table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "")));
       if (node.summary) add(body, el("p", "", node.summary));
-      // Ý của node do AI nào đề xuất; chỉ hiện khi có ý của GPT hoặc node do GPT đề xuất.
-      var byCount = node.by || {};
-      if (byCount.gpt || byCount["claude+gpt"] || node.nodeBy) {
-        var byParts = ["claude", "gpt", "claude+gpt"].filter(function (k) { return byCount[k]; })
-          .map(function (k) { return BY_NAMES[k] + " " + byCount[k]; });
-        add(body, el("p", "gd-note", "Ý do AI đề xuất: " + byParts.join(" · ") +
-          (node.nodeBy ? ". Node này do " + BY_NAMES[node.nodeBy.who] + " đề xuất (góp ý " + node.nodeBy.advice + ")" : "") + "."));
+      // Ý của node do AI nào đề xuất, ý GPT bị loại, và góp ý của GPT chưa được đưa vào node.
+      var byCount = node.by || {}, gptSide = node.gpt || { dropped: [], missing: [], clarified: 0 };
+      if (byCount.gpt || gptSide.clarified || gptSide.dropped.length || gptSide.missing.length || node.nodeBy) {
+        var byParts = ["Claude " + (byCount.claude || 0), "GPT " + (byCount.gpt || 0)];
+        if (gptSide.clarified) byParts.push("GPT làm rõ " + gptSide.clarified);
+        if (gptSide.dropped.length) byParts.push("GPT bị loại " + gptSide.dropped.length);
+        add(body, el("p", "gd-note", "Ý theo AI đề xuất: " + byParts.join(" · ") +
+          (node.nodeBy ? ". Node này do GPT đề xuất (lần hỏi " + node.nodeBy.advice + ")" : "") + "."));
+        gptSide.dropped.forEach(function (d) {
+          add(body, el("p", "gd-note", "Ý của GPT đã bị loại: " + d.title + " (" + d.advice + "#" + d.point + ")"));
+        });
+        gptSide.missing.forEach(function (m) {
+          add(body, el("p", "bad-text", "Góp ý của GPT chưa vào node: " + m.title + " (" + m.advice + "#" + m.point + ")"));
+        });
       }
       if (node.cheat) add(body, el("p", "gd-gate ok", "Node cheat: mỗi ý là một state dựng nhanh ở bản dev để test và review. " +
         "Đây là nơi duy nhất đặt ảnh art của feature (tối đa 3 state, mỗi state một frame và một ảnh)."));

@@ -128,15 +128,26 @@ HASH_LEN = 12
 GLOSSARY_KEY = "glossary"     # the round-2 node holding the shared terms (not a feature)
 _SEG = r"[a-z0-9]+(?:-[a-z0-9]+)*"
 REF_RX = re.compile(rf"^({_SEG}(?:/{_SEG})*)(?:#({_SEG}))?@([0-9a-f]{{{HASH_LEN}}})$")
-# Which AI proposed an idea or a node (`by:` and `node-by:` in the head of data.md; outside the data hash). An idea
-# that is not named is Claude's (@GameDesigner). The advice id names the file GPT's answer is in:
-# Management/game-design/advice/<node path with '.' for '/', _root for the root>/<advice id>.md (gd_advise.py).
+# Which AI proposed an idea or a node. GPT's advice (gd_advise.py) is a list of points; every point of a node's advice
+# becomes one idea of that node, as weighty as one of Claude's (@GameDesigner), and is scored the same way. The head
+# of data.md says where an idea came from (outside the data hash); an idea that is not named is Claude's:
+#     by: <idea id>=gpt@<advice id>#<point id>, ...       the idea is that point of GPT's (Claude may only shorten it)
+#     gpt-dropped: <advice id>#<point id>=<idea id>, ...   the idea made from that point was scored below 5 and removed
+#     node-by: gpt@<advice id>                             the node itself was GPT's proposal
+# The advice is Management/game-design/advice/<node path with '.' for '/', _root for the root>/<advice id>.md; a
+# point there is `### <point id> | <thêm | làm rõ <idea id> | thay <idea id>> | <title>` and its reasons below.
 ADVICE_DIR = "advice"
 ADVICE_ROOT, ADVICE_GENERAL = "_root", "_general"
-BY_CLAUDE, BY_GPT, BY_BOTH = "claude", "gpt", "claude+gpt"
-BY_NAMES = {BY_CLAUDE: "Claude", BY_GPT: "GPT", BY_BOTH: "Claude + GPT"}
-BY_WHO_RX = re.compile(rf"^(gpt|claude\+gpt)@({_SEG})$")
-BY_RX = re.compile(rf"^({_SEG})=(gpt|claude\+gpt)@({_SEG})$")
+ADVICE_TITLE = "Góp ý của GPT"
+BY_CLAUDE, BY_GPT = "claude", "gpt"
+BY_NAMES = {BY_CLAUDE: "Claude", BY_GPT: "GPT"}
+BY_WHO_RX = re.compile(rf"^gpt@({_SEG})$")
+BY_RX = re.compile(rf"^({_SEG})=gpt@({_SEG})#({_SEG})$")
+DROPPED_RX = re.compile(rf"^({_SEG})#({_SEG})=({_SEG})$")
+POINT_ADD, POINT_CLARIFY, POINT_REPLACE = "thêm", "làm rõ", "thay"
+POINT_RX = re.compile(rf"^###\s+({_SEG})\s*\|\s*(thêm|làm rõ\s+({_SEG})|thay\s+({_SEG}))\s*\|\s*(\S.*?)\s*$")
+POINT_LOOSE_RX = re.compile(r"^###\s")
+IDEA_TITLE_MAX, IDEA_DETAIL_MAX = 120, 500      # one idea is one decision: longer than this is two ideas in one
 MENTION_RX = re.compile(r"`([^`\n]+)`")
 MENTION_PATH_RX = re.compile(rf"^{_SEG}(?:/{_SEG})+$")
 MENTION_TERM_RX = re.compile(rf"^{GLOSSARY_KEY}#({_SEG})$")
@@ -294,9 +305,10 @@ def write_mode(root, mode):
 
 # ---------------------------------------------------------------- data.md
 def parse_data(text):
-    """{based_on, refs, title, summary, items: [{id, text, ai, hash, by, advice}], nodeBy, hash, errors} of a data.md.
-    by: which AI proposed the idea (claude | gpt | claude+gpt), advice: the id of GPT's advice it came from."""
-    errors, based_on, refs, screen, frame_mode, by, node_by = [], "", [], "", "", {}, None
+    """{based_on, refs, title, summary, items: [{id, text, ai, hash, by, sources}], nodeBy, dropped, hash, errors} of a
+    data.md. sources: the points of GPT's advice the idea stands for [{advice, point}]; by: gpt when it has any,
+    else claude (read_node turns a Claude idea that GPT only made clearer back into claude)."""
+    errors, based_on, refs, screen, frame_mode, by, node_by, dropped = [], "", [], "", "", {}, None, []
     text = text.strip("\n")
     if text.startswith("---\n"):
         head, sep, rest = text[4:].partition("\n---")
@@ -313,17 +325,24 @@ def parse_data(text):
                 elif key.strip() == "node-by":
                     m = BY_WHO_RX.match(value.strip())
                     if m:
-                        node_by = {"who": m.group(1), "advice": m.group(2)}
+                        node_by = {"who": BY_GPT, "advice": m.group(1)}
                     else:
-                        errors.append(f"node-by: '{value.strip()}' phải có dạng gpt@<id góp ý> hoặc claude+gpt@<id góp ý>")
+                        errors.append(f"node-by: '{value.strip()}' phải có dạng gpt@<id lần hỏi>")
                 elif key.strip() == "by":
                     for entry in [e.strip() for e in value.split(",") if e.strip()]:
                         m = BY_RX.match(entry)
-                        if m and m.group(1) not in by:
-                            by[m.group(1)] = {"who": m.group(2), "advice": m.group(3)}
+                        source = {"advice": m.group(2), "point": m.group(3)} if m else None
+                        if m and source not in [x for sources in by.values() for x in sources]:
+                            by.setdefault(m.group(1), []).append(source)
                         else:
-                            errors.append(f"by: '{entry}' phải có dạng <id ý>=gpt@<id góp ý> hoặc "
-                                          "<id ý>=claude+gpt@<id góp ý>, mỗi ý một lần")
+                            errors.append(f"by: '{entry}' phải có dạng <id ý>=gpt@<id lần hỏi>#<id góp ý>, mỗi góp ý một lần")
+                elif key.strip() == "gpt-dropped":
+                    for entry in [e.strip() for e in value.split(",") if e.strip()]:
+                        m = DROPPED_RX.match(entry)
+                        if m:
+                            dropped.append({"advice": m.group(1), "point": m.group(2), "item": m.group(3)})
+                        else:
+                            errors.append(f"gpt-dropped: '{entry}' phải có dạng <id lần hỏi>#<id góp ý>=<id ý đã bị loại>")
                 elif key.strip() == "refs":
                     for entry in re.split(r"[,\s]+", value.strip().strip("[]")):
                         m = REF_RX.match(entry.strip("\"'`")) if entry else None
@@ -393,7 +412,7 @@ def parse_data(text):
         out.append({"id": it["id"], "title": head, "detail": detail, "titled": titled,
                     "text": head + ("\n" + body if body else "") if titled else body,
                     "ai": it["ai"], "hash": short_hash(*parts), "parts": parts,
-                    "by": by.get(it["id"], {}).get("who", BY_CLAUDE), "advice": by.get(it["id"], {}).get("advice", "")})
+                    "by": BY_GPT if by.get(it["id"]) else BY_CLAUDE, "sources": by.get(it["id"], [])})
     for item_id in by:
         if item_id not in seen:
             errors.append(f"by: node không có ý '{item_id}'")
@@ -403,7 +422,7 @@ def parse_data(text):
     if frame_mode and frame_mode != FRAME_NONE:
         errors.append(f"frame: chỉ nhận '{FRAME_NONE}' (node không có bố cục)")
     return {"based_on": based_on, "refs": refs, "screen": screen, "frameMode": frame_mode, "title": title,
-            "nodeBy": node_by, "summary": summary, "items": out, "hash": data_hash, "errors": errors}
+            "nodeBy": node_by, "dropped": dropped, "summary": summary, "items": out, "hash": data_hash, "errors": errors}
 
 
 def frame_files(folder):
@@ -1650,15 +1669,11 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     stale = parent_hash is not None and data["based_on"] != parent_hash
     table = folder.parents[len(path.split("/")) - 1] if path else folder
     advice = advice_folder(table, path)
-    for it in items:
-        if it["advice"] and not (advice / f"{it['advice']}.md").is_file():
-            problems.append({"path": where, "text": f"{DATA_FILE}: nhãn của ý '{it['id']}' trỏ tới góp ý '{it['advice']}' "
-                                                    f"không có ({ADVICE_DIR}/{advice.name}/{it['advice']}.md)"})
-    # the advice that proposed a node was asked about the node above it (or, later, about the node itself)
+    gpt = mark_sources(folder, table, path, data, items, mode, problems, where)
     named = (data.get("nodeBy") or {}).get("advice", "")
-    above = advice_folder(table, path.rpartition("/")[0]) if path else advice
+    above = advice_folder(table, path.rpartition("/")[0]) if path else advice      # asked about the node above, or this one
     if named and not any((d / f"{named}.md").is_file() for d in (advice, above)):
-        problems.append({"path": where, "text": f"{DATA_FILE}: node-by trỏ tới góp ý '{named}' không có "
+        problems.append({"path": where, "text": f"{DATA_FILE}: node-by trỏ tới lần hỏi '{named}' không có "
                                                 f"({ADVICE_DIR}/{above.name}/{named}.md hoặc {ADVICE_DIR}/{advice.name}/{named}.md)"})
     by_count = {who: sum(1 for it in items if it["by"] == who) for who in BY_NAMES}
     raw = read_text(folder / DATA_FILE) if (folder / DATA_FILE).is_file() else ""
@@ -1729,7 +1744,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
             "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
-            "screen": data["screen"], "styles": styles, "by": by_count, "nodeBy": data.get("nodeBy"),
+            "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "nodeBy": data.get("nodeBy"),
             "refText": raw + "\n" + doc, "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
@@ -1760,9 +1775,117 @@ def advice_ids(folder):
     return sorted(p.stem for p in folder.iterdir() if p.is_file() and p.suffix == ".md" and KEY_RX.match(p.stem))
 
 
+def advice_points(path):
+    """(points, errors) of one answer file: [{id, kind, target, title, text}] from the part under ADVICE_TITLE (the
+    whole text when there is no such heading: an answer not yet filed). kind: POINT_ADD | POINT_CLARIFY | POINT_REPLACE;
+    target: the idea a point makes clearer or stands against. text is GPT's own wording, title and reasons."""
+    text = read_text(Path(path)) if not isinstance(path, str) else path
+    mark = f"\n## {ADVICE_TITLE}\n"
+    body = ("\n" + text).split(mark, 1)[1] if mark in "\n" + text else text
+    points, errors, current = [], [], None
+    for line in body.strip("\n").split("\n"):
+        if POINT_LOOSE_RX.match(line):
+            m = POINT_RX.match(line)
+            if not m:
+                errors.append(f"dòng góp ý sai dạng: {line.strip()[:70]}")
+                current = None
+                continue
+            kind = POINT_ADD if m.group(2) == POINT_ADD else POINT_CLARIFY if m.group(3) else POINT_REPLACE
+            current = {"id": m.group(1), "kind": kind, "target": m.group(3) or m.group(4) or "", "title": m.group(5), "lines": []}
+            if current["id"] in [p["id"] for p in points]:
+                errors.append(f"id góp ý '{current['id']}' trùng")
+            points.append(current)
+        elif current is not None:
+            current["lines"].append(line)
+        elif line.strip():
+            errors.append(f"chữ nằm ngoài một góp ý: {line.strip()[:50]}")
+    for p in points:
+        detail = tidy("\n".join(p.pop("lines")))
+        p["detail"], p["text"] = detail, p["title"] + ("\n" + detail if detail else "")
+    return points, errors
+
+
+def read_advice(folder):
+    """{advice id: [points]} of one advice folder (the answers <id>.md; a file that cannot be read as points is left out)."""
+    return {aid: advice_points(Path(folder) / f"{aid}.md")[0] for aid in advice_ids(folder)}
+
+
+def mark_sources(folder, table, path, data, items, mode, problems, where):
+    """Ties the ideas of a node to GPT's advice about it and returns what the node owes that advice:
+    {"clarified": n, "dropped": [{advice, point, item, title}], "missing": [{advice, point, title}]}.
+    Sets on every idea: sources (each with the point's kind, target, title and GPT's own text), by (claude when GPT
+    only made Claude's idea clearer), clarified, clash (ids of ideas that stand against it: a point that replaces
+    an idea, and that idea, while both are in the node) and long.
+    In the proposed table every point must be an idea or be declared dropped; a drop in mode user needs the human's
+    score below PASS_MIN in the node's history, in mode auto the declaration is taken as it is."""
+    proposed = Path(table).name != TABLES["live"][-1]
+    advice = read_advice(advice_folder(table, path))
+    name = f"{ADVICE_DIR}/{advice_name(path)}"
+    known = {(aid, p["id"]): p for aid, points in advice.items() for p in points}
+    ids = {it["id"] for it in items}
+    used = set()
+    for it in items:
+        it["clash"], it["clarified"] = [], False
+        it["long"] = len(it["title"]) > IDEA_TITLE_MAX or len(it["detail"]) > IDEA_DETAIL_MAX
+        for src in it["sources"]:
+            point = known.get((src["advice"], src["point"]))
+            if point is None:
+                problems.append({"path": where, "text": f"{DATA_FILE}: nhãn của ý '{it['id']}' trỏ tới góp ý "
+                                                        f"'{src['advice']}#{src['point']}' không có trong {name}/{src['advice']}.md"})
+                src.update(kind="", target="", title="", text="")
+                continue
+            used.add((src["advice"], src["point"]))
+            src.update(kind=point["kind"], target=point["target"], title=point["title"], text=point["text"])
+        live = [s for s in it["sources"] if s["kind"]]
+        if live and all(s["kind"] == POINT_CLARIFY and s["target"] == it["id"] for s in live):
+            it["by"], it["clarified"] = BY_CLAUDE, True      # Claude's idea, made clearer by GPT
+    for it in items:      # a point that replaces an idea stands against it while both are here
+        for src in it["sources"]:
+            if src["kind"] == POINT_REPLACE and src["target"] in ids and src["target"] != it["id"]:
+                other = next(x for x in items if x["id"] == src["target"])
+                for a, b in ((it, other), (other, it)):
+                    if b["id"] not in a["clash"]:
+                        a["clash"].append(b["id"])
+    turned_down = {e.get("item") for e in rejected(folder)} if proposed else set()
+    dropped = []
+    for d in data.get("dropped") or []:
+        key = (d["advice"], d["point"])
+        if key not in known:
+            problems.append({"path": where, "text": f"{DATA_FILE}: gpt-dropped trỏ tới góp ý '{d['advice']}#{d['point']}' "
+                                                    f"không có trong {name}/{d['advice']}.md"})
+            continue
+        if key in used or d["item"] in ids:
+            problems.append({"path": where, "text": f"{DATA_FILE}: gpt-dropped khai góp ý '{d['advice']}#{d['point']}' đã bị "
+                                                    f"loại trong khi ý của nó vẫn còn trong node"})
+            continue
+        if proposed and mode == "user" and d["item"] not in turned_down:
+            problems.append({"path": where, "text": f"{DATA_FILE}: không được bỏ góp ý '{d['advice']}#{d['point']}' của GPT: "
+                                                    f"lịch sử chưa có ý '{d['item']}' bị người chấm dưới {PASS_MIN}. Đưa ý đó "
+                                                    f"trở lại '## {ITEMS_TITLE}' và chờ người chấm"})
+            continue
+        used.add(key)
+        dropped.append(dict(d, title=known[key]["title"]))
+    missing = [{"advice": aid, "point": pid, "title": p["title"]} for (aid, pid), p in known.items() if (aid, pid) not in used]
+    if proposed:
+        for m in missing:
+            problems.append({"path": where, "text": f"góp ý '{m['advice']}#{m['point']}' của GPT chưa vào '## {ITEMS_TITLE}' "
+                                                    f"({name}/{m['advice']}.md: {m['title']}). Viết nó thành một ý và khai "
+                                                    f"by: <id ý>=gpt@{m['advice']}#{m['point']}; ý của GPT không được bỏ"})
+    return {"clarified": sum(1 for it in items if it["clarified"]), "dropped": dropped, "missing": missing if proposed else []}
+
+
 def by_label(item):
-    """' · GPT (góp ý <id>)' for an idea GPT proposed or shaped; '' for one of Claude's."""
-    return "" if item.get("by", BY_CLAUDE) == BY_CLAUDE else f" · {BY_NAMES[item['by']]} (góp ý {item['advice']})"
+    """' · GPT (góp ý q1#p)' for an idea that is GPT's, ' · GPT làm rõ (...)' for one of Claude's that GPT made
+    clearer; '' for one of Claude's own."""
+    sources = [f"{s['advice']}#{s['point']}" for s in item.get("sources", [])]
+    if not sources:
+        return ""
+    return (" · GPT làm rõ" if item.get("clarified") else " · GPT") + f" (góp ý {', '.join(sources)})"
+
+
+def score_meaning(score):
+    """'7: Chấp nhận ở hiện tại, ...' for a score on the 0-10 scale."""
+    return f"{score}: " + next((b["label"] for b in BANDS if b["min"] <= score <= b["max"]), "")
 
 
 def read_tree(root, table, mode=None):
@@ -1799,6 +1922,9 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
     def visit(node):
         other = in_live.get(node["path"])
         node["state"] = "new" if other is None else ("same" if other["hash"] == node["hash"] else "changed")
+        fixed = {it["id"]: it["hash"] for it in other["items"]} if other else {}
+        for it in node["items"]:      # an idea is fixed when live holds it with this very content
+            it["fixed"] = fixed.get(it["id"]) == it["hash"]
         node["approved"] = node["passed"] and (mode != "user" or node["state"] == "same")
         below = [visit(c) for c in node["children"]]
         live_keys = {c["key"] for c in other["children"]} if other else set()

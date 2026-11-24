@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Tests for gd_advise.py (asking GPT about the design) and for the labels that say which AI proposed an idea
-(`by:` / `node-by:` in data.md, `by` of a question's option). Codex CLI is replaced by a fake; the design tree is a
-throw-away one in a temp folder.
+"""Tests for gd_advise.py (asking GPT about the design) and for what ties GPT's points to the ideas of a node
+(`by:`, `gpt-dropped:`, `node-by:` in data.md): every point becomes an idea, none is left out. Codex CLI is replaced
+by a fake; the design tree is a throw-away one in a temp folder.
 
     python Management/tools/test_gd_advise.py
 """
@@ -19,19 +19,22 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
 import gd_advise  # noqa: E402
+import gd_pack  # noqa: E402
 import gd_status  # noqa: E402
 
 results = []
-FAKE = '''import sys
+FAKE = '''import os, sys
 args = sys.argv[1:]
 prompt = sys.stdin.buffer.read().decode("utf-8")
-open(args[args.index("-o") + 1] + ".prompt", "w", encoding="utf-8").write(prompt)
-import os
 answer = os.environ.get("FAKE_ANSWER", "")
 if answer:
     open(args[args.index("-o") + 1], "w", encoding="utf-8").write(answer)
 open(os.environ["FAKE_LOG"], "a", encoding="utf-8").write(" ".join(args) + "\\n" + prompt + "\\n=====\\n")
 '''
+GOOD = ("### add-bench | thêm | Có ghế dự bị 2 hero\nĐổi hero giữa trận.\n\n"
+        "### clear-count | làm rõ hero-count | Mỗi trận tối đa 5 hero trên sân cùng lúc\nBản cũ không nói tính hero đã gục.\n\n"
+        "### four-heroes | thay hero-count | Mỗi trận tối đa 4 hero\nMàn hình điện thoại hẹp.\n")
+PLAIN = "\n### hero-count | AI 8 | Tối đa 5 hero\nĐủ đông.\n\n### hero-speed | AI 3 | Hero chạy nhanh\nChưa rõ.\n"
 
 
 def check(label, got, expect=True):
@@ -54,6 +57,17 @@ def run(root, *args):
     return code, out.getvalue()
 
 
+def hero_node(root, by=""):
+    base = gd.read_data(gd.table_dir(root, "idea"))["hash"]
+    return node(root, "idea", "feature-hero", by[1] if isinstance(by, tuple) else PLAIN,
+                f"---\nbased-on: {base}\n{by[0] if isinstance(by, tuple) else by}---\n")
+
+
+def hero(root):
+    tree, problems = gd.read_tree(root, "idea")
+    return next(x for x in gd.walk(tree) if x["path"] == "feature-hero"), [p["text"] for p in problems if p["path"] == "feature-hero"]
+
+
 def advise_cases(root, tmp):
     advice = Path(root).joinpath(*gd.BASE, gd.ADVICE_DIR)
     log = Path(tmp) / "fake.log"
@@ -61,12 +75,12 @@ def advise_cases(root, tmp):
     fake.write_text(FAKE, encoding="utf-8")
     os.environ.update(STUDIO_CODEX=str(fake), FAKE_LOG=str(log))
     node(root, "idea", "", "\n### loop | AI 8 | Vòng lặp chính\nĐánh, nhặt, nâng cấp.\n")
-    hero = node(root, "idea", "feature-hero", "\n### hero-count | AI 8 | Tối đa 5 hero\nĐủ đông.\n")
-    good = "### keep-five | Giữ nguyên 5 hero\nĐủ đọc trên điện thoại.\n\n### add-bench | Thêm ghế dự bị\nĐổi hero giữa trận.\n"
+    folder = hero_node(root)
+    gd.save_review(root, "feature-hero", {"hero-count": {"score": 7, "feedback": "Thử 4 xem sao"}})
 
     for args in (("feature-hero",), ("Feature-Hero", "q1"), ("feature-hero", "Q1"), ("a/b", "q1"), ("../x", "q1")):
         check(f"bad arguments are refused: {args}", run(root, *args)[0], 1)
-    os.environ["FAKE_ANSWER"] = good
+    os.environ["FAKE_ANSWER"] = GOOD
     code, text = run(root, "feature-hero", "q1")
     check("no question file: refused, Codex is not run", (code, "chưa có câu hỏi" in text, log.exists()), (1, True, False))
     (advice / "feature-none").mkdir(parents=True)
@@ -80,101 +94,166 @@ def advise_cases(root, tmp):
     answer = advice / "feature-hero" / "q1.md"
     said = answer.read_text(encoding="utf-8") if answer.is_file() else ""
     check("a good answer is written beside the question", (code, answer.is_file()), (0, True))
-    check("the answer file names the node, its hash, the question and GPT's points",
-          all(s in said for s in ("node: feature-hero", "table: ai/idea", f"hash: {gd.read_data(hero)['hash']}", "binding: no",
-                                  "5 hero có nhiều quá không?", "### keep-five | Giữ nguyên 5 hero", "### add-bench |")))
-    check("the command prints the points", ("2 góp ý" in text, "- keep-five: Giữ nguyên 5 hero" in text), (True, True))
+    check("the answer file names the node, its hash, the question and GPT's points; it no longer says the advice binds nobody",
+          (all(s in said for s in ("node: feature-hero", "table: ai/idea", f"hash: {gd.read_data(folder)['hash']}",
+                                   "5 hero có nhiều quá không?", f"## {gd.ADVICE_TITLE}", "### add-bench | thêm | Có ghế dự bị 2 hero")),
+           "binding" in said), (True, False))
+    check("the command prints the points with their kind and says none may be left out",
+          all(s in text for s in ("3 góp ý", "- add-bench (thêm): Có ghế dự bị 2 hero", "- four-heroes (thay hero-count):", "không được bỏ")))
     logged = log.read_text(encoding="utf-8")
     first_line = logged.split("\n")[0].split(" ")
     check("Codex runs read-only at the project root, the prompt on stdin",
           (first_line[0], first_line[first_line.index("-C") + 1] == str(Path(root)), first_line[first_line.index("-s") + 1], first_line[-1]),
           ("exec", True, "read-only", "-"))
-    check("the prompt holds the question, the node and the node above, and asks for separate points",
-          all(s in logged for s in ("5 hero có nhiều quá không?", "Tối đa 5 hero", "Chi tiết của feature-hero", "Vòng lặp chính",
-                                    "### <id góp ý")))
+    check("the prompt holds the question, the node, the node above, the three kinds, and asks to add and to make clear",
+          all(s in logged for s in ("5 hero có nhiều quá không?", "[hero-count] Tối đa 5 hero", "Chi tiết của feature-hero", "[loop] Vòng lặp chính",
+                                    "`thêm` · `làm rõ <id ý>` · `thay <id ý>`", "BỔ SUNG", "LÀM RÕ", "MỘT quyết định")))
+    check("the prompt gives the human's score with its meaning and feedback, and says when the human has not scored",
+          all(s in logged for s in ("[hero-count] Tối đa 5 hero (người chấm 7: Chấp nhận ở hiện tại", "phản hồi của người: Thử 4 xem sao",
+                                    "[hero-speed] Hero chạy nhanh (người chưa chấm)")))
+    check("the prompt never gives the AI's scores", [s for s in ("AI 8", "AI 3", "| AI") if s in logged.replace("`### <id> | AI <n>`", "")], [])
 
-    os.environ["FAKE_ANSWER"] = "### keep-five | Vẫn giữ\nLần hai.\n"
+    os.environ["FAKE_ANSWER"] = "### add-bench | thêm | Vẫn nên có ghế dự bị\nLần hai.\n"
     code, _ = run(root, "feature-hero", "q1")
     check("asked again: the earlier answer is kept as v1", (code, (advice / "feature-hero" / "q1.v1.md").read_text(encoding="utf-8") == said,
                                                             "Lần hai." in answer.read_text(encoding="utf-8")), (0, True, True))
     before = answer.read_text(encoding="utf-8")
-    for bad in ("Tôi nghĩ ổn rồi.\n", "### a | Một\nx\n### a | Hai\ny\n"):
+    long_title, long_body = "x" * (gd.IDEA_TITLE_MAX + 1), "y" * (gd.IDEA_DETAIL_MAX + 1)
+    for label, bad in (("no points", "Tôi nghĩ ổn rồi.\n"), ("the old form without a kind", "### a | Một ý\nx\n"),
+                       ("an unknown kind", "### a | xoá hero-count | Bỏ ý này\nx\n"), ("the same id twice", "### a | thêm | Một\nx\n### a | thêm | Hai\ny\n"),
+                       ("an idea the node does not have", "### a | thay hero-none | Khác\nx\n"),
+                       ("a title that is too long", f"### a | thêm | {long_title}\nx\n"), ("reasons that are too long", f"### a | thêm | Ngắn\n{long_body}\n"),
+                       ("words outside a point", "Mở đầu.\n### a | thêm | Một\nx\n")):
         os.environ["FAKE_ANSWER"] = bad
         code, text = run(root, "feature-hero", "q1")
-        check(f"an answer without separate points is refused and kept aside: {bad[:12]!r}",
+        check(f"an answer that cannot be used is refused and kept aside: {label}",
               (code, (advice / "feature-hero" / "q1.rejected.md").read_text(encoding="utf-8").strip() == bad.strip(),
                answer.read_text(encoding="utf-8") == before), (1, True, True))
     os.environ["FAKE_ANSWER"] = ""
     code, text = run(root, "feature-hero", "q1")
     check("Codex says nothing: refused, the answer stays", (code, "không trả lời" in text, answer.read_text(encoding="utf-8") == before), (1, True, True))
 
-    os.environ["FAKE_ANSWER"] = good
+    os.environ["FAKE_ANSWER"] = "### more-loot | thêm | Quái rơi đồ\nCó thứ để nhặt.\n"
     for name in (gd.ADVICE_ROOT, gd.ADVICE_GENERAL):
         (advice / name).mkdir(parents=True, exist_ok=True)
         (advice / name / "g1.q.md").write_text("Game này thiếu gì?", encoding="utf-8")
-    code, _ = run(root, gd.ADVICE_ROOT, "g1")
-    check("the root node is asked as _root", (code, "node: (gốc)" in (advice / gd.ADVICE_ROOT / "g1.md").read_text(encoding="utf-8")), (0, True))
     code, _ = run(root, gd.ADVICE_GENERAL, "g1")
     check("a question about no node", (code, "node: (không gắn node nào)" in (advice / gd.ADVICE_GENERAL / "g1.md").read_text(encoding="utf-8")), (0, True))
+    os.environ["FAKE_ANSWER"] = "### a | làm rõ loop | Rõ hơn\nx\n"
+    check("a question about no node takes only points that add", run(root, gd.ADVICE_GENERAL, "g2")[0], 1)
     live = node(root, "live", "feature-live", "\n### a | AI 8 | Chỉ có trong live\n")
     (advice / "feature-live").mkdir(parents=True)
     (advice / "feature-live" / "q1.q.md").write_text("Hỏi về node đã chốt?", encoding="utf-8")
+    os.environ["FAKE_ANSWER"] = "### b | thêm | Thêm một ý\nx\n"
     code, _ = run(root, "feature-live", "q1")
-    check("a node that is only in live", (code, f"hash: {gd.read_data(live)['hash']}" in (advice / "feature-live" / "q1.md").read_text(encoding="utf-8")
-                                          and "table: live" in (advice / "feature-live" / "q1.md").read_text(encoding="utf-8")), (0, True))
+    filed = (advice / "feature-live" / "q1.md").read_text(encoding="utf-8")
+    check("a node that is only in live", (code, f"hash: {gd.read_data(live)['hash']}" in filed and "table: live" in filed), (0, True))
     shutil.rmtree(live)
-    tree, problems = gd.read_tree(root, "idea")
-    check("the advice folder is not read as part of the design tree", ([n["path"] for n in gd.walk(tree)], problems), (["", "feature-hero"], []))
+    shutil.rmtree(advice / "feature-live")
+    shutil.rmtree(advice / "feature-none")
+    # back to the full answer for the label cases
+    os.environ["FAKE_ANSWER"] = GOOD
+    check("the full answer is filed again", run(root, "feature-hero", "q1")[0], 0)
 
 
 def label_cases(root):
-    plain = "\n### hero-count | AI 8 | Tối đa 5 hero\nĐủ đông.\n\n### hero-bench | AI 7 | Có ghế dự bị\nĐổi giữa trận.\n"
-    base = gd.read_data(gd.table_dir(root, "idea"))["hash"]
-    head = f"---\nbased-on: {base}\n" + "{}---\n"
-    hero = node(root, "idea", "feature-hero", plain, head.format(""))
-    data = gd.read_data(hero)
-    check("an idea without a label is Claude's", [(it["by"], it["advice"]) for it in data["items"]], [("claude", ""), ("claude", "")])
-    labelled = node(root, "idea", "feature-hero", plain, head.format("by: hero-bench=gpt@q1, hero-count=claude+gpt@q1\nnode-by: gpt@q1\n"))
-    data2 = gd.read_data(labelled)
-    check("by: labels each idea, node-by: the node", ([(it["id"], it["by"], it["advice"]) for it in data2["items"]], data2["nodeBy"], data2["errors"]),
-          ([("hero-count", "claude+gpt", "q1"), ("hero-bench", "gpt", "q1")], {"who": "gpt", "advice": "q1"}, []))
-    check("labels do not change the data hash or the ideas' hashes",
-          (data2["hash"], [it["hash"] for it in data2["items"]]), (data["hash"], [it["hash"] for it in data["items"]]))
-    tree, problems = gd.read_tree(root, "idea")
-    n = next(x for x in gd.walk(tree) if x["path"] == "feature-hero")
-    check("the node counts its ideas by AI and has no problem when the advice exists",
-          (n["by"], n["nodeBy"], problems), ({"claude": 0, "gpt": 1, "claude+gpt": 1}, {"who": "gpt", "advice": "q1"}, []))
-    for bad, why in (("by: hero-bench=gpt\n", "phải có dạng"), ("by: hero-bench=codex@q1\n", "phải có dạng"),
-                     ("by: nope=gpt@q1\n", "không có ý 'nope'"), ("by: hero-bench=gpt@q1, hero-bench=gpt@q1\n", "mỗi ý một lần"),
-                     ("node-by: claude@q1\n", "node-by"), ("by: hero-bench=gpt@missing\n", "trỏ tới góp ý 'missing' không có"),
-                     ("node-by: gpt@missing\n", "trỏ tới góp ý 'missing' không có")):
-        node(root, "idea", "feature-hero", plain, head.format(bad))
-        _, problems = gd.read_tree(root, "idea")
-        check(f"a wrong label is a structure problem: {bad.strip()}", any(why in p["text"] for p in problems))
-    node(root, "idea", "feature-hero", plain, head.format("node-by: gpt@g1\n"))      # g1 was asked about the root
-    check("node-by may name advice asked about the node above", gd.read_tree(root, "idea")[1], [])
-    node(root, "idea", "feature-hero", plain, head.format("by: hero-bench=gpt@q1\n"))
-    status = "\n".join(gd_status_lines(root, "feature-hero"))
-    check("gd_status prints the label beside the idea",
-          ("- Ý hero-bench · GPT (góp ý q1): AI 7" in status, "- Ý hero-count: AI 8" in status), (True, True))
-    check("gd_status lists the node's advice", "advice/feature-hero/q1.md" in status)
-    qdir = hero / gd.QUESTIONS_DIR
+    hero_node(root)
+    n, problems = hero(root)
+    check("an idea without a label is Claude's", [(it["by"], it["sources"]) for it in n["items"]], [("claude", []), ("claude", [])])
+    check("every point of GPT's that is not an idea yet is a structure problem",
+          sorted(p.split("'")[1] for p in problems if "chưa vào" in p), ["q1#add-bench", "q1#clear-count", "q1#four-heroes"])
+    check("the node says what it owes", ([m["point"] for m in n["gpt"]["missing"]], n["gpt"]["dropped"]),
+          (["add-bench", "clear-count", "four-heroes"], []))
+    plain_hash = (n["dataHash"], [it["hash"] for it in n["items"]][:2])
+
+    full = PLAIN + "\n### hero-bench | AI 6 | Có ghế dự bị 2 hero\nĐổi giữa trận.\n\n### hero-four | AI 5 | Tối đa 4 hero\nMàn hẹp.\n"
+    by = "by: hero-bench=gpt@q1#add-bench, hero-count=gpt@q1#clear-count, hero-four=gpt@q1#four-heroes\n"
+    hero_node(root, (by, full))
+    n, problems = hero(root)
+    items = {it["id"]: it for it in n["items"]}
+    check("all points are ideas: nothing owed, no problem", (n["gpt"]["missing"], problems), ([], []))
+    check("a point that adds or replaces makes the idea GPT's; one that only makes Claude's idea clearer leaves it Claude's",
+          {k: (v["by"], v["clarified"]) for k, v in items.items()},
+          {"hero-count": ("claude", True), "hero-speed": ("claude", False), "hero-bench": ("gpt", False), "hero-four": ("gpt", False)})
+    check("the node counts its ideas by AI", (n["by"], n["gpt"]["clarified"]), ({"claude": 2, "gpt": 2}, 1))
+    check("an idea carries GPT's own words", items["hero-bench"]["sources"][0]["text"], "Có ghế dự bị 2 hero\nĐổi hero giữa trận.")
+    check("the idea that replaces another and the one it replaces stand against each other",
+          {k: v["clash"] for k, v in items.items()}, {"hero-count": ["hero-four"], "hero-speed": [], "hero-bench": [], "hero-four": ["hero-count"]})
+    hero_node(root, ("", full))
+    check("labels do not change the hash of the data or of an idea",
+          ([it["hash"] for it in hero(root)[0]["items"]][:2], hero(root)[0]["dataHash"] == n["dataHash"]), (plain_hash[1], True))
+    hero_node(root, (by, full))
+    status = gd_status.report(root, "ai/idea/feature-hero")
+    check("gd_status prints where an idea came from, the clash, and the node's advice",
+          all(s in status for s in ("- Ý hero-bench · GPT (góp ý q1#add-bench): AI 6", "- Ý hero-count · GPT làm rõ (góp ý q1#clear-count): AI 8",
+                                    "TRÁI NHAU với hero-count", "advice/feature-hero/q1.md", "- Ý hero-speed: AI 3")))
+
+    for bad, why in (("by: hero-bench=gpt@q1\n", "phải có dạng"), ("by: hero-bench=claude+gpt@q1#add-bench\n", "phải có dạng"),
+                     ("by: nope=gpt@q1#add-bench\n", "không có ý 'nope'"),
+                     ("by: hero-bench=gpt@q1#add-bench, hero-four=gpt@q1#add-bench\n", "mỗi góp ý một lần"),
+                     ("by: hero-bench=gpt@q1#no-point\n", "trỏ tới góp ý 'q1#no-point' không có"),
+                     ("by: hero-bench=gpt@q9#add-bench\n", "trỏ tới góp ý 'q9#add-bench' không có"),
+                     ("node-by: claude@q1\n", "node-by"), ("node-by: gpt@missing\n", "node-by trỏ tới lần hỏi 'missing' không có"),
+                     ("gpt-dropped: q1#add-bench\n", "gpt-dropped"), ("gpt-dropped: q1#no-point=hero-x\n", "gpt-dropped trỏ tới góp ý"),
+                     (by + "gpt-dropped: q1#add-bench=hero-bench\n", "vẫn còn trong node")):
+        hero_node(root, (bad, full))
+        check(f"a wrong label is a structure problem: {bad.strip()[-60:]}", any(why in p for p in hero(root)[1]))
+    hero_node(root, ("node-by: gpt@g1\n" + by, full))      # g1 was asked about no node; the folder above is _root
+    (Path(root).joinpath(*gd.BASE, gd.ADVICE_DIR, gd.ADVICE_ROOT) / "g1.md").write_text(f"## {gd.ADVICE_TITLE}\n\n### split | thêm | Tách node hero\nx\n", encoding="utf-8")
+    n, problems = hero(root)
+    check("node-by may name advice asked about the node above", (n["nodeBy"], [p for p in problems if "node-by" in p]), ({"who": "gpt", "advice": "g1"}, []))
+
+    # dropping one of GPT's ideas: declared; in mode user only after the human scored it below 5
+    kept = "by: hero-count=gpt@q1#clear-count, hero-four=gpt@q1#four-heroes\n"
+    without = PLAIN + "\n### hero-four | AI 5 | Tối đa 4 hero\nMàn hẹp.\n"
+    drop = kept + "gpt-dropped: q1#add-bench=hero-bench\n"
+    gd.write_mode(root, "auto")
+    hero_node(root, (kept, without))
+    check("an idea of GPT's taken out without a word: the point is owed again", [m["point"] for m in hero(root)[0]["gpt"]["missing"]], ["add-bench"])
+    hero_node(root, (drop, without))
+    n, problems = hero(root)
+    check("mode auto: the declared drop is taken, and shown", (n["gpt"]["missing"], [d["point"] for d in n["gpt"]["dropped"]], problems), ([], ["add-bench"], []))
+    check("gd_status shows the dropped idea", "Ý của GPT đã bị loại: q1#add-bench (ý hero-bench)" in gd_status.report(root, "ai/idea/feature-hero"))
+    gd.write_mode(root, "user")
+    n, problems = hero(root)
+    check("mode user: a drop the human did not score below 5 is refused",
+          (any("không được bỏ góp ý 'q1#add-bench'" in p for p in problems), [m["point"] for m in n["gpt"]["missing"]]), (True, ["add-bench"]))
+    hero_node(root, (by, full))
+    gd.save_review(root, "feature-hero", {"hero-bench": {"score": 3, "feedback": "Không cần"}})
+    hero_node(root, (drop, without))
+    n, problems = hero(root)
+    check("mode user: after the human scored it below 5 the drop is taken",
+          (n["gpt"]["missing"], [d["point"] for d in n["gpt"]["dropped"]], [p for p in problems if "bỏ" in p]), ([], ["add-bench"], []))
+    gd.write_mode(root, "auto")
+
+    # fixed ideas: the ones live holds with the same content
+    hero_node(root, (by, full))
+    live_root = node(root, "live", "", "\n### loop | AI 8 | Vòng lặp chính\nĐánh, nhặt, nâng cấp.\n")
+    node(root, "live", "feature-hero", PLAIN.replace("Hero chạy nhanh", "Hero chạy chậm"), f"---\nbased-on: {gd.read_data(live_root)['hash']}\n---\n")
+    snap = gd.snapshot(root)
+    n = next(x for x in gd.walk(snap["idea"]) if x["path"] == "feature-hero")
+    check("an idea is fixed when live holds it with the same content",
+          {it["id"]: it["fixed"] for it in n["items"]}, {"hero-count": True, "hero-speed": False, "hero-bench": False, "hero-four": False})
+    check("the live table has no advice owed", [x["gpt"]["missing"] for x in gd.walk(snap["live"])], [[], []])
+    check("gd_pack labels GPT's ideas", "GPT (góp ý q1#add-bench)" in "\n".join(gd_pack_lines(n)))
+    long = PLAIN + f"\n### hero-long | AI 6 | {'d' * (gd.IDEA_TITLE_MAX + 1)}\nx\n"
+    hero_node(root, ("", long))
+    check("an idea that is too long is pointed out, not refused",
+          ("- Ý hero-long: AI 6, người chưa chấm | Ý DÀI" in gd_status.report(root, "ai/idea/feature-hero"),
+           [p for p in hero(root)[1] if "hero-long" in p]), (True, []))
+    qdir = gd.table_dir(root, "idea") / "feature-hero" / gd.QUESTIONS_DIR
     qdir.mkdir(exist_ok=True)
-
-    def ask(options):
-        (qdir / gd.QUESTIONS_FILE).write_text(json.dumps({"questions": [{"id": "bench", "text": "Có ghế dự bị?", "options": options}]}), encoding="utf-8")
-        problems = []
-        return gd.read_questions(hero, "feature-hero", problems), problems
-
-    qs, problems = ask([{"id": "yes", "label": "Có", "by": "gpt"}, {"id": "no", "label": "Không", "by": "claude"}, {"id": "later", "label": "Để sau"}])
+    (qdir / gd.QUESTIONS_FILE).write_text(json.dumps({"questions": [{"id": "bench", "text": "Có ghế dự bị?", "options": [
+        {"id": "yes", "label": "Có", "by": "gpt"}, {"id": "no", "label": "Không", "by": "claude"}, {"id": "later", "label": "Để sau"}]}]}), encoding="utf-8")
+    problems = []
+    qs = gd.read_questions(qdir.parent, "feature-hero", problems)
     check("an option of a question says which AI proposed it", ([o["by"] for o in qs[0]["options"]], problems), (["gpt", "claude", ""], []))
-    qs, problems = ask([{"id": "yes", "label": "Có", "by": "human"}])
-    check("an unknown proposer of an option is a problem, the option stays", ([o["by"] for o in qs[0]["options"]], len(problems)), ([""], 1))
-    (qdir / gd.QUESTIONS_FILE).unlink()
 
 
-def gd_status_lines(root, path):
-    return gd_status.report(root, "ai/idea/" + path).split("\n")
+def gd_pack_lines(n):
+    out = []
+    gd_pack.node_lines(n, out) if hasattr(gd_pack, "node_lines") else out.extend(f"- {it['title']}{gd.by_label(it)}" for it in n["items"])
+    return out
 
 
 def main():

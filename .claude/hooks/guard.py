@@ -28,7 +28,8 @@ The value, by group:
               @DesignAdvisor              asks GPT (Codex CLI, through gd_advise.py) about the design when the human or
                                           @GameDesigner asks it to; reads Management/game-design, writes only its questions
                                           and notes in Management/game-design/advice (<node>/<id>.q.md, <id>.note.md); the
-                                          answers are written by gd_advise.py. Its advice binds nobody
+                                          answers are written by gd_advise.py. GPT's points weigh as much as
+                                          @GameDesigner's ideas: each becomes an idea of the node (gamedesign.py checks it)
     Basic     @Core                       edits only Assets/Core
     Features  <Name>                      edits only its feature
     Services  _Services/<Name>            edits only its service
@@ -118,7 +119,7 @@ PASS_TOOLS = {"AskUserQuestion", "TodoWrite", "TaskCreate", "TaskUpdate", "TaskL
 FORBIDDEN_DIRS = {"library", "temp", "logs", "obj", "usersettings"}
 DESIGN_AI, DESIGN_LIVE, DESIGN_BASE = ("Management/game-design/ai", "Management/game-design/live",
                                        "Management/game-design")
-DESIGN_ADVICE = "Management/game-design/advice"      # what GPT said about the design: @DesignAdvisor's, binds nobody
+DESIGN_ADVICE = "Management/game-design/advice"      # GPT's points about the design, asked by @DesignAdvisor; each becomes an idea
 DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE, DESIGN_ADVICE}
 READ_ALL_ZONES = {"Management/studio", "Resources"}      # the orders and what was delivered: every bound chat reads
 # Inside ai: the proposed tree; the human's answers file that sits beside each node's questions; and the folders
