@@ -511,49 +511,97 @@
 
     var listBox = put(pane, section("Thread hiện có"));
     listBox.style.marginTop = "16px";
-    // Đọc lại quy trình: server chạy một lượt ngầm trong thread (claude --resume) bảo nó đọc lại luật của vai trò.
+    // Ba thao tác trên một thread, server chạy lượt ngầm (claude --resume) trong chính thread đó:
+    // Đọc lại quy trình; Compact (/compact); Renew (bỏ ngữ cảnh cũ, gán lại FEATURE, đọc quy trình; cần PIN).
+    var ACTIONS = {
+      reread: { label: "Đọc lại quy trình", path: "/api/sessions/reread", done: "đã đọc" },
+      compact: { label: "Compact", path: "/api/sessions/compact", done: "đã compact" },
+      renew: { label: "Renew", path: "/api/sessions/renew", done: "đã làm mới", pin: true }
+    };
+    var ACTION_KEYS = ["reread", "compact", "renew"];
     var rereadRow = put(listBox, el("div", "gap"));
-    var rereadAllBtn = put(rereadRow, el("button", "copy", "Đọc lại quy trình: tất cả"));
-    rereadAllBtn.type = "button";
+    var allBtns = {};
+    ACTION_KEYS.forEach(function (k) {
+      allBtns[k] = put(rereadRow, el("button", "copy", ACTIONS[k].label + ": tất cả"));
+      allBtns[k].type = "button";
+      allBtns[k].style.marginRight = "8px";
+    });
     var rereadStatus = put(listBox, el("p", "gap muted",
-      "Mỗi thread tốn một lượt. Chat đang mở trong VS Code có thể chưa thấy lượt này: mở lại chat đó."));
-    var rereadState = {};      // id -> { cls, text }: giữ qua các lần vẽ lại bảng
+      "Mỗi thao tác tốn lượt của thread. Chat đang mở trong VS Code có thể chưa thấy lượt này: mở lại chat đó. " +
+      "Renew cần PIN (ô PIN ở trên), bỏ toàn bộ ngữ cảnh của thread rồi gán lại và nhắc đọc quy trình: việc dở dang chưa ghi ra file sẽ mất, chỉ bấm khi thread đang rảnh."));
+    var confirmRow = put(listBox, el("p", "gap", ""));      // dòng xác nhận của "Renew: tất cả" (không dùng hộp thoại trình duyệt)
+    var rereadState = {};      // id -> { cls, text, running }: giữ qua các lần vẽ lại bảng
     var rereadable = [];       // id của thread đủ điều kiện, theo thứ tự trong bảng
-    var rereadCells = {};      // id -> { btn, note } của lần vẽ hiện tại
+    var rereadCells = {};      // id -> { btns, note } của lần vẽ hiện tại
     var paintReread = function (id) {
       var cell = rereadCells[id], st = rereadState[id];
       if (!cell) return;
-      cell.btn.disabled = !!(st && st.running);
+      cell.btns.forEach(function (b) { b.disabled = !!(st && st.running); });
       cell.note.className = st ? st.cls : "muted";
       cell.note.textContent = st ? " " + st.text : "";
       cell.note.title = st && st.full ? st.full : "";
     };
-    var rereadOne = function (id) {
-      rereadState[id] = { cls: "muted", text: "đang chạy…", running: true };
+    // Chạy một thao tác trên một thread; trả { ok, pin } (pin: server từ chối vì PIN, không nên thử tiếp thread khác).
+    var runOne = function (kind, id) {
+      var act = ACTIONS[kind], body = { id: id };
+      if (act.pin) {
+        body.pin = pin.value;
+        if (!body.pin) {
+          rereadState[id] = { cls: "bad-text", text: "nhập PIN ở ô phía trên rồi bấm lại" };
+          paintReread(id);
+          return Promise.resolve({ ok: false, pin: true });
+        }
+      }
+      var out = { ok: false, pin: false };
+      rereadState[id] = { cls: "muted", text: act.label + ": đang chạy…", running: true };
       paintReread(id);
-      return api("POST", "/api/sessions/reread", { id: id }).then(function (res) {
-        rereadState[id] = res.ok ? { cls: "ok-text", text: "đã đọc", full: res.answer || "" }
+      return api("POST", act.path, body).then(function (res) {
+        out.ok = !!res.ok; out.pin = !!res.pin;
+        rereadState[id] = res.ok ? { cls: "ok-text", text: act.done, full: res.answer || "" }
           : { cls: "bad-text", text: "lỗi: " + res.error };
       }, function (e) {
         rereadState[id] = { cls: "bad-text", text: "lỗi gọi server: " + e.message };
-      }).then(function () { paintReread(id); return !!(rereadState[id] && rereadState[id].cls === "ok-text"); });
+      }).then(function () { paintReread(id); return out; });
     };
-    rereadAllBtn.addEventListener("click", function () {
-      var queue = rereadable.slice(), total = queue.length, done = 0, good = 0;
-      if (!total) { rereadStatus.className = "gap bad-text"; rereadStatus.textContent = "Không có thread nào đã gán để nhắc."; return; }
-      rereadAllBtn.disabled = true;
+    var runAll = function (kind) {
+      var act = ACTIONS[kind], queue = rereadable.slice(), total = queue.length, done = 0, good = 0, stopped = false;
+      if (!total) { rereadStatus.className = "gap bad-text"; rereadStatus.textContent = "Không có thread nào đã gán."; return; }
+      if (act.pin && !pin.value) { rereadStatus.className = "gap bad-text"; rereadStatus.textContent = "Nhập PIN ở ô phía trên rồi bấm lại."; return; }
+      ACTION_KEYS.forEach(function (k) { allBtns[k].disabled = true; });
       var show = function (end) {
         rereadStatus.className = "gap " + (end ? (good === total ? "ok-text" : "bad-text") : "muted");
-        rereadStatus.textContent = (end ? "Xong " : "Đang chạy… xong ") + done + "/" + total +
-          (done > good ? ", lỗi " + (done - good) : "") + (end ? ". Mở lại chat đang mở trong VS Code để thấy lượt mới." : "");
+        rereadStatus.textContent = act.label + ": " + (end ? "xong " : "đang chạy… xong ") + done + "/" + total +
+          (done > good ? ", lỗi " + (done - good) : "") + (stopped ? ". Dừng vì PIN bị từ chối: các thread còn lại chưa chạy" : "") +
+          (end ? ". Mở lại chat đang mở trong VS Code để thấy lượt mới." : "");
       };
       show(false);
-      var next = function () {      // tối đa 3 thread cùng lúc
-        var id = queue.shift();
+      var next = function () {
+        var id = stopped ? null : queue.shift();
         if (!id) return Promise.resolve();
-        return rereadOne(id).then(function (ok) { done++; if (ok) good++; show(false); return next(); });
+        return runOne(kind, id).then(function (r) {
+          done++; if (r.ok) good++;
+          if (r.pin) stopped = true;      // PIN sai: không thử tiếp, mỗi lần sai đều bị đếm
+          show(false);
+          return next();
+        });
       };
-      Promise.all([next(), next(), next()]).then(function () { show(true); rereadAllBtn.disabled = false; });
+      // Thao tác cần PIN chạy từng thread một (PIN sai thì dừng ngay ở thread đầu); còn lại tối đa 3 thread cùng lúc.
+      Promise.all(act.pin ? [next()] : [next(), next(), next()]).then(function () {
+        show(true);
+        ACTION_KEYS.forEach(function (k) { allBtns[k].disabled = false; });
+      });
+    };
+    allBtns.reread.addEventListener("click", function () { runAll("reread"); });
+    allBtns.compact.addEventListener("click", function () { runAll("compact"); });
+    allBtns.renew.addEventListener("click", function () {
+      confirmRow.textContent = "";
+      confirmRow.className = "gap bad-text";
+      add(confirmRow, el("span", "", "Renew bỏ toàn bộ ngữ cảnh của " + rereadable.length + " thread đã gán. "));
+      var yes = put(confirmRow, el("button", "copy", "Renew cả " + rereadable.length + " thread"));
+      var no = put(confirmRow, el("button", "copy", "Thôi"));
+      yes.type = "button"; no.type = "button"; no.style.marginLeft = "8px";
+      yes.addEventListener("click", function () { confirmRow.textContent = ""; runAll("renew"); });
+      no.addEventListener("click", function () { confirmRow.textContent = ""; });
     });
     var listBody = put(listBox, el("div"));
 
@@ -602,7 +650,7 @@
         vsStatus.textContent = vs.running ? "VS Code đang chạy: tắt hẳn VS Code rồi chạy lệnh trên trong terminal ngoài." : "VS Code đang tắt: bấm nút để gom nhóm.";
       }
       var table = put(listBody, el("table"));
-      add(table, headRow(["Tên", "Đang gán", "Nhóm VS Code", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id", "Quy trình"]));
+      add(table, headRow(["Tên", "Đang gán", "Nhóm VS Code", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id", "Session"]));
       var body = put(table, el("tbody")), lastTier = null;
       rereadable = [];
       rereadCells = {};
@@ -616,14 +664,18 @@
         }
         var why = t.archived ? "thread đã archive" : t.unlisted ? "VS Code không hiện thread này"
           : !t.binding ? "thread chưa gán FEATURE: chạy Setup trước" : "";
-        var rereadBox = el("span"), rereadBtn = put(rereadBox, el("button", "copy", "Đọc lại quy trình"));
-        rereadBtn.type = "button";
+        var rereadBox = el("span"), rowBtns = ACTION_KEYS.map(function (k) {
+          var b = put(rereadBox, el("button", "copy", ACTIONS[k].label));
+          b.type = "button";
+          b.style.marginRight = "4px";
+          if (why) { b.disabled = true; b.title = why; }
+          else b.addEventListener("click", (function (kind, id) { return function () { runOne(kind, id); }; })(k, t.id));
+          return b;
+        });
         var rereadNote = put(rereadBox, el("span", "muted", ""));
-        if (why) { rereadBtn.disabled = true; rereadBtn.title = why; }
-        else {
+        if (!why) {
           rereadable.push(t.id);
-          rereadCells[t.id] = { btn: rereadBtn, note: rereadNote };
-          rereadBtn.addEventListener("click", (function (id) { return function () { rereadOne(id); }; })(t.id));
+          rereadCells[t.id] = { btns: rowBtns, note: rereadNote };
           paintReread(t.id);
         }
         var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")

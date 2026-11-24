@@ -19,6 +19,10 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
 - POST /api/sessions/reread {id} (page token, no PIN): one headless turn in an existing bound thread,
   `claude --resume <id> -p <REREAD_PROMPT>`, so it reads the rules again after they changed. The page's
   "Đọc lại quy trình" buttons (one thread, or all of them a few at a time) call it. It binds nothing.
+- POST /api/sessions/compact {id} (page token, no PIN): one headless turn that runs /compact in that thread.
+- POST /api/sessions/renew {id, pin} (with the PIN, as it binds): empties the thread's context in the same chat (a
+  /compact told to keep nothing; the CLI's /clear does not work on a resumed session in a headless turn), binds
+  it again to the FEATURE it had, and tells it to read the rules. Three headless turns at most.
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
   enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
@@ -101,13 +105,17 @@ MAX_BODY = 4096
 # What a thread is told when it is created and when the page's "Đọc lại quy trình" button is pressed.
 REREAD_PROMPT = ("Đọc lại quy trình: đọc lại CLAUDE.md gốc và các file luật của vai trò này (dòng guard: ở đầu tin nêu "
                  "vai trò và file luật). Chưa làm việc gì khác. Trả lời ngắn: đã đọc những file nào.")
+COMPACT_PROMPT = "/compact"
+# Renew: the CLI's /clear does not empty a resumed session in a headless turn, a /compact told to keep nothing does.
+WIPE_PROMPT = ("/compact Session này được làm mới: KHÔNG giữ lại bất kì nội dung, con số, file, việc dở dang hay quyết định nào "
+               "của cuộc trò chuyện. Bản tóm tắt chỉ gồm đúng một câu: 'Session đã được làm mới, không còn ngữ cảnh cũ.'")
 CLAUDE_SECONDS = 300      # one headless turn that reads the rules
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY,
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
-              "/api/sessions/reread": MAX_BODY}
+              "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY}
 
 
 def transcripts_dir():
@@ -237,26 +245,78 @@ def create(name, feature, model, effort):
     return sid
 
 
-def reread(session_id):
-    """Tells one existing, bound thread to read the rules again: one headless turn (`claude --resume <id> -p ...`).
-    A chat that is open in VS Code may not show this turn until it is opened again."""
+def eligible(session_id):
+    """(thread, None) for an existing, listed, bound thread the page may run a headless turn in; else (None, the
+    refusal to send back)."""
     t = next((t for t in threads() if t["id"] == session_id), None) if isinstance(session_id, str) else None
     if t is None:
-        return {"ok": False, "error": "không có thread này"}
+        return None, {"ok": False, "error": "không có thread này"}
     why = ("thread đã archive" if t["archived"] else "VS Code không hiện thread này" if t["unlisted"]
            else "thread chưa gán FEATURE: chạy Setup trước" if not t["binding"] else "")
     if why:
-        return {"ok": False, "id": t["id"], "title": t["title"], "error": why}
+        return None, {"ok": False, "id": t["id"], "title": t["title"], "error": why}
+    return t, None
+
+
+def turn(t, prompt):
+    """One headless turn in thread t, on the model and effort it last used; what it printed."""
     args = ["--resume", t["id"]]
     if t["model"]:
         args += ["--model", t["model"]]
     if t["effort"] in EFFORTS:
         args += ["--effort", t["effort"]]
+    return run_claude(args + ["-p", prompt])
+
+
+def reread(session_id):
+    """Tells one existing, bound thread to read the rules again: one headless turn (`claude --resume <id> -p ...`).
+    A chat that is open in VS Code may not show this turn until it is opened again."""
+    t, no = eligible(session_id)
+    if no:
+        return no
     try:
-        answer = run_claude(args + ["-p", REREAD_PROMPT])
+        answer = turn(t, REREAD_PROMPT)
     except Exception as ex:
         return {"ok": False, "id": t["id"], "title": t["title"], "error": str(ex)[:300]}
     return {"ok": True, "id": t["id"], "title": t["title"], "answer": answer[:300]}
+
+
+def compact(session_id):
+    """Compacts one existing, bound thread: one headless turn that runs /compact. It binds nothing."""
+    t, no = eligible(session_id)
+    if no:
+        return no
+    try:
+        turn(t, COMPACT_PROMPT)
+    except Exception as ex:
+        return {"ok": False, "id": t["id"], "title": t["title"], "error": str(ex)[:300]}
+    return {"ok": True, "id": t["id"], "title": t["title"], "answer": "đã compact"}
+
+
+def renew(session_id, pin):
+    """Makes one existing, bound thread new again, in the same chat: its context is emptied, it is bound again to
+    the FEATURE it had, and it is told to read the rules. With the PIN, as every binding.
+    The claude CLI cannot run /clear on a session in a headless turn (it opens another, empty session and leaves
+    this one as it was), so the context is emptied by a /compact that is told to keep nothing: same session id,
+    same chat in VS Code. The old messages stay in the transcript above the compact line; the model no longer has
+    them."""
+    t, no = eligible(session_id)
+    if no:
+        return no
+    error = bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
+    if error:
+        return {"ok": False, "id": t["id"], "title": t["title"], "error": error, "pin": True}
+    try:
+        turn(t, WIPE_PROMPT)
+    except Exception as ex:      # nothing was changed
+        return {"ok": False, "id": t["id"], "title": t["title"], "error": "chưa làm mới được: " + str(ex)[:260]}
+    bind(t["id"], t["binding"])
+    try:
+        answer = turn(t, f"Thread {t['title']} vừa được làm mới (renew) từ trang Setup: ngữ cảnh cũ đã bỏ. {REREAD_PROMPT}")
+    except Exception as ex:
+        return {"ok": False, "id": t["id"], "title": t["title"], "renewed": True,
+                "error": "đã làm mới và gán lại, CHƯA đọc quy trình (bấm Đọc lại quy trình): " + str(ex)[:200]}
+    return {"ok": True, "id": t["id"], "title": t["title"], "answer": "đã làm mới, gán lại " + t["binding"] + ". " + answer[:240]}
 
 
 def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
@@ -485,6 +545,10 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, answer(data.get("path"), data.get("answers")))
             if self.path == "/api/sessions/reread":
                 return self.send_json(200, reread(data.get("id")))
+            if self.path == "/api/sessions/compact":
+                return self.send_json(200, compact(data.get("id")))
+            if self.path == "/api/sessions/renew":
+                return self.send_json(200, renew(data.get("id"), data.get("pin")))
             if self.path == "/api/vscode-groups":
                 return self.send_json(200, group_in_vscode())
             if self.path == "/api/studio/review":

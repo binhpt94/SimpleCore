@@ -95,6 +95,66 @@ def main():
         check("reread: a failed run is reported, not hidden", (res["ok"], res["error"]), (False, "claude: not logged in"))
         check("reread binds nothing", ss.guard.bound_feature("aaaa1111", store) or "", "")
         check("the page may post to the reread path", "/api/sessions/reread" in ss.POST_PATHS)
+        # compact: one headless turn that runs /compact; nothing is bound
+        ss.run_claude = fake
+        before = len(calls)
+        for sid_, why in (("nope", "không có thread này"), ("cccc3333", "thread chưa gán FEATURE: chạy Setup trước"),
+                          ("dddd4444", "thread đã archive"), ("eeee5555", "VS Code không hiện thread này")):
+            res = ss.compact(sid_)
+            check(f"compact refused: {sid_}", (res["ok"], res["error"]), (False, why))
+        check("compact: a refused thread runs nothing", len(calls), before)
+        res = ss.compact("aaaa1111")
+        check("compact: runs /compact in that thread, on its model and effort",
+              (res["ok"], calls[-1]), (True, ["--resume", "aaaa1111", "--model", "claude-opus-x", "--effort", "medium", "-p", "/compact"]))
+        ss.run_claude = failing
+        res = ss.compact("aaaa1111")
+        check("compact: a failed run is reported", (res["ok"], res["error"]), (False, "claude: not logged in"))
+        check("compact binds nothing", ss.guard.bound_feature("aaaa1111", store) or "", "")
+        # renew: with the PIN; the context is emptied in the same chat, the thread is bound again, then reads the rules
+        real_pin = ss.bind_session.check_pin
+        ss.bind_session.check_pin = lambda store_, pin: "" if pin == "1234" else "PIN sai"
+        try:
+            ss.run_claude = fake
+            before = len(calls)
+            for pin in ("", "0000", None, 1234):
+                res = ss.renew("aaaa1111", pin)
+                check(f"renew: a wrong PIN is refused ({pin!r})", (res["ok"], res["error"], res.get("pin")), (False, "PIN sai", True))
+            check("renew: a wrong PIN runs nothing and binds nothing",
+                  (len(calls), ss.guard.bound_feature("aaaa1111", store) or ""), (before, ""))
+            res = ss.renew("cccc3333", "1234")
+            check("renew: a thread that is not bound is refused before the PIN is looked at",
+                  (res["ok"], res["error"], len(calls)), (False, "thread chưa gán FEATURE: chạy Setup trước", before))
+            res = ss.renew("aaaa1111", "1234")
+            first, second = calls[-2], calls[-1]
+            check("renew: first the context is emptied in the same thread (a /compact told to keep nothing, not /clear)",
+                  (first[:2], first[-2], first[-1] == ss.WIPE_PROMPT, first[-1].startswith("/compact "), "KHÔNG giữ lại" in first[-1]),
+                  (["--resume", "aaaa1111"], "-p", True, True, True))
+            check("renew: then it is told it was renewed and to read the rules",
+                  (second[:2], second[-1].startswith("Thread CodeLead vừa được làm mới"), ss.REREAD_PROMPT in second[-1], len(calls) - before),
+                  (["--resume", "aaaa1111"], True, True, 2))
+            check("renew: it is bound again to the FEATURE it had", (res["ok"], ss.guard.bound_feature("aaaa1111", store)), (True, "@CodeLead"))
+            os.remove(ss.guard.binding_path("aaaa1111", store))
+            ss.run_claude = failing
+            res = ss.renew("aaaa1111", "1234")
+            check("renew: when emptying fails nothing is bound", (res["ok"], res["error"].startswith("chưa làm mới được"),
+                                                                  ss.guard.bound_feature("aaaa1111", store) or ""), (False, True, ""))
+            turns = []
+
+            def second_fails(args):
+                turns.append(args)
+                if len(turns) == 2:
+                    raise RuntimeError("claude: timeout")
+                return ""
+
+            ss.run_claude = second_fails
+            res = ss.renew("aaaa1111", "1234")
+            check("renew: emptied and bound but the rules not read: said so, the binding stays",
+                  (res["ok"], res.get("renewed"), "CHƯA đọc quy trình" in res["error"], ss.guard.bound_feature("aaaa1111", store)),
+                  (False, True, True, "@CodeLead"))
+        finally:
+            ss.bind_session.check_pin = real_pin
+        check("the page may post to the compact and renew paths",
+              ("/api/sessions/compact" in ss.POST_PATHS, "/api/sessions/renew" in ss.POST_PATHS), (True, True))
     finally:
         ss.run_claude, ss.threads, ss.guard.STORE_DIR = real
         shutil.rmtree(store, ignore_errors=True)
