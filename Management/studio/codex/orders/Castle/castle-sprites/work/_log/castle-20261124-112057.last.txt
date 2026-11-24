@@ -1,0 +1,5 @@
+Đã lưu đúng một ảnh tại [out/castle.png](D:/AI/CoreSimple/Management/studio/codex/orders/Castle/castle-sprites/work/out/castle.png).
+
+PNG 512 × 512 có nền alpha 0, vùng thành đúng 372 × 496 px, căn giữa ngang và chạm mép dưới. Viền ngoài `#1B2330` liền và dày 8 px.
+
+Đường bao thân thành và mái đối xứng. Hai lá cờ cùng hướng nên phần cờ lệch đối xứng.

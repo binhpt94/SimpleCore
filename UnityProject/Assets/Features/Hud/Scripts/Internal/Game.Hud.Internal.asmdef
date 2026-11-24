@@ -1,0 +1,22 @@
+{
+  "name": "Game.Hud.Internal",
+  "rootNamespace": "Game.Hud",
+  "references": [
+    "Game.Core",
+    "Game.Castle.Contracts",
+    "Game.Wallet.Contracts",
+    "Game.Wave.Contracts",
+    "Game.Run.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

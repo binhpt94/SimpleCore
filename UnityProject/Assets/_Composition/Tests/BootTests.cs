@@ -14,7 +14,7 @@ namespace Game.Composition.Tests
         private static readonly object[] Scenes =
         {
             new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 2 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 5 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 13 },
         };
 
         [Test]
@@ -51,8 +51,8 @@ namespace Game.Composition.Tests
         [TestCaseSource(nameof(Scenes))]
         public void Variant_RunsEveryInstallerWithoutMissingDependencies(string variant, string scene, string last, int count)
         {
-            // Wallet resolves the session, Shop resolves Wallet and Popup, Popup reads the scene's popup
-            // catalog during Install, so a wrong order or a missing catalog throws here.
+            // Popup reads the scene's popup catalog and Wallet resolves the session and the run during Install,
+            // so a wrong order or a missing catalog throws here.
             Assert.DoesNotThrow(() => Load(variant).Run());
         }
 
@@ -70,11 +70,11 @@ namespace Game.Composition.Tests
         }
 
         [Test]
-        public void GameScene_PopupCatalogHasThePurchasedPopupOfShop()
+        public void GameScene_PopupCatalogHasTheLosePopup()
         {
             var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").Catalogs);
 
-            Assert.That(catalogs.Get("Popup").TryGet("Shop/Purchased", out var prefab), Is.True);
+            Assert.That(catalogs.Get("Popup").TryGet("PopupLose/Main", out var prefab), Is.True);
             Assert.That(prefab, Is.InstanceOf<GameObject>());
         }
 

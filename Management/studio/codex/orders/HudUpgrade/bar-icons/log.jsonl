@@ -1,0 +1,19 @@
+{"at": "2026-11-24 10:13:05", "event": "attempt", "item": "hero-knight", "n": 1, "images": []}
+{"at": "2026-11-24 10:16:23", "event": "run", "tool": "codex", "item": "hero-knight", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-knight.png", "files": ["hero-knight.png"], "error": ""}
+{"at": "2026-11-24 10:16:34", "event": "attempt", "item": "hero-axeman", "n": 1, "images": []}
+{"at": "2026-11-24 10:21:30", "event": "run", "tool": "codex", "item": "hero-axeman", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-axeman.png", "files": ["hero-axeman.png"], "error": ""}
+{"at": "2026-11-24 10:21:31", "event": "attempt", "item": "hero-swordsman", "n": 1, "images": []}
+{"at": "2026-11-24 10:25:26", "event": "run", "tool": "codex", "item": "hero-swordsman", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-swordsman.png", "files": ["hero-swordsman.png"], "error": ""}
+{"at": "2026-11-24 10:25:28", "event": "attempt", "item": "hero-archer", "n": 1, "images": []}
+{"at": "2026-11-24 10:31:30", "event": "run", "tool": "codex", "item": "hero-archer", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-archer.png", "files": ["hero-archer.png"], "error": ""}
+{"at": "2026-11-24 10:31:33", "event": "attempt", "item": "hero-mage", "n": 1, "images": []}
+{"at": "2026-11-24 10:35:11", "event": "run", "tool": "codex", "item": "hero-mage", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-mage.png", "files": ["hero-mage.png"], "error": ""}
+{"at": "2026-11-24 10:37:50", "event": "attempt", "item": "castle-health", "n": 1, "images": []}
+{"at": "2026-11-24 10:40:58", "event": "run", "tool": "codex", "item": "castle-health", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/castle-health.png", "files": ["castle-health.png"], "error": ""}
+{"at": "2026-11-24 10:40:59", "event": "attempt", "item": "castle-attack", "n": 1, "images": []}
+{"at": "2026-11-24 10:44:01", "event": "run", "tool": "codex", "item": "castle-attack", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/castle-attack.png", "files": ["castle-attack.png"], "error": ""}
+{"at": "2026-11-24 10:44:01", "event": "attempt", "item": "castle-skill", "n": 1, "images": []}
+{"at": "2026-11-24 10:48:59", "event": "run", "tool": "codex", "item": "castle-skill", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/castle-skill.png", "files": ["castle-skill.png"], "error": ""}
+{"at": "2026-11-24 10:49:00", "event": "attempt", "item": "coin", "n": 1, "images": []}
+{"at": "2026-11-24 10:49:58", "event": "run", "tool": "codex", "item": "coin", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/coin.png", "files": ["coin.png"], "error": ""}
+{"at": "2026-11-24 10:50:44", "event": "deliver", "version": 1, "files": ["castle-attack.png", "castle-health.png", "castle-skill.png", "coin.png", "hero-archer.png", "hero-axeman.png", "hero-knight.png", "hero-mage.png", "hero-swordsman.png", "quality.json"], "below": []}

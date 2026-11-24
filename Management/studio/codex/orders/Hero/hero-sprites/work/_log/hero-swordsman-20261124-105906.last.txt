@@ -1,0 +1,3 @@
+Đã lưu một sprite tại [out/hero-swordsman.png](D:/AI/CoreSimple/Management/studio/codex/orders/Hero/hero-sprites/work/out/hero-swordsman.png). PNG 256 × 384 có nền alpha 0. Đỉnh đầu cách mép trên 25 px, đế giày cách mép dưới 4 px và mũi kiếm cách mép phải 7 px.
+
+Ở cỡ 50 × 75 px, khăn đỏ, áo đỏ và lưỡi kiếm bạc vẫn rõ. Viền dùng màu `#1B2330` và mỏng hơn 8 px ở một số đoạn.

@@ -19,7 +19,7 @@ namespace Game.SceneFlow
             var session = registry.Resolve<ISessionScene>();
 
             if (side == SceneFlowSide.Loading) InstallLoadingSide(session);
-            else InstallGameSide(session);
+            else InstallGameSide(session, registry);
         }
 
         private void InstallLoadingSide(ISessionScene session)
@@ -34,13 +34,18 @@ namespace Game.SceneFlow
             }
 
             session.Join(new LoadingToGameFlow(session, new UnitySceneLoader(),
-                new PrefabLoadingScreenSource(loadingScreenPrefab), settings, Debug.LogException));
+                new PrefabLoadingScreenSource(loadingScreenPrefab), new UnityTimer(), settings, Debug.LogException));
         }
 
-        private void InstallGameSide(ISessionScene session)
+        private void InstallGameSide(ISessionScene session, IServiceRegistry registry)
         {
             if (config == null) throw Missing("config");
             if (gateCarrierPrefab == null) throw Missing("gateCarrierPrefab");
+            if (!registry.TryResolve<ISessionLoadProgress>(out var progress))
+            {
+                throw new InvalidOperationException(
+                    $"{name}: no ISessionLoadProgress registered; install SessionScene before SceneFlow (side {side}).");
+            }
 
             var gameScene = config.Settings.GameScene;
             if (string.IsNullOrEmpty(gameScene))
@@ -48,7 +53,7 @@ namespace Game.SceneFlow
                 throw new InvalidOperationException($"{name}: SceneFlowConfig must name the game scene.");
             }
 
-            var gate = new SceneGate();
+            var gate = new SceneGate(progress);
 
             // The carrier must exist before the Loading scene looks for it, so it cannot wait for Run.
             // Outside Play mode (EditMode tests run installers) it would be left behind in the open scene.

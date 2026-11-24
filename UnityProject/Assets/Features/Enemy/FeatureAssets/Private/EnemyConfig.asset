@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89efccc39ba42944e8ee856f75dea4c7, type: 3}
+  m_Name: EnemyConfig
+  m_EditorClassIdentifier: Game.Enemy.Internal::Game.Enemy.EnemyConfig
+  _spawnDistance: 17
+  _slowMoveFactor: 0.5
+  _slowHitFactor: 2
+  _kinds:
+  - _type: 0
+    _width: 1
+    _height: 1.2
+    _health: 40
+    _damage: 5
+    _secondsPerHit: 1
+    _range: 1
+    _moveSpeed: 1.5
+    _coins: 5
+  - _type: 1
+    _width: 1.2
+    _height: 0.8
+    _health: 20
+    _damage: 3
+    _secondsPerHit: 0.8
+    _range: 1
+    _moveSpeed: 3
+    _coins: 4
+  - _type: 2
+    _width: 2
+    _height: 2.5
+    _health: 150
+    _damage: 15
+    _secondsPerHit: 1.5
+    _range: 1.2
+    _moveSpeed: 0.8
+    _coins: 15
+  - _type: 3
+    _width: 1
+    _height: 1.2
+    _health: 25
+    _damage: 6
+    _secondsPerHit: 1.2
+    _range: 5
+    _moveSpeed: 1.5
+    _coins: 6
+  - _type: 4
+    _width: 3
+    _height: 3.5
+    _health: 400
+    _damage: 40
+    _secondsPerHit: 2
+    _range: 1.5
+    _moveSpeed: 0.6
+    _coins: 100

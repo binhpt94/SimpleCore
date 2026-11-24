@@ -9,6 +9,9 @@ namespace Game.Services.SessionScene
     {
         [SerializeField] private GameObject driverPrefab;
 
+        [Tooltip("Longest one participant may take to load before the session fails, in seconds.")]
+        [SerializeField] private float loadTimeLimitSeconds = 10f;
+
         public override void Install(IServiceRegistry registry)
         {
             if (driverPrefab == null)
@@ -17,8 +20,16 @@ namespace Game.Services.SessionScene
                     "SessionSceneInstaller: driverPrefab is not assigned; without it the session never leaves Init.");
             }
 
-            var logic = new SessionSceneLogic(Debug.LogException);
+            if (loadTimeLimitSeconds <= 0f)
+            {
+                throw new InvalidOperationException(
+                    $"SessionSceneInstaller: loadTimeLimitSeconds must be positive, it is {loadTimeLimitSeconds}.");
+            }
+
+            var logic = new SessionSceneLogic(
+                Debug.LogException, new FrameLoadTimer(), TimeSpan.FromSeconds(loadTimeLimitSeconds));
             registry.Register<ISessionScene>(logic);
+            registry.Register<ISessionLoadProgress>(logic);
 
             // Outside Play mode (EditMode tests run installers) no Start would ever come, and the
             // driver object would be left behind in the open scene.

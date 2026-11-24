@@ -1,0 +1,31 @@
+{
+  "name": "Game.HudUpgrade.Tests",
+  "rootNamespace": "Game.HudUpgrade.Tests",
+  "references": [
+    "Game.Core",
+    "Game.HudUpgrade.Internal",
+    "Game.Upgrade.Contracts",
+    "Game.Hero.Contracts",
+    "Game.Wallet.Contracts",
+    "Game.Run.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

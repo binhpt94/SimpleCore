@@ -1,0 +1,20 @@
+{
+  "name": "Game.PopupLose.Internal",
+  "rootNamespace": "Game.PopupLose",
+  "references": [
+    "Game.Core",
+    "Game.Run.Contracts",
+    "Game.Services.Popup.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Game.Home.Internal",
+  "rootNamespace": "Game.Home",
+  "references": [
+    "Game.Core",
+    "Game.Run.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

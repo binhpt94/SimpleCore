@@ -1,0 +1,215 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Game.Castle
+{
+    /// <summary>
+    /// Draws the castle, its shots and the Thunder effect in world units (1 world unit = 1 battlefield unit,
+    /// ground at y = 0). Sprites left empty are drawn as plain coloured boxes until the generated art arrives.
+    /// </summary>
+    internal sealed class CastleView : MonoBehaviour, ICastleView
+    {
+        [SerializeField] private Sprite castleSprite;
+        [SerializeField] private Sprite shotSprite;
+        [SerializeField] private Sprite thunderSprite;
+        [SerializeField] private Color castleColor = new Color(0.55f, 0.5f, 0.45f);
+        [SerializeField] private Color flashColor = new Color(1f, 0.35f, 0.35f);
+        [SerializeField] private Color shotColor = new Color(1f, 0.9f, 0.3f);
+        [SerializeField] private Color thunderColor = new Color(0.6f, 0.8f, 1f);
+        [SerializeField] private float shotHeight = 3f;
+        [SerializeField] private float shotSize = 0.3f;
+        [SerializeField] private float thunderHeight = 1f;
+        [SerializeField] private float thunderSize = 1.5f;
+
+        private readonly List<Shot> _shots = new List<Shot>();
+        private readonly List<Effect> _thunders = new List<Effect>();
+        private Sprite _placeholder;
+        private SpriteRenderer _body;
+        private Vector3 _bodyScale = Vector3.one;
+        private float _flashLeft;
+        private float _collapseLeft;
+        private float _collapseTotal;
+        private bool _collapsed;
+
+        public event Action<float> Ticked;
+
+        private void Awake()
+        {
+            var bodyObject = new GameObject("Body");
+            bodyObject.transform.SetParent(transform, false);
+            _body = bodyObject.AddComponent<SpriteRenderer>();
+            _body.sprite = castleSprite ? castleSprite : Placeholder();
+            _body.color = castleSprite ? Color.white : castleColor;
+        }
+
+        private void Update() => Ticked?.Invoke(Time.deltaTime);
+
+        private void OnDestroy()
+        {
+            if (_placeholder) Destroy(_placeholder);
+        }
+
+        public void Place(float halfWidth, float height)
+        {
+            transform.position = Vector3.zero;
+            var size = _body.sprite.bounds.size;
+            _bodyScale = new Vector3(2f * halfWidth / Mathf.Max(size.x, 1e-4f), height / Mathf.Max(size.y, 1e-4f), 1f);
+            _body.transform.localPosition = new Vector3(0f, -_body.sprite.bounds.min.y * _bodyScale.y, 0f);
+            _body.transform.localScale = _bodyScale;
+        }
+
+        public void SetVisible(bool visible) => gameObject.SetActive(visible);
+
+        public void ResetBody()
+        {
+            _flashLeft = 0f;
+            _collapseLeft = 0f;
+            _collapsed = false;
+            _body.transform.localScale = _bodyScale;
+            _body.color = BodyColor;
+        }
+
+        public void FlashHit(float seconds)
+        {
+            if (_collapsed) return;
+            _flashLeft = seconds;
+            _body.color = castleSprite ? flashColor : Color.Lerp(castleColor, flashColor, 0.8f);
+        }
+
+        public void Collapse(float seconds)
+        {
+            _collapsed = true;
+            _flashLeft = 0f;
+            _body.color = BodyColor;
+            _collapseTotal = Mathf.Max(seconds, 1e-4f);
+            _collapseLeft = _collapseTotal;
+        }
+
+        public void ShowShot(int targetHandle, float fromX, float toX, float seconds)
+        {
+            var renderer = MakeEffect("Shot", shotSprite, shotColor, shotSize);
+            renderer.transform.position = new Vector3(fromX, shotHeight, 0f);
+            _shots.Add(new Shot
+            {
+                Renderer = renderer, Handle = targetHandle, FromX = fromX, ToX = toX,
+                Total = Mathf.Max(seconds, 1e-4f),
+            });
+        }
+
+        public void DropShotsAt(int targetHandle)
+        {
+            for (var i = _shots.Count - 1; i >= 0; i--)
+            {
+                if (_shots[i].Handle != targetHandle) continue;
+                Destroy(_shots[i].Renderer.gameObject);
+                _shots.RemoveAt(i);
+            }
+        }
+
+        public void ShowThunder(float x, float seconds)
+        {
+            var renderer = MakeEffect("Thunder", thunderSprite, thunderColor, thunderSize * 0.5f);
+            renderer.transform.position = new Vector3(x, thunderHeight, 0f);
+            _thunders.Add(new Effect { Renderer = renderer, Total = Mathf.Max(seconds, 1e-4f) });
+        }
+
+        public void Advance(float seconds)
+        {
+            if (_flashLeft > 0f)
+            {
+                _flashLeft -= seconds;
+                if (_flashLeft <= 0f) _body.color = BodyColor;
+            }
+
+            if (_collapseLeft > 0f)
+            {
+                _collapseLeft = Mathf.Max(0f, _collapseLeft - seconds);
+                _body.transform.localScale = _bodyScale * (_collapseLeft / _collapseTotal);
+            }
+
+            for (var i = _shots.Count - 1; i >= 0; i--)
+            {
+                var shot = _shots[i];
+                shot.Elapsed += seconds;
+                if (shot.Elapsed >= shot.Total)
+                {
+                    Destroy(shot.Renderer.gameObject);
+                    _shots.RemoveAt(i);
+                    continue;
+                }
+                var t = shot.Elapsed / shot.Total;
+                shot.Renderer.transform.position = new Vector3(Mathf.Lerp(shot.FromX, shot.ToX, t), Mathf.Lerp(shotHeight, thunderHeight, t), 0f);
+                _shots[i] = shot;
+            }
+
+            for (var i = _thunders.Count - 1; i >= 0; i--)
+            {
+                var effect = _thunders[i];
+                effect.Elapsed += seconds;
+                if (effect.Elapsed >= effect.Total)
+                {
+                    Destroy(effect.Renderer.gameObject);
+                    _thunders.RemoveAt(i);
+                    continue;
+                }
+                var size = Mathf.Lerp(thunderSize * 0.5f, thunderSize, effect.Elapsed / effect.Total);
+                effect.Renderer.transform.localScale = Scale(effect.Renderer.sprite, size);
+                _thunders[i] = effect;
+            }
+        }
+
+        public void ClearEffects()
+        {
+            foreach (var shot in _shots) Destroy(shot.Renderer.gameObject);
+            _shots.Clear();
+            foreach (var effect in _thunders) Destroy(effect.Renderer.gameObject);
+            _thunders.Clear();
+        }
+
+        private Color BodyColor => castleSprite ? Color.white : castleColor;
+
+        private SpriteRenderer MakeEffect(string effectName, Sprite sprite, Color placeholderColor, float size)
+        {
+            var effectObject = new GameObject(effectName);
+            effectObject.transform.SetParent(transform, false);
+            var renderer = effectObject.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite ? sprite : Placeholder();
+            renderer.color = sprite ? Color.white : placeholderColor;
+            renderer.sortingOrder = 10;
+            renderer.transform.localScale = Scale(renderer.sprite, size);
+            return renderer;
+        }
+
+        private static Vector3 Scale(Sprite sprite, float size)
+        {
+            var bounds = sprite.bounds.size;
+            var largest = Mathf.Max(bounds.x, bounds.y, 1e-4f);
+            return Vector3.one * (size / largest);
+        }
+
+        private Sprite Placeholder()
+        {
+            if (!_placeholder)
+                _placeholder = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 4f, 4f), new Vector2(0.5f, 0.5f), 4f);
+            return _placeholder;
+        }
+
+        private struct Shot
+        {
+            public SpriteRenderer Renderer;
+            public int Handle;
+            public float FromX;
+            public float ToX;
+            public float Elapsed;
+            public float Total;
+        }
+
+        private struct Effect
+        {
+            public SpriteRenderer Renderer;
+            public float Elapsed;
+            public float Total;
+        }
+    }
+}

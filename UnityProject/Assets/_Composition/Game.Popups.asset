@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Core::Game.Core.AssetCatalog
   kind: Popup
   entries:
-  - id: Shop/Purchased
-    asset: {fileID: 2000000000000001, guid: 22220000000000000000000000000005, type: 3}
+  - id: PopupLose/Main
+    asset: {fileID: 1000000000000000001, guid: d5f03cb0cea3eb74cafe8bb9995fa12c, type: 3}

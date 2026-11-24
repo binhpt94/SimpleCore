@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce9de5e0dc9cb584ba5565996ea130da, type: 3}
+  m_Name: WaveConfig
+  m_EditorClassIdentifier: Game.Wave.Internal::Game.Wave.WaveConfig
+  baseCount: 6
+  countPerWave: 2
+  baseInterval: 1
+  intervalStep: 0.05
+  minInterval: 0.3
+  statStepPerWave: 0.1
+  wolfFromWave: 3
+  giantFromWave: 5
+  archerFromWave: 7
+  bossEveryWaves: 10
+  useArcher: 0
+  useBoss: 0
+  tiers:
+  - fromWave: 1
+    soldier: 100
+    wolf: 0
+    giant: 0
+    archer: 0
+  - fromWave: 3
+    soldier: 70
+    wolf: 30
+    giant: 0
+    archer: 0
+  - fromWave: 5
+    soldier: 55
+    wolf: 30
+    giant: 15
+    archer: 0
+  - fromWave: 7
+    soldier: 45
+    wolf: 25
+    giant: 15
+    archer: 15
+  - fromWave: 10
+    soldier: 40
+    wolf: 25
+    giant: 20
+    archer: 15
+  - fromWave: 15
+    soldier: 35
+    wolf: 25
+    giant: 20
+    archer: 20
+  clearRewardBase: 20
+  clearRewardPerWave: 5
+  gapSeconds: 3
+  aliveCap: 40
+  maxSameSideRun: 3

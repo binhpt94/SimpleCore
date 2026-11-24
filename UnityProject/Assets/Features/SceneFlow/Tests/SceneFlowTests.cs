@@ -6,8 +6,8 @@ using Game.Core;
 using Game.Services.SessionScene;
 using NUnit.Framework;
 using UnityEditor;
-// UnityEditor has its own SessionState class; the one meant here is the session contract's enum.
-using SessionState = Game.Services.SessionScene.SessionState;
+// UnityEditor has its own SessionState class; the one meant here is Core's session enum.
+using SessionState = Game.Core.SessionState;
 
 namespace Game.SceneFlow.Tests
 {
@@ -20,6 +20,8 @@ namespace Game.SceneFlow.Tests
         private FakeSession session;
         private FakeScenes scenes;
         private FakeScreens screens;
+        private FakeProgress progress;
+        private FakeTimer timer;
         private LoadingToGameFlow flow;
 
         [SetUp]
@@ -28,10 +30,89 @@ namespace Game.SceneFlow.Tests
             log = new List<string>();
             errors = new List<Exception>();
             session = new FakeSession(log);
-            scenes = new FakeScenes(log) { Gate = new SceneGate() };
+            progress = new FakeProgress(4);
+            scenes = new FakeScenes(log) { Gate = new SceneGate(progress) };
             screens = new FakeScreens(log);
-            flow = new LoadingToGameFlow(session, scenes, screens,
-                new SceneFlowSettings("Loading", "Game", FailedMessage), errors.Add);
+            timer = new FakeTimer();
+            flow = new LoadingToGameFlow(session, scenes, screens, timer,
+                new SceneFlowSettings("Loading", "Game", FailedMessage, "Lỗi tải: {0}", TimeSpan.FromSeconds(1)),
+                errors.Add);
+        }
+
+        [Test]
+        public void WhenOneGameSceneFeatureFailsToLoad_TheErrorNamesThatFeature()
+        {
+            flow.Run();
+
+            progress.Fail("Wallet");
+            scenes.Gate.Fail();
+
+            Assert.That(screens.Screen.Error, Is.EqualTo("Lỗi tải: Wallet"));
+        }
+
+        [Test]
+        public void WhenTheFailedFeatureIsNamedJustAfterTheFailure_TheErrorStillNamesIt()
+        {
+            flow.Run();
+
+            scenes.Gate.Fail();
+            progress.Fail("Wallet");
+
+            Assert.That(screens.Screen.Error, Is.EqualTo("Lỗi tải: Wallet"));
+        }
+
+        [Test]
+        public void TheLoadingBar_StartsEmpty_AndFillsAsGameSceneFeaturesFinishLoading()
+        {
+            flow.Run();
+            Assert.That(screens.Screen.Progress, Is.EqualTo(0f));
+
+            progress.Load(1);
+            Assert.That(screens.Screen.Progress, Is.EqualTo(0.25f));
+
+            progress.Load(3);
+            Assert.That(screens.Screen.Progress, Is.EqualTo(1f));
+        }
+
+        [Test]
+        public void TheLoadingBar_StopsWhereItWas_WhenTheGameSceneFails()
+        {
+            flow.Run();
+            progress.Load(2);
+
+            scenes.Gate.Fail();
+            progress.Load(1);
+
+            Assert.That(screens.Screen.Progress, Is.EqualTo(0.5f));
+        }
+
+        [Test]
+        public void TheLoadingScreenStaysForItsMinimumTime_EvenWhenTheGameSceneIsPlayableSooner()
+        {
+            timer.Pending = true;
+            flow.Run();
+
+            scenes.Gate.Open();
+
+            Assert.That(timer.Requested, Is.EqualTo(TimeSpan.FromSeconds(1)));
+            Assert.That(session.Ended, Is.False);
+            Assert.That(log, Has.None.EqualTo("unload Loading"));
+
+            timer.Elapse();
+
+            Assert.That(log, Has.Member("unload Loading"));
+        }
+
+        [Test]
+        public void TheMinimumTime_CountsFromWhenTheLoadingScreenShows()
+        {
+            timer.Pending = true;
+            flow.Run();
+            timer.Elapse();
+
+            scenes.Gate.Open();
+
+            Assert.That(log, Has.Member("unload Loading"));
         }
 
         [Test]
@@ -138,7 +219,7 @@ namespace Game.SceneFlow.Tests
         {
             // Regression: views opened in Run were created in the still-active Loading scene and
             // disappeared with it. Loading comes before every Run, so activating there is in time.
-            var signal = new GameReadySignal(session, new SceneGate(), scenes, "Game");
+            var signal = new GameReadySignal(session, new SceneGate(progress), scenes, "Game");
 
             signal.LoadAsync(CancellationToken.None).Forget();
 
@@ -148,7 +229,7 @@ namespace Game.SceneFlow.Tests
         [Test]
         public void GameScene_OpensTheGate_WhenItsSessionRuns()
         {
-            var gate = new SceneGate();
+            var gate = new SceneGate(progress);
             var signal = new GameReadySignal(session, gate, scenes, "Game");
 
             signal.Run();
@@ -159,7 +240,7 @@ namespace Game.SceneFlow.Tests
         [Test]
         public void GameScene_MarksTheGateFailed_WhenItsSessionFails()
         {
-            var gate = new SceneGate();
+            var gate = new SceneGate(progress);
             var signal = new GameReadySignal(session, gate, scenes, "Game");
 
             session.Raise(SessionState.Failed);
@@ -171,7 +252,7 @@ namespace Game.SceneFlow.Tests
         [Test]
         public void GameScene_GateStaysUnanswered_WhileItsSessionIsStillLoading()
         {
-            var gate = new SceneGate();
+            var gate = new SceneGate(progress);
             var signal = new GameReadySignal(session, gate, scenes, "Game");
 
             session.Raise(SessionState.Loading);
@@ -181,30 +262,72 @@ namespace Game.SceneFlow.Tests
         }
 
         [Test]
-        public void LoadingScreenPrefab_WhenAnErrorIsShown_HidesTheLoadingTextAndShowsTheError()
+        public void LoadingScreenPrefab_WhenAnErrorIsShown_KeepsTheGameNameAndBar_AndShowsTheError()
         {
-            var prefab = AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>(
-                "Assets/Features/SceneFlow/FeatureAssets/Private/LoadingScreen.prefab");
-            Assert.That(prefab, Is.Not.Null, "LoadingScreen.prefab missing");
-            var instance = UnityEngine.Object.Instantiate(prefab);
+            var instance = InstantiateLoadingScreen();
             try
             {
                 var title = instance.transform.Find("Title");
+                var bar = instance.transform.Find("ProgressBar");
                 var error = instance.transform.Find("Error");
                 Assert.That(title, Is.Not.Null, "LoadingScreen.prefab has no child named Title");
+                Assert.That(bar, Is.Not.Null, "LoadingScreen.prefab has no child named ProgressBar");
                 Assert.That(error, Is.Not.Null, "LoadingScreen.prefab has no child named Error");
-                Assert.That(title.gameObject.activeSelf, Is.True, "the loading text should show before any error");
                 Assert.That(error.gameObject.activeSelf, Is.False, "no error should show before one happens");
 
                 instance.GetComponentInChildren<ILoadingScreen>(true).ShowError(FailedMessage);
 
-                Assert.That(title.gameObject.activeSelf, Is.False, "the loading text should hide once an error shows");
+                Assert.That(title.gameObject.activeSelf, Is.True, "the game name should stay when an error shows");
+                Assert.That(bar.gameObject.activeSelf, Is.True, "the bar should stay where it stopped");
                 Assert.That(error.gameObject.activeSelf, Is.True);
+                Assert.That(Serialized(error, "Text").FindProperty("m_Text").stringValue, Is.EqualTo(FailedMessage));
             }
             finally
             {
                 UnityEngine.Object.DestroyImmediate(instance);
             }
+        }
+
+        [Test]
+        public void LoadingScreenPrefab_TheBarFillsWithTheProgressItIsGiven()
+        {
+            var instance = InstantiateLoadingScreen();
+            try
+            {
+                var fill = instance.transform.Find("ProgressBar/Fill");
+                Assert.That(fill, Is.Not.Null, "LoadingScreen.prefab has no ProgressBar/Fill");
+                // Read through the serialized fields: this test assembly does not reference UnityEngine.UI.
+                const int filled = 3;
+                var image = Serialized(fill, "Image");
+                Assert.That(image.FindProperty("m_Type").intValue, Is.EqualTo(filled), "the fill Image should be of type Filled");
+                Assert.That(image.FindProperty("m_Sprite").objectReferenceValue, Is.Not.Null,
+                    "an Image without a sprite ignores its fill amount");
+                Assert.That(image.FindProperty("m_FillAmount").floatValue, Is.EqualTo(0f), "the bar should start empty");
+
+                instance.GetComponentInChildren<ILoadingScreen>(true).ShowProgress(0.4f);
+
+                image.Update();
+                Assert.That(image.FindProperty("m_FillAmount").floatValue, Is.EqualTo(0.4f).Within(0.0001f));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(instance);
+            }
+        }
+
+        private static SerializedObject Serialized(UnityEngine.Transform owner, string componentType)
+        {
+            var component = owner.GetComponent(componentType);
+            Assert.That(component, Is.Not.Null, $"{owner.name} has no {componentType}");
+            return new SerializedObject(component);
+        }
+
+        private static UnityEngine.GameObject InstantiateLoadingScreen()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>(
+                "Assets/Features/SceneFlow/FeatureAssets/Private/LoadingScreen.prefab");
+            Assert.That(prefab, Is.Not.Null, "LoadingScreen.prefab missing");
+            return UnityEngine.Object.Instantiate(prefab);
         }
 
         [TestCase("SceneFlowLoadingInstaller")]
@@ -214,6 +337,7 @@ namespace Game.SceneFlow.Tests
             var installer = LoadInstaller(assetName);
             var registry = new ServiceRegistry();
             registry.Register<ISessionScene>(session);
+            registry.Register<ISessionLoadProgress>(progress);
 
             // Also proves the asset's config and prefabs are assigned: Install throws without them.
             installer.Install(registry);
@@ -335,11 +459,67 @@ namespace Game.SceneFlow.Tests
             }
         }
 
+        private sealed class FakeProgress : ISessionLoadProgress
+        {
+            public FakeProgress(int participants)
+            {
+                ParticipantCount = participants;
+            }
+
+            public int ParticipantCount { get; }
+
+            public int LoadedCount { get; private set; }
+
+            public string FailedParticipant { get; private set; }
+
+            public event Action LoadProgressChanged;
+
+            public void Load(int more)
+            {
+                LoadedCount += more;
+                LoadProgressChanged?.Invoke();
+            }
+
+            public void Fail(string participant)
+            {
+                FailedParticipant = participant;
+                LoadProgressChanged?.Invoke();
+            }
+        }
+
+        private sealed class FakeTimer : ITimer
+        {
+            private readonly UniTaskCompletionSource elapsed = new UniTaskCompletionSource();
+
+            /// <summary>False: every delay is already over. True: delays wait for Elapse.</summary>
+            public bool Pending;
+
+            public TimeSpan? Requested { get; private set; }
+
+            public UniTask DelayAsync(TimeSpan delay)
+            {
+                Requested = delay;
+                return Pending ? elapsed.Task : UniTask.CompletedTask;
+            }
+
+            public void Elapse()
+            {
+                elapsed.TrySetResult();
+            }
+        }
+
         private sealed class FakeScreen : ILoadingScreen
         {
             public string Error { get; private set; }
 
             public bool Closed { get; private set; }
+
+            public float? Progress { get; private set; }
+
+            public void ShowProgress(float fraction)
+            {
+                Progress = fraction;
+            }
 
             public void ShowError(string message)
             {

@@ -1,0 +1,19 @@
+{
+  "name": "Game.TeamSelect.View",
+  "rootNamespace": "Game.TeamSelect",
+  "references": [
+    "Game.Core",
+    "Game.TeamSelect.Internal",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

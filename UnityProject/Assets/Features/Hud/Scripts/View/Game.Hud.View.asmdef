@@ -1,0 +1,19 @@
+{
+  "name": "Game.Hud.View",
+  "rootNamespace": "Game.Hud",
+  "references": [
+    "Game.Core",
+    "Game.Hud.Internal",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

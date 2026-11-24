@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21b1cb94f5231fe428297f90e6a5efd8, type: 3}
+  m_Name: HeroConfig
+  m_EditorClassIdentifier: Game.Hero.Internal::Game.Hero.HeroConfig
+  heroes:
+  - code: knight
+    displayName: "Hi\u1EC7p s\u0129"
+    group: 0
+    attack: 0
+    maxHealth: 300
+    damage: 12
+    secondsPerAttack: 1
+    range: 1.2
+    moveSpeed: 2.5
+    areaSize: 0
+    sprite: {fileID: 0}
+    placeholderColor: {r: 0.35, g: 0.55, b: 0.95, a: 1}
+  - code: axeman
+    displayName: "\u0110\u1EA5u s\u0129 r\xECu"
+    group: 0
+    attack: 1
+    maxHealth: 240
+    damage: 14
+    secondsPerAttack: 1.4
+    range: 1.3
+    moveSpeed: 2.5
+    areaSize: 1.5
+    sprite: {fileID: 0}
+    placeholderColor: {r: 0.9, g: 0.55, b: 0.2, a: 1}
+  - code: swordsman
+    displayName: "Ki\u1EBFm kh\xE1ch"
+    group: 0
+    attack: 0
+    maxHealth: 180
+    damage: 16
+    secondsPerAttack: 0.7
+    range: 1.2
+    moveSpeed: 3.5
+    areaSize: 0
+    sprite: {fileID: 0}
+    placeholderColor: {r: 0.9, g: 0.25, b: 0.25, a: 1}
+  - code: archer
+    displayName: "Cung th\u1EE7"
+    group: 1
+    attack: 0
+    maxHealth: 120
+    damage: 14
+    secondsPerAttack: 0.8
+    range: 7
+    moveSpeed: 2.5
+    areaSize: 0
+    sprite: {fileID: 0}
+    placeholderColor: {r: 0.3, g: 0.75, b: 0.3, a: 1}
+  - code: mage
+    displayName: "Ph\xE1p s\u01B0"
+    group: 1
+    attack: 2
+    maxHealth: 100
+    damage: 18
+    secondsPerAttack: 1.6
+    range: 6
+    moveSpeed: 2.2
+    areaSize: 1.5
+    sprite: {fileID: 0}
+    placeholderColor: {r: 0.65, g: 0.35, b: 0.9, a: 1}
+  heroPrefab: {fileID: 4210000000000000001, guid: db0ef26bcc72a194f82be7654fbc0dbc, type: 3}
+  targetHalfRange: 16
+  walkHalfRange: 15
+  slotSpawnX:
+  - -1.5
+  - 1.5
+  - -1.5
+  boxWidth: 1
+  boxHeight: 1.5
+  respawnSeconds: 8
+  fallSeconds: 0.3
+  respawnGrowSeconds: 0.3
+  levelStatStep: 0.15
+  levelAttackSpeedStep: 0.03
+  levelAttackSpeedCap: 0.6

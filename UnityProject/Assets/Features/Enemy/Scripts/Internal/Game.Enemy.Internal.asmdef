@@ -1,0 +1,20 @@
+{
+  "name": "Game.Enemy.Internal",
+  "rootNamespace": "Game.Enemy",
+  "references": [
+    "Game.Core",
+    "Game.Enemy.Contracts",
+    "Game.Wallet.Contracts",
+    "Game.Run.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

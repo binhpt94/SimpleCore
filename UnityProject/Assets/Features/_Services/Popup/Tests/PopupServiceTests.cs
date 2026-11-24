@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using Game.Core;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using SessionState = Game.Core.SessionState;
 
 namespace Game.Services.Popup.Tests
 {
@@ -13,128 +16,280 @@ namespace Game.Services.Popup.Tests
         private static readonly PopupId IdA = new PopupId("Test/A");
         private static readonly PopupId IdB = new PopupId("Test/B");
         private static readonly PopupId IdC = new PopupId("Test/C");
+        private static readonly PopupId IdD = new PopupId("Test/D");
 
         private readonly List<Object> created = new List<Object>();
         private FakePresenter presenter;
         private FakePrefabs prefabs;
+        private FakeLog log;
         private PopupService service;
-        private GameObject prefabA;
-        private GameObject prefabB;
-        private GameObject prefabC;
 
         [SetUp]
         public void SetUp()
         {
-            presenter = new FakePresenter();
-            prefabA = Make("A");
-            prefabB = Make("B");
-            prefabC = Make("C");
-            prefabs = new FakePrefabs { [IdA] = prefabA, [IdB] = prefabB, [IdC] = prefabC };
-            service = new PopupService(presenter, prefabs);
+            presenter = new FakePresenter(created);
+            prefabs = new FakePrefabs { [IdA] = Make("A"), [IdB] = Make("B"), [IdC] = Make("C"), [IdD] = Make("D") };
+            log = new FakeLog();
+            service = new PopupService(presenter, prefabs, log, 3);
+            service.Start();
         }
 
         [TearDown]
         public void TearDown()
         {
-            foreach (var o in created) Object.DestroyImmediate(o);
+            foreach (var o in created) if (o != null) Object.DestroyImmediate(o);
             created.Clear();
         }
 
+        // ---- stack
+
         [Test]
-        public void Show_WhenNothingOpen_OpensThePrefabOfThatIdImmediately()
+        public void Show_OpensThePopupOnTopAtOnce()
         {
             var handle = service.Show(IdA);
 
             Assert.That(handle.IsValid, Is.True);
-            Assert.That(service.Current, Is.EqualTo(handle));
-            Assert.That(presenter.Presented, Is.EqualTo(new[] { prefabA }));
+            Assert.That(presenter.Open, Has.Count.EqualTo(1));
+            Assert.That(service.IsOnTop(handle), Is.True);
         }
 
         [Test]
-        public void Show_WhileAnotherIsOpen_Waits()
-        {
-            var first = service.Show(IdA);
-            service.Show(IdB);
-
-            Assert.That(service.Current, Is.EqualTo(first));
-            Assert.That(service.WaitingCount, Is.EqualTo(1));
-            Assert.That(presenter.Presented, Is.EqualTo(new[] { prefabA }));
-        }
-
-        [Test]
-        public void Close_OpenPopup_DismissesItAndOpensNextInRequestOrder()
+        public void Show_WhileAnotherIsOpen_StacksTheNewOneOnTop()
         {
             var first = service.Show(IdA);
             var second = service.Show(IdB);
-            service.Show(IdC);
 
-            service.Close(first);
-
-            Assert.That(presenter.Dismissed, Is.EqualTo(new[] { prefabA }));
-            Assert.That(service.Current, Is.EqualTo(second));
-            Assert.That(presenter.Presented, Is.EqualTo(new[] { prefabA, prefabB }));
-            Assert.That(service.WaitingCount, Is.EqualTo(1));
+            Assert.That(service.OpenCount, Is.EqualTo(2));
+            Assert.That(service.IsOnTop(second), Is.True);
+            Assert.That(service.IsOnTop(first), Is.False);
         }
 
         [Test]
-        public void Close_LastPopup_LeavesNothingOpen()
-        {
-            var only = service.Show(IdA);
-
-            service.Close(only);
-
-            Assert.That(service.Current.IsValid, Is.False);
-            Assert.That(service.WaitingCount, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void Close_WaitingPopup_CancelsItWithoutTouchingTheOpenOne()
+        public void Close_TopPopup_GivesTopBackToThePopupBelow()
         {
             var first = service.Show(IdA);
             var second = service.Show(IdB);
 
             service.Close(second);
 
-            Assert.That(service.Current, Is.EqualTo(first));
-            Assert.That(service.WaitingCount, Is.EqualTo(0));
-            Assert.That(presenter.Dismissed, Is.Empty);
+            Assert.That(service.IsOnTop(first), Is.True);
+            Assert.That(presenter.Open, Has.Count.EqualTo(1));
         }
 
         [Test]
-        public void Close_SameHandleTwice_SecondCallDoesNothing()
+        public void Close_PopupInTheMiddle_LeavesTheTopOneOnTop()
+        {
+            service.Show(IdA);
+            var middle = service.Show(IdB);
+            var top = service.Show(IdC);
+
+            service.Close(middle);
+
+            Assert.That(service.OpenCount, Is.EqualTo(2));
+            Assert.That(service.IsOnTop(top), Is.True);
+            Assert.That(presenter.Dismissed, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void Close_ClosedUnknownOrDefaultHandle_IsIgnored()
+        {
+            var first = service.Show(IdA);
+            service.Close(first);
+
+            service.Close(first);
+            service.Close(default);
+            service.Close(new PopupHandle(999));
+
+            Assert.That(presenter.Dismissed, Has.Count.EqualTo(1));
+            Assert.That(log.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Show_FourthPopup_IsRefusedWithAnErrorNamingTheId_AndTheThreeStay()
+        {
+            service.Show(IdA);
+            service.Show(IdB);
+            var top = service.Show(IdC);
+
+            var fourth = service.Show(IdD);
+
+            Assert.That(fourth.IsValid, Is.False);
+            Assert.That(service.OpenCount, Is.EqualTo(3));
+            Assert.That(service.IsOnTop(top), Is.True);
+            Assert.That(log.Errors, Has.Count.EqualTo(1).And.Some.Contains("Test/D"));
+        }
+
+        [Test]
+        public void Show_IdThatIsAlreadyOpen_IsRefusedWithAWarning_AndDoesNotComeToTheTop()
         {
             var first = service.Show(IdA);
             var second = service.Show(IdB);
 
-            service.Close(first);
-            service.Close(first);
+            var again = service.Show(IdA);
 
-            Assert.That(service.Current, Is.EqualTo(second));
-            Assert.That(presenter.Dismissed, Has.Count.EqualTo(1));
+            Assert.That(again.IsValid, Is.False);
+            Assert.That(service.OpenCount, Is.EqualTo(2));
+            Assert.That(service.IsOnTop(second), Is.True);
+            Assert.That(service.IsOnTop(first), Is.False);
+            Assert.That(log.Warnings, Has.Count.EqualTo(1).And.Some.Contains("Test/A"));
+        }
+
+        [Test]
+        public void Show_IdClosedEarlier_OpensAgain()
+        {
+            service.Close(service.Show(IdA));
+
+            Assert.That(service.Show(IdA).IsValid, Is.True);
         }
 
         [Test]
         public void Show_IdTheSceneDoesNotHave_FailsAndShowsNothing()
         {
             Assert.Throws<InvalidOperationException>(() => service.Show(new PopupId("Test/Missing")));
-            Assert.That(presenter.Presented, Is.Empty);
-            Assert.That(service.Current.IsValid, Is.False);
+            Assert.That(presenter.Open, Is.Empty);
+        }
+
+        // ---- views
+
+        [Test]
+        public void TryGetView_FindsTheCallersComponentOnTheOpenPopup()
+        {
+            prefabs[IdA].AddComponent<BoxCollider>();   // stands for the caller's view component
+            var handle = service.Show(IdA);
+
+            Assert.That(service.TryGetView<BoxCollider>(handle, out var view), Is.True);
+            Assert.That(view.gameObject, Is.SameAs(presenter.Open[0]));
         }
 
         [Test]
-        public void Close_InvalidOrUnknownHandle_IsIgnored()
+        public void TryGetView_ClosedPopupOrMissingComponent_IsFalse()
         {
-            var first = service.Show(IdA);
+            var handle = service.Show(IdA);
+            Assert.That(service.TryGetView<BoxCollider>(handle, out _), Is.False);
 
-            service.Close(default);
-            service.Close(new PopupHandle(999));
-
-            Assert.That(service.Current, Is.EqualTo(first));
-            Assert.That(presenter.Dismissed, Is.Empty);
+            service.Close(handle);
+            Assert.That(service.TryGetView<Transform>(handle, out _), Is.False);
         }
 
+        // ---- session
+
+        [Test]
+        public void Show_BeforeTheSceneRuns_IsRefusedWithAnError()
+        {
+            var notRunning = new PopupService(presenter, prefabs, log, 3);
+
+            Assert.That(notRunning.Show(IdA).IsValid, Is.False);
+            Assert.That(presenter.Open, Is.Empty);
+            Assert.That(log.Errors, Has.Count.EqualTo(1).And.Some.Contains("Test/A"));
+        }
+
+        [Test]
+        public void SessionEnds_EveryPopupGoes_AndNoneOpensAfterwards()
+        {
+            var handle = service.Show(IdA);
+            service.Show(IdB);
+
+            service.Stop();
+
+            Assert.That(presenter.DismissedAll, Is.True);
+            Assert.That(service.OpenCount, Is.EqualTo(0));
+            Assert.That(service.IsOnTop(handle), Is.False);
+            Assert.That(service.Show(IdC).IsValid, Is.False);
+        }
+
+        [Test]
+        public void Participant_LoadsByPreparingThePopups_RunsThenDisposes()
+        {
+            var fresh = new PopupService(presenter, prefabs, log, 3);
+            var participant = new PopupParticipant(fresh, prefabs);
+
+            participant.LoadAsync(CancellationToken.None).GetAwaiter().GetResult();
+            Assert.That(prefabs.Prepared, Is.True);
+            Assert.That(fresh.Show(IdA).IsValid, Is.False, "not running before Run");
+
+            participant.Run();
+            Assert.That(fresh.Show(IdB).IsValid, Is.True);
+
+            participant.DisposeAsync().GetAwaiter().GetResult();
+            Assert.That(fresh.OpenCount, Is.EqualTo(0));
+        }
+
+        // ---- catalog
+
+        [Test]
+        public void CatalogPrefabs_DefaultOrUnknownId_FailsNamingIdAndCatalog()
+        {
+            var lookup = new CatalogPopupPrefabs(Catalog("GamePopups", ("Test/A", prefabs[IdA])));
+
+            Assert.That(lookup.Get(IdA), Is.SameAs(prefabs[IdA]));
+            Assert.Throws<ArgumentException>(() => lookup.Get(default));
+            var error = Assert.Throws<InvalidOperationException>(() => lookup.Get(IdB));
+            Assert.That(error.Message, Does.Contain("Test/B").And.Contain("GamePopups"));
+        }
+
+        [Test]
+        public void CatalogPrefabs_Prepare_FailsNamingTheId_ForABadIdANonPrefabOrADuplicate()
+        {
+            var badId = new CatalogPopupPrefabs(Catalog("GamePopups", ("not an id", prefabs[IdA])));
+            var notPrefab = new CatalogPopupPrefabs(Catalog("GamePopups", ("Test/A", Catalog("Other"))));
+            var twice = new CatalogPopupPrefabs(Catalog("GamePopups", ("Test/A", prefabs[IdA]), ("Test/A", prefabs[IdB])));
+
+            Assert.That(Assert.Throws<InvalidOperationException>(badId.Prepare).Message, Does.Contain("not an id"));
+            Assert.That(Assert.Throws<InvalidOperationException>(notPrefab.Prepare).Message, Does.Contain("Test/A"));
+            Assert.That(Assert.Throws<InvalidOperationException>(twice.Prepare).Message, Does.Contain("Test/A"));
+        }
+
+        [Test]
+        public void CatalogPrefabs_Prepare_GoodCatalog_Passes()
+        {
+            var lookup = new CatalogPopupPrefabs(Catalog("GamePopups", ("Test/A", prefabs[IdA]), ("Test/B", prefabs[IdB])));
+
+            Assert.DoesNotThrow(lookup.Prepare);
+        }
+
+        // ---- installer
+
+        [Test]
+        public void InstallerAsset_RegistersBothContractsAndJoinsTheSession()
+        {
+            var registry = new ServiceRegistry();
+            var session = new FakeSession();
+            registry.Register<IAssetCatalogs>(new AssetCatalogs(new[] { Catalog("GamePopups", ("Test/A", prefabs[IdA])) }));
+            registry.Register<ISessionScene>(session);
+
+            LoadInstallerAsset().Install(registry);
+
+            Assert.That(registry.TryResolve<IPopupService>(out var popups), Is.True);
+            Assert.That(registry.TryResolve<IPopupViews>(out var views), Is.True);
+            Assert.That(views, Is.SameAs(popups));
+            Assert.That(session.Joined, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void InstallerAsset_SceneWithoutPopupCatalog_FailsNamingTheKind()
+        {
+            var registry = new ServiceRegistry();
+            registry.Register<IAssetCatalogs>(new AssetCatalogs(new AssetCatalog[0]));
+            registry.Register<ISessionScene>(new FakeSession());
+
+            var error = Assert.Throws<InvalidOperationException>(() => LoadInstallerAsset().Install(registry));
+
+            Assert.That(error.Message, Does.Contain("'Popup'"));
+        }
+
+        [Test]
+        public void InstallerAsset_WithoutSession_Fails()
+        {
+            var registry = new ServiceRegistry();
+            registry.Register<IAssetCatalogs>(new AssetCatalogs(new[] { Catalog("GamePopups") }));
+
+            Assert.That(() => LoadInstallerAsset().Install(registry), Throws.Exception);
+        }
+
+        // ---- PopupId
+
         [TestCase("Shop/Purchased")]
-        [TestCase("Shop/Buy.Confirm")]
+        [TestCase("PopupLose/Main")]
         [TestCase("_Services/Popup/Error")]
         public void PopupId_OwnerSlashName_IsAccepted(string value)
         {
@@ -152,47 +307,7 @@ namespace Game.Services.Popup.Tests
             Assert.Throws<ArgumentException>(() => new PopupId(value));
         }
 
-        [Test]
-        public void CatalogPrefabs_DefaultOrUnknownId_FailsNamingIdAndCatalog()
-        {
-            var lookup = new CatalogPopupPrefabs(Catalog("GamePopups", "Popup", ("Test/A", prefabA)));
-
-            Assert.That(lookup.Get(IdA), Is.SameAs(prefabA));
-            Assert.Throws<ArgumentException>(() => lookup.Get(default));
-            var error = Assert.Throws<InvalidOperationException>(() => lookup.Get(IdB));
-            Assert.That(error.Message, Does.Contain("Test/B").And.Contain("GamePopups"));
-        }
-
-        [Test]
-        public void CatalogPrefabs_EntryThatIsNotAPopupIdOrNotAPrefab_Fails()
-        {
-            Assert.Throws<InvalidOperationException>(
-                () => new CatalogPopupPrefabs(Catalog("GamePopups", "Popup", ("not an id", prefabA))));
-            Assert.Throws<InvalidOperationException>(
-                () => new CatalogPopupPrefabs(Catalog("GamePopups", "Popup", ("Test/A", Catalog("Other", "X")))));
-        }
-
-        [Test]
-        public void InstallerAsset_RegistersPopupServiceReadingTheScenesPopupCatalog()
-        {
-            var registry = new ServiceRegistry();
-            registry.Register<IAssetCatalogs>(new AssetCatalogs(new[] { Catalog("GamePopups", "Popup", ("Test/A", prefabA)) }));
-
-            LoadInstallerAsset().Install(registry);
-
-            Assert.That(registry.TryResolve<IPopupService>(out _), Is.True);
-        }
-
-        [Test]
-        public void InstallerAsset_SceneWithoutPopupCatalog_FailsNamingTheKind()
-        {
-            var registry = new ServiceRegistry();
-            registry.Register<IAssetCatalogs>(new AssetCatalogs(new AssetCatalog[0]));
-
-            var error = Assert.Throws<InvalidOperationException>(() => LoadInstallerAsset().Install(registry));
-
-            Assert.That(error.Message, Does.Contain("'Popup'"));
-        }
+        // ---- helpers
 
         private static PopupInstaller LoadInstallerAsset()
         {
@@ -209,13 +324,13 @@ namespace Game.Services.Popup.Tests
             return go;
         }
 
-        private AssetCatalog Catalog(string name, string kind, params (string id, Object asset)[] entries)
+        private AssetCatalog Catalog(string name, params (string id, Object asset)[] entries)
         {
             var catalog = ScriptableObject.CreateInstance<AssetCatalog>();
             catalog.name = name;
             created.Add(catalog);
             var so = new SerializedObject(catalog);
-            so.FindProperty("kind").stringValue = kind;
+            so.FindProperty("kind").stringValue = CatalogPopupPrefabs.Kind;
             var list = so.FindProperty("entries");
             list.arraySize = entries.Length;
             for (var i = 0; i < entries.Length; i++)
@@ -229,6 +344,10 @@ namespace Game.Services.Popup.Tests
 
         private sealed class FakePrefabs : Dictionary<PopupId, GameObject>, IPopupPrefabs
         {
+            internal bool Prepared;
+
+            public void Prepare() => Prepared = true;
+
             public GameObject Get(PopupId id)
             {
                 if (TryGetValue(id, out var prefab)) return prefab;
@@ -236,22 +355,59 @@ namespace Game.Services.Popup.Tests
             }
         }
 
-        /// <summary>Records calls; "instances" are the prefabs themselves so the test can compare them.</summary>
+        /// <summary>Clones the prefab so the test can look for components on the "instance".</summary>
         private sealed class FakePresenter : IPopupPresenter
         {
-            internal readonly List<GameObject> Presented = new List<GameObject>();
+            private readonly List<Object> created;
+            internal readonly List<GameObject> Open = new List<GameObject>();
             internal readonly List<GameObject> Dismissed = new List<GameObject>();
+            internal bool DismissedAll;
+
+            internal FakePresenter(List<Object> created) => this.created = created;
 
             public GameObject Present(GameObject prefab)
             {
-                Presented.Add(prefab);
-                return prefab;
+                var instance = Object.Instantiate(prefab);
+                created.Add(instance);
+                Open.Add(instance);
+                return instance;
             }
 
             public void Dismiss(GameObject instance)
             {
+                Open.Remove(instance);
                 Dismissed.Add(instance);
             }
+
+            public void DismissAll()
+            {
+                Open.Clear();
+                DismissedAll = true;
+            }
+        }
+
+        private sealed class FakeLog : IPopupLog
+        {
+            internal readonly List<string> Warnings = new List<string>();
+            internal readonly List<string> Errors = new List<string>();
+            internal int Count => Warnings.Count + Errors.Count;
+
+            public void Warning(string message) => Warnings.Add(message);
+
+            public void Error(string message) => Errors.Add(message);
+        }
+
+        private sealed class FakeSession : ISessionScene
+        {
+            internal readonly List<ISessionParticipant> Joined = new List<ISessionParticipant>();
+
+            public SessionState State => SessionState.Init;
+
+            public event Action<SessionState> StateChanged { add { } remove { } }
+
+            public void Join(ISessionParticipant participant) => Joined.Add(participant);
+
+            public UniTask EndAsync() => UniTask.CompletedTask;
         }
     }
 }

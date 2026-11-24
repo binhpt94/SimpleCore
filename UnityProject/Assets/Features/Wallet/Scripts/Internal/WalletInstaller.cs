@@ -1,6 +1,6 @@
 using System;
 using Game.Core;
-using Game.Services.SessionScene;
+using Game.Run;
 using UnityEngine;
 
 namespace Game.Wallet
@@ -9,18 +9,20 @@ namespace Game.Wallet
     public sealed class WalletInstaller : InstallerAsset
     {
         [SerializeField] private WalletConfig config;
-        [SerializeField] private GameObject coinsLabelPrefab;
 
         public override void Install(IServiceRegistry registry)
         {
             if (config == null) throw Missing("config");
-            if (coinsLabelPrefab == null) throw Missing("coinsLabelPrefab");
 
             var session = registry.Resolve<ISessionScene>();
+            var run = registry.Resolve<IRunFlow>();
 
-            var logic = new WalletLogic(config.StartCoins);
+            var logic = new WalletLogic(config.StartCoins, new UnityWalletLog());
             registry.Register<IWalletService>(logic);
-            session.Join(new WalletCoinsPresenter(logic, new PrefabCoinsDisplaySource(coinsLabelPrefab)));
+            registry.Register<IWalletBalance>(logic);
+            registry.Register<IWalletIncome>(logic);
+
+            session.Join(new WalletRunReset(logic, run));
         }
 
         private InvalidOperationException Missing(string field)

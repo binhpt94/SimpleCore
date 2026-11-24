@@ -1,9 +1,9 @@
 {
- "hash": "87729fab7a06",
+ "hash": "f2a2605c001d",
  "items": {
-  "popup-over-battle": {
-   "hash": "f493e10c8813",
-   "text": "Một popup đang mở trên trận: màn chơi và HUD bên dưới, nền che, khung popup trên cùng\nÉp: mở popup `PopupPause/Main` giữa trận (trận đứng yên). Thấy đủ ba lớp của dịch vụ: màn chơi và HUD không nhận bấm, nền che tối, khung popup chuẩn nhận chạm. Nội dung trong khung là của feature gọi, không vẽ ở đây."
+  "sample-popup": {
+   "hash": "839cf79a5044",
+   "text": "Popup mẫu của dịch vụ đang mở trên scene đang chạy: phần bên dưới không nhận bấm, nền che, khung popup trống trên cùng\nÉp: mở id `Popup/DevSample` do chính dịch vụ sở hữu, chỉ có ở bản dev; khung trống cỡ khung chuẩn của `stack-rules`, một nút \"Đóng\" để thử đóng. Không đụng trận: không dừng trận, không cần biết đang ở màn nào. Không mở id của feature khác."
   }
  }
 }

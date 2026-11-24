@@ -13,4 +13,3 @@ MonoBehaviour:
   m_Name: WalletInstaller
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 11110000000000000000000000000003, type: 2}
-  coinsLabelPrefab: {fileID: 100000, guid: 11110000000000000000000000000005, type: 3}

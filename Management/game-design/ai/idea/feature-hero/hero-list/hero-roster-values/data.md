@@ -1,6 +1,6 @@
 ---
 based-on: 1bf8998ab5a4
-refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-core/castle-body-values@a89edb2f03ba
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-core/castle-body-values@a89edb2f03ba, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-run/run-start/start-values@ecc0af822edd
 ---
 # Năm hero: chỉ số, kích thước, kiểu đòn
 

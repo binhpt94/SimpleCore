@@ -1,0 +1,45 @@
+using System;
+using Game.Core;
+using Game.Hero;
+using Game.Run;
+using Game.Upgrade;
+using Game.Wallet;
+using UnityEngine;
+
+namespace Game.HudUpgrade
+{
+    /// <summary>
+    /// Wires the upgrade bar: joins the scene session with a participant that opens the bar.
+    /// Install after SessionScene, Run, Wallet, Hero and Upgrade.
+    /// </summary>
+    [CreateAssetMenu(menuName = "Game/HudUpgrade/Installer", fileName = "HudUpgradeInstaller")]
+    public sealed class HudUpgradeInstaller : InstallerAsset
+    {
+        [SerializeField] private HudUpgradeConfig config;
+        [SerializeField] private GameObject barPrefab;
+
+        public override void Install(IServiceRegistry registry)
+        {
+            if (registry == null) throw new ArgumentNullException(nameof(registry));
+            if (config == null) throw new InvalidOperationException("HudUpgradeInstaller: missing config (HudUpgradeConfig).");
+            if (barPrefab == null) throw new InvalidOperationException("HudUpgradeInstaller: missing barPrefab (UpgradeBar).");
+            if (barPrefab.GetComponent<IUpgradeBarView>() == null)
+                throw new InvalidOperationException($"HudUpgradeInstaller: barPrefab '{barPrefab.name}' has no IUpgradeBarView component.");
+
+            var session = registry.Resolve<ISessionScene>();
+            var shop = registry.Resolve<IUpgradeShop>();
+            var roster = registry.Resolve<IHeroRoster>();
+            var run = registry.Resolve<IRunFlow>();
+
+            var cheat = default(HudUpgradeParticipant.CheatSetup);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (config.CheatState != HudUpgradeCheatState.None)
+                cheat = new HudUpgradeParticipant.CheatSetup(config.CheatState, config.MixedButtonsCoins,
+                    config.MixedButtonsLevels, registry.Resolve<IWalletBalance>(), registry.Resolve<IWalletIncome>(),
+                    registry.Resolve<IWalletService>());
+#endif
+
+            session.Join(new HudUpgradeParticipant(shop, roster, run, new PrefabBarViewFactory(barPrefab), cheat));
+        }
+    }
+}

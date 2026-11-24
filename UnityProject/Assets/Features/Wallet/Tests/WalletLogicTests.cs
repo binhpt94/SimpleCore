@@ -2,183 +2,285 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Game.Core;
-using Game.Services.SessionScene;
+using Game.Run;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 // UnityEditor has its own SessionState class; the one meant here is the session contract's enum.
-using SessionState = Game.Services.SessionScene.SessionState;
+using SessionState = Game.Core.SessionState;
 
 namespace Game.Wallet.Tests
 {
     public class WalletLogicTests
     {
+        // ---- start of a run ----
+
         [Test]
         public void StartsWithConfiguredCoins()
         {
-            Assert.That(new WalletLogic(100).Coins, Is.EqualTo(100));
+            Assert.That(NewWallet(50).Coins, Is.EqualTo(50));
         }
 
         [Test]
         public void NegativeStartCoins_AreTreatedAsZero()
         {
-            Assert.That(new WalletLogic(-5).Coins, Is.EqualTo(0));
+            Assert.That(NewWallet(-5).Coins, Is.EqualTo(0));
         }
+
+        [Test]
+        public void NewRun_PutsCoinsBackToStartCoins_AndAnnouncesThem()
+        {
+            var wallet = NewWallet(50);
+            wallet.Add(70);
+            var balance = RecordBalance(wallet);
+
+            wallet.ResetToStart();
+
+            Assert.That(wallet.Coins, Is.EqualTo(50));
+            Assert.That(balance, Is.EqualTo(new[] { 50 }));
+        }
+
+        [Test]
+        public void NewRun_WhenCoinsAlreadyEqualStartCoins_StillAnnouncesOnce()
+        {
+            var wallet = NewWallet(50);
+            var balance = RecordBalance(wallet);
+
+            wallet.ResetToStart();
+
+            Assert.That(balance, Is.EqualTo(new[] { 50 }));
+        }
+
+        [Test]
+        public void WhenTheRunStarts_CoinsGoBackToStartCoins()
+        {
+            var wallet = NewWallet(50);
+            var run = new FakeRunFlow();
+            new WalletRunReset(wallet, run).Run();
+            wallet.TrySpend(30);
+
+            run.StartRun();
+
+            Assert.That(wallet.Coins, Is.EqualTo(50));
+        }
+
+        [Test]
+        public void AfterTheSessionEnds_ANewRunNoLongerResetsCoins()
+        {
+            var wallet = NewWallet(50);
+            var run = new FakeRunFlow();
+            var reset = new WalletRunReset(wallet, run);
+            reset.Run();
+            reset.DisposeAsync().Forget();
+            wallet.TrySpend(30);
+
+            run.StartRun();
+
+            Assert.That(wallet.Coins, Is.EqualTo(20));
+        }
+
+        // ---- spending ----
 
         [Test]
         public void TrySpend_WithEnoughCoins_TakesThem()
         {
-            var wallet = new WalletLogic(100);
+            var wallet = NewWallet(50);
 
             Assert.That(wallet.TrySpend(30), Is.EqualTo(SpendResult.Ok));
-            Assert.That(wallet.Coins, Is.EqualTo(70));
+            Assert.That(wallet.Coins, Is.EqualTo(20));
         }
 
         [Test]
-        public void TrySpend_ExactBalance_LeavesZero()
+        public void TrySpend_ExactBalance_LeavesZero_AndAnnouncesZero()
         {
-            var wallet = new WalletLogic(100);
+            var wallet = NewWallet(50);
+            var balance = RecordBalance(wallet);
 
-            Assert.That(wallet.TrySpend(100), Is.EqualTo(SpendResult.Ok));
+            Assert.That(wallet.TrySpend(50), Is.EqualTo(SpendResult.Ok));
             Assert.That(wallet.Coins, Is.EqualTo(0));
+            Assert.That(balance, Is.EqualTo(new[] { 0 }));
         }
 
         [Test]
         public void TrySpend_MoreThanBalance_ChangesNothing()
         {
-            var wallet = new WalletLogic(100);
+            var wallet = NewWallet(50);
             var events = Record(wallet);
+            var balance = RecordBalance(wallet);
 
-            Assert.That(wallet.TrySpend(101), Is.EqualTo(SpendResult.NotEnoughCoins));
-            Assert.That(wallet.Coins, Is.EqualTo(100));
+            Assert.That(wallet.TrySpend(51), Is.EqualTo(SpendResult.NotEnoughCoins));
+            Assert.That(wallet.Coins, Is.EqualTo(50));
             Assert.That(events, Is.Empty);
+            Assert.That(balance, Is.Empty);
         }
 
-        [TestCase(0)]
-        [TestCase(-10)]
-        public void TrySpend_NonPositiveAmount_IsInvalidAndChangesNothing(int amount)
+        [Test]
+        public void TwoQuickBuys_WithCoinsForOnlyOne_SecondIsNotEnough()
         {
-            var wallet = new WalletLogic(100);
-            var events = Record(wallet);
+            var wallet = NewWallet(50);
 
-            Assert.That(wallet.TrySpend(amount), Is.EqualTo(SpendResult.InvalidAmount));
-            Assert.That(wallet.Coins, Is.EqualTo(100));
-            Assert.That(events, Is.Empty);
+            Assert.That(wallet.TrySpend(30), Is.EqualTo(SpendResult.Ok));
+            Assert.That(wallet.TrySpend(30), Is.EqualTo(SpendResult.NotEnoughCoins));
+            Assert.That(wallet.Coins, Is.EqualTo(20));
+        }
+
+        [Test]
+        public void TrySpend_PriceZero_IsOk_AndAnnouncesNothing()
+        {
+            var wallet = NewWallet(50);
+            var balance = RecordBalance(wallet);
+
+            Assert.That(wallet.TrySpend(0), Is.EqualTo(SpendResult.Ok));
+            Assert.That(wallet.Coins, Is.EqualTo(50));
+            Assert.That(balance, Is.Empty);
+        }
+
+        [Test]
+        public void TrySpend_PriceZero_WithNoCoins_IsOk()
+        {
+            Assert.That(NewWallet(0).TrySpend(0), Is.EqualTo(SpendResult.Ok));
+        }
+
+        [Test]
+        public void TrySpend_NegativePrice_IsRefusedAndLogged_AndChangesNothing()
+        {
+            var log = new FakeLog();
+            var wallet = new WalletLogic(50, log);
+            var balance = RecordBalance(wallet);
+
+            Assert.That(wallet.TrySpend(-10), Is.EqualTo(SpendResult.InvalidAmount));
+            Assert.That(wallet.Coins, Is.EqualTo(50));
+            Assert.That(balance, Is.Empty);
+            Assert.That(log.Messages, Has.Count.EqualTo(1));
         }
 
         [Test]
         public void TrySpend_RaisesCoinsChangedWithBothValues()
         {
-            var wallet = new WalletLogic(100);
+            var wallet = NewWallet(50);
             var events = Record(wallet);
 
             wallet.TrySpend(30);
 
             Assert.That(events, Has.Count.EqualTo(1));
-            Assert.That(events[0].Previous, Is.EqualTo(100));
-            Assert.That(events[0].Current, Is.EqualTo(70));
+            Assert.That(events[0].Previous, Is.EqualTo(50));
+            Assert.That(events[0].Current, Is.EqualTo(20));
+        }
+
+        // ---- income ----
+
+        [Test]
+        public void Add_IncreasesCoins_AndAnnouncesTheNewBalance()
+        {
+            var wallet = NewWallet(50);
+            var balance = RecordBalance(wallet);
+
+            wallet.Add(5);
+
+            Assert.That(wallet.Coins, Is.EqualTo(55));
+            Assert.That(balance, Is.EqualTo(new[] { 55 }));
         }
 
         [Test]
-        public void Grant_AddsCoinsAndRaisesCoinsChanged()
+        public void Add_Zero_IsIgnored_AndAnnouncesNothing()
         {
-            var wallet = new WalletLogic(100);
-            var events = Record(wallet);
+            var log = new FakeLog();
+            var wallet = new WalletLogic(50, log);
+            var balance = RecordBalance(wallet);
 
-            Assert.That(wallet.Grant(50), Is.True);
-            Assert.That(wallet.Coins, Is.EqualTo(150));
-            Assert.That(events, Has.Count.EqualTo(1));
-            Assert.That(events[0].Current, Is.EqualTo(150));
-        }
+            wallet.Add(0);
 
-        [TestCase(0)]
-        [TestCase(-1)]
-        public void Grant_NonPositiveAmount_IsRefused(int amount)
-        {
-            var wallet = new WalletLogic(100);
-
-            Assert.That(wallet.Grant(amount), Is.False);
-            Assert.That(wallet.Coins, Is.EqualTo(100));
+            Assert.That(wallet.Coins, Is.EqualTo(50));
+            Assert.That(balance, Is.Empty);
+            Assert.That(log.Messages, Is.Empty);
         }
 
         [Test]
-        public void NoCoinDisplayExists_BeforeTheSessionRuns()
+        public void Add_Negative_IsRefusedAndLogged_AndChangesNothing()
         {
-            var displays = new FakeDisplays();
-            var presenter = new WalletCoinsPresenter(new WalletLogic(100), displays);
+            var log = new FakeLog();
+            var wallet = new WalletLogic(50, log);
+            var balance = RecordBalance(wallet);
 
-            Assert.That(displays.Display, Is.Null);
-            Assert.That(presenter, Is.Not.Null);
+            wallet.Add(-5);
+
+            Assert.That(wallet.Coins, Is.EqualTo(50));
+            Assert.That(balance, Is.Empty);
+            Assert.That(log.Messages, Has.Count.EqualTo(1));
         }
 
         [Test]
-        public void WhenTheSessionRuns_TheDisplayShowsTheCurrentCoins()
+        public void Add_PastTheCap_StopsAtMaxCoins_AndAnnouncesIt()
         {
-            var displays = new FakeDisplays();
-            var presenter = new WalletCoinsPresenter(new WalletLogic(100), displays);
+            var wallet = NewWallet(WalletLogic.MaxCoins - 10);
+            var balance = RecordBalance(wallet);
 
-            presenter.Run();
+            wallet.Add(int.MaxValue);
 
-            Assert.That(displays.Display.Shown, Is.EqualTo(new[] { 100 }));
+            Assert.That(wallet.Coins, Is.EqualTo(999_999_999));
+            Assert.That(balance, Is.EqualTo(new[] { 999_999_999 }));
         }
 
         [Test]
-        public void WhenCoinsChange_TheDisplayFollows()
+        public void Add_AtTheCap_ChangesNothing_AndAnnouncesNothing()
         {
-            var wallet = new WalletLogic(100);
-            var displays = new FakeDisplays();
-            new WalletCoinsPresenter(wallet, displays).Run();
+            var wallet = NewWallet(WalletLogic.MaxCoins);
+            var balance = RecordBalance(wallet);
 
+            wallet.Add(1);
+
+            Assert.That(wallet.Coins, Is.EqualTo(WalletLogic.MaxCoins));
+            Assert.That(balance, Is.Empty);
+        }
+
+        [Test]
+        public void AddThenSpendInOneFrame_EachChangeIsAnnounced_LastIsTheBalance()
+        {
+            var wallet = NewWallet(50);
+            var balance = RecordBalance(wallet);
+
+            wallet.Add(5);
             wallet.TrySpend(30);
-            wallet.Grant(5);
 
-            Assert.That(displays.Display.Shown, Is.EqualTo(new[] { 100, 70, 75 }));
+            Assert.That(balance, Is.EqualTo(new[] { 55, 25 }));
         }
 
-        [Test]
-        public void WhenTheSessionEnds_TheDisplayCloses_AndLaterChangesAreNotShown()
-        {
-            var wallet = new WalletLogic(100);
-            var displays = new FakeDisplays();
-            var presenter = new WalletCoinsPresenter(wallet, displays);
-            presenter.Run();
-            var display = displays.Display;
-
-            presenter.DisposeAsync().Forget();
-            wallet.TrySpend(30);
-
-            Assert.That(display.Closed, Is.True);
-            Assert.That(display.Shown, Is.EqualTo(new[] { 100 }));
-        }
+        // ---- installer ----
 
         [Test]
-        public void EndingASessionThatNeverRan_ClosesNothing()
-        {
-            var presenter = new WalletCoinsPresenter(new WalletLogic(100), new FakeDisplays());
-
-            Assert.DoesNotThrow(() => presenter.DisposeAsync().Forget());
-        }
-
-        [Test]
-        public void InstallerAsset_RegistersWalletWithCoinsFromConfigAsset_AndJoinsTheSession()
+        public void InstallerAsset_RegistersWalletContractsWithCoinsFromConfigAsset_AndJoinsTheSession()
         {
             var installer = LoadInstaller();
             var session = new FakeSession();
             var registry = new ServiceRegistry();
             registry.Register<ISessionScene>(session);
+            registry.Register<IRunFlow>(new FakeRunFlow());
 
-            // Also proves the coin label prefab is assigned: Install throws without it.
             installer.Install(registry);
 
-            var wallet = (WalletLogic)registry.Resolve<IWalletService>();
-            Assert.That(wallet.Coins, Is.EqualTo(100), "start coins should come from WalletConfig.asset");
+            var balance = registry.Resolve<IWalletBalance>();
+            Assert.That(balance.Coins, Is.EqualTo(50), "start coins should come from WalletConfig.asset");
+            Assert.That(registry.Resolve<IWalletService>(), Is.SameAs(balance));
+            Assert.That(registry.Resolve<IWalletIncome>(), Is.SameAs(balance));
             Assert.That(session.Joined, Has.Count.EqualTo(1));
         }
 
         [Test]
         public void InstallerAsset_WithoutASessionInstalledFirst_FailsAtInstall()
         {
-            Assert.That(() => LoadInstaller().Install(new ServiceRegistry()), Throws.Exception);
+            var registry = new ServiceRegistry();
+            registry.Register<IRunFlow>(new FakeRunFlow());
+
+            Assert.That(() => LoadInstaller().Install(registry), Throws.Exception);
+        }
+
+        [Test]
+        public void InstallerAsset_WithoutTheRunInstalledFirst_FailsAtInstall()
+        {
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+
+            Assert.That(() => LoadInstaller().Install(registry), Throws.Exception);
         }
 
         [Test]
@@ -187,6 +289,7 @@ namespace Game.Wallet.Tests
             var installer = ScriptableObject.CreateInstance<WalletInstaller>();
             var registry = new ServiceRegistry();
             registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IRunFlow>(new FakeRunFlow());
 
             try
             {
@@ -199,6 +302,13 @@ namespace Game.Wallet.Tests
             }
         }
 
+        // ---- helpers and fakes ----
+
+        private static WalletLogic NewWallet(int startCoins)
+        {
+            return new WalletLogic(startCoins, new FakeLog());
+        }
+
         private static WalletInstaller LoadInstaller()
         {
             var installer = AssetDatabase.LoadAssetAtPath<WalletInstaller>(
@@ -207,31 +317,27 @@ namespace Game.Wallet.Tests
             return installer;
         }
 
-        private sealed class FakeDisplays : ICoinsDisplaySource
+        private static List<CoinsChanged> Record(WalletLogic wallet)
         {
-            public FakeDisplay Display { get; private set; }
-
-            public ICoinsDisplay Create()
-            {
-                Display = new FakeDisplay();
-                return Display;
-            }
+            var events = new List<CoinsChanged>();
+            wallet.CoinsChanged += events.Add;
+            return events;
         }
 
-        private sealed class FakeDisplay : ICoinsDisplay
+        private static List<int> RecordBalance(IWalletBalance wallet)
         {
-            public readonly List<int> Shown = new List<int>();
+            var values = new List<int>();
+            wallet.CoinsChanged += values.Add;
+            return values;
+        }
 
-            public bool Closed { get; private set; }
+        private sealed class FakeLog : IWalletLog
+        {
+            public readonly List<string> Messages = new List<string>();
 
-            public void ShowCoins(int coins)
+            public void Refused(string message)
             {
-                Shown.Add(coins);
-            }
-
-            public void Close()
-            {
-                Closed = true;
+                Messages.Add(message);
             }
         }
 
@@ -256,11 +362,33 @@ namespace Game.Wallet.Tests
             }
         }
 
-        private static List<CoinsChanged> Record(WalletLogic wallet)
+#pragma warning disable CS0067 // only RunStarted matters to the wallet
+        private sealed class FakeRunFlow : IRunFlow
         {
-            var events = new List<CoinsChanged>();
-            wallet.CoinsChanged += events.Add;
-            return events;
+            public RunStep Step => RunStep.Home;
+            public event Action<RunStep> StepChanged;
+            public RunTeam Team => default;
+            public event Action<RunTeam> RunStarted;
+            public event Action BattleStarted;
+            public event Action BattleStopped;
+            public event Action BattleCleared;
+            public bool IsPaused => false;
+
+            public void StartRun()
+            {
+                RunStarted?.Invoke(new RunTeam(new[] { "hero" }));
+            }
+
+            public void Play() { }
+            public void EnterBattle(RunTeam team) { }
+            public void Pause() { }
+            public void Resume() { }
+            public void Abandon() { }
+            public void Replay() { }
+            public void GoHome() { }
+            public void Lose() { }
+            public void CountClearedWave(int wave) { }
         }
+#pragma warning restore CS0067
     }
 }

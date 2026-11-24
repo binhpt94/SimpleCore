@@ -1,0 +1,18 @@
+{
+  "name": "Game.Run.View",
+  "rootNamespace": "Game.Run",
+  "references": [
+    "Game.Core",
+    "Game.Run.Contracts",
+    "Game.Run.Internal"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

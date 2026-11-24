@@ -5,13 +5,17 @@ using Cysharp.Threading.Tasks;
 using Game.Core;
 using NUnit.Framework;
 using UnityEditor;
+using SessionState = Game.Core.SessionState;
 
 namespace Game.Services.SessionScene.Tests
 {
     public class SessionSceneLogicTests
     {
+        private static readonly TimeSpan Limit = TimeSpan.FromSeconds(10);
+
         private List<string> log;
         private List<Exception> errors;
+        private FakeTimer timer;
         private SessionSceneLogic session;
 
         [SetUp]
@@ -19,7 +23,8 @@ namespace Game.Services.SessionScene.Tests
         {
             log = new List<string>();
             errors = new List<Exception>();
-            session = new SessionSceneLogic(errors.Add);
+            timer = new FakeTimer();
+            session = new SessionSceneLogic(errors.Add, timer, Limit);
         }
 
         [Test]
@@ -42,7 +47,23 @@ namespace Game.Services.SessionScene.Tests
         }
 
         [Test]
-        public void SessionStaysLoading_AndNobodyRuns_UntilTheSlowestParticipantLoaded()
+        public void ParticipantsLoadOneAtATime_TheNextStartsOnlyAfterThePreviousFinished()
+        {
+            var first = Join("first");
+            first.Load = new UniTaskCompletionSource();
+            Join("second");
+
+            session.BeginAsync().Forget();
+
+            Assert.That(log, Is.EqualTo(new[] { "load first" }));
+
+            first.Load.TrySetResult();
+
+            Assert.That(log, Is.EqualTo(new[] { "load first", "load second", "run first", "run second" }));
+        }
+
+        [Test]
+        public void SessionStaysLoading_AndNobodyRuns_UntilTheLastParticipantLoaded()
         {
             Join("fast");
             var slow = Join("slow");
@@ -68,21 +89,38 @@ namespace Game.Services.SessionScene.Tests
         }
 
         [Test]
-        public void WhenOneParticipantFailsToLoad_SessionFails_OthersAreCancelled_NobodyRuns_EveryoneCleansUp()
+        public void JoiningTwice_IsRefused()
         {
-            var waiting = Join("waiting");
-            waiting.Load = new UniTaskCompletionSource();
-            var broken = Join("broken");
-            broken.LoadError = new InvalidOperationException("save file is corrupt");
+            var once = Join("once");
+
+            Assert.Throws<InvalidOperationException>(() => session.Join(once));
+        }
+
+        [Test]
+        public void WhenAParticipantFailsToLoad_LaterOnesNeverLoad_ThoseReachedCleanUpInReverse_SessionFails()
+        {
+            Join("ok");
+            Join("broken").LoadError = new InvalidOperationException("save file is corrupt");
+            Join("after");
 
             session.BeginAsync().Forget();
 
             Assert.That(session.State, Is.EqualTo(SessionState.Failed));
-            Assert.That(waiting.LoadWasCancelled, Is.True);
-            Assert.That(log, Has.None.StartsWith("run"));
-            Assert.That(log, Has.Member("dispose waiting").And.Member("dispose broken"));
+            Assert.That(log, Is.EqualTo(new[] { "load ok", "load broken", "dispose broken", "dispose ok" }));
             Assert.That(errors, Has.Count.EqualTo(1));
             Assert.That(errors[0].Message, Does.Contain("FakeParticipant").And.Contain("save file is corrupt"));
+        }
+
+        [Test]
+        public void WhenAParticipantFailsToLoad_ItsFeatureNameIsReportedForTheLoadingScreen()
+        {
+            Join("broken").LoadError = new InvalidOperationException("no save");
+
+            session.BeginAsync().Forget();
+
+            // The fake lives in Game.Services.SessionScene.Tests, so its feature is SessionScene.
+            Assert.That(session.FailedParticipant, Is.EqualTo("SessionScene"));
+            Assert.That(errors[0].Message, Does.Contain("SessionScene"));
         }
 
         [Test]
@@ -98,6 +136,36 @@ namespace Game.Services.SessionScene.Tests
         }
 
         [Test]
+        public void EachParticipantGetsTheConfiguredTimeLimit()
+        {
+            Join("a");
+            Join("b");
+
+            session.BeginAsync().Forget();
+
+            Assert.That(timer.Requested, Is.EqualTo(new[] { Limit, Limit }));
+        }
+
+        [Test]
+        public void WhenAParticipantLoadsLongerThanTheLimit_ItIsTold_ToStop_LaterOnesNeverLoad_SessionFails()
+        {
+            Join("ok");
+            var slow = Join("slow");
+            slow.Load = new UniTaskCompletionSource();
+            Join("after");
+            session.BeginAsync().Forget();
+
+            timer.Expire();
+
+            Assert.That(session.State, Is.EqualTo(SessionState.Failed));
+            Assert.That(slow.LoadWasCancelled, Is.True);
+            Assert.That(session.FailedParticipant, Is.EqualTo("SessionScene"));
+            Assert.That(log, Is.EqualTo(new[] { "load ok", "load slow", "dispose slow", "dispose ok" }));
+            Assert.That(errors, Has.Count.EqualTo(1));
+            Assert.That(errors[0].Message, Does.Contain("10 seconds"));
+        }
+
+        [Test]
         public void WhenAParticipantFailsToRun_SessionFails_AndEveryoneCleansUp()
         {
             Join("a").RunError = new InvalidOperationException("prefab missing");
@@ -109,6 +177,7 @@ namespace Game.Services.SessionScene.Tests
             Assert.That(log, Has.None.EqualTo("run b"));
             Assert.That(log, Has.Member("dispose a").And.Member("dispose b"));
             Assert.That(errors, Has.Count.EqualTo(1));
+            Assert.That(session.FailedParticipant, Is.Null);
         }
 
         [Test]
@@ -139,18 +208,39 @@ namespace Game.Services.SessionScene.Tests
         }
 
         [Test]
-        public void EndingWhileLoading_CancelsTheLoads_NobodyRuns_AndSessionIsDisposed()
+        public void EndingWhileLoading_CancelsTheLoad_LaterOnesNeverLoad_OnlyThoseReachedCleanUp()
         {
             var slow = Join("slow");
             slow.Load = new UniTaskCompletionSource();
+            Join("after");
             session.BeginAsync().Forget();
 
             session.EndAsync().Forget();
 
             Assert.That(slow.LoadWasCancelled, Is.True);
             Assert.That(session.State, Is.EqualTo(SessionState.Disposed));
-            Assert.That(log, Has.None.StartsWith("run"));
-            Assert.That(log, Has.Member("dispose slow"));
+            Assert.That(log, Is.EqualTo(new[] { "load slow", "dispose slow" }));
+            Assert.That(errors, Is.Empty);
+            Assert.That(session.FailedParticipant, Is.Null);
+        }
+
+        [Test]
+        public void EndingWhileLoading_WaitsForAParticipantThatIgnoresTheCancel_AtMostUntilTheLimit()
+        {
+            var stubborn = Join("stubborn");
+            stubborn.Load = new UniTaskCompletionSource();
+            stubborn.IgnoresCancellation = true;
+            session.BeginAsync().Forget();
+
+            var end = session.EndAsync();
+
+            Assert.That(session.State, Is.EqualTo(SessionState.Loading));
+            Assert.That(end.Status, Is.EqualTo(UniTaskStatus.Pending));
+
+            timer.Expire();
+
+            Assert.That(session.State, Is.EqualTo(SessionState.Disposed));
+            Assert.That(log, Is.EqualTo(new[] { "load stubborn", "dispose stubborn" }));
             Assert.That(errors, Is.Empty);
         }
 
@@ -222,6 +312,50 @@ namespace Game.Services.SessionScene.Tests
         }
 
         [Test]
+        public void LoadProgress_CountsJoinedParticipants_AndRisesAsEachFinishesLoading()
+        {
+            Join("fast");
+            var slow = Join("slow");
+            slow.Load = new UniTaskCompletionSource();
+            var reported = new List<int>();
+            session.LoadProgressChanged += () => reported.Add(session.LoadedCount);
+
+            Assert.That(session.ParticipantCount, Is.EqualTo(2));
+            Assert.That(session.LoadedCount, Is.EqualTo(0));
+
+            session.BeginAsync().Forget();
+            Assert.That(session.LoadedCount, Is.EqualTo(1));
+
+            slow.Load.TrySetResult();
+            Assert.That(session.LoadedCount, Is.EqualTo(session.ParticipantCount));
+            Assert.That(reported, Is.EqualTo(new[] { 1, 2 }));
+        }
+
+        [Test]
+        public void LoadProgress_WhenAParticipantFails_DoesNotCountIt_AndReportsTheFailure()
+        {
+            Join("ok");
+            Join("broken").LoadError = new InvalidOperationException("no save");
+            var reported = new List<string>();
+            session.LoadProgressChanged += () => reported.Add(session.LoadedCount + ":" + session.FailedParticipant);
+
+            session.BeginAsync().Forget();
+
+            Assert.That(session.LoadedCount, Is.EqualTo(1));
+            Assert.That(reported, Is.EqualTo(new[] { "1:", "1:SessionScene" }));
+        }
+
+        [TestCase("Game.Wallet", "WalletParticipant", ExpectedResult = "Wallet")]
+        [TestCase("Game.Services.Popup", "PopupParticipant", ExpectedResult = "Popup")]
+        [TestCase("Game.Wallet.Internal", "WalletParticipant", ExpectedResult = "Wallet")]
+        [TestCase("Other.Library", "Thing", ExpectedResult = "Thing")]
+        [TestCase(null, "Thing", ExpectedResult = "Thing")]
+        public string FailedFeatureName_IsTheFeaturePartOfTheNamespace(string typeNamespace, string typeName)
+        {
+            return SessionSceneLogic.FeatureNameOf(typeNamespace, typeName);
+        }
+
+        [Test]
         public void InstallerAsset_RegistersASessionWaitingInInit()
         {
             var installer = AssetDatabase.LoadAssetAtPath<SessionSceneInstaller>(
@@ -229,10 +363,12 @@ namespace Game.Services.SessionScene.Tests
             Assert.That(installer, Is.Not.Null, "SessionSceneInstaller.asset missing or its script reference is broken");
             var registry = new ServiceRegistry();
 
-            // Also proves the driver prefab is assigned: Install throws without it.
+            // Also proves the driver prefab is assigned and the time limit is valid: Install throws otherwise.
             installer.Install(registry);
 
             Assert.That(registry.Resolve<ISessionScene>().State, Is.EqualTo(SessionState.Init));
+            Assert.That(registry.Resolve<ISessionLoadProgress>().LoadedCount, Is.EqualTo(0));
+            Assert.That(registry.Resolve<ISessionLoadProgress>().FailedParticipant, Is.Null);
         }
 
         private FakeParticipant Join(string name)
@@ -240,6 +376,30 @@ namespace Game.Services.SessionScene.Tests
             var participant = new FakeParticipant(name, log);
             session.Join(participant);
             return participant;
+        }
+
+        /// <summary>The time limit passes only when the test calls <see cref="Expire"/>.</summary>
+        private sealed class FakeTimer : ILoadTimer
+        {
+            private readonly List<UniTaskCompletionSource> pending = new List<UniTaskCompletionSource>();
+
+            public List<TimeSpan> Requested { get; } = new List<TimeSpan>();
+
+            public UniTask WaitAsync(TimeSpan limit, CancellationToken cancellation)
+            {
+                Requested.Add(limit);
+                var wait = new UniTaskCompletionSource();
+                cancellation.Register(() => wait.TrySetCanceled(cancellation));
+                pending.Add(wait);
+                return wait.Task;
+            }
+
+            public void Expire()
+            {
+                var waits = pending.ToArray();
+                pending.Clear();
+                foreach (var wait in waits) wait.TrySetResult();
+            }
         }
 
         private sealed class FakeParticipant : ISessionParticipant
@@ -255,6 +415,7 @@ namespace Game.Services.SessionScene.Tests
 
             /// <summary>Null: loading finishes at once. Otherwise loading waits for this source.</summary>
             public UniTaskCompletionSource Load;
+            public bool IgnoresCancellation;
             public Exception LoadError;
             public Exception RunError;
             public Exception DisposeError;
@@ -271,7 +432,7 @@ namespace Game.Services.SessionScene.Tests
                 cancellation.Register(() =>
                 {
                     LoadWasCancelled = true;
-                    Load.TrySetCanceled(cancellation);
+                    if (!IgnoresCancellation) Load.TrySetCanceled(cancellation);
                 });
                 return Load.Task;
             }

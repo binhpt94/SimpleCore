@@ -7,13 +7,30 @@ namespace Game.SceneFlow
     internal sealed class LoadingScreenView : MonoBehaviour, ILoadingScreen
     {
         [SerializeField] private Text errorLabel;
-        [SerializeField] private GameObject loadingIndicator;
+        [Tooltip("Image of type Filled; its fill amount is the load progress.")]
+        [SerializeField] private Image progressFill;
+
+        private bool reportedMissingBar;
+
+        void ILoadingScreen.ShowProgress(float fraction)
+        {
+            if (progressFill == null)
+            {
+                if (!reportedMissingBar)
+                {
+                    reportedMissingBar = true;
+                    Debug.LogError("LoadingScreenView has no progressFill assigned; the player sees no progress bar.", this);
+                }
+
+                return;
+            }
+
+            progressFill.fillAmount = Mathf.Clamp01(fraction);
+        }
 
         void ILoadingScreen.ShowError(string message)
         {
-            // Nothing is loading any more; leaving the indicator up would contradict the error.
-            if (loadingIndicator != null) loadingIndicator.SetActive(false);
-
+            // The game name and the bar (stopped where it was) stay; the error line shows under them.
             if (errorLabel == null)
             {
                 Debug.LogError($"LoadingScreenView has no errorLabel assigned; the player cannot see: {message}", this);

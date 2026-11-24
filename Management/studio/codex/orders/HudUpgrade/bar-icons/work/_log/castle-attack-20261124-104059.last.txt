@@ -1,0 +1,1 @@
+Đã lưu [out/castle-attack.png](D:/AI/CoreSimple/Management/studio/codex/orders/HudUpgrade/bar-icons/work/out/castle-attack.png). Ảnh PNG 256×256 có nền alpha 0, hình căn giữa và viền `#1B2330` đo được 8–9 px ở các đoạn kiểm tra.

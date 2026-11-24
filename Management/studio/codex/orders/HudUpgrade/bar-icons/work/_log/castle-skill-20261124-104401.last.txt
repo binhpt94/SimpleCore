@@ -1,0 +1,3 @@
+Đã lưu [out/castle-skill.png](D:/AI/CoreSimple/Management/studio/codex/orders/HudUpgrade/bar-icons/work/out/castle-skill.png). PNG 256×256 có nền alpha 0. Ở 70×70 px, cờ đỏ, tia sét vàng và bông tuyết xanh vẫn phân biệt được và tạo thành một khối liền.
+
+Ảnh được tạo bằng ImageGen, sau đó chuẩn hóa màu phẳng và viền `#1B2330` khi xuất.

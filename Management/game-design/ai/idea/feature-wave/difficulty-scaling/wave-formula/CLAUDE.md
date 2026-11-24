@@ -5,7 +5,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Làm gì
 - Đầu mỗi đợt, từ số đợt w tính ra: số quái, nhịp thả, hệ số chỉ số, số con từng loại (kể cả Trùm). Kết quả giao cho `feature-wave/spawning/spawn-order` để lập danh sách thả.
 - Mọi tham số (số quái gốc, số quái thêm mỗi đợt, nhịp gốc, mức giảm, sàn, hệ số tăng, mốc mở loại, chu kì Trùm, bảng phần trăm) nằm trong cấu hình của `feature-wave`; giá trị do `feature-balance` quyết.
-- Không giữ chỉ số gốc của quái; chỉ nhân lên chỉ số của `feature-enemy`.
+- Không giữ chỉ số gốc của quái. Node này giữ công thức và tính hệ số chỉ số; hệ số đi kèm từng quái lúc sinh, `feature-enemy` nhận hệ số (không nhận số đợt) và nhân với chỉ số gốc (`feature-enemy/enemy-stats/enemy-stat-values`).
 
 ## Thông số
 | Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |

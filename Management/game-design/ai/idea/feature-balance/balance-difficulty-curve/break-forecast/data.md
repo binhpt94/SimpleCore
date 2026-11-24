@@ -1,6 +1,6 @@
 ---
 based-on: f1f04ceb7020
-refs: feature-balance/balance-config/number-table@3f8b1fde7f49, feature-wave/spawning/spawn-order@5884f63cfa93, feature-balance/balance-economy/income-and-prices@295cfe59ac28, feature-balance/balance-team/hero-compare@d356532cffe9, feature-balance/balance-config@6934878b1b70, feature-enemy/enemy-stats/enemy-stat-values@213bae407954, feature-wave/difficulty-scaling@fed0ac86d57c
+refs: feature-balance/balance-config/number-table@3f8b1fde7f49, feature-wave/spawning/spawn-order@5884f63cfa93, feature-balance/balance-economy/income-and-prices@295cfe59ac28, feature-balance/balance-team/hero-compare@d356532cffe9, feature-balance/balance-config@6934878b1b70, feature-enemy/enemy-stats/enemy-stat-values@7016e0fe183b, feature-wave/difficulty-scaling@fed0ac86d57c
 frame: none
 ---
 # Dự đoán đợt gãy

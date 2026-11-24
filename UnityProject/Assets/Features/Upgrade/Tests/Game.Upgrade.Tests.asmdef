@@ -1,0 +1,32 @@
+{
+  "name": "Game.Upgrade.Tests",
+  "rootNamespace": "Game.Upgrade.Tests",
+  "references": [
+    "Game.Core",
+    "Game.Upgrade.Contracts",
+    "Game.Upgrade.Internal",
+    "Game.Wallet.Contracts",
+    "Game.Hero.Contracts",
+    "Game.Castle.Contracts",
+    "Game.Run.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,13 +1,16 @@
 # Wallet
 
-Làm chủ số xu của người chơi. Không feature nào khác được giữ hay sửa số xu.
+Làm chủ số tiền của người chơi trong một lượt. Không feature nào khác được giữ hay sửa số tiền.
 
-- Contract: `IWalletService.TrySpend(amount)` trả `SpendResult`. Chưa ai cần đọc số xu từ ngoài, nên chưa có contract đọc.
-- Cộng xu (`Grant`) và sự kiện `CoinsChanged` đang là `internal`; feature khác cần thì đề xuất thêm vào Contracts.
-- Số xu ban đầu: `WalletConfig.asset` trong `FeatureAssets/Private`, lúc chạy chỉ đọc.
-- Logic nằm trong `WalletLogic` (C# thuần). Không có static: `WalletCoinsPresenter` đẩy số xu xuống view qua `ICoinsDisplay`.
-- Dùng `ISessionScene` (SessionScene): label số xu chỉ được tạo khi phiên tới Running, và bị huỷ khi phiên kết thúc.
-- Prefab label: `WalletCoinsLabel.prefab` trong `FeatureAssets/Private`. Phải được cài sau SessionScene.
+- Contracts (cùng một `WalletLogic`):
+  - `IWalletService.TrySpend(amount)` trả `SpendResult` (Upgrade). Giá 0 trả `Ok`, giá âm trả `InvalidAmount` và ghi log.
+  - `IWalletBalance` (`Coins`, `CoinsChanged`) cho Hud, Upgrade. Chỉ báo khi số dư đổi, và luôn báo khi đặt lại.
+  - `IWalletIncome.Add(amount)` cho Enemy, Wave. Cộng 0 bỏ qua, cộng âm từ chối và ghi log, trần 999.999.999.
+- Đặt lại về tiền đầu lượt khi `IRunFlow.RunStarted` (Run), qua `WalletRunReset`.
+- Tiền đầu lượt: `WalletConfig.asset` trong `FeatureAssets/Private` (50), lúc chạy chỉ đọc.
+- Logic nằm trong `WalletLogic` (C# thuần). Log qua `IWalletLog`.
+- Không có view: hiển thị số tiền là việc của Hud (qua `IWalletBalance`).
+- Tham gia `Game.Core.ISessionScene` chỉ để nghe `RunStarted` trong lúc phiên chạy. Phải được cài sau SessionScene và Run.
 - `WalletInstaller.asset` trong `FeatureAssets/Public` là thứ duy nhất `_Composition` thấy.
 
 Test: assembly `Game.Wallet.Tests` (EditMode).

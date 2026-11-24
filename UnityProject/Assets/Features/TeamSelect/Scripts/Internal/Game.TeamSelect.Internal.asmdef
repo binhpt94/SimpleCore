@@ -1,0 +1,20 @@
+{
+  "name": "Game.TeamSelect.Internal",
+  "rootNamespace": "Game.TeamSelect",
+  "references": [
+    "Game.Core",
+    "Game.Hero.Contracts",
+    "Game.Run.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

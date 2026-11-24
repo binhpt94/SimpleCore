@@ -1,0 +1,21 @@
+{
+  "name": "Game.Castle.Internal",
+  "rootNamespace": "Game.Castle",
+  "references": [
+    "Game.Core",
+    "Game.Castle.Contracts",
+    "Game.Enemy.Contracts",
+    "Game.Hero.Contracts",
+    "Game.Run.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Game.HudUpgrade.Internal",
+  "rootNamespace": "Game.HudUpgrade",
+  "references": [
+    "Game.Core",
+    "Game.Upgrade.Contracts",
+    "Game.Hero.Contracts",
+    "Game.Wallet.Contracts",
+    "Game.Run.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

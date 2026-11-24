@@ -4,17 +4,24 @@ using UnityEngine;
 
 namespace Game.Services.Popup
 {
-    /// <summary>Reads popup prefabs from the scene's asset catalog of kind "Popup".</summary>
+    /// <summary>
+    /// Reads popup prefabs from the scene's asset catalog of kind "Popup". The catalog points straight at the
+    /// prefabs, so they are loaded with the scene; preparing means checking every entry before play.
+    /// </summary>
     internal sealed class CatalogPopupPrefabs : IPopupPrefabs
     {
         internal const string Kind = "Popup";
 
         private readonly AssetCatalog catalog;
 
-        /// <summary>Throws, naming the catalog and the id, when an id is not a popup id or its asset is not a prefab.</summary>
         internal CatalogPopupPrefabs(AssetCatalog catalog)
         {
-            this.catalog = catalog;
+            this.catalog = catalog ? catalog : throw new ArgumentNullException(nameof(catalog));
+        }
+
+        public void Prepare()
+        {
+            catalog.Check();   // empty id, id listed twice, entry without asset: message names the catalog and id
             foreach (var id in catalog.Ids)
             {
                 if (!PopupId.IsValid(id))
@@ -29,7 +36,7 @@ namespace Game.Services.Popup
         {
             if (id.Value == null)
                 throw new ArgumentException("No popup id given (default PopupId).", nameof(id));
-            if (catalog.TryGet(id.Value, out var asset)) return (GameObject)asset;
+            if (catalog.TryGet(id.Value, out var asset) && asset is GameObject prefab) return prefab;
             throw new InvalidOperationException(
                 $"Popup '{id}' is not in popup catalog '{catalog.name}' of this scene. Add it in _Composition.");
         }

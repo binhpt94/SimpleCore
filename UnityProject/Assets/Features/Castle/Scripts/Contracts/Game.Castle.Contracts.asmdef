@@ -1,0 +1,16 @@
+{
+  "name": "Game.Castle.Contracts",
+  "rootNamespace": "Game.Castle",
+  "references": [
+    "Game.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

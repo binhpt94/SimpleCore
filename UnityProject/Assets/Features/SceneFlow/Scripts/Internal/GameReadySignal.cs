@@ -1,6 +1,6 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Game.Services.SessionScene;
+using Game.Core;
 
 namespace Game.SceneFlow
 {

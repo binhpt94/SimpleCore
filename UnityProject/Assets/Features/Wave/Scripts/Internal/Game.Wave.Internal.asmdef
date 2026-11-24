@@ -1,0 +1,22 @@
+{
+  "name": "Game.Wave.Internal",
+  "rootNamespace": "Game.Wave",
+  "references": [
+    "Game.Core",
+    "Game.Wave.Contracts",
+    "Game.Enemy.Contracts",
+    "Game.Wallet.Contracts",
+    "Game.Run.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Game.Upgrade.Internal",
+  "rootNamespace": "Game.Upgrade",
+  "references": [
+    "Game.Core",
+    "Game.Upgrade.Contracts",
+    "Game.Wallet.Contracts",
+    "Game.Hero.Contracts",
+    "Game.Castle.Contracts",
+    "Game.Run.Contracts",
+    "Game.Services.SessionScene.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

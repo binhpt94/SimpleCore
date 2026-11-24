@@ -1,0 +1,167 @@
+using Game.Core;
+using Game.Hero;
+using Game.Run;
+using Game.Upgrade;
+using Game.Wallet;
+using NUnit.Framework;
+using UnityEditor;
+
+namespace Game.HudUpgrade.Tests
+{
+    public sealed class HudUpgradeSessionTests
+    {
+        private const string InstallerPath = "Assets/Features/HudUpgrade/FeatureAssets/Public/HudUpgradeInstaller.asset";
+
+        [Test]
+        public void Bar_opens_when_session_runs_and_is_removed_when_session_ends()
+        {
+            var wallet = new FakeWallet();
+            var shop = new FakeShop(wallet);
+            shop.SetTeam("knight", "archer", "mage");
+            var views = new FakeViewFactory();
+            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), new FakeRun(), views);
+
+            participant.Run();
+            Assert.AreEqual(1, views.Created);
+            Assert.AreEqual(6, views.View.Pictures.Count);
+
+            participant.DisposeAsync().GetAwaiter().GetResult();
+            Assert.AreEqual(1, views.Destroyed);
+            wallet.Coins = 1000;
+            shop.Changed();
+            Assert.IsFalse(views.View.Looks[5].Lit, "bar must stop listening once the session ended");
+        }
+
+        [Test]
+        public void Bar_shows_when_run_starts_a_frame_after_the_session_runs()
+        {
+            // Session reaches Running with no run yet: the shop is empty, the step is Home.
+            var wallet = new FakeWallet { Coins = 50 };
+            var shop = new FakeShop(wallet);
+            var run = new FakeRun();
+            var views = new FakeViewFactory();
+            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views);
+            participant.Run();
+            Assert.IsFalse(views.View.Visible);
+
+            // Next frame: RunStarted (shop builds its list), BattleStarted, then Step = Playing.
+            shop.SetTeam("knight", "archer", "mage");
+            run.StartBattle();
+            run.GoTo(RunStep.Playing);
+
+            Assert.AreEqual(6, views.View.Pictures.Count);
+            Assert.IsTrue(views.View.Visible);
+            participant.DisposeAsync().GetAwaiter().GetResult();
+        }
+
+        [Test]
+        public void Bar_shows_when_the_step_turns_playing_before_the_items_arrive()
+        {
+            var wallet = new FakeWallet { Coins = 50 };
+            var shop = new FakeShop(wallet);
+            var run = new FakeRun();
+            var views = new FakeViewFactory();
+            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views);
+            participant.Run();
+
+            run.GoTo(RunStep.Playing);
+            Assert.IsFalse(views.View.Visible, "no buttons yet");
+            shop.SetTeam("knight", "archer", "mage");
+
+            Assert.IsTrue(views.View.Visible);
+            participant.DisposeAsync().GetAwaiter().GetResult();
+        }
+
+        [Test]
+        public void Bar_shows_when_items_arrive_after_step_changed_but_before_its_event()
+        {
+            var wallet = new FakeWallet { Coins = 50 };
+            var shop = new FakeShop(wallet);
+            var run = new FakeRun();
+            var views = new FakeViewFactory();
+            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views);
+            participant.Run();
+
+            run.SetStepQuietly(RunStep.Playing);
+            shop.SetTeam("knight", "archer", "mage");
+
+            Assert.IsTrue(views.View.Visible);
+            participant.DisposeAsync().GetAwaiter().GetResult();
+        }
+
+        [Test]
+        public void Mixed_buttons_cheat_lights_five_buttons_and_dims_the_skill_button()
+        {
+            var wallet = new FakeWallet { Coins = 50 };
+            var shop = new FakeShop(wallet);
+            shop.SetTeam("knight", "archer", "mage");
+            var run = new FakeRun();
+            var views = new FakeViewFactory();
+            var cheat = new HudUpgradeParticipant.CheatSetup(HudUpgradeCheatState.MixedButtons, 120,
+                new[] { 3, 1, 5, 2, 4, 3 }, wallet, wallet, wallet);
+            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views, cheat);
+
+            participant.Run();
+            run.StartBattle();
+
+            Assert.AreEqual(120, wallet.Coins);
+            var levels = new int[6];
+            for (var i = 0; i < 6; i++) levels[i] = shop.Get(i).Level;
+            CollectionAssert.AreEqual(new[] { 3, 1, 5, 2, 4, 3 }, levels);
+            // FakeShop has its own simple prices; with the real price table the skill button (135) is the dim one.
+            // Here: lit/dim follows the shop's CanBuy after the cheat.
+            for (var i = 0; i < 6; i++) Assert.AreEqual(shop.Get(i).CanBuy, views.View.Looks[i].Lit);
+
+            participant.DisposeAsync().GetAwaiter().GetResult();
+            Assert.AreEqual(0, run.BattleStartedListeners);
+        }
+
+        [Test]
+        public void Cheat_is_off_by_default_and_changes_nothing()
+        {
+            var wallet = new FakeWallet { Coins = 50 };
+            var shop = new FakeShop(wallet);
+            shop.SetTeam("knight", "archer", "mage");
+            var run = new FakeRun();
+            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, new FakeViewFactory());
+
+            participant.Run();
+            run.StartBattle();
+
+            Assert.AreEqual(50, wallet.Coins);
+            Assert.AreEqual(0, shop.BuyCalls);
+        }
+
+        [Test]
+        public void Installer_asset_joins_the_session_with_the_bar()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
+            Assert.IsNotNull(installer, "missing " + InstallerPath);
+
+            var registry = new FakeRegistry();
+            var session = new FakeSession();
+            var wallet = new FakeWallet();
+            registry.Register<ISessionScene>(session);
+            registry.Register<IUpgradeShop>(new FakeShop(wallet));
+            registry.Register<IHeroRoster>(new FakeRoster());
+            registry.Register<IRunFlow>(new FakeRun());
+            registry.Register<IWalletBalance>(wallet);
+            registry.Register<IWalletIncome>(wallet);
+            registry.Register<IWalletService>(wallet);
+
+            installer.Install(registry);
+
+            Assert.AreEqual(1, session.Joined.Count);
+        }
+
+        [Test]
+        public void Installer_fails_at_once_naming_the_missing_shop()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
+            var registry = new FakeRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            var error = Assert.Throws<System.InvalidOperationException>(() => installer.Install(registry));
+            StringAssert.Contains("IUpgradeShop", error.Message);
+        }
+    }
+}

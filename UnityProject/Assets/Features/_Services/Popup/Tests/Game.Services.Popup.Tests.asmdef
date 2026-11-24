@@ -5,6 +5,7 @@
     "Game.Core",
     "Game.Services.Popup.Contracts",
     "Game.Services.Popup.Internal",
+    "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],

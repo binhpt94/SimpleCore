@@ -1,0 +1,1 @@
+Đã tạo một ảnh [out/coin.png](D:/AI/CoreSimple/Management/studio/codex/orders/HudUpgrade/bar-icons/work/out/coin.png). PNG 256×256 có nền alpha 0. Đồng xu đường kính 226 px, căn giữa, viền tối 11 px, với ngôi sao dập nổi và vệt sáng chéo ở góc trên trái.

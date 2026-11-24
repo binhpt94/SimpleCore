@@ -4,7 +4,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Làm gì
 - Giữ bảng chỉ số gốc của 5 loại quái (asset cấu hình, không viết cứng).
-- Lúc sinh quái: nhận loại và số đợt từ `feature-wave`; tính máu tối đa và sát thương = gốc × (1 + 0.10×(đợt-1)); quái ra đầy máu.
+- Lúc sinh quái: nhận loại và hệ số chỉ số từ `feature-wave` (không nhận số đợt); máu tối đa và sát thương = gốc × hệ số; quái ra đầy máu.
 - Nhận sát thương từ hero, đòn tự bắn và Sấm sét; máu ≤ 0 thì bị hạ, báo `feature-enemy/enemy-reward` đúng một lần.
 - Định nghĩa khoảng cách, nhịp đánh, sát thương theo `feature-hero/hero-stats/hero-level-values`.
 
@@ -18,7 +18,7 @@ Chỉ số gốc ở đợt 1 (dự kiến, theo bộ số chung):
 | Cung thủ quái | 25 | 6 | 1.2 | 5 | 1.5 | 5.0 |
 | Trùm | 400 | 40 | 2.0 | 1.5 | 0.6 | 20.0 |
 
-Hệ số đợt (dự kiến): `hệ số = 1 + 0.10 × (đợt - 1)`, áp cho máu tối đa và sát thương.
+Hệ số đợt (dự kiến) do `feature-wave/difficulty-scaling/wave-formula` tính: `hệ số = 1 + 0.10 × (đợt - 1)`, áp cho máu tối đa và sát thương. Bảng dưới chỉ để xem kết quả nhân; tham số nằm ở cấu hình của `feature-wave`.
 | Đợt | Hệ số | Lính máu / sát thương | Khổng lồ | Trùm |
 |---|---|---|---|---|
 | 1 | 1.0 | 40 / 5 | 150 / 15 | (chưa có) |
@@ -49,6 +49,7 @@ Cân bằng dự kiến: Trùm đợt 10 có 760 máu; đội Hiệp sĩ, Cung t
 - Tạm dừng: anim 0.3s đứng yên.
 
 ## Đã tự quyết
+- **Wave giữ và tính hệ số, Enemy chỉ nhân (2026-11-24, sửa lệch theo @Manager).** Bản trước ghi Enemy nhận số đợt rồi tự tính, trái với `feature-wave/difficulty-scaling/wave-formula` và node cha (`feature-enemy/enemy-stats`: mức tăng theo đợt do `feature-wave` quyết). Một nơi giữ công thức, quái không cần biết đang đợt mấy. Đã loại: Enemy giữ công thức hệ số.
 - **Hệ số đợt áp lúc sinh, không áp lại.** Quái sống qua đợt sau vẫn giữ chỉ số đợt của nó. Đã loại: tính lại theo đợt hiện tại.
 - **Chỉ nhân máu và sát thương.** Giữ hình dạng trận (tốc độ, tầm) như nhau mọi đợt; khó lên nhờ số đông và độ trâu.
 - **Máu Trùm gốc 800 xuống 400, sát thương 40 giữ nguyên (2026-11-23).** Theo đề xuất ở `feature-balance/balance-difficulty-curve/break-forecast`: 800 làm đợt 10 vọt quá mạnh. Đợt Trùm vẫn khó vọt hơn đợt trước, là ngoại lệ có chủ đích. Đã loại: Trùm chiếm 5 chỗ trong số quái.

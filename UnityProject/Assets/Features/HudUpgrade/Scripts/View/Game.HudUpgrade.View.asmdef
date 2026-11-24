@@ -1,0 +1,19 @@
+{
+  "name": "Game.HudUpgrade.View",
+  "rootNamespace": "Game.HudUpgrade",
+  "references": [
+    "Game.Core",
+    "Game.HudUpgrade.Internal",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

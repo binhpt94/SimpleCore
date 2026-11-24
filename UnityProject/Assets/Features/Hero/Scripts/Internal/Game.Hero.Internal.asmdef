@@ -1,0 +1,20 @@
+{
+  "name": "Game.Hero.Internal",
+  "rootNamespace": "Game.Hero",
+  "references": [
+    "Game.Core",
+    "Game.Hero.Contracts",
+    "Game.Enemy.Contracts",
+    "Game.Run.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

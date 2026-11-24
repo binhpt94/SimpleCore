@@ -6,7 +6,7 @@ namespace Game.Wallet
     [CreateAssetMenu(menuName = "Game/Wallet/Config")]
     internal sealed class WalletConfig : ScriptableObject
     {
-        [SerializeField] private int startCoins = 100;
+        [SerializeField, Min(0)] private int startCoins = 50;
 
         internal int StartCoins => startCoins;
     }

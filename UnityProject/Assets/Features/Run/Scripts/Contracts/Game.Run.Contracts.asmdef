@@ -1,0 +1,16 @@
+{
+  "name": "Game.Run.Contracts",
+  "rootNamespace": "Game.Run",
+  "references": [
+    "Game.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": true
+}

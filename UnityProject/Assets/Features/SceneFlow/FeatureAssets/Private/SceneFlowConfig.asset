@@ -15,3 +15,5 @@ MonoBehaviour:
   loadingScene: Loading
   gameScene: Game
   loadFailedMessage: "Kh\xF4ng tải được game. Vui l\xF2ng mở lại."
+  featureFailedMessage: "Lỗi tải: {0}"
+  minLoadingScreenSeconds: 1

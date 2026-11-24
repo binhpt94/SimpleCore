@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33330000000000000000000000000001, type: 3}
   m_Name: PopupInstaller
   m_EditorClassIdentifier:
+  config: {fileID: 11400000, guid: 5c2e8a4f6b1d4397a0e2c4f6b8d0a1e3, type: 2}

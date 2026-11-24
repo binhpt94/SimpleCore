@@ -1,9 +1,0 @@
-kind: ui
-title: Cheat dịch vụ popup: một popup trên trận
-use panel-x = feature-popup/popup-layer/stack-rules#panel-x
-use panel-y = feature-popup/popup-layer/stack-rules#panel-y
-use panel-w = feature-popup/popup-layer/stack-rules#panel-w
-use panel-h = feature-popup/popup-layer/stack-rules#panel-h
-- battle    rect       x=0 y=0 w=1920 h=1080 label="Màn chơi và HUD bên dưới (không nhận bấm)"
-- backdrop  rect       x=0 y=0 w=1920 h=1080 overlap label="Nền che: tối, chặn mọi chạm"
-- panel     round-rect x=panel-x y=panel-y w=panel-w h=panel-h overlap label="Khung popup trên cùng (nội dung do feature gọi điền)"

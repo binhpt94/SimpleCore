@@ -1,0 +1,1 @@
+Đã lưu một ảnh [out/hero-archer.png](/D:/AI/CoreSimple/Management/studio/codex/orders/Hero/hero-sprites/work/out/hero-archer.png). Sprite cung thủ quay phải, PNG 256 × 384 với nền alpha 0. Đỉnh mũ cách mép trên 24 px, chân cách mép dưới 4 px.

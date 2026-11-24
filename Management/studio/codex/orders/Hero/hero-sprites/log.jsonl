@@ -1,0 +1,13 @@
+{"at": "2026-11-24 10:51:26", "event": "attempt", "item": "hero-knight", "n": 1, "images": []}
+{"at": "2026-11-24 10:56:01", "event": "run", "tool": "codex", "item": "hero-knight", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-knight.png", "files": ["hero-knight.png"], "error": ""}
+{"at": "2026-11-24 10:56:01", "event": "attempt", "item": "hero-axeman", "n": 1, "images": []}
+{"at": "2026-11-24 10:59:06", "event": "run", "tool": "codex", "item": "hero-axeman", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-axeman.png", "files": ["hero-axeman.png"], "error": ""}
+{"at": "2026-11-24 10:59:06", "event": "attempt", "item": "hero-swordsman", "n": 1, "images": []}
+{"at": "2026-11-24 11:04:24", "event": "run", "tool": "codex", "item": "hero-swordsman", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-swordsman.png", "files": ["hero-swordsman.png"], "error": ""}
+{"at": "2026-11-24 11:04:25", "event": "attempt", "item": "hero-archer", "n": 1, "images": []}
+{"at": "2026-11-24 11:08:14", "event": "run", "tool": "codex", "item": "hero-archer", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-archer.png", "files": ["hero-archer.png"], "error": ""}
+{"at": "2026-11-24 11:08:14", "event": "attempt", "item": "hero-mage", "n": 1, "images": []}
+{"at": "2026-11-24 11:12:47", "event": "run", "tool": "codex", "item": "hero-mage", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-mage.png", "files": ["hero-mage.png"], "error": ""}
+{"at": "2026-11-24 11:13:03", "event": "attempt", "item": "hero-swordsman", "n": 2, "images": []}
+{"at": "2026-11-24 11:20:08", "event": "run", "tool": "codex", "item": "hero-swordsman", "mode": "workspace-write", "exit": 0, "result": "đã có work/out/hero-swordsman.png", "files": ["hero-swordsman.png"], "error": ""}
+{"at": "2026-11-24 11:20:29", "event": "deliver", "version": 1, "files": ["hero-archer.png", "hero-axeman.png", "hero-knight.png", "hero-mage.png", "hero-swordsman.png", "quality.json"], "below": []}

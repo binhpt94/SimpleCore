@@ -1,0 +1,29 @@
+{
+  "name": "Game.Hero.Tests",
+  "rootNamespace": "Game.Hero.Tests",
+  "references": [
+    "Game.Core",
+    "Game.Hero.Contracts",
+    "Game.Hero.Internal",
+    "Game.Enemy.Contracts",
+    "Game.Run.Contracts",
+    "UniTask",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
