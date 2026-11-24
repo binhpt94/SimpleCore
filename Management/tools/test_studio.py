@@ -24,7 +24,7 @@ args = sys.argv[1:]
 work = args[args.index("-C") + 1]
 mode = args[args.index("-s") + 1]
 last = args[args.index("-o") + 1] if "-o" in args else None
-prompt = sys.stdin.read()
+prompt = sys.stdin.buffer.read().decode("utf-8")      # studio.py sends UTF-8, whatever the console code page is
 open(os.environ["FAKE_PROMPT"], "a", encoding="utf-8").write("=== " + mode + "\n" + prompt + "\n")
 how = os.environ.get("FAKE_MODE", "write1")
 m = re.search(r"Mục cần làm \(chỉ mục này\): ([a-z0-9-]+):", prompt)
