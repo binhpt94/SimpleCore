@@ -519,6 +519,7 @@
       renew: { label: "Renew", path: "/api/sessions/renew", done: "đã làm mới", pin: true }
     };
     var ACTION_KEYS = ["reread", "compact", "renew"];
+    var BATCH = 5;      // số thread chạy cùng lúc của các nút "tất cả"
     var rereadRow = put(listBox, el("div", "gap"));
     var allBtns = {};
     ACTION_KEYS.forEach(function (k) {
@@ -527,7 +528,7 @@
       allBtns[k].style.marginRight = "8px";
     });
     var rereadStatus = put(listBox, el("p", "gap muted",
-      "Mỗi thao tác tốn lượt của thread. Chat đang mở trong VS Code có thể chưa thấy lượt này: mở lại chat đó. " +
+      "Mỗi thao tác tốn lượt của thread. Nút \"tất cả\" chạy " + BATCH + " thread cùng lúc. Chat đang mở trong VS Code có thể chưa thấy lượt này: mở lại chat đó. " +
       "Renew cần PIN (ô PIN ở trên), bỏ toàn bộ ngữ cảnh của thread rồi gán lại và nhắc đọc quy trình: việc dở dang chưa ghi ra file sẽ mất, chỉ bấm khi thread đang rảnh."));
     var confirmRow = put(listBox, el("p", "gap", ""));      // dòng xác nhận của "Renew: tất cả" (không dùng hộp thoại trình duyệt)
     var rereadState = {};      // id -> { cls, text, running }: giữ qua các lần vẽ lại bảng
@@ -585,8 +586,14 @@
           return next();
         });
       };
-      // Thao tác cần PIN chạy từng thread một (PIN sai thì dừng ngay ở thread đầu); còn lại tối đa 3 thread cùng lúc.
-      Promise.all(act.pin ? [next()] : [next(), next(), next()]).then(function () {
+      // Mỗi đợt tối đa BATCH thread cùng lúc. Thao tác cần PIN chạy thread đầu một mình trước (PIN sai thì dừng
+      // ngay ở đó, chỉ bị đếm một lần sai), PIN qua rồi mới chạy song song phần còn lại.
+      var lanes = function () {
+        var all = [];
+        for (var i = 0; i < BATCH; i++) all.push(next());
+        return Promise.all(all);
+      };
+      (act.pin ? next().then(lanes) : lanes()).then(function () {
         show(true);
         ACTION_KEYS.forEach(function (k) { allBtns[k].disabled = false; });
       });
