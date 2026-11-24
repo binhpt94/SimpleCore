@@ -128,6 +128,15 @@ HASH_LEN = 12
 GLOSSARY_KEY = "glossary"     # the round-2 node holding the shared terms (not a feature)
 _SEG = r"[a-z0-9]+(?:-[a-z0-9]+)*"
 REF_RX = re.compile(rf"^({_SEG}(?:/{_SEG})*)(?:#({_SEG}))?@([0-9a-f]{{{HASH_LEN}}})$")
+# Which AI proposed an idea or a node (`by:` and `node-by:` in the head of data.md; outside the data hash). An idea
+# that is not named is Claude's (@GameDesigner). The advice id names the file GPT's answer is in:
+# Management/game-design/advice/<node path with '.' for '/', _root for the root>/<advice id>.md (gd_advise.py).
+ADVICE_DIR = "advice"
+ADVICE_ROOT, ADVICE_GENERAL = "_root", "_general"
+BY_CLAUDE, BY_GPT, BY_BOTH = "claude", "gpt", "claude+gpt"
+BY_NAMES = {BY_CLAUDE: "Claude", BY_GPT: "GPT", BY_BOTH: "Claude + GPT"}
+BY_WHO_RX = re.compile(rf"^(gpt|claude\+gpt)@({_SEG})$")
+BY_RX = re.compile(rf"^({_SEG})=(gpt|claude\+gpt)@({_SEG})$")
 MENTION_RX = re.compile(r"`([^`\n]+)`")
 MENTION_PATH_RX = re.compile(rf"^{_SEG}(?:/{_SEG})+$")
 MENTION_TERM_RX = re.compile(rf"^{GLOSSARY_KEY}#({_SEG})$")
@@ -285,8 +294,9 @@ def write_mode(root, mode):
 
 # ---------------------------------------------------------------- data.md
 def parse_data(text):
-    """{based_on, refs, title, summary, items: [{id, text, ai, hash}], hash, errors} of a data.md."""
-    errors, based_on, refs, screen, frame_mode = [], "", [], "", ""
+    """{based_on, refs, title, summary, items: [{id, text, ai, hash, by, advice}], nodeBy, hash, errors} of a data.md.
+    by: which AI proposed the idea (claude | gpt | claude+gpt), advice: the id of GPT's advice it came from."""
+    errors, based_on, refs, screen, frame_mode, by, node_by = [], "", [], "", "", {}, None
     text = text.strip("\n")
     if text.startswith("---\n"):
         head, sep, rest = text[4:].partition("\n---")
@@ -300,6 +310,20 @@ def parse_data(text):
                     screen = value.strip()
                 elif key.strip() == "frame":
                     frame_mode = value.strip()
+                elif key.strip() == "node-by":
+                    m = BY_WHO_RX.match(value.strip())
+                    if m:
+                        node_by = {"who": m.group(1), "advice": m.group(2)}
+                    else:
+                        errors.append(f"node-by: '{value.strip()}' phải có dạng gpt@<id góp ý> hoặc claude+gpt@<id góp ý>")
+                elif key.strip() == "by":
+                    for entry in [e.strip() for e in value.split(",") if e.strip()]:
+                        m = BY_RX.match(entry)
+                        if m and m.group(1) not in by:
+                            by[m.group(1)] = {"who": m.group(2), "advice": m.group(3)}
+                        else:
+                            errors.append(f"by: '{entry}' phải có dạng <id ý>=gpt@<id góp ý> hoặc "
+                                          "<id ý>=claude+gpt@<id góp ý>, mỗi ý một lần")
                 elif key.strip() == "refs":
                     for entry in re.split(r"[,\s]+", value.strip().strip("[]")):
                         m = REF_RX.match(entry.strip("\"'`")) if entry else None
@@ -368,14 +392,18 @@ def parse_data(text):
             detail, parts = ("" if head == body else body), (it["id"], body)
         out.append({"id": it["id"], "title": head, "detail": detail, "titled": titled,
                     "text": head + ("\n" + body if body else "") if titled else body,
-                    "ai": it["ai"], "hash": short_hash(*parts), "parts": parts})
+                    "ai": it["ai"], "hash": short_hash(*parts), "parts": parts,
+                    "by": by.get(it["id"], {}).get("who", BY_CLAUDE), "advice": by.get(it["id"], {}).get("advice", "")})
+    for item_id in by:
+        if item_id not in seen:
+            errors.append(f"by: node không có ý '{item_id}'")
     data_hash = short_hash(title, summary, *[p for it in out for p in it.pop("parts")])
     if screen and screen not in SCREENS:
         errors.append(f"screen: '{screen}' phải là " + " hoặc ".join(SCREENS))
     if frame_mode and frame_mode != FRAME_NONE:
         errors.append(f"frame: chỉ nhận '{FRAME_NONE}' (node không có bố cục)")
     return {"based_on": based_on, "refs": refs, "screen": screen, "frameMode": frame_mode, "title": title,
-            "summary": summary, "items": out, "hash": data_hash, "errors": errors}
+            "nodeBy": node_by, "summary": summary, "items": out, "hash": data_hash, "errors": errors}
 
 
 def frame_files(folder):
@@ -1282,7 +1310,12 @@ def read_questions(folder, where, problems):
             if (isinstance(oid, str) and KEY_RX.match(oid) and oid not in option_ids
                     and isinstance(o.get("label"), str) and o["label"].strip()):
                 option_ids.add(oid)
-                options.append({"id": oid, "label": o["label"].strip(), "detail": str(o.get("detail") or "").strip()})
+                who = o.get("by") if o.get("by") in (BY_CLAUDE, BY_GPT) else ""
+                if o.get("by") not in (None, "", BY_CLAUDE, BY_GPT):
+                    problems.append({"path": where, "text": f"{label} ({qid}): 'by' của đề xuất {oid} phải là "
+                                                            f"'{BY_GPT}' hoặc '{BY_CLAUDE}'"})
+                options.append({"id": oid, "label": o["label"].strip(), "detail": str(o.get("detail") or "").strip(),
+                                "by": who})
             else:
                 problems.append({"path": where, "text": f"{label} ({qid}): mỗi đề xuất cần id (không trùng) và label"})
         if not options:
@@ -1616,6 +1649,18 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     merge_review(review or folder, items)
     stale = parent_hash is not None and data["based_on"] != parent_hash
     table = folder.parents[len(path.split("/")) - 1] if path else folder
+    advice = advice_folder(table, path)
+    for it in items:
+        if it["advice"] and not (advice / f"{it['advice']}.md").is_file():
+            problems.append({"path": where, "text": f"{DATA_FILE}: nhãn của ý '{it['id']}' trỏ tới góp ý '{it['advice']}' "
+                                                    f"không có ({ADVICE_DIR}/{advice.name}/{it['advice']}.md)"})
+    # the advice that proposed a node was asked about the node above it (or, later, about the node itself)
+    named = (data.get("nodeBy") or {}).get("advice", "")
+    above = advice_folder(table, path.rpartition("/")[0]) if path else advice
+    if named and not any((d / f"{named}.md").is_file() for d in (advice, above)):
+        problems.append({"path": where, "text": f"{DATA_FILE}: node-by trỏ tới góp ý '{named}' không có "
+                                                f"({ADVICE_DIR}/{above.name}/{named}.md hoặc {ADVICE_DIR}/{advice.name}/{named}.md)"})
+    by_count = {who: sum(1 for it in items if it["by"] == who) for who in BY_NAMES}
     raw = read_text(folder / DATA_FILE) if (folder / DATA_FILE).is_file() else ""
     screen_key = ("screen", str(table))
     if screen_key not in cache:
@@ -1684,7 +1729,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
             "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
-            "screen": data["screen"], "styles": styles,
+            "screen": data["screen"], "styles": styles, "by": by_count, "nodeBy": data.get("nodeBy"),
             "refText": raw + "\n" + doc, "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
@@ -1693,6 +1738,31 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
         node["children"].append(read_node(child, child_path, depth + 1, problems, mode, data["hash"],
                                           review / child.name if review else None, cache))
     return node
+
+
+def advice_name(path):
+    """The folder of a node's advice: its path with '.' for '/', ADVICE_ROOT for the root node."""
+    return path.replace("/", ".") if path else ADVICE_ROOT
+
+
+def advice_folder(table, path):
+    """Where GPT's advice about the node at `path` of a table folder (ai/idea or live) is kept."""
+    table = Path(table)
+    base = table.parent if table.name == TABLES["live"][-1] else table.parent.parent
+    return base / ADVICE_DIR / advice_name(path)
+
+
+def advice_ids(folder):
+    """The ids of the answers in one advice folder (<id>.md; not the questions, the notes or the earlier answers)."""
+    folder = Path(folder)
+    if not folder.is_dir():
+        return []
+    return sorted(p.stem for p in folder.iterdir() if p.is_file() and p.suffix == ".md" and KEY_RX.match(p.stem))
+
+
+def by_label(item):
+    """' · GPT (góp ý <id>)' for an idea GPT proposed or shaped; '' for one of Claude's."""
+    return "" if item.get("by", BY_CLAUDE) == BY_CLAUDE else f" · {BY_NAMES[item['by']]} (góp ý {item['advice']})"
 
 
 def read_tree(root, table, mode=None):

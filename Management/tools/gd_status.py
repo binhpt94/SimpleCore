@@ -93,9 +93,19 @@ def lines_for(root, node, out):
         out.append("- Tiến độ: " + " · ".join(cells))
     for gate in node["codeGate"]:
         out.append(f"- Thư mục code {gate['unity']}: " + ("ĐƯỢC CODE" if gate["ok"] else "ĐANG KHOÁ, " + gate["reason"]))
+    advice = gd.advice_folder(gd.table_dir(root, "idea"), node["path"])
+    asked = gd.advice_ids(advice)
+    if asked or node.get("nodeBy"):
+        used = {it["advice"] for it in node["items"] if it["advice"]}
+        where = "/".join(gd.BASE[1:] + (gd.ADVICE_DIR, advice.name))
+        if node.get("nodeBy"):
+            out.append(f"- Node do {gd.BY_NAMES[node['nodeBy']['who']]} đề xuất (góp ý {node['nodeBy']['advice']})")
+        if asked:
+            out.append("- Góp ý của GPT (không ràng buộc; lọc theo mục 'Bên @GameDesigner' của .claude/rules/designadvisor.md): "
+                       + ", ".join(f"{where}/{a}.md" + (" (đã có ý dùng)" if a in used else "") for a in asked))
     for it in node["items"]:
         user = "chưa chấm" if it["user"] is None else str(it["user"])
-        out.append(f"- Ý {it['id']}: AI {it['ai']}, người {user}" + (f", phản hồi: {it['feedback']}" if it["feedback"] else "")
+        out.append(f"- Ý {it['id']}{gd.by_label(it)}: AI {it['ai']}, người {user}" + (f", phản hồi: {it['feedback']}" if it["feedback"] else "")
                    + ("" if it["titled"] else " | THIẾU TIÊU ĐỀ: viết lại dòng thành '### id | AI n | tiêu đề ngắn'"))
         if it["previous"]:
             p = it["previous"]

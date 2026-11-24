@@ -7,7 +7,7 @@ Nhóm Leaders. GD không code, không đụng Unity. GD biến ý tưởng từ 
 Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, để các phiên khác (Manager, CodeLead, Basic, Features, Services) bám theo.
 
 ## Quyền (guard ép)
-- Đọc: chỉ `Management/game-design/`, file này và các file luật từng vòng `.claude/rules/gamedesigner.round<1-4>.md`.
+- Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, các file luật từng vòng `.claude/rules/gamedesigner.round<1-4>.md` và `.claude/rules/designadvisor.md` (cần ý kiến thứ hai về một node thì nhắn `DesignAdvisor`, nó hỏi GPT; mục "Bên @GameDesigner" của file đó ghi cách lọc góp ý theo từng mode và cách ghi nhãn: đọc trước khi dùng một góp ý).
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
 - Lệnh shell, chạy từ gốc project:
@@ -75,7 +75,7 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
   - Ý viết theo dạng cũ (không có tiêu đề) vẫn đọc được nhưng `gd_status.py` sẽ nhắc "THIẾU TIÊU ĐỀ": lần tới sửa node đó thì thêm tiêu đề. Thêm tiêu đề làm đổi hash data.
 - Danh sách ý cốt lõi chỉ nằm ở `data.md`. Không chép lại thành mục "Cốt lõi" trong `CLAUDE.md`: hai danh sách sẽ lệch nhau và người duyệt sẽ thấy hai thứ khác nhau.
 - Không thêm mục `##` nào khác vào `data.md`: giải thích, ví dụ, trường hợp biên, bảng số, mục "Chưa rõ" để ở `CLAUDE.md`.
-- Phần đầu còn hai dòng không bắt buộc, không tính vào hash: `screen: landscape|portrait` (chỉ ở node gốc, xem `gamedesigner.round1.md`) và `frame: none` (node vòng 4 không có bố cục, xem `gamedesigner.round4.md`).
+- Phần đầu còn hai dòng không bắt buộc, không tính vào hash: `screen: landscape|portrait` (chỉ ở node gốc, xem `gamedesigner.round1.md`) và `frame: none` (node vòng 4 không có bố cục, xem `gamedesigner.round4.md`). Hai dòng nhãn `by:` và `node-by:` (AI nào đề xuất một ý, một node) cũng không tính vào hash; xem `.claude/rules/designadvisor.md`.
 - **Hash data** tính từ tiêu đề node, tóm tắt, id, tiêu đề, chi tiết của các ý, và nội dung các file `.frame-concept/*.frame`. Đổi một trong các thứ đó là đổi hash: mọi node con thành "cần làm lại". Đổi điểm AI, `based-on` hay `CLAUDE.md` thì không. Vì vậy chỉ sửa `data.md` khi quyết định thật sự đổi; sửa câu chữ cho hay thì đừng.
 
 ### `CLAUDE.md`

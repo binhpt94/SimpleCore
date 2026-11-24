@@ -420,6 +420,7 @@ def run_cases():
     run_report_cases()
     run_codelead_cases()
     run_designer_cases()
+    run_advisor_cases()
     run_progress_cases()
     run_unity_cases()
     run_tool_cases()
@@ -428,6 +429,85 @@ def run_cases():
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + "/x.txt"}, "cwd": real}), root=None)
     cli("real root", "", "allow", "Read <real root>\\CLAUDE.md, no --root",
         json.dumps({"tool_name": "Read", "tool_input": {"file_path": real + "/CLAUDE.md"}, "cwd": real}), root=None)
+
+
+def run_advisor_cases():
+    """@DesignAdvisor asks GPT about the design: reads the design tree, the studio, the root CLAUDE.md and the rules
+    of the design roles; writes only its questions and notes in Management/game-design/advice; runs gd_advise.py and
+    gd_status.py. It never writes the design, and nobody else writes in advice."""
+    import bind_session
+    W, D, V = "Wallet", "@GameDesigner", "@DesignAdvisor"
+    base = FX + "/Management/game-design"
+    idea, live, advice = base + "/ai/idea", base + "/live", base + "/advice"
+    for d in (idea, live, advice + "/feature-hero"):
+        os.makedirs(d, exist_ok=True)
+
+    g = "advisor: writes only its questions and notes"
+    for p in (advice + "/feature-hero/q1.q.md", advice + "/feature-hero/q1.note.md", advice + "/feature-hero.hero-list/round-2.q.md",
+              advice + "/_root/g1.q.md", advice + "/_general/g1.note.md"):
+        w(g, V, "allow", p)
+        e(g, V, "allow", p)
+    for p in (advice + "/feature-hero/q1.md", advice + "/feature-hero/q1.v1.md", advice + "/feature-hero/q1.rejected.md",
+              advice + "/q1.q.md", advice + "/feature-hero/sub/q1.q.md", advice + "/feature-hero/q1.q.txt",
+              advice + "/_other/q1.q.md", advice + "/feature-hero/hero-list/q1.q.md", advice + "/feature_hero/q1.q.md"):
+        w(g + " (the answers are the command's)", V, "deny", p)
+    for p in (idea + "/data.md", idea + "/feature-hero/data.md", idea + "/notes.md", live + "/data.md", base + "/mode.json",
+              base + "/x.md", FX + "/Management/proposals/new.md", FX + "/Management/studio/codex/lessons.md",
+              FX + "/Management/studio/codex/orders/_design/feature-hero.cheat/a/order.md", FX + "/CLAUDE.md",
+              FX + "/.claude/rules/designadvisor.md", F + "/Wallet/Scripts/Internal/W.cs", A + "/Core/Base.cs"):
+        w(g + " (never the design or anything else)", V, "deny", p)
+    t(g, V, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
+    t(g, V, "deny", "mcp__unityMCP__refresh_unity", {})
+    t(g, V, "deny", "mcp__unityMCP__read_console", {"action": "get"})
+    t(g, V, "pass", "SendMessage", {"to": "GameDesigner", "message": "x"})
+
+    g = "advisor: the others do not write in advice"
+    for who in (W, D, "@Manager", "@CodeLead", "@Core", "@Codex", ""):
+        w(g, who, "deny", advice + "/feature-hero/q1.q.md")
+        w(g, who, "deny", advice + "/feature-hero/q1.md")
+    for who in (W, D, "@Manager", "@CodeLead", "@Codex"):
+        r(g + " (they read it)", who, "allow", advice + "/feature-hero/q1.md")
+
+    g = "advisor: reads the design, not the code"
+    for p in (idea + "/data.md", live + "/data.md", advice + "/feature-hero/q1.md", base, base + "/mode.json",
+              FX + "/Management/studio/codex/lessons.md", FX + "/CLAUDE.md", FX + "/.claude/rules/designadvisor.md",
+              FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/rules/gamedesigner.round3.md"):
+        r(g, V, "allow", p)
+    t(g, V, "allow", "Grep", {"pattern": "hero", "path": base})
+    for p in (FX + "/.claude/rules/codelead.md", FX + "/.claude/rules/studio.md", FX + "/.claude/hooks/guard.py",
+              FX + "/Management/proposals/old.md", FX + "/Management/tools/gd_advise.py", FX + "/Management",
+              F + "/Wallet/Scripts/Contracts/IWallet.cs", F + "/Wallet/CLAUDE.md", A + "/Core/Base.cs", "C:/Windows/x"):
+        r(g, V, "deny", p)
+    t(g, V, "deny", "Grep", {"pattern": "x"})
+
+    g = "advisor: commands"
+    ADVISE, STATUS = "python Management/tools/gd_advise.py", "python Management/tools/gd_status.py"
+    for cmd in (ADVISE + " feature-hero q1", ADVISE + " feature-hero.hero-list.hero-roster round-2", ADVISE + " _root g1",
+                ADVISE + " _general g1", "python3 Management/tools/gd_advise.py feature-hero q1", STATUS, STATUS + " ai/idea/feature-hero",
+                "python Management/tools/gd_pack.py Wallet", "python Management/tools/gd_frame.py live/feature-hero/a/b",
+                "python Management/tools/studio.py status"):
+        t(g, V, "allow", "Bash", {"command": cmd})
+    for cmd in (ADVISE, ADVISE + " feature-hero", ADVISE + " feature-hero q1 extra", ADVISE + " feature-hero/hero-list q1",
+                ADVISE + " ../x q1", ADVISE + " Feature-Hero q1", ADVISE + " feature-hero Q1", ADVISE + " feature-hero q1; ls",
+                ADVISE + " feature-hero q1 --root C:/x", ADVISE + " _other q1", "codex exec -s read-only x",
+                "python Management/tools/studio.py consult Wallet/a b", "python Management/tools/studio.py codex Wallet/a b",
+                "python Management/tools/gd_delete.py ai/idea/feature-hero",
+                'python Management/tools/studio.py redo _design/feature-hero.cheat/a b "x"',
+                "python Management/tools/gd_progress.py ai/idea/a idea done", "ls"):
+        t(g, V, "deny", "Bash", {"command": cmd})
+    for who in (W, D, "@Manager", "@CodeLead", "@Core", "@Codex", ""):
+        t(g + " (only the advisor asks GPT)", who, "deny", "Bash", {"command": ADVISE + " feature-hero q1"})
+
+    g = "advisor: bind"
+    say(g, "block, bound=@DesignAdvisor", "bind @DesignAdvisor", f"FEATURE=@designadvisor {PIN}", session="role-adv")
+    told = bind_session.context({"session_id": "role-adv"}, FX, STORE)
+    check(g, V, True, "the context names the advice folder, the command, who may ask and the rules",
+          all(s in told for s in ("FEATURE=@DesignAdvisor", "game-design/advice", "gd_advise.py", "người hoặc @GameDesigner",
+                                  ".claude/rules/designadvisor.md", "Full Auto")))
+    check(g, V, False, "the context never has the PIN", PIN in told)
+    told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
+    check(g, D, True, "@GameDesigner is told about the advisor and the labels",
+          all(s in told for s in ("DesignAdvisor", "game-design/advice", "by: <id ý>=gpt@<id góp ý>", "node-by:")))
 
 
 def say(group, expect, label, prompt, session="chat1", store=None):
@@ -1002,7 +1082,7 @@ def run_designer_cases():
     for p in (idea + "/data.md", live + "/data.md", idea + "/feature-hero/.images/a.png", base, base + "/mode.json",
               idea + choose + "/answers.json", idea + "/.user-review/review.json", idea + "/.history/log.jsonl",
               FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/rules/gamedesigner.round1.md",
-              FX + "/.claude/rules/gamedesigner.round4.md"):
+              FX + "/.claude/rules/gamedesigner.round4.md", FX + "/.claude/rules/designadvisor.md"):
         r(g, D, "allow", p)
     r(g, D, "allow" if WIN else "deny", FX + "/.claude/rules/GameDesigner.Round4.md")      # same file only on Windows
     for p in (FX + "/.claude/rules/codelead.md", FX + "/.claude/rules/gamedesigner.round5.md", FX + "/.claude/rules/gamedesigner.round2.md.bak",

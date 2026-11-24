@@ -63,9 +63,11 @@ import validate  # noqa: E402
 import vscode_groups  # noqa: E402
 from vscode_groups import vscode_state  # noqa: E402
 
-BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender", "@ClaudeImage", "@Core"]
+BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor",
+         "@Core"]
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
-               "@Codex": "Tools", "@Blender": "Tools", "@ClaudeImage": "Tools", "@Core": "Basic"}
+               "@Codex": "Tools", "@Blender": "Tools", "@ClaudeImage": "Tools", "@DesignAdvisor": "Tools",
+               "@Core": "Basic"}
 GROUP_ORDER = ["Master", "Leaders", "Tools", "Basic", "Services", "Features"]      # the tiers of CLAUDE.md, top to bottom
 STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp", ".ttf")
 

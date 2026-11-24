@@ -22,6 +22,7 @@
     { key: "user", label: "User control", hint: "AI hỏi, bạn quyết. Node đạt khi bạn chấm mọi ý từ mức đạt trở lên và trả lời hết câu hỏi; bạn bấm Sync hoặc Chốt; vòng sau bị khoá tới khi vòng trước được chốt." }
   ];
   var STATES = { "new": "chưa có trong live", "changed": "khác live", "same": "giống live" };
+  var BY_NAMES = { "claude": "Claude", "gpt": "GPT", "claude+gpt": "Claude + GPT" };   // AI nào đề xuất một ý
   var DATA_FILE = "data/gamedesign.js";
   var SERVER_HINT = "Mở trang qua python Management/tools/setup_server.py để lưu.";
   // Ô nhập cao theo nội dung, để người gõ thấy hết phần mình gõ.
@@ -104,6 +105,7 @@
     ".gd-id { margin: 0 0 8px; font-size: 11.5px; color: var(--muted); }",
     ".gd-id code { font-size: 11.5px; }",
     ".gd-mark { padding: 1px 8px; border: 1px solid var(--line); border-radius: 4px; font-size: 11.5px; line-height: 1.5; color: var(--muted); white-space: nowrap; }",
+    ".gd-mark.by { border-color: var(--accent, var(--line)); color: var(--accent, var(--muted)); }",
     ".gd-mark.good { border-color: var(--ok); background: var(--ok); color: var(--panel); }",
     ".gd-mark.fine { border-color: var(--ok); color: var(--ok); }",
     ".gd-mark.bad { border-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); }",
@@ -793,6 +795,12 @@
         // Một hàng: tiêu đề bên trái, rồi ý kiến đã ghi (rút gọn) và hai khung điểm bên phải.
         add(head, inline(ctx, el("p", "text"), it.title));
         var marks = put(head, el("div", "gd-marks"));
+        // Nhãn AI nào đề xuất ý này (dòng by: của data.md); ý của Claude không cần nhãn.
+        if (it.by && it.by !== "claude") {
+          var byMark = put(marks, el("span", "gd-mark by", BY_NAMES[it.by] || it.by));
+          byMark.title = (it.by === "gpt" ? "GPT đề xuất, Claude nhận" : "Claude sửa theo góp ý của GPT") +
+            (it.advice ? " · góp ý " + it.advice + " (Management/game-design/advice)" : "");
+        }
         var aiMark = put(marks, el("span", "gd-mark " + band(it.ai).key, "AI: " + it.ai));
         aiMark.title = "AI chấm " + it.ai + " · " + band(it.ai).label;
         var userMark = put(marks, el("span", "gd-mark", ""));
@@ -882,6 +890,7 @@
           input.checked = q.chosen.indexOf(o.id) >= 0;
           var text = put(label, el("div"));
           add(text, el("span", "", o.label));
+          if (o.by) add(text, el("span", "gd-mark by", (BY_NAMES[o.by] || o.by) + " đề xuất"));
           if (o.detail) add(text, el("small", "", o.detail));
           input.addEventListener("change", function () {
             // Radio trong DOM thật tự bỏ chọn ô khác; làm tay để không phụ thuộc trình duyệt.
@@ -1120,6 +1129,14 @@
       add(body, el("p", "gd-path", "Vòng " + node.round + " · " + ((data.rounds || [])[node.round - 1] || "") + " · " +
         table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "")));
       if (node.summary) add(body, el("p", "", node.summary));
+      // Ý của node do AI nào đề xuất; chỉ hiện khi có ý của GPT hoặc node do GPT đề xuất.
+      var byCount = node.by || {};
+      if (byCount.gpt || byCount["claude+gpt"] || node.nodeBy) {
+        var byParts = ["claude", "gpt", "claude+gpt"].filter(function (k) { return byCount[k]; })
+          .map(function (k) { return BY_NAMES[k] + " " + byCount[k]; });
+        add(body, el("p", "gd-note", "Ý do AI đề xuất: " + byParts.join(" · ") +
+          (node.nodeBy ? ". Node này do " + BY_NAMES[node.nodeBy.who] + " đề xuất (góp ý " + node.nodeBy.advice + ")" : "") + "."));
+      }
       if (node.cheat) add(body, el("p", "gd-gate ok", "Node cheat: mỗi ý là một state dựng nhanh ở bản dev để test và review. " +
         "Đây là nơi duy nhất đặt ảnh art của feature (tối đa 3 state, mỗi state một frame và một ảnh)."));
       renderPriority(body, node);

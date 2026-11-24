@@ -226,6 +226,16 @@ def designer_mode(root):
             "Người chấm được cả ý đã chốt trong live: điểm dưới 5 ở đó cũng bắt làm lại.")
 
 
+def advice_mode(root):
+    """How GPT's advice is used under the mode in mode.json: who filters it and who decides."""
+    mode = read_json(os.path.join(root, "Management", "game-design", "mode.json"), None)
+    if isinstance(mode, dict) and mode.get("mode") == "user":
+        return ("Góp ý của GPT ở mode User control (người ở giữa): @GameDesigner không tự nhận hay bỏ góp ý nào; mỗi góp ý "
+                "thành một câu hỏi cho người, mỗi đề xuất ghi 'by' là gpt hoặc claude; người chọn.")
+    return ("Góp ý của GPT ở mode Full Auto (AI tự lọc và chốt): @GameDesigner xét từng góp ý (dùng, sửa, bỏ); góp ý nó "
+            "định bỏ hoặc sửa được gửi lại GPT một lượt phản biện qua @DesignAdvisor, rồi @GameDesigner quyết.")
+
+
 def context(data, root, store):
     """One line for the model on every prompt that gets through: what this chat is bound to.
     Read from the binding each time, so it stays right after a rebind or a compaction. Never has the PIN."""
@@ -308,7 +318,7 @@ def context(data, root, store):
                 f"Luật ở .claude/rules/studio.md." + studio_pending(root, tool) + editor_status(store))
     if role == "@GameDesigner":
         return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Chỉ đọc "
-                "Management/game-design, .claude/rules/gamedesigner.md và gamedesigner.round<1-4>.md; chỉ ghi trong Management/game-design/ai "
+                "Management/game-design, .claude/rules/gamedesigner.md, gamedesigner.round<1-4>.md và designadvisor.md; chỉ ghi trong Management/game-design/ai "
                 "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
                 "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
                 "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on (cả cây thì lệnh "
@@ -316,6 +326,11 @@ def context(data, root, store):
                 "đọc phần cần bằng Read offset/limit hoặc Grep). Độ quan trọng "
                 "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
                 + designer_mode(root) +
+                " Cần ý kiến thứ hai về thiết kế: nhắn @DesignAdvisor (to: \"DesignAdvisor\") node nào, hỏi gì; nó hỏi GPT và "
+                "ghi câu trả lời vào Management/game-design/advice/<node>/<id>.md (chỉ đọc; gd_status.py liệt kê ở từng node). "
+                + advice_mode(root) + " Ý lấy từ góp ý thì ghi nhãn ở phần đầu data.md: by: <id ý>=gpt@<id góp ý> (nhận nguyên) "
+                "hoặc <id ý>=claude+gpt@<id góp ý> (bạn sửa theo góp ý); node tạo theo đề xuất của GPT: node-by: gpt@<id góp ý>. "
+                "Xem mục 'Bên @GameDesigner' của .claude/rules/designadvisor.md."
                 " Ảnh concept có hai loại: claude-concept (order ở claudeimage/orders/_design, tool: claudeimage, nhắn "
                 "@ClaudeImage, to: \"ClaudeImage\"; đủ cho giai đoạn IDEA; đặt cho mọi node vòng 4 có frame, mỗi frame một "
                 "ảnh, node vòng 4 trước rồi mới tới cheat vì cheat do tool dựng từ phần của chúng) và art-concept "
@@ -329,6 +344,18 @@ def context(data, root, store):
                 "lượt bằng python Management/tools/studio.py redo <ref> <frame> \"<lí do>\" rồi nhắn @ClaudeImage (vẽ mới sau "
                 "khi giao luôn cần lệnh này của một Leader)." + studio_pending(root, None) +
                 " Làm theo .claude/rules/gamedesigner.md; trước khi viết node vòng N đọc .claude/rules/gamedesigner.round<N>.md.")
+    if role == "@DesignAdvisor":
+        return ("guard: chat này gán FEATURE=@DesignAdvisor (nhóm Tools): cố vấn thiết kế game, hỏi GPT (Codex CLI) giúp "
+                "người và @GameDesigner. Không code, không viết thiết kế. CHỈ nhận việc khi người hoặc @GameDesigner nhắn; "
+                "không tự rà, phiên khác nhờ thì từ chối và bảo họ nhờ @GameDesigner. Đọc: Management/game-design (ai/idea là "
+                "bảng đề xuất, live là bảng đã chốt), CLAUDE.md gốc, .claude/rules/designadvisor.md và gamedesigner*.md. Ghi: "
+                "chỉ Management/game-design/advice/<node, '/' thay bằng '.'; node gốc _root; không gắn node _general>/<id>.q.md "
+                "(câu hỏi gửi GPT) và <id>.note.md (nhận xét của mình). Hỏi GPT: viết <id>.q.md rồi chạy python "
+                "Management/tools/gd_advise.py <node> <id>; lệnh ghi câu trả lời vào <id>.md cùng thư mục (các góp ý rời, mỗi "
+                "góp ý '### <id> | <tiêu đề>'), không trần lượt. Xem thiết kế: python Management/tools/gd_status.py "
+                "[ai/idea/<node>]. Xong thì nhắn bên hỏi (SendMessage, to: \"GameDesigner\") đường dẫn file. Góp ý không ràng "
+                "buộc: @GameDesigner lọc, người chốt. " + advice_mode(root) +
+                " Làm theo .claude/rules/designadvisor.md.")
     if role == "@Manager":
         return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "
                 "file mới trong Management/proposals và nhắn các phiên bằng SendMessage. Báo cáo của các phiên ở "

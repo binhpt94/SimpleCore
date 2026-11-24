@@ -25,6 +25,10 @@ The value, by group:
                                           studio.py; blender MCP (@Blender) and unity-mcp custom tools are a soft gate.
                                           @ClaudeImage draws each picture itself as an SVG in the work folder and
                                           studio.py makes the PNG
+              @DesignAdvisor              asks GPT (Codex CLI, through gd_advise.py) about the design when the human or
+                                          @GameDesigner asks it to; reads Management/game-design, writes only its questions
+                                          and notes in Management/game-design/advice (<node>/<id>.q.md, <id>.note.md); the
+                                          answers are written by gd_advise.py. Its advice binds nobody
     Basic     @Core                       edits only Assets/Core
     Features  <Name>                      edits only its feature
     Services  _Services/<Name>            edits only its service
@@ -85,6 +89,14 @@ DESIGNER_COMMANDS = [
     PY + r"Management/tools/gd_delete\.py ai(/[A-Za-z0-9._-]+)+",
     PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
 ]
+# For @DesignAdvisor only: ask GPT one question about a design node (the question is the file
+# Management/game-design/advice/<node>/<id>.q.md it wrote; the answer lands beside it), and look at the design's status.
+ADVICE_ID = r"[a-z0-9]+(-[a-z0-9]+)*"
+ADVICE_NODE = r"(_general|_root|" + ADVICE_ID + r"(\." + ADVICE_ID + r")*)"
+ADVISOR_COMMANDS = [
+    PY + r"Management/tools/gd_advise\.py " + ADVICE_NODE + " " + ADVICE_ID,
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+]
 # For @CodeLead only: mark the progress of a design leaf after checking the code, and look at the design's status.
 CODELEAD_COMMANDS = [
     PY + r"Management/tools/gd_progress\.py ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* (idea|prototype|full) (todo|doing|done)",
@@ -106,7 +118,8 @@ PASS_TOOLS = {"AskUserQuestion", "TodoWrite", "TaskCreate", "TaskUpdate", "TaskL
 FORBIDDEN_DIRS = {"library", "temp", "logs", "obj", "usersettings"}
 DESIGN_AI, DESIGN_LIVE, DESIGN_BASE = ("Management/game-design/ai", "Management/game-design/live",
                                        "Management/game-design")
-DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE}
+DESIGN_ADVICE = "Management/game-design/advice"      # what GPT said about the design: @DesignAdvisor's, binds nobody
+DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE, DESIGN_ADVICE}
 READ_ALL_ZONES = {"Management/studio", "Resources"}      # the orders and what was delivered: every bound chat reads
 # Inside ai: the proposed tree; the human's answers file that sits beside each node's questions; and the folders
 # only the page and the history code write (the human's scores, the node's history).
@@ -115,7 +128,8 @@ DESIGN_KEPT = {".user-review", ".history", ".progress"}
 DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per round
 HUMAN_ASK_ZONES = set()      # zone names where the human chat is still asked before an edit; the human emptied it
 # FEATURE values that are not feature folders.
-ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender", "@ClaudeImage")
+ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@DesignAdvisor", "@Codex", "@Blender",
+         "@ClaudeImage")
 # Tools: they take orders from the features and make images (Codex; ClaudeImage draws them itself as SVG) or 3D
 # models (Blender); they never code.
 TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender", "@ClaudeImage": "claudeimage"}
@@ -235,7 +249,11 @@ SESSION_RX = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 # --- the file system this hook runs on
 WINDOWS = os.name == "nt"
 CASE = re.I if WINDOWS else 0                    # regex flag for zones that grant something
-DESIGNER_RULES_RX = re.compile(r"^gamedesigner(\.round[1-4])?\.md$", CASE)
+DESIGNER_RULES_RX = re.compile(r"^designadvisor\.md$|^gamedesigner(\.round[1-4])?\.md$", CASE)
+ADVISOR_RULES_RX = re.compile(r"^(designadvisor|gamedesigner(\.round[1-4])?)\.md$", CASE)
+# What @DesignAdvisor writes below advice/<node>/: its question and its own note. The answer is gd_advise.py's.
+ADVICE_FILE_RX = re.compile(r"^" + ADVICE_ID + r"\.(q|note)\.md$")
+ADVICE_NODE_RX = re.compile(r"^" + ADVICE_NODE + r"$")
 # The skeleton: the public gates and base classes of the code, edited by @CodeLead only.
 SKELETON_DIRS_RX = re.compile(r"^Scripts/(Contracts|Internal/Base|View/Base)(/|$)", CASE)
 # An interface file (I<Name>.cs) or a base class file (<Name>Base.cs) of Core / _Composition.
@@ -447,6 +465,8 @@ def zone(full, root, feature, area=None, read_all=False):
                 return DESIGN_AI, True, "design"
             if n >= 3 and low[2] == "live":
                 return DESIGN_LIVE, True, "deny"
+            if n >= 3 and low[2] == "advice" and exact(seg[:3], DESIGN_ADVICE):
+                return DESIGN_ADVICE, True, "advice"
             return DESIGN_BASE, True, "deny"
         if low[1:] == ["tools", "rules.json"]:
             if exact(seg, "Management/tools/rules.json"):
@@ -546,7 +566,7 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         return "deny", "unity-mcp manage_asset: a feature session may use only action 'delete'"
     if mode == "none":
         return "deny", "FEATURE is not set or is not an existing feature folder; deleting is blocked"
-    if mode in ("manager", "gamedesigner"):
+    if mode in ("manager", "gamedesigner", "advisor"):
         return "deny", f"{who} does not change the project; ask the session that owns the file"
     path = text_of(ti.get("path")).replace("\\", "/")      # a Unity asset path: '/' on every OS
     if not re.match(r"^Assets/[^/]", path):
@@ -632,6 +652,17 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
     return "deny", ("Management/studio: the tool chats write their lessons and work, the features their orders, "
                     "@GameDesigner the art orders (codex/orders/_design, claudeimage/orders/_design), studio.py and "
                     "the page the rest")
+
+
+def decide_advice_edit(full, root):
+    """@DesignAdvisor writing inside Management/game-design/advice: only <node>/<id>.q.md (the question it asks GPT)
+    and <node>/<id>.note.md (its own remarks). <node> is a node path with '.' for '/', _root or _general."""
+    seg = rel_segments(full, root)[3:]      # below Management/game-design/advice
+    if len(seg) == 2 and ADVICE_NODE_RX.match(seg[0]) and ADVICE_FILE_RX.match(seg[1]):
+        return "allow", "a question or a note of @DesignAdvisor"
+    return "deny", ("in Management/game-design/advice you write only <node>/<id>.q.md and <node>/<id>.note.md (<node>: "
+                    "the node path with '.' for '/', _root for the round-1 node, _general for no node; id: lower case, "
+                    "digits, '-'). The answer <id>.md is written by: python Management/tools/gd_advise.py <node> <id>")
 
 
 def decide_designer_edit(full, root, name):
@@ -893,7 +924,7 @@ def decide_unity_one(tool, ti, ctx, work):
 def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
     """unity-mcp for every session but @human: see UNITY_RULES. The Editor lock is taken only when every command
     of the call is allowed."""
-    if mode in ("none", "manager", "gamedesigner"):
+    if mode in ("none", "manager", "gamedesigner", "advisor"):
         return "deny", (f"{who or 'this chat'} does not use unity-mcp" if mode != "none"
                         else "FEATURE is not set or is not an existing feature folder; unity-mcp is blocked")
     if tool in UNITY_RESOURCE_TOOLS:
@@ -964,6 +995,8 @@ def decide(data, session_value, root, store=None):
         mode, area = "codelead", LEAD_AREA
     elif role == "@GameDesigner":
         mode = "gamedesigner"
+    elif role == "@DesignAdvisor":
+        mode = "advisor"
     elif role in ROLE_AREAS:
         mode, area = "area", ROLE_AREAS[role]
     elif role in TOOL_ROLES:
@@ -989,6 +1022,7 @@ def decide(data, session_value, root, store=None):
     if tool in SHELL_TOOLS:
         cmd = text_of(ti.get("command")).strip()
         commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else []) + (
+            ADVISOR_COMMANDS if mode == "advisor" else []) + (
             CODELEAD_COMMANDS if mode == "codelead" else []) + (MANAGER_COMMANDS if mode == "manager" else []) + (
             TOOL_COMMANDS[TOOL_ROLES[role]] if mode == "tool" else [])
         m = FEATURE_STUDIO_RX.match(cmd)
@@ -1041,6 +1075,15 @@ def decide(data, session_value, root, store=None):
                 return decide_designer_edit(full, root, name)
             return "deny", ("@GameDesigner writes only inside Management/game-design/ai. live is fixed by the human "
                             "(the promote button of the management page). See .claude/rules/gamedesigner.md.")
+        if mode == "advisor":
+            if edit == "advice":
+                return decide_advice_edit(full, root)
+            return "deny", ("@DesignAdvisor writes only its questions and notes in Management/game-design/advice; it "
+                            "never writes the design (ai is @GameDesigner's, live is the human's). "
+                            "See .claude/rules/designadvisor.md.")
+        if edit == "advice":
+            return "deny", (f"FEATURE={who} may not edit {name}: only @DesignAdvisor writes there (questions and "
+                            "notes); the answers are written by gd_advise.py.")
         if edit == "design":
             return "deny", (f"FEATURE={who} may not edit {name}: only @GameDesigner writes there. Ask @GameDesigner "
                             "(or the human) for a design change.")
@@ -1086,6 +1129,10 @@ def decide(data, session_value, root, store=None):
             readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
                 same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
                 and bool(DESIGNER_RULES_RX.match(posixpath.basename(full))))
+        if mode == "advisor":      # the design tree, the studio, the root CLAUDE.md, its rules and the designer's
+            readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or name == "root CLAUDE.md" or (
+                same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
+                and bool(ADVISOR_RULES_RX.match(posixpath.basename(full))))
         if readable:
             return "allow", f"read inside {name}"
         return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."
