@@ -49,6 +49,12 @@ Gửi @CodeLead bằng SendMessage, đủ 3 mục:
 - Đề xuất: đổi gì, vì sao không làm được trong vùng của mình.
 Bắt buộc gửi khi cần đổi khung (bảng trên) hoặc xoá, đổi tên asset `FeatureAssets/Public`. Phiên đó không tự sửa khung: guard chặn.
 
+## Gọi tester (@UnityAutoPlay)
+- Tester giữ khoá Editor suốt lúc chơi, cùng khoá với Play và test của bạn. Đợt chơi thử cả feature do @Manager (hoặc người) giao, không phải bạn.
+- Bạn được nhắn `UnityAutoPlay` **chỉ khi** cần giả lập một thao tác của người chơi để xác nhận một tính năng mà test tự động và việc bạn tự Play không phủ được (bấm, kéo, một chuỗi thao tác trong lúc Play). Tin theo khuôn `XÁC NHẬN · Feature: … · Thao tác: … (từng bước) · Mong đợi: … · Scene hoặc state cheat: …`.
+- Trước khi nhắn: Stop Play và lưu scene của mình, để nó lấy được khoá. Nó trả lời thẳng bạn kết quả.
+- Cần test rộng hơn một tính năng: nhắn `Manager`, nêu feature và điều cần xác nhận.
+
 ## Báo chặn cho @Manager
 @Manager chỉ điều phối lại được khi biết bạn đang đứng. Khối báo cáo cuối lượt chỉ có ở lượt có sửa file, nên lượt bị chặn thường không tới được nó.
 - **Khi nào**: (a) gặp lỗi không tự gỡ được trong vùng của mình: guard chặn, biên dịch hoặc test hỏng do code của phiên khác, unity-mcp hay công cụ không chạy, khoá Editor bị phiên khác giữ lâu; (b) phải dừng chờ người: duyệt đề xuất, quyết `rules.json`, `Packages`, `ProjectSettings`, hay một lựa chọn chỉ người quyết được.

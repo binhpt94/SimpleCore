@@ -25,6 +25,9 @@ The value, by group:
                                           studio.py; blender MCP (@Blender) and unity-mcp custom tools are a soft gate.
                                           @ClaudeImage draws each picture itself as an SVG in the work folder and
                                           studio.py makes the PNG
+    Testers   @UnityAutoPlay              plays the game in the Editor: reads all of UnityProject, edits nothing there;
+                                          writes only Tester/UnityAutoPlay (runs, tester.py); unity-mcp: read, play,
+                                          tests, load a scene, menu, camera, execute_code (a soft gate)
               @DesignAdvisor              asks GPT (Codex CLI, through gd_advise.py) about the design when the human or
                                           @GameDesigner asks it to; reads Management/game-design, writes only its questions
                                           and notes in Management/game-design/advice (<node>/<id>.q.md, <id>.note.md); the
@@ -133,7 +136,23 @@ DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per ro
 HUMAN_ASK_ZONES = set()      # zone names where the human chat is still asked before an edit; the human emptied it
 # FEATURE values that are not feature folders.
 ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@DesignAdvisor", "@Codex", "@Blender",
-         "@ClaudeImage")
+         "@ClaudeImage", "@UnityAutoPlay")
+# Testers: they play the game in the Editor and write what they saw. They read all the code of UnityProject and
+# change none of it; each writes only its own folder Tester/<name> (.claude/rules/tester.md). A new tester is one
+# more line here.
+TESTER_ROLES = {"@UnityAutoPlay": "UnityAutoPlay"}
+TESTER_DIR, TESTER_ARCHIVE = "Tester", "Archive"
+TESTER_ZONE, TESTER_ARCHIVE_ZONE = "Tester", "Tester archive"
+TESTER_RUN_RX = re.compile(r"^\d{8}-\d{6}$")      # one test run: a folder named by its time
+TESTER_IMAGES = "images"
+TESTER_DATA_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".md", ".txt", ".json", ".csv", ".log")
+# Who reads Tester/: the Leaders, the code tiers and the testers. Old runs moved to Tester/<name>/Archive are read by
+# the testers only, so the other chats do not fill their context with them.
+TESTER_READERS = ("manager", "codelead", "gamedesigner", "area", "feature", "tester")
+# Who may message a tester (SendMessage): it holds the Unity Editor while it plays, so only @Manager hands it a test
+# run (and the human, whose chat the guard lets through); the other Leaders may ask it to act one thing out as a
+# player to confirm a feature (.claude/rules/tester.md). Everybody else asks @Manager.
+TESTER_CALLERS = ("manager", "codelead", "gamedesigner")
 # Tools: they take orders from the features and make images (Codex; ClaudeImage draws them itself as SVG) or 3D
 # models (Blender); they never code.
 TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender", "@ClaudeImage": "claudeimage"}
@@ -162,6 +181,20 @@ for _commands in (DESIGNER_COMMANDS, CODELEAD_COMMANDS):
 # A Leader may run several allowed commands in one call, joined by ';' or '&&' (its checks at the start of a session:
 # studio status, validate, scaffold --dry-run). Every part must pass alone, so a chain grants nothing a single call
 # does not; a part with a quoted text (review, redo) is never chained.
+# The test runs (Management/tools/tester.py). Looking: whoever reads Tester/. A new run and moving old runs to the
+# archive: that tester; @Manager archives for any tester.
+TESTER_NAME = "(" + "|".join(TESTER_ROLES.values()) + ")"
+TESTER_TOOL = PY + r"Management/tools/tester\.py "
+TESTER_READ_COMMANDS = [TESTER_TOOL + r"(check|status( " + TESTER_NAME + r")?)"]
+TESTER_ARCHIVE_ARGS = r" (\d{8}-\d{6}|--keep [0-9]{1,3})"
+MANAGER_COMMANDS.append(TESTER_TOOL + "archive " + TESTER_NAME + TESTER_ARCHIVE_ARGS)
+
+
+def tester_commands(name):
+    """What the tester `name` may run on its own runs: start one (its title in double quotes), archive old ones."""
+    return [TESTER_TOOL + "new " + name + r' "[^"\\]+"', TESTER_TOOL + "archive " + name + TESTER_ARCHIVE_ARGS]
+
+
 CHAIN_MODES = ("manager", "codelead", "gamedesigner")
 CHAIN_SPLIT_RX = re.compile(r"\s*(?:;|&&)\s*")
 CHAIN_MAX = 6
@@ -195,6 +228,10 @@ UNITY_PREFIX = "mcp__unityMCP__"
 BLENDER_PREFIX = "mcp__blender__"
 TOOL_UNITY = {"execute_custom_tool", "execute_menu_item"}      # the indirect way of a tool chat (soft gate), with the lock
 UNITY_TOOL_ROLES = ("@Codex", "@Blender")      # the tool chats that have an outside tool to run that way
+# What a tester may run besides reading, play and tests: a menu of the Editor (the cheats), the camera (screenshots)
+# and execute_code (C# in the Editor: press a button, call a cheat, read a state). The last is a soft gate, like the
+# tool chats' way above: the guard cannot read the code, the rule (.claude/rules/tester.md) forbids changing files.
+TESTER_UNITY = {"execute_menu_item", "manage_camera", "execute_code"}
 UNITY_ASSET_TOOL = UNITY_PREFIX + "manage_asset"
 UNITY_SERVER = "unityMCP"
 UNITY_RESOURCE_TOOLS = {"ReadMcpResourceTool", "ListMcpResourcesTool", "ReadMcpResourceDirTool"}
@@ -210,6 +247,7 @@ UNITY_RULES = {
     **{t: {ANY: "lead"} for t in _LEAD_TOOLS},
     **{t: {ANY: "script"} for t in _SCRIPT_TOOLS},
     "read_console": {"": "read", "get": "read", "clear": "state"},
+    "execute_code": {ANY: "tester"},      # the testers only
     "refresh_unity": {ANY: "shared"},
     "run_tests": {ANY: "play"},
     "manage_scene": {"get_hierarchy": "read", "get_active": "read", "get_loaded_scenes": "read",
@@ -518,6 +556,12 @@ def zone(full, root, feature, area=None, read_all=False):
                 return "Management/tools/rules.json", True, "ask"
             return "Management", True, "deny"
         return "Management", True, "deny"
+    if low[0] == TESTER_DIR.lower():      # what the testers wrote; who reads it is decided by the mode (decide)
+        if not same(seg[0], TESTER_DIR):
+            return "unlisted", False, "deny"
+        if n >= 3 and low[2] == TESTER_ARCHIVE.lower():
+            return TESTER_ARCHIVE_ZONE, False, "deny"
+        return TESTER_ZONE, True, "tester"
     if low[0] != "unityproject" or n < 2:
         return "unlisted", False, "deny"
 
@@ -898,6 +942,12 @@ def decide_unity_one(tool, ti, ctx, work):
         else:
             return "deny", (f"unity-mcp {short} {action}: a tool chat only reads and, when its tool cannot run, "
                             f"calls {' or '.join(sorted(TOOL_UNITY))}"), False
+    elif mode == "tester":
+        if not (kind in ("read", "shared", "play") or short in TESTER_UNITY or (short, action) == ("manage_scene", "load")):
+            return "deny", (f"unity-mcp {short} {action}: {who} plays and reads, it changes nothing in the project (no "
+                            "asset, object, scene save, setting or code). Report what is wrong to the owner."), False
+    elif kind == "tester":
+        return "deny", f"unity-mcp {short}: only the testers run it (.claude/rules/tester.md)", False
     elif kind in ("play", "lead") and not lead:
         return "deny", f"unity-mcp {short} {action}: only @CodeLead (play, tests, project settings); ask @CodeLead", False
     paths = unity_paths(short, action, ti)
@@ -931,7 +981,7 @@ def decide_unity_one(tool, ti, ctx, work):
         if why:
             return "deny", why, False
         opens = (short, action) in (("manage_scene", "load"), ("manage_editor", "open_prefab_stage"))
-        if lead and opens:
+        if (lead or mode == "tester") and opens:      # open to look or to play; neither saves outside its area
             name, readable, _ = zone(full, root, None, None, True)
             if not readable:
                 return "deny", f"unity-mcp {short}: may not open {name}", False
@@ -984,7 +1034,8 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
     other = held if held and held.get("session") != session else None
     mine = held if held and not other else {}
     work = {"scene": text_of(mine.get("scene")), "prefab": text_of(mine.get("prefab"))}
-    ctx = {"mode": mode, "feature": feature, "area": area, "who": who, "root": root, "read_all": mode == "codelead"}
+    ctx = {"mode": mode, "feature": feature, "area": area, "who": who, "root": root,
+           "read_all": mode in ("codelead", "tester")}
     decisions, reasons, needs_lock, shared = [], [], False, False
     for t, p in cmds:
         if t == UNITY_PREFIX + "batch_execute":
@@ -1006,6 +1057,28 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
     if "ask" in decisions:
         return "ask", reasons[decisions.index("ask")]
     return "allow", reasons[0] if len(reasons) == 1 else f"batch of {len(reasons)} unity-mcp commands"
+
+
+def decide_tester_edit(full, root, name, who):
+    """A tester writes only its own folder Tester/<name>: its README.md, and in a run folder <time>/ the README.md,
+    other .md notes and the data under images/. Never the archive (tester.py moves runs there), never code."""
+    home = under(root, TESTER_DIR, name)
+    if not inside(full, home):
+        return "deny", (f"{who} changes nothing in the project: it reads the code, plays in the Editor and writes only "
+                        f"{TESTER_DIR}/{name}/ (see .claude/rules/tester.md). Report what is wrong to the owner.")
+    seg = rel_segments(full, home)
+    if same(seg[0], TESTER_ARCHIVE):
+        return "deny", f"{TESTER_DIR}/{name}/{TESTER_ARCHIVE} is written by tester.py archive only"
+    if len(seg) == 1 and seg[0] == "README.md":
+        return "allow", "the README of this tester"
+    if TESTER_RUN_RX.match(seg[0]):
+        if len(seg) == 2 and seg[1].lower().endswith(".md"):
+            return "allow", "a note of a test run"
+        if len(seg) >= 3 and seg[1] == TESTER_IMAGES and seg[-1].lower().endswith(TESTER_DATA_EXT):
+            return "allow", "data of a test run"
+    return "deny", (f"in {TESTER_DIR}/{name} write README.md, and inside a run folder <yyyymmdd-hhmmss>/ (made by: python "
+                    f"Management/tools/tester.py new {name} \"<title>\") its README.md, other .md notes, and pictures "
+                    f"or data under {TESTER_IMAGES}/")
 
 
 def edit_texts(ti):
@@ -1046,10 +1119,12 @@ def decide(data, session_value, root, store=None):
         mode, area = "area", ROLE_AREAS[role]
     elif role in TOOL_ROLES:
         mode = "tool"
+    elif role in TESTER_ROLES:
+        mode = "tester"
     elif valid_feature(raw, root):
         mode, feature = "feature", raw
     who = role or raw
-    read_all = mode == "codelead"
+    read_all = mode in ("codelead", "tester")      # they read the private parts of every feature
 
     edit_path = text_of(ti.get("file_path")) or text_of(ti.get("notebook_path"))
 
@@ -1061,6 +1136,11 @@ def decide(data, session_value, root, store=None):
                 return "ask", f"human session editing {name}"
         return None
 
+    if tool == "SendMessage":
+        to = text_of(ti.get("to")).strip().lstrip("@").lower()
+        if to in (n.lower() for n in TESTER_ROLES.values()) and mode not in TESTER_CALLERS:
+            return "deny", ("only @Manager (and the human) gives a tester work: it holds the Unity Editor while it plays. "
+                            "Message Manager instead: the feature and what you need confirmed.")
     if tool in PASS_TOOLS:
         return None
 
@@ -1069,7 +1149,9 @@ def decide(data, session_value, root, store=None):
         commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else []) + (
             ADVISOR_COMMANDS if mode == "advisor" else []) + (
             CODELEAD_COMMANDS if mode == "codelead" else []) + (MANAGER_COMMANDS if mode == "manager" else []) + (
-            TOOL_COMMANDS[TOOL_ROLES[role]] if mode == "tool" else [])
+            TOOL_COMMANDS[TOOL_ROLES[role]] if mode == "tool" else []) + (
+            TESTER_READ_COMMANDS if mode in TESTER_READERS else []) + (
+            tester_commands(TESTER_ROLES[role]) if mode == "tester" else [])
         m = FEATURE_STUDIO_RX.match(cmd)
         # review: only the feature that ordered. The feedback text may hold "..", the part before it may not.
         if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
@@ -1103,6 +1185,8 @@ def decide(data, session_value, root, store=None):
             return "deny", ".asmref files are forbidden: they put code into another assembly"
         if own_session_zone(full, data.get("session_id")) == "write":
             return "allow", "scratch file of this session"
+        if mode == "tester":
+            return decide_tester_edit(full, root, TESTER_ROLES[role], who)
         if mode == "codelead":
             name, _, edit = zone(full, root, None, LEAD_AREA, True)
             if edit == "allow":      # Assets/_Composition, outside its skeleton
@@ -1188,6 +1272,13 @@ def decide(data, session_value, root, store=None):
             readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or name == "root CLAUDE.md" or (
                 same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
                 and bool(ADVISOR_RULES_RX.match(posixpath.basename(full))))
+        if name == TESTER_ZONE:      # the test runs: the Leaders, the code tiers and the testers
+            readable = mode in TESTER_READERS
+        if name == TESTER_ARCHIVE_ZONE:      # old runs: the testers only
+            if mode != "tester":
+                return "deny", ("may not read: archived test runs. They were moved out so that they do not fill your "
+                                "context; ask the tester (or the human) when you need one.")
+            readable = True
         if readable:
             return "allow", f"read inside {name}"
         return "deny", (f"may not read: {name}. Search and read only inside your own area or a readable zone"

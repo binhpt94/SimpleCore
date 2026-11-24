@@ -34,7 +34,7 @@ HERE = Path(__file__).resolve().parent
 STATE_KEY = "Anthropic.claude-code"
 GROUPS_PREFIX = "sessionGroups:"
 WORKSPACE_PREFIXES = (GROUPS_PREFIX, "sessionUnread:", "sessionSectionCollapseState:")
-TIERS = ["Master", "Leaders", "Tools", "Basic", "Services", "Features"]      # the order of CLAUDE.md, top to bottom
+TIERS = ["Master", "Leaders", "Tools", "Testers", "Basic", "Services", "Features"]      # the order of CLAUDE.md, top to bottom
 TIER_NAMES = {tier: f"{i} · {tier}" for i, tier in enumerate(TIERS, 1)}
 TIER_NAME_RX = re.compile(r"^\d+ · (" + "|".join(TIERS) + r")$")      # also a tier group of an older numbering
 

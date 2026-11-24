@@ -424,6 +424,7 @@ def run_cases():
     run_progress_cases()
     run_unity_cases()
     run_tool_cases()
+    run_tester_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + "/x.txt"}, "cwd": real}), root=None)
@@ -877,6 +878,11 @@ def run_report_cases():
         [human, edit, result, say_text("Xong.")])
     rep("pass, +1 report", "@GameDesigner with report", "rep-gd", [human, edit, result, say_text(REPORT_OK)])
     rep("pass, +0 report", "@GameDesigner turn without edits", "rep-gd", [human, say_text("Đã xem gd_status, chưa sửa gì.")])
+    Path(guard.binding_path("rep-tester", STORE)).write_text(json.dumps({"feature": "@UnityAutoPlay"}))
+    rep("block, +0 report", "a tester wrote a run without a report", "rep-tester", [human, edit, result, say_text("Xong.")])
+    rep("pass, +1 report", "a tester with report", "rep-tester", [human, edit, result, say_text(REPORT_OK)])
+    rep("pass, +0 report", "a tester that only played is not asked", "rep-tester",
+        [human, use("mcp__unityMCP__manage_editor", action="play"), result, use("mcp__unityMCP__execute_code", code="x"), result, say_text("Đã chơi.")])
     rep("pass, +0 report", "unbound chat is not asked", "rep-none", [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "missing transcript lets the agent stop", "rep-wallet", [], transcript=False)
     # The hook's own message may show up as a new user entry: the pending mark keeps the check on.
@@ -1291,6 +1297,143 @@ def run_designer_cases():
     os.remove(base + "/mode.json")
     told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
     check(g, D, True, "without a mode file the context says Full Auto", "Full Auto" in told and "User control" not in told)
+
+
+def run_tester_cases():
+    """The testers (@UnityAutoPlay): read all the code, edit nothing in the project, write only Tester/<name> (a README,
+    runs named by their time, data under images/), play through unity-mcp and change nothing there. Tester/ is read
+    by the Leaders and the code tiers; an Archive only by the testers."""
+    import bind_session
+    T, W, L, M = "@UnityAutoPlay", "Wallet", "@CodeLead", "@Manager"
+    home = FX + "/Tester/UnityAutoPlay"
+    run = home + "/20261125-143000"
+    old = home + "/Archive/20261120-101500"
+    for d in (run + "/images", old + "/images", FX + "/Tester/Other/20261125-143000", F + "/Shop/FeatureAssets/Private"):
+        os.makedirs(d, exist_ok=True)
+    for f in (FX + "/Tester/README.md", home + "/README.md", run + "/README.md", run + "/images/hud.png", old + "/README.md",
+              home + "/Archive/README.md"):
+        Path(f).write_text("x")
+    guard.release_lock(STORE)
+
+    g = "tester: reads all the code, edits none of it"
+    for path in (F + "/Shop/Scripts/Internal/S.cs", F + "/Wallet/Scripts/Internal/Old.cs", F + "/Shop/FeatureAssets/Private/s.asset",
+                 A + "/Core/Old.cs", FX + "/UnityProject/Packages/manifest.json", FX + "/Management/game-design/live/data.md",
+                 FX + "/CLAUDE.md", FX + "/.claude/rules/tester.md"):
+        r(g, T, "allow", path)
+    t(g, T, "allow", "Grep", {"pattern": "IPopupService", "path": F})
+    for path in (FX + "/UnityProject/Library/x", FX + "/secret.txt"):
+        r(g, T, "deny", path)
+    for path in (F + "/Shop/Scripts/Internal/S.cs", F + "/Wallet/Scripts/Contracts/I.cs", A + "/Core/Old.cs", A + "/_Composition/Boot.cs",
+                 F + "/Wallet/FeatureAssets/Private/c.asset", FX + "/Management/proposals/new.md", FX + "/Management/tools/rules.json",
+                 FX + "/Management/game-design/ai/idea/data.md", FX + "/.claude/rules/tester.md", FX + "/CLAUDE.md",
+                 FX + "/Resources/x.png", FX + "/UnityProject/ProjectSettings/x.asset"):
+        w(g, T, "deny", path)
+        e(g, T, "deny", path)
+
+    g = "tester: writes only its own folder"
+    for path in (home + "/README.md", run + "/README.md", run + "/notes.md", run + "/images/hud.png", run + "/images/state.json",
+                 run + "/images/sub/a.jpg", home + "/20261126-090000/README.md"):
+        w(g, T, "allow", path)
+    for path in (FX + "/Tester/README.md", home + "/notes.md", home + "/run1/README.md", run + "/script.cs", run + "/shot.png",
+                 run + "/images/tool.exe", run + "/images/a.cs", run + "/other/a.png", old + "/README.md", home + "/Archive/README.md",
+                 home + "/Archive/20261120-101500/images/a.png", FX + "/Tester/Other/README.md",
+                 FX + "/Tester/Other/20261125-143000/README.md", FX + "/tester/UnityAutoPlay/README.md" if os.name != "nt" else FX + "/Tester/Nope/x.md"):
+        w(g, T, "deny", path)
+    for who in (W, L, M, "@GameDesigner", "@Core", "@Codex", "@DesignAdvisor", ""):
+        w(g + " (nobody else writes there)", who, "deny", run + "/README.md")
+        w(g + " (nobody else writes there)", who, "deny", run + "/images/x.png")
+
+    g = "tester folder: who reads it"
+    for who in (T, M, L, "@GameDesigner", "@Core", W, "_Services/Popup"):
+        for path in (FX + "/Tester/README.md", home + "/README.md", run + "/README.md", run + "/images/hud.png"):
+            r(g, who, "allow", path)
+        t(g, who, "allow", "Grep", {"pattern": "Kết quả", "path": home})
+    for who in ("@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor", ""):
+        r(g + " (not the tool chats)", who, "deny", run + "/README.md")
+    g = "tester archive: the testers only"
+    for path in (old + "/README.md", home + "/Archive/README.md", old + "/images/a.png", home + "/Archive"):
+        r(g, T, "allow", path)
+        for who in (M, L, "@GameDesigner", "@Core", W, "@Codex", "@DesignAdvisor", ""):
+            r(g + " (others)", who, "deny", path)
+    t(g + " (others)", M, "deny", "Grep", {"pattern": "x", "path": home + "/Archive"})
+
+    g = "tester: shell commands"
+    TOOL = "python Management/tools/tester.py "
+    for cmd in (TOOL + 'new UnityAutoPlay "Chơi thử Hud mức IDEA"', TOOL + "archive UnityAutoPlay 20261120-101500",
+                TOOL + "archive UnityAutoPlay --keep 10", TOOL + "status", TOOL + "status UnityAutoPlay", TOOL + "check",
+                "python Management/tools/gd_pack.py Hud", "python Management/tools/validate.py"):
+        t(g, T, "allow", "Bash", {"command": cmd})
+    for cmd in (TOOL + 'new Other "x"', TOOL + 'new UnityAutoPlay "x"; ls', TOOL + "new UnityAutoPlay x", TOOL + "archive Other --keep 1",
+                TOOL + "archive UnityAutoPlay ../x", TOOL + "archive UnityAutoPlay --keep", TOOL + "status; ls",
+                "python Management/tools/scaffold.py", "python Management/tools/gd_status.py", "git status"):
+        t(g, T, "deny", "Bash", {"command": cmd})
+    for cmd in (TOOL + "archive UnityAutoPlay 20261120-101500", TOOL + "archive UnityAutoPlay --keep 3", TOOL + "status", TOOL + "check",
+                TOOL + "status; " + TOOL + "check"):
+        t(g + " (@Manager archives and looks)", M, "allow", "Bash", {"command": cmd})
+    t(g + " (@Manager starts no run)", M, "deny", "Bash", {"command": TOOL + 'new UnityAutoPlay "x"'})
+    for who in (L, "@GameDesigner", "@Core", W):
+        t(g + " (readers look)", who, "allow", "Bash", {"command": TOOL + "status"})
+        t(g + " (readers look)", who, "allow", "Bash", {"command": TOOL + "check"})
+        t(g + " (readers do not archive)", who, "deny", "Bash", {"command": TOOL + "archive UnityAutoPlay --keep 3"})
+        t(g + " (readers start no run)", who, "deny", "Bash", {"command": TOOL + 'new UnityAutoPlay "x"'})
+    for who in ("@Codex", "@DesignAdvisor", ""):
+        t(g + " (not the tool chats)", who, "deny", "Bash", {"command": TOOL + "status"})
+
+    g = "tester: unity-mcp plays and reads"
+    u = lambda expect, name, who=T, session="tester-a", **ti: t(g, who, expect, "mcp__unityMCP__" + name, ti, session=session)      # noqa: E731
+    for name in ("read_console", "find_gameobjects", "get_test_job", "refresh_unity"):
+        u("allow", name)
+    u("allow", "manage_scene", action="get_hierarchy")
+    u("allow", "manage_asset", action="get_info", path="Assets/Features/Shop/FeatureAssets/Private/s.asset")
+    u("allow", "validate_script", uri="mcpforunity://path/Assets/Features/Shop/Scripts/Internal/S.cs")
+    for action in ("play", "pause", "stop"):
+        u("allow", "manage_editor", action=action)
+    u("allow", "run_tests", mode="PlayMode")
+    u("allow", "manage_scene", action="load", path="Assets/_Composition/Scenes/Game.unity")
+    u("allow", "execute_menu_item", menu_path="Cheat/Hud/Mid battle")
+    u("allow", "manage_camera", action="screenshot")
+    u("allow", "execute_code", code="GameObject.Find(\"Play\")")
+    held = guard.read_lock(STORE) or {}
+    check(g, T, ("tester-a", T), "playing holds the Editor lock", (held.get("session"), held.get("who")))
+    t(g + " (the lock)", L, "deny", "mcp__unityMCP__manage_editor", {"action": "play"}, session="lead-b")
+    t(g + " (the lock)", T, "allow", "mcp__unityMCP__read_console", {}, session="tester-b")
+    guard.release_lock(STORE)
+
+    g = "tester: unity-mcp changes nothing"
+    for name, ti in (("manage_scene", {"action": "save"}), ("manage_scene", {"action": "create", "path": "Assets/_Composition/Scenes", "name": "X"}),
+                     ("manage_gameobject", {"action": "create", "name": "x"}), ("manage_components", {"action": "add"}),
+                     ("manage_asset", {"action": "create", "path": "Assets/Features/Shop/FeatureAssets/Private/n.asset"}),
+                     ("manage_asset", {"action": "delete", "path": "Assets/Features/Shop/FeatureAssets/Private/s.asset"}),
+                     ("manage_prefabs", {"action": "modify_contents", "prefab_path": "Assets/Features/Shop/FeatureAssets/Private/p.prefab"}),
+                     ("manage_scriptable_object", {"action": "modify", "target": {"path": "Assets/Features/Shop/FeatureAssets/Private/s.asset"}}),
+                     ("manage_material", {"action": "create", "material_path": "Assets/Features/Shop/FeatureAssets/Private/m.mat"}),
+                     ("manage_editor", {"action": "add_tag"}), ("manage_editor", {"action": "open_prefab_stage", "prefab_path": "Assets/x.prefab"}),
+                     ("manage_packages", {"action": "add"}), ("manage_graphics", {}), ("manage_physics", {}), ("execute_custom_tool", {}),
+                     ("read_console", {"action": "clear"}), ("create_script", {"path": "Assets/x.cs"}), ("script_apply_edits", {}),
+                     ("manage_script", {"action": "create"})):
+        t(g, T, "deny", "mcp__unityMCP__" + name, ti, session="tester-a")
+    check(g, T, None, "a refused call takes no lock", guard.read_lock(STORE))
+    for who in (W, L, M, "@GameDesigner", "@Core", "@Codex", "@ClaudeImage", "@DesignAdvisor", ""):
+        t("execute_code: the testers only", who, "deny", "mcp__unityMCP__execute_code", {"code": "x"}, session="other")
+    guard.release_lock(STORE)
+
+    g = "tester: who may message it"
+    for to in ("UnityAutoPlay", "unityautoplay", "@UnityAutoPlay", " UnityAutoPlay "):
+        for who in (M, L, "@GameDesigner"):
+            t(g, who, "pass", "SendMessage", {"to": to, "message": "x"})
+        for who in (W, "_Services/Popup", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor", T, ""):
+            t(g + " (the others ask @Manager)", who, "deny", "SendMessage", {"to": to, "message": "x"})
+        t(g, "@human", "pass", "SendMessage", {"to": to, "message": "x"})
+    for who in (W, "@Core", "@Codex", T, M):
+        for to in ("Manager", "CodeLead", "Shop", "UnityAutoPlayer", ""):
+            t(g + " (other chats as before)", who, "pass", "SendMessage", {"to": to, "message": "x"})
+
+    g = "tester: is told its job, and reports"
+    Path(guard.binding_path("role-tester", STORE)).write_text(json.dumps({"feature": T}))
+    told = bind_session.context({"session_id": "role-tester"}, FX, STORE)
+    check(g, T, [], "the guard line names the folder, the commands, the soft gate and the report",
+          [x for x in ("nhóm Testers", "Tester/UnityAutoPlay/", "tester.py new UnityAutoPlay", "execute_code", "cổng mềm", "XÁC NHẬN",
+                       "Báo cáo cho @Manager", ".claude/rules/tester.md") if x not in told])
 
 
 def run_progress_cases():

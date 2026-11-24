@@ -39,7 +39,7 @@ ITERATIONS = 200_000
 # Anything that starts like the command is handled here and never passed on: it may carry the PIN.
 COMMAND_RX = re.compile(r"feature\s*(\?|=(.*))?", re.I)
 CONTEXT_BLOCK_RX = re.compile(r"<([A-Za-z][\w-]*)\b[^>]*>.*?</\1>", re.S)
-USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Manager, @CodeLead, @GameDesigner hoặc @human> <PIN>. "
+USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Manager, @CodeLead, @GameDesigner, @UnityAutoPlay hoặc @human> <PIN>. "
          "Xem chat đang gán gì: FEATURE?")
 MAX_LISTED_REPORTS = 20
 
@@ -267,7 +267,9 @@ def context(data, root, store):
     if role == "@CodeLead":
         return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders). Gặp lỗi không tự gỡ được hoặc phải dừng chờ người: "
                 "trước khi kết thúc lượt nhắn Manager (SendMessage) một tin BÁO CHẶN theo khuôn ở .claude/rules/codelead.md, "
-                "hết chặn thì nhắn HẾT CHẶN. Việc của vai trò: kiểm code và giải quyết xung đột của nhóm "
+                "hết chặn thì nhắn HẾT CHẶN. Tester UnityAutoPlay giữ khoá Editor: chỉ nhắn nó khi cần giả lập một thao tác "
+                "người chơi để xác nhận một tính năng (khuôn XÁC NHẬN ở codelead.md); test rộng hơn thì nhờ Manager. "
+                "Việc của vai trò: kiểm code và giải quyết xung đột của nhóm "
                 "Basic, Features, Services, và quản cấu trúc khung. Chỉ sửa khung: Scripts/Contracts, Scripts/Internal/"
                 "Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs của feature đã mở khoá code; *.asmdef, "
                 "AssemblyInfo.cs, interface I*.cs và lớp base *Base.cs của Core. Thêm toàn bộ UnityProject/Assets/_Composition (nối dây: Boot, "
@@ -281,6 +283,21 @@ def context(data, root, store):
                 "python Management/tools/gd_status.py). gd_status.py và gd_pack.py in đường dẫn file và mục lục có số "
                 "dòng khi bản in dài: đọc phần cần bằng Read (offset, limit) hoặc Grep. Quy trình ở .claude/rules/codelead.md."
                 + editor_status(store) + unread_reports(root, store, role))
+    if role in guard.TESTER_ROLES:
+        name = guard.TESTER_ROLES[role]
+        return (f"guard: chat này gán FEATURE={role} (nhóm Testers): chơi thử game trong Unity và ghi lại kết quả; KHÔNG "
+                "sửa gì trong project (không code, asset, scene, cài đặt). Đọc được toàn bộ UnityProject/Assets (cả phần "
+                f"riêng của mọi feature), Management và Tester (cả Archive). Chỉ ghi trong Tester/{name}/: README.md, và "
+                "trong một đợt <yyyymmdd-hhmmss>/ thì README.md, ghi chú .md, images/**. Tạo đợt: python "
+                f"Management/tools/tester.py new {name} \"<tên đợt>\"; kiểm cấu trúc: tester.py check; dời đợt cũ: "
+                f"tester.py archive {name} <đợt> hoặc --keep <N>. unity-mcp: đọc, play/pause/stop, run_tests, manage_scene "
+                "load (không save), refresh_unity, execute_menu_item, manage_camera, execute_code; các lệnh chơi giữ khoá "
+                "Editor tới hết lượt, phiên khác đang giữ thì chờ. execute_code và menu là cổng mềm: chỉ để thao tác lúc "
+                "Play và chụp ảnh vào images/ của đợt đang chạy, cấm dùng để ghi, sửa, xoá file hay asset. Lượt có ghi file "
+                "kết thúc bằng khối '## Báo cáo cho @Manager'; bị chặn hoặc chờ người thì nhắn Manager tin BÁO CHẶN. Làm "
+                "theo .claude/rules/tester.md. Ai giao việc: đợt chơi thử chỉ nhận từ người hoặc Manager; CodeLead và "
+                "GameDesigner chỉ được nhờ một yêu cầu hẹp theo khuôn XÁC NHẬN (một tính năng, thao tác cụ thể, kết quả "
+                "mong đợi), rộng hơn thì bảo họ qua Manager; xong thì Stop Play ngay để trả khoá Editor." + editor_status(store))
     if role in guard.TOOL_ROLES:
         tool = guard.TOOL_ROLES[role]
         how = ("ảnh (kind image) và tham vấn GPT (kind consult). Gen ảnh: python Management/tools/studio.py codex "
@@ -323,7 +340,9 @@ def context(data, root, store):
                 "phải kết thúc bằng khối '## Báo cáo cho @Manager' (8 dòng, xem gamedesigner.md; Stop hook ép): @Manager "
                 "dựa vào đó để biết việc đã xong và đang chờ ai. Gặp lỗi không tự gỡ được hoặc phải dừng chờ người (chấm, "
                 "trả lời, chọn ý trái nhau, chốt), kể cả lượt không sửa file: trước khi kết thúc lượt nhắn Manager "
-                "(SendMessage) một tin BÁO CHẶN theo khuôn ở gamedesigner.md, hết chặn thì nhắn HẾT CHẶN. Chỉ đọc "
+                "(SendMessage) một tin BÁO CHẶN theo khuôn ở gamedesigner.md, hết chặn thì nhắn HẾT CHẶN. Tester UnityAutoPlay "
+                "giữ khoá Unity Editor: chỉ nhắn nó khi cần giả lập một thao tác người chơi để xác nhận một tính năng (khuôn "
+                "XÁC NHẬN), chơi thử rộng hơn thì nhờ Manager. Chỉ đọc "
                 "Management/game-design, .claude/rules/gamedesigner.md, gamedesigner.round<1-4>.md và designadvisor.md; chỉ ghi trong Management/game-design/ai "
                 "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
                 "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
@@ -382,7 +401,9 @@ def context(data, root, store):
                 "thiết kế của nó tới vòng 4 trong live (mục 'Cổng code theo feature' ở đầu bản in gd_status.py); feature ĐANG "
                 "KHOÁ thì việc thuộc @GameDesigner và người, không giao code hay khung. Việc không phụ thuộc nhau thì nhắn các "
                 "phiên CÙNG LÚC trong một lượt, không tuần tự từng phiên. Nhận tin BÁO CHẶN của một Leader: điều phối lại ngay "
-                "(dừng việc phụ thuộc, giao việc không phụ thuộc, gom việc chờ người thành một danh sách cho người)." + unread_reports(root, store, role))
+                "(dừng việc phụ thuộc, giao việc không phụ thuộc, gom việc chờ người thành một danh sách cho người). Chỉ bạn và "
+                "người giao đợt chơi thử cho tester UnityAutoPlay (nó giữ khoá Unity Editor): gom thành một đợt, không giao "
+                "khi CodeLead đang Play hay test." + unread_reports(root, store, role))
     if raw and guard.valid_feature(raw, root):
         group = "Services" if raw.startswith("_Services/") else "Features"
         return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "
