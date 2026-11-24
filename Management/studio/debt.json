@@ -24,9 +24,9 @@
   "file": "Resources/_design/feature-popup-lose.cheat/codex/lose-popup-concept/v2/new-record.png",
   "reason": "Lỗi nhưng chưa cần làm ngay",
   "kind": "người chấm",
-  "state": "open",
+  "state": "closed",
   "at": "2026-11-24 08:15:59",
-  "closedBy": "",
-  "closedAt": ""
+  "closedBy": "người chấp nhận nợ",
+  "closedAt": "2026-11-24 08:19:51"
  }
 ]
