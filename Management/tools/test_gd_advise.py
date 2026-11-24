@@ -154,6 +154,88 @@ def advise_cases(root, tmp):
     # back to the full answer for the label cases
     os.environ["FAKE_ANSWER"] = GOOD
     check("the full answer is filed again", run(root, "feature-hero", "q1")[0], 0)
+    context_cases(root, advice, log)
+
+
+def context_cases(root, advice, log):
+    """What the command adds by itself: the other features, the nodes beside and below, what the human turned down,
+    GPT's earlier points; and the nodes a question adds with `also:`."""
+    idea = gd.table_dir(root, "idea")
+    top = f"---\nbased-on: {gd.read_data(idea)['hash']}\n---\n"
+    under = f"---\nbased-on: {gd.read_data(idea / 'feature-hero')['hash']}\n---\n"
+    made = [node(root, "idea", "feature-shop", "\n### shop-count | AI 9 | Shop có 6 ô\nĐủ chọn.\n", top),
+            node(root, "idea", "feature-hero/hero-list", "\n### list-a | AI 9 | Danh sách có 8 hero\n", under),
+            node(root, "idea", "feature-hero/hero-skill", "\n### skill-a | AI 9 | Mỗi hero một kĩ năng\n", under),
+            node(root, "live", "feature-hero/hero-list", "\n### list-a | AI 9 | Danh sách có 8 hero\n", under)]
+    history = idea / "feature-hero" / gd.HISTORY_DIR / gd.LOG_FILE
+    kept = history.read_text(encoding="utf-8") if history.is_file() else None
+    history.parent.mkdir(parents=True, exist_ok=True)
+    with open(history, "a", encoding="utf-8") as f:
+        f.write(json.dumps({"event": "review", "rejected": True, "item": "hero-fly", "text": "Hero biết bay", "score": 2,
+                            "feedback": "Không hợp"}, ensure_ascii=False) + "\n")
+
+    def ask(name, aid, question, answer="### more | thêm | Thêm một ý\nx\n"):
+        os.environ["FAKE_ANSWER"] = answer
+        (advice / name).mkdir(parents=True, exist_ok=True)
+        (advice / name / f"{aid}.q.md").write_text(question, encoding="utf-8")
+        before = len(log.read_text(encoding="utf-8"))
+        code, text = run(root, name, aid)
+        return code, text, log.read_text(encoding="utf-8")[before:]
+
+    code, _, sent = ask("feature-hero", "q2", "also: feature-shop\nHero và shop có trùng việc không?\n")
+    check("the prompt carries the other features, what is decided below (fixed or not), what the human turned down and GPT's earlier points",
+          [x for x in ("feature-hero/hero-list (ĐÃ CHỐT ở live): hero-list", "· [list-a] Danh sách có 8 hero",
+                       "feature-hero/hero-skill (đề xuất, chưa chốt)", "[hero-fly] Hero biết bay (người chấm 2; phản hồi: Không hợp)",
+                       "feature-hero/q1#add-bench (thêm): Có ghế dự bị 2 hero", "feature-hero/q1#four-heroes (thay hero-count)",
+                       "KHÔNG đề xuất ngược") if x not in sent], [])
+    check("a node named by also: is given in full with the human's score, and the line itself is not part of the question",
+          (code, "node feature-shop" in sent and "node liên quan" in sent, "[shop-count] Shop có 6 ô (người chưa chấm)" in sent,
+           "also:" in sent.split("===== Thiết kế")[0], "also: feature-shop" in (advice / "feature-hero" / "q2.md").read_text(encoding="utf-8")),
+          (0, True, True, False, True))
+    check("the added context never gives the AI's scores", [x for x in ("AI 9", "AI 8", "| AI") if x in sent.replace("`### <id> | AI <n>`", "")], [])
+    code, _, sent = ask("feature-hero.hero-list", "q1", "Danh sách hero thiếu gì?")
+    check("a round-3 node also sees the nodes beside it and the feature map",
+          (code, "Node bên cạnh" in sent and "- feature-hero/hero-skill: hero-skill" in sent, "- feature-shop: feature-shop" in sent), (0, True, True))
+    for bad in ("also: feature-nowhere\nHỏi?", "also: _root\nHỏi?", "also: feature-hero\nHỏi?", "also: feature-shop\n"):
+        code, _, sent = ask("feature-hero", "q3", bad)
+        check(f"a bad also: line is refused and Codex is not run: {bad.split(chr(10))[0]!r} {'(no question)' if bad.endswith(chr(10)) else ''}",
+              (code, sent), (1, ""))
+    code, _, sent = ask(gd.ADVICE_GENERAL, "g3", "Bộ feature này có trùng việc không?")
+    check("a question about no node sees the root and every feature",
+          (code, "[loop] Vòng lặp chính" in sent, "- feature-hero: feature-hero" in sent and "· [shop-count] Shop có 6 ô" in sent,
+           f"{gd.ADVICE_GENERAL}/g1#more-loot" in sent), (0, True, True, True))
+    values = node(root, "idea", "feature-hero/hero-list/values", "\n### v-a | AI 9 | 8 hero, mỗi hero 3 chỉ số\n",
+                  f"---\nbased-on: {gd.read_data(idea / 'feature-hero' / 'hero-list')['hash']}\n---\n")
+    asks = {name: gd_advise.build_prompt(root, name, gd_advise.node_folders(root, name), "Hỏi?")
+            for name in (gd.ADVICE_ROOT, gd.ADVICE_GENERAL, "feature-hero", "feature-hero.hero-list", "feature-hero.hero-list.values")}
+    shutil.rmtree(values)
+    check("GPT is told it may propose new features and nodes in rounds 1-3 and about no node, and may not at the last round",
+          {name: ("Feature mới:" in text, "KHÔNG đề xuất feature hay node mới" in text) for name, text in asks.items()},
+          {gd.ADVICE_ROOT: (True, False), gd.ADVICE_GENERAL: (True, False), "feature-hero": (True, False),
+           "feature-hero.hero-list": (True, False), "feature-hero.hero-list.values": (False, True)})
+    found = gd_advise.node_folders(root, "feature-hero")
+    full = gd_advise.design_text(root, "feature-hero", found)
+    limit, gd_advise.INLINE_MAX = gd_advise.INLINE_MAX, len(full[0]) + 120
+    try:
+        cut = gd_advise.design_text(root, "feature-hero", found)
+    finally:
+        gd_advise.INLINE_MAX = limit
+    check("over the budget only the added context is cut, never the node asked about",
+          (cut[0] == full[0], len(cut[1]) < len(full[1]), "cắt bớt" in cut[1]), (True, True, True))
+
+    for folder in made:      # leave the tree as the label cases expect it
+        shutil.rmtree(folder)
+    shutil.rmtree(gd.table_dir(root, "live") / "feature-hero", ignore_errors=True)
+    shutil.rmtree(advice / "feature-hero.hero-list")
+    for name in ("q2.md", "q2.q.md", "q3.q.md"):
+        (advice / "feature-hero" / name).unlink()
+    for name in ("g3.md", "g3.q.md"):
+        (advice / gd.ADVICE_GENERAL / name).unlink()
+    if kept is None:
+        history.unlink()
+    else:
+        history.write_text(kept, encoding="utf-8")
+    os.environ["FAKE_ANSWER"] = GOOD
 
 
 def label_cases(root):
@@ -186,7 +268,7 @@ def label_cases(root):
     status = gd_status.report(root, "ai/idea/feature-hero")
     check("gd_status prints where an idea came from, the clash, and the node's advice",
           all(s in status for s in ("- Ý hero-bench · GPT (góp ý q1#add-bench): AI 6", "- Ý hero-count · GPT làm rõ (góp ý q1#clear-count): AI 8",
-                                    "TRÁI NHAU với hero-count", "advice/feature-hero/q1.md", "- Ý hero-speed: AI 3")))
+                                    "TRÁI NHAU với hero-count (", "TRÁI NHAU với hero-four (Tối đa 4 hero)", "advice/feature-hero/q1.md", "- Ý hero-speed: AI 3")))
 
     for bad, why in (("by: hero-bench=gpt@q1\n", "phải có dạng"), ("by: hero-bench=claude+gpt@q1#add-bench\n", "phải có dạng"),
                      ("by: nope=gpt@q1#add-bench\n", "không có ý 'nope'"),
@@ -198,6 +280,12 @@ def label_cases(root):
                      (by + "gpt-dropped: q1#add-bench=hero-bench\n", "vẫn còn trong node")):
         hero_node(root, (bad, full))
         check(f"a wrong label is a structure problem: {bad.strip()[-60:]}", any(why in p for p in hero(root)[1]))
+    general = Path(root).joinpath(*gd.BASE, gd.ADVICE_DIR, gd.ADVICE_GENERAL)
+    (general / "g9.md").write_text(f"## {gd.ADVICE_TITLE}\n\n### new-hero | thêm | Feature mới: hero\nx\n", encoding="utf-8")
+    hero_node(root, ("node-by: gpt@g9\n" + by, full))
+    check("node-by may name advice asked about no node (the question put to all features)",
+          (hero(root)[0]["nodeBy"], [p for p in hero(root)[1] if "node-by" in p]), ({"who": "gpt", "advice": "g9"}, []))
+    (general / "g9.md").unlink()
     hero_node(root, ("node-by: gpt@g1\n" + by, full))      # g1 was asked about no node; the folder above is _root
     (Path(root).joinpath(*gd.BASE, gd.ADVICE_DIR, gd.ADVICE_ROOT) / "g1.md").write_text(f"## {gd.ADVICE_TITLE}\n\n### split | thêm | Tách node hero\nx\n", encoding="utf-8")
     n, problems = hero(root)

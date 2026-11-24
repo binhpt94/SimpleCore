@@ -110,11 +110,13 @@ def lines_for(root, node, out):
                    f"-> viết thành một ý, khai by: <id ý>=gpt@{m['advice']}#{m['point']}")
     for d in gpt.get("dropped", []):
         out.append(f"- Ý của GPT đã bị loại: {d['advice']}#{d['point']} (ý {d['item']}): {d['title']}")
+    titles = {x["id"]: x["title"] for x in node["items"]}
     for it in node["items"]:
         user = "chưa chấm" if it["user"] is None else str(it["user"])
         out.append(f"- Ý {it['id']}{gd.by_label(it)}: AI {it['ai']}, người {user}" + (f", phản hồi: {it['feedback']}" if it["feedback"] else "")
                    + ("" if it["titled"] else " | THIẾU TIÊU ĐỀ: viết lại dòng thành '### id | AI n | tiêu đề ngắn'")
-                   + (f" | TRÁI NHAU với {', '.join(it['clash'])}: hai ý không cùng đúng, chờ chấm rồi loại một bên" if it.get("clash") else "")
+                   + (" | TRÁI NHAU với " + ", ".join(f"{c} ({titles.get(c, '?')})" for c in it["clash"])
+                      + ": các ý này không cùng đúng (chọn 1), chờ chấm rồi loại một bên" if it.get("clash") else "")
                    + (f" | Ý DÀI: một ý một quyết định (tiêu đề tối đa {gd.IDEA_TITLE_MAX} kí tự, chi tiết {gd.IDEA_DETAIL_MAX}); "
                       "tách hoặc đưa phần giải thích sang CLAUDE.md lần tới sửa node" if it.get("long") else ""))
         if it["previous"]:

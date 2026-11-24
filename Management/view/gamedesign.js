@@ -22,6 +22,7 @@
     { key: "user", label: "User control", hint: "AI hỏi, bạn quyết. Node đạt khi bạn chấm mọi ý từ mức đạt trở lên và trả lời hết câu hỏi; bạn bấm Sync hoặc Chốt; vòng sau bị khoá tới khi vòng trước được chốt." }
   ];
   var STATES = { "new": "chưa có trong live", "changed": "khác live", "same": "giống live" };
+  var PICK_KEEP = 8, PICK_DROP = 2;      // điểm nháp của nút "Chọn ý này" trong nhóm ý trái nhau: ý được chọn, các ý còn lại
   var BY_NAMES = { "claude": "Claude", "gpt": "GPT" };   // AI nào đề xuất một ý
   var DATA_FILE = "data/gamedesign.js";
   var SERVER_HINT = "Mở trang qua python Management/tools/setup_server.py để lưu.";
@@ -113,6 +114,14 @@
     ".gd-item .text.claude { color: var(--claude); }",
     ".gd-item .text.gpt { color: var(--gpt); }",
     ".gd-item .text.clash { color: var(--clash); }",
+    // Nhóm "Chọn 1": các ý trái nhau nằm chung một khung viền cam, mỗi ý một chữ cái.
+    ".gd-pick { border: 1px solid var(--clash); border-radius: 8px; padding: 2px 10px 0; margin: 8px 0; }",
+    ".gd-pick .gd-item:last-child { border-bottom: 0; }",
+    ".gd-pick-head { margin: 6px 0 2px; font-size: 12.5px; color: var(--muted); }",
+    ".gd-pick-head b { color: var(--clash); font-weight: 700; margin-right: 8px; }",
+    ".gd-pick-letter { flex: none; font-weight: 700; color: var(--clash); margin-right: 8px; }",
+    ".gd-pick-btn { flex: none; margin-left: 8px; padding: 2px 8px; font: inherit; font-size: 12px; border: 1px solid var(--clash); color: var(--clash); background: transparent; border-radius: 6px; cursor: pointer; }",
+    ".gd-pick-btn:disabled { opacity: .5; cursor: default; }",
     ".gd-mark.by.claude { border-color: var(--claude); color: var(--claude); }",
     ".gd-mark.by.gpt { border-color: var(--gpt); color: var(--gpt); }",
     ".gd-mark.by.clash { border-color: var(--clash); color: var(--clash); }",
@@ -811,7 +820,7 @@
       if (!node.items.length) { add(body, el("p", "muted", "Node chưa có ý nào trong data.md.")); return; }
       // Chú giải màu chữ: ý đã chốt (có trong live, đúng nội dung) và ý còn là đề xuất của từng AI.
       var legend = put(body, el("p", "gd-legend"));
-      [["fixed", "Đã chốt"], ["claude", "Claude đề xuất"], ["gpt", "GPT đề xuất"], ["clash", "Hai ý trái nhau"]].forEach(function (x) {
+      [["fixed", "Đã chốt"], ["claude", "Claude đề xuất"], ["gpt", "GPT đề xuất"], ["clash", "Trái nhau: chọn 1"]].forEach(function (x) {
         add(legend, el("b", x[0], x[1]));
       });
       var drafts = [];
@@ -821,10 +830,40 @@
         saveBtn.disabled = !changed || !ctx.setup;
         saveNote.textContent = !ctx.setup ? SERVER_HINT : changed ? changed + " ý có thay đổi chưa lưu." : "Chấm điểm hoặc ghi phản hồi rồi bấm Lưu.";
       };
+      // Các ý trái nhau (nối với nhau qua it.clash) gom thành nhóm "Chọn 1": một khung, các ý nằm liền nhau ở vị trí
+      // của ý đầu tiên trong nhóm, để thấy ngay ý nào trái với ý nào.
+      var byId = {}, groupOf = {}, order = [];
+      node.items.forEach(function (it) { byId[it.id] = it; });
       node.items.forEach(function (it) {
+        if (!(it.clash && it.clash.length) || groupOf[it.id]) return;
+        var g = { ids: [], box: null, setters: {} }, stack = [it.id];
+        while (stack.length) {
+          var id = stack.pop();
+          if (groupOf[id] || !byId[id]) continue;
+          groupOf[id] = g;
+          g.ids.push(id);
+          (byId[id].clash || []).forEach(function (x) { stack.push(x); });
+        }
+        g.ids.sort(function (a, b) { return node.items.indexOf(byId[a]) - node.items.indexOf(byId[b]); });
+      });
+      node.items.forEach(function (it) {
+        var g = groupOf[it.id];
+        if (!g || g.ids.length < 2) { order.push(it); return; }
+        if (g.placed) return;
+        g.placed = true;
+        g.ids.forEach(function (id) { order.push(byId[id]); });
+      });
+      order.forEach(function (it) {
         // Chữ của ý là chính. Dưới nó chỉ có hai khung nhỏ (điểm AI, điểm của bạn). Bấm vào ý mới mở phần cập nhật:
         // hàng nút chấm điểm và ô nhập phản hồi.
-        var block = put(body, el("div", "gd-item"));
+        var group = groupOf[it.id] && groupOf[it.id].ids.length > 1 ? groupOf[it.id] : null;
+        if (group && !group.box) {
+          group.box = put(body, el("div", "gd-pick"));
+          var pickHead = put(group.box, el("p", "gd-pick-head"));
+          add(pickHead, el("b", "", "Chọn 1 trong " + group.ids.length), el("span", "", "Các ý này trái nhau, chỉ giữ một. " +
+            "\"Chọn ý này\" chấm ý đó " + PICK_KEEP + " và các ý còn lại " + PICK_DROP + "; vẫn sửa được, bấm Lưu chấm điểm để ghi."));
+        }
+        var block = put(group ? group.box : body, el("div", "gd-item"));
         var draft = { score: it.user, feedback: it.feedback || "" };
         var head = put(block, el("div", "gd-head"));
         head.tabIndex = 0;
@@ -837,6 +876,7 @@
         var who = it.by === "gpt" ? "gpt" : "claude";
         var clash = it.clash && it.clash.length;
         var itemFixed = state.table === "live" || it.fixed;
+        if (group) add(head, el("span", "gd-pick-letter", String.fromCharCode(65 + group.ids.indexOf(it.id))));
         add(head, inline(ctx, el("p", "text" + (clash ? " clash" : itemFixed ? "" : " " + who)), it.title));
         var marks = put(head, el("div", "gd-marks"));
         var sources = (it.sources || []).map(function (x) { return x.advice + "#" + x.point; }).join(", ");
@@ -847,8 +887,19 @@
           clearMark.title = "Ý của Claude, GPT viết lại cho rõ (góp ý " + sources + ")";
         }
         if (clash) {
-          var clashMark = put(marks, el("span", "gd-mark by clash", "trái nhau"));
-          clashMark.title = "Trái với ý: " + it.clash.join(", ") + ". Hai ý không cùng đúng: chấm điểm để loại một bên.";
+          var clashMark = put(marks, el("span", "gd-mark by clash", group ? "chọn 1" : "trái nhau"));
+          clashMark.title = "Trái với: " + it.clash.map(function (id) { return byId[id] ? byId[id].title : id; }).join(" · ") +
+            ". Các ý này không cùng đúng: chấm điểm để loại một bên.";
+        }
+        var pickBtn = null;
+        if (group) {
+          pickBtn = put(head, el("button", "gd-pick-btn", "Chọn ý này"));
+          pickBtn.type = "button";
+          pickBtn.title = "Chấm ý này " + PICK_KEEP + " và các ý còn lại trong nhóm " + PICK_DROP + " (điểm nháp, chưa lưu)";
+          if (!ctx.setup) pickBtn.disabled = true;
+          pickBtn.addEventListener("click", function () {
+            group.ids.forEach(function (id) { group.setters[id](id === it.id ? PICK_KEEP : PICK_DROP); });
+          });
         }
         var aiMark = put(marks, el("span", "gd-mark " + band(it.ai).key, "AI: " + it.ai));
         aiMark.title = "AI chấm " + it.ai + " · " + band(it.ai).label;
@@ -874,13 +925,15 @@
         add(code, el("code", "", it.id));
         var row = put(editor, el("div", "gd-score"));
         var buttons = [];
+        var setScore = function (value) {
+          draft.score = value;
+          buttons.forEach(function (x, i) { x.setAttribute("aria-pressed", i === value ? "true" : "false"); });
+          showMarks();
+          refresh();
+        };
+        if (group) group.setters[it.id] = setScore;
         for (var s = 0; s <= 10; s++) (function (value) {
-          var b = button(String(value), function () {
-            draft.score = value;
-            buttons.forEach(function (x, i) { x.setAttribute("aria-pressed", i === value ? "true" : "false"); });
-            showMarks();
-            refresh();
-          }, it.user === value, "");
+          var b = button(String(value), function () { setScore(value); }, it.user === value, "");
           b.title = value + " · " + band(value).label;
           if (!ctx.setup) b.disabled = true;
           buttons.push(put(row, b));
@@ -897,7 +950,10 @@
           showMarks();
           if (!editor.hidden) grow(area);
         };
-        head.addEventListener("click", toggle);
+        head.addEventListener("click", function (e) {
+          if (pickBtn && e && e.target === pickBtn) return;      // nút "Chọn ý này" không mở phần chấm điểm
+          toggle();
+        });
         head.addEventListener("keydown", function (e) {
           if (!e || (e.key !== "Enter" && e.key !== " ")) return;
           if (e.preventDefault) e.preventDefault();

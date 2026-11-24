@@ -133,7 +133,8 @@ REF_RX = re.compile(rf"^({_SEG}(?:/{_SEG})*)(?:#({_SEG}))?@([0-9a-f]{{{HASH_LEN}
 # of data.md says where an idea came from (outside the data hash); an idea that is not named is Claude's:
 #     by: <idea id>=gpt@<advice id>#<point id>, ...       the idea is that point of GPT's (Claude may only shorten it)
 #     gpt-dropped: <advice id>#<point id>=<idea id>, ...   the idea made from that point was scored below 5 and removed
-#     node-by: gpt@<advice id>                             the node itself was GPT's proposal
+#     node-by: gpt@<advice id>                             the node itself was GPT's proposal (advice about the node
+#                                                          above, about the node, or about no node: _general)
 # The advice is Management/game-design/advice/<node path with '.' for '/', _root for the root>/<advice id>.md; a
 # point there is `### <point id> | <thêm | làm rõ <idea id> | thay <idea id>> | <title>` and its reasons below.
 ADVICE_DIR = "advice"
@@ -1673,9 +1674,11 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     gpt = mark_sources(folder, table, path, data, items, mode, problems, where)
     named = (data.get("nodeBy") or {}).get("advice", "")
     above = advice_folder(table, path.rpartition("/")[0]) if path else advice      # asked about the node above, or this one
-    if named and not any((d / f"{named}.md").is_file() for d in (advice, above)):
+    general = advice.parent / ADVICE_GENERAL      # the question put to all features of a round
+    if named and not any((d / f"{named}.md").is_file() for d in (advice, above, general)):
         problems.append({"path": where, "text": f"{DATA_FILE}: node-by trỏ tới lần hỏi '{named}' không có "
-                                                f"({ADVICE_DIR}/{above.name}/{named}.md hoặc {ADVICE_DIR}/{advice.name}/{named}.md)"})
+                                                f"({ADVICE_DIR}/{above.name}/{named}.md, {ADVICE_DIR}/{advice.name}/{named}.md "
+                                                f"hoặc {ADVICE_DIR}/{ADVICE_GENERAL}/{named}.md)"})
     by_count = {who: sum(1 for it in items if it["by"] == who) for who in BY_NAMES}
     # Asking GPT is a must in ADVICE_ROUNDS (the glossary is no feature). Not a structure problem: those stop promote.
     gpt_owed = (Path(table).name != TABLES["live"][-1] and depth in ADVICE_ROUNDS and path != GLOSSARY_KEY
