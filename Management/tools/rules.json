@@ -6,7 +6,7 @@
     "bannedApis: regex quét trên code đã bỏ chú thích và chuỗi; không áp dụng cho Tests.",
     "exceptions: { rule, path, reason, approvedBy, date }. path dùng wildcard * và tính từ gốc project, ví dụ 'UnityProject/Assets/Features/_Services/Popup/Scripts/Contracts/*'. Thiếu reason hoặc approvedBy thì ngoại lệ không có hiệu lực."
   ],
-  "extraAssetRoots": [],
+  "extraAssetRoots": ["TextMesh Pro"],
   "allowedPackages": {
     "*": ["UniTask"],
     "View": ["UnityEngine.UI", "Unity.TextMeshPro"],

@@ -690,6 +690,44 @@ def run_role_cases(payload):
     t(g, M, "pass", "SendMessage", {"to": "Shop", "message": "x"})
     t(g, M, "pass", "ListAgents", {})
 
+    g = "own session folders outside the project"
+    home, temp = tempfile.mkdtemp(prefix="guard-home-"), tempfile.mkdtemp(prefix="guard-temp-")
+    guard.OWN_HOME, guard.OWN_TEMP = home, temp
+    ME, OTHER = "11111111-2222-3333-4444-555555555555", "99999999-2222-3333-4444-555555555555"
+    store_of = lambda sid: os.path.join(home, ".claude", "projects", "d--proj", sid)      # noqa: E731
+    temp_of = lambda sid: os.path.join(temp, "claude", "abc123", sid)      # noqa: E731
+    for d in (os.path.join(store_of(ME), "tool-results"), os.path.join(temp_of(ME), "tasks"), os.path.join(temp_of(ME), "scratchpad"),
+              os.path.join(store_of(OTHER), "tool-results"), os.path.join(temp_of(OTHER), "scratchpad"),
+              os.path.join(home, ".claude", "projects", "d--proj", "memory")):
+        os.makedirs(d)
+    mine = [os.path.join(store_of(ME), "tool-results", "toolu_1.txt"), os.path.join(temp_of(ME), "tasks", "b1.output"),
+            os.path.join(temp_of(ME), "scratchpad", "note.py")]
+    try:
+        for who in ("Wallet", M, "@GameDesigner", "@DesignAdvisor", "@Codex", "@CodeLead", "@Core", ""):
+            for p in mine:
+                t(g + ": reads its own", who, "allow", "Read", {"file_path": p}, session=ME)
+        t(g + ": searches its own", M, "allow", "Grep", {"pattern": "x", "path": os.path.join(store_of(ME), "tool-results")}, session=ME)
+        for p in (os.path.join(store_of(OTHER), "tool-results", "toolu_1.txt"), os.path.join(temp_of(OTHER), "scratchpad", "note.py"),
+                  os.path.join(home, ".claude", "projects", "d--proj", ME + ".jsonl"),
+                  os.path.join(home, ".claude", "projects", "d--proj", "memory", "MEMORY.md"),
+                  os.path.join(home, ".claude", "settings.json"), os.path.join(temp, "other.txt"),
+                  os.path.join(store_of(ME), "..", OTHER, "tool-results", "toolu_1.txt"),
+                  os.path.join(home, ".claude", "projects", "d--proj")):
+            t(g + ": nothing else out there", M, "deny", "Read", {"file_path": p}, session=ME)
+        for p in mine:      # the id must be this session's, and a real one
+            t(g + ": not another session's", M, "deny", "Read", {"file_path": p}, session=OTHER)
+            t(g + ": not without a real id", M, "deny", "Read", {"file_path": p})
+        for who in ("Wallet", M, "@GameDesigner", "@Codex"):
+            t(g + ": writes its scratchpad", who, "allow", "Write", {"file_path": mine[2], "content": "x"}, session=ME)
+        t(g + ": unbound writes nothing", "", "deny", "Write", {"file_path": mine[2], "content": "x"}, session=ME)
+        for p in (mine[0], mine[1], os.path.join(temp_of(OTHER), "scratchpad", "note.py"), os.path.join(temp_of(ME), "scratchpad"),
+                  os.path.join(temp_of(ME), "other", "x.txt")):
+            t(g + ": writes only inside its scratchpad", "Wallet", "deny", "Write", {"file_path": p, "content": "x"}, session=ME)
+    finally:
+        guard.OWN_HOME, guard.OWN_TEMP = None, None
+        shutil.rmtree(home, ignore_errors=True)
+        shutil.rmtree(temp, ignore_errors=True)
+
     g = "manager: scaffold command"
     SCAFFOLD = "python Management/tools/scaffold.py"
     for cmd in (SCAFFOLD, SCAFFOLD + " --dry-run", "python3 Management/tools/scaffold.py"):
@@ -699,7 +737,36 @@ def run_role_cases(payload):
         t(g, M, "deny", "Bash", sh(cmd))
     for who in ("Wallet", "@CodeLead", "@GameDesigner", "@Core", ""):
         t(g + " (others)", who, "deny", "Bash", sh(SCAFFOLD))
+    for who in ("@CodeLead", "@GameDesigner"):      # looking is every Leader's, creating is @Manager's
+        t(g + " (dry run: every Leader)", who, "allow", "Bash", sh(SCAFFOLD + " --dry-run"))
+    for who in ("Wallet", "@Core", "@DesignAdvisor", "@Codex", ""):
+        t(g + " (dry run: others)", who, "deny", "Bash", sh(SCAFFOLD + " --dry-run"))
+
+    g = "leaders: a chain of allowed commands"
+    CHAIN = "python Management/tools/studio.py status; python Management/tools/validate.py; python Management/tools/scaffold.py --dry-run"
+    for who in (M, "@CodeLead", "@GameDesigner"):
+        for tool in ("Bash", "PowerShell"):
+            t(g, who, "allow", tool, sh(CHAIN))
+        t(g, who, "allow", "Bash", sh("python Management/tools/validate.py && python Management/tools/gd_status.py"))
+        t(g, who, "allow", "Bash", sh("python Management/tools/validate.py;python Management/tools/studio.py check"))
+    for bad in (CHAIN + "; ls", CHAIN + "; rm -rf UnityProject", "ls; " + CHAIN, CHAIN + " | more", CHAIN + " > out.txt",
+                CHAIN + "; $(ls)", CHAIN + ";", "; " + CHAIN, CHAIN.replace("; ", " & "), CHAIN.replace("; ", " || "),
+                "; ".join(["python Management/tools/validate.py"] * 7),
+                'python Management/tools/validate.py; python Management/tools/studio.py redo _design/feature-hero.cheat/a b "x"',
+                "python Management/tools/validate.py; python Management/tools/../tools/validate.py"):
+        t(g + " (refused)", M, "deny", "Bash", sh(bad))
+    t(g + " (refused)", "@CodeLead", "deny", "Bash", sh("python Management/tools/validate.py; python Management/tools/scaffold.py"))
+    for who in ("Wallet", "@Core", "@DesignAdvisor", "@Codex", ""):      # the others run one command a call
+        t(g + " (others)", who, "deny", "Bash", sh("python Management/tools/validate.py; python Management/tools/studio.py status"))
     t(g + " (others)", "@human", "pass", "Bash", sh(SCAFFOLD))
+
+    g = "manager: reads the design's status"
+    STATUS = "python Management/tools/gd_status.py"
+    for cmd in (STATUS, STATUS + " ai/idea/feature-hero", STATUS + " ai/idea/feature-hero/hero-list"):
+        t(g, M, "allow", "Bash", sh(cmd))
+    for cmd in (STATUS + " live", STATUS + " ai/idea/../x", STATUS + " && ls", "python Management/tools/gd_delete.py ai/idea/feature-hero",
+                "python Management/tools/gd_progress.py ai/idea/feature-hero idea done"):
+        t(g, M, "deny", "Bash", sh(cmd))
 
     g = "any chat: design pack command"
     PACK = "python Management/tools/gd_pack.py"
@@ -806,8 +873,10 @@ def run_report_cases():
         [human, edit, result, say_text("Xong.")])
     rep("pass, +1 report", "@CodeLead with report", "rep-lead", [human, edit, result, say_text(REPORT_OK)])
     rep("pass, +0 report", "@CodeLead turn without edits", "rep-lead", [human, say_text("Đã kiểm, không lỗi.")])
-    rep("pass, +0 report", "@GameDesigner is not asked (its work is the design tree)", "rep-gd",
+    rep("block, +0 report", "@GameDesigner edited the design without a report", "rep-gd",
         [human, edit, result, say_text("Xong.")])
+    rep("pass, +1 report", "@GameDesigner with report", "rep-gd", [human, edit, result, say_text(REPORT_OK)])
+    rep("pass, +0 report", "@GameDesigner turn without edits", "rep-gd", [human, say_text("Đã xem gd_status, chưa sửa gì.")])
     rep("pass, +0 report", "unbound chat is not asked", "rep-none", [human, edit, result, say_text("Xong.")])
     rep("pass, +0 report", "missing transcript lets the agent stop", "rep-wallet", [], transcript=False)
     # The hook's own message may show up as a new user entry: the pending mark keeps the check on.
@@ -1135,7 +1204,7 @@ def run_designer_cases():
     for tail in (" live", " ai", " ai/idea/..", " ai/idea/../live", " ai/idea/Feature", " ai/idea/a b", " ai/idea/a; ls",
                  " --root C:/x", " ai/idea/.history", " ai/idea ai/idea"):
         t(g, D, "deny", "Bash", {"command": STATUS + tail})
-    for who in (W, "@Manager", "@Core", ""):      # @CodeLead may run it too: see "codelead: progress command"
+    for who in (W, "@Core", ""):      # @CodeLead and @Manager may run it too: see "codelead: progress command", "manager: reads the design's status"
         t(g + " (others)", who, "deny", "Bash", {"command": STATUS})
 
     g = "designer: write gate"

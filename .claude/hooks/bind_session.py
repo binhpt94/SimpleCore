@@ -317,7 +317,9 @@ def context(data, root, store):
                 f"Phản hồi là một luật chung thì thêm một mục vào lessons.md. "
                 f"Luật ở .claude/rules/studio.md." + studio_pending(root, tool) + editor_status(store))
     if role == "@GameDesigner":
-        return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Chỉ đọc "
+        return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Lượt có sửa file "
+                "phải kết thúc bằng khối '## Báo cáo cho @Manager' (8 dòng, xem gamedesigner.md; Stop hook ép): @Manager "
+                "dựa vào đó để biết việc đã xong và đang chờ ai. Chỉ đọc "
                 "Management/game-design, .claude/rules/gamedesigner.md, gamedesigner.round<1-4>.md và designadvisor.md; chỉ ghi trong Management/game-design/ai "
                 "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
                 "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
@@ -369,7 +371,10 @@ def context(data, root, store):
     if role == "@Manager":
         return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "
                 "file mới trong Management/proposals và nhắn các phiên bằng SendMessage. Báo cáo của các phiên ở "
-                "Management/reports/." + unread_reports(root, store, role))
+                "Management/reports/. Làm theo .claude/rules/manager.md. Lượt làm việc đầu tiên sau khi được tạo mới hoặc "
+                "renew: kiểm tra đầu phiên trước mọi việc khác, đúng thứ tự: (1) ListAgents, thiếu CodeLead hoặc GameDesigner "
+                "thì báo lỗi cho người và DỪNG; (2) tiến độ của hai Leader (gd_status.py, báo cáo, hỏi từng Leader); (3) rồi "
+                "mới tới Tools, Basic, Services, Features; (4) tổng hợp cho người." + unread_reports(root, store, role))
     if raw and guard.valid_feature(raw, root):
         group = "Services" if raw.startswith("_Services/") else "Features"
         return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "

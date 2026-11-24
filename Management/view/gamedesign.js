@@ -75,6 +75,8 @@
     ".gd-chip:hover { border-color: var(--accent); }",
     ".gd-chip.ask { border-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); font-weight: 600; }",
     ".gd-chip.go { border-color: var(--accent); background: var(--accent); color: var(--panel); font-weight: 600; text-decoration: none; }",
+    ".gd-chip.todo { border-color: var(--bad); color: var(--bad); font-weight: 600; text-decoration: none; }",
+    ".gd-chip.tick { width: 24px; height: 24px; padding: 0; border-radius: 12px; font-size: 14px; line-height: 22px; text-align: center; margin: -2px 0; }",
     ".gd-tag.bad { border-color: var(--bad); color: var(--bad); font-weight: 600; }",
     ".gd-tag.ok { border-color: var(--ok); color: var(--ok); }",
     ".gd-num { display: inline-block; min-width: 24px; padding: 2px 6px; border-radius: 10px; font-size: 12px; font-weight: 600; line-height: 1.3; text-align: center; border: 1px solid var(--line); color: var(--muted); }",
@@ -731,19 +733,29 @@
         ask.title = "Mở node để trả lời " + n.pending + " câu hỏi của @GameDesigner";
         out.push(ask);
       }
-      if (!n.passed) {
-        // redo: việc của @GameDesigner; còn lại là node đang chờ bạn chấm hoặc trả lời.
-        var redo = el("span", n.redo ? "gd-tag bad" : "gd-tag", n.redo ? "cần làm lại" : "chờ bạn");
+      // Node cần bạn duyệt mang nhãn đỏ "Chưa duyệt" (bấm để mở node). Node đang đạt có thêm dấu ✓: duyệt nhanh,
+      // chốt node sang live mà không cần mở. Node chưa đạt vì việc của @GameDesigner thì "cần làm lại".
+      var todo = function (why) {
+        var b = button("Chưa duyệt", open, null, "gd-chip todo");
+        b.title = why;
+        return b;
+      };
+      if (!n.passed && n.redo) {
+        var redo = el("span", "gd-tag bad", "cần làm lại");
         redo.title = n.reasons.join("\n");
         out.push(redo);
+      } else if (!n.passed) {
+        out.push(todo("Đang chờ bạn chấm hoặc trả lời; bấm để mở node.\n" + n.reasons.join("\n")));
       } else if (n.state === "same") {
         out.push(el("span", "gd-tag ok", "đã chốt"));
-      } else if (ctx.setup) {
-        var go = button("Chốt", function () { promote(n, false); }, null, "gd-chip go");
-        go.title = "Chốt node này sang live (không cần PIN)";
-        out.push(go);
       } else {
-        out.push(el("span", "gd-tag", "chờ chốt"));
+        out.push(todo("Node đạt nhưng chưa chốt sang live" + (ctx.setup ? ": bấm ✓ để duyệt nhanh, hoặc bấm đây để mở node." : ". " + SERVER_HINT)));
+        if (ctx.setup) {
+          var go = button("✓", function () { promote(n, false); }, null, "gd-chip go tick");
+          go.title = "Duyệt: chốt node này sang live (không cần PIN)";
+          go.setAttribute("aria-label", "Duyệt và chốt node " + (n.title || where(n)) + " sang live");
+          out.push(go);
+        }
       }
       return out;
     };

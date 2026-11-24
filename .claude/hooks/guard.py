@@ -70,6 +70,7 @@ import os
 import posixpath
 import re
 import stat
+import tempfile
 import time
 import sys
 
@@ -104,9 +105,11 @@ CODELEAD_COMMANDS = [
     PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
 ]
 # For @Manager only: create the feature, service, Core and _Composition folders the live design asks for and that
-# are missing (folders and .gitkeep only, never code; see scaffold.py).
+# are missing (folders and .gitkeep only, never code; see scaffold.py), and look at the design's status (how far
+# @GameDesigner is: the first thing it checks after it is created or renewed, .claude/rules/manager.md).
 MANAGER_COMMANDS = [
     PY + r"Management/tools/scaffold\.py( --dry-run)?",
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
 ]
 
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
@@ -153,6 +156,15 @@ LEADER_REDO = (STUDIO + r"redo _design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0
                + r' "[^"\\]+"')
 for _commands in (DESIGNER_COMMANDS, CODELEAD_COMMANDS, MANAGER_COMMANDS):
     _commands.append(LEADER_REDO)
+# Every Leader may look at what scaffold.py would create (it prints, it creates nothing); creating is @Manager's.
+for _commands in (DESIGNER_COMMANDS, CODELEAD_COMMANDS):
+    _commands.append(PY + r"Management/tools/scaffold\.py --dry-run")
+# A Leader may run several allowed commands in one call, joined by ';' or '&&' (its checks at the start of a session:
+# studio status, validate, scaffold --dry-run). Every part must pass alone, so a chain grants nothing a single call
+# does not; a part with a quoted text (review, redo) is never chained.
+CHAIN_MODES = ("manager", "codelead", "gamedesigner")
+CHAIN_SPLIT_RX = re.compile(r"\s*(?:;|&&)\s*")
+CHAIN_MAX = 6
 TOOL_COMMANDS = {
     # @ClaudeImage writes work/<item>.svg itself; `claude` checks it and makes the PNG (no outside tool is run).
     "claudeimage": [STUDIO + r"claude " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver claudeimage " + STUDIO_REF,
@@ -357,6 +369,38 @@ def inside(full, root):
 def rel_segments(full, root):
     """Segments of a canonical path below root (call only when inside(full, root))."""
     return full[len(root) + 1:].split("/")
+
+
+# A session's own folders outside the project. Claude Code puts there what a session must read back: a tool output
+# too long for the chat (~/.claude/projects/<project>/<session id>/tool-results), the output of its background
+# commands and subagents (<temp>/claude/<x>/<session id>/tasks) and its scratch files (.../scratchpad). They hold only
+# what tools the guard already let this session run printed, so reading them grants nothing new. Another session's
+# folders, the transcripts and everything else outside the project stay closed.
+OWN_ID_RX = re.compile(r"^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$")      # a real session id only
+OWN_WRITE_DIR = "scratchpad"
+OWN_HOME, OWN_TEMP = None, None      # tests point these at their own folders
+
+
+def own_session_zone(full, session_id):
+    """'read' or 'write' when the canonical path `full` lies in a folder of this very session outside the project
+    (see above): 'write' only inside its scratchpad, 'read' in the rest. None otherwise."""
+    if not isinstance(session_id, str) or not OWN_ID_RX.match(session_id):
+        return None
+    bases = ((canonical_root(os.path.join(OWN_HOME or os.path.expanduser("~"), ".claude", "projects")), False),
+             (canonical_root(os.path.join(OWN_TEMP or tempfile.gettempdir(), "claude")), True))
+    for base, temp in bases:
+        if not inside(full, base):
+            continue
+        seg = rel_segments(full, base)
+        if len(seg) < 2 or seg[1] != session_id or any(s in ("", ".", "..") for s in seg):
+            return None
+        cur = base
+        for s in seg:      # no link or junction on the way: it could lead anywhere
+            cur = cur + "/" + s
+            if is_link(cur):
+                return None
+        return "write" if temp and len(seg) > 3 and seg[2] == OWN_WRITE_DIR else "read"
+    return None
 
 
 def is_link(path):
@@ -1035,8 +1079,14 @@ def decide(data, session_value, root, store=None):
             if ordered.startswith("_design/"):
                 return "deny", "art concepts are judged by the human on the management page (tab Game design)"
             return "deny", f"only the chat of {ordered} judges its own orders"
-        if any(re.fullmatch(rx, cmd) for rx in commands) and not SHELL_META_RX.search(cmd) and ".." not in cmd:
+        def listed(one):
+            return any(re.fullmatch(rx, one) for rx in commands) and not SHELL_META_RX.search(one) and ".." not in one
+
+        if listed(cmd):
             return "allow", "shell command is on the allow-list"
+        parts = CHAIN_SPLIT_RX.split(cmd)
+        if mode in CHAIN_MODES and 1 < len(parts) <= CHAIN_MAX and all(listed(p) and '"' not in p for p in parts):
+            return "allow", "every command of the chain is on the allow-list"
         return "deny", "shell command is not on the allow-list in guard.py. Stop and tell the human."
 
     if tool in EDIT_TOOLS:
@@ -1051,6 +1101,8 @@ def decide(data, session_value, root, store=None):
         # Files that define the boundary itself.
         if is_asmref(full):
             return "deny", ".asmref files are forbidden: they put code into another assembly"
+        if own_session_zone(full, data.get("session_id")) == "write":
+            return "allow", "scratch file of this session"
         if mode == "codelead":
             name, _, edit = zone(full, root, None, LEAD_AREA, True)
             if edit == "allow":      # Assets/_Composition, outside its skeleton
@@ -1125,6 +1177,8 @@ def decide(data, session_value, root, store=None):
         full = resolve_target(target, cwd)
         if goes_through_link(full, root):
             return "deny", "path goes through a link or junction"
+        if own_session_zone(full, data.get("session_id")):
+            return "allow", "this session's own tool output or scratch file"
         name, readable, _ = zone(full, root, feature, area, read_all)
         if mode == "gamedesigner":      # sees the design tree, its own rules and the studio, nothing else
             readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
@@ -1136,7 +1190,9 @@ def decide(data, session_value, root, store=None):
                 and bool(ADVISOR_RULES_RX.match(posixpath.basename(full))))
         if readable:
             return "allow", f"read inside {name}"
-        return "deny", f"may not read: {name}. Search and read only inside your own area or a readable zone."
+        return "deny", (f"may not read: {name}. Search and read only inside your own area or a readable zone"
+                        + (" (outside the project only this session's own tool-results, tasks and scratchpad folders "
+                           "are readable; another session's are not)." if name == "outside the project" else "."))
 
     if tool.startswith(BLENDER_PREFIX):      # soft gate: the guard cannot read the Python it runs (.claude/rules/studio.md)
         if mode == "tool" and TOOL_ROLES[role] == "blender":
