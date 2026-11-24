@@ -231,8 +231,9 @@ def context(data, root, store):
     raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
     role = guard.role_of(raw)
     if role == "@human":
-        return ("guard: chat này gán FEATURE=@human (phiên của người): không giới hạn feature; sửa Core, "
-                "_Composition, .claude, CLAUDE.md gốc vẫn bị hỏi từng lần.")
+        return ("guard: chat này gán FEATURE=@human (phiên của người): không giới hạn feature; guard không hỏi ở "
+                "vùng nào (cả Core, _Composition, .claude, CLAUDE.md gốc, thiết kế live). .claude/settings.json vẫn hỏi "
+                "khi sửa Management/data, Management/tools, Management/index.html, Packages, ProjectSettings.")
     worker = (" Khung (Scripts/Contracts, Scripts/Internal/Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs; ở "
               "Core/_Composition thêm các interface I*.cs) chỉ đọc: viết code mới trên lớp con ở phần còn lại của "
               "Internal/View; muốn đổi khung thì nhắn @CodeLead (ngữ cảnh, file, đề xuất) và chờ. Xung đột code do "

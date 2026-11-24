@@ -388,9 +388,9 @@ def run_cases():
     e(g, H, "pass", F + "/Wallet/Scripts/Internal/W.cs")
     e(g, H, "pass", F + "/Shop/Scripts/Internal/S.cs")
     w(g, H, "pass", FX + "/Management/data/idea.js")
-    e(g, H, "ask", A + "/Core/Base.cs")
-    e(g, H, "ask", A + "/_Composition/Boot.cs")
-    e(g, H, "ask", FX + "/.claude/hooks/guard.py")
+    e(g, H, "pass", A + "/Core/Base.cs")                # code: the human edits it without being asked
+    e(g, H, "pass", A + "/_Composition/Boot.cs")
+    e(g, H, "pass", FX + "/.claude/hooks/guard.py")      # the human chat is not asked anywhere (HUMAN_ASK_ZONES is empty)
     t(g, H, "pass", "Bash", {"command": "ls"})
     e("human case-sensitive", "@Human", "deny", F + "/Wallet/Scripts/Internal/W.cs")
 
@@ -403,7 +403,7 @@ def run_cases():
     cli(g, W, "pass", "TodoWrite", payload("TodoWrite", {}))
     cli(g, "", "deny", "Edit, FEATURE unset", payload("Edit", {"file_path": F + "/Wallet/Scripts/Internal/W.cs"}))
     cli(g, "@human", "pass", "Edit, @human", payload("Edit", {"file_path": F + "/Shop/Scripts/Internal/S.cs"}))
-    cli(g, "@human", "ask", "Edit .claude, @human", payload("Edit", {"file_path": FX + "/.claude/settings.json"}))
+    cli(g, "@human", "pass", "Edit .claude, @human", payload("Edit", {"file_path": FX + "/.claude/settings.json"}))
     cli(g, W, "deny", "malformed JSON", "{ not json")
     cli(g, W, "deny", "empty input", " ")
     cli(g, W, "deny", "JSON array instead of object", "[1,2]")
@@ -511,7 +511,7 @@ def run_binding_cases(payload):
     b(g, "allow", "chat2", "Edit", {"file_path": F + "/_Services/Popup/Scripts/Internal/P.cs"})
     b(g, "deny", "chat2", "Edit", {"file_path": own})
     b(g, "pass", "chat3", "Edit", {"file_path": S})
-    b(g, "ask", "chat3", "Edit", {"file_path": FX + "/.claude/hooks/guard.py"})
+    b(g, "pass", "chat3", "Edit", {"file_path": FX + "/.claude/hooks/guard.py"})
     b(g, "deny", "other-chat", "Edit", {"file_path": own})           # a binding belongs to one chat only
     b(g, "deny", None, "Edit", {"file_path": own})
     b(g, "deny", "..\\chat1", "Edit", {"file_path": own})
@@ -784,7 +784,7 @@ def run_codelead_cases():
         w(g + ": case-sensitive", L, "deny", A + "/_composition/Boot.cs")
     for who in ("Wallet", "@Core", "@Manager", "@GameDesigner", "@Codex", ""):
         w(g + " (others)", who, "deny", A + "/_Composition/Boot.cs")
-    e(g + " (others)", "@human", "ask", A + "/_Composition/Old.cs")
+    e(g + " (others)", "@human", "pass", A + "/_Composition/Old.cs")
 
     g = "codelead: reads every layer of Basic, Features, Services"
     for p in (internal, F + "/Shop/Scripts/View/V.cs", F + "/Wallet/Tests/T.cs", F + "/Wallet/FeatureAssets/Private/c.asset",
@@ -879,7 +879,7 @@ def run_codelead_cases():
     for who in ("@Manager", "@GameDesigner", ""):
         e(g + " (others)", who, "deny", F + "/Wallet/Scripts/Contracts/IWallet.cs")
     e(g + " (human)", "@human", "pass", F + "/Wallet/Scripts/Contracts/IWallet.cs")
-    e(g + " (human)", "@human", "ask", A + "/Core/IServiceRegistry.cs")
+    e(g + " (human)", "@human", "pass", A + "/Core/IServiceRegistry.cs")
     for p in (A + "/Core/Old.cs", A + "/_Composition/Old.cs"):
         e(g + ": a feature never edits Core/_Composition", W, "deny", p)
     e(g, W, "ask", FX + "/Management/tools/rules.json")
@@ -1000,8 +1000,8 @@ def run_designer_cases():
         r(g, who, "allow", live + "/data.md")
         r(g, who, "allow", idea + "/data.md")
     w(g, "@human", "pass", idea + "/data.md")
-    w(g, "@human", "ask", live + "/data.md")
-    e(g, "@human", "ask", live + "/feature-hero/data.md")
+    w(g, "@human", "pass", live + "/data.md")
+    e(g, "@human", "pass", live + "/feature-hero/data.md")
 
     g = "designer: delete command"
     for path in ("ai/idea/feature-hero", "ai/idea/feature-hero/node.md", "ai/idea/feature-hero/.images/Hero_01.png", "ai/notes.md"):

@@ -8,10 +8,6 @@
       "Edit(/Management/studio/**)"
     ],
     "ask": [
-      "Edit(/UnityProject/Assets/_Composition/**)",
-      "Edit(/UnityProject/Assets/Core/**)",
-      "Edit(/.claude/**)",
-      "Edit(/CLAUDE.md)",
       "Edit(/Management/data/**)",
       "Edit(/Management/tools/**)",
       "Edit(/Management/index.html)",

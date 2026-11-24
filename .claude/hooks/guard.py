@@ -5,7 +5,7 @@ Who a session is comes from the human, never from the agent: the binding for thi
 made when the human types `FEATURE=<value> <PIN>` in the chat; see bind_session.py. Bindings and the
 PIN live outside the project, in STORE_DIR. The FEATURE environment variable is not used.
 The value, by group:
-    Master    @human                      no feature limits; still asks for .claude, _Composition, Core
+    Master    @human                      no feature limits and no questions: every edit passes (HUMAN_ASK_ZONES)
     Leaders   @Manager                    coordinator: edits nothing but new files in Management/proposals; runs
                                           scaffold.py, which makes the folders the live design names (no code)
               @CodeLead                   checks code, settles conflicts and owns the SKELETON: edits only the
@@ -108,7 +108,7 @@ READ_ALL_ZONES = {"Management/studio", "Resources"}      # the orders and what w
 DESIGN_TREE, DESIGN_CHOOSE, DESIGN_ANSWERS = "idea", ".ai-need-user-choose", "answers.json"
 DESIGN_KEPT = {".user-review", ".history", ".progress"}
 DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per round
-HUMAN_ASK_ZONES = {".claude", "_Composition", "Core", DESIGN_LIVE}
+HUMAN_ASK_ZONES = set()      # zone names where the human chat is still asked before an edit; the human emptied it
 # FEATURE values that are not feature folders.
 ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@Codex", "@Blender")
 # Tools: they take orders from the features and make images (Codex) or 3D models (Blender); they never code.
