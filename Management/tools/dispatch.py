@@ -17,9 +17,9 @@ A message counts as delivered only when its id is seen in the thread's transcrip
     python Management/tools/dispatch.py list [<target>]
     python Management/tools/dispatch.py cancel <id>
 
-mode "always-live" (the default) keeps today's behaviour: the courier still delivers, but stops no thread and has no
-limit. "on-demand" stops a thread that has been idle `idle_minutes` and keeps at most `limits` threads of each pool
-running (the human's open chats count).
+mode "always-live" (the default): the courier stops no thread. "on-demand": it stops a thread that has been idle
+`idle_minutes`. In both modes a thread that is not running is started only while fewer than `limits` threads of its
+pool run (the human's open chats count), so many messages at once never start dozens of threads.
 """
 import json
 import os

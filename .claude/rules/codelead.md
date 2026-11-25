@@ -38,6 +38,8 @@ Dùng skill `codelead-scaffold-feature` (gd_pack, Contracts, asmdef, `AssemblyIn
 - Đây là code @CodeLead tự viết và tự kiểm: báo cáo ghi rõ đã đổi gì trong `_Composition` để người soi.
 
 ## Tiến độ
+- **Việc không có id sổ** (việc kỹ thuật do khung đòi, đề xuất người đã duyệt, ví dụ `session-usage-tracking`): kiểm bằng test EditMode của feature (chạy `run_tests`) và đọc code; kết quả ghi vào báo cáo của bạn (feature nào xong, feature nào sai). Sai thì giao lại qua hộp thư, nêu tên đề xuất.
+- **Test ở `_Composition/Tests`** (của bạn) được sổ nhận cho yêu cầu nối dây của dịch vụ: phiên sở hữu trích `BootTests.<Hàm>` khi ghi `done`; giữ tên test ổn định, đổi tên thì sổ báo "mất test".
 - Chỉ đánh `done` cho một giai đoạn của node lá sau khi code ứng với node đó đã biên dịch, test qua và Play không lỗi ở mức giai đoạn đó (PROTOTYPE: đủ tính năng quan trọng; FULL: đủ tính năng, đủ art).
 - Mức IDEA: các tính năng đủ để thấy được gameplay. Unit 2D: hiển thị được hình, sprite có nghĩa (ảnh @ClaudeImage vẽ là đủ; không đòi ảnh @Codex ở mức này), anim đơn giản bằng scale, move, rotate hoặc đổi màu. Unit 3D: model low poly (làm qua blender mcp), anim cơ bản bằng scale, move, rotate, đổi màu. Đạt mức này là đủ để đánh IDEA `done`; không đòi hơn. Ảnh @Codex dành cho PROTOTYPE và FULL; hình tham chiếu ở IDEA là claude-concept của node cheat (`gd_pack.py` in mục Claude concept).
 - Đang có phiên làm thì đánh `doing`. Phát hiện lỗi ở thứ đã `done` thì trả về `doing` và báo phiên sở hữu.

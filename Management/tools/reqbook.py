@@ -155,10 +155,19 @@ def feature_keys(root, feature):
     return keys
 
 
+COMPOSITION = "_Composition"
+
+
 def code_folders(root, key, feature):
     live = gd.table_dir(root, "live")
     names = gd.read_code(live / key, key, gd.CODE_ROUND, []) or [feature]
     return [Path(root, "UnityProject", "Assets", "Features", *n.split("/")) for n in names]
+
+
+def test_folders(root, key, feature):
+    """Where the tests of a requirement may be: the Tests of the feature's code folders, and _Composition/Tests (the
+    wiring: Boot variants, catalogs; @CodeLead writes it, so a requirement that is a wiring list is proven there)."""
+    return code_folders(root, key, feature) + [Path(root, "UnityProject", "Assets", COMPOSITION)]
 
 
 # ---------------------------------------------------------------- tests
@@ -250,7 +259,7 @@ def view(root, feature):
     live, idea = gd.table_dir(root, "live"), gd.table_dir(root, "idea")
     nodes, dropped = [], []
     for key in keys:
-        tests = test_names(code_folders(root, key, feature))
+        tests = test_names(test_folders(root, key, feature))
         live_leaves = leaves(live, key)
         for path, folder in live_leaves:
             nodes.append(node_view(root, path, folder, tests))
@@ -372,11 +381,11 @@ def mark(root, feature, refs, action, by, note=None, tests=None, play=None):
             bad = [t for t in names if not TEST_RX.match(t)]
             if bad:
                 raise ValueError("tên test phải có dạng Lớp.Hàm: " + ", ".join(bad))
-            have = set().union(*(test_names(code_folders(root, k, feature)) for k in v["keys"]))
+            have = set().union(*(test_names(test_folders(root, k, feature)) for k in v["keys"]))
             gone = [t for t in names if t not in have]
             if gone:
                 raise ValueError(f"không thấy test [Test] nào tên {', '.join(gone)} trong UnityProject/Assets/Features/"
-                                 f"{feature}/Tests; viết test trước rồi mới ghi done")
+                                 f"{feature}/Tests hay UnityProject/Assets/{COMPOSITION}/Tests; viết test trước rồi mới ghi done")
             write(root, node, req, {"state": "done", "note": saved.get("note") or "", "tests": names, "play": play_text},
                   by, play_text or ", ".join(names))
         elif action == "verify":

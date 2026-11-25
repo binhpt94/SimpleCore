@@ -16,3 +16,6 @@ Cùng loại vấn đề với `2026-11-25-gd-req-test-composition.md`: test đ�
 
 ## Ảnh hưởng
 PopupRevive hiện còn chờ khung từ @CodeLead, nên đề xuất này chưa chặn việc ngay. Nhưng khi có khung, khoảng một nửa trong 12 yêu cầu của `order-values` sẽ không đóng được nếu chưa có quyết định.
+
+## Quyết định của người (2026-11-25)
+Chưa quyết. Không gấp: ở mức IDEA luồng hồi sinh không có (bảng "Thông số theo giai đoạn" của `order-values`). Hướng đang cân nhắc: B (tách ý về node của Run và Castle) trước khi sang PROTOTYPE.

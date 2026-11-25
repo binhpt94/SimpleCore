@@ -72,6 +72,7 @@ Default is deny: unknown tools, unknown zones and any error in this script are b
 Reads the hook JSON on stdin, writes the decision JSON on stdout. Standard library only.
 Tests: python .claude/hooks/test_guard.py
 """
+import hashlib
 import json
 import ntpath
 import os
@@ -1029,6 +1030,109 @@ def unity_kind(tool, ti):
     return short, action, actions.get(action, actions.get(ANY))
 
 
+# The one Unity Editor of this project. unity-mcp sees every Editor that runs its plugin (other projects on this
+# machine too) and names each <folder>@<first 8 hex of sha1("<project>/Assets")>, e.g. UnityProject@638c2683; it
+# writes ~/.unity-mcp/unity-mcp-status-<hash>.json (project_path, refreshed with every heartbeat). A chat may name only
+# this project's instance (unity_instance, set_active_instance), and may not use unity-mcp at all while this Editor
+# is gone and another project's Editor runs (the calls would land in that project).
+UNITY_STATUS_ENV = "UNITY_MCP_STATUS_DIR"      # tests point it at a folder of their own
+UNITY_STALE_SECONDS = 600
+UNITY_PROJECT_DIR = "UnityProject"
+
+
+def unity_status_dir():
+    return os.environ.get(UNITY_STATUS_ENV) or os.path.join(os.path.expanduser("~"), ".unity-mcp")
+
+
+def unity_port_paths():
+    """The project paths the port files of ~/.unity-mcp name (unity-mcp-port.json is the default an unnamed call
+    may go to: a probe found a chat aimed at another project's Editor that way)."""
+    folder, out = unity_status_dir(), []
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        return out
+    for n in names:
+        if re.fullmatch(r"unity-mcp-port(-[0-9a-f]{6,})?\.json", n):
+            try:
+                with open(os.path.join(folder, n), encoding="utf-8") as f:
+                    data = json.load(f)
+            except (OSError, ValueError):
+                continue
+            if isinstance(data, dict) and text_of(data.get("project_path")):
+                out.append(text_of(data.get("project_path")).replace("\\", "/").rstrip("/"))
+    return out
+
+
+def unity_statuses():
+    """[{hash, name, path, age}] of the Editors unity-mcp knows (their status files; age: seconds since the last write)."""
+    folder = unity_status_dir()
+    out = []
+    try:
+        names = os.listdir(folder)
+    except OSError:
+        return out
+    for n in names:
+        m = re.fullmatch(r"unity-mcp-status-([0-9a-f]{6,})\.json", n)
+        if not m:
+            continue
+        full = os.path.join(folder, n)
+        try:
+            with open(full, encoding="utf-8") as f:
+                data = json.load(f)
+            age = time.time() - os.path.getmtime(full)
+        except (OSError, ValueError):
+            continue
+        if isinstance(data, dict):
+            out.append({"hash": m.group(1), "name": text_of(data.get("project_name")),
+                        "path": text_of(data.get("project_path")).replace("\\", "/").rstrip("/"), "age": age})
+    return out
+
+
+def project_unity(root, statuses):
+    """(hashes, id) of this project's Editor: the sha1 of its Assets path, plus any status file naming that path."""
+    assets = root.rstrip("/") + "/" + UNITY_PROJECT_DIR + "/Assets"
+    hashes = {hashlib.sha1(assets.encode("utf-8")).hexdigest()[:8]}
+    hashes |= {st["hash"] for st in statuses if st["path"] and same(st["path"], assets)}
+    return hashes, f"{UNITY_PROJECT_DIR}@{sorted(hashes)[0]}"
+
+
+def names_this_project(value, hashes):
+    """True when an instance named as unity-mcp takes it (Name@hash, a hash prefix of 4+ hex, a port) is this one."""
+    v = text_of(value).strip().lower()
+    if "@" in v:
+        return v.rsplit("@", 1)[1] in hashes
+    return bool(re.fullmatch(r"[0-9a-f]{4,}", v)) and any(h.startswith(v) for h in hashes)
+
+
+def unity_instance_problem(tool, ti, cmds, root):
+    """Why a unity-mcp call would reach an Editor that is not this project's, or ''."""
+    statuses = unity_statuses()
+    hashes, ident = project_unity(root, statuses)
+    named = [(tool, ti.get("unity_instance"))] + [(t, p.get("unity_instance")) for t, p in cmds]
+    named += [(t, p.get("instance")) for t, p in cmds if t == UNITY_PREFIX + "set_active_instance"]
+    for t, value in named:
+        if value not in (None, "") and not names_this_project(value, hashes):
+            return (f"unity-mcp may reach only this project's Editor ({ident}); '{text_of(value)}' is another one "
+                    "(a port is refused too: it changes each time Unity opens)")
+    # Another project's Editor is known on this machine (a status or a port file): a call that names no instance
+    # may go to the server's default, which can be that project. Then every call names this one.
+    assets = root.rstrip("/") + "/" + UNITY_PROJECT_DIR + "/Assets"
+    elsewhere = any(st["hash"] not in hashes for st in statuses) or any(not same(p, assets) for p in unity_port_paths())
+    unnamed = not text_of(ti.get("unity_instance")) and not all(
+        text_of(p.get("unity_instance")) or t == UNITY_PREFIX + "set_active_instance" for t, p in cmds)
+    if elsewhere and unnamed:
+        return (f"another Unity project is known on this machine, and a call without an instance may land in it: add "
+                f"\"unity_instance\": \"{ident}\" to this call (for batch_execute: to the call or to every command)")
+    mine = [st for st in statuses if st["hash"] in hashes]
+    others = [st for st in statuses if st["hash"] not in hashes and st["age"] < UNITY_STALE_SECONDS]
+    if others and not any(st["age"] < UNITY_STALE_SECONDS for st in mine):
+        names = ", ".join(sorted({st["name"] or st["hash"] for st in others}))
+        return (f"this project's Unity Editor ({ident}) is not running, and unity-mcp sees another project ({names}): "
+                "a call would land there. Open UnityProject in Unity (one Editor for this project), then try again.")
+    return ""
+
+
 def unity_commands(tool, ti):
     """[(tool, params)] a unity-mcp call runs: itself, or the commands of a batch_execute."""
     if tool != UNITY_PREFIX + "batch_execute":
@@ -1232,6 +1336,9 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
     cmds = unity_commands(tool, ti)
     if not cmds or len(cmds) > BATCH_MAX:
         return "deny", f"batch_execute takes 1 to {BATCH_MAX} commands"
+    wrong = unity_instance_problem(tool, ti, cmds, root)
+    if wrong:
+        return "deny", wrong
     session = session if isinstance(session, str) else ""
     held = read_lock(store)
     other = held if held and held.get("session") != session else None

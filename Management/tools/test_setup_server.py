@@ -505,13 +505,24 @@ def courier_cases(check):
         stale = ss.dispatch.send(root, "Wallet", "Yêu cầu bị trả", "gd_req", key="reject:x", check="gone")
         fresh = ss.dispatch.send(root, "Wallet", "Việc còn đúng", "@Manager", check="ok")
         n = len(given)
-        ss.dispatch.set_config(root, mode="always-live")
+        ss.dispatch.set_config(root, mode="always-live", limits={"feature": 4})
         ss.courier_tick(time.time())
         ss.still_valid = real_valid
         check("courier: an automatic message whose event no longer holds is cancelled, not given; the others are",
               (ss.dispatch.get(root, stale["id"])["state"], ss.dispatch.get(root, stale["id"])["why"], fresh["id"] in given[-1][1],
                stale["id"] in given[-1][1], len(given) - n), ("cancelled", "hết hợp lệ: đã sửa", True, False, 1))
         check("still_valid: a check it cannot read lets the message go", (ss.still_valid(None), ss.still_valid("weird x")), ((True, ""), (True, "")))
+        ss.dispatch.set_config(root, mode="always-live", limits={"feature": 1})
+        live.clear()
+        live["w0000000"] = {"kind": "background", "status": "busy", "state": "working", "short": "w0000000"}
+        age("w0000000", 300)
+        capped = ss.dispatch.send(root, "Hud", "Việc khi nhóm đã đầy", "@Manager")
+        n_stop, n_given = len(stopped), len(given)
+        ss.courier_tick(time.time())
+        check("always-live: a thread is started only while its pool is under the limit; nothing is stopped to make room",
+              (ss.dispatch.get(root, capped["id"])["state"], "hết chỗ" in ss.dispatch.get(root, capped["id"])["why"],
+               len(stopped) - n_stop, len(given) - n_given), ("waiting", True, 0, 0))
+        ss.dispatch.cancel(root, capped["id"])
         check("agents: a listed job with no pid (retired by the CLI's daemon, or waiting for the human) is not running",
               ss.parse_agents([{"sessionId": "a", "kind": "background", "state": "blocked", "id": "a"},
                                {"sessionId": "b", "pid": 7, "kind": "background", "status": "idle", "state": "done", "id": "b"},

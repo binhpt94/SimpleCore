@@ -39,7 +39,7 @@
   var STATE_NAMES = { queued: "chờ giao", waiting: "đang chờ", delivering: "đang giao", delivered: "đã giao",
                       error: "lỗi", cancelled: "đã huỷ" };
   var MODE_HELP = {
-    "always-live": "Như trước: thread không bị tự tắt, không có trần. Hộp thư vẫn giao tin (thread tắt thì bật lên với tin đó).",
+    "always-live": "Thread không bị tự tắt. Hộp thư vẫn giao tin: thread đang tắt thì bật lên với tin đó, nhưng chỉ khi nhóm còn dưới trần (giao nhiều tin cùng lúc không bật hàng chục thread).",
     "on-demand": "Thread feature và tool chỉ chạy khi có việc: rảnh đủ lâu thì tự tắt; mỗi nhóm chạy cùng lúc tối đa theo trần (chat bạn mở tính vào). Leader và tester không bị đụng."
   };
   var REFRESH_MS = 5000;
@@ -110,7 +110,7 @@
         var card = put(poolsBox, el("div", "ib-pool"));
         add(card, el("div", "muted", pool === "feature" ? "Feature, service, @Core" : "Tool"));
         var line = put(card, el("div", ""));
-        add(line, el("b", "", String(p.running)), el("span", "", on ? " / " + p.limit + " đang chạy" : " đang chạy (không trần)"));
+        add(line, el("b", "", String(p.running)), el("span", "", " / " + p.limit + " đang chạy" + (on ? "" : " (trần khi bật thread mới)")));
         if (p.open_chats) add(card, el("div", "muted", p.open_chats + " là chat bạn đang mở"));
       });
     };

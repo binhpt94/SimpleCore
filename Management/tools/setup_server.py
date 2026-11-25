@@ -46,7 +46,8 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   message (a probe showed a session may refuse work that comes that way, and the relay helper may claim a message went
   through when it did not). Delivered = the message id is in the thread's transcript; not seen in time = tried again,
   an error after the last try. A chat open in VS Code or a terminal is never given a turn. In "on-demand" mode a thread
-  idle `idle_minutes` is stopped and each pool keeps under its limit; "always-live" (default) stops nothing.
+  idle `idle_minutes` is stopped; in both modes a thread that is not running is started only while its pool is under
+  its limit (many messages at once must not start dozens of threads); "always-live" (default) stops nothing.
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
   enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
@@ -1135,9 +1136,9 @@ def _courier_tick(now):
             wait("thread đang chạy một lượt")
             continue
         pool = dispatch.pool_of(target)
-        if not s and cfg["mode"] == "on-demand" and running(pool) >= cfg["limits"][pool]:
+        if not s and running(pool) >= cfg["limits"][pool]:      # starting a thread: the limit holds in both modes
             free = sorted((x for x in listed if dispatch.pool_of(x["binding"]) == pool and can_stop(x, live, open_targets, cfg, now)),
-                          key=lambda x: idle_seconds(x["id"], now), reverse=True)
+                          key=lambda x: idle_seconds(x["id"], now), reverse=True) if cfg["mode"] == "on-demand" else []
             if not (free and stop(free[0], "stopped-for-slot")):
                 wait(f"hết chỗ: {cfg['limits'][pool]} thread {pool} đang chạy")
                 continue

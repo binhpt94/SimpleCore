@@ -20,3 +20,6 @@ Chép test sang `Tests` của dịch vụ là sai: dịch vụ không đọc đ�
 
 ## Ảnh hưởng
 Không chặn việc chơi được game ở IDEA. Chỉ để sổ của SessionScene và Popup đóng được, và để các node đó đánh được IDEA `done`.
+
+## Quyết định của người (2026-11-25)
+Duyệt **A (gọn)**, đã làm: `gd_req.py done` nhận test trong `UnityProject/Assets/_Composition/Tests` cho mọi feature (không giới hạn tên lớp; chỉ @CodeLead viết vùng đó). Phiên sở hữu vẫn ghi `done`, @CodeLead vẫn `verify`. Lưu ý: test trong đề xuất đã đổi tên thành `BootTests.GameScene_AtIdea_JoinsItsFeaturesInTheDesignedOrder`.

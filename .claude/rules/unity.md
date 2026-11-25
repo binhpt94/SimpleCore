@@ -44,6 +44,11 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 - Asset giao cho dịch vụ (ví dụ prefab popup) là của feature gọi, đặt ở `FeatureAssets/Public` của nó, và đi qua id `<Owner>/<Name>` (ví dụ `Shop/Purchased`), không qua object Unity. Id khai báo một lần, `static readonly` (giá trị bất biến, không phải trạng thái), trong Internal của chủ; validator SRC-05 kiểm.
 
 ## unity-mcp (guard ép theo tác động của lệnh)
+**Chỉ Editor của SimpleCore** (guard ép): unity-mcp thấy mọi Unity Editor đang chạy plugin, kể cả project khác trên máy, và đặt tên `<thư mục>@<hash>` (ở đây `UnityProject@<hash>`).
+- `unity_instance` và `set_active_instance` (chỉ @CodeLead) chỉ được trỏ instance này: dùng tên `UnityProject@<hash>` hoặc hash. Không dùng cổng, vì cổng đổi mỗi lần mở Unity. Trỏ project khác thì bị từ chối, và câu từ chối nêu đúng id.
+- Editor của SimpleCore tắt mà unity-mcp đang thấy Editor của project khác thì mọi lệnh unity-mcp bị chặn: báo người mở `UnityProject` trong Unity. Vẫn đọc được resource (`mcpforunity://instances`).
+- Máy có dấu vết Editor của project khác (file trong `~/.unity-mcp`, như hiện nay với SmashyQube): lệnh không nêu instance có thể rơi vào project đó, nên guard đòi **mọi lệnh** ghi `"unity_instance": "UnityProject@<hash>"` (với `batch_execute`: ghi ở lệnh ngoài hoặc ở từng lệnh con). Câu từ chối nêu đúng id cần ghi. Không dựa vào `set_active_instance`: thread chạy theo việc tắt, bật lại là mất.
+
 | Loại | Lệnh | Ai |
 |---|---|---|
 | Đọc | `read_console get`, `find_gameobjects`, `manage_scene get_*`, `manage_asset search/get_info/get_components`, `manage_prefabs get_info/get_hierarchy`, `manage_material get_material_info`, `manage_ui read/get_visual_tree`, `find_in_file`, `get_sha`, `validate_script`, docs, resource | mọi phiên code; path phải đọc được, `search` phải có `path` |

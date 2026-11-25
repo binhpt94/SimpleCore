@@ -13,9 +13,12 @@ Quyền và ranh giới ở bảng của `CLAUDE.md` gốc; luật code ở `.cl
 5. **Code:** trong vùng của mình, trên lớp con của lớp base (khung chỉ đọc). Luật game ở lớp C# thuần trong `Internal`; View chỉ hiển thị. Cần đổi khung: skill `feature-request-framework-change`, rồi chờ. Cần ảnh hay model: skill `feature-order-asset`.
 6. **Test:** mỗi hành vi người chơi thấy được có ít nhất một test EditMode, tên nói hành vi; feature khác thay bằng đồ giả trong file test. Sửa lỗi thì thêm test tái hiện lỗi trước.
 7. **Biên dịch:** `refresh_unity` rồi `read_console`, sửa hết lỗi của mình. Chạy test và Play là việc của @CodeLead.
-8. **Ghi xong:** `python Management/tools/gd_req.py <Tên> done <node>#<id> <Lớp.Hàm>[,...]`. Không kiểm được bằng EditMode thì `done <node>#<id> play "<cách thấy khi Play>"`. @CodeLead chạy đúng các test đó rồi `verify` hoặc `reject`; chỉ khi đó yêu cầu mới tính xong.
+8. **Ghi xong:** `python Management/tools/gd_req.py <Tên> done <node>#<id> <Lớp.Hàm>[,...]`. Test nằm ở `Tests` của mình; yêu cầu là danh sách nối dây (Boot variant, catalog ở `_Composition`) thì trích test của @CodeLead trong `UnityProject/Assets/_Composition/Tests` (ví dụ `BootTests.<Hàm>`). Không kiểm được bằng EditMode thì `done <node>#<id> play "<cách thấy khi Play>"`. @CodeLead chạy đúng các test đó rồi `verify` hoặc `reject`; chỉ khi đó yêu cầu mới tính xong.
 9. **Kiểm ranh giới:** `python Management/tools/validate.py --feature <Tên>`; còn vi phạm thì chưa xong.
 10. **Báo cáo:** kết thúc lượt bằng khối `## Báo cáo cho @Manager` (`report.md`). Dòng "Việc" nêu các id `<node>#<id>` đã làm và đã ghi `doing`/`done`. "Công khai đổi" ghi rõ Contracts, `FeatureAssets/Public`, id asset nào đã đổi.
+
+## Việc không có id (đề xuất người đã duyệt)
+Việc kỹ thuật do khung đòi (ví dụ gọi `TrackView`, `TrackJob` của `SessionParticipantBase` theo đề xuất `session-usage-tracking`) có thể tới không kèm id sổ: tin nêu tên đề xuất. Làm trong vùng mình, viết test EditMode trong `Tests` của mình, biên dịch, `validate.py`, rồi báo cáo ("Việc" nêu tên đề xuất). Không ghi `doing`/`done` vào sổ.
 
 ## Lưu ý
 - Thiết kế đổi, test mất hay ý bị xoá thì sổ tự báo, yêu cầu không còn tính xong: làm lại từ bước 2.

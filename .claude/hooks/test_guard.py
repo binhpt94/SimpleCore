@@ -8,6 +8,7 @@ folder layout in a temp folder; the real project is not touched.
 """
 import importlib.util
 import json
+import time
 import os
 import shutil
 import subprocess
@@ -27,6 +28,9 @@ A = FX + "/UnityProject/Assets"
 F = A + "/Features"
 VALIDATE = "python Management/tools/validate.py"
 STORE = FX + "/guard-store"      # stands in for guard.STORE_DIR; the real one is never touched
+UNITY_STATUS = FX + "/unity-mcp-status"      # stands in for ~/.unity-mcp: the Editors of this machine are never read
+os.makedirs(UNITY_STATUS, exist_ok=True)
+os.environ[guard.UNITY_STATUS_ENV] = UNITY_STATUS
 PIN = "tr0ng-test"
 
 results = []
@@ -507,6 +511,7 @@ def run_cases():
     run_tool_cases()
     run_tester_cases()
     run_inbox_cases()
+    run_unity_instance_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + "/x.txt"}, "cwd": real}), root=None)
@@ -1555,6 +1560,71 @@ def run_designer_cases():
     os.remove(base + "/mode.json")
     told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
     check(g, D, True, "without a mode file the context says Full Auto", "Full Auto" in told and "User control" not in told)
+
+
+def run_unity_instance_cases():
+    """unity-mcp reaches only this project's Editor: unity_instance, set_active_instance, and no call while this
+    Editor is gone and another project's runs."""
+    import hashlib
+    g = "unity: only this project's Editor"
+    mine = hashlib.sha1((FX + "/UnityProject/Assets").encode("utf-8")).hexdigest()[:8]
+    other = "5e230bc6"
+
+    def status(h, name, path, age):
+        f = os.path.join(UNITY_STATUS, f"unity-mcp-status-{h}.json")
+        with open(f, "w", encoding="utf-8") as out:
+            json.dump({"project_name": name, "project_path": path}, out)
+        os.utime(f, (time.time() - age, time.time() - age))
+
+    def clear():
+        for n in os.listdir(UNITY_STATUS):
+            os.remove(os.path.join(UNITY_STATUS, n))
+    L = "@CodeLead"
+    read = "mcp__UnityMCP__read_console"
+    try:
+        clear()
+        t(g + " (no status files: as before)", L, "allow", read, {"action": "get"})
+        status(mine, "UnityProject", FX + "/UnityProject/Assets", 5)
+        status(other, "Rebuilt", "/elsewhere/Rebuilt/Assets", 5)
+        for value in ("UnityProject@" + mine, mine, mine[:4], mine.upper()):
+            t(g, L, "allow", read, {"action": "get", "unity_instance": value})
+        for value in ("Rebuilt@" + other, other, other[:4], "6400", "UnityProject@" + other, "abc"):
+            t(g + " (another Editor, a port, a name that is not one)", L, "deny", read, {"action": "get", "unity_instance": value})
+        t(g + " (inside a batch)", L, "deny", "mcp__UnityMCP__batch_execute",
+          {"commands": [{"tool": "read_console", "params": {"action": "get", "unity_instance": other}}]})
+        t(g + " (the batch itself)", L, "deny", "mcp__UnityMCP__batch_execute",
+          {"unity_instance": other, "commands": [{"tool": "read_console", "params": {"action": "get"}}]})
+        t(g + " (set_active_instance)", L, "allow", "mcp__UnityMCP__set_active_instance", {"instance": "UnityProject@" + mine})
+        t(g + " (set_active_instance)", L, "deny", "mcp__UnityMCP__set_active_instance", {"instance": "Rebuilt@" + other})
+        t(g + " (set_active_instance)", L, "deny", "mcp__UnityMCP__set_active_instance", {"instance": "6400"})
+        t(g + " (another project known, no instance named: may land there, so refused)", L, "deny", read, {"action": "get"})
+        t(g + " (another project known, no instance named: may land there, so refused)", L, "deny", "mcp__UnityMCP__batch_execute",
+          {"commands": [{"tool": "read_console", "params": {"action": "get", "unity_instance": mine}},
+                        {"tool": "refresh_unity", "params": {}}]})
+        t(g + " (every command of a batch names it)", L, "allow", "mcp__UnityMCP__batch_execute",
+          {"commands": [{"tool": "read_console", "params": {"action": "get", "unity_instance": mine}}]})
+        status(mine, "UnityProject", FX + "/UnityProject/Assets", 3600)
+        t(g + " (this Editor gone, another runs: nothing reaches it)", L, "deny", read, {"action": "get", "unity_instance": mine})
+        t(g + " (... resources may still be read)", L, "allow", "ReadMcpResourceTool", {"server": "UnityMCP", "uri": "mcpforunity://instances"})
+        status(other, "Rebuilt", "/elsewhere/Rebuilt/Assets", 3600)
+        t(g + " (every Editor quiet: the server says what it sees)", L, "allow", read, {"action": "get", "unity_instance": mine})
+        clear()
+        status("abcd1234", "UnityProject", FX + "/UnityProject/Assets", 5)      # the path written another way: its hash counts
+        status(other, "Rebuilt", "/elsewhere/Rebuilt/Assets", 5)
+        t(g + " (a status file naming this project's path)", L, "allow", read, {"action": "get", "unity_instance": "UnityProject@abcd1234"})
+        clear()
+        status(mine, "UnityProject", FX + "/UnityProject/Assets", 5)
+
+        def port(name, path):
+            with open(os.path.join(UNITY_STATUS, name), "w", encoding="utf-8") as out:
+                json.dump({"unity_port": 6400, "project_path": path}, out)
+        port("unity-mcp-port.json", FX + "/UnityProject/Assets")
+        t(g + " (only this project known: no instance needed, as before)", L, "allow", read, {"action": "get"})
+        port("unity-mcp-port.json", "/elsewhere/UnityGame/Assets")
+        t(g + " (the default port file names another project: the call must name this one)", L, "deny", read, {"action": "get"})
+        t(g + " (the default port file names another project: the call must name this one)", L, "allow", read, {"action": "get", "unity_instance": mine})
+    finally:
+        clear()
 
 
 def run_inbox_cases():

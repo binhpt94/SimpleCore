@@ -126,6 +126,22 @@ def run_flow(root):
     rb.mark(root, W, "wallet-rules#cap-max", "done", W, play="cộng vượt trần, số dừng ở 999.999.999")
     rb.mark(root, W, "wallet-rules#cap-max", "reject", "@CodeLead", note="chưa có test trần")
     check("reject sends it back with the reason", state(root, "cap-max"), "rejected")
+    boot = root / "UnityProject/Assets/_Composition/Tests"
+    boot.mkdir(parents=True, exist_ok=True)
+    (boot / "BootTests.cs").write_text("using NUnit.Framework;\nnamespace Game.Composition.Tests\n{\n    public class BootTests\n    {\n"
+                                       "        [Test]\n        public void GameScene_JoinsItsFeatures() { }\n    }\n}\n", encoding="utf-8")
+    rb.mark(root, W, "wallet-rules#cap-max", "done", W, tests=["BootTests.GameScene_JoinsItsFeatures"])
+    check("done: a wiring requirement may cite a test in _Composition/Tests (BootTests, @CodeLead's)", state(root, "cap-max"), "done")
+    try:
+        rb.mark(root, W, "wallet-rules#cap-max", "done", W, tests=["BootTests.Nope"])
+        msg = ""
+    except ValueError as ex:
+        msg = str(ex)
+    check("done: a test found nowhere is refused, and the message names both places",
+          ("Features/Wallet/Tests" in msg, "_Composition/Tests" in msg), (True, True))
+    (boot / "BootTests.cs").unlink()
+    check("a _Composition test that is gone makes the requirement 'mất test'", state(root, "cap-max"), "no-test")
+    rb.mark(root, W, "wallet-rules#cap-max", "reject", "@CodeLead", note="chưa có test trần")
     import dispatch
     import gd_req
     said = gd_req.reject_notices(root, W, "wallet-rules#cap-max", "chưa có test trần")
