@@ -433,6 +433,9 @@ def main():
               ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/uidesigner.md",
                ".claude/skills/ui-layout-screen/SKILL.md", ".claude/skills/ui-frame-syntax/SKILL.md",
                ".claude/skills/ui-claude-concept-order/SKILL.md", ".claude/skills/gd-round-4/SKILL.md"])
+        check("reread: a feature follows the feature skills", [r for r in ss.bind_session.rule_files("Wallet", str(ss.ROOT)) if "skills" in r],
+              [".claude/skills/feature-implement-req/SKILL.md", ".claude/skills/feature-order-asset/SKILL.md",
+               ".claude/skills/feature-request-framework-change/SKILL.md"])
         sp = ss.reread_prompt([".claude/rules/uidesigner.md", ".claude/skills/ui-frame-syntax/SKILL.md"])
         check("reread: a changed rule file is Read again, a changed skill is only named (called again when used)",
               ("Read lại toàn bộ đúng các file đó" in sp, ".claude/rules/uidesigner.md" in sp, "Skill sau vừa đổi: ui-frame-syntax" in sp,

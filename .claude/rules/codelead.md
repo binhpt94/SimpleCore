@@ -45,12 +45,8 @@ Dùng skill `codelead-scaffold-feature` (gd_pack, Contracts, asmdef, `AssemblyIn
 - **Sổ yêu cầu** (`python Management/tools/gd_req.py <Tên>`): mỗi ý, trường hợp biên và phần thông số của node lá là một yêu cầu; phiên feature ghi `doing` rồi `done` kèm tên test. Nhận báo xong: chạy đúng các test đó (`run_tests`), đọc code xem test có thật sự kiểm điều yêu cầu nói không, rồi `gd_req.py <Tên> verify <node>#<id>[,...]`; sai hoặc test không đủ thì `gd_req.py <Tên> reject <node>#<id> "<lỗi>"`. Yêu cầu `play` thì kiểm bằng Play. `gd_progress.py … done` bị từ chối khi node còn yêu cầu chưa kiểm; node `done` mà sổ báo "cần làm lại" (thiết kế đổi, test mất) thì trả về `doing`. Xem cả project: `gd_req.py status`.
 - Một feature chỉ được code khi thiết kế của nó đã tới vòng 4 trong `Management/game-design/live`; phiên feature báo bị khoá thì đó là việc của @GameDesigner và người, không phải lỗi code.
 
-## Bên gửi vấn đề (phiên nhóm Basic, Features, Services)
-Gửi @CodeLead bằng SendMessage, đủ 3 mục:
-- Ngữ cảnh: đang làm gì, vướng ở đâu, ai đang dùng thứ sẽ đổi.
-- File: đường dẫn cụ thể.
-- Đề xuất: đổi gì, vì sao không làm được trong vùng của mình.
-Bắt buộc gửi khi cần đổi khung (bảng trên) hoặc xoá, đổi tên asset `FeatureAssets/Public`. Phiên đó không tự sửa khung: guard chặn.
+## Bên gửi vấn đề
+Phiên Basic, Features, Services nhờ đổi khung hay asset `FeatureAssets/Public` theo skill `feature-request-framework-change` (đủ ngữ cảnh, file, đề xuất).
 
 ## Gọi tester (@UnityAutoPlay)
 - Tester giữ khoá Editor suốt lúc chơi, cùng khoá với Play và test của bạn. Đợt chơi thử cả feature do @Manager (hoặc người) giao, không phải bạn.

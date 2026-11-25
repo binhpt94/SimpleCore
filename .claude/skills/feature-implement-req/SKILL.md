@@ -1,0 +1,22 @@
+---
+name: feature-implement-req
+description: Chỉ phiên Features và Services (FEATURE=<Tên> hoặc _Services/<Tên>). Làm một yêu cầu trong sổ yêu cầu của feature, từ lúc nhận tới lúc báo xong - đọc sổ gd_req.py, ghi doing, đọc gói gd_pack.py (node vòng 4 và CHEAT), code trên lớp con, test EditMode, biên dịch và đọc console, ghi done kèm tên test hoặc play, validate, báo cáo. Dùng mỗi khi bắt đầu hay làm tiếp một yêu cầu, hoặc sửa yêu cầu bị @CodeLead trả.
+---
+# Làm một yêu cầu của feature
+Quyền và ranh giới ở bảng của `CLAUDE.md` gốc; luật code ở `.claude/rules/unity.md`; báo cáo ở `.claude/rules/report.md`. Dòng `guard:` đầu tin nói feature đang ĐƯỢC CODE hay ĐANG KHOÁ: khoá thì dừng và báo người, không code.
+
+## Các bước
+1. **Đọc sổ:** `python Management/tools/gd_req.py <Tên>`. Mỗi ý, trường hợp biên và phần thông số của node vòng 4 (và node cheat) trong `live` là một yêu cầu `<node>#<id>`, tự sinh, không viết tay. Làm trước: yêu cầu bị trả (`reject`, kèm lỗi của @CodeLead), yêu cầu đổi thiết kế hoặc mất test, rồi tới yêu cầu @Manager giao, rồi yêu cầu chưa làm. Phiên vừa renew đọc sổ để biết đã làm, đang làm gì (dòng `Sổ yêu cầu` ở đầu mỗi tin).
+2. **Ghi đang làm:** `python Management/tools/gd_req.py <Tên> doing <node>#<id> "<đang làm gì>"`.
+3. **Đọc thiết kế:** `python Management/tools/gd_pack.py <Tên>` ghi gói ra `Management/game-design/.pack/` và in mục lục có số dòng. Đọc đủ node vòng 4 của yêu cầu và mục CHEAT của phần đó bằng Read (offset, limit) hoặc Grep, không chỉ đọc mục lục. Bám đúng con số, tên, trường hợp biên của gói; thiết kế thiếu hay mâu thuẫn thì hỏi, không tự bịa.
+4. **Code:** trong vùng của mình, trên lớp con của lớp base (khung chỉ đọc). Luật game ở lớp C# thuần trong `Internal`; View chỉ hiển thị. Cần đổi khung: skill `feature-request-framework-change`, rồi chờ. Cần ảnh hay model: skill `feature-order-asset`.
+5. **Test:** mỗi hành vi người chơi thấy được có ít nhất một test EditMode, tên nói hành vi; feature khác thay bằng đồ giả trong file test. Sửa lỗi thì thêm test tái hiện lỗi trước.
+6. **Biên dịch:** `refresh_unity` rồi `read_console`, sửa hết lỗi của mình. Chạy test và Play là việc của @CodeLead.
+7. **Ghi xong:** `python Management/tools/gd_req.py <Tên> done <node>#<id> <Lớp.Hàm>[,...]`. Không kiểm được bằng EditMode thì `done <node>#<id> play "<cách thấy khi Play>"`. @CodeLead chạy đúng các test đó rồi `verify` hoặc `reject`; chỉ khi đó yêu cầu mới tính xong.
+8. **Kiểm ranh giới:** `python Management/tools/validate.py --feature <Tên>`; còn vi phạm thì chưa xong.
+9. **Báo cáo:** kết thúc lượt bằng khối `## Báo cáo cho @Manager` (`report.md`). Dòng "Việc" nêu các id `<node>#<id>` đã làm và đã ghi `doing`/`done`. "Công khai đổi" ghi rõ Contracts, `FeatureAssets/Public`, id asset nào đã đổi.
+
+## Lưu ý
+- Thiết kế đổi, test mất hay ý bị xoá thì sổ tự báo, yêu cầu không còn tính xong: làm lại theo bước 1.
+- Lỗi @CodeLead báo về thì tự sửa trong vùng mình, ghi `done` lại với test mới.
+- Bị guard chặn thì dừng và báo người, không tìm đường vòng.

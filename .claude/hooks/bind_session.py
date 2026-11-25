@@ -53,14 +53,16 @@ ROLE_RULES = {"@Manager": ("manager.md",), "@CodeLead": ("codelead.md",), "@UIDe
 # at them where the procedure used to be.
 SKILLS_DIR = ".claude/skills"
 GD_ROUNDS = ("gd-round-1", "gd-round-2", "gd-round-3", "gd-round-4")
-ROLE_SKILLS = {"@Manager": ("manager-startup-check",),
+ROLE_SKILLS = {"@Manager": ("manager-startup-check", "manager-dispatch"),
                "@CodeLead": ("codelead-scaffold-feature", "codelead-resolve-issue"),
                "@GameDesigner": GD_ROUNDS + ("gd-rework-node", "gd-integrate-advice"),
                "@DesignAdvisor": ("advisor-ask-gpt", "gd-integrate-advice") + GD_ROUNDS,
                "@UIDesigner": ("ui-layout-screen", "ui-frame-syntax", "ui-claude-concept-order", "gd-round-4"),
                **{r: ("studio-fulfill-order",) for r in guard.TOOL_ROLES},
                "@ClaudeImage": ("studio-fulfill-order", "studio-claude-concept"),
-               **{r: ("tester-playtest-session",) for r in guard.TESTER_ROLES}}
+               **{r: ("tester-playtest-session",) for r in guard.TESTER_ROLES},
+               "@Core": ("feature-request-framework-change", "feature-order-asset")}
+FEATURE_SKILLS = ("feature-implement-req", "feature-order-asset", "feature-request-framework-change")      # Features, Services
 RULES_READ_DIR = "rules-read"      # in the store: <session id>.json, {"role": ...} once the chat was told to read
 
 
@@ -283,12 +285,8 @@ def context(data, root, store):
               "(refresh_unity) rồi đọc console sửa lỗi của mình, tạo/sửa asset và prefab trong vùng mình; mở, sửa, lưu "
               "scene hay prefab stage thì guard giữ khoá Editor cho chat này tới hết lượt (lưu trước khi dừng); Play, "
               "test, cài đặt project là việc của @CodeLead; code chỉ viết bằng Edit/Write (bảng ở .claude/rules/unity.md)." + (
-              " Cần ảnh hay model 3D: đặt order (Write mới Management/studio/<claudeimage|codex|blender>/orders/<feature của mình>/<id>/"
-              "order.md theo khung ở .claude/rules/studio.md), nhắn @ClaudeImage/@Codex/@Blender. Giai đoạn IDEA: ảnh đặt "
-              "@ClaudeImage (tool: claudeimage) là đủ, chưa cần @Codex. Hàng giao rồi thì chấm từng item: "
-              "python Management/tools/studio.py review <F>/<id> <item> <0-3> \"<phản hồi>\" (0 làm lại ngay: phải có "
-              "phản hồi, tool chạy lại 1 lượt; 1 lỗi nhưng chưa cần làm ngay; 2 đúng phần lớn; 3 đạt). Mức 1-3 được chép "
-              "vào FeatureAssets; có item mức 0 thì nhắn tool làm lại.")
+              " Cần ảnh hay model 3D, hoặc chấm hàng tool đã giao: skill feature-order-asset (giai đoạn IDEA: ảnh @ClaudeImage "
+              "là đủ, chưa cần @Codex).")
               + editor_status(store))
     if role in guard.ROLE_AREAS:
         area = guard.ROLE_AREAS[role]
@@ -445,7 +443,7 @@ def context(data, root, store):
                 "mới tới Tools, Basic, Services, Features; (4) tổng hợp cho người. Điều phối: một feature chỉ được code khi "
                 "thiết kế của nó tới vòng 4 trong live (mục 'Cổng code theo feature' ở đầu bản in gd_status.py); feature ĐANG "
                 "KHOÁ thì việc thuộc @GameDesigner và người, không giao code hay khung. Việc không phụ thuộc nhau thì nhắn các "
-                "phiên CÙNG LÚC trong một lượt, không tuần tự từng phiên. Nhận tin BÁO CHẶN của một Leader: điều phối lại ngay "
+                "phiên CÙNG LÚC trong một lượt, không tuần tự từng phiên (skill manager-dispatch). Nhận tin BÁO CHẶN của một Leader: điều phối lại ngay "
                 "(dừng việc phụ thuộc, giao việc không phụ thuộc, gom việc chờ người thành một danh sách cho người). Chỉ bạn và "
                 "người giao đợt chơi thử cho tester UnityAutoPlay (nó giữ khoá Unity Editor): gom thành một đợt, không giao "
                 "khi CodeLead đang Play hay test." + unread_reports(root, store, role))
@@ -480,7 +478,10 @@ def rule_files(raw, root):
 
 def role_skills(raw):
     """The names of the skills of the role a chat bound to `raw` has."""
-    return list(ROLE_SKILLS.get(guard.role_of(raw) or "", ()))
+    role = guard.role_of(raw)
+    if not role:      # a feature or a service (an invalid value has every edit denied anyway)
+        return list(FEATURE_SKILLS) if (raw or "").strip() else []
+    return list(ROLE_SKILLS.get(role, ()))
 
 
 def skill_files(raw, root):
