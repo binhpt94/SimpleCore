@@ -1,6 +1,6 @@
 {
   "enabledMcpjsonServers": [
-    "unityMCP"
+    "UnityMCP"
   ],
   "env": {
     "CLAUDE_BG_ISOLATION": "none"
@@ -12,7 +12,6 @@
     "defaultMode": "default",
     "disableBypassPermissionsMode": "disable",
     "allow": [
-      "mcp__unityMCP",
       "mcp__UnityMCP",
       "Edit(/Management/**)"
     ],

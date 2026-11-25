@@ -263,8 +263,8 @@ UNITY_SERVER = "unityMCP"
 
 
 def unity_name(tool):
-    """The same unity-mcp server is registered as unityMCP (.mcp.json, http) or UnityMCP (stdio, local scope of the
-    CLI): both name the one Editor, so a tool of either is read as mcp__unityMCP__<tool>."""
+    """The unity-mcp server is UnityMCP (stdio, .mcp.json). An old http registration named unityMCP may linger in a
+    machine's config: both name the one Editor, so a tool of either is read as mcp__unityMCP__<tool>."""
     tool = text_of(tool)
     if tool.lower().startswith(UNITY_PREFIX.lower()):
         return UNITY_PREFIX + tool[len(UNITY_PREFIX):]
