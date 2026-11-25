@@ -77,6 +77,17 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
 - Không thêm mục `##` nào khác vào `data.md`: giải thích, ví dụ, trường hợp biên, bảng số, mục "Chưa rõ" để ở `CLAUDE.md`.
 - Phần đầu còn hai dòng không bắt buộc, không tính vào hash: `screen: landscape|portrait` (chỉ ở node gốc, xem `gamedesigner.round1.md`) và `frame: none` (node vòng 4 không có bố cục, xem `gamedesigner.round4.md`). Ba dòng về ý của GPT, `by:`, `gpt-dropped:` và `node-by:`, cũng không tính vào hash; xem `.claude/rules/designadvisor.md`.
 - **Hash data** tính từ tiêu đề node, tóm tắt, id, tiêu đề, chi tiết của các ý, và nội dung các file `.frame-concept/*.frame`. Đổi một trong các thứ đó là đổi hash: mọi node con thành "cần làm lại". Đổi điểm AI, `based-on` hay `CLAUDE.md` thì không. Vì vậy chỉ sửa `data.md` khi quyết định thật sự đổi; sửa câu chữ cho hay thì đừng.
+- **Trang hiện mọi thay đổi so với `live`** (bản chốt gần nhất), tới khi node được chốt lại:
+  - Thẻ node mang nhãn `Đổi +mới ✎sửa −bỏ`, hoặc `Mới` khi `live` chưa có node.
+  - Ý có nhãn `Mới` hoặc `Đã sửa`. Ý sửa hiện chữ cũ gạch, chữ mới tô, cả ở tiêu đề lẫn chi tiết.
+  - Ý bị xoá nằm ở mục "Ý đã bỏ so với live".
+  - Tên node, tóm tắt và frame đổi cũng được báo.
+  - Ý đổi mà người chưa chấm được đánh dấu để người xem trước.
+
+  Hệ quả:
+  - Sửa một ý thì giữ `id`. Đổi `id` thì người thấy một ý bị bỏ và một ý mới, mất phần so sánh và điểm cũ.
+  - Mỗi chữ sửa trong `data.md` là một ý "Đã sửa" người phải đọc lại, kể cả trong Full Auto. Đừng sửa câu chữ kèm khi sửa ý khác.
+  - Báo cáo cuối lượt nêu đúng các ý đã thêm, sửa, bỏ (`<node>#<id>`), khớp với thứ trang hiện.
 
 ### `CLAUDE.md`
 Dòng đầu `# <Tên>`, ngay dưới là dòng trỏ tới `data.md` (ví dụ `Dữ liệu cốt lõi: [data.md](data.md)`). Phần còn lại là diễn giải của vòng đó, chia mục bằng `##`; các mục của từng vòng ghi trong file luật của vòng.
