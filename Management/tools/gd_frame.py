@@ -9,7 +9,7 @@ and what is measurably wrong. Reads only, unless --html is given.
     python Management/tools/gd_frame.py <node path> --png         also draws every frame into PNGs to look at:
         Management/game-design/.pack/frames/<node, '/' as '.'>/<frame>.png          as a concept shows it (no numbers)
                                                               .../<frame>.measure.png  with the numbers and notes
-The frame syntax is at the top of the frames part of gamedesign.py and in .claude/rules/gamedesigner.round4.md.
+The frame syntax is at the top of the frames part of gamedesign.py and in the skill .claude/skills/ui-frame-syntax/SKILL.md.
 """
 import html
 import sys

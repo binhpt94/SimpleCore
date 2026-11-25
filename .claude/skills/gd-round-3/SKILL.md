@@ -1,11 +1,10 @@
 ---
-paths:
-  - "Management/game-design/ai/idea/*/*/*"
-  - "Management/game-design/live/*/*/*"
+name: gd-round-3
+description: Chỉ phiên FEATURE=@GameDesigner (@DesignAdvisor đọc để hiểu). Luật riêng của vòng 3 cây thiết kế, quan hệ và định nghĩa ở ai/idea/<feature>/<detail>/. Dùng trước khi viết hoặc sửa một node vòng 3 - viết gì, để gì cho vòng 4, định nghĩa đưa vào glossary.
 ---
 # GD vòng 3: Quan hệ và định nghĩa
-Luật chung: `.claude/rules/gamedesigner.md`. File này chỉ thêm phần riêng của vòng 3 (`ai/idea/<feature>/<detail>/`).
-Node `<feature>/cheat/` nằm ở chỗ của vòng 3 nhưng không theo file này: xem mục "Node cheat" trong `gamedesigner.round4.md`.
+Luật chung: `.claude/rules/gamedesigner.md`. Skill này chỉ thêm phần riêng của vòng 3 (`ai/idea/<feature>/<detail>/`).
+Node `<feature>/cheat/` nằm ở chỗ của vòng 3 nhưng không theo skill này: xem mục "Node cheat" của skill `gd-round-4`.
 
 ## Viết gì
 Vòng 3 là nơi quyết định các quan hệ và định nghĩa, hiện thực hoá dần các ý của vòng 2. Ví dụ:

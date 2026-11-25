@@ -427,6 +427,16 @@ def main():
         check("reread: a thread not told before is told every file of its role, not those of other roles",
               ss.bind_session.rule_files("@CodeLead", str(ss.ROOT)),
               ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/codelead.md", ".claude/rules/unity.md"])
+        check("reread: a role with skills is told about them too (each SKILL.md is followed for changes)",
+              ss.bind_session.rule_files("@UIDesigner", str(ss.ROOT)),
+              ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/uidesigner.md",
+               ".claude/skills/ui-frame-syntax/SKILL.md", ".claude/skills/gd-round-4/SKILL.md"])
+        sp = ss.reread_prompt([".claude/rules/uidesigner.md", ".claude/skills/ui-frame-syntax/SKILL.md"])
+        check("reread: a changed rule file is Read again, a changed skill is only named (called again when used)",
+              ("Read lại toàn bộ đúng các file đó" in sp, ".claude/rules/uidesigner.md" in sp, "Skill sau vừa đổi: ui-frame-syntax" in sp,
+               "skills/ui-frame-syntax/SKILL.md" in sp), (True, True, True, False))
+        sp = ss.reread_prompt([".claude/skills/gd-round-4/SKILL.md"])
+        check("reread: only a skill changed: nothing to Read", ("Read lại" in sp, "gd-round-4" in sp), (False, True))
         check("reread: answers with the start of what the thread said",
               (res["ok"], res["id"], res["title"], len(res["answer"]), res["answer"].startswith("Đã đọc CLAUDE.md")),
               (True, "aaaa1111", "CodeLead", 300, True))

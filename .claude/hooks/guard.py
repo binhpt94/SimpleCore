@@ -349,12 +349,18 @@ SESSION_RX = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 # --- the file system this hook runs on
 WINDOWS = os.name == "nt"
 CASE = re.I if WINDOWS else 0                    # regex flag for zones that grant something
-DESIGNER_RULES_RX = re.compile(r"^(designadvisor|uidesigner)\.md$|^gamedesigner(\.round[1-4])?\.md$", CASE)
-UIDESIGNER_RULES_RX = re.compile(r"^(uidesigner|gamedesigner(\.round[1-4])?)\.md$", CASE)
+DESIGNER_RULES_RX = re.compile(r"^(designadvisor|uidesigner|gamedesigner)\.md$", CASE)
+UIDESIGNER_RULES_RX = re.compile(r"^(uidesigner|gamedesigner)\.md$", CASE)
+# The skills (.claude/skills/<name>/...: one task's procedure, loaded by the Skill tool when the chat needs it) each design
+# role reads besides its rule files: the Skill tool itself passes the guard, these are for Reading a skill's other files.
+SKILLS_DIR = ".claude/skills"
+DESIGNER_SKILLS_RX = re.compile(r"^gd-[a-z0-9-]+$", CASE)
+UIDESIGNER_SKILLS_RX = re.compile(r"^(ui-[a-z0-9-]+|gd-round-4)$", CASE)
+ADVISOR_SKILLS_RX = re.compile(r"^(advisor|gd)-[a-z0-9-]+$", CASE)
 FRAME_DIR_NAME = ".frame-concept"      # the frames of a node (gamedesign.py FRAME_DIR): @UIDesigner's
 FRAME_FILE_RX = re.compile(r"^[a-z][a-z0-9-]*\.frame$")
 UI_LESSONS = "ui-lessons.md"      # Management/game-design/ai/ui-lessons.md: what @UIDesigner learned from the scores
-ADVISOR_RULES_RX = re.compile(r"^(designadvisor|gamedesigner(\.round[1-4])?)\.md$", CASE)
+ADVISOR_RULES_RX = re.compile(r"^(designadvisor|gamedesigner)\.md$", CASE)
 # What @DesignAdvisor writes below advice/<node>/: its question and its own note. The answer is gd_advise.py's.
 ADVICE_FILE_RX = re.compile(r"^" + ADVICE_ID + r"\.(q|note)\.md$")
 ADVICE_NODE_RX = re.compile(r"^" + ADVICE_NODE + r"$")
@@ -460,6 +466,14 @@ def inside(full, root):
 def rel_segments(full, root):
     """Segments of a canonical path below root (call only when inside(full, root))."""
     return full[len(root) + 1:].split("/")
+
+
+def own_skill(full, root, rx):
+    """True when `full` is a file inside .claude/skills/<name>/ and <name> matches rx (the skills of a design role)."""
+    if not inside(full, root):
+        return False
+    seg = rel_segments(full, root)
+    return len(seg) >= 4 and exact(seg[:2], SKILLS_DIR) and bool(rx.match(seg[2])) and "" not in seg
 
 
 # A session's own folders outside the project. Claude Code puts there what a session must read back: a tool output
@@ -1420,15 +1434,15 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all, store=No
     if mode == "gamedesigner":      # sees the design tree, its own rules and the studio, nothing else
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
             same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
-            and bool(DESIGNER_RULES_RX.match(posixpath.basename(full))))
+            and bool(DESIGNER_RULES_RX.match(posixpath.basename(full)))) or own_skill(full, root, DESIGNER_SKILLS_RX)
     if mode == "uidesigner":      # the same as @GameDesigner, with its own rules and the designer's
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
             same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
-            and bool(UIDESIGNER_RULES_RX.match(posixpath.basename(full))))
+            and bool(UIDESIGNER_RULES_RX.match(posixpath.basename(full)))) or own_skill(full, root, UIDESIGNER_SKILLS_RX)
     if mode == "advisor":      # the design tree, the studio, the root CLAUDE.md, its rules and the designer's
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or name == "root CLAUDE.md" or (
             same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
-            and bool(ADVISOR_RULES_RX.match(posixpath.basename(full))))
+            and bool(ADVISOR_RULES_RX.match(posixpath.basename(full)))) or own_skill(full, root, ADVISOR_SKILLS_RX)
     if name == TESTER_ZONE:      # the test runs: the Leaders, the code tiers and the testers
         readable = mode in TESTER_READERS
     if name == TESTER_ARCHIVE_ZONE:      # old runs: the testers only

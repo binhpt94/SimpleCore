@@ -7,7 +7,7 @@ Nhóm Leaders. GD không code, không đụng Unity. GD biến ý tưởng từ 
 Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, để các phiên khác (Manager, CodeLead, Basic, Features, Services) bám theo.
 
 ## Quyền (guard ép)
-- Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, các file luật từng vòng `.claude/rules/gamedesigner.round<1-4>.md` và `.claude/rules/designadvisor.md` (GPT cùng thiết kế qua `DesignAdvisor`: **vòng 1 và 2 bắt buộc hỏi GPT**, mỗi node ít nhất một lần, node cũ chưa hỏi thì hỏi bù; không tự dặn GPT "đừng thêm feature, node mới" (vòng 1-3 GPT được đề xuất); ý của GPT ngang hàng ý của bạn, mỗi góp ý phải thành một ý của node, chỉ được tóm gọn câu chữ, không được bỏ; mục "Bên @GameDesigner" của file đó ghi cách đưa vào và cách khai nguồn: đọc trước khi viết một node đã có góp ý).
+- Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, skill từng vòng `gd-round-1`…`gd-round-4` (`.claude/skills/gd-round-<N>/`) và `.claude/rules/designadvisor.md` (GPT cùng thiết kế qua `DesignAdvisor`: **vòng 1 và 2 bắt buộc hỏi GPT**, mỗi node ít nhất một lần, node cũ chưa hỏi thì hỏi bù; không tự dặn GPT "đừng thêm feature, node mới" (vòng 1-3 GPT được đề xuất); ý của GPT ngang hàng ý của bạn, mỗi góp ý phải thành một ý của node, chỉ được tóm gọn câu chữ, không được bỏ; mục "Bên @GameDesigner" của file đó ghi cách đưa vào và cách khai nguồn: đọc trước khi viết một node đã có góp ý).
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
 - Lệnh shell, chạy từ gốc project (nối được các lệnh đã cho phép bằng `;`, tối đa 6, không nối lệnh có chuỗi trong ngoặc kép; thêm `scaffold.py --dry-run` để xem thư mục còn thiếu):
@@ -20,12 +20,12 @@ Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, �
 
 | Vòng | Vị trí | Nội dung | Luật riêng của vòng |
 |---|---|---|---|
-| 1. Ý tưởng sơ khai | `ai/idea/` | Game là gì, cho ai, cảm giác chính, vòng lặp chơi cốt lõi | `gamedesigner.round1.md` |
-| 2. Feature (tóm tắt) | `ai/idea/<feature>/` | Chia vòng 1 thành các feature, mỗi feature chỉ ghi cốt lõi; thêm node `glossary` (không phải feature, xem "Bảng thuật ngữ chung") | `gamedesigner.round2.md` |
-| 3. Quan hệ và định nghĩa | `ai/idea/<feature>/<detail>/` | Quan hệ, định nghĩa, danh sách, luật cơ bản; chưa có con số và trường hợp biên | `gamedesigner.round3.md` |
-| 4. Quyết định chi tiết | `ai/idea/<feature>/<detail>/<tech>/` | Làm gì, với thông số nào, thông số theo giai đoạn, trường hợp biên; đủ để chơi được ở mức IDEA | `gamedesigner.round4.md` |
+| 1. Ý tưởng sơ khai | `ai/idea/` | Game là gì, cho ai, cảm giác chính, vòng lặp chơi cốt lõi | skill `gd-round-1` |
+| 2. Feature (tóm tắt) | `ai/idea/<feature>/` | Chia vòng 1 thành các feature, mỗi feature chỉ ghi cốt lõi; thêm node `glossary` (không phải feature, xem "Bảng thuật ngữ chung") | skill `gd-round-2` |
+| 3. Quan hệ và định nghĩa | `ai/idea/<feature>/<detail>/` | Quan hệ, định nghĩa, danh sách, luật cơ bản; chưa có con số và trường hợp biên | skill `gd-round-3` |
+| 4. Quyết định chi tiết | `ai/idea/<feature>/<detail>/<tech>/` | Làm gì, với thông số nào, thông số theo giai đoạn, trường hợp biên; đủ để chơi được ở mức IDEA | skill `gd-round-4` |
 
-**Trước khi viết hay sửa một node vòng N, đọc `.claude/rules/gamedesigner.round<N>.md`**: vòng đó viết gì, chưa viết gì, `CLAUDE.md` của node gồm những mục nào. Thứ thuộc vòng sau thì để vòng sau, không viết sớm.
+**Trước khi viết hay sửa một node vòng N, dùng skill `gd-round-<N>`**: vòng đó viết gì, chưa viết gì, `CLAUDE.md` của node gồm những mục nào. Thứ thuộc vòng sau thì để vòng sau, không viết sớm.
 
 ## Một node
 ```
@@ -33,10 +33,10 @@ Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, �
   data.md                    dữ liệu cốt lõi: tiêu đề, tóm tắt, các ý có điểm        GD ghi
   CLAUDE.md                  diễn giải chi tiết; dòng đầu trỏ tới data.md           GD ghi
   priority.json              độ quan trọng do AI chấm, chỉ ở node lá                GD ghi
-  code.json                  chỉ ở node feature (vòng 2): thư mục code của nó       GD ghi (xem gamedesigner.round2.md)
+  code.json                  chỉ ở node feature (vòng 2): thư mục code của nó       GD ghi (xem skill gd-round-2)
   .progress/progress.json    chỉ ở node lá: tiến độ từng giai đoạn                  chỉ đọc (@CodeLead và người ghi)
   .images/                   ảnh + index.md (`- <tên file>: <ảnh để làm gì>`)       người bỏ ảnh, GD ghi index.md
-  ui.md                      node vòng 4 có giao diện: phần tử UI, tương tác, flow    GD ghi (xem gamedesigner.round4.md)
+  ui.md                      node vòng 4 có giao diện: phần tử UI, tương tác, flow    GD ghi (xem skill gd-round-4)
   .frame-concept/<tên>.frame bố cục dạng chữ (vị trí, kích thước), người chấm từng frame  @UIDesigner ghi (uidesigner.md)
   .ai-need-user-choose/      questions.json (GD ghi), answers.json (người)
   .user-review/review.json   điểm và phản hồi của người cho từng ý                  chỉ đọc
@@ -75,7 +75,7 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
   - Ý viết theo dạng cũ (không có tiêu đề) vẫn đọc được nhưng `gd_status.py` sẽ nhắc "THIẾU TIÊU ĐỀ": lần tới sửa node đó thì thêm tiêu đề. Thêm tiêu đề làm đổi hash data.
 - Danh sách ý cốt lõi chỉ nằm ở `data.md`. Không chép lại thành mục "Cốt lõi" trong `CLAUDE.md`: hai danh sách sẽ lệch nhau và người duyệt sẽ thấy hai thứ khác nhau.
 - Không thêm mục `##` nào khác vào `data.md`: giải thích, ví dụ, trường hợp biên, bảng số, mục "Chưa rõ" để ở `CLAUDE.md`.
-- Phần đầu còn hai dòng không bắt buộc, không tính vào hash: `screen: landscape|portrait` (chỉ ở node gốc, xem `gamedesigner.round1.md`) và `frame: none` (node vòng 4 không có bố cục, xem `gamedesigner.round4.md`). Ba dòng về ý của GPT, `by:`, `gpt-dropped:` và `node-by:`, cũng không tính vào hash; xem `.claude/rules/designadvisor.md`.
+- Phần đầu còn hai dòng không bắt buộc, không tính vào hash: `screen: landscape|portrait` (chỉ ở node gốc, xem skill `gd-round-1`) và `frame: none` (node vòng 4 không có bố cục, xem skill `gd-round-4`). Ba dòng về ý của GPT, `by:`, `gpt-dropped:` và `node-by:`, cũng không tính vào hash; xem `.claude/rules/designadvisor.md`.
 - **Hash data** tính từ tiêu đề node, tóm tắt, id, tiêu đề, chi tiết của các ý, và nội dung các file `.frame-concept/*.frame`. Đổi một trong các thứ đó là đổi hash: mọi node con thành "cần làm lại". Đổi điểm AI, `based-on` hay `CLAUDE.md` thì không. Vì vậy chỉ sửa `data.md` khi quyết định thật sự đổi; sửa câu chữ cho hay thì đừng.
 - **Trang hiện mọi thay đổi so với `live`** (bản chốt gần nhất), tới khi node được chốt lại:
   - Thẻ node mang nhãn `Đổi +mới ✎sửa −bỏ` (`Mới` khi `live` chưa có node). Ý có nhãn `Mới` hoặc `Đã sửa`, chữ cũ gạch, chữ mới tô; ý bị xoá nằm ở mục "Ý đã bỏ so với live"; ý đổi mà người chưa chấm được đánh dấu.
@@ -143,7 +143,7 @@ Làm lại từ trên xuống: node cha đạt rồi mới tới node con.
 - Chỉ thêm từ khi đã có node dùng. Thấy từ định nghĩa ở hai nơi, hoặc một node định nghĩa lại từ đã có, thì `gd_status.py` (cả cây) nhắc ở mục "Thuật ngữ": gom về glossary, nghĩa khác nhau thì quyết một (User control: hỏi người).
 
 ## Ảnh concept và node cheat (claude-concept: @UIDesigner đặt; art-concept: bạn đặt)
-Frame (của @UIDesigner) rẻ, sửa thoải mái. Ảnh concept có hai loại, cùng cổng, độc lập nhau (art-concept do người chấm, claude-concept không ai chấm): **claude-concept** (@ClaudeImage tự vẽ SVG, `studio.py` đổi ra PNG; không tốn lượt Codex; **giai đoạn IDEA chỉ cần loại này**) và **art-concept** (@Codex gen, tốn lượt, dành cho PROTOTYPE/FULL). Art-concept chỉ đặt ở node `<feature>/cheat` (tối đa 3 state dựng nhanh ở bản dev, bắt buộc khi feature có frame giao diện; luật ở mục "Node cheat" của `gamedesigner.round4.md`). **Claude-concept do @UIDesigner đặt và theo dõi** (mỗi frame một ảnh; luật ở `uidesigner.md`); phần dưới đây là art-concept của bạn. Cổng:
+Frame (của @UIDesigner) rẻ, sửa thoải mái. Ảnh concept có hai loại, cùng cổng, độc lập nhau (art-concept do người chấm, claude-concept không ai chấm): **claude-concept** (@ClaudeImage tự vẽ SVG, `studio.py` đổi ra PNG; không tốn lượt Codex; **giai đoạn IDEA chỉ cần loại này**) và **art-concept** (@Codex gen, tốn lượt, dành cho PROTOTYPE/FULL). Art-concept chỉ đặt ở node `<feature>/cheat` (tối đa 3 state dựng nhanh ở bản dev, bắt buộc khi feature có frame giao diện; luật ở mục "Node cheat" của skill `gd-round-4`). **Claude-concept do @UIDesigner đặt và theo dõi** (mỗi frame một ảnh; luật ở `uidesigner.md`); phần dưới đây là art-concept của bạn. Cổng:
 - **Chỉ đặt cho node `cheat` đã ở `live`, có frame**, khi vòng 1 trong `live` đã có style; `studio.py check` từ chối order khác. Mỗi dòng Danh sách là tên một frame của node (ở node cheat: id một state), mỗi frame đúng một ảnh.
 - Order nằm ở `Management/studio/codex/orders/_design/<đường dẫn node, '/' thay bằng '.'>/<id>/order.md` (id không trùng với order claude-concept của @UIDesigner), theo khung của `.claude/rules/studio.md` với phần đầu:
   ```
@@ -197,4 +197,4 @@ Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đ
 ## Yêu cầu riêng của người
 (Người bổ sung tại đây; mục này đứng trên mọi quy ước ở trên.)
 
-- **Không đưa dữ liệu theo giai đoạn vào feature** (người yêu cầu, 2026-11-23). Node mô tả feature là gì, không mô tả bản phát hành nào làm tới đâu. Không viết "bản đầu", "giai đoạn 1", "MVP", "làm trước / để sau", hay con số gắn với một bản (sai: "số loại hero (dự kiến 2 cho bản đầu)"; đúng: "có nhiều loại hero"). Áp dụng cho `data.md`, `CLAUDE.md` và câu hỏi. Dữ liệu theo giai đoạn chỉ nằm ở hai chỗ: `priority.json` (mục "Độ quan trọng của node") và mục `## Thông số theo giai đoạn` trong `CLAUDE.md` của node vòng 4 (người cho phép, 2026-11-23; xem `gamedesigner.round4.md`). Vòng 1 đến 3 vẫn cấm; phạm vi cụ thể của từng bản thì nêu với người trong chat, không ghi vào node.
+- **Không đưa dữ liệu theo giai đoạn vào feature** (người yêu cầu, 2026-11-23). Node mô tả feature là gì, không mô tả bản phát hành nào làm tới đâu. Không viết "bản đầu", "giai đoạn 1", "MVP", "làm trước / để sau", hay con số gắn với một bản (sai: "số loại hero (dự kiến 2 cho bản đầu)"; đúng: "có nhiều loại hero"). Áp dụng cho `data.md`, `CLAUDE.md` và câu hỏi. Dữ liệu theo giai đoạn chỉ nằm ở hai chỗ: `priority.json` (mục "Độ quan trọng của node") và mục `## Thông số theo giai đoạn` trong `CLAUDE.md` của node vòng 4 (người cho phép, 2026-11-23; xem skill `gd-round-4`). Vòng 1 đến 3 vẫn cấm; phạm vi cụ thể của từng bản thì nêu với người trong chat, không ghi vào node.

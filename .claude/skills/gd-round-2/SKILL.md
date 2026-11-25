@@ -1,10 +1,9 @@
 ---
-paths:
-  - "Management/game-design/ai/idea/*/*"
-  - "Management/game-design/live/*/*"
+name: gd-round-2
+description: Chỉ phiên FEATURE=@GameDesigner (@DesignAdvisor đọc để hiểu). Luật riêng của vòng 2 cây thiết kế, chia game thành feature ở ai/idea/<feature>/. Dùng trước khi viết hoặc sửa một node feature - cách chia feature, ba feature hạ tầng mặc định, code.json, hỏi GPT vòng 2.
 ---
 # GD vòng 2: Feature (tóm tắt)
-Luật chung: `.claude/rules/gamedesigner.md`. File này chỉ thêm phần riêng của vòng 2 (`ai/idea/<feature>/`).
+Luật chung: `.claude/rules/gamedesigner.md`. Skill này chỉ thêm phần riêng của vòng 2 (`ai/idea/<feature>/`).
 
 ## Mục tiêu
 Danh sách feature phủ hết vòng lặp chơi của vòng 1, không feature nào trùng việc của feature khác, và mỗi feature đủ rõ để giao riêng cho một phiên.

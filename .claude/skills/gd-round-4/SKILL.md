@@ -1,10 +1,9 @@
 ---
-paths:
-  - "Management/game-design/ai/idea/*/*/*/*"
-  - "Management/game-design/live/*/*/*/*"
+name: gd-round-4
+description: Chỉ phiên FEATURE=@GameDesigner (@UIDesigner và @DesignAdvisor đọc để hiểu). Luật riêng của vòng 4 cây thiết kế, quyết định chi tiết ở ai/idea/<feature>/<detail>/<tech>/. Dùng trước khi viết hoặc sửa một node vòng 4, ui.md, thông số theo giai đoạn, hoặc node cheat <feature>/cheat.
 ---
 # GD vòng 4: Quyết định chi tiết
-Luật chung: `.claude/rules/gamedesigner.md`. File này chỉ thêm phần riêng của vòng 4 (`ai/idea/<feature>/<detail>/<tech>/`).
+Luật chung: `.claude/rules/gamedesigner.md`. Skill này chỉ thêm phần riêng của vòng 4 (`ai/idea/<feature>/<detail>/<tech>/`).
 
 ## Mục tiêu
 Sau vòng 4, phiên code làm được game chơi được ở **mức IDEA** mà không phải hỏi lại thiết kế.

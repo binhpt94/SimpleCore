@@ -136,8 +136,16 @@ RULES_SEEN_DIR = "rules-seen"
 
 
 def reread_prompt(changed):
-    return ("Đọc lại quy trình: các file luật sau vừa đổi: " + ", ".join(changed) + ". Read lại toàn bộ đúng các file "
-            "đó, không Read file nào khác. Chưa làm việc gì khác. Trả lời ngắn: đã đọc những file nào.")
+    """The rule files are Read again; a changed skill is not (it is loaded only when used): the thread is told that a
+    copy of it already in its context is old, so it calls the skill again the next time it does that task."""
+    skills = [c.split("/")[2] for c in changed if c.startswith(bind_session.SKILLS_DIR + "/")]
+    rules = [c for c in changed if not c.startswith(bind_session.SKILLS_DIR + "/")]
+    told = ("Skill sau vừa đổi: " + ", ".join(skills) + ". Không Read nó bây giờ; bản đã nạp trong ngữ cảnh (nếu có) "
+            "đã cũ, lần tới làm việc đó thì gọi lại skill bằng tool Skill. ") if skills else ""
+    if not rules:
+        return "Đọc lại quy trình: " + told + "Chưa làm việc gì khác. Trả lời ngắn: đã biết."
+    return ("Đọc lại quy trình: các file luật sau vừa đổi: " + ", ".join(rules) + ". Read lại toàn bộ đúng các file "
+            "đó, không Read file nào khác. " + told + "Chưa làm việc gì khác. Trả lời ngắn: đã đọc những file nào.")
 
 
 def rules_state(binding):

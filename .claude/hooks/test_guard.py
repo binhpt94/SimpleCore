@@ -523,10 +523,21 @@ def run_uidesigner_cases():
     os.makedirs(idea + "/feature-hero", exist_ok=True)
     g = "uidesigner: reads the design, its rules, never the code"
     for p in (idea + "/feature-hero/data.md", base + "/live/data.md", FX + "/Management/studio/claudeimage/lessons.md",
-              FX + "/.claude/rules/uidesigner.md", FX + "/.claude/rules/gamedesigner.round4.md"):
+              FX + "/.claude/rules/uidesigner.md", FX + "/.claude/rules/gamedesigner.md",
+              FX + "/.claude/skills/ui-frame-syntax/SKILL.md", FX + "/.claude/skills/ui-frame-syntax/button-rects.png",
+              FX + "/.claude/skills/gd-round-4/SKILL.md"):
         r(g, U, "allow", p)
-    for p in (F + "/Wallet/Scripts/Internal/W.cs", FX + "/.claude/rules/codelead.md", FX + "/Management/tools/guard.py"):
-        r(g, U, "deny", p)
+    for p in (F + "/Wallet/Scripts/Internal/W.cs", FX + "/.claude/rules/codelead.md", FX + "/Management/tools/guard.py",
+              FX + "/.claude/skills/gd-round-1/SKILL.md", FX + "/.claude/skills/codelead-scaffold-feature/SKILL.md",
+              FX + "/.claude/skills/studio-claude-concept/SKILL.md", FX + "/.claude/skills/ui-frame-syntax",
+              FX + "/.claude/skills/ui_x/SKILL.md", FX + "/.claude/rules/ui-frame-syntax/SKILL.md"):
+        r(g + " (of the skills only its own)", U, "deny", p)
+    for p in (FX + "/.claude/skills/ui-frame-syntax/SKILL.md", FX + "/.claude/skills/new-skill/SKILL.md"):
+        w(g + " (the skills are the human's)", U, "deny", p)
+    g = "skills: every other bound chat reads them, none writes them"
+    for who in ("Wallet", "@Core", "@CodeLead", "@Manager", "@Codex", "@ClaudeImage", "@UnityAutoPlay"):
+        r(g, who, "allow", FX + "/.claude/skills/studio-claude-concept/SKILL.md")
+        w(g, who, "deny", FX + "/.claude/skills/studio-claude-concept/SKILL.md")
     g = "uidesigner: commands"
     for cmd in ("python Management/tools/gd_status.py", "python Management/tools/gd_status.py ai/idea/feature-hero",
                 "python Management/tools/gd_frame.py ai/idea/feature-hero/hero-list/x",
@@ -605,10 +616,12 @@ def run_advisor_cases():
     g = "advisor: reads the design, not the code"
     for p in (idea + "/data.md", live + "/data.md", advice + "/feature-hero/q1.md", base, base + "/mode.json",
               FX + "/Management/studio/codex/lessons.md", FX + "/CLAUDE.md", FX + "/.claude/rules/designadvisor.md",
-              FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/rules/gamedesigner.round3.md"):
+              FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/skills/gd-round-3/SKILL.md",
+              FX + "/.claude/skills/advisor-ask-gpt/SKILL.md"):
         r(g, V, "allow", p)
     t(g, V, "allow", "Grep", {"pattern": "hero", "path": base})
     for p in (FX + "/.claude/rules/codelead.md", FX + "/.claude/rules/studio.md", FX + "/.claude/hooks/guard.py",
+              FX + "/.claude/skills/ui-frame-syntax/SKILL.md", FX + "/.claude/skills/manager-startup-check/SKILL.md",
               FX + "/Management/proposals/old.md", FX + "/Management/tools/gd_advise.py", FX + "/Management",
               F + "/Wallet/Scripts/Contracts/IWallet.cs", F + "/Wallet/CLAUDE.md", A + "/Core/Base.cs", "C:/Windows/x"):
         r(g, V, "deny", p)
@@ -1366,7 +1379,7 @@ def run_designer_cases():
     for p in (live + "/node.md", live + "/feature-new/node.md", base + "/readme.md", base + "/other/node.md",
               base + "/mode.json", base + "/idea/node.md",
               FX + "/Management/proposals/gd.md", FX + "/Management/data/idea.js", FX + "/Management/tools/rules.json",
-              F + "/Wallet/Scripts/Internal/W.cs", A + "/Core/Base.cs", FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/rules/gamedesigner.round2.md",
+              F + "/Wallet/Scripts/Internal/W.cs", A + "/Core/Base.cs", FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/skills/gd-round-2/SKILL.md",
               FX + "/CLAUDE.md", idea + "/../../live/node.md", FX + "/Management/game-design-x/ai/node.md"):
         w(g, D, "deny", p)
     w(g, D, "deny", idea + "/x.asmref")
@@ -1385,12 +1398,17 @@ def run_designer_cases():
     g = "designer: reads only the design tree"
     for p in (idea + "/data.md", live + "/data.md", idea + "/feature-hero/.images/a.png", base, base + "/mode.json",
               idea + choose + "/answers.json", idea + "/.user-review/review.json", idea + "/.history/log.jsonl",
-              FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/rules/gamedesigner.round1.md",
-              FX + "/.claude/rules/gamedesigner.round4.md", FX + "/.claude/rules/designadvisor.md"):
+              FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/skills/gd-round-1/SKILL.md",
+              FX + "/.claude/skills/gd-round-4/SKILL.md", FX + "/.claude/skills/gd-rework-node/notes/a.md",
+              FX + "/.claude/rules/designadvisor.md"):
         r(g, D, "allow", p)
-    r(g, D, "allow" if WIN else "deny", FX + "/.claude/rules/GameDesigner.Round4.md")      # same file only on Windows
-    for p in (FX + "/.claude/rules/codelead.md", FX + "/.claude/rules/gamedesigner.round5.md", FX + "/.claude/rules/gamedesigner.round2.md.bak",
-              FX + "/.claude/rules/sub/gamedesigner.md", FX + "/.claude/hooks/gamedesigner.md"):
+    r(g, D, "allow" if WIN else "deny", FX + "/.claude/rules/GameDesigner.md")      # same file only on Windows
+    r(g, D, "allow" if WIN else "deny", FX + "/.claude/Skills/gd-round-1/SKILL.md")
+    for p in (FX + "/.claude/rules/codelead.md", FX + "/.claude/rules/gamedesigner.round5.md", FX + "/.claude/rules/gamedesigner.md.bak",
+              FX + "/.claude/rules/sub/gamedesigner.md", FX + "/.claude/hooks/gamedesigner.md",
+              FX + "/.claude/skills/ui-frame-syntax/SKILL.md", FX + "/.claude/skills/gd-round-1",
+              FX + "/.claude/skills/gd-round-1/../codelead-x/SKILL.md", FX + "/.claude/skills/gd-/SKILL.md",
+              FX + "/.claude/skills/x/gd-round-1/SKILL.md"):
         r(g + " (of the rules only its own)", D, "deny", p)
     t(g, D, "allow", "Glob", {"pattern": "**/node.md", "path": base})
     t(g, D, "allow", "Grep", {"pattern": "hero", "path": live})

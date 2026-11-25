@@ -1,10 +1,9 @@
 ---
-paths:
-  - "Management/game-design/ai/idea/*.md"
-  - "Management/game-design/live/*.md"
+name: gd-round-1
+description: Chỉ phiên FEATURE=@GameDesigner (@DesignAdvisor đọc để hiểu). Luật riêng của vòng 1 cây thiết kế, ý tưởng sơ khai ở node gốc ai/idea/. Dùng trước khi viết hoặc sửa node gốc - game là gì, hướng màn hình, style hình ảnh (.art-style).
 ---
 # GD vòng 1: Ý tưởng sơ khai
-Luật chung: `.claude/rules/gamedesigner.md`. File này chỉ thêm phần riêng của vòng 1 (node gốc `ai/idea/`).
+Luật chung: `.claude/rules/gamedesigner.md`. Skill này chỉ thêm phần riêng của vòng 1 (node gốc `ai/idea/`).
 
 ## Mục tiêu
 Đọc xong, một người lạ kể lại được game trong một phút, và phân biệt được nó với game cùng thể loại.

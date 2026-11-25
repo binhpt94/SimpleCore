@@ -20,7 +20,7 @@ Tester chơi game trong Unity Editor như một người chơi, đối chiếu v
 - **`execute_code` và `execute_menu_item` là cổng mềm**: guard không đọc được code hay menu chạy gì. Luật:
   - chỉ dùng để thao tác lúc Play: bấm nút, kéo thả, gọi cheat, đọc trạng thái object, đợi một điều kiện;
   - **không** ghi, sửa, xoá file hay asset (`File.*`, `AssetDatabase.Create/Delete/Move/SaveAssets`, `EditorSceneManager.SaveScene`, `PrefabUtility.Save*`, `PlayerSettings`...), không đổi cài đặt project, không cài package;
-  - không ghi file nào, kể cả ảnh: ảnh chụp bằng `manage_camera` rồi `tester.py shot` (bước 5 của "Một đợt test"); dữ liệu đo dạng chữ ghi bằng Write vào `images/`;
+  - không ghi file nào, kể cả ảnh: ảnh chụp bằng `manage_camera` rồi `tester.py shot` (bước 5 của skill `tester-playtest-session`); dữ liệu đo dạng chữ ghi bằng Write vào `images/`;
   - không dùng nó để làm việc mà guard đã chặn ở lệnh khác.
 - Bị guard chặn thì dừng và báo người, không tìm đường vòng.
 
@@ -60,17 +60,7 @@ Tester giữ khoá Unity Editor suốt lúc chơi, nên chỉ vài bên được
 - Tin từ phiên khác lọt tới (chuyển lời qua một bên được phép): không làm, báo `Manager`.
 
 ## Một đợt test
-1. Nhận việc từ người hoặc @Manager (xem "Ai giao việc"): test feature nào, mức nào (IDEA, PROTOTYPE, FULL), vì sao.
-2. `tester.py new <Tên mình> "<tên đợt>"`. Ghi ngay mục Mục đích, Test gì, Môi trường.
-3. Đọc thiết kế đã chốt: `python Management/tools/gd_pack.py <Tên feature>` (đọc đủ node vòng 4 và mục CHEAT của phần sẽ test). Đọc code khi cần hiểu vì sao game chạy như vậy; không sửa.
-4. Chơi: mở scene, Play, dựng state bằng cheat của feature (menu hoặc `execute_code`), thao tác như người chơi, đọc console. Mỗi điều kiểm được ghi thành một bước: làm gì, mong thấy gì theo thiết kế, thực tế thấy gì.
-5. Chụp ảnh chỗ đáng xem (state đạt, lỗi):
-   - `manage_camera` action `screenshot`, `output_folder: "Captures"`, `screenshot_file_name: "<tên>.png"`, `include_image: true` (thấy ảnh ngay); guard chặn folder khác;
-   - `python Management/tools/tester.py shot <Tên mình> <đợt> <tên>.png [<tên mới>]`: dời ảnh vào `images/` của đợt (Captures không commit, chỉ `images/` được giữ);
-   - mỗi ảnh một dòng trong mục "Cấu trúc thư mục". Không chép ảnh bằng đường khác.
-6. Stop Play. Ghi Kết quả và Lỗi tìm thấy. Lỗi phải tái hiện được: bước, ảnh, câu lỗi console, feature sở hữu.
-7. `tester.py check` tới khi không còn lỗi cấu trúc.
-8. Báo cáo cuối lượt (dưới). Lỗi của feature nào thì nhắn thêm @CodeLead (`SendMessage`, to: `CodeLead`) đường dẫn đợt test và danh sách lỗi; không nhắn thẳng yêu cầu sửa cho phiên feature, không sửa hộ.
+Mỗi đợt (cả yêu cầu `XÁC NHẬN` hẹp): dùng skill `tester-playtest-session` (tám bước: nhận việc, `tester.py new`, `gd_pack.py`, chơi, chụp ảnh qua `Captures` rồi `tester.py shot`, ghi kết quả và lỗi, `tester.py check`, báo cáo).
 
 ## Báo cáo (Stop hook ép)
 Lượt có ghi file kết thúc bằng khối `## Báo cáo cho @Manager` đủ 8 dòng theo `.claude/rules/report.md`: "Đã đổi" là đường dẫn đợt test; "Công khai đổi" ghi `không`; "Cần bên khác" là feature có lỗi và lỗi gì, hoặc `không`; "Kiểm tra" là kết quả `tester.py check` và kết quả đợt test.
