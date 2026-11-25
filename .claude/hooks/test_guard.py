@@ -1146,9 +1146,23 @@ def run_codelead_cases():
     t(g, L, "allow", "ReadMcpResourceTool", {"server": "unityMCP", "uri": "mcpforunity://editor/state"})
     t(g, L, "deny", "ReadMcpResourceTool", {"server": "other", "uri": "x"})
     for name, action in (("manage_editor", "add_tag"), ("manage_editor", "deploy_package"), ("execute_menu_item", ""),
-                         ("manage_packages", "add"), ("manage_camera", "screenshot"), ("manage_gameobject", "create"),
+                         ("manage_packages", "add"), ("manage_camera", "list_cameras"), ("manage_gameobject", "create"),
                          ("manage_components", "add"), ("read_console", "clear")):
         u(name, expect="allow", action=action)      # project settings, menus and the scene: @CodeLead, holding the lock
+    # screenshots: only into UnityProject/Captures (outside Assets); without a folder they would land in Assets/Screenshots
+    u("manage_camera", expect="deny", action="screenshot")
+    u("manage_camera", expect="deny", action="screenshot", output_folder="")
+    u("manage_camera", expect="deny", action="screenshot_multiview")
+    for folder in ("Captures", "Captures/run1", FX + "/UnityProject/Captures", FX + "/UnityProject/Captures/a"):
+        u("manage_camera", expect="allow", action="screenshot", output_folder=folder, include_image=True)
+    u("manage_camera", expect="allow", action="screenshot_multiview", output_folder="Captures")
+    for folder in ("Assets/Screenshots", "Assets/_Composition/Screenshots", "Captures/../Assets", "../Captures",
+                   "Assets", "CapturesX", FX + "/Captures", "~/Captures"):
+        u("manage_camera", expect="deny", action="screenshot", output_folder=folder)
+    t(g, L, "deny", "mcp__unityMCP__batch_execute", {"commands": [
+        {"tool": "read_console", "params": {"action": "get"}}, {"tool": "manage_camera", "params": {"action": "screenshot"}}]})
+    t(g, L, "allow", "mcp__unityMCP__batch_execute", {"commands": [
+        {"tool": "manage_camera", "params": {"action": "screenshot", "output_folder": "Captures"}}]})
     u("manage_scene", expect="allow", action="load", path="Assets/_Composition/Scenes/Game.unity")
     u("manage_scene", expect="allow", action="save")      # a scene of _Composition: its own
     u("manage_asset", expect="allow", action="create", path="Assets/_Composition/Catalog.asset")
@@ -1550,7 +1564,9 @@ def run_tester_cases():
     u("allow", "run_tests", mode="PlayMode")
     u("allow", "manage_scene", action="load", path="Assets/_Composition/Scenes/Game.unity")
     u("allow", "execute_menu_item", menu_path="Cheat/Hud/Mid battle")
-    u("allow", "manage_camera", action="screenshot")
+    u("allow", "manage_camera", action="screenshot", output_folder="Captures")
+    u("deny", "manage_camera", action="screenshot")      # would land in Assets/Screenshots
+    u("deny", "manage_camera", action="screenshot", output_folder="Assets/Screenshots")
     u("allow", "execute_code", code="GameObject.Find(\"Play\")")
     held = guard.read_lock(STORE) or {}
     check(g, T, ("tester-a", T), "playing holds the Editor lock", (held.get("session"), held.get("who")))

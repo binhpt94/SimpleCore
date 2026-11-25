@@ -248,6 +248,10 @@ UNITY_TOOL_ROLES = ("@Codex", "@Blender")      # the tool chats that have an out
 # and execute_code (C# in the Editor: press a button, call a cheat, read a state). The last is a soft gate, like the
 # tool chats' way above: the guard cannot read the code, the rule (.claude/rules/tester.md) forbids changing files.
 TESTER_UNITY = {"execute_menu_item", "manage_camera", "execute_code"}
+# Screenshots of manage_camera go to UnityProject/Captures (git-ignored, outside Assets: Unity does not import them, no
+# .meta, nothing to commit). Without output_folder the tool falls back to the Editor preference, then Assets/Screenshots.
+CAPTURE_DIR = "Captures"
+CAPTURE_ACTIONS = {"screenshot", "screenshot_multiview"}
 UNITY_ASSET_TOOL = UNITY_PREFIX + "manage_asset"
 UNITY_SERVER = "unityMCP"
 
@@ -1017,6 +1021,24 @@ def unity_own(full, root, mode, feature, area, who):
     return None
 
 
+def capture_folder_error(value, root):
+    """None when output_folder of a screenshot lies in UnityProject/Captures (taken from UnityProject when relative);
+    otherwise why not."""
+    value = text_of(value).strip()
+    if not value:
+        return "output_folder is missing, so the picture would land in Assets/Screenshots"
+    if ".." in value.replace("\\", "/").split("/"):
+        return f'output_folder with "..": {value}'
+    try:
+        full = resolve_target(value, under(root, "UnityProject"))
+    except ValueError as ex:
+        return f"output_folder refused: {ex}"
+    captures = under(root, "UnityProject", CAPTURE_DIR)
+    if not (same(full, captures) or inside(full, captures)) or goes_through_link(full, root):
+        return f"output_folder must be {CAPTURE_DIR} or a folder inside it, not {value}"
+    return None
+
+
 def decide_unity_one(tool, ti, ctx, work):
     """(decision, reason, needs lock) of one unity-mcp command. work: the lock this session would hold after the
     commands before it ({scene, prefab}); updated in place."""
@@ -1043,6 +1065,11 @@ def decide_unity_one(tool, ti, ctx, work):
         return "deny", f"unity-mcp {short}: only the testers run it (.claude/rules/tester.md)", False
     elif kind in ("play", "lead") and not lead:
         return "deny", f"unity-mcp {short} {action}: only @CodeLead (play, tests, project settings); ask @CodeLead", False
+    if short == "manage_camera" and action in CAPTURE_ACTIONS:
+        why = capture_folder_error(ti.get("output_folder"), root)
+        if why:
+            return "deny", (f"unity-mcp manage_camera {action}: {why}. Write output_folder: \"{CAPTURE_DIR}\" (outside "
+                            "Assets, not committed), with include_image: true to see the picture in the chat"), False
     paths = unity_paths(short, action, ti)
     if kind == "read":
         for key, value in paths:
