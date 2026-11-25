@@ -292,6 +292,53 @@ def run_live_scores(root):
     check("and stops at the node the human has not scored", snap_node(root, "feature-hero")["passed"], False)
 
 
+def run_stage(root):
+    """The phase the project is built for now: a node of that phase or an earlier one is due and must reach the last
+    round; a node of a later phase is only defined."""
+    mk(root, "")
+    mk(root, "feature-hero"), mk(root, "feature-hero/skills"), mk(root, "feature-hero/skills/cooldown"), mk(root, "feature-hero/level")
+    mk(root, "feature-shop"), mk(root, "feature-wallet"), mk(root, "feature-ads"), mk(root, "feature-new")
+    for path, score in (("feature-hero/skills/cooldown", 9), ("feature-hero/level", 6), ("feature-shop", 3), ("feature-wallet", 9),
+                        ("feature-ads", 1)):
+        put(root, f"idea/{path}/priority.json", json.dumps({"ai": score, "why": "vì"}))
+    flags = lambda key: {n["path"]: n[key] for n in gd.walk(gd.snapshot(root)["idea"]) if n["path"]}      # noqa: E731
+    check("no stage set: every node is due, none is asked to go deeper, the page is told so",
+          (gd.read_stage(root), set(flags("due").values()), set(flags("deepen").values()), gd.snapshot(root)["stage"]["stage"]),
+          ("", {True}, {False}, ""))
+    check("a stage that is no phase is refused", (refused(gd.write_stage, root, "optional"), refused(gd.write_stage, root, "x"), gd.read_stage(root)),
+          (True, True, ""))
+    put(root, "stage.json", '{"stage": "later"}')
+    check("a broken stage file reads as not set", gd.read_stage(root), "")
+    gd.write_stage(root, "idea")
+    check("the stage is stored with its time", (gd.read_stage(root), bool(gd.read_stage_info(root)["at"]), gd.snapshot(root)["stages"]),
+          ("idea", True, ["idea", "prototype", "full"]))
+    check("stage IDEA: the nodes of IDEA and the node not scored yet are due; PROTOTYPE, FULL and optional ones wait",
+          flags("due"), {"feature-hero": True, "feature-hero/skills": True, "feature-hero/skills/cooldown": True, "feature-hero/level": False,
+                         "feature-shop": False, "feature-wallet": True, "feature-ads": False, "feature-new": True})
+    check("a due leaf that is not at the last round must go deeper; a node that waits, or one at the last round, need not",
+          sorted(p for p, v in flags("deepen").items() if v), ["feature-new", "feature-wallet"])
+    report = gd_status.report(root)
+    check("the status names the stage, what must reach round 4 and what waits",
+          ("## Giai đoạn đang làm: IDEA" in report, "### Cần thiết kế tới vòng 4 (2)" in report, "- feature-wallet (đang ở vòng 2, IDEA)" in report,
+           "- feature-new (đang ở vòng 2, chưa chấm độ quan trọng)" in report, "- feature-shop (FULL, vòng 2)" in report,
+           "- feature-hero/level (PROTOTYPE, vòng 3)" in report), (True, True, True, True, True, True))
+    row = {r["key"]: r for r in gd.snapshot(root)["features"]}
+    check("the feature table: its phase, whether it waits, and the nodes it still has to deepen",
+          [(row[k]["phase"], row[k]["due"], row[k]["deepen"], "@GameDesigner" in row[k]["waiting"]) for k in ("feature-wallet", "feature-shop")],
+          [("idea", True, ["feature-wallet"], True), ("full", False, [], False)])
+    gd.write_stage(root, "prototype")
+    check("stage PROTOTYPE: its nodes are due too", (flags("due")["feature-hero/level"], flags("deepen")["feature-hero/level"], flags("due")["feature-shop"]),
+          (True, True, False))
+    gd.write_stage(root, "full")
+    check("stage FULL: everything but the optional node", sorted(p for p, v in flags("due").items() if not v), ["feature-ads"])
+    check("the phases the requirement book reads are the ones the page shows",
+          gd.leaf_phases(root), {n["path"]: n["priority"]["phase"] for n in gd.walk(gd.snapshot(root)["idea"])})
+    put(root, "idea/feature-shop/.user-review/priority.json", json.dumps({"score": 9}))
+    gd.write_stage(root, "idea")
+    check("the human's score decides the phase of a node", (flags("due")["feature-shop"], gd.leaf_phases(root)["feature-shop"]), (True, "idea"))
+    check("the stage is no part of a node: no hash moved", snap_node(root, "feature-shop")["state"], "new")
+
+
 def run_priority(root):
     """Importance 0-10 and the phase it means: leaves are scored, parents take the highest below, a human score is
     absolute and shifts the unscored nodes below it by the same offset. Outside every hash."""
@@ -1314,7 +1361,7 @@ def run_deco(root):
 
 
 def main():
-    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_follow, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco):
+    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_stage, run_progress, run_infra, run_code_names, run_flow, run_refs, run_follow, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

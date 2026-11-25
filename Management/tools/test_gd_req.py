@@ -259,6 +259,51 @@ def run_tables(root):
           refused(lambda: rb.mark(root, W, "wallet-rules#enemies-big-boss", "verify", "@CodeLead")))
 
 
+def run_stage(root):
+    """The phase the project is in: the requirements of a node (or of a table row) that is for a later phase wait."""
+    W = "Wallet"
+    idea = gd.table_dir(root, "idea")
+    score = lambda path, n: (idea.joinpath(*path.split("/")) / "priority.json").write_text(json.dumps({"ai": n, "why": "x"}), encoding="utf-8")      # noqa: E731
+    OTHER = "feature-wallet/income/income-amounts"
+    score(NODE, 9), score(OTHER, 3)
+    rb.mark(root, W, "wallet-rules#start-50", "done", W, tests=["WalletLogicTests.StartsWithConfiguredCoins"])
+    first = next(r["id"] for n in rb.view(root, W)["nodes"] if n["path"] == OTHER for r in n["reqs"])
+    rb.mark(root, W, f"income-amounts#{first}", "done", W, tests=["WalletLogicTests.Adds"])
+    v = rb.view(root, W)
+    total = v["total"]
+    check("no stage set: nothing waits", (v["later"], v["stage"], any(r["later"] for n in v["nodes"] for r in n["reqs"])), (0, "", False))
+    gd.write_stage(root, "idea")
+    v = rb.view(root, W)
+    other = next(n for n in v["nodes"] if n["path"] == OTHER)
+    check("stage IDEA: the requirements of the FULL node that nobody started wait and are in no count; the one already done stays",
+          (v["later"], v["total"], other["later"], len(other["open"]), [r["state"] for r in other["reqs"] if not r["later"]],
+           {r["deferred"] for r in other["reqs"]}), (len(other["reqs"]) - 1, total - (len(other["reqs"]) - 1), len(other["reqs"]) - 1, 1, ["done"], {"full"}))
+    check("the node of this stage is untouched", {r["later"] for n in v["nodes"] if n["path"] == NODE for r in n["reqs"]}, {False})
+    later = next(r["id"] for r in other["reqs"] if r["later"])
+    check("a requirement that waits takes no doing and no done",
+          (refused(lambda: rb.mark(root, W, f"income-amounts#{later}", "doing", W, note="x")),
+           refused(lambda: rb.mark(root, W, f"income-amounts#{later}", "done", W, tests=["WalletLogicTests.Adds"]))), (True, True))
+    rb.mark(root, W, f"income-amounts#{first}", "verify", "@CodeLead")
+    check("what was done before can still be verified", next(r["state"] for r in rb.view(root, W)["nodes"][1]["reqs"] if r["id"] == first)
+          if rb.view(root, W)["nodes"][1]["path"] == OTHER else state(root, first, OTHER), "verified")
+    text = rb.render(rb.view(root, W))
+    check("the book prints them apart, and the counts say how many wait",
+          ("## Để sau (thuộc giai đoạn sau; project đang làm IDEA" in text, f"- [FULL] {OTHER}#{later}" in text, f"để sau {len(other['reqs']) - 1}" in text,
+           "Giai đoạn đang làm: IDEA" in rb.status_all(root)), (True, True, True, True))
+    check("a node that waits and was only defined (not at the last round) gives no requirement",
+          (rb.node_view(root, "feature-wallet/income", gd.table_dir(root, "live") / "feature-wallet" / "income", set(), "full", "idea")["reqs"],
+           bool(rb.node_view(root, "feature-wallet/income", gd.table_dir(root, "live") / "feature-wallet" / "income", set(), "idea", "idea")["reqs"])),
+          ([], True))
+    cols = (("id", "string"), ("name", "string"), ("stage", "enum:idea|prototype|full"))
+    put_table(root, "Enemies", "list", "id", cols, [("soldier", "Lính", "idea"), ("boss", "Trùm", "full")])
+    rows = {r["id"]: r for n in rb.view(root, W)["nodes"] if n["path"] == NODE for r in n["reqs"]}
+    check("a row of a list whose stage is later waits, in a node that does not",
+          (rows["enemies-soldier"]["later"], rows["enemies-boss"]["later"], rows["enemies-boss"]["deferred"]), (False, True, "full"))
+    gd.write_stage(root, "full")
+    v = rb.view(root, W)
+    check("the stage moved on: everything is work again", (v["later"], rb.mark(root, W, f"income-amounts#{later}", "doing", W, note="làm")[0][:7]), (0, "Đã ghi "))
+
+
 def run_progress_gate(root):
     W = "Wallet"
     check("a phase cannot be marked done while requirements are open",
@@ -367,7 +412,7 @@ def run_cli(root):
 
 
 def main():
-    for fn in (run_list, run_flow, run_tables, run_progress_gate, run_changes, run_cli):
+    for fn in (run_list, run_flow, run_tables, run_stage, run_progress_gate, run_changes, run_cli):
         root = make_root()
         try:
             if fn in (run_changes,):

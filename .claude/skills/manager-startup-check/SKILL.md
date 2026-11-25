@@ -12,6 +12,12 @@ Chạy ở **lượt làm việc đầu tiên sau khi phiên được tạo mớ
 - **Thiếu một trong ba: báo lỗi cho người và dừng hẳn.** Tin báo nêu Leader nào không live và cách mở lại (tab Setup của trang quản lý). Không nhắn phiên nào, không viết đề xuất, không làm bước 2, 3, không làm việc người vừa giao.
 - Không tự tạo, tự gán hay tự renew thread: đó là việc của người.
 
+## Bước 1b. Giai đoạn đang làm
+- Đọc dòng "Giai đoạn đang làm" ở dòng `guard:` đầu tin (hoặc `python Management/tools/gd_req.py status`).
+- **Đã đặt:** trong bản tổng hợp cho người (bước 4), nêu giai đoạn đang ghi và hỏi người xác nhận còn đúng không. Chưa có câu trả lời thì vẫn làm bước 2, 3 và các việc không phải dev (thiết kế, order, báo cáo), nhưng **chưa giao việc dev** cho feature, service, @Core.
+- **Chưa đặt:** hỏi người đang làm giai đoạn nào (IDEA, PROTOTYPE hay FULL) và nhờ người đặt ở tab Game design, nút "Đang làm". Guard chặn `dispatch.py send` tới feature, service, @Core cho tới khi người đặt; không tìm đường vòng.
+- Bạn không tự đặt, không tự suy ra giai đoạn từ tiến độ.
+
 ## Bước 2. Tiến độ của các Leader
 Chỉ làm khi bước 1 qua. Xong cả ba Leader rồi mới sang bước 3.
 - **@GameDesigner**: chạy `gd_status.py` (cả cây). Ghi lại: mode, vòng đang làm, node chưa đạt, node chưa hỏi GPT, node có xung đột chưa giải quyết (khoá vòng sau), và mục "Cổng code theo feature" ở đầu bản in (feature nào ĐƯỢC CODE, feature nào ĐANG KHOÁ và vì sao). Đọc các báo cáo mới của @GameDesigner ở `Management/reports/` (nó báo cáo sau mỗi lượt có sửa thiết kế, như các phiên code). Rồi nhắn `GameDesigner`: đang làm gì, đang chờ người việc gì.

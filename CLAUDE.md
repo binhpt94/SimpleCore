@@ -20,6 +20,7 @@ Lệnh shell được chạy (mọi phiên), từ gốc project:
 Bốn Leader (@Manager, @CodeLead, @GameDesigner, @UIDesigner) nối được các lệnh đã cho phép bằng `;` trong một lần gọi (tối đa 6, mỗi lệnh phải tự nó được phép) và đều chạy được `scaffold.py --dry-run`; phiên khác mỗi lần gọi một lệnh.
 @Manager có thêm `python Management/tools/scaffold.py [--dry-run]`: tạo thư mục feature, service, Core, `_Composition` còn thiếu theo các feature trong `live` (tên trong `code.json`, chưa có thì tên đề xuất theo key; chỉ thư mục và `.gitkeep`, không tạo code). @Manager vẫn không code.
 
+Project làm theo giai đoạn (IDEA, PROTOTYPE, FULL): người đặt "giai đoạn đang làm" ở tab Game design (có PIN); dòng `guard:` đầu tin, `gd_status.py` và `gd_req.py status` nêu nó. Mỗi node thiết kế có giai đoạn của nó (điểm độ quan trọng). Node của giai đoạn đang làm và trước đó là tới hạn: phải thiết kế tới vòng 4 và yêu cầu của nó là việc dev. Node của giai đoạn sau chỉ định nghĩa để đó: sổ yêu cầu ghi "để sau", không giao, `doing`/`done` bị từ chối. Chưa đặt giai đoạn thì @Manager chưa giao được việc dev (guard chặn) và phải hỏi người; đã đặt thì đầu mỗi phiên @Manager vẫn xác nhận lại với người.
 Feature nằm ở `UnityProject/Assets/Features/<Tên>/`, dịch vụ ở `Features/_Services/<Tên>/`. Không tạo `Shared/`. Phiên Features/Services chỉ sửa được code của mình khi thiết kế của nó đã tới vòng 4 trong `Management/game-design/live` (guard kiểm; dòng `guard:` đầu tin báo đang mở hay khoá); bị khoá thì dừng và báo người.
 
 | Vùng | Đọc | Sửa |

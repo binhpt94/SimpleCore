@@ -1656,6 +1656,20 @@ def run_inbox_cases():
     D = 'python Management/tools/dispatch.py '
 
     def sh(f, x, cmd): t(g, f, x, "Bash", {"command": cmd})
+    # @Manager hands out development work only once the human has set the phase the project is in (stage.json)
+    stage_file = Path(FX + "/Management/game-design/stage.json")
+    stage_file.parent.mkdir(parents=True, exist_ok=True)
+    for text in (None, "{}", '{"stage": "later"}', "not json"):
+        if text is None:
+            stage_file.unlink(missing_ok=True)
+        else:
+            stage_file.write_text(text)
+        t(g + " (no stage set: no development work)", "@Manager", "deny", "Bash", {"command": D + 'send Wallet --from Manager "x"'})
+        t(g + " (no stage set: no development work)", "@Manager", "deny", "Bash", {"command": D + 'send @Core --from Manager "x"'})
+        t(g + " (no stage set: the tools still get work)", "@Manager", "allow", "Bash", {"command": D + 'send @Codex --from Manager "x"'})
+        t(g + " (no stage set: @CodeLead still sends its fixes)", "@CodeLead", "allow", "Bash", {"command": D + 'send Shop --from CodeLead "x"'})
+    stage_file.write_text('{"stage": "idea", "at": "2026-11-25 22:00"}')
+    t(g + " (stage set)", "@Manager", "allow", "Bash", {"command": D + 'send @Core --from Manager "x"'})
     for who in ("Wallet", "@Core", "@Codex", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@UnityAutoPlay"):
         sh(who, "allow", D + "list")
         sh(who, "allow", D + "list Wallet")

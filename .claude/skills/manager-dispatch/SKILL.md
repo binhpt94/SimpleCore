@@ -6,7 +6,8 @@ description: Chỉ phiên FEATURE=@Manager. Điều phối một đợt việc -
 Quyền, chuỗi của một feature và danh sách "phải nối tiếp" vẫn ở `.claude/rules/manager.md`. Kiểm tra đầu phiên: skill `manager-startup-check`.
 
 ## Giao việc theo đợt
-1. Lập bảng theo feature: `live` tới vòng mấy, ĐƯỢC CODE hay ĐANG KHOÁ, đang ở bước nào của chuỗi, phiên nào đang làm, đang chờ ai.
+0. Chỉ giao việc dev khi người đã xác nhận giai đoạn đang làm trong phiên này (skill `manager-startup-check`, bước 1b). Chỉ lấy việc của node **tới hạn**: yêu cầu ghi "để sau" trong sổ (`gd_req.py <Tên>`, mục "Để sau") không giao; feature để sau còn dừng ở vòng 2, 3 không giục @GameDesigner đào sâu.
+1. Lập bảng theo feature: giai đoạn của nó (tới hạn hay để sau), `live` tới vòng mấy, ĐƯỢC CODE hay ĐANG KHOÁ, đang ở bước nào của chuỗi, phiên nào đang làm, đang chờ ai.
 2. Với mỗi feature, lấy đúng một việc kế tiếp theo chuỗi. Ở bước Code, giao theo sổ yêu cầu (`gd_req.py <Tên>`): nêu id yêu cầu cần làm, không giao "làm tiếp feature". Ngoại lệ duy nhất: việc kỹ thuật do khung đòi, có đề xuất người đã duyệt (mục "Quyết định của người" trong `Management/proposals/<đề xuất>.md`): giao không cần id, tin nêu tên đề xuất; vẫn theo đợt, mỗi đợt tối đa bằng trần của hộp thư (4).
 3. Bỏ các việc vướng danh sách "phải nối tiếp". **Giao cùng lúc** mọi phiên còn lại trong một lượt: Leader bằng `SendMessage`; feature, service, @Core và tool bằng hộp thư, `python Management/tools/dispatch.py send <tên> --from Manager "<việc>"` (mỗi phiên một lệnh; nêu id yêu cầu `<node>#<id>`, vì phiên có thể vừa renew). Không chờ phiên này trả lời rồi mới giao phiên kia.
    - `dispatch.py send` báo **SERVER TẮT** (lỗi 3): tin đã lưu, chưa ai giao. Ngừng giao thêm cho feature, tool; đưa "bật setup_server.py" lên đầu danh sách chờ người. Bật lại thì tin tự đi, không gửi lại.

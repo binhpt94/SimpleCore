@@ -128,7 +128,7 @@ def table_requirements(tables):
                     continue
                 label = r[name_at] if name_at is not None and r[name_at] else key
                 out.append({"id": slug(t["sheet"]) + "-" + slug(key), "kind": "row", "table": t["kind"], "sheet": t["sheet"],
-                            "key": key, "title": f"{t['sheet']}: {label}" + (f" ({key})" if label != key else ""),
+                            "key": key, "stage": r[names.index("stage")] if t["kind"] == "list" and "stage" in names else "", "title": f"{t['sheet']}: {label}" + (f" ({key})" if label != key else ""),
                             "text": f"Bảng {head}, dòng {key}\n" + lines(r), "hash": gd.short_hash(*names, *types, *r)})
         else:
             out.append({"id": slug(t["sheet"]), "kind": "table", "table": t["kind"], "sheet": t["sheet"],
@@ -316,16 +316,23 @@ def check_one(req, saved, tests):
     return state, ""
 
 
-def node_view(root, path, folder, tests):
-    """One leaf of live: its requirements, each with the state a read gives."""
+def node_view(root, path, folder, tests, phase="", stage=""):
+    """One leaf of live: its requirements, each with the state a read gives. phase: the phase the node is for;
+    stage: the phase the project is in (gamedesign.read_stage). A requirement of a node (or of a table row) that is
+    for a later phase is `deferred`; one of those nobody started is `later`: it is not work yet and is not counted.
+    A deferred node that was only defined (not at the last round, no cheat node) gives no requirement at all."""
     data = gd.parse_data(gd.read_text(folder / gd.DATA_FILE))
     doc = gd.read_text(folder / gd.DOC_FILE) if (folder / gd.DOC_FILE).is_file() else ""
     book = read_book(root, path)
     reqs = []
-    for r in node_requirements(data, doc, gd.gd_excel.view(folder)):
+    node_later = not gd.is_due(phase, stage)
+    shallow = len(path.split("/")) + 1 < len(gd.ROUNDS) and folder.name != gd.CHEAT_KEY      # the root is round 1
+    found = [] if node_later and shallow else node_requirements(data, doc, gd.gd_excel.view(folder))
+    for r in found:
         saved = book["items"].get(r["id"])
         state, why = check_one(r, saved, tests)
-        row = dict(r, ref=f"{path}#{r['id']}", state=state, why=why,
+        of = phase if node_later else r.get("stage", "") if not gd.is_due(r.get("stage", ""), stage) else ""
+        row = dict(r, ref=f"{path}#{r['id']}", state=state, why=why, deferred=of, later=bool(of) and state == "todo",
                    saved=saved if isinstance(saved, dict) else None)
         reqs.append(row)
     current = {r["id"] for r in reqs}
@@ -333,20 +340,24 @@ def node_view(root, path, folder, tests):
                if rid not in current and isinstance(s, dict) and s.get("state") not in (None, "todo")]
     progress = gd.read_progress(gd.table_dir(root, "idea").joinpath(*path.split("/")))
     return {"path": path, "title": data["title"], "cheat": folder.name == gd.CHEAT_KEY, "reqs": reqs,
-            "dropped": dropped, "progress": progress, "log": book["log"], "hasBook": book_path(root, path).is_file()}
+            "phase": phase, "later": sum(1 for r in reqs if r["later"]), "dropped": dropped, "progress": progress, "log": book["log"], "hasBook": book_path(root, path).is_file()}
 
 
-def view(root, feature):
-    """The whole book of a code folder: {feature, keys, nodes, dropped, counts, allowed, reason}."""
+def view(root, feature, phases=None):
+    """The whole book of a code folder: {feature, keys, nodes, dropped, counts, later, stage, allowed, reason}.
+    phases: {node path: phase} when the caller has them (gamedesign.leaf_phases reads them otherwise). Requirements
+    for a later phase that nobody started (`later`) are in no count: total, met and open are the work of now."""
     root = Path(root)
     keys = feature_keys(root, feature)
+    stage = gd.read_stage(root)
+    phases = phases if phases is not None else (gd.leaf_phases(root) if stage else {})
     live, idea = gd.table_dir(root, "live"), gd.table_dir(root, "idea")
     nodes, dropped = [], []
     for key in keys:
         tests = test_names(test_folders(root, key, feature))
         live_leaves = leaves(live, key)
         for path, folder in live_leaves:
-            nodes.append(node_view(root, path, folder, tests))
+            nodes.append(node_view(root, path, folder, tests, phases.get(path, ""), stage))
         known = {p for p, _ in live_leaves}
         # books of nodes that are no longer leaves of live (deleted, moved, or split into children)
         top = idea / key
@@ -363,12 +374,14 @@ def view(root, feature):
     counts = {k: 0 for k in ORDER}
     for n in nodes:
         for r in n["reqs"]:
-            counts[r["state"]] += 1
+            if not r["later"]:
+                counts[r["state"]] += 1
         n["met"] = sum(1 for r in n["reqs"] if r["state"] in MET)
-        n["open"] = [r["ref"] for r in n["reqs"] if r["state"] not in MET]
+        n["open"] = [r["ref"] for r in n["reqs"] if r["state"] not in MET and not r["later"]]
     ok, reason = gd.code_allowed(root, feature)
-    return {"feature": feature, "keys": keys, "nodes": nodes, "dropped": dropped, "counts": counts,
-            "total": sum(len(n["reqs"]) for n in nodes), "met": sum(counts[k] for k in MET),
+    return {"feature": feature, "keys": keys, "nodes": nodes, "dropped": dropped, "counts": counts, "stage": stage,
+            "later": sum(n["later"] for n in nodes),
+            "total": sum(len(n["reqs"]) - n["later"] for n in nodes), "met": sum(counts[k] for k in MET),
             "allowed": ok, "reason": reason}
 
 
@@ -400,8 +413,9 @@ def leaf_status(root, path):
     key = parts[0]
     names = gd.read_code(live / key, key, gd.CODE_ROUND, []) or [gd.suggested_code_name(key) or key]
     tests = test_names([Path(root, "UnityProject", "Assets", "Features", *n.split("/")) for n in names])
-    n = node_view(root, path, folder, tests)
-    return n["reqs"], [r["ref"] for r in n["reqs"] if r["state"] not in MET]
+    stage = gd.read_stage(root)
+    n = node_view(root, path, folder, tests, gd.leaf_phases(root).get(path, "") if stage else "", stage)
+    return n["reqs"], [r["ref"] for r in n["reqs"] if r["state"] not in MET and not r["later"]]
 
 
 # ---------------------------------------------------------------- writing
@@ -454,6 +468,9 @@ def mark(root, feature, refs, action, by, note=None, tests=None, play=None):
         node, req = find_req(v, ref.strip())
         state = req["state"]
         saved = req["saved"] or {}
+        if action in ("doing", "done") and req.get("deferred"):
+            raise ValueError(f"{req['ref']} thuộc giai đoạn {gd.stage_name(req['deferred']) or req['deferred']}, project đang làm "
+                             f"{gd.stage_name(v['stage'])}: để sau, chưa làm. Người đổi giai đoạn đang làm ở tab Game design")
         if action == "doing":
             write(root, node, req, {"state": "doing", "note": check_note(note, True), "tests": saved.get("tests") or [],
                                     "play": saved.get("play") or ""}, by, note)
@@ -523,6 +540,8 @@ def counts_line(v):
     for k in ("done", "doing", "rejected", "changed", "no-test", "todo"):
         if c[k]:
             parts.append(f"{STATE_NAMES[k]} {c[k]}")
+    if v.get("later"):
+        parts.append(f"để sau {v['later']}")
     if v["dropped"]:
         parts.append(f"đã bỏ {len(v['dropped'])}")
     return " · ".join(parts)
@@ -580,10 +599,17 @@ def render(v):
             out += req_line(r)
         out.append("")
     for n in v["nodes"]:
-        out.append(f"## {n['path']}" + ("  ·  CHEAT" if n["cheat"] else "") + f"  ·  {n['title']}  ·  {n['met']}/{len(n['reqs'])}")
+        out.append(f"## {n['path']}" + ("  ·  CHEAT" if n["cheat"] else "") + f"  ·  {n['title']}  ·  {n['met']}/{len(n['reqs']) - n['later']}"
+                   + (f"  ·  để sau {n['later']}" if n["later"] else ""))
         out.append("Tiến độ node: " + progress_note(n))
-        for r in sorted(n["reqs"], key=lambda r: ORDER.index(r["state"])):
+        for r in sorted((r for r in n["reqs"] if not r["later"]), key=lambda r: ORDER.index(r["state"])):
             out += req_line(r)
+        out.append("")
+    waiting = [(n, r) for n in v["nodes"] for r in n["reqs"] if r["later"]]
+    if waiting:
+        out.append(f"## Để sau (thuộc giai đoạn sau; project đang làm {gd.stage_name(v['stage'])}: chưa làm, không tính vào việc còn nợ)")
+        for n, r in waiting:
+            out.append(f"- [{gd.stage_name(r['deferred']) or r['deferred']}] {r['ref']}: {r['title']}")
         out.append("")
     if v["dropped"]:
         out.append("## Đã bỏ (không còn trong live; xoá code hoặc test chỉ phục vụ nó, hoặc gắn lại test cho yêu cầu mới)")
@@ -609,14 +635,18 @@ def brief(root, feature):
 
 def status_all(root):
     """One line per code folder of live: met/total and what waits."""
-    out = ["# Sổ yêu cầu theo feature (đã kiểm/tổng; chờ kiểm là việc của @CodeLead, bị trả và đổi thiết kế là việc của feature)"]
+    stage = gd.read_stage(root)
+    phases = gd.leaf_phases(root) if stage else {}
+    out = ["# Sổ yêu cầu theo feature (đã kiểm/tổng; chờ kiểm là việc của @CodeLead, bị trả và đổi thiết kế là việc của feature)",
+           "Giai đoạn đang làm: " + (gd.stage_name(stage) + " (việc của giai đoạn sau ghi 'để sau', không giao)" if stage else
+                                    "CHƯA ĐẶT: người đặt ở tab Game design; @Manager chưa giao việc dev")]
     for folder, key, declared in gd.live_feature_names(root):
         try:
-            v = view(root, folder)
+            v = view(root, folder, phases)
         except (ValueError, OSError) as ex:
             out.append(f"- {folder}: không đọc được ({ex})")
             continue
-        if not v["total"]:
+        if not v["total"] and not v["later"]:
             continue
         gate = "" if v["allowed"] else " (ĐANG KHOÁ)"
         out.append(f"- {folder}{gate}: {counts_line(v)}")

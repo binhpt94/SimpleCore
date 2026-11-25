@@ -99,7 +99,7 @@ Mode Full Auto thêm mục `## Đã tự quyết`: quyết gì, vì sao, phươn
 - Điểm của người gắn với đúng nội dung ý lúc chấm. Viết lại một ý thì ý đó thành chưa chấm; điểm và phản hồi cũ vẫn nằm trong lịch sử.
 - Người chấm được ở cả bảng đề xuất và bảng `live`; đó là một bộ điểm chung. Một ý đã chốt bị người chấm dưới 5 thì node đề xuất tương ứng cũng thành "cần làm lại" (khi nội dung ý còn giống).
 ## Độ quan trọng của node (tiền đề cho kế hoạch)
-Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn phát triển nào. Ngoài điểm này, dữ liệu theo giai đoạn chỉ được ghi ở mục "Thông số theo giai đoạn" của node vòng 4 (hoặc trong bảng `.excel` của node đó).
+Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn phát triển nào. **Mọi node lá phải có điểm, kể cả một feature mới dừng ở vòng 2 hay một node vòng 3 chưa có con** (nó là node lá cho tới khi có con). Project làm theo giai đoạn: người đặt "giai đoạn đang làm" (dòng `guard:` và `gd_status.py` nêu nó). Node của giai đoạn đang làm và trước đó là **tới hạn**: phải viết tới vòng 4 (`gd_status.py`, mục "Cần thiết kế tới vòng 4"). Node của giai đoạn sau (và node tuỳ chọn) là **để sau**: chỉ cần tóm tắt và các ý cốt lõi đủ để biết nó là gì và nối với feature nào; không đào sâu thêm khi chưa tới giai đoạn của nó (máy không chặn, nhưng đó là công bỏ ra sớm và sẽ phải làm lại). Người đổi giai đoạn thì `gd_status.py` liệt kê các node vừa tới hạn. Chưa đặt giai đoạn: mọi node coi như tới hạn. Ngoài điểm này, dữ liệu theo giai đoạn chỉ được ghi ở mục "Thông số theo giai đoạn" của node vòng 4 (hoặc trong bảng `.excel` của node đó).
 
 | Điểm | Giai đoạn | Nghĩa |
 |---|---|---|

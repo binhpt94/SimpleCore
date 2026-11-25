@@ -206,6 +206,7 @@ LIVE_CACHE = {"at": 0.0, "value": {}}
 LIVE_LOCK = threading.Lock()
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
+              "/api/gamedesign/stage": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/gamedesign/requirement": 64 * 1024, "/api/vscode-groups": MAX_BODY,
               "/api/references/upload": 12 * 1024 * 1024, "/api/references/note": 64 * 1024,
@@ -899,6 +900,18 @@ def set_mode(pin, mode):
     return {"ok": True, "data": sync_page.write_gamedesign(ROOT)}
 
 
+def set_stage(pin, stage):
+    """The "Đang làm" switch of the Game design tab: the phase the project is built for now (IDEA, PROTOTYPE,
+    FULL). Needs the PIN: it decides which nodes must reach round 4 and which requirements are work."""
+    if stage not in gamedesign.stages():      # before the PIN: a bad request must not cost a try
+        return {"ok": False, "error": f"giai đoạn phải là một trong {gamedesign.stages()}"}
+    error = bind_session.check_pin(guard.STORE_DIR, pin)
+    if error:
+        return {"ok": False, "error": error}
+    gamedesign.write_stage(ROOT, stage)
+    return {"ok": True, "data": sync_page.write_gamedesign(ROOT)}
+
+
 def answer(path, answers):
     """The OK button of the questions panel: stores the human's choices beside the node. No PIN: it changes
     nothing in live, and the page token already shows the request comes from the page this server served."""
@@ -1344,6 +1357,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, sync_live(str(data.get("pin") or "")))
             if self.path == "/api/gamedesign/mode":
                 return self.send_json(200, set_mode(str(data.get("pin") or ""), data.get("mode")))
+            if self.path == "/api/gamedesign/stage":
+                return self.send_json(200, set_stage(str(data.get("pin") or ""), data.get("stage")))
             if self.path == "/api/gamedesign/answers":
                 return self.send_json(200, answer(data.get("path"), data.get("answers")))
             if self.path == "/api/sessions/reread":

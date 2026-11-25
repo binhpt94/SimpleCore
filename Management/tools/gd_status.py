@@ -220,6 +220,22 @@ def report(root, arg=""):
         if following:
             out.append(f"- Chỉ theo ref, tự chốt khi node gốc được chốt ({len(following)}): "
                        + ", ".join(f"{n['path']} ← {', '.join(r or '(gốc)' for r in n['followOf']) or 'dòng refs'}" for n in following))
+    # the stage the project is in: which nodes still have to be written down to the last round, which only wait
+    stage = snap["stage"]["stage"]
+    names = {ph["key"]: ph["name"] for ph in gd.PHASES}
+    if not stage:
+        out += ["", "## Giai đoạn đang làm: CHƯA ĐẶT (người đặt ở tab Game design; cho tới lúc đó mọi node coi như tới hạn, "
+                    "và @Manager chưa giao việc dev)"]
+    else:
+        deepen = [n for n in gd.walk(node) if n.get("deepen")]
+        later = [n for n in gd.walk(node) if not n.get("due", True) and not n["children"]]
+        out += ["", f"## Giai đoạn đang làm: {names[stage]} (chỉ node của giai đoạn này và trước đó phải tới vòng {len(gd.ROUNDS)})"]
+        out.append(f"### Cần thiết kế tới vòng {len(gd.ROUNDS)} ({len(deepen)})")
+        out += [f"- {n['path'] or '(gốc)'} (đang ở vòng {n['round']}, {names.get(n['priority'].get('phase'), 'chưa chấm độ quan trọng')}): {n['title']}"
+                for n in deepen] or ["- không còn node nào"]
+        out.append(f"### Để sau: thuộc giai đoạn sau, không đào sâu thêm, yêu cầu code chưa giao ({len(later)})")
+        out += [f"- {n['path']} ({names.get(n['priority'].get('phase'), n['priority'].get('phase'))}, vòng {n['round']}): {n['title']}"
+                for n in later] or ["- không có"]
     owed = [n for n in gd.walk(node) if n.get("gptOwed")]
     if owed:
         out += ["", f"## Chưa hỏi GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}; nhờ DesignAdvisor qua hộp thư dispatch.py send, kể cả node đã chốt)"] + [

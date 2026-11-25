@@ -42,6 +42,7 @@ Vòng 2 luôn có ba node sau, với đúng key và `code.json` này (không c�
 | `feature-popup` | `{"unity": ["_Services/Popup"]}` | Dịch vụ hiện popup. Khác với từng popup: mỗi popup là một feature riêng |
 
 - Tạo ba node này cùng lúc chia feature, viết và chấm điểm như mọi feature khác, rồi đi tiếp vòng 3, 4.
+- **Feature theo giai đoạn:** chấm điểm độ quan trọng (`priority.json`) cho mỗi feature ngay khi viết node vòng 2, lúc nó còn là node lá: điểm đó nói feature thuộc giai đoạn nào. Chỉ feature **tới hạn** (giai đoạn đang làm hoặc trước đó; `gd_status.py` mục "Cần thiết kế tới vòng 4") mới đi tiếp vòng 3, 4. Feature **để sau** dừng ở vòng 2: tóm tắt và ý cốt lõi đủ để biết nó là gì và nối với feature nào; tới giai đoạn của nó mới đào sâu. Ba feature hạ tầng luôn tới hạn ở IDEA.
 - `gd_status.py` in mục "Thiếu feature hạ tầng" khi còn thiếu node hoặc `code.json` chưa đúng.
 - Chúng bị khoá code như mọi feature cho tới khi nhánh của chúng có vòng 4 đã chốt trong `live`.
 

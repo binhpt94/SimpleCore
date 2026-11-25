@@ -860,6 +860,17 @@ def empty_folder(full):
     return True
 
 
+def stage_set(root):
+    """True when the human has set the phase the project is in (stage.json). Read straight from the file: this gate
+    must not depend on the design code loading."""
+    try:
+        with open(os.path.join(root, "Management", "game-design", "stage.json"), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return False
+    return isinstance(data, dict) and data.get("stage") in ("idea", "prototype", "full")
+
+
 def gamedesign_module(root):
     tools = os.path.join(root, "Management", "tools")
     if tools not in sys.path:
@@ -1693,6 +1704,12 @@ def decide(data, session_value, root, store=None):
             if sender != role:
                 return "deny", f"--from must name this chat's own role ({role or 'none'})"
             if target in allowed or ("feature" in allowed and not target.startswith("@")):
+                # development work is handed out only once the human has said which phase the project is in
+                dev = not target.startswith("@") or target == "@Core"
+                if role == "@Manager" and dev and not stage_set(root):
+                    return "deny", ("the phase the project is being built for is not set yet (Management/game-design/stage.json): "
+                                    "ask the human which phase to work on (IDEA, PROTOTYPE or FULL); they set it on the page, "
+                                    "tab Game design, 'Đang làm'. Until then no development work goes to a feature, a service or @Core")
                 return "allow", f"{role} sends a message to the inbox of {target}"
             return "deny", (f"{role or 'this chat'} may not send to the inbox of {target}"
                             + (f" (only: {', '.join(allowed)})" if allowed else ""))

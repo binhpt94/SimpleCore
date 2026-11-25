@@ -14,6 +14,9 @@ Vòng 3 là nơi quyết định các quan hệ và định nghĩa, hiện thự
 - Danh sách: vật phẩm gồm Bình HP lớn, Bình HP nhỏ.
 - Thưởng-phạt: chết mất MỘT hoặc NHIỀU vật phẩm.
 
+## Node để sau
+Node vòng 3 thuộc giai đoạn sau giai đoạn đang làm (điểm độ quan trọng của chính nó khi chưa có con; `gd_status.py` mục "Để sau") dừng ở đây: không viết vòng 4 cho nó khi chưa tới giai đoạn. Node tới hạn thì viết tiếp vòng 4.
+
 ## Chưa viết (để vòng 4)
 - **Con số chính xác và kĩ thuật.** Sai: "Bình HP lớn = 500 HP". Đúng: "Bình HP lớn hồi nhiều hơn Bình HP nhỏ".
 - **Trường hợp biên, ngoại lệ.** Vòng 3 chỉ gồm các quyết định tất yếu cơ bản. Sai: "Hero HP = 0 thì chết, nhưng sẽ hồi sinh khi dùng thuốc hồi sinh". Đúng: "Hero HP = 0 thì chết".

@@ -367,6 +367,84 @@ def write_mode(root, mode):
     write_json(Path(root).joinpath(*BASE, MODE_FILE), {"mode": mode, "at": now()})
 
 
+# The phase the project is being built for now (stage.json beside mode.json; only the human sets it, on the page,
+# with the PIN). A node whose own phase is that one or an earlier one is due: it must be designed down to round 4 and
+# its requirements are work. A node of a later phase (or an optional one) is only defined for now. No file: not set,
+# every node is due as before, and @Manager may not hand out development work (guard.py).
+STAGE_FILE = "stage.json"
+
+
+def stages():
+    """The phases a project can be in, first to last: every phase but the optional one."""
+    return [ph["key"] for ph in PHASES if ph["min"] > 1]
+
+
+def stage_name(key):
+    return next((ph["name"] for ph in PHASES if ph["key"] == key), "")
+
+
+def read_stage_info(root):
+    """{"stage": '' or a phase key, "at": when it was set}."""
+    try:
+        data = read_json(Path(root).joinpath(*BASE, STAGE_FILE))
+    except ValueError:
+        data = None
+    stage = data.get("stage") if isinstance(data, dict) else None
+    return {"stage": stage if stage in stages() else "", "at": (data.get("at") or "") if isinstance(data, dict) and stage in stages() else ""}
+
+
+def read_stage(root):
+    return read_stage_info(root)["stage"]
+
+
+def write_stage(root, stage, by="người"):
+    if stage not in stages():
+        raise ValueError(f"giai đoạn phải là một trong {', '.join(stages())}")
+    write_json(Path(root).joinpath(*BASE, STAGE_FILE), {"stage": stage, "at": now(), "by": by})
+
+
+def is_due(phase, stage):
+    """True when a node of `phase` is to be built in the project's `stage`: no stage set, or no phase yet (it must
+    be scored first), or a phase not later than the stage. An optional node is never due once a stage is set."""
+    order = stages()
+    if not stage or not phase:
+        return True
+    return phase in order and order.index(phase) <= order.index(stage)
+
+
+def mark_due(tree, stage):
+    """Sets on every node `priority.top` (the highest score of the leaves below, finished ones too: `effective`
+    leaves a finished branch without a score), `due` (is_due of its phase) and `deepen`: a due leaf that is not at the last round yet
+    (the glossary and a cheat node never go deeper), so its branch still has to be written down to round 4."""
+    def top(n):      # the highest score below, done or not: the phase a branch belongs to once its work is over
+        below = [t for t in (top(c) for c in n["children"]) if t is not None]
+        own = n["priority"].get("effective")
+        n["priority"]["top"] = max(below) if below else own
+        return n["priority"]["top"]
+    if tree:
+        top(tree)
+    for n in walk(tree) if tree else []:
+        n["due"] = is_due(n["priority"].get("phase", ""), stage)
+        fixed = n.get("cheat") or (n["round"] == CODE_ROUND and n["key"] == GLOSSARY_KEY)
+        n["deepen"] = bool(stage) and n["due"] and not n["children"] and n["round"] < len(ROUNDS) and not fixed
+
+
+def leaf_phases(root):
+    """{path: phase key} of every node of the proposed tree, from the stored scores alone (no data.md is read):
+    what the requirement book needs to tell the work of this stage from the work of a later one."""
+    def node(folder, path, depth):
+        kids = sorted(c for c in folder.iterdir() if c.is_dir() and not c.name.startswith(".") and (c / DATA_FILE).is_file())
+        return {"path": path, "key": folder.name if path else "", "title": path, "round": depth,
+                "priority": read_priority(folder), "progress": read_progress(folder),
+                "children": [node(c, f"{path}/{c.name}" if path else c.name, depth + 1) for c in kids]}
+    top = table_dir(root, "idea")
+    if not top.is_dir():
+        return {}
+    tree = node(top, "", 1)
+    mark_priority(tree)
+    return {n["path"]: n["priority"].get("phase", "") for n in walk(tree)}
+
+
 # ---------------------------------------------------------------- data.md
 def parse_data(text):
     """{based_on, refs, title, summary, items: [{id, text, ai, hash, by, sources}], nodeBy, dropped, hash, errors} of a
@@ -2522,7 +2600,10 @@ def feature_rows(idea, live, views):
                                    or (n["passed"] and n.get("state") != "same") for n in below)
         redo = any(n["redo"] for n in below)
         layout = any(n.get("uiWait") for n in below)
+        shallow = [n["path"] for n in below if n.get("deepen")]
         base = {"path": node["path"], "key": node["key"], "title": node["title"], "design": design, "clash": clash,
+                "phase": node["priority"].get("phase", ""), "due": node.get("due", True), "deepen": shallow,
+                "home": phase_of(node["priority"].get("top")),      # the phase the feature belongs to, finished or not
                 "roundIdea": max(n["round"] for n in below),
                 "roundLive": max((n["round"] for n in walk(live_node)), default=0) if live_node else 0,
                 "leaves": [sum(1 for n in leaves if n["progress"][idea_key]["state"] == "done"), len(leaves)]}
@@ -2530,7 +2611,7 @@ def feature_rows(idea, live, views):
             v = views.get(gate["unity"]) if gate["unity"] else None
             reqs = ({"met": v["met"], "total": v["total"], "counts": v["counts"], "dropped": len(v["dropped"])}
                     if v and v["total"] else None)
-            waiting = (["@GameDesigner"] if redo else []) + (["@UIDesigner"] if layout else []) + (["người"] if human else [])
+            waiting = (["@GameDesigner"] if redo or shallow else []) + (["@UIDesigner"] if layout else []) + (["người"] if human else [])
             if reqs and gate["ok"]:
                 c = reqs["counts"]
                 if c.get("done"):
@@ -3118,6 +3199,10 @@ def snapshot(root):
     for n in walk(live):      # importance and progress are kept with the proposed node; the fixed node shows them
         if n["path"] in ranked:
             n["priority"], n["progress"] = ranked[n["path"]]["priority"], ranked[n["path"]]["progress"]
+    stage = read_stage_info(root)
+    mark_due(idea, stage["stage"])
+    mark_due(live, stage["stage"])
+    phases = {n["path"]: n["priority"].get("phase", "") for n in walk(idea)}
     for n in walk(live):      # whether each named feature folder may be coded now (the gate guard.py applies)
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
     for n in walk(idea):
@@ -3126,10 +3211,12 @@ def snapshot(root):
     books, views = {}, {}
     for folder, _, _ in live_feature_names(root):
         try:
-            views[folder] = reqbook.view(root, folder)
+            views[folder] = reqbook.view(root, folder, phases)
             for bn in views[folder]["nodes"]:
                 books[bn["path"]] = {"met": bn["met"], "open": len(bn["open"]), "hasBook": bn["hasBook"], "feature": folder,
+                                     "later": bn["later"],
                                      "items": [{"ref": r["ref"], "id": r["id"], "kind": r["kind"], "title": r["title"],
+                                                "later": r["later"],
                                                 "state": r["state"], "why": r["why"], "hint": r.get("hint", ""),
                                                 "note": (r["saved"] or {}).get("note", ""), "tests": (r["saved"] or {}).get("tests", []),
                                                 "play": (r["saved"] or {}).get("play", ""), "by": (r["saved"] or {}).get("by", ""),
@@ -3149,6 +3236,6 @@ def snapshot(root):
         for n in walk(tree):
             n.pop("refText", None)      # read by glossary_view only; the page does not need a second copy
     features = feature_rows(idea, live, views)
-    return {"features": features, "rounds": ROUNDS, "mode": mode, "frameCss": font_css(embed=False) + "\n" + FRAME_CSS,"screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "reqStates": __import__("reqbook").STATE_NAMES, "live": live, "idea": idea,
+    return {"features": features, "rounds": ROUNDS, "mode": mode, "stage": stage, "stages": stages(), "frameCss": font_css(embed=False) + "\n" + FRAME_CSS,"screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "reqStates": __import__("reqbook").STATE_NAMES, "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
             "missingCode": missing_code(idea)}

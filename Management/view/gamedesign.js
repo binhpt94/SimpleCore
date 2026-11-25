@@ -74,6 +74,11 @@
     ".gd-card span.id { display: block; margin-top: 2px; font: 11px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--muted); white-space: nowrap; overflow: hidden; cursor: copy; }",
     ".gd-card span.id:hover { color: var(--accent); }",
     ".gd-card.follow { border-left-color: var(--muted); }",
+    ".gd-group select { font: inherit; font-size: 13px; padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); }",
+    ".gd-group select.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }",
+    ".gd-tag.later { border-style: dashed; color: var(--muted); }",
+    ".gd-tag.deepen { border-color: var(--clash); color: var(--clash); }",
+    ".gd-ftable tr.dim { opacity: .35; }",
     ".gd-chip.follow { border-style: dashed; color: var(--muted); text-decoration: none; }",
     ".gd-chip.branch.follow { border-color: var(--muted); color: var(--muted); font-weight: 400; }",
     ".gd-tag.pull { border-color: var(--warn-text); color: var(--warn-text); }",
@@ -309,7 +314,7 @@
     ".gd-history li { padding: 8px 0; border-bottom: 1px solid var(--line); }",
     ".gd-history time { display: block; font-size: 12px; color: var(--muted); }",
     ".gd-history .out { color: var(--bad); }",
-    ".gd-card.dim, .gd-chips.dim { opacity: .28; }",
+    ".gd-card.dim, .gd-chips.dim, .gd-mini.dim { opacity: .28; }",
     ".gd-tag.ph { font-weight: 600; }",
     ".gd-tag.cheat { border-color: var(--warn-text); color: var(--warn-text); font-weight: 600; }",
     ".gd-tag.ph-idea { border-color: var(--accent); background: var(--accent); color: var(--panel); }",
@@ -427,10 +432,11 @@
   };
 
   // Xếp chỗ: mỗi vòng một cột; lá chiếm một hàng, cha nằm giữa các con.
-  var layout = function (root, focus, lastRound) {
+  var layout = function (root, focus, lastRound, order) {
     var placed = [], rows = 0;
     var place = function (node, parent) {
       var kids = shownChildren(node, focus, lastRound);
+      if (order) kids = order(kids);
       var item = { node: node, parent: parent, hidden: node.children.length - kids.length, row: 0 };
       placed.push(item);
       if (!kids.length) { item.row = rows++; return item; }
@@ -519,7 +525,8 @@
     // view: "tree" (bản đồ) | "table" (mỗi feature một dòng); expandAll: bản đồ cả cây, mọi vòng; query: chữ lọc
     // feature (lưới và bảng); needAll: ô "Cần tôi" hiện mọi dòng; sort: cột đang xếp của bảng.
     var state = { table: "live", focus: null, selected: null, message: null, ask: null, phase: null, onlyChanged: false,
-                  view: "tree", expandAll: false, query: "", needAll: false, sort: null };
+                  view: "tree", expandAll: false, query: "", needAll: false, sort: null,
+                  filter: { due: "all", review: "all", code: "all" } };
     // Chỉ là tiện lợi của người xem (trình duyệt này): thiếu hay lỗi thì trang vẫn chạy với mặc định.
     var PREFS_KEY = "coresimple.gamedesign.view";
     try {
@@ -531,12 +538,16 @@
         state.query = typeof saved.query === "string" ? saved.query : "";
         state.focus = typeof saved.focus === "string" ? saved.focus : null;
         state.selected = typeof saved.selected === "string" ? saved.selected : null;
+        ["due", "review", "code"].forEach(function (k) {
+          if (saved.filter && typeof saved.filter[k] === "string") state.filter[k] = saved.filter[k];
+        });
       }
     } catch (e) { /* không có localStorage */ }
     var savePrefs = function () {
       try {
         window.localStorage.setItem(PREFS_KEY, JSON.stringify({ table: state.table, view: state.view, expandAll: state.expandAll,
-                                                               query: state.query, focus: state.focus, selected: state.selected }));
+                                                               query: state.query, focus: state.focus, selected: state.selected,
+                                                               filter: state.filter }));
       } catch (e) { /* không có localStorage */ }
     };
 
@@ -759,11 +770,60 @@
       return tag;
     };
     // Lọc theo giai đoạn là cộng dồn: chọn PROTOTYPE thì node của IDEA cũng sáng.
+    // Ba bộ lọc thêm (Hạn, Duyệt, Code): mỗi bộ một lựa chọn, kết hợp bằng "và". Node không khớp bị làm mờ; node cha
+    // vẫn sáng khi bên dưới có node khớp, để còn thấy đường tới nó.
+    var reqItems = function (n) { return n.reqs && n.reqs.items ? n.reqs.items.filter(function (r) { return !r.later; }) : []; };
+    var hasState = function (n, states) { return reqItems(n).some(function (r) { return states.indexOf(r.state) >= 0; }); };
+    var FILTERS = [
+      { key: "due", name: "Hạn", hint: "Theo giai đoạn đang làm của project", options: [
+        ["all", "Tất cả", null],
+        ["due", "Tới hạn", function (n) { return n.due !== false; }],
+        ["later", "Để sau", function (n) { return n.due === false; }],
+        ["deepen", "Cần đào tới vòng 4", function (n) { return !!n.deepen; }]] },
+      { key: "review", name: "Duyệt", hint: "Theo trạng thái duyệt của node (bảng đề xuất)", options: [
+        ["all", "Tất cả", null],
+        ["root", "Thay đổi gốc", function (n) { return n.passed && n.state !== "same" && !n.follow; }],
+        ["follow", "Theo ref", function (n) { return own(n) === "follow"; }],
+        ["redo", "Cần làm lại", function (n) { return own(n) === "redo"; }],
+        ["score", "Chờ tôi chấm", function (n) { return own(n) === "todo" && !n.passed; }],
+        ["ui", "Chờ @UIDesigner", function (n) { return own(n) === "ui"; }],
+        ["ok", "Đã duyệt", function (n) { return own(n) === "ok"; }]] },
+      { key: "code", name: "Code", hint: "Theo sổ yêu cầu của node lá và cổng code của feature", options: [
+        ["all", "Tất cả", null],
+        ["open", "Còn việc", function (n) { return hasState(n, ["todo", "doing", "rejected", "changed", "no-test"]); }],
+        ["doing", "Đang làm", function (n) { return hasState(n, ["doing"]); }],
+        ["done", "Chờ kiểm", function (n) { return hasState(n, ["done"]); }],
+        ["back", "Bị trả hoặc đổi thiết kế", function (n) { return hasState(n, ["rejected", "changed", "no-test"]); }],
+        ["met", "Xong", function (n) { return reqItems(n).length > 0 && !hasState(n, ["todo", "doing", "rejected", "changed", "no-test", "done"]); }],
+        ["later", "Có việc để sau", function (n) { return !!(n.reqs && n.reqs.later); }],
+        ["locked", "Khoá code", function (n) { return (n.codeGate || []).some(function (g) { return !g.ok; }); }]] }
+    ];
+    var filterTest = function (f, value) {
+      var opt = f.options.filter(function (o) { return o[0] === value; })[0];
+      return opt ? opt[2] : null;
+    };
+    var filtering = function () { return FILTERS.some(function (f) { return !!filterTest(f, state.filter[f.key]); }); };
+    var fits = function (n) {
+      return FILTERS.every(function (f) { var t = filterTest(f, state.filter[f.key]); return !t || t(n); });
+    };
+    var fitsBelow = function (n) { return fits(n) || n.children.some(fitsBelow); };
+    // Thứ tự hiện: node tới hạn và đang sáng lên trước (giai đoạn sớm trước), rồi node để sau, cuối cùng là node bị làm
+    // mờ. Cùng nhóm thì giữ thứ tự trong cây.
+    var dueGroup = function (n) { return !n ? 0 : !needed(n) ? 2 : n.due === false ? 1 : 0; };
+    var dueFirst = function (nodes) {
+      var group = dueGroup;
+      var early = function (n) { var r = rank(n), t = r.top !== null && r.top !== undefined ? r.top : r.effective; return t === null || t === undefined ? 1 : -t; };
+      return nodes.map(function (n, i) { return { n: n, i: i, g: group(n), e: early(n) }; })
+        .sort(function (a, b) { return a.g - b.g || a.e - b.e || a.i - b.i; })
+        .map(function (x) { return x.n; });
+    };
     var needed = function (node) {
       var p = state.phase ? phase(state.phase) : null;
-      if (!p) return true;
-      var e = rank(node).effective;
-      return e !== null && e !== undefined && e >= p.min;
+      if (p) {      // điểm cao nhất bên dưới, kể cả lá đã xong: nhánh đã làm xong vẫn thuộc giai đoạn của nó
+        var r = rank(node), e = r.top !== null && r.top !== undefined ? r.top : r.effective;
+        if (!(e !== null && e !== undefined && e >= p.min)) return false;
+      }
+      return !filtering() || fitsBelow(node);
     };
     // So với live (bảng đề xuất): gamedesign.py tính sẵn n.diff và it.change ("new" | "rewritten" | "same").
     var diffOf = function (n) {
@@ -1044,12 +1104,47 @@
           (ctx.setup ? "" : " Cần mở trang qua setup_server.py.");
         sync.disabled = !ready || !ctx.setup;
 
+        var stageNow = data.stage ? data.stage.stage : "";
+        var stageBox = group("Đang làm 🔒", "Giai đoạn project đang làm. Chỉ node của giai đoạn này và trước đó phải thiết kế tới vòng 4 " +
+          "và là việc dev; node của giai đoạn sau chỉ định nghĩa để đó. Đổi cần PIN." + (data.stage && data.stage.at ? " Đặt lúc " + data.stage.at + "." : ""));
+        (data.stages || []).forEach(function (key) {
+          var ph = phase(key) || { name: key, label: "" };
+          var b = put(stageBox, button(ph.name, function () { if (key !== stageNow) ask({ kind: "stage", key: key }); }, stageNow === key));
+          b.title = ph.label + (ctx.setup ? ". Đặt giai đoạn đang làm cần PIN." : ". Muốn đặt: mở trang qua setup_server.py.");
+          if (!ctx.setup && stageNow !== key) b.disabled = true;
+        });
+        if (!stageNow) add(stageBox, el("span", "bad-text", "chưa đặt"));
+
         var modes = group("Mode 🔒", "Cách @GameDesigner làm việc. Đổi mode cần PIN.");
         MODES.forEach(function (m) {
           var b = put(modes, button(m.label, function () { if (m.key !== mode()) ask({ kind: "mode", key: m.key }); }, mode() === m.key));
           b.title = m.hint + (ctx.setup ? " Đổi mode cần PIN." : " Muốn đổi mode: mở trang qua setup_server.py.");
           if (!ctx.setup && mode() !== m.key) b.disabled = true;
         });
+      }
+      if (data && tree()) {
+        var all = [], hit = 0;
+        each(tree(), function (n) { all.push(n); });
+        var filterBox = group("Lọc", "Làm mờ node không khớp. Mỗi bộ chọn một giá trị, kết hợp bằng \"và\"; node cha vẫn sáng khi bên dưới có node khớp.");
+        FILTERS.forEach(function (f) {
+          if (f.key === "review" && state.table !== "idea") return;
+          add(filterBox, el("span", "gd-group-name", f.name));
+          var sel = put(filterBox, el("select", state.filter[f.key] !== "all" ? "on" : ""));
+          sel.title = f.hint;
+          sel.setAttribute("aria-label", "Lọc theo " + f.name);
+          f.options.forEach(function (o) {
+            var count = o[2] ? all.filter(o[2]).length : all.length;
+            var opt = put(sel, el("option", "", o[1] + " (" + count + ")"));
+            opt.value = o[0];
+            if (state.filter[f.key] === o[0]) opt.selected = true;
+          });
+          sel.addEventListener("change", function () { state.filter[f.key] = sel.value; render(); });
+        });
+        if (filtering()) {
+          all.forEach(function (n) { if (fits(n)) hit++; });
+          add(filterBox, el("span", "muted", "khớp " + hit + "/" + all.length + " node"));
+          put(filterBox, button("Bỏ lọc", function () { state.filter = { due: "all", review: "all", code: "all" }; render(); }));
+        }
       }
       add(bar, el("span", "gd-time", data && data.generatedAt ? "Đọc lúc " + data.generatedAt.replace("T", " ") : ""));
     };
@@ -1059,7 +1154,10 @@
       if (state.ask && ctx.setup) {
         // Một khung xác nhận dùng chung cho mọi nút cần PIN: nói rõ sẽ làm gì, rồi mới hỏi PIN.
         var target = state.ask.kind === "mode" ? MODES.filter(function (m) { return m.key === state.ask.key; })[0] : null;
-        var what = target ? "Đổi sang " + target.label + ": " + target.hint
+        var stageTo = state.ask.kind === "stage" ? (phase(state.ask.key) || { key: state.ask.key, name: state.ask.key, label: "" }) : null;
+        var what = stageTo ? "Đặt giai đoạn đang làm: " + stageTo.name + " (" + stageTo.label + "). Node của giai đoạn này và trước đó phải thiết kế " +
+            "tới vòng 4 và thành việc dev; node của giai đoạn sau chỉ định nghĩa để đó, yêu cầu code của chúng ghi \"để sau\"."
+          : target ? "Đổi sang " + target.label + ": " + target.hint
           : "Sync: chép " + syncable() + " node đang đạt sang live (bảng đã chốt), ghi đè bản cũ của các node đó: " +
             syncList().map(trail).join(" · ") + ".";
         var confirmBox = put(noticeBox, el("div", "gd-confirm gd-inline"));
@@ -1072,7 +1170,12 @@
         var go = function () {
           if (!pin.value) { pin.focus(); return; }
           var failed = function (text) { say("Không thực hiện: " + text); };
-          if (target) {
+          if (stageTo) {
+            send("/api/gamedesign/stage", { pin: pin.value, stage: stageTo.key }, function () {
+              state.ask = null;
+              return "Đang làm: " + stageTo.name + ".";
+            }, failed);
+          } else if (target) {
             send("/api/gamedesign/mode", { pin: pin.value, mode: target.key }, function () {
               state.ask = null;
               return "Đã đổi sang " + target.label + ".";
@@ -1085,9 +1188,13 @@
           }
         };
         pin.addEventListener("keydown", function (e) { if (e && e.key === "Enter") go(); });
-        add(confirmBox, button(target ? "Đổi mode" : "Sync", go, null, "gd-btn main"), button("Thôi", function () { state.ask = null; render(); }));
+        add(confirmBox, button(stageTo ? "Đặt giai đoạn" : target ? "Đổi mode" : "Sync", go, null, "gd-btn main"), button("Thôi", function () { state.ask = null; render(); }));
       }
       if (state.message) add(noticeBox, el("p", state.message.bad ? "bad-text" : "ok-text", state.message.text));
+      if (data && data.stages && !(data.stage && data.stage.stage)) {
+        add(noticeBox, el("p", "bad-text", "Chưa đặt giai đoạn đang làm (nhóm \"Đang làm\" ở thanh trên): @Manager chưa giao được việc dev cho " +
+          "feature, và mọi node đang được coi là phải thiết kế tới vòng 4."));
+      }
       renderNeeds();
       // Mọi node khác live mà chưa đạt: AI đã đổi, đang chờ bạn chấm hoặc chờ @GameDesigner làm lại. Gập sẵn: việc
       // của bạn trong đó đã có ở ô "Cần tôi".
@@ -1201,7 +1308,7 @@
       if (idea) statusChips(root).forEach(function (c) { add(head, c); });
       var features = root.children.filter(function (c) { return c.round === FOCUS_ROUND; });
       var grid = el("div", "gd-grid");
-      var visible = function () { return features.filter(function (f) { return matches(f.key, f.title); }); };
+      var visible = function () { return dueFirst(features.filter(function (f) { return matches(f.key, f.title); })); };
       var fill = function () {
         grid.textContent = "";
         visible().forEach(function (n) {
@@ -1251,6 +1358,7 @@
       var cols = [
         { key: "feature", label: "Feature", value: function (r) { return plain(r.title); } },
         { key: "round", label: "Vòng đề xuất / live", value: function (r) { return r.roundLive * 10 + r.roundIdea; } },
+        { key: "phase", label: "Giai đoạn", value: function (r) { var p = phase(r.home || r.phase); return p ? -p.min : 1; } },
         { key: "gate", label: "Cổng code", value: function (r) { return r.gate.ok ? 1 : 0; } },
         { key: "reqs", label: "Yêu cầu", value: function (r) { return r.reqs ? r.reqs.met / Math.max(r.reqs.total, 1) : -1; } },
         { key: "clash", label: "Ý trái nhau", value: function (r) { return r.clash; } },
@@ -1260,7 +1368,11 @@
       if (withSession) cols.push({ key: "session", label: "Phiên", value: function (r) { return sessionOf(r); } });
       var sort = state.sort || { key: "needs", dir: -1 };
       var by = cols.filter(function (c) { return c.key === sort.key; })[0] || cols[cols.length - 1];
+      // Tới hạn trước, rồi để sau, cuối cùng là hàng bị làm mờ; trong mỗi nhóm mới xếp theo cột đang chọn.
+      var groupOf = {};
+      rows.forEach(function (r) { groupOf[r.path] = dueGroup(data.idea ? find(data.idea, r.path) : null); });
       rows = rows.slice().sort(function (a, b) {
+        if (groupOf[a.path] !== groupOf[b.path]) return groupOf[a.path] - groupOf[b.path];
         var x = by.value(a), y = by.value(b);
         if (x < y) return -sort.dir;
         if (x > y) return sort.dir;
@@ -1271,7 +1383,8 @@
       var fill = function () {
         tbody.textContent = "";
         visible().forEach(function (r) {
-          var tr = put(tbody, el("tr"));
+          var rowNode = data.idea ? find(data.idea, r.path) : null;
+          var tr = put(tbody, el("tr", rowNode && !needed(rowNode) ? "dim" : ""));
           tr.tabIndex = 0;
           var open = function () {
             var node = data.idea ? find(data.idea, r.path) : null;
@@ -1287,6 +1400,12 @@
           };
           cell(r.title, r.unity || "(chưa khai thư mục code)");
           cell(r.roundIdea + " / " + r.roundLive, DESIGN_TEXT[r.design] || "");
+          // Giai đoạn của feature (theo điểm cao nhất bên dưới, kể cả phần đã xong); dòng nhỏ: phần còn lại thuộc giai đoạn nào.
+          var rp = phase(r.home || r.phase), rest = phase(r.phase);
+          cell(rp ? rp.name : "chưa chấm",
+               (r.deepen || []).length ? r.deepen.length + " node cần tới vòng 4"
+                 : !rp ? "" : !rest ? "đã xong" : r.due === false ? (rest.key !== rp.key ? "phần còn lại: " + rest.name + ", để sau" : "để sau") : rest.key !== rp.key ? "phần còn lại: " + rest.name : "",
+               r.due === false ? "muted" : "");
           var gate = cell(r.gate.ok ? "ĐƯỢC CODE" : "ĐANG KHOÁ", "", r.gate.ok ? "ok-text" : "bad-text");
           gate.title = r.gate.reason || "";
           if (r.reqs) {
@@ -1385,6 +1504,16 @@
           out.push(go);
         }
       }
+      if (n.due === false) {
+        var ph = phase(rank(n).phase);
+        var laterTag = el("span", "gd-tag later", "Để sau · " + (ph ? ph.name : "tuỳ chọn"));
+        laterTag.title = "Node của giai đoạn sau giai đoạn đang làm: chỉ định nghĩa để đó, chưa cần đào sâu; yêu cầu code của nó chưa giao.";
+        out.push(laterTag);
+      } else if (n.deepen) {
+        var deepTag = el("span", "gd-tag deepen", "Cần tới vòng 4");
+        deepTag.title = "Node tới hạn của giai đoạn đang làm nhưng mới ở vòng " + n.round + ": @GameDesigner phải viết tiếp tới vòng 4.";
+        out.push(deepTag);
+      }
       var pulls = n.followers || { ready: [], redo: [] };
       if (n.state !== "same" && !n.follow && (pulls.ready.length || pulls.redo.length)) {
         var pull = el("span", "gd-tag pull", "Kéo theo " + (pulls.ready.length + pulls.redo.length));
@@ -1427,7 +1556,7 @@
       mapBox.textContent = "";
       var rounds = data.rounds || [];
       var lastRound = state.focus !== null || state.expandAll ? rounds.length : Math.min(OVERVIEW_LAST_ROUND, rounds.length);
-      var plan = layout(root, state.focus, lastRound);
+      var plan = layout(root, state.focus, lastRound, dueFirst);
       var colX = function (round) { return (round - 1) * (CARD_W + GAP_X); };
       var rowY = function (row) { return HEAD_H + row * (CARD_H + GAP_Y); };
       var width = colX(lastRound) + CARD_W, height = rowY(plan.rows) - GAP_Y;

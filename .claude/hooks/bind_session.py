@@ -266,6 +266,20 @@ def req_brief(root, feature):
         return f"Sổ yêu cầu: không đọc được ({ex}); chạy python Management/tools/gd_req.py {feature}."
 
 
+def stage_line(root):
+    """The phase the project is being built for (Management/game-design/stage.json, set by the human on the page);
+    read on every prompt."""
+    data = read_json(os.path.join(root, "Management", "game-design", "stage.json"), None)
+    stage = data.get("stage") if isinstance(data, dict) else None
+    names = {"idea": "IDEA", "prototype": "PROTOTYPE", "full": "FULL"}
+    if stage not in names:
+        return (" Giai đoạn đang làm: CHƯA ĐẶT (người đặt ở tab Game design, nút 'Đang làm'). Chưa đặt thì chưa giao việc "
+                "dev cho feature, service, @Core (guard chặn dispatch.py send của Manager): hỏi người đang làm giai đoạn nào.")
+    return (f" Giai đoạn đang làm: {names[stage]} (người đặt lúc {data.get('at', '?')}). Chỉ node của giai đoạn này và trước "
+            "đó phải thiết kế tới vòng 4 và là việc dev; node của giai đoạn sau chỉ định nghĩa để đó, yêu cầu của nó ghi "
+            "'để sau' trong sổ (gd_status.py, gd_req.py nêu rõ).")
+
+
 def designer_mode(root):
     """What the mode in Management/game-design/mode.json asks of @GameDesigner; read on every prompt."""
     mode = read_json(os.path.join(root, "Management", "game-design", "mode.json"), None)
@@ -334,7 +348,7 @@ def context(data, root, store):
                 "python Management/tools/gd_status.py). gd_status.py và gd_pack.py in đường dẫn file và mục lục có số "
                 "dòng khi bản in dài: đọc phần cần bằng Read (offset, limit) hoặc Grep. Luật ở .claude/rules/codelead.md; dựng khung "
                 "theo skill codelead-scaffold-feature, xử lý vấn đề theo skill codelead-resolve-issue."
-                + editor_status(store) + inbox_line(root) + unread_reports(root, store, role))
+                + editor_status(store) + stage_line(root) + inbox_line(root) + unread_reports(root, store, role))
     if role in guard.TESTER_ROLES:
         name = guard.TESTER_ROLES[role]
         return (f"guard: chat này gán FEATURE={role} (nhóm Testers): chơi thử game trong Unity và ghi lại kết quả; KHÔNG "
@@ -397,7 +411,7 @@ def context(data, root, store):
                 "in đường dẫn file trong Management/game-design/.pack và mục lục có số dòng kèm Kết luận từng node: "
                 "đọc phần cần bằng Read offset/limit hoặc Grep). Độ quan trọng "
                 "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
-                + designer_mode(root) +
+                + designer_mode(root) + stage_line(root) +
                 " GPT cùng thiết kế qua @DesignAdvisor, nhờ bằng hộp thư: python Management/tools/dispatch.py send @DesignAdvisor "
                 "--from GameDesigner \"<node> · <hỏi gì>\" (nó chạy theo việc, SendMessage tới nó bị chặn; nó trả lời bạn bằng SendMessage): vòng 2 nhờ hỏi một câu chung về cả bộ feature trước, rồi "
                 "từng feature (feature giao nhau thì hỏi kèm nhau); KHÔNG tự dặn GPT đừng thêm feature hay node mới (vòng 1-3 GPT được đề xuất, "
@@ -476,12 +490,12 @@ def context(data, root, store):
                 "phiên CÙNG LÚC trong một lượt, không tuần tự từng phiên (skill manager-dispatch). Nhận tin BÁO CHẶN của một Leader: điều phối lại ngay "
                 "(dừng việc phụ thuộc, giao việc không phụ thuộc, gom việc chờ người thành một danh sách cho người). Chỉ bạn và "
                 "người giao đợt chơi thử cho tester UnityAutoPlay (nó giữ khoá Unity Editor): gom thành một đợt, không giao "
-                "khi CodeLead đang Play hay test. Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from Manager \"<việc>\", tin đó bật thread lên." + inbox_line(root) + unread_reports(root, store, role))
+                "khi CodeLead đang Play hay test. Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from Manager \"<việc>\", tin đó bật thread lên." + stage_line(root) + " Đầu phiên (tạo mới, renew): nêu giai đoạn đang ghi và hỏi người xác nhận còn đúng trước khi giao việc dev; chỉ giao việc của node tới hạn." + inbox_line(root) + unread_reports(root, store, role))
     if raw and guard.valid_feature(raw, root):
         group = "Services" if raw.startswith("_Services/") else "Features"
         return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "
                 "theo bảng quyền ở CLAUDE.md gốc; không cần dò lại quyền. Phiên chạy theo việc: việc tới ở đầu tin (hộp thư, "
-                "[tin <id> · từ ...]); tin có mã đã làm thì bỏ qua; cần Leader thì SendMessage. " + code_gate(root, raw) + worker)
+                "[tin <id> · từ ...]); tin có mã đã làm thì bỏ qua; cần Leader thì SendMessage. " + code_gate(root, raw) + stage_line(root) + worker)
     if raw:
         return f"guard: chat này gán FEATURE={raw}, giá trị không hợp lệ: mọi thao tác sửa bị chặn."
     return ("guard: chat này chưa gán FEATURE: mọi thao tác sửa bị chặn. Chỉ người gán được, "
