@@ -124,6 +124,37 @@
    "title": "Một feature lỗi ở bước huỷ thì ghi lỗi nêu tên nó, vẫn huỷ tiếp các feature còn lại",
    "by": "@CodeLead",
    "at": "2026-11-25 12:02:58"
+  },
+  "edge-mot-feature-co-ten-trong-danh-sach-hai": {
+   "state": "done",
+   "note": "Kiểm trùng feature theo kiểu participant trước bước tải, Failed từ Init, nêu tên feature, không tải ai",
+   "tests": [
+    "SessionSceneLogicTests.AFeatureListedTwice_FailsBeforeLoading_NamesTheFeature_AndNothingLoadsOrRuns",
+    "SessionSceneLogicTests.AFeatureListedTwice_TellsTheLoadingScreenWhichFeatureFailed",
+    "SessionSceneLogicTests.AFeatureListedTwice_EndingAfterwards_CompletesAndTheSessionStaysFailed",
+    "SessionSceneLogicTests.TwoParticipantsOfTheSameClass_AreOneFeatureListedTwice_InTheRealSession"
+   ],
+   "play": "",
+   "hash": "d9d79505d980",
+   "text": "**Một feature có tên trong danh sách hai lần**: lỗi ngay trước bước tải, nêu tên feature trùng; scene không tải.",
+   "title": "Một feature có tên trong danh sách hai lần",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 13:37:46"
+  },
+  "edge-danh-sach-rong": {
+   "state": "done",
+   "note": "Danh sách rỗng vẫn qua ba bước, ghi cảnh báo qua reportWarning",
+   "tests": [
+    "SessionSceneLogicTests.AnEmptyList_StillGoesThroughTheThreeSteps_AndWarnsOnce",
+    "SessionSceneLogicTests.AnEmptyList_ShowsTheLoadingStepAsDone_WithNothingFailed",
+    "SessionSceneLogicTests.AListWithParticipants_DoesNotWarn"
+   ],
+   "play": "",
+   "hash": "2453f2b78296",
+   "text": "**Danh sách rỗng**: scene vẫn đi qua ba bước, không có view nào (chỉ xảy ra khi cấu hình sai; ghi cảnh báo).",
+   "title": "Danh sách rỗng",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 13:37:48"
   }
  },
  "log": [
@@ -287,6 +318,34 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-25 13:36:45",
+   "id": "edge-mot-feature-co-ten-trong-danh-sach-hai",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "Kiểm trùng feature theo kiểu participant trước bước tải, Failed từ Init, nêu tên feature, không tải ai"
+  },
+  {
+   "at": "2026-11-25 13:36:46",
+   "id": "edge-danh-sach-rong",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "Danh sách rỗng vẫn qua ba bước, ghi cảnh báo qua reportWarning"
+  },
+  {
+   "at": "2026-11-25 13:37:46",
+   "id": "edge-mot-feature-co-ten-trong-danh-sach-hai",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.AFeatureListedTwice_FailsBeforeLoading_NamesTheFeature_AndNothingLoadsOrRuns, SessionSceneLogicTests.AFeatureListedTwice_TellsTheLoadingScreenWhichFeatureFailed, SessionSceneLogicTests.AFeatureListedTwice_EndingAfterwards_CompletesAndTheSessionStaysFailed, SessionSceneLogicTests.TwoParticipantsOfTheSameClass_AreOneFeatureListedTwice_InTheRealSession"
+  },
+  {
+   "at": "2026-11-25 13:37:48",
+   "id": "edge-danh-sach-rong",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.AnEmptyList_StillGoesThroughTheThreeSteps_AndWarnsOnce, SessionSceneLogicTests.AnEmptyList_ShowsTheLoadingStepAsDone_WithNothingFailed, SessionSceneLogicTests.AListWithParticipants_DoesNotWarn"
   }
  ]
 }

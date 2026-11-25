@@ -18,7 +18,27 @@ namespace Game.Run
         [Tooltip("Hero codes of the team used when menus are skipped, slot 1 first.")]
         [SerializeField] private string[] defaultTeam = { "knight", "axeman", "archer" };
 
+        [Tooltip("The battle pauses when the game leaves the screen (pause-rules). IDEA: off, the battle keeps running.")]
+        [SerializeField] private bool pauseOnLeavingApp;
+
+        [Tooltip("The device back key pauses a running battle (flow-rules, pause-rules). IDEA: off.")]
+        [SerializeField] private bool backKeyPauses;
+
+        [Tooltip("The castle's first fall in a run offers one revive by ad (revive popup after the lose delay). IDEA: off, the first fall loses.")]
+        [SerializeField] private bool reviveOnce;
+
+        public bool ReviveOnce => reviveOnce;
+
+        [Tooltip("Prefab that hears the device (leaving the game, back key): FeatureAssets/Private/RunAppSignals.prefab.")]
+        [SerializeField] private GameObject appSignalsPrefab;
+
+        public GameObject AppSignalsPrefab => appSignalsPrefab;
+
         public float LoseDelaySeconds => loseDelaySeconds;
+
+        public bool PauseOnLeavingApp => pauseOnLeavingApp;
+
+        public bool BackKeyPauses => backKeyPauses;
 
         public int TeamSize => teamSize;
 

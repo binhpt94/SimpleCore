@@ -1,6 +1,6 @@
 ---
 based-on: f1f04ceb7020
-refs: feature-balance/balance-config/number-table@e95b703d1aa9, feature-wave/spawning/spawn-order@5884f63cfa93, feature-balance/balance-economy/income-and-prices@295cfe59ac28, feature-balance/balance-team/hero-compare@d356532cffe9, feature-balance/balance-config@6934878b1b70, feature-enemy/enemy-stats/enemy-stat-values@7016e0fe183b, feature-wave/difficulty-scaling@fed0ac86d57c
+refs: feature-balance/balance-config/number-table@e95b703d1aa9, feature-wave/spawning/spawn-order@5884f63cfa93, feature-balance/balance-economy/income-and-prices@295cfe59ac28, feature-balance/balance-team/hero-compare@d356532cffe9, feature-balance/balance-config@6934878b1b70, feature-enemy/enemy-stats/enemy-stat-values@7016e0fe183b, feature-wave/difficulty-scaling@fed0ac86d57c, feature-wave/wave-gap/gap-timer@4d5cfe278549, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed
 frame: none
 ---
 # Dự đoán đợt gãy
@@ -21,7 +21,7 @@ Khớp luật "các đợt đầu trụ được mà chưa cần nâng cấp nhi
 ### mid-pressure | AI 7 | Từ đợt 11 tới đợt 15, P tăng từ khoảng 1.5 lên khoảng 2.5, thành mất máu đều mỗi đợt
 Nhịp thả chạm sàn 0.3 s ở đợt 15 làm quái dồn nhanh hơn.
 
-### normal-break | AI 7 | Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–9 phút
+### normal-break | AI 7 | Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–10.5 phút
 Đợt 20 (Trùm, P khoảng 2.9) gần như chắc gãy với cách chơi này.
 
 ### skill-gap | AI 6 | Chơi vụng gãy ở khoảng đợt 10 (Trùm đầu tiên), chơi khéo kéo tới khoảng đợt 20–25

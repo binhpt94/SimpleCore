@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c7a9e21b4d64f0a8e5b17c2d9f03a61, type: 3}
+  m_Name: HomeConfig
+  m_EditorClassIdentifier:
+  title: "Thủ th\xE0nh anh h\xF9ng"
+  recordFormat: "Kỉ lục: {0} đợt"
+  playLabel: "Chơi"
+  recordWhenNone: 0
+  tapsPerShow: 1
+  referenceScreen: {x: 1920, y: 1080}
+  titleRect:
+    serializedVersion: 2
+    x: 360
+    y: 200
+    width: 1200
+    height: 160
+  recordRect:
+    serializedVersion: 2
+    x: 660
+    y: 420
+    width: 600
+    height: 80
+  playRect:
+    serializedVersion: 2
+    x: 760
+    y: 620
+    width: 400
+    height: 120

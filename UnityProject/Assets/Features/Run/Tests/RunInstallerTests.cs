@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Game.Core;
 using NUnit.Framework;
+using Game.Services.Popup;
 using UnityEditor;
 using SessionState = Game.Core.SessionState;
 
@@ -22,13 +23,16 @@ namespace Game.Run.Tests
             var registry = new ServiceRegistry();
             var session = new FakeSession();
             registry.Register<ISessionScene>(session);
+            registry.Register<IPopupStack>(new FakePopupStack());
 
             installer.Install(registry);
 
             Assert.IsTrue(registry.TryResolve<IRunFlow>(out var flow));
             Assert.IsTrue(registry.TryResolve<IRunScore>(out _));
+            Assert.IsTrue(registry.TryResolve<IRunRevive>(out var revive));
+            Assert.AreSame(flow, revive, "IRunRevive must be the same object as IRunFlow.");
             Assert.AreEqual(RunStep.Home, flow.Step);
-            Assert.AreEqual(1, session.Joined.Count);
+            Assert.AreEqual(2, session.Joined.Count, "The run and its leftover popup check join the session.");
         }
 
         [Test]
@@ -44,6 +48,49 @@ namespace Game.Run.Tests
         }
 
         [Test]
+        public void ConfigAssetKeepsTheIdeaBattleRunningWhenLeavingTheGameOrPressingBack()
+        {
+            // pause-rules "Thông số theo giai đoạn": IDEA has no auto pause and no back key pause.
+            var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
+            Assert.IsNotNull(config, $"Missing {ConfigPath}");
+
+            Assert.IsFalse(config.PauseOnLeavingApp);
+            Assert.IsFalse(config.BackKeyPauses);
+        }
+
+        [Test]
+        public void IdeaRunHasNoReviveSoTheFirstCastleFallLoses()
+        {
+            // flow-rules "Thông số theo giai đoạn": IDEA has no revive step.
+            var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
+            Assert.IsNotNull(config, $"Missing {ConfigPath}");
+            Assert.IsFalse(config.ReviveOnce);
+
+            var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IPopupStack>(new FakePopupStack());
+            installer.Install(registry);
+            var flow = (RunFlow)registry.Resolve<IRunFlow>();
+            Assert.IsFalse(flow.ReviveOnce);
+
+            flow.Begin();
+            flow.Lose();
+            Assert.AreEqual(RunStep.Ending, flow.Step);
+            flow.Shutdown();
+        }
+
+        [Test]
+        public void ConfigAssetHasTheDevicePrefabThatHearsLeavingAndBackKey()
+        {
+            var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
+            Assert.IsNotNull(config, $"Missing {ConfigPath}");
+            Assert.IsNotNull(config.AppSignalsPrefab, "RunConfig has no app signals prefab.");
+            Assert.IsNotNull(config.AppSignalsPrefab.GetComponent<IAppSignals>(),
+                "The app signals prefab has no RunAppSignalsView.");
+        }
+
+        [Test]
         public void InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam()
         {
             var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
@@ -51,6 +98,7 @@ namespace Game.Run.Tests
 
             var registry = new ServiceRegistry();
             registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IPopupStack>(new FakePopupStack());
             installer.Install(registry);
 
             var flow = registry.Resolve<IRunFlow>() as RunFlow;
@@ -73,6 +121,23 @@ namespace Game.Run.Tests
 
             var error = Assert.Throws<InvalidOperationException>(() => installer.Install(new ServiceRegistry()));
             StringAssert.Contains(nameof(ISessionScene), error.Message);
+        }
+
+        [Test]
+        public void InstallWithoutPopupStackFailsNamingIt()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
+            Assert.IsNotNull(installer, $"Missing {InstallerPath}");
+
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            var error = Assert.Throws<InvalidOperationException>(() => installer.Install(registry));
+            StringAssert.Contains(nameof(IPopupStack), error.Message);
+        }
+
+        private sealed class FakePopupStack : IPopupStack
+        {
+            public IReadOnlyList<PopupId> OpenIds => Array.Empty<PopupId>();
         }
 
         private sealed class FakeSession : ISessionScene

@@ -16,6 +16,13 @@ namespace Game.Hud.Tests
         public float Health { get; private set; } = 1000f;
         public float MaxHealth { get; private set; } = 1000f;
         public bool IsDestroyed => Health <= 0f;
+
+        /// <summary>The castle falls: health 0, Destroyed raised (the run then moves on to Ending).</summary>
+        public void Destroy()
+        {
+            Set(0f, MaxHealth);
+            Destroyed?.Invoke();
+        }
         public event Action HealthChanged;
         public event Action Destroyed;
 
@@ -160,9 +167,19 @@ namespace Game.Hud.Tests
 
         public void StopBattle() => BattleStopped?.Invoke();
 
+        /// <summary>How many times the HUD reported "pause pressed".</summary>
+        public int PauseRequests;
+
         public void Play() { }
         public void EnterBattle(RunTeam team) { }
-        public void Pause() { }
+
+        /// <summary>Like the real run: counts the request and pauses only a running battle.</summary>
+        public void Pause()
+        {
+            PauseRequests++;
+            if (Step == RunStep.Playing) SetStep(RunStep.Paused);
+        }
+
         public void Resume() { }
         public void Abandon() { }
         public void Replay() { }
@@ -187,7 +204,14 @@ namespace Game.Hud.Tests
         public string CheatLabel;
 
         public event Action<int> SkillPressed;
+        public event Action PausePressed;
         public event Action CheatPressed;
+        public int SkillButtonsCreated;
+        public HudInsets Insets;
+
+        public void ApplySafeArea(HudInsets insets) => Insets = insets;
+        public void PressPause() => PausePressed?.Invoke();
+        public int PauseListeners => PausePressed?.GetInvocationList().Length ?? 0;
 
         public void SetVisible(bool visible) => Visible = visible;
 
@@ -210,6 +234,7 @@ namespace Game.Hud.Tests
 
         public void CreateSkillButtons(IReadOnlyList<string> names, IReadOnlyList<int> slots)
         {
+            SkillButtonsCreated++;
             SkillNames.Clear();
             SkillNames.AddRange(names);
             SkillSlots.Clear();

@@ -1,0 +1,19 @@
+{
+  "name": "Game.GameFlow.View",
+  "rootNamespace": "Game.GameFlow",
+  "references": [
+    "Game.Core",
+    "Game.GameFlow.Internal",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

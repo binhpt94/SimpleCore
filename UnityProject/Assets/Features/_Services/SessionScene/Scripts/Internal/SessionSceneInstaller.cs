@@ -27,7 +27,7 @@ namespace Game.Services.SessionScene
             }
 
             var logic = new SessionSceneLogic(
-                Debug.LogException, new FrameLoadTimer(), TimeSpan.FromSeconds(loadTimeLimitSeconds));
+                Debug.LogException, Debug.LogWarning, new FrameLoadTimer(), TimeSpan.FromSeconds(loadTimeLimitSeconds));
             registry.Register<ISessionScene>(logic);
             registry.Register<ISessionLoadProgress>(logic);
 

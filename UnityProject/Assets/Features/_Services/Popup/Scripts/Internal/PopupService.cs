@@ -8,7 +8,7 @@ namespace Game.Services.Popup
     /// Owns the popup stack (feature-popup/popup-layer/stack-rules, popup-request/request-rules): up to
     /// <c>maxOpen</c> popups, one copy per id, newest on top. Popups open only while the scene's session runs.
     /// </summary>
-    internal sealed class PopupService : IPopupService, IPopupViews
+    internal sealed class PopupService : IPopupService, IPopupViews, IPopupStack
     {
         private readonly IPopupPresenter presenter;
         private readonly IPopupPrefabs prefabs;
@@ -92,6 +92,18 @@ namespace Game.Services.Popup
         }
 
         public bool IsOnTop(PopupHandle handle) => handle.IsValid && Top.Equals(handle);
+
+        /// <summary>A snapshot: later opens and closes do not change a list already handed out.</summary>
+        public IReadOnlyList<PopupId> OpenIds
+        {
+            get
+            {
+                if (stack.Count == 0) return Array.Empty<PopupId>();
+                var ids = new PopupId[stack.Count];
+                for (var i = 0; i < stack.Count; i++) ids[i] = stack[i].Id;
+                return ids;
+            }
+        }
 
         private int IndexOf(PopupHandle handle)
         {

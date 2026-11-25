@@ -13,8 +13,12 @@ namespace Game.Services.SessionScene
         private readonly CancellationTokenSource loadCancellation = new CancellationTokenSource();
         private readonly UniTaskCompletionSource finished = new UniTaskCompletionSource();
         private readonly Action<Exception> reportError;
+        private readonly Action<string> reportWarning;
         private readonly ILoadTimer timer;
         private readonly TimeSpan loadLimit;
+
+        /// <summary>Which feature a participant belongs to: two participants with the same key are one feature twice.</summary>
+        private readonly Func<ISessionParticipant, object> featureOf;
 
         /// <summary>Null outside dev builds: nothing is counted after the dispose step.</summary>
         private readonly IParticipantUsage usage;
@@ -25,11 +29,15 @@ namespace Game.Services.SessionScene
         /// <summary>How many participants, from the first, must be disposed when the session ends or fails.</summary>
         private int toDispose;
 
+        /// <param name="featureOf">Null: a participant's feature is its type, as each feature has one participant class.</param>
         internal SessionSceneLogic(
-            Action<Exception> reportError, ILoadTimer timer, TimeSpan loadLimit, IParticipantUsage usage = null)
+            Action<Exception> reportError, Action<string> reportWarning, ILoadTimer timer, TimeSpan loadLimit,
+            IParticipantUsage usage = null, Func<ISessionParticipant, object> featureOf = null)
         {
             this.usage = usage;
+            this.featureOf = featureOf ?? (participant => participant.GetType());
             this.reportError = reportError ?? throw new ArgumentNullException(nameof(reportError));
+            this.reportWarning = reportWarning ?? throw new ArgumentNullException(nameof(reportWarning));
             this.timer = timer ?? throw new ArgumentNullException(nameof(timer));
             if (loadLimit <= TimeSpan.Zero)
             {
@@ -112,6 +120,24 @@ namespace Game.Services.SessionScene
                 throw new InvalidOperationException($"The session can begin only once, from Init; it is {State}.");
             }
 
+            // A feature listed twice fails before the Loading step: nobody loads, so nobody needs disposing.
+            var twice = FindFeatureListedTwice();
+            if (twice != null)
+            {
+                FailedParticipant = FeatureNameOf(twice.GetType());
+                LoadProgressChanged?.Invoke();
+                await FailAsync(new InvalidOperationException(
+                    $"Session participant {FailedParticipant} ({twice.GetType().Name}) is in this scene's list twice; " +
+                    "the scene does not load. Remove the second entry from the scene's Boot list."));
+                return;
+            }
+
+            if (participants.Count == 0)
+            {
+                reportWarning("The session of this scene has no participants: it goes through its steps with no views. " +
+                              "The scene's Boot list is probably misconfigured.");
+            }
+
             Set(SessionState.Loading);
             var failure = await LoadInTurnAsync();
             if (failure != null)
@@ -147,6 +173,18 @@ namespace Game.Services.SessionScene
 
             if (failure != null) await FailAsync(failure);
             else if (endRequested) await ShutDownAsync();
+        }
+
+        /// <summary>The second participant of a feature that joined twice; null when each feature joined once.</summary>
+        private ISessionParticipant FindFeatureListedTwice()
+        {
+            var seen = new HashSet<object>();
+            foreach (var participant in participants)
+            {
+                if (!seen.Add(featureOf(participant))) return participant;
+            }
+
+            return null;
         }
 
         /// <summary>

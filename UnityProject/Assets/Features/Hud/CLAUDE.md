@@ -1,6 +1,6 @@
 # Hud
 
-HUD trận: máu thành, tiền, số đợt, thông báo "Đợt N", ba nút kĩ năng thành. Chỉ hiện, không giữ hay tính số nào của feature khác.
+HUD trận: nút tạm dừng, máu thành, tiền, số đợt, thông báo "Đợt N", ba nút kĩ năng thành. Chỉ hiện, không giữ hay tính số nào của feature khác.
 
 - Không có Contracts. Không ai gọi Hud.
 - Dùng: `ICastle`, `ICastleSkills` (Castle), `IWalletBalance` (Wallet), `IWaveProgress` (Wave), `IRunFlow` (Run), `Game.Core.ISessionScene`. Bản dev dùng thêm `IWalletIncome`, `IWalletService`, `ICastleCheat`, `IWaveCheat` cho cheat.
@@ -15,6 +15,8 @@ HUD trận: máu thành, tiền, số đợt, thông báo "Đợt N", ba nút k�
 - Sprite (IDEA, @ClaudeImage, chấm mức 3): `FeatureAssets/Private/Generated/` gồm `hud-band/band` (nền dải trên), `hud-hp/hp` (khung thanh máu, phần đỏ nằm lọt trong viền 6 px), `hud-coin/coin`, `skill-tray/tray` (khay dưới cụm kĩ năng), `skill-buttons/skill-thunder|frost|rally`. Band, hp, tray là 9-slice viền 24 px. Gán trên prefab; ô nào trống thì về ô màu tạm. Nút đang hồi tô xám bằng màu, không cần sprite riêng.
 - `HudInstaller.asset` trong `FeatureAssets/Public`. Cài sau SessionScene, Run, Castle, Wallet, Wave.
 - Cheat `mid-battle` (`Scripts/Internal/Cheat`, chỉ bản dev): nút tím trong dải trên, giữa thanh máu và ô đợt (x 1290..1550, y 15..65), không che dải chiến trường. Thứ tự: `IWaveCheat.StartWave(7)`, `ICastleCheat.SetHealth(300)`, hồi chiêu Sấm sét 0, Băng giá 12, Cổ vũ 0, rồi tiền 245 qua Wallet. Kĩ năng không có trong `ICastleSkills.Skills` thì bỏ qua và ghi cảnh báo "không có ở mức này".
-- Nút tạm dừng: chưa làm (không thuộc IDEA).
+- `HudPausePresenter`: nút tạm dừng (góc trên trái, x 40..160, y 10..130, hai vạch đứng, không chữ; có `pauseSprite` trên prefab thì dùng sprite). Chạm chỉ gọi `IRunFlow.Pause()` khi `Step == Playing`, không tạm dừng và thành chưa bị phá (chạm cùng khung hình thành bị phá thì bỏ). Nút sống từ `Run` tới hết phiên, hiện cùng HUD ở mọi bước trận.
+- Vùng an toàn: mọi phần nằm trong khung `Safe` (con của canvas). `HudView.Update` đọc `Screen.safeArea`, `HudSafeArea.Insets` đổi ra đơn vị màn chuẩn và chỉ dời phần vượt lề sẵn có (trái phải 40, trên 10, dưới 20).
+- Thanh nâng cấp: mép dưới bên trái cụm kĩ năng luôn trống, ít nhất 1420 đơn vị ở 16:9; cụm kĩ năng không bao giờ nhường chỗ.
 
 Test: assembly `Game.Hud.Tests` (EditMode).

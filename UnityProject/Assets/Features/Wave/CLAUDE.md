@@ -19,5 +19,6 @@
 - Số cân bằng: `WaveConfig.asset` trong `FeatureAssets/Private`. `useArcher`/`useBoss` đang tắt (mức IDEA: chỗ của chúng dồn cho Lính); bật khi Enemy có đủ 5 loại.
 - `WaveInstaller.asset` trong `FeatureAssets/Public`. Cài sau SessionScene, Run, Wallet, Enemy. Không có view.
 - Cheat (chỉ bản dev, `#if UNITY_EDITOR || DEVELOPMENT_BUILD`): contract `IWaveCheat.StartWave(w)` cho Hud dựng state mid-battle. `WaveDirector` hiện thực; installer đăng ký cùng cờ dev. Chỉ chạy khi trận đang chạy (đang thả hoặc đang thở). Bỏ phần còn lại của đợt hoặc lúc thở, rồi `CurrentWaveChanged(w)`, `WaveStarted(w)`, con đầu ra ngay. Quái còn trên sân vẫn tính vào số còn sống của đợt mới. Đợt bị bỏ qua không có thưởng và không tính điểm.
+- Cheat trên installer: trường `cheatPausedAtWave` của `WaveInstaller` (0 = tắt; asset thật để 0). Đặt w > 0 thì installer cho thêm `WaveStartCheat` tham gia phiên: một khung hình sau `BattleStarted` gọi `StartWave(w)` rồi `IRunFlow.Pause()`, một lần mỗi phiên. Dùng cho state "trận đứng ở đợt 5, đang tạm dừng" của `feature-popup-pause/cheat` (w = 5).
 
 Test: assembly `Game.Wave.Tests` (EditMode).

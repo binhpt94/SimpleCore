@@ -1,15 +1,18 @@
 {
  "items": {
   "top-row-order": {
-   "state": "doing",
+   "state": "done",
    "note": "tiền, máu, đợt đã đặt, chưa có nút tạm dừng vì không thuộc IDEA, cần test vị trí",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.TopRowGoesPauseThenMoneyThenHealthThenWaveFromLeftToRight",
+    "HudLayoutTests.PauseButtonSitsInTheTopLeftCornerOnTheOtherEdgeFromTheSkills"
+   ],
    "play": "",
    "hash": "c434090b25bd",
    "text": "Mép trên từ trái sang phải: nút tạm dừng, tiền, máu thành, đợt\nMáu thành ở giữa, thẳng phía trên thành. Nút tạm dừng ở góc trên bên trái, xa góc dưới bên phải nơi có nút kĩ năng.",
    "title": "Mép trên từ trái sang phải: nút tạm dừng, tiền, máu thành, đợt",
    "by": "Hud",
-   "at": "2026-11-25 10:56:09"
+   "at": "2026-11-25 13:39:45"
   },
   "skills-bottom-right": {
    "state": "verified",
@@ -111,6 +114,38 @@
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
    "at": "2026-11-25 12:02:23"
+  },
+  "safe-area": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HudSafeAreaTests.NotchNarrowerThanTheSideMarginMovesNothing",
+    "HudSafeAreaTests.WideNotchMovesTheLeftSideInByWhatTheMarginDoesNotCover",
+    "HudSafeAreaTests.NavigationBarAtTheBottomMovesTheBottomPartsUpByWhatTheMarginDoesNotCover",
+    "HudSafeAreaTests.CutsOnEverySideAreMeasuredFromTheirOwnEdge",
+    "HudLayoutTests.WithASafeAreaEveryPartStaysInsideItAndKeepsItsOrder"
+   ],
+   "play": "",
+   "hash": "affc4f8dd18f",
+   "text": "Mọi phần HUD nằm trong vùng an toàn của máy (không bị tai thỏ, góc bo hay thanh điều hướng che)",
+   "title": "Mọi phần HUD nằm trong vùng an toàn của máy (không bị tai thỏ, góc bo hay thanh điều hướng che)",
+   "by": "Hud",
+   "at": "2026-11-25 13:39:49"
+  },
+  "edge-thanh-nang-cap-can-nhieu-cho-hon-doi": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HudLayoutTests.UpgradeBarAlwaysGetsAtLeastItsFrameWidthLeftOfTheSkills",
+    "HudLayoutTests.BottomEdgeLeftOfTheSkillClusterIsLeftFreeForTheUpgradeBar",
+    "HudSkillSlotTests.SlotsSitInTheBottomRightClusterAndTheTrayKeepsAllThree"
+   ],
+   "play": "",
+   "hash": "e7ffedfb9add",
+   "text": "**Thanh nâng cấp cần nhiều chỗ hơn (đội 3 hero + 3 nút thành = 6 nút):** thanh tự co nút trong phần của nó; không lấn sang cụm kĩ năng.",
+   "title": "Thanh nâng cấp cần nhiều chỗ hơn (đội 3 hero + 3 nút thành = 6 nút)",
+   "by": "Hud",
+   "at": "2026-11-25 13:39:51"
   }
  },
  "log": [
@@ -281,6 +316,27 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-25 13:39:45",
+   "id": "top-row-order",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.TopRowGoesPauseThenMoneyThenHealthThenWaveFromLeftToRight, HudLayoutTests.PauseButtonSitsInTheTopLeftCornerOnTheOtherEdgeFromTheSkills"
+  },
+  {
+   "at": "2026-11-25 13:39:49",
+   "id": "safe-area",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSafeAreaTests.NotchNarrowerThanTheSideMarginMovesNothing, HudSafeAreaTests.WideNotchMovesTheLeftSideInByWhatTheMarginDoesNotCover, HudSafeAreaTests.NavigationBarAtTheBottomMovesTheBottomPartsUpByWhatTheMarginDoesNotCover, HudSafeAreaTests.CutsOnEverySideAreMeasuredFromTheirOwnEdge, HudLayoutTests.WithASafeAreaEveryPartStaysInsideItAndKeepsItsOrder"
+  },
+  {
+   "at": "2026-11-25 13:39:51",
+   "id": "edge-thanh-nang-cap-can-nhieu-cho-hon-doi",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.UpgradeBarAlwaysGetsAtLeastItsFrameWidthLeftOfTheSkills, HudLayoutTests.BottomEdgeLeftOfTheSkillClusterIsLeftFreeForTheUpgradeBar, HudSkillSlotTests.SlotsSitInTheBottomRightClusterAndTheTrayKeepsAllThree"
   }
  ]
 }

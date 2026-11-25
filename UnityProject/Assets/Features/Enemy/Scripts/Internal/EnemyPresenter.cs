@@ -22,6 +22,8 @@ namespace Game.Enemy
 
             _field.Spawned += OnSpawned;
             _field.Struck += OnStruck;
+            _field.Shot += OnShot;
+            _field.Rewarded += OnRewarded;
             _field.Hurt += OnHurt;
             _field.Defeated += OnDefeated;
             _field.Cleared += OnCleared;
@@ -37,6 +39,8 @@ namespace Game.Enemy
         {
             _field.Spawned -= OnSpawned;
             _field.Struck -= OnStruck;
+            _field.Shot -= OnShot;
+            _field.Rewarded -= OnRewarded;
             _field.Hurt -= OnHurt;
             _field.Defeated -= OnDefeated;
             _field.Cleared -= OnCleared;
@@ -61,6 +65,8 @@ namespace Game.Enemy
 
         private void OnSpawned(EnemyLook look) => _stage.Show(look);
         private void OnStruck(int handle, int direction) => _stage.Lunge(handle, direction);
+        private void OnShot(EnemyShot shot) => _stage.Shoot(shot);
+        private void OnRewarded(EnemyReward reward) => _stage.ShowCoins(reward);
         private void OnHurt(int handle) => _stage.Flash(handle);
         private void OnDefeated(EnemyDefeat defeat) => _stage.Defeat(defeat.Handle);
         private void OnCleared() => _stage.RemoveAll();

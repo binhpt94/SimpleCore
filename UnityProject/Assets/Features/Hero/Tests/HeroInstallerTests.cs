@@ -52,6 +52,17 @@ namespace Game.Hero.Tests
         }
 
         [Test]
+        public void Installing_lets_the_castle_set_where_heroes_start()
+        {
+            RegisterAllDependencies();
+
+            LoadInstaller().Install(_registry);
+
+            Assert.That(_registry.TryResolve<IHeroSpawnPoints>(out var points), Is.True);
+            Assert.DoesNotThrow(() => points.SetSpawnX(new[] { -1.5f, 1.5f, -1.5f }));
+        }
+
+        [Test]
         public void Installing_lets_enemies_attack_the_heroes_and_joins_the_session()
         {
             RegisterAllDependencies();

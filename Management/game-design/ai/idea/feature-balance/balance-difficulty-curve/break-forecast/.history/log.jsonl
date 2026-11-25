@@ -7,3 +7,5 @@
 {"at": "2026-11-24 12:46:14", "event": "promote", "by": "người (Sync)", "hash": "38dc08b97bc3"}
 {"at": "2026-11-25 00:11:02", "event": "promote", "by": "người", "hash": "38dc08b97bc3"}
 {"at": "2026-11-25 12:54:40", "event": "promote", "by": "người", "hash": "38dc08b97bc3"}
+{"at": "2026-11-25 13:48:06", "event": "data", "hash": "b38ef8e31b57", "previous": "38dc08b97bc3", "added": [], "removed": [], "rewritten": [{"id": "normal-break", "old": "Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–9 phút\nĐợt 20 (Trùm, P khoảng 2.9) gần như chắc gãy với cách chơi này.", "new": "Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–10.5 phút\nĐợt 20 (Trùm, P khoảng 2.9) gần như chắc gãy với cách chơi này."}]}
+{"at": "2026-11-25 13:50:15", "event": "promote", "by": "người (Sync)", "hash": "b38ef8e31b57"}

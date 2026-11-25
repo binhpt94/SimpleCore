@@ -15,6 +15,7 @@ namespace Game.Services.SessionScene.Tests
 
         private List<string> log;
         private List<Exception> errors;
+        private List<string> warnings;
         private FakeTimer timer;
         private SessionSceneLogic session;
 
@@ -23,8 +24,19 @@ namespace Game.Services.SessionScene.Tests
         {
             log = new List<string>();
             errors = new List<Exception>();
+            warnings = new List<string>();
             timer = new FakeTimer();
-            session = new SessionSceneLogic(errors.Add, timer, Limit);
+            session = NewSession();
+        }
+
+        /// <summary>
+        /// Every fake shares one class, so the test session tells features apart by the fake's name: "a" and "a"
+        /// are one feature listed twice, "a" and "b" are two features.
+        /// </summary>
+        private SessionSceneLogic NewSession(IParticipantUsage usage = null)
+        {
+            return new SessionSceneLogic(errors.Add, warnings.Add, timer, Limit, usage,
+                participant => ((FakeParticipant)participant).Name);
         }
 
         [Test]
@@ -94,6 +106,113 @@ namespace Game.Services.SessionScene.Tests
             var once = Join("once");
 
             Assert.Throws<InvalidOperationException>(() => session.Join(once));
+        }
+
+        // participant-order#edge-mot-feature-co-ten-trong-danh-sach-hai: a feature listed twice fails before
+        // the Loading step, naming the feature; the scene loads nothing.
+        [Test]
+        public void AFeatureListedTwice_FailsBeforeLoading_NamesTheFeature_AndNothingLoadsOrRuns()
+        {
+            var states = new List<SessionState>();
+            session.StateChanged += states.Add;
+            Join("wallet");
+            Join("popup");
+            Join("wallet");
+
+            session.BeginAsync().Forget();
+
+            Assert.That(session.State, Is.EqualTo(SessionState.Failed));
+            Assert.That(states, Is.EqualTo(new[] { SessionState.Failed }), "the session must never enter Loading");
+            Assert.That(log, Is.Empty, "no participant may load, run or be disposed");
+            Assert.That(errors, Has.Count.EqualTo(1));
+            Assert.That(errors[0].Message, Does.Contain("SessionScene").And.Contain("twice"));
+            Assert.That(session.FailedParticipant, Is.EqualTo("SessionScene"));
+            Assert.That(session.LoadedCount, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void AFeatureListedTwice_TellsTheLoadingScreenWhichFeatureFailed()
+        {
+            var changes = 0;
+            session.LoadProgressChanged += () => changes++;
+            Join("wallet");
+            Join("wallet");
+
+            session.BeginAsync().Forget();
+
+            Assert.That(changes, Is.EqualTo(1));
+            Assert.That(session.FailedParticipant, Is.Not.Null);
+        }
+
+        [Test]
+        public void AFeatureListedTwice_EndingAfterwards_CompletesAndTheSessionStaysFailed()
+        {
+            Join("wallet");
+            Join("wallet");
+            session.BeginAsync().Forget();
+
+            var end = session.EndAsync();
+
+            Assert.That(end.Status, Is.EqualTo(UniTaskStatus.Succeeded));
+            Assert.That(session.State, Is.EqualTo(SessionState.Failed));
+            Assert.That(log, Is.Empty);
+        }
+
+        [Test]
+        public void TwoParticipantsOfTheSameClass_AreOneFeatureListedTwice_InTheRealSession()
+        {
+            // The real session tells features apart by class: the same installer listed twice joins two
+            // participants of one class.
+            var real = new SessionSceneLogic(errors.Add, warnings.Add, timer, Limit);
+            real.Join(new FakeParticipant("first copy", log));
+            real.Join(new FakeParticipant("second copy", log));
+
+            real.BeginAsync().Forget();
+
+            Assert.That(real.State, Is.EqualTo(SessionState.Failed));
+            Assert.That(log, Is.Empty);
+            Assert.That(errors[0].Message, Does.Contain("FakeParticipant").And.Contain("twice"));
+        }
+
+        // participant-order#edge-danh-sach-rong: an empty list still goes through the three steps, with a warning.
+        [Test]
+        public void AnEmptyList_StillGoesThroughTheThreeSteps_AndWarnsOnce()
+        {
+            var states = new List<SessionState>();
+            session.StateChanged += states.Add;
+
+            session.BeginAsync().Forget();
+            var end = session.EndAsync();
+
+            Assert.That(end.Status, Is.EqualTo(UniTaskStatus.Succeeded));
+            Assert.That(states, Is.EqualTo(new[]
+            {
+                SessionState.Loading, SessionState.Running, SessionState.Disposing, SessionState.Disposed,
+            }));
+            Assert.That(warnings, Has.Count.EqualTo(1));
+            Assert.That(warnings[0], Does.Contain("no participants"));
+            Assert.That(errors, Is.Empty);
+        }
+
+        [Test]
+        public void AnEmptyList_ShowsTheLoadingStepAsDone_WithNothingFailed()
+        {
+            session.BeginAsync().Forget();
+
+            Assert.That(session.ParticipantCount, Is.EqualTo(0));
+            Assert.That(session.LoadedCount, Is.EqualTo(0));
+            Assert.That(session.FailedParticipant, Is.Null);
+            Assert.That(session.State, Is.EqualTo(SessionState.Running));
+        }
+
+        [Test]
+        public void AListWithParticipants_DoesNotWarn()
+        {
+            Join("a");
+
+            session.BeginAsync().Forget();
+
+            Assert.That(warnings, Is.Empty);
         }
 
         [Test]
@@ -635,7 +754,7 @@ namespace Game.Services.SessionScene.Tests
             session.EndAsync().Forget();
             log.Clear();
 
-            var next = new SessionSceneLogic(errors.Add, timer, Limit);
+            var next = NewSession();
             next.Join(new FakeParticipant("game", log));
 
             Assert.That(next.State, Is.EqualTo(SessionState.Init));
@@ -701,7 +820,7 @@ namespace Game.Services.SessionScene.Tests
         private FakeUsage CountWith()
         {
             var usage = new FakeUsage(log);
-            session = new SessionSceneLogic(errors.Add, timer, Limit, usage);
+            session = NewSession(usage);
             return usage;
         }
 

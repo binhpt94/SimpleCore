@@ -10,7 +10,7 @@ namespace Game.Hero
     /// (live: feature-hero/*). Enemies see the targetable heroes through <see cref="IEnemyFoes"/> (key = slot).
     /// Pure C#: time comes in through <see cref="Tick"/>.
     /// </summary>
-    internal sealed class HeroSquad : IHeroSquad, IEnemyFoes
+    internal sealed class HeroSquad : IHeroSquad, IEnemyFoes, IHeroSpawnPoints
     {
         private const float Epsilon = 1e-4f;
 
@@ -21,10 +21,14 @@ namespace Game.Hero
         private readonly HashSet<int> _defeatedThisFrame = new HashSet<int>();
         private readonly List<int> _struck = new List<int>();
 
+        /// <summary>Start and respawn x by slot for the next run; the config's values until the castle gives its own.</summary>
+        private readonly List<float> _spawnX = new List<float>();
+
         public HeroSquad(HeroConfig config, IEnemyField field)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _field = field ?? throw new ArgumentNullException(nameof(field));
+            _spawnX.AddRange(_config.SlotSpawnX);
         }
 
         /// <summary>The team was replaced (a run started) or removed (battle cleared).</summary>
@@ -44,6 +48,9 @@ namespace Game.Hero
         /// <summary>The team, slot 1 first; empty outside a run.</summary>
         public IReadOnlyList<HeroUnit> Units => _units;
 
+        /// <summary>How many heroes a team going into battle has: one per slot.</summary>
+        public int TeamSize => _config.SlotSpawnX.Count;
+
         private float HalfWidth => _config.BoxWidth * 0.5f;
 
         /// <summary>A run starts: the team spawns at its slots' spawn points, at level 1 and full health.</summary>
@@ -55,9 +62,9 @@ namespace Game.Hero
             {
                 var hero = _config.Find(codes[slot])
                            ?? throw new InvalidOperationException($"Hero code '{codes[slot]}' of slot {slot + 1} is not in the hero config.");
-                if (slot >= _config.SlotSpawnX.Count)
-                    throw new InvalidOperationException($"The hero config has no spawn point for slot {slot + 1}.");
-                _units.Add(new HeroUnit(slot, hero, _config.SlotSpawnX[slot], HeroLevelStats.At(hero, 1, _config)));
+                if (slot >= _spawnX.Count)
+                    throw new InvalidOperationException($"There is no spawn point for slot {slot + 1}.");
+                _units.Add(new HeroUnit(slot, hero, _spawnX[slot], HeroLevelStats.At(hero, 1, _config)));
             }
             TeamChanged?.Invoke();
         }
@@ -68,6 +75,23 @@ namespace Game.Hero
             if (_units.Count == 0) return;
             _units.Clear();
             TeamChanged?.Invoke();
+        }
+
+        // ------------------------------------------------------------------ IHeroSpawnPoints
+
+        /// <summary>
+        /// The points are read when a run starts, so heroes already on the field keep theirs until the next run.
+        /// A list without a point for every slot is refused and the current points stay.
+        /// </summary>
+        public void SetSpawnX(IReadOnlyList<float> xBySlot)
+        {
+            if (xBySlot == null) throw new ArgumentNullException(nameof(xBySlot));
+            if (xBySlot.Count < TeamSize)
+                throw new ArgumentException(
+                    $"Hero spawn points cover {xBySlot.Count} slot(s); slot {xBySlot.Count + 1} of {TeamSize} has no point.",
+                    nameof(xBySlot));
+            _spawnX.Clear();
+            for (var slot = 0; slot < TeamSize; slot++) _spawnX.Add(xBySlot[slot]);
         }
 
         // ------------------------------------------------------------------ IHeroSquad

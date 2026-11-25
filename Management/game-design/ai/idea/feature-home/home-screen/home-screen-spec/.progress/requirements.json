@@ -1,0 +1,270 @@
+{
+ "items": {
+  "home-title-text": {
+   "state": "verified",
+   "note": "Presenter + bố cục màn bắt đầu, view dựng bằng code",
+   "tests": [
+    "HomeScreenTests.TitleLineShowsGameName",
+    "HomeScreenTests.TitleCannotBePressed"
+   ],
+   "play": "",
+   "hash": "28c6de4d6bdd",
+   "text": "Dòng tên game hiện chữ \"Thủ thành anh hùng\", không bấm được\nTên tạm của game (node gốc). Đổi tên chỉ đổi chữ.",
+   "title": "Dòng tên game hiện chữ \"Thủ thành anh hùng\", không bấm được",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "home-record-text": {
+   "state": "verified",
+   "note": "Dòng kỉ lục đọc IRunScore.Best mỗi lần màn hiện",
+   "tests": [
+    "HomeScreenTests.RecordLineShowsCurrentBest",
+    "HomeScreenTests.RecordLineShowsZeroWhenNoBestYet"
+   ],
+   "play": "",
+   "hash": "58a7cc265138",
+   "text": "Dòng kỉ lục hiện \"Kỉ lục: N đợt\", N là kỉ lục hiện tại, chưa có thì N = 0\nĐọc lại mỗi lần màn hiện, nên vừa phá kỉ lục rồi về màn này là thấy số mới.",
+   "title": "Dòng kỉ lục hiện \"Kỉ lục: N đợt\", N là kỉ lục hiện tại, chưa có thì N = 0",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "home-play-button": {
+   "state": "verified",
+   "note": "Nút Chơi gọi IRunFlow.Play một lần mỗi lần màn hiện",
+   "tests": [
+    "HomeScreenTests.PlayButtonSaysChoi",
+    "HomeScreenTests.FirstTapOnPlayReportsPlayToTheRun",
+    "HomeScreenTests.MoreTapsWhileLeavingAreIgnored",
+    "HomeScreenTests.ScreenHidesWhenRunMovesToTeamSelect"
+   ],
+   "play": "",
+   "hash": "1978924bb52d",
+   "text": "Có đúng 1 nút \"Chơi\"; chạm 1 lần là báo đã bấm chơi, sang màn chọn đội\nChỉ lần chạm đầu có tác dụng; chạm thêm trong lúc đổi màn bị bỏ qua.",
+   "title": "Có đúng 1 nút \"Chơi\"; chạm 1 lần là báo đã bấm chơi, sang màn chọn đội",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "home-nothing-else": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HomeScreenTests.ScreenHasExactlyThreeElementsAndOnlyPlayCanBePressed"
+   ],
+   "play": "",
+   "hash": "978542620f81",
+   "text": "Ngoài nút \"Chơi\", không có chỗ nào trên màn bấm được\nKhông nút thoát, không cài đặt, không cửa hàng.",
+   "title": "Ngoài nút \"Chơi\", không có chỗ nào trên màn bấm được",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "edge-ki-luc-rat-lon-vi-du-999": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HomeScreenTests.VeryLargeRecordShowsEveryDigit"
+   ],
+   "play": "",
+   "hash": "c8d025cc14fb",
+   "text": "**Kỉ lục rất lớn (ví dụ 999):** hiện đủ số, không rút gọn.",
+   "title": "Kỉ lục rất lớn (ví dụ 999)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "edge-ve-man-bat-dau-bang-bo-luot-va": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HomeScreenTests.BackFromAbandonWithNewBestShowsNewRecord",
+    "HomeScreenTests.RecordSavedJustAfterReturningHomeStillShows",
+    "HomeScreenTests.ScreenNeverAnnouncesNewBest"
+   ],
+   "play": "",
+   "hash": "68f3275c7b56",
+   "text": "**Về màn bắt đầu bằng bỏ lượt và vừa phá kỉ lục:** dòng kỉ lục hiện số mới; màn này không báo \"kỉ lục mới\" (chỉ popup thua báo).",
+   "title": "Về màn bắt đầu bằng bỏ lượt và vừa phá kỉ lục",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "edge-man-hien-lai-nhieu-lan-trong-mot-lan": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HomeScreenTests.PlayTakesOneNewTapEachTimeScreenShowsAgain"
+   ],
+   "play": "",
+   "hash": "e05185b98401",
+   "text": "**Màn hiện lại nhiều lần trong một lần mở game:** nút \"Chơi\" lại nhận một lần chạm mới mỗi lần màn hiện.",
+   "title": "Màn hiện lại nhiều lần trong một lần mở game",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "params": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HomeInstallerTests.ConfigAssetHoldsTheDesignNumbers",
+    "HomeInstallerTests.InstallJoinsTheGameSceneSession",
+    "HomeInstallerTests.ScreenIsBuiltWhenSessionRunsAndRemovedWhenItEnds"
+   ],
+   "play": "",
+   "hash": "ae8e08cd911a",
+   "text": "## Làm gì\n- Hiện màn bắt đầu trong scene Game khi `feature-run/run-flow/flow-rules` yêu cầu.\n- Mỗi lần hiện: đọc kỉ lục từ `feature-run/run-score/score-rules`, ghi vào dòng kỉ lục.\n- Nút \"Chơi\": báo `feature-run` \"đã bấm chơi\"; không tự chuyển màn.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số thành phần | 3 (tên game, kỉ lục, nút Chơi) | | `home-items` |\n| Số nút | 1 | nút | Vào trận bằng một chạm |\n| Chữ tên game | \"Thủ thành anh hùng\" (tên tạm) | | Node gốc |\n| Chữ kỉ lục | \"Kỉ lục: N đợt\" | | Kỉ lục là số đợt dọn sạch |\n| Kỉ lục khi chưa có | 0 | đợt | `record-default-zero` |\n| Chữ trên nút | \"Chơi\" | | |\n| Số lần chạm có tác dụng mỗi lần màn hiện | 1 | lần | Tránh chuyển màn hai lần |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Có màn bắt đầu | Không (mở game vào thẳng trận) | Có, 3 thành phần dạng chữ và nút đơn giản | Có, kèm hình nền và logo tên game |\n| Hiệu ứng khi màn hiện | Không | Không | Tên game và nút hiện dần, 0.3 giây (dự kiến) |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "edge-nut-quay-lai-cua-may": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Play scene Game, ở màn bắt đầu bấm Esc là nút quay lại, màn đứng yên và không chuyển màn",
+   "hash": "f7c063f1afb6",
+   "text": "**Nút quay lại của máy:** không làm gì (`feature-run/run-flow/flow-rules`).",
+   "title": "Nút quay lại của máy",
+   "by": "Home",
+   "at": "2026-11-25 13:41:01"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 13:36:39",
+   "id": "home-title-text",
+   "state": "doing",
+   "by": "Home",
+   "note": "Presenter + bố cục màn bắt đầu, view dựng bằng code"
+  },
+  {
+   "at": "2026-11-25 13:36:42",
+   "id": "home-record-text",
+   "state": "doing",
+   "by": "Home",
+   "note": "Dòng kỉ lục đọc IRunScore.Best mỗi lần màn hiện"
+  },
+  {
+   "at": "2026-11-25 13:36:43",
+   "id": "home-play-button",
+   "state": "doing",
+   "by": "Home",
+   "note": "Nút Chơi gọi IRunFlow.Play một lần mỗi lần màn hiện"
+  },
+  {
+   "at": "2026-11-25 13:40:44",
+   "id": "home-title-text",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeScreenTests.TitleLineShowsGameName, HomeScreenTests.TitleCannotBePressed"
+  },
+  {
+   "at": "2026-11-25 13:40:45",
+   "id": "home-record-text",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeScreenTests.RecordLineShowsCurrentBest, HomeScreenTests.RecordLineShowsZeroWhenNoBestYet"
+  },
+  {
+   "at": "2026-11-25 13:40:47",
+   "id": "home-play-button",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeScreenTests.PlayButtonSaysChoi, HomeScreenTests.FirstTapOnPlayReportsPlayToTheRun, HomeScreenTests.MoreTapsWhileLeavingAreIgnored, HomeScreenTests.ScreenHidesWhenRunMovesToTeamSelect"
+  },
+  {
+   "at": "2026-11-25 13:40:48",
+   "id": "home-nothing-else",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeScreenTests.ScreenHasExactlyThreeElementsAndOnlyPlayCanBePressed"
+  },
+  {
+   "at": "2026-11-25 13:40:49",
+   "id": "edge-ki-luc-rat-lon-vi-du-999",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeScreenTests.VeryLargeRecordShowsEveryDigit"
+  },
+  {
+   "at": "2026-11-25 13:40:50",
+   "id": "edge-ve-man-bat-dau-bang-bo-luot-va",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeScreenTests.BackFromAbandonWithNewBestShowsNewRecord, HomeScreenTests.RecordSavedJustAfterReturningHomeStillShows, HomeScreenTests.ScreenNeverAnnouncesNewBest"
+  },
+  {
+   "at": "2026-11-25 13:40:51",
+   "id": "edge-man-hien-lai-nhieu-lan-trong-mot-lan",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeScreenTests.PlayTakesOneNewTapEachTimeScreenShowsAgain"
+  },
+  {
+   "at": "2026-11-25 13:40:53",
+   "id": "params",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeInstallerTests.ConfigAssetHoldsTheDesignNumbers, HomeInstallerTests.InstallJoinsTheGameSceneSession, HomeInstallerTests.ScreenIsBuiltWhenSessionRunsAndRemovedWhenItEnds"
+  },
+  {
+   "at": "2026-11-25 13:41:01",
+   "id": "edge-nut-quay-lai-cua-may",
+   "state": "done",
+   "by": "Home",
+   "note": "Play scene Game, ở màn bắt đầu bấm Esc là nút quay lại, màn đứng yên và không chuyển màn"
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "home-title-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "home-record-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "home-play-button",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "home-nothing-else",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "edge-ki-luc-rat-lon-vi-du-999",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "edge-ve-man-bat-dau-bang-bo-luot-va",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "edge-man-hien-lai-nhieu-lan-trong-mot-lan",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  }
+ ]
+}

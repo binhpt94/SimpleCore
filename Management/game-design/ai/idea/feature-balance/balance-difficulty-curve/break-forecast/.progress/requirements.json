@@ -1,0 +1,292 @@
+{
+ "items": {
+  "pressure-formula": {
+   "state": "done",
+   "note": "BalanceBreakForecastTests: H, T, P theo bảng tính thử",
+   "tests": [
+    "BalanceBreakForecastTests.PressureIsEnemyHpOverTeamDamageDuringTheSpawn"
+   ],
+   "play": "",
+   "hash": "5e9882f53397",
+   "text": "Áp lực P của đợt = tổng máu quái ÷ (sát thương mỗi giây của đội × thời gian thả đợt tính bằng giây)\nP dưới 1: đội hạ kịp nhịp thả. P từ 1 tới 2: quái dồn lại, thành bắt đầu mất máu. P từ 2.5 trở lên trong vài đợt liền: thành không trụ được.",
+   "title": "Áp lực P của đợt = tổng máu quái ÷ (sát thương mỗi giây của đội × thời gian thả đợt tính bằng giây)",
+   "by": "Balance",
+   "at": "2026-11-25 13:45:39"
+  },
+  "team-dps": {
+   "state": "done",
+   "note": "BalanceBreakForecastTests: D của đội mẫu",
+   "tests": [
+    "BalanceBreakForecastTests.TeamDpsIsHeroesWithAreaHittingTwoPlusCastleShotPlusThunderOverTwentySeconds"
+   ],
+   "play": "",
+   "hash": "c0982b196af2",
+   "text": "Sát thương mỗi giây của đội = tổng của 3 hero (đòn vùng tính trúng 2 con) + đòn tự bắn + Sấm sét chia 20 giây\nSấm sét tính trúng 4 con ở đợt 1–5, 5 con ở đợt 6–15, 6 con từ đợt 16. Hero cấp L nhân (1 + 0.15×(L−1)) × (1 + 0.03×(L−1)).",
+   "title": "Sát thương mỗi giây của đội = tổng của 3 hero (đòn vùng tính trúng 2 con) + đòn tự bắn + Sấm sét chia 20 giây",
+   "by": "Balance",
+   "at": "2026-11-25 13:45:40"
+  },
+  "early-easy-check": {
+   "state": "done",
+   "note": "BalanceBreakForecastTests: P đợt 1, 5, 9",
+   "tests": [
+    "BalanceBreakForecastTests.EarlyWavesOneToNineStayUnderPressureOnePointOne"
+   ],
+   "play": "",
+   "hash": "d1e58b09b876",
+   "text": "Đợt 1–9 có P dưới 1.1 (đợt 1: 0.6, đợt 5: 0.9, đợt 9: 1.1)\nKhớp luật \"các đợt đầu trụ được mà chưa cần nâng cấp nhiều\".",
+   "title": "Đợt 1–9 có P dưới 1.1 (đợt 1: 0.6, đợt 5: 0.9, đợt 9: 1.1)",
+   "by": "Balance",
+   "at": "2026-11-25 13:45:41"
+  },
+  "mid-pressure": {
+   "state": "done",
+   "note": "BalanceBreakForecastTests: P đợt 11 tới 15",
+   "tests": [
+    "BalanceBreakForecastTests.PressureRisesFromAboutOnePointFiveToTwoPointFiveOverWavesElevenToFifteen"
+   ],
+   "play": "",
+   "hash": "f1635a28f6c1",
+   "text": "Từ đợt 11 tới đợt 15, P tăng từ khoảng 1.5 lên khoảng 2.5, thành mất máu đều mỗi đợt\nNhịp thả chạm sàn 0.3 s ở đợt 15 làm quái dồn nhanh hơn.",
+   "title": "Từ đợt 11 tới đợt 15, P tăng từ khoảng 1.5 lên khoảng 2.5, thành mất máu đều mỗi đợt",
+   "by": "Balance",
+   "at": "2026-11-25 13:45:42"
+  },
+  "normal-break": {
+   "state": "done",
+   "note": "BalanceBreakForecastTests: P đợt 15 tới 20",
+   "tests": [
+    "BalanceBreakForecastTests.NormalPlayerBreaksAroundWavesFifteenToNineteen",
+    "BalanceBreakForecastTests.NormalRunThatBreaksInWavesFifteenToNineteenLastsSevenToTenAndAHalfMinutes"
+   ],
+   "play": "",
+   "hash": "d96e907958bf",
+   "text": "Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–10.5 phút\nĐợt 20 (Trùm, P khoảng 2.9) gần như chắc gãy với cách chơi này.",
+   "title": "Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–10.5 phút",
+   "by": "Balance",
+   "at": "2026-11-25 13:51:43"
+  },
+  "skill-gap": {
+   "state": "done",
+   "note": "Chỉ kiểm được bằng chơi thử",
+   "tests": [],
+   "play": "Chơi thử ít nhất 5 lượt đội mẫu, lượt vụng gãy quanh đợt 10, lượt khéo tới đợt 20 đến 25, ghi đợt gãy",
+   "hash": "e1e987e62a0f",
+   "text": "Chơi vụng gãy ở khoảng đợt 10 (Trùm đầu tiên), chơi khéo kéo tới khoảng đợt 20–25\nKhác nhau ở: đội có hero hợp loại quái, Sấm sét bắn lúc quái dồn đông, Băng giá dùng khi Trùm tới, không để tiền nằm yên.",
+   "title": "Chơi vụng gãy ở khoảng đợt 10 (Trùm đầu tiên), chơi khéo kéo tới khoảng đợt 20–25",
+   "by": "Balance",
+   "at": "2026-11-25 13:45:58"
+  },
+  "edge-cong-thuc-p-la-uoc-luong-tho": {
+   "state": "done",
+   "note": "BalanceBreakForecastTests: P không tính Băng giá, Cổ vũ",
+   "tests": [
+    "BalanceBreakForecastTests.PressureIgnoresIceAndCheer"
+   ],
+   "play": "",
+   "hash": "136f335cb6bc",
+   "text": "**Công thức P là ước lượng thô:** không tính quãng đi của quái (khoảng 10 s với Lính), không tính hero chết và hồi sinh 8 s, không tính Băng giá và Cổ vũ. Dùng để so các đợt với nhau và thấy xu hướng, không để đoán chính xác một lượt.",
+   "title": "Công thức P là ước lượng thô",
+   "by": "Balance",
+   "at": "2026-11-25 13:45:47"
+  },
+  "edge-dot-co-gioi-han-40-quai-song": {
+   "state": "done",
+   "note": "BalanceBreakForecastTests: hoãn thả làm P thấp hơn",
+   "tests": [
+    "BalanceBreakForecastTests.AliveCapFromWaveSeventeenStretchesSpawnAndLowersRealPressure"
+   ],
+   "play": "",
+   "hash": "373d8a716076",
+   "text": "**Đợt có giới hạn 40 quái sống** (từ đợt 17 trở đi N ≥ 40): khi đội yếu, việc hoãn thả kéo dài T và làm P thật thấp hơn bảng; đợt gãy thật có thể muộn hơn khoảng 1 đợt.",
+   "title": "Đợt có giới hạn 40 quái sống",
+   "by": "Balance",
+   "at": "2026-11-25 13:45:48"
+  },
+  "edge-doi-lech-toan-can-chien": {
+   "state": "done",
+   "note": "BalanceBreakForecastTests: đội cận chiến",
+   "tests": [
+    "BalanceBreakForecastTests.MeleeOnlyTeamMatchesTheSampleEarlyButMustChaseEnemyArchersFromWaveSeven"
+   ],
+   "play": "",
+   "hash": "a6826a113dce",
+   "text": "**Đội lệch toàn cận chiến** (Hiệp sĩ + Đấu sĩ rìu + Kiếm khách): D lv1 = 12 + 20 + 22.9 = 54.9, gần đội mẫu; khó hơn từ đợt 7 vì phải đuổi Cung thủ quái. Xem `feature-balance/balance-team/hero-compare`.",
+   "title": "Đội lệch toàn cận chiến",
+   "by": "Balance",
+   "at": "2026-11-25 13:45:50"
+  },
+  "params": {
+   "state": "done",
+   "note": "BalanceBreakForecastTests: mục tiêu P và bảng tính thử",
+   "tests": [
+    "BalanceBreakForecastTests.BossWavesAreTheOnlyIntendedPressureSpikes",
+    "BalanceBreakForecastTests.EarlyWavesOneToNineStayUnderPressureOnePointOne",
+    "BalanceBreakForecastTests.PressureIsEnemyHpOverTeamDamageDuringTheSpawn",
+    "BalanceBreakForecastTests.NormalRunThatBreaksInWavesFifteenToNineteenLastsSevenToTenAndAHalfMinutes"
+   ],
+   "play": "",
+   "hash": "2dd23586b716",
+   "text": "## Làm gì\n- Tính áp lực P cho các đợt mẫu mỗi khi bộ số đổi; so với mục tiêu: đợt 1–9 P < 1.1, không có hai đợt liền nhau mà P chênh quá 0.5 (trừ đợt Trùm, ngoại lệ có chủ đích), người chơi bình thường gãy ở đợt 15–19.\n- Sau chơi thử: ghi đợt gãy thật của vài lượt, so với dự đoán, rồi chỉnh số ở `feature-balance/balance-config/number-table`.\n\n## Thông số\n### Công thức (dự kiến)\n- Máu quái đợt w: H(w) = Σ (máu gốc × số con) × (1 + 0.10×(w−1)).\n- Thời gian thả: T(w) = (N − 1) × nhịp thả, với N = 6 + 2×w (`feature-wave/spawning/spawn-order`).\n- Sát thương mỗi giây hiệu dụng của đội: D = Σ hero (sát thương/giây lv1 × m(L), đòn vùng ×2) + 10×(1 + 0.2×(cấp sức đánh − 1)) + 80×(1 + 0.2×(cấp Sấm − 1)) × số quái trúng ÷ 20.\n- m(L) = (1 + 0.15×(L−1)) × (1 + min(0.03×(L−1), 0.6)): cấp 3 = 1.38, cấp 5 = 1.79, cấp 7 = 2.24, cấp 9 = 2.73.\n- Áp lực: P(w) = H(w) ÷ (D × T(w)).\n- Sát thương mỗi giây của quái nếu tất cả cùng đánh: E(w) = Σ (sát thương gốc ÷ giây mỗi đòn × số con) × (1 + 0.10×(w−1)). Dùng để thấy quái dồn tới thành nguy cỡ nào.\n\n### Đội mẫu và cách mua\nĐội Hiệp sĩ + Cung thủ + Pháp sư (một chắn, một bắn xa, một đòn vùng). Tổng sát thương/giây hiệu dụng lv1 của 3 hero: 12 + 17.5 + 11.25×2 = 52. Người chơi tiêu hết tiền ở đầu mỗi đợt theo `feature-balance/balance-economy/income-and-prices`, khoảng 55% cho hero, 45% cho thành và kĩ năng.\n\n### Kết quả tính thử (dự kiến)\n| Đợt | Tiền đầu đợt (xu) | Đội đã mua | D (sát thương/giây) | H tổng máu quái | T thả (s) | P | E quái (sát thương/giây) | Máu thành tối đa | Tổng máu 3 hero |\n|---|---|---|---|---|---|---|---|---|---|\n| 1 | 50 | chưa nâng | 78 | 320 | 7 | 0.6 | 40 | 1000 | 520 |\n| 5 | 393 | hero cấp 3; máu, sức đánh, Sấm cấp 2 | 103 | 1092 | 12 | 0.9 | 119 | 1150 | 676 |\n| 9 | 1070 | hero cấp 5; máu thành 4, sức đánh 3, Sấm 3 | 135 | 2025 | 13.8 | 1.1 | 230 | 1450 | 832 |\n| 10 (Trùm) | 1282 | hero cấp 5/5/6; máu, sức đánh 4; Sấm 3; Cổ vũ 2 | 140 | 3391 | 13.75 | 1.8 | 309 | 1450 | 877 |\n| 11 | 1624 | hero cấp 6; máu 5, sức đánh 4; Sấm 3; Cổ vũ 2 | 149 | 2940 | 13.5 | 1.5 | 313 | 1600 | 910 |\n| 15 | 2791 | hero cấp 7 (một con 8); máu, sức đánh 6; Sấm 4; Cổ vũ, Băng 2 | 173 | 4620 | 10.5 | 2.5 | 489 | 1750 | 988 |\n| 19 | 4273 | hero cấp 9; máu, sức đánh 6; Sấm 5; Cổ vũ, Băng 2 | 205 | 6440 | 12.9 | 2.4 | 690 | 1750 | 1144 |\n| 20 (Trùm) | 4685 | hero cấp 9; máu, sức đánh 7; Sấm 5; Băng 3; Cổ vũ 2 | 207 | 8222 | 13.5 | 2.9 | 801 | 1900 | 1144 |\n\nĐọc bảng:\n- Đợt 1–9: P ≤ 1.1, đội hạ gần kịp nhịp thả; thành mất ít hoặc không mất máu.\n- Đợt 10: Trùm (760 máu, 76 sát thương mỗi đòn) chiếm khoảng 22% máu cả đợt; P vọt lên 1.8 rồi rơi về 1.5 ở đợt 11. Đây là ngoại lệ có chủ đích (đỉnh căng thẳng); người chơi vụng thường gãy ở đây.\n- Đợt 11–15: P lên đều tới 2.5; máu thành không tự hồi nên mất mát cộng dồn. Đợt 15 nhịp thả chạm sàn 0.3 s, quái dồn nhanh hơn.\n- Đợt 15–19: P quanh 2.4–2.6, sức quái nhân hệ số tăng tuyến tính trong khi sức đội chỉ tăng theo bậc thang giá mũ; người chơi bình thường gãy trong khoảng này.\n- Đợt 20: Trùm 1160 máu (khoảng 14% máu cả đợt); P ≈ 2.9, E quái 801/giây so với 1900 máu thành; nếu Trùm và đám đông tới thành cùng lúc, thành vỡ trong vài giây.\n\n### Độ dài lượt (dự kiến)\nMỗi đợt mất T × (1 + P) (thời gian thả cộng thời gian dọn quái tồn, khoảng T × P) cộng 3 s lúc thở: đợt 1 khoảng 14 s, đợt 5 khoảng 26 s, đợt 10 khoảng 41 s, đợt 15–19 khoảng 40–47 s (P các đợt giữa hai mẫu lấy nội suy tuyến tính). Cộng dồn: hết đợt 9 khoảng 3.7 phút, hết đợt 14 khoảng 7.0 phút, hết đợt 18 khoảng 9.8 phút, hết đợt 19 khoảng 10.6 phút. Gãy ở đợt 15–19 (thua giữa đợt đó): lượt dài khoảng 7–10.5 phút. Khớp ước tính của `feature-wave/wave-gap/gap-timer` (gãy ở đợt 15: khoảng 7–8 phút).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Mục tiêu đợt gãy người chơi bình thường | không kiểm | đợt 15–19 | chốt sau chơi thử |\n| Mục tiêu P đợt 1–9 | không kiểm | dưới 1.1 | chốt sau chơi thử |\n| Kiểm bằng chơi thử | không bắt buộc | ít nhất 5 lượt, ghi đợt gãy | ít nhất 20 lượt, nhiều đội khác nhau |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Balance",
+   "at": "2026-11-25 13:51:45"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 13:44:39",
+   "id": "pressure-formula",
+   "state": "doing",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests: H, T, P theo bảng tính thử"
+  },
+  {
+   "at": "2026-11-25 13:44:40",
+   "id": "team-dps",
+   "state": "doing",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests: D của đội mẫu"
+  },
+  {
+   "at": "2026-11-25 13:44:41",
+   "id": "early-easy-check",
+   "state": "doing",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests: P đợt 1, 5, 9"
+  },
+  {
+   "at": "2026-11-25 13:44:42",
+   "id": "mid-pressure",
+   "state": "doing",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests: P đợt 11 tới 15"
+  },
+  {
+   "at": "2026-11-25 13:44:43",
+   "id": "normal-break",
+   "state": "doing",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests: P đợt 15 tới 20"
+  },
+  {
+   "at": "2026-11-25 13:44:44",
+   "id": "skill-gap",
+   "state": "doing",
+   "by": "Balance",
+   "note": "Chỉ kiểm được bằng chơi thử"
+  },
+  {
+   "at": "2026-11-25 13:44:46",
+   "id": "edge-cong-thuc-p-la-uoc-luong-tho",
+   "state": "doing",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests: P không tính Băng giá, Cổ vũ"
+  },
+  {
+   "at": "2026-11-25 13:44:47",
+   "id": "edge-dot-co-gioi-han-40-quai-song",
+   "state": "doing",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests: hoãn thả làm P thấp hơn"
+  },
+  {
+   "at": "2026-11-25 13:44:48",
+   "id": "edge-doi-lech-toan-can-chien",
+   "state": "doing",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests: đội cận chiến"
+  },
+  {
+   "at": "2026-11-25 13:44:49",
+   "id": "params",
+   "state": "doing",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests: mục tiêu P và bảng tính thử"
+  },
+  {
+   "at": "2026-11-25 13:45:39",
+   "id": "pressure-formula",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.PressureIsEnemyHpOverTeamDamageDuringTheSpawn"
+  },
+  {
+   "at": "2026-11-25 13:45:40",
+   "id": "team-dps",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.TeamDpsIsHeroesWithAreaHittingTwoPlusCastleShotPlusThunderOverTwentySeconds"
+  },
+  {
+   "at": "2026-11-25 13:45:41",
+   "id": "early-easy-check",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.EarlyWavesOneToNineStayUnderPressureOnePointOne"
+  },
+  {
+   "at": "2026-11-25 13:45:42",
+   "id": "mid-pressure",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.PressureRisesFromAboutOnePointFiveToTwoPointFiveOverWavesElevenToFifteen"
+  },
+  {
+   "at": "2026-11-25 13:45:44",
+   "id": "normal-break",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.NormalPlayerBreaksAroundWavesFifteenToNineteen"
+  },
+  {
+   "at": "2026-11-25 13:45:47",
+   "id": "edge-cong-thuc-p-la-uoc-luong-tho",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.PressureIgnoresIceAndCheer"
+  },
+  {
+   "at": "2026-11-25 13:45:48",
+   "id": "edge-dot-co-gioi-han-40-quai-song",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.AliveCapFromWaveSeventeenStretchesSpawnAndLowersRealPressure"
+  },
+  {
+   "at": "2026-11-25 13:45:50",
+   "id": "edge-doi-lech-toan-can-chien",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.MeleeOnlyTeamMatchesTheSampleEarlyButMustChaseEnemyArchersFromWaveSeven"
+  },
+  {
+   "at": "2026-11-25 13:45:51",
+   "id": "params",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.BossWavesAreTheOnlyIntendedPressureSpikes, BalanceBreakForecastTests.EarlyWavesOneToNineStayUnderPressureOnePointOne"
+  },
+  {
+   "at": "2026-11-25 13:45:58",
+   "id": "skill-gap",
+   "state": "done",
+   "by": "Balance",
+   "note": "Chơi thử ít nhất 5 lượt đội mẫu, lượt vụng gãy quanh đợt 10, lượt khéo tới đợt 20 đến 25, ghi đợt gãy"
+  },
+  {
+   "at": "2026-11-25 13:51:43",
+   "id": "normal-break",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.NormalPlayerBreaksAroundWavesFifteenToNineteen, BalanceBreakForecastTests.NormalRunThatBreaksInWavesFifteenToNineteenLastsSevenToTenAndAHalfMinutes"
+  },
+  {
+   "at": "2026-11-25 13:51:45",
+   "id": "params",
+   "state": "done",
+   "by": "Balance",
+   "note": "BalanceBreakForecastTests.BossWavesAreTheOnlyIntendedPressureSpikes, BalanceBreakForecastTests.EarlyWavesOneToNineStayUnderPressureOnePointOne, BalanceBreakForecastTests.PressureIsEnemyHpOverTeamDamageDuringTheSpawn, BalanceBreakForecastTests.NormalRunThatBreaksInWavesFifteenToNineteenLastsSevenToTenAndAHalfMinutes"
+  }
+ ]
+}

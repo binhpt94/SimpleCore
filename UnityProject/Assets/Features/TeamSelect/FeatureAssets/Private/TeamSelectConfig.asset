@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c247f2995b8883829910e3d17d6ea09, type: 3}
+  m_Name: TeamSelectConfig
+  m_EditorClassIdentifier: Game.TeamSelect.Internal::Game.TeamSelect.TeamSelectConfig
+  slotCount: 3
+  defaultTeam:
+  - knight
+  - axeman
+  - archer
+  meleeWord: "C\u1EADn chi\u1EBFn"
+  rangedWord: "B\u1EAFn xa"
+  separator: " \xB7 "
+  roleWords:
+  - heroCode: knight
+    word: "Ch\u1EAFn"
+  - heroCode: swordsman
+    word: "\u0110\xE1nh nhanh"
+  - heroCode: archer
+    word: "T\u1EA7m xa"
+  singleTargetWord: "M\u1ED9t m\u1EE5c ti\xEAu"
+  frontCleaveWord: "Ch\xE9m v\xF9ng"
+  blastWord: "N\u1ED5 v\xF9ng"

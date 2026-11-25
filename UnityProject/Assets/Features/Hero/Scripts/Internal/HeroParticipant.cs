@@ -68,6 +68,15 @@ namespace Game.Hero
 
         private void OnRunStarted(RunTeam team)
         {
+            // A team short of (or over) one hero per slot is an error of the team select screen: no hero enters.
+            if (team.Count != _squad.TeamSize)
+            {
+                _battleActive = false;
+                _squad.Clear();
+                UnityEngine.Debug.LogError(
+                    $"[Hero] The run brought {team.Count} heroes; a team needs {_squad.TeamSize}. No hero enters the battle.");
+                return;
+            }
             _squad.Begin(team);
             _battleActive = true;
         }

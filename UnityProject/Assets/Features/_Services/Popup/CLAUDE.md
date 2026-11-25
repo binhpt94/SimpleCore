@@ -3,7 +3,7 @@
 Xếp chồng popup của scene (`live/feature-popup`): tối đa 3, mỗi id một bản, popup mới nằm trên và là popup duy nhất nhận bấm.
 Không sở hữu popup nào. Feature gọi xin mở bằng id; prefab, nội dung và nút là của feature gọi.
 
-- Contract: `IPopupService` (`Show(PopupId)`, `Close`), `IPopupViews` (`TryGetView<T>`, `IsOnTop`), `PopupId`, `PopupHandle`. Contracts thuần C#.
+- Contract: `IPopupService` (`Show(PopupId)`, `Close`), `IPopupViews` (`TryGetView<T>`, `IsOnTop`), `IPopupStack` (`OpenIds`: id đang mở, đáy trước, bản chụp), `PopupId`, `PopupHandle`. Contracts thuần C#.
 - Mở id đang mở (cảnh báo), khi đã đủ 3, id không có trong danh sách của scene, hoặc khi phiên chưa Running (lỗi nêu id): từ chối, trả handle không hợp lệ. Id mặc định là lỗi lập trình: ném `ArgumentException`.
 - `Close` đóng được popup ở mọi vị trí; handle đã đóng hay lạ thì bỏ qua.
 - Prefab theo id lấy từ catalog loại "Popup" của scene (`AssetCatalog` của Core, trên variant Boot trong `_Composition`).

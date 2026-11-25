@@ -43,6 +43,12 @@ namespace Game.Enemy
         /// <summary>An enemy hit its foe; the int is the direction it faces (+1 right, -1 left).</summary>
         public event Action<int, int> Struck;
 
+        /// <summary>A ranged enemy hit its foe: a shot flies from the enemy to the foe (the damage already landed).</summary>
+        public event Action<EnemyShot> Shot;
+
+        /// <summary>A defeated enemy paid its coins: where it stood and how much.</summary>
+        public event Action<EnemyReward> Rewarded;
+
         /// <summary>An enemy was hit and is still alive.</summary>
         public event Action<int> Hurt;
 
@@ -105,6 +111,7 @@ namespace Game.Enemy
             _alive.RemoveAt(index);
             unit.Alive = false;
             _income.Add(unit.Kind.Coins);
+            Rewarded?.Invoke(new EnemyReward(unit.Handle, unit.X, unit.Kind.Height, unit.Kind.Coins));
             Defeated?.Invoke(new EnemyDefeat(unit.Handle, unit.Type, unit.Side));
             return true;
         }
@@ -182,6 +189,8 @@ namespace Game.Enemy
                     unit.HitWait = unit.Kind.SecondsPerHit;
                     _foes[group].Hit(foe.Key, unit.HitDamage);
                     Struck?.Invoke(unit.Handle, unit.Direction);
+                    if (unit.Kind.Ranged)
+                        Shot?.Invoke(new EnemyShot(unit.Handle, unit.X, unit.Kind.Height * 0.5f, foe.X));
                 }
 
                 return;
@@ -286,6 +295,40 @@ namespace Game.Enemy
             public EnemyLook Look() =>
                 new EnemyLook(Handle, Type, X, Kind.Width, Kind.Height, Direction, Walking, SlowLeft > 0f);
         }
+    }
+
+    /// <summary>A shot of a ranged enemy: from the enemy at <see cref="FromX"/>, <see cref="Y"/> to the foe at <see cref="ToX"/>.</summary>
+    internal readonly struct EnemyShot
+    {
+        public EnemyShot(int handle, float fromX, float y, float toX)
+        {
+            Handle = handle;
+            FromX = fromX;
+            Y = y;
+            ToX = toX;
+        }
+
+        public int Handle { get; }
+        public float FromX { get; }
+        public float Y { get; }
+        public float ToX { get; }
+    }
+
+    /// <summary>Coins paid by one defeated enemy, and where it stood (x, top of its box).</summary>
+    internal readonly struct EnemyReward
+    {
+        public EnemyReward(int handle, float x, float top, int coins)
+        {
+            Handle = handle;
+            X = x;
+            Top = top;
+            Coins = coins;
+        }
+
+        public int Handle { get; }
+        public float X { get; }
+        public float Top { get; }
+        public int Coins { get; }
     }
 
     /// <summary>How one enemy looks at the moment it was read: what the view draws.</summary>

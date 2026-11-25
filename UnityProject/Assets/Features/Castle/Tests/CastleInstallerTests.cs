@@ -14,15 +14,50 @@ namespace Game.Castle.Tests
         private const string InstallerPath = "Assets/Features/Castle/FeatureAssets/Public/CastleInstaller.asset";
 
         private static ServiceRegistry RegistryWithDependencies(out FakeSessionScene session, out FakeEnemyField enemies)
+            => RegistryWithDependencies(out session, out enemies, out _);
+
+        private static ServiceRegistry RegistryWithDependencies(
+            out FakeSessionScene session, out FakeEnemyField enemies, out FakeHeroSpawnPoints spawnPoints)
         {
             var registry = new ServiceRegistry();
             session = new FakeSessionScene();
             enemies = new FakeEnemyField();
+            spawnPoints = new FakeHeroSpawnPoints();
+            var run = new FakeRunFlow();
             registry.Register<ISessionScene>(session);
-            registry.Register<IRunFlow>(new FakeRunFlow());
+            registry.Register<IRunFlow>(run);
+            registry.Register<IRunRevive>(run);
             registry.Register<IEnemyField>(enemies);
             registry.Register<IHeroSquad>(new FakeHeroSquad());
+            registry.Register<IHeroSpawnPoints>(spawnPoints);
             return registry;
+        }
+
+        [Test]
+        public void Installer_gives_the_heroes_their_start_points_at_the_castle_edges()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
+            var registry = RegistryWithDependencies(out _, out _, out var spawnPoints);
+
+            installer.Install(registry);
+
+            Assert.That(spawnPoints.SpawnX, Is.EqualTo(new[] { -1.5f, 1.5f, -1.5f }), "slot 1 and 3 left edge, slot 2 right edge");
+        }
+
+        [Test]
+        public void Installer_fails_when_the_hero_spawn_points_were_not_installed_first()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
+            var registry = new ServiceRegistry();
+            var run = new FakeRunFlow();
+            registry.Register<ISessionScene>(new FakeSessionScene());
+            registry.Register<IRunFlow>(run);
+            registry.Register<IRunRevive>(run);
+            registry.Register<IEnemyField>(new FakeEnemyField());
+            registry.Register<IHeroSquad>(new FakeHeroSquad());
+
+            var error = Assert.Throws<InvalidOperationException>(() => installer.Install(registry));
+            StringAssert.Contains(nameof(IHeroSpawnPoints), error.Message);
         }
 
         [Test]
@@ -65,9 +100,12 @@ namespace Game.Castle.Tests
         {
             var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
             var registry = new ServiceRegistry();
+            var run = new FakeRunFlow();
             registry.Register<ISessionScene>(new FakeSessionScene());
-            registry.Register<IRunFlow>(new FakeRunFlow());
+            registry.Register<IRunFlow>(run);
+            registry.Register<IRunRevive>(run);
             registry.Register<IHeroSquad>(new FakeHeroSquad());
+            registry.Register<IHeroSpawnPoints>(new FakeHeroSpawnPoints());
 
             var error = Assert.Throws<InvalidOperationException>(() => installer.Install(registry));
             StringAssert.Contains(nameof(IEnemyField), error.Message);

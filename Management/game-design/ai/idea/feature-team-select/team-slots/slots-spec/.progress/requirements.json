@@ -1,0 +1,274 @@
+{
+ "items": {
+  "slots-three": {
+   "state": "done",
+   "note": "TeamSlots: 3 chỗ, luật chạm thẻ/chỗ, nút Vào trận",
+   "tests": [
+    "TeamSlotsTests.TeamHasThreeSlotsPickedFromFiveHeroes",
+    "TeamSlotsTests.SameHeroCannotBeInTwoSlots"
+   ],
+   "play": "",
+   "hash": "afac915b4f7e",
+   "text": "Đội có đúng 3 chỗ, chọn từ 5 hero; mỗi lượt bỏ lại 2 hero",
+   "title": "Đội có đúng 3 chỗ, chọn từ 5 hero; mỗi lượt bỏ lại 2 hero",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:14"
+  },
+  "tap-add-first-empty": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.TappingUnpickedHeroFillsLowestEmptySlot"
+   ],
+   "play": "",
+   "hash": "c0d72582a6da",
+   "text": "Chạm thẻ hero chưa chọn khi còn chỗ trống: hero vào chỗ trống có số nhỏ nhất\nBỏ hero ở chỗ 2 rồi chọn hero khác thì hero mới vào chỗ 2.",
+   "title": "Chạm thẻ hero chưa chọn khi còn chỗ trống: hero vào chỗ trống có số nhỏ nhất",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:15"
+  },
+  "tap-remove": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.TappingPickedCardOrItsSlotRemovesHeroWithoutShifting"
+   ],
+   "play": "",
+   "hash": "21987a8b26f7",
+   "text": "Chạm thẻ hero đã chọn, hoặc chạm chỗ đang có hero: hero rời đội, chỗ đó trống\nCác hero khác giữ nguyên chỗ, không dồn lên.",
+   "title": "Chạm thẻ hero đã chọn, hoặc chạm chỗ đang có hero: hero rời đội, chỗ đó trống",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:16"
+  },
+  "tap-full-ignored": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.TappingUnpickedHeroWhenFullChangesNothing"
+   ],
+   "play": "",
+   "hash": "6dd28727cce2",
+   "text": "Đội đã đủ 3 mà chạm thẻ hero chưa chọn thì không có gì đổi\nPhải bỏ một hero trước.",
+   "title": "Đội đã đủ 3 mà chạm thẻ hero chưa chọn thì không có gì đổi",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:17"
+  },
+  "start-button-gate": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.StartButtonIsLockedAndDoesNothingUntilThreeSlotsFilled"
+   ],
+   "play": "",
+   "hash": "5a3e9bf2f9e4",
+   "text": "Nút \"Vào trận\" chỉ có tác dụng khi đủ 3 chỗ; thiếu thì nút ở trạng thái khoá, chạm không làm gì\nTrạng thái khoá phải nhìn khác trạng thái bấm được.",
+   "title": "Nút \"Vào trận\" chỉ có tác dụng khi đủ 3 chỗ; thiếu thì nút ở trạng thái khoá, chạm không làm gì",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:18"
+  },
+  "start-button-once": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.StartWithFullTeamReportsTeamOnceThenIgnoresTaps"
+   ],
+   "play": "",
+   "hash": "2fdc359a0882",
+   "text": "Chạm \"Vào trận\" khi đủ 3: báo đội cho `feature-run` đúng một lần, rồi màn không nhận chạm nữa",
+   "title": "Chạm \"Vào trận\" khi đủ 3: báo đội cho `feature-run` đúng một lần, rồi màn không nhận chạm nữa",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:19"
+  },
+  "screen-parts": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.ScreenShowsFiveCardsThreeSlotsAndOneStartButton"
+   ],
+   "play": "",
+   "hash": "7cc0620308f8",
+   "text": "Màn chọn đội có 3 phần: 5 thẻ hero, 3 chỗ trong đội, 1 nút \"Vào trận\"\nKhông có nút quay lại màn bắt đầu.",
+   "title": "Màn chọn đội có 3 phần: 5 thẻ hero, 3 chỗ trong đội, 1 nút \"Vào trận\"",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:20"
+  },
+  "edge-cham-cung-luc-hai-the-khi-con-mot": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.TwoCardsTappedAtOnceWithOneSlotLeftOnlyFirstGetsIn"
+   ],
+   "play": "",
+   "hash": "29694108970e",
+   "text": "**Chạm cùng lúc hai thẻ khi còn một chỗ:** thẻ được xử lí trước vào chỗ; thẻ sau bị bỏ qua vì đội đã đủ.",
+   "title": "Chạm cùng lúc hai thẻ khi còn một chỗ",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:21"
+  },
+  "edge-cham-cho-trong": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.TappingEmptySlotDoesNothing"
+   ],
+   "play": "",
+   "hash": "994afd42d63c",
+   "text": "**Chạm chỗ trống:** không làm gì.",
+   "title": "Chạm chỗ trống",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:22"
+  },
+  "edge-bo-hero-ra-roi-chon-lai-chinh-hero": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.RemovedHeroPickedAgainGoesToLowestEmptySlot"
+   ],
+   "play": "",
+   "hash": "566b2735cecc",
+   "text": "**Bỏ hero ra rồi chọn lại chính hero đó:** vào chỗ trống có số nhỏ nhất, có thể khác chỗ cũ.",
+   "title": "Bỏ hero ra rồi chọn lại chính hero đó",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:23"
+  },
+  "edge-doi-nho-do-vao-thieu-cho-hero-khong": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.RememberedTeamWithMissingHeroLeavesStartLockedUntilFull"
+   ],
+   "play": "",
+   "hash": "6a5a8c089c02",
+   "text": "**Đội nhớ đổ vào thiếu chỗ (hero không còn trong danh sách):** nút \"Vào trận\" khoá tới khi đủ 3.",
+   "title": "Đội nhớ đổ vào thiếu chỗ (hero không còn trong danh sách)",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:24"
+  },
+  "edge-nut-quay-lai-cua-may": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.DeviceBackKeyDoesNothing"
+   ],
+   "play": "",
+   "hash": "28026891385b",
+   "text": "**Nút quay lại của máy:** không làm gì.",
+   "title": "Nút quay lại của máy",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:25"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "TeamSlotsTests.DesignValuesAreThreeSlotsAndDefaultTeam"
+   ],
+   "play": "",
+   "hash": "2abecce37b9d",
+   "text": "## Làm gì\n- Giữ 3 chỗ, mỗi chỗ một hero hoặc trống. Lúc mở màn, chỗ được đổ từ `feature-team-select/team-memory/memory-rules`.\n- Nhận chạm từ thẻ (`feature-team-select/hero-cards/card-spec`) và từ chỗ; áp luật thêm, bỏ.\n- Nút \"Vào trận\": khoá khi thiếu, mở khi đủ 3; bấm thì ghi đội nhớ và báo đội cho `feature-run/run-start`.\n- Mỗi chỗ hiện hình và tên hero đang ở đó, hoặc trống.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số chỗ | 3 | chỗ | Bộ số chung; 5 hero bỏ lại 2 là có lựa chọn |\n| Số hero chọn được | 5 | hero | `feature-hero/hero-list` |\n| Số nút | 1 (\"Vào trận\") | nút | |\n| Số lần một hero ở trong đội | tối đa 1 | lần | Không trùng |\n| Số cách đội có thể ghép | 10 | đội | Chọn 3 trong 5, không tính thứ tự |\n| Số chạm có tác dụng của nút \"Vào trận\" mỗi lần màn mở | 1 | lần | Tránh vào trận hai lần |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Màn chọn đội | Không có; đội cố định Hiệp sĩ, Đấu sĩ rìu, Cung thủ | Có đủ luật chọn | Có đủ luật chọn |\n| Số chỗ | 3 | 3 | 3 (chỉnh qua `feature-balance` nếu cần) |\n| Hiệu ứng hero vào chỗ | Không | Không | Hình hero bay từ thẻ vào chỗ, 0.2 giây (dự kiến) |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "TeamSelect",
+   "at": "2026-11-25 13:39:26"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 13:36:10",
+   "id": "slots-three",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "TeamSlots: 3 chỗ, luật chạm thẻ/chỗ, nút Vào trận"
+  },
+  {
+   "at": "2026-11-25 13:39:14",
+   "id": "slots-three",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.TeamHasThreeSlotsPickedFromFiveHeroes, TeamSlotsTests.SameHeroCannotBeInTwoSlots"
+  },
+  {
+   "at": "2026-11-25 13:39:15",
+   "id": "tap-add-first-empty",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.TappingUnpickedHeroFillsLowestEmptySlot"
+  },
+  {
+   "at": "2026-11-25 13:39:16",
+   "id": "tap-remove",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.TappingPickedCardOrItsSlotRemovesHeroWithoutShifting"
+  },
+  {
+   "at": "2026-11-25 13:39:17",
+   "id": "tap-full-ignored",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.TappingUnpickedHeroWhenFullChangesNothing"
+  },
+  {
+   "at": "2026-11-25 13:39:18",
+   "id": "start-button-gate",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.StartButtonIsLockedAndDoesNothingUntilThreeSlotsFilled"
+  },
+  {
+   "at": "2026-11-25 13:39:19",
+   "id": "start-button-once",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.StartWithFullTeamReportsTeamOnceThenIgnoresTaps"
+  },
+  {
+   "at": "2026-11-25 13:39:20",
+   "id": "screen-parts",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.ScreenShowsFiveCardsThreeSlotsAndOneStartButton"
+  },
+  {
+   "at": "2026-11-25 13:39:21",
+   "id": "edge-cham-cung-luc-hai-the-khi-con-mot",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.TwoCardsTappedAtOnceWithOneSlotLeftOnlyFirstGetsIn"
+  },
+  {
+   "at": "2026-11-25 13:39:22",
+   "id": "edge-cham-cho-trong",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.TappingEmptySlotDoesNothing"
+  },
+  {
+   "at": "2026-11-25 13:39:23",
+   "id": "edge-bo-hero-ra-roi-chon-lai-chinh-hero",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.RemovedHeroPickedAgainGoesToLowestEmptySlot"
+  },
+  {
+   "at": "2026-11-25 13:39:24",
+   "id": "edge-doi-nho-do-vao-thieu-cho-hero-khong",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.RememberedTeamWithMissingHeroLeavesStartLockedUntilFull"
+  },
+  {
+   "at": "2026-11-25 13:39:25",
+   "id": "edge-nut-quay-lai-cua-may",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.DeviceBackKeyDoesNothing"
+  },
+  {
+   "at": "2026-11-25 13:39:26",
+   "id": "params",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.DesignValuesAreThreeSlotsAndDefaultTeam"
+  }
+ ]
+}

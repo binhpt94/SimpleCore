@@ -1,0 +1,20 @@
+{
+  "name": "Game.PopupRevive.Internal",
+  "rootNamespace": "Game.PopupRevive",
+  "references": [
+    "Game.Core",
+    "Game.Run.Contracts",
+    "Game.Ads.Contracts",
+    "Game.Services.Popup.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

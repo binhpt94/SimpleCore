@@ -149,8 +149,13 @@ namespace Game.Enemy.Tests
         [TestCase("_lungeSeconds", 0.15f)]
         [TestCase("_flashSeconds", 0.1f)]
         [TestCase("_defeatSeconds", 0.3f)]
+        [TestCase("_shotSeconds", 0.15f)]
+        [TestCase("_coinRise", 1f)]
+        [TestCase("_coinSeconds", 0.6f)]
         public void The_real_stage_plays_the_unit_motions_with_the_design_numbers(string field, float expected)
         {
+            // Also: an enemy archer's shot reaches its target in 0.15s (live: enemy-type-values); the "+coins" text
+            // rises 1u in 0.6s then is gone (live: reward-values).
             // bob 0.1u each 0.4s while walking, lunge 0.2u in 0.15s on a hit, flash 0.1s when hit,
             // shrink to nothing in 0.3s when defeated (live: enemy-move-values, enemy-stat-values).
             var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
@@ -162,6 +167,20 @@ namespace Game.Enemy.Tests
             var property = new SerializedObject(stage).FindProperty(field);
             Assert.That(property, Is.Not.Null, $"stage has no field {field}");
             Assert.That(property.floatValue, Is.EqualTo(expected).Within(1e-4f));
+        }
+
+        [TestCase(EnemyType.Soldier, false)]
+        [TestCase(EnemyType.Wolf, false)]
+        [TestCase(EnemyType.Giant, false)]
+        [TestCase(EnemyType.Archer, true)]
+        [TestCase(EnemyType.Boss, false)]
+        public void Only_the_enemy_archer_hits_from_afar_in_the_real_config(EnemyType type, bool ranged)
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
+            var config = new SerializedObject(installer).FindProperty("_config").objectReferenceValue as EnemyConfig;
+            Assert.That(config, Is.Not.Null, "EnemyInstaller.asset has no EnemyConfig assigned");
+
+            Assert.That(config.Kind(type).Ranged, Is.EqualTo(ranged));
         }
 
         [Test]

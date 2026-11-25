@@ -28,6 +28,7 @@ namespace Game.Hud
         private IHudView _view;
         private HudStatusPresenter _status;
         private HudSkillPresenter _skillButtons;
+        private HudPausePresenter _pauseButton;
 
         public HudSession(IHudViewSpawner spawner, IHudClock clock, ICastle castle, ICastleSkills skills,
             IWalletBalance wallet, IWaveProgress waves, IRunFlow run, HudTimings timings
@@ -69,6 +70,10 @@ namespace Game.Hud
             _skillButtons = new HudSkillPresenter(view, _skills, _run, _timings);
             _skillButtons.Start();
             WhenDisposed(_skillButtons.Stop);
+
+            _pauseButton = new HudPausePresenter(view, _run, _castle);
+            _pauseButton.Start();
+            WhenDisposed(_pauseButton.Stop);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (_cheat != null)

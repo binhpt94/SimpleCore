@@ -9,7 +9,8 @@ namespace Game.Castle
 {
     /// <summary>
     /// Wires the castle: publishes ICastle, ICastleSkills, ICastleUpgrades, adds the castle body to the enemies'
-    /// foes and joins the scene session. Install after SessionScene, Run, Enemy and Hero.
+    /// foes, gives the heroes their start points at the castle edges and joins the scene session.
+    /// Install after SessionScene, Run, Enemy and Hero.
     /// </summary>
     public sealed class CastleInstaller : InstallerAsset
     {
@@ -25,8 +26,10 @@ namespace Game.Castle
 
             var session = registry.Resolve<ISessionScene>();
             var runFlow = registry.Resolve<IRunFlow>();
+            var runRevive = registry.Resolve<IRunRevive>();
             var enemyField = registry.Resolve<IEnemyField>();
             var heroSquad = registry.Resolve<IHeroSquad>();
+            var heroSpawnPoints = registry.Resolve<IHeroSpawnPoints>();
 
             var body = new CastleBody(config, runFlow);
             var skills = new CastleSkills(config, body, runFlow, enemyField, heroSquad);
@@ -41,8 +44,9 @@ namespace Game.Castle
 #endif
 
             enemyField.AddFoes(body);
+            heroSpawnPoints.SetSpawnX(config.HeroSlotX);
             session.Join(new CastleSession(
-                config, runFlow, enemyField, body, skills, upgrades, autoShot,
+                config, runFlow, runRevive, enemyField, body, skills, upgrades, autoShot,
                 new CastleViewSpawner(config.ViewPrefab)));
         }
     }

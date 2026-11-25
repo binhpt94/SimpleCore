@@ -1,0 +1,430 @@
+{
+ "items": {
+  "lock-until-shown": {
+   "state": "verified",
+   "note": "ScreenRouter: cờ khoá từ lúc nhận yêu cầu tới lúc màn đích hiện, yêu cầu trong lúc khoá bị bỏ kèm cảnh báo",
+   "tests": [
+    "ScreenRouterTests.RequestArrivingBeforeTheTargetScreenIsShown_IsDroppedWithAWarning",
+    "ScreenRouterTests.WhileBuilding_TheFlowIsLockedAndRequestsAreDropped",
+    "ScreenRouterTests.AfterTheTargetScreenIsShown_RequestsAreTakenAgain"
+   ],
+   "play": "",
+   "hash": "a2f3955cb048",
+   "text": "Khoá yêu cầu đổi màn từ lúc nhận yêu cầu tới khung hình màn đích hiện\nYêu cầu tới trong lúc khoá bị bỏ, ghi cảnh báo.",
+   "title": "Khoá yêu cầu đổi màn từ lúc nhận yêu cầu tới khung hình màn đích hiện",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "build-limit": {
+   "state": "verified",
+   "note": "ScreenRouter: hạn dựng trận 3 giây qua Tick, lỗi thì ở lại chọn đội, hiện dòng lỗi, mở lại nút",
+   "tests": [
+    "ScreenRouterTests.BuildFailure_StaysOnTeamSelect_ShowsTheErrorLine_AndReopensEnterBattle",
+    "ScreenRouterTests.BuildTakingOverThreeSeconds_FailsAndCancelsTheBuild",
+    "ScreenRouterTests.BattleBuiltAfterTheLimitPassed_IsIgnored",
+    "ScreenRouterTests.AfterAFailedBuild_EnterBattleCanBePressedAgain_AndHidesTheErrorLine"
+   ],
+   "play": "",
+   "hash": "76514b7a2ba9",
+   "text": "Dựng trận quá 3 giây (dự kiến) hoặc báo lỗi thì ở lại màn chọn đội, hiện dòng \"Không vào được trận, thử lại\" và mở lại nút \"Vào trận\"\nĐội vừa xác nhận vẫn trong các chỗ; đội được nhớ chưa đổi.",
+   "title": "Dựng trận quá 3 giây (dự kiến) hoặc báo lỗi thì ở lại màn chọn đội, hiện dòng \"Không vào được trận, thử lại\" và mở lại nút \"Vào trận\"",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "home-first-once": {
+   "state": "verified",
+   "note": "ScreenRouter.SceneReady: màn bắt đầu hiện một lần, báo lặp bị bỏ",
+   "tests": [
+    "ScreenRouterTests.SceneReady_ShowsTheStartScreen",
+    "ScreenRouterTests.RepeatedSceneReady_IsIgnored",
+    "ScreenRouterTests.Participant_ShowsTheStartScreenWhenTheSessionRuns"
+   ],
+   "play": "",
+   "hash": "7fad34e0d2af",
+   "text": "Mỗi lần scene Game sẵn sàng, màn bắt đầu hiện đúng một lần; báo sẵn sàng lặp lại bị bỏ",
+   "title": "Mỗi lần scene Game sẵn sàng, màn bắt đầu hiện đúng một lần; báo sẵn sàng lặp lại bị bỏ",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "back-key-map": {
+   "state": "verified",
+   "note": "ScreenRouter.BackKey: chọn đội như Quay lại, màn bắt đầu và màn trận không làm gì",
+   "tests": [
+    "ScreenRouterTests.BackKeyOnTeamSelect_ActsLikeBack",
+    "ScreenRouterTests.BackKeyOnTheStartScreen_DoesNothing",
+    "ScreenRouterTests.BackKeyInBattle_IsLeftToTheRun"
+   ],
+   "play": "",
+   "hash": "4fc6dba6549c",
+   "text": "Nút quay lại của máy: ở màn chọn đội như \"Quay lại\"; ở màn bắt đầu không làm gì\nTrong màn trận giữ luật của `feature-run` (như bấm tạm dừng).",
+   "title": "Nút quay lại của máy: ở màn chọn đội như \"Quay lại\"; ở màn bắt đầu không làm gì",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "switch-instant": {
+   "state": "verified",
+   "note": "ScreenRouter: một lần gọi Show ẩn màn cũ và hiện màn mới",
+   "tests": [
+    "ScreenRouterTests.SwitchingScreens_HidesOldAndShowsNewInOneStep",
+    "ScreenRouterTests.EnterBattle_KeepsTeamSelectUpUntilTheBattleIsBuilt"
+   ],
+   "play": "",
+   "hash": "26720a874124",
+   "text": "Đổi giữa hai màn chính là tức thì: màn cũ ẩn và màn mới hiện trong cùng một khung hình\nRiêng vào trận: màn chọn đội ở lại tới khi trận dựng xong rồi mới đổi.",
+   "title": "Đổi giữa hai màn chính là tức thì: màn cũ ẩn và màn mới hiện trong cùng một khung hình",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "back-button": {
+   "state": "verified",
+   "note": "ScreenRouter.Back: chọn đội về màn bắt đầu, cỡ và chỗ nút ghi trong RouteSettings",
+   "tests": [
+    "ScreenRouterTests.BackOnTeamSelect_GoesToTheStartScreen_WithoutTouchingTheRememberedTeam",
+    "ScreenRouterTests.BackButton_SitsTopLeftWithASideOfAtLeast120Px",
+    "ScreenRouterTests.BackOutsideTeamSelect_IsIgnored"
+   ],
+   "play": "",
+   "hash": "93320692bad1",
+   "text": "Màn chọn đội có nút \"Quay lại\" ở góc trên trái, cạnh tối thiểu 120 px; chạm thì về màn bắt đầu\nĐội được nhớ không đổi; các chỗ đang chọn dở bị bỏ.",
+   "title": "Màn chọn đội có nút \"Quay lại\" ở góc trên trái, cạnh tối thiểu 120 px; chạm thì về màn bắt đầu",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "edge-bam-vao-tran-hai-lan-nhanh": {
+   "state": "verified",
+   "note": "ScreenRouter: lần bấm Vào trận thứ hai rơi vào lúc khoá, chỉ dựng một trận",
+   "tests": [
+    "ScreenRouterTests.EnterBattlePressedTwiceQuickly_BuildsOnlyOneBattle",
+    "ScreenRouterTests.BattleBuiltInsideTheBuildCall_StillShowsTheBattle"
+   ],
+   "play": "",
+   "hash": "be98ff751869",
+   "text": "**Bấm \"Vào trận\" hai lần nhanh:** lần hai rơi vào lúc khoá, bị bỏ; chỉ một trận được dựng.",
+   "title": "Bấm \"Vào trận\" hai lần nhanh",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "edge-bam-quay-lai-dung-luc-dang-dung-tran": {
+   "state": "verified",
+   "note": "ScreenRouter: Quay lại trong lúc dựng trận bị bỏ vì đang khoá",
+   "tests": [
+    "ScreenRouterTests.BackPressedWhileBuilding_IsIgnored"
+   ],
+   "play": "",
+   "hash": "ef9cd24d0701",
+   "text": "**Bấm \"Quay lại\" đúng lúc đang dựng trận:** bị bỏ vì đang khoá.",
+   "title": "Bấm \"Quay lại\" đúng lúc đang dựng trận",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "edge-dung-tran-loi-roi-bam-quay-lai": {
+   "state": "verified",
+   "note": "ScreenRouter: dựng lỗi rồi Quay lại thì về màn bắt đầu, đội nhớ giữ đội cũ",
+   "tests": [
+    "ScreenRouterTests.BuildFailedThenBack_GoesHome_AndTheRememberedTeamIsTheOneOfTheLastBattle"
+   ],
+   "play": "",
+   "hash": "10eacf3a8c0a",
+   "text": "**Dựng trận lỗi rồi bấm \"Quay lại\":** về màn bắt đầu; đội được nhớ vẫn là đội của lần vào trận trước.",
+   "title": "Dựng trận lỗi rồi bấm \"Quay lại\"",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "edge-roi-game-khi-dang-dung-tran": {
+   "state": "verified",
+   "note": "ScreenRouter: lúc rời game không tính vào hạn 3 giây",
+   "tests": [
+    "ScreenRouterTests.TimeInTheBackgroundDoesNotCountTowardsTheBuildLimit"
+   ],
+   "play": "",
+   "hash": "4b790a31957a",
+   "text": "**Rời game khi đang dựng trận:** thời gian ở ngoài không tính vào hạn 3 giây.",
+   "title": "Rời game khi đang dựng trận",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "edge-bao-don-tran-xong-toi-khi-khong-dang": {
+   "state": "verified",
+   "note": "ScreenRouter.RunLeft: không ở màn trận thì bỏ và ghi lỗi",
+   "tests": [
+    "ScreenRouterTests.BattleClearedWhileNotOnTheBattleScreen_IsIgnoredAndLoggedAsAnError",
+    "ScreenRouterTests.LeaveChoices_GoToTheirScreens"
+   ],
+   "play": "",
+   "hash": "a8b2ce231c51",
+   "text": "**Báo dọn trận xong tới khi không đang ở màn trận (lỗi):** bỏ, ghi lỗi.",
+   "title": "Báo dọn trận xong tới khi không đang ở màn trận (lỗi)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  },
+  "params": {
+   "state": "verified",
+   "note": "RouteSettings: thời gian đổi màn 0, hạn dựng 3 giây, nút Quay lại 120 px, dòng lỗi",
+   "tests": [
+    "ScreenRouterTests.Settings_MatchTheDesignedValues",
+    "ScreenRouterTests.Settings_RejectValuesThatCannotWork",
+    "ScreenRouterTests.ARetryAfterAFailureIsNotLimited"
+   ],
+   "play": "",
+   "hash": "2f58a0ff36a6",
+   "text": "## Làm gì\n- Giữ màn chính đang hiện (bắt đầu, chọn đội, trận) và cờ khoá.\n- Nhận yêu cầu theo bảng của node cha; đang khoá thì bỏ.\n- \"Vào trận\": giao đội cho `feature-run`, chờ báo dựng xong (tối đa 3 giây), rồi ẩn màn chọn đội, hiện màn trận.\n- Lựa chọn rời trận tới qua `feature-run` sau khi dọn trận: hiện màn đích ngay.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Thời gian đổi màn | 0 (cùng khung hình) | giây | Mức đơn giản nhất, khớp `feature-run/run-flow/flow-rules` |\n| Hạn dựng trận | 3 (dự kiến) | giây | Mọi thứ đã tải ở bước tải của scene; dựng trận chỉ là tạo object |\n| Số lần thử lại khi dựng lỗi | không giới hạn, mỗi lần một chạm | lần | Người chơi tự bấm lại |\n| Nút \"Quay lại\" | góc trên trái màn chọn đội, cạnh tối thiểu 120 px | px | Cỡ chạm tối thiểu của HUD và popup |\n| Dòng lỗi dựng trận | \"Không vào được trận, thử lại\" | | Người chơi biết bấm lại |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Ai đổi màn | `feature-run` (chỉ có màn trận; mở game và chơi lại vào thẳng trận) | Điều hướng màn, theo bảng của node cha | Như PROTOTYPE |\n| Nút \"Quay lại\" ở màn chọn đội | Không (chưa có màn chọn đội) | Có | Có |\n| Hiệu ứng đổi màn | Không | Không | Mờ dần ra rồi vào, 0.3 giây mỗi chiều (dự kiến), khoá trong lúc chạy |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:35"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 13:37:56",
+   "id": "lock-until-shown",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter: cờ khoá từ lúc nhận yêu cầu tới lúc màn đích hiện, yêu cầu trong lúc khoá bị bỏ kèm cảnh báo"
+  },
+  {
+   "at": "2026-11-25 13:37:58",
+   "id": "build-limit",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter: hạn dựng trận 3 giây qua Tick, lỗi thì ở lại chọn đội, hiện dòng lỗi, mở lại nút"
+  },
+  {
+   "at": "2026-11-25 13:38:00",
+   "id": "home-first-once",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter.SceneReady: màn bắt đầu hiện một lần, báo lặp bị bỏ"
+  },
+  {
+   "at": "2026-11-25 13:38:01",
+   "id": "back-key-map",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter.BackKey: chọn đội như Quay lại, màn bắt đầu và màn trận không làm gì"
+  },
+  {
+   "at": "2026-11-25 13:38:06",
+   "id": "switch-instant",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter: một lần gọi Show ẩn màn cũ và hiện màn mới"
+  },
+  {
+   "at": "2026-11-25 13:38:07",
+   "id": "back-button",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter.Back: chọn đội về màn bắt đầu, cỡ và chỗ nút ghi trong RouteSettings"
+  },
+  {
+   "at": "2026-11-25 13:38:08",
+   "id": "edge-bam-vao-tran-hai-lan-nhanh",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter: lần bấm Vào trận thứ hai rơi vào lúc khoá, chỉ dựng một trận"
+  },
+  {
+   "at": "2026-11-25 13:38:09",
+   "id": "edge-bam-quay-lai-dung-luc-dang-dung-tran",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter: Quay lại trong lúc dựng trận bị bỏ vì đang khoá"
+  },
+  {
+   "at": "2026-11-25 13:38:10",
+   "id": "edge-dung-tran-loi-roi-bam-quay-lai",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter: dựng lỗi rồi Quay lại thì về màn bắt đầu, đội nhớ giữ đội cũ"
+  },
+  {
+   "at": "2026-11-25 13:38:11",
+   "id": "edge-roi-game-khi-dang-dung-tran",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter: lúc rời game không tính vào hạn 3 giây"
+  },
+  {
+   "at": "2026-11-25 13:38:15",
+   "id": "edge-bao-don-tran-xong-toi-khi-khong-dang",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "ScreenRouter.RunLeft: không ở màn trận thì bỏ và ghi lỗi"
+  },
+  {
+   "at": "2026-11-25 13:38:16",
+   "id": "params",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "RouteSettings: thời gian đổi màn 0, hạn dựng 3 giây, nút Quay lại 120 px, dòng lỗi"
+  },
+  {
+   "at": "2026-11-25 13:40:35",
+   "id": "switch-instant",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.SwitchingScreens_HidesOldAndShowsNewInOneStep, ScreenRouterTests.EnterBattle_KeepsTeamSelectUpUntilTheBattleIsBuilt"
+  },
+  {
+   "at": "2026-11-25 13:40:36",
+   "id": "lock-until-shown",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.RequestArrivingBeforeTheTargetScreenIsShown_IsDroppedWithAWarning, ScreenRouterTests.WhileBuilding_TheFlowIsLockedAndRequestsAreDropped, ScreenRouterTests.AfterTheTargetScreenIsShown_RequestsAreTakenAgain"
+  },
+  {
+   "at": "2026-11-25 13:40:38",
+   "id": "build-limit",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.BuildFailure_StaysOnTeamSelect_ShowsTheErrorLine_AndReopensEnterBattle, ScreenRouterTests.BuildTakingOverThreeSeconds_FailsAndCancelsTheBuild, ScreenRouterTests.BattleBuiltAfterTheLimitPassed_IsIgnored, ScreenRouterTests.AfterAFailedBuild_EnterBattleCanBePressedAgain_AndHidesTheErrorLine"
+  },
+  {
+   "at": "2026-11-25 13:40:40",
+   "id": "back-button",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.BackOnTeamSelect_GoesToTheStartScreen_WithoutTouchingTheRememberedTeam, ScreenRouterTests.BackButton_SitsTopLeftWithASideOfAtLeast120Px, ScreenRouterTests.BackOutsideTeamSelect_IsIgnored"
+  },
+  {
+   "at": "2026-11-25 13:40:41",
+   "id": "home-first-once",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.SceneReady_ShowsTheStartScreen, ScreenRouterTests.RepeatedSceneReady_IsIgnored, ScreenRouterTests.Participant_ShowsTheStartScreenWhenTheSessionRuns"
+  },
+  {
+   "at": "2026-11-25 13:40:42",
+   "id": "back-key-map",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.BackKeyOnTeamSelect_ActsLikeBack, ScreenRouterTests.BackKeyOnTheStartScreen_DoesNothing, ScreenRouterTests.BackKeyInBattle_IsLeftToTheRun"
+  },
+  {
+   "at": "2026-11-25 13:40:45",
+   "id": "edge-bam-vao-tran-hai-lan-nhanh",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.EnterBattlePressedTwiceQuickly_BuildsOnlyOneBattle, ScreenRouterTests.BattleBuiltInsideTheBuildCall_StillShowsTheBattle"
+  },
+  {
+   "at": "2026-11-25 13:40:46",
+   "id": "edge-bam-quay-lai-dung-luc-dang-dung-tran",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.BackPressedWhileBuilding_IsIgnored"
+  },
+  {
+   "at": "2026-11-25 13:40:47",
+   "id": "edge-dung-tran-loi-roi-bam-quay-lai",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.BuildFailedThenBack_GoesHome_AndTheRememberedTeamIsTheOneOfTheLastBattle"
+  },
+  {
+   "at": "2026-11-25 13:40:48",
+   "id": "edge-roi-game-khi-dang-dung-tran",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.TimeInTheBackgroundDoesNotCountTowardsTheBuildLimit"
+  },
+  {
+   "at": "2026-11-25 13:40:50",
+   "id": "edge-bao-don-tran-xong-toi-khi-khong-dang",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.BattleClearedWhileNotOnTheBattleScreen_IsIgnoredAndLoggedAsAnError, ScreenRouterTests.LeaveChoices_GoToTheirScreens"
+  },
+  {
+   "at": "2026-11-25 13:40:51",
+   "id": "params",
+   "state": "done",
+   "by": "GameFlow",
+   "note": "ScreenRouterTests.Settings_MatchTheDesignedValues, ScreenRouterTests.Settings_RejectValuesThatCannotWork, ScreenRouterTests.ARetryAfterAFailureIsNotLimited"
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "switch-instant",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "lock-until-shown",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "build-limit",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "back-button",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "home-first-once",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "back-key-map",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "edge-bam-vao-tran-hai-lan-nhanh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "edge-bam-quay-lai-dung-luc-dang-dung-tran",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "edge-dung-tran-loi-roi-bam-quay-lai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "edge-roi-game-khi-dang-dung-tran",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "edge-bao-don-tran-xong-toi-khi-khong-dang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:35",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  }
+ ]
+}

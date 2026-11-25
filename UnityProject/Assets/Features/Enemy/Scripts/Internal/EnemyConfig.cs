@@ -75,6 +75,9 @@ namespace Game.Enemy
         [SerializeField] private float _moveSpeed = 1.5f;
         [SerializeField] private int _coins = 5;
 
+        [Tooltip("On: hits from afar; every hit shows a shot flying to the foe (damage still lands at once).")]
+        [SerializeField] private bool _ranged;
+
         [Tooltip("Off: this type is not in the game at the current stage; asking to spawn it is an error.")]
         [SerializeField] private bool _available = true;
 
@@ -88,5 +91,6 @@ namespace Game.Enemy
         public float Range => _range;
         public float MoveSpeed => _moveSpeed;
         public int Coins => _coins;
+        public bool Ranged => _ranged;
     }
 }

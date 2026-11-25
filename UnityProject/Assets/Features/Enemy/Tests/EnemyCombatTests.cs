@@ -261,6 +261,96 @@ namespace Game.Enemy.Tests
         }
 
         [Test]
+        public void An_enemy_archer_shows_a_shot_flying_to_its_foe_on_every_hit_while_the_damage_lands_at_once()
+        {
+            var stage = new FakeStage();
+            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            _heroes.Foes.Add(new EnemyFoe(7, 12f, 0.5f));        // gap 17 - 0.5 - 0.5 - 12 = 4u, within 5u
+            _field.Spawn(new EnemySpawn(EnemyType.Archer, EnemySide.Right, 1f));
+
+            stage.RaiseFrame(Step);
+
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "damage lands in the frame of the hit");
+            Assert.That(stage.Shots.Count, Is.EqualTo(1));
+            Assert.That(stage.Shots[0].FromX, Is.EqualTo(17f).Within(1e-4f));
+            Assert.That(stage.Shots[0].ToX, Is.EqualTo(12f).Within(1e-4f));
+            Assert.That(stage.Shots[0].Y, Is.EqualTo(0.6f).Within(1e-4f), "from the middle of its 1.2u box");
+
+            for (var i = 0; i < 60; i++) stage.RaiseFrame(Step);  // 1.2s later: next hit
+            Assert.That(stage.Shots.Count, Is.EqualTo(_heroes.Hits.Count));
+        }
+
+        [TestCase(EnemyType.Soldier)]
+        [TestCase(EnemyType.Wolf)]
+        [TestCase(EnemyType.Giant)]
+        [TestCase(EnemyType.Boss)]
+        public void A_melee_enemy_hits_without_a_shot(EnemyType type)
+        {
+            var stage = new FakeStage();
+            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            _heroes.Foes.Add(new EnemyFoe(7, 15f, 0.5f));
+            _field.Spawn(new EnemySpawn(type, EnemySide.Right, 1f));
+
+            for (var i = 0; i < 200; i++) stage.RaiseFrame(Step);
+
+            Assert.That(_heroes.Hits.Count, Is.GreaterThan(0));
+            Assert.That(stage.Shots, Is.Empty);
+        }
+
+        [Test]
+        public void A_defeated_enemy_shows_the_coins_it_paid_where_it_stood()
+        {
+            var stage = new FakeStage();
+            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            _field.Spawn(new EnemySpawn(EnemyType.Giant, EnemySide.Left, 1f));
+            var handle = Handle();
+
+            _field.Damage(handle, 10f);
+            Assert.That(stage.Coins, Is.Empty, "a hurt enemy pays nothing");
+
+            _field.Damage(handle, 1000f);
+            Assert.That(stage.Coins.Count, Is.EqualTo(1));
+            Assert.That(stage.Coins[0].Coins, Is.EqualTo(15));
+            Assert.That(stage.Coins[0].X, Is.EqualTo(-17f).Within(1e-4f));
+            Assert.That(stage.Coins[0].Top, Is.EqualTo(2.5f).Within(1e-4f), "starts at the top of its box");
+
+            _field.Damage(handle, 1000f);
+            Assert.That(stage.Coins.Count, Is.EqualTo(1), "shown once");
+        }
+
+        [Test]
+        public void Leaving_the_battle_shows_no_coins_for_the_enemies_removed()
+        {
+            var stage = new FakeStage();
+            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            _field.Clear();
+
+            Assert.That(stage.Coins, Is.Empty);
+        }
+
+        [Test]
+        public void While_paused_no_enemy_is_defeated_and_the_rising_coin_text_stands_still()
+        {
+            var runFlow = new FakeRunFlow();
+            var stage = new FakeStage();
+            using var presenter = new EnemyPresenter(_field, runFlow, stage);
+            _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.Spawn(new EnemySpawn(EnemyType.Wolf, EnemySide.Left, 1f));
+            _field.Damage(Handle(), 1000f);
+            Assert.That(stage.Coins.Count, Is.EqualTo(1));
+
+            runFlow.Paused = true;
+            stage.RaiseFrame(3f);
+
+            Assert.That(stage.Paused, Is.True, "the stage freezes everything it plays, the coin text too");
+            Assert.That(stage.Coins.Count, Is.EqualTo(1), "nothing defeated, nothing paid while paused");
+            Assert.That(_field.AliveCount, Is.EqualTo(1));
+        }
+
+        [Test]
         public void An_enemy_keeps_hitting_a_hero_that_walked_past_it_toward_the_edge()
         {
             _heroes.Foes.Add(new EnemyFoe(7, 17.6f, 0.5f));
@@ -581,12 +671,16 @@ namespace Game.Enemy.Tests
             public readonly List<int> Flashed = new List<int>();
             public readonly List<int> Defeated = new List<int>();
             public readonly List<int> Lunges = new List<int>();
+            public readonly List<EnemyShot> Shots = new List<EnemyShot>();
+            public readonly List<EnemyReward> Coins = new List<EnemyReward>();
 
             public event Action<float> Frame;
             public void RaiseFrame(float seconds) => Frame?.Invoke(seconds);
             public void Show(EnemyLook look) => Shown.Add(look.Handle);
             public void Move(EnemyLook look) { }
             public void Lunge(int handle, int direction) => Lunges.Add(direction);
+            public void Shoot(EnemyShot shot) => Shots.Add(shot);
+            public void ShowCoins(EnemyReward reward) => Coins.Add(reward);
             public void Flash(int handle) => Flashed.Add(handle);
             public void Defeat(int handle) => Defeated.Add(handle);
             public void RemoveAll() { }

@@ -76,6 +76,36 @@
    "title": "Tắt game giữa trận",
    "by": "Run",
    "at": "2026-11-25 11:47:35"
+  },
+  "edge-bo-luot-tu-popup-tam-dung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunPauseTests.GivingUpFromThePauseClearsTheStillBattleAndTheNextRunStartsClean"
+   ],
+   "play": "",
+   "hash": "cb18361d726d",
+   "text": "**Bỏ lượt từ popup tạm dừng**: popup xác nhận và popup tạm dừng đều đóng trước khi về màn bắt đầu; trận đứng yên lúc tạm dừng vẫn phải được dọn khi lượt mới bắt đầu.",
+   "title": "Bỏ lượt từ popup tạm dừng",
+   "by": "Run",
+   "at": "2026-11-25 13:43:11"
+  },
+  "edge-luot-moi-bat-dau-ma-con-popup-mo": {
+   "state": "done",
+   "note": "LeftoverPopupCheck xong, cho ref Popup.Contracts trong Tests asmdef de sua RunInstallerTests",
+   "tests": [
+    "RunLeftoverPopupTests.NewRunWithAPopupStillOpenLogsAnErrorNamingIt",
+    "RunLeftoverPopupTests.NewRunWithNoPopupOpenLogsNothing",
+    "RunLeftoverPopupTests.PopupClosedByThePressThatStartedTheRunIsNotAnError",
+    "RunLeftoverPopupTests.EveryNewRunIsChecked",
+    "RunInstallerTests.InstallWithoutPopupStackFailsNamingIt"
+   ],
+   "play": "",
+   "hash": "a1a3699f7792",
+   "text": "**Lượt mới bắt đầu mà còn popup mở (lỗi)**: ghi lỗi nêu id popup; không tự đóng âm thầm.",
+   "title": "Lượt mới bắt đầu mà còn popup mở (lỗi)",
+   "by": "Run",
+   "at": "2026-11-25 14:07:55"
   }
  },
  "log": [
@@ -162,6 +192,34 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-25 13:43:11",
+   "id": "edge-bo-luot-tu-popup-tam-dung",
+   "state": "done",
+   "by": "Run",
+   "note": "RunPauseTests.GivingUpFromThePauseClearsTheStillBattleAndTheNextRunStartsClean"
+  },
+  {
+   "at": "2026-11-25 13:45:33",
+   "id": "edge-luot-moi-bat-dau-ma-con-popup-mo",
+   "state": "doing",
+   "by": "Run",
+   "note": "cho IPopupStack"
+  },
+  {
+   "at": "2026-11-25 14:06:42",
+   "id": "edge-luot-moi-bat-dau-ma-con-popup-mo",
+   "state": "doing",
+   "by": "Run",
+   "note": "LeftoverPopupCheck xong, cho ref Popup.Contracts trong Tests asmdef de sua RunInstallerTests"
+  },
+  {
+   "at": "2026-11-25 14:07:55",
+   "id": "edge-luot-moi-bat-dau-ma-con-popup-mo",
+   "state": "done",
+   "by": "Run",
+   "note": "RunLeftoverPopupTests.NewRunWithAPopupStillOpenLogsAnErrorNamingIt, RunLeftoverPopupTests.NewRunWithNoPopupOpenLogsNothing, RunLeftoverPopupTests.PopupClosedByThePressThatStartedTheRunIsNotAnError, RunLeftoverPopupTests.EveryNewRunIsChecked, RunInstallerTests.InstallWithoutPopupStackFailsNamingIt"
   }
  ]
 }

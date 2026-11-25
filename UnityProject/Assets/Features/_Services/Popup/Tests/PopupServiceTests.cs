@@ -187,6 +187,56 @@ namespace Game.Services.Popup.Tests
         }
 
         [Test]
+        public void RunEndsWhilePausePopupIsOpen_CallerClosesItThenOpensTheLosePopup_InTheSameFrame()
+        {
+            var timeScale = Time.timeScale;
+            try
+            {
+                Time.timeScale = 0f;   // should not happen (battle stands still), but if it does:
+                var pause = service.Show(IdA);
+
+                service.Close(pause);
+                var lose = service.Show(IdB);
+
+                Assert.That(lose.IsValid, Is.True, "the lose popup opens at once");
+                Assert.That(service.IsOnTop(lose), Is.True);
+                Assert.That(service.OpenCount, Is.EqualTo(1), "the pause popup and its backdrop are gone");
+                Assert.That(service.IsOnTop(pause), Is.False);
+                Assert.That(presenter.Dismissed, Has.Count.EqualTo(1));
+                Assert.That(log.Count, Is.EqualTo(0));
+
+                service.Close(pause);   // a late close from the pause side is ignored
+
+                Assert.That(service.IsOnTop(lose), Is.True);
+                Assert.That(log.Count, Is.EqualTo(0));
+            }
+            finally
+            {
+                Time.timeScale = timeScale;
+            }
+        }
+
+        [Test]
+        public void OpenIds_ListsTheOpenPopupsBottomFirst_AndIsEmptyOnceTheyClose()
+        {
+            IPopupStack stackView = service;
+            Assert.That(stackView.OpenIds, Is.Empty);
+
+            var first = service.Show(IdA);
+            var second = service.Show(IdB);
+            var snapshot = stackView.OpenIds;
+
+            Assert.That(snapshot, Is.EqualTo(new[] { IdA, IdB }));
+
+            service.Close(first);
+            Assert.That(stackView.OpenIds, Is.EqualTo(new[] { IdB }));
+            service.Close(second);
+
+            Assert.That(stackView.OpenIds, Is.Empty);
+            Assert.That(snapshot, Is.EqualTo(new[] { IdA, IdB }), "a list already handed out does not change");
+        }
+
+        [Test]
         public void NoPopupOpen_NothingIsOnTop_AndNothingWasPresented()
         {
             Assert.That(service.OpenCount, Is.EqualTo(0));
@@ -328,6 +378,8 @@ namespace Game.Services.Popup.Tests
             Assert.That(registry.TryResolve<IPopupService>(out var popups), Is.True);
             Assert.That(registry.TryResolve<IPopupViews>(out var views), Is.True);
             Assert.That(views, Is.SameAs(popups));
+            Assert.That(registry.TryResolve<IPopupStack>(out var stackView), Is.True, "the read-only stack is registered too");
+            Assert.That(stackView, Is.SameAs(popups));
             Assert.That(session.Joined, Has.Count.EqualTo(1));
         }
 

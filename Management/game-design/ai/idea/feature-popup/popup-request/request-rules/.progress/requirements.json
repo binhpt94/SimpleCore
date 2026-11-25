@@ -174,6 +174,19 @@
    "title": "Id có nhưng asset thiếu",
    "by": "@CodeLead",
    "at": "2026-11-25 12:02:54"
+  },
+  "edge-dang-mo-popup-tam-dung-ma-luot-ket": {
+   "state": "done",
+   "note": "Test dịch vụ: đóng popup tạm dừng rồi mở popup thua cùng khung hình, popup thua trên cùng, không còn popup tạm dừng",
+   "tests": [
+    "PopupServiceTests.RunEndsWhilePausePopupIsOpen_CallerClosesItThenOpensTheLosePopup_InTheSameFrame"
+   ],
+   "play": "",
+   "hash": "17ec994ef784",
+   "text": "**Đang mở popup tạm dừng mà lượt kết thúc (không xảy ra vì trận đứng yên)**: nếu vẫn xảy ra, feature gọi đóng popup tạm dừng rồi mới mở popup thua.",
+   "title": "Đang mở popup tạm dừng mà lượt kết thúc (không xảy ra vì trận đứng yên)",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 13:35:53"
   }
  },
  "log": [
@@ -365,6 +378,20 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-25 13:35:37",
+   "id": "edge-dang-mo-popup-tam-dung-ma-luot-ket",
+   "state": "doing",
+   "by": "_Services/Popup",
+   "note": "Test dịch vụ: đóng popup tạm dừng rồi mở popup thua cùng khung hình, popup thua trên cùng, không còn popup tạm dừng"
+  },
+  {
+   "at": "2026-11-25 13:35:53",
+   "id": "edge-dang-mo-popup-tam-dung-ma-luot-ket",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupServiceTests.RunEndsWhilePausePopupIsOpen_CallerClosesItThenOpensTheLosePopup_InTheSameFrame"
   }
  ]
 }

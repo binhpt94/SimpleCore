@@ -30,7 +30,10 @@ namespace Game.Run
         /// <summary>The player leaves the battle: remove everything the battle created.</summary>
         event Action BattleCleared;
 
-        /// <summary>True while the battlefield stands still (<see cref="RunStep.Paused"/>).</summary>
+        /// <summary>
+        /// True while the battlefield stands still: <see cref="RunStep.Paused"/>, and the revive steps
+        /// <see cref="RunStep.ReviveWait"/>, <see cref="RunStep.ReviveOffer"/>, <see cref="RunStep.Reviving"/>.
+        /// </summary>
         bool IsPaused { get; }
 
         /// <summary>Start screen: the player pressed Play.</summary>
@@ -54,7 +57,11 @@ namespace Game.Run
         /// <summary>Lose popup: the player chose Back to start.</summary>
         void GoHome();
 
-        /// <summary>In battle: the run is lost (the castle fell). Stops the battle at once; ignored after the first call.</summary>
+        /// <summary>
+        /// In battle: the castle fell. The first fall of a run, when revives are on, freezes the battle and goes to
+        /// <see cref="RunStep.ReviveWait"/> (see <see cref="IRunRevive"/>); otherwise the run is lost and the battle
+        /// stops at once. Ignored while the run is already ending or in a revive step.
+        /// </summary>
         void Lose();
 
         /// <summary>

@@ -34,6 +34,15 @@ namespace Game.Hud
         /// <summary>The player tapped a skill button, with its index.</summary>
         event Action<int> SkillPressed;
 
+        /// <summary>The player tapped the pause button (two vertical bars, top-left corner, shown all battle).</summary>
+        event Action PausePressed;
+
+        /// <summary>
+        /// Keeps every HUD part inside the device safe area: <paramref name="insets"/> in reference units
+        /// (see <see cref="HudSafeArea"/>), zero when nothing is cut off.
+        /// </summary>
+        void ApplySafeArea(HudInsets insets);
+
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         /// <summary>Dev only: a button that applies a cheat state.</summary>
         void ShowCheatButton(string label);

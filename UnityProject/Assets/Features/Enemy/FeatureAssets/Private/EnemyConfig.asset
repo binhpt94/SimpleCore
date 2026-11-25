@@ -55,6 +55,7 @@ MonoBehaviour:
     _range: 5
     _moveSpeed: 1.5
     _coins: 6
+    _ranged: 1
     _available: 0
   - _type: 4
     _width: 3

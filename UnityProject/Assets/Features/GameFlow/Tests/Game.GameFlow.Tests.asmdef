@@ -1,0 +1,27 @@
+{
+  "name": "Game.GameFlow.Tests",
+  "rootNamespace": "Game.GameFlow.Tests",
+  "references": [
+    "Game.Core",
+    "Game.GameFlow.Internal",
+    "Game.Run.Contracts",
+    "UniTask",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

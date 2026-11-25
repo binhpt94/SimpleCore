@@ -1,0 +1,393 @@
+{
+ "items": {
+  "fixed-step": {
+   "state": "verified",
+   "note": "FixedStepClock 0.02s, toi da 5 buoc moi khung, CombatLoop",
+   "tests": [
+    "CombatLoopTests.BattleRunsFiftyTicksEachSecondOfTwoHundredthsEach",
+    "CombatLoopTests.FastFramesWaitUntilAWholeStepHasPassed",
+    "CombatLoopTests.SlowFrameRunsSeveralTicks",
+    "CombatLoopTests.VerySlowFrameRunsAtMostFiveTicksAndTheBattleSlowsDown",
+    "CombatLoopTests.SameFrameTimesGiveTheSameTicksOnFastAndSlowDevices"
+   ],
+   "play": "",
+   "hash": "75320b992a48",
+   "text": "Trận cập nhật theo bước cố định 0.02 giây (50 bước mỗi giây); mỗi bước một nhịp giao chiến\nBước cố định cho kết quả giống nhau trên máy nhanh và máy chậm. Khung hình chậm thì chạy nhiều bước trong một khung, tối đa 5 bước.",
+   "title": "Trận cập nhật theo bước cố định 0.02 giây (50 bước mỗi giây); mỗi bước một nhịp giao chiến",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "tick-order": {
+   "state": "verified",
+   "note": "CombatTick: Aim, Strike, gom, loc, cong, TakeTotal, ReportFallen, TickDone",
+   "tests": [
+    "CombatTickTests.TickRunsAimStrikeFilterTakeHealthReportFallThenDone",
+    "CombatTickTests.EveryActorStrikesOnlyAfterEveryActorAimed",
+    "CombatTickTests.TickWithNoHitStillReportsDone",
+    "CombatTickTests.HitDealtWhileReportingAFallBelongsToTheNextTick"
+   ],
+   "play": "",
+   "hash": "1dde4e7de6ac",
+   "text": "Trong một nhịp: đi và nhắm, ra đòn, gom đòn, lọc, cộng, chủ trừ máu, báo hết máu, báo nhịp xong\nMọi bên ra đòn trong bước dựa trên vị trí và trạng thái đầu bước.",
+   "title": "Trong một nhịp: đi và nhắm, ra đòn, gom đòn, lọc, cộng, chủ trừ máu, báo hết máu, báo nhịp xong",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "damage-real": {
+   "state": "verified",
+   "note": "tong so thuc, khong lam tron",
+   "tests": [
+    "CombatTickTests.DamageKeepsFractionsWhenSummedAndTaken",
+    "CombatTickTests.SidesWithLessThanOneHealthLeftAreNotFallen"
+   ],
+   "play": "",
+   "hash": "7743bc8fd4bd",
+   "text": "Sát thương giữ số thực khi cộng và trừ, không làm tròn trong nhịp\nHiện số do HUD (máu thành làm tròn xuống).",
+   "title": "Sát thương giữ số thực khi cộng và trừ, không làm tròn trong nhịp",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "pause-no-tick": {
+   "state": "verified",
+   "note": "CombatLoop doc IRunFlow.IsPaused, BattleStopped",
+   "tests": [
+    "CombatLoopTests.NoTickRunsWhilePaused",
+    "CombatLoopTests.NoTickRunsWhileWaitingForARevive",
+    "CombatLoopTests.NoTickRunsAfterTheRunEnded",
+    "CombatLoopTests.NoTickRunsBeforeTheBattleStarts",
+    "CombatLoopTests.CastleFallingInATickStopsTheRestOfTheFramesTicks",
+    "CombatLoopTests.HitsWaitingWhenTheBattleIsClearedDoNotReachTheNextRun"
+   ],
+   "play": "",
+   "hash": "13c3b605b658",
+   "text": "Lúc tạm dừng, lúc chờ hồi sinh và sau khi lượt kết thúc không có nhịp nào chạy",
+   "title": "Lúc tạm dừng, lúc chờ hồi sinh và sau khi lượt kết thúc không có nhịp nào chạy",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "edge-don-vao-quai-da-ra-ngoai-man-16u": {
+   "state": "verified",
+   "note": "Combat khong loc theo vi tri",
+   "tests": [
+    "CombatTickTests.HitOnEnemyOutsideTheScreenStillLandsWhenTheDealerChoseIt"
+   ],
+   "play": "",
+   "hash": "77245d4f1fd7",
+   "text": "**Đòn vào quái đã ra ngoài màn (±16u):** vẫn trúng nếu bên ra đòn đã chọn nó; luật chọn là của bên ra đòn.",
+   "title": "Đòn vào quái đã ra ngoài màn (±16u)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "params": {
+   "state": "verified",
+   "note": "CombatConfig asset 0.02s, 5 buoc",
+   "tests": [
+    "CombatConfigTests.BattleStepsAreTwoHundredthsOfASecondAndAtMostFivePerFrame"
+   ],
+   "play": "",
+   "hash": "09374f40362d",
+   "text": "## Làm gì\n- Mỗi bước cố định 0.02 giây của trận: chạy một nhịp theo thứ tự ở `tick-order`.\n- Nhận đòn trúng từ hero, quái, thành (đòn tự bắn, Sấm sét), lọc theo trạng thái đầu nhịp, cộng theo bên trúng.\n- Chuyển tổng cho feature sở hữu; chờ mọi bên trừ máu và báo xong; báo nhịp xong cho `feature-wave` và `feature-run`.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Bước cập nhật | 0.02 (50 bước/giây) | giây | Nhịp đòn nhanh nhất là 0.7 giây (Kiếm khách, `feature-hero/hero-list/hero-roster-values`); 0.02 giây đủ mịn |\n| Số bước tối đa trong một khung hình | 5 | bước | Khung hình chậm (0.1 giây) vẫn theo kịp; chậm hơn thì trận chạy chậm lại, không nhảy cóc |\n| Làm tròn sát thương | không | | Hệ số đợt cho số lẻ |\n| Đòn Sấm sét | một đòn mỗi quái trong vùng | đòn | `feature-castle/castle-skills/skill-values` |\n| Tiền khi hạ quái | một lần mỗi quái | lần | Dù nhiều bên cùng hạ |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Giao chiến | Không có: mỗi bên trừ máu ngay khi trúng | Có, bước 0.02 giây | Như PROTOTYPE |\n| Bước cập nhật cố định | Không bắt buộc | 0.02 giây | Như PROTOTYPE |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "skill-is-hit": {
+   "state": "verified",
+   "note": "phan Combat: don goi ngoai nhip vao nhip ke, Castle tao don moi quai cho dot 2",
+   "tests": [
+    "CombatTickTests.ThunderPressedBetweenTicksHitsEveryEnemyInZoneOnTheNextTick"
+   ],
+   "play": "",
+   "hash": "c8989f72e67b",
+   "text": "Sấm sét tạo một đòn trúng cho mỗi quái trong vùng, ở nhịp người chơi bấm\nBên ra đòn ghi là thành.",
+   "title": "Sấm sét tạo một đòn trúng cho mỗi quái trong vùng, ở nhịp người chơi bấm",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "kill-credit": {
+   "state": "verified",
+   "note": "mot tong moi quai moi nhip, Enemy tra tien mot lan cho dot 2",
+   "tests": [
+    "CombatTickTests.HitsOfSeveralSidesOnOneEnemyBecomeOneTotalAndOneFall"
+   ],
+   "play": "",
+   "hash": "e4f502bdddd6",
+   "text": "Quái hết máu do tổng của nhiều bên thì vẫn cho tiền đúng một lần, không chia theo bên\nTiền vào ví như mọi lần hạ quái.",
+   "title": "Quái hết máu do tổng của nhiều bên thì vẫn cho tiền đúng một lần, không chia theo bên",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "edge-hero-va-quai-ket-lieu-nhau-cung-nhip": {
+   "state": "verified",
+   "note": "do gia hero va quai, Hero va Enemy that cho dot 2",
+   "tests": [
+    "CombatTickTests.HeroAndEnemyThatFinishEachOtherInOneTickBothFall"
+   ],
+   "play": "",
+   "hash": "526e7526d1b7",
+   "text": "**Hero và quái kết liễu nhau cùng nhịp:** cả hai hết máu; hero gục, quái bị hạ, quái vẫn cho tiền.",
+   "title": "Hero và quái kết liễu nhau cùng nhịp",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "edge-thanh-va-con-quai-cuoi-cung-het-mau": {
+   "state": "verified",
+   "note": "moi ben tru mau xong moi bao, Run va Wave xet thua truoc cho dot 2",
+   "tests": [
+    "CombatTickTests.CastleAndLastEnemyFallingTogetherAreReportedOnlyAfterBothTookHealth"
+   ],
+   "play": "",
+   "hash": "c972296dbd9c",
+   "text": "**Thành và con quái cuối cùng hết máu cùng nhịp:** thành bị phá xét trước; luồng hồi sinh giữ tin dọn sạch.",
+   "title": "Thành và con quái cuối cùng hết máu cùng nhịp",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  },
+  "edge-co-vu-hoi-mau-cung-nhip-hero-nhan": {
+   "state": "verified",
+   "note": "hoi mau truoc buoc tru mau, Hero that cho dot 2",
+   "tests": [
+    "CombatTickTests.CheerHealingInTheSameTickSavesTheHeroBeforeDamageIsTaken"
+   ],
+   "play": "",
+   "hash": "f5565013c00e",
+   "text": "**Cổ vũ hồi máu cùng nhịp hero nhận đòn:** Cổ vũ không qua giao chiến; hồi máu áp ở bước \"đi và nhắm\" trước khi trừ máu.",
+   "title": "Cổ vũ hồi máu cùng nhịp hero nhận đòn",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:46:40"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 13:41:34",
+   "id": "fixed-step",
+   "state": "doing",
+   "by": "Combat",
+   "note": "FixedStepClock 0.02s, toi da 5 buoc moi khung, CombatLoop"
+  },
+  {
+   "at": "2026-11-25 13:41:37",
+   "id": "tick-order",
+   "state": "doing",
+   "by": "Combat",
+   "note": "CombatTick: Aim, Strike, gom, loc, cong, TakeTotal, ReportFallen, TickDone"
+  },
+  {
+   "at": "2026-11-25 13:41:38",
+   "id": "damage-real",
+   "state": "doing",
+   "by": "Combat",
+   "note": "tong so thuc, khong lam tron"
+  },
+  {
+   "at": "2026-11-25 13:41:42",
+   "id": "pause-no-tick",
+   "state": "doing",
+   "by": "Combat",
+   "note": "CombatLoop doc IRunFlow.IsPaused, BattleStopped"
+  },
+  {
+   "at": "2026-11-25 13:41:45",
+   "id": "edge-don-vao-quai-da-ra-ngoai-man-16u",
+   "state": "doing",
+   "by": "Combat",
+   "note": "Combat khong loc theo vi tri"
+  },
+  {
+   "at": "2026-11-25 13:41:47",
+   "id": "params",
+   "state": "doing",
+   "by": "Combat",
+   "note": "CombatConfig asset 0.02s, 5 buoc"
+  },
+  {
+   "at": "2026-11-25 13:41:51",
+   "id": "skill-is-hit",
+   "state": "doing",
+   "by": "Combat",
+   "note": "phan Combat: don goi ngoai nhip vao nhip ke, Castle tao don moi quai cho dot 2"
+  },
+  {
+   "at": "2026-11-25 13:41:52",
+   "id": "kill-credit",
+   "state": "doing",
+   "by": "Combat",
+   "note": "mot tong moi quai moi nhip, Enemy tra tien mot lan cho dot 2"
+  },
+  {
+   "at": "2026-11-25 13:41:53",
+   "id": "edge-hero-va-quai-ket-lieu-nhau-cung-nhip",
+   "state": "doing",
+   "by": "Combat",
+   "note": "do gia hero va quai, Hero va Enemy that cho dot 2"
+  },
+  {
+   "at": "2026-11-25 13:41:54",
+   "id": "edge-thanh-va-con-quai-cuoi-cung-het-mau",
+   "state": "doing",
+   "by": "Combat",
+   "note": "moi ben tru mau xong moi bao, Run va Wave xet thua truoc cho dot 2"
+  },
+  {
+   "at": "2026-11-25 13:41:55",
+   "id": "edge-co-vu-hoi-mau-cung-nhip-hero-nhan",
+   "state": "doing",
+   "by": "Combat",
+   "note": "hoi mau truoc buoc tru mau, Hero that cho dot 2"
+  },
+  {
+   "at": "2026-11-25 13:46:03",
+   "id": "fixed-step",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatLoopTests.BattleRunsFiftyTicksEachSecondOfTwoHundredthsEach, CombatLoopTests.FastFramesWaitUntilAWholeStepHasPassed, CombatLoopTests.SlowFrameRunsSeveralTicks, CombatLoopTests.VerySlowFrameRunsAtMostFiveTicksAndTheBattleSlowsDown, CombatLoopTests.SameFrameTimesGiveTheSameTicksOnFastAndSlowDevices"
+  },
+  {
+   "at": "2026-11-25 13:46:04",
+   "id": "tick-order",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatTickTests.TickRunsAimStrikeFilterTakeHealthReportFallThenDone, CombatTickTests.EveryActorStrikesOnlyAfterEveryActorAimed, CombatTickTests.TickWithNoHitStillReportsDone, CombatTickTests.HitDealtWhileReportingAFallBelongsToTheNextTick"
+  },
+  {
+   "at": "2026-11-25 13:46:05",
+   "id": "damage-real",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatTickTests.DamageKeepsFractionsWhenSummedAndTaken, CombatTickTests.SidesWithLessThanOneHealthLeftAreNotFallen"
+  },
+  {
+   "at": "2026-11-25 13:46:06",
+   "id": "skill-is-hit",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatTickTests.ThunderPressedBetweenTicksHitsEveryEnemyInZoneOnTheNextTick"
+  },
+  {
+   "at": "2026-11-25 13:46:07",
+   "id": "kill-credit",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatTickTests.HitsOfSeveralSidesOnOneEnemyBecomeOneTotalAndOneFall"
+  },
+  {
+   "at": "2026-11-25 13:46:09",
+   "id": "pause-no-tick",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatLoopTests.NoTickRunsWhilePaused, CombatLoopTests.NoTickRunsWhileWaitingForARevive, CombatLoopTests.NoTickRunsAfterTheRunEnded, CombatLoopTests.NoTickRunsBeforeTheBattleStarts, CombatLoopTests.CastleFallingInATickStopsTheRestOfTheFramesTicks, CombatLoopTests.HitsWaitingWhenTheBattleIsClearedDoNotReachTheNextRun"
+  },
+  {
+   "at": "2026-11-25 13:46:10",
+   "id": "edge-hero-va-quai-ket-lieu-nhau-cung-nhip",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatTickTests.HeroAndEnemyThatFinishEachOtherInOneTickBothFall"
+  },
+  {
+   "at": "2026-11-25 13:46:11",
+   "id": "edge-thanh-va-con-quai-cuoi-cung-het-mau",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatTickTests.CastleAndLastEnemyFallingTogetherAreReportedOnlyAfterBothTookHealth"
+  },
+  {
+   "at": "2026-11-25 13:46:12",
+   "id": "edge-don-vao-quai-da-ra-ngoai-man-16u",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatTickTests.HitOnEnemyOutsideTheScreenStillLandsWhenTheDealerChoseIt"
+  },
+  {
+   "at": "2026-11-25 13:46:14",
+   "id": "edge-co-vu-hoi-mau-cung-nhip-hero-nhan",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatTickTests.CheerHealingInTheSameTickSavesTheHeroBeforeDamageIsTaken"
+  },
+  {
+   "at": "2026-11-25 13:46:14",
+   "id": "params",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatConfigTests.BattleStepsAreTwoHundredthsOfASecondAndAtMostFivePerFrame"
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "fixed-step",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "tick-order",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "damage-real",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "skill-is-hit",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "kill-credit",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "pause-no-tick",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "edge-hero-va-quai-ket-lieu-nhau-cung-nhip",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "edge-thanh-va-con-quai-cuoi-cung-het-mau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "edge-don-vao-quai-da-ra-ngoai-man-16u",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "edge-co-vu-hoi-mau-cung-nhip-hero-nhan",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:46:40",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  }
+ ]
+}

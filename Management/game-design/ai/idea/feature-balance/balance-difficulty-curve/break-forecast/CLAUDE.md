@@ -28,7 +28,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | 10 (Trùm) | 1282 | hero cấp 5/5/6; máu, sức đánh 4; Sấm 3; Cổ vũ 2 | 140 | 3391 | 13.75 | 1.8 | 309 | 1450 | 877 |
 | 11 | 1624 | hero cấp 6; máu 5, sức đánh 4; Sấm 3; Cổ vũ 2 | 149 | 2940 | 13.5 | 1.5 | 313 | 1600 | 910 |
 | 15 | 2791 | hero cấp 7 (một con 8); máu, sức đánh 6; Sấm 4; Cổ vũ, Băng 2 | 173 | 4620 | 10.5 | 2.5 | 489 | 1750 | 988 |
-| 19 | 4273 | hero cấp 9; máu, sức đánh 6; Sấm 5; Cổ vũ, Băng 2 | 205 | 6440 | 12.9 | 2.4 | 650 | 1750 | 1144 |
+| 19 | 4273 | hero cấp 9; máu, sức đánh 6; Sấm 5; Cổ vũ, Băng 2 | 205 | 6440 | 12.9 | 2.4 | 690 | 1750 | 1144 |
 | 20 (Trùm) | 4685 | hero cấp 9; máu, sức đánh 7; Sấm 5; Băng 3; Cổ vũ 2 | 207 | 8222 | 13.5 | 2.9 | 801 | 1900 | 1144 |
 
 Đọc bảng:
@@ -39,7 +39,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Đợt 20: Trùm 1160 máu (khoảng 14% máu cả đợt); P ≈ 2.9, E quái 801/giây so với 1900 máu thành; nếu Trùm và đám đông tới thành cùng lúc, thành vỡ trong vài giây.
 
 ### Độ dài lượt (dự kiến)
-Mỗi đợt mất thời gian thả cộng thời gian dọn quái tồn (khoảng T × P) cộng 3 s lúc thở: đợt 1 khoảng 13 s, đợt 10 khoảng 30 s, đợt 15–19 khoảng 30–40 s. Gãy ở đợt 15–19: lượt dài khoảng 7–9 phút.
+Mỗi đợt mất T × (1 + P) (thời gian thả cộng thời gian dọn quái tồn, khoảng T × P) cộng 3 s lúc thở: đợt 1 khoảng 14 s, đợt 5 khoảng 26 s, đợt 10 khoảng 41 s, đợt 15–19 khoảng 40–47 s (P các đợt giữa hai mẫu lấy nội suy tuyến tính). Cộng dồn: hết đợt 9 khoảng 3.7 phút, hết đợt 14 khoảng 7.0 phút, hết đợt 18 khoảng 9.8 phút, hết đợt 19 khoảng 10.6 phút. Gãy ở đợt 15–19 (thua giữa đợt đó): lượt dài khoảng 7–10.5 phút. Khớp ước tính của `feature-wave/wave-gap/gap-timer` (gãy ở đợt 15: khoảng 7–8 phút).
 
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
@@ -59,9 +59,11 @@ Mỗi đợt mất thời gian thả cộng thời gian dọn quái tồn (kho�
 - **Không đổi bộ số chuẩn trong node này.** Đề xuất đổi ở "Chưa rõ".
 - **Tính lại đợt 10 và 20 theo máu Trùm gốc 400 (2026-11-23).** Đợt 10: H 4151 → 3391, P 2.2 → 1.8. Đợt 20: H 9382 → 8222, P 3.4 → 2.9. Sửa ý `normal-break` cho khớp P đợt 20. Bước P đợt 9 → 10 (1.1 → 1.8) vẫn hơn 0.5: chấp nhận vì đợt Trùm là ngoại lệ có chủ đích của `curve-smooth`.
 
+- **Sửa hai số lệch công thức (2026-11-25, phiên Balance báo qua @Manager).** E đợt 19: 650 → 690; tính lại theo `feature-wave/difficulty-scaling/wave-formula` (44 con: Lính 17, Sói 11, Khổng lồ 8, Cung thủ quái 8) và `feature-enemy/enemy-stats/enemy-stat-values`: (5×17 + 3.75×11 + 10×8 + 5×8) × 2.8 = 689.5. Các hàng E khác, mọi hàng H, T, P đã rà lại và khớp. Độ dài lượt: bản cũ ghi "đợt 10 khoảng 30 s, 7–9 phút", không khớp chính công thức T × (1 + P) + 3; tính lại ra 7–10.5 phút, sửa ý `normal-break`. Không đổi bộ số chuẩn, không đổi đợt gãy dự kiến.
+
 ## Chưa rõ
 - **Đợt Trùm vọt quá mạnh: đã áp dụng (2026-11-23).** Máu Trùm gốc giảm 800 → 400, giữ sát thương 40 (`feature-enemy/enemy-stats/enemy-stat-values`); P đợt 9 → 10 → 11 còn 1.1 → 1.8 → 1.5, đợt 20 còn 2.9. Đợt Trùm là ngoại lệ có chủ đích của `curve-smooth`. Đã loại: Trùm chiếm 5 chỗ trong số quái.
 - **Mục "không có đợt đặc biệt" của `feature-wave/difficulty-scaling`:** đã sửa thành ngoại lệ đợt Trùm (2026-11-23).
 Đề xuất cho agent chính quyết (chưa áp dụng):
-- **Nếu muốn lượt ngắn hơn** (khoảng 5 phút, gãy ở đợt 10–14): tăng hệ số máu, sát thương quái từ +0.10 lên +0.12 mỗi đợt. Hiện tại giữ +0.10 vì lượt 7–9 phút vẫn hợp "lượt ngắn".
+- **Nếu muốn lượt ngắn hơn** (khoảng 5 phút, gãy ở đợt 10–14): tăng hệ số máu, sát thương quái từ +0.10 lên +0.12 mỗi đợt. Hiện tại giữ +0.10 vì lượt 7–10.5 phút vẫn hợp "lượt ngắn".
 - Băng giá và Cổ vũ chưa vào công thức; chơi thử sẽ cho biết chúng kéo đợt gãy được bao nhiêu.

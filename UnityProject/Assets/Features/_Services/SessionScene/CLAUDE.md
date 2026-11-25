@@ -6,7 +6,8 @@ Không biết feature nào; feature tự xin tham gia bằng `ISessionScene.Join
 - Vòng đời (`ISessionScene`, `ISessionParticipant`, `SessionState`) nằm ở `Game.Core`. Contract riêng: `ISessionLoadProgress` (`ParticipantCount`, `LoadedCount`, `FailedParticipant`, `LoadProgressChanged`) cho thanh tiến độ. Dùng UniTask.
 - Thiết kế: `live/feature-session-scene/session-steps/participant-order`.
 - Loading: tải lần lượt theo thứ tự `Join`; mỗi participant tối đa `loadTimeLimitSeconds` (installer, mặc định 10 giây), đếm qua `ILoadTimer`. Lỗi hoặc quá giờ: không tải cái sau, ghi `FailedParticipant` (tên feature lấy từ namespace), huỷ ngược các cái đã tới (kể cả cái lỗi), phiên thành Failed.
-- Yêu cầu kết thúc lúc đang tải: huỷ token, chờ cái đang tải xong (tối đa tới giới hạn), rồi huỷ ngược các cái đã tới. Join trùng thì lỗi ngay.
+- Yêu cầu kết thúc lúc đang tải: huỷ token, chờ cái đang tải xong (tối đa tới giới hạn), rồi huỷ ngược các cái đã tới. Join trùng (cùng object) thì lỗi ngay.
+- Một feature có hai participant (cùng kiểu, ví dụ installer có hai lần trong Boot): lúc Begin, trước bước tải, phiên thành Failed (Init → Failed), ghi `FailedParticipant`, không tải ai. Danh sách rỗng: vẫn qua ba bước, ghi cảnh báo (`reportWarning`).
 - Running: gọi `Run` theo thứ tự tham gia. View của feature chỉ được tạo từ đây.
 - Disposing: gọi `DisposeAsync` theo thứ tự ngược, từng cái một. Failed cũng dọn như vậy rồi dừng ở Failed.
 - Logic nằm trong `SessionSceneLogic` (C# thuần). `SessionSceneDriver` (View) chỉ chuyển `Start`/`OnDestroy` thành tín hiệu.

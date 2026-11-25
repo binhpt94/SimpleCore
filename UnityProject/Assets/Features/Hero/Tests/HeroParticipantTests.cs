@@ -1,4 +1,7 @@
+using System.Text.RegularExpressions;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Game.Hero.Tests
 {
@@ -27,6 +30,46 @@ namespace Game.Hero.Tests
         [TearDown]
         public void TearDown() => _participant.DisposeAsync();
 
+        /// <summary>A full team whose slots 2 and 3 fall at once, so the test watches the knight (slot 1) alone.</summary>
+        private void StartWithOnlyTheKnightStanding()
+        {
+            _run.StartRun("knight", "axeman", "archer");
+            _squad.Hit(1, 1000f);
+            _squad.Hit(2, 1000f);
+        }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(4)]
+        public void A_team_without_exactly_three_heroes_does_not_enter_the_battle(int heroCount)
+        {
+            var codes = new string[heroCount];
+            System.Array.Copy(new[] { "knight", "axeman", "archer", "mage" }, codes, heroCount);
+            var enemy = _field.Add(0f);
+            LogAssert.Expect(LogType.Error, new Regex(@"\[Hero\] The run brought \d+ heroes; a team needs 3"));
+
+            _run.StartRun(codes);
+            _participant.Step(1f);
+
+            Assert.That(_displays.Made, Is.Empty);
+            Assert.That(_squad.Units, Is.Empty);
+            Assert.That(_field.Taken(enemy), Is.EqualTo(0f));
+        }
+
+        [Test]
+        public void A_short_team_on_replay_takes_the_previous_team_off_the_field()
+        {
+            _run.StartRun("knight", "axeman", "archer");
+            LogAssert.Expect(LogType.Error, new Regex(@"\[Hero\] The run brought 2 heroes"));
+
+            _run.StartRun("knight", "axeman");
+
+            Assert.That(_displays.Made, Has.Count.EqualTo(3));
+            Assert.That(_displays.Made.TrueForAll(d => d.Removed), Is.True);
+            Assert.That(_squad.Units, Is.Empty);
+        }
+
         [Test]
         public void A_new_run_shows_each_hero_of_the_team_at_its_spawn_point()
         {
@@ -43,7 +86,7 @@ namespace Game.Hero.Tests
         [Test]
         public void Heroes_on_screen_follow_the_battle_each_frame()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
             _field.Add(10f);
 
             _participant.Step(1f);
@@ -55,7 +98,7 @@ namespace Game.Hero.Tests
         [Test]
         public void While_paused_heroes_and_their_animations_stand_still()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
             _field.Add(10f);
             _run.IsPaused = true;
 
@@ -68,7 +111,7 @@ namespace Game.Hero.Tests
         [Test]
         public void While_paused_a_hitting_hero_keeps_its_target_and_its_wait()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
             var enemy = _field.Add(0f);
             _participant.Step(0.05f);              // first hit, then 1.0s to wait
             _run.IsPaused = true;
@@ -85,7 +128,7 @@ namespace Game.Hero.Tests
         [Test]
         public void While_paused_the_respawn_wait_stands_still()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
             _squad.Hit(0, 1000f);
             _run.IsPaused = true;
 
@@ -102,7 +145,7 @@ namespace Game.Hero.Tests
         [Test]
         public void Once_the_battle_stopped_a_fallen_hero_does_not_respawn()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
             _squad.Hit(0, 1000f);
             _run.StopBattle();                     // the castle fell the same frame
 
@@ -115,7 +158,7 @@ namespace Game.Hero.Tests
         [Test]
         public void An_enemy_left_over_between_waves_is_still_fought()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
             var leftover = _field.Add(0f);         // no wave signal reaches the heroes; any living enemy counts
 
             _participant.Step(0.05f);
@@ -126,7 +169,7 @@ namespace Game.Hero.Tests
         [Test]
         public void Once_the_battle_stopped_heroes_no_longer_act()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
             var enemy = _field.Add(0f);
             _run.StopBattle();
 
@@ -138,7 +181,7 @@ namespace Game.Hero.Tests
         [Test]
         public void A_hit_shows_a_strike_and_the_enemy_side_sees_hurt_and_fall()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
             _field.Add(0f);
 
             _participant.Step(0.05f);
@@ -154,7 +197,7 @@ namespace Game.Hero.Tests
         [Test]
         public void A_fallen_hero_reappears_with_the_respawn_animation()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
             _squad.Hit(0, 1000f);
 
             for (var i = 0; i < 81; i++) _participant.Step(0.1f);
@@ -166,7 +209,7 @@ namespace Game.Hero.Tests
         [Test]
         public void Buying_a_level_shows_the_level_up_pop()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
 
             _squad.ApplyLevel(0, 2);
 
@@ -178,7 +221,7 @@ namespace Game.Hero.Tests
         [Test]
         public void Buying_two_levels_in_one_frame_pops_once_per_level()
         {
-            _run.StartRun("knight");
+            StartWithOnlyTheKnightStanding();
 
             _squad.ApplyLevel(0, 2);
             _squad.ApplyLevel(0, 3);
@@ -211,13 +254,13 @@ namespace Game.Hero.Tests
         [Test]
         public void After_the_session_ends_the_heroes_are_gone_and_runs_are_ignored()
         {
-            _run.StartRun("knight");
+            _run.StartRun("knight", "axeman", "archer");
 
             _participant.DisposeAsync();
-            _run.StartRun("knight");
+            _run.StartRun("knight", "axeman", "archer");
 
-            Assert.That(_displays.Made, Has.Count.EqualTo(1));
-            Assert.That(_displays.Made[0].Removed, Is.True);
+            Assert.That(_displays.Made, Has.Count.EqualTo(3));
+            Assert.That(_displays.Made.TrueForAll(d => d.Removed), Is.True);
         }
     }
 }

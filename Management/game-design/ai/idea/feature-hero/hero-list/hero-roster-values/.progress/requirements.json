@@ -185,6 +185,20 @@
    "title": "Mỗi hero một tốc độ chạy riêng, không hai hero trùng: từ 2.0u/s (Hiệp sĩ) tới 3.5u/s (Kiếm khách)",
    "by": "@CodeLead",
    "at": "2026-11-25 13:03:33"
+  },
+  "edge-doi-chua-du-3-hero-loi-tu-man": {
+   "state": "verified",
+   "note": "HeroParticipant từ chối đội không đủ 3 hero: không hero nào vào trận, log lỗi",
+   "tests": [
+    "HeroParticipantTests.A_team_without_exactly_three_heroes_does_not_enter_the_battle",
+    "HeroParticipantTests.A_short_team_on_replay_takes_the_previous_team_off_the_field"
+   ],
+   "play": "",
+   "hash": "c51544f3ed5e",
+   "text": "Đội chưa đủ 3 hero (lỗi từ màn chọn): không vào trận; `feature-team-select` phải bảo đảm đủ 3.",
+   "title": "Đội chưa đủ 3 hero (lỗi từ màn chọn)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:43:56"
   }
  },
  "log": [
@@ -450,6 +464,27 @@
   {
    "at": "2026-11-25 13:03:33",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:36:19",
+   "id": "edge-doi-chua-du-3-hero-loi-tu-man",
+   "state": "doing",
+   "by": "Hero",
+   "note": "HeroParticipant từ chối đội không đủ 3 hero: không hero nào vào trận, log lỗi"
+  },
+  {
+   "at": "2026-11-25 13:37:16",
+   "id": "edge-doi-chua-du-3-hero-loi-tu-man",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.A_team_without_exactly_three_heroes_does_not_enter_the_battle, HeroParticipantTests.A_short_team_on_replay_takes_the_previous_team_off_the_field"
+  },
+  {
+   "at": "2026-11-25 13:43:56",
+   "id": "edge-doi-chua-du-3-hero-loi-tu-man",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

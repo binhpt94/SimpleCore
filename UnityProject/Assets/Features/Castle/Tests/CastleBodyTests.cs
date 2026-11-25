@@ -130,6 +130,95 @@ namespace Game.Castle.Tests
         }
 
         [Test]
+        public void Revive_stands_the_castle_up_with_thirty_percent_of_max_health()
+        {
+            _body.Hit(0, 5000f);
+
+            var revived = _body.Revive();
+
+            Assert.That(revived, Is.True);
+            Assert.That(_body.IsDestroyed, Is.False);
+            Assert.That(_body.Health, Is.EqualTo(300f));
+            Assert.That(_body.MaxHealth, Is.EqualTo(1000f));
+        }
+
+        [Test]
+        public void Revive_takes_thirty_percent_of_the_upgraded_max_health_and_keeps_it()
+        {
+            _body.ApplyHealthLevel(3); // 1300 max
+            _body.Hit(0, 5000f);
+
+            _body.Revive();
+
+            Assert.That(_body.MaxHealth, Is.EqualTo(1300f));
+            Assert.That(_body.Health, Is.EqualTo(390f));
+        }
+
+        [Test]
+        public void Revive_rounds_up_without_float_drift_adding_a_point()
+        {
+            // Every max health is 1000 + 150k, so 30% is whole (300 + 45k); 1150 * 0.3 in floats is 345.00003,
+            // which must stay 345 and not round up to 346.
+            _body.ApplyHealthLevel(2);
+            _body.Hit(0, 5000f);
+
+            _body.Revive();
+
+            Assert.That(_body.Health, Is.EqualTo(345f));
+        }
+
+        [Test]
+        public void Revive_does_nothing_to_a_standing_castle()
+        {
+            _body.Hit(0, 100f);
+
+            var revived = _body.Revive();
+
+            Assert.That(revived, Is.False);
+            Assert.That(_body.Health, Is.EqualTo(900f));
+        }
+
+        [Test]
+        public void Revived_castle_takes_damage_at_once_with_no_grace_time()
+        {
+            _body.Hit(0, 5000f);
+            _body.Revive();
+
+            _body.Hit(0, 5f);
+
+            Assert.That(_body.Health, Is.EqualTo(295f));
+            var foes = new List<EnemyFoe>();
+            _body.GetFoes(foes);
+            Assert.That(foes, Has.Count.EqualTo(1), "enemies at the wall see the castle again");
+        }
+
+        [Test]
+        public void Revived_castle_falling_again_tells_the_run_once_more()
+        {
+            var destroyed = 0;
+            _body.Destroyed += () => destroyed++;
+            _body.Hit(0, 5000f);
+            _body.Revive();
+
+            _body.Hit(0, 200f);
+            _body.Hit(0, 200f);
+            _body.Hit(0, 200f);
+
+            Assert.That(_run.LoseCalls, Is.EqualTo(2));
+            Assert.That(destroyed, Is.EqualTo(2));
+            Assert.That(_body.IsDestroyed, Is.True);
+            Assert.That(_body.Health, Is.EqualTo(0f));
+        }
+
+        [Test]
+        public void Heroes_start_and_revive_at_the_castle_edges_two_left_one_right()
+        {
+            Assert.That(_body.HeroStartX(0), Is.EqualTo(-1.5f), "slot 1");
+            Assert.That(_body.HeroStartX(1), Is.EqualTo(1.5f), "slot 2");
+            Assert.That(_body.HeroStartX(2), Is.EqualTo(-1.5f), "slot 3");
+        }
+
+        [Test]
         public void New_run_puts_the_castle_back_to_full_health_standing()
         {
             _body.ApplyHealthLevel(3);

@@ -109,6 +109,30 @@ namespace Game.Hud.Tests
         }
 
         [Test]
+        public void PauseButtonWorksFromBattleStartUntilTheBattleIsRemoved()
+        {
+            var session = NewSession();
+            session.Run();
+            Assert.AreEqual(1, _spawner.View.PauseListeners);
+
+            _spawner.View.PressPause();
+            Assert.AreEqual(1, _run.PauseRequests);
+
+            // Paused, ending and lost are battle steps: the HUD, and with it the button, stays on screen.
+            foreach (var step in new[] { RunStep.Paused, RunStep.Ending, RunStep.Lost })
+            {
+                _run.SetStep(step);
+                Assert.IsTrue(_spawner.View.Visible, step.ToString());
+            }
+
+            session.DisposeAsync();
+            _spawner.View.PressPause();
+
+            Assert.AreEqual(0, _spawner.View.PauseListeners);
+            Assert.AreEqual(1, _run.PauseRequests);
+        }
+
+        [Test]
         public void CheatButtonShowsTheWholeMidBattleState()
         {
             NewSession(NewCheat()).Run();

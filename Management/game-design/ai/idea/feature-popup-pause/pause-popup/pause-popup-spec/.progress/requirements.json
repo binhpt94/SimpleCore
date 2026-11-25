@@ -1,0 +1,497 @@
+{
+ "items": {
+  "step-main": {
+   "state": "verified",
+   "note": "Presenter mở popup ở bước chính khi trận vào Paused",
+   "tests": [
+    "PausePopupTests.PausingTheBattle_OpensThePausePopupAtTheMainStep",
+    "PausePopupTests.NoPausePopup_WhileTheBattleRuns"
+   ],
+   "play": "",
+   "hash": "f4a0b7625703",
+   "text": "Bước chính có tiêu đề \"Tạm dừng\" và 2 nút: \"Tiếp tục\" (nút chính) và \"Bỏ lượt\"\nPopup luôn mở ở bước chính.",
+   "title": "Bước chính có tiêu đề \"Tạm dừng\" và 2 nút: \"Tiếp tục\" (nút chính) và \"Bỏ lượt\"",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "quit-to-confirm": {
+   "state": "verified",
+   "note": "Bỏ lượt ở bước chính đổi sang bước hỏi, không Show thêm",
+   "tests": [
+    "PausePopupTests.TappingQuitAtTheMainStep_SwitchesToTheConfirmStepInTheSamePopup"
+   ],
+   "play": "",
+   "hash": "33ad405fb2ef",
+   "text": "Chạm \"Bỏ lượt\" ở bước chính thì popup đổi sang bước hỏi, không mở popup thứ hai\nBước hỏi có câu \"Bỏ lượt này? Điểm tính theo số đợt đã dọn.\" và 2 nút: \"Bỏ lượt\" và \"Không\" (nút chính).",
+   "title": "Chạm \"Bỏ lượt\" ở bước chính thì popup đổi sang bước hỏi, không mở popup thứ hai",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "confirm-yes": {
+   "state": "verified",
+   "note": "Bỏ lượt ở bước hỏi gọi IRunFlow.Abandon",
+   "tests": [
+    "PausePopupTests.ConfirmingQuit_AbandonsTheRunAndClosesThePopup"
+   ],
+   "play": "",
+   "hash": "04291f156014",
+   "text": "Chạm \"Bỏ lượt\" ở bước hỏi thì báo `feature-run/run-pause` bỏ lượt; popup đóng, về màn bắt đầu",
+   "title": "Chạm \"Bỏ lượt\" ở bước hỏi thì báo `feature-run/run-pause` bỏ lượt; popup đóng, về màn bắt đầu",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "confirm-no": {
+   "state": "verified",
+   "note": "Không ở bước hỏi quay lại bước chính",
+   "tests": [
+    "PausePopupTests.TappingNoAtTheConfirmStep_GoesBackToTheMainStepAndStaysPaused"
+   ],
+   "play": "",
+   "hash": "1d59e347fe34",
+   "text": "Chạm \"Không\" ở bước hỏi thì quay lại bước chính; trận vẫn tạm dừng",
+   "title": "Chạm \"Không\" ở bước hỏi thì quay lại bước chính; trận vẫn tạm dừng",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "back-key": {
+   "state": "verified",
+   "note": "Nút quay lại: bước chính = Tiếp tục, bước hỏi = Không, chỉ khi popup trên cùng",
+   "tests": [
+    "PausePopupTests.BackKeyAtTheMainStep_ActsLikeContinue",
+    "PausePopupTests.BackKeyAtTheConfirmStep_ActsLikeNo",
+    "PausePopupTests.BackKey_IsIgnoredWhenThePausePopupIsNotOnTop",
+    "PausePopupTests.BackKeyInTheFrameThePopupOpened_IsIgnored_TheNextFrameItContinues",
+    "PausePopupTests.BackKeyInTheFrameThePopupOpened_IsIgnoredAgainAfterReopening"
+   ],
+   "play": "",
+   "hash": "d5a6ec3a270b",
+   "text": "Nút quay lại của máy: ở bước chính như chạm \"Tiếp tục\", ở bước hỏi như chạm \"Không\"",
+   "title": "Nút quay lại của máy: ở bước chính như chạm \"Tiếp tục\", ở bước hỏi như chạm \"Không\"",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "no-backdrop-close": {
+   "state": "verified",
+   "note": "Popup chỉ đóng khi trận rời Paused",
+   "tests": [
+    "PausePopupTests.ThePopupNeverClosesItself_OnlyWhenTheRunLeavesPaused"
+   ],
+   "play": "",
+   "hash": "5664d23fb855",
+   "text": "Chạm nền che không đóng popup và không đổi bước",
+   "title": "Chạm nền che không đóng popup và không đổi bước",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "one-report-per-choice": {
+   "state": "verified",
+   "note": "Sau khi báo, mọi nút bị bỏ qua và view khoá bấm",
+   "tests": [
+    "PausePopupTests.AfterAChoiceIsReported_NoButtonTakesATapAnyMore",
+    "PausePopupTests.AfterQuitIsConfirmed_NoOtherTapIsReported"
+   ],
+   "play": "",
+   "hash": "cee4b2d28989",
+   "text": "Sau khi đã báo tiếp tục hoặc bỏ lượt, mọi nút của popup không nhận chạm nữa",
+   "title": "Sau khi đã báo tiếp tục hoặc bỏ lượt, mọi nút của popup không nhận chạm nữa",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "edge-roi-game-khi-popup-dang-mo-o-bat": {
+   "state": "verified",
+   "note": "Paused lặp lại không mở thêm, giữ bước",
+   "tests": [
+    "PausePopupTests.LeavingTheAppWhilePaused_KeepsTheOnePopupAtItsStep"
+   ],
+   "play": "",
+   "hash": "8b28e37493b3",
+   "text": "**Rời game khi popup đang mở (ở bất kì bước nào):** không mở thêm popup; quay lại vẫn đúng bước cũ.",
+   "title": "Rời game khi popup đang mở (ở bất kì bước nào)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "edge-mo-lai-popup-sau-khi-da-tiep-tuc": {
+   "state": "verified",
+   "note": "Mở lại luôn ở bước chính",
+   "tests": [
+    "PausePopupTests.ReopeningAfterContinue_AlwaysStartsAtTheMainStep",
+    "PausePopupTests.ReopeningAfterTheRunLeftPausedAtTheConfirmStep_StartsAtTheMainStep"
+   ],
+   "play": "",
+   "hash": "87e6dc2ab7cc",
+   "text": "**Mở lại popup sau khi đã tiếp tục:** luôn bắt đầu ở bước chính, không nhớ bước hỏi.",
+   "title": "Mở lại popup sau khi đã tiếp tục",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "edge-cham-tiep-tuc-va-bo-luot-gan-nhu": {
+   "state": "verified",
+   "note": "Chạm trước tính, chạm sau bỏ",
+   "tests": [
+    "PausePopupTests.QuitThenContinueAlmostTogether_OnlyQuitCountsAndGoesToConfirm",
+    "PausePopupTests.ContinueThenQuitAlmostTogether_OnlyContinueCounts"
+   ],
+   "play": "",
+   "hash": "60daf794eb23",
+   "text": "**Chạm \"Tiếp tục\" và \"Bỏ lượt\" gần như cùng lúc:** chỉ chạm được xử lí trước tính; nếu là \"Bỏ lượt\" thì sang bước hỏi, chạm kia bị bỏ.",
+   "title": "Chạm \"Tiếp tục\" và \"Bỏ lượt\" gần như cùng lúc",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "edge-nut-quay-lai-cua-may-bam-lien-tuc": {
+   "state": "verified",
+   "note": "Mỗi lần bấm một bước",
+   "tests": [
+    "PausePopupTests.BackKeyPressedRepeatedly_GoesConfirmThenMainThenContinue_OneStepPerPress"
+   ],
+   "play": "",
+   "hash": "774bd8e69ad9",
+   "text": "**Nút quay lại của máy bấm liên tục:** bước hỏi → bước chính → tiếp tục; mỗi lần bấm một bước.",
+   "title": "Nút quay lại của máy bấm liên tục",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "params": {
+   "state": "verified",
+   "note": "1 popup, 2 bước, không đếm ngược, báo 1 lần",
+   "tests": [
+    "PausePopupTests.Params_OnePopup_TwoSteps_NoCountdown_OneReportPerOpening"
+   ],
+   "play": "",
+   "hash": "ea1183814ec4",
+   "text": "## Làm gì\n- Mở khi `feature-run/run-pause` nhờ (qua `feature-popup`), luôn ở bước chính.\n- Đổi bước trong cùng popup khi chạm \"Bỏ lượt\" hoặc \"Không\".\n- Báo lựa chọn cuối (tiếp tục hoặc bỏ lượt) cho `feature-run/run-pause` một lần; `feature-run` đóng popup.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số popup tạm dừng mở cùng lúc | tối đa 1 | popup | `feature-run/run-pause/pause-rules` |\n| Số bước | 2 (chính, hỏi xác nhận) | bước | Xác nhận trong cùng popup |\n| Bước chính | tiêu đề \"Tạm dừng\"; nút \"Tiếp tục\" (chính), \"Bỏ lượt\" | 2 nút | |\n| Bước hỏi | câu \"Bỏ lượt này? Điểm tính theo số đợt đã dọn.\"; nút \"Bỏ lượt\", \"Không\" (chính) | 2 nút | Nút an toàn là nút chính |\n| Đếm ngược khi tiếp tục | 0 | giây | Trận chạy ngay |\n| Số lần báo mỗi lần popup mở | 1 | lần | |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Có popup tạm dừng | Không | Không bắt buộc (nếu có: chỉ nút \"Tiếp tục\") | Có đủ 2 bước |\n| Bước hỏi xác nhận | Không | Không bắt buộc | Có |\n| Hiệu ứng mở popup | Không | Không | Phóng từ nhỏ ra đủ cỡ trong 0.2 giây (dự kiến) |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "resume-tap": {
+   "state": "verified",
+   "note": "Tiếp tục gọi IRunFlow.Resume, popup đóng khi trận rời Paused",
+   "tests": [
+    "PausePopupTests.TappingContinue_ResumesTheRunAtOnceAndClosesThePopup"
+   ],
+   "play": "",
+   "hash": "0e86f3b2f2af",
+   "text": "Chạm \"Tiếp tục\" thì báo `feature-run/run-pause` tiếp tục; popup đóng và trận chạy ngay",
+   "title": "Chạm \"Tiếp tục\" thì báo `feature-run/run-pause` tiếp tục; popup đóng và trận chạy ngay",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  },
+  "edge-bo-luot-khi-chua-don-dot-nao": {
+   "state": "verified",
+   "note": "Vẫn hỏi xác nhận, điểm do Run tính",
+   "tests": [
+    "PausePopupTests.QuittingBeforeAnyWaveWasCleared_StillAsksForConfirmation"
+   ],
+   "play": "",
+   "hash": "fe0de3dbce8f",
+   "text": "**Bỏ lượt khi chưa dọn đợt nào:** vẫn hỏi xác nhận; điểm 0.",
+   "title": "Bỏ lượt khi chưa dọn đợt nào",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:34"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 13:36:45",
+   "id": "step-main",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Presenter mở popup ở bước chính khi trận vào Paused"
+  },
+  {
+   "at": "2026-11-25 13:36:48",
+   "id": "quit-to-confirm",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Bỏ lượt ở bước chính đổi sang bước hỏi, không Show thêm"
+  },
+  {
+   "at": "2026-11-25 13:36:49",
+   "id": "confirm-yes",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Bỏ lượt ở bước hỏi gọi IRunFlow.Abandon"
+  },
+  {
+   "at": "2026-11-25 13:36:50",
+   "id": "confirm-no",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Không ở bước hỏi quay lại bước chính"
+  },
+  {
+   "at": "2026-11-25 13:36:52",
+   "id": "back-key",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Nút quay lại: bước chính = Tiếp tục, bước hỏi = Không, chỉ khi popup trên cùng"
+  },
+  {
+   "at": "2026-11-25 13:36:54",
+   "id": "no-backdrop-close",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Popup chỉ đóng khi trận rời Paused"
+  },
+  {
+   "at": "2026-11-25 13:36:55",
+   "id": "one-report-per-choice",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Sau khi báo, mọi nút bị bỏ qua và view khoá bấm"
+  },
+  {
+   "at": "2026-11-25 13:36:56",
+   "id": "edge-roi-game-khi-popup-dang-mo-o-bat",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Paused lặp lại không mở thêm, giữ bước"
+  },
+  {
+   "at": "2026-11-25 13:36:57",
+   "id": "edge-mo-lai-popup-sau-khi-da-tiep-tuc",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Mở lại luôn ở bước chính"
+  },
+  {
+   "at": "2026-11-25 13:36:59",
+   "id": "edge-cham-tiep-tuc-va-bo-luot-gan-nhu",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Chạm trước tính, chạm sau bỏ"
+  },
+  {
+   "at": "2026-11-25 13:37:02",
+   "id": "edge-nut-quay-lai-cua-may-bam-lien-tuc",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Mỗi lần bấm một bước"
+  },
+  {
+   "at": "2026-11-25 13:37:03",
+   "id": "params",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "1 popup, 2 bước, không đếm ngược, báo 1 lần"
+  },
+  {
+   "at": "2026-11-25 13:37:10",
+   "id": "resume-tap",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Tiếp tục gọi IRunFlow.Resume, popup đóng khi trận rời Paused"
+  },
+  {
+   "at": "2026-11-25 13:37:11",
+   "id": "edge-bo-luot-khi-chua-don-dot-nao",
+   "state": "doing",
+   "by": "PopupPause",
+   "note": "Vẫn hỏi xác nhận, điểm do Run tính"
+  },
+  {
+   "at": "2026-11-25 13:40:21",
+   "id": "step-main",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.PausingTheBattle_OpensThePausePopupAtTheMainStep, PausePopupTests.NoPausePopup_WhileTheBattleRuns"
+  },
+  {
+   "at": "2026-11-25 13:40:22",
+   "id": "resume-tap",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.TappingContinue_ResumesTheRunAtOnceAndClosesThePopup"
+  },
+  {
+   "at": "2026-11-25 13:40:24",
+   "id": "quit-to-confirm",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.TappingQuitAtTheMainStep_SwitchesToTheConfirmStepInTheSamePopup"
+  },
+  {
+   "at": "2026-11-25 13:40:25",
+   "id": "confirm-yes",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.ConfirmingQuit_AbandonsTheRunAndClosesThePopup"
+  },
+  {
+   "at": "2026-11-25 13:40:26",
+   "id": "confirm-no",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.TappingNoAtTheConfirmStep_GoesBackToTheMainStepAndStaysPaused"
+  },
+  {
+   "at": "2026-11-25 13:40:28",
+   "id": "back-key",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.BackKeyAtTheMainStep_ActsLikeContinue, PausePopupTests.BackKeyAtTheConfirmStep_ActsLikeNo, PausePopupTests.BackKey_IsIgnoredWhenThePausePopupIsNotOnTop"
+  },
+  {
+   "at": "2026-11-25 13:40:29",
+   "id": "no-backdrop-close",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.ThePopupNeverClosesItself_OnlyWhenTheRunLeavesPaused"
+  },
+  {
+   "at": "2026-11-25 13:40:30",
+   "id": "one-report-per-choice",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.AfterAChoiceIsReported_NoButtonTakesATapAnyMore, PausePopupTests.AfterQuitIsConfirmed_NoOtherTapIsReported"
+  },
+  {
+   "at": "2026-11-25 13:40:32",
+   "id": "edge-roi-game-khi-popup-dang-mo-o-bat",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.LeavingTheAppWhilePaused_KeepsTheOnePopupAtItsStep"
+  },
+  {
+   "at": "2026-11-25 13:40:33",
+   "id": "edge-mo-lai-popup-sau-khi-da-tiep-tuc",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.ReopeningAfterContinue_AlwaysStartsAtTheMainStep, PausePopupTests.ReopeningAfterTheRunLeftPausedAtTheConfirmStep_StartsAtTheMainStep"
+  },
+  {
+   "at": "2026-11-25 13:40:35",
+   "id": "edge-cham-tiep-tuc-va-bo-luot-gan-nhu",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.QuitThenContinueAlmostTogether_OnlyQuitCountsAndGoesToConfirm, PausePopupTests.ContinueThenQuitAlmostTogether_OnlyContinueCounts"
+  },
+  {
+   "at": "2026-11-25 13:40:36",
+   "id": "edge-bo-luot-khi-chua-don-dot-nao",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.QuittingBeforeAnyWaveWasCleared_StillAsksForConfirmation"
+  },
+  {
+   "at": "2026-11-25 13:40:38",
+   "id": "edge-nut-quay-lai-cua-may-bam-lien-tuc",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.BackKeyPressedRepeatedly_GoesConfirmThenMainThenContinue_OneStepPerPress"
+  },
+  {
+   "at": "2026-11-25 13:40:39",
+   "id": "params",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.Params_OnePopup_TwoSteps_NoCountdown_OneReportPerOpening"
+  },
+  {
+   "at": "2026-11-25 13:45:29",
+   "id": "back-key",
+   "state": "done",
+   "by": "PopupPause",
+   "note": "PausePopupTests.BackKeyAtTheMainStep_ActsLikeContinue, PausePopupTests.BackKeyAtTheConfirmStep_ActsLikeNo, PausePopupTests.BackKey_IsIgnoredWhenThePausePopupIsNotOnTop, PausePopupTests.BackKeyInTheFrameThePopupOpened_IsIgnored_TheNextFrameItContinues, PausePopupTests.BackKeyInTheFrameThePopupOpened_IsIgnoredAgainAfterReopening"
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "step-main",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "resume-tap",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "quit-to-confirm",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "confirm-yes",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "confirm-no",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "back-key",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "no-backdrop-close",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "one-report-per-choice",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "edge-roi-game-khi-popup-dang-mo-o-bat",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "edge-mo-lai-popup-sau-khi-da-tiep-tuc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "edge-cham-tiep-tuc-va-bo-luot-gan-nhu",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "edge-bo-luot-khi-chua-don-dot-nao",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "edge-nut-quay-lai-cua-may-bam-lien-tuc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:34",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  }
+ ]
+}

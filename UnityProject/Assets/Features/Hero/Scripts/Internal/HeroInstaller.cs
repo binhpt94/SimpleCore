@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Game.Hero
 {
     /// <summary>
-    /// Wires the hero feature: publishes IHeroRoster and IHeroSquad, adds the heroes to the enemies' foes and
+    /// Wires the hero feature: publishes IHeroRoster, IHeroSquad and IHeroSpawnPoints, adds the heroes to the enemies' foes and
     /// joins the session. Installed after Enemy and before Castle. No game rules here.
     /// </summary>
     public sealed class HeroInstaller : InstallerAsset
@@ -33,6 +33,7 @@ namespace Game.Hero
             var squad = new HeroSquad(config, enemyField);
             registry.Register<IHeroRoster>(roster);
             registry.Register<IHeroSquad>(squad);
+            registry.Register<IHeroSpawnPoints>(squad);
             enemyField.AddFoes(squad);
 
             var presenter = new HeroPresenter(squad, config, new PrefabHeroDisplayFactory(config.HeroPrefab));

@@ -35,10 +35,15 @@ namespace Game.Hud
         [SerializeField] private Sprite skillTraySprite;
         [Tooltip("One per cluster slot, left to right: Thunder, Frost, Rally.")]
         [SerializeField] private Sprite[] skillSprites = new Sprite[0];
+        [Tooltip("Pause button picture (two vertical bars). Empty: a dark square with two bars drawn in.")]
+        [SerializeField] private Sprite pauseSprite;
 
         private readonly List<SkillButton> _skills = new List<SkillButton>();
         private Canvas _canvas;
         private RectTransform _root;
+        private RectTransform _safe;
+        private Rect _lastSafeArea;
+        private Vector2Int _lastScreen;
         private Font _font;
         private Text _coins;
         private Text _health;
@@ -50,11 +55,30 @@ namespace Game.Hud
 #endif
 
         public event Action<int> SkillPressed;
+        public event Action PausePressed;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         public event Action CheatPressed;
 #endif
 
         private void Awake() => Build();
+
+        /// <summary>Follows the device safe area when the screen turns or changes size.</summary>
+        private void Update()
+        {
+            var area = Screen.safeArea;
+            var screen = new Vector2Int(Screen.width, Screen.height);
+            if (area == _lastSafeArea && screen == _lastScreen) return;
+            _lastSafeArea = area;
+            _lastScreen = screen;
+            ApplySafeArea(HudSafeArea.Insets(screen.x, screen.y, area.x, area.y, area.width, area.height));
+        }
+
+        public void ApplySafeArea(HudInsets insets)
+        {
+            Build();
+            _safe.offsetMin = new Vector2(insets.Left, insets.Bottom);
+            _safe.offsetMax = new Vector2(-insets.Right, -insets.Top);
+        }
 
         public void SetVisible(bool visible)
         {
@@ -106,7 +130,7 @@ namespace Game.Hud
                 var index = i;
                 var slot = slots[i];
                 var button = new SkillButton();
-                button.Root = Rect("Skill " + names[i], _root, new Vector2(1f, 0f), HudSkillSlots.Left(slot), HudSkillSlots.ClusterTop, SkillSize, SkillSize);
+                button.Root = Rect("Skill " + names[i], _safe, new Vector2(1f, 0f), HudSkillSlots.Left(slot), HudSkillSlots.ClusterTop, SkillSize, SkillSize);
                 button.Back = button.Root.gameObject.AddComponent<Image>();
                 button.Sprite = slot >= 0 && slot < skillSprites.Length ? skillSprites[slot] : null;
                 if (button.Sprite != null) button.Back.sprite = button.Sprite;
@@ -153,7 +177,7 @@ namespace Game.Hud
             if (_cheatButton != null) return;
             // Dev only, not part of the released HUD. Inside the top band, between the health bar and the wave box
             // (x 1290..1550, y 15..65), so it never covers the battle strip; anchored like the health bar to stay there.
-            var rect = Rect("Cheat", _root, new Vector2(0.5f, 1f), 1290f, 15f, 260f, 50f);
+            var rect = Rect("Cheat", _safe, new Vector2(0.5f, 1f), 1290f, 15f, 260f, 50f);
             var back = rect.gameObject.AddComponent<Image>();
             back.color = new Color(0.6f, 0.1f, 0.6f, 0.8f);
             var press = rect.gameObject.AddComponent<Button>();
@@ -187,10 +211,21 @@ namespace Game.Hud
             if (gameObject.GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
             _root = (RectTransform)transform;
 
+            // Every part sits in this box: the whole screen, shrunk by the safe-area insets (ApplySafeArea).
+            var safeGo = new GameObject("Safe", typeof(RectTransform));
+            safeGo.layer = gameObject.layer;
+            _safe = (RectTransform)safeGo.transform;
+            _safe.SetParent(_root, false);
+            _safe.anchorMin = Vector2.zero;
+            _safe.anchorMax = Vector2.one;
+            _safe.pivot = new Vector2(0.5f, 0.5f);
+            _safe.offsetMin = Vector2.zero;
+            _safe.offsetMax = Vector2.zero;
+
             // Top band behind money, health and wave: stretched across the top 140 px of the screen (9-slice).
             if (bandSprite != null)
             {
-                var band = Rect("Band", _root, new Vector2(0f, 1f), 0f, 0f, RefWidth, 140f);
+                var band = Rect("Band", _safe, new Vector2(0f, 1f), 0f, 0f, RefWidth, 140f);
                 band.anchorMax = new Vector2(1f, 1f);
                 band.offsetMin = new Vector2(0f, band.offsetMin.y);
                 band.offsetMax = new Vector2(0f, band.offsetMax.y);
@@ -199,11 +234,14 @@ namespace Game.Hud
 
             // Tray under the 3 skill buttons, bottom-right corner (x 1420..1880, y 920..1060); buttons are added on top.
             if (skillTraySprite != null)
-                Picture(Rect("Skill tray", _root, new Vector2(1f, 0f), HudSkillSlots.ClusterLeft, HudSkillSlots.ClusterTop,
+                Picture(Rect("Skill tray", _safe, new Vector2(1f, 0f), HudSkillSlots.ClusterLeft, HudSkillSlots.ClusterTop,
                     HudSkillSlots.ClusterWidth, SkillSize), skillTraySprite, Color.white);
 
+            // Pause: top-left corner (x 40..160, y 10..130), left of the money; two vertical bars, no text.
+            BuildPauseButton();
+
             // Money: coin icon + number, top band, left of the health bar.
-            var coin = Rect("Coin", _root, new Vector2(0f, 1f), 220f, 10f, 60f, 60f);
+            var coin = Rect("Coin", _safe, new Vector2(0f, 1f), 220f, 10f, 60f, 60f);
             if (coinSprite != null)
             {
                 Picture(coin, coinSprite, Color.white).preserveAspect = true;
@@ -215,11 +253,11 @@ namespace Game.Hud
                 coinMark.text = "xu";
                 coinMark.color = new Color(0.35f, 0.22f, 0f, 1f);
             }
-            _coins = Label("Coins", _root, new Vector2(0f, 1f), 290f, 10f, 230f, 60f, 44, TextAnchor.MiddleLeft);
+            _coins = Label("Coins", _safe, new Vector2(0f, 1f), 290f, 10f, 230f, 60f, 44, TextAnchor.MiddleLeft);
 
             // Castle health: centre of the top band, right above the castle. With the frame sprite the red fill
             // sits inside its border so the frame stays visible.
-            var bar = Rect("Health", _root, new Vector2(0.5f, 1f), 660f, 10f, 600f, 60f);
+            var bar = Rect("Health", _safe, new Vector2(0.5f, 1f), 660f, 10f, 600f, 60f);
             Picture(bar, healthFrameSprite, healthFrameSprite != null ? Color.white : HealthBack);
             var inset = healthFrameSprite != null ? HealthBorder : 0f;
             _healthFill = Rect("Fill", bar, Vector2.zero, 0f, 0f, 0f, 0f);
@@ -231,12 +269,28 @@ namespace Game.Hud
             _health = Label("Number", bar, 180f, 5f, 240f, 50f, 38, TextAnchor.MiddleCenter);
 
             // Wave number: right end of the top band.
-            _wave = Label("Wave", _root, new Vector2(1f, 1f), 1580f, 10f, 300f, 60f, 44, TextAnchor.MiddleRight);
+            _wave = Label("Wave", _safe, new Vector2(1f, 1f), 1580f, 10f, 300f, 60f, 44, TextAnchor.MiddleRight);
 
             // "Đợt N" banner: in the top band, under the health bar; never blocks taps.
-            _banner = Label("Banner", _root, new Vector2(0.5f, 1f), 760f, 76f, 400f, 56f, 44, TextAnchor.MiddleCenter);
+            _banner = Label("Banner", _safe, new Vector2(0.5f, 1f), 760f, 76f, 400f, 56f, 44, TextAnchor.MiddleCenter);
             _banner.color = new Color(1f, 0.92f, 0.5f, 1f);
             _banner.gameObject.SetActive(false);
+        }
+
+        private void BuildPauseButton()
+        {
+            var rect = Rect("Pause", _safe, new Vector2(0f, 1f), 40f, 10f, 120f, 120f);
+            var back = rect.gameObject.AddComponent<Image>();
+            back.sprite = pauseSprite;
+            back.preserveAspect = pauseSprite != null;
+            back.color = pauseSprite != null ? Color.white : PanelColor;
+            var press = rect.gameObject.AddComponent<Button>();
+            press.onClick.AddListener(() => PausePressed?.Invoke());
+            if (pauseSprite != null) return;
+
+            var topLeft = new Vector2(0f, 1f);
+            Picture(Rect("Bar left", rect, topLeft, 34f, 28f, 20f, 64f), null, Color.white);
+            Picture(Rect("Bar right", rect, topLeft, 66f, 28f, 20f, 64f), null, Color.white);
         }
 
         /// <summary>
@@ -253,7 +307,7 @@ namespace Game.Hud
             rect.anchorMax = anchor;
             rect.pivot = new Vector2(0f, 1f);
             rect.sizeDelta = new Vector2(width, height);
-            if (parent == _root)
+            if (parent == _safe)
                 rect.anchoredPosition = new Vector2(x - anchor.x * RefWidth, -(y - (1f - anchor.y) * RefHeight));
             else
                 rect.anchoredPosition = new Vector2(x, -y);

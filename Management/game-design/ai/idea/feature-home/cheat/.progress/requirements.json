@@ -1,0 +1,69 @@
+{
+ "items": {
+  "with-record": {
+   "state": "verified",
+   "note": "Cheat with-record: ép kỉ lục 15 qua IRunScore bọc lại, chỉ bản dev",
+   "tests": [
+    "HomeCheatTests.WithRecordShowsStartScreenWithRecordFifteen",
+    "HomeCheatTests.WithRecordKeepsTheRunsOtherScoreValues"
+   ],
+   "play": "",
+   "hash": "e55f3e6f53c1",
+   "text": "Màn bắt đầu đang hiện, đã có kỉ lục\nÉp: kỉ lục 15 (ghi đè kỉ lục lưu trên máy chỉ trong bản dev), dòng kỉ lục hiện \"Kỉ lục: 15 đợt\". Có đủ mọi thành phần của màn: tên game, dòng kỉ lục, nút \"Chơi\".",
+   "title": "Màn bắt đầu đang hiện, đã có kỉ lục",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "params": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HomeCheatTests.WithRecordShowsStartScreenWithRecordFifteen",
+    "HomeCheatTests.NoCheatLeavesTheScoreAlone"
+   ],
+   "play": "",
+   "hash": "aab152a6515e",
+   "text": "## Làm gì\n- Ở bản dev, chọn state `with-record` thì game hiện ngay màn bắt đầu với kỉ lục ép là 15.\n- Kỉ lục ép đi qua đúng đường của game: màn đọc kỉ lục từ `feature-run/run-score/score-rules` như bình thường (`feature-home/home-screen/home-screen-spec`).\n- Code cheat nằm trong thư mục `Home`, sau cờ dev; không lọt vào bản phát hành.",
+   "title": "Số và việc của node (Làm gì)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 13:36:44",
+   "id": "with-record",
+   "state": "doing",
+   "by": "Home",
+   "note": "Cheat with-record: ép kỉ lục 15 qua IRunScore bọc lại, chỉ bản dev"
+  },
+  {
+   "at": "2026-11-25 13:40:56",
+   "id": "with-record",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeCheatTests.WithRecordShowsStartScreenWithRecordFifteen, HomeCheatTests.WithRecordKeepsTheRunsOtherScoreValues"
+  },
+  {
+   "at": "2026-11-25 13:40:57",
+   "id": "params",
+   "state": "done",
+   "by": "Home",
+   "note": "HomeCheatTests.WithRecordShowsStartScreenWithRecordFifteen, HomeCheatTests.NoCheatLeavesTheScoreAlone"
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "with-record",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  }
+ ]
+}

@@ -17,11 +17,25 @@ namespace Game.Castle.Tests
         public UniTask EndAsync() => UniTask.CompletedTask;
     }
 
-    internal sealed class FakeRunFlow : IRunFlow
+    internal sealed class FakeRunFlow : IRunFlow, IRunRevive
     {
         public int LoseCalls;
+        public int ReviveShownCalls;
         public Action OnLose;
-        public RunStep Step => default;
+        public RunStep Step { get; set; }
+        public event Action ReviveStarted;
+        public bool LostAfterFailedRevive => false;
+        public void Revive() { }
+        public void DeclineRevive() { }
+        public void FailRevive() { }
+        public void ReviveShown() => ReviveShownCalls++;
+        /// <summary>The run enters Reviving: the battle stands still and the castle is asked to stand up.</summary>
+        public void StartRevive()
+        {
+            Step = RunStep.Reviving;
+            IsPaused = true;
+            ReviveStarted?.Invoke();
+        }
         public event Action<RunStep> StepChanged { add { } remove { } }
         public RunTeam Team => default;
         public event Action<RunTeam> RunStarted;
@@ -66,7 +80,7 @@ namespace Game.Castle.Tests
     {
         public readonly List<string> Calls = new List<string>();
         public bool Visible;
-        public float FlashSeconds, CollapseSeconds, ShotSeconds, ThunderSeconds;
+        public float FlashSeconds, CollapseSeconds, GrowBackSeconds, ShotSeconds, ThunderSeconds;
         public event Action<float> Ticked;
         public void Tick(float seconds) => Ticked?.Invoke(seconds);
         public void Place(float halfWidth, float height) => Calls.Add($"place {halfWidth} {height}");
@@ -75,6 +89,7 @@ namespace Game.Castle.Tests
         public void FlashHit(float seconds) { FlashSeconds = seconds; Calls.Add("flash"); }
         public void PopLevelUp(float scale, float seconds) => Calls.Add($"pop {scale} {seconds}");
         public void Collapse(float seconds) { CollapseSeconds = seconds; Calls.Add("collapse"); }
+        public void GrowBack(float seconds) { GrowBackSeconds = seconds; Calls.Add("grow"); }
         public void ShowShot(int targetHandle, float fromX, float toX, float seconds) { ShotSeconds = seconds; Calls.Add($"shot {targetHandle}"); }
         public void DropShotsAt(int targetHandle) => Calls.Add($"drop {targetHandle}");
         public void ShowThunder(float x, float seconds) { ThunderSeconds = seconds; Calls.Add($"thunder {x}"); }
@@ -88,6 +103,12 @@ namespace Game.Castle.Tests
         public bool Despawned;
         public ICastleView Spawn() => View;
         public void Despawn(ICastleView view) => Despawned = true;
+    }
+
+    internal sealed class FakeHeroSpawnPoints : IHeroSpawnPoints
+    {
+        public IReadOnlyList<float> SpawnX;
+        public void SetSpawnX(IReadOnlyList<float> xBySlot) => SpawnX = xBySlot;
     }
 
     internal sealed class FakeHeroSquad : IHeroSquad

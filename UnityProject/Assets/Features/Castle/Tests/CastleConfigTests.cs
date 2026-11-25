@@ -25,6 +25,9 @@ namespace Game.Castle.Tests
             Assert.That(config.Height, Is.EqualTo(4f));
             Assert.That(config.HitFlashSeconds, Is.EqualTo(0.1f).Within(1e-5f));
             Assert.That(config.CollapseSeconds, Is.EqualTo(0.5f).Within(1e-5f));
+            Assert.That(config.ReviveFraction, Is.EqualTo(0.3f).Within(1e-5f));
+            Assert.That(config.ReviveGrowSeconds, Is.EqualTo(0.5f).Within(1e-5f));
+            Assert.That(config.HeroSlotX, Is.EqualTo(new[] { -1.5f, 1.5f, -1.5f }), "slot 1 and 3 left edge, slot 2 right edge");
         }
 
         [Test]

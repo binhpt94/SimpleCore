@@ -27,6 +27,9 @@ namespace Game.Castle
         /// <summary>Shrinks the castle to nothing over <paramref name="seconds"/>.</summary>
         void Collapse(float seconds);
 
+        /// <summary>Grows a collapsed castle back from nothing to full size over <paramref name="seconds"/>.</summary>
+        void GrowBack(float seconds);
+
         /// <summary>A shot drawing flies from <paramref name="fromX"/> to <paramref name="toX"/> in <paramref name="seconds"/>.</summary>
         void ShowShot(int targetHandle, float fromX, float toX, float seconds);
 

@@ -1,6 +1,6 @@
 ---
 based-on: 4b7bbae60edf
-refs: feature-balance/balance-config/number-table@e95b703d1aa9, feature-balance/balance-difficulty-curve/break-forecast@38dc08b97bc3
+refs: feature-balance/balance-config/number-table@e95b703d1aa9, feature-balance/balance-difficulty-curve/break-forecast@b38ef8e31b57
 frame: none
 ---
 # So sánh sức hero

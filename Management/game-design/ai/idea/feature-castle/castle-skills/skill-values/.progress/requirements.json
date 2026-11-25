@@ -72,7 +72,7 @@
    "at": "2026-11-25 12:02:39"
   },
   "skill-feedback": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleSessionTests.Thunder_shows_its_effect_on_every_enemy_struck",
@@ -82,8 +82,8 @@
    "hash": "4d7b8bdd400f",
    "text": "Mỗi kĩ năng có một hiệu ứng ngắn: Sấm sét 0.3s trên mỗi quái trúng, Băng giá dấu chậm trên quái suốt thời gian chậm, Cổ vũ 0.5s trên mỗi hero được hồi\nNgười chơi thấy kĩ năng trúng ai. Dấu chậm xuất hiện lúc trúng, biến mất lúc hết chậm hoặc lúc quái bị hạ.",
    "title": "Mỗi kĩ năng có một hiệu ứng ngắn: Sấm sét 0.3s trên mỗi quái trúng, Băng giá dấu chậm trên quái suốt thời gian chậm, Cổ vũ 0.5s trên mỗi hero được hồi",
-   "by": "Castle",
-   "at": "2026-11-25 11:40:17"
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:43:56"
   },
   "edge-bam-ki-nang-dang-hoi": {
    "state": "verified",
@@ -152,7 +152,7 @@
    "at": "2026-11-25 12:02:39"
   },
   "edge-co-vu-tren-hero-day-mau": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleSkillsTests.Frost_slows_every_enemy_and_rally_heals_every_hero",
@@ -162,8 +162,8 @@
    "hash": "3786f0881422",
    "text": "Cổ vũ trên hero đầy máu: không đổi gì, hiệu ứng vẫn hiện.",
    "title": "Cổ vũ trên hero đầy máu",
-   "by": "Castle",
-   "at": "2026-11-25 11:40:28"
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:43:56"
   },
   "edge-tam-dung": {
    "state": "verified",
@@ -444,6 +444,20 @@
   {
    "at": "2026-11-25 12:02:39",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:43:56",
+   "id": "skill-feedback",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:43:56",
+   "id": "edge-co-vu-tren-hero-day-mau",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

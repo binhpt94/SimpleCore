@@ -33,8 +33,25 @@ namespace Game.Enemy
         [SerializeField] private float _flashSeconds = 0.1f;
         [SerializeField] private float _defeatSeconds = 0.3f;
 
+        [Header("Shot of a ranged enemy")]
+        [SerializeField] private float _shotSeconds = 0.15f;
+        [SerializeField] private Vector2 _shotSize = new Vector2(0.4f, 0.08f);
+        [SerializeField] private Color _shotColor = new Color(0.35f, 0.2f, 0.1f, 1f);
+
+        [Header("Coins paid by a defeated enemy")]
+        [SerializeField] private float _coinRise = 1f;
+        [SerializeField] private float _coinSeconds = 0.6f;
+        [SerializeField] private float _coinTextHeight = 0.5f;
+        [SerializeField] private Color _coinColor = new Color(1f, 0.85f, 0.2f, 1f);
+        [Tooltip("Empty: Unity's built-in font.")]
+        [SerializeField] private Font _coinFont;
+
+        private const int CoinFontSize = 64;
+
         private readonly Dictionary<int, Drawn> _drawn = new Dictionary<int, Drawn>();
         private readonly List<Drawn> _dying = new List<Drawn>();
+        private readonly List<Flying> _shots = new List<Flying>();
+        private readonly List<Flying> _coins = new List<Flying>();
         private Sprite _boxSprite;
         private bool _paused;
 
@@ -83,6 +100,43 @@ namespace Game.Enemy
             drawn.LungeDirection = direction;
         }
 
+        public void Shoot(EnemyShot shot)
+        {
+            var go = new GameObject($"Enemy shot #{shot.Handle}");
+            go.transform.SetParent(transform, false);
+            var renderer = go.AddComponent<SpriteRenderer>();
+            renderer.sprite = BoxSprite();
+            renderer.color = _shotColor;
+            renderer.sortingOrder = _sortingOrder + 1;
+            go.transform.localScale = new Vector3(_shotSize.x, _shotSize.y, 1f);
+            var from = new Vector3(shot.FromX, shot.Y - _shotSize.y * 0.5f, 0f);
+            var to = new Vector3(shot.ToX, from.y, 0f);
+            go.transform.localPosition = from;
+            _shots.Add(new Flying(go, from, to, _shotSeconds));
+        }
+
+        public void ShowCoins(EnemyReward reward)
+        {
+            var go = new GameObject($"Enemy coins +{reward.Coins}");
+            go.transform.SetParent(transform, false);
+            var text = go.AddComponent<TextMesh>();
+            var font = _coinFont != null ? _coinFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            text.font = font;
+            text.fontSize = CoinFontSize;
+            text.characterSize = _coinTextHeight / (CoinFontSize * 0.1f);
+            text.anchor = TextAnchor.LowerCenter;
+            text.alignment = TextAlignment.Center;
+            text.color = _coinColor;
+            text.text = "+" + reward.Coins;
+            var mesh = go.GetComponent<MeshRenderer>();
+            if (font != null) mesh.sharedMaterial = font.material;
+            mesh.sortingOrder = _sortingOrder + 2;
+
+            var from = new Vector3(reward.X, reward.Top, 0f);
+            go.transform.localPosition = from;
+            _coins.Add(new Flying(go, from, from + Vector3.up * _coinRise, _coinSeconds));
+        }
+
         public void Flash(int handle)
         {
             if (_drawn.TryGetValue(handle, out var drawn)) drawn.FlashLeft = _flashSeconds;
@@ -102,6 +156,8 @@ namespace Game.Enemy
             _drawn.Clear();
             for (var i = 0; i < _dying.Count; i++) Destroy(_dying[i].Go);
             _dying.Clear();
+            ClearFlying(_shots);
+            ClearFlying(_coins);
         }
 
         public void SetPaused(bool paused) => _paused = paused;
@@ -133,6 +189,33 @@ namespace Game.Enemy
                 var t = Mathf.Clamp01(drawn.DefeatLeft / Mathf.Max(_defeatSeconds, 0.001f));
                 drawn.Go.transform.localScale = drawn.BaseScale * t;
             }
+
+            Fly(_shots, dt);
+            Fly(_coins, dt);
+        }
+
+        /// <summary>Moves each flying thing from its start to its end in its seconds, then removes it.</summary>
+        private static void Fly(List<Flying> flying, float dt)
+        {
+            for (var i = flying.Count - 1; i >= 0; i--)
+            {
+                var item = flying[i];
+                item.Elapsed += dt;
+                if (item.Elapsed >= item.Seconds)
+                {
+                    Destroy(item.Go);
+                    flying.RemoveAt(i);
+                    continue;
+                }
+
+                item.Go.transform.localPosition = Vector3.Lerp(item.From, item.To, item.Elapsed / item.Seconds);
+            }
+        }
+
+        private static void ClearFlying(List<Flying> flying)
+        {
+            for (var i = 0; i < flying.Count; i++) Destroy(flying[i].Go);
+            flying.Clear();
         }
 
         private void OnDestroy()
@@ -194,6 +277,23 @@ namespace Game.Enemy
                 texture.width);
             _boxSprite.name = "EnemyBox";
             return _boxSprite;
+        }
+
+        private sealed class Flying
+        {
+            public Flying(GameObject go, Vector3 from, Vector3 to, float seconds)
+            {
+                Go = go;
+                From = from;
+                To = to;
+                Seconds = Mathf.Max(seconds, 0.001f);
+            }
+
+            public GameObject Go { get; }
+            public Vector3 From { get; }
+            public Vector3 To { get; }
+            public float Seconds { get; }
+            public float Elapsed { get; set; }
         }
 
         private sealed class Drawn

@@ -104,6 +104,50 @@
    "title": "Quái bị hạ lúc nghỉ giữa hai đợt",
    "by": "@CodeLead",
    "at": "2026-11-25 12:02:13"
+  },
+  "reward-popup-text": {
+   "state": "verified",
+   "note": "Chữ +tiền bay lên 1u trong 0.6s ở chỗ quái bị hạ: field báo Rewarded, presenter đẩy xuống stage",
+   "tests": [
+    "EnemyCombatTests.A_defeated_enemy_shows_the_coins_it_paid_where_it_stood",
+    "EnemyCombatTests.Leaving_the_battle_shows_no_coins_for_the_enemies_removed",
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+   ],
+   "play": "",
+   "hash": "b9e09f8458a5",
+   "text": "Hiện số tiền nhận (ví dụ \"+5\") ở chỗ quái bị hạ, bay lên 1u trong 0.6s rồi biến mất\nNgười chơi thấy tiền đến từ đâu mà không phải nhìn ví.",
+   "title": "Hiện số tiền nhận (ví dụ \"+5\") ở chỗ quái bị hạ, bay lên 1u trong 0.6s rồi biến mất",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:43:56"
+  },
+  "params": {
+   "state": "verified",
+   "note": "Số chữ tiền 1u/0.6s trên stage prefab, kiểm bằng test installer",
+   "tests": [
+    "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type",
+    "EnemyFieldTests.Coins_for_an_enemy_do_not_grow_with_the_wave_scale",
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers",
+    "EnemyCombatTests.A_defeated_enemy_shows_the_coins_it_paid_where_it_stood"
+   ],
+   "play": "",
+   "hash": "ae675c35ccb5",
+   "text": "## Làm gì\n- Giữ bảng tiền theo loại quái (asset cấu hình, không viết cứng).\n- Khi `feature-enemy/enemy-stats/enemy-stat-values` báo một quái bị hạ: cộng tiền của loại đó vào `feature-wallet` ngay, một lần.\n- Hiện chữ số tiền nhận ở chỗ quái bị hạ.\n\n## Thông số\n| Loại | Tiền | Máu đợt 1 | Tiền / 10 máu | Lí do |\n|---|---|---|---|---|\n| Lính | 5 | 40 | 1.25 | Mức chuẩn |\n| Sói | 4 | 20 | 2.0 | Ít hơn Lính (luật vòng 3) |\n| Khổng lồ | 15 | 150 | 1.0 | Nhiều hơn Lính |\n| Cung thủ quái | 6 | 25 | 2.4 | Ngang Lính, hơi hơn vì khó với tới |\n| Trùm | 100 | 400 | 2.5 | Nhiều nhất; một lần mua đáng kể, là phần thưởng riêng của đợt Trùm |\n\n| Thông số khác | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Nhân theo đợt | không | | Bộ số chung |\n| Chữ tiền bay lên | 1u trong 0.6s | u, s | Đủ đọc, không che trận |\n\nCân bằng dự kiến (chỉ tính tiền quái, chưa cộng thưởng dọn đợt 20+5×đợt của `feature-wave`):\n- Đợt 1: 8 Lính = 40.\n- Đợt 5: 16 quái, giả sử 8 Lính, 5 Sói, 3 Khổng lồ = 40+20+45 = 105.\n- Đợt 10: 26 quái gồm 1 Trùm, giả sử 10 Lính, 7 Sói, 5 Khổng lồ, 3 Cung thủ quái = 50+28+75+18+100 = 271.\nGiá cấp hero thứ 5 là 30×1.35^4 ≈ 100: tới đợt 10 người chơi mua được khoảng 2-3 cấp mỗi đợt.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Loại có tiền | Lính 5, Sói 4, Khổng lồ 15 | cả 5 loại như bảng | theo số đã chỉnh sau chơi thử |\n| Chữ tiền bay lên | không bắt buộc | có, 1u trong 0.6s | có, kèm âm thanh |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:43:56"
+  },
+  "edge-tam-dung": {
+   "state": "verified",
+   "note": "Tạm dừng thì không hạ quái nên không tiền, chữ đang bay đứng yên theo SetPaused",
+   "tests": [
+    "EnemyCombatTests.While_paused_no_enemy_is_defeated_and_the_rising_coin_text_stands_still"
+   ],
+   "play": "",
+   "hash": "4061dbf3e2d2",
+   "text": "Tạm dừng: không có quái bị hạ nên không có tiền; chữ đang bay đứng yên.",
+   "title": "Tạm dừng",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:43:56"
   }
  },
  "log": [
@@ -215,6 +259,69 @@
   {
    "at": "2026-11-25 12:02:13",
    "id": "edge-vi-co-gioi-han-hay-khong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:36:11",
+   "id": "reward-popup-text",
+   "state": "doing",
+   "by": "Enemy",
+   "note": "Chữ +tiền bay lên 1u trong 0.6s ở chỗ quái bị hạ: field báo Rewarded, presenter đẩy xuống stage"
+  },
+  {
+   "at": "2026-11-25 13:36:16",
+   "id": "params",
+   "state": "doing",
+   "by": "Enemy",
+   "note": "Số chữ tiền 1u/0.6s trên stage prefab, kiểm bằng test installer"
+  },
+  {
+   "at": "2026-11-25 13:36:19",
+   "id": "edge-tam-dung",
+   "state": "doing",
+   "by": "Enemy",
+   "note": "Tạm dừng thì không hạ quái nên không tiền, chữ đang bay đứng yên theo SetPaused"
+  },
+  {
+   "at": "2026-11-25 13:38:21",
+   "id": "reward-popup-text",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyCombatTests.A_defeated_enemy_shows_the_coins_it_paid_where_it_stood, EnemyCombatTests.Leaving_the_battle_shows_no_coins_for_the_enemies_removed, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+  },
+  {
+   "at": "2026-11-25 13:38:22",
+   "id": "edge-tam-dung",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyCombatTests.While_paused_no_enemy_is_defeated_and_the_rising_coin_text_stands_still"
+  },
+  {
+   "at": "2026-11-25 13:38:24",
+   "id": "params",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyFieldTests.Coins_for_an_enemy_do_not_grow_with_the_wave_scale, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers, EnemyCombatTests.A_defeated_enemy_shows_the_coins_it_paid_where_it_stood"
+  },
+  {
+   "at": "2026-11-25 13:43:56",
+   "id": "reward-popup-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:43:56",
+   "id": "edge-tam-dung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:43:56",
+   "id": "params",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

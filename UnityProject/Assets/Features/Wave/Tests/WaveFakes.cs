@@ -34,7 +34,11 @@ namespace Game.Wave.Tests
 
         public void Play() { }
         public void EnterBattle(RunTeam team) { }
-        public void Pause() { }
+        public void Pause()
+        {
+            IsPaused = true;
+            Log.Add("pause");
+        }
         public void Resume() { }
         public void Abandon() { }
         public void Replay() { }
@@ -82,6 +86,23 @@ namespace Game.Wave.Tests
     internal sealed class FirstRandom : IWaveRandom
     {
         public int Next(int maxExclusive) => 0;
+    }
+
+    /// <summary>Frames stepped by hand: <see cref="Frame"/> calls every started tick that was not cancelled.</summary>
+    internal sealed class FakeClock : IWaveClock
+    {
+        private readonly List<(Action<float> Tick, System.Threading.CancellationToken Stop)> _ticks =
+            new List<(Action<float>, System.Threading.CancellationToken)>();
+
+        public void Start(Action<float> tick, System.Threading.CancellationToken cancellation) => _ticks.Add((tick, cancellation));
+
+        public int Running => _ticks.FindAll(t => !t.Stop.IsCancellationRequested).Count;
+
+        public void Frame(float seconds = 0.016f)
+        {
+            foreach (var t in _ticks.ToArray())
+                if (!t.Stop.IsCancellationRequested) t.Tick(seconds);
+        }
     }
 
     internal sealed class FakeSession : ISessionScene

@@ -14,7 +14,7 @@ namespace Game.Composition.Tests
         private static readonly object[] Scenes =
         {
             new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 2 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 14 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 17 },
         };
 
         [Test]
@@ -59,7 +59,7 @@ namespace Game.Composition.Tests
         }
 
         [Test]
-        public void GameScene_AtIdea_JoinsTwelveFeaturesInTheDesignedOrder()
+        public void GameScene_AtIdea_JoinsItsFeaturesInTheDesignedOrder()
         {
             var names = Load("Assets/_Composition/Boot.Game.prefab").Installers.Select(i => i.name).ToList();
 
@@ -68,7 +68,7 @@ namespace Game.Composition.Tests
                 SessionScene,
                 "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
                 "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
-                "HudUpgradeInstaller", "PopupLoseInstaller",
+                "HudUpgradeInstaller", "PopupLoseInstaller", "PopupPauseInstaller", "AdsInstaller", "HomeInstaller",
                 "SceneFlowGameInstaller",
             }));
         }
@@ -100,6 +100,15 @@ namespace Game.Composition.Tests
             var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").Catalogs);
 
             Assert.That(catalogs.Get("Popup").TryGet("PopupLose/Main", out var prefab), Is.True);
+            Assert.That(prefab, Is.InstanceOf<GameObject>());
+        }
+
+        [Test]
+        public void GameScene_PopupCatalogHasThePausePopup()
+        {
+            var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").Catalogs);
+
+            Assert.That(catalogs.Get("Popup").TryGet("PopupPause/Main", out var prefab), Is.True);
             Assert.That(prefab, Is.InstanceOf<GameObject>());
         }
 

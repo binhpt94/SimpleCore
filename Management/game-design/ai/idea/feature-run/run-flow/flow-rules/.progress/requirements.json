@@ -149,6 +149,83 @@
    "title": "Bấm \"Chơi lại\" và \"Về màn bắt đầu\" gần như cùng lúc",
    "by": "@CodeLead",
    "at": "2026-11-25 12:03:29"
+  },
+  "revive-step": {
+   "state": "done",
+   "note": "RunFlow cai IRunRevive: ReviveWait, ReviveOffer, Reviving, giu tin don dot, co trong config",
+   "tests": [
+    "RunReviveTests.FirstCastleFallFreezesTheBattleAndOffersTheReviveAfterTheDelay",
+    "RunReviveTests.WatchedAdStandsTheCastleUpAndTheBattleGoesOnFromWhereItStopped",
+    "RunReviveTests.DecliningTheReviveLosesAtOnceWithoutAnotherWait",
+    "RunReviveTests.AdNotWatchedLosesAtOnceAndTellsTheLosePopup",
+    "RunReviveTests.SecondCastleFallInTheRunGoesStraightToTheLosePopup",
+    "RunReviveTests.NothingCanBePressedDuringTheWaitBeforeTheRevivePopup",
+    "RunReviveTests.OnlyTheFirstChoiceOnTheRevivePopupCounts",
+    "RunInstallerTests.IdeaRunHasNoReviveSoTheFirstCastleFallLoses"
+   ],
+   "play": "",
+   "hash": "9c249309dfb0",
+   "text": "Chọn hồi sinh và xem xong quảng cáo: đóng popup hồi sinh, thành có lại máu, trận chạy tiếp ngay từ chỗ dừng\nKhông đếm ngược; quái, hero, đợt, tiền, cấp, hồi chiêu giữ đúng như lúc dừng. Bỏ qua đề nghị, hoặc quảng cáo không xem hết hay không tải được: đóng popup hồi sinh, chốt điểm, hiện popup thua ngay (không chờ thêm 1 giây). Mỗi lượt chỉ một lần hồi sinh.",
+   "title": "Chọn hồi sinh và xem xong quảng cáo: đóng popup hồi sinh, thành có lại máu, trận chạy tiếp ngay từ chỗ dừng",
+   "by": "Run",
+   "at": "2026-11-25 13:42:59"
+  },
+  "edge-thanh-bi-pha-khi-popup-tam-dung-dang": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunPauseTests.CastleFallingWhilePausedStillEndsTheRun",
+    "RunReviveTests.CastleFallingWhilePausedOffersTheReviveAndThePauseEnds"
+   ],
+   "play": "",
+   "hash": "da1ccc06bca4",
+   "text": "**Thành bị phá khi popup tạm dừng đang mở:** không xảy ra, vì lúc tạm dừng quái không đánh (`feature-run/run-pause`).",
+   "title": "Thành bị phá khi popup tạm dừng đang mở",
+   "by": "Run",
+   "at": "2026-11-25 13:43:00"
+  },
+  "edge-roi-game-dung-luc-thanh-vua-bi-pha": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunPauseTests.LeavingAfterTheCastleFellDoesNotPauseAndTheLosePopupStillShows",
+    "RunReviveTests.LeavingTheGameOrBackKeyDuringTheReviveOpensNoPause"
+   ],
+   "play": "",
+   "hash": "159140d34854",
+   "text": "**Rời game đúng lúc thành vừa bị phá (trong 1 giây chờ):** không mở popup tạm dừng; quay lại thì popup thua hiện (lượt đã kết thúc, tạm dừng không áp dụng).",
+   "title": "Rời game đúng lúc thành vừa bị phá (trong 1 giây chờ)",
+   "by": "Run",
+   "at": "2026-11-25 13:43:01"
+  },
+  "edge-dang-o-man-bat-dau-hoac-man-chon": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunPauseTests.LeavingOrBackKeyOnTheStartScreenOrTeamSelectDoesNothing"
+   ],
+   "play": "",
+   "hash": "c75eea164d45",
+   "text": "**Đang ở màn bắt đầu hoặc màn chọn đội mà rời game:** không có gì dừng; quay lại vẫn ở màn đó.",
+   "title": "Đang ở màn bắt đầu hoặc màn chọn đội mà rời game",
+   "by": "Run",
+   "at": "2026-11-25 13:43:02"
+  },
+  "edge-nut-quay-lai-cua-may-android": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunPauseTests.BackKeyPausesARunningBattle",
+    "RunPauseTests.BackKeyOnThePausePopupIsLeftToThePopup",
+    "RunPauseTests.LeavingOrBackKeyOnTheStartScreenOrTeamSelectDoesNothing",
+    "RunPauseTests.LeavingAfterTheCastleFellDoesNotPauseAndTheLosePopupStillShows"
+   ],
+   "play": "",
+   "hash": "1d56bb0b8c24",
+   "text": "**Nút quay lại của máy (Android):** ở màn bắt đầu, màn chọn đội, popup thua và trong 1 giây chờ: không làm gì. Trong trận đang đánh: như bấm nút tạm dừng. Trên popup tạm dừng: theo `feature-popup-pause/pause-popup/pause-popup-spec`.",
+   "title": "Nút quay lại của máy (Android)",
+   "by": "Run",
+   "at": "2026-11-25 13:43:04"
   }
  },
  "log": [
@@ -368,6 +445,48 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-25 13:40:41",
+   "id": "revive-step",
+   "state": "doing",
+   "by": "Run",
+   "note": "RunFlow cai IRunRevive: ReviveWait, ReviveOffer, Reviving, giu tin don dot, co trong config"
+  },
+  {
+   "at": "2026-11-25 13:42:59",
+   "id": "revive-step",
+   "state": "done",
+   "by": "Run",
+   "note": "RunReviveTests.FirstCastleFallFreezesTheBattleAndOffersTheReviveAfterTheDelay, RunReviveTests.WatchedAdStandsTheCastleUpAndTheBattleGoesOnFromWhereItStopped, RunReviveTests.DecliningTheReviveLosesAtOnceWithoutAnotherWait, RunReviveTests.AdNotWatchedLosesAtOnceAndTellsTheLosePopup, RunReviveTests.SecondCastleFallInTheRunGoesStraightToTheLosePopup, RunReviveTests.NothingCanBePressedDuringTheWaitBeforeTheRevivePopup, RunReviveTests.OnlyTheFirstChoiceOnTheRevivePopupCounts, RunInstallerTests.IdeaRunHasNoReviveSoTheFirstCastleFallLoses"
+  },
+  {
+   "at": "2026-11-25 13:43:00",
+   "id": "edge-thanh-bi-pha-khi-popup-tam-dung-dang",
+   "state": "done",
+   "by": "Run",
+   "note": "RunPauseTests.CastleFallingWhilePausedStillEndsTheRun, RunReviveTests.CastleFallingWhilePausedOffersTheReviveAndThePauseEnds"
+  },
+  {
+   "at": "2026-11-25 13:43:01",
+   "id": "edge-roi-game-dung-luc-thanh-vua-bi-pha",
+   "state": "done",
+   "by": "Run",
+   "note": "RunPauseTests.LeavingAfterTheCastleFellDoesNotPauseAndTheLosePopupStillShows, RunReviveTests.LeavingTheGameOrBackKeyDuringTheReviveOpensNoPause"
+  },
+  {
+   "at": "2026-11-25 13:43:02",
+   "id": "edge-dang-o-man-bat-dau-hoac-man-chon",
+   "state": "done",
+   "by": "Run",
+   "note": "RunPauseTests.LeavingOrBackKeyOnTheStartScreenOrTeamSelectDoesNothing"
+  },
+  {
+   "at": "2026-11-25 13:43:04",
+   "id": "edge-nut-quay-lai-cua-may-android",
+   "state": "done",
+   "by": "Run",
+   "note": "RunPauseTests.BackKeyPausesARunningBattle, RunPauseTests.BackKeyOnThePausePopupIsLeftToThePopup, RunPauseTests.LeavingOrBackKeyOnTheStartScreenOrTeamSelectDoesNothing, RunPauseTests.LeavingAfterTheCastleFellDoesNotPauseAndTheLosePopupStillShows"
   }
  ]
 }

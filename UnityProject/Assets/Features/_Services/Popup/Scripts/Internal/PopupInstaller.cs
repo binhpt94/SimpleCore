@@ -34,6 +34,7 @@ namespace Game.Services.Popup
 
             registry.Register<IPopupService>(service);
             registry.Register<IPopupViews>(service);
+            registry.Register<IPopupStack>(service);
             session.Join(new PopupParticipant(service, prefabs));
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             PopupCheat.Join(cheat, session, service);   // after the service's part: its Run opens the stack first

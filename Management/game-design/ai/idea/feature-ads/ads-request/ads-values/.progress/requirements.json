@@ -1,0 +1,330 @@
+{
+ "items": {
+  "params": {
+   "state": "verified",
+   "note": "AdRequests: luồng 4 bước, hạn chờ 8s/5s trong AdsConfig, 1 yêu cầu một lúc",
+   "tests": [
+    "AdRequestsTests.ConfigDefaultsAreTheDesignNumbers",
+    "AdRequestsTests.LimitsComeFromTheGivenNumbers",
+    "AdRequestsTests.OneRequestAtATime",
+    "AdsInstallerTests.InstallerAssetPublishesRewardedAdsAndJoinsTheSession",
+    "AdsInstallerTests.InstallWithoutSessionSceneFails"
+   ],
+   "play": "",
+   "hash": "022e02a423af",
+   "text": "## Làm gì\n- Nhận yêu cầu kèm mã đề nghị; từ chối ngay nếu đang bận.\n- Chờ mở (tối đa 8 giây), cho phát, chờ xác nhận thưởng (tối đa 5 giây), chờ game trở lại, rồi trả kết quả kèm mã.\n- Bên gọi huỷ thì bỏ kết quả.\n- Ghi lí do của mọi \"không xem được\" vào log.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Hạn chờ mở | 8 (dự kiến) | giây | Mạng chậm vẫn kịp; người chơi đang chờ |\n| Hạn chờ xác nhận thưởng | 5 (dự kiến) | giây | Xác nhận thường tới ngay khi đóng |\n| Thời gian quảng cáo đang phát | không giới hạn, không tính hạn | | Do nhà cung cấp |\n| Số yêu cầu cùng lúc | 1 | yêu cầu | Node cha |\n| Màn chờ của nhà cung cấp giả | 2 | giây | Đủ thấy trạng thái chờ của popup |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Quảng cáo | Không có | Nhà cung cấp giả (bản dev và bản thử) | Nhà cung cấp thật, nhà cung cấp giả chỉ ở bản dev |\n| Hạn chờ mở, xác nhận | | 8 giây, 5 giây | Chỉnh theo nhà cung cấp thật |\n| Log lí do | | Có | Có |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "open-limit": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "AdRequestsTests.AdThatNeverOpensIsNotWatchedAfterEightSeconds",
+    "AdRequestsTests.TimePlayingDoesNotCountTowardsAnyLimit"
+   ],
+   "play": "",
+   "hash": "ecf49ad6e1bc",
+   "text": "Hạn chờ mở quảng cáo là 8 giây (dự kiến); quá hạn là \"không xem được\"\nĐủ cho mạng chậm tải một quảng cáo; người chơi đang nhìn popup chờ nên không để lâu hơn.",
+   "title": "Hạn chờ mở quảng cáo là 8 giây (dự kiến); quá hạn là \"không xem được\"",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "confirm-limit": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "AdRequestsTests.ClosedAdWithoutConfirmationIsNotWatchedAfterFiveSeconds",
+    "AdRequestsTests.ConfirmationWithinFiveSecondsOfClosingIsWatched",
+    "AdRequestsTests.ResultIsGivenOnlyOnce"
+   ],
+   "play": "",
+   "hash": "26617bd58532",
+   "text": "Hạn chờ xác nhận thưởng sau khi quảng cáo đóng là 5 giây (dự kiến); quá hạn là \"không xem được\"",
+   "title": "Hạn chờ xác nhận thưởng sau khi quảng cáo đóng là 5 giây (dự kiến); quá hạn là \"không xem được\"",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "return-wait": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "AdRequestsTests.ResultWaitsWithoutLimitUntilTheGameIsBackOnScreen",
+    "AdRequestsTests.ResultIsNeverGivenInsideTheProviderCallback"
+   ],
+   "play": "",
+   "hash": "f530e33fcea9",
+   "text": "Kết quả trả về ở khung hình đầu tiên sau khi game trở lại màn hình\nGame chưa trở lại (người chơi còn ở ngoài) thì kết quả chờ, không có hạn.",
+   "title": "Kết quả trả về ở khung hình đầu tiên sau khi game trở lại màn hình",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "busy-reply": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "AdRequestsTests.RequestWhileAnotherRunsIsNotWatchedAtOnceAndTheRunningOneGoesOn",
+    "AdRequestsTests.NewRequestIsAcceptedOnceTheLastResultWasGiven",
+    "AdsInstallerTests.InstalledAdsAnswersBusyRequestsAtOnce"
+   ],
+   "play": "",
+   "hash": "b6f40624edca",
+   "text": "Yêu cầu chen vào khi đang có yêu cầu nhận \"không xem được\" ngay trong khung hình đó",
+   "title": "Yêu cầu chen vào khi đang có yêu cầu nhận \"không xem được\" ngay trong khung hình đó",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "test-provider": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "FakeAdProviderTests.WatchedShowsTheWaitScreenForTwoSecondsThenGivesWatched",
+    "FakeAdProviderTests.NotWatchedGivesNotWatchedOnTheNextFrameWithoutAScreen",
+    "FakeAdProviderTests.TimedOutPlaysTwoSecondsThenWaitsFiveForAConfirmationThatNeverComes",
+    "FakeAdProviderTests.OutcomeCanBeChangedBetweenAds",
+    "FakeAdProviderTests.WorksWithoutAScreen"
+   ],
+   "play": "",
+   "hash": "0c4b9211d260",
+   "text": "Bản dev có nhà cung cấp giả: chọn trước kết quả \"đã xem đủ\", \"không xem được\" hay \"quá hạn\" để thử luồng hồi sinh\nNhà cung cấp giả hiện một màn chờ 2 giây thay cho quảng cáo; chỉ chạy ở bản dev.",
+   "title": "Bản dev có nhà cung cấp giả: chọn trước kết quả \"đã xem đủ\", \"không xem được\" hay \"quá hạn\" để thử luồng hồi sinh",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "log-reason": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "AdRequestsTests.EveryNotWatchedWritesItsReasonToTheLog",
+    "AdRequestsTests.WatchedWritesNothingToTheLog"
+   ],
+   "play": "",
+   "hash": "0e82eb42a876",
+   "text": "Mỗi kết quả \"không xem được\" ghi lí do vào log (hết quảng cáo, mất mạng, đóng sớm, quá hạn, đang bận)\nNgười chơi không thấy lí do; log để phiên code và người dò lỗi.",
+   "title": "Mỗi kết quả \"không xem được\" ghi lí do vào log (hết quảng cáo, mất mạng, đóng sớm, quá hạn, đang bận)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "edge-mat-mang-giua-luc-quang-cao-phat": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "AdRequestsTests.NetworkLostWhileAdPlaysWaitsForCloseThenFiveSecondsThenNotWatched",
+    "AdRequestsTests.NetworkLostWhileWaitingToOpenIsNotWatchedOnTheNextFrame"
+   ],
+   "play": "",
+   "hash": "22dff25c11d7",
+   "text": "**Mất mạng giữa lúc quảng cáo phát:** chờ quảng cáo đóng; không có xác nhận trong 5 giây thì \"không xem được\".",
+   "title": "Mất mạng giữa lúc quảng cáo phát",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "edge-xac-nhan-thuong-toi-truoc-khi-quang-cao": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "AdRequestsTests.ConfirmationBeforeCloseIsKeptAndWatchedAfterCloseAndReturn",
+    "AdRequestsTests.ProblemReportedAfterConfirmationStillGivesWatched"
+   ],
+   "play": "",
+   "hash": "0bd7c1aff877",
+   "text": "**Xác nhận thưởng tới trước khi quảng cáo đóng:** giữ, trả \"đã xem đủ\" sau khi đóng và game trở lại.",
+   "title": "Xác nhận thưởng tới trước khi quảng cáo đóng",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "edge-nguoi-choi-tat-game-khi-quang-cao-phat": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "AdRequestsTests.SessionEndingWhileAdPlaysGivesNoResultToAnyone",
+    "FakeAdProviderTests.SessionEndingHidesTheWaitScreen"
+   ],
+   "play": "",
+   "hash": "8e934942833e",
+   "text": "**Người chơi tắt game khi quảng cáo phát:** không có kết quả; lượt dở không lưu (chỉ kỉ lục lưu).",
+   "title": "Người chơi tắt game khi quảng cáo phát",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  },
+  "edge-ket-qua-toi-khi-ben-goi-da-huy": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "AdRequestsTests.ResultAfterCancelIsDroppedAndLogged",
+    "AdRequestsTests.CancelForAnotherOfferChangesNothing",
+    "AdRequestsTests.EventsOfAnEarlierAdDoNotTouchTheNextRequest"
+   ],
+   "play": "",
+   "hash": "9db0af732e22",
+   "text": "**Kết quả tới khi bên gọi đã huỷ:** bỏ, ghi log.",
+   "title": "Kết quả tới khi bên gọi đã huỷ",
+   "by": "@CodeLead",
+   "at": "2026-11-25 13:55:28"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 13:38:26",
+   "id": "params",
+   "state": "doing",
+   "by": "Ads",
+   "note": "AdRequests: luồng 4 bước, hạn chờ 8s/5s trong AdsConfig, 1 yêu cầu một lúc"
+  },
+  {
+   "at": "2026-11-25 13:43:44",
+   "id": "open-limit",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.AdThatNeverOpensIsNotWatchedAfterEightSeconds, AdRequestsTests.TimePlayingDoesNotCountTowardsAnyLimit"
+  },
+  {
+   "at": "2026-11-25 13:43:47",
+   "id": "confirm-limit",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.ClosedAdWithoutConfirmationIsNotWatchedAfterFiveSeconds, AdRequestsTests.ConfirmationWithinFiveSecondsOfClosingIsWatched, AdRequestsTests.ResultIsGivenOnlyOnce"
+  },
+  {
+   "at": "2026-11-25 13:43:50",
+   "id": "return-wait",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.ResultWaitsWithoutLimitUntilTheGameIsBackOnScreen, AdRequestsTests.ResultIsNeverGivenInsideTheProviderCallback"
+  },
+  {
+   "at": "2026-11-25 13:43:53",
+   "id": "busy-reply",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.RequestWhileAnotherRunsIsNotWatchedAtOnceAndTheRunningOneGoesOn, AdRequestsTests.NewRequestIsAcceptedOnceTheLastResultWasGiven, AdsInstallerTests.InstalledAdsAnswersBusyRequestsAtOnce"
+  },
+  {
+   "at": "2026-11-25 13:43:56",
+   "id": "test-provider",
+   "state": "done",
+   "by": "Ads",
+   "note": "FakeAdProviderTests.WatchedShowsTheWaitScreenForTwoSecondsThenGivesWatched, FakeAdProviderTests.NotWatchedGivesNotWatchedOnTheNextFrameWithoutAScreen, FakeAdProviderTests.TimedOutPlaysTwoSecondsThenWaitsFiveForAConfirmationThatNeverComes, FakeAdProviderTests.OutcomeCanBeChangedBetweenAds, FakeAdProviderTests.WorksWithoutAScreen"
+  },
+  {
+   "at": "2026-11-25 13:43:59",
+   "id": "log-reason",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.EveryNotWatchedWritesItsReasonToTheLog, AdRequestsTests.WatchedWritesNothingToTheLog"
+  },
+  {
+   "at": "2026-11-25 13:44:03",
+   "id": "edge-mat-mang-giua-luc-quang-cao-phat",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.NetworkLostWhileAdPlaysWaitsForCloseThenFiveSecondsThenNotWatched, AdRequestsTests.NetworkLostWhileWaitingToOpenIsNotWatchedOnTheNextFrame"
+  },
+  {
+   "at": "2026-11-25 13:44:06",
+   "id": "edge-xac-nhan-thuong-toi-truoc-khi-quang-cao",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.ConfirmationBeforeCloseIsKeptAndWatchedAfterCloseAndReturn, AdRequestsTests.ProblemReportedAfterConfirmationStillGivesWatched"
+  },
+  {
+   "at": "2026-11-25 13:44:09",
+   "id": "edge-nguoi-choi-tat-game-khi-quang-cao-phat",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.SessionEndingWhileAdPlaysGivesNoResultToAnyone, FakeAdProviderTests.SessionEndingHidesTheWaitScreen"
+  },
+  {
+   "at": "2026-11-25 13:44:12",
+   "id": "edge-ket-qua-toi-khi-ben-goi-da-huy",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.ResultAfterCancelIsDroppedAndLogged, AdRequestsTests.CancelForAnotherOfferChangesNothing, AdRequestsTests.EventsOfAnEarlierAdDoNotTouchTheNextRequest"
+  },
+  {
+   "at": "2026-11-25 13:44:15",
+   "id": "params",
+   "state": "done",
+   "by": "Ads",
+   "note": "AdRequestsTests.ConfigDefaultsAreTheDesignNumbers, AdRequestsTests.LimitsComeFromTheGivenNumbers, AdRequestsTests.OneRequestAtATime, AdsInstallerTests.InstallerAssetPublishesRewardedAdsAndJoinsTheSession, AdsInstallerTests.InstallWithoutSessionSceneFails"
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "open-limit",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "confirm-limit",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "return-wait",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "busy-reply",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "test-provider",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "log-reason",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "edge-mat-mang-giua-luc-quang-cao-phat",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "edge-xac-nhan-thuong-toi-truoc-khi-quang-cao",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "edge-nguoi-choi-tat-game-khi-quang-cao-phat",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "edge-ket-qua-toi-khi-ben-goi-da-huy",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:55:28",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  }
+ ]
+}

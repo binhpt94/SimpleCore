@@ -200,6 +200,21 @@ namespace Game.Hud.Tests
         }
 
         [Test]
+        public void SkillUpgradesLeaveTheButtonsAndTheirCooldownAsTheyAre()
+        {
+            // Upgrades do not touch cooldowns (feature-castle/castle-skills): the buttons are made once per battle
+            // and keep showing the castle's own cooldown however long the battle runs.
+            for (var frame = 0; frame < 300; frame++) _buttons.Tick(0.016f);
+            _view.Press(0);
+            _buttons.Tick(0.016f);
+
+            Assert.AreEqual(1, _view.SkillButtonsCreated);
+            CollectionAssert.AreEqual(new[] { "Sấm sét", "Băng giá", "Cổ vũ" }, _view.SkillNames);
+            CollectionAssert.AreEqual(new[] { 0, 1, 2 }, _view.SkillSlots);
+            Assert.AreEqual("20", _view.Skills[0].Seconds);
+        }
+
+        [Test]
         public void StoppedButtonsIgnoreTaps()
         {
             _buttons.Stop();

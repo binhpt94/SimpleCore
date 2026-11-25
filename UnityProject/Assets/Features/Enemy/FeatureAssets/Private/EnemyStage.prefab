@@ -69,3 +69,11 @@ MonoBehaviour:
   _lungeSeconds: 0.15
   _flashSeconds: 0.1
   _defeatSeconds: 0.3
+  _shotSeconds: 0.15
+  _shotSize: {x: 0.4, y: 0.08}
+  _shotColor: {r: 0.35, g: 0.2, b: 0.1, a: 1}
+  _coinRise: 1
+  _coinSeconds: 0.6
+  _coinTextHeight: 0.5
+  _coinColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  _coinFont: {fileID: 0}

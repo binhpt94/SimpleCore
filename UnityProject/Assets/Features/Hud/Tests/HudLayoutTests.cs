@@ -25,6 +25,7 @@ namespace Game.Hud.Tests
 
         private GameObject _instance;
         private IHudView _view;
+        private RectTransform _canvasRoot;
         private RectTransform _root;
 
         [SetUp]
@@ -35,7 +36,7 @@ namespace Game.Hud.Tests
             _instance = Object.Instantiate(prefab);
             _view = _instance.GetComponent<IHudView>();
             Assert.IsNotNull(_view, "prefab root has no IHudView");
-            _root = (RectTransform)_instance.transform;
+            _canvasRoot = (RectTransform)_instance.transform;
 
             _view.ShowHealth("1000/1000", 1f);
             _view.ShowCoins("50");
@@ -43,6 +44,10 @@ namespace Game.Hud.Tests
             _view.ShowBanner("Đợt 1");
             _view.CreateSkillButtons(new[] { "Sấm sét", "Băng giá", "Cổ vũ" }, new[] { 0, 1, 2 });
             _view.ShowCheatButton("Cheat: mid-battle");
+
+            // Awake does not run in EditMode: the view builds itself on the first call above.
+            _root = (RectTransform)_canvasRoot.Find("Safe");
+            Assert.IsNotNull(_root, "HUD parts must sit in the safe-area box 'Safe'");
         }
 
         [TestCase(Wide16By9)]
@@ -60,6 +65,91 @@ namespace Game.Hud.Tests
         public void TearDown()
         {
             if (_instance != null) Object.DestroyImmediate(_instance);
+        }
+
+        [TestCase(Wide16By9)]
+        [TestCase(Wide21By9)]
+        public void TopRowGoesPauseThenMoneyThenHealthThenWaveFromLeftToRight(float width)
+        {
+            var pause = Box("Pause", width);
+            var coin = Box("Coin", width);
+            var health = Box("Health", width);
+            var wave = Box("Wave", width);
+
+            Assert.Less(pause.xMax, coin.xMin);
+            Assert.Less(coin.xMax, health.xMin);
+            Assert.Less(health.xMax, wave.xMin);
+            Assert.AreEqual(width / 2f, health.center.x, 0.5f);
+        }
+
+        [TestCase(Wide16By9)]
+        [TestCase(Wide21By9)]
+        public void PauseButtonSitsInTheTopLeftCornerOnTheOtherEdgeFromTheSkills(float width)
+        {
+            var pause = Box("Pause", width);
+
+            Assert.AreEqual(40f, pause.xMin, 0.5f);
+            Assert.AreEqual(10f, pause.yMin, 0.5f);
+            Assert.AreEqual(120f, pause.width, 0.5f);
+            Assert.AreEqual(120f, pause.height, 0.5f);
+            Assert.LessOrEqual(pause.yMax, StripTop, "pause is on the top edge");
+            Assert.GreaterOrEqual(Box("Skill Sấm sét", width).yMin, StripBottom, "skills are on the bottom edge");
+        }
+
+        [Test]
+        public void PauseButtonIsOnePressableButtonWithTwoVerticalBarsAndNoText()
+        {
+            var pause = _root.Find("Pause");
+            Assert.IsNotNull(pause);
+
+            var selectables = 0;
+            foreach (var component in pause.GetComponentsInChildren<Component>(true))
+            {
+                Assert.IsFalse(component.GetType().Name == "Text", "pause button has text on " + component.name);
+                if (IsSelectable(component)) selectables++;
+            }
+
+            Assert.AreEqual(1, selectables);
+            Assert.AreEqual(1, CountNamed(_root, "Pause"), "exactly one pause button");
+
+            if (SpriteOf(pause.gameObject) != null) return;
+            var left = BoxOf((RectTransform)pause.Find("Bar left"), Wide16By9);
+            var right = BoxOf((RectTransform)pause.Find("Bar right"), Wide16By9);
+            Assert.Greater(left.height, left.width, "bars stand upright");
+            Assert.Greater(right.height, right.width, "bars stand upright");
+            Assert.Less(left.xMax, right.xMin);
+            Assert.AreEqual(left.yMin, right.yMin, 0.5f);
+        }
+
+        [TestCase(Wide16By9)]
+        [TestCase(Wide21By9)]
+        public void WithASafeAreaEveryPartStaysInsideItAndKeepsItsOrder(float width)
+        {
+            // Notch 80 on the left, rounded corner 60 on the right, navigation bar 30 at the bottom (beyond the margins).
+            _view.ApplySafeArea(new HudInsets(80f, 60f, 0f, 30f));
+
+            foreach (var part in Parts(width))
+            {
+                var box = part.Value;
+                Assert.GreaterOrEqual(box.xMin, 80f - 0.5f, part.Key);
+                Assert.LessOrEqual(box.xMax, width - 60f + 0.5f, part.Key);
+                Assert.LessOrEqual(box.yMax, Height - 30f + 0.5f, part.Key);
+            }
+
+            Assert.Less(Box("Pause", width).xMax, Box("Coin", width).xMin);
+            Assert.Less(Box("Skill Sấm sét", width).xMax, Box("Skill Băng giá", width).xMin);
+            Assert.Less(Box("Skill Băng giá", width).xMax, Box("Skill Cổ vũ", width).xMin);
+        }
+
+        [TestCase(Wide16By9)]
+        [TestCase(Wide21By9)]
+        public void UpgradeBarAlwaysGetsAtLeastItsFrameWidthLeftOfTheSkills(float width)
+        {
+            // Frame: upgrade bar x 40..1380 (1340 wide), then 40 to the cluster. Six buttons shrink inside that part;
+            // the cluster never gives up room, so the free bottom edge is never narrower than the frame's.
+            var clusterLeft = Box("Skill Sấm sét", width).xMin;
+            Assert.GreaterOrEqual(clusterLeft, 40f + 1340f + 40f - 0.5f);
+            Assert.AreEqual(width - 40f - HudSkillSlots.ClusterWidth, clusterLeft, 0.5f);
         }
 
         [TestCase(Wide16By9)]
@@ -204,13 +294,37 @@ namespace Game.Hud.Tests
             return parts;
         }
 
-        private static Rect BoxOf(RectTransform rect, float width)
+        /// <summary>Box of a HUD part on the screen (y down from the top), through the safe-area box it sits in.</summary>
+        private Rect BoxOf(RectTransform rect, float width)
         {
-            var left = rect.anchorMin.x * width + rect.offsetMin.x;
-            var right = rect.anchorMax.x * width + rect.offsetMax.x;
-            var bottomUp = rect.anchorMin.y * Height + rect.offsetMin.y;
-            var topUp = rect.anchorMax.y * Height + rect.offsetMax.y;
-            return Rect.MinMaxRect(left, Height - topUp, right, Height - bottomUp);
+            var part = UpBoxOnScreen(rect, width);
+            return Rect.MinMaxRect(part.xMin, Height - part.yMax, part.xMax, Height - part.yMin);
+        }
+
+        /// <summary>Box on the screen, y up, walking the parents up to the canvas (the whole screen).</summary>
+        private Rect UpBoxOnScreen(RectTransform rect, float width)
+        {
+            if (rect == _canvasRoot) return new Rect(0f, 0f, width, Height);
+            var parent = UpBoxOnScreen((RectTransform)rect.parent, width);
+            return UpBox(rect, parent.xMin, parent.yMin, parent.width, parent.height);
+        }
+
+        /// <summary>Box of a rect inside a parent box, y measured upward (Unity's way).</summary>
+        private static Rect UpBox(RectTransform rect, float parentX, float parentY, float parentWidth, float parentHeight)
+        {
+            var left = parentX + rect.anchorMin.x * parentWidth + rect.offsetMin.x;
+            var right = parentX + rect.anchorMax.x * parentWidth + rect.offsetMax.x;
+            var bottom = parentY + rect.anchorMin.y * parentHeight + rect.offsetMin.y;
+            var top = parentY + rect.anchorMax.y * parentHeight + rect.offsetMax.y;
+            return Rect.MinMaxRect(left, bottom, right, top);
+        }
+
+        private static int CountNamed(Transform parent, string name)
+        {
+            var count = 0;
+            foreach (Transform child in parent)
+                if (child.name == name) count++;
+            return count;
         }
 
         private static bool IsSelectable(Component component)
