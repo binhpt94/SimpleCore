@@ -58,3 +58,6 @@ Thumbs.db
 
 # Excel lock files (a workbook open in Excel)
 ~$*
+
+# studio.py: khoá của một lượt đang chạy, không commit
+Management/studio/**/.run.lock
