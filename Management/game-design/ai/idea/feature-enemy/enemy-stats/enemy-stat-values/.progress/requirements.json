@@ -1,7 +1,7 @@
 {
  "items": {
   "base-stats": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type"
@@ -10,11 +10,11 @@
    "hash": "ff313a4295d0",
    "text": "Chỉ số gốc (máu / sát thương / giây mỗi đòn / tầm u / đi u/s): Lính 40/5/1.0/1.0/1.5, Sói 20/3/0.8/1.0/3.0, Khổng lồ 150/15/1.5/1.2/0.8, Cung thủ quái 25/6/1.2/5/1.5, Trùm 400/40/2.0/1.5/0.6\nSói nhanh gấp đôi Lính, Khổng lồ gần gấp 4 máu Lính, Trùm 10 lần máu Lính. Đợt có Trùm khó vọt hơn đợt trước là ngoại lệ có chủ đích.",
    "title": "Chỉ số gốc (máu / sát thương / giây mỗi đòn / tầm u / đi u/s): Lính 40/5/1.0/1.0/1.5, Sói 20/3/0.8/1.0/3.0, Khổng lồ 150/15/1.5/1.2/0.8, Cung thủ quái 25/6/1.2/5/1.5, Trùm 400/40/2.0/1.5/0.6",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:44"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "wave-multiplier": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.Wave_scale_multiplies_enemy_health",
@@ -25,25 +25,26 @@
    "hash": "40f3ad8506e9",
    "text": "Lúc ra, máu tối đa và sát thương nhân hệ số đợt do `feature-wave` đưa vào; quái ra rồi thì không đổi nữa\nQuái không biết số đợt và không giữ công thức: `feature-wave/difficulty-scaling/wave-formula` giữ tham số, tính hệ số (hiện là 1 + 0.10×(đợt−1)) và đưa vào lúc sinh. Lính với hệ số 1.9 (đợt 10): 76 máu, 9.5 sát thương. Tốc độ đi, giây mỗi đòn và tầm không nhân.",
    "title": "Lúc ra, máu tối đa và sát thương nhân hệ số đợt do `feature-wave` đưa vào; quái ra rồi thì không đổi nữa",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:45"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "defeated-values": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Bị hạ, cho tiền, rời danh sách sống đã kiểm. Thu nhỏ về 0 trong 0.3 giây chỉ kiểm stage giả được gọi Defeat, số 0.3 nằm trong serialized field của EnemyStageView. Thêm test nạp prefab stage thật kiểm 0.3 giây, hoặc ghi play",
    "tests": [
     "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it",
-    "EnemyCombatTests.The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones"
+    "EnemyCombatTests.The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones",
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
    ],
    "play": "",
    "hash": "817d2243d753",
    "text": "Máu ≤ 0 thì quái bị hạ ngay khung hình đó: không đánh, không bị nhắm, cho tiền, thu nhỏ về 0 trong 0.3s rồi biến mất\n0.3s thu nhỏ chỉ để nhìn; quái không chắn đòn khác trong lúc đó. Đòn vùng không tính quái đã bị hạ.",
    "title": "Máu ≤ 0 thì quái bị hạ ngay khung hình đó: không đánh, không bị nhắm, cho tiền, thu nhỏ về 0 trong 0.3s rồi biến mất",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:47"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:26"
   },
   "no-regen-enemy": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.An_enemy_never_heals_over_time"
@@ -52,11 +53,11 @@
    "hash": "4dd64279e9e5",
    "text": "Quái không tự hồi máu, máu chỉ giảm\nĐã loại: quái tự hồi (người chơi phải hạ dứt điểm sẽ khó đọc).",
    "title": "Quái không tự hồi máu, máu chỉ giảm",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:48"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-nhieu-don-trung-cung-khung-hinh-dua-mau": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it"
@@ -65,11 +66,11 @@
    "hash": "5dd78f0b3b95",
    "text": "Nhiều đòn trúng cùng khung hình đưa máu xuống ≤ 0: quái bị hạ một lần, tiền một lần; các đòn sau trong khung hình bỏ qua quái này.",
    "title": "Nhiều đòn trúng cùng khung hình đưa máu xuống ≤ 0",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:49"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-quai-da-sinh-o-x-17u-ngoai-man": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.Frost_halves_walking_speed_while_it_lasts"
@@ -78,11 +79,11 @@
    "hash": "7593dc4a9312",
    "text": "Quái đã sinh ở x=±17u (ngoài màn) bị Băng giá: bị chậm, không bị hạ bởi hero (hero chưa nhắm ngoài màn).",
    "title": "Quái đã sinh ở x=±17u (ngoài màn) bị Băng giá",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:50"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-quai-bi-ha-khi-dang-cham": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.A_slowed_enemy_that_is_defeated_leaves_nothing_behind"
@@ -91,11 +92,11 @@
    "hash": "85909c52de02",
    "text": "Quái bị hạ khi đang chậm: trạng thái chậm biến mất cùng quái.",
    "title": "Quái bị hạ khi đang chậm",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:53"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-sat-thuong-co-so-le-9-5": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.Damage_dealt_scales_with_the_spawn_stat_scale"
@@ -104,11 +105,11 @@
    "hash": "613a5010f3d4",
    "text": "Sát thương có số lẻ (9.5): giữ số thực; hiện ra theo cách làm tròn ở `feature-hero/hero-stats/hero-level-values`.",
    "title": "Sát thương có số lẻ (9.5)",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:54"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-thanh-bi-pha": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.After_the_battle_stopped_no_enemy_is_defeated_and_no_coins_are_paid"
@@ -117,8 +118,8 @@
    "hash": "7442a4708676",
    "text": "Thành bị phá: quái còn lại không bị hạ thêm, không cho tiền; `feature-run` gỡ quái khi dừng trận.",
    "title": "Thành bị phá",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:55"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-tam-dung": {
    "state": "done",
@@ -132,19 +133,19 @@
    "at": "2026-11-25 11:36:56"
   },
   "params": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Bảng chỉ số và hệ số đã kiểm. Thu nhỏ khi bị hạ 0.3 giây ở bảng Thông số và cột IDEA chưa test nào kiểm, như ở defeated-values",
    "tests": [
     "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type",
     "EnemyFieldTests.Wave_scale_multiplies_enemy_health",
-    "EnemyCombatTests.The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones"
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
    ],
    "play": "",
    "hash": "e781f2a854c3",
    "text": "## Làm gì\n- Giữ bảng chỉ số gốc của 5 loại quái (asset cấu hình, không viết cứng).\n- Lúc sinh quái: nhận loại và hệ số chỉ số từ `feature-wave` (không nhận số đợt); máu tối đa và sát thương = gốc × hệ số; quái ra đầy máu.\n- Nhận sát thương từ hero, đòn tự bắn và Sấm sét; máu ≤ 0 thì bị hạ, báo `feature-enemy/enemy-reward` đúng một lần.\n- Định nghĩa khoảng cách, nhịp đánh, sát thương theo `feature-hero/hero-stats/hero-level-values`.\n\n## Thông số\nChỉ số gốc ở đợt 1 (dự kiến, theo bộ số chung):\n| Loại | Máu | Sát thương | s mỗi đòn | Tầm (u) | Đi (u/s) | Sát thương/s |\n|---|---|---|---|---|---|---|\n| Lính | 40 | 5 | 1.0 | 1.0 | 1.5 | 5.0 |\n| Sói | 20 | 3 | 0.8 | 1.0 | 3.0 | 3.75 |\n| Khổng lồ | 150 | 15 | 1.5 | 1.2 | 0.8 | 10.0 |\n| Cung thủ quái | 25 | 6 | 1.2 | 5 | 1.5 | 5.0 |\n| Trùm | 400 | 40 | 2.0 | 1.5 | 0.6 | 20.0 |\n\nHệ số đợt (dự kiến) do `feature-wave/difficulty-scaling/wave-formula` tính: `hệ số = 1 + 0.10 × (đợt - 1)`, áp cho máu tối đa và sát thương. Bảng dưới chỉ để xem kết quả nhân; tham số nằm ở cấu hình của `feature-wave`.\n| Đợt | Hệ số | Lính máu / sát thương | Khổng lồ | Trùm |\n|---|---|---|---|---|\n| 1 | 1.0 | 40 / 5 | 150 / 15 | (chưa có) |\n| 5 | 1.4 | 56 / 7 | 210 / 21 | (chưa có) |\n| 10 | 1.9 | 76 / 9.5 | 285 / 28.5 | 760 / 76 |\n| 20 | 2.9 | 116 / 14.5 | 435 / 43.5 | 1160 / 116 |\n\n| Thông số khác | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Thu nhỏ khi bị hạ | 0.3 | s | Cùng nhịp với hero gục |\n| Tự hồi máu | 0 | máu/s | Luật vòng 3 |\n\nCân bằng dự kiến: Trùm đợt 10 có 760 máu; đội Hiệp sĩ, Cung thủ, Pháp sư cấp 5 (21.5 + 31.4 + 20.2 ≈ 73 sát thương/s) cộng thành 10 sát thương/s hạ trong khoảng 9s nếu cả đội cùng đánh.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Loại có chỉ số | Lính, Sói, Khổng lồ | cả 5 | cả 5 |\n| Hệ số đợt | 1 + 0.10×(đợt-1) | như IDEA | theo số đã chỉnh sau chơi thử |\n| Bị hạ | thu nhỏ 0.3s | như IDEA | anim bị hạ riêng từng loại, âm thanh |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:58"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:26"
   }
  },
  "log": [
@@ -224,6 +225,104 @@
    "state": "done",
    "by": "Enemy",
    "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyFieldTests.Wave_scale_multiplies_enemy_health, EnemyCombatTests.The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones"
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "base-stats",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "wave-multiplier",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "no-regen-enemy",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-nhieu-don-trung-cung-khung-hinh-dua-mau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-quai-da-sinh-o-x-17u-ngoai-man",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-quai-bi-ha-khi-dang-cham",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-sat-thuong-co-so-le-9-5",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-thanh-bi-pha",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:11",
+   "id": "defeated-values",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Bị hạ, cho tiền, rời danh sách sống đã kiểm. Thu nhỏ về 0 trong 0.3 giây chỉ kiểm stage giả được gọi Defeat, số 0.3 nằm trong serialized field của EnemyStageView. Thêm test nạp prefab stage thật kiểm 0.3 giây, hoặc ghi play"
+  },
+  {
+   "at": "2026-11-25 12:03:12",
+   "id": "params",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Bảng chỉ số và hệ số đã kiểm. Thu nhỏ khi bị hạ 0.3 giây ở bảng Thông số và cột IDEA chưa test nào kiểm, như ở defeated-values"
+  },
+  {
+   "at": "2026-11-25 12:05:40",
+   "id": "defeated-values",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it, EnemyCombatTests.The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+  },
+  {
+   "at": "2026-11-25 12:05:46",
+   "id": "params",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyFieldTests.Wave_scale_multiplies_enemy_health, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+  },
+  {
+   "at": "2026-11-25 12:06:26",
+   "id": "defeated-values",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:26",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

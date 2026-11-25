@@ -1,7 +1,7 @@
 {
  "items": {
   "numbers-at-owner": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.Buying_a_hero_level_tells_the_hero_in_that_slot_at_once",
@@ -11,11 +11,11 @@
    "hash": "a9aba69eeb76",
    "text": "Nâng cấp không tính chỉ số; mức tăng mỗi cấp do bên giữ chỉ số quyết\nHero: `feature-hero/hero-stats/hero-level-values`. Thành (máu, sức đánh, kĩ năng): `feature-castle/castle-upgrade-effects/upgrade-effect-values`. Đã loại: nâng cấp giữ bảng mức tăng của mọi mục.",
    "title": "Nâng cấp không tính chỉ số; mức tăng mỗi cấp do bên giữ chỉ số quyết",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:23"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "report-same-frame": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.A_level_report_reaches_the_owner_before_the_buy_returns"
@@ -24,11 +24,11 @@
    "hash": "14624535c1de",
    "text": "Mua thành công một cấp thì báo \"mục X lên cấp L\" trong cùng khung hình mua\nBên nhận áp hiệu lực ngay trong khung hình đó, nên người chơi thấy mạnh lên liền.",
    "title": "Mua thành công một cấp thì báo \"mục X lên cấp L\" trong cùng khung hình mua",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:25"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "report-right-owner": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.Buying_a_hero_level_tells_the_hero_in_that_slot_at_once",
@@ -39,11 +39,11 @@
    "hash": "049e6e249674",
    "text": "Mục hero báo cho `feature-hero` kèm đúng hero được mua; mục máu, sức đánh, kĩ năng thành báo cho `feature-castle`\nMỗi lần mua chỉ báo cho một bên, một mục.",
    "title": "Mục hero báo cho `feature-hero` kèm đúng hero được mua; mục máu, sức đánh, kĩ năng thành báo cho `feature-castle`",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:27"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "report-each-level": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.Several_buys_of_one_item_report_every_level_one_by_one_in_order"
@@ -52,11 +52,11 @@
    "hash": "c09a3927880a",
    "text": "Mua nhiều cấp liên tiếp trong một khung hình thì báo từng cấp một theo thứ tự mua, mỗi lần tăng đúng 1\nKết quả như mua lần lượt ở các khung hình khác nhau (`feature-upgrade/upgrade-purchase/purchase-rules`: mỗi chạm một yêu cầu, xử lí lần lượt).",
    "title": "Mua nhiều cấp liên tiếp trong một khung hình thì báo từng cấp một theo thứ tự mua, mỗi lần tăng đúng 1",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:29"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "report-only-up": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.Refused_buys_report_nothing_and_never_repeat_an_old_level",
@@ -66,11 +66,11 @@
    "hash": "6087993375ff",
    "text": "Cấp được báo luôn lớn hơn cấp trước đúng 1; nâng cấp không bao giờ báo cấp thấp hơn hay báo lại cấp cũ\nKhông có hạ cấp, không có hoàn tiền.",
    "title": "Cấp được báo luôn lớn hơn cấp trước đúng 1; nâng cấp không bao giờ báo cấp thấp hơn hay báo lại cấp cũ",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:31"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "edge-mua-cap-cho-hero-dang-guc": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.Buying_a_hero_level_tells_the_hero_in_that_slot_at_once"
@@ -79,11 +79,11 @@
    "hash": "46801a7f0301",
    "text": "**Mua cấp cho hero đang gục**: vẫn báo ngay; `feature-hero` chỉ đổi cấp và dùng cấp mới khi hồi sinh (`hero-level-values`).",
    "title": "Mua cấp cho hero đang gục",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:36"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "edge-mua-nhieu-cap-lien-tiep-trong-mot-khung": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.Several_buys_of_one_item_report_every_level_one_by_one_in_order",
@@ -93,11 +93,11 @@
    "hash": "faff2837a525",
    "text": "**Mua nhiều cấp liên tiếp trong một khung hình**: báo từng cấp một (2, rồi 3...), không gộp thành một lời báo \"lên cấp 3\".",
    "title": "Mua nhiều cấp liên tiếp trong một khung hình",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:38"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "edge-lan-mua-bi-tu-choi": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.Refused_buys_report_nothing_and_never_repeat_an_old_level",
@@ -107,11 +107,11 @@
    "hash": "9cd310967a8a",
    "text": "**Lần mua bị từ chối** (không đủ tiền, đang tạm dừng, lượt đã kết thúc): không báo gì.",
    "title": "Lần mua bị từ chối",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:40"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "edge-luot-moi-bat-dau": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.A_new_run_does_not_report_level_1_to_anyone"
@@ -120,11 +120,11 @@
    "hash": "765c02e2e2a3",
    "text": "**Lượt mới bắt đầu**: cấp về 1 do lệnh đặt lại của `feature-run`; nâng cấp không gửi lời báo \"lên cấp 1\".",
    "title": "Lượt mới bắt đầu",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:42"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "gan test bao len cap",
    "tests": [
     "UpgradeShopTests.Several_buys_of_one_item_report_every_level_one_by_one_in_order",
@@ -136,8 +136,8 @@
    "hash": "24ed4417959f",
    "text": "## Làm gì\n- Lần mua được chấp nhận (`feature-upgrade/upgrade-purchase/purchase-rules`: trừ tiền xong, tăng cấp): báo \"mục X lên cấp L\" trong cùng khung hình.\n  - Mục hero: báo `feature-hero`, kèm chỗ của hero đó trong đội.\n  - Mục máu thành, sức đánh thành, kĩ năng thành: báo `feature-castle`, kèm tên mục.\n- Bên nhận tự tính chỉ số theo cấp mới và áp ngay; nâng cấp không giữ, không tính chỉ số.\n- Nhiều lần mua trong một khung hình: mỗi lần một lời báo, theo thứ tự mua.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số lời báo mỗi lần mua | 1 | lời báo | `report-each-level` |\n| Mức tăng cấp mỗi lời báo | 1 | cấp | Mỗi lần mua một cấp |\n| Độ trễ từ lúc mua tới lúc báo | 0 | khung hình | `report-same-frame` |\n| Bên nhận mục hero | `feature-hero` | | `report-right-owner` |\n| Bên nhận mục máu, sức đánh, kĩ năng thành | `feature-castle` | | `report-right-owner` |\n\nMức tăng mỗi cấp (tham khảo, không phải của node này):\n- Hero: máu và sát thương + 15% cấp 1 mỗi cấp, tốc độ đánh + 3% mỗi cấp tối đa 60% (`feature-hero/hero-stats/hero-level-values`).\n- Thành: máu tối đa + 150 mỗi cấp, sát thương tự bắn + 20% cấp 1, ba kĩ năng + 20% hiệu lực cấp 1, hồi chiêu không đổi (`feature-castle/castle-upgrade-effects/upgrade-effect-values`).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Báo lên cấp cho hero | có | có | có |\n| Báo lên cấp cho thành (máu, sức đánh, kĩ năng) | có | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:45"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   }
  },
  "log": [
@@ -280,6 +280,76 @@
    "state": "done",
    "by": "Upgrade",
    "note": "UpgradeShopTests.Several_buys_of_one_item_report_every_level_one_by_one_in_order, UpgradeShopTests.A_level_report_reaches_the_owner_before_the_buy_returns, UpgradeShopTests.Buying_castle_items_tells_the_castle_which_part_and_level, UpgradeShopTests.Buying_a_hero_level_tells_the_hero_in_that_slot_at_once"
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "numbers-at-owner",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "report-same-frame",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "report-right-owner",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "report-each-level",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "report-only-up",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "edge-mua-cap-cho-hero-dang-guc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "edge-mua-nhieu-cap-lien-tiep-trong-mot-khung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "edge-lan-mua-bi-tu-choi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "edge-luot-moi-bat-dau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

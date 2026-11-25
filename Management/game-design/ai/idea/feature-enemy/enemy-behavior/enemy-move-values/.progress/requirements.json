@@ -1,7 +1,7 @@
 {
  "items": {
   "spawn-walk": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.A_spawned_enemy_appears_at_the_edge_of_its_side",
@@ -12,11 +12,11 @@
    "hash": "e8f7fc8b599a",
    "text": "Quái bên trái sinh ở x=-17u đi sang phải, bên phải sinh ở x=+17u đi sang trái, theo tốc độ của loại (0.6-3.0u/s)\nBên do `feature-wave` chọn. Lính 1.5u/s đi từ x=17u tới lúc chạm tầm thành (mép cách mép thành 1.0u) mất khoảng (17-0.5-1.5-1.0)/1.5 ≈ 9.3s.",
    "title": "Quái bên trái sinh ở x=-17u đi sang phải, bên phải sinh ở x=+17u đi sang trái, theo tốc độ của loại (0.6-3.0u/s)",
-   "by": "Enemy",
-   "at": "2026-11-25 11:35:55"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "hero-first": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.A_hero_in_range_blocks_the_enemy_before_the_castle",
@@ -27,11 +27,11 @@
    "hash": "c4c361f379b9",
    "text": "Có hero đang đứng trong tầm thì quái dừng lại đánh hero gần nhất, kể cả khi thành cũng trong tầm\nGiữ hero đó tới khi hero gục, hết trong tầm, hoặc rời trận; rồi xét lại. Hero trong 0.3s hồi sinh không tính.",
    "title": "Có hero đang đứng trong tầm thì quái dừng lại đánh hero gần nhất, kể cả khi thành cũng trong tầm",
-   "by": "Enemy",
-   "at": "2026-11-25 11:35:58"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "castle-stop": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.An_enemy_stops_at_the_castle_edge_by_its_range_and_hits_the_castle",
@@ -42,15 +42,17 @@
    "hash": "bfdefee5a03c",
    "text": "Khoảng cách tới mép thành ≤ tầm của quái thì quái đứng yên đánh thành, không đi thêm\nLính (tầm 1.0u) dừng với mép cách mép thành 1.0u; Cung thủ quái (tầm 5u) dừng cách 5u, tức tâm ở x=±7.0u, vẫn trong tầm tự bắn 6u của thành.",
    "title": "Khoảng cách tới mép thành ≤ tầm của quái thì quái đứng yên đánh thành, không đi thêm",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:00"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "slow-values": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Chỉ kiểm tốc độ đi trở lại sau khi hết chậm. Nhịp đánh chưa có ca hết chậm giữa lúc chờ đòn, thời gian còn lại chia 2 và nhịp về 1.0 giây ngay, cũng chưa có ca trúng chậm giữa nhịp, phần còn lại nhân 2",
    "tests": [
     "EnemyCombatTests.Frost_halves_walking_speed_while_it_lasts",
     "EnemyCombatTests.Frost_doubles_the_wait_between_hits",
+    "EnemyCombatTests.Frost_landing_mid_wait_doubles_the_time_left_before_the_next_hit",
+    "EnemyCombatTests.When_Frost_ends_mid_wait_the_time_left_halves_and_the_rhythm_is_back_at_once",
     "EnemyCombatTests.An_enemy_spawned_after_Frost_is_not_slowed",
     "EnemyInstallerTests.The_real_config_slows_enemies_by_half_under_Frost"
    ],
@@ -58,13 +60,14 @@
    "hash": "9ce86d7e38a3",
    "text": "Bị Băng giá: tốc độ đi ×0.5 và giây mỗi đòn ×2 trong suốt thời gian chậm, hết chậm thì trở lại ngay\nLần đánh đang chờ lúc trúng chậm: thời gian còn lại nhân 2; lúc hết chậm thì thời gian còn lại chia 2.",
    "title": "Bị Băng giá: tốc độ đi ×0.5 và giây mỗi đòn ×2 trong suốt thời gian chậm, hết chậm thì trở lại ngay",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:01"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:26"
   },
   "enemy-feedback": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Test chỉ thấy presenter gọi Show, Flash, Defeat, Lunge trên stage giả. Chưa kiểm nhún khi đi và các số 0.1u mỗi 0.4 giây, nhích 0.2u trong 0.15 giây, nháy 0.1 giây, các số chỉ nằm trong serialized field của EnemyStageView. Thêm test nạp prefab stage thật kiểm các số, hoặc ghi play",
    "tests": [
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers",
     "EnemyCombatTests.The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones",
     "EnemyCombatTests.The_stage_lunges_the_enemy_toward_its_foe_when_it_hits"
    ],
@@ -72,24 +75,26 @@
    "hash": "1f15c94667f4",
    "text": "Quái đi thì nhún 0.1u mỗi 0.4s, ra đòn thì nhích 0.2u về phía mục tiêu trong 0.15s, bị đánh thì nháy 0.1s\nCùng bộ chuyển động với hero (`feature-hero/hero-list/hero-roster-values`) để mọi unit đọc giống nhau.",
    "title": "Quái đi thì nhún 0.1u mỗi 0.4s, ra đòn thì nhích 0.2u về phía mục tiêu trong 0.15s, bị đánh thì nháy 0.1s",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:03"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:26"
   },
   "edge-hero-di-xuyen-qua-quai-va-ra-phia": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Hero ở x 17.6 vẫn chồng hộp với quái nên khoảng cách bằng 0, chưa phải ra phía sau. Thêm ca hero nằm hẳn sau quái phía mép màn, khoảng cách dương trong tầm vẫn bị đánh, và ca hero sau quái ngoài tầm thì quái đi tiếp về thành",
    "tests": [
+    "EnemyCombatTests.A_hero_standing_behind_the_enemy_toward_the_edge_but_in_range_is_still_hit",
+    "EnemyCombatTests.A_hero_behind_the_enemy_out_of_range_does_not_stop_it",
     "EnemyCombatTests.An_enemy_keeps_hitting_a_hero_that_walked_past_it_toward_the_edge"
    ],
    "play": "",
    "hash": "dffbca5706b2",
    "text": "Hero đi xuyên qua quái và ra phía sau (phía mép màn): khoảng cách vẫn đo được; còn trong tầm thì quái vẫn đánh, quái không quay đầu đi theo.",
    "title": "Hero đi xuyên qua quái và ra phía sau (phía mép màn)",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:04"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:26"
   },
   "edge-hero-dang-bi-danh-guc": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.When_the_hero_being_hit_falls_the_enemy_turns_to_another_hero_in_range"
@@ -98,11 +103,11 @@
    "hash": "cc4b06389ebb",
    "text": "Hero đang bị đánh gục: quái xét lại ngay khung hình đó; có hero khác trong tầm thì đánh hero đó, không thì đi tiếp hoặc đánh thành.",
    "title": "Hero đang bị đánh gục",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:05"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-quai-dung-danh-thanh-mot-hero-hoi-sinh": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.An_enemy_hitting_the_castle_turns_to_a_hero_that_appears_in_range"
@@ -111,11 +116,11 @@
    "hash": "8d9b5b7ae8ab",
    "text": "Quái đứng đánh thành, một hero hồi sinh ngay sát nó: sau 0.3s hero hiện đủ thì quái chuyển sang đánh hero.",
    "title": "Quái đứng đánh thành, một hero hồi sinh ngay sát nó",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:08"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-quai-dang-dung-danh-hero-ma-hero-vao": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.The_hit_wait_is_not_reset_when_the_hero_being_hit_falls"
@@ -124,11 +129,11 @@
    "hash": "9203239de834",
    "text": "Quái đang đứng đánh hero mà hero vào trạng thái gục: lần chờ đòn không đặt lại.",
    "title": "Quái đang đứng đánh hero mà hero vào trạng thái gục",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:09"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-nhieu-quai-chong-hinh-nhau": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.Enemies_may_overlap_and_do_not_push_each_other"
@@ -137,11 +142,11 @@
    "hash": "487bceee23a4",
    "text": "Nhiều quái chồng hình nhau: cho phép, không đẩy nhau ra.",
    "title": "Nhiều quái chồng hình nhau",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:10"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-bang-gia-trung-quai-dang-dung-danh": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.Frost_doubles_the_wait_between_hits"
@@ -150,50 +155,53 @@
    "hash": "6154b95f7687",
    "text": "Băng giá trúng quái đang đứng đánh: nó vẫn đứng đánh, chỉ chậm nhịp đánh.",
    "title": "Băng giá trúng quái đang đứng đánh",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:11"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-thanh-bi-pha": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Test chỉ kiểm không còn đòn sau Stop. Thiết kế nói quái đứng yên: thêm ca quái đang đi lúc thành bị phá, vị trí x không đổi sau nhiều khung hình",
    "tests": [
+    "EnemyCombatTests.When_the_castle_falls_a_walking_enemy_stands_still",
     "EnemyCombatTests.After_the_battle_stopped_enemies_stand_still_and_stop_hitting"
    ],
    "play": "",
    "hash": "9dfbc40f9ecc",
    "text": "Thành bị phá: quái đứng yên tới khi `feature-run` dừng trận.",
    "title": "Thành bị phá",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:13"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:26"
   },
   "edge-tam-dung": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Thiếu ca giữ thời gian chờ đòn qua tạm dừng: quái đang đánh hero, tạm dừng lâu hơn giây mỗi đòn thì không có đòn nào, tiếp tục thì đòn kế ra đúng phần thời gian còn lại",
    "tests": [
     "EnemyCombatTests.While_paused_enemies_stand_still",
-    "EnemyCombatTests.Pause_keeps_the_time_left_on_Frost"
+    "EnemyCombatTests.Pause_keeps_the_time_left_on_Frost",
+    "EnemyCombatTests.Pause_keeps_the_time_left_before_the_next_hit"
    ],
    "play": "",
    "hash": "05ed87ae23d8",
    "text": "Tạm dừng: quái đứng yên, giữ trạng thái, thời gian chờ đòn và thời gian chậm.",
    "title": "Tạm dừng",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:14"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:26"
   },
   "params": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Bảng tâm dừng trước thành chỉ test Lính 3.0, Sói 3.1 và các loại khác chưa có. Cột IDEA chuyển động nhún, nhích, nháy chưa test như ở enemy-feedback. Thêm ca tâm dừng cho các loại có ở IDEA và kiểm số chuyển động",
    "tests": [
+    "EnemyCombatTests.Each_type_stops_at_its_range_from_the_castle_edge_on_both_sides",
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers",
     "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type",
-    "EnemyInstallerTests.The_real_config_has_the_base_numbers_of_every_enemy_type",
-    "EnemyCombatTests.An_enemy_stops_at_the_castle_edge_by_its_range_and_hits_the_castle"
+    "EnemyCombatTests.Enemies_may_overlap_and_do_not_push_each_other"
    ],
    "play": "",
    "hash": "70bac11ca491",
    "text": "## Làm gì\nMỗi khung hình, với mỗi quái còn sống:\n1. Tìm hero đang đứng (không gục, không trong 0.3s hồi sinh) có khoảng cách ≤ tầm của quái. Có: **Đánh hero** gần nhất (đang đánh hero nào thì giữ hero đó nếu nó còn trong tầm).\n2. Không có hero: khoảng cách tới mép thành ≤ tầm thì **Đánh thành**.\n3. Không thì **Đi** về phía thành theo tốc độ đi hiện tại; không đi vào trong thành.\n- Ra đòn theo nhịp và sát thương ở `feature-hero/hero-stats/hero-level-values` (dùng chung); chỉ số của loại ở `feature-enemy/enemy-stats/enemy-stat-values`.\n- Nhận trạng thái chậm từ `feature-castle/castle-skills/skill-values`.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Điểm sinh | x=-17 (bên trái), x=+17 (bên phải) | u | Ngay ngoài màn (màn tới ±16u) |\n| Hướng đi | luôn về phía x=0 | | Một làn, không quay đầu |\n| Tốc độ đi | theo loại, 0.6-3.0 | u/s | `feature-enemy/enemy-stats/enemy-stat-values` |\n| Điểm dừng trước thành | mép quái cách mép thành đúng bằng tầm | u | Không đi sát hơn cần thiết |\n| Chậm do Băng giá | tốc độ đi ×0.5, giây mỗi đòn ×2 | | Bộ số chung (chậm 50%) |\n| Quái chắn nhau | không | | Luật vòng 3; đi xuyên qua nhau |\n\nĐiểm dừng trước thành theo loại (tâm quái, bên phải; bên trái là số âm):\n| Loại | Tầm (u) | Rộng (u) | Tâm dừng x (u) |\n|---|---|---|---|\n| Lính | 1.0 | 1 | 3.0 |\n| Sói | 1.0 | 1.2 | 3.1 |\n| Khổng lồ | 1.2 | 2 | 3.7 |\n| Cung thủ quái | 5 | 1 | 7.0 |\n| Trùm | 1.5 | 3 | 4.5 |\n\nMọi điểm dừng nằm trong tầm tự bắn và vùng Sấm sét (mép trong ≤ 7.5u).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Luật đi, dừng, đánh | như bảng | như bảng | như bảng |\n| Chậm do Băng giá | không có (IDEA chưa có Băng giá) | ×0.5 đi, ×2 giây mỗi đòn | theo số đã chỉnh |\n| Chuyển động | nhún khi đi, nhích khi đánh, nháy khi bị đánh | như IDEA | anim đi, đánh riêng từng loại |\n| Dấu chậm | không có | hiện suốt thời gian chậm | hiệu ứng riêng |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:15"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:26"
   }
  },
  "log": [
@@ -294,6 +302,188 @@
    "state": "done",
    "by": "Enemy",
    "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyInstallerTests.The_real_config_has_the_base_numbers_of_every_enemy_type, EnemyCombatTests.An_enemy_stops_at_the_castle_edge_by_its_range_and_hits_the_castle"
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "spawn-walk",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "hero-first",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "castle-stop",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-hero-dang-bi-danh-guc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-quai-dung-danh-thanh-mot-hero-hoi-sinh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-quai-dang-dung-danh-hero-ma-hero-vao",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-nhieu-quai-chong-hinh-nhau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-bang-gia-trung-quai-dang-dung-danh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:01",
+   "id": "slow-values",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Chỉ kiểm tốc độ đi trở lại sau khi hết chậm. Nhịp đánh chưa có ca hết chậm giữa lúc chờ đòn, thời gian còn lại chia 2 và nhịp về 1.0 giây ngay, cũng chưa có ca trúng chậm giữa nhịp, phần còn lại nhân 2"
+  },
+  {
+   "at": "2026-11-25 12:03:03",
+   "id": "enemy-feedback",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test chỉ thấy presenter gọi Show, Flash, Defeat, Lunge trên stage giả. Chưa kiểm nhún khi đi và các số 0.1u mỗi 0.4 giây, nhích 0.2u trong 0.15 giây, nháy 0.1 giây, các số chỉ nằm trong serialized field của EnemyStageView. Thêm test nạp prefab stage thật kiểm các số, hoặc ghi play"
+  },
+  {
+   "at": "2026-11-25 12:03:05",
+   "id": "edge-hero-di-xuyen-qua-quai-va-ra-phia",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Hero ở x 17.6 vẫn chồng hộp với quái nên khoảng cách bằng 0, chưa phải ra phía sau. Thêm ca hero nằm hẳn sau quái phía mép màn, khoảng cách dương trong tầm vẫn bị đánh, và ca hero sau quái ngoài tầm thì quái đi tiếp về thành"
+  },
+  {
+   "at": "2026-11-25 12:03:06",
+   "id": "edge-thanh-bi-pha",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test chỉ kiểm không còn đòn sau Stop. Thiết kế nói quái đứng yên: thêm ca quái đang đi lúc thành bị phá, vị trí x không đổi sau nhiều khung hình"
+  },
+  {
+   "at": "2026-11-25 12:03:07",
+   "id": "edge-tam-dung",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Thiếu ca giữ thời gian chờ đòn qua tạm dừng: quái đang đánh hero, tạm dừng lâu hơn giây mỗi đòn thì không có đòn nào, tiếp tục thì đòn kế ra đúng phần thời gian còn lại"
+  },
+  {
+   "at": "2026-11-25 12:03:09",
+   "id": "params",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Bảng tâm dừng trước thành chỉ test Lính 3.0, Sói 3.1 và các loại khác chưa có. Cột IDEA chuyển động nhún, nhích, nháy chưa test như ở enemy-feedback. Thêm ca tâm dừng cho các loại có ở IDEA và kiểm số chuyển động"
+  },
+  {
+   "at": "2026-11-25 12:05:31",
+   "id": "slow-values",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyCombatTests.Frost_halves_walking_speed_while_it_lasts, EnemyCombatTests.Frost_doubles_the_wait_between_hits, EnemyCombatTests.Frost_landing_mid_wait_doubles_the_time_left_before_the_next_hit, EnemyCombatTests.When_Frost_ends_mid_wait_the_time_left_halves_and_the_rhythm_is_back_at_once, EnemyCombatTests.An_enemy_spawned_after_Frost_is_not_slowed, EnemyInstallerTests.The_real_config_slows_enemies_by_half_under_Frost"
+  },
+  {
+   "at": "2026-11-25 12:05:33",
+   "id": "enemy-feedback",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers, EnemyCombatTests.The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones, EnemyCombatTests.The_stage_lunges_the_enemy_toward_its_foe_when_it_hits"
+  },
+  {
+   "at": "2026-11-25 12:05:34",
+   "id": "edge-hero-di-xuyen-qua-quai-va-ra-phia",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyCombatTests.A_hero_standing_behind_the_enemy_toward_the_edge_but_in_range_is_still_hit, EnemyCombatTests.A_hero_behind_the_enemy_out_of_range_does_not_stop_it, EnemyCombatTests.An_enemy_keeps_hitting_a_hero_that_walked_past_it_toward_the_edge"
+  },
+  {
+   "at": "2026-11-25 12:05:36",
+   "id": "edge-thanh-bi-pha",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyCombatTests.When_the_castle_falls_a_walking_enemy_stands_still, EnemyCombatTests.After_the_battle_stopped_enemies_stand_still_and_stop_hitting"
+  },
+  {
+   "at": "2026-11-25 12:05:37",
+   "id": "edge-tam-dung",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyCombatTests.While_paused_enemies_stand_still, EnemyCombatTests.Pause_keeps_the_time_left_on_Frost, EnemyCombatTests.Pause_keeps_the_time_left_before_the_next_hit"
+  },
+  {
+   "at": "2026-11-25 12:05:39",
+   "id": "params",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyCombatTests.Each_type_stops_at_its_range_from_the_castle_edge_on_both_sides, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers, EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyCombatTests.Enemies_may_overlap_and_do_not_push_each_other"
+  },
+  {
+   "at": "2026-11-25 12:06:26",
+   "id": "slow-values",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:26",
+   "id": "enemy-feedback",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:26",
+   "id": "edge-hero-di-xuyen-qua-quai-va-ra-phia",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:26",
+   "id": "edge-thanh-bi-pha",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:26",
+   "id": "edge-tam-dung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:26",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

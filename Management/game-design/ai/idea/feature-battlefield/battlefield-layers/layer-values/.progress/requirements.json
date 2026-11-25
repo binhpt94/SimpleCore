@@ -1,147 +1,182 @@
 {
  "items": {
   "params": {
-   "state": "doing",
+   "state": "verified",
    "note": "Config BattlefieldConfig, BackdropLayout dựng 4 lớp, participant và installer mức IDEA",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.RealConfig_BreaksNoDesignRule",
+    "BattlefieldParticipantTests.BattleSetUp_ShowsTheBackdropOnce_WithAllLayers",
+    "BattlefieldInstallerTests.RealInstaller_WithRunAndSession_JoinsTheBackdropToTheSession",
+    "BattlefieldInstallerTests.RealInstaller_WithoutTheRun_FailsAtOnceNamingIt"
+   ],
    "play": "",
    "hash": "0b4ae6c8b895",
    "text": "## Làm gì\n- Khi màn trận dựng (bước chạy của scene Game, cùng lúc trận được dựng): tạo bốn lớp nền theo bảng dưới, ở các lớp vẽ sau thành, quái, hero.\n- Khi rời màn trận: huỷ cùng trận.\n- Không đọc gì từ trận; không đổi gì trong suốt trận.\n\n## Thông số\n| Thứ | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Quy đổi | 1u = 60 px trên màn 1920x1080 | | Camera đang có của scene Game (orthographic size 9, cao 18u), theo @CodeLead |\n| Mặt đất y=0 | px 840 từ mép trên | px | Như trên; chân thành, hero, quái đều ở đây |\n| Khung thấy ở 16:9 | x −16…+16u, y −4…+14u | u | Như trên; mép màn x khớp `feature-castle/castle-core/castle-body-values` |\n| Phủ ngang của trời, cảnh xa, đất | x −21…+21u | u | Màn 21:9 thấy khoảng ±21u |\n| Trời | y 0…14u | u | Phủ tới mép trên khung |\n| Cảnh xa | y 0…2.5u (dự kiến) | u | Thấp hơn thành 4u |\n| Dải đất | y −4…0u | u | Phủ tới mép dưới khung |\n| Decor | 10 món: mỗi bên cỏ ở ±4, ±9, ±14u; đá ở ±6.5, ±11.5u | u (tâm x) | Rải đều 2.5u, cách thành |\n| Cỡ decor | cỏ 0.8×0.3u, đá 0.6×0.3u | u | Phẳng, thấp hơn mọi unit (unit thấp nhất cao 0.8u) |\n| Vùng không decor | x −3…+3u | u | Thân thành ±1.5u và chỗ hero ±2u, chừa thêm |\n| Mép dưới dải HUD trên | y = 11.7u (px 140) | u | `feature-hud/hud-layout/layout-spec` (dải trên cao 140 px) |\n| Mép trên thanh dưới | y = −1.3u (px 920) | u | Thanh nâng cấp, khay kĩ năng (đo lúc Play, theo @CodeLead); dải dưới của layout-spec cao 180 px |\n\nThứ tự vẽ (sau ra trước, theo node cha): trời → cảnh xa → dải đất → decor → thành → quái và hero → hiệu ứng → HUD → popup.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Trời | 1 sprite @ClaudeImage, đứng yên | Art @Codex | Thêm mây trôi chậm |\n| Cảnh xa | 1 dải sprite @ClaudeImage, đứng yên | 2 dải có độ sâu (dải sau nhỏ, nhạt hơn), art @Codex | Như PROTOTYPE |\n| Dải đất | 1 sprite lặp ngang | Art @Codex | Như PROTOTYPE |\n| Decor | 10 món phẳng (cỏ, đá), đứng yên | Thêm decor đứng (cờ, hàng rào) trong dải cảnh xa, art @Codex | Cỏ lay nhẹ |\n| Đổi nền theo mốc đợt | Không | Không | Xét lại (trái \"một bản đồ\" ở vòng 1, cần người quyết) |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:34:20"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "view-camera": {
-   "state": "doing",
+   "state": "verified",
    "note": "ScreenMapping theo camera Game, test BackdropLayoutTests.Camera_*",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.Camera_GroundLineSitsAtPixel840_AndOneUnitIs60Pixels",
+    "BackdropLayoutTests.Camera_At16By9_ShowsXMinus16To16_AndYMinus4To14"
+   ],
    "play": "",
    "hash": "fb974be1b715",
    "text": "Nền vẽ theo camera đang có: 1u = 60 px, mặt đất y=0 ở px 840, màn 16:9 thấy x −16…+16u, y −4…+14u\nCamera là của scene Game, không đổi vì nền; nền bám theo.",
    "title": "Nền vẽ theo camera đang có: 1u = 60 px, mặt đất y=0 ở px 840, màn 16:9 thấy x −16…+16u, y −4…+14u",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:17"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "cover-width": {
-   "state": "doing",
+   "state": "verified",
    "note": "BackdropLayout phủ x -21..21, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.SkyFarAndGround_CoverXMinus21To21"
+   ],
    "play": "",
    "hash": "b00ab28b038a",
    "text": "Trời, cảnh xa và dải đất phủ x từ −21 tới +21u\nMàn rộng giữ chiều cao 18u nên thấy rộng ra hai bên; 21:9 thấy khoảng ±21u. Phủ tới đó thì không hở mép.",
    "title": "Trời, cảnh xa và dải đất phủ x từ −21 tới +21u",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:18"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "sky-values": {
-   "state": "doing",
+   "state": "verified",
    "note": "Lớp trời y 0..14, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.Sky_FillsFromTheGroundLineToY14",
+    "BattlefieldParticipantTests.PauseCastleDestroyedAndRevive_LeaveTheBackdropUntouched"
+   ],
    "play": "",
    "hash": "643b40bbf39c",
    "text": "Trời là một hình phủ từ y=0 tới y=14u, đứng yên\nPhần trời trên y=11.7u nằm sau dải HUD trên, vẫn được vẽ.",
    "title": "Trời là một hình phủ từ y=0 tới y=14u, đứng yên",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:19"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "far-values": {
-   "state": "doing",
+   "state": "verified",
    "note": "Lớp cảnh xa cao 2.5u, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.FarScenery_IsOneStripStandingOnTheGround_2Point5High_BelowTheCastle"
+   ],
    "play": "",
    "hash": "c6bb07bf4e0a",
    "text": "Cảnh xa là một dải liền đứng trên mặt đất, cao 2.5u (dự kiến), đứng yên\nThấp hơn thành (4u) để thành nổi lên giữa màn; cao hơn decor để đọc được là cảnh phía sau.",
    "title": "Cảnh xa là một dải liền đứng trên mặt đất, cao 2.5u (dự kiến), đứng yên",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:20"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "ground-values": {
-   "state": "doing",
+   "state": "verified",
    "note": "Dải đất y -4..0, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.Ground_FillsFromYMinus4UpToTheGroundLine"
+   ],
    "play": "",
    "hash": "555047e2f852",
    "text": "Dải đất phủ từ y=−4u lên tới mặt đất y=0\nPhần đất dưới y=−1.3u nằm sau thanh nâng cấp và khay kĩ năng, vẫn được vẽ; mặt đất và 1.3u đất ngay dưới nó luôn thấy được.",
    "title": "Dải đất phủ từ y=−4u lên tới mặt đất y=0",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:21"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "decor-ten": {
-   "state": "doing",
+   "state": "verified",
    "note": "10 decor theo config, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.Decor_IsTenFlatPieces_ThreeGrassAndTwoStonesEachSide_AtTheDesignedCentres"
+   ],
    "play": "",
    "hash": "18dacac67946",
    "text": "Decor gồm 10 hoạ tiết phẳng: mỗi bên 3 cỏ và 2 đá, tâm ở x ±4, ±6.5, ±9, ±11.5, ±14u\nCỏ ở ±4, ±9, ±14; đá ở ±6.5, ±11.5. Cỏ rộng 0.8u, đá rộng 0.6u, cùng cao 0.3u, chân trên y=0. Hai bên đối xứng.",
    "title": "Decor gồm 10 hoạ tiết phẳng: mỗi bên 3 cỏ và 2 đá, tâm ở x ±4, ±6.5, ±9, ±11.5, ±14u",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:22"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "decor-clear-castle": {
-   "state": "doing",
+   "state": "verified",
    "note": "Kiểm vùng x -3..3 không decor, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.Decor_NoPieceReachesIntoXMinus3To3",
+    "BackdropLayoutTests.Decor_PlacedInsideTheCastleZone_IsReportedAsAProblem"
+   ],
    "play": "",
    "hash": "477343954b14",
    "text": "Không món decor nào có phần nằm trong khoảng x −3…+3u\nKhoảng này là thân thành và chỗ hero xuất phát, hồi sinh; để trống cho unit đọc rõ.",
    "title": "Không món decor nào có phần nằm trong khoảng x −3…+3u",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:23"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "hud-clear": {
-   "state": "doing",
+   "state": "verified",
    "note": "HudCoversOnlySkyAndGround, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.Hud_TopBandOnlyCoversSky_BottomBarOnlyCoversGround",
+    "BackdropLayoutTests.Hud_FarSceneryReachingUnderTheTopBand_IsNotClear"
+   ],
    "play": "",
    "hash": "a31d18798eb0",
    "text": "Dải HUD trên chỉ che trời, thanh dưới chỉ che đất: mặt đất, cảnh xa, decor và thành không bị HUD che\nKiểm bằng hai đường y=11.7u (px 140) và y=−1.3u (px 920) trên frame.",
    "title": "Dải HUD trên chỉ che trời, thanh dưới chỉ che đất: mặt đất, cảnh xa, decor và thành không bị HUD che",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:24"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "edge-man-rong-hon-21-9": {
-   "state": "doing",
+   "state": "verified",
    "note": "ScreenMapping.Covers theo tỉ lệ màn, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.WideScreen_Up21By9_IsCovered_WiderLeavesGapsAtTheSides"
+   ],
    "play": "",
    "hash": "16f548346bb0",
    "text": "**Màn rộng hơn 21:9:** hở hai mép ngoài ±21u; không hỗ trợ tỉ lệ đó. Màn 4:3 hẹp hơn: thấy ít hơn ±16u, nền vẫn phủ.",
    "title": "Màn rộng hơn 21:9",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:25"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "edge-unit-dung-tren-decor": {
-   "state": "doing",
+   "state": "verified",
    "note": "Decor sorting dưới unit, không collider, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BackdropLayoutTests.Layers_DrawSkyThenFarThenGroundThenDecor_AllBelowTheCastleAndUnits"
+   ],
    "play": "",
    "hash": "0e78eabc321e",
    "text": "**Unit đứng trên decor:** decor vẽ sau, unit che decor; không có va chạm.",
    "title": "Unit đứng trên decor",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:26"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "edge-tam-dung-thanh-bi-pha-hoi-sinh": {
-   "state": "doing",
+   "state": "verified",
    "note": "Participant bỏ qua pause, stop, hồi sinh, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BattlefieldParticipantTests.PauseCastleDestroyedAndRevive_LeaveTheBackdropUntouched"
+   ],
    "play": "",
    "hash": "56ac0d0a49e1",
    "text": "**Tạm dừng, thành bị phá, hồi sinh:** nền không đổi gì.",
    "title": "Tạm dừng, thành bị phá, hồi sinh",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:32"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   },
   "edge-roi-man-tran-roi-vao-lai": {
-   "state": "doing",
+   "state": "verified",
    "note": "BattleCleared huỷ, BattleStarted dựng lại, chờ biên dịch",
-   "tests": [],
+   "tests": [
+    "BattlefieldParticipantTests.LeavingTheBattle_RemovesTheBackdrop",
+    "BattlefieldParticipantTests.LeavingAndEnteringAgain_BuildsTheSameBackdrop",
+    "BattlefieldParticipantTests.SessionEnd_RemovesTheBackdrop_AndStopsListening"
+   ],
    "play": "",
    "hash": "b407b019060a",
    "text": "**Rời màn trận rồi vào lại:** nền dựng lại như cũ (một bản đồ).",
    "title": "Rời màn trận rồi vào lại",
-   "by": "Battlefield",
-   "at": "2026-11-25 11:41:33"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:10:47"
   }
  },
  "log": [
@@ -235,6 +270,188 @@
    "state": "doing",
    "by": "Battlefield",
    "note": "BattleCleared huỷ, BattleStarted dựng lại, chờ biên dịch"
+  },
+  {
+   "at": "2026-11-25 12:09:23",
+   "id": "view-camera",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.Camera_GroundLineSitsAtPixel840_AndOneUnitIs60Pixels, BackdropLayoutTests.Camera_At16By9_ShowsXMinus16To16_AndYMinus4To14"
+  },
+  {
+   "at": "2026-11-25 12:09:24",
+   "id": "cover-width",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.SkyFarAndGround_CoverXMinus21To21"
+  },
+  {
+   "at": "2026-11-25 12:09:25",
+   "id": "sky-values",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.Sky_FillsFromTheGroundLineToY14, BattlefieldParticipantTests.PauseCastleDestroyedAndRevive_LeaveTheBackdropUntouched"
+  },
+  {
+   "at": "2026-11-25 12:09:26",
+   "id": "far-values",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.FarScenery_IsOneStripStandingOnTheGround_2Point5High_BelowTheCastle"
+  },
+  {
+   "at": "2026-11-25 12:09:27",
+   "id": "ground-values",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.Ground_FillsFromYMinus4UpToTheGroundLine"
+  },
+  {
+   "at": "2026-11-25 12:09:28",
+   "id": "decor-ten",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.Decor_IsTenFlatPieces_ThreeGrassAndTwoStonesEachSide_AtTheDesignedCentres"
+  },
+  {
+   "at": "2026-11-25 12:09:30",
+   "id": "decor-clear-castle",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.Decor_NoPieceReachesIntoXMinus3To3, BackdropLayoutTests.Decor_PlacedInsideTheCastleZone_IsReportedAsAProblem"
+  },
+  {
+   "at": "2026-11-25 12:09:31",
+   "id": "hud-clear",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.Hud_TopBandOnlyCoversSky_BottomBarOnlyCoversGround, BackdropLayoutTests.Hud_FarSceneryReachingUnderTheTopBand_IsNotClear"
+  },
+  {
+   "at": "2026-11-25 12:09:32",
+   "id": "edge-man-rong-hon-21-9",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.WideScreen_Up21By9_IsCovered_WiderLeavesGapsAtTheSides"
+  },
+  {
+   "at": "2026-11-25 12:09:33",
+   "id": "edge-unit-dung-tren-decor",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.Layers_DrawSkyThenFarThenGroundThenDecor_AllBelowTheCastleAndUnits"
+  },
+  {
+   "at": "2026-11-25 12:09:34",
+   "id": "edge-tam-dung-thanh-bi-pha-hoi-sinh",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BattlefieldParticipantTests.PauseCastleDestroyedAndRevive_LeaveTheBackdropUntouched"
+  },
+  {
+   "at": "2026-11-25 12:09:36",
+   "id": "edge-roi-man-tran-roi-vao-lai",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BattlefieldParticipantTests.LeavingTheBattle_RemovesTheBackdrop, BattlefieldParticipantTests.LeavingAndEnteringAgain_BuildsTheSameBackdrop, BattlefieldParticipantTests.SessionEnd_RemovesTheBackdrop_AndStopsListening"
+  },
+  {
+   "at": "2026-11-25 12:09:38",
+   "id": "params",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.RealConfig_BreaksNoDesignRule, BattlefieldParticipantTests.BattleSetUp_ShowsTheBackdropOnce_WithAllLayers, BattlefieldInstallerTests.RealInstaller_WithRunAndSession_JoinsTheBackdropToTheSession, BattlefieldInstallerTests.RealInstaller_WithoutTheRun_FailsAtOnceNamingIt"
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "view-camera",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "cover-width",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "sky-values",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "far-values",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "ground-values",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "decor-ten",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "decor-clear-castle",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "hud-clear",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "edge-man-rong-hon-21-9",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "edge-unit-dung-tren-decor",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "edge-tam-dung-thanh-bi-pha-hoi-sinh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "edge-roi-man-tran-roi-vao-lai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:10:47",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

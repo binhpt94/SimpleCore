@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40eaed254d986b0e4b0ba9de0e11d62e, type: 3}
+  m_Name: BattlefieldInstaller
+  m_EditorClassIdentifier: Game.Battlefield.Internal::Game.Battlefield.BattlefieldInstaller
+  config: {fileID: 11400000, guid: e287a3ad5c4c95181a160911f24ab137, type: 2}
+  viewPrefab: {fileID: 1000000000000000001, guid: d38a85373f600fff4a0155b2289a1d12, type: 3}

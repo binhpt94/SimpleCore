@@ -1,7 +1,7 @@
 {
  "items": {
   "three-things": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Each_button_shows_level_and_next_price",
@@ -12,11 +12,11 @@
    "hash": "df24c00d4a09",
    "text": "Mỗi nút hiện đúng 3 thứ: hình của mục, chữ \"Cấp N\" và giá cấp sau kèm biểu tượng tiền\nVí dụ nút hero 1 vừa vào trận: chân dung hero đó, \"Cấp 1\", giá 30.",
    "title": "Mỗi nút hiện đúng 3 thứ: hình của mục, chữ \"Cấp N\" và giá cấp sau kèm biểu tượng tiền",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:31"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "icons": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Each_button_picture_is_its_own_hero_or_castle_icon",
@@ -26,11 +26,11 @@
    "hash": "131cf5e40c01",
    "text": "Có 4 loại hình: chân dung từng hero, biểu tượng máu thành, biểu tượng đòn tự bắn, biểu tượng kĩ năng thành\nChân dung hero là hình của đúng hero ở chỗ đó. Biểu tượng kĩ năng đại diện cho cả ba kĩ năng, không phải một kĩ năng riêng.",
    "title": "Có 4 loại hình: chân dung từng hero, biểu tượng máu thành, biểu tượng đòn tự bắn, biểu tượng kĩ năng thành",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:32"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "bright-dim": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Button_is_lit_when_affordable_and_dim_when_not",
@@ -41,11 +41,11 @@
    "hash": "e483cbceb241",
    "text": "Nút sáng khi mua được và mờ khi không mua được, đổi trong cùng 1 khung hình với lúc số dư, cấp hoặc tạm dừng đổi\n\"Mua được\" lấy từ `feature-upgrade`; nút không tự so tiền với giá.",
    "title": "Nút sáng khi mua được và mờ khi không mua được, đổi trong cùng 1 khung hình với lúc số dư, cấp hoặc tạm dừng đổi",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:33"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "tap-once": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level",
@@ -55,11 +55,11 @@
    "hash": "f2445b86f3bb",
    "text": "1 chạm vào nút sáng gửi đúng 1 yêu cầu mua; chạm nút mờ gửi 0 yêu cầu\nKhông xác nhận. Chạm liên tiếp nhanh thì mỗi chạm một yêu cầu; `feature-upgrade` từ chối yêu cầu không đủ tiền.",
    "title": "1 chạm vào nút sáng gửi đúng 1 yêu cầu mua; chạm nút mờ gửi 0 yêu cầu",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:34"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "buy-feedback": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level",
@@ -70,11 +70,11 @@
    "hash": "faedc4b55f40",
    "text": "Mua thành công thì nút nảy lên một lần trong 0,2 giây và cấp, giá trên nút đổi ngay\nNgười chơi biết chạm đã có tác dụng. Mua bị từ chối thì không nảy.",
    "title": "Mua thành công thì nút nảy lên một lần trong 0,2 giây và cấp, giá trên nút đổi ngay",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:38"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "short-number": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PriceTextTests.Price_reads_in_full_below_ten_thousand_and_cut_down_above",
@@ -84,11 +84,11 @@
    "hash": "7fedd29f2e1d",
    "text": "Giá từ 10.000 tiền trở lên hiện rút gọn: 10.000-999.999 thành \"12,3K\", từ 1.000.000 thành \"1,2M\"\nRút gọn cắt bớt, giữ một chữ số thập phân (12.399 thành \"12,3K\"). Dưới 10.000 hiện đủ số. Sáng hay mờ vẫn theo giá thật.",
    "title": "Giá từ 10.000 tiền trở lên hiện rút gọn: 10.000-999.999 thành \"12,3K\", từ 1.000.000 thành \"1,2M\"",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:40"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "edge-bam-hai-lan-rat-nhanh-khi-chi-du": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Two_fast_taps_with_coins_for_one_buy_only_once_and_bounce_once"
@@ -97,11 +97,11 @@
    "hash": "42c12e976dfa",
    "text": "**Bấm hai lần rất nhanh khi chỉ đủ tiền một lần**: nút gửi hai yêu cầu (nếu chạm lần hai tới trước khi nút kịp mờ) hoặc một yêu cầu; `purchase-rules` xử lí lần lượt nên chỉ một lần mua thành công, nút nảy một lần, rồi mờ.",
    "title": "Bấm hai lần rất nhanh khi chỉ đủ tiền một lần",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:41"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "edge-so-du-vua-dung-bang-gia": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Coins_equal_to_the_price_light_the_button_and_buying_dims_it"
@@ -110,11 +110,11 @@
    "hash": "70c26772d32a",
    "text": "**Số dư vừa đúng bằng giá**: nút sáng; mua xong số dư về 0, nút mờ ngay (giá mới cao hơn).",
    "title": "Số dư vừa đúng bằng giá",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:42"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "edge-hero-dang-guc": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level",
@@ -124,11 +124,11 @@
    "hash": "bc0f26871577",
    "text": "**Hero đang gục**: nút hero vẫn sáng nếu đủ tiền, mua được.",
    "title": "Hero đang gục",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:43"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "edge-tam-dung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Every_button_dims_while_shop_is_closed_by_pause",
@@ -138,11 +138,11 @@
    "hash": "f6444dc13df4",
    "text": "**Tạm dừng**: mọi nút mờ; hết tạm dừng thì nút đủ tiền sáng lại ngay.",
    "title": "Tạm dừng",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:44"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "edge-thua-dung-luc-dang-cham": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Every_button_dims_while_shop_is_closed_by_pause",
@@ -153,11 +153,11 @@
    "hash": "7033efc78777",
    "text": "**Thua đúng lúc đang chạm**: từ khung hình thành về 0 máu mọi nút mờ; chạm không gửi yêu cầu hoặc yêu cầu bị từ chối.",
    "title": "Thua đúng lúc đang chạm",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:48"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "edge-gia-rat-lon": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Big_prices_read_short_on_the_button",
@@ -167,11 +167,11 @@
    "hash": "e2345277c4ea",
    "text": "**Giá rất lớn**: rút gọn (\"181,0K\"); sáng/mờ theo giá thật, nên có thể thấy giá \"12,3K\" mờ khi đang có 12.350 tiền (giá thật 12.399).",
    "title": "Giá rất lớn",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:49"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "edge-cap-rat-lon": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Big_level_reads_in_full_without_shortening"
@@ -180,11 +180,11 @@
    "hash": "8aaf6a93fea2",
    "text": "**Cấp rất lớn**: hiện đủ số, không rút gọn (cấp không lớn tới mức cần).",
    "title": "Cấp rất lớn",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:50"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "edge-tien-vao-lam-nhieu-nut-cung-sang": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Coins_arriving_light_every_affordable_button_in_one_update"
@@ -193,11 +193,11 @@
    "hash": "5d54cfab7dfe",
    "text": "**Tiền vào làm nhiều nút cùng sáng**: mọi nút đổi trong cùng khung hình.",
    "title": "Tiền vào làm nhiều nút cùng sáng",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:51"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "UpgradeBarTests.Each_button_shows_level_and_next_price",
@@ -211,8 +211,8 @@
    "hash": "bd2141f4df58",
    "text": "## Làm gì\n- Mỗi nút nhận từ `feature-upgrade/upgrade-purchase/purchase-rules`: cấp hiện tại, giá cấp sau, mua được hay không. Nhận lại mỗi khi một trong ba thứ đổi, và hiện ngay trong khung hình đó.\n- Mỗi nút hiện:\n  | Thứ | Nội dung | Ví dụ |\n  |---|---|---|\n  | Hình | Chân dung hero ở chỗ đó, hoặc biểu tượng mục thành | Chân dung hero chỗ 2 |\n  | Cấp | \"Cấp N\", N là cấp hiện tại | \"Cấp 3\" |\n  | Giá | Giá cấp sau kèm biểu tượng tiền, rút gọn khi lớn | 55, \"12,3K\" |\n- Hình của mục:\n  | Nút | Hình đại diện cho |\n  |---|---|\n  | Hero 1, 2, 3 | Chính hero ở chỗ đó trong đội |\n  | Máu | Máu thành |\n  | Sức đánh | Đòn tự bắn của thành |\n  | Kĩ năng | Cả ba kĩ năng thành gộp chung |\n- Trạng thái: sáng (mua được) hoặc mờ (không mua được: không đủ tiền, đang tạm dừng, hoặc lượt đã kết thúc).\n- Chạm nút sáng: gửi một yêu cầu mua cho mục đó tới `purchase-rules`. Chạm nút mờ: không gửi gì, không có phản hồi.\n- Mua thành công: nút nảy một lần (phóng to rồi về cỡ cũ) trong 0,2 giây; cấp và giá đổi theo thông tin mới.\n- Nút không tự tính giá, không tự so tiền với giá, không tự quyết mua.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số thứ hiện trên mỗi nút | 3 | | Hình, cấp, giá (vòng 3) |\n| Số trạng thái | 2 | | Sáng, mờ (vòng 3) |\n| Độ trễ cập nhật | 0 | khung hình | Mua giữa trận cần thấy đúng ngay |\n| Thời gian nảy khi mua thành công | 0,2 (dự kiến) | giây | Đủ thấy, không cản chạm tiếp |\n| Ngưỡng rút gọn số | 10.000 | tiền | Giữ chữ ngắn trên nút; giá dưới ngưỡng đọc dễ |\n| Rút gọn | 10.000-999.999 → \"N,NK\"; >= 1.000.000 → \"N,NM\"; cắt bớt một chữ số thập phân | | Ví dụ 12.399 → \"12,3K\"; 1.250.000 → \"1,2M\" |\n| Số yêu cầu mua mỗi chạm nút sáng | 1 | yêu cầu | Vòng 3 |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Hình hero | sprite hero gen bằng AI, thu nhỏ | chân dung riêng gen bằng AI | chân dung đủ art |\n| Biểu tượng máu / sức đánh / kĩ năng | hình đơn giản gen bằng AI | biểu tượng riêng | đủ art |\n| Phản hồi mua thành công | nảy 0,2 giây | nảy 0,2 giây và tiếng mua | thêm hiệu ứng đủ art |\n| Phản hồi chạm nút mờ | không | rung nhẹ nút 0,2 giây | rung và tiếng báo không đủ tiền |\n| Dấu \"hero đang gục\" trên nút hero | không | có | có |\n| Rút gọn số | có | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:53"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   }
  },
  "log": [
@@ -320,6 +320,111 @@
    "state": "done",
    "by": "HudUpgrade",
    "note": "UpgradeBarTests.Each_button_shows_level_and_next_price, UpgradeBarTests.Button_is_lit_when_affordable_and_dim_when_not, UpgradeBarTests.Buttons_light_up_in_the_same_call_coins_arrive, UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level, PriceTextTests.Price_reads_in_full_below_ten_thousand_and_cut_down_above, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "three-things",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "icons",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "bright-dim",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "tap-once",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "buy-feedback",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "short-number",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "edge-bam-hai-lan-rat-nhanh-khi-chi-du",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "edge-so-du-vua-dung-bang-gia",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "edge-hero-dang-guc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "edge-tam-dung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "edge-thua-dung-luc-dang-cham",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "edge-gia-rat-lon",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "edge-cap-rat-lon",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "edge-tien-vao-lam-nhieu-nut-cung-sang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

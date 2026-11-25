@@ -16,7 +16,7 @@
    "at": "2026-11-25 11:39:25"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupCheatTests.DevSamplePrefabs_KeepsTheScenesPopups",
@@ -29,8 +29,8 @@
    "hash": "ffce92c21d62",
    "text": "## Làm gì\n- Ở bản dev, chọn state `sample-popup` thì dịch vụ mở popup mẫu `_Services/Popup/DevSample` lên scene đang chạy, qua đúng đường mở, đóng của dịch vụ (`feature-popup/popup-request/request-rules`), để xem nền che, khung và việc chặn bấm (`feature-popup/popup-layer/stack-rules`).\n- Id `_Services/Popup/DevSample` do chính dịch vụ khai trong Internal của nó; asset popup mẫu (khung trống, một nút \"Đóng\") nằm trong thư mục của dịch vụ. Cả id lẫn asset chỉ có ở bản dev, nên danh sách id của scene Game ở bản phát hành vẫn đúng các id của `request-rules` (ở IDEA chỉ `PopupLose/Main`).\n- Bấm \"Đóng\": dịch vụ đóng popup mẫu như mọi lần đóng do feature gọi yêu cầu; ở đây dịch vụ tự là bên gọi.\n- Code cheat nằm trong thư mục `_Services/Popup`, sau cờ dev; không lọt vào bản phát hành.",
    "title": "Số và việc của node (Làm gì)",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 11:45:54"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:54"
   }
  },
  "log": [
@@ -68,6 +68,13 @@
    "state": "done",
    "by": "_Services/Popup",
    "note": "PopupCheatTests.DevSamplePrefabs_KeepsTheScenesPopups, PopupCheatTests.DevSamplePrefabs_SceneCatalogAlsoListingTheSampleId_FailsTheLoadNamingIt, PopupCheatTests.Installer_SamplePopupWithoutSamplePrefab_FailsNamingTheField, PopupCheatTests.SamplePopup_SessionEnds_TheCloseButtonNoLongerReachesTheService, PopupCheatTests.InstallerAsset_HasTheSamplePopupStateOff_AndItsConfigHoldsTheSamplePrefab"
+  },
+  {
+   "at": "2026-11-25 12:02:54",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

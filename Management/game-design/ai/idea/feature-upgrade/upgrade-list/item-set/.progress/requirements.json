@@ -106,7 +106,7 @@
    "at": "2026-11-25 11:39:14"
   },
   "built-at-run-start": {
-   "state": "done",
+   "state": "verified",
    "note": "test moi da soan, cho go chan worktree",
    "tests": [
     "UpgradeShopTests.The_six_items_stay_the_same_through_the_run_and_keep_their_levels",
@@ -116,11 +116,11 @@
    "hash": "b348d3a36846",
    "text": "Danh sách 6 mục được lập một lần khi vào trận, từ đội nhận qua feature-run, và không đổi tới hết lượt\nHero gục không làm mất mục; lượt mới lập lại từ đầu.",
    "title": "Danh sách 6 mục được lập một lần khi vào trận, từ đội nhận qua feature-run, và không đổi tới hết lượt",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:08"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "test moi da soan, cho go chan worktree",
    "tests": [
     "UpgradeShopTests.Run_start_lists_three_heroes_in_slot_order_then_castle_health_attack_skills",
@@ -131,8 +131,8 @@
    "hash": "3c25debb32aa",
    "text": "## Làm gì\n- Khi vào trận, nhận đội (3 hero theo thứ tự chỗ 1, 2, 3) từ `feature-run`.\n- Lập 6 mục theo thứ tự:\n  1. `hero-1`: cấp hero của hero ở chỗ 1.\n  2. `hero-2`: cấp hero của hero ở chỗ 2.\n  3. `hero-3`: cấp hero của hero ở chỗ 3.\n  4. `castle-health`: máu thành.\n  5. `castle-attack`: sức đánh thành (đòn tự bắn).\n  6. `castle-skill`: kĩ năng thành (cả ba kĩ năng).\n- Mỗi mục giữ: mã mục (ở trên), loại (hero hoặc thành), hero nó trỏ tới (với mục hero), cấp hiện tại.\n- Đưa danh sách theo đúng thứ tự cho `feature-hud-upgrade` để lập nút.\n- `feature-run` ra lệnh đặt lại đầu lượt: lập lại 6 mục, mọi mục về cấp 1.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số hero trong đội | 3 (dự kiến) | hero | Bộ số chung |\n| Số mục hero | 3 | mục | Một mục mỗi hero |\n| Số mục thành | 3 | mục | Máu, sức đánh, kĩ năng (vòng 3) |\n| Tổng số mục | 6 | mục | 3 + 3 |\n| Cấp ban đầu | 1 | cấp | Chưa mua lần nào |\n| Cấp tối đa | không có | | Giá tăng tự hãm (vòng 3) |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số mục hero | 3 | 3 | 3 |\n| Số mục thành | 3 | 3 | 3 |\n| Tên hiển thị của mục | mã mục hoặc tên hero | tên tiếng Việt | tên và mô tả ngắn đủ art |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Upgrade",
-   "at": "2026-11-25 11:36:10"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:47"
   }
  },
  "log": [
@@ -328,6 +328,20 @@
   {
    "at": "2026-11-25 11:39:14",
    "id": "edge-luot-moi-voi-doi-khac",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "built-at-run-start",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:47",
+   "id": "params",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

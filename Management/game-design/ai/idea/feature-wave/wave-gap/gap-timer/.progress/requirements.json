@@ -1,7 +1,7 @@
 {
  "items": {
   "gap-length": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "WaveDirectorTests.AfterThreeSecondsOfBreak_TheNextWaveStartsWithAnEnemyAtOnce"
@@ -10,22 +10,22 @@
    "hash": "bf58dfbdb31d",
    "text": "Lúc thở dài 3 giây, như nhau ở mọi đợt\nNgắn hơn hẳn thời gian thả của đợt ngắn nhất (đợt 1: 7 s). Đủ để thấy ranh giới đợt và bấm một nâng cấp.",
    "title": "Lúc thở dài 3 giây, như nhau ở mọi đợt",
-   "by": "Wave",
-   "at": "2026-11-25 11:36:54"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:01:19"
   },
   "gap-start-next": {
    "state": "done",
    "note": "",
    "tests": [
-    "WaveDirectorTests.AfterThreeSecondsOfBreak_TheNextWaveStartsWithAnEnemyAtOnce",
-    "WaveDirectorTests.ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave"
+    "WaveDirectorTests.BreakEnd_StartsTheUpcomingWave_WithoutChangingTheWaveNumberAgain",
+    "WaveDirectorTests.AfterThreeSecondsOfBreak_TheNextWaveStartsWithAnEnemyAtOnce"
    ],
    "play": "",
-   "hash": "abe49eb0101d",
-   "text": "Hết 3 giây thì số đợt tăng 1 và đợt mới bắt đầu, con đầu tiên ra ở 0 giây của đợt mới\nKhông cần người chơi bấm.",
-   "title": "Hết 3 giây thì số đợt tăng 1 và đợt mới bắt đầu, con đầu tiên ra ở 0 giây của đợt mới",
+   "hash": "70faeabc55e0",
+   "text": "Hết 3 giây thì đợt sắp tới bắt đầu thả quái, con đầu tiên ra ở 0 giây của đợt mới\nKhông cần người chơi bấm. Số đợt không đổi ở lúc này: nó đã thành đợt sắp tới ngay lúc dọn sạch (`gap-next-number`).",
+   "title": "Hết 3 giây thì đợt sắp tới bắt đầu thả quái, con đầu tiên ra ở 0 giây của đợt mới",
    "by": "Wave",
-   "at": "2026-11-25 11:36:56"
+   "at": "2026-11-25 12:56:59"
   },
   "gap-pause-freeze": {
    "state": "done",
@@ -52,7 +52,7 @@
    "at": "2026-11-25 11:37:00"
   },
   "edge-tam-dung-trong-luc-tho": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "WaveDirectorTests.PauseDuringTheBreak_KeepsTheRestOfTheThreeSeconds",
@@ -62,11 +62,11 @@
    "hash": "4535a9f81874",
    "text": "**Tạm dừng trong lúc thở:** đồng hồ đứng yên; tiếp tục thì đếm phần còn lại.",
    "title": "Tạm dừng trong lúc thở",
-   "by": "Wave",
-   "at": "2026-11-25 11:37:01"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:01:19"
   },
   "edge-thanh-bi-pha-trong-luc-tho": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "WaveDirectorTests.CastleFallingDuringTheBreak_KeepsTheClearedWave_AndStartsNoNewWave"
@@ -75,11 +75,11 @@
    "hash": "5250151f6500",
    "text": "**Thành bị phá trong lúc thở** (chỉ có thể do đạn quái còn bay): lượt kết thúc, đồng hồ dừng, không bắt đầu đợt mới.",
    "title": "Thành bị phá trong lúc thở",
-   "by": "Wave",
-   "at": "2026-11-25 11:37:02"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:01:19"
   },
   "edge-mua-nang-cap-dung-luc-het-3-giay": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "WaveDirectorTests.NextWave_StartsOnTime_WithoutWaitingForAnythingElse"
@@ -88,11 +88,11 @@
    "hash": "098948d739a2",
    "text": "**Mua nâng cấp đúng lúc hết 3 giây:** nâng cấp có hiệu lực ngay; đợt mới vẫn bắt đầu đúng giờ, không chờ.",
    "title": "Mua nâng cấp đúng lúc hết 3 giây",
-   "by": "Wave",
-   "at": "2026-11-25 11:37:03"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:01:19"
   },
   "edge-hero-dang-hoi-sinh-khi-dot-moi-bat": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "WaveDirectorTests.NextWave_StartsOnTime_WithoutWaitingForAnythingElse"
@@ -101,11 +101,11 @@
    "hash": "c8b8d1e4ef63",
    "text": "**Hero đang hồi sinh khi đợt mới bắt đầu:** hồi sinh tiếp tục theo đồng hồ 8 s riêng của hero; đợt mới không chờ.",
    "title": "Hero đang hồi sinh khi đợt mới bắt đầu",
-   "by": "Wave",
-   "at": "2026-11-25 11:37:04"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:01:19"
   },
   "edge-luc-tho-truoc-dot-1": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "WaveDirectorTests.BattleStart_StartsWaveOne_WithTheFirstEnemyAtOnce"
@@ -114,22 +114,37 @@
    "hash": "0d4475d8dd68",
    "text": "**Lúc thở trước đợt 1:** không có; đợt 1 bắt đầu ngay khi trận bắt đầu (`feature-wave/spawning/spawn-order`).",
    "title": "Lúc thở trước đợt 1",
-   "by": "Wave",
-   "at": "2026-11-25 11:37:05"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:01:19"
   },
   "params": {
    "state": "done",
    "note": "",
    "tests": [
     "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers",
-    "WaveDirectorTests.AfterThreeSecondsOfBreak_TheNextWaveStartsWithAnEnemyAtOnce"
+    "WaveDirectorTests.ClearingWaveOne_MakesTheWaveNumberTwoAtOnce_AndKeepsItThroughTheBreak",
+    "WaveDirectorTests.BreakEnd_StartsTheUpcomingWave_WithoutChangingTheWaveNumberAgain"
    ],
    "play": "",
-   "hash": "d456bee283fd",
-   "text": "## Làm gì\n- Nhận \"đã dọn sạch đợt w\" từ `feature-wave/wave-clear/clear-rules`; bắt đầu đếm 3 giây.\n- Trong lúc đếm không thả quái. Không chặn hay đổi bất kì luật nào của `feature-upgrade`, `feature-castle`, `feature-hero`.\n- Đếm xong: số đợt thành w + 1, gọi `feature-wave/difficulty-scaling/wave-formula` và `feature-wave/spawning/spawn-order` lập và thả đợt mới.\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Độ dài lúc thở | 3 | s | Theo bộ số chuẩn; ngắn hơn hẳn đợt (đợt ngắn nhất thả trong 7 s), đủ để thấy \"đã dọn sạch\" |\n| Độ dài thay đổi theo đợt | không | | Nhịp quen thuộc, dễ đoán |\n\nƯớc tính độ dài một lượt (dự kiến): mỗi đợt mất thời gian thả cộng thời gian dọn quái tồn, khoảng 15 s ở đợt 1 tới 35–45 s ở đợt 10–20; cộng 3 s mỗi lúc thở. Một lượt gãy ở đợt 15 dài khoảng 7–8 phút.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Độ dài lúc thở | 3 s | 3 s, chỉnh sau chơi thử | chốt sau chơi thử |\n| Báo đợt mới cho `feature-hud` | không bắt buộc | có | có |\n| Tạm dừng đóng băng đồng hồ | có | có | có |",
+   "hash": "56222dc7542c",
+   "text": "## Làm gì\n- Nhận \"đã dọn sạch đợt w\" từ `feature-wave/wave-clear/clear-rules`: số đợt thành w + 1 ngay, báo `feature-hud`; bắt đầu đếm 3 giây.\n- Trong lúc đếm không thả quái. Không chặn hay đổi bất kì luật nào của `feature-upgrade`, `feature-castle`, `feature-hero`.\n- Đếm xong: gọi `feature-wave/difficulty-scaling/wave-formula` (với số đợt w + 1) và `feature-wave/spawning/spawn-order` lập và thả đợt mới; báo `feature-hud` \"đợt w + 1 bắt đầu\" để hiện thông báo đợt.\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Độ dài lúc thở | 3 | s | Theo bộ số chuẩn; ngắn hơn hẳn đợt (đợt ngắn nhất thả trong 7 s), đủ để thấy \"đã dọn sạch\" |\n| Độ dài thay đổi theo đợt | không | | Nhịp quen thuộc, dễ đoán |\n\nƯớc tính độ dài một lượt (dự kiến): mỗi đợt mất thời gian thả cộng thời gian dọn quái tồn, khoảng 15 s ở đợt 1 tới 35–45 s ở đợt 10–20; cộng 3 s mỗi lúc thở. Một lượt gãy ở đợt 15 dài khoảng 7–8 phút.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Độ dài lúc thở | 3 s | 3 s, chỉnh sau chơi thử | chốt sau chơi thử |\n| Báo đợt mới cho `feature-hud` | không bắt buộc | có | có |\n| Tạm dừng đóng băng đồng hồ | có | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "Wave",
-   "at": "2026-11-25 11:37:06"
+   "at": "2026-11-25 12:57:00"
+  },
+  "gap-next-number": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveDirectorTests.ClearingWaveOne_MakesTheWaveNumberTwoAtOnce_AndKeepsItThroughTheBreak",
+    "WaveDirectorTests.ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave"
+   ],
+   "play": "",
+   "hash": "14ddc73c0a8a",
+   "text": "Dọn sạch đợt w thì số đợt thành w + 1 ngay khung hình đó; suốt 3 giây thở, số đợt là đợt sắp tới\nĐây là số `feature-hud` hiện ở ô đợt. Điểm của lượt vẫn tính theo đợt vừa dọn (`feature-wave/wave-clear/clear-rules`).",
+   "title": "Dọn sạch đợt w thì số đợt thành w + 1 ngay khung hình đó; suốt 3 giây thở, số đợt là đợt sắp tới",
+   "by": "Wave",
+   "at": "2026-11-25 12:56:58"
   }
  },
  "log": [
@@ -202,6 +217,76 @@
    "state": "done",
    "by": "Wave",
    "note": "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers, WaveDirectorTests.AfterThreeSecondsOfBreak_TheNextWaveStartsWithAnEnemyAtOnce"
+  },
+  {
+   "at": "2026-11-25 12:01:19",
+   "id": "gap-length",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:01:19",
+   "id": "edge-tam-dung-trong-luc-tho",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:01:19",
+   "id": "edge-thanh-bi-pha-trong-luc-tho",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:01:19",
+   "id": "edge-mua-nang-cap-dung-luc-het-3-giay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:01:19",
+   "id": "edge-hero-dang-hoi-sinh-khi-dot-moi-bat",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:01:19",
+   "id": "edge-luc-tho-truoc-dot-1",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:01:19",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:56:58",
+   "id": "gap-next-number",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.ClearingWaveOne_MakesTheWaveNumberTwoAtOnce_AndKeepsItThroughTheBreak, WaveDirectorTests.ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-25 12:56:59",
+   "id": "gap-start-next",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.BreakEnd_StartsTheUpcomingWave_WithoutChangingTheWaveNumberAgain, WaveDirectorTests.AfterThreeSecondsOfBreak_TheNextWaveStartsWithAnEnemyAtOnce"
+  },
+  {
+   "at": "2026-11-25 12:57:00",
+   "id": "params",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers, WaveDirectorTests.ClearingWaveOne_MakesTheWaveNumberTwoAtOnce_AndKeepsItThroughTheBreak, WaveDirectorTests.BreakEnd_StartsTheUpcomingWave_WithoutChangingTheWaveNumberAgain"
   }
  ]
 }

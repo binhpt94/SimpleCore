@@ -29,7 +29,7 @@
    "at": "2026-11-25 11:39:17"
   },
   "edge-yeu-cau-huy-den-khi-scene-dang-tai": {
-   "state": "done",
+   "state": "verified",
    "note": "Thiếu thứ tự ngược: cả hai test chỉ có một participant đã tới nên không thấy được huỷ ngược. Thêm ca a và b đã tải, c đang tải thì EndAsync: c không bị bỏ qua, b sau c, a cuối, log đúng dispose c, dispose b, dispose a, và không có load nào sau c",
    "tests": [
     "SessionSceneLogicTests.EndingWhileTheThirdIsLoading_DisposesTheOneLoadingFirst_ThenTheLoadedOnesInReverse_AndLoadsNoMore",
@@ -40,8 +40,8 @@
    "hash": "ee1993b51a03",
    "text": "**Yêu cầu huỷ đến khi scene đang tải**: chờ feature đang tải xong (hoặc quá 10 giây), rồi huỷ các feature đã tải theo thứ tự ngược.",
    "title": "Yêu cầu huỷ đến khi scene đang tải",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 11:36:53"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:58"
   },
   "edge-nguoi-choi-roi-game-luc-dang-tai": {
    "state": "done",
@@ -55,7 +55,7 @@
    "at": "2026-11-25 10:54:12"
   },
   "load-timeout": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SessionSceneLogicTests.EachParticipantGetsTheConfiguredTimeLimit",
@@ -66,11 +66,11 @@
    "hash": "af81b03fe983",
    "text": "Mỗi feature tải tối đa 10 giây (dự kiến); quá thì coi là tải lỗi\nCác feature tải lần lượt theo thứ tự danh sách.",
    "title": "Mỗi feature tải tối đa 10 giây (dự kiến); quá thì coi là tải lỗi",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 11:36:57"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:58"
   },
   "run-no-wait": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SessionSceneLogicTests.RunStep_EveryoneRunsInTheSameCallThatFinishedTheLastLoad_WithoutAnyNewLoadTimer",
@@ -80,11 +80,11 @@
    "hash": "2556f16c88de",
    "text": "Bước chạy không tải thêm gì và xong trong cùng khung hình\nMọi thứ cần cho view đã có từ bước tải, nên view hiện ra cùng lúc, không thiếu hình.",
    "title": "Bước chạy không tải thêm gì và xong trong cùng khung hình",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 11:37:00"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:58"
   },
   "load-or-run-fail": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SessionSceneLogicTests.WhenAParticipantFailsToLoad_LaterOnesNeverLoad_ThoseReachedCleanUpInReverse_SessionFails",
@@ -95,11 +95,11 @@
    "hash": "652033320af5",
    "text": "Một feature lỗi ở bước tải hoặc chạy thì scene dừng, các feature đã qua bước đó được huỷ theo thứ tự ngược, lỗi nêu tên feature lỗi\nKhông feature nào sau nó được tải hay chạy. Đã loại: bỏ qua feature lỗi rồi chạy tiếp (scene thiếu thứ, lỗi khó lần).",
    "title": "Một feature lỗi ở bước tải hoặc chạy thì scene dừng, các feature đã qua bước đó được huỷ theo thứ tự ngược, lỗi nêu tên feature lỗi",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 11:37:04"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:58"
   },
   "edge-feature-thu-k-chay-loi": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SessionSceneLogicTests.WhenTheKthParticipantFailsToRun_LaterOnesNeverRun_EveryoneCleansUpFromTheLast_AndTheErrorNamesIt"
@@ -108,11 +108,11 @@
    "hash": "5392f37e45b1",
    "text": "**Feature thứ k chạy lỗi**: không chạy k+1 trở đi; huỷ từ cuối danh sách về đầu (mọi feature đều đã tải); báo lỗi nêu tên feature k.",
    "title": "Feature thứ k chạy lỗi",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 11:37:05"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:58"
   },
   "dispose-never-stops": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SessionSceneLogicTests.WhenAParticipantFailsToCleanUp_TheErrorNamesIt_AndTheOnesBeforeItStillCleanUpInReverse",
@@ -122,8 +122,8 @@
    "hash": "704c2558048e",
    "text": "Một feature lỗi ở bước huỷ thì ghi lỗi nêu tên nó, vẫn huỷ tiếp các feature còn lại\nBước huỷ phải đi hết danh sách để không còn gì sống sót.",
    "title": "Một feature lỗi ở bước huỷ thì ghi lỗi nêu tên nó, vẫn huỷ tiếp các feature còn lại",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 11:37:06"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:58"
   }
  },
  "log": [
@@ -242,6 +242,48 @@
   {
    "at": "2026-11-25 11:39:17",
    "id": "edge-feature-loi-o-buoc-huy",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:58",
+   "id": "load-timeout",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:58",
+   "id": "run-no-wait",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:58",
+   "id": "load-or-run-fail",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:58",
+   "id": "dispose-never-stops",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:58",
+   "id": "edge-feature-thu-k-chay-loi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:58",
+   "id": "edge-yeu-cau-huy-den-khi-scene-dang-tai",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

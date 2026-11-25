@@ -1,7 +1,7 @@
 {
  "items": {
   "edge-tien-vao-sau-khi-luot-ket-thuc": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn lại test theo bản mới: bỏ qua, không báo, nhận lại sau khi đặt lại",
    "tests": [
     "WalletLogicTests.IncomeAfterTheRunEnded_IsIgnored_AndAnnouncesNothing",
@@ -12,8 +12,8 @@
    "hash": "d6c524e068a5",
    "text": "**Tiền vào sau khi lượt kết thúc** (ví dụ quái gục cùng lúc thành bị phá): ví bỏ qua lời gọi cộng, số dư giữ nguyên, không báo số mới; tới lệnh đặt lại của lượt mới thì ví nhận cộng trở lại. Ví biết lượt đã kết thúc qua trạng thái lượt do `feature-run` cấp.",
    "title": "Tiền vào sau khi lượt kết thúc",
-   "by": "Wallet",
-   "at": "2026-11-25 11:45:45"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "start-50": {
    "state": "verified",
@@ -543,6 +543,13 @@
    "state": "done",
    "by": "Wallet",
    "note": "WalletLogicTests.IncomeAfterTheRunEnded_IsIgnored_AndAnnouncesNothing, WalletLogicTests.EnemyFallingInTheFrameTheCastleFalls_GivesNoCoinsOnceTheRunStopped, WalletLogicTests.IncomeFromTheOldRun_DoesNotCarryIntoTheNewRun_AndNewIncomeCountsAgain"
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "edge-tien-vao-sau-khi-luot-ket-thuc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

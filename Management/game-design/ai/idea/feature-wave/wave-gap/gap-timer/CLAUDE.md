@@ -3,9 +3,9 @@
 Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Làm gì
-- Nhận "đã dọn sạch đợt w" từ `feature-wave/wave-clear/clear-rules`; bắt đầu đếm 3 giây.
+- Nhận "đã dọn sạch đợt w" từ `feature-wave/wave-clear/clear-rules`: số đợt thành w + 1 ngay, báo `feature-hud`; bắt đầu đếm 3 giây.
 - Trong lúc đếm không thả quái. Không chặn hay đổi bất kì luật nào của `feature-upgrade`, `feature-castle`, `feature-hero`.
-- Đếm xong: số đợt thành w + 1, gọi `feature-wave/difficulty-scaling/wave-formula` và `feature-wave/spawning/spawn-order` lập và thả đợt mới.
+- Đếm xong: gọi `feature-wave/difficulty-scaling/wave-formula` (với số đợt w + 1) và `feature-wave/spawning/spawn-order` lập và thả đợt mới; báo `feature-hud` "đợt w + 1 bắt đầu" để hiện thông báo đợt.
 
 ## Thông số
 | Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |
@@ -31,6 +31,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Đã tự quyết
 - **3 giây cố định.** Theo bộ số chuẩn. Đã loại: lúc thở dài dần theo đợt (làm lượt dài thêm mà không thêm quyết định).
+- **Số đợt tăng ngay lúc dọn sạch, thả quái sau 3 giây (2026-11-25, làm rõ, theo câu hỏi của @CodeLead).** Bản trước ghi "hết 3 giây thì số đợt tăng 1", đọc được thành số người chơi thấy chỉ đổi sau 3 giây, trái với `feature-hud/hud-status/status-spec` (`wave-label`: trong lúc thở hiện đợt sắp tới) và node cha ở nhánh HUD ("lúc thở hiện đợt sắp tới"). Tách thành hai ý: `gap-next-number` (số đợt đổi ngay) và `gap-start-next` (thả quái sau 3 giây). Không đổi hành vi code hiện có (Wave đặt đợt hiện tại bằng w + 1 lúc dọn sạch). Đã loại: số đợt đổi sau 3 giây (ô đợt hiện đợt đã dọn suốt lúc thở).
 - **Đợt mới không chờ hero hồi sinh xong.** Hero gục là hậu quả của đợt trước; chờ thì làm nhẹ áp lực. Đã loại: chờ cả đội đứng dậy.
 
 ## Chưa rõ

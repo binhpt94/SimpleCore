@@ -22,6 +22,10 @@ namespace Game.Run
         private bool _begun;
         private IDisposable _pendingLose;
 
+        // Waves reported cleared in the current frame; they count on the next frame unless the castle falls first.
+        private readonly List<int> _clearedThisFrame = new List<int>();
+        private IDisposable _pendingClears;
+
         /// <param name="skipMenus">
         /// IDEA stage: <see cref="Begin"/> goes straight into battle with <paramref name="defaultTeam"/>, Play again starts a new
         /// battle with it, and there is no way back to the start screen (Back to start, Give up are ignored).
@@ -60,6 +64,14 @@ namespace Game.Run
         }
 
         public RunStep Step { get; private set; } = RunStep.Home;
+
+        internal float LoseDelaySeconds => _loseDelaySeconds;
+
+        internal int TeamSize => _teamSize;
+
+        internal bool SkipMenus => _skipMenus;
+
+        internal RunTeam DefaultTeam => _defaultTeam;
 
         public RunTeam Team { get; private set; }
 
@@ -101,6 +113,7 @@ namespace Game.Run
             if (_skipMenus || !CanChange(RunStep.Paused)) return;
             Change(() =>
             {
+                CommitClearedWaves();
                 _score.Settle();
                 BattleStopped?.Invoke();
                 BattleCleared?.Invoke();
@@ -112,6 +125,8 @@ namespace Game.Run
         {
             // The castle can fall while a step change is running (e.g. during a BattleStarted handler), so no lock here.
             if (Step != RunStep.Playing && Step != RunStep.Paused) return;
+            // The castle falling wins over a wave cleared in the same frame: that wave does not count.
+            DropClearedWaves();
             _score.Settle();
             SetStep(RunStep.Ending);
             BattleStopped?.Invoke();
@@ -142,18 +157,44 @@ namespace Game.Run
         public void CountClearedWave(int wave)
         {
             if (Step != RunStep.Playing && Step != RunStep.Paused) return;
-            _score.CountClearedWave(wave);
+            _clearedThisFrame.Add(wave);
+            if (_pendingClears == null) _pendingClears = _delay.NextFrame(OnNextFrameAfterClear);
         }
 
-        /// <summary>The scene session ends: drop the pending lose popup.</summary>
+        /// <summary>The scene session ends: drop the pending lose popup and uncounted waves.</summary>
         public void Shutdown()
         {
             _pendingLose?.Dispose();
             _pendingLose = null;
+            DropClearedWaves();
+        }
+
+        private void OnNextFrameAfterClear()
+        {
+            _pendingClears = null;
+            CommitClearedWaves();
+        }
+
+        private void CommitClearedWaves()
+        {
+            _pendingClears?.Dispose();
+            _pendingClears = null;
+            var waves = _clearedThisFrame.ToArray();
+            _clearedThisFrame.Clear();
+            if (Step != RunStep.Playing && Step != RunStep.Paused) return;
+            foreach (var wave in waves) _score.CountClearedWave(wave);
+        }
+
+        private void DropClearedWaves()
+        {
+            _pendingClears?.Dispose();
+            _pendingClears = null;
+            _clearedThisFrame.Clear();
         }
 
         private void StartBattle(RunTeam team)
         {
+            DropClearedWaves();
             Team = team;
             _score.StartRun();
             SetStep(RunStep.Playing);

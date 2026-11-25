@@ -27,11 +27,11 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ### Mạnh và yếu (so trong 5 hero)
 | Hero | Mạnh | Yếu |
 |---|---|---|
-| Hiệp sĩ | máu cao nhất (300) | sát thương mỗi đòn thấp nhất (12), tầm ngắn nhất (1.2u, bằng Kiếm khách) |
+| Hiệp sĩ | máu cao nhất (300) | sát thương mỗi đòn thấp nhất (12), tầm ngắn nhất (1.2u, bằng Kiếm khách), đi chậm nhất (2.0 u/s) |
 | Đấu sĩ rìu | đòn vùng cận chiến, máu cao nhì (240) | đánh chậm nhì (1.4 s), sát thương mỗi mục tiêu thấp nhất (10) |
 | Kiếm khách | sát thương mỗi giây cao nhất (22.9), đi nhanh nhất (3.5 u/s) | máu thấp nhất trong cận chiến (180) |
 | Cung thủ | tầm xa nhất (7u) | máu thấp nhì (120), một mục tiêu |
-| Pháp sư | nổ vùng bán kính 1.5u, tầm 6u | máu thấp nhất (100), đánh chậm nhất (1.6 s), đi chậm nhất (2.2 u/s) |
+| Pháp sư | nổ vùng bán kính 1.5u, tầm 6u | máu thấp nhất (100), đánh chậm nhất (1.6 s) |
 
 ### Bảng hợp khó với loại quái (dự kiến, ở cùng cấp)
 | Hero | Hợp | Lí do | Khó | Lí do |
@@ -69,6 +69,7 @@ Mọi hero: cấp L nhân máu và sát thương với (1 + 0.15×(L−1)), tố
 ## Đã tự quyết
 - **S là căn của tích máu và sát thương.** Hero nhiều máu ít sát thương và hero ít máu nhiều sát thương so được trên cùng thang. Đã loại: cộng máu với sát thương (đơn vị khác nhau).
 - **Đòn vùng ×2, tầm từ 5u máu ×2.** Ước lượng thô, đủ để thấy không hero nào lệch hẳn. Đã loại: bỏ qua đòn vùng và tầm (Pháp sư sẽ trông yếu nhất xa).
+- **Tốc độ chạy mới không đổi sức tổng S (2026-11-25).** Người yêu cầu mỗi hero một tốc độ chạy (Hiệp sĩ 2.0, Đấu sĩ rìu 2.4, Pháp sư 2.6, Cung thủ 3.0, Kiếm khách 3.5 u/s, giữ ở `feature-hero`). Công thức S không có tốc độ chạy nên bảng kết quả giữ nguyên; chỉ sửa cột mạnh, yếu: Hiệp sĩ thêm "đi chậm nhất", Pháp sư bỏ "đi chậm nhất". Tốc độ là một cặp đối chiếu của node cha ("tốc độ di chuyển so với máu"): hero máu nhiều đi chậm, hero máu ít đi nhanh.
 - **Ngưỡng ±10%.** Đủ chặt để không có hero rõ ràng tốt nhất, đủ lỏng để hero có cá tính.
 
 ## Chưa rõ

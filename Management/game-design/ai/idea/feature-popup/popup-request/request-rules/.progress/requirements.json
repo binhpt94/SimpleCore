@@ -162,7 +162,7 @@
    "at": "2026-11-25 11:39:25"
   },
   "edge-id-co-nhung-asset-thieu": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test mới cho mục catalog không có asset, chờ gỡ chặn worktree",
    "tests": [
     "PopupServiceTests.CatalogPrefabs_Prepare_IdListedWithoutItsAsset_FailsTheLoadNamingTheId",
@@ -172,8 +172,8 @@
    "hash": "0059c5a8c513",
    "text": "**Id có nhưng asset thiếu**: lỗi ngay ở bước tải, scene Game không chạy; không chờ tới lúc mở mới báo.",
    "title": "Id có nhưng asset thiếu",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 11:36:02"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:54"
   }
  },
  "log": [
@@ -355,6 +355,13 @@
   {
    "at": "2026-11-25 11:39:25",
    "id": "edge-feature-goi-xin-mo-truoc-khi-scene-vao",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:54",
+   "id": "edge-id-co-nhung-asset-thieu",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

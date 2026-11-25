@@ -1,21 +1,22 @@
 {
  "items": {
   "switch-steps": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Phiên giả EndAsync luôn xong ngay, nên test không phân biệt việc tải scene mới có chờ huỷ scene cũ xong hay không. Thêm ca EndAsync còn treo thì chưa có lệnh load Game, cho EndAsync xong rồi mới thấy load Game",
    "tests": [
     "SceneFlowTests.ASwitch_ShowsTheCover_EndsTheOldScene_LoadsTheNewOne_ThenRemovesTheCoverOnceItRuns",
+    "SceneFlowTests.TheNewScene_StartsLoadingOnlyOnceTheOldSceneHasEnded",
     "SceneFlowTests.WhenTheLoadingSceneRuns_ItAsksToSwitchToTheGameScene"
    ],
    "play": "",
    "hash": "b6c21729d494",
    "text": "Một lần chuyển đi đúng sáu bước: nhận tên, hiện lớp che, huỷ scene cũ, tải scene mới, chạy scene mới, bỏ lớp che\nBước sau chỉ bắt đầu khi bước trước xong. Lớp che bỏ đi sau khi scene mới đã tạo xong view của bước chạy, nên người chơi không thấy màn trống.",
    "title": "Một lần chuyển đi đúng sáu bước: nhận tên, hiện lớp che, huỷ scene cũ, tải scene mới, chạy scene mới, bỏ lớp che",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:08"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:09"
   },
   "cover-instant": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.TheCover_ShowsAtOnce_AndStaysUntilTheNewSceneHasRun",
@@ -25,11 +26,11 @@
    "hash": "3f1ed10d4def",
    "text": "Lớp che hiện và biến mất tức thì, che kín toàn màn hình và chặn mọi lần bấm\nLớp che không trong suốt. Nội dung lớp che giống màn Loading: tên game và thanh tiến độ tải của scene mới.",
    "title": "Lớp che hiện và biến mất tức thì, che kín toàn màn hình và chặn mọi lần bấm",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:11"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "reject-unknown": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.ARequestForAnUnknownScene_IsRefused_WithAnErrorNamingIt_AndTheCurrentSceneKeepsRunning"
@@ -38,11 +39,11 @@
    "hash": "9bc3167b7612",
    "text": "Xin chuyển tới tên scene không có trong danh sách thì từ chối, ghi lỗi nêu tên đó, scene hiện tại chạy tiếp\nDanh sách scene: Loading, Game (`feature-scene-flow/scene-list`).",
    "title": "Xin chuyển tới tên scene không có trong danh sách thì từ chối, ghi lỗi nêu tên đó, scene hiện tại chạy tiếp",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:12"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "reject-busy": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.ARequestWhileASwitchIsGoing_IsIgnored_WithAWarning_AndNotQueued"
@@ -51,11 +52,11 @@
    "hash": "6f52e8f0ba28",
    "text": "Đang chuyển mà có yêu cầu chuyển mới thì yêu cầu mới bị bỏ qua và ghi cảnh báo\nKhông xếp hàng chờ. Đã loại: hàng chờ yêu cầu (dễ chuyển hai lần liền ngoài ý muốn).",
    "title": "Đang chuyển mà có yêu cầu chuyển mới thì yêu cầu mới bị bỏ qua và ghi cảnh báo",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:14"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "reject-same": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.ARequestForTheSceneAlreadyRunning_IsIgnored_WithoutReloading"
@@ -64,11 +65,11 @@
    "hash": "a6eceb3ac220",
    "text": "Xin chuyển sang chính scene đang chạy thì bỏ qua, không tải lại\nĐặt lại lượt chơi không đi qua đây (`feature-session-scene/session-clean`).",
    "title": "Xin chuyển sang chính scene đang chạy thì bỏ qua, không tải lại",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:15"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "switch-fail": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.WhenOneFeatureOfTheNewSceneFailsToLoad_TheCoverStays_WithAnErrorNamingThatFeature",
@@ -79,11 +80,11 @@
    "hash": "a1ea35676bb5",
    "text": "Tải hoặc chạy scene mới bị lỗi thì lớp che giữ nguyên, hiện dòng lỗi nêu tên feature lỗi, không quay về scene cũ\nScene cũ đã huỷ nên không quay về được. Người chơi tắt mở lại game.",
    "title": "Tải hoặc chạy scene mới bị lỗi thì lớp che giữ nguyên, hiện dòng lỗi nêu tên feature lỗi, không quay về scene cũ",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:16"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "edge-hai-feature-xin-chuyen-trong-cung-mot-khung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.TwoRequestsInTheSameFrame_OnlyTheFirstIsTaken"
@@ -92,24 +93,25 @@
    "hash": "44c129bdbdbc",
    "text": "**Hai feature xin chuyển trong cùng một khung hình**: yêu cầu đến trước được nhận, yêu cầu sau bị bỏ qua theo `reject-busy`.",
    "title": "Hai feature xin chuyển trong cùng một khung hình",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:17"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "edge-xin-chuyen-trong-luc-dang-huy-hoac-dang": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Test chỉ xin chuyển lúc đang chờ tải scene mới. Bước huỷ trong test xong tức thì nên ca xin chuyển lúc đang huỷ chưa được kiểm. Thêm ca EndAsync còn treo, xin chuyển lúc đó thì bị bỏ qua, có cảnh báo, không chạy sau",
    "tests": [
+    "SceneFlowTests.ARequestWhileTheOldSceneIsStillEnding_IsIgnored_WithAWarning",
     "SceneFlowTests.ARequestWhileASwitchIsGoing_IsIgnored_WithAWarning_AndNotQueued"
    ],
    "play": "",
    "hash": "cd10c4315aab",
    "text": "**Xin chuyển trong lúc đang huỷ hoặc đang tải**: bỏ qua, ghi cảnh báo.",
    "title": "Xin chuyển trong lúc đang huỷ hoặc đang tải",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:19"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:09"
   },
   "edge-mot-feature-cua-scene-cu-huy-bi-loi": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.WhenEndingTheOldSceneThrows_TheErrorIsLogged_AndTheNewSceneStillLoads"
@@ -118,11 +120,11 @@
    "hash": "bac32123ba08",
    "text": "**Một feature của scene cũ huỷ bị lỗi**: ghi lỗi, vẫn huỷ tiếp các feature còn lại và đi tiếp sang bước tải (`feature-session-scene/session-steps/participant-order`).",
    "title": "Một feature của scene cũ huỷ bị lỗi",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:20"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "edge-mot-feature-cua-scene-moi-tai-loi-hoac": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.WhenOneFeatureOfTheNewSceneFailsToLoad_TheCoverStays_WithAnErrorNamingThatFeature",
@@ -132,11 +134,11 @@
    "hash": "ee65e5e3fbae",
    "text": "**Một feature của scene mới tải lỗi hoặc quá 10 giây (dự kiến)**: các feature đã tải xong của scene mới được huỷ theo thứ tự ngược; lớp che giữ nguyên và hiện dòng lỗi; không bước nào tiếp theo được làm.",
    "title": "Một feature của scene mới tải lỗi hoặc quá 10 giây (dự kiến)",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:21"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "edge-bam-len-lop-che": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.LoadingScreenPrefab_CoversTheWholeScreen_AndCatchesEveryTap"
@@ -145,11 +147,11 @@
    "hash": "977565c7d69c",
    "text": "**Bấm lên lớp che**: không có tác dụng gì, không chuyển xuống dưới.",
    "title": "Bấm lên lớp che",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:22"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.ASwitch_ShowsTheCover_EndsTheOldScene_LoadsTheNewOne_ThenRemovesTheCoverOnceItRuns",
@@ -161,8 +163,8 @@
    "hash": "257056478400",
    "text": "## Làm gì\nMột lần chuyển, theo đúng thứ tự:\n1. Nhận tên scene đích. Kiểm: tên có trong danh sách, không đang chuyển, không trùng scene đang chạy. Sai thì từ chối theo `reject-*`, không làm bước nào tiếp.\n2. Hiện lớp che (tức thì). Từ lúc này mọi lần bấm bị lớp che chặn.\n3. Nhờ `feature-session-scene` huỷ scene cũ (bước huỷ của mọi feature tham gia).\n4. Nhờ `feature-session-scene` tải scene mới; thanh tiến độ trên lớp che tăng theo số feature tham gia đã tải xong.\n5. Nhờ `feature-session-scene` cho scene mới chạy (các feature tạo view).\n6. Bỏ lớp che (tức thì). Lần chuyển kết thúc; từ đây nhận được yêu cầu chuyển mới.\n\nLớp che là thứ duy nhất của feature này sống qua lúc chuyển: nó không thuộc scene cũ hay scene mới, chỉ tồn tại từ bước 2 tới bước 6.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số bước một lần chuyển | 6 | bước | Như mục \"Làm gì\" |\n| Thời gian hiện, ẩn lớp che | 0 | giây | Tức thì; đơn giản, không có lúc che dở |\n| Độ che của lớp che | 100 | % | Không thấy scene dở dang |\n| Số lần chuyển cùng lúc | 1 | lần | Theo `one-switch-at-a-time` |\n| Số yêu cầu chờ | 0 | yêu cầu | Không hàng chờ |\n| Số lần chuyển trong một lần chạy game | 1 (Loading → Game) | lần | Theo `feature-scene-flow/scene-list` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Hiện, ẩn lớp che | Tức thì | Tức thì | Mờ dần 0,2 giây (dự kiến) |\n| Nội dung lớp che | Tên game dạng chữ + thanh tiến độ | Như IDEA | Như màn Loading bản đủ art |\n| Dòng lỗi khi chuyển hỏng | Nêu tên feature lỗi | Như IDEA | Chữ thân thiện, tên feature chỉ vào log |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:24"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "edge-nguoi-choi-roi-game-luc-dang-chuyen": {
    "state": "done",
@@ -267,6 +269,118 @@
    "state": "done",
    "by": "SceneFlow",
    "note": "Play từ Loading.unity, trong lúc màn Loading đang chạy thanh thì bỏ focus cửa sổ Game rồi quay lại: lần chuyển đi tiếp từ chỗ dở, không tải lại từ đầu"
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "cover-instant",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "reject-unknown",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "reject-busy",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "reject-same",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "switch-fail",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "edge-hai-feature-xin-chuyen-trong-cung-mot-khung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "edge-mot-feature-cua-scene-cu-huy-bi-loi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "edge-mot-feature-cua-scene-moi-tai-loi-hoac",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "edge-bam-len-lop-che",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:23",
+   "id": "switch-steps",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Phiên giả EndAsync luôn xong ngay, nên test không phân biệt việc tải scene mới có chờ huỷ scene cũ xong hay không. Thêm ca EndAsync còn treo thì chưa có lệnh load Game, cho EndAsync xong rồi mới thấy load Game"
+  },
+  {
+   "at": "2026-11-25 12:03:25",
+   "id": "edge-xin-chuyen-trong-luc-dang-huy-hoac-dang",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test chỉ xin chuyển lúc đang chờ tải scene mới. Bước huỷ trong test xong tức thì nên ca xin chuyển lúc đang huỷ chưa được kiểm. Thêm ca EndAsync còn treo, xin chuyển lúc đó thì bị bỏ qua, có cảnh báo, không chạy sau"
+  },
+  {
+   "at": "2026-11-25 12:04:28",
+   "id": "switch-steps",
+   "state": "done",
+   "by": "SceneFlow",
+   "note": "SceneFlowTests.ASwitch_ShowsTheCover_EndsTheOldScene_LoadsTheNewOne_ThenRemovesTheCoverOnceItRuns, SceneFlowTests.TheNewScene_StartsLoadingOnlyOnceTheOldSceneHasEnded, SceneFlowTests.WhenTheLoadingSceneRuns_ItAsksToSwitchToTheGameScene"
+  },
+  {
+   "at": "2026-11-25 12:04:29",
+   "id": "edge-xin-chuyen-trong-luc-dang-huy-hoac-dang",
+   "state": "done",
+   "by": "SceneFlow",
+   "note": "SceneFlowTests.ARequestWhileTheOldSceneIsStillEnding_IsIgnored_WithAWarning, SceneFlowTests.ARequestWhileASwitchIsGoing_IsIgnored_WithAWarning_AndNotQueued"
+  },
+  {
+   "at": "2026-11-25 12:06:09",
+   "id": "switch-steps",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:09",
+   "id": "edge-xin-chuyen-trong-luc-dang-huy-hoac-dang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

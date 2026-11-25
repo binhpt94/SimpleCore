@@ -36,6 +36,13 @@ namespace Game.Run.Tests
             _log.Clear();
         }
 
+        /// <summary>A wave is reported cleared and the frame ends.</summary>
+        private void ClearWave(int wave)
+        {
+            _flow.CountClearedWave(wave);
+            _delay.NextFrameArrives();
+        }
+
         [Test]
         public void GameSceneOpensOnTheStartScreen()
         {
@@ -203,9 +210,9 @@ namespace Game.Run.Tests
         public void EachClearedWaveAddsOnePoint()
         {
             EnterBattle();
-            _flow.CountClearedWave(1);
-            _flow.CountClearedWave(2);
-            _flow.CountClearedWave(3);
+            ClearWave(1);
+            ClearWave(2);
+            ClearWave(3);
             _flow.Lose();
             Assert.AreEqual(3, _score.Score);
         }
@@ -214,8 +221,8 @@ namespace Game.Run.Tests
         public void SameWaveReportedTwiceCountsOnce()
         {
             EnterBattle();
-            _flow.CountClearedWave(1);
-            _flow.CountClearedWave(1);
+            ClearWave(1);
+            ClearWave(1);
             Assert.AreEqual(1, _score.Score);
         }
 
@@ -223,17 +230,52 @@ namespace Game.Run.Tests
         public void WaveClearedAfterTheCastleFellDoesNotCount()
         {
             EnterBattle();
-            _flow.CountClearedWave(1);
+            ClearWave(1);
             _flow.Lose();
-            _flow.CountClearedWave(2);
+            ClearWave(2);
             Assert.AreEqual(1, _score.Score);
+        }
+
+        [Test]
+        public void WaveClearedInTheSameFrameJustBeforeTheCastleFallsDoesNotCount()
+        {
+            EnterBattle();
+            ClearWave(1);
+
+            _flow.CountClearedWave(2);
+            _flow.Lose();
+            _delay.NextFrameArrives();
+
+            Assert.AreEqual(1, _score.Score);
+            Assert.AreEqual(1, _score.Best);
+        }
+
+        [Test]
+        public void WaveClearedCountsOnceTheFrameEndsWithoutTheCastleFalling()
+        {
+            EnterBattle();
+            _flow.CountClearedWave(1);
+            Assert.AreEqual(0, _score.Score);
+
+            _delay.NextFrameArrives();
+            Assert.AreEqual(1, _score.Score);
+        }
+
+        [Test]
+        public void SessionEndDropsAWaveNotCountedYet()
+        {
+            EnterBattle();
+            _flow.CountClearedWave(1);
+            _flow.Shutdown();
+            _delay.NextFrameArrives();
+            Assert.AreEqual(0, _score.Score);
         }
 
         [Test]
         public void NewRunStartsTheScoreAtZero()
         {
             EnterBattle();
-            _flow.CountClearedWave(1);
+            ClearWave(1);
             _flow.Lose();
             _delay.Fire();
             _flow.Replay();
@@ -246,8 +288,8 @@ namespace Game.Run.Tests
         public void HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup()
         {
             EnterBattle();
-            _flow.CountClearedWave(1);
-            _flow.CountClearedWave(2);
+            ClearWave(1);
+            ClearWave(2);
             _flow.Lose();
 
             Assert.AreEqual(2, _score.Best);
@@ -262,8 +304,8 @@ namespace Game.Run.Tests
             _store.Value = 2;
             _score.LoadBest();
             EnterBattle();
-            _flow.CountClearedWave(1);
-            _flow.CountClearedWave(2);
+            ClearWave(1);
+            ClearWave(2);
             _flow.Lose();
 
             Assert.AreEqual(2, _score.Best);
@@ -287,7 +329,7 @@ namespace Game.Run.Tests
         public void GivingUpSettlesTheScoreLikeLosing()
         {
             EnterBattle();
-            _flow.CountClearedWave(1);
+            ClearWave(1);
             _flow.Pause();
             _flow.Abandon();
             Assert.AreEqual(1, _score.Best);
@@ -311,7 +353,7 @@ namespace Game.Run.Tests
         {
             _store.ThrowOnSave = true;
             EnterBattle();
-            _flow.CountClearedWave(1);
+            ClearWave(1);
             Assert.DoesNotThrow(() => _flow.Lose());
             Assert.AreEqual(1, _score.Best);
         }
@@ -336,7 +378,7 @@ namespace Game.Run.Tests
             Assert.AreEqual(3, _score.Best);
 
             EnterBattle();
-            _flow.CountClearedWave(1);
+            ClearWave(1);
             Assert.AreEqual(1, _score.Score);
         }
 
@@ -395,7 +437,27 @@ namespace Game.Run.Tests
                 return new Cancel(this);
             }
 
-            public IDisposable NextFrame(Action then) => throw new NotSupportedException("RunFlow never waits a frame.");
+            private Action _nextFrame;
+
+            public IDisposable NextFrame(Action then)
+            {
+                _nextFrame = then;
+                return new CancelNextFrame(this);
+            }
+
+            public void NextFrameArrives()
+            {
+                var then = _nextFrame;
+                _nextFrame = null;
+                then?.Invoke();
+            }
+
+            private sealed class CancelNextFrame : IDisposable
+            {
+                private readonly FakeDelay _owner;
+                public CancelNextFrame(FakeDelay owner) => _owner = owner;
+                public void Dispose() => _owner._nextFrame = null;
+            }
 
             public void Fire()
             {

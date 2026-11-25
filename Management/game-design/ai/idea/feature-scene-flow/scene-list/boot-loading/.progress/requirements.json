@@ -1,7 +1,7 @@
 {
  "items": {
   "loading-content": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.LoadingScreenPrefab_ShowsOnlyTheGameNameAndTheBar_WithNoButton",
@@ -12,11 +12,11 @@
    "hash": "6bdf2d8404e8",
    "text": "Màn Loading chỉ có tên game và một thanh tiến độ 0-100%, không có nút\nTiến độ tính bằng số feature của scene Game đã tải xong chia cho tổng số feature tham gia. Lớp che lúc chuyển sang Game (`feature-scene-flow/scene-request`) có cùng nội dung, nên người chơi thấy một màn Loading liền mạch. Đã loại: thanh tiến độ giả chạy theo thời gian.",
    "title": "Màn Loading chỉ có tên game và một thanh tiến độ 0-100%, không có nút",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:30"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "loading-min-time": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.TheLoadingScreenStaysForItsMinimumTime_EvenWhenTheGameSceneIsReadySooner",
@@ -26,11 +26,11 @@
    "hash": "598fa321c50b",
    "text": "Màn Loading hiện ít nhất 1 giây, kể cả khi tải xong sớm hơn\nTránh màn nháy lên rồi mất. Không kéo dài hơn mức này khi đã tải xong.",
    "title": "Màn Loading hiện ít nhất 1 giây, kể cả khi tải xong sớm hơn",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:32"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "loading-max-time": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.ASwitchStillGoingAfterFiveSeconds_LogsAPerformanceWarning_AndKeepsGoing",
@@ -40,11 +40,11 @@
    "hash": "89d42c519191",
    "text": "Từ lúc mở game tới lúc thấy màn đầu tiên của scene Game không quá 5 giây trên điện thoại tầm trung (dự kiến)\nQuá 5 giây là lỗi hiệu năng cần báo, không chặn người chơi.",
    "title": "Từ lúc mở game tới lúc thấy màn đầu tiên của scene Game không quá 5 giây trên điện thoại tầm trung (dự kiến)",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:45:59"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "loading-fail": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.WhenOneFeatureOfTheNewSceneFailsToLoad_TheCoverStays_WithAnErrorNamingThatFeature",
@@ -55,11 +55,11 @@
    "hash": "aab0559d3a7c",
    "text": "Một feature tải lỗi thì dừng ở Loading, hiện dòng lỗi nêu tên feature đó, không sang scene Game\nKhông tự thử lại; người chơi tắt mở lại game. Đã loại: bỏ qua feature lỗi rồi vào Game thiếu thứ.",
    "title": "Một feature tải lỗi thì dừng ở Loading, hiện dòng lỗi nêu tên feature đó, không sang scene Game",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:35"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "edge-tai-xong-truoc-1-giay": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.TheLoadingScreenStaysForItsMinimumTime_EvenWhenTheGameSceneIsReadySooner",
@@ -69,11 +69,11 @@
    "hash": "b1faecb80931",
    "text": "**Tải xong trước 1 giây**: chờ cho đủ 1 giây rồi mới sang màn bắt đầu.",
    "title": "Tải xong trước 1 giây",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:38"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "edge-qua-5-giay-nhung-van-dang-tai": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.ASwitchStillGoingAfterFiveSeconds_LogsAPerformanceWarning_AndKeepsGoing"
@@ -82,11 +82,11 @@
    "hash": "822f492248a3",
    "text": "**Quá 5 giây nhưng vẫn đang tải**: tiếp tục tải, ghi cảnh báo hiệu năng vào log; chỉ coi là lỗi khi một feature quá 10 giây.",
    "title": "Quá 5 giây nhưng vẫn đang tải",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:39"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "edge-mot-feature-tai-loi-hoac-qua-10-giay": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.TheBar_StopsWhereItWas_WhenTheNewSceneFails",
@@ -97,8 +97,8 @@
    "hash": "40103bc75a3c",
    "text": "**Một feature tải lỗi hoặc quá 10 giây**: dừng ở màn Loading, thanh tiến độ đứng yên, hiện dòng lỗi nêu tên feature. Các feature đã tải xong của scene Game được huỷ theo thứ tự ngược (`feature-session-scene/session-steps/participant-order`).",
    "title": "Một feature tải lỗi hoặc quá 10 giây",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:41"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "edge-nguoi-choi-roi-game-ve-man-hinh-chinh": {
    "state": "done",
@@ -112,7 +112,7 @@
    "at": "2026-11-25 11:43:42"
   },
   "edge-cham-man-hinh-luc-loading": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.LoadingScreenPrefab_ShowsOnlyTheGameNameAndTheBar_WithNoButton",
@@ -122,11 +122,11 @@
    "hash": "3c85b7326316",
    "text": "**Chạm màn hình lúc Loading**: không có tác dụng.",
    "title": "Chạm màn hình lúc Loading",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:44"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SceneFlowTests.ConfigAsset_HoldsTheDesignTimings_AndBothScenes",
@@ -140,19 +140,19 @@
    "hash": "1de130db1256",
    "text": "## Làm gì\n1. Mở game: engine mở scene Loading. Scene Loading tải và chạy như mọi scene (`feature-session-scene/session-steps`); view màn Loading là của feature này.\n2. Màn Loading hiện tên game (chữ) và thanh tiến độ ở 0%. Ngay sau khi màn Loading hiện, feature này xin chuyển sang scene Game (`feature-scene-flow/scene-request`).\n3. Lớp che hiện lên với đúng nội dung màn Loading (tên game, thanh tiến độ), rồi scene Loading bị huỷ. Người chơi không thấy khác gì: vẫn là màn Loading.\n4. Trong lúc scene Game tải, thanh tiến độ trên lớp che tăng theo số feature tham gia của scene Game đã tải xong.\n5. Tải xong và màn Loading (tính từ lúc nó hiện ở bước 2) đã hiện đủ thời gian ít nhất: scene Game chạy, màn đầu tiên được tạo (trận, theo `game-first-screen`), rồi lớp che biến mất.\n6. Sau đó không quay lại Loading trong lần chạy game này.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Thời gian hiện ít nhất của màn Loading | 1 | giây | Tránh màn nháy; ngắn đủ để không thấy chờ |\n| Thời gian tối đa từ mở game tới màn đầu tiên của scene Game | 5 (dự kiến) | giây | Lượt chơi ngắn, người chơi phổ thông dễ bỏ nếu chờ lâu |\n| Thời gian chờ tối đa một feature tải | 10 (dự kiến) | giây | Quá mức này coi là tải lỗi (`loading-fail`) |\n| Bước tiến độ | 1 feature | feature | Tiến độ thật, không giả |\n| Số nút trên màn Loading | 0 | nút | Theo `boot-path` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Nội dung màn Loading | Tên game dạng chữ + thanh tiến độ | Như IDEA | Có hình nền và logo game |\n| Thời gian hiện ít nhất | 1 giây | 1 giây | 1 giây |\n| Thời gian tối đa tới màn đầu tiên của scene Game | 5 giây (dự kiến); ở IDEA màn đầu là trận, chưa có màn bắt đầu (`feature-run/run-flow/flow-rules`) | 5 giây (màn bắt đầu) | 3 giây (dự kiến, sau khi tối ưu) |\n| Màn đầu tiên của scene Game | Trận, đội mặc định | Màn bắt đầu (`feature-home`) | Màn bắt đầu |\n| Thanh tiến độ | Nhảy theo từng feature | Chạy mượt giữa các mốc | Như PROTOTYPE |\n| Màn lỗi tải | Dòng chữ nêu tên feature lỗi | Như IDEA | Chữ thân thiện cho người chơi, tên feature chỉ ghi vào log |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:46:03"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:22"
   },
   "game-first-screen": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play từ Loading.unity: sau màn Loading thấy ngay trận với đội mặc định, view trận đã có khi màn Loading biến mất, không thấy màn trống",
    "hash": "daa0f3659e7f",
    "text": "Sang scene Game thì màn đầu tiên người chơi thấy là trận, với đội mặc định\nChưa có màn bắt đầu và màn chọn đội; trận do `feature-run` dựng (`feature-run/run-flow/flow-rules`).",
    "title": "Sang scene Game thì màn đầu tiên người chơi thấy là trận, với đội mặc định",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:46:00"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:07:41"
   }
  },
  "log": [
@@ -253,6 +253,76 @@
    "state": "done",
    "by": "SceneFlow",
    "note": "SceneFlowTests.ConfigAsset_HoldsTheDesignTimings_AndBothScenes, SceneFlowTests.TheLoadingScreenStaysForItsMinimumTime_EvenWhenTheGameSceneIsReadySooner, SceneFlowTests.ASwitchStillGoingAfterFiveSeconds_LogsAPerformanceWarning_AndKeepsGoing, SceneFlowTests.TheBar_StartsEmpty_AndFillsAsTheNewScenesFeaturesFinishLoading, SceneFlowTests.LoadingScreenPrefab_ShowsOnlyTheGameNameAndTheBar_WithNoButton, SceneFlowTests.ASwitch_ShowsTheCover_EndsTheOldScene_LoadsTheNewOne_ThenRemovesTheCoverOnceItRuns"
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "loading-content",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "loading-min-time",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "loading-max-time",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "loading-fail",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "edge-tai-xong-truoc-1-giay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "edge-qua-5-giay-nhung-van-dang-tai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "edge-mot-feature-tai-loi-hoac-qua-10-giay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "edge-cham-man-hinh-luc-loading",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:22",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:07:41",
+   "id": "game-first-screen",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

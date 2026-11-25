@@ -191,7 +191,7 @@ namespace Game.Hero.Tests
         {
             Start("knight");
             var enemy = _field.Add(10f);
-            Run(2f);                               // walked out to x = 3.5
+            Run(2f);                               // walked out to x = 2.5
             _squad.Hit(0, 300f);
             _field.Remove(enemy);
 
@@ -226,14 +226,14 @@ namespace Game.Hero.Tests
         {
             Start("knight");
             _field.Add(10f);
-            Run(1f);                               // x = 1.0, walking right
+            Run(1f);                               // x = 0.5, walking right
             Assert.That(Hero(0).Facing, Is.EqualTo(1));
 
-            _field.Add(-4f);                       // gap 4.1u, the first is 8.1u away
+            _field.Add(-4f);                       // gap 3.6u, the first is 8.6u away
             _squad.Tick(0.05f);
 
             Assert.That(Hero(0).Facing, Is.EqualTo(-1));
-            Assert.That(Hero(0).X, Is.LessThan(1.0f));
+            Assert.That(Hero(0).X, Is.LessThan(0.5f));
         }
 
         [Test]
@@ -241,9 +241,9 @@ namespace Game.Hero.Tests
         {
             Start("knight");
             var enemy = _field.Add(15f);
-            Run(2f);                               // x = 3.5
+            Run(2f);                               // x = 2.5
             _field.Remove(enemy);
-            Run(0.5f);                             // walking home, x = 2.25
+            Run(0.5f);                             // walking home, x = 1.5
             Assert.That(Hero(0).Facing, Is.EqualTo(-1));
 
             _field.Add(12f);
@@ -251,7 +251,7 @@ namespace Game.Hero.Tests
 
             Assert.That(Hero(0).Facing, Is.EqualTo(1));
             Assert.That(Hero(0).Mode, Is.EqualTo(HeroMode.Approaching));
-            Assert.That(Hero(0).X, Is.GreaterThan(2.25f));
+            Assert.That(Hero(0).X, Is.GreaterThan(1.5f));
         }
 
         [Test]
@@ -273,6 +273,57 @@ namespace Game.Hero.Tests
 
             Run(0.7f);
             Assert.That(_field.Taken(second), Is.EqualTo(12f));
+        }
+
+        [Test]
+        public void A_hero_lets_go_of_a_target_that_moved_out_of_range_and_takes_the_nearest()
+        {
+            Start("knight");                       // x = -1.5
+            var first = _field.Add(0f);            // gap 0.6u
+            _squad.Tick(0.05f);
+            Assert.That(_field.Taken(first), Is.EqualTo(12f));
+            var behind = _field.Add(-4f);          // gap 1.6u: out of range, ignored while hitting
+
+            _field.Move(first, 3f);                // gap 3.6u: out of range now
+            _squad.Tick(0.05f);
+
+            Assert.That(Hero(0).TargetHandle, Is.EqualTo(behind));
+            Assert.That(Hero(0).Facing, Is.EqualTo(-1));
+            Assert.That(Hero(0).Mode, Is.EqualTo(HeroMode.Approaching));
+        }
+
+        [Test]
+        public void The_attack_wait_keeps_running_while_the_hero_walks_to_a_new_enemy()
+        {
+            Start("knight");                       // x = -1.5
+            var first = _field.Add(0f, health: 12f);
+            _squad.Tick(0.05f);                    // first hit defeats it; 1.0s to wait
+            Assert.That(_field.Taken(first), Is.EqualTo(12f));
+            var next = _field.Add(1.6f);           // gap 2.2u: 1.0u past range, 0.5s of walking
+
+            Run(0.7f);
+            Assert.That(Hero(0).Mode, Is.EqualTo(HeroMode.Attacking), "arrived");
+            Assert.That(_field.Taken(next), Is.EqualTo(0f), "the wait did not restart or end on arrival");
+
+            Run(0.35f);
+            Assert.That(_field.Taken(next), Is.EqualTo(12f), "hit 1.0s after the previous one");
+        }
+
+        [Test]
+        public void The_mage_blast_hits_an_enemy_between_it_and_the_target_only_when_close_to_the_target()
+        {
+            Start("mage");                         // x = -1.5, range 6
+            var target = _field.Add(4f);
+            _squad.Tick(0.05f);                    // first blast; the mage keeps this target
+            Assert.That(_field.Taken(target), Is.EqualTo(18f));
+            var near = _field.Add(2.2f);           // edge 2.6: 1.4u from the target's centre
+            var far = _field.Add(1.8f);            // edge 2.2: 1.8u from the target's centre
+
+            Run(1.7f);
+
+            Assert.That(_field.Taken(target), Is.EqualTo(36f));
+            Assert.That(_field.Taken(near), Is.EqualTo(18f));
+            Assert.That(_field.Taken(far), Is.EqualTo(0f));
         }
 
         [Test]
@@ -310,7 +361,7 @@ namespace Game.Hero.Tests
             Start("knight");
             var far = _field.Add(16f);             // inner edge 15.6u; from x = 15 the gap is 0.1u
 
-            Run(8f);
+            Run(9f);                               // 16.5u at 2.0u/s
 
             Assert.That(Hero(0).X, Is.EqualTo(15f).Within(1e-4f));
             Assert.That(Hero(0).Mode, Is.EqualTo(HeroMode.Approaching));
@@ -321,6 +372,35 @@ namespace Game.Hero.Tests
 
             Assert.That(_field.Taken(near), Is.EqualTo(12f));
             Assert.That(Hero(0).X, Is.LessThanOrEqualTo(15f + 1e-4f));
+        }
+
+        // ------------------------------------------------------------------ run speed
+
+        [TestCase("knight", 2.0f)]
+        [TestCase("axeman", 2.4f)]
+        [TestCase("mage", 2.6f)]
+        [TestCase("archer", 3.0f)]
+        [TestCase("swordsman", 3.5f)]
+        public void Each_hero_walks_at_its_own_run_speed(string code, float speed)
+        {
+            Start(code);                           // x = -1.5
+            _field.Add(15f);                       // far beyond every range
+
+            Run(1f);
+
+            Assert.That(Hero(0).X, Is.EqualTo(-1.5f + speed).Within(1e-3f));
+        }
+
+        [Test]
+        public void Levelling_up_does_not_change_a_hero_run_speed()
+        {
+            Start("knight");
+            _squad.ApplyLevel(0, 10);
+            _field.Add(15f);
+
+            Run(1f);
+
+            Assert.That(Hero(0).X, Is.EqualTo(0.5f).Within(1e-3f), "still 2.0u/s at level 10");
         }
 
         // ------------------------------------------------------------------ area hits

@@ -14,7 +14,7 @@ HUD trận: máu thành, tiền, số đợt, thông báo "Đợt N", ba nút k�
 - Prefab view: `HudView.prefab` trong `FeatureAssets/Private`.
 - Sprite (IDEA, @ClaudeImage, chấm mức 3): `FeatureAssets/Private/Generated/` gồm `hud-band/band` (nền dải trên), `hud-hp/hp` (khung thanh máu, phần đỏ nằm lọt trong viền 6 px), `hud-coin/coin`, `skill-tray/tray` (khay dưới cụm kĩ năng), `skill-buttons/skill-thunder|frost|rally`. Band, hp, tray là 9-slice viền 24 px. Gán trên prefab; ô nào trống thì về ô màu tạm. Nút đang hồi tô xám bằng màu, không cần sprite riêng.
 - `HudInstaller.asset` trong `FeatureAssets/Public`. Cài sau SessionScene, Run, Castle, Wallet, Wave.
-- Cheat `mid-battle` (`Scripts/Internal/Cheat`, chỉ bản dev): nút tím dưới góc trên trái. Thứ tự: `IWaveCheat.StartWave(7)`, `ICastleCheat.SetHealth(300)`, hồi chiêu Sấm sét 0, Băng giá 12, Cổ vũ 0, rồi tiền 245 qua Wallet. Kĩ năng không có trong `ICastleSkills.Skills` thì bỏ qua và ghi cảnh báo "không có ở mức này".
+- Cheat `mid-battle` (`Scripts/Internal/Cheat`, chỉ bản dev): nút tím trong dải trên, giữa thanh máu và ô đợt (x 1290..1550, y 15..65), không che dải chiến trường. Thứ tự: `IWaveCheat.StartWave(7)`, `ICastleCheat.SetHealth(300)`, hồi chiêu Sấm sét 0, Băng giá 12, Cổ vũ 0, rồi tiền 245 qua Wallet. Kĩ năng không có trong `ICastleSkills.Skills` thì bỏ qua và ghi cảnh báo "không có ở mức này".
 - Nút tạm dừng: chưa làm (không thuộc IDEA).
 
 Test: assembly `Game.Hud.Tests` (EditMode).

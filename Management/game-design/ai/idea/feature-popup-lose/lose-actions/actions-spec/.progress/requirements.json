@@ -15,7 +15,7 @@
    "at": "2026-11-25 11:39:16"
   },
   "first-tap-only": {
-   "state": "done",
+   "state": "verified",
    "note": "test mới bắn ReplayPressed hai lần thẳng vào participant",
    "tests": [
     "LosePopupTests.SecondTouchReachingThePopupBeforeTheLockIsNotReported",
@@ -25,8 +25,8 @@
    "hash": "72a2322c7130",
    "text": "Chỉ lần chạm nút đầu tiên được báo; sau đó cả 2 nút không nhận chạm\nTránh chạm cả hai nút hay chạm một nút hai lần.",
    "title": "Chỉ lần chạm nút đầu tiên được báo; sau đó cả 2 nút không nhận chạm",
-   "by": "PopupLose",
-   "at": "2026-11-25 11:37:35"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:55"
   },
   "edge-popup-khac-chong-len-popup-thua-khong-nen": {
    "state": "verified",
@@ -42,18 +42,18 @@
    "at": "2026-11-25 11:39:16"
   },
   "no-other-close": {
-   "state": "done",
+   "state": "verified",
    "note": "chuyển sang kiểm bằng Play: nền che, ngoài popup, nút quay lại",
    "tests": [],
    "play": "Play scene Game với cheat new-record của PopupLoseInstaller. Khi popup thua mở: chạm nền che tối ở góc màn, chạm vùng ngoài khung popup, bấm Escape là nút quay lại của máy trong Editor. Mong thấy popup vẫn mở, nút Chơi lại vẫn bấm được, console không lỗi. Chỉ chạm Chơi lại mới làm popup đóng khi lượt rời bước thua.",
    "hash": "0c826fb2f22c",
    "text": "Chạm nền che, chạm ngoài popup hay nút quay lại của máy đều không đóng popup",
    "title": "Chạm nền che, chạm ngoài popup hay nút quay lại của máy đều không đóng popup",
-   "by": "PopupLose",
-   "at": "2026-11-25 11:02:16"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:23:27"
   },
   "edge-cham-hai-nut-gan-nhu-cung-luc": {
-   "state": "done",
+   "state": "verified",
    "note": "test mới bắn nhiều chạm trong cùng khung hình thẳng vào participant",
    "tests": [
     "LosePopupTests.TouchesInTheSameFrameCountOnlyTheFirst"
@@ -62,8 +62,8 @@
    "hash": "ab827e1a0a11",
    "text": "**Chạm hai nút gần như cùng lúc:** chỉ nút được xử lí trước tính.",
    "title": "Chạm hai nút gần như cùng lúc",
-   "by": "PopupLose",
-   "at": "2026-11-25 11:37:41"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:55"
   }
  },
  "log": [
@@ -210,6 +210,27 @@
   {
    "at": "2026-11-25 11:39:16",
    "id": "edge-popup-khac-chong-len-popup-thua-khong-nen",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:55",
+   "id": "first-tap-only",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:55",
+   "id": "edge-cham-hai-nut-gan-nhu-cung-luc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:23:27",
+   "id": "no-other-close",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

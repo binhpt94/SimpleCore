@@ -14,7 +14,7 @@ namespace Game.Composition.Tests
         private static readonly object[] Scenes =
         {
             new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 2 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 13 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 14 },
         };
 
         [Test]
@@ -46,6 +46,31 @@ namespace Game.Composition.Tests
 
             Assert.That(names.First(), Is.EqualTo(SessionScene));
             Assert.That(names.Last(), Is.EqualTo(last));
+        }
+
+        // feature-session-scene/session-steps/participant-order: the scene's participants join in install order,
+        // between SessionScene (first) and the scene's SceneFlow side (last).
+        [Test]
+        public void LoadingScene_HasOnlySceneFlowAsParticipant()
+        {
+            var names = Load("Assets/_Composition/Boot.Loading.prefab").Installers.Select(i => i.name).ToList();
+
+            Assert.That(names, Is.EqualTo(new[] { SessionScene, "SceneFlowLoadingInstaller" }));
+        }
+
+        [Test]
+        public void GameScene_AtIdea_JoinsTwelveFeaturesInTheDesignedOrder()
+        {
+            var names = Load("Assets/_Composition/Boot.Game.prefab").Installers.Select(i => i.name).ToList();
+
+            Assert.That(names, Is.EqualTo(new[]
+            {
+                SessionScene,
+                "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
+                "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
+                "HudUpgradeInstaller", "PopupLoseInstaller",
+                "SceneFlowGameInstaller",
+            }));
         }
 
         [TestCaseSource(nameof(Scenes))]

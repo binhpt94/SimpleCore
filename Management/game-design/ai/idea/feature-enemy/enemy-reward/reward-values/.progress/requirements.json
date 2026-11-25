@@ -1,7 +1,7 @@
 {
  "items": {
   "reward-table": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.Defeating_an_enemy_pays_the_coins_of_its_type",
@@ -11,11 +11,11 @@
    "hash": "a29161905f01",
    "text": "Tiền mỗi quái bị hạ: Lính 5, Sói 4, Khổng lồ 15, Cung thủ quái 6, Trùm 100\nĐợt 1 có 8 Lính: 40 tiền, cộng thưởng dọn đợt 25 (`feature-wave`) là 65, đủ mua 2 cấp hero đầu (30 và 41).",
    "title": "Tiền mỗi quái bị hạ: Lính 5, Sói 4, Khổng lồ 15, Cung thủ quái 6, Trùm 100",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:33"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "reward-no-wave-scale": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.Coins_for_an_enemy_do_not_grow_with_the_wave_scale"
@@ -24,11 +24,11 @@
    "hash": "add69b920a30",
    "text": "Tiền mỗi quái không nhân theo đợt\nĐợt sau nhiều tiền hơn nhờ đông quái và loại trâu hơn, còn giá nâng cấp tăng theo hàm mũ, nên càng về sau càng phải chọn. Đã loại: tiền nhân hệ số đợt như máu.",
    "title": "Tiền mỗi quái không nhân theo đợt",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:34"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "reward-once-instant": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it"
@@ -37,11 +37,11 @@
    "hash": "b04a1436a799",
    "text": "Quái bị hạ thì tiền vào `feature-wallet` ngay trong khung hình đó, đúng 1 lần\nNhiều đòn cùng hạ một quái vẫn chỉ cho 1 lần. Quái bị gỡ khi hết lượt mà không bị hạ thì không cho tiền.",
    "title": "Quái bị hạ thì tiền vào `feature-wallet` ngay trong khung hình đó, đúng 1 lần",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:35"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-hai-don-cung-khung-hinh-ha-mot-quai": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it"
@@ -50,11 +50,11 @@
    "hash": "e137a79d8fda",
    "text": "Hai đòn cùng khung hình hạ một quái (ví dụ Sấm sét và một mũi tên): tiền một lần.",
    "title": "Hai đòn cùng khung hình hạ một quái (ví dụ Sấm sét và một mũi tên)",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:36"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-don-vung-ha-nhieu-quai": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.An_area_hit_that_defeats_several_enemies_pays_each_of_them"
@@ -63,11 +63,11 @@
    "hash": "d6e1c3463a15",
    "text": "Đòn vùng hạ nhiều quái: mỗi quái cho tiền riêng, cùng khung hình.",
    "title": "Đòn vùng hạ nhiều quái",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:37"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-quai-bi-ha-cung-khung-hinh-thanh-bi": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.After_the_battle_stopped_no_enemy_is_defeated_and_no_coins_are_paid"
@@ -76,11 +76,11 @@
    "hash": "5e7ec0a1119e",
    "text": "Quái bị hạ cùng khung hình thành bị phá: thành bị phá xử lý trước, không cộng tiền (`feature-run` đã dừng lượt).",
    "title": "Quái bị hạ cùng khung hình thành bị phá",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:38"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-vi-co-gioi-han-hay-khong": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.Defeating_an_enemy_pays_the_coins_of_its_type"
@@ -89,11 +89,11 @@
    "hash": "787e5f0ca883",
    "text": "Ví có giới hạn hay không: việc của `feature-wallet`; node này luôn gửi đủ số tiền.",
    "title": "Ví có giới hạn hay không",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:39"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-quai-bi-ha-luc-nghi-giua-hai-dot": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it"
@@ -102,8 +102,8 @@
    "hash": "927e64c87b25",
    "text": "Quái bị hạ lúc nghỉ giữa hai đợt: vẫn cho tiền.",
    "title": "Quái bị hạ lúc nghỉ giữa hai đợt",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:43"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   }
  },
  "log": [
@@ -162,6 +162,62 @@
    "state": "done",
    "by": "Enemy",
    "note": "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it"
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "reward-table",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "reward-no-wave-scale",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "reward-once-instant",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-hai-don-cung-khung-hinh-ha-mot-quai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-don-vung-ha-nhieu-quai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-quai-bi-ha-cung-khung-hinh-thanh-bi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-quai-bi-ha-luc-nghi-giua-hai-dot",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-vi-co-gioi-han-hay-khong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

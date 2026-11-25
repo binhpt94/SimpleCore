@@ -1,6 +1,6 @@
 ---
 based-on: a2ebbbaf3ca9
-refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-castle/castle-skills/skill-values@ad45ef4fdcc9, feature-hero/hero-list/hero-roster-values@8a2346250094
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-castle/castle-skills/skill-values@ad45ef4fdcc9, feature-hero/hero-list/hero-roster-values@b91d8c9d12d4
 frame: none
 ---
 # Thông số nhịp giao chiến

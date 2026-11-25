@@ -1,13 +1,17 @@
 {
- "hash": "6bd8e5861fbd",
+ "hash": "4d5cfe278549",
  "items": {
   "gap-length": {
    "hash": "bf58dfbdb31d",
    "text": "Lúc thở dài 3 giây, như nhau ở mọi đợt\nNgắn hơn hẳn thời gian thả của đợt ngắn nhất (đợt 1: 7 s). Đủ để thấy ranh giới đợt và bấm một nâng cấp."
   },
   "gap-start-next": {
-   "hash": "abe49eb0101d",
-   "text": "Hết 3 giây thì số đợt tăng 1 và đợt mới bắt đầu, con đầu tiên ra ở 0 giây của đợt mới\nKhông cần người chơi bấm."
+   "hash": "70faeabc55e0",
+   "text": "Hết 3 giây thì đợt sắp tới bắt đầu thả quái, con đầu tiên ra ở 0 giây của đợt mới\nKhông cần người chơi bấm. Số đợt không đổi ở lúc này: nó đã thành đợt sắp tới ngay lúc dọn sạch (`gap-next-number`)."
+  },
+  "gap-next-number": {
+   "hash": "14ddc73c0a8a",
+   "text": "Dọn sạch đợt w thì số đợt thành w + 1 ngay khung hình đó; suốt 3 giây thở, số đợt là đợt sắp tới\nĐây là số `feature-hud` hiện ở ô đợt. Điểm của lượt vẫn tính theo đợt vừa dọn (`feature-wave/wave-clear/clear-rules`)."
   },
   "gap-pause-freeze": {
    "hash": "5a499610fe53",

@@ -143,6 +143,27 @@ namespace Game.Enemy.Tests
             Assert.That(kind.Coins, Is.EqualTo(coins), "coins");
         }
 
+        [TestCase("_bobHeight", 0.1f)]
+        [TestCase("_bobPeriod", 0.4f)]
+        [TestCase("_lungeDistance", 0.2f)]
+        [TestCase("_lungeSeconds", 0.15f)]
+        [TestCase("_flashSeconds", 0.1f)]
+        [TestCase("_defeatSeconds", 0.3f)]
+        public void The_real_stage_plays_the_unit_motions_with_the_design_numbers(string field, float expected)
+        {
+            // bob 0.1u each 0.4s while walking, lunge 0.2u in 0.15s on a hit, flash 0.1s when hit,
+            // shrink to nothing in 0.3s when defeated (live: enemy-move-values, enemy-stat-values).
+            var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
+            var prefab = new SerializedObject(installer).FindProperty("_stagePrefab").objectReferenceValue as GameObject;
+            Assert.That(prefab, Is.Not.Null, "EnemyInstaller.asset has no stage prefab assigned");
+            var stage = prefab.GetComponent<IEnemyStage>() as Component;
+            Assert.That(stage, Is.Not.Null, "stage prefab has no IEnemyStage component");
+
+            var property = new SerializedObject(stage).FindProperty(field);
+            Assert.That(property, Is.Not.Null, $"stage has no field {field}");
+            Assert.That(property.floatValue, Is.EqualTo(expected).Within(1e-4f));
+        }
+
         [Test]
         public void The_real_config_slows_enemies_by_half_under_Frost()
         {

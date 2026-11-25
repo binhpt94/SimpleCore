@@ -46,6 +46,9 @@ namespace Game.Wave.Tests
             var plan = Full().Plan(100);
 
             Assert.That(plan.Count, Is.EqualTo(206));
+            Assert.That(plan.Soldiers + plan.Wolves + plan.Giants + plan.Archers + plan.Bosses, Is.EqualTo(206),
+                "every kind added up is exactly the wave count");
+            Assert.That(plan.StatScale, Is.EqualTo(10.9f).Within(1e-4), "1 + 0.10 × 99, no cap");
             Assert.That(plan.Interval, Is.EqualTo(0.3f).Within(1e-4));
             Assert.That(plan.Soldiers, Is.GreaterThanOrEqualTo(1));
             Assert.That(plan.Bosses, Is.EqualTo(1));

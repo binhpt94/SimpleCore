@@ -1,7 +1,7 @@
 {
  "items": {
   "target-on-screen": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroSquadTests.A_hero_ignores_enemies_outside_the_screen",
@@ -11,11 +11,11 @@
    "hash": "8b120ff17a91",
    "text": "Hero chỉ nhắm quái còn sống có tâm trong x=-16u tới +16u, chọn con có khoảng cách nhỏ nhất\nQuái vừa sinh ở x=±17u chưa bị nhắm cho tới khi vào màn. Bằng khoảng cách thì chọn quái gần thành hơn, vẫn bằng thì chọn quái ra trước. Khoảng cách theo `feature-hero/hero-stats/hero-level-values`.",
    "title": "Hero chỉ nhắm quái còn sống có tâm trong x=-16u tới +16u, chọn con có khoảng cách nhỏ nhất",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:19"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "walk-limit": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroEdgeCaseTests.A_hero_at_the_walk_limit_waits_there_and_switches_to_a_nearer_enemy"
@@ -24,25 +24,26 @@
    "hash": "8d10690f7086",
    "text": "Tâm hero luôn trong x=-15u tới +15u; mục tiêu ngoài đó thì hero đứng ở mốc ±15u chờ\nĐứng ở mốc mà mục tiêu vào tầm thì đánh. Hero bắn xa tầm 6-7u luôn với tới quái trên màn; Hiệp sĩ ở x=15u với tới quái có mép trong tới 16.7u.",
    "title": "Tâm hero luôn trong x=-15u tới +15u; mục tiêu ngoài đó thì hero đứng ở mốc ±15u chờ",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:20"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "retarget-check": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Câu yêu cầu giữ mục tiêu tới khi nó bị hạ hoặc ra ngoài tầm, test chỉ có ca bị hạ. Thêm ca mục tiêu đang bị đánh dời ra ngoài tầm thì hero bỏ nó, chọn lại quái gần nhất hoặc đi theo",
    "tests": [
     "HeroEdgeCaseTests.A_walking_hero_turns_to_a_nearer_enemy_as_soon_as_it_appears",
-    "HeroSquadTests.A_hitting_hero_keeps_its_target_until_it_is_defeated"
+    "HeroSquadTests.A_hitting_hero_keeps_its_target_until_it_is_defeated",
+    "HeroEdgeCaseTests.A_hero_lets_go_of_a_target_that_moved_out_of_range_and_takes_the_nearest"
    ],
    "play": "",
    "hash": "650ebdbbddcd",
    "text": "Khi đang đi, mỗi khung hình chọn lại quái gần nhất; khi đang đánh, giữ mục tiêu tới khi nó bị hạ hoặc khoảng cách lớn hơn tầm\nHero cận chiến đang đi về bên trái mà một con Sói tới gần hơn ở bên phải thì quay sang Sói ngay.",
    "title": "Khi đang đi, mỗi khung hình chọn lại quái gần nhất; khi đang đánh, giữ mục tiêu tới khi nó bị hạ hoặc khoảng cách lớn hơn tầm",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:21"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:07:37"
   },
   "idle-return": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroSquadTests.With_no_enemy_left_a_hero_walks_back_to_its_spawn_point"
@@ -51,11 +52,11 @@
    "hash": "ebac556df760",
    "text": "Không còn quái nào trên màn thì hero đi về điểm xuất phát của chỗ mình (x=-1.5u hoặc +1.5u) và đứng chờ\nĐi với tốc độ chạy bình thường. Quái mới vào màn khi hero đang về thì hero quay ra ngay.",
    "title": "Không còn quái nào trên màn thì hero đi về điểm xuất phát của chỗ mình (x=-1.5u hoặc +1.5u) và đứng chờ",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:22"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "edge-muc-tieu-dang-duoc-danh-bi-don-khac": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroEdgeCaseTests.When_its_target_is_defeated_by_someone_else_a_hero_picks_another_without_resetting_its_wait"
@@ -64,8 +65,8 @@
    "hash": "cb3132e3af92",
    "text": "Mục tiêu đang được đánh bị đòn khác hạ: khung hình sau chọn lại ngay; nhịp đòn không đặt lại.",
    "title": "Mục tiêu đang được đánh bị đòn khác hạ",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:23"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "edge-muc-tieu-bi-bang-gia-lam-cham": {
    "state": "done",
@@ -79,7 +80,7 @@
    "at": "2026-11-25 11:41:25"
   },
   "edge-cung-luc-co-quai-hai-ben-cach-bang": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroEdgeCaseTests.Of_two_equally_near_enemies_the_one_closer_to_the_castle_is_chosen",
@@ -89,11 +90,11 @@
    "hash": "cac56a47d8c9",
    "text": "Cùng lúc có quái hai bên cách bằng nhau: chọn con gần thành hơn; nếu vẫn bằng thì con ra trước.",
    "title": "Cùng lúc có quái hai bên cách bằng nhau",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:26"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "edge-hero-dung-chong-len-quai-khoang-cach-0": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroEdgeCaseTests.A_hero_overlapping_an_enemy_hits_it_without_stepping_back"
@@ -102,11 +103,11 @@
    "hash": "fe6119958408",
    "text": "Hero đứng chồng lên quái (khoảng cách 0): đánh được, không phải lùi lại.",
    "title": "Hero đứng chồng lên quái (khoảng cách 0)",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:27"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "edge-muc-tieu-o-ngoai-15u-va-ngoai-tam": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroEdgeCaseTests.A_hero_at_the_walk_limit_waits_there_and_switches_to_a_nearer_enemy"
@@ -115,11 +116,11 @@
    "hash": "d358ae9d13e8",
    "text": "Mục tiêu ở ngoài ±15u và ngoài tầm khi hero đứng ở mốc: hero đứng yên ở mốc, vẫn chọn lại mỗi khung hình; có quái khác gần hơn thì đổi.",
    "title": "Mục tiêu ở ngoài ±15u và ngoài tầm khi hero đứng ở mốc",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:28"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "edge-quai-moi-vao-man-khi-hero-dang-ve": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroEdgeCaseTests.A_hero_walking_home_turns_out_at_once_for_a_new_enemy"
@@ -128,11 +129,11 @@
    "hash": "6da8cac52dc6",
    "text": "Quái mới vào màn khi hero đang về điểm đứng chờ: chọn quái đó ngay, không cần về tới nơi.",
    "title": "Quái mới vào màn khi hero đang về điểm đứng chờ",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:29"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "edge-giua-hai-dot-con-quai-sot": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroParticipantTests.An_enemy_left_over_between_waves_is_still_fought"
@@ -141,11 +142,11 @@
    "hash": "2f990bbfa985",
    "text": "Giữa hai đợt còn quái sót: vẫn nhắm và đánh như thường.",
    "title": "Giữa hai đợt còn quái sót",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:30"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "edge-tam-dung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroParticipantTests.While_paused_a_hitting_hero_keeps_its_target_and_its_wait",
@@ -155,11 +156,11 @@
    "hash": "c0c89e19cf98",
    "text": "Tạm dừng: hero đứng yên, giữ trạng thái và mục tiêu.",
    "title": "Tạm dừng",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:31"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroConfigValuesTests.Heroes_target_enemies_within_16u_and_walk_within_15u_of_the_castle_centre",
@@ -169,8 +170,8 @@
    "hash": "c4aa8cb8f34c",
    "text": "## Làm gì\nMỗi khung hình, với mỗi hero đang đứng (không gục, không trong 0.3s hồi sinh):\n1. Trạng thái **Đánh**: mục tiêu còn sống và khoảng cách ≤ tầm thì giữ mục tiêu, ra đòn theo nhịp; không thì sang bước 2.\n2. Chọn mục tiêu: quái còn sống, tâm trong [-16u, +16u], khoảng cách nhỏ nhất.\n3. Có mục tiêu: khoảng cách ≤ tầm thì sang **Đánh** (đứng yên); không thì **Đi tới** mục tiêu với tốc độ chạy, không vượt [-15u, +15u].\n4. Không có mục tiêu: **Đứng chờ**: đi về điểm xuất phát của chỗ mình rồi đứng yên.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Vùng quái được nhắm | tâm x từ -16 tới +16 | u | Bằng màn hình; không đánh thứ người chơi chưa thấy |\n| Vùng hero đi được | tâm x từ -15 tới +15 | u | Bộ số chung; hero luôn nằm trọn trong màn |\n| Tốc độ chạy | theo từng hero (2.2-3.5) | u/s | `feature-hero/hero-list/hero-roster-values` |\n| Điểm đứng chờ | -1.5 / +1.5 / -1.5 theo chỗ 1 / 2 / 3 | x (u) | Trùng điểm xuất phát |\n| Chọn khi bằng khoảng cách | gần thành hơn, rồi ra trước | | Ưu tiên con nguy hơn cho thành |\n| Hero chắn nhau | không | | Luật vòng 3; hero đi xuyên qua nhau |\n\nThời gian dự kiến: Hiệp sĩ từ x=1.5u đi tới quái mới vào ở x=16u (mép trong 15.5u) mất khoảng (15.5-1.2-2)/2.5 ≈ 4.9s; quái cũng đi vào nên gặp sớm hơn, khoảng 3s.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Luật nhắm | như bảng | như bảng | như bảng |\n| Vùng nhắm / vùng đi | ±16u / ±15u | ±16u / ±15u | chỉnh nếu đổi khung màn |\n| Quay mặt | lật sprite theo hướng đi hoặc hướng mục tiêu | như IDEA | như IDEA, có anim quay |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:32"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:00"
   }
  },
  "log": [
@@ -264,6 +265,104 @@
    "state": "done",
    "by": "Hero",
    "note": "HeroConfigValuesTests.Heroes_target_enemies_within_16u_and_walk_within_15u_of_the_castle_centre, HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges"
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "target-on-screen",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "walk-limit",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "idle-return",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "edge-muc-tieu-dang-duoc-danh-bi-don-khac",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "edge-cung-luc-co-quai-hai-ben-cach-bang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "edge-hero-dung-chong-len-quai-khoang-cach-0",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "edge-muc-tieu-o-ngoai-15u-va-ngoai-tam",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "edge-quai-moi-vao-man-khi-hero-dang-ve",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "edge-giua-hai-dot-con-quai-sot",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "edge-tam-dung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:00",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:04",
+   "id": "retarget-check",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Câu yêu cầu giữ mục tiêu tới khi nó bị hạ hoặc ra ngoài tầm, test chỉ có ca bị hạ. Thêm ca mục tiêu đang bị đánh dời ra ngoài tầm thì hero bỏ nó, chọn lại quái gần nhất hoặc đi theo"
+  },
+  {
+   "at": "2026-11-25 12:06:50",
+   "id": "retarget-check",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_walking_hero_turns_to_a_nearer_enemy_as_soon_as_it_appears, HeroSquadTests.A_hitting_hero_keeps_its_target_until_it_is_defeated, HeroEdgeCaseTests.A_hero_lets_go_of_a_target_that_moved_out_of_range_and_takes_the_nearest"
+  },
+  {
+   "at": "2026-11-25 12:07:37",
+   "id": "retarget-check",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

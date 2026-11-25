@@ -375,6 +375,126 @@ namespace Game.Enemy.Tests
             Assert.That(X(), Is.EqualTo(3.0f).Within(0.05f));
         }
 
+        [Test]
+        public void Frost_landing_mid_wait_doubles_the_time_left_before_the_next_hit()
+        {
+            _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.Tick(Step);                     // first hit at once, next due after 1.0s
+            Run(0.48f);                            // 0.5s gone, 0.5s left
+
+            _field.SlowAll(10f);                   // 0.5s left becomes 1.0s
+
+            Run(0.94f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "not yet at 1.44s");
+            Run(0.1f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "second hit at 1.5s");
+        }
+
+        [Test]
+        public void When_Frost_ends_mid_wait_the_time_left_halves_and_the_rhythm_is_back_at_once()
+        {
+            _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.Tick(Step);                     // hit at 0, next due at 1.0s
+            Run(0.48f);                            // 0.5s gone, 0.5s left
+
+            _field.SlowAll(0.4f);                  // 0.5s left -> 1.0s; after 0.4s slowed 0.6s left -> halves to 0.3s
+            Run(0.64f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "not yet at 1.14s");
+            Run(0.1f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "second hit at 1.2s");
+
+            Run(0.9f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "not yet at 2.14s");
+            Run(0.1f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(3), "third hit 1.0s after the second");
+        }
+
+        [Test]
+        public void A_hero_standing_behind_the_enemy_toward_the_edge_but_in_range_is_still_hit()
+        {
+            // Enemy centre 17, half width 0.5; hero centre 18.6, half width 0.5: a clear 0.6u gap behind it.
+            _heroes.Foes.Add(new EnemyFoe(7, 18.6f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            Run(2f);
+
+            Assert.That(X(), Is.EqualTo(17f), "does not turn around or walk on");
+            Assert.That(_heroes.Hits.Count, Is.GreaterThan(0));
+        }
+
+        [Test]
+        public void A_hero_behind_the_enemy_out_of_range_does_not_stop_it()
+        {
+            // Gap 1.5u behind, more than the soldier's 1.0u range.
+            _heroes.Foes.Add(new EnemyFoe(7, 19.5f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            Run(2f);
+
+            Assert.That(X(), Is.EqualTo(14f).Within(0.05f), "walks on toward the castle");
+            Assert.That(_heroes.Hits, Is.Empty);
+        }
+
+        [Test]
+        public void When_the_castle_falls_a_walking_enemy_stands_still()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            Run(1f);
+            var x = X();
+
+            _field.Stop();
+            Run(5f);
+
+            Assert.That(X(), Is.EqualTo(x));
+        }
+
+        [Test]
+        public void Pause_keeps_the_time_left_before_the_next_hit()
+        {
+            var runFlow = new FakeRunFlow();
+            var stage = new FakeStage();
+            using var presenter = new EnemyPresenter(_field, runFlow, stage);
+            _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            stage.RaiseFrame(Step);                // hit at once, next due after 1.0s
+            stage.RaiseFrame(0.4f);                // 0.6s left
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1));
+
+            runFlow.Paused = true;
+            stage.RaiseFrame(3f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "no hit while paused, even past 1.0s");
+
+            runFlow.Paused = false;
+            stage.RaiseFrame(0.5f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "0.1s still left");
+            stage.RaiseFrame(0.1f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "next hit when the time left runs out");
+        }
+
+        // Centre where each type stops before the castle (right side; left is the negative).
+        [TestCase(EnemyType.Soldier, 3.0f)]
+        [TestCase(EnemyType.Wolf, 3.1f)]
+        [TestCase(EnemyType.Giant, 3.7f)]
+        [TestCase(EnemyType.Archer, 7.0f)]
+        [TestCase(EnemyType.Boss, 4.5f)]
+        public void Each_type_stops_at_its_range_from_the_castle_edge_on_both_sides(EnemyType type, float centre)
+        {
+            _field.Spawn(new EnemySpawn(type, EnemySide.Right, 1f));
+            _field.Spawn(new EnemySpawn(type, EnemySide.Left, 1f));
+
+            Run(30f);
+
+            // Frames are 0.02s: an enemy may step into its range by up to one frame of walking.
+            var tolerance = _config.Kind(type).MoveSpeed * Step + 0.001f;
+            var alive = new List<EnemyTarget>();
+            _field.GetAlive(alive);
+            Assert.That(alive[0].X, Is.EqualTo(centre).Within(tolerance));
+            Assert.That(alive[1].X, Is.EqualTo(-centre).Within(tolerance));
+            Assert.That(_castle.Hits.Count, Is.GreaterThan(0));
+        }
+
         private static EnemyConfig AllTypesConfig()
         {
             var real = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);

@@ -31,11 +31,11 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ### Hero (`feature-hero`), lv1
 | Hero | Máu | Sát thương | s mỗi đòn | Tầm (u) | Đi (u/s) | Kiểu đòn | Sát thương mỗi giây |
 |---|---|---|---|---|---|---|---|
-| Hiệp sĩ | 300 | 12 | 1.0 | 1.2 | 2.5 | 1 mục tiêu | 12.0 |
-| Đấu sĩ rìu | 240 | 14 | 1.4 | 1.3 | 2.5 | chém vùng 1.5u trước mặt | 10.0 mỗi mục tiêu |
+| Hiệp sĩ | 300 | 12 | 1.0 | 1.2 | 2.0 | 1 mục tiêu | 12.0 |
+| Đấu sĩ rìu | 240 | 14 | 1.4 | 1.3 | 2.4 | chém vùng 1.5u trước mặt | 10.0 mỗi mục tiêu |
 | Kiếm khách | 180 | 16 | 0.7 | 1.2 | 3.5 | 1 mục tiêu | 22.9 |
-| Cung thủ | 120 | 14 | 0.8 | 7 | 2.5 | 1 mục tiêu | 17.5 |
-| Pháp sư | 100 | 18 | 1.6 | 6 | 2.2 | nổ bán kính 1.5u | 11.25 mỗi mục tiêu |
+| Cung thủ | 120 | 14 | 0.8 | 7 | 3.0 | 1 mục tiêu | 17.5 |
+| Pháp sư | 100 | 18 | 1.6 | 6 | 2.6 | nổ bán kính 1.5u | 11.25 mỗi mục tiêu |
 
 Chung: đội 3 hero, chọn từ 5, không trùng; nhắm quái gần nhất cả hai bên, ra tối đa x = ±15u; hồi sinh 8 s, đầy máu, giữ cấp. Mỗi cấp: máu và sát thương +15% của lv1 (cấp L: ×(1 + 0.15×(L−1))); tốc độ đánh +3% mỗi cấp, tối đa +60% (cấp 21). Xem lại khi đổi: giá nâng hero, `feature-balance/balance-team/hero-compare`.
 

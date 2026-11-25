@@ -1,25 +1,25 @@
 {
  "items": {
   "params": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Độ trễ 1 giây, đội mặc định và việc bỏ màn bắt đầu ở IDEA đều do test tự truyền vào RunFlow. Thêm test nạp RunConfig asset thật kiểm loseDelaySeconds 1, teamSize 3, skipMenus bật, đội knight, axeman, archer",
    "tests": [
-    "RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam",
+    "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues",
+    "RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam",
     "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
     "RunSkipMenusTests.ThereIsNoBackToStartOnTheLosePopup",
     "RunSkipMenusTests.ThereIsNoGivingUp",
-    "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay",
     "RunFlowTests.OnlyTheFirstPressCountsWhileTheScreenIsChanging"
    ],
    "play": "",
    "hash": "44990ba9f1cc",
    "text": "## Làm gì\n- Giữ một trạng thái màn hiện tại trong scene Game: màn bắt đầu, màn chọn đội, trận (đang đánh / tạm dừng / đã kết thúc).\n- Nhận báo bấm nút từ `feature-home`, `feature-team-select`, `feature-popup-lose`, `feature-popup-pause` và báo thành bị phá từ `feature-castle`; quyết định màn tiếp theo theo bảng ở node cha.\n- Khi vào trận: dựng trận mới, báo lượt mới (`feature-run/run-start`).\n- Khi thành bị phá: dừng trận ngay, chốt điểm (`feature-run/run-score`), chờ 1 giây, nhờ `feature-popup` hiện popup thua.\n- Khi rời trận (chơi lại, về màn bắt đầu, bỏ lượt): đóng popup đang mở, huỷ mọi thứ của trận, hiện màn đích.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số scene | 2 (Loading, Game) | scene | Theo `feature-scene-flow/scene-list` |\n| Màn đầu tiên trong scene Game | Trận, đội mặc định | | `boot-to-home`; từ PROTOTYPE là màn bắt đầu (bảng giai đoạn) |\n| Độ trễ trước popup thua | 1 (dự kiến) | giây | Đủ thấy thành bị phá, không làm chậm chơi lại |\n| Số lần bấm có tác dụng trong lúc đổi màn | 1 | lần | Tránh mở trận hai lần |\n| Thời gian đổi màn | 0 (đổi ngay) | giây | Mức đơn giản nhất; hiệu ứng ở bảng giai đoạn |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Màn sau Loading | Vào thẳng trận với đội mặc định (`feature-team-select/team-memory/memory-rules`) | Màn bắt đầu | Màn bắt đầu |\n| Chơi lại ở popup thua | Vào thẳng trận mới với đội mặc định | Sang màn chọn đội | Sang màn chọn đội |\n| Về màn bắt đầu ở popup thua | Không có (chưa có màn bắt đầu) | Có | Có |\n| Bỏ lượt | Không có (chưa có tạm dừng) | Không bắt buộc | Có |\n| Độ trễ trước popup thua | 1 giây | 1 giây | 1 giây |\n| Bước hồi sinh (popup hồi sinh, quảng cáo) | Không có: thành bị phá lần đầu vào thẳng popup thua sau 1 giây | Có, mỗi lượt 1 lần | Có, mỗi lượt 1 lần |\n| Hiệu ứng đổi màn | Không | Không | Mờ dần ra rồi vào, 0.3 giây mỗi chiều (dự kiến) |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Run",
-   "at": "2026-11-25 11:46:39"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:48"
   },
   "replay-path": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
@@ -30,11 +30,11 @@
    "hash": "e59094bf4cce",
    "text": "Chơi lại ở popup thua: huỷ trận, sang màn chọn đội; về màn bắt đầu: huỷ trận, sang màn bắt đầu\nChơi lại không đi qua màn bắt đầu.",
    "title": "Chơi lại ở popup thua: huỷ trận, sang màn chọn đội; về màn bắt đầu: huỷ trận, sang màn bắt đầu",
-   "by": "Run",
-   "at": "2026-11-25 11:34:14"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "lose-stop-same-moment": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay",
@@ -45,13 +45,15 @@
    "hash": "16fb9e578d28",
    "text": "Thành báo bị phá thì trong cùng khung hình trận dừng hẳn\nQuái thôi ra, mọi unit thôi đi và thôi đánh, nút kĩ năng và thanh nâng cấp thôi nhận bấm, nút tạm dừng thôi tác dụng. Báo dọn sạch đợt tới sau lúc này bị bỏ qua. Điểm chốt khi lượt thật sự kết thúc (thua không hồi sinh, hoặc bỏ lượt), không chốt ở lần bị phá đầu.",
    "title": "Thành báo bị phá thì trong cùng khung hình trận dừng hẳn",
-   "by": "Run",
-   "at": "2026-11-25 11:34:16"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "lose-popup-delay": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Số 1 giây là tham số test tự truyền vào RunFlow, nên test qua với mọi giá trị cấu hình. Thêm test nạp RunConfig asset thật kiểm loseDelaySeconds bằng 1 và installer dựng RunFlow với giá trị đó",
    "tests": [
+    "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues",
+    "RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam",
     "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay",
     "RunFlowTests.NothingCanBePressedDuringTheWaitBeforeTheLosePopup"
    ],
@@ -59,11 +61,11 @@
    "hash": "678a0fc1e59f",
    "text": "Popup sau khi thành bị phá hiện sau 1 giây kể từ lúc trận dừng\n1 giây (dự kiến) để người chơi thấy thành vừa bị phá. Lần bị phá đầu trong lượt: hiện popup hồi sinh; lần sau: hiện popup thua. Trong 1 giây này không có gì bấm được.",
    "title": "Popup sau khi thành bị phá hiện sau 1 giây kể từ lúc trận dừng",
-   "by": "Run",
-   "at": "2026-11-25 11:34:17"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:48"
   },
   "transition-lock": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.OnlyTheFirstPressCountsWhileTheScreenIsChanging",
@@ -73,39 +75,42 @@
    "hash": "9d26d1c5984d",
    "text": "Trong lúc đổi màn chỉ lần bấm đầu tiên có tác dụng\nBấm thêm nút ở màn cũ trong lúc đang đổi màn thì bỏ qua, để không mở hai trận hay chuyển màn hai lần.",
    "title": "Trong lúc đổi màn chỉ lần bấm đầu tiên có tác dụng",
-   "by": "Run",
-   "at": "2026-11-25 11:34:18"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "edge-thanh-bi-pha-cung-khung-hinh-voi-luc": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Hoan cong diem don dot toi khung hinh sau, thanh bi pha cung khung hinh thi bo",
    "tests": [
-    "RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount"
+    "RunFlowTests.WaveClearedInTheSameFrameJustBeforeTheCastleFallsDoesNotCount",
+    "RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount",
+    "RunFlowTests.WaveClearedCountsOnceTheFrameEndsWithoutTheCastleFalling"
    ],
    "play": "",
    "hash": "b71929e1354a",
    "text": "**Thành bị phá cùng khung hình với lúc dọn sạch đợt:** xử lí thành bị phá trước; đợt đó không được tính vào điểm.",
    "title": "Thành bị phá cùng khung hình với lúc dọn sạch đợt",
-   "by": "Run",
-   "at": "2026-11-25 11:34:19"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:48"
   },
   "boot-to-home": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Test tự truyền skipMenus true và đội mặc định vào RunFlow, nên chỉ qua nhờ tham số của test. Thêm test nạp RunConfig asset thật, kiểm skipMenus bật và đội mặc định knight, axeman, archer, và installer dựng RunFlow từ đó",
    "tests": [
+    "RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam",
+    "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues",
     "RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam",
-    "RunSkipMenusTests.BattleStartsOnTheFrameAfterTheSessionRuns",
-    "RunSkipMenusTests.BeginningTwiceStartsOnlyOneBattle"
+    "RunSkipMenusTests.BattleStartsOnTheFrameAfterTheSessionRuns"
    ],
    "play": "",
    "hash": "c2970d6d7da3",
    "text": "Mở game: scene Loading tải xong tự sang scene Game, vào thẳng trận với đội mặc định\nChưa có màn bắt đầu và màn chọn đội; đội mặc định theo `feature-team-select/team-memory/memory-rules`. Không có nút ở Loading. Đã vào scene Game thì không quay lại Loading; mọi đổi màn sau đó là đổi trong scene Game, không tải scene.",
    "title": "Mở game: scene Loading tải xong tự sang scene Game, vào thẳng trận với đội mặc định",
-   "by": "Run",
-   "at": "2026-11-25 11:46:37"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:48"
   },
   "quit-path": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.GivingUpStopsAndClearsTheBattleAndGoesHomeWithoutLosePopup",
@@ -115,11 +120,11 @@
    "hash": "89aec6b4ce50",
    "text": "Đồng ý bỏ lượt: chốt điểm như thua, huỷ trận, về thẳng màn bắt đầu, không hiện popup thua\nKỉ lục cập nhật như thua; màn bắt đầu hiện kỉ lục đã cập nhật.",
    "title": "Đồng ý bỏ lượt: chốt điểm như thua, huỷ trận, về thẳng màn bắt đầu, không hiện popup thua",
-   "by": "Run",
-   "at": "2026-11-25 11:34:21"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "fresh-battle": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
@@ -129,11 +134,11 @@
    "hash": "33bded91ba45",
    "text": "Mỗi lần bấm vào trận, trận được dựng mới hoàn toàn; không giữ gì của trận trước\nThành, hero, quái, HUD, thanh nâng cấp của trận trước bị huỷ hết khi rời trận. Vào trận là dựng lại từ đầu rồi báo \"lượt mới\" (`feature-run/run-start`).",
    "title": "Mỗi lần bấm vào trận, trận được dựng mới hoàn toàn; không giữ gì của trận trước",
-   "by": "Run",
-   "at": "2026-11-25 11:46:40"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "edge-bam-choi-lai-va-ve-man-bat-dau": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.PressingPlayAgainAndBackToStartTogetherOnlyTheFirstCounts"
@@ -142,8 +147,8 @@
    "hash": "8baa05c328bc",
    "text": "**Bấm \"Chơi lại\" và \"Về màn bắt đầu\" gần như cùng lúc:** chỉ lần bấm đầu tính (`transition-lock`).",
    "title": "Bấm \"Chơi lại\" và \"Về màn bắt đầu\" gần như cùng lúc",
-   "by": "Run",
-   "at": "2026-11-25 11:46:41"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   }
  },
  "log": [
@@ -230,6 +235,139 @@
    "state": "done",
    "by": "Run",
    "note": "RunFlowTests.PressingPlayAgainAndBackToStartTogetherOnlyTheFirstCounts"
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "fresh-battle",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "lose-stop-same-moment",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "replay-path",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "quit-path",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "transition-lock",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "edge-bam-choi-lai-va-ve-man-bat-dau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:31",
+   "id": "boot-to-home",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test tự truyền skipMenus true và đội mặc định vào RunFlow, nên chỉ qua nhờ tham số của test. Thêm test nạp RunConfig asset thật, kiểm skipMenus bật và đội mặc định knight, axeman, archer, và installer dựng RunFlow từ đó"
+  },
+  {
+   "at": "2026-11-25 12:03:32",
+   "id": "lose-popup-delay",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Số 1 giây là tham số test tự truyền vào RunFlow, nên test qua với mọi giá trị cấu hình. Thêm test nạp RunConfig asset thật kiểm loseDelaySeconds bằng 1 và installer dựng RunFlow với giá trị đó"
+  },
+  {
+   "at": "2026-11-25 12:03:34",
+   "id": "edge-thanh-bi-pha-cung-khung-hinh-voi-luc",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test chỉ có thứ tự báo thành bị phá trước rồi báo dọn sạch. Thiết kế đòi xử lí thành bị phá trước dù cùng khung hình. Thêm ca báo dọn sạch tới trước báo thành bị phá trong cùng khung hình mà đợt đó vẫn không được tính, có thể code hiện tại sẽ cộng điểm ở ca này"
+  },
+  {
+   "at": "2026-11-25 12:03:36",
+   "id": "params",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Độ trễ 1 giây, đội mặc định và việc bỏ màn bắt đầu ở IDEA đều do test tự truyền vào RunFlow. Thêm test nạp RunConfig asset thật kiểm loseDelaySeconds 1, teamSize 3, skipMenus bật, đội knight, axeman, archer"
+  },
+  {
+   "at": "2026-11-25 12:04:44",
+   "id": "edge-thanh-bi-pha-cung-khung-hinh-voi-luc",
+   "state": "doing",
+   "by": "Run",
+   "note": "Hoan cong diem don dot toi khung hinh sau, thanh bi pha cung khung hinh thi bo"
+  },
+  {
+   "at": "2026-11-25 12:06:08",
+   "id": "edge-thanh-bi-pha-cung-khung-hinh-voi-luc",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.WaveClearedInTheSameFrameJustBeforeTheCastleFallsDoesNotCount, RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount, RunFlowTests.WaveClearedCountsOnceTheFrameEndsWithoutTheCastleFalling"
+  },
+  {
+   "at": "2026-11-25 12:06:10",
+   "id": "boot-to-home",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam, RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues, RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam, RunSkipMenusTests.BattleStartsOnTheFrameAfterTheSessionRuns"
+  },
+  {
+   "at": "2026-11-25 12:06:11",
+   "id": "lose-popup-delay",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues, RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam, RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay, RunFlowTests.NothingCanBePressedDuringTheWaitBeforeTheLosePopup"
+  },
+  {
+   "at": "2026-11-25 12:06:13",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues, RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam, RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam, RunSkipMenusTests.ThereIsNoBackToStartOnTheLosePopup, RunSkipMenusTests.ThereIsNoGivingUp, RunFlowTests.OnlyTheFirstPressCountsWhileTheScreenIsChanging"
+  },
+  {
+   "at": "2026-11-25 12:06:48",
+   "id": "boot-to-home",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:48",
+   "id": "lose-popup-delay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:48",
+   "id": "edge-thanh-bi-pha-cung-khung-hinh-voi-luc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:48",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

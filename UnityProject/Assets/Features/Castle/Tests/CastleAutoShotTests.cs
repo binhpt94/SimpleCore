@@ -60,6 +60,31 @@ namespace Game.Castle.Tests
         }
 
         [Test]
+        public void Range_counts_the_gap_from_the_castle_edge_not_from_its_centre()
+        {
+            // Centre 8.1u away (beyond 6u from the centre), but the gap between edges is 8.1 - 1.0 - 1.5 = 5.6u.
+            _enemies.AddEnemy(1, 8.1f, 1.0f);
+            // Gap 8.0 - 0.4 - 1.5 = 6.1u: just out of range.
+            _enemies.AddEnemy(2, -8.0f);
+
+            _shot.Tick(1f);
+            _shot.Tick(1f);
+
+            Assert.That(_enemies.Damaged, Is.EqualTo(new[] { (1, 10f), (1, 10f) }));
+        }
+
+        [Test]
+        public void Nearest_is_judged_by_the_gap_so_a_wider_enemy_with_a_farther_centre_can_be_nearer()
+        {
+            _enemies.AddEnemy(1, 5f, 0.4f);    // gap 5 - 0.4 - 1.5 = 3.1
+            _enemies.AddEnemy(2, -5.5f, 1.5f); // centre farther, gap 5.5 - 1.5 - 1.5 = 2.5
+
+            _shot.Tick(1f);
+
+            Assert.That(_enemies.Damaged[0].handle, Is.EqualTo(2));
+        }
+
+        [Test]
         public void Castle_shoots_the_enemy_nearest_its_edge_on_either_side()
         {
             _enemies.AddEnemy(1, 6f);

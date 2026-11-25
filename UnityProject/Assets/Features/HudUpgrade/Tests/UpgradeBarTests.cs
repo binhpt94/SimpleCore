@@ -253,7 +253,11 @@ namespace Game.HudUpgrade.Tests
     public sealed class BarLayoutTests
     {
         private static readonly int[] Groups = { 0, 0, 0, 1, 1, 1 };
-        private static readonly BarLayout.Settings Frame = new BarLayout.Settings(50, 200, 10, 70, 1920 - 1420);
+        private const float SkillsGap = 40;
+        private static readonly BarLayout.Settings Frame = new BarLayout.Settings(50, 200, 10, 70, 1920 - 1420 + SkillsGap);
+
+        /// <summary>Left edge of the skill cluster on a canvas of this width (it is anchored to the bottom-right).</summary>
+        private static float SkillsLeft(float canvasWidth) => canvasWidth - 500;
 
         [Test]
         public void On_a_16_9_screen_the_six_buttons_sit_where_the_frame_puts_them()
@@ -277,7 +281,16 @@ namespace Game.HudUpgrade.Tests
         {
             var layout = BarLayout.Compute(Groups, canvasWidth, Frame);
             Assert.Less(layout.Scale, 1f);
-            Assert.LessOrEqual(layout.RightEdge(Frame), canvasWidth - 500f + 0.01f);
+            Assert.LessOrEqual(layout.RightEdge(Frame), SkillsLeft(canvasWidth) - SkillsGap + 0.01f);
+        }
+
+        [TestCase(1920f)] // 16:9: 60 px as in the frame
+        [TestCase(1800f)] // 5:3: the 800x480 Game view where the last button touched the Lightning button
+        [TestCase(1440f)] // 4:3
+        public void Last_button_keeps_at_least_the_frame_gap_before_the_skill_cluster(float canvasWidth)
+        {
+            var layout = BarLayout.Compute(Groups, canvasWidth, Frame);
+            Assert.GreaterOrEqual(SkillsLeft(canvasWidth) - layout.RightEdge(Frame), SkillsGap - 0.01f);
         }
 
         [Test]

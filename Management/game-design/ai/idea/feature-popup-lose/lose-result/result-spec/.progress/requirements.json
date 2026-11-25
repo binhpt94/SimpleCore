@@ -81,7 +81,7 @@
    "at": "2026-11-25 11:39:16"
   },
   "edge-bang-ki-luc-cu": {
-   "state": "done",
+   "state": "verified",
    "note": "test mới: điểm bằng kỉ lục cũ, cờ tắt",
    "tests": [
     "LosePopupTests.ScoreEqualToTheOldBestShowsNoNewRecordLine"
@@ -90,8 +90,8 @@
    "hash": "d12d506c65fc",
    "text": "**Bằng kỉ lục cũ:** N = M nhưng không có dòng kỉ lục mới.",
    "title": "Bằng kỉ lục cũ",
-   "by": "PopupLose",
-   "at": "2026-11-25 11:37:46"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:55"
   }
  },
  "log": [
@@ -231,6 +231,13 @@
   {
    "at": "2026-11-25 11:39:16",
    "id": "edge-pha-ki-luc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:55",
+   "id": "edge-bang-ki-luc-cu",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

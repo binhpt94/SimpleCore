@@ -368,6 +368,41 @@ namespace Game.Wave.Tests
         }
 
         [Test]
+        public void ClearingWaveOne_MakesTheWaveNumberTwoAtOnce_AndKeepsItThroughTheBreak()
+        {
+            _run.StartBattle();
+            _director.Tick(7.01f);
+            _enemies.DefeatAll();
+            _log.Clear();
+
+            _director.Tick(0.01f);
+            Assert.That(_director.CurrentWave, Is.EqualTo(2), "the number moves on in the step of the clear");
+            Assert.That(_log, Has.Member("current 2"));
+
+            _log.Clear();
+            _director.Tick(1.5f);
+            _director.Tick(1.4f);
+            Assert.That(_director.InBreak, Is.True);
+            Assert.That(_director.CurrentWave, Is.EqualTo(2), "during the break the number is the upcoming wave");
+            Assert.That(_log, Is.Empty, "no number change while breathing");
+        }
+
+        [Test]
+        public void BreakEnd_StartsTheUpcomingWave_WithoutChangingTheWaveNumberAgain()
+        {
+            _run.StartBattle();
+            ClearWaveOne();
+            _log.Clear();
+
+            _director.Tick(3.01f);
+
+            Assert.That(_log, Is.EqualTo(new[] { "started 2" }), "only the start of wave 2, no second number change");
+            Assert.That(_director.CurrentWave, Is.EqualTo(2));
+            Assert.That(_enemies.Spawned[_enemies.Spawned.Count - 1].StatScale, Is.EqualTo(1.1f).Within(1e-4),
+                "the first enemy of wave 2 comes at once with the wave-2 scale");
+        }
+
+        [Test]
         public void NextWave_StartsOnTime_WithoutWaitingForAnythingElse()
         {
             // Wave never waits for heroes coming back or upgrades: only the 3 s clock starts the next wave.

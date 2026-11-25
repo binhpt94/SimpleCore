@@ -1,6 +1,6 @@
 ---
 based-on: 10b291cde6dc
-refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-behavior@cf9290ce16e6, feature-enemy/enemy-stats/enemy-stat-values@7016e0fe183b, feature-enemy/enemy-reward/reward-values@30a4a6c88e50, feature-enemy/enemy-behavior/enemy-move-values@820f944e332f, feature-hero/hero-list/hero-roster-values@8a2346250094, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/spawning/spawn-order@5884f63cfa93
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-behavior@cf9290ce16e6, feature-enemy/enemy-stats/enemy-stat-values@7016e0fe183b, feature-enemy/enemy-reward/reward-values@30a4a6c88e50, feature-enemy/enemy-behavior/enemy-move-values@820f944e332f, feature-hero/hero-list/hero-roster-values@b91d8c9d12d4, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/spawning/spawn-order@5884f63cfa93
 ---
 # Năm loại quái: hộp và kiểu đánh
 

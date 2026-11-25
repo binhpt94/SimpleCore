@@ -3,3 +3,5 @@
 {"at": "2026-11-23 14:48:49", "event": "promote", "by": "người", "hash": "6bd8e5861fbd"}
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "6bd8e5861fbd"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "6bd8e5861fbd"}
+{"at": "2026-11-25 12:02:13", "event": "data", "hash": "4d5cfe278549", "previous": "6bd8e5861fbd", "added": ["gap-next-number"], "removed": [], "rewritten": [{"id": "gap-start-next", "old": "Hết 3 giây thì số đợt tăng 1 và đợt mới bắt đầu, con đầu tiên ra ở 0 giây của đợt mới\nKhông cần người chơi bấm.", "new": "Hết 3 giây thì đợt sắp tới bắt đầu thả quái, con đầu tiên ra ở 0 giây của đợt mới\nKhông cần người chơi bấm. Số đợt không đổi ở lúc này: nó đã thành đợt sắp tới ngay lúc dọn sạch (`gap-next-number`)."}]}
+{"at": "2026-11-25 12:03:40", "event": "promote", "by": "người", "hash": "4d5cfe278549"}

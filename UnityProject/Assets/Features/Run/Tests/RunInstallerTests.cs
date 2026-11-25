@@ -11,6 +11,7 @@ namespace Game.Run.Tests
     public class RunInstallerTests
     {
         private const string InstallerPath = "Assets/Features/Run/FeatureAssets/Public/RunInstaller.asset";
+        private const string ConfigPath = "Assets/Features/Run/FeatureAssets/Private/RunConfig.asset";
 
         [Test]
         public void InstallerAssetPublishesTheRunAndJoinsTheSession()
@@ -28,6 +29,40 @@ namespace Game.Run.Tests
             Assert.IsTrue(registry.TryResolve<IRunScore>(out _));
             Assert.AreEqual(RunStep.Home, flow.Step);
             Assert.AreEqual(1, session.Joined.Count);
+        }
+
+        [Test]
+        public void ConfigAssetHoldsTheIdeaRunValues()
+        {
+            var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
+            Assert.IsNotNull(config, $"Missing {ConfigPath}");
+
+            Assert.AreEqual(1f, config.LoseDelaySeconds);
+            Assert.AreEqual(3, config.TeamSize);
+            Assert.IsTrue(config.SkipMenus);
+            CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, config.DefaultTeam.HeroCodes);
+        }
+
+        [Test]
+        public void InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
+            Assert.IsNotNull(installer, $"Missing {InstallerPath}");
+
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            installer.Install(registry);
+
+            var flow = registry.Resolve<IRunFlow>() as RunFlow;
+            Assert.IsNotNull(flow, "IRunFlow is not the run's RunFlow.");
+            Assert.AreEqual(1f, flow.LoseDelaySeconds);
+            Assert.AreEqual(3, flow.TeamSize);
+            Assert.IsTrue(flow.SkipMenus);
+
+            flow.Begin();
+            Assert.AreEqual(RunStep.Playing, flow.Step);
+            CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, flow.Team.HeroCodes);
+            flow.Shutdown();
         }
 
         [Test]

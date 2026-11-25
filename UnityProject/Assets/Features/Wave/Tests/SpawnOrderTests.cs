@@ -39,6 +39,24 @@ namespace Game.Wave.Tests
         }
 
         [Test]
+        public void KindOrder_IsShuffled_DifferentRunsGiveDifferentOrders()
+        {
+            var rules = new WaveRules();
+            var plan = new WaveFormula(rules).Plan(7);
+            var orders = new HashSet<string>();
+            var firstKinds = new HashSet<EnemyType>();
+            for (var seed = 0; seed < 30; seed++)
+            {
+                var list = new SpawnOrder(rules, new SystemWaveRandom(seed)).Build(plan);
+                orders.Add(string.Join(",", list.Select(e => e.Type)));
+                firstKinds.Add(list[0].Type);
+            }
+
+            Assert.That(orders.Count, Is.GreaterThan(20), "30 seeds should give many different kind orders");
+            Assert.That(firstKinds.Count, Is.GreaterThan(1), "the first enemy is not always the same kind");
+        }
+
+        [Test]
         public void SendList_HoldsExactlyTheKindsOfThePlan()
         {
             var rules = new WaveRules();

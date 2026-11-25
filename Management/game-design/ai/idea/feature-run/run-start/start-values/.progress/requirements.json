@@ -1,7 +1,7 @@
 {
  "items": {
   "start-wave-1": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.NewRunStartsTheScoreAtZero"
@@ -10,11 +10,11 @@
    "hash": "7ff475d75045",
    "text": "Đầu lượt đợt hiện tại là 1, điểm là 0",
    "title": "Đầu lượt đợt hiện tại là 1, điểm là 0",
-   "by": "Run",
-   "at": "2026-11-25 11:47:04"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "start-team-3": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.EnteringBattleAnnouncesTheNewRunBeforeTheBattleStarts",
@@ -24,11 +24,11 @@
    "hash": "80d35ad1c760",
    "text": "Đầu lượt cả 3 hero của đội đã chọn sinh ra ở thành cùng lúc, đủ máu\nĐội 3 hero không trùng; trong trận không đổi đội.",
    "title": "Đầu lượt cả 3 hero của đội đã chọn sinh ra ở thành cùng lúc, đủ máu",
-   "by": "Run",
-   "at": "2026-11-25 11:47:05"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "start-before-wave": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.EnteringBattleAnnouncesTheNewRunBeforeTheBattleStarts",
@@ -38,11 +38,11 @@
    "hash": "3fde595b840b",
    "text": "Mọi giá trị trên đã đặt xong và HUD đã hiện đúng trước khi quái đầu tiên của đợt 1 ra",
    "title": "Mọi giá trị trên đã đặt xong và HUD đã hiện đúng trước khi quái đầu tiên của đợt 1 ra",
-   "by": "Run",
-   "at": "2026-11-25 11:47:06"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "edge-doi-nhan-duoc-khong-du-3-hero-hoac": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.TeamWithoutThreeHeroesCannotEnterBattle",
@@ -53,77 +53,78 @@
    "hash": "10aa57667258",
    "text": "**Đội nhận được không đủ 3 hero hoặc có hero trùng:** không vào trận; đây là lỗi của màn chọn đội, báo lỗi rõ cho phiên code (người chơi không gặp vì nút vào trận bị khoá).",
    "title": "Đội nhận được không đủ 3 hero hoặc có hero trùng",
-   "by": "Run",
-   "at": "2026-11-25 11:47:07"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "params": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Đội mặc định IDEA là Hiệp sĩ, Đấu sĩ rìu, Cung thủ nhưng test tự truyền đội vào RunFlow. Thêm test kiểm RunConfig asset thật giữ đúng đội knight, axeman, archer và installer dùng đội đó",
    "tests": [
-    "RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam",
+    "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues",
+    "RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam",
     "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam"
    ],
    "play": "",
    "hash": "9b633257befb",
    "text": "## Làm gì\n- Khi trận được dựng: nhận đội 3 hero từ `feature-team-select`, báo \"lượt mới\" kèm đội cho các feature trong trận.\n- Mỗi feature tự đặt giá trị của mình theo bảng dưới (giá trị nằm trong cấu hình của `feature-balance`); feature này không giữ hộ.\n- Chỉ cho `feature-wave` bắt đầu đợt 1 sau khi mọi feature đã đặt xong.\n\n## Thông số\n| Thứ | Giá trị đầu lượt | Đơn vị | Feature giữ | Lí do |\n|---|---|---|---|---|\n| Máu thành | 1000 / 1000 (dự kiến) | máu | `feature-castle` | Bộ số chung |\n| Cấp nâng cấp thành (máu, sức đánh, kĩ năng) | 1 | cấp | `feature-upgrade` | Bắt đầu lại từ đầu |\n| Tiền | 50 (dự kiến) | xu | `feature-wallet` | Bộ số chung; đủ mua vài nâng cấp đầu |\n| Cấp từng hero | 1 | cấp | `feature-upgrade` | Bắt đầu lại từ đầu |\n| Đợt hiện tại | 1 | đợt | `feature-wave` | Chưa dọn đợt nào |\n| Điểm | 0 | đợt | `feature-run/run-score` | |\n| Kĩ năng thành | cả 3 sẵn sàng, hồi chiêu 0 | giây | `feature-castle` | `feature-castle/castle-skills` |\n| Hero trên chiến trường | 3, đủ máu, ở thành | hero | `feature-hero` | Đội 3 hero |\n| Kỉ lục | giữ nguyên | đợt | `feature-run/run-score` | Thứ duy nhất không đặt lại |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Đội vào trận | Đội mặc định cố định (Hiệp sĩ, Đấu sĩ rìu, Cung thủ) | Đội vừa chọn ở màn chọn đội | Đội vừa chọn ở màn chọn đội |\n| Máu thành đầu lượt | 1000 | 1000 (chỉnh theo thử) | Theo `feature-balance` |\n| Tiền đầu lượt | 50 | 50 (chỉnh theo thử) | Theo `feature-balance` |\n| Lần hồi sinh thành đầu lượt | Không có (chưa có hồi sinh) | 1 | 1 |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Run",
-   "at": "2026-11-25 11:47:09"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:48"
   },
   "start-castle-1000": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play 3 luot: dau moi luot thanh hien 1000/1000 mau, ke ca sau khi luot truoc bi danh. Run chi bao RunStarted, Castle dat gia tri",
    "hash": "d02313462acb",
    "text": "Đầu lượt thành có 1000 máu trên 1000 máu tối đa, cấp mọi nâng cấp của thành là 1\nMáu tối đa về 1000 dù lượt trước đã nâng.",
    "title": "Đầu lượt thành có 1000 máu trên 1000 máu tối đa, cấp mọi nâng cấp của thành là 1",
-   "by": "Run",
-   "at": "2026-11-25 11:47:15"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:07:40"
   },
   "start-money-50": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play 3 luot: dau moi luot HUD tien hien 50, khong cong don tu luot truoc. Run chi bao RunStarted, Wallet dat gia tri",
    "hash": "ed1bad753540",
    "text": "Đầu lượt tiền là 50, không cộng dồn từ lượt trước",
    "title": "Đầu lượt tiền là 50, không cộng dồn từ lượt trước",
-   "by": "Run",
-   "at": "2026-11-25 11:47:16"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:07:40"
   },
   "start-levels-1": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play: nang cap trong luot 1, choi lai: moi hero va thanh ve cap 1. Run chi bao RunStarted, Upgrade dat gia tri",
    "hash": "b664f2ab4aac",
    "text": "Đầu lượt mọi hero trong đội ở cấp 1",
    "title": "Đầu lượt mọi hero trong đội ở cấp 1",
-   "by": "Run",
-   "at": "2026-11-25 11:47:18"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:07:40"
   },
   "start-skills-ready": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play: dung ki nang roi thua, choi lai: ca 3 ki nang thanh san sang, khong hoi chieu. Run chi bao RunStarted, Castle dat gia tri",
    "hash": "3c0495df647b",
    "text": "Đầu lượt cả ba kĩ năng thành Sấm sét, Băng giá, Cổ vũ đều sẵn sàng, không có hồi chiêu",
    "title": "Đầu lượt cả ba kĩ năng thành Sấm sét, Băng giá, Cổ vũ đều sẵn sàng, không có hồi chiêu",
-   "by": "Run",
-   "at": "2026-11-25 11:47:19"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:07:40"
   },
   "edge-choi-lai-ngay-sau-thua": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play: thua roi bam Choi lai ngay: mau thanh, tien, cap, dot, diem deu ve bang dau luot. Test phan Run: RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
    "hash": "ad23220e8690",
    "text": "**Chơi lại ngay sau thua:** mọi giá trị về như bảng, kể cả máu tối đa đã được nâng ở lượt trước.",
    "title": "Chơi lại ngay sau thua",
-   "by": "Run",
-   "at": "2026-11-25 11:47:21"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:23:21"
   },
   "edge-hieu-ung-ki-nang-con-do-tu-luot": {
    "state": "done",
@@ -232,6 +233,90 @@
    "state": "done",
    "by": "Run",
    "note": "Play: thua dung luc dot vua don, choi lai: tien dau luot dung 50. Phan Run co test RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount"
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "start-wave-1",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "start-team-3",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "start-before-wave",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "edge-doi-nhan-duoc-khong-du-3-hero-hoac",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:40",
+   "id": "params",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Đội mặc định IDEA là Hiệp sĩ, Đấu sĩ rìu, Cung thủ nhưng test tự truyền đội vào RunFlow. Thêm test kiểm RunConfig asset thật giữ đúng đội knight, axeman, archer và installer dùng đội đó"
+  },
+  {
+   "at": "2026-11-25 12:06:15",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues, RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam, RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam"
+  },
+  {
+   "at": "2026-11-25 12:06:48",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:07:40",
+   "id": "start-castle-1000",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:07:40",
+   "id": "start-money-50",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:07:40",
+   "id": "start-levels-1",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:07:40",
+   "id": "start-skills-ready",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:23:21",
+   "id": "edge-choi-lai-ngay-sau-thua",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

@@ -6,9 +6,9 @@ namespace Game.HudUpgrade
     /// <summary>
     /// Where the bar's buttons go along the bottom edge, in canvas units (px on the 1920x1080 reference screen).
     /// Buttons of one group sit <see cref="Settings.ButtonGap"/> apart; a new group starts after the wider
-    /// <see cref="Settings.GroupGap"/>. The whole bar must end left of the skill cluster of feature-hud
-    /// (x 1420 on the reference screen, i.e. 500 units from the right edge): when the screen is narrower the
-    /// bar shrinks uniformly to fit instead of running under it.
+    /// <see cref="Settings.GroupGap"/>. The whole bar must end at least 40 units left of the skill cluster of
+    /// feature-hud (x 1420 on the reference screen, 500 units from the right edge): when the screen is narrower
+    /// the bar shrinks uniformly to keep that gap instead of touching or running under it.
     /// </summary>
     internal static class BarLayout
     {
@@ -29,7 +29,10 @@ namespace Game.HudUpgrade
             public float ButtonGap { get; }
             public float GroupGap { get; }
 
-            /// <summary>Width kept free at the right edge for the skill cluster (1920 - 1420 = 500).</summary>
+            /// <summary>
+            /// Width kept free at the right edge: the skill cluster (1920 - 1420 = 500) plus the least gap
+            /// before it (40, frame bar-buttons), so 540.
+            /// </summary>
             public float RightReserve { get; }
         }
 

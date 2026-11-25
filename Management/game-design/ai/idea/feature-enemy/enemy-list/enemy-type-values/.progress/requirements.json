@@ -1,7 +1,7 @@
 {
  "items": {
   "type-boxes": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type"
@@ -10,11 +10,11 @@
    "hash": "2eb98ab3fb39",
    "text": "Hộp quái (rộng×cao, u): Lính 1×1.2, Sói 1.2×0.8, Khổng lồ 2×2.5, Cung thủ quái 1×1.2, Trùm 3×3.5\nKích thước nói lên vai: Sói thấp dài, Khổng lồ và Trùm to hơn hẳn hero (1×1.5u). Mọi quái chân trên mặt đất y=0.",
    "title": "Hộp quái (rộng×cao, u): Lính 1×1.2, Sói 1.2×0.8, Khổng lồ 2×2.5, Cung thủ quái 1×1.2, Trùm 3×3.5",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:18"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-hai-trum-cung-luc": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.Two_bosses_can_be_on_the_field_at_once"
@@ -23,11 +23,11 @@
    "hash": "17f0fada6354",
    "text": "**Hai Trùm cùng lúc** (Trùm đợt 10 còn sống tới đợt 20): cho phép, mỗi con theo luật của mọi quái.",
    "title": "Hai Trùm cùng lúc",
-   "by": "Enemy",
-   "at": "2026-11-25 11:40:32"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-cung-thu-quai-dung-o-x-7-0u": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.An_enemy_archer_stops_at_7u_to_shoot_the_castle"
@@ -36,8 +36,8 @@
    "hash": "aa71ce99c81c",
    "text": "**Cung thủ quái đứng ở x=±7.0u đánh thành**: trong tầm tự bắn và Sấm sét; hero cận chiến phải đi ra tới nó.",
    "title": "Cung thủ quái đứng ở x=±7.0u đánh thành",
-   "by": "Enemy",
-   "at": "2026-11-25 11:40:33"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "type-melee-ranged": {
    "state": "doing",
@@ -51,7 +51,7 @@
    "at": "2026-11-25 11:36:30"
   },
   "boss-no-skill": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyCombatTests.A_boss_walks_and_hits_by_the_same_rules_as_any_enemy",
@@ -61,11 +61,11 @@
    "hash": "e13635662d71",
    "text": "Trùm không có đòn riêng; đi và đánh theo cùng luật như mọi quái\nChỉ khác ở hộp, chỉ số và tiền (`feature-enemy/enemy-behavior`, `feature-enemy/enemy-stats/enemy-stat-values`).",
    "title": "Trùm không có đòn riêng; đi và đánh theo cùng luật như mọi quái",
-   "by": "Enemy",
-   "at": "2026-11-25 11:40:34"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "waves-elsewhere": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.A_spawned_enemy_appears_at_the_edge_of_its_side",
@@ -75,11 +75,11 @@
    "hash": "b969909da531",
    "text": "Đợt đầu có mặt của từng loại, đợt có Trùm và việc Trùm ra cuối đợt do `feature-wave` quyết, quái không giữ\nMốc mở loại và chu kì Trùm ở `feature-wave/difficulty-scaling/wave-formula`; Trùm là con cuối của đợt ở `feature-wave/spawning/spawn-order`. Mỗi lần sinh, quái chỉ nhận loại, bên và hệ số.",
    "title": "Đợt đầu có mặt của từng loại, đợt có Trùm và việc Trùm ra cuối đợt do `feature-wave` quyết, quái không giữ",
-   "by": "Enemy",
-   "at": "2026-11-25 11:40:36"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "edge-yeu-cau-tha-mot-loai-chua-co-o": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyFieldTests.Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing",
@@ -89,11 +89,11 @@
    "hash": "c9851d581197",
    "text": "**Yêu cầu thả một loại chưa có ở giai đoạn đang làm** (ví dụ Cung thủ quái ở IDEA): lỗi nêu mã loại, không sinh; cấu hình của `feature-wave` sai.",
    "title": "Yêu cầu thả một loại chưa có ở giai đoạn đang làm",
-   "by": "Enemy",
-   "at": "2026-11-25 11:40:37"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type",
@@ -104,8 +104,8 @@
    "hash": "7e88fd0ac272",
    "text": "## Làm gì\n- Giữ danh sách loại quái: mã, tên tạm, hộp, cận chiến hay bắn xa, tầm. Sinh một con khi `feature-wave` gửi yêu cầu thả kèm loại, bên và hệ số.\n- Hiện quái bằng sprite 2D gen bằng AI, vừa hộp của loại, quay mặt về phía thành.\n- Chỉ số của từng loại ở `feature-enemy/enemy-stats/enemy-stat-values`; tiền ở `feature-enemy/enemy-reward/reward-values`.\n- Không quyết loại nào ra ở đợt nào: `feature-wave/difficulty-scaling/wave-formula` (mốc mở loại, chu kì Trùm) và `feature-wave/spawning/spawn-order` (Trùm ra cuối, trần quái sống).\n\n## Thông số\n| Loại | Mã | Hộp rộng×cao (u) | Kiểu đánh | Tầm (u) | Lí do |\n|---|---|---|---|---|---|\n| Lính | soldier | 1×1.2 | Cận chiến | 1.0 | Loại chuẩn |\n| Sói | wolf | 1.2×0.8 | Cận chiến | 1.0 | Nhanh, thấp dài |\n| Khổng lồ | giant | 2×2.5 | Cận chiến | 1.2 | Trâu, to hơn hẳn hero |\n| Cung thủ quái | archer | 1×1.2 | Bắn xa | 5 | Ép đội có hero bắn xa |\n| Trùm | boss | 3×3.5 | Cận chiến | 1.5 | Đỉnh căng thẳng |\n\nSố liệu là dự kiến theo bộ số chung.\n\nHiệu ứng (mức tối thiểu, dùng chung với `feature-enemy/enemy-behavior/enemy-move-values`):\n| Hiệu ứng | Xuất hiện | Biến mất |\n|---|---|---|\n| Hình đạn Cung thủ quái | mỗi đòn | tới mục tiêu sau 0.15s |\n| Trùm vào màn: phóng to 1.2 lần rồi về | lúc tâm Trùm vào x=±16u | sau 0.5s |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Loại có trong game (có hình, sinh được) | Lính, Sói, Khổng lồ | đủ 5 loại | đủ 5 loại |\n| Hình | 1 sprite mỗi loại, anim bằng move/scale/nháy | như IDEA | anim đi, đánh, bị hạ riêng; âm thanh |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Enemy",
-   "at": "2026-11-25 11:40:38"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:13"
   }
  },
  "log": [
@@ -178,6 +178,55 @@
    "state": "done",
    "by": "Enemy",
    "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyFieldTests.Soldiers_wolves_and_giants_can_be_spawned_in_this_stage, EnemyFieldTests.Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing"
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "type-boxes",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "boss-no-skill",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "waves-elsewhere",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-yeu-cau-tha-mot-loai-chua-co-o",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-hai-trum-cung-luc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "edge-cung-thu-quai-dung-o-x-7-0u",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:13",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using Game.Core;
 using Game.Hero;
 using Game.Run;
@@ -97,10 +98,14 @@ namespace Game.HudUpgrade.Tests
             var wallet = new FakeWallet { Coins = 50 };
             var shop = new FakeShop(wallet);
             shop.SetTeam("knight", "axeman", "archer");
+            // Prices of the state's levels from the design's price table; lower levels cost little, the cheat tops up.
+            var levelsOfState = new[] { 3, 5, 1, 2, 4, 3 };
+            var pricesOfState = new[] { 55, 100, 30, 56, 110, 135 };
+            shop.PriceOf = (index, level) => level == levelsOfState[index] ? pricesOfState[index] : 10;
             var run = new FakeRun();
             var views = new FakeViewFactory();
             var cheat = new HudUpgradeParticipant.CheatSetup(HudUpgradeCheatState.MixedButtons, 120,
-                new[] { 3, 5, 1, 2, 4, 3 }, wallet, wallet, wallet, new[] { "knight", "axeman", "archer" });
+                levelsOfState, wallet, wallet, wallet, new[] { "knight", "axeman", "archer" });
             var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views, cheat);
 
             participant.Run();
@@ -110,9 +115,11 @@ namespace Game.HudUpgrade.Tests
             var levels = new int[6];
             for (var i = 0; i < 6; i++) levels[i] = shop.Get(i).Level;
             CollectionAssert.AreEqual(new[] { 3, 5, 1, 2, 4, 3 }, levels);
-            // FakeShop has its own simple prices; with the real price table the skill button (135) is the dim one.
-            // Here: lit/dim follows the shop's CanBuy after the cheat.
-            for (var i = 0; i < 6; i++) Assert.AreEqual(shop.Get(i).CanBuy, views.View.Looks[i].Lit);
+            CollectionAssert.AreEqual(new[] { "55", "100", "30", "56", "110", "135" },
+                new[] { 0, 1, 2, 3, 4, 5 }.Select(i => views.View.Looks[i].PriceText).ToArray());
+            CollectionAssert.AreEqual(new[] { true, true, true, true, true, false },
+                new[] { 0, 1, 2, 3, 4, 5 }.Select(i => views.View.Looks[i].Lit).ToArray(),
+                "five buttons lit, the castle skill button (135 > 120) dim");
 
             participant.DisposeAsync().GetAwaiter().GetResult();
             Assert.AreEqual(0, run.BattleStartedListeners);
@@ -203,8 +210,10 @@ namespace Game.HudUpgrade.Tests
             // On the 1920x1080 reference screen the last button must end left of the skill cluster (x 1420).
             var settings = new BarLayout.Settings(so.FindProperty("barLeft").floatValue,
                 so.FindProperty("buttonSize").vector2Value.x, so.FindProperty("buttonGap").floatValue,
-                so.FindProperty("groupGap").floatValue, 1920 - so.FindProperty("skillsLeft").floatValue);
+                so.FindProperty("groupGap").floatValue,
+                1920 - so.FindProperty("skillsLeft").floatValue + so.FindProperty("skillsGap").floatValue);
             Assert.AreEqual(1420f, so.FindProperty("skillsLeft").floatValue);
+            Assert.AreEqual(40f, so.FindProperty("skillsGap").floatValue);
             var layout = BarLayout.Compute(new[] { 0, 0, 0, 1, 1, 1 }, 1920, settings);
             Assert.LessOrEqual(layout.RightEdge(settings), 1420f);
             Assert.AreEqual(0.2f, so.FindProperty("bounceSeconds").floatValue, 0.0001f);

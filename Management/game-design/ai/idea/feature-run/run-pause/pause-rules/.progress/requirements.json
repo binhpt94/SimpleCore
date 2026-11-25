@@ -1,7 +1,7 @@
 {
  "items": {
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunSkipMenusTests.ThereIsNoGivingUp"
@@ -10,11 +10,11 @@
    "hash": "40965e0e3cfb",
    "text": "## Làm gì\n- Giữ trạng thái trận: đang đánh, tạm dừng, đã kết thúc.\n- Vào tạm dừng: dừng thời gian trận, báo `feature-wave`, `feature-enemy`, `feature-hero`, `feature-castle` đứng yên; nhờ `feature-popup` hiện popup tạm dừng (`feature-popup-pause`).\n- Nhận lựa chọn từ popup: tiếp tục (chạy lại ngay) hoặc bỏ lượt (kết thúc lượt qua `feature-run/run-flow/flow-rules`).\n- Theo dõi game rời khỏi màn hình (mất tiêu điểm hoặc bị ẩn) để tự vào tạm dừng.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Hồi chiêu đứng yên | Sấm sét 20, Băng giá 35, Cổ vũ 25 | giây | Bộ số chung; đều đứng khi dừng |\n| Nghỉ giữa hai đợt đứng yên | 3 | giây | Bộ số chung |\n| Đếm ngược khi tiếp tục | 0 | giây | Chạy lại ngay |\n| Số popup tạm dừng mở cùng lúc | tối đa 1 | popup | Không mở chồng |\n| Điểm khi bỏ lượt | số đợt đã dọn sạch | đợt | Giống thua |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Nút tạm dừng và popup tạm dừng | Không có | Không bắt buộc | Có |\n| Tự tạm dừng khi rời game | Không có (trận cứ chạy) | Không bắt buộc | Có |\n| Nút quay lại của máy mở tạm dừng | Không có | Không bắt buộc | Có |\n| Bỏ lượt | Không có | Không bắt buộc | Có, có hỏi xác nhận |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Run",
-   "at": "2026-11-25 11:47:00"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "pause-quit-ends": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.GivingUpSettlesTheScoreLikeLosing",
@@ -24,11 +24,11 @@
    "hash": "8065a64a729a",
    "text": "Đồng ý bỏ lượt thì lượt kết thúc với điểm bằng số đợt đã dọn sạch, đợt đang dở không tính\nSau đó về màn bắt đầu (`feature-run/run-flow/flow-rules`).",
    "title": "Đồng ý bỏ lượt thì lượt kết thúc với điểm bằng số đợt đã dọn sạch, đợt đang dở không tính",
-   "by": "Run",
-   "at": "2026-11-25 11:47:02"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "edge-bo-luot-khi-chua-don-dot-nao": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.GivingUpRightAfterEnteringBattleScoresZeroAndKeepsTheBest"
@@ -37,8 +37,8 @@
    "hash": "7c88daa0416e",
    "text": "**Bỏ lượt khi chưa dọn đợt nào:** điểm 0, kỉ lục không đổi.",
    "title": "Bỏ lượt khi chưa dọn đợt nào",
-   "by": "Run",
-   "at": "2026-11-25 11:47:03"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   }
  },
  "log": [
@@ -62,6 +62,27 @@
    "state": "done",
    "by": "Run",
    "note": "RunFlowTests.GivingUpRightAfterEnteringBattleScoresZeroAndKeepsTheBest"
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "pause-quit-ends",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "edge-bo-luot-khi-chua-don-dot-nao",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

@@ -1,6 +1,6 @@
 ---
 based-on: 72f1cb81f16b
-refs: feature-hud/hud-layout/layout-spec@ebefd7f8b116, feature-hud-upgrade/bar-layout/bar-buttons@b972ab828a57, feature-hud-upgrade/button-state/button-display@79f973592f0d, feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09, feature-hero/hero-list/hero-roster-values@8a2346250094
+refs: feature-hud/hud-layout/layout-spec@ebefd7f8b116, feature-hud-upgrade/bar-layout/bar-buttons@b972ab828a57, feature-hud-upgrade/button-state/button-display@79f973592f0d, feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09, feature-hero/hero-list/hero-roster-values@b91d8c9d12d4
 ---
 # Cheat: thanh nâng cấp
 

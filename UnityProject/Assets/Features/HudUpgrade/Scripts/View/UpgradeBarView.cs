@@ -35,6 +35,8 @@ namespace Game.HudUpgrade
         [SerializeField] private float groupGap = 70;
         [Tooltip("Mép trái cụm kĩ năng của feature-hud trên màn chuẩn; thanh phải kết thúc trước đó.")]
         [SerializeField] private float skillsLeft = 1420;
+        [Tooltip("Khoảng hở tối thiểu giữa thanh và cụm kĩ năng (frame bar-buttons: thanh kết thúc ở 1380, cụm kĩ năng ở 1420).")]
+        [SerializeField] private float skillsGap = 40;
         [SerializeField] private int sortingOrder = 10;
 
         [Header("Màu và chuyển động")]
@@ -104,7 +106,7 @@ namespace Game.HudUpgrade
         }
 
         private BarLayout.Settings LayoutSettings() =>
-            new BarLayout.Settings(barLeft, buttonSize.x, buttonGap, groupGap, referenceResolution.x - skillsLeft);
+            new BarLayout.Settings(barLeft, buttonSize.x, buttonGap, groupGap, referenceResolution.x - skillsLeft + skillsGap);
 
         /// <summary>Canvas width in canvas units (equals 1920 on a 16:9 screen; less on a narrower one).</summary>
         private float CanvasWidth()

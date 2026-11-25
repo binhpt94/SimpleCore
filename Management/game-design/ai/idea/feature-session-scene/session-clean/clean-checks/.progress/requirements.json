@@ -12,7 +12,7 @@
    "at": "2026-11-25 11:37:16"
   },
   "leak-names-owner": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SessionSceneLogicTests.AfterTheDisposeStep_AParticipantThatStillHoldsViewsOrJobs_IsReportedByNameWithWhatItLeft",
@@ -22,11 +22,11 @@
    "hash": "9764eaed9499",
    "text": "Sau bước huỷ còn sót thì ghi lỗi nêu tên feature tham gia còn sót và số view, số việc còn lại\nKhông tự dọn hộ âm thầm; thứ sót là lỗi của feature sở hữu.",
    "title": "Sau bước huỷ còn sót thì ghi lỗi nêu tên feature tham gia còn sót và số view, số việc còn lại",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 11:37:08"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:58"
   },
   "edge-feature-khong-co-view-hay-viec-nao": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SessionSceneLogicTests.AfterTheDisposeStep_ParticipantsThatHoldNothing_AreNotReported"
@@ -35,11 +35,11 @@
    "hash": "462b4217bcb0",
    "text": "**Feature không có view hay việc nào**: số đếm 0, không ghi gì.",
    "title": "Feature không có view hay việc nào",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 11:37:09"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:58"
   },
   "edge-feature-loi-o-buoc-huy": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "SessionSceneLogicTests.AParticipantThatFailsToCleanUp_IsStillCounted_AndWhatItLeftIsReported"
@@ -48,8 +48,8 @@
    "hash": "ecfcf6f5d1f2",
    "text": "**Feature lỗi ở bước huỷ**: vẫn huỷ tiếp các feature còn lại (luật xử lí lỗi ở nhánh ba bước của dịch vụ); số đếm của feature lỗi vẫn được đọc và ghi lỗi nếu còn sót.",
    "title": "Feature lỗi ở bước huỷ",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 11:37:10"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:58"
   },
   "count-per-participant": {
    "state": "doing",
@@ -126,6 +126,27 @@
    "state": "doing",
    "by": "_Services/SessionScene",
    "note": "logic đã đếm sau bước huỷ qua IParticipantUsage, có test EveryParticipantReached_IsCountedOnlyAfterEveryoneDisposed. Còn bộ đếm thật trong Unity, chờ CodeLead chốt cách đếm"
+  },
+  {
+   "at": "2026-11-25 12:02:58",
+   "id": "leak-names-owner",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:58",
+   "id": "edge-feature-loi-o-buoc-huy",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:58",
+   "id": "edge-feature-khong-co-view-hay-viec-nao",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

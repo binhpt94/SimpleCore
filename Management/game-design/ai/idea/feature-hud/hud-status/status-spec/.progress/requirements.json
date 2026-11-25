@@ -150,7 +150,7 @@
    "at": "2026-11-25 11:39:09"
   },
   "wave-banner": {
-   "state": "done",
+   "state": "verified",
    "note": "đã có test 1.5 giây, cần test view cho thông báo không chặn chạm",
    "tests": [
     "HudStatusTests.WaveStartShowsTheBannerForOneAndAHalfSeconds",
@@ -160,11 +160,11 @@
    "hash": "4bb1d86aecd7",
    "text": "Mỗi lần một đợt bắt đầu, thông báo \"Đợt N\" hiện 1.5 giây rồi tự tắt, không chặn bấm\nKhông che thao tác: chạm xuyên qua thông báo vẫn tới nút bên dưới.",
    "title": "Mỗi lần một đợt bắt đầu, thông báo \"Đợt N\" hiện 1.5 giây rồi tự tắt, không chặn bấm",
-   "by": "Hud",
-   "at": "2026-11-25 11:36:44"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:23"
   },
   "money-icon-number": {
-   "state": "done",
+   "state": "verified",
    "note": "số tiền đã có test, cần test view cho biểu tượng xu",
    "tests": [
     "HudLayoutTests.MoneyShowsTheCoinIconRightBeforeTheNumber",
@@ -175,11 +175,11 @@
    "hash": "6da49a5675ac",
    "text": "Tiền hiện bằng 1 biểu tượng xu và số nguyên đầy đủ, ví dụ \"50\"\nBiểu tượng xu đại diện cho tiền trong lượt (`feature-wallet`). Đổi ngay khi nhận hay tiêu.",
    "title": "Tiền hiện bằng 1 biểu tượng xu và số nguyên đầy đủ, ví dụ \"50\"",
-   "by": "Hud",
-   "at": "2026-11-25 11:36:45"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:23"
   },
   "status-no-input": {
-   "state": "done",
+   "state": "verified",
    "note": "cần test view cho ba ô và thông báo không nhận chạm",
    "tests": [
     "HudLayoutTests.StatusBoxesAndBannerTakeNoTaps",
@@ -189,8 +189,8 @@
    "hash": "666356054e66",
    "text": "Ba ô thông tin và thông báo đợt không nhận chạm, không tự tính số nào\nMáu từ `feature-castle`, tiền từ `feature-wallet`, đợt từ `feature-wave`.",
    "title": "Ba ô thông tin và thông báo đợt không nhận chạm, không tự tính số nào",
-   "by": "Hud",
-   "at": "2026-11-25 11:36:48"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:23"
   }
  },
  "log": [
@@ -386,6 +386,27 @@
   {
    "at": "2026-11-25 11:39:09",
    "id": "edge-luot-ket-thuc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:23",
+   "id": "money-icon-number",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:23",
+   "id": "wave-banner",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:23",
+   "id": "status-no-input",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

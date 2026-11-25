@@ -1,7 +1,7 @@
 {
  "items": {
   "castle-box": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleBodyTests.Enemies_see_the_castle_centred_at_zero_with_its_half_width",
@@ -12,11 +12,11 @@
    "hash": "4e0c5807c1e2",
    "text": "Thành là khối 2D đứng yên, tâm ở x=0u, rộng 3u, cao 4u; mép thành ở x=-1.5u và x=+1.5u\nMọi khoảng cách tới thành (tầm quái, tầm tự bắn, vùng Sấm sét) tính từ mép thành, không từ tâm. Đã loại: tính từ tâm (tầm thay đổi khi đổi kích thước hình).",
    "title": "Thành là khối 2D đứng yên, tâm ở x=0u, rộng 3u, cao 4u; mép thành ở x=-1.5u và x=+1.5u",
-   "by": "Castle",
-   "at": "2026-11-25 11:39:56"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:39"
   },
   "castle-hp-value": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleBodyTests.Castle_starts_at_full_health",
@@ -26,11 +26,11 @@
    "hash": "abfb267ba822",
    "text": "Máu tối đa lúc vào trận là 1000, máu hiện tại bắt đầu bằng 1000\nMột con Lính đợt 1 (5 sát thương/1.0s) phải đứng đánh 200s mới phá được thành; áp lực đến từ số đông và các đợt sau. Không tự hồi; chỉ nâng cấp máu (`feature-castle/castle-upgrade-effects`) làm máu tăng.",
    "title": "Máu tối đa lúc vào trận là 1000, máu hiện tại bắt đầu bằng 1000",
-   "by": "Castle",
-   "at": "2026-11-25 11:39:57"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:39"
   },
   "castle-destroyed-once": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleBodyTests.Castle_falling_tells_the_run_it_is_lost_once_before_destroyed",
@@ -42,11 +42,11 @@
    "hash": "52f1771b2c08",
    "text": "Máu hiện tại nhỏ hơn hoặc bằng 0 thì thành bị phá, báo `feature-run` đúng 1 lần\nSau khi bị phá, thành không nhận thêm sát thương, không tự bắn, không cho dùng kĩ năng, cho tới khi được hồi sinh. Nhiều đòn cùng lúc đưa máu xuống dưới 0 vẫn chỉ báo 1 lần; máu hiện ra là 0, không âm. Hồi sinh rồi bị phá lần nữa thì báo thêm 1 lần.",
    "title": "Máu hiện tại nhỏ hơn hoặc bằng 0 thì thành bị phá, báo `feature-run` đúng 1 lần",
-   "by": "Castle",
-   "at": "2026-11-25 11:39:59"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:39"
   },
   "castle-hit-feedback": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleSessionTests.Enemy_hit_flashes_the_castle_and_its_fall_collapses_it",
@@ -56,11 +56,11 @@
    "hash": "596acd6245c9",
    "text": "Thành bị đánh thì nháy 0.1s; bị phá thì thu nhỏ còn 0 trong 0.5s\nNgười chơi thấy ngay thành đang bị đánh dù không nhìn thanh máu. Nháy nhiều đòn liên tiếp thì đặt lại 0.1s, không cộng dồn.",
    "title": "Thành bị đánh thì nháy 0.1s; bị phá thì thu nhỏ còn 0 trong 0.5s",
-   "by": "Castle",
-   "at": "2026-11-25 11:40:00"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:39"
   },
   "edge-nhieu-quai-danh-trung-cung-mot-khung-hinh": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleBodyTests.Castle_falling_tells_the_run_it_is_lost_once_before_destroyed"
@@ -69,11 +69,11 @@
    "hash": "2a2e08cbee56",
    "text": "Nhiều quái đánh trúng cùng một khung hình: trừ lần lượt; lần đưa máu về ≤0 là lần báo bị phá; các lần sau bị bỏ qua.",
    "title": "Nhiều quái đánh trúng cùng một khung hình",
-   "by": "Castle",
-   "at": "2026-11-25 11:40:01"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:39"
   },
   "edge-nang-mau-dung-luc-mau-ve-0-cung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleBodyTests.Health_bought_in_the_frame_the_castle_fell_is_not_applied",
@@ -83,11 +83,11 @@
    "hash": "f66b696a3547",
    "text": "Nâng máu đúng lúc máu về 0 cùng khung hình: bị phá xử lý trước; đã bị phá thì không mua được nữa (`feature-run` dừng trận).",
    "title": "Nâng máu đúng lúc máu về 0 cùng khung hình",
-   "by": "Castle",
-   "at": "2026-11-25 11:40:03"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:39"
   },
   "edge-mau-hien-tai-co-so-le-sat-thuong": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleBodyTests.Fraction_of_health_left_keeps_the_castle_standing"
@@ -96,11 +96,11 @@
    "hash": "ed8e802b1b2d",
    "text": "Máu hiện tại có số lẻ (sát thương quái nhân hệ số đợt): giữ số thực; còn 0.4 máu thì thành chưa bị phá. Cách hiện số là việc của `feature-hud` (làm tròn xuống, nên hiện \"0/1000\" và thanh còn một vệt).",
    "title": "Máu hiện tại có số lẻ (sát thương quái nhân hệ số đợt)",
-   "by": "Castle",
-   "at": "2026-11-25 11:40:04"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:39"
   },
   "edge-tam-dung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleSessionTests.Nothing_moves_while_paused"
@@ -109,11 +109,11 @@
    "hash": "9f7b7337b944",
    "text": "Tạm dừng: thành không nhận sát thương vì mọi quái đứng yên; hiệu ứng nháy đang chạy cũng dừng.",
    "title": "Tạm dừng",
-   "by": "Castle",
-   "at": "2026-11-25 11:40:04"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:39"
   },
   "edge-hero-va-don-cua-chinh-thanh-ki-nang": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleAutoShotTests.Castle_shot_never_hurts_the_castle",
@@ -123,8 +123,8 @@
    "hash": "2363b4d6662b",
    "text": "Hero và đòn của chính thành, kĩ năng thành không bao giờ trừ máu thành.",
    "title": "Hero và đòn của chính thành, kĩ năng thành không bao giờ trừ máu thành.",
-   "by": "Castle",
-   "at": "2026-11-25 11:40:09"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:39"
   },
   "params": {
    "state": "done",
@@ -228,6 +228,69 @@
    "state": "doing",
    "by": "Castle",
    "note": "cho contract cua CodeLead: Castle dua diem xuat phat va hoi sinh cho Hero, dung sau khi choi duoc IDEA"
+  },
+  {
+   "at": "2026-11-25 12:02:39",
+   "id": "castle-box",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:39",
+   "id": "castle-hp-value",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:39",
+   "id": "castle-destroyed-once",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:39",
+   "id": "castle-hit-feedback",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:39",
+   "id": "edge-nhieu-quai-danh-trung-cung-mot-khung-hinh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:39",
+   "id": "edge-nang-mau-dung-luc-mau-ve-0-cung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:39",
+   "id": "edge-mau-hien-tai-co-so-le-sat-thuong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:39",
+   "id": "edge-tam-dung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:39",
+   "id": "edge-hero-va-don-cua-chinh-thanh-ki-nang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

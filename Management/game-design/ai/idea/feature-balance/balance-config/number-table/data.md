@@ -9,8 +9,8 @@ Bộ số chuẩn của cả game gom thành một bảng đối chiếu: mỗi 
 
 ## Ý cốt lõi
 
-### table-hero | AI 7 | Chỉ số lv1 của 5 hero nằm ở cấu hình `feature-hero`, ví dụ Hiệp sĩ 300 máu, 12 sát thương mỗi 1.0 s, tầm 1.2u, đi 2.5 u/s
-Gồm máu, sát thương, giây mỗi đòn, tầm, tốc độ, kiểu đòn; hồi sinh 8 s; mỗi cấp +15% máu và sát thương của lv1, +3% tốc độ đánh tới tối đa +60%.
+### table-hero | AI 7 | Chỉ số lv1 của 5 hero nằm ở cấu hình `feature-hero`, ví dụ Hiệp sĩ 300 máu, 12 sát thương mỗi 1.0 s, tầm 1.2u, đi 2.0 u/s
+Gồm máu, sát thương, giây mỗi đòn, tầm, tốc độ (mỗi hero một mức, 2.0 tới 3.5 u/s), kiểu đòn; hồi sinh 8 s; mỗi cấp +15% máu và sát thương của lv1, +3% tốc độ đánh tới tối đa +60%.
 
 ### table-castle | AI 7 | Chỉ số thành nằm ở cấu hình `feature-castle`: 1000 máu, 10 sát thương mỗi 1.0 s, tầm 6u từ mép thành
 Cùng 3 kĩ năng: Sấm sét 80 sát thương hồi 20 s, Băng giá chậm 50% trong 5 s hồi 35 s, Cổ vũ hồi 30% máu hero hồi 25 s; mức tăng mỗi cấp của máu (+150), sức đánh (+20% lv1), kĩ năng (+20% hiệu lực lv1).

@@ -66,6 +66,37 @@ namespace Game.SceneFlow.Tests
         }
 
         [Test]
+        public void TheNewScene_StartsLoadingOnlyOnceTheOldSceneHasEnded()
+        {
+            session.EndPending = true;
+
+            RequestGame();
+
+            Assert.That(log, Is.EqualTo(new[] { "screen shown", "end session" }), "no load while the old scene is ending");
+
+            session.FinishEnd();
+
+            Assert.That(log, Is.EqualTo(new[] { "screen shown", "end session", "session ended", "load Game" }));
+        }
+
+        [Test]
+        public void ARequestWhileTheOldSceneIsStillEnding_IsIgnored_WithAWarning()
+        {
+            session.EndPending = true;
+            RequestGame();
+            log.Clear();
+
+            var second = switcher.Request("Loading", session.EndAsync);
+
+            Assert.That(second, Is.False);
+            Assert.That(flowLog.Warnings, Has.Count.EqualTo(1));
+            Assert.That(log, Is.Empty, "no second cover, no second session end");
+
+            session.FinishEnd();
+            Assert.That(log, Is.EqualTo(new[] { "session ended", "load Game" }), "only the first switch goes on");
+        }
+
+        [Test]
         public void TheCover_ShowsAtOnce_AndStaysUntilTheNewSceneHasRun()
         {
             RequestGame();
@@ -616,10 +647,21 @@ namespace Game.SceneFlow.Tests
                 Joined.Add(participant);
             }
 
+            /// <summary>When set, EndAsync stays pending until the test finishes it with FinishEnd.</summary>
+            public bool EndPending;
+
+            private readonly UniTaskCompletionSource ended = new UniTaskCompletionSource();
+
             public UniTask EndAsync()
             {
                 log.Add("end session");
-                return UniTask.CompletedTask;
+                return EndPending ? ended.Task : UniTask.CompletedTask;
+            }
+
+            public void FinishEnd()
+            {
+                log.Add("session ended");
+                ended.TrySetResult();
             }
 
             public void Raise(SessionState state)

@@ -267,6 +267,34 @@ namespace Game.Upgrade.Tests
         }
 
         [Test]
+        public void The_bar_is_told_again_when_play_resumes_after_a_pause()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            _run.SetStep(RunStep.Paused);
+            _changes = 0;
+
+            _run.SetStep(RunStep.Playing);
+
+            Assert.GreaterOrEqual(_changes, 1);
+            for (var i = 0; i < _shop.Count; i++) Assert.IsTrue(_shop.Get(i).CanBuy);
+        }
+
+        [Test]
+        public void The_bar_is_told_when_the_castle_falls_and_every_item_turns_unbuyable()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            for (var i = 0; i < _shop.Count; i++) Assert.IsTrue(_shop.Get(i).CanBuy);
+            _changes = 0;
+
+            _run.Stop();
+
+            Assert.GreaterOrEqual(_changes, 1);
+            for (var i = 0; i < _shop.Count; i++) Assert.IsFalse(_shop.Get(i).CanBuy);
+        }
+
+        [Test]
         public void A_new_run_puts_every_item_back_to_level_1_with_the_new_team()
         {
             EnterBattle("knight", "archer", "mage");

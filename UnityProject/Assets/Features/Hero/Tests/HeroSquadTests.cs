@@ -140,7 +140,7 @@ namespace Game.Hero.Tests
             Assert.That(Hero(0).Stats.Damage, Is.EqualTo(32.9f).Within(1e-3f));
             Assert.That(Hero(0).Stats.SecondsPerAttack, Is.EqualTo(0.630f).Within(1e-3f));
             Assert.That(Hero(0).Hero.range, Is.EqualTo(7f));
-            Assert.That(Hero(0).Hero.moveSpeed, Is.EqualTo(2.5f));
+            Assert.That(Hero(0).Hero.moveSpeed, Is.EqualTo(3f));
         }
 
         [Test]
@@ -227,7 +227,7 @@ namespace Game.Hero.Tests
 
             Run(1f);
 
-            Assert.That(Hero(0).X, Is.EqualTo(1.0f).Within(1e-3f));
+            Assert.That(Hero(0).X, Is.EqualTo(0.5f).Within(1e-3f), "2.0u/s from -1.5");
             Assert.That(Hero(0).Facing, Is.EqualTo(1));
             Assert.That(Hero(0).IsMoving, Is.True);
         }
@@ -238,7 +238,7 @@ namespace Game.Hero.Tests
             Start("knight");
             var enemy = _field.Add(10f);
 
-            Run(4f, 0.01f);                // arrives at x = 10 - 0.9 - 1.2 = 7.9 after 3.76s
+            Run(5f, 0.01f);                // arrives at x = 10 - 0.9 - 1.2 = 7.9 after 4.7s
 
             Assert.That(Hero(0).X, Is.EqualTo(7.9f).Within(0.01f));
             Assert.That(Hero(0).Mode, Is.EqualTo(HeroMode.Attacking));
@@ -257,7 +257,7 @@ namespace Game.Hero.Tests
 
             Run(1f);
 
-            Assert.That(Hero(0).X, Is.EqualTo(1.0f).Within(1e-3f), "went right, to the nearer enemy");
+            Assert.That(Hero(0).X, Is.EqualTo(0.5f).Within(1e-3f), "went right, to the nearer enemy");
         }
 
         [Test]
@@ -271,7 +271,7 @@ namespace Game.Hero.Tests
 
             _field.Move(enemy, 15.9f);
             Run(1f);
-            Assert.That(Hero(0).X, Is.EqualTo(1.0f).Within(1e-3f));
+            Assert.That(Hero(0).X, Is.EqualTo(0.5f).Within(1e-3f));
         }
 
         [Test]
@@ -296,11 +296,11 @@ namespace Game.Hero.Tests
         {
             Start("knight");
             var enemy = _field.Add(15f);
-            Run(2f);                       // x = 3.5
+            Run(2f);                       // x = 2.5
             _field.Remove(enemy);
 
             Run(1f);
-            Assert.That(Hero(0).X, Is.EqualTo(1.0f).Within(1e-3f));
+            Assert.That(Hero(0).X, Is.EqualTo(0.5f).Within(1e-3f));
             Assert.That(Hero(0).Facing, Is.EqualTo(-1));
             Assert.That(Hero(0).Mode, Is.EqualTo(HeroMode.Waiting));
 

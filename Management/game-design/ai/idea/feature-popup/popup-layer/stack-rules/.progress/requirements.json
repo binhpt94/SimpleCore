@@ -119,7 +119,7 @@
    "at": "2026-11-25 10:54:57"
   },
   "backdrop-dim": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree",
    "tests": [
     "PopupLayerAssetTests.Backdrop_DarkensTheWholeScreenBy60Percent",
@@ -129,11 +129,11 @@
    "hash": "336d33fe10ee",
    "text": "Nền che làm tối phần bên dưới 60% (dự kiến); mỗi popup một nền, nền chồng thì tối thêm\nKhi có popup chồng lên, popup bên dưới cũng bị tối đi, người chơi biết đang ở popup nào.",
    "title": "Nền che làm tối phần bên dưới 60% (dự kiến); mỗi popup một nền, nền chồng thì tối thêm",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 11:35:52"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:54"
   },
   "backdrop-tap-nothing": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree",
    "tests": [
     "PopupLayerAssetTests.Backdrop_TakesEveryTouch_AndATapOnItDoesNothing"
@@ -142,11 +142,11 @@
    "hash": "8b326f0b4c54",
    "text": "Bấm vào nền che không làm gì: không đóng popup, không xuống phần bên dưới",
    "title": "Bấm vào nền che không làm gì: không đóng popup, không xuống phần bên dưới",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 11:35:53"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:54"
   },
   "edge-khong-co-popup": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree",
    "tests": [
     "PopupLayerAssetTests.Presenter_MakesNoLayerUntilTheFirstPopup",
@@ -156,11 +156,11 @@
    "hash": "47d97d7bc32e",
    "text": "**Không có popup**: lớp popup không chặn bấm, không làm tối gì.",
    "title": "Không có popup",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 11:35:57"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:54"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree",
    "tests": [
     "PopupLayerAssetTests.Config_AllowsAtMostThreePopupsAtOnce",
@@ -174,11 +174,11 @@
    "hash": "c265d454211e",
    "text": "## Làm gì\n- Lớp popup của scene Game giữ một chồng popup, từ 0 tới 3 cái.\n- Mở popup: kiểm id chưa mở và chồng chưa đủ 3; đặt nền che rồi popup lên trên cùng; popup cũ trên cùng thôi nhận bấm.\n- Đóng popup: bỏ popup và nền che của nó; popup ngay dưới (nếu có) nhận bấm lại; không còn popup thì lớp popup không chặn gì.\n- Khi có popup mở: HUD, màn chơi và các popup không ở trên cùng không nhận bấm. Nút quay lại của điện thoại chỉ được chuyển cho feature của popup trên cùng.\n\nCác tình huống trong game hiện tại:\n\n| Tình huống | Chồng popup (dưới → trên) | Nhận bấm |\n|---|---|---|\n| Đang đánh | (trống) | HUD, màn chơi |\n| Tạm dừng (cả bước hỏi xác nhận bỏ lượt) | popup tạm dừng | popup tạm dừng |\n| Thua | popup thua | popup thua |\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số popup chồng tối đa | 3 | popup | Game hiện cần 1; dư cho popup sau này, quá 3 là dấu hiệu lỗi |\n| Số bản mỗi id cùng lúc | 1 | bản | Chặn mở trùng do bấm nhanh |\n| Độ tối của một nền che | 60 (dự kiến) | % | Đủ thấy đang có popup mà vẫn nhận ra trận phía sau |\n| Thời gian hiện, đóng popup | 0 | giây | Tức thì, nhận bấm ngay |\n| Tác dụng khi bấm nền che | không | — | Tránh bấm nhầm mất popup thua |\n| Tác dụng nút quay lại của điện thoại khi có popup | chuyển cho feature của popup trên cùng; dịch vụ không tự làm gì | — | Mỗi popup tự quyết (popup tạm dừng: như \"Tiếp tục\"/\"Không\"; popup thua: không tác dụng) |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Hiệu ứng mở popup | Không, hiện tức thì | Phóng to từ 90% lên 100% trong 0,15 giây (dự kiến) | Như PROTOTYPE, chỉnh theo art |\n| Hiệu ứng đóng popup | Không, mất tức thì | Mất tức thì | Thu nhỏ và mờ 0,1 giây (dự kiến) |\n| Nhận bấm trong lúc hiệu ứng mở | Không có hiệu ứng | Chặn bấm tới khi hiệu ứng xong | Như PROTOTYPE |\n| Độ tối nền che | 60% (dự kiến) | 60% | Chỉnh theo art |\n| Số popup chồng tối đa | 3 | 3 | 3 |\n| Nút quay lại của điện thoại | Chuyển cho popup trên cùng | Chuyển cho popup trên cùng | Chuyển cho popup trên cùng |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 11:36:01"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:54"
   },
   "runs-while-frozen": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test mới với Time.timeScale bằng 0, chờ gỡ chặn worktree",
    "tests": [
     "PopupServiceTests.Popups_OpenTakeTheTopAndClose_WhileTheBattleClockIsStopped"
@@ -187,11 +187,11 @@
    "hash": "1acef0975a2d",
    "text": "Popup hiện, nhận bấm và đóng được cả khi trận đang đứng yên\nPopup tạm dừng và popup thua đều mở lúc trận đã dừng.",
    "title": "Popup hiện, nhận bấm và đóng được cả khi trận đang đứng yên",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 11:35:54"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:54"
   },
   "edge-tran-dung-yen-tam-dung-thua": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test mới với Time.timeScale bằng 0, chờ gỡ chặn worktree",
    "tests": [
     "PopupServiceTests.Popups_OpenTakeTheTopAndClose_WhileTheBattleClockIsStopped"
@@ -200,8 +200,8 @@
    "hash": "534ba32d8680",
    "text": "**Trận đứng yên (tạm dừng, thua)**: popup và hiệu ứng của popup không đứng theo; popup không dựa vào đồng hồ của trận.",
    "title": "Trận đứng yên (tạm dừng, thua)",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 11:35:55"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:54"
   }
  },
  "log": [
@@ -411,6 +411,48 @@
   {
    "at": "2026-11-25 11:39:25",
    "id": "edge-dong-popup-khong-o-tren-cung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:54",
+   "id": "backdrop-dim",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:54",
+   "id": "backdrop-tap-nothing",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:54",
+   "id": "runs-while-frozen",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:54",
+   "id": "edge-tran-dung-yen-tam-dung-thua",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:54",
+   "id": "edge-khong-co-popup",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:54",
+   "id": "params",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

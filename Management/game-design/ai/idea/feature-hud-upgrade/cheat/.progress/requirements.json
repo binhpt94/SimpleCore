@@ -1,8 +1,8 @@
 {
  "items": {
   "mixed-buttons": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "CodeLead trả: đồ giả trả đúng giá của state 55 100 30 56 110 135, khẳng định năm nút sáng, nút kĩ năng mờ",
    "tests": [
     "HudUpgradeSessionTests.Mixed_buttons_cheat_lights_five_buttons_and_dims_the_skill_button",
     "HudUpgradeSessionTests.Config_asset_holds_the_mixed_buttons_state_of_the_design",
@@ -13,11 +13,11 @@
    "hash": "bcfb63b2cb9e",
    "text": "Giữa trận, đủ tiền mua năm mục, thiếu tiền cho một mục\nÉp: tiền 120; đội Hiệp sĩ cấp 3 (giá 55), Đấu sĩ rìu cấp 5 (giá 100), Cung thủ cấp 1 (giá 30); máu thành cấp 2 (giá 56), sức đánh thành cấp 4 (giá 110), kĩ năng thành cấp 3 (giá 135). Năm nút sáng, nút kĩ năng mờ vì 120 < 135. Có đủ mọi thành phần của nút: hình, cấp, xu, giá, sáng và mờ.",
    "title": "Giữa trận, đủ tiền mua năm mục, thiếu tiền cho một mục",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:55"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:07:39"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudUpgradeSessionTests.Mixed_buttons_cheat_lights_five_buttons_and_dims_the_skill_button",
@@ -28,8 +28,8 @@
    "hash": "b401a1aa01fd",
    "text": "## Làm gì\n- Ở bản dev, chọn state `mixed-buttons` thì game dựng trận với số tiền và cấp từng mục như ép, không cần chơi tới.\n- Giá trị ép đi qua đúng đường của game: tiền qua `feature-wallet`, cấp qua `feature-upgrade`; giá và sáng/mờ do `feature-upgrade/upgrade-purchase/purchase-rules` tính như thường, thanh nâng cấp chỉ hiện (`feature-hud-upgrade/button-state/button-display`).\n- Code cheat nằm trong thư mục `HudUpgrade`, sau cờ dev; không lọt vào bản phát hành.",
    "title": "Số và việc của node (Làm gì)",
-   "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:59"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:19"
   }
  },
  "log": [
@@ -46,6 +46,41 @@
    "state": "done",
    "by": "HudUpgrade",
    "note": "HudUpgradeSessionTests.Mixed_buttons_cheat_lights_five_buttons_and_dims_the_skill_button, HudUpgradeSessionTests.Cheat_is_off_by_default_and_changes_nothing, HudUpgradeSessionTests.Config_asset_holds_the_mixed_buttons_state_of_the_design"
+  },
+  {
+   "at": "2026-11-25 12:02:19",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:14",
+   "id": "mixed-buttons",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "FakeShop giá 30 cộng 10 mỗi cấp, với 120 tiền cả 6 nút đều sáng, test chỉ so Lit với CanBuy nên không kiểm được năm nút sáng, nút kĩ năng mờ như thiết kế. Cho đồ giả trả đúng giá của state 55, 100, 30, 56, 110, 135 và khẳng định năm nút đầu sáng, nút thứ 6 mờ"
+  },
+  {
+   "at": "2026-11-25 12:04:21",
+   "id": "mixed-buttons",
+   "state": "doing",
+   "by": "HudUpgrade",
+   "note": "CodeLead trả: đồ giả trả đúng giá của state 55 100 30 56 110 135, khẳng định năm nút sáng, nút kĩ năng mờ"
+  },
+  {
+   "at": "2026-11-25 12:06:46",
+   "id": "mixed-buttons",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "HudUpgradeSessionTests.Mixed_buttons_cheat_lights_five_buttons_and_dims_the_skill_button, HudUpgradeSessionTests.Config_asset_holds_the_mixed_buttons_state_of_the_design, HudUpgradeSessionTests.Mixed_buttons_cheat_accepts_the_knight_axeman_archer_team, HudUpgradeSessionTests.Mixed_buttons_cheat_names_both_teams_when_another_team_was_picked"
+  },
+  {
+   "at": "2026-11-25 12:07:39",
+   "id": "mixed-buttons",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

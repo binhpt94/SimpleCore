@@ -99,7 +99,12 @@ namespace Game.HudUpgrade.Tests
             return PurchaseResult.Bought;
         }
 
-        private int Price(int index) => _items[index].basePrice + 10 * (_items[index].level - 1);
+        /// <summary>When set, price of item (index, level); replaces the simple base + 10 per level.</summary>
+        public Func<int, int, int> PriceOf { get; set; }
+
+        private int Price(int index) => PriceOf != null
+            ? PriceOf(index, _items[index].level)
+            : _items[index].basePrice + 10 * (_items[index].level - 1);
     }
 
     internal sealed class FakeRoster : IHeroRoster

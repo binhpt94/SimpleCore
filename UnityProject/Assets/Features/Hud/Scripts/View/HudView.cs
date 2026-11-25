@@ -151,8 +151,9 @@ namespace Game.Hud
         {
             Build();
             if (_cheatButton != null) return;
-            // Dev only, just under the pause corner; not part of the released HUD.
-            var rect = Rect("Cheat", _root, new Vector2(0f, 1f), 40f, 150f, 260f, 50f);
+            // Dev only, not part of the released HUD. Inside the top band, between the health bar and the wave box
+            // (x 1290..1550, y 15..65), so it never covers the battle strip; anchored like the health bar to stay there.
+            var rect = Rect("Cheat", _root, new Vector2(0.5f, 1f), 1290f, 15f, 260f, 50f);
             var back = rect.gameObject.AddComponent<Image>();
             back.color = new Color(0.6f, 0.1f, 0.6f, 0.8f);
             var press = rect.gameObject.AddComponent<Button>();

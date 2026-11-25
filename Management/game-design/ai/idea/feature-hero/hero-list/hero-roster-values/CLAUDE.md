@@ -10,13 +10,24 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Thông số
 | Hero | Nhóm | Máu | Sát thương | s mỗi đòn | Tầm (u) | Chạy (u/s) | Hộp (u) | Kiểu đòn | Sát thương/s |
 |---|---|---|---|---|---|---|---|---|---|
-| Hiệp sĩ | Cận chiến | 300 | 12 | 1.0 | 1.2 | 2.5 | 1×1.5 | Một mục tiêu | 12.0 |
-| Đấu sĩ rìu | Cận chiến | 240 | 14 | 1.4 | 1.3 | 2.5 | 1×1.5 | Chém 1.5u phía trước | 10.0 mỗi quái |
+| Hiệp sĩ | Cận chiến | 300 | 12 | 1.0 | 1.2 | 2.0 | 1×1.5 | Một mục tiêu | 12.0 |
+| Đấu sĩ rìu | Cận chiến | 240 | 14 | 1.4 | 1.3 | 2.4 | 1×1.5 | Chém 1.5u phía trước | 10.0 mỗi quái |
 | Kiếm khách | Cận chiến | 180 | 16 | 0.7 | 1.2 | 3.5 | 1×1.5 | Một mục tiêu | 22.9 |
-| Cung thủ | Bắn xa | 120 | 14 | 0.8 | 7 | 2.5 | 1×1.5 | Một mục tiêu | 17.5 |
-| Pháp sư | Bắn xa | 100 | 18 | 1.6 | 6 | 2.2 | 1×1.5 | Nổ bán kính 1.5u | 11.25 mỗi quái |
+| Cung thủ | Bắn xa | 120 | 14 | 0.8 | 7 | 3.0 | 1×1.5 | Một mục tiêu | 17.5 |
+| Pháp sư | Bắn xa | 100 | 18 | 1.6 | 6 | 2.6 | 1×1.5 | Nổ bán kính 1.5u | 11.25 mỗi quái |
 
-Mọi giá trị là cấp 1, dự kiến, theo bộ số chung. Lí do chung: cận chiến máu 180-300, bắn xa 100-120; hero đánh vùng có sát thương/s mỗi quái thấp hơn hero một mục tiêu (luật `hero-tradeoff` vòng 3).
+Mọi giá trị là cấp 1, dự kiến, theo bộ số chung.
+
+Tốc độ chạy theo vai (dự kiến):
+| Hero | Chạy (u/s) | Lí do |
+|---|---|---|
+| Hiệp sĩ | 2.0 | Giáp nặng; đứng chắn gần thành nên ít phải đi xa |
+| Đấu sĩ rìu | 2.4 | Rìu nặng; vẫn kịp ra gặp cụm quái |
+| Pháp sư | 2.6 | Áo choàng nhẹ, tầm 6u nên không cần chạy nhanh |
+| Cung thủ | 3.0 | Đồ nhẹ; chạy nhanh tới chỗ bắn, tầm 7u |
+| Kiếm khách | 3.5 | Nhanh nhất (vòng 3); lao tới hạ từng con |
+
+So với quái: Lính 1.5, Sói 3.0 u/s (`feature-enemy`). Chỉ Kiếm khách chạy nhanh hơn Sói; Cung thủ bằng Sói. Lí do chung: cận chiến máu 180-300, bắn xa 100-120; hero đánh vùng có sát thương/s mỗi quái thấp hơn hero một mục tiêu (luật `hero-tradeoff` vòng 3).
 
 Kiểu đòn:
 | Kiểu | Trúng ai |
@@ -41,6 +52,7 @@ Hiệu ứng (mức tối thiểu):
 | Số chỗ trong đội | 3 (cả 3 hero, không cần chọn; đúng đội mặc định của `feature-team-select/team-memory/memory-rules`) | 3 chọn từ 5 | 3 chọn từ 5 |
 | Kiểu đòn có | Một mục tiêu, Chém phía trước | cả ba | cả ba |
 | Chỉ số | như bảng | như bảng | theo số đã chỉnh sau chơi thử |
+| Tốc độ chạy riêng từng hero | có: Hiệp sĩ 2.0, Đấu sĩ rìu 2.4, Cung thủ 3.0 u/s | cả 5 hero như bảng | theo số đã chỉnh sau chơi thử |
 | Hình | 1 sprite mỗi hero, anim bằng move/scale/nháy | như IDEA, thêm sprite khi đánh | đủ anim đi, đánh, gục; âm thanh |
 
 ## Trường hợp biên
@@ -52,6 +64,7 @@ Hiệu ứng (mức tối thiểu):
 
 ## Đã tự quyết
 - **IDEA dùng Hiệp sĩ, Đấu sĩ rìu, Cung thủ (2026-11-24, sửa lệch theo @Manager và @CodeLead).** Bản trước ghi Hiệp sĩ, Cung thủ, Pháp sư, trái với đội mặc định cố định ở IDEA (`feature-team-select/team-memory/memory-rules`, `feature-run/run-start/start-values`, cheat của `feature-team-select`: Hiệp sĩ, Đấu sĩ rìu, Cung thủ). IDEA không có màn chọn đội nên danh sách phải đúng bằng đội đó. Vẫn đủ chắn, đòn vùng (chém) và bắn xa một mục tiêu. Đã loại: đổi đội mặc định sang Pháp sư (phải sửa data ba node đã chốt và cheat có ảnh); thêm Đấu sĩ rìu thành 4 hero (Pháp sư không bao giờ vào trận ở IDEA).
+- **Mỗi hero một tốc độ chạy riêng (2026-11-25, người yêu cầu "Các Hero sẽ có tốc độ di chuyển khác nhau", qua @Manager).** Bản trước có ba hero cùng 2.5u/s. Node này là nơi duy nhất giữ tốc độ chạy; nhánh nhắm và di chuyển của hero, `feature-balance` chỉ tham chiếu. Chọn theo độ nặng của vai: Hiệp sĩ 2.0, Đấu sĩ rìu 2.4, Pháp sư 2.6, Cung thủ 3.0, Kiếm khách 3.5. Có từ IDEA (ba hero của đội mặc định đã khác nhau). Đã loại: giữ chung 2.5u/s cho ba hero (trái yêu cầu); cho hero bắn xa chậm hơn mọi hero cận chiến (Cung thủ cần đổi chỗ bắn nhanh khi quái hai bên).
 - **Mọi hero cùng hộp 1×1.5u.** Bộ số chung; khác nhau ở chỉ số, không ở kích thước.
 - **Vùng chém đo từ mép trước hero.** Hợp với tầm đánh 1.3u: quái đứng sau mục tiêu tới 1.5u vẫn bị chém.
 

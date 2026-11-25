@@ -1,7 +1,7 @@
 {
  "items": {
   "income-same-frame": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn lại test theo bản mới: ví được gọi cộng thì số dư đổi và báo ngay",
    "tests": [
     "WalletLogicTests.Add_IncreasesCoins_AndAnnouncesTheNewBalance"
@@ -10,11 +10,11 @@
    "hash": "d2966a7704dd",
    "text": "Tiền vào số dư trong cùng khung hình ví được gọi cộng\nKhông có độ trễ, không có tiền rơi phải nhặt. Số dư mới được báo ngay theo `feature-wallet/balance-spend/wallet-rules`.",
    "title": "Tiền vào số dư trong cùng khung hình ví được gọi cộng",
-   "by": "Wallet",
-   "at": "2026-11-25 11:41:20"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "add-in-call-order": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test: nhiều lần cộng trong một khung hình theo thứ tự gọi",
    "tests": [
     "WalletLogicTests.SeveralIncomesInOneFrame_AreAddedInCallOrder_EachAnnounced"
@@ -23,11 +23,11 @@
    "hash": "bb2bc97a5758",
    "text": "Nhiều lần cộng trong cùng khung hình được cộng lần lượt theo thứ tự gọi tới\nVí dụ con quái cuối của đợt gục: tiền con quái tới trước, thưởng dọn đợt tới sau, theo thứ tự của `feature-wave/wave-clear/clear-rules`.",
    "title": "Nhiều lần cộng trong cùng khung hình được cộng lần lượt theo thứ tự gọi tới",
-   "by": "Wallet",
-   "at": "2026-11-25 11:41:08"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "add-once-per-call": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test: mỗi lời gọi cộng đúng một lần đúng số",
    "tests": [
     "WalletLogicTests.EachIncomeCall_AddsExactlyTheGivenAmount_Once"
@@ -36,11 +36,11 @@
    "hash": "054e913a18bf",
    "text": "Mỗi lần bên báo gọi cộng tiền là đúng một lần cộng, đúng bằng số được đưa\nVí không gộp, không bỏ, không nhân. Việc mỗi quái hay mỗi đợt chỉ báo một lần là của bên báo.",
    "title": "Mỗi lần bên báo gọi cộng tiền là đúng một lần cộng, đúng bằng số được đưa",
-   "by": "Wallet",
-   "at": "2026-11-25 11:41:07"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "amounts-from-caller": {
-   "state": "done",
+   "state": "verified",
    "note": "viết test: ví cộng đúng số bên báo đưa, không tra bảng",
    "tests": [
     "WalletLogicTests.Income_AddsWhateverAmountTheCallerGives_WithNoTableOfItsOwn"
@@ -49,11 +49,11 @@
    "hash": "a5bc6afffc76",
    "text": "Ví không giữ bảng tiền hạ quái hay công thức thưởng dọn đợt; mức tiền do bên báo đưa vào\nTiền hạ từng loại quái ở `feature-enemy/enemy-reward/reward-values`, thưởng dọn đợt ở `feature-wave/wave-clear/clear-rules`. Đã loại: ví tra bảng theo loại quái hay tự tính thưởng theo số đợt.",
    "title": "Ví không giữ bảng tiền hạ quái hay công thức thưởng dọn đợt; mức tiền do bên báo đưa vào",
-   "by": "Wallet",
-   "at": "2026-11-25 11:41:09"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "edge-hai-loi-goi-cong-cung-khung-hinh": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test: hai lời gọi cộng cùng khung hình",
    "tests": [
     "WalletLogicTests.SeveralIncomesInOneFrame_AreAddedInCallOrder_EachAnnounced",
@@ -63,11 +63,11 @@
    "hash": "c21ce1c1178c",
    "text": "**Hai lời gọi cộng cùng khung hình** (ví dụ đòn vùng hạ nhiều quái): mỗi lời gọi một lần cộng, lần lượt theo thứ tự tới.",
    "title": "Hai lời gọi cộng cùng khung hình",
-   "by": "Wallet",
-   "at": "2026-11-25 11:41:22"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "edge-con-quai-cuoi-cua-dot-guc": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test: tiền quái rồi thưởng đợt, cộng đúng thứ tự",
    "tests": [
     "WalletLogicTests.SeveralIncomesInOneFrame_AreAddedInCallOrder_EachAnnounced"
@@ -76,11 +76,11 @@
    "hash": "bda324cd5526",
    "text": "**Con quái cuối của đợt gục**: tiền con quái tới trước, thưởng dọn đợt tới sau; ví cộng đúng thứ tự đó.",
    "title": "Con quái cuối của đợt gục",
-   "by": "Wallet",
-   "at": "2026-11-25 11:41:23"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "edge-loi-goi-cong-0-tien-hoac-so-am": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có của wallet-rules",
    "tests": [
     "WalletLogicTests.Add_Zero_IsIgnored_AndAnnouncesNothing",
@@ -90,11 +90,11 @@
    "hash": "ae3c99a18a96",
    "text": "**Lời gọi cộng 0 tiền hoặc số âm**: theo `feature-wallet/balance-spend/wallet-rules` (0 bỏ qua, âm bị từ chối và ghi lỗi).",
    "title": "Lời gọi cộng 0 tiền hoặc số âm",
-   "by": "Wallet",
-   "at": "2026-11-25 11:41:24"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "edge-cong-lam-so-du-vuot-tran": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có của wallet-rules",
    "tests": [
     "WalletLogicTests.Add_PastTheCap_StopsAtMaxCoins_AndAnnouncesIt"
@@ -103,11 +103,11 @@
    "hash": "75f499a05235",
    "text": "**Cộng làm số dư vượt trần**: dừng ở 999.999.999 tiền theo `feature-wallet/balance-spend/wallet-rules`.",
    "title": "Cộng làm số dư vượt trần",
-   "by": "Wallet",
-   "at": "2026-11-25 11:41:25"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "ignore-after-run-end": {
-   "state": "done",
+   "state": "verified",
    "note": "ví khoá cộng khi BattleStopped, mở lại khi RunStarted đặt lại số dư",
    "tests": [
     "WalletLogicTests.IncomeAfterTheRunEnded_IsIgnored_AndAnnouncesNothing",
@@ -117,11 +117,11 @@
    "hash": "fccaae610a4a",
    "text": "Lời gọi cộng tới sau khi lượt đã kết thúc thì ví bỏ qua, số dư giữ nguyên\nQuái gục cùng khung hình thành bị phá không được cộng, theo `feature-enemy/enemy-reward/reward-values` (thành bị phá xử lí trước). Tiền của lượt cũ tới muộn cũng không vào lượt mới (`feature-run/run-start/start-values`).",
    "title": "Lời gọi cộng tới sau khi lượt đã kết thúc thì ví bỏ qua, số dư giữ nguyên",
-   "by": "Wallet",
-   "at": "2026-11-25 11:43:36"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "edge-quai-guc-cung-khung-hinh-thanh-bi-pha": {
-   "state": "done",
+   "state": "verified",
    "note": "test: lời gọi cộng tới sau BattleStopped bị bỏ qua",
    "tests": [
     "WalletLogicTests.EnemyFallingInTheFrameTheCastleFalls_GivesNoCoinsOnceTheRunStopped"
@@ -130,11 +130,11 @@
    "hash": "fc7bd7a48681",
    "text": "**Quái gục cùng khung hình thành bị phá**: không cộng. Bên báo không gửi (`feature-enemy/enemy-reward/reward-values`); nếu lời gọi vẫn tới sau khi lượt đã kết thúc thì ví bỏ qua.",
    "title": "Quái gục cùng khung hình thành bị phá",
-   "by": "Wallet",
-   "at": "2026-11-25 11:43:37"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "edge-tien-cua-luot-cu-toi-sau-khi-luot": {
-   "state": "done",
+   "state": "verified",
    "note": "test: tiền lượt cũ không vào lượt mới",
    "tests": [
     "WalletLogicTests.IncomeFromTheOldRun_DoesNotCarryIntoTheNewRun_AndNewIncomeCountsAgain"
@@ -143,11 +143,11 @@
    "hash": "74def743f177",
    "text": "**Tiền của lượt cũ tới sau khi lượt mới đã bắt đầu**: bỏ qua, không cộng vào lượt mới (`feature-run/run-start/start-values`).",
    "title": "Tiền của lượt cũ tới sau khi lượt mới đã bắt đầu",
-   "by": "Wallet",
-   "at": "2026-11-25 11:43:38"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "thông số: một lần cộng mỗi lời gọi, trễ 0 khung hình, bỏ qua sau khi lượt kết thúc",
    "tests": [
     "WalletLogicTests.EachIncomeCall_AddsExactlyTheGivenAmount_Once",
@@ -158,8 +158,8 @@
    "hash": "2ac9c24cb2c9",
    "text": "## Làm gì\n- Nhận lời gọi cộng tiền từ hai bên báo: `feature-enemy` khi một quái bị hạ, `feature-wave` khi một đợt được dọn sạch. Mỗi lời gọi kèm đúng số tiền.\n- Cộng đúng số đó vào số dư ngay trong khung hình được gọi, theo luật số dư của `feature-wallet/balance-spend/wallet-rules` (cộng 0 bỏ qua, số âm bị từ chối, trần 999.999.999).\n- Nhiều lời gọi trong một khung hình: cộng lần lượt theo thứ tự tới.\n- Lượt đã kết thúc thì bỏ qua mọi lời gọi cộng cho tới khi lượt mới đặt lại số dư.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số lần cộng cho mỗi lời gọi | 1 | lần | `add-once-per-call` |\n| Độ trễ từ lúc được gọi tới lúc số dư đổi | 0 | khung hình | `income-same-frame` |\n| Lời gọi cộng sau khi lượt kết thúc | bỏ qua | | `ignore-after-run-end` |\n\nSố tiền cụ thể (tham khảo, không phải của node này):\n- Tiền hạ quái: `feature-enemy/enemy-reward/reward-values` (Lính 5, Sói 4, Khổng lồ 15, Cung thủ quái 6, Trùm 100).\n- Thưởng dọn đợt: `feature-wave/wave-clear/clear-rules` (20 + 5 × số đợt vừa dọn).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Nhận cộng từ quái bị hạ | có | có | có |\n| Nhận cộng từ dọn đợt | có | có | có |\n| Bỏ qua lời gọi sau khi lượt kết thúc | có | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Wallet",
-   "at": "2026-11-25 11:43:39"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:52"
   }
  },
  "log": [
@@ -344,6 +344,90 @@
    "state": "done",
    "by": "Wallet",
    "note": "WalletLogicTests.EachIncomeCall_AddsExactlyTheGivenAmount_Once, WalletLogicTests.Add_IncreasesCoins_AndAnnouncesTheNewBalance, WalletLogicTests.IncomeAfterTheRunEnded_IsIgnored_AndAnnouncesNothing"
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "amounts-from-caller",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "add-once-per-call",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "income-same-frame",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "add-in-call-order",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "ignore-after-run-end",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "edge-hai-loi-goi-cong-cung-khung-hinh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "edge-con-quai-cuoi-cua-dot-guc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "edge-quai-guc-cung-khung-hinh-thanh-bi-pha",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "edge-tien-cua-luot-cu-toi-sau-khi-luot",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "edge-loi-goi-cong-0-tien-hoac-so-am",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "edge-cong-lam-so-du-vuot-tran",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:52",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

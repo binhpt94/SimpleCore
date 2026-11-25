@@ -48,7 +48,7 @@ namespace Game.Hero.Tests
 
             _participant.Step(1f);
 
-            Assert.That(_displays.Made[0].X, Is.EqualTo(1.0f).Within(1e-3f));
+            Assert.That(_displays.Made[0].X, Is.EqualTo(0.5f).Within(1e-3f));
             Assert.That(_displays.Made[0].Moving, Is.True);
         }
 

@@ -1,7 +1,7 @@
 {
  "items": {
   "score-start-zero": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.NewRunStartsTheScoreAtZero",
@@ -11,11 +11,11 @@
    "hash": "18bd686f6336",
    "text": "Đầu lượt điểm bằng 0; mỗi lần `feature-wave` báo dọn sạch một đợt thì điểm cộng 1\nDọn sạch đợt 1 thì điểm 1; thua giữa đợt 4 thì điểm 3.",
    "title": "Đầu lượt điểm bằng 0; mỗi lần `feature-wave` báo dọn sạch một đợt thì điểm cộng 1",
-   "by": "Run",
-   "at": "2026-11-25 11:46:45"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "score-lock-once": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount",
@@ -26,11 +26,11 @@
    "hash": "e82b9756e080",
    "text": "Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thua hoặc đồng ý bỏ lượt)\nSau khi chốt, báo dọn sạch tới muộn không làm đổi điểm.",
    "title": "Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thua hoặc đồng ý bỏ lượt)",
-   "by": "Run",
-   "at": "2026-11-25 11:46:46"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "record-update": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup",
@@ -41,25 +41,25 @@
    "hash": "ee245bca5cf7",
    "text": "Chốt điểm xong: điểm lớn hơn kỉ lục thì kỉ lục bằng điểm và cờ \"kỉ lục mới\" bật\nBằng hoặc nhỏ hơn thì kỉ lục giữ nguyên, cờ tắt. Điểm 0 không bao giờ bật cờ.",
    "title": "Chốt điểm xong: điểm lớn hơn kỉ lục thì kỉ lục bằng điểm và cờ \"kỉ lục mới\" bật",
-   "by": "Run",
-   "at": "2026-11-25 11:46:47"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "record-default-zero": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "NoSavedBestCountsAsZero dùng kho giả trả về 0, qua nhờ đồ giả. Thêm test kho thật PlayerPrefsBestScoreStore khi chưa có khoá kỉ lục thì đọc ra 0, dọn khoá trước và sau test",
    "tests": [
-    "RunFlowTests.NoSavedBestCountsAsZero",
-    "RunFlowTests.BrokenSavedBestCountsAsZero"
+    "RunBestScoreStoreTests.NothingSavedOnTheDeviceMeansTheBestIsZero",
+    "RunFlowTests.NoSavedBestCountsAsZero"
    ],
    "play": "",
    "hash": "8862664f3c2d",
    "text": "Chưa có kỉ lục lưu trên máy thì kỉ lục là 0\nLần mở game đầu tiên, hoặc dữ liệu lưu đọc không được, đều coi là 0.",
    "title": "Chưa có kỉ lục lưu trên máy thì kỉ lục là 0",
-   "by": "Run",
-   "at": "2026-11-25 11:46:48"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:48"
   },
   "record-save-now": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup"
@@ -68,11 +68,11 @@
    "hash": "403c316e6e09",
    "text": "Kỉ lục mới được ghi xuống máy ngay khi đổi, trước khi popup thua hiện\nTắt game ngay trên popup thua vẫn giữ kỉ lục mới.",
    "title": "Kỉ lục mới được ghi xuống máy ngay khi đổi, trước khi popup thua hiện",
-   "by": "Run",
-   "at": "2026-11-25 11:46:49"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "record-read-anytime": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.ScoreBestAndNewBestCanBeReadAtAnyTime"
@@ -81,11 +81,11 @@
    "hash": "cde7c9dfa319",
    "text": "Điểm, kỉ lục và cờ kỉ lục mới đọc được bất cứ lúc nào, không cần chờ\n`feature-home` đọc kỉ lục; `feature-popup-lose` đọc cả ba.",
    "title": "Điểm, kỉ lục và cờ kỉ lục mới đọc được bất cứ lúc nào, không cần chờ",
-   "by": "Run",
-   "at": "2026-11-25 11:46:50"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "edge-thua-o-dot-1": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.LosingInTheFirstWaveScoresZeroAndKeepsTheBest"
@@ -94,11 +94,11 @@
    "hash": "928389ef014e",
    "text": "**Thua ở đợt 1:** điểm 0, cờ tắt, kỉ lục giữ.",
    "title": "Thua ở đợt 1",
-   "by": "Run",
-   "at": "2026-11-25 11:46:51"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "edge-diem-bang-ki-luc": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.EqualScoreIsNotANewBest"
@@ -107,24 +107,26 @@
    "hash": "80698028ecc1",
    "text": "**Điểm bằng kỉ lục:** không phải kỉ lục mới.",
    "title": "Điểm bằng kỉ lục",
-   "by": "Run",
-   "at": "2026-11-25 11:46:52"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "edge-du-lieu-luu-la-so-am-hoac-khong": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Ca số âm đạt. Ca không phải số chỉ giả bằng kho giả ném lỗi, kho thật không ném. Thêm test kho thật khi khoá kỉ lục lưu kiểu chuỗi thì kỉ lục là 0, và ca sau dữ liệu hỏng một lượt có điểm lớn hơn 0 thì kỉ lục mới được ghi đè xuống máy",
    "tests": [
+    "RunBestScoreStoreTests.NegativeSavedBestCountsAsZero",
+    "RunBestScoreStoreTests.SavedBestThatIsNotANumberCountsAsZero",
     "RunFlowTests.BrokenSavedBestCountsAsZero"
    ],
    "play": "",
    "hash": "0f5e26eb9e48",
    "text": "**Dữ liệu lưu là số âm hoặc không phải số:** coi kỉ lục là 0, ghi đè ở lần phá kỉ lục kế tiếp.",
    "title": "Dữ liệu lưu là số âm hoặc không phải số",
-   "by": "Run",
-   "at": "2026-11-25 11:46:53"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:06:48"
   },
   "edge-ghi-xuong-may-that-bai": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.FailedSaveKeepsTheBestForThisSession"
@@ -133,11 +135,11 @@
    "hash": "2a097229aaf1",
    "text": "**Ghi xuống máy thất bại:** kỉ lục trong lúc game mở vẫn đúng; không báo lỗi cho người chơi.",
    "title": "Ghi xuống máy thất bại",
-   "by": "Run",
-   "at": "2026-11-25 11:46:54"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "edge-bao-don-sach-toi-hai-lan-cho-cung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.SameWaveReportedTwiceCountsOnce"
@@ -146,11 +148,11 @@
    "hash": "ea17baf45050",
    "text": "**Báo dọn sạch tới hai lần cho cùng một đợt:** chỉ cộng một lần (đợt sau phải có số lớn hơn đợt đã tính).",
    "title": "Báo dọn sạch tới hai lần cho cùng một đợt",
-   "by": "Run",
-   "at": "2026-11-25 11:46:55"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "edge-bo-luot-ngay-khi-vao-tran": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.GivingUpRightAfterEnteringBattleScoresZeroAndKeepsTheBest"
@@ -159,11 +161,11 @@
    "hash": "593ec5e1fb75",
    "text": "**Bỏ lượt ngay khi vào trận:** điểm 0, như thua ở đợt 1.",
    "title": "Bỏ lượt ngay khi vào trận",
-   "by": "Run",
-   "at": "2026-11-25 11:46:56"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.EachClearedWaveAddsOnePoint",
@@ -175,8 +177,8 @@
    "hash": "e6823e82f128",
    "text": "## Làm gì\n- Đặt điểm về 0 khi lượt mới bắt đầu.\n- Nghe báo dọn sạch đợt từ `feature-wave`; cộng 1 điểm mỗi lần, chỉ khi lượt chưa kết thúc.\n- Khi lượt kết thúc: chốt điểm, so với kỉ lục, cập nhật kỉ lục và cờ kỉ lục mới, ghi kỉ lục xuống máy nếu đổi.\n- Lúc mở game: đọc kỉ lục đã lưu (không có hoặc hỏng thì 0).\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Điểm đầu lượt | 0 | đợt | Chưa dọn đợt nào |\n| Điểm cộng mỗi lần dọn sạch | 1 | đợt | Điểm = số đợt đã dọn |\n| Kỉ lục mặc định | 0 | đợt | Chưa chơi lượt nào |\n| Kiểu số | số nguyên không âm | | Không có điểm lẻ |\n| Số kỉ lục lưu | 1 cho cả game | | Không theo đội |\n| Lúc ghi kỉ lục | ngay khi đổi | | Người chơi hay tắt ngang |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Đếm điểm | Có | Có | Có |\n| Kỉ lục nhớ trong lúc game mở | Có | Có | Có |\n| Kỉ lục lưu khi tắt game | Không bắt buộc | Có | Có |\n| Cờ kỉ lục mới | Có | Có | Có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Run",
-   "at": "2026-11-25 11:46:57"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:03:29"
   }
  },
  "log": [
@@ -270,6 +272,125 @@
    "state": "done",
    "by": "Run",
    "note": "RunFlowTests.EachClearedWaveAddsOnePoint, RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup, RunFlowTests.NewRunStartsTheScoreAtZero, RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam"
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "score-start-zero",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "score-lock-once",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "record-update",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "record-save-now",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "record-read-anytime",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "edge-thua-o-dot-1",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "edge-diem-bang-ki-luc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "edge-ghi-xuong-may-that-bai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "edge-bao-don-sach-toi-hai-lan-cho-cung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "edge-bo-luot-ngay-khi-vao-tran",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:29",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:03:37",
+   "id": "record-default-zero",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "NoSavedBestCountsAsZero dùng kho giả trả về 0, qua nhờ đồ giả. Thêm test kho thật PlayerPrefsBestScoreStore khi chưa có khoá kỉ lục thì đọc ra 0, dọn khoá trước và sau test"
+  },
+  {
+   "at": "2026-11-25 12:03:39",
+   "id": "edge-du-lieu-luu-la-so-am-hoac-khong",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Ca số âm đạt. Ca không phải số chỉ giả bằng kho giả ném lỗi, kho thật không ném. Thêm test kho thật khi khoá kỉ lục lưu kiểu chuỗi thì kỉ lục là 0, và ca sau dữ liệu hỏng một lượt có điểm lớn hơn 0 thì kỉ lục mới được ghi đè xuống máy"
+  },
+  {
+   "at": "2026-11-25 12:06:16",
+   "id": "record-default-zero",
+   "state": "done",
+   "by": "Run",
+   "note": "RunBestScoreStoreTests.NothingSavedOnTheDeviceMeansTheBestIsZero, RunFlowTests.NoSavedBestCountsAsZero"
+  },
+  {
+   "at": "2026-11-25 12:06:17",
+   "id": "edge-du-lieu-luu-la-so-am-hoac-khong",
+   "state": "done",
+   "by": "Run",
+   "note": "RunBestScoreStoreTests.NegativeSavedBestCountsAsZero, RunBestScoreStoreTests.SavedBestThatIsNotANumberCountsAsZero, RunFlowTests.BrokenSavedBestCountsAsZero"
+  },
+  {
+   "at": "2026-11-25 12:06:48",
+   "id": "record-default-zero",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:06:48",
+   "id": "edge-du-lieu-luu-la-so-am-hoac-khong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

@@ -108,7 +108,7 @@
    "at": "2026-11-25 11:39:09"
   },
   "edge-hoi-chieu-tong-bang-0-cau-hinh-sai": {
-   "state": "done",
+   "state": "verified",
    "note": "bị trả, thêm test nút sẵn sàng và chạm báo castle, chờ gỡ bgIsolation",
    "tests": [
     "HudSkillButtonTests.ZeroCooldownSkillTheCastleReportsReadyStaysReadyAndATapUsesIt",
@@ -118,8 +118,8 @@
    "hash": "ede5e704d5be",
    "text": "**Hồi chiêu tổng bằng 0 (cấu hình sai):** nút luôn sẵn sàng, không hiện số, không phủ.",
    "title": "Hồi chiêu tổng bằng 0 (cấu hình sai)",
-   "by": "Hud",
-   "at": "2026-11-25 11:36:35"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:23"
   },
   "params": {
    "state": "verified",
@@ -139,7 +139,7 @@
    "at": "2026-11-25 11:39:09"
   },
   "edge-hai-nut-duoc-cham-cung-luc": {
-   "state": "done",
+   "state": "verified",
    "note": "code có, cần test mới cho hai nút chạm cùng lúc",
    "tests": [
     "HudSkillButtonTests.TwoButtonsTappedTogetherEachUseTheirOwnSkill"
@@ -148,11 +148,11 @@
    "hash": "09311ff7c670",
    "text": "**Hai nút được chạm cùng lúc:** cả hai đều báo `feature-castle`; mỗi kĩ năng dùng độc lập.",
    "title": "Hai nút được chạm cùng lúc",
-   "by": "Hud",
-   "at": "2026-11-25 11:36:36"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:23"
   },
   "edge-cham-dung-khung-hinh-vua-hoi-xong": {
-   "state": "done",
+   "state": "verified",
    "note": "code có, cần test mới cho chạm đúng khung hình vừa hồi xong",
    "tests": [
     "HudSkillButtonTests.TapInTheFrameTheCastleTurnsReadyUsesTheSkill",
@@ -162,11 +162,11 @@
    "hash": "13d91c14db3a",
    "text": "**Chạm đúng khung hình vừa hồi xong:** nếu `feature-castle` đã báo sẵn sàng thì dùng; chưa thì bỏ qua.",
    "title": "Chạm đúng khung hình vừa hồi xong",
-   "by": "Hud",
-   "at": "2026-11-25 11:36:39"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:23"
   },
   "edge-feature-castle-tu-choi-dung-vi-du-luot": {
-   "state": "done",
+   "state": "verified",
    "note": "code có, cần test mới cho castle từ chối dùng",
    "tests": [
     "HudSkillButtonTests.RefusedUseKeepsTheButtonAsTheCastleReportsIt"
@@ -175,8 +175,8 @@
    "hash": "245131046ed9",
    "text": "**`feature-castle` từ chối dùng (ví dụ lượt vừa kết thúc):** nút giữ nguyên trạng thái `feature-castle` báo, không tự chuyển sang đang hồi.",
    "title": "`feature-castle` từ chối dùng (ví dụ lượt vừa kết thúc)",
-   "by": "Hud",
-   "at": "2026-11-25 11:36:40"
+   "by": "@CodeLead",
+   "at": "2026-11-25 12:02:23"
   }
  },
  "log": [
@@ -372,6 +372,34 @@
   {
    "at": "2026-11-25 11:39:09",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:23",
+   "id": "edge-hai-nut-duoc-cham-cung-luc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:23",
+   "id": "edge-cham-dung-khung-hinh-vua-hoi-xong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:23",
+   "id": "edge-feature-castle-tu-choi-dung-vi-du-luot",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 12:02:23",
+   "id": "edge-hoi-chieu-tong-bang-0-cau-hinh-sai",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
