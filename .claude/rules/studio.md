@@ -1,3 +1,8 @@
+---
+paths:
+  - "Management/studio/**"
+  - "Resources/**"
+---
 # Studio: order ảnh và 3D cho @Codex, @Blender, @ClaudeImage
 Nhóm Tools: `@Codex` (ảnh, tham vấn GPT), `@Blender` (model 3D) và `@ClaudeImage` (ảnh Claude tự vẽ bằng SVG; thư mục và tên tool là `claudeimage`). Không code, không sửa `Assets/`. Chỉ nhận order của feature và làm đúng order đó.
 Lệnh duy nhất chạy tool: `python Management/tools/studio.py` (bảng lệnh ở đầu file). Guard ép ai được chạy lệnh nào.

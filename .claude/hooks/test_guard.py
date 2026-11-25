@@ -695,6 +695,29 @@ def run_binding_cases(payload):
         p = subprocess.run(args, input=stdin.encode("utf-8"), capture_output=True)
         check(g, "", f"exit{expect}, no output", label, f"exit{p.returncode}, {'output' if p.stdout.strip() else 'no output'}")
 
+    # ---- role rules are not loaded into every chat: the chat of that role is told to Read them, once per context
+    g = "bind: role rules reminder"
+    sid = "rules-mgr"
+    bind_session.write_json(guard.binding_path(sid, STORE), {"feature": "@Manager"})
+    bind_session.forget_rules_read(sid, STORE)
+
+    def told(*extra):
+        args = [sys.executable, "-I", str(HERE / "bind_session.py"), *extra, "--root", FX, "--store", STORE]
+        p = subprocess.run(args, input=json.dumps({"session_id": sid, "prompt": "xin chào"}).encode("utf-8"),
+                           capture_output=True)
+        return "Read toàn bộ .claude/rules/manager.md" in p.stdout.decode("utf-8", "replace")
+    check(g, "", True, "first prompt after binding: told to Read its role rules", told())
+    check(g, "", False, "next prompt: not told again", told())
+    check(g, "", False, "SessionStart (compact, clear) adds nothing to the context", told("--session-start"))
+    check(g, "", True, "first prompt after a compaction: told again", told())
+    bind_session.write_json(guard.binding_path(sid, STORE), {"feature": "@CodeLead"})
+    check(g, "", ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/codelead.md", ".claude/rules/unity.md"],
+          "rule files of @CodeLead (what a reread names)", bind_session.rule_files("@CodeLead", FX))
+    check(g, "", [], "a feature chat reads no role file itself (unity.md loads with the Unity files)", bind_session.must_read("Wallet"))
+    for name in ("manager.md", "codelead.md", "tester.md", "studio.md", "unity.md"):
+        head = (HERE.parent / "rules" / name).read_text(encoding="utf-8").split("\n", 2)[:2]
+        check(g, "", ["---", "paths:"], f"{name} is path-scoped, not loaded into every chat", head)
+
 
 def run_role_cases(payload):
     """@Core: like a feature session whose feature is Core. @Manager: edits nothing."""

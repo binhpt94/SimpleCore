@@ -42,6 +42,13 @@ CONTEXT_BLOCK_RX = re.compile(r"<([A-Za-z][\w-]*)\b[^>]*>.*?</\1>", re.S)
 USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Manager, @CodeLead, @GameDesigner, @UnityAutoPlay hoặc @human> <PIN>. "
          "Xem chat đang gán gì: FEATURE?")
 MAX_LISTED_REPORTS = 20
+# Role rules that are not loaded into every chat (their frontmatter `paths:` keeps them out; loading the rules of
+# every role into all ~30 chats cost each call ~20k tokens). The chat of that role is told to Read its file once:
+# after it is bound, and again after a compaction or /clear empties its context (SessionStart hook, --session-start).
+RULES_DIR = ".claude/rules"
+ROLE_RULES = {"@Manager": ("manager.md",), "@CodeLead": ("codelead.md",),
+              **{r: ("tester.md",) for r in guard.TESTER_ROLES}, **{r: ("studio.md",) for r in guard.TOOL_ROLES}}
+RULES_READ_DIR = "rules-read"      # in the store: <session id>.json, {"role": ...} once the chat was told to read
 
 
 def pin_hash(pin, salt):
@@ -424,6 +431,53 @@ def context(data, root, store):
             "bằng FEATURE=<tên> <PIN>; AI không gán và không hỏi PIN.")
 
 
+def must_read(raw):
+    """The role rule files (paths from the project root) a chat bound to `raw` reads itself, since they are not loaded."""
+    return [f"{RULES_DIR}/{n}" for n in ROLE_RULES.get(guard.role_of(raw) or "", ())]
+
+
+def rule_files(raw, root):
+    """Every rule file a chat bound to `raw` follows: the root CLAUDE.md, the shared rules and those of its role.
+    The Setup page's 'Đọc lại quy trình' only tells a chat about the ones of these that changed."""
+    role = guard.role_of(raw)
+    if not raw:
+        return []
+    names = ["report.md"] + list(ROLE_RULES.get(role or "", ()))
+    if role in ("@Core", "@CodeLead") or role in guard.TESTER_ROLES or not role and guard.valid_feature(raw, root):
+        names.append("unity.md")
+    if role in ("@GameDesigner", "@DesignAdvisor"):
+        rules = os.path.join(root, *RULES_DIR.split("/"))
+        names += sorted(n for n in (os.listdir(rules) if os.path.isdir(rules) else ())
+                        if n.startswith("gamedesigner") and n.endswith(".md")) + ["designadvisor.md"]
+    return ["CLAUDE.md"] + [f"{RULES_DIR}/{n}" for n in dict.fromkeys(names)]
+
+
+def rules_read_path(session_id, store):
+    path = guard.binding_path(session_id, store)
+    return path and os.path.join(store, RULES_READ_DIR, os.path.basename(path))
+
+
+def rules_reminder(session_id, raw, store):
+    """The line that tells a chat to Read its role rules, once per binding and per emptied context; else ''."""
+    files = must_read(raw)
+    path = rules_read_path(session_id, store)
+    if not files or not path or read_json(path, {}).get("role") == raw:
+        return ""
+    write_json(path, {"role": raw, "at": time.strftime("%Y-%m-%d %H:%M:%S")})
+    return (" LUẬT VAI TRÒ KHÔNG TỰ NẠP vào ngữ cảnh: trước mọi việc khác, Read toàn bộ " + ", ".join(files) +
+            " (một lần; ngữ cảnh bị compact hay clear thì dòng này nhắc lại). CLAUDE.md gốc đã nạp sẵn, không Read lại.")
+
+
+def forget_rules_read(session_id, store):
+    """SessionStart after a compaction or /clear: the chat no longer has its role rules in context."""
+    path = rules_read_path(session_id, store)
+    if path:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+
+
 def add_context(text):
     out = {"hookSpecificOutput": {"hookEventName": "UserPromptSubmit", "additionalContext": text}}
     sys.stdout.buffer.write(json.dumps(out, ensure_ascii=False).encode("utf-8"))
@@ -456,6 +510,9 @@ def set_pin(store):
 def main(argv):
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     store = guard.STORE_DIR
+    session_start = len(argv) > 1 and argv[1] == "--session-start"      # SessionStart hook (compact, clear)
+    if session_start:
+        argv = argv[:1] + argv[2:]
     if len(argv) == 5 and argv[1] == "--root" and argv[3] == "--store":      # test-only override
         root, store = os.path.abspath(argv[2]), argv[4]
     elif len(argv) == 2 and argv[1] == "--set-pin":
@@ -466,11 +523,15 @@ def main(argv):
         data = json.loads(raw.decode("utf-8-sig"))
         if not isinstance(data, dict):
             return 0
+        if session_start:
+            forget_rules_read(data.get("session_id"), store)
+            return 0
         message = handle(data, root, store)
         if message:
             block(message)
         else:
-            add_context(context(data, root, store))
+            raw_feature = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
+            add_context(context(data, root, store) + rules_reminder(data.get("session_id"), raw_feature, store))
         return 0
     except BaseException as ex:
         # An ordinary prompt must not be lost to a broken hook, but one that may carry the PIN must not get through.

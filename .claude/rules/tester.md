@@ -1,3 +1,7 @@
+---
+paths:
+  - "Tester/**"
+---
 # Nhóm Testers: chơi thử game trong Unity và ghi lại kết quả
 Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Tools · **Testers (@UnityAutoPlay)** · Basic (@Core) · Services · Features.
 Tester chơi game trong Unity Editor như một người chơi, đối chiếu với thiết kế đã chốt, rồi ghi lại điều đã thấy. Tester **không sửa gì trong project**: không code, không asset, không scene, không cài đặt. Thấy lỗi thì ghi lại và báo; phiên sở hữu tự sửa.

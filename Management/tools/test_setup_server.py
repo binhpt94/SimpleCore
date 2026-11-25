@@ -23,6 +23,11 @@ def check(label, got, expect=True):
     results.append((got == expect, label, expect, got))
 
 
+def RP(binding):
+    """What 'Đọc lại quy trình' tells a thread that has not read its rules yet: every rule file of its role."""
+    return ss.reread_prompt(ss.bind_session.rule_files(binding, str(ss.ROOT)))
+
+
 def thread(sid, title, binding="", archived=False, unlisted=False, model="claude-opus-x", effort="medium"):
     return {"id": sid, "title": title, "feature": ss.feature_of(title), "group": "", "legacy": False, "archived": archived,
             "unlisted": unlisted, "model": model, "effort": effort, "binding": binding, "modified": ""}
@@ -129,7 +134,8 @@ def job_cases(check):
 
 def live_cases(check):
     """Live: a thread runs on as a background session (claude --bg --resume), so ListAgents shows it."""
-    real = (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep, ss.transcripts_dir)
+    real = (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep, ss.transcripts_dir, ss.guard.STORE_DIR)
+    ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="live-store-")      # what a reread writes stays out of the real store
     live, calls = {}, []
     tdir = Path(tempfile.mkdtemp(prefix="livefx-"))
     (tdir / "99999999-aaaa.jsonl").write_text("{}\n", encoding="utf-8")      # the copy the CLI makes for copy0000
@@ -173,7 +179,7 @@ def live_cases(check):
         check("live: a chat open in VS Code is left as it is", (res["ok"], "live sẵn" in res["answer"], calls), (True, True, []))
         res = ss.reread("eeee5555")
         check("reread: a chat open in VS Code gets the prompt as a message (a relay helper calls SendMessage), nothing else runs",
-              (res["ok"], len(calls), calls[0][:4], 'to="human"' in calls[0][-1], ss.REREAD_PROMPT in calls[0][-1] and "KHÔNG trả lời" in calls[0][-1], "eeee5555" in live),
+              (res["ok"], len(calls), calls[0][:4], 'to="human"' in calls[0][-1], RP("@human") in calls[0][-1] and "KHÔNG trả lời" in calls[0][-1], "eeee5555" in live),
               (True, 1, ["-p", "--model", ss.RELAY_MODEL, "--no-session-persistence"], True, True, True))
         calls.clear()
         for name, fn in (("compact", lambda: ss.compact("eeee5555")), ("renew", lambda: ss.renew("eeee5555", "sai-pin"))):
@@ -190,7 +196,7 @@ def live_cases(check):
         res = ss.reread("aaaa1111")
         check("live: reread on a background thread stops it, then runs the prompt as a background session again (no -p)",
               (res["ok"], calls[before][0], calls[-1][:3], calls[-1][-1], "-p" in calls[-1], "aaaa1111" in live),
-              (True, "stop", ["--bg", "--resume", "aaaa1111"], ss.REREAD_PROMPT, False, True))
+              (True, "stop", ["--bg", "--resume", "aaaa1111"], RP("@CodeLead"), False, True))
         check("live: between stop and resume, the stopped job is removed",
               [c for c in calls[before + 1:-1]], [["rm", "aaaa1111"], ["rm", "aaaa1111"]])
         res = ss.reread("bbbb2222")
@@ -244,7 +250,8 @@ def live_cases(check):
         check("the page may post to the live and stop paths",
               ("/api/sessions/live" in ss.POST_PATHS, "/api/sessions/stop" in ss.POST_PATHS), (True, True))
     finally:
-        (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep, ss.transcripts_dir) = real
+        shutil.rmtree(ss.guard.STORE_DIR, ignore_errors=True)
+        (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep, ss.transcripts_dir, ss.guard.STORE_DIR) = real
         shutil.rmtree(tdir, ignore_errors=True)
 
 
@@ -323,6 +330,10 @@ def delete_cases(check):
 
 def main():
     store = tempfile.mkdtemp(prefix="setup-store-")
+
+    def forget():      # no thread has read the rules yet: a reread names all of its role's files
+        shutil.rmtree(os.path.join(store, ss.RULES_SEEN_DIR), ignore_errors=True)
+
     real = (ss.run_claude, ss.threads, ss.guard.STORE_DIR, ss.start_bg)
     calls = []
     try:
@@ -374,18 +385,34 @@ def main():
             res = ss.reread(sid_)
             check(f"reread refused: {sid_}", (res["ok"], res["error"]), (False, why))
         check("reread: a refused thread runs nothing", len(calls), before)
+        forget()
         res = ss.reread("aaaa1111")
-        check("reread: resumes that thread with its model and effort, and the prompt",
-              calls[-1], ["--resume", "aaaa1111", "--model", "claude-opus-x", "--effort", "medium", "-p", ss.REREAD_PROMPT])
+        check("reread: resumes that thread with its model and effort, and the prompt naming the rule files of its role",
+              calls[-1], ["--resume", "aaaa1111", "--model", "claude-opus-x", "--effort", "medium", "-p", RP("@CodeLead")])
+        check("reread: a thread not told before is told every file of its role, not those of other roles",
+              ss.bind_session.rule_files("@CodeLead", str(ss.ROOT)),
+              ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/codelead.md", ".claude/rules/unity.md"])
         check("reread: answers with the start of what the thread said",
               (res["ok"], res["id"], res["title"], len(res["answer"]), res["answer"].startswith("Đã đọc CLAUDE.md")),
               (True, "aaaa1111", "CodeLead", 300, True))
+        before = len(calls)
+        res = ss.reread("aaaa1111")
+        check("reread: nothing changed since the thread last read its rules: no turn at all",
+              (res["ok"], res.get("skipped"), len(calls) - before), (True, True, 0))
+        seen = os.path.join(store, ss.RULES_SEEN_DIR, "aaaa1111.json")
+        state = ss.bind_session.read_json(seen, {})
+        state[".claude/rules/codelead.md"] = "old"
+        ss.bind_session.write_json(seen, state)
+        ss.reread("aaaa1111")
+        check("reread: one rule file changed: only that file is named",
+              calls[-1][-1], ss.reread_prompt([".claude/rules/codelead.md"]))
         ss.reread("bbbb2222")
-        check("reread: no model or effort known: the CLI's own defaults", calls[-1], ["--resume", "bbbb2222", "-p", ss.REREAD_PROMPT])
+        check("reread: no model or effort known: the CLI's own defaults", calls[-1], ["--resume", "bbbb2222", "-p", RP("Wallet")])
         ss.reread("ffff6666")
         check("reread: an effort the CLI does not know is left out",
-              calls[-1], ["--resume", "ffff6666", "--model", "claude-opus-x", "-p", ss.REREAD_PROMPT])
+              calls[-1], ["--resume", "ffff6666", "--model", "claude-opus-x", "-p", RP("Hud")])
         ss.run_claude = failing
+        forget()
         res = ss.reread("aaaa1111")
         check("reread: a failed run is reported, not hidden", (res["ok"], res["error"]), (False, "claude: not logged in"))
         check("reread binds nothing", ss.guard.bound_feature("aaaa1111", store) or "", "")

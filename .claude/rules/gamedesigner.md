@@ -78,18 +78,9 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
 - Phần đầu còn hai dòng không bắt buộc, không tính vào hash: `screen: landscape|portrait` (chỉ ở node gốc, xem `gamedesigner.round1.md`) và `frame: none` (node vòng 4 không có bố cục, xem `gamedesigner.round4.md`). Ba dòng về ý của GPT, `by:`, `gpt-dropped:` và `node-by:`, cũng không tính vào hash; xem `.claude/rules/designadvisor.md`.
 - **Hash data** tính từ tiêu đề node, tóm tắt, id, tiêu đề, chi tiết của các ý, và nội dung các file `.frame-concept/*.frame`. Đổi một trong các thứ đó là đổi hash: mọi node con thành "cần làm lại". Đổi điểm AI, `based-on` hay `CLAUDE.md` thì không. Vì vậy chỉ sửa `data.md` khi quyết định thật sự đổi; sửa câu chữ cho hay thì đừng.
 - **Trang hiện mọi thay đổi so với `live`** (bản chốt gần nhất), tới khi node được chốt lại:
-  - Thẻ node mang nhãn `Đổi +mới ✎sửa −bỏ`, hoặc `Mới` khi `live` chưa có node.
-  - Ý có nhãn `Mới` hoặc `Đã sửa`. Ý sửa hiện chữ cũ gạch, chữ mới tô, cả ở tiêu đề lẫn chi tiết.
-  - Ý bị xoá nằm ở mục "Ý đã bỏ so với live".
-  - Mọi file của node (`CLAUDE.md`, `code.json`, frame, ảnh, style, phần đầu `data.md`) và điểm AI của từng ý đều có bản live đặt cạnh để so: so từng dòng, xem được hai bản cạnh nhau.
-  - Vì vậy chỉnh `CLAUDE.md` hay đổi điểm AI cũng là thứ người phải đọc lại.
-  - Ý đổi mà người chưa chấm được đánh dấu để người xem trước.
-
-  Hệ quả:
-  - Sửa một ý thì giữ `id`. Đổi `id` thì người thấy một ý bị bỏ và một ý mới, mất phần so sánh và điểm cũ.
-  - Mỗi chữ sửa trong `data.md` là một ý "Đã sửa" người phải đọc lại, kể cả trong Full Auto. Đừng sửa câu chữ kèm khi sửa ý khác.
-  - Báo cáo cuối lượt nêu đúng các ý đã thêm, sửa, bỏ (`<node>#<id>`), khớp với thứ trang hiện.
-
+  - Thẻ node mang nhãn `Đổi +mới ✎sửa −bỏ` (`Mới` khi `live` chưa có node). Ý có nhãn `Mới` hoặc `Đã sửa`, chữ cũ gạch, chữ mới tô; ý bị xoá nằm ở mục "Ý đã bỏ so với live"; ý đổi mà người chưa chấm được đánh dấu.
+  - Mọi file của node (`CLAUDE.md`, `code.json`, frame, ảnh, style, phần đầu `data.md`) và điểm AI của từng ý đều có bản live đặt cạnh để so. Vì vậy chỉnh `CLAUDE.md` hay đổi điểm AI cũng là thứ người phải đọc lại.
+  - Hệ quả: sửa một ý thì giữ `id` (đổi `id` là một ý bỏ và một ý mới, mất so sánh và điểm cũ); mỗi chữ sửa trong `data.md` là một ý "Đã sửa" người phải đọc lại, kể cả trong Full Auto, nên đừng sửa câu chữ kèm khi sửa ý khác; báo cáo cuối lượt nêu đúng các ý đã thêm, sửa, bỏ (`<node>#<id>`).
 ### `CLAUDE.md`
 Dòng đầu `# <Tên>`, ngay dưới là dòng trỏ tới `data.md` (ví dụ `Dữ liệu cốt lõi: [data.md](data.md)`). Phần còn lại là diễn giải của vòng đó, chia mục bằng `##`; các mục của từng vòng ghi trong file luật của vòng.
 Mode Full Auto thêm mục `## Đã tự quyết`: quyết gì, vì sao, phương án đã loại.
@@ -106,7 +97,6 @@ Mode Full Auto thêm mục `## Đã tự quyết`: quyết gì, vì sao, phươn
 - Người chấm trên tab Game design (0 đến 10, kèm phản hồi). **Điểm của người là tuyệt đối**; điểm AI chỉ dùng cho ý người chưa chấm.
 - Điểm của người gắn với đúng nội dung ý lúc chấm. Viết lại một ý thì ý đó thành chưa chấm; điểm và phản hồi cũ vẫn nằm trong lịch sử.
 - Người chấm được ở cả bảng đề xuất và bảng `live`; đó là một bộ điểm chung. Một ý đã chốt bị người chấm dưới 5 thì node đề xuất tương ứng cũng thành "cần làm lại" (khi nội dung ý còn giống).
-
 ## Độ quan trọng của node (tiền đề cho kế hoạch)
 Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn phát triển nào. Ngoài điểm này, dữ liệu theo giai đoạn chỉ được ghi ở mục "Thông số theo giai đoạn" của node vòng 4.
 
@@ -123,14 +113,12 @@ Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn p
 - Người chấm được ở mọi node; điểm của người là tuyệt đối, và các node con người chưa chấm dời theo cùng khoảng cách. `gd_status.py` in điểm hiệu lực; đừng sửa điểm AI để "bù" lại điểm của người.
 - Đổi độ quan trọng không đổi hash, không làm node phải làm lại, không ảnh hưởng đạt hay chốt, không ghi vào lịch sử.
 - Tiến độ (`.progress`, GD chỉ đọc): node lá đã xong giai đoạn của nó thì không còn đẩy điểm lên node cha; node cha lấy điểm cao nhất của phần **chưa xong** bên dưới.
-
 ## Khi nào một node đạt
 Node **đạt** khi có ít nhất một ý, `based-on` khớp hash data của cha, và:
 - **Full Auto**: mọi ý có điểm hiệu lực từ 5 trở lên (điểm của người nếu đã chấm, chưa thì điểm AI). Node đạt chỉ sang `live` khi người bấm Sync hoặc Chốt; node con của node đạt thì mở ngay, không cần chờ.
 - **User control**: người đã chấm mọi ý, mọi điểm từ 5 trở lên, và không còn câu hỏi chưa trả lời. Người bấm Chốt; node con chỉ mở sau khi node cha đã chốt giống `live`.
 
 Node chưa đạt thì các node con bị guard khoá. Chính node đó vẫn sửa được. Node còn ý trái nhau mà người chưa chọn ("XUNG ĐỘT CHƯA GIẢI QUYẾT" trong `gd_status.py`) cũng khoá node con, ở cả hai mode: không tự chọn thay người, báo người rồi chờ.
-
 ## Làm lại một node
 `gd_status.py` ghi rõ node nào "bạn cần làm lại" và vì sao. Có ba lí do:
 1. **Ý bị chấm dưới 5** (người hoặc AI): đọc phản hồi của người, viết lại đúng ý đó trong `data.md` (giữ `id`), chấm lại điểm AI. Đừng đụng các ý đã đạt.

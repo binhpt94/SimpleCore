@@ -82,6 +82,18 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -I \"$CLAUDE_PROJECT_DIR/.claude/hooks/bind_session.py\" --session-start",
+            "timeout": 15
+          }
+        ]
+      }
     ]
   }
 }

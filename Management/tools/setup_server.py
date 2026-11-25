@@ -17,8 +17,9 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   file bind_session.py writes, so the PIN never goes through a chat (a bind command typed as the first message
   of a chat can end up in the thread's generated title).
 - POST /api/sessions/reread {id} (page token, no PIN): one headless turn in an existing bound thread,
-  `claude --resume <id> -p <REREAD_PROMPT>`, so it reads the rules again after they changed. The page's
-  "Đọc lại quy trình" buttons (one thread, or all of them a few at a time) call it. It binds nothing.
+  `claude --resume <id> -p <reread_prompt>`, naming only the rule files of its role that changed since it last read
+  them (none changed: no turn). The page's "Đọc lại quy trình" buttons (one thread, or all of them a few at a time)
+  call it. It binds nothing.
 - POST /api/sessions/compact {id} (page token, no PIN): one headless turn that runs /compact in that thread.
 - POST /api/sessions/renew {id, pin} (with the PIN, as it binds): empties the thread's context in the same chat (a
   /compact told to keep nothing; the CLI's /clear does not work on a resumed session in a headless turn), binds
@@ -51,6 +52,7 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   only, read only) so the page can show them.
 """
 import argparse
+import hashlib
 import html
 import json
 import os
@@ -122,9 +124,53 @@ ENTRY_RX = re.compile(r'"entrypoint"\s*:\s*"([^"]+)"')
 VSCODE_ENTRY, HEADLESS_ENTRY = "claude-vscode", "sdk-cli"
 TITLE_RX = re.compile(r'"type"\s*:\s*"custom-title".*?"customTitle"\s*:\s*"((?:[^"\\]|\\.)*)"')
 MAX_BODY = 4096
-# What a thread is told when it is created and when the page's "Đọc lại quy trình" button is pressed.
-REREAD_PROMPT = ("Đọc lại quy trình: đọc lại CLAUDE.md gốc và các file luật của vai trò này (dòng guard: ở đầu tin nêu "
-                 "vai trò và file luật). Chưa làm việc gì khác. Trả lời ngắn: đã đọc những file nào.")
+# What a thread is told when it is created or renewed. The root CLAUDE.md and the shared rules are already in its
+# context (the CLI loads them); Reading them again only doubles them. Its role rules are not loaded (their `paths:`
+# keeps them out of the ~30 other chats), so the guard line tells it which file to Read (bind_session.rules_reminder).
+REREAD_PROMPT = ("Đọc lại quy trình: CLAUDE.md gốc và luật chung đã nạp sẵn trong ngữ cảnh, không Read lại. Chỉ Read "
+                 "file luật mà dòng guard ở đầu tin bảo đọc (nếu có). Chưa làm việc gì khác. Trả lời ngắn: đã đọc những file nào.")
+# The page's "Đọc lại quy trình" button: only the rule files of the thread's role that changed since it last read them
+# (rules-seen/<id>.json in the guard store: path -> sha1). Nothing changed: no turn at all, so pressing "tất cả" after
+# a change costs one turn only in the threads that follow a changed file.
+RULES_SEEN_DIR = "rules-seen"
+
+
+def reread_prompt(changed):
+    return ("Đọc lại quy trình: các file luật sau vừa đổi: " + ", ".join(changed) + ". Read lại toàn bộ đúng các file "
+            "đó, không Read file nào khác. Chưa làm việc gì khác. Trả lời ngắn: đã đọc những file nào.")
+
+
+def rules_state(binding):
+    """{path from the root: sha1} of the rule files a thread bound to `binding` follows."""
+    out = {}
+    for rel in bind_session.rule_files(binding, str(ROOT)):
+        try:
+            out[rel] = hashlib.sha1((ROOT / rel).read_bytes()).hexdigest()
+        except OSError:
+            pass
+    return out
+
+
+def rules_seen_path(session_id):
+    path = guard.binding_path(session_id, guard.STORE_DIR)
+    return path and os.path.join(guard.STORE_DIR, RULES_SEEN_DIR, os.path.basename(path))
+
+
+def changed_rules(t):
+    """(rule files of thread t that changed since it last read them, their current state)."""
+    now = rules_state(t["binding"])
+    path = rules_seen_path(t["id"])
+    seen = bind_session.read_json(path, {}) if path else {}
+    seen = seen if isinstance(seen, dict) else {}
+    return [rel for rel, sha in now.items() if seen.get(rel) != sha], now
+
+
+def mark_rules_seen(session_id, state):
+    path = rules_seen_path(session_id)
+    if path:
+        bind_session.write_json(path, state)
+
+
 COMPACT_PROMPT = "/compact"
 # Renew: the CLI's /clear does not empty a resumed session in a headless turn, a /compact told to keep nothing does.
 WIPE_PROMPT = ("/compact Session này được làm mới: KHÔNG giữ lại bất kì nội dung, con số, file, việc dở dang hay quyết định nào "
@@ -393,6 +439,7 @@ def create(name, feature, model, effort):
     try:
         run_claude(["-n", name, "--session-id", sid, "--model", model, "--effort", effort,
                     "-p", f"Thread {name} được tạo bởi trang Setup. {REREAD_PROMPT}"])
+        mark_rules_seen(sid, rules_state(feature))
     except Exception:
         try:
             os.remove(guard.binding_path(sid, guard.STORE_DIR))      # no thread: leave no binding behind
@@ -528,10 +575,16 @@ def reread(session_id):
     t, no = eligible(session_id)
     if no:
         return no
+    changed, now = changed_rules(t)
+    if not changed:
+        return {"ok": True, "id": t["id"], "title": t["title"], "skipped": True,
+                "answer": "luật của vai trò này không đổi từ lần đọc trước: không chạy lượt nào"}
+    prompt = reread_prompt(changed)
     try:
-        answer = relay(t, REREAD_PROMPT) if t.get("live") == "interactive" else turn(t, REREAD_PROMPT)
+        answer = relay(t, prompt) if t.get("live") == "interactive" else turn(t, prompt)
     except Exception as ex:
         return {"ok": False, "id": t["id"], "title": t["title"], "error": str(ex)[:300]}
+    mark_rules_seen(t["id"], now)
     return {"ok": True, "id": t["id"], "title": t["title"], "answer": answer[:300]}
 
 
@@ -579,6 +632,7 @@ def renew(session_id, pin):
     except Exception as ex:
         return {"ok": False, "id": t["id"], "title": t["title"], "renewed": True,
                 "error": "đã làm mới và gán lại, CHƯA đọc quy trình (bấm Đọc lại quy trình): " + str(ex)[:200]}
+    mark_rules_seen(t["id"], rules_state(t["binding"]))
     return {"ok": True, "id": t["id"], "title": t["title"], "answer": "đã làm mới, gán lại " + t["binding"] + ". " + answer[:240]}
 
 

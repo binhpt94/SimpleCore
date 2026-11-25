@@ -1,3 +1,7 @@
+---
+paths:
+  - "UnityProject/**"
+---
 # Luật Unity mà validator không kiểm được
 Validator ép ranh giới. File này ghi phần còn lại; người duyệt sẽ soi theo từng mục.
 
