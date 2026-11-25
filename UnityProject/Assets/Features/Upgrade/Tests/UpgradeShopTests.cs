@@ -284,6 +284,196 @@ namespace Game.Upgrade.Tests
         }
 
         [Test]
+        public void The_six_items_stay_the_same_through_the_run_and_keep_their_levels()
+        {
+            EnterBattle("knight", "archer", "mage");
+            _wallet.Coins = 1000;
+            _shop.Buy(1);
+
+            _run.SetStep(RunStep.Paused);
+            _run.SetStep(RunStep.Playing);
+            _wallet.Grant(50);
+            _run.CountClearedWave(1);
+
+            Assert.AreEqual(6, _shop.Count);
+            Assert.AreEqual("knight", _shop.Get(0).HeroCode);
+            Assert.AreEqual("archer", _shop.Get(1).HeroCode);
+            Assert.AreEqual("mage", _shop.Get(2).HeroCode);
+            Assert.AreEqual(1, _shop.Get(0).Level);
+            Assert.AreEqual(2, _shop.Get(1).Level);
+        }
+
+        [Test]
+        public void A_team_of_the_wrong_size_builds_no_items()
+        {
+            Assert.Throws<InvalidOperationException>(() => EnterBattle("knight", "archer"));
+
+            Assert.AreEqual(0, _shop.Count);
+        }
+
+        [Test]
+        public void Buying_works_again_after_resuming_from_pause()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            _run.SetStep(RunStep.Paused);
+            _run.SetStep(RunStep.Playing);
+
+            Assert.IsTrue(_shop.Get(0).CanBuy);
+            Assert.AreEqual(PurchaseResult.Bought, _shop.Buy(0));
+        }
+
+        [Test]
+        public void Buying_stays_open_the_whole_battle_including_the_break_between_waves()
+        {
+            // The break between waves raises no run event: the shop closes only on pause or at the end of the run.
+            EnterBattle();
+            _wallet.Coins = 1000;
+
+            Assert.AreEqual(PurchaseResult.Bought, _shop.Buy(0));
+            _run.CountClearedWave(1);
+            Assert.IsTrue(_shop.Get(3).CanBuy);
+            Assert.AreEqual(PurchaseResult.Bought, _shop.Buy(3));
+            _run.CountClearedWave(2);
+            Assert.AreEqual(PurchaseResult.Bought, _shop.Buy(5));
+        }
+
+        [Test]
+        public void Every_item_keeps_selling_levels_with_no_cap_and_no_refund()
+        {
+            EnterBattle();
+            _wallet.Coins = int.MaxValue;
+            long paid = 0;
+
+            for (var i = 0; i < 30; i++)
+            {
+                var price = _shop.Get(0).NextPrice;
+                Assert.AreEqual(PurchaseResult.Bought, _shop.Buy(0));
+                paid += price;
+            }
+
+            Assert.AreEqual(31, _shop.Get(0).Level);
+            Assert.AreEqual(int.MaxValue - paid, (long)_wallet.Coins);
+        }
+
+        [Test]
+        public void A_buy_made_before_the_castle_falls_stays_and_later_taps_are_refused()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            _shop.Buy(3);
+
+            _run.Stop();
+
+            Assert.AreEqual(PurchaseResult.Unavailable, _shop.Buy(3));
+            Assert.AreEqual(2, _shop.Get(3).Level);
+            Assert.AreEqual(960, _wallet.Coins);
+            CollectionAssert.AreEqual(new[] { (CastleUpgrade.Health, 2) }, _castle.Applied);
+        }
+
+        [Test]
+        public void Coins_that_arrive_before_a_tap_count_for_that_tap()
+        {
+            EnterBattle();
+            _wallet.Coins = 20;
+            Assert.AreEqual(PurchaseResult.NotEnoughCoins, _shop.Buy(0));
+
+            _wallet.Grant(10);
+
+            Assert.AreEqual(PurchaseResult.Bought, _shop.Buy(0));
+            Assert.AreEqual(0, _wallet.Coins);
+        }
+
+        [Test]
+        public void Hero_price_from_level_30_to_31_is_the_whole_number_180635()
+        {
+            Assert.AreEqual(180635, new PriceCurve(30, 1.35).PriceAt(30));
+        }
+
+        [Test]
+        public void Several_buys_of_one_item_report_every_level_one_by_one_in_order()
+        {
+            EnterBattle();
+            _wallet.Coins = 10000;
+
+            _shop.Buy(4);
+            _shop.Buy(4);
+            _shop.Buy(4);
+
+            CollectionAssert.AreEqual(
+                new[] { (CastleUpgrade.Attack, 2), (CastleUpgrade.Attack, 3), (CastleUpgrade.Attack, 4) },
+                _castle.Applied);
+            Assert.IsEmpty(_heroes.Applied);
+        }
+
+        [Test]
+        public void A_level_report_reaches_the_owner_before_the_buy_returns()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            var reportedBeforeBarUpdate = false;
+            _shop.ItemsChanged += () => reportedBeforeBarUpdate = _heroes.Applied.Count == 1;
+
+            _shop.Buy(1);
+
+            Assert.AreEqual(1, _heroes.Applied.Count);
+            Assert.IsTrue(reportedBeforeBarUpdate);
+        }
+
+        [Test]
+        public void Refused_buys_report_nothing_and_never_repeat_an_old_level()
+        {
+            EnterBattle();
+            _wallet.Coins = 30;
+            _shop.Buy(0);
+
+            _shop.Buy(0);                         // not enough coins
+            _wallet.Coins = 1000;
+            _run.SetStep(RunStep.Paused);
+            _shop.Buy(0);                         // paused
+            _run.SetStep(RunStep.Playing);
+            _shop.Buy(0);
+            _run.Stop();
+            _shop.Buy(0);                         // run over
+
+            CollectionAssert.AreEqual(new[] { (0, 2), (0, 3) }, _heroes.Applied);
+            Assert.IsEmpty(_castle.Applied);
+        }
+
+        [Test]
+        public void A_new_run_does_not_report_level_1_to_anyone()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            _shop.Buy(0);
+            _shop.Buy(3);
+            _run.Stop();
+            _heroes.Applied.Clear();
+            _castle.Applied.Clear();
+
+            EnterBattle("mage", "priest", "archer");
+
+            Assert.IsEmpty(_heroes.Applied);
+            Assert.IsEmpty(_castle.Applied);
+        }
+
+        [Test]
+        public void The_session_follows_the_run_only_between_run_and_dispose()
+        {
+            var shop = new UpgradeShopLogic(StandardPrices(), _run, _wallet, _wallet, _heroes, _castle);
+            var session = new UpgradeSession(shop);
+
+            session.Run();
+            EnterBattle();
+            Assert.AreEqual(6, shop.Count);
+
+            session.DisposeAsync().GetAwaiter().GetResult();
+            _run.Stop();
+            EnterBattle("mage", "priest", "archer");
+            Assert.AreEqual("knight", shop.Get(0).HeroCode);
+        }
+
+        [Test]
         public void After_detach_the_shop_no_longer_follows_the_run()
         {
             _shop.Detach();

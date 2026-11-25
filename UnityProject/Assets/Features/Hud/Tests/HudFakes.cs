@@ -43,10 +43,13 @@ namespace Game.Hud.Tests
 
         public CastleSkillState GetState(CastleSkill skill) => _states[skill];
 
+        /// <summary>When true the castle turns every use down (for example the run has just ended) and nothing changes.</summary>
+        public bool Refuse;
+
         public bool TryUse(CastleSkill skill)
         {
             Used.Add(skill);
-            if (!_states[skill].Ready) return false;
+            if (Refuse || !_states[skill].Ready) return false;
             _states[skill] = new CastleSkillState(skill, false, Cooldown(skill), Cooldown(skill));
             return true;
         }

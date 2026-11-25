@@ -17,3 +17,4 @@ MonoBehaviour:
   loadFailedMessage: "Kh\xF4ng tải được game. Vui l\xF2ng mở lại."
   featureFailedMessage: "Lỗi tải: {0}"
   minLoadingScreenSeconds: 1
+  slowSwitchWarningSeconds: 5

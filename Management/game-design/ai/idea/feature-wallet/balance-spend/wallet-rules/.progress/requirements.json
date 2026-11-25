@@ -1,18 +1,21 @@
 {
  "items": {
   "edge-tien-vao-sau-khi-luot-ket-thuc": {
-   "state": "doing",
-   "note": "viết test: tiền vào sau khi trận dừng vẫn được cộng",
-   "tests": [],
+   "state": "done",
+   "note": "theo luật đã chốt: tiền vào sau khi lượt kết thúc bị bỏ qua",
+   "tests": [
+    "WalletLogicTests.IncomeAfterTheRunEnded_IsIgnored_AndAnnouncesNothing",
+    "WalletLogicTests.IncomeFromTheOldRun_DoesNotCarryIntoTheNewRun_AndNewIncomeCountsAgain"
+   ],
    "play": "",
    "hash": "580ff09248b4",
    "text": "**Tiền vào sau khi lượt kết thúc** (ví dụ quái gục cùng lúc thành bị phá): ví vẫn cộng bình thường; không ảnh hưởng gì vì lượt mới sẽ đặt lại về 50. Ví không cần biết lượt đã kết thúc.",
    "title": "Tiền vào sau khi lượt kết thúc",
    "by": "Wallet",
-   "at": "2026-11-25 10:53:14"
+   "at": "2026-11-25 11:43:41"
   },
   "start-50": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.StartsWithConfiguredCoins",
@@ -23,11 +26,11 @@
    "hash": "cd4ce6bf1db6",
    "text": "Đầu mỗi lượt số dư là 50 tiền\nĐủ mua ngay một cấp hero (giá 30) nhưng chưa đủ mua thêm một mục thành (giá 40), nên lựa chọn đầu tiên đã có ý nghĩa.",
    "title": "Đầu mỗi lượt số dư là 50 tiền",
-   "by": "Wallet",
-   "at": "2026-11-25 10:53:32"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "integer-non-negative": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.NegativeStartCoins_AreTreatedAsZero",
@@ -38,11 +41,11 @@
    "hash": "bc43a11ff38c",
    "text": "Số dư là số nguyên từ 0 tiền trở lên, không có phần lẻ\nMọi khoản cộng và mọi giá đều là số nguyên.",
    "title": "Số dư là số nguyên từ 0 tiền trở lên, không có phần lẻ",
-   "by": "Wallet",
-   "at": "2026-11-25 10:53:38"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "spend-equal-ok": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.TrySpend_ExactBalance_LeavesZero_AndAnnouncesZero"
@@ -51,11 +54,11 @@
    "hash": "fffce6ae8b3a",
    "text": "Số dư bằng đúng giá thì trừ được, số dư về 0 tiền\nĐiều kiện trừ là số dư lớn hơn hoặc bằng giá.",
    "title": "Số dư bằng đúng giá thì trừ được, số dư về 0 tiền",
-   "by": "Wallet",
-   "at": "2026-11-25 10:53:43"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "one-at-a-time": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.TwoQuickBuys_WithCoinsForOnlyOne_SecondIsNotEnough"
@@ -64,11 +67,11 @@
    "hash": "ef795595aa09",
    "text": "Mỗi yêu cầu trừ được xử lí xong mới tới yêu cầu sau, nên hai lần trừ liền nhau không bao giờ làm số dư dưới 0 tiền\nVí dụ số dư 50, hai yêu cầu trừ 30 tới gần như cùng lúc: lần đầu được (còn 20), lần sau \"không đủ\".",
    "title": "Mỗi yêu cầu trừ được xử lí xong mới tới yêu cầu sau, nên hai lần trừ liền nhau không bao giờ làm số dư dưới 0 tiền",
-   "by": "Wallet",
-   "at": "2026-11-25 10:53:50"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "reject-bad-amount": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.Add_Zero_IsIgnored_AndAnnouncesNothing",
@@ -79,11 +82,11 @@
    "hash": "5981abd042a4",
    "text": "Cộng 0 tiền thì bỏ qua; cộng hay trừ một số âm là lỗi và bị từ chối, số dư giữ nguyên\nLỗi được ghi ra log để phiên code thấy, không làm dừng trận.",
    "title": "Cộng 0 tiền thì bỏ qua; cộng hay trừ một số âm là lỗi và bị từ chối, số dư giữ nguyên",
-   "by": "Wallet",
-   "at": "2026-11-25 10:53:56"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "notify-on-change": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.Add_IncreasesCoins_AndAnnouncesTheNewBalance",
@@ -96,11 +99,11 @@
    "hash": "8eefd897be05",
    "text": "Ví báo số dư mới ngay trong khung hình số dư đổi, và luôn báo một lần khi đặt lại về 50 tiền\nSố dư không đổi (cộng 0, trừ bị từ chối) thì không báo.",
    "title": "Ví báo số dư mới ngay trong khung hình số dư đổi, và luôn báo một lần khi đặt lại về 50 tiền",
-   "by": "Wallet",
-   "at": "2026-11-25 10:54:02"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "cap-max": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.Add_PastTheCap_StopsAtMaxCoins_AndAnnouncesIt",
@@ -110,11 +113,11 @@
    "hash": "87bb0e190c7a",
    "text": "Số dư không vượt quá 999.999.999 tiền; cộng vượt thì dừng ở mức đó\nTrong chơi thường không chạm tới; chỉ để tránh tràn số.",
    "title": "Số dư không vượt quá 999.999.999 tiền; cộng vượt thì dừng ở mức đó",
-   "by": "Wallet",
-   "at": "2026-11-25 10:54:08"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "edge-hai-lan-bam-mua-rat-nhanh-chi-du": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.TwoQuickBuys_WithCoinsForOnlyOne_SecondIsNotEnough"
@@ -123,11 +126,11 @@
    "hash": "db08fa606e92",
    "text": "**Hai lần bấm mua rất nhanh, chỉ đủ tiền một lần**: hai yêu cầu trừ tới lần lượt; lần đầu \"được\", lần sau thấy số dư mới và trả \"không đủ\". Số dư không âm.",
    "title": "Hai lần bấm mua rất nhanh, chỉ đủ tiền một lần",
-   "by": "Wallet",
-   "at": "2026-11-25 10:54:14"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "edge-tien-vua-du-dung-bang-gia": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.TrySpend_ExactBalance_LeavesZero_AndAnnouncesZero"
@@ -136,11 +139,11 @@
    "hash": "49f192a3eb38",
    "text": "**Tiền vừa đủ đúng bằng giá**: trừ được, số dư về 0, báo số 0.",
    "title": "Tiền vừa đủ đúng bằng giá",
-   "by": "Wallet",
-   "at": "2026-11-25 10:54:20"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "edge-cong-va-tru-trong-cung-khung-hinh": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.AddThenSpendInOneFrame_EachChangeIsAnnounced_LastIsTheBalance"
@@ -149,11 +152,11 @@
    "hash": "5e672d85fd1f",
    "text": "**Cộng và trừ trong cùng khung hình**: xử lí theo thứ tự tới; mỗi lần đổi báo một lần (bên theo dõi có thể nhận hai số trong một khung hình, số cuối là đúng).",
    "title": "Cộng và trừ trong cùng khung hình",
-   "by": "Wallet",
-   "at": "2026-11-25 10:54:28"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "edge-cong-lam-vuot-999-999-999": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.Add_PastTheCap_StopsAtMaxCoins_AndAnnouncesIt"
@@ -162,11 +165,11 @@
    "hash": "ae24797a3541",
    "text": "**Cộng làm vượt 999.999.999**: số dư dừng ở 999.999.999, báo số đó.",
    "title": "Cộng làm vượt 999.999.999",
-   "by": "Wallet",
-   "at": "2026-11-25 10:54:34"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "edge-dat-lai-khi-so-du-dang-dung-bang": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.NewRun_WhenCoinsAlreadyEqualStartCoins_StillAnnouncesOnce"
@@ -175,11 +178,11 @@
    "hash": "bdeb36f77c11",
    "text": "**Đặt lại khi số dư đang đúng bằng 50**: vẫn báo một lần để HUD lượt mới chắc chắn hiện đúng.",
    "title": "Đặt lại khi số dư đang đúng bằng 50",
-   "by": "Wallet",
-   "at": "2026-11-25 10:54:40"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "edge-yeu-cau-tru-gia-0": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có",
    "tests": [
     "WalletLogicTests.TrySpend_PriceZero_IsOk_AndAnnouncesNothing",
@@ -189,11 +192,11 @@
    "hash": "72ceeb820f01",
    "text": "**Yêu cầu trừ giá 0**: số dư >= 0 luôn đúng nên trả \"được\", số dư không đổi, không báo. Trong game không có món giá 0.",
    "title": "Yêu cầu trừ giá 0",
-   "by": "Wallet",
-   "at": "2026-11-25 10:54:48"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test đã có: tiền đầu lượt từ asset cấu hình, sàn 0, trần 999.999.999",
    "tests": [
     "WalletLogicTests.InstallerAsset_RegistersWalletContractsWithCoinsFromConfigAsset_AndJoinsTheSession",
@@ -206,8 +209,8 @@
    "hash": "1adef60db9e3",
    "text": "## Làm gì\n- Giữ một số dư nguyên, không âm, cho lượt đang chơi.\n- Ba thao tác:\n  - **Cộng(n)**: n > 0 thì số dư tăng n; n = 0 thì bỏ qua; n < 0 thì từ chối và ghi lỗi.\n  - **Trừ(giá)**: giá < 0 thì từ chối và ghi lỗi; số dư >= giá thì trừ, trả \"được\"; ngược lại trả \"không đủ\", số dư giữ nguyên.\n  - **Đặt lại**: số dư về tiền đầu lượt (50), luôn báo số mới.\n- Sau mỗi thao tác làm số dư đổi: báo số dư mới cho mọi bên theo dõi (`feature-hud`, `feature-hud-upgrade`) ngay trong khung hình đó.\n- Xử lí tuần tự: một yêu cầu xong (kể cả báo số mới) mới tới yêu cầu sau. Không có hàng đợi trì hoãn, không có \"giữ chỗ\" tiền.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Tiền đầu lượt | 50 (dự kiến) | tiền | Mua được một cấp hero (30) ngay, chưa đủ cho hai món; bộ số chung |\n| Số dư nhỏ nhất | 0 | tiền | Luật không âm |\n| Số dư lớn nhất | 999.999.999 | tiền | Tránh tràn số; không chạm tới khi chơi thường |\n| Thời điểm báo số mới | cùng khung hình | khung hình | HUD phải khớp ngay với số tiền |\n\nTiền đầu lượt là số cấu hình của ví (asset cấu hình), không viết cứng.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Tiền đầu lượt | 50 | 50, chỉnh theo chơi thử | Chốt theo `feature-balance` |\n| Ghi log khi cộng/trừ bị từ chối | có | có | có |\n| Số dư lớn nhất | 999.999.999 | 999.999.999 | 999.999.999 |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Wallet",
-   "at": "2026-11-25 10:54:54"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:01"
   }
  },
  "log": [
@@ -413,6 +416,118 @@
    "state": "done",
    "by": "Wallet",
    "note": "WalletLogicTests.InstallerAsset_RegistersWalletContractsWithCoinsFromConfigAsset_AndJoinsTheSession, WalletLogicTests.Installer_WithoutConfig_FailsAtInstall_InsteadOfStartingWithZeroCoins, WalletLogicTests.NegativeStartCoins_AreTreatedAsZero, WalletLogicTests.Add_PastTheCap_StopsAtMaxCoins_AndAnnouncesIt, WalletLogicTests.AddThenSpendInOneFrame_EachChangeIsAnnounced_LastIsTheBalance"
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "start-50",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "integer-non-negative",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "spend-equal-ok",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "one-at-a-time",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "reject-bad-amount",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "notify-on-change",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "cap-max",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "edge-hai-lan-bam-mua-rat-nhanh-chi-du",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "edge-tien-vua-du-dung-bang-gia",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "edge-cong-va-tru-trong-cung-khung-hinh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "edge-cong-lam-vuot-999-999-999",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "edge-dat-lai-khi-so-du-dang-dung-bang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "edge-yeu-cau-tru-gia-0",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:01",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:43:00",
+   "id": "edge-tien-vao-sau-khi-luot-ket-thuc",
+   "state": "doing",
+   "by": "Wallet",
+   "note": "theo luật đã chốt: tiền vào sau khi lượt kết thúc bị bỏ qua"
+  },
+  {
+   "at": "2026-11-25 11:43:41",
+   "id": "edge-tien-vao-sau-khi-luot-ket-thuc",
+   "state": "done",
+   "by": "Wallet",
+   "note": "WalletLogicTests.IncomeAfterTheRunEnded_IsIgnored_AndAnnouncesNothing, WalletLogicTests.IncomeFromTheOldRun_DoesNotCarryIntoTheNewRun_AndNewIncomeCountsAgain"
   }
  ]
 }

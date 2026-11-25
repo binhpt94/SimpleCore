@@ -17,7 +17,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 |---|---|---|---|
 | Điểm ra bên trái / phải | x = −17 / +17, trên mặt đất của làn | u | Ngoài mép màn hình (±16u) 1u, quái đi vào khung hình |
 | Số quái mỗi bên | N/2 | con | Kẹp đều hai phía |
-| Vị trí Trùm | N (con cuối) | thứ tự | Cuối đợt, khớp `feature-enemy/enemy-list/enemy-type-values` |
+| Vị trí Trùm | N (con cuối) | thứ tự | Cuối đợt; luật này do node này giữ |
 | Chuỗi cùng bên tối đa | 3 | con | Không bỏ trống một bên lâu |
 | Con đầu tiên ra | 0 | s từ đầu đợt | Đợt bắt đầu là thấy quái ngay |
 | Giới hạn quái sống | 40 | con | Màn hình điện thoại vẫn đọc được |
@@ -47,6 +47,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Đã tự quyết
 - **Trùm là con cuối của đợt, vị trí cố định (2026-11-23, sửa lệch).** Bản cũ đặt Trùm ở giữa đợt, trái với `feature-enemy/enemy-list/enemy-type-values` (ý `boss-single`: ra cuối đợt). Theo node của enemy: người chơi dọn bớt quái thường rồi mới gặp Trùm, đợt dồn lên một đỉnh rõ. Mức IDEA không có Trùm (theo node enemy). Đã loại: Trùm giữa đợt, Trùm ngẫu nhiên.
+- **Luật "Trùm ra cuối đợt" và "Trùm chờ dưới 40" thuộc node này (2026-11-25).** Node loại quái của `feature-enemy` đã bỏ bản chép của hai luật này (theo hướng A người chọn); node đó chỉ còn hộp, kiểu đánh và việc Trùm không có đòn riêng. Không đổi luật nào ở đây.
 - **Lính đi khoảng 9.3 s tới mép thành (2026-11-23).** Lấy theo `feature-enemy/enemy-behavior/enemy-move-values`; bản cũ ghi khoảng 10 s.
 - **Chuỗi cùng bên tối đa 3.** Ý `spawn-both-sides` cần cả hai bên luôn có áp lực. Đã loại: xen kẽ trái phải tuyệt đối (dễ đoán), ngẫu nhiên hoàn toàn (có lúc 6 con cùng bên).
 - **Hoãn khi đủ 40 rồi thả ngay khi bớt.** Không mất quái nào của đợt, đợt vẫn đủ số. Đã loại: bỏ con thừa (đợt nhẹ đi khi đội yếu, thưởng người chơi kém).

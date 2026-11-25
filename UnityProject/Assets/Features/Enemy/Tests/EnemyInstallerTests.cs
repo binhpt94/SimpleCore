@@ -118,6 +118,41 @@ namespace Game.Enemy.Tests
             Assert.That(config.SpawnDistance, Is.EqualTo(17f));
         }
 
+        // width, height, health, damage, seconds per hit, range, walk speed, coins
+        // (live: enemy-type-values, enemy-stat-values, reward-values)
+        [TestCase(EnemyType.Soldier, 1f, 1.2f, 40f, 5f, 1.0f, 1.0f, 1.5f, 5)]
+        [TestCase(EnemyType.Wolf, 1.2f, 0.8f, 20f, 3f, 0.8f, 1.0f, 3.0f, 4)]
+        [TestCase(EnemyType.Giant, 2f, 2.5f, 150f, 15f, 1.5f, 1.2f, 0.8f, 15)]
+        [TestCase(EnemyType.Archer, 1f, 1.2f, 25f, 6f, 1.2f, 5f, 1.5f, 6)]
+        [TestCase(EnemyType.Boss, 3f, 3.5f, 400f, 40f, 2.0f, 1.5f, 0.6f, 100)]
+        public void The_real_config_matches_the_design_table_of_each_enemy_type(EnemyType type, float width,
+            float height, float health, float damage, float secondsPerHit, float range, float moveSpeed, int coins)
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
+            var config = new SerializedObject(installer).FindProperty("_config").objectReferenceValue as EnemyConfig;
+            Assert.That(config, Is.Not.Null, "EnemyInstaller.asset has no EnemyConfig assigned");
+
+            var kind = config.Kind(type);
+            Assert.That(kind.Width, Is.EqualTo(width).Within(1e-4f), "width");
+            Assert.That(kind.Height, Is.EqualTo(height).Within(1e-4f), "height");
+            Assert.That(kind.Health, Is.EqualTo(health).Within(1e-4f), "health");
+            Assert.That(kind.Damage, Is.EqualTo(damage).Within(1e-4f), "damage");
+            Assert.That(kind.SecondsPerHit, Is.EqualTo(secondsPerHit).Within(1e-4f), "seconds per hit");
+            Assert.That(kind.Range, Is.EqualTo(range).Within(1e-4f), "range");
+            Assert.That(kind.MoveSpeed, Is.EqualTo(moveSpeed).Within(1e-4f), "walk speed");
+            Assert.That(kind.Coins, Is.EqualTo(coins), "coins");
+        }
+
+        [Test]
+        public void The_real_config_slows_enemies_by_half_under_Frost()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
+            var config = new SerializedObject(installer).FindProperty("_config").objectReferenceValue as EnemyConfig;
+
+            Assert.That(config.SlowMoveFactor, Is.EqualTo(0.5f));
+            Assert.That(config.SlowHitFactor, Is.EqualTo(2f));
+        }
+
         private sealed class FakeRegistry : IServiceRegistry
         {
             private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();

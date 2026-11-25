@@ -1,0 +1,255 @@
+{
+ "items": {
+  "team-size": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.A_new_run_puts_the_team_at_the_castle_edges_by_slot_at_full_health",
+    "HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges",
+    "HeroInstallerTests.The_roster_offers_the_five_heroes_in_order"
+   ],
+   "play": "",
+   "hash": "b74a1c4f0e89",
+   "text": "Đội có 3 chỗ, chọn từ danh sách 5 hero, không chọn trùng\nMỗi lượt bỏ ra 2 hero nên luôn có lựa chọn. Màn chọn là `feature-team-select`.",
+   "title": "Đội có 3 chỗ, chọn từ danh sách 5 hero, không chọn trùng",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:21"
+  },
+  "knight-values": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers",
+    "HeroSquadTests.A_single_target_hero_hits_only_its_target",
+    "HeroSquadTests.A_hero_walks_towards_an_enemy_at_its_run_speed"
+   ],
+   "play": "",
+   "hash": "85203bbc0d5a",
+   "text": "Hiệp sĩ: 300 máu, 12 sát thương mỗi 1.0s, tầm 1.2u, chạy 2.5u/s, một mục tiêu\nMáu nhiều nhất, đứng chắn. 12 sát thương/s.",
+   "title": "Hiệp sĩ: 300 máu, 12 sát thương mỗi 1.0s, tầm 1.2u, chạy 2.5u/s, một mục tiêu",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:25"
+  },
+  "axeman-values": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers",
+    "HeroSquadTests.The_axeman_cleave_hits_every_enemy_in_the_stretch_in_front_but_not_behind"
+   ],
+   "play": "",
+   "hash": "e763bae08943",
+   "text": "Đấu sĩ rìu: 240 máu, 14 sát thương mỗi 1.4s, tầm 1.3u, chạy 2.5u/s, chém trúng mọi quái trong 1.5u phía trước\nVùng chém tính từ mép trước của hero về phía mục tiêu, cùng bên với mục tiêu. 10 sát thương/s mỗi quái, thấp hơn Hiệp sĩ nhưng trúng nhiều con.",
+   "title": "Đấu sĩ rìu: 240 máu, 14 sát thương mỗi 1.4s, tầm 1.3u, chạy 2.5u/s, chém trúng mọi quái trong 1.5u phía trước",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:26"
+  },
+  "swordsman-values": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers"
+   ],
+   "play": "",
+   "hash": "ed94ddf6cba1",
+   "text": "Kiếm khách: 180 máu, 16 sát thương mỗi 0.7s, tầm 1.2u, chạy 3.5u/s, một mục tiêu\nĐi nhanh nhất, 22.9 sát thương/s cao nhất; máu ít nên dễ gục.",
+   "title": "Kiếm khách: 180 máu, 16 sát thương mỗi 0.7s, tầm 1.2u, chạy 3.5u/s, một mục tiêu",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:27"
+  },
+  "archer-values": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers",
+    "HeroEdgeCaseTests.An_archer_hit_takes_health_at_once_at_full_range"
+   ],
+   "play": "",
+   "hash": "bde43b059bae",
+   "text": "Cung thủ: 120 máu, 14 sát thương mỗi 0.8s, tầm 7u, chạy 2.5u/s, một mục tiêu\nTầm xa nhất, hơn tầm Cung thủ quái (5u), 17.5 sát thương/s.",
+   "title": "Cung thủ: 120 máu, 14 sát thương mỗi 0.8s, tầm 7u, chạy 2.5u/s, một mục tiêu",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:28"
+  },
+  "mage-values": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers",
+    "HeroSquadTests.The_mage_blast_hits_every_enemy_close_around_the_target"
+   ],
+   "play": "",
+   "hash": "82348eddfeac",
+   "text": "Pháp sư: 100 máu, 18 sát thương mỗi 1.6s, tầm 6u, chạy 2.2u/s, nổ trúng mục tiêu và mọi quái cách tâm mục tiêu không quá 1.5u\n11.25 sát thương/s mỗi quái, chậm nhất nhưng dọn cụm.",
+   "title": "Pháp sư: 100 máu, 18 sát thương mỗi 1.6s, tầm 6u, chạy 2.2u/s, nổ trúng mục tiêu và mọi quái cách tâm mục tiêu không quá 1.5u",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:29"
+  },
+  "hero-feedback": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Play scene Game: hero đi thì nhún 0.1u chu kì 0.4s, mỗi đòn nhích 0.2u về phía mục tiêu trong 0.15s, bị quái đánh thì nháy đỏ 0.1s, Đấu sĩ rìu có vệt chém 0.2s, Cung thủ có đạn bay 0.15s - HeroView, số trong Hero.prefab",
+   "hash": "13086c97764e",
+   "text": "Hero đi thì nhún 0.1u mỗi 0.4s, ra đòn thì nhích 0.2u về phía mục tiêu trong 0.15s, bị đánh thì nháy 0.1s\nNgười chơi phân biệt được hero đang đi, đang đánh, đang bị đánh mà không cần thanh trạng thái.",
+   "title": "Hero đi thì nhún 0.1u mỗi 0.4s, ra đòn thì nhích 0.2u về phía mục tiêu trong 0.15s, bị đánh thì nháy 0.1s",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:36"
+  },
+  "edge-dau-si-riu-chem": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.The_axeman_cleave_counts_overlapping_enemies_on_the_target_side_only",
+    "HeroSquadTests.The_axeman_cleave_hits_every_enemy_in_the_stretch_in_front_but_not_behind"
+   ],
+   "play": "",
+   "hash": "8eed5a1b6f89",
+   "text": "Đấu sĩ rìu chém: chỉ trúng quái phía trước (bên có mục tiêu); quái chồng lên chính Đấu sĩ rìu (khoảng cách 0) cũng tính là phía trước nếu ở cùng bên với mục tiêu theo tâm.",
+   "title": "Đấu sĩ rìu chém",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:39"
+  },
+  "edge-phap-su-no": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.The_mage_picks_another_target_when_its_target_fell_earlier_that_frame",
+    "HeroSquadTests.The_mage_blast_hits_every_enemy_close_around_the_target"
+   ],
+   "play": "",
+   "hash": "cccc41559359",
+   "text": "Pháp sư nổ: tính vùng quanh tâm mục tiêu lúc ra đòn; mục tiêu bị đòn khác hạ cùng khung hình trước khi Pháp sư ra đòn thì Pháp sư chọn lại mục tiêu, không nổ vào chỗ trống.",
+   "title": "Pháp sư nổ",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:40"
+  },
+  "edge-don-vung-ha-nhieu-quai-cung-luc": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.An_area_hit_that_defeats_several_enemies_takes_each_one_once"
+   ],
+   "play": "",
+   "hash": "96bdc80d46c6",
+   "text": "Đòn vùng hạ nhiều quái cùng lúc: mỗi quái cho tiền một lần (`feature-enemy/enemy-reward`).",
+   "title": "Đòn vùng hạ nhiều quái cùng lúc",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:41"
+  },
+  "edge-don-vung-khong-trung-thanh-khong-trung-hero": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.An_area_hit_never_hurts_another_hero"
+   ],
+   "play": "",
+   "hash": "bf24ea98ec6f",
+   "text": "Đòn vùng không trúng thành, không trúng hero.",
+   "title": "Đòn vùng không trúng thành, không trúng hero.",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:42"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers",
+    "HeroConfigValuesTests.Every_hero_shares_a_box_1u_wide_and_1_5u_tall",
+    "HeroInstallerTests.The_roster_offers_the_five_heroes_in_order"
+   ],
+   "play": "",
+   "hash": "d8819731295a",
+   "text": "## Làm gì\n- Cung cấp danh sách hero (mã, tên tạm, nhóm, kiểu đòn, chỉ số lv1, hộp) cho `feature-team-select` và cho việc sinh hero trong trận.\n- Ra đòn theo kiểu đòn của hero, dùng luật đo khoảng cách, nhịp đánh và sát thương ở `feature-hero/hero-stats/hero-level-values`.\n- Hiện hero bằng sprite 2D gen bằng AI, chân trên mặt đất (y=0), quay mặt về phía mục tiêu hoặc hướng đang đi.\n\n## Thông số\n| Hero | Nhóm | Máu | Sát thương | s mỗi đòn | Tầm (u) | Chạy (u/s) | Hộp (u) | Kiểu đòn | Sát thương/s |\n|---|---|---|---|---|---|---|---|---|---|\n| Hiệp sĩ | Cận chiến | 300 | 12 | 1.0 | 1.2 | 2.5 | 1×1.5 | Một mục tiêu | 12.0 |\n| Đấu sĩ rìu | Cận chiến | 240 | 14 | 1.4 | 1.3 | 2.5 | 1×1.5 | Chém 1.5u phía trước | 10.0 mỗi quái |\n| Kiếm khách | Cận chiến | 180 | 16 | 0.7 | 1.2 | 3.5 | 1×1.5 | Một mục tiêu | 22.9 |\n| Cung thủ | Bắn xa | 120 | 14 | 0.8 | 7 | 2.5 | 1×1.5 | Một mục tiêu | 17.5 |\n| Pháp sư | Bắn xa | 100 | 18 | 1.6 | 6 | 2.2 | 1×1.5 | Nổ bán kính 1.5u | 11.25 mỗi quái |\n\nMọi giá trị là cấp 1, dự kiến, theo bộ số chung. Lí do chung: cận chiến máu 180-300, bắn xa 100-120; hero đánh vùng có sát thương/s mỗi quái thấp hơn hero một mục tiêu (luật `hero-tradeoff` vòng 3).\n\nKiểu đòn:\n| Kiểu | Trúng ai |\n|---|---|\n| Một mục tiêu | Chỉ mục tiêu |\n| Chém phía trước | Mục tiêu và mọi quái có hộp chạm đoạn dài 1.5u bắt đầu từ mép trước của hero, về phía mục tiêu |\n| Nổ quanh mục tiêu | Mục tiêu và mọi quái có mép hộp cách tâm mục tiêu không quá 1.5u, cả hai phía của mục tiêu |\n\nHiệu ứng (mức tối thiểu):\n| Hiệu ứng | Xuất hiện | Biến mất |\n|---|---|---|\n| Nhún khi đi (0.1u, chu kì 0.4s) | bắt đầu đi | dừng đi |\n| Nhích khi ra đòn (0.2u về phía mục tiêu, 0.15s) | mỗi đòn | sau 0.15s |\n| Nháy khi bị đánh | mỗi đòn trúng | sau 0.1s, đòn mới đặt lại |\n| Vệt chém (Đấu sĩ rìu) | mỗi đòn, phủ đoạn 1.5u | sau 0.2s |\n| Vòng nổ (Pháp sư) | lúc trúng, bán kính 1.5u quanh mục tiêu | sau 0.3s |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số hero trong danh sách | 3 (Hiệp sĩ, Đấu sĩ rìu, Cung thủ) | 5 | 5 |\n| Số chỗ trong đội | 3 (cả 3 hero, không cần chọn; đúng đội mặc định của `feature-team-select/team-memory/memory-rules`) | 3 chọn từ 5 | 3 chọn từ 5 |\n| Kiểu đòn có | Một mục tiêu, Chém phía trước | cả ba | cả ba |\n| Chỉ số | như bảng | như bảng | theo số đã chỉnh sau chơi thử |\n| Hình | 1 sprite mỗi hero, anim bằng move/scale/nháy | như IDEA, thêm sprite khi đánh | đủ anim đi, đánh, gục; âm thanh |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:43"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:40:21",
+   "id": "team-size",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_new_run_puts_the_team_at_the_castle_edges_by_slot_at_full_health, HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges, HeroInstallerTests.The_roster_offers_the_five_heroes_in_order"
+  },
+  {
+   "at": "2026-11-25 11:40:25",
+   "id": "knight-values",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers, HeroSquadTests.A_single_target_hero_hits_only_its_target, HeroSquadTests.A_hero_walks_towards_an_enemy_at_its_run_speed"
+  },
+  {
+   "at": "2026-11-25 11:40:26",
+   "id": "axeman-values",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers, HeroSquadTests.The_axeman_cleave_hits_every_enemy_in_the_stretch_in_front_but_not_behind"
+  },
+  {
+   "at": "2026-11-25 11:40:27",
+   "id": "swordsman-values",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers"
+  },
+  {
+   "at": "2026-11-25 11:40:28",
+   "id": "archer-values",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers, HeroEdgeCaseTests.An_archer_hit_takes_health_at_once_at_full_range"
+  },
+  {
+   "at": "2026-11-25 11:40:29",
+   "id": "mage-values",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers, HeroSquadTests.The_mage_blast_hits_every_enemy_close_around_the_target"
+  },
+  {
+   "at": "2026-11-25 11:40:36",
+   "id": "hero-feedback",
+   "state": "done",
+   "by": "Hero",
+   "note": "Play scene Game: hero đi thì nhún 0.1u chu kì 0.4s, mỗi đòn nhích 0.2u về phía mục tiêu trong 0.15s, bị quái đánh thì nháy đỏ 0.1s, Đấu sĩ rìu có vệt chém 0.2s, Cung thủ có đạn bay 0.15s - HeroView, số trong Hero.prefab"
+  },
+  {
+   "at": "2026-11-25 11:40:39",
+   "id": "edge-dau-si-riu-chem",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.The_axeman_cleave_counts_overlapping_enemies_on_the_target_side_only, HeroSquadTests.The_axeman_cleave_hits_every_enemy_in_the_stretch_in_front_but_not_behind"
+  },
+  {
+   "at": "2026-11-25 11:40:40",
+   "id": "edge-phap-su-no",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.The_mage_picks_another_target_when_its_target_fell_earlier_that_frame, HeroSquadTests.The_mage_blast_hits_every_enemy_close_around_the_target"
+  },
+  {
+   "at": "2026-11-25 11:40:41",
+   "id": "edge-don-vung-ha-nhieu-quai-cung-luc",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.An_area_hit_that_defeats_several_enemies_takes_each_one_once"
+  },
+  {
+   "at": "2026-11-25 11:40:42",
+   "id": "edge-don-vung-khong-trung-thanh-khong-trung-hero",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.An_area_hit_never_hurts_another_hero"
+  },
+  {
+   "at": "2026-11-25 11:40:43",
+   "id": "params",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers, HeroConfigValuesTests.Every_hero_shares_a_box_1u_wide_and_1_5u_tall, HeroInstallerTests.The_roster_offers_the_five_heroes_in_order"
+  }
+ ]
+}

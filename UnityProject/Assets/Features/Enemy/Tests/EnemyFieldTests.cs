@@ -9,6 +9,7 @@ namespace Game.Enemy.Tests
     {
         private const string ConfigPath = "Assets/Features/Enemy/FeatureAssets/Private/EnemyConfig.asset";
 
+        private EnemyConfig _config;
         private FakeIncome _income;
         private EnemyField _field;
         private List<EnemyDefeat> _defeats;
@@ -16,12 +17,53 @@ namespace Game.Enemy.Tests
         [SetUp]
         public void SetUp()
         {
-            var config = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);
-            Assert.That(config, Is.Not.Null, $"Missing {ConfigPath}");
+            // The rules are the same for every type, also those not in the game at this stage: test them all.
+            var real = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);
+            Assert.That(real, Is.Not.Null, $"Missing {ConfigPath}");
+            _config = UnityEngine.Object.Instantiate(real);
+            var so = new SerializedObject(_config);
+            var kinds = so.FindProperty("_kinds");
+            for (var i = 0; i < kinds.arraySize; i++)
+                kinds.GetArrayElementAtIndex(i).FindPropertyRelative("_available").boolValue = true;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
             _income = new FakeIncome();
-            _field = new EnemyField(config, _income);
+            _field = new EnemyField(_config, _income);
             _defeats = new List<EnemyDefeat>();
             _field.Defeated += d => _defeats.Add(d);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (_config != null) UnityEngine.Object.DestroyImmediate(_config);
+        }
+
+        [TestCase(EnemyType.Archer)]
+        [TestCase(EnemyType.Boss)]
+        public void Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing(EnemyType type)
+        {
+            var real = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);
+            var field = new EnemyField(real, new FakeIncome());
+
+            var error = Assert.Throws<System.InvalidOperationException>(
+                () => field.Spawn(new EnemySpawn(type, EnemySide.Left, 1f)));
+
+            StringAssert.Contains(type.ToString(), error.Message);
+            Assert.That(field.AliveCount, Is.Zero);
+        }
+
+        [TestCase(EnemyType.Soldier)]
+        [TestCase(EnemyType.Wolf)]
+        [TestCase(EnemyType.Giant)]
+        public void Soldiers_wolves_and_giants_can_be_spawned_in_this_stage(EnemyType type)
+        {
+            var real = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);
+            var field = new EnemyField(real, new FakeIncome());
+
+            field.Spawn(new EnemySpawn(type, EnemySide.Left, 1f));
+
+            Assert.That(field.AliveCount, Is.EqualTo(1));
         }
 
         [Test]
@@ -88,6 +130,70 @@ namespace Game.Enemy.Tests
             Assert.That(_field.AliveCount, Is.Zero);
             Assert.That(_income.Added, Is.Empty);
             Assert.That(_defeats, Is.Empty);
+        }
+
+        [TestCase(EnemyType.Soldier, 5)]
+        [TestCase(EnemyType.Wolf, 4)]
+        [TestCase(EnemyType.Giant, 15)]
+        [TestCase(EnemyType.Archer, 6)]
+        [TestCase(EnemyType.Boss, 100)]
+        public void Defeating_an_enemy_pays_the_coins_of_its_type(EnemyType type, int coins)
+        {
+            _field.Spawn(new EnemySpawn(type, EnemySide.Left, 1f));
+
+            _field.Damage(FirstHandle(), 100000f);
+
+            Assert.That(_income.Added, Is.EqualTo(new[] { coins }));
+        }
+
+        [Test]
+        public void Coins_for_an_enemy_do_not_grow_with_the_wave_scale()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Left, 1.9f));
+
+            _field.Damage(FirstHandle(), 100000f);
+
+            Assert.That(_income.Added, Is.EqualTo(new[] { 5 }));
+        }
+
+        [Test]
+        public void An_area_hit_that_defeats_several_enemies_pays_each_of_them()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Left, 1f));
+            _field.Spawn(new EnemySpawn(EnemyType.Wolf, EnemySide.Right, 1f));
+            var alive = new List<EnemyTarget>();
+            _field.GetAlive(alive);
+
+            for (var i = 0; i < alive.Count; i++) _field.Damage(alive[i].Handle, 100f);
+
+            Assert.That(_income.Added, Is.EqualTo(new[] { 5, 4 }));
+            Assert.That(_defeats.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void An_enemy_never_heals_over_time()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            var handle = FirstHandle();
+            _field.Damage(handle, 39f);
+
+            for (var i = 0; i < 500; i++) _field.Tick(0.02f);
+
+            Assert.That(_field.Damage(handle, 1f), Is.True, "the 1 health left is all it has");
+        }
+
+        [Test]
+        public void A_slowed_enemy_that_is_defeated_leaves_nothing_behind()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.SlowAll(5f);
+
+            _field.Damage(FirstHandle(), 100f);
+
+            var looks = new List<EnemyLook>();
+            _field.GetLooks(looks);
+            Assert.That(looks, Is.Empty);
+            Assert.That(_field.AliveCount, Is.Zero);
         }
 
         private int FirstHandle()

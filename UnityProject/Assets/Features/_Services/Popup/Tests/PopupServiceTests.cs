@@ -162,6 +162,39 @@ namespace Game.Services.Popup.Tests
             Assert.That(presenter.Open, Is.Empty);
         }
 
+        [Test]
+        public void Popups_OpenTakeTheTopAndClose_WhileTheBattleClockIsStopped()
+        {
+            var timeScale = Time.timeScale;
+            try
+            {
+                Time.timeScale = 0f;   // the battle stands still (paused or lost)
+
+                var first = service.Show(IdA);
+                var second = service.Show(IdB);
+                Assert.That(service.IsOnTop(second), Is.True);
+
+                service.Close(second);
+
+                Assert.That(service.IsOnTop(first), Is.True);
+                Assert.That(presenter.Open, Has.Count.EqualTo(1));
+                Assert.That(log.Count, Is.EqualTo(0));
+            }
+            finally
+            {
+                Time.timeScale = timeScale;
+            }
+        }
+
+        [Test]
+        public void NoPopupOpen_NothingIsOnTop_AndNothingWasPresented()
+        {
+            Assert.That(service.OpenCount, Is.EqualTo(0));
+            Assert.That(service.Top.IsValid, Is.False);
+            Assert.That(service.IsOnTop(default), Is.False);
+            Assert.That(presenter.Open, Is.Empty);
+        }
+
         // ---- views
 
         [Test]
@@ -250,6 +283,26 @@ namespace Game.Services.Popup.Tests
             Assert.That(Assert.Throws<InvalidOperationException>(badId.Prepare).Message, Does.Contain("not an id"));
             Assert.That(Assert.Throws<InvalidOperationException>(notPrefab.Prepare).Message, Does.Contain("Test/A"));
             Assert.That(Assert.Throws<InvalidOperationException>(twice.Prepare).Message, Does.Contain("Test/A"));
+        }
+
+        [Test]
+        public void CatalogPrefabs_Prepare_IdListedWithoutItsAsset_FailsTheLoadNamingTheId()
+        {
+            var missing = new CatalogPopupPrefabs(Catalog("GamePopups", ("Test/A", prefabs[IdA]), ("Test/B", null)));
+
+            var error = Assert.Throws<InvalidOperationException>(missing.Prepare);
+
+            Assert.That(error.Message, Does.Contain("Test/B"));
+        }
+
+        [Test]
+        public void Participant_LoadFails_WhenAPopupOfTheSceneHasNoAsset()
+        {
+            var lookup = new CatalogPopupPrefabs(Catalog("GamePopups", ("Test/B", null)));
+            var participant = new PopupParticipant(new PopupService(presenter, lookup, log, 3), lookup);
+
+            Assert.Throws<InvalidOperationException>(
+                () => participant.LoadAsync(CancellationToken.None).GetAwaiter().GetResult());
         }
 
         [Test]

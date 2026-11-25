@@ -1,2 +1,3 @@
 {"at": "2026-11-25 01:22:29", "event": "data", "hash": "66f0417d12da", "previous": "", "added": ["switch-instant", "lock-until-shown", "build-limit", "back-button", "home-first-once", "back-key-map"], "removed": [], "rewritten": []}
 {"at": "2026-11-25 01:23:28", "event": "promote", "by": "người (Sync)", "hash": "66f0417d12da"}
+{"at": "2026-11-25 11:45:01", "event": "promote", "by": "người (Sync)", "hash": "66f0417d12da"}

@@ -1,9 +1,9 @@
 {
- "hash": "9109afcd6a93",
+ "hash": "c2c5ba06ffa8",
  "items": {
   "boot-to-home": {
-   "hash": "36de003e0c3d",
-   "text": "Mở game: scene Loading tải xong tự sang scene Game, màn đầu tiên là màn bắt đầu\nKhông có nút ở Loading. Đã vào scene Game thì không quay lại Loading; mọi đổi màn sau đó là đổi trong scene Game, không tải scene."
+   "hash": "c2970d6d7da3",
+   "text": "Mở game: scene Loading tải xong tự sang scene Game, vào thẳng trận với đội mặc định\nChưa có màn bắt đầu và màn chọn đội; đội mặc định theo `feature-team-select/team-memory/memory-rules`. Không có nút ở Loading. Đã vào scene Game thì không quay lại Loading; mọi đổi màn sau đó là đổi trong scene Game, không tải scene."
   },
   "fresh-battle": {
    "hash": "33bded91ba45",

@@ -35,18 +35,19 @@ namespace Game.SceneFlow
                 throw new InvalidOperationException($"{name}: SceneFlowConfig must name both the loading and the game scene.");
             }
 
-            var screens = new PrefabLoadingScreenSource(loadingScreenPrefab);
-
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (cheat == SceneFlowCheatState.LoadError)
             {
-                session.Join(new LoadErrorCheat(screens, settings));
+                session.Join(new LoadErrorCheat(new PrefabLoadingScreenSource(loadingScreenPrefab, false), settings));
                 return;
             }
 #endif
 
-            session.Join(new LoadingToGameFlow(session, new UnitySceneLoader(), screens, new UnityTimer(), settings,
-                Debug.LogException));
+            // The cover must outlive the Loading scene, which is removed while the Game scene loads.
+            var covers = new PrefabLoadingScreenSource(loadingScreenPrefab, true);
+            var switcher = new SceneSwitcher(settings.LoadingScene, new UnitySceneLoader(), covers, new UnityTimer(),
+                settings, new UnitySceneFlowLog());
+            session.Join(new LoadingToGameFlow(session, switcher, settings.GameScene));
         }
 
         private void InstallGameSide(ISessionScene session, IServiceRegistry registry)

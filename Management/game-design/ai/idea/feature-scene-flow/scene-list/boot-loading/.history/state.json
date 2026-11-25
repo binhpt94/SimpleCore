@@ -1,5 +1,5 @@
 {
- "hash": "76aeeee9bf6f",
+ "hash": "cf7c99a185e0",
  "items": {
   "loading-content": {
    "hash": "6bdf2d8404e8",
@@ -10,16 +10,16 @@
    "text": "Màn Loading hiện ít nhất 1 giây, kể cả khi tải xong sớm hơn\nTránh màn nháy lên rồi mất. Không kéo dài hơn mức này khi đã tải xong."
   },
   "loading-max-time": {
-   "hash": "476f649d47c6",
-   "text": "Từ lúc mở game tới lúc thấy màn bắt đầu không quá 5 giây trên điện thoại tầm trung (dự kiến)\nQuá 5 giây là lỗi hiệu năng cần báo, không chặn người chơi."
+   "hash": "89d42c519191",
+   "text": "Từ lúc mở game tới lúc thấy màn đầu tiên của scene Game không quá 5 giây trên điện thoại tầm trung (dự kiến)\nQuá 5 giây là lỗi hiệu năng cần báo, không chặn người chơi."
   },
   "loading-fail": {
    "hash": "aab0559d3a7c",
    "text": "Một feature tải lỗi thì dừng ở Loading, hiện dòng lỗi nêu tên feature đó, không sang scene Game\nKhông tự thử lại; người chơi tắt mở lại game. Đã loại: bỏ qua feature lỗi rồi vào Game thiếu thứ."
   },
   "game-first-screen": {
-   "hash": "1d822a6c8c7c",
-   "text": "Sang scene Game thì màn đầu tiên người chơi thấy là màn bắt đầu\nKhông vào thẳng trận hay màn chọn đội."
+   "hash": "daa0f3659e7f",
+   "text": "Sang scene Game thì màn đầu tiên người chơi thấy là trận, với đội mặc định\nChưa có màn bắt đầu và màn chọn đội; trận do `feature-run` dựng (`feature-run/run-flow/flow-rules`)."
   }
  }
 }

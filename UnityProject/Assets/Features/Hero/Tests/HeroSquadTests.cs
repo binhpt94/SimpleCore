@@ -53,6 +53,7 @@ namespace Game.Hero.Tests
             Assert.That(Hero(0).Health, Is.EqualTo(300f));
             Assert.That(Hero(1).Health, Is.EqualTo(240f));
             Assert.That(Hero(2).Health, Is.EqualTo(120f));
+            Assert.That(_squad.Units, Has.All.Matches<HeroUnit>(u => u.Level == 1 && u.IsStanding));
         }
 
         [Test]

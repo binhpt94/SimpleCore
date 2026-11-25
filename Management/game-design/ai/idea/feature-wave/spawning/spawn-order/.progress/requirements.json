@@ -1,0 +1,335 @@
+{
+ "items": {
+  "half-split": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow",
+    "WaveDirectorTests.WaveOne_SendsHalfOfItsEnemiesToEachSide"
+   ],
+   "play": "",
+   "hash": "cee596cab873",
+   "text": "Mỗi bên đúng một nửa số quái của đợt (đợt 1: 4 trái, 4 phải)\nSố quái luôn chẵn. Trùm, nếu có, ra ở bên được bốc ngẫu nhiên và tính vào nửa của bên đó.",
+   "title": "Mỗi bên đúng một nửa số quái của đợt (đợt 1: 4 trái, 4 phải)",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:17"
+  },
+  "shuffle-order": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave",
+    "SpawnOrderTests.SendList_HoldsExactlyTheKindsOfThePlan"
+   ],
+   "play": "",
+   "hash": "36b7fdfc8345",
+   "text": "Thứ tự loại quái xáo ngẫu nhiên, trừ Trùm luôn là con cuối cùng của đợt\nĐợt 10 có 26 con: Trùm là con thứ 26. Người chơi dọn bớt quái thường rồi mới gặp Trùm, đỉnh căng thẳng ở cuối đợt (khớp `feature-enemy/enemy-list/enemy-type-values`).",
+   "title": "Thứ tự loại quái xáo ngẫu nhiên, trừ Trùm luôn là con cuối cùng của đợt",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:18"
+  },
+  "side-run": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow"
+   ],
+   "play": "",
+   "hash": "b0821404eea8",
+   "text": "Không có quá 3 con liên tiếp ra cùng một bên\nGiữ cảm giác bị kẹp liên tục; không có lúc một bên bỏ trống lâu. Bên ra vẫn ngẫu nhiên trong giới hạn này.",
+   "title": "Không có quá 3 con liên tiếp ra cùng một bên",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:19"
+  },
+  "spawn-timing": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveDirectorTests.BattleStart_StartsWaveOne_WithTheFirstEnemyAtOnce",
+    "WaveDirectorTests.Enemies_ComeOneByOne_OnePerSecondInWaveOne"
+   ],
+   "play": "",
+   "hash": "b66418959059",
+   "text": "Con đầu tiên ra lúc 0 s của đợt, mỗi con sau cách con trước đúng một nhịp thả của đợt\nĐợt 1: 8 con ra trong 7 s; đợt 20: 46 con ra trong 13.5 s (nếu không bị hoãn).",
+   "title": "Con đầu tiên ra lúc 0 s của đợt, mỗi con sau cách con trước đúng một nhịp thả của đợt",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:20"
+  },
+  "alive-cap": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveDirectorTests.FortyEnemiesAlive_HoldsTheNextOne_UntilOneFalls"
+   ],
+   "play": "",
+   "hash": "d01dee511ec2",
+   "text": "Đã có 40 quái sống thì hoãn thả; còn dưới 40 thì con kế tiếp ra ngay, rồi lại đếm nhịp từ đó\nGiữ màn hình đọc được và máy không quá tải. Đồng hồ nhịp đứng yên trong lúc hoãn.",
+   "title": "Đã có 40 quái sống thì hoãn thả; còn dưới 40 thì con kế tiếp ra ngay, rồi lại đếm nhịp từ đó",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:21"
+  },
+  "stop-on-end": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveDirectorTests.BattleStopped_StopsSendingEnemies",
+    "WaveDirectorTests.CastleFallingWhileHeldAtTheCap_DropsTheWaitingEnemies_AndNeverClears"
+   ],
+   "play": "",
+   "hash": "e26952c3dbdb",
+   "text": "Thành bị phá thì ngừng thả ngay, các con chưa ra bị bỏ\nĐợt đó không được tính là dọn sạch.",
+   "title": "Thành bị phá thì ngừng thả ngay, các con chưa ra bị bỏ",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:22"
+  },
+  "edge-du-40-quai-song-dung-luc-toi-nhip": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveDirectorTests.FortyEnemiesAlive_HoldsTheNextOne_UntilOneFalls"
+   ],
+   "play": "",
+   "hash": "a5ef829414f5",
+   "text": "**Đủ 40 quái sống đúng lúc tới nhịp:** con đó chưa ra; đồng hồ nhịp dừng. Một con bị hạ (còn 39) thì con đó ra ngay, đồng hồ đếm lại một nhịp đầy đủ cho con kế tiếp.",
+   "title": "Đủ 40 quái sống đúng lúc tới nhịp",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:23"
+  },
+  "edge-thanh-bi-pha-giua-luc-tha-hoac-luc": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveDirectorTests.BattleStopped_StopsSendingEnemies",
+    "WaveDirectorTests.CastleFallingWhileHeldAtTheCap_DropsTheWaitingEnemies_AndNeverClears"
+   ],
+   "play": "",
+   "hash": "4471c4fa4901",
+   "text": "**Thành bị phá giữa lúc thả hoặc lúc đang hoãn:** ngừng thả ngay; các mục chưa ra bị bỏ; quái đang sống đứng theo luật kết thúc của `feature-run`.",
+   "title": "Thành bị phá giữa lúc thả hoặc lúc đang hoãn",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:25"
+  },
+  "edge-tam-dung-giua-luc-tha": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveDirectorTests.PauseMidInterval_ResumesTheRestOfTheInterval_WithoutCatchingUp",
+    "WaveDirectorTests.Pause_FreezesSendingAndTheBreak"
+   ],
+   "play": "",
+   "hash": "b827d46470df",
+   "text": "**Tạm dừng giữa lúc thả:** đồng hồ nhịp đứng yên; bỏ tạm dừng thì đếm tiếp phần còn lại của nhịp, không thả bù.",
+   "title": "Tạm dừng giữa lúc thả",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:26"
+  },
+  "spawn-point": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Wave chỉ gửi bên ra trong EnemySpawn.Side, Enemy đặt quái ở x âm 17u hoặc dương 17u. Play scene Game: quái hiện ngoài mép màn hai bên rồi đi vào thành",
+   "hash": "f63bc768affd",
+   "text": "Quái ra trên mặt đất ở x = −17u (bên trái) hoặc x = +17u (bên phải), ngoài mép màn hình 1u\nRa xong tự đi vào thành theo `feature-enemy`. Lính cần khoảng 9.3 s để tới mép thành (x = ±1.5u), nên người chơi thấy quái đi vào chứ không hiện sát thành.",
+   "title": "Quái ra trên mặt đất ở x = −17u (bên trái) hoặc x = +17u (bên phải), ngoài mép màn hình 1u",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:29"
+  },
+  "edge-hai-con-ra-cung-cho": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Wave không chặn con ra cùng chỗ, chỉ đếm nhịp. Play đợt 1: hai con liền một bên vẫn ra, chồng lên nhau rồi Enemy tách khi đi",
+   "hash": "489f811b1a3a",
+   "text": "**Hai con ra cùng chỗ** (con trước còn đứng ở x = ±17u): vẫn ra, cho chồng lên nhau; `feature-enemy` lo việc tách khi đi.",
+   "title": "Hai con ra cùng chỗ",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:33"
+  },
+  "edge-khong-xep-duoc-ben-de-chuoi-3": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow"
+   ],
+   "play": "",
+   "hash": "65782a0ff218",
+   "text": "**Không xếp được bên để chuỗi ≤ 3:** với N/2 trái, N/2 phải luôn xếp được; nếu bước ngẫu nhiên ra chuỗi 4 thì đổi bên mục thứ 4 với mục gần nhất phía sau thuộc bên kia.",
+   "title": "Không xếp được bên để chuỗi ≤ 3",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:34"
+  },
+  "edge-trum-va-gioi-han-40": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveDirectorTests.Boss_WaitsUnderTheAliveCapLikeEveryEnemy_AndStillComesLast",
+    "SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave"
+   ],
+   "play": "",
+   "hash": "4b80cac159c0",
+   "text": "**Trùm và giới hạn 40:** Trùm cũng phải chờ dưới 40 như mọi con; vẫn là con cuối của đợt.",
+   "title": "Trùm và giới hạn 40",
+   "by": "Wave",
+   "at": "2026-11-25 11:39:27"
+  },
+  "edge-mua-nang-cap-dung-ki-nang-thanh-giua": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Wave không nghe Upgrade hay Castle. Play: mua nâng cấp và dùng kĩ năng thành giữa lúc thả, quái vẫn ra đúng nhịp",
+   "hash": "d11d9f5115a6",
+   "text": "**Mua nâng cấp, dùng kĩ năng thành giữa lúc thả:** không ảnh hưởng danh sách hay nhịp.",
+   "title": "Mua nâng cấp, dùng kĩ năng thành giữa lúc thả",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:37"
+  },
+  "edge-dot-1": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveDirectorTests.BattleStart_StartsWaveOne_WithTheFirstEnemyAtOnce"
+   ],
+   "play": "",
+   "hash": "f5b928dcb7b6",
+   "text": "**Đợt 1:** bắt đầu ngay lúc `feature-run` báo trận bắt đầu, con đầu ra ở 0 s; quãng đi khoảng 9.3 s của Lính (`feature-enemy/enemy-behavior/enemy-move-values`) đủ để đội hero ra khỏi thành.",
+   "title": "Đợt 1",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:37"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers",
+    "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow"
+   ],
+   "play": "",
+   "hash": "12627d974efe",
+   "text": "## Làm gì\n1. Đầu đợt nhận từ `feature-wave/difficulty-scaling/wave-formula`: số quái N, nhịp thả, hệ số chỉ số, số con từng loại.\n2. Lập danh sách N mục (loại, bên, lúc ra):\n   - Xáo thứ tự các loại không phải Trùm.\n   - Nếu đợt có Trùm: đặt Trùm ở vị trí cuối (thứ N).\n   - Gán bên: đúng N/2 trái, N/2 phải, ngẫu nhiên, không có chuỗi quá 3 mục liên tiếp cùng bên.\n   - Lúc ra dự kiến của mục thứ i (đếm từ 1) là (i − 1) × nhịp thả, tính từ đầu đợt, cộng thời gian bị hoãn.\n3. Thả lần lượt theo danh sách. Mỗi con mới ra mang chỉ số đã nhân hệ số của đợt đang đánh.\n4. Báo \"đã ra hết\" cho `feature-wave/wave-clear/clear-rules` khi mục cuối đã ra.\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Điểm ra bên trái / phải | x = −17 / +17, trên mặt đất của làn | u | Ngoài mép màn hình (±16u) 1u, quái đi vào khung hình |\n| Số quái mỗi bên | N/2 | con | Kẹp đều hai phía |\n| Vị trí Trùm | N (con cuối) | thứ tự | Cuối đợt, khớp `feature-enemy/enemy-list/enemy-type-values` |\n| Chuỗi cùng bên tối đa | 3 | con | Không bỏ trống một bên lâu |\n| Con đầu tiên ra | 0 | s từ đầu đợt | Đợt bắt đầu là thấy quái ngay |\n| Giới hạn quái sống | 40 | con | Màn hình điện thoại vẫn đọc được |\n| Thời gian thả cả đợt (không hoãn) | (N − 1) × nhịp | s | Đợt 1: 7 s, đợt 5: 12 s, đợt 10: 13.75 s, đợt 20: 13.5 s |\n\n\"Quái sống\" là quái đã ra và chưa bị hạ, ở bất kì vị trí nào (kể cả còn ngoài màn hình).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Điểm ra | x = ±17u | x = ±17u | x = ±17u |\n| Chia bên | N/2 mỗi bên | N/2 mỗi bên | N/2 mỗi bên |\n| Chuỗi cùng bên tối đa | 3 con | 3 con | chỉnh sau chơi thử |\n| Vị trí Trùm | không có Trùm | con cuối (N) | chỉnh sau chơi thử |\n| Giới hạn quái sống | 40 con | 40 con | chỉnh theo hiệu năng máy thật |\n| Xáo thứ tự, bên | có | có | có |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:39"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:36:17",
+   "id": "half-split",
+   "state": "done",
+   "by": "Wave",
+   "note": "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow, WaveDirectorTests.WaveOne_SendsHalfOfItsEnemiesToEachSide"
+  },
+  {
+   "at": "2026-11-25 11:36:18",
+   "id": "shuffle-order",
+   "state": "done",
+   "by": "Wave",
+   "note": "SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave, SpawnOrderTests.SendList_HoldsExactlyTheKindsOfThePlan"
+  },
+  {
+   "at": "2026-11-25 11:36:19",
+   "id": "side-run",
+   "state": "done",
+   "by": "Wave",
+   "note": "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow"
+  },
+  {
+   "at": "2026-11-25 11:36:20",
+   "id": "spawn-timing",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.BattleStart_StartsWaveOne_WithTheFirstEnemyAtOnce, WaveDirectorTests.Enemies_ComeOneByOne_OnePerSecondInWaveOne"
+  },
+  {
+   "at": "2026-11-25 11:36:21",
+   "id": "alive-cap",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.FortyEnemiesAlive_HoldsTheNextOne_UntilOneFalls"
+  },
+  {
+   "at": "2026-11-25 11:36:22",
+   "id": "stop-on-end",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.BattleStopped_StopsSendingEnemies, WaveDirectorTests.CastleFallingWhileHeldAtTheCap_DropsTheWaitingEnemies_AndNeverClears"
+  },
+  {
+   "at": "2026-11-25 11:36:23",
+   "id": "edge-du-40-quai-song-dung-luc-toi-nhip",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.FortyEnemiesAlive_HoldsTheNextOne_UntilOneFalls"
+  },
+  {
+   "at": "2026-11-25 11:36:25",
+   "id": "edge-thanh-bi-pha-giua-luc-tha-hoac-luc",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.BattleStopped_StopsSendingEnemies, WaveDirectorTests.CastleFallingWhileHeldAtTheCap_DropsTheWaitingEnemies_AndNeverClears"
+  },
+  {
+   "at": "2026-11-25 11:36:26",
+   "id": "edge-tam-dung-giua-luc-tha",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.PauseMidInterval_ResumesTheRestOfTheInterval_WithoutCatchingUp, WaveDirectorTests.Pause_FreezesSendingAndTheBreak"
+  },
+  {
+   "at": "2026-11-25 11:36:29",
+   "id": "spawn-point",
+   "state": "done",
+   "by": "Wave",
+   "note": "Wave chỉ gửi bên ra trong EnemySpawn.Side, Enemy đặt quái ở x âm 17u hoặc dương 17u. Play scene Game: quái hiện ngoài mép màn hai bên rồi đi vào thành"
+  },
+  {
+   "at": "2026-11-25 11:36:33",
+   "id": "edge-hai-con-ra-cung-cho",
+   "state": "done",
+   "by": "Wave",
+   "note": "Wave không chặn con ra cùng chỗ, chỉ đếm nhịp. Play đợt 1: hai con liền một bên vẫn ra, chồng lên nhau rồi Enemy tách khi đi"
+  },
+  {
+   "at": "2026-11-25 11:36:34",
+   "id": "edge-khong-xep-duoc-ben-de-chuoi-3",
+   "state": "done",
+   "by": "Wave",
+   "note": "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow"
+  },
+  {
+   "at": "2026-11-25 11:36:35",
+   "id": "edge-trum-va-gioi-han-40",
+   "state": "done",
+   "by": "Wave",
+   "note": "SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave, WaveDirectorTests.FortyEnemiesAlive_HoldsTheNextOne_UntilOneFalls"
+  },
+  {
+   "at": "2026-11-25 11:36:37",
+   "id": "edge-mua-nang-cap-dung-ki-nang-thanh-giua",
+   "state": "done",
+   "by": "Wave",
+   "note": "Wave không nghe Upgrade hay Castle. Play: mua nâng cấp và dùng kĩ năng thành giữa lúc thả, quái vẫn ra đúng nhịp"
+  },
+  {
+   "at": "2026-11-25 11:36:37",
+   "id": "edge-dot-1",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.BattleStart_StartsWaveOne_WithTheFirstEnemyAtOnce"
+  },
+  {
+   "at": "2026-11-25 11:36:39",
+   "id": "params",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers, SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow"
+  },
+  {
+   "at": "2026-11-25 11:39:27",
+   "id": "edge-trum-va-gioi-han-40",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.Boss_WaitsUnderTheAliveCapLikeEveryEnemy_AndStillComesLast, SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave"
+  }
+ ]
+}

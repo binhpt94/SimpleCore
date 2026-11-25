@@ -7,33 +7,6 @@ namespace Game.Castle.Tests
 {
     public class CastleSessionTests
     {
-        private sealed class FakeView : ICastleView
-        {
-            public readonly List<string> Calls = new List<string>();
-            public bool Visible;
-            public event Action<float> Ticked;
-            public void Tick(float seconds) => Ticked?.Invoke(seconds);
-            public void Place(float halfWidth, float height) => Calls.Add($"place {halfWidth} {height}");
-            public void SetVisible(bool visible) => Visible = visible;
-            public void ResetBody() => Calls.Add("reset");
-            public void FlashHit(float seconds) => Calls.Add("flash");
-            public void PopLevelUp(float scale, float seconds) => Calls.Add($"pop {scale} {seconds}");
-            public void Collapse(float seconds) => Calls.Add("collapse");
-            public void ShowShot(int targetHandle, float fromX, float toX, float seconds) => Calls.Add($"shot {targetHandle}");
-            public void DropShotsAt(int targetHandle) => Calls.Add($"drop {targetHandle}");
-            public void ShowThunder(float x, float seconds) => Calls.Add($"thunder {x}");
-            public void Advance(float seconds) => Calls.Add("advance");
-            public void ClearEffects() => Calls.Add("clear");
-        }
-
-        private sealed class FakeSpawner : ICastleViewSpawner
-        {
-            public readonly FakeView View = new FakeView();
-            public bool Despawned;
-            public ICastleView Spawn() => View;
-            public void Despawn(ICastleView view) => Despawned = true;
-        }
-
         private CastleConfig _config;
         private FakeRunFlow _run;
         private FakeEnemyField _enemies;
@@ -106,6 +79,24 @@ namespace Game.Castle.Tests
 
             Assert.That(_enemies.Damaged, Is.Empty);
             Assert.That(_spawner.View.Calls, Does.Not.Contain("advance"));
+        }
+
+        [Test]
+        public void Shot_timer_stands_still_while_paused_and_goes_on_from_there()
+        {
+            StartBattle();
+            _enemies.AddEnemy(1, 3f);
+            _spawner.View.Tick(0.02f);
+            _spawner.View.Tick(0.5f);
+
+            _run.IsPaused = true;
+            _spawner.View.Tick(10f);
+            _run.IsPaused = false;
+            _spawner.View.Tick(0.45f);
+            Assert.That(_enemies.Damaged, Has.Count.EqualTo(1), "the paused 10s did not count");
+
+            _spawner.View.Tick(0.06f);
+            Assert.That(_enemies.Damaged, Has.Count.EqualTo(2));
         }
 
         [Test]
@@ -198,6 +189,95 @@ namespace Game.Castle.Tests
             _upgrades.ApplyLevel(CastleUpgrade.Health, 2);
 
             Assert.That(_spawner.View.Calls, Has.None.StartsWith("pop"));
+        }
+
+        [Test]
+        public void Hit_flash_lasts_a_tenth_of_a_second_and_the_fall_shrinks_over_half_a_second()
+        {
+            StartBattle();
+
+            _body.Hit(0, 10f);
+            _body.Hit(0, 5000f);
+
+            Assert.That(_spawner.View.FlashSeconds, Is.EqualTo(0.1f).Within(1e-5f));
+            Assert.That(_spawner.View.CollapseSeconds, Is.EqualTo(0.5f).Within(1e-5f));
+        }
+
+        [Test]
+        public void Shot_drawing_flies_for_fifteen_hundredths_of_a_second_after_the_damage_was_dealt()
+        {
+            StartBattle();
+            _enemies.AddEnemy(1, 3f);
+
+            _spawner.View.Tick(0.02f);
+
+            Assert.That(_enemies.Damaged, Is.EqualTo(new[] { (1, 10f) }), "damage is dealt when the shot fires");
+            Assert.That(_spawner.View.ShotSeconds, Is.EqualTo(0.15f).Within(1e-5f));
+        }
+
+        [Test]
+        public void Shot_drawing_vanishes_when_its_target_is_defeated_by_someone_else()
+        {
+            StartBattle();
+            _enemies.AddEnemy(1, 3f);
+            _spawner.View.Tick(0.02f);
+            var damageBefore = _enemies.Damaged.Count;
+
+            _enemies.Defeat(1);
+
+            Assert.That(_spawner.View.Calls, Does.Contain("drop 1"));
+            Assert.That(_enemies.Damaged, Has.Count.EqualTo(damageBefore), "no damage moves to another enemy");
+        }
+
+        [Test]
+        public void Thunder_effect_lasts_three_tenths_of_a_second()
+        {
+            StartBattle();
+            _enemies.AddEnemy(1, 3f);
+
+            _skills.TryUse(CastleSkill.Thunder);
+
+            Assert.That(_spawner.View.ThunderSeconds, Is.EqualTo(0.3f).Within(1e-5f));
+        }
+
+        [Test]
+        public void Castle_keeps_shooting_through_the_rest_between_two_waves()
+        {
+            StartBattle();
+            _enemies.AddEnemy(1, 3f);
+            _spawner.View.Tick(0.02f);
+
+            _spawner.View.Tick(3f); // the 3s rest between waves: no battle signal arrives
+
+            Assert.That(_enemies.Damaged, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void Skill_cooldown_keeps_running_into_the_next_wave()
+        {
+            StartBattle();
+            _skills.TryUse(CastleSkill.Thunder);
+
+            _spawner.View.Tick(3f);
+            _spawner.View.Tick(10f);
+
+            Assert.That(_skills.GetState(CastleSkill.Thunder).CooldownLeft, Is.EqualTo(7f).Within(1e-4f));
+        }
+
+        [Test]
+        public void New_run_puts_every_castle_level_back_to_one()
+        {
+            StartBattle();
+            _upgrades.ApplyLevel(CastleUpgrade.Health, 4);
+            _upgrades.ApplyLevel(CastleUpgrade.Attack, 4);
+            _upgrades.ApplyLevel(CastleUpgrade.Skills, 4);
+
+            _run.StartRun();
+
+            Assert.That(_body.MaxHealth, Is.EqualTo(1000f));
+            Assert.That(_upgrades.AttackLevel, Is.EqualTo(1));
+            _upgrades.ApplyLevel(CastleUpgrade.Health, 2);
+            Assert.That(_body.MaxHealth, Is.EqualTo(1150f), "level 2 counts again after the reset");
         }
 
         [Test]

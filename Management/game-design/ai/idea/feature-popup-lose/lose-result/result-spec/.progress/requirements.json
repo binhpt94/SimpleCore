@@ -1,7 +1,7 @@
 {
  "items": {
   "result-title-text": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test có sẵn cho code đã có",
    "tests": [
     "LosePopupTests.PopupShowsTitleScoreAndBestWithoutNewRecordLine"
@@ -10,11 +10,11 @@
    "hash": "88eee1ad94d8",
    "text": "Tiêu đề popup là \"Thành đã bị phá\"",
    "title": "Tiêu đề popup là \"Thành đã bị phá\"",
-   "by": "PopupLose",
-   "at": "2026-11-25 10:54:00"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:16"
   },
   "result-score-text": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test có sẵn cho code đã có",
    "tests": [
     "LosePopupTests.PopupShowsTitleScoreAndBestWithoutNewRecordLine",
@@ -24,11 +24,11 @@
    "hash": "0a4445d8b145",
    "text": "Dòng điểm hiện \"Trụ được N đợt\", N là điểm đã chốt của lượt\nThua ở đợt 1 thì \"Trụ được 0 đợt\".",
    "title": "Dòng điểm hiện \"Trụ được N đợt\", N là điểm đã chốt của lượt",
-   "by": "PopupLose",
-   "at": "2026-11-25 10:54:06"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:16"
   },
   "result-record-text": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test có sẵn cho code đã có",
    "tests": [
     "LosePopupTests.PopupShowsTitleScoreAndBestWithoutNewRecordLine",
@@ -38,11 +38,11 @@
    "hash": "43bea75971c5",
    "text": "Dòng kỉ lục hiện \"Kỉ lục: M đợt\", M là kỉ lục đã cập nhật với lượt vừa xong",
    "title": "Dòng kỉ lục hiện \"Kỉ lục: M đợt\", M là kỉ lục đã cập nhật với lượt vừa xong",
-   "by": "PopupLose",
-   "at": "2026-11-25 10:54:12"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:16"
   },
   "result-read-only": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test có sẵn cho code đã có",
    "tests": [
     "LosePopupTests.ScoreIsReadOnceWhenThePopupOpens"
@@ -51,11 +51,11 @@
    "hash": "857df7485153",
    "text": "Popup chỉ đọc điểm, kỉ lục, cờ một lần lúc mở; không đổi số nào",
    "title": "Popup chỉ đọc điểm, kỉ lục, cờ một lần lúc mở; không đổi số nào",
-   "by": "PopupLose",
-   "at": "2026-11-25 10:54:18"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:16"
   },
   "edge-diem-0-ki-luc-0": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test có sẵn cho code đã có",
    "tests": [
     "LosePopupTests.ZeroScoreReadsZeroWaves"
@@ -64,11 +64,11 @@
    "hash": "ff1573fbe79b",
    "text": "**Điểm 0, kỉ lục 0:** \"Trụ được 0 đợt\", \"Kỉ lục: 0 đợt\", không có dòng kỉ lục mới.",
    "title": "Điểm 0, kỉ lục 0",
-   "by": "PopupLose",
-   "at": "2026-11-25 10:54:24"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:16"
   },
   "edge-pha-ki-luc": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test có sẵn cho code đã có",
    "tests": [
     "LosePopupTests.NewBestShowsTheNewRecordLine"
@@ -77,8 +77,21 @@
    "hash": "72a4d913d3f4",
    "text": "**Phá kỉ lục:** N = M, có dòng kỉ lục mới.",
    "title": "Phá kỉ lục",
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:16"
+  },
+  "edge-bang-ki-luc-cu": {
+   "state": "done",
+   "note": "test mới: điểm bằng kỉ lục cũ, cờ tắt",
+   "tests": [
+    "LosePopupTests.ScoreEqualToTheOldBestShowsNoNewRecordLine"
+   ],
+   "play": "",
+   "hash": "d12d506c65fc",
+   "text": "**Bằng kỉ lục cũ:** N = M nhưng không có dòng kỉ lục mới.",
+   "title": "Bằng kỉ lục cũ",
    "by": "PopupLose",
-   "at": "2026-11-25 10:54:30"
+   "at": "2026-11-25 11:37:46"
   }
  },
  "log": [
@@ -165,6 +178,62 @@
    "state": "done",
    "by": "PopupLose",
    "note": "LosePopupTests.NewBestShowsTheNewRecordLine"
+  },
+  {
+   "at": "2026-11-25 11:37:44",
+   "id": "edge-bang-ki-luc-cu",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "test mới: điểm bằng kỉ lục cũ, cờ tắt"
+  },
+  {
+   "at": "2026-11-25 11:37:46",
+   "id": "edge-bang-ki-luc-cu",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.ScoreEqualToTheOldBestShowsNoNewRecordLine"
+  },
+  {
+   "at": "2026-11-25 11:39:16",
+   "id": "result-title-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:16",
+   "id": "result-score-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:16",
+   "id": "result-record-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:16",
+   "id": "result-read-only",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:16",
+   "id": "edge-diem-0-ki-luc-0",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:16",
+   "id": "edge-pha-ki-luc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

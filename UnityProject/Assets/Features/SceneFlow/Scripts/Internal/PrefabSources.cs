@@ -6,15 +6,19 @@ namespace Game.SceneFlow
     internal sealed class PrefabLoadingScreenSource : ILoadingScreenSource
     {
         private readonly GameObject prefab;
+        private readonly bool keepAcrossScenes;
 
-        internal PrefabLoadingScreenSource(GameObject prefab)
+        /// <param name="keepAcrossScenes">True for the switch cover: it must outlive the scene it was opened in.</param>
+        internal PrefabLoadingScreenSource(GameObject prefab, bool keepAcrossScenes)
         {
             this.prefab = prefab;
+            this.keepAcrossScenes = keepAcrossScenes;
         }
 
         public ILoadingScreen Create()
         {
             var instance = UnityEngine.Object.Instantiate(prefab);
+            if (keepAcrossScenes) UnityEngine.Object.DontDestroyOnLoad(instance);
             var screen = instance.GetComponentInChildren<ILoadingScreen>(true);
             if (screen == null)
             {

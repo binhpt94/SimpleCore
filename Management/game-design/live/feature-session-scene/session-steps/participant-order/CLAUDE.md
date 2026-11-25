@@ -4,7 +4,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Làm gì
 - Scene Loading: danh sách gồm `feature-scene-flow` (view màn Loading, `feature-scene-flow/scene-list/boot-loading`).
-- Scene Game: danh sách theo thứ tự dưới đây. Tải và chạy từ 1 tới 15; huỷ từ 15 về 1.
+- Scene Game: danh sách theo thứ tự dưới đây. Tải và chạy từ đầu tới cuối danh sách; huỷ từ cuối về đầu.
 
 | # | Feature | Vì sao đứng ở đây |
 |---|---|---|
@@ -17,12 +17,9 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | 7 | `feature-castle` | Thành; cần dịch vụ chiến trường của enemy và đội hero |
 | 8 | `feature-wave` | Đợt quái; cần enemy |
 | 9 | `feature-upgrade` | Nâng cấp; cần wallet, hero, castle |
-| 10 | `feature-home` | Màn bắt đầu |
-| 11 | `feature-team-select` | Màn chọn đội |
-| 12 | `feature-hud` | HUD trận |
-| 13 | `feature-hud-upgrade` | Thanh nâng cấp; cần upgrade, wallet |
-| 14 | `feature-popup-lose` | Popup thua; cần popup, run |
-| 15 | `feature-popup-pause` | Popup tạm dừng; cần popup, run |
+| 10 | `feature-hud` | HUD trận |
+| 11 | `feature-hud-upgrade` | Thanh nâng cấp; cần upgrade, wallet |
+| 12 | `feature-popup-lose` | Popup thua; cần popup, run |
 
 - Bước tải: lần lượt từng feature, feature sau bắt đầu tải khi feature trước xong. Báo tiến độ sau mỗi feature (thanh tiến độ của màn Loading).
 - Bước chạy: lần lượt từng feature tạo view; cả bước xong trong một khung hình.
@@ -32,7 +29,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Thông số | Giá trị | Đơn vị | Lí do |
 |---|---|---|---|
 | Số feature tham gia scene Loading | 1 | feature | Chỉ có màn Loading |
-| Số feature tham gia scene Game | 15 | feature | Mọi feature có view hoặc cần tải, trừ `feature-scene-flow`, `feature-session-scene`, `feature-balance` |
+| Số feature tham gia scene Game | 12 | feature | Mọi feature có view hoặc cần tải ở mức đang chơi được, trừ `feature-scene-flow`, `feature-session-scene`, `feature-balance` |
 | Thời gian tải tối đa một feature | 10 (dự kiến) | giây | Đủ rộng cho máy yếu; quá mức này gần như chắc là lỗi |
 | Thời gian bước chạy cả scene | 1 | khung hình | Không tải gì thêm ở bước chạy |
 | Thời gian bước huỷ cả scene | không giới hạn, không chờ tải | — | Huỷ chỉ dọn, không chờ mạng hay file |
@@ -43,11 +40,11 @@ Dữ liệu cốt lõi: [data.md](data.md)
 |---|---|---|---|
 | Cách tải các feature | Lần lượt | Lần lượt | Lần lượt (xét tải song song nếu quá 3 giây) |
 | Thời gian tải tối đa một feature | 10 giây (dự kiến) | 10 giây | 10 giây |
-| Số feature scene Game | 15 (thêm `feature-battlefield`, 2026-11-25) | 19: thêm `feature-ads` (sau popup), `feature-combat` (trước castle), `feature-game-flow` (sau run), `feature-popup-revive` (sau popup-lose); thứ tự chốt khi vào PROTOTYPE | Theo danh sách feature lúc đó |
+| Số feature scene Game | 12: popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose | 19: thêm `feature-ads` (sau popup), `feature-game-flow` (sau run), `feature-combat` (trước castle), `feature-home` và `feature-team-select` (sau upgrade, trước hud), `feature-popup-revive` và `feature-popup-pause` (sau popup-lose); thứ tự chốt khi vào PROTOTYPE | Theo danh sách feature lúc đó |
 
 ## Trường hợp biên
 - **Feature thứ k tải lỗi**: không tải feature k+1 trở đi; huỷ feature k (phần đã tải được) rồi k-1 về 1; báo lỗi nêu tên feature k.
-- **Feature thứ k chạy lỗi**: không chạy k+1 trở đi; huỷ từ 15 về 1 (mọi feature đều đã tải); báo lỗi nêu tên feature k.
+- **Feature thứ k chạy lỗi**: không chạy k+1 trở đi; huỷ từ cuối danh sách về đầu (mọi feature đều đã tải); báo lỗi nêu tên feature k.
 - **Feature lỗi ở bước huỷ**: ghi lỗi, huỷ tiếp feature đứng trước nó; bước huỷ luôn đi hết danh sách.
 - **Yêu cầu huỷ đến khi scene đang tải**: chờ feature đang tải xong (hoặc quá 10 giây), rồi huỷ các feature đã tải theo thứ tự ngược.
 - **Một feature có tên trong danh sách hai lần**: lỗi ngay trước bước tải, nêu tên feature trùng; scene không tải.
@@ -57,6 +54,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Đã tự quyết
 - **Tải lần lượt, không song song.** Đơn giản, biết rõ feature nào lỗi, thanh tiến độ thật. Đã loại: tải song song (nhanh hơn nhưng khó lần lỗi).
 - **Enemy, Hero, Castle theo thứ tự phụ thuộc (2026-11-25, theo @CodeLead qua @Manager).** Hero và Castle lấy dịch vụ chiến trường của Enemy ngay khi cài; Castle lấy thêm đội hero. Bản trước xếp Castle trước vì "hero sinh ra từ thành", nhưng đó là vị trí trong trận, không đòi thành tải trước. Đã loại: giữ thứ tự cũ và đổi code ba feature (việc lớn, không được gì).
+- **Danh sách scene Game ở IDEA có 12 feature, không có màn bắt đầu, màn chọn đội, popup tạm dừng (2026-11-25, theo @CodeLead qua @Manager).** Bản trước ghi 15, lệch với các node đã chốt: bảng giai đoạn của `feature-home/home-screen/home-screen-spec` ("Không, mở game vào thẳng trận"), `feature-team-select/team-slots/slots-spec` ("Không có; đội cố định"), `feature-popup-pause/pause-popup/pause-popup-spec` ("Không") và `feature-game-flow/flow-routes/routes-values` (chỉ có màn trận). Ba feature đó vào lại danh sách ở PROTOTYPE. Đã loại: giữ 15 (bắt phiên SessionScene và CodeLead nối ba feature IDEA không dùng).
 - **Popup đứng đầu danh sách scene Game.** Feature nào cũng có thể cần mở popup khi chạy; popup huỷ sau cùng nên không popup nào còn chủ mà mất dịch vụ.
 - **Run đứng trước các feature trận.** Các feature trận nghe "lượt mới bắt đầu" từ `feature-run/run-start`.
 - **Balance không tham gia.** Số liệu nằm trong cấu hình của từng feature (`feature-balance/balance-config`), không có view hay việc tải riêng.

@@ -5,3 +5,5 @@
 {"at": "2026-11-23 16:19:04", "event": "data", "hash": "1782de2d557d", "previous": "a91bdaba8708", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "1782de2d557d"}
 {"at": "2026-11-24 12:46:14", "event": "promote", "by": "người (Sync)", "hash": "1782de2d557d"}
+{"at": "2026-11-25 11:38:06", "event": "data", "hash": "96f77fbbafff", "previous": "1782de2d557d", "added": ["boss-no-skill", "waves-elsewhere"], "removed": [{"id": "type-first-wave", "text": "Đợt đầu có mặt: Lính đợt 1, Sói đợt 3, Khổng lồ đợt 5, Cung thủ quái đợt 7, Trùm đợt 10, 20, 30...\nMỗi 2 đợt có một loại mới tới đợt 7, người chơi thấy trận thay đổi. Tỉ lệ từng loại trong đợt là việc của `feature-wave`."}, {"id": "boss-single", "text": "Trùm: mỗi đợt có Trùm thì có đúng 1 con, ra cuối đợt, không có đòn riêng\nRa cuối để là đỉnh căng thẳng của đợt. Luật đi và đánh như mọi quái (`feature-enemy/enemy-behavior`)."}], "rewritten": []}
+{"at": "2026-11-25 11:38:27", "event": "promote", "by": "người (Sync)", "hash": "96f77fbbafff"}

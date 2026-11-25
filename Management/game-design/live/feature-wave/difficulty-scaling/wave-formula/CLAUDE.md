@@ -53,6 +53,7 @@ Ví dụ kết quả (dự kiến, tính theo công thức trên):
 - **Có Trùm ở đợt chia hết cho 10 (theo bộ số chuẩn và `feature-enemy/enemy-list`).** Mục "Đã tự quyết" của node cha ghi "không có đợt trùm"; bộ số chuẩn và `feature-enemy/enemy-list` (Trùm, "khi nào trùm ra là việc của `feature-wave`") quyết khác, node này theo bộ số chuẩn.
 - **Chỉ số giữ số thực, làm tròn khi hiện (2026-11-23, sửa lệch).** Bản cũ làm tròn lên số nguyên, trái với ý `decimal-stats` của `feature-hero/hero-stats/hero-level-values` và với `feature-enemy/enemy-stats/enemy-stat-values` (Lính đợt 10: 9.5 sát thương). Một luật cho hero, quái và thành. Đã loại: làm tròn lên lúc nhân.
 - **Mức IDEA chỉ có Lính, Sói, Khổng lồ, không có Trùm (2026-11-23, sửa lệch).** Theo bảng giai đoạn của `feature-enemy/enemy-list/enemy-type-values`. Công thức giữ nguyên; ở IDEA, chỗ của Cung thủ quái và Trùm dồn cho Lính.
+- **Mốc mở loại và chu kì Trùm chỉ nằm ở node này (2026-11-25).** Node loại quái của `feature-enemy` đã bỏ bản chép "đợt đầu có mặt" và "Trùm ở đợt 10, 20..." (theo hướng A người chọn); node đó chỉ còn loại nào có hình ở từng giai đoạn, khớp hàng "Loại quái dùng" ở bảng giai đoạn trên. Không đổi số nào.
 - **Thu giảm sau đợt Trùm là ngoại lệ có chủ đích (2026-11-23).** Sửa chi tiết ý `reward-by-mix` (trước ghi "thu vẫn tăng không giảm", sai với bảng ví dụ: đợt 11 thu 187 < đợt 10 thu 272). Máu Trùm gốc đổi 800 → 400 (`feature-enemy/enemy-stats/enemy-stat-values`) không đổi số nào trong node này vì node chỉ ghi hệ số, không ghi máu.
 
 ## Chưa rõ

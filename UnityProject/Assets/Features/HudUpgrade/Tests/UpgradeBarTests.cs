@@ -153,12 +153,145 @@ namespace Game.HudUpgrade.Tests
         }
 
         [Test]
+        public void Each_button_picture_is_its_own_hero_or_castle_icon()
+        {
+            CollectionAssert.AreEqual(new[]
+                {
+                    ButtonPictureKind.Hero, ButtonPictureKind.Hero, ButtonPictureKind.Hero,
+                    ButtonPictureKind.CastleHealth, ButtonPictureKind.CastleAttack, ButtonPictureKind.CastleSkill,
+                },
+                _view.Pictures.Select(p => p.Kind).ToArray());
+        }
+
+        [Test]
+        public void Bar_keeps_one_button_per_shop_item_even_for_a_hero_it_has_no_name_for()
+        {
+            _shop.SetTeam("knight", "unknown-hero", "archer");
+            Assert.AreEqual(6, _view.Pictures.Count);
+            Assert.AreEqual("unknown-hero", _view.Pictures[1].HeroCode);
+        }
+
+        [Test]
+        public void Coins_equal_to_the_price_light_the_button_and_buying_dims_it()
+        {
+            _wallet.Coins = 30;
+            _shop.Changed();
+            Assert.IsTrue(_view.Looks[0].Lit);
+
+            _view.Tap(0);
+
+            Assert.AreEqual(0, _wallet.Coins);
+            Assert.IsFalse(_view.Looks[0].Lit);
+        }
+
+        [Test]
+        public void Buttons_light_again_as_soon_as_the_pause_ends()
+        {
+            _shop.Open = false;
+            _shop.Changed();
+            Assert.IsFalse(_view.Looks[0].Lit);
+
+            _shop.Open = true;
+            _shop.Changed();
+
+            Assert.IsTrue(_view.Looks[0].Lit);
+        }
+
+        [Test]
+        public void Short_price_still_lights_by_the_real_price()
+        {
+            _shop.SetPrice(5, 12_399);
+            _wallet.Coins = 12_350;
+            _shop.Changed();
+            Assert.AreEqual("12,3K", _view.Looks[5].PriceText);
+            Assert.IsFalse(_view.Looks[5].Lit);
+
+            _wallet.Add(49);
+
+            Assert.IsTrue(_view.Looks[5].Lit);
+        }
+
+        [Test]
+        public void Big_level_reads_in_full_without_shortening()
+        {
+            _shop.SetLevel(0, 123_456);
+            Assert.AreEqual("Cấp 123456", _view.Looks[0].LevelText);
+        }
+
+        [Test]
+        public void Coins_arriving_light_every_affordable_button_in_one_update()
+        {
+            _wallet.Coins = 0;
+            _shop.Changed();
+            Assert.IsTrue(_view.Looks.Values.All(l => !l.Lit));
+
+            _wallet.Add(100);
+
+            Assert.AreEqual(6, _view.Looks.Count);
+            Assert.IsTrue(_view.Looks.Values.All(l => l.Lit));
+        }
+
+        [Test]
+        public void Between_waves_the_bar_stays_up_and_buttons_follow_the_coins()
+        {
+            _run.GoTo(RunStep.Playing);
+            _wallet.Add(20);
+            Assert.IsTrue(_view.Visible);
+            Assert.IsTrue(_view.Looks[5].Lit);
+        }
+
+        [Test]
         public void Bar_stops_listening_after_dispose()
         {
             _presenter.Dispose();
             _wallet.Coins = 1000;
             _shop.Changed();
             Assert.IsFalse(_view.Looks[5].Lit);
+        }
+    }
+
+    public sealed class BarLayoutTests
+    {
+        private static readonly int[] Groups = { 0, 0, 0, 1, 1, 1 };
+        private static readonly BarLayout.Settings Frame = new BarLayout.Settings(50, 200, 10, 70, 1920 - 1420);
+
+        [Test]
+        public void On_a_16_9_screen_the_six_buttons_sit_where_the_frame_puts_them()
+        {
+            var layout = BarLayout.Compute(Groups, 1920, Frame);
+            CollectionAssert.AreEqual(new float[] { 0, 210, 420, 690, 900, 1110 }, layout.ButtonLefts);
+            Assert.AreEqual(1f, layout.Scale);
+        }
+
+        [Test]
+        public void Last_button_ends_left_of_the_skill_cluster_at_1420_on_a_16_9_screen()
+        {
+            var layout = BarLayout.Compute(Groups, 1920, Frame);
+            Assert.LessOrEqual(layout.RightEdge(Frame), 1420f);
+        }
+
+        [TestCase(1440f)] // 4:3, canvas matched on height
+        [TestCase(1620f)] // 3:2
+        public void On_a_narrower_screen_the_bar_shrinks_to_stay_left_of_the_skill_cluster(float canvasWidth)
+        {
+            var layout = BarLayout.Compute(Groups, canvasWidth, Frame);
+            Assert.Less(layout.Scale, 1f);
+            Assert.LessOrEqual(layout.RightEdge(Frame), canvasWidth - 500f + 0.01f);
+        }
+
+        [Test]
+        public void On_a_20_9_screen_the_bar_keeps_its_size()
+        {
+            Assert.AreEqual(1f, BarLayout.Compute(Groups, 2400, Frame).Scale);
+        }
+
+        [Test]
+        public void Gap_between_the_groups_is_wider_than_between_buttons_of_one_group()
+        {
+            var lefts = BarLayout.Compute(Groups, 1920, Frame).ButtonLefts;
+            var inGroup = lefts[1] - lefts[0] - 200;
+            var between = lefts[3] - lefts[2] - 200;
+            Assert.Greater(between, inGroup);
         }
     }
 

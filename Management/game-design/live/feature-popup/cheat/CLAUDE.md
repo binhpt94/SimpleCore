@@ -4,7 +4,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Làm gì
 - Ở bản dev, chọn state `sample-popup` thì dịch vụ mở popup mẫu `_Services/Popup/DevSample` lên scene đang chạy, qua đúng đường mở, đóng của dịch vụ (`feature-popup/popup-request/request-rules`), để xem nền che, khung và việc chặn bấm (`feature-popup/popup-layer/stack-rules`).
-- Id `_Services/Popup/DevSample` do chính dịch vụ khai trong Internal của nó; asset popup mẫu (khung trống, một nút "Đóng") nằm trong thư mục của dịch vụ. Cả id lẫn asset chỉ có ở bản dev, nên danh sách id của scene Game ở bản phát hành vẫn đúng 2 id như `request-rules`.
+- Id `_Services/Popup/DevSample` do chính dịch vụ khai trong Internal của nó; asset popup mẫu (khung trống, một nút "Đóng") nằm trong thư mục của dịch vụ. Cả id lẫn asset chỉ có ở bản dev, nên danh sách id của scene Game ở bản phát hành vẫn đúng các id của `request-rules` (ở IDEA chỉ `PopupLose/Main`).
 - Bấm "Đóng": dịch vụ đóng popup mẫu như mọi lần đóng do feature gọi yêu cầu; ở đây dịch vụ tự là bên gọi.
 - Code cheat nằm trong thư mục `_Services/Popup`, sau cờ dev; không lọt vào bản phát hành.
 

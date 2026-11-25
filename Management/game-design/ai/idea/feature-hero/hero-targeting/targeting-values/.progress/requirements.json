@@ -1,0 +1,269 @@
+{
+ "items": {
+  "target-on-screen": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.A_hero_ignores_enemies_outside_the_screen",
+    "HeroSquadTests.A_hero_targets_the_nearest_enemy_on_either_side"
+   ],
+   "play": "",
+   "hash": "8b120ff17a91",
+   "text": "Hero chỉ nhắm quái còn sống có tâm trong x=-16u tới +16u, chọn con có khoảng cách nhỏ nhất\nQuái vừa sinh ở x=±17u chưa bị nhắm cho tới khi vào màn. Bằng khoảng cách thì chọn quái gần thành hơn, vẫn bằng thì chọn quái ra trước. Khoảng cách theo `feature-hero/hero-stats/hero-level-values`.",
+   "title": "Hero chỉ nhắm quái còn sống có tâm trong x=-16u tới +16u, chọn con có khoảng cách nhỏ nhất",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:19"
+  },
+  "walk-limit": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.A_hero_at_the_walk_limit_waits_there_and_switches_to_a_nearer_enemy"
+   ],
+   "play": "",
+   "hash": "8d10690f7086",
+   "text": "Tâm hero luôn trong x=-15u tới +15u; mục tiêu ngoài đó thì hero đứng ở mốc ±15u chờ\nĐứng ở mốc mà mục tiêu vào tầm thì đánh. Hero bắn xa tầm 6-7u luôn với tới quái trên màn; Hiệp sĩ ở x=15u với tới quái có mép trong tới 16.7u.",
+   "title": "Tâm hero luôn trong x=-15u tới +15u; mục tiêu ngoài đó thì hero đứng ở mốc ±15u chờ",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:20"
+  },
+  "retarget-check": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.A_walking_hero_turns_to_a_nearer_enemy_as_soon_as_it_appears",
+    "HeroSquadTests.A_hitting_hero_keeps_its_target_until_it_is_defeated"
+   ],
+   "play": "",
+   "hash": "650ebdbbddcd",
+   "text": "Khi đang đi, mỗi khung hình chọn lại quái gần nhất; khi đang đánh, giữ mục tiêu tới khi nó bị hạ hoặc khoảng cách lớn hơn tầm\nHero cận chiến đang đi về bên trái mà một con Sói tới gần hơn ở bên phải thì quay sang Sói ngay.",
+   "title": "Khi đang đi, mỗi khung hình chọn lại quái gần nhất; khi đang đánh, giữ mục tiêu tới khi nó bị hạ hoặc khoảng cách lớn hơn tầm",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:21"
+  },
+  "idle-return": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.With_no_enemy_left_a_hero_walks_back_to_its_spawn_point"
+   ],
+   "play": "",
+   "hash": "ebac556df760",
+   "text": "Không còn quái nào trên màn thì hero đi về điểm xuất phát của chỗ mình (x=-1.5u hoặc +1.5u) và đứng chờ\nĐi với tốc độ chạy bình thường. Quái mới vào màn khi hero đang về thì hero quay ra ngay.",
+   "title": "Không còn quái nào trên màn thì hero đi về điểm xuất phát của chỗ mình (x=-1.5u hoặc +1.5u) và đứng chờ",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:22"
+  },
+  "edge-muc-tieu-dang-duoc-danh-bi-don-khac": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.When_its_target_is_defeated_by_someone_else_a_hero_picks_another_without_resetting_its_wait"
+   ],
+   "play": "",
+   "hash": "cb3132e3af92",
+   "text": "Mục tiêu đang được đánh bị đòn khác hạ: khung hình sau chọn lại ngay; nhịp đòn không đặt lại.",
+   "title": "Mục tiêu đang được đánh bị đòn khác hạ",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:23"
+  },
+  "edge-muc-tieu-bi-bang-gia-lam-cham": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Play scene Game, bấm kĩ năng Băng giá khi hero đang đánh: hero giữ mục tiêu và nhịp đòn như cũ, chỉ quái chậm lại. Hero không đọc tốc độ quái nên cách nhắm không đổi",
+   "hash": "84ecd3009c73",
+   "text": "Mục tiêu bị Băng giá làm chậm: không đổi gì với cách nhắm.",
+   "title": "Mục tiêu bị Băng giá làm chậm",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:25"
+  },
+  "edge-cung-luc-co-quai-hai-ben-cach-bang": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.Of_two_equally_near_enemies_the_one_closer_to_the_castle_is_chosen",
+    "HeroEdgeCaseTests.Of_two_enemies_equal_in_every_way_the_first_out_is_chosen"
+   ],
+   "play": "",
+   "hash": "cac56a47d8c9",
+   "text": "Cùng lúc có quái hai bên cách bằng nhau: chọn con gần thành hơn; nếu vẫn bằng thì con ra trước.",
+   "title": "Cùng lúc có quái hai bên cách bằng nhau",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:26"
+  },
+  "edge-hero-dung-chong-len-quai-khoang-cach-0": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.A_hero_overlapping_an_enemy_hits_it_without_stepping_back"
+   ],
+   "play": "",
+   "hash": "fe6119958408",
+   "text": "Hero đứng chồng lên quái (khoảng cách 0): đánh được, không phải lùi lại.",
+   "title": "Hero đứng chồng lên quái (khoảng cách 0)",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:27"
+  },
+  "edge-muc-tieu-o-ngoai-15u-va-ngoai-tam": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.A_hero_at_the_walk_limit_waits_there_and_switches_to_a_nearer_enemy"
+   ],
+   "play": "",
+   "hash": "d358ae9d13e8",
+   "text": "Mục tiêu ở ngoài ±15u và ngoài tầm khi hero đứng ở mốc: hero đứng yên ở mốc, vẫn chọn lại mỗi khung hình; có quái khác gần hơn thì đổi.",
+   "title": "Mục tiêu ở ngoài ±15u và ngoài tầm khi hero đứng ở mốc",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:28"
+  },
+  "edge-quai-moi-vao-man-khi-hero-dang-ve": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.A_hero_walking_home_turns_out_at_once_for_a_new_enemy"
+   ],
+   "play": "",
+   "hash": "6da8cac52dc6",
+   "text": "Quái mới vào màn khi hero đang về điểm đứng chờ: chọn quái đó ngay, không cần về tới nơi.",
+   "title": "Quái mới vào màn khi hero đang về điểm đứng chờ",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:29"
+  },
+  "edge-giua-hai-dot-con-quai-sot": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroParticipantTests.An_enemy_left_over_between_waves_is_still_fought"
+   ],
+   "play": "",
+   "hash": "2f990bbfa985",
+   "text": "Giữa hai đợt còn quái sót: vẫn nhắm và đánh như thường.",
+   "title": "Giữa hai đợt còn quái sót",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:30"
+  },
+  "edge-tam-dung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroParticipantTests.While_paused_a_hitting_hero_keeps_its_target_and_its_wait",
+    "HeroParticipantTests.While_paused_heroes_and_their_animations_stand_still"
+   ],
+   "play": "",
+   "hash": "c0c89e19cf98",
+   "text": "Tạm dừng: hero đứng yên, giữ trạng thái và mục tiêu.",
+   "title": "Tạm dừng",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:31"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroConfigValuesTests.Heroes_target_enemies_within_16u_and_walk_within_15u_of_the_castle_centre",
+    "HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges"
+   ],
+   "play": "",
+   "hash": "c4aa8cb8f34c",
+   "text": "## Làm gì\nMỗi khung hình, với mỗi hero đang đứng (không gục, không trong 0.3s hồi sinh):\n1. Trạng thái **Đánh**: mục tiêu còn sống và khoảng cách ≤ tầm thì giữ mục tiêu, ra đòn theo nhịp; không thì sang bước 2.\n2. Chọn mục tiêu: quái còn sống, tâm trong [-16u, +16u], khoảng cách nhỏ nhất.\n3. Có mục tiêu: khoảng cách ≤ tầm thì sang **Đánh** (đứng yên); không thì **Đi tới** mục tiêu với tốc độ chạy, không vượt [-15u, +15u].\n4. Không có mục tiêu: **Đứng chờ**: đi về điểm xuất phát của chỗ mình rồi đứng yên.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Vùng quái được nhắm | tâm x từ -16 tới +16 | u | Bằng màn hình; không đánh thứ người chơi chưa thấy |\n| Vùng hero đi được | tâm x từ -15 tới +15 | u | Bộ số chung; hero luôn nằm trọn trong màn |\n| Tốc độ chạy | theo từng hero (2.2-3.5) | u/s | `feature-hero/hero-list/hero-roster-values` |\n| Điểm đứng chờ | -1.5 / +1.5 / -1.5 theo chỗ 1 / 2 / 3 | x (u) | Trùng điểm xuất phát |\n| Chọn khi bằng khoảng cách | gần thành hơn, rồi ra trước | | Ưu tiên con nguy hơn cho thành |\n| Hero chắn nhau | không | | Luật vòng 3; hero đi xuyên qua nhau |\n\nThời gian dự kiến: Hiệp sĩ từ x=1.5u đi tới quái mới vào ở x=16u (mép trong 15.5u) mất khoảng (15.5-1.2-2)/2.5 ≈ 4.9s; quái cũng đi vào nên gặp sớm hơn, khoảng 3s.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Luật nhắm | như bảng | như bảng | như bảng |\n| Vùng nhắm / vùng đi | ±16u / ±15u | ±16u / ±15u | chỉnh nếu đổi khung màn |\n| Quay mặt | lật sprite theo hướng đi hoặc hướng mục tiêu | như IDEA | như IDEA, có anim quay |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:32"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:41:19",
+   "id": "target-on-screen",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_hero_ignores_enemies_outside_the_screen, HeroSquadTests.A_hero_targets_the_nearest_enemy_on_either_side"
+  },
+  {
+   "at": "2026-11-25 11:41:20",
+   "id": "walk-limit",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_hero_at_the_walk_limit_waits_there_and_switches_to_a_nearer_enemy"
+  },
+  {
+   "at": "2026-11-25 11:41:21",
+   "id": "retarget-check",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_walking_hero_turns_to_a_nearer_enemy_as_soon_as_it_appears, HeroSquadTests.A_hitting_hero_keeps_its_target_until_it_is_defeated"
+  },
+  {
+   "at": "2026-11-25 11:41:22",
+   "id": "idle-return",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.With_no_enemy_left_a_hero_walks_back_to_its_spawn_point"
+  },
+  {
+   "at": "2026-11-25 11:41:23",
+   "id": "edge-muc-tieu-dang-duoc-danh-bi-don-khac",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.When_its_target_is_defeated_by_someone_else_a_hero_picks_another_without_resetting_its_wait"
+  },
+  {
+   "at": "2026-11-25 11:41:25",
+   "id": "edge-muc-tieu-bi-bang-gia-lam-cham",
+   "state": "done",
+   "by": "Hero",
+   "note": "Play scene Game, bấm kĩ năng Băng giá khi hero đang đánh: hero giữ mục tiêu và nhịp đòn như cũ, chỉ quái chậm lại. Hero không đọc tốc độ quái nên cách nhắm không đổi"
+  },
+  {
+   "at": "2026-11-25 11:41:26",
+   "id": "edge-cung-luc-co-quai-hai-ben-cach-bang",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.Of_two_equally_near_enemies_the_one_closer_to_the_castle_is_chosen, HeroEdgeCaseTests.Of_two_enemies_equal_in_every_way_the_first_out_is_chosen"
+  },
+  {
+   "at": "2026-11-25 11:41:27",
+   "id": "edge-hero-dung-chong-len-quai-khoang-cach-0",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_hero_overlapping_an_enemy_hits_it_without_stepping_back"
+  },
+  {
+   "at": "2026-11-25 11:41:28",
+   "id": "edge-muc-tieu-o-ngoai-15u-va-ngoai-tam",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_hero_at_the_walk_limit_waits_there_and_switches_to_a_nearer_enemy"
+  },
+  {
+   "at": "2026-11-25 11:41:29",
+   "id": "edge-quai-moi-vao-man-khi-hero-dang-ve",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_hero_walking_home_turns_out_at_once_for_a_new_enemy"
+  },
+  {
+   "at": "2026-11-25 11:41:30",
+   "id": "edge-giua-hai-dot-con-quai-sot",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.An_enemy_left_over_between_waves_is_still_fought"
+  },
+  {
+   "at": "2026-11-25 11:41:31",
+   "id": "edge-tam-dung",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.While_paused_a_hitting_hero_keeps_its_target_and_its_wait, HeroParticipantTests.While_paused_heroes_and_their_animations_stand_still"
+  },
+  {
+   "at": "2026-11-25 11:41:32",
+   "id": "params",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Heroes_target_enemies_within_16u_and_walk_within_15u_of_the_castle_centre, HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges"
+  }
+ ]
+}

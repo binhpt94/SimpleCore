@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 640" width="1920" height="640">
+  <!-- troi: ba bac mau phang tu tren dam xuong chan troi nhat, khong may, khong mat troi; phu kin khung -->
+  <rect x="0" y="0" width="1920" height="640" fill="#7FC2E6"/>
+  <rect x="0" y="300" width="1920" height="340" fill="#99D0EC"/>
+  <rect x="0" y="500" width="1920" height="140" fill="#B6DEF2"/>
+</svg>

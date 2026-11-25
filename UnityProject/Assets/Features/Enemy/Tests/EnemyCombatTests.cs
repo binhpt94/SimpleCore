@@ -13,6 +13,7 @@ namespace Game.Enemy.Tests
         private const string ConfigPath = "Assets/Features/Enemy/FeatureAssets/Private/EnemyConfig.asset";
         private const float Step = 0.02f;
 
+        private EnemyConfig _config;
         private EnemyField _field;
         private FakeFoes _heroes;
         private FakeFoes _castle;
@@ -20,14 +21,36 @@ namespace Game.Enemy.Tests
         [SetUp]
         public void SetUp()
         {
-            var config = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);
-            Assert.That(config, Is.Not.Null, $"Missing {ConfigPath}");
-            _field = new EnemyField(config, new FakeIncome());
+            // The rules are the same for every type, also those not in the game at this stage: test them all.
+            _config = AllTypesConfig();
+            _field = new EnemyField(_config, new FakeIncome());
             _heroes = new FakeFoes();
             _castle = new FakeFoes();
             _castle.Foes.Add(new EnemyFoe(1, 0f, 1.5f));
             _field.AddFoes(_heroes);
             _field.AddFoes(_castle);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (_config != null) UnityEngine.Object.DestroyImmediate(_config);
+        }
+
+        [Test]
+        public void A_boss_walks_and_hits_by_the_same_rules_as_any_enemy()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Boss, EnemySide.Right, 1f));
+
+            Run(25f);
+
+            Assert.That(X(), Is.EqualTo(4.5f).Within(0.05f), "stops at its range from the castle edge");
+            Assert.That(_castle.Hits.Count, Is.GreaterThan(0));
+            Assert.That(_castle.Hits.TrueForAll(h => Math.Abs(h.Damage - 40f) < 1e-4f), Is.True, "plain hits only");
+
+            var hitsBefore = _castle.Hits.Count;
+            Run(4f);
+            Assert.That(_castle.Hits.Count - hitsBefore, Is.EqualTo(2), "one hit each 2.0s");
         }
 
         [Test]
@@ -235,6 +258,134 @@ namespace Game.Enemy.Tests
             stage.RaiseFrame(Step);
 
             Assert.That(stage.Lunges, Is.EqualTo(new[] { -1 }));
+        }
+
+        [Test]
+        public void An_enemy_keeps_hitting_a_hero_that_walked_past_it_toward_the_edge()
+        {
+            _heroes.Foes.Add(new EnemyFoe(7, 17.6f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            Run(2f);
+
+            Assert.That(X(), Is.EqualTo(17f), "does not turn around or walk on");
+            Assert.That(_heroes.Hits.Count, Is.GreaterThan(0));
+            Assert.That(_heroes.Hits.TrueForAll(h => h.Key == 7), Is.True);
+        }
+
+        [Test]
+        public void When_the_hero_being_hit_falls_the_enemy_turns_to_another_hero_in_range()
+        {
+            _heroes.Foes.Add(new EnemyFoe(1, 16.0f, 0.5f));
+            _heroes.Foes.Add(new EnemyFoe(2, 15.3f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.Tick(Step);
+            Assert.That(_heroes.Hits[0].Key, Is.EqualTo(1), "nearest hero first");
+
+            _heroes.Foes.RemoveAt(0);
+            Run(1.5f);
+
+            Assert.That(_heroes.Hits.FindAll(h => h.Key == 2).Count, Is.GreaterThan(0));
+            Assert.That(X(), Is.EqualTo(17f), "stays and hits, does not walk on");
+        }
+
+        [Test]
+        public void The_hit_wait_is_not_reset_when_the_hero_being_hit_falls()
+        {
+            _heroes.Foes.Add(new EnemyFoe(1, 16.0f, 0.5f));
+            _heroes.Foes.Add(new EnemyFoe(2, 15.3f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.Tick(Step);
+            Run(0.5f);
+
+            _heroes.Foes.RemoveAt(0);
+            _field.Tick(Step);
+            Assert.That(_heroes.Hits.FindAll(h => h.Key == 2).Count, Is.Zero, "no fresh hit when switching");
+
+            Run(0.5f);
+            Assert.That(_heroes.Hits.FindAll(h => h.Key == 2).Count, Is.EqualTo(1), "next hit on the old rhythm");
+        }
+
+        [Test]
+        public void Enemies_may_overlap_and_do_not_push_each_other()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            Run(15f);
+
+            var alive = new List<EnemyTarget>();
+            _field.GetAlive(alive);
+            Assert.That(alive[0].X, Is.EqualTo(3.0f).Within(0.05f));
+            Assert.That(alive[1].X, Is.EqualTo(3.0f).Within(0.05f));
+        }
+
+        [Test]
+        public void Pause_keeps_the_time_left_on_Frost()
+        {
+            var runFlow = new FakeRunFlow();
+            var stage = new FakeStage();
+            using var presenter = new EnemyPresenter(_field, runFlow, stage);
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.SlowAll(2f);
+
+            runFlow.Paused = true;
+            stage.RaiseFrame(5f);
+            runFlow.Paused = false;
+            stage.RaiseFrame(1f);
+
+            Assert.That(X(), Is.EqualTo(17f - 0.75f).Within(0.001f), "still slowed after the pause");
+        }
+
+        [Test]
+        public void An_enemy_archer_stops_at_7u_to_shoot_the_castle()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Archer, EnemySide.Right, 1f));
+
+            Run(15f);
+
+            Assert.That(X(), Is.EqualTo(7.0f).Within(0.05f));
+            Assert.That(_castle.Hits.Count, Is.GreaterThan(0));
+        }
+
+        [Test]
+        public void Two_bosses_can_be_on_the_field_at_once()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Boss, EnemySide.Right, 1f));
+            _field.Spawn(new EnemySpawn(EnemyType.Boss, EnemySide.Left, 1f));
+
+            Run(25f);
+
+            var alive = new List<EnemyTarget>();
+            _field.GetAlive(alive);
+            Assert.That(alive.Count, Is.EqualTo(2));
+            Assert.That(alive[0].X, Is.EqualTo(4.5f).Within(0.05f));
+            Assert.That(alive[1].X, Is.EqualTo(-4.5f).Within(0.05f));
+        }
+
+        [Test]
+        public void Wave_scale_does_not_change_walking_speed_or_range()
+        {
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1.9f));
+
+            Run(2f);
+            Assert.That(X(), Is.EqualTo(14f).Within(0.05f));
+
+            Run(13f);
+            Assert.That(X(), Is.EqualTo(3.0f).Within(0.05f));
+        }
+
+        private static EnemyConfig AllTypesConfig()
+        {
+            var real = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);
+            Assert.That(real, Is.Not.Null, $"Missing {ConfigPath}");
+            var copy = UnityEngine.Object.Instantiate(real);
+            var so = new SerializedObject(copy);
+            var kinds = so.FindProperty("_kinds");
+            for (var i = 0; i < kinds.arraySize; i++)
+                kinds.GetArrayElementAtIndex(i).FindPropertyRelative("_available").boolValue = true;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return copy;
         }
 
         private void Run(float seconds)

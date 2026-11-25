@@ -245,6 +245,94 @@ namespace Game.Wallet.Tests
             Assert.That(balance, Is.EqualTo(new[] { 55, 25 }));
         }
 
+        [Test]
+        public void EachIncomeCall_AddsExactlyTheGivenAmount_Once()
+        {
+            var wallet = NewWallet(50);
+            var balance = RecordBalance(wallet);
+
+            wallet.Add(5);
+            wallet.Add(5);
+            wallet.Add(5);
+
+            Assert.That(wallet.Coins, Is.EqualTo(65));
+            Assert.That(balance, Is.EqualTo(new[] { 55, 60, 65 }));
+        }
+
+        [Test]
+        public void SeveralIncomesInOneFrame_AreAddedInCallOrder_EachAnnounced()
+        {
+            var wallet = NewWallet(50);
+            var balance = RecordBalance(wallet);
+
+            // last enemy of a wave falls: its coins arrive first, then the wave-clear bonus
+            wallet.Add(5);
+            wallet.Add(25);
+
+            Assert.That(wallet.Coins, Is.EqualTo(80));
+            Assert.That(balance, Is.EqualTo(new[] { 55, 80 }));
+        }
+
+        [Test]
+        public void IncomeAfterTheRunEnded_IsIgnored_AndAnnouncesNothing()
+        {
+            var wallet = NewWallet(50);
+            var run = new FakeRunFlow();
+            new WalletRunReset(wallet, run).Run();
+            var balance = RecordBalance(wallet);
+
+            run.StopBattle();
+            wallet.Add(5);
+
+            Assert.That(wallet.Coins, Is.EqualTo(50));
+            Assert.That(balance, Is.Empty);
+        }
+
+        [Test]
+        public void EnemyFallingInTheFrameTheCastleFalls_GivesNoCoinsOnceTheRunStopped()
+        {
+            var wallet = NewWallet(50);
+            var run = new FakeRunFlow();
+            new WalletRunReset(wallet, run).Run();
+
+            wallet.Add(5);   // reached the wallet before the castle fell
+            run.StopBattle();
+            wallet.Add(6);   // reached the wallet after the run ended
+
+            Assert.That(wallet.Coins, Is.EqualTo(55));
+        }
+
+        [Test]
+        public void IncomeFromTheOldRun_DoesNotCarryIntoTheNewRun_AndNewIncomeCountsAgain()
+        {
+            var wallet = NewWallet(50);
+            var run = new FakeRunFlow();
+            new WalletRunReset(wallet, run).Run();
+            wallet.TrySpend(30);
+
+            run.StopBattle();
+            wallet.Add(15);
+            run.StartRun();
+
+            Assert.That(wallet.Coins, Is.EqualTo(50));
+
+            wallet.Add(5);
+
+            Assert.That(wallet.Coins, Is.EqualTo(55));
+        }
+
+        [Test]
+        public void Income_AddsWhateverAmountTheCallerGives_WithNoTableOfItsOwn()
+        {
+            var wallet = NewWallet(50);
+
+            wallet.Add(100);
+            wallet.Add(4);
+            wallet.Add(37);
+
+            Assert.That(wallet.Coins, Is.EqualTo(191));
+        }
+
         // ---- installer ----
 
         [Test]
@@ -377,6 +465,11 @@ namespace Game.Wallet.Tests
             public void StartRun()
             {
                 RunStarted?.Invoke(new RunTeam(new[] { "hero" }));
+            }
+
+            public void StopBattle()
+            {
+                BattleStopped?.Invoke();
             }
 
             public void Play() { }

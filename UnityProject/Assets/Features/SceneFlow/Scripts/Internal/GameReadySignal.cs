@@ -9,7 +9,7 @@ namespace Game.SceneFlow
     /// the gate once every other feature of the scene is running, or marks it failed when the
     /// session fails. Install it last so its Run comes after all the others.
     /// </summary>
-    internal sealed class GameReadySignal : ISessionParticipant
+    internal sealed class GameReadySignal : SessionParticipantBase
     {
         private readonly ISessionScene session;
         private readonly SceneGate gate;
@@ -25,7 +25,7 @@ namespace Game.SceneFlow
             session.StateChanged += OnStateChanged;
         }
 
-        public UniTask LoadAsync(CancellationToken cancellation)
+        protected override UniTask OnLoadAsync(CancellationToken cancellation)
         {
             // Unity puts newly created objects in the active scene. While the Loading scene is still
             // the active one, views opened in Run would land there and vanish when it is removed.
@@ -34,12 +34,13 @@ namespace Game.SceneFlow
             return UniTask.CompletedTask;
         }
 
-        public void Run()
+        protected override void OnRun()
         {
             gate.Open();
         }
 
-        public UniTask DisposeAsync()
+        // Subscribed in the constructor, not in Run: the session can fail while still loading, before any Run.
+        protected override UniTask OnDisposeAsync()
         {
             session.StateChanged -= OnStateChanged;
             return UniTask.CompletedTask;

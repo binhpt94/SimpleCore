@@ -33,6 +33,8 @@ namespace Game.HudUpgrade
         [SerializeField] private Vector2 buttonSize = new Vector2(200, 140);
         [SerializeField] private float buttonGap = 10;
         [SerializeField] private float groupGap = 70;
+        [Tooltip("Mép trái cụm kĩ năng của feature-hud trên màn chuẩn; thanh phải kết thúc trước đó.")]
+        [SerializeField] private float skillsLeft = 1420;
         [SerializeField] private int sortingOrder = 10;
 
         [Header("Màu và chuyển động")]
@@ -44,6 +46,7 @@ namespace Game.HudUpgrade
 
         private readonly List<ButtonParts> _buttons = new List<ButtonParts>();
         private RectTransform _bar;
+        private int[] _groups = Array.Empty<int>();
         private Font _font;
 
         private sealed class ButtonParts
@@ -82,15 +85,33 @@ namespace Game.HudUpgrade
             foreach (var parts in _buttons) Destroy(parts.Root.gameObject);
             _buttons.Clear();
 
-            var x = 0f;
+            _groups = new int[buttons.Count];
+            for (var i = 0; i < buttons.Count; i++) _groups[i] = buttons[i].Group;
+            var layout = BarLayout.Compute(_groups, CanvasWidth(), LayoutSettings());
             for (var i = 0; i < buttons.Count; i++)
-            {
-                if (i > 0) x += buttons[i].Group != buttons[i - 1].Group ? groupGap : buttonGap;
-                _buttons.Add(NewButton(i, buttons[i], x, onTap));
-                x += buttonSize.x;
-            }
+                _buttons.Add(NewButton(i, buttons[i], layout.ButtonLefts[i], onTap));
 
-            _bar.sizeDelta = new Vector2(x, buttonSize.y);
+            _bar.sizeDelta = new Vector2(layout.Width, buttonSize.y);
+            _bar.localScale = Vector3.one * layout.Scale;
+        }
+
+        /// <summary>Screen size changed: shrink or grow the bar so it still ends left of the skill cluster.</summary>
+        private void OnRectTransformDimensionsChange()
+        {
+            if (!_bar) return;
+            var layout = BarLayout.Compute(_groups, CanvasWidth(), LayoutSettings());
+            _bar.localScale = Vector3.one * layout.Scale;
+        }
+
+        private BarLayout.Settings LayoutSettings() =>
+            new BarLayout.Settings(barLeft, buttonSize.x, buttonGap, groupGap, referenceResolution.x - skillsLeft);
+
+        /// <summary>Canvas width in canvas units (equals 1920 on a 16:9 screen; less on a narrower one).</summary>
+        private float CanvasWidth()
+        {
+            var root = transform as RectTransform;
+            var width = root ? root.rect.width : 0f;
+            return width > 0 ? width : referenceResolution.x;
         }
 
         public void SetButton(int index, ButtonLook look)

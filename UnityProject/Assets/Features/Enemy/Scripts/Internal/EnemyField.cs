@@ -57,6 +57,11 @@ namespace Game.Enemy
         public void Spawn(EnemySpawn spawn)
         {
             var kind = _config.Kind(spawn.Type);
+            if (!kind.Available)
+                throw new InvalidOperationException(
+                    $"Enemy type {spawn.Type} is not in the game at this stage (EnemyConfig '{_config.name}'): " +
+                    "the wave config asks for a type that cannot be spawned yet.");
+
             var scale = spawn.StatScale > 0f ? spawn.StatScale : 1f;
             var x = spawn.Side == EnemySide.Left ? -_config.SpawnDistance : _config.SpawnDistance;
             var unit = new Unit(_nextHandle++, _nextSpawnOrder++, spawn.Type, spawn.Side, kind, scale, x);

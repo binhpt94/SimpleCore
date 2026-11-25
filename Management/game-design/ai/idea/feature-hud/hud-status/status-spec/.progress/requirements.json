@@ -1,7 +1,7 @@
 {
  "items": {
   "hp-bar-and-number": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.LosingHealthShortensTheBarAndUpdatesTheNumber",
@@ -11,11 +11,11 @@
    "hash": "f587fd14406d",
    "text": "Máu thành hiện bằng một thanh và chữ \"hiện tại/tối đa\", ví dụ \"750/1000\"\nThanh dài theo tỉ lệ máu hiện tại trên máu tối đa. Số là số nguyên, làm tròn xuống; thành bị phá hiện \"0/…\".",
    "title": "Máu thành hiện bằng một thanh và chữ \"hiện tại/tối đa\", ví dụ \"750/1000\"",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:06"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "hp-max-change": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.RaisingMaxHealthUpdatesNumberAndBarAtOnce"
@@ -24,11 +24,11 @@
    "hash": "c21319a832ed",
    "text": "Nâng máu tối đa thì số tối đa và tỉ lệ thanh đổi ngay trong khung hình nhận báo\nVí dụ 750/1000 nâng thành 850/1100: số đổi, thanh tính lại theo tỉ lệ mới.",
    "title": "Nâng máu tối đa thì số tối đa và tỉ lệ thanh đổi ngay trong khung hình nhận báo",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:06"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "wave-label": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.WaveBoxFollowsTheCurrentOrNextWave",
@@ -38,11 +38,11 @@
    "hash": "752e5ceede42",
    "text": "Ô đợt hiện chữ \"Đợt N\", N là đợt đang đánh; trong 3 giây nghỉ thì N là đợt sắp tới\nĐầu lượt hiện \"Đợt 1\".",
    "title": "Ô đợt hiện chữ \"Đợt N\", N là đợt đang đánh; trong 3 giây nghỉ thì N là đợt sắp tới",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:11"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-mau-con-0-4-le": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.HealthNumberRoundsDownSoAlmostDeadShowsZeroWithASliverOfBar"
@@ -51,11 +51,11 @@
    "hash": "9531e0a40c57",
    "text": "**Máu còn 0.4 (lẻ):** số làm tròn xuống thành 0 nhưng thành chưa bị phá; vẫn hiện \"0/1000\" và thanh còn một vệt rất nhỏ. Thành chỉ bị phá khi `feature-castle` báo.",
    "title": "Máu còn 0.4 (lẻ)",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:12"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-mau-xuong-duoi-0-trong-tinh-toan": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.HealthBelowZeroShowsZeroAndAnEmptyBar"
@@ -64,11 +64,11 @@
    "hash": "935bb2f62c25",
    "text": "**Máu xuống dưới 0 trong tính toán:** hiện 0, thanh rỗng.",
    "title": "Máu xuống dưới 0 trong tính toán",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:15"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-mau-vuot-mau-toi-da-khong-nen-xay": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.HealthAboveMaxFillsTheBarAndShowsTheRealNumber"
@@ -77,11 +77,11 @@
    "hash": "3ec7994fa7e1",
    "text": "**Máu vượt máu tối đa (không nên xảy ra):** thanh đầy, số hiện đúng giá trị nhận được.",
    "title": "Máu vượt máu tối đa (không nên xảy ra)",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:15"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-tien-rat-lon-vi-du-12345": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.CoinsChangeTheMomentTheWalletChanges"
@@ -90,11 +90,11 @@
    "hash": "4c5804d84f0c",
    "text": "**Tiền rất lớn (ví dụ 12345):** hiện đủ số, không rút gọn.",
    "title": "Tiền rất lớn (ví dụ 12345)",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:19"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-dot-moi-bat-dau-khi-thong-bao-dot": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.NewWaveWhileBannerIsUpReplacesItAndRestartsTheTime"
@@ -103,11 +103,11 @@
    "hash": "bd879e8a7cc0",
    "text": "**Đợt mới bắt đầu khi thông báo đợt trước còn hiện:** thay ngay bằng thông báo mới, đếm lại 1.5 giây.",
    "title": "Đợt mới bắt đầu khi thông báo đợt trước còn hiện",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:20"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-tam-dung-khi-thong-bao-dot-dang-hien": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.BannerTimeStandsStillWhilePaused"
@@ -116,11 +116,11 @@
    "hash": "95bed493119b",
    "text": "**Tạm dừng khi thông báo đợt đang hiện:** thời gian hiện đứng yên cùng trận, tiếp tục thì chạy tiếp phần còn lại.",
    "title": "Tạm dừng khi thông báo đợt đang hiện",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:23"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-luot-ket-thuc": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudStatusTests.RunEndingHidesTheBannerAndKeepsTheLastValues"
@@ -129,11 +129,11 @@
    "hash": "a6642ec01b38",
    "text": "**Lượt kết thúc:** 3 ô giữ giá trị cuối (máu 0) cho tới khi trận bị huỷ; thông báo đợt đang hiện thì tắt.",
    "title": "Lượt kết thúc",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:24"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSessionTests.RunningSessionShowsTheHudWithStartValues",
@@ -146,41 +146,51 @@
    "hash": "22253eac489c",
    "text": "## Làm gì\n- Khi trận dựng xong: hiện 3 ô với giá trị đầu lượt (1000/1000, 50, \"Đợt 1\").\n- Nghe `feature-castle` (máu hiện tại, máu tối đa), `feature-wallet` (tiền), `feature-wave` (đợt đang đánh hoặc sắp tới, đợt bắt đầu) và cập nhật ngay.\n- Khi `feature-wave` báo một đợt bắt đầu: hiện thông báo \"Đợt N\" trong 1.5 giây.\n- Khi trận bị huỷ: huỷ cả 3 ô và thông báo.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số ô thông tin | 3 (máu, tiền, đợt) | ô | `hud-status` |\n| Chữ máu | \"hiện tại/tối đa\" | máu | Bộ số chung yêu cầu số và thanh |\n| Làm tròn máu | xuống, số nguyên | | Thấy \"0\" là biết rất nguy; xem trường hợp biên |\n| Chữ tiền | số nguyên đầy đủ, kèm 1 biểu tượng xu | xu | |\n| Chữ đợt | \"Đợt N\" | | Người chơi quen nhìn \"đợt mấy\" |\n| Thời gian hiện thông báo đợt | 1.5 (dự kiến) | giây | Ngắn hơn nghỉ 3 giây, đủ đọc |\n| Thông báo đợt chặn bấm | không | | Trận không dừng |\n| Độ trễ cập nhật | 0, ngay khung hình nhận báo | | `status-read-only` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Máu thành | Thanh và số | Thanh và số | Thanh và số, thanh tụt dần 0.3 giây khi mất máu (dự kiến) |\n| Tiền | Số kèm biểu tượng xu | Như IDEA | Số nảy nhẹ khi nhận tiền |\n| Ô đợt | \"Đợt N\" | Như IDEA | Như IDEA |\n| Thông báo \"Đợt N\" đầu đợt | Không bắt buộc | Có, 1.5 giây | Có, kèm hiện dần và mờ dần |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:28"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "wave-banner": {
-   "state": "doing",
+   "state": "done",
    "note": "đã có test 1.5 giây, cần test view cho thông báo không chặn chạm",
-   "tests": [],
+   "tests": [
+    "HudStatusTests.WaveStartShowsTheBannerForOneAndAHalfSeconds",
+    "HudLayoutTests.StatusBoxesAndBannerTakeNoTaps"
+   ],
    "play": "",
    "hash": "4bb1d86aecd7",
    "text": "Mỗi lần một đợt bắt đầu, thông báo \"Đợt N\" hiện 1.5 giây rồi tự tắt, không chặn bấm\nKhông che thao tác: chạm xuyên qua thông báo vẫn tới nút bên dưới.",
    "title": "Mỗi lần một đợt bắt đầu, thông báo \"Đợt N\" hiện 1.5 giây rồi tự tắt, không chặn bấm",
    "by": "Hud",
-   "at": "2026-11-25 10:56:02"
+   "at": "2026-11-25 11:36:44"
   },
   "money-icon-number": {
-   "state": "doing",
+   "state": "done",
    "note": "số tiền đã có test, cần test view cho biểu tượng xu",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.MoneyShowsTheCoinIconRightBeforeTheNumber",
+    "HudStatusTests.CoinsChangeTheMomentTheWalletChanges",
+    "HudStatusTests.BattleStartShowsFullHealthStartCoinsAndWaveOne"
+   ],
    "play": "",
    "hash": "6da49a5675ac",
    "text": "Tiền hiện bằng 1 biểu tượng xu và số nguyên đầy đủ, ví dụ \"50\"\nBiểu tượng xu đại diện cho tiền trong lượt (`feature-wallet`). Đổi ngay khi nhận hay tiêu.",
    "title": "Tiền hiện bằng 1 biểu tượng xu và số nguyên đầy đủ, ví dụ \"50\"",
    "by": "Hud",
-   "at": "2026-11-25 10:56:05"
+   "at": "2026-11-25 11:36:45"
   },
   "status-no-input": {
-   "state": "doing",
+   "state": "done",
    "note": "cần test view cho ba ô và thông báo không nhận chạm",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.StatusBoxesAndBannerTakeNoTaps",
+    "HudStatusTests.StoppedPresenterNoLongerFollowsTheCastle"
+   ],
    "play": "",
    "hash": "666356054e66",
    "text": "Ba ô thông tin và thông báo đợt không nhận chạm, không tự tính số nào\nMáu từ `feature-castle`, tiền từ `feature-wallet`, đợt từ `feature-wave`.",
    "title": "Ba ô thông tin và thông báo đợt không nhận chạm, không tự tính số nào",
    "by": "Hud",
-   "at": "2026-11-25 10:56:06"
+   "at": "2026-11-25 11:36:48"
   }
  },
  "log": [
@@ -281,6 +291,104 @@
    "state": "doing",
    "by": "Hud",
    "note": "cần test view cho ba ô và thông báo không nhận chạm"
+  },
+  {
+   "at": "2026-11-25 11:36:44",
+   "id": "wave-banner",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudStatusTests.WaveStartShowsTheBannerForOneAndAHalfSeconds, HudLayoutTests.StatusBoxesAndBannerTakeNoTaps"
+  },
+  {
+   "at": "2026-11-25 11:36:45",
+   "id": "money-icon-number",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.MoneyShowsTheCoinIconRightBeforeTheNumber, HudStatusTests.CoinsChangeTheMomentTheWalletChanges, HudStatusTests.BattleStartShowsFullHealthStartCoinsAndWaveOne"
+  },
+  {
+   "at": "2026-11-25 11:36:48",
+   "id": "status-no-input",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.StatusBoxesAndBannerTakeNoTaps, HudStatusTests.StoppedPresenterNoLongerFollowsTheCastle"
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "hp-bar-and-number",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "hp-max-change",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "wave-label",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "edge-mau-con-0-4-le",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "edge-mau-xuong-duoi-0-trong-tinh-toan",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "edge-mau-vuot-mau-toi-da-khong-nen-xay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "edge-tien-rat-lon-vi-du-12345",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "edge-dot-moi-bat-dau-khi-thong-bao-dot",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "edge-tam-dung-khi-thong-bao-dot-dang-hien",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "edge-luot-ket-thuc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

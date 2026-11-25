@@ -12,6 +12,7 @@ namespace Game.HudUpgrade.Tests
     {
         private const string InstallerPath = "Assets/Features/HudUpgrade/FeatureAssets/Public/HudUpgradeInstaller.asset";
         private const string ConfigPath = "Assets/Features/HudUpgrade/FeatureAssets/Private/HudUpgradeConfig.asset";
+        private const string BarPrefabPath = "Assets/Features/HudUpgrade/FeatureAssets/Private/UpgradeBar.prefab";
 
         [Test]
         public void Bar_opens_when_session_runs_and_is_removed_when_session_ends()
@@ -167,6 +168,46 @@ namespace Game.HudUpgrade.Tests
 
             Assert.AreEqual(50, wallet.Coins);
             Assert.AreEqual(0, shop.BuyCalls);
+        }
+
+        [Test]
+        public void Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>(BarPrefabPath);
+            Assert.IsNotNull(prefab, "missing " + BarPrefabPath);
+            UnityEngine.Component view = null;
+            foreach (var c in prefab.GetComponentsInChildren<UnityEngine.Component>(true))
+                if (c != null && c.GetType().Name == "UpgradeBarView") view = c;
+            Assert.IsNotNull(view, "UpgradeBar prefab has no UpgradeBarView");
+            var so = new SerializedObject(view);
+
+            var portraits = so.FindProperty("heroPortraits");
+            foreach (var code in new[] { "knight", "axeman", "archer" })
+            {
+                var found = false;
+                for (var i = 0; i < portraits.arraySize; i++)
+                {
+                    var p = portraits.GetArrayElementAtIndex(i);
+                    if (p.FindPropertyRelative("heroCode").stringValue != code) continue;
+                    found = p.FindPropertyRelative("sprite").objectReferenceValue != null;
+                }
+
+                Assert.IsTrue(found, "no portrait for " + code);
+            }
+
+            foreach (var icon in new[] { "castleHealthIcon", "castleAttackIcon", "castleSkillIcon", "coinIcon" })
+                Assert.IsNotNull(so.FindProperty(icon).objectReferenceValue, "missing " + icon);
+
+            Assert.Greater(so.FindProperty("groupGap").floatValue, so.FindProperty("buttonGap").floatValue);
+
+            // On the 1920x1080 reference screen the last button must end left of the skill cluster (x 1420).
+            var settings = new BarLayout.Settings(so.FindProperty("barLeft").floatValue,
+                so.FindProperty("buttonSize").vector2Value.x, so.FindProperty("buttonGap").floatValue,
+                so.FindProperty("groupGap").floatValue, 1920 - so.FindProperty("skillsLeft").floatValue);
+            Assert.AreEqual(1420f, so.FindProperty("skillsLeft").floatValue);
+            var layout = BarLayout.Compute(new[] { 0, 0, 0, 1, 1, 1 }, 1920, settings);
+            Assert.LessOrEqual(layout.RightEdge(settings), 1420f);
+            Assert.AreEqual(0.2f, so.FindProperty("bounceSeconds").floatValue, 0.0001f);
         }
 
         [Test]

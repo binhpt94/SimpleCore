@@ -9,8 +9,8 @@ Các bước chuyển màn trong scene Game, thời điểm dừng trận khi th
 
 ## Ý cốt lõi
 
-### boot-to-home | AI 8 | Mở game: scene Loading tải xong tự sang scene Game, màn đầu tiên là màn bắt đầu
-Không có nút ở Loading. Đã vào scene Game thì không quay lại Loading; mọi đổi màn sau đó là đổi trong scene Game, không tải scene.
+### boot-to-home | AI 8 | Mở game: scene Loading tải xong tự sang scene Game, vào thẳng trận với đội mặc định
+Chưa có màn bắt đầu và màn chọn đội; đội mặc định theo `feature-team-select/team-memory/memory-rules`. Không có nút ở Loading. Đã vào scene Game thì không quay lại Loading; mọi đổi màn sau đó là đổi trong scene Game, không tải scene.
 
 ### fresh-battle | AI 8 | Mỗi lần bấm vào trận, trận được dựng mới hoàn toàn; không giữ gì của trận trước
 Thành, hero, quái, HUD, thanh nâng cấp của trận trước bị huỷ hết khi rời trận. Vào trận là dựng lại từ đầu rồi báo "lượt mới" (`feature-run/run-start`).

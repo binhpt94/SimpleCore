@@ -6,9 +6,11 @@ namespace Game.SceneFlow
 {
     internal sealed class UnitySceneLoader : ISceneLoader
     {
-        public async UniTask LoadAdditiveAsync(string sceneName)
+        public async UniTask LoadReplacingAsync(string sceneName)
         {
-            var loading = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            // Single mode removes every open scene once the new one is in. The old scene's session has already
+            // ended by then (design: destroy the old scene first, then load the new one).
+            var loading = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
             if (loading == null)
             {
                 throw new InvalidOperationException(
@@ -16,17 +18,6 @@ namespace Game.SceneFlow
             }
 
             await loading.ToUniTask();
-        }
-
-        public async UniTask UnloadAsync(string sceneName)
-        {
-            var unloading = SceneManager.UnloadSceneAsync(sceneName);
-            if (unloading == null)
-            {
-                throw new InvalidOperationException($"Scene '{sceneName}' cannot be unloaded: it is not loaded.");
-            }
-
-            await unloading.ToUniTask();
         }
 
         public void SetActive(string sceneName)

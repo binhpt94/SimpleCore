@@ -88,6 +88,48 @@ namespace Game.Castle.Tests
         }
 
         [Test]
+        public void Fraction_of_health_left_keeps_the_castle_standing()
+        {
+            _body.Hit(0, 999.6f);
+
+            Assert.That(_body.Health, Is.EqualTo(0.4f).Within(1e-3f));
+            Assert.That(_body.IsDestroyed, Is.False);
+            Assert.That(_run.LoseCalls, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Health_bought_in_the_frame_the_castle_fell_is_not_applied()
+        {
+            _body.Hit(0, 1000f);
+
+            _body.ApplyHealthLevel(2);
+
+            Assert.That(_body.IsDestroyed, Is.True);
+            Assert.That(_body.Health, Is.EqualTo(0f));
+            Assert.That(_body.MaxHealth, Is.EqualTo(1000f));
+        }
+
+        [Test]
+        public void Health_level_bought_at_one_health_leaves_the_castle_at_151()
+        {
+            _body.Hit(0, 999f);
+
+            _body.ApplyHealthLevel(2);
+
+            Assert.That(_body.Health, Is.EqualTo(151f).Within(1e-3f));
+            Assert.That(_body.MaxHealth, Is.EqualTo(1150f));
+        }
+
+        [Test]
+        public void Health_level_five_gives_1600_max_health()
+        {
+            _body.ApplyHealthLevel(5);
+
+            Assert.That(_body.MaxHealth, Is.EqualTo(1600f));
+            Assert.That(_body.Health, Is.EqualTo(1600f));
+        }
+
+        [Test]
         public void New_run_puts_the_castle_back_to_full_health_standing()
         {
             _body.ApplyHealthLevel(3);

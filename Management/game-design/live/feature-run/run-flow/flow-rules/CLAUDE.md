@@ -13,7 +13,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Thông số | Giá trị | Đơn vị | Lí do |
 |---|---|---|---|
 | Số scene | 2 (Loading, Game) | scene | Theo `feature-scene-flow/scene-list` |
-| Màn đầu tiên trong scene Game | Màn bắt đầu | | `flow-order` |
+| Màn đầu tiên trong scene Game | Trận, đội mặc định | | `boot-to-home`; từ PROTOTYPE là màn bắt đầu (bảng giai đoạn) |
 | Độ trễ trước popup thua | 1 (dự kiến) | giây | Đủ thấy thành bị phá, không làm chậm chơi lại |
 | Số lần bấm có tác dụng trong lúc đổi màn | 1 | lần | Tránh mở trận hai lần |
 | Thời gian đổi màn | 0 (đổi ngay) | giây | Mức đơn giản nhất; hiệu ứng ở bảng giai đoạn |
@@ -39,6 +39,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Đã tự quyết
 - **Mọi màn trong scene Game, không tách scene trận.** Theo `feature-scene-flow/scene-list` và ý `flow-scenes` của node cha (đã sửa cho khớp, 2026-11-23). Lượt mới luôn sạch vì trận được dựng mới và huỷ hết mỗi lần (`fresh-battle`). Đã loại: tải lại scene Game mỗi lượt (chậm, trái `no-return-loading`).
+- **Mở game vào thẳng trận (2026-11-25, sửa lệch, theo @Manager).** Ý `boot-to-home` và hàng "Màn đầu tiên" bản trước ghi màn bắt đầu, trái với bảng giai đoạn của chính node này ("Màn sau Loading: vào thẳng trận"). Ý cốt lõi nêu giá trị IDEA; giữ `id` cũ dù tên không còn khớp. Đã loại: giữ màn bắt đầu (IDEA không có màn đó).
 - **Chờ 1 giây trước popup thua.** Popup hiện ngay thì người chơi không hiểu vì sao thua. Đã loại: 3 giây (chậm chơi lại).
 - **Bỏ qua báo dọn sạch tới sau khi chốt điểm.** Điểm chỉ chốt một lần.
 - **Nút quay lại của máy trong trận = tạm dừng.** Thói quen điện thoại; không thoát nhầm khỏi lượt.

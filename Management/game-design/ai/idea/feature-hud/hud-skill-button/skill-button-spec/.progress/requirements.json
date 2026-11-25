@@ -1,7 +1,7 @@
 {
  "items": {
   "three-buttons-order": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.ThreeButtonsInCastleOrderAllReadyAtBattleStart"
@@ -10,11 +10,11 @@
    "hash": "a60a9722b34a",
    "text": "Có 3 nút theo thứ tự cố định: Sấm sét, Băng giá, Cổ vũ, mỗi nút một biểu tượng riêng\nBiểu tượng đại diện cho kĩ năng: Sấm sét (sét đánh quanh thành), Băng giá (làm chậm mọi quái), Cổ vũ (hồi máu mọi hero).",
    "title": "Có 3 nút theo thứ tự cố định: Sấm sét, Băng giá, Cổ vũ, mỗi nút một biểu tượng riêng",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:28"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "ready-tap": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.TappingAReadyButtonUsesThatSkillOnce"
@@ -23,11 +23,11 @@
    "hash": "de13a1be5ced",
    "text": "Nút sẵn sàng: chạm 1 lần là báo `feature-castle` dùng kĩ năng đó\nMột chạm chỉ dùng một lần; chạm liền nhiều lần trong cùng lúc cũng chỉ dùng một lần.",
    "title": "Nút sẵn sàng: chạm 1 lần là báo `feature-castle` dùng kĩ năng đó",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:32"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "cooldown-seconds": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.CoolingButtonShowsSecondsRoundedUpAndCoverForTheShareLeft",
@@ -38,11 +38,11 @@
    "hash": "1b96cd1e95cd",
    "text": "Nút đang hồi hiện số giây còn lại làm tròn lên: Sấm sét bắt đầu từ 20, Băng giá 35, Cổ vũ 25\nCòn 0.3 giây thì hiện \"1\". Hồi xong thì số biến mất. Thời gian lấy từ `feature-castle`, HUD không tự đếm.",
    "title": "Nút đang hồi hiện số giây còn lại làm tròn lên: Sấm sét bắt đầu từ 20, Băng giá 35, Cổ vũ 25",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:34"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "cooldown-overlay": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.CoolingButtonShowsSecondsRoundedUpAndCoverForTheShareLeft",
@@ -52,11 +52,11 @@
    "hash": "afa951f81f53",
    "text": "Nút đang hồi có lớp phủ vơi dần theo tỉ lệ thời gian còn lại trên tổng hồi chiêu\nVừa bấm thì phủ kín; còn một nửa thời gian thì phủ một nửa; hết thì không còn phủ.",
    "title": "Nút đang hồi có lớp phủ vơi dần theo tỉ lệ thời gian còn lại trên tổng hồi chiêu",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:37"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "cooldown-tap-nothing": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.TappingACoolingButtonDoesNotAskTheCastle"
@@ -65,11 +65,11 @@
    "hash": "2a7acfd6d9c0",
    "text": "Chạm nút đang hồi thì không có gì xảy ra và không báo `feature-castle`",
    "title": "Chạm nút đang hồi thì không có gì xảy ra và không báo `feature-castle`",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:38"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "ready-bounce": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.ButtonBouncesOnceWhenItsCooldownEnds"
@@ -78,11 +78,11 @@
    "hash": "dd3b8f5c5c4a",
    "text": "Lúc vừa hồi xong, nút phóng to lên 1.2 lần rồi về cỡ cũ trong 0.3 giây, một lần\nNgười chơi đang nhìn chiến trường vẫn nhận ra kĩ năng dùng lại được.",
    "title": "Lúc vừa hồi xong, nút phóng to lên 1.2 lần rồi về cỡ cũ trong 0.3 giây, một lần",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:40"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "buttons-locked-off-battle": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.NoButtonTakesTapsWhilePausedOrAfterTheRunEnded"
@@ -91,11 +91,11 @@
    "hash": "2a05691cf777",
    "text": "Lúc tạm dừng hoặc lượt đã kết thúc, cả 3 nút không nhận chạm và số giây đứng yên",
    "title": "Lúc tạm dừng hoặc lượt đã kết thúc, cả 3 nút không nhận chạm và số giây đứng yên",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:41"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-tam-dung-khi-dang-nay": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.BounceStandsStillWhilePaused"
@@ -104,24 +104,25 @@
    "hash": "a3cb5c8b2bee",
    "text": "**Tạm dừng khi đang nảy:** hiệu ứng nảy đứng yên cùng trận.",
    "title": "Tạm dừng khi đang nảy",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:44"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-hoi-chieu-tong-bang-0-cau-hinh-sai": {
-   "state": "doing",
+   "state": "done",
    "note": "bị trả, thêm test nút sẵn sàng và chạm báo castle, chờ gỡ bgIsolation",
    "tests": [
-    "HudSkillButtonTests.ZeroCooldownSkillShowsNoSecondsAndNoCover"
+    "HudSkillButtonTests.ZeroCooldownSkillTheCastleReportsReadyStaysReadyAndATapUsesIt",
+    "HudSkillButtonTests.ZeroCooldownWithMismatchedDataShowsNoSecondsAndNoCover"
    ],
    "play": "",
    "hash": "ede5e704d5be",
    "text": "**Hồi chiêu tổng bằng 0 (cấu hình sai):** nút luôn sẵn sàng, không hiện số, không phủ.",
    "title": "Hồi chiêu tổng bằng 0 (cấu hình sai)",
    "by": "Hud",
-   "at": "2026-11-25 11:04:20"
+   "at": "2026-11-25 11:36:35"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.ThreeButtonsInCastleOrderAllReadyAtBattleStart",
@@ -134,41 +135,48 @@
    "hash": "294d186fb4bb",
    "text": "## Làm gì\n- Lấy danh sách kĩ năng từ `feature-castle` (3 kĩ năng), tạo một nút cho mỗi kĩ năng theo thứ tự danh sách.\n- Mỗi khung hình hiện theo trạng thái `feature-castle` báo: sẵn sàng, hoặc đang hồi kèm thời gian còn lại và tổng hồi chiêu.\n- Chạm nút sẵn sàng: báo `feature-castle`; `feature-castle` quyết dùng được hay không.\n- Khi trạng thái đổi từ đang hồi sang sẵn sàng: chạy hiệu ứng nảy một lần.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số nút | 3 | nút | `feature-castle/castle-skills` |\n| Thứ tự | Sấm sét, Băng giá, Cổ vũ | | Theo danh sách kĩ năng |\n| Hồi chiêu Sấm sét | 20 (dự kiến) | giây | Bộ số chung |\n| Hồi chiêu Băng giá | 35 (dự kiến) | giây | Bộ số chung; dài nhất |\n| Hồi chiêu Cổ vũ | 25 (dự kiến) | giây | Bộ số chung |\n| Cách hiện số giây | số nguyên, làm tròn lên | giây | Không hiện \"0\" khi chưa dùng được |\n| Lớp phủ | tỉ lệ còn lại / tổng hồi chiêu | | Liếc là thấy sắp xong chưa |\n| Hiệu ứng hồi xong | phóng 1.0 → 1.2 → 1.0 trong 0.3 giây (dự kiến), một lần | lần, giây | Anim bằng scale |\n| Trạng thái lúc vào trận | cả 3 sẵn sàng | | `feature-run/run-start/start-values` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số nút | 1 (Sấm sét; chỉ kĩ năng có trong trận ở giai đoạn này, theo `feature-castle/castle-skills`) | 3 | 3 |\n| Số giây còn lại | Có | Có | Có |\n| Lớp phủ vơi dần | Không bắt buộc | Có | Có |\n| Hiệu ứng nảy khi hồi xong | Không bắt buộc | Có | Có, kèm âm thanh ngắn |\n| Biểu tượng | Sprite 2D gen bằng AI hoặc chữ tên kĩ năng | Sprite 2D gen bằng AI | Sprite hoàn thiện |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:51"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "edge-hai-nut-duoc-cham-cung-luc": {
-   "state": "doing",
+   "state": "done",
    "note": "code có, cần test mới cho hai nút chạm cùng lúc",
-   "tests": [],
+   "tests": [
+    "HudSkillButtonTests.TwoButtonsTappedTogetherEachUseTheirOwnSkill"
+   ],
    "play": "",
    "hash": "09311ff7c670",
    "text": "**Hai nút được chạm cùng lúc:** cả hai đều báo `feature-castle`; mỗi kĩ năng dùng độc lập.",
    "title": "Hai nút được chạm cùng lúc",
    "by": "Hud",
-   "at": "2026-11-25 10:55:56"
+   "at": "2026-11-25 11:36:36"
   },
   "edge-cham-dung-khung-hinh-vua-hoi-xong": {
-   "state": "doing",
+   "state": "done",
    "note": "code có, cần test mới cho chạm đúng khung hình vừa hồi xong",
-   "tests": [],
+   "tests": [
+    "HudSkillButtonTests.TapInTheFrameTheCastleTurnsReadyUsesTheSkill",
+    "HudSkillButtonTests.TapInTheFrameTheCastleStillCoolsIsIgnored"
+   ],
    "play": "",
    "hash": "13d91c14db3a",
    "text": "**Chạm đúng khung hình vừa hồi xong:** nếu `feature-castle` đã báo sẵn sàng thì dùng; chưa thì bỏ qua.",
    "title": "Chạm đúng khung hình vừa hồi xong",
    "by": "Hud",
-   "at": "2026-11-25 10:55:57"
+   "at": "2026-11-25 11:36:39"
   },
   "edge-feature-castle-tu-choi-dung-vi-du-luot": {
-   "state": "doing",
+   "state": "done",
    "note": "code có, cần test mới cho castle từ chối dùng",
-   "tests": [],
+   "tests": [
+    "HudSkillButtonTests.RefusedUseKeepsTheButtonAsTheCastleReportsIt"
+   ],
    "play": "",
    "hash": "245131046ed9",
    "text": "**`feature-castle` từ chối dùng (ví dụ lượt vừa kết thúc):** nút giữ nguyên trạng thái `feature-castle` báo, không tự chuyển sang đang hồi.",
    "title": "`feature-castle` từ chối dùng (ví dụ lượt vừa kết thúc)",
    "by": "Hud",
-   "at": "2026-11-25 10:56:01"
+   "at": "2026-11-25 11:36:40"
   }
  },
  "log": [
@@ -276,6 +284,97 @@
    "state": "doing",
    "by": "Hud",
    "note": "bị trả, thêm test nút sẵn sàng và chạm báo castle, chờ gỡ bgIsolation"
+  },
+  {
+   "at": "2026-11-25 11:36:35",
+   "id": "edge-hoi-chieu-tong-bang-0-cau-hinh-sai",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSkillButtonTests.ZeroCooldownSkillTheCastleReportsReadyStaysReadyAndATapUsesIt, HudSkillButtonTests.ZeroCooldownWithMismatchedDataShowsNoSecondsAndNoCover"
+  },
+  {
+   "at": "2026-11-25 11:36:36",
+   "id": "edge-hai-nut-duoc-cham-cung-luc",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSkillButtonTests.TwoButtonsTappedTogetherEachUseTheirOwnSkill"
+  },
+  {
+   "at": "2026-11-25 11:36:39",
+   "id": "edge-cham-dung-khung-hinh-vua-hoi-xong",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSkillButtonTests.TapInTheFrameTheCastleTurnsReadyUsesTheSkill, HudSkillButtonTests.TapInTheFrameTheCastleStillCoolsIsIgnored"
+  },
+  {
+   "at": "2026-11-25 11:36:40",
+   "id": "edge-feature-castle-tu-choi-dung-vi-du-luot",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSkillButtonTests.RefusedUseKeepsTheButtonAsTheCastleReportsIt"
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "three-buttons-order",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "ready-tap",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "cooldown-seconds",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "cooldown-overlay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "cooldown-tap-nothing",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "ready-bounce",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "buttons-locked-off-battle",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "edge-tam-dung-khi-dang-nay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

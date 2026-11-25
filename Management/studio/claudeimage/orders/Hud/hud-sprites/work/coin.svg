@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60">
+  <!-- dong xu vang nhin thang, vien nau dam 4 px, chiem khoang 88% khung, can giua -->
+  <circle cx="30" cy="30" r="24" fill="#FFC93C" stroke="#5A3A12" stroke-width="4"/>
+  <circle cx="30" cy="30" r="15" fill="none" stroke="#C98A00" stroke-width="3"/>
+  <path d="M17 24 A14 14 0 0 1 27 14 L29 18 A10 10 0 0 0 21 26 Z" fill="#FFF1B8"/>
+</svg>

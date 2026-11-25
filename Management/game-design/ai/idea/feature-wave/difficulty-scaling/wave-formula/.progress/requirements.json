@@ -1,0 +1,274 @@
+{
+ "items": {
+  "stat-multiplier": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix",
+    "WaveDirectorTests.SpawnedEnemies_CarryTheWaveStatScale"
+   ],
+   "play": "",
+   "hash": "3acdbbf1e7b9",
+   "text": "Máu và sức đánh của quái đợt w nhân hệ số 1 + 0.10×(w − 1) (đợt 10: ×1.9, đợt 20: ×2.9)\nÁp cho chỉ số gốc của `feature-enemy`. Tốc độ đánh, tầm đánh, tốc độ di chuyển và tiền khi hạ không nhân.",
+   "title": "Máu và sức đánh của quái đợt w nhân hệ số 1 + 0.10×(w − 1) (đợt 10: ×1.9, đợt 20: ×2.9)",
+   "by": "Wave",
+   "at": "2026-11-25 11:35:54"
+  },
+  "type-unlock": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix",
+    "WaveFormulaTests.NewlyUnlockedKind_AlwaysShowsUpAtLeastOnce"
+   ],
+   "play": "",
+   "hash": "6ae6bb0a761c",
+   "text": "Lính có từ đợt 1, Sói từ đợt 3, Khổng lồ từ đợt 5, Cung thủ quái từ đợt 7\nLoại đã mở giữ mở tới hết lượt. Đợt mở loại mới luôn có ít nhất 1 con loại đó.",
+   "title": "Lính có từ đợt 1, Sói từ đợt 3, Khổng lồ từ đợt 5, Cung thủ quái từ đợt 7",
+   "by": "Wave",
+   "at": "2026-11-25 11:35:55"
+  },
+  "reward-by-mix": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix",
+    "WaveDirectorTests.SpawnedEnemies_CarryTheWaveStatScale"
+   ],
+   "play": "",
+   "hash": "e311af73f28a",
+   "text": "Tiền mỗi con giữ theo loại; tiền trung bình mỗi con tăng theo đợt nhờ phần loại trâu tăng (5 xu ở đợt 1, khoảng 9 xu ở đợt 20)\nKhông có hệ số tiền theo đợt. Thu của đợt tăng theo số quái và phần Khổng lồ tăng; ngoại lệ có chủ đích: đợt ngay sau đợt Trùm thu ít hơn đợt Trùm (đợt 10: 272 xu, đợt 11: 187 xu) vì 100 xu của Trùm là phần thưởng riêng.",
+   "title": "Tiền mỗi con giữ theo loại; tiền trung bình mỗi con tăng theo đợt nhờ phần loại trâu tăng (5 xu ở đợt 1, khoảng 9 xu ở đợt 20)",
+   "by": "Wave",
+   "at": "2026-11-25 11:35:57"
+  },
+  "edge-dot-rat-cao-w-100": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.VeryHighWave_StillAddsUpAndKeepsTheIntervalFloor"
+   ],
+   "play": "",
+   "hash": "e23f1b1e7c72",
+   "text": "**Đợt rất cao (w ≥ 100):** công thức vẫn chạy, không có trần; số quái 206 con ở đợt 100 vẫn thả được vì giới hạn quái sống cùng lúc nằm ở `feature-wave/spawning/spawn-order`.",
+   "title": "Đợt rất cao (w ≥ 100)",
+   "by": "Wave",
+   "at": "2026-11-25 11:35:58"
+  },
+  "count-formula": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix"
+   ],
+   "play": "",
+   "hash": "9259943ce494",
+   "text": "Số quái của đợt w là 6 + 2×w con (đợt 1: 8 con, đợt 10: 26 con, đợt 20: 46 con)\nLuôn là số chẵn, chia đúng một nửa cho mỗi bên. Trùm, nếu có, tính trong số này.",
+   "title": "Số quái của đợt w là 6 + 2×w con (đợt 1: 8 con, đợt 10: 26 con, đợt 20: 46 con)",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:02"
+  },
+  "interval-formula": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix",
+    "WaveDirectorTests.Enemies_ComeOneByOne_OnePerSecondInWaveOne"
+   ],
+   "play": "",
+   "hash": "e3a5aebd3e9d",
+   "text": "Nhịp thả của đợt w là 1.0 − 0.05×(w − 1) giây, thấp nhất 0.3 giây (chạm sàn từ đợt 15)\nĐợt 1: 1.0 s, đợt 5: 0.8 s, đợt 10: 0.55 s, đợt 15 trở đi: 0.3 s.",
+   "title": "Nhịp thả của đợt w là 1.0 − 0.05×(w − 1) giây, thấp nhất 0.3 giây (chạm sàn từ đợt 15)",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:03"
+  },
+  "type-mix": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix",
+    "WaveFormulaTests.IdeaStage_HasNoBossNorArcher_TheirPlacesGoToSoldiers"
+   ],
+   "play": "",
+   "hash": "9ab38aa05d1f",
+   "text": "Phần trăm từng loại theo bậc đợt; đợt 15 trở đi cố định Lính 35%, Sói 25%, Khổng lồ 20%, Cung thủ quái 20%\nBậc: đợt 1–2 Lính 100%; đợt 3–4 Lính 70%, Sói 30%; đợt 5–6 Lính 55%, Sói 30%, Khổng lồ 15%; đợt 7–9 Lính 45%, Sói 25%, Khổng lồ 15%, Cung thủ quái 15%; đợt 10–14 Lính 40%, Sói 25%, Khổng lồ 20%, Cung thủ quái 15%. Phần trăm tính trên số chỗ còn lại sau Trùm; mỗi loại không phải Lính lấy phần nguyên của (phần trăm × số chỗ), tối thiểu 1; Lính lấy phần còn lại.",
+   "title": "Phần trăm từng loại theo bậc đợt; đợt 15 trở đi cố định Lính 35%, Sói 25%, Khổng lồ 20%, Cung thủ quái 20%",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:04"
+  },
+  "boss-wave": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.BossWave_TakesOnePlace_TheOtherKindsShareTheRest"
+   ],
+   "play": "",
+   "hash": "43f0e0c115c2",
+   "text": "Đợt có số chia hết cho 10 (10, 20, 30…) có đúng 1 Trùm, chiếm 1 chỗ trong số quái\nCác đợt khác không có Trùm. Trùm cũng nhân hệ số máu và sức đánh của đợt.",
+   "title": "Đợt có số chia hết cho 10 (10, 20, 30…) có đúng 1 Trùm, chiếm 1 chỗ trong số quái",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:05"
+  },
+  "edge-dot-trum": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.BossWave_TakesOnePlace_TheOtherKindsShareTheRest",
+    "SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave"
+   ],
+   "play": "",
+   "hash": "93bcd105e6de",
+   "text": "**Đợt Trùm:** Trùm chiếm 1 chỗ; phần trăm các loại khác tính trên số chỗ còn lại (đợt 10: 25 chỗ).",
+   "title": "Đợt Trùm",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:06"
+  },
+  "edge-phan-tram-lam-tron-ra-0-cho-loai": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.UnlockedKindWhoseShareRoundsDownToZero_StillGetsOne_TakenFromSoldiers"
+   ],
+   "play": "",
+   "hash": "d3c749e62b91",
+   "text": "**Phần trăm làm tròn ra 0 cho loại đã mở:** nâng lên 1, bớt 1 Lính.",
+   "title": "Phần trăm làm tròn ra 0 cho loại đã mở",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:07"
+  },
+  "edge-phan-nguyen-cac-loai-kho-cong-lai-vuot": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.HardKindsTakingEveryPlace_AreTrimmedFromTheLowestShare_KeepingOneSoldier",
+    "WaveFormulaTests.ConfigWhoseTierDoesNotAddUpTo100_IsRefusedNamingTheTier"
+   ],
+   "play": "",
+   "hash": "14ba44d93abf",
+   "text": "**Phần nguyên các loại khó cộng lại vượt số chỗ:** không xảy ra với bảng hiện tại (tổng loại khó tối đa 65%); nếu cấu hình đổi làm xảy ra thì bớt từ loại có phần trăm thấp nhất cho tới khi Lính còn ít nhất 1. Cấu hình sai (tổng phần trăm khác 100%) thì báo lỗi lúc nạp cấu hình, nêu tên bậc sai.",
+   "title": "Phần nguyên các loại khó cộng lại vượt số chỗ",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:08"
+  },
+  "edge-chi-so-sau-nhan-ra-so-le": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveFormulaTests.HealthAndDamageScale_StaysFractional_NotRounded"
+   ],
+   "play": "",
+   "hash": "5f088df4825d",
+   "text": "**Chỉ số sau nhân ra số lẻ:** máu và sức đánh giữ số thực, chỉ làm tròn khi hiện ra, theo luật chung ở `feature-hero/hero-stats/hero-level-values` (Lính đợt 2: 44 máu, 5.5 sức đánh).",
+   "title": "Chỉ số sau nhân ra số lẻ",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:09"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers",
+    "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix"
+   ],
+   "play": "",
+   "hash": "9d345dc24e4b",
+   "text": "## Làm gì\n- Đầu mỗi đợt, từ số đợt w tính ra: số quái, nhịp thả, hệ số chỉ số, số con từng loại (kể cả Trùm). Kết quả giao cho `feature-wave/spawning/spawn-order` để lập danh sách thả.\n- Mọi tham số (số quái gốc, số quái thêm mỗi đợt, nhịp gốc, mức giảm, sàn, hệ số tăng, mốc mở loại, chu kì Trùm, bảng phần trăm) nằm trong cấu hình của `feature-wave`; giá trị do `feature-balance` quyết.\n- Không giữ chỉ số gốc của quái. Node này giữ công thức và tính hệ số chỉ số; hệ số đi kèm từng quái lúc sinh, `feature-enemy` nhận hệ số (không nhận số đợt) và nhân với chỉ số gốc (`feature-enemy/enemy-stats/enemy-stat-values`).\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Số quái | 6 + 2×w | con | Đợt 1 đủ ít để làm quen; tăng đều, luôn chẵn để chia đôi hai bên |\n| Nhịp thả | max(0.3, 1.0 − 0.05×(w−1)) | giây | Dày dần; sàn 0.3 s để màn hình vẫn đọc được từng con |\n| Hệ số máu, sức đánh | 1 + 0.10×(w−1) | lần | Tăng tuyến tính, nhân với số quái tăng thành áp lực tăng nhanh hơn sức đội mua được |\n| Mốc mở loại | Lính 1, Sói 3, Khổng lồ 5, Cung thủ quái 7 | đợt | Mỗi 2 đợt gặp một loại mới, kịp quen loại cũ |\n| Chu kì Trùm | w chia hết cho 10, 1 con | đợt | Đỉnh căng thẳng hiếm, dễ nhớ |\n| Bảng phần trăm | xem data.md, ý `type-mix` | % số chỗ | Phần Khổng lồ, Cung thủ quái tăng theo bậc; Lính giảm dần |\n| Làm tròn | phần nguyên, tối thiểu 1 cho loại đã mở; dư cho Lính | con | Tổng luôn đúng số quái; không loại đã mở nào vắng mặt |\n\nVí dụ kết quả (dự kiến, tính theo công thức trên):\n\n| Đợt | Số quái | Nhịp (s) | Hệ số | Lính | Sói | Khổng lồ | Cung thủ quái | Trùm | Tiền hạ quái cả đợt (xu) |\n|---|---|---|---|---|---|---|---|---|---|\n| 1 | 8 | 1.0 | 1.0 | 8 | 0 | 0 | 0 | 0 | 40 |\n| 3 | 12 | 0.9 | 1.2 | 9 | 3 | 0 | 0 | 0 | 57 |\n| 5 | 16 | 0.8 | 1.4 | 10 | 4 | 2 | 0 | 0 | 96 |\n| 7 | 20 | 0.7 | 1.6 | 9 | 5 | 3 | 3 | 0 | 128 |\n| 10 | 26 | 0.55 | 1.9 | 11 | 6 | 5 | 3 | 1 | 272 |\n| 15 | 36 | 0.3 | 2.4 | 13 | 9 | 7 | 7 | 0 | 248 |\n| 20 | 46 | 0.3 | 2.9 | 16 | 11 | 9 | 9 | 1 | 413 |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số quái | 6 + 2×w | 6 + 2×w, chỉnh sau chơi thử | chốt sau chơi thử |\n| Nhịp thả | max(0.3, 1.0 − 0.05×(w−1)) s | như IDEA, chỉnh sau chơi thử | chốt sau chơi thử |\n| Hệ số máu, sức đánh | 1 + 0.10×(w−1) | như IDEA, chỉnh sau chơi thử | chốt sau chơi thử |\n| Loại quái dùng | Lính, Sói, Khổng lồ theo mốc; không Trùm, không Cung thủ quái (chỗ của chúng dồn cho Lính) | đủ 5 loại | đủ 5 loại |\n| Bảng phần trăm | đủ 6 bậc | đủ 6 bậc, chỉnh sau chơi thử | chốt sau chơi thử |\n| Tham số đặt trong cấu hình | có | có | có |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Wave",
+   "at": "2026-11-25 11:36:10"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:35:54",
+   "id": "stat-multiplier",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix, WaveDirectorTests.SpawnedEnemies_CarryTheWaveStatScale"
+  },
+  {
+   "at": "2026-11-25 11:35:55",
+   "id": "type-unlock",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix, WaveFormulaTests.NewlyUnlockedKind_AlwaysShowsUpAtLeastOnce"
+  },
+  {
+   "at": "2026-11-25 11:35:57",
+   "id": "reward-by-mix",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix, WaveDirectorTests.SpawnedEnemies_CarryTheWaveStatScale"
+  },
+  {
+   "at": "2026-11-25 11:35:58",
+   "id": "edge-dot-rat-cao-w-100",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.VeryHighWave_StillAddsUpAndKeepsTheIntervalFloor"
+  },
+  {
+   "at": "2026-11-25 11:36:02",
+   "id": "count-formula",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix"
+  },
+  {
+   "at": "2026-11-25 11:36:03",
+   "id": "interval-formula",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix, WaveDirectorTests.Enemies_ComeOneByOne_OnePerSecondInWaveOne"
+  },
+  {
+   "at": "2026-11-25 11:36:04",
+   "id": "type-mix",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix, WaveFormulaTests.IdeaStage_HasNoBossNorArcher_TheirPlacesGoToSoldiers"
+  },
+  {
+   "at": "2026-11-25 11:36:05",
+   "id": "boss-wave",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.BossWave_TakesOnePlace_TheOtherKindsShareTheRest"
+  },
+  {
+   "at": "2026-11-25 11:36:06",
+   "id": "edge-dot-trum",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.BossWave_TakesOnePlace_TheOtherKindsShareTheRest, SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave"
+  },
+  {
+   "at": "2026-11-25 11:36:07",
+   "id": "edge-phan-tram-lam-tron-ra-0-cho-loai",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.UnlockedKindWhoseShareRoundsDownToZero_StillGetsOne_TakenFromSoldiers"
+  },
+  {
+   "at": "2026-11-25 11:36:08",
+   "id": "edge-phan-nguyen-cac-loai-kho-cong-lai-vuot",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.HardKindsTakingEveryPlace_AreTrimmedFromTheLowestShare_KeepingOneSoldier, WaveFormulaTests.ConfigWhoseTierDoesNotAddUpTo100_IsRefusedNamingTheTier"
+  },
+  {
+   "at": "2026-11-25 11:36:09",
+   "id": "edge-chi-so-sau-nhan-ra-so-le",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveFormulaTests.HealthAndDamageScale_StaysFractional_NotRounded"
+  },
+  {
+   "at": "2026-11-25 11:36:10",
+   "id": "params",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers, WaveFormulaTests.Wave_IsMadeOfTheDesignedMix"
+  }
+ ]
+}

@@ -1,6 +1,6 @@
 ---
 based-on: 78ed2dcc0859
-refs: feature-scene-flow/scene-request@646c23aa767e, feature-session-scene/session-steps@70f3b17acc2e, feature-session-scene/session-steps/participant-order@741dae9e43c1, feature-run/run-flow/flow-rules@9109afcd6a93
+refs: feature-scene-flow/scene-request@646c23aa767e, feature-session-scene/session-steps@70f3b17acc2e, feature-session-scene/session-steps/participant-order@f45d732dc921, feature-run/run-flow/flow-rules@c2c5ba06ffa8
 ---
 # Màn Loading lúc mở game
 
@@ -14,11 +14,11 @@ Tiến độ tính bằng số feature của scene Game đã tải xong chia cho
 ### loading-min-time | AI 7 | Màn Loading hiện ít nhất 1 giây, kể cả khi tải xong sớm hơn
 Tránh màn nháy lên rồi mất. Không kéo dài hơn mức này khi đã tải xong.
 
-### loading-max-time | AI 7 | Từ lúc mở game tới lúc thấy màn bắt đầu không quá 5 giây trên điện thoại tầm trung (dự kiến)
+### loading-max-time | AI 7 | Từ lúc mở game tới lúc thấy màn đầu tiên của scene Game không quá 5 giây trên điện thoại tầm trung (dự kiến)
 Quá 5 giây là lỗi hiệu năng cần báo, không chặn người chơi.
 
 ### loading-fail | AI 8 | Một feature tải lỗi thì dừng ở Loading, hiện dòng lỗi nêu tên feature đó, không sang scene Game
 Không tự thử lại; người chơi tắt mở lại game. Đã loại: bỏ qua feature lỗi rồi vào Game thiếu thứ.
 
-### game-first-screen | AI 8 | Sang scene Game thì màn đầu tiên người chơi thấy là màn bắt đầu
-Không vào thẳng trận hay màn chọn đội.
+### game-first-screen | AI 8 | Sang scene Game thì màn đầu tiên người chơi thấy là trận, với đội mặc định
+Chưa có màn bắt đầu và màn chọn đội; trận do `feature-run` dựng (`feature-run/run-flow/flow-rules`).

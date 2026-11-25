@@ -14,46 +14,164 @@ namespace Game.SceneFlow.Tests
     public class SceneFlowTests
     {
         private const string FailedMessage = "cannot load";
+        private static readonly TimeSpan MinTime = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan SlowTime = TimeSpan.FromSeconds(5);
 
         private List<string> log;
-        private List<Exception> errors;
+        private FakeLog flowLog;
         private FakeSession session;
         private FakeScenes scenes;
         private FakeScreens screens;
         private FakeProgress progress;
         private FakeTimer timer;
-        private LoadingToGameFlow flow;
+        private SceneSwitcher switcher;
 
         [SetUp]
         public void SetUp()
         {
             log = new List<string>();
-            errors = new List<Exception>();
+            flowLog = new FakeLog();
             session = new FakeSession(log);
             progress = new FakeProgress(4);
             scenes = new FakeScenes(log) { Gate = new SceneGate(progress) };
             screens = new FakeScreens(log);
             timer = new FakeTimer();
-            flow = new LoadingToGameFlow(session, scenes, screens, timer,
-                new SceneFlowSettings("Loading", "Game", FailedMessage, "Lỗi tải: {0}", TimeSpan.FromSeconds(1)),
-                errors.Add);
+            switcher = new SceneSwitcher("Loading", scenes, screens, timer, Settings(), flowLog);
+        }
+
+        private static SceneFlowSettings Settings()
+        {
+            return new SceneFlowSettings("Loading", "Game", FailedMessage, "Lỗi tải: {0}", MinTime, SlowTime);
+        }
+
+        private bool RequestGame()
+        {
+            return switcher.Request("Game", session.EndAsync);
+        }
+
+        // --- One switch: steps and cover (switch-rules) ---
+
+        [Test]
+        public void ASwitch_ShowsTheCover_EndsTheOldScene_LoadsTheNewOne_ThenRemovesTheCoverOnceItRuns()
+        {
+            Assert.That(RequestGame(), Is.True);
+            Assert.That(log, Is.EqualTo(new[] { "screen shown", "end session", "load Game" }));
+
+            scenes.Gate.Open();
+            timer.Elapse(MinTime);
+
+            Assert.That(log, Is.EqualTo(new[] { "screen shown", "end session", "load Game", "screen closed" }));
+            Assert.That(switcher.CurrentScene, Is.EqualTo("Game"));
+            Assert.That(switcher.IsSwitching, Is.False);
         }
 
         [Test]
-        public void WhenOneGameSceneFeatureFailsToLoad_TheErrorNamesThatFeature()
+        public void TheCover_ShowsAtOnce_AndStaysUntilTheNewSceneHasRun()
         {
-            flow.Run();
+            RequestGame();
+
+            Assert.That(screens.Screen, Is.Not.Null, "the cover must show in the same frame as the request");
+            Assert.That(screens.Screen.Progress, Is.EqualTo(0f));
+
+            timer.Elapse(MinTime);
+            Assert.That(screens.Screen.Closed, Is.False, "the new scene has not run yet");
+
+            scenes.Gate.Open();
+            Assert.That(screens.Screen.Closed, Is.True);
+        }
+
+        [Test]
+        public void WhenEndingTheOldSceneThrows_TheErrorIsLogged_AndTheNewSceneStillLoads()
+        {
+            switcher.Request("Game", () => throw new InvalidOperationException("Wallet could not let go"));
+
+            Assert.That(flowLog.Exceptions, Has.Count.EqualTo(1));
+            Assert.That(log, Has.Member("load Game"));
+        }
+
+        // --- Refused requests (switch-rules) ---
+
+        [Test]
+        public void ARequestForAnUnknownScene_IsRefused_WithAnErrorNamingIt_AndTheCurrentSceneKeepsRunning()
+        {
+            var accepted = switcher.Request("Shop", session.EndAsync);
+
+            Assert.That(accepted, Is.False);
+            Assert.That(flowLog.Errors, Has.Count.EqualTo(1));
+            Assert.That(flowLog.Errors[0], Does.Contain("'Shop'"));
+            Assert.That(log, Is.Empty, "no cover, no session end, no load");
+            Assert.That(switcher.CurrentScene, Is.EqualTo("Loading"));
+        }
+
+        [Test]
+        public void ARequestWhileASwitchIsGoing_IsIgnored_WithAWarning_AndNotQueued()
+        {
+            RequestGame();
+            log.Clear();
+
+            var second = switcher.Request("Loading", session.EndAsync);
+
+            Assert.That(second, Is.False);
+            Assert.That(flowLog.Warnings, Has.Count.EqualTo(1));
+            Assert.That(log, Is.Empty);
+
+            scenes.Gate.Open();
+            timer.Elapse(MinTime);
+            Assert.That(log, Is.EqualTo(new[] { "screen closed" }), "the ignored request must not run afterwards");
+        }
+
+        [Test]
+        public void TwoRequestsInTheSameFrame_OnlyTheFirstIsTaken()
+        {
+            var first = RequestGame();
+            var second = RequestGame();
+
+            Assert.That(first, Is.True);
+            Assert.That(second, Is.False);
+            Assert.That(log.FindAll(line => line == "load Game"), Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void ARequestForTheSceneAlreadyRunning_IsIgnored_WithoutReloading()
+        {
+            var accepted = switcher.Request("Loading", session.EndAsync);
+
+            Assert.That(accepted, Is.False);
+            Assert.That(log, Is.Empty);
+            Assert.That(flowLog.Errors, Is.Empty);
+        }
+
+        [Test]
+        public void OnceASwitchHasEnded_ANewRequestIsTaken()
+        {
+            RequestGame();
+            scenes.Gate.Open();
+            timer.Elapse(MinTime);
+
+            Assert.That(switcher.Request("Loading", session.EndAsync), Is.True);
+        }
+
+        // --- Failure ---
+
+        [Test]
+        public void WhenOneFeatureOfTheNewSceneFailsToLoad_TheCoverStays_WithAnErrorNamingThatFeature()
+        {
+            RequestGame();
 
             progress.Fail("Wallet");
             scenes.Gate.Fail();
+            timer.Elapse(MinTime);
 
             Assert.That(screens.Screen.Error, Is.EqualTo("Lỗi tải: Wallet"));
+            Assert.That(screens.Screen.Closed, Is.False);
+            Assert.That(switcher.IsSwitching, Is.True, "no step after the failure, no new switch");
+            Assert.That(log, Has.None.EqualTo("load Loading"), "there is no way back to the old scene");
         }
 
         [Test]
         public void WhenTheFailedFeatureIsNamedJustAfterTheFailure_TheErrorStillNamesIt()
         {
-            flow.Run();
+            RequestGame();
 
             scenes.Gate.Fail();
             progress.Fail("Wallet");
@@ -62,9 +180,46 @@ namespace Game.SceneFlow.Tests
         }
 
         [Test]
-        public void TheLoadingBar_StartsEmpty_AndFillsAsGameSceneFeaturesFinishLoading()
+        public void WhenTheNewSceneFailsWithoutNamingAFeature_ThePlayerSeesTheGeneralError()
         {
-            flow.Run();
+            RequestGame();
+
+            scenes.Gate.Fail();
+
+            Assert.That(screens.Screen.Error, Is.EqualTo(FailedMessage));
+        }
+
+        [Test]
+        public void WhenTheNewSceneHasNoGate_ThePlayerSeesTheError_AndTheCauseIsLogged()
+        {
+            scenes.Gate = null;
+
+            RequestGame();
+
+            Assert.That(screens.Screen.Error, Is.EqualTo(FailedMessage));
+            Assert.That(flowLog.Exceptions, Has.Count.EqualTo(1));
+            Assert.That(flowLog.Exceptions[0].Message, Does.Contain("'Game'").And.Contain("gate"));
+            Assert.That(screens.Screen.Closed, Is.False);
+        }
+
+        [Test]
+        public void WhenTheNewSceneCannotBeLoaded_ThePlayerSeesTheError_AndTheCauseIsLogged()
+        {
+            scenes.LoadError = new InvalidOperationException("not in Build Settings");
+
+            RequestGame();
+
+            Assert.That(screens.Screen.Error, Is.EqualTo(FailedMessage));
+            Assert.That(flowLog.Exceptions, Has.Count.EqualTo(1));
+            Assert.That(flowLog.Exceptions[0].Message, Does.Contain("not in Build Settings"));
+        }
+
+        // --- Progress bar ---
+
+        [Test]
+        public void TheBar_StartsEmpty_AndFillsAsTheNewScenesFeaturesFinishLoading()
+        {
+            RequestGame();
             Assert.That(screens.Screen.Progress, Is.EqualTo(0f));
 
             progress.Load(1);
@@ -75,9 +230,9 @@ namespace Game.SceneFlow.Tests
         }
 
         [Test]
-        public void TheLoadingBar_StopsWhereItWas_WhenTheGameSceneFails()
+        public void TheBar_StopsWhereItWas_WhenTheNewSceneFails()
         {
-            flow.Run();
+            RequestGame();
             progress.Load(2);
 
             scenes.Gate.Fail();
@@ -86,133 +241,97 @@ namespace Game.SceneFlow.Tests
             Assert.That(screens.Screen.Progress, Is.EqualTo(0.5f));
         }
 
+        // --- Timings (boot-loading) ---
+
         [Test]
-        public void TheLoadingScreenStaysForItsMinimumTime_EvenWhenTheGameSceneIsPlayableSooner()
+        public void TheLoadingScreenStaysForItsMinimumTime_EvenWhenTheGameSceneIsReadySooner()
         {
-            timer.Pending = true;
-            flow.Run();
+            RequestGame();
 
             scenes.Gate.Open();
 
-            Assert.That(timer.Requested, Is.EqualTo(TimeSpan.FromSeconds(1)));
-            Assert.That(session.Ended, Is.False);
-            Assert.That(log, Has.None.EqualTo("unload Loading"));
-
-            timer.Elapse();
-
-            Assert.That(log, Has.Member("unload Loading"));
-        }
-
-        [Test]
-        public void TheMinimumTime_CountsFromWhenTheLoadingScreenShows()
-        {
-            timer.Pending = true;
-            flow.Run();
-            timer.Elapse();
-
-            scenes.Gate.Open();
-
-            Assert.That(log, Has.Member("unload Loading"));
-        }
-
-        [Test]
-        public void WhenTheLoadingSceneRuns_TheLoadingScreenShows_AndTheGameSceneLoadsOnTop()
-        {
-            flow.Run();
-
-            Assert.That(log, Is.EqualTo(new[] { "screen shown", "load Game" }));
-        }
-
-        [Test]
-        public void TheLoadingScreenStays_UntilTheGameSceneIsPlayable()
-        {
-            flow.Run();
-
-            Assert.That(session.Ended, Is.False);
-            Assert.That(log, Has.None.EqualTo("unload Loading"));
+            Assert.That(timer.Requested, Has.Member(MinTime));
             Assert.That(screens.Screen.Closed, Is.False);
-        }
 
-        [Test]
-        public void WhenTheGameSceneIsPlayable_TheLoadingSessionEnds_ThenTheLoadingSceneIsRemoved()
-        {
-            flow.Run();
-            log.Clear();
-
-            scenes.Gate.Open();
-
-            Assert.That(log, Is.EqualTo(new[] { "end session", "unload Loading" }));
-            Assert.That(errors, Is.Empty);
-        }
-
-        [Test]
-        public void WhenTheGameSceneWasPlayableBeforeAnyoneAsked_TheSwitchStillHappens()
-        {
-            scenes.Gate.Open();
-
-            flow.Run();
-
-            Assert.That(log, Has.Member("unload Loading"));
-        }
-
-        [Test]
-        public void WhenTheGameSceneFails_ThePlayerSeesTheError_AndTheLoadingSceneStays()
-        {
-            flow.Run();
-
-            scenes.Gate.Fail();
-
-            Assert.That(screens.Screen.Error, Is.EqualTo(FailedMessage));
-            Assert.That(session.Ended, Is.False);
-            Assert.That(log, Has.None.EqualTo("unload Loading"));
-        }
-
-        [Test]
-        public void WhenTheGameSceneHasNoGate_ThePlayerSeesTheError_AndTheCauseIsReported()
-        {
-            scenes.Gate = null;
-
-            flow.Run();
-
-            Assert.That(screens.Screen.Error, Is.EqualTo(FailedMessage));
-            Assert.That(errors, Has.Count.EqualTo(1));
-            Assert.That(errors[0].Message, Does.Contain("'Game'").And.Contain("gate"));
-            Assert.That(session.Ended, Is.False);
-        }
-
-        [Test]
-        public void WhenTheGameSceneCannotBeLoaded_ThePlayerSeesTheError_AndTheCauseIsReported()
-        {
-            scenes.LoadError = new InvalidOperationException("not in Build Settings");
-
-            flow.Run();
-
-            Assert.That(screens.Screen.Error, Is.EqualTo(FailedMessage));
-            Assert.That(errors, Has.Count.EqualTo(1));
-            Assert.That(errors[0].Message, Does.Contain("not in Build Settings"));
-        }
-
-        [Test]
-        public void WhenTheLoadingSessionEnds_TheLoadingScreenCloses()
-        {
-            flow.Run();
-
-            flow.DisposeAsync().Forget();
+            timer.Elapse(MinTime);
 
             Assert.That(screens.Screen.Closed, Is.True);
         }
 
         [Test]
-        public void WhenTheLoadingSceneGoesAwayFirst_ALateAnswerFromTheGameSceneChangesNothing()
+        public void TheMinimumTime_CountsFromWhenTheLoadingScreenShows()
         {
-            flow.Run();
-            flow.DisposeAsync().Forget();
-            log.Clear();
+            RequestGame();
+            timer.Elapse(MinTime);
 
             scenes.Gate.Open();
 
-            Assert.That(log, Is.Empty);
+            Assert.That(screens.Screen.Closed, Is.True, "loading took longer than the minimum: no extra wait");
         }
+
+        [Test]
+        public void WhenTheGameSceneWasReadyBeforeAnyoneAsked_TheSwitchStillEnds()
+        {
+            scenes.Gate.Open();
+
+            RequestGame();
+            timer.Elapse(MinTime);
+
+            Assert.That(screens.Screen.Closed, Is.True);
+        }
+
+        [Test]
+        public void ASwitchStillGoingAfterFiveSeconds_LogsAPerformanceWarning_AndKeepsGoing()
+        {
+            RequestGame();
+            timer.Elapse(MinTime);
+
+            timer.Elapse(SlowTime);
+
+            Assert.That(flowLog.Warnings, Has.Count.EqualTo(1));
+            Assert.That(flowLog.Warnings[0], Does.Contain("'Game'"));
+            Assert.That(screens.Screen.Error, Is.Null, "slow is not an error");
+
+            scenes.Gate.Open();
+            Assert.That(screens.Screen.Closed, Is.True);
+        }
+
+        [Test]
+        public void ASwitchDoneWithinFiveSeconds_LogsNoWarning()
+        {
+            RequestGame();
+            scenes.Gate.Open();
+            timer.Elapse(MinTime);
+
+            timer.Elapse(SlowTime);
+
+            Assert.That(flowLog.Warnings, Is.Empty);
+        }
+
+        // --- Loading scene participant ---
+
+        [Test]
+        public void WhenTheLoadingSceneRuns_ItAsksToSwitchToTheGameScene()
+        {
+            var flow = new LoadingToGameFlow(session, switcher, "Game");
+
+            flow.Run();
+
+            Assert.That(log, Is.EqualTo(new[] { "screen shown", "end session", "load Game" }));
+        }
+
+        [Test]
+        public void WhenTheLoadingSessionEnds_TheLoadingScreenStays_BecauseItIsTheSwitchCover()
+        {
+            var flow = new LoadingToGameFlow(session, switcher, "Game");
+            flow.Run();
+
+            flow.DisposeAsync().Forget();
+
+            Assert.That(screens.Screen.Closed, Is.False);
+        }
+
+        // --- Game scene side ---
 
         [Test]
         public void GameScene_BecomesTheActiveScene_BeforeAnyFeatureOpensAView()
@@ -262,10 +381,23 @@ namespace Game.SceneFlow.Tests
         }
 
         [Test]
+        public void GameScene_StopsListening_WhenItsSessionEnds()
+        {
+            var gate = new SceneGate(progress);
+            var signal = new GameReadySignal(session, gate, scenes, "Game");
+
+            signal.DisposeAsync().Forget();
+            session.Raise(SessionState.Failed);
+
+            Assert.That(gate.WaitAsync().Status, Is.EqualTo(UniTaskStatus.Pending));
+        }
+
+        // --- Cheat (feature-scene-flow/cheat) ---
+
+        [Test]
         public void CheatLoadError_ShowsTheLoadingScreenStoppedAt40Percent_WithTheErrorNamingWallet()
         {
-            var cheat = new LoadErrorCheat(screens,
-                new SceneFlowSettings("Loading", "Game", FailedMessage, "Lỗi tải: {0}", TimeSpan.FromSeconds(1)));
+            var cheat = new LoadErrorCheat(screens, Settings());
 
             cheat.Run();
 
@@ -277,8 +409,7 @@ namespace Game.SceneFlow.Tests
         [Test]
         public void CheatLoadError_ClosesItsScreen_WhenTheLoadingSessionEnds()
         {
-            var cheat = new LoadErrorCheat(screens,
-                new SceneFlowSettings("Loading", "Game", FailedMessage, "Lỗi tải: {0}", TimeSpan.FromSeconds(1)));
+            var cheat = new LoadErrorCheat(screens, Settings());
             cheat.Run();
 
             cheat.DisposeAsync().Forget();
@@ -295,6 +426,70 @@ namespace Game.SceneFlow.Tests
             Assert.That(installer.FindProperty("cheat").intValue, Is.EqualTo((int)SceneFlowCheatState.None));
         }
 
+        // --- Assets ---
+
+        [Test]
+        public void ConfigAsset_HoldsTheDesignTimings_AndBothScenes()
+        {
+            var config = new SerializedObject(AssetDatabase.LoadAssetAtPath<SceneFlowConfig>(
+                "Assets/Features/SceneFlow/FeatureAssets/Private/SceneFlowConfig.asset"));
+
+            Assert.That(config.FindProperty("loadingScene").stringValue, Is.EqualTo("Loading"));
+            Assert.That(config.FindProperty("gameScene").stringValue, Is.EqualTo("Game"));
+            Assert.That(config.FindProperty("minLoadingScreenSeconds").floatValue, Is.EqualTo(1f));
+            Assert.That(config.FindProperty("slowSwitchWarningSeconds").floatValue, Is.EqualTo(5f));
+            Assert.That(config.FindProperty("featureFailedMessage").stringValue, Does.Contain("{0}"));
+        }
+
+        [Test]
+        public void LoadingScreenPrefab_ShowsOnlyTheGameNameAndTheBar_WithNoButton()
+        {
+            var instance = InstantiateLoadingScreen();
+            try
+            {
+                Assert.That(instance.transform.Find("Title"), Is.Not.Null, "LoadingScreen.prefab has no child named Title");
+                Assert.That(Serialized(instance.transform.Find("Title"), "Text").FindProperty("m_Text").stringValue,
+                    Is.Not.Empty, "the game name");
+                Assert.That(instance.transform.Find("ProgressBar"), Is.Not.Null);
+                Assert.That(instance.transform.Find("Error").gameObject.activeSelf, Is.False,
+                    "no error should show before one happens");
+
+                foreach (var component in instance.GetComponentsInChildren<UnityEngine.Component>(true))
+                {
+                    if (component == null) continue; // missing script: not a button either
+                    Assert.That(component.GetType().Name, Is.Not.EqualTo("Button"), $"{component.name} is a button");
+                }
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(instance);
+            }
+        }
+
+        [Test]
+        public void LoadingScreenPrefab_CoversTheWholeScreen_AndCatchesEveryTap()
+        {
+            var instance = InstantiateLoadingScreen();
+            try
+            {
+                var background = instance.transform.Find("Background");
+                Assert.That(background, Is.Not.Null, "LoadingScreen.prefab has no Background");
+                Assert.That(instance.GetComponent("GraphicRaycaster"), Is.Not.Null, "taps must reach the cover");
+
+                var rect = new SerializedObject(background.GetComponent<UnityEngine.RectTransform>());
+                Assert.That(rect.FindProperty("m_AnchorMin").vector2Value, Is.EqualTo(UnityEngine.Vector2.zero));
+                Assert.That(rect.FindProperty("m_AnchorMax").vector2Value, Is.EqualTo(UnityEngine.Vector2.one));
+
+                var image = Serialized(background, "Image");
+                Assert.That(image.FindProperty("m_Color").colorValue.a, Is.EqualTo(1f), "the cover is not see-through");
+                Assert.That(image.FindProperty("m_RaycastTarget").boolValue, Is.True, "taps must stop on the cover");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(instance);
+            }
+        }
+
         [Test]
         public void LoadingScreenPrefab_WhenAnErrorIsShown_KeepsTheGameNameAndBar_AndShowsTheError()
         {
@@ -307,7 +502,6 @@ namespace Game.SceneFlow.Tests
                 Assert.That(title, Is.Not.Null, "LoadingScreen.prefab has no child named Title");
                 Assert.That(bar, Is.Not.Null, "LoadingScreen.prefab has no child named ProgressBar");
                 Assert.That(error, Is.Not.Null, "LoadingScreen.prefab has no child named Error");
-                Assert.That(error.gameObject.activeSelf, Is.False, "no error should show before one happens");
 
                 instance.GetComponentInChildren<ILoadingScreen>(true).ShowError(FailedMessage);
 
@@ -413,8 +607,6 @@ namespace Game.SceneFlow.Tests
 
             public readonly List<ISessionParticipant> Joined = new List<ISessionParticipant>();
 
-            public bool Ended { get; private set; }
-
             public SessionState State { get; private set; } = SessionState.Init;
 
             public event Action<SessionState> StateChanged;
@@ -426,7 +618,6 @@ namespace Game.SceneFlow.Tests
 
             public UniTask EndAsync()
             {
-                Ended = true;
                 log.Add("end session");
                 return UniTask.CompletedTask;
             }
@@ -450,16 +641,10 @@ namespace Game.SceneFlow.Tests
             public SceneGate Gate;
             public Exception LoadError;
 
-            public UniTask LoadAdditiveAsync(string sceneName)
+            public UniTask LoadReplacingAsync(string sceneName)
             {
                 log.Add("load " + sceneName);
                 if (LoadError != null) throw LoadError;
-                return UniTask.CompletedTask;
-            }
-
-            public UniTask UnloadAsync(string sceneName)
-            {
-                log.Add("unload " + sceneName);
                 return UniTask.CompletedTask;
             }
 
@@ -471,6 +656,28 @@ namespace Game.SceneFlow.Tests
             public SceneGate FindGate()
             {
                 return Gate;
+            }
+        }
+
+        private sealed class FakeLog : ISceneFlowLog
+        {
+            public readonly List<string> Warnings = new List<string>();
+            public readonly List<string> Errors = new List<string>();
+            public readonly List<Exception> Exceptions = new List<Exception>();
+
+            public void Warning(string message)
+            {
+                Warnings.Add(message);
+            }
+
+            public void Error(string message)
+            {
+                Errors.Add(message);
+            }
+
+            public void Exception(Exception exception)
+            {
+                Exceptions.Add(exception);
             }
         }
 
@@ -488,7 +695,7 @@ namespace Game.SceneFlow.Tests
             public ILoadingScreen Create()
             {
                 log.Add("screen shown");
-                Screen = new FakeScreen();
+                Screen = new FakeScreen(log);
                 return Screen;
             }
         }
@@ -521,29 +728,46 @@ namespace Game.SceneFlow.Tests
             }
         }
 
+        /// <summary>Every delay waits until the test elapses that length by hand.</summary>
         private sealed class FakeTimer : ITimer
         {
-            private readonly UniTaskCompletionSource elapsed = new UniTaskCompletionSource();
+            private readonly Dictionary<TimeSpan, UniTaskCompletionSource> delays =
+                new Dictionary<TimeSpan, UniTaskCompletionSource>();
 
-            /// <summary>False: every delay is already over. True: delays wait for Elapse.</summary>
-            public bool Pending;
-
-            public TimeSpan? Requested { get; private set; }
+            public readonly List<TimeSpan> Requested = new List<TimeSpan>();
 
             public UniTask DelayAsync(TimeSpan delay)
             {
-                Requested = delay;
-                return Pending ? elapsed.Task : UniTask.CompletedTask;
+                Requested.Add(delay);
+                return Source(delay).Task;
             }
 
-            public void Elapse()
+            public void Elapse(TimeSpan delay)
             {
-                elapsed.TrySetResult();
+                Source(delay).TrySetResult();
+            }
+
+            private UniTaskCompletionSource Source(TimeSpan delay)
+            {
+                if (!delays.TryGetValue(delay, out var source))
+                {
+                    source = new UniTaskCompletionSource();
+                    delays.Add(delay, source);
+                }
+
+                return source;
             }
         }
 
         private sealed class FakeScreen : ILoadingScreen
         {
+            private readonly List<string> log;
+
+            public FakeScreen(List<string> log)
+            {
+                this.log = log;
+            }
+
             public string Error { get; private set; }
 
             public bool Closed { get; private set; }
@@ -563,6 +787,7 @@ namespace Game.SceneFlow.Tests
             public void Close()
             {
                 Closed = true;
+                log.Add("screen closed");
             }
         }
     }

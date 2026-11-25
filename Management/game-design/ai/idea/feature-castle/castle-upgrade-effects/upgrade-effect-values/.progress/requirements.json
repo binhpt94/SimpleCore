@@ -1,0 +1,252 @@
+{
+ "items": {
+  "hp-per-level": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleBodyTests.Health_upgrade_adds_to_max_and_current_without_healing_what_was_lost",
+    "CastleBodyTests.Health_level_five_gives_1600_max_health"
+   ],
+   "play": "",
+   "hash": "549e5623b9f8",
+   "text": "Mỗi cấp máu cộng 150 vào máu tối đa và 150 vào máu hiện tại\nCấp n có máu tối đa = 1000 + 150×(n-1). Không hồi phần đã mất: thành đang 400/1000 mua 1 cấp thành 550/1150.",
+   "title": "Mỗi cấp máu cộng 150 vào máu tối đa và 150 vào máu hiện tại",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:35"
+  },
+  "attack-per-level": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleAutoShotTests.Attack_level_adds_a_fifth_of_the_base_damage_per_level"
+   ],
+   "play": "",
+   "hash": "f324237221d6",
+   "text": "Mỗi cấp sức đánh cộng 2 sát thương vào mỗi phát tự bắn (20% của 10)\nCấp n có sát thương = 10 × (1 + 0.2×(n-1)). Tốc độ bắn 1.0s và tầm 6u không đổi.",
+   "title": "Mỗi cấp sức đánh cộng 2 sát thương vào mỗi phát tự bắn (20% của 10)",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:36"
+  },
+  "skill-per-level": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSkillsTests.Skills_level_strengthens_all_three_effects_by_a_fifth_per_level"
+   ],
+   "play": "",
+   "hash": "a628548a0f1a",
+   "text": "Mỗi cấp kĩ năng cộng 20% hiệu lực lv1 cho cả ba: Sấm sét +16 máu, Băng giá +1s chậm, Cổ vũ +6% máu tối đa\nCấp n: Sấm sét 80×(1+0.2×(n-1)) máu; Băng giá chậm 5×(1+0.2×(n-1)) giây, mức chậm vẫn 50%; Cổ vũ hồi 30%×(1+0.2×(n-1)) máu tối đa. Hồi chiêu không đổi.",
+   "title": "Mỗi cấp kĩ năng cộng 20% hiệu lực lv1 cho cả ba: Sấm sét +16 máu, Băng giá +1s chậm, Cổ vũ +6% máu tối đa",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:37"
+  },
+  "no-cap": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleUpgradesTests.Levels_have_no_cap",
+    "CastleUpgradesTests.Every_item_starts_a_run_at_level_one",
+    "CastleSessionTests.New_run_puts_every_castle_level_back_to_one"
+   ],
+   "play": "",
+   "hash": "d6f7b937ee8d",
+   "text": "Ba mục không có cấp tối đa, cấp bắt đầu là 1 mỗi lượt\nGiá tăng theo cấp (`feature-upgrade`) tự giới hạn số lần mua. Cấp về 1 khi lượt mới bắt đầu (`feature-run`).",
+   "title": "Ba mục không có cấp tối đa, cấp bắt đầu là 1 mỗi lượt",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:39"
+  },
+  "edge-mua-nang-ki-nang-khi-bang-gia-dang": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSkillsTests.Skills_level_bought_while_on_cooldown_keeps_the_cooldown_and_strengthens_the_next_use"
+   ],
+   "play": "",
+   "hash": "539f31fdb02c",
+   "text": "Mua nâng kĩ năng khi Băng giá đang làm chậm quái: quái đang chậm giữ thời gian cũ; lần bấm sau mới dùng thời gian mới.",
+   "title": "Mua nâng kĩ năng khi Băng giá đang làm chậm quái",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:40"
+  },
+  "edge-mua-nang-ki-nang-khi-ki-nang-dang": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSkillsTests.Skills_level_bought_while_on_cooldown_keeps_the_cooldown_and_strengthens_the_next_use"
+   ],
+   "play": "",
+   "hash": "ab5562bd8350",
+   "text": "Mua nâng kĩ năng khi kĩ năng đang hồi: hồi chiêu không đổi; lần bấm sau mạnh hơn.",
+   "title": "Mua nâng kĩ năng khi kĩ năng đang hồi",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:46"
+  },
+  "edge-mua-nang-suc-danh-khi-hinh-dan-dang": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleAutoShotTests.Attack_bought_after_a_shot_left_only_strengthens_the_next_shot"
+   ],
+   "play": "",
+   "hash": "e08349d363f8",
+   "text": "Mua nâng sức đánh khi hình đạn đang bay: phát đó đã tính sát thương lúc bắn; phát sau mới dùng số mới.",
+   "title": "Mua nâng sức đánh khi hình đạn đang bay",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:47"
+  },
+  "edge-mua-nang-mau-khi-thanh-con-1-mau": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleBodyTests.Health_level_bought_at_one_health_leaves_the_castle_at_151"
+   ],
+   "play": "",
+   "hash": "2e266aa21305",
+   "text": "Mua nâng máu khi thành còn 1 máu: thành thành 151 máu, máu tối đa +150.",
+   "title": "Mua nâng máu khi thành còn 1 máu",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:48"
+  },
+  "edge-co-vu-vuot-100-mau-toi-da-cap": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSkillsTests.Rally_at_skills_level_thirteen_asks_for_more_than_full_health_and_heroes_cap_it"
+   ],
+   "play": "",
+   "hash": "cce7a24a4302",
+   "text": "Cổ vũ vượt 100% máu tối đa (cấp ≥ 13): hero hồi tới đầy, không vượt.",
+   "title": "Cổ vũ vượt 100% máu tối đa (cấp ≥ 13)",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:50"
+  },
+  "edge-tam-dung-hoac-thanh-da-bi-pha": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleUpgradesTests.Fallen_castle_takes_no_level",
+    "CastleSessionTests.Fallen_castle_does_not_pop_on_a_level"
+   ],
+   "play": "",
+   "hash": "28fe783d5189",
+   "text": "Tạm dừng hoặc thành đã bị phá: không nhận lệnh mua (`feature-upgrade` chặn).",
+   "title": "Tạm dừng hoặc thành đã bị phá",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:51"
+  },
+  "edge-khong-co-hoan-tien-khong-co-ha-cap": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleUpgradesTests.A_lower_or_same_level_never_takes_strength_away"
+   ],
+   "play": "",
+   "hash": "f20d73875ed8",
+   "text": "Không có hoàn tiền, không có hạ cấp.",
+   "title": "Không có hoàn tiền, không có hạ cấp.",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:52"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleConfigTests.Upgrade_numbers_match_the_design",
+    "CastleSessionTests.Buying_a_castle_level_pops_the_castle_for_a_moment",
+    "CastleUpgradesTests.Items_level_independently"
+   ],
+   "play": "",
+   "hash": "754e4928b4af",
+   "text": "## Làm gì\n- Giữ cấp hiện tại của ba mục: máu, sức đánh, kĩ năng (bắt đầu lượt ở cấp 1).\n- Khi `feature-upgrade` báo một mục vừa mua xong: tăng cấp mục đó lên 1 và áp hiệu lực ngay.\n  - Máu: cộng 150 vào máu tối đa và 150 vào máu hiện tại (`feature-castle/castle-core/castle-body-values`).\n  - Sức đánh: tính lại sát thương đòn tự bắn (`feature-castle/castle-attack/auto-shot-values`).\n  - Kĩ năng: tính lại hiệu lực cả ba kĩ năng (`feature-castle/castle-skills/skill-values`).\n- Cho `feature-upgrade` và `feature-hud-upgrade` đọc cấp hiện tại để tính và hiện giá.\n\n## Thông số\n| Mục | Công thức ở cấp n | Đơn vị | Ví dụ cấp 1 / 2 / 5 | Lí do |\n|---|---|---|---|---|\n| Máu tối đa | 1000 + 150×(n-1) | máu | 1000 / 1150 / 1600 | 150 ≈ 15% máu đầu, thấy rõ trên thanh máu |\n| Sát thương tự bắn | 10 × (1 + 0.2×(n-1)) | máu/phát | 10 / 12 / 18 | Bộ số chung |\n| Sấm sét | 80 × (1 + 0.2×(n-1)) | máu/quái | 80 / 96 / 144 | Bộ số chung |\n| Băng giá thời gian chậm | 5 × (1 + 0.2×(n-1)) | s | 5 / 6 / 9 | Bộ số chung |\n| Cổ vũ lượng hồi | 30% × (1 + 0.2×(n-1)) | % máu tối đa của hero | 30% / 36% / 54% | Bộ số chung |\n| Hồi chiêu ba kĩ năng | không đổi (20s / 35s / 25s) | s | | Luật vòng 3 |\n\nGiá tham khảo (của `feature-upgrade`, dự kiến): máu và sức đánh 40×1.4^(n-1), kĩ năng 60×1.5^(n-1), làm tròn lên. Cấp máu 2 giá 40, cấp 5 cần tổng 40+56+79+110=285.\n\nCân bằng dự kiến: Băng giá cấp 31 thì chậm 35s bằng hồi chiêu (chậm liên tục); giá cấp 31 ≈ 60×1.5^30, không thể đạt trong một lượt bình thường.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Mục mua được | Máu, Sức đánh, Kĩ năng | như IDEA | cả ba |\n| Máu mỗi cấp | +150 | như IDEA | theo số đã chỉnh sau chơi thử |\n| Sức đánh mỗi cấp | +20% lv1 | như IDEA | theo số đã chỉnh |\n| Kĩ năng mỗi cấp | +20% hiệu lực lv1 | như IDEA | theo số đã chỉnh |\n| Phản hồi khi lên cấp | thành phóng to 1.1 lần rồi về cỡ cũ trong 0.3s | như IDEA | hiệu ứng riêng mỗi mục, âm thanh |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:53"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:40:35",
+   "id": "hp-per-level",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleBodyTests.Health_upgrade_adds_to_max_and_current_without_healing_what_was_lost, CastleBodyTests.Health_level_five_gives_1600_max_health"
+  },
+  {
+   "at": "2026-11-25 11:40:36",
+   "id": "attack-per-level",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.Attack_level_adds_a_fifth_of_the_base_damage_per_level"
+  },
+  {
+   "at": "2026-11-25 11:40:37",
+   "id": "skill-per-level",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSkillsTests.Skills_level_strengthens_all_three_effects_by_a_fifth_per_level"
+  },
+  {
+   "at": "2026-11-25 11:40:39",
+   "id": "no-cap",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleUpgradesTests.Levels_have_no_cap, CastleUpgradesTests.Every_item_starts_a_run_at_level_one, CastleSessionTests.New_run_puts_every_castle_level_back_to_one"
+  },
+  {
+   "at": "2026-11-25 11:40:40",
+   "id": "edge-mua-nang-ki-nang-khi-bang-gia-dang",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSkillsTests.Skills_level_bought_while_on_cooldown_keeps_the_cooldown_and_strengthens_the_next_use"
+  },
+  {
+   "at": "2026-11-25 11:40:46",
+   "id": "edge-mua-nang-ki-nang-khi-ki-nang-dang",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSkillsTests.Skills_level_bought_while_on_cooldown_keeps_the_cooldown_and_strengthens_the_next_use"
+  },
+  {
+   "at": "2026-11-25 11:40:47",
+   "id": "edge-mua-nang-suc-danh-khi-hinh-dan-dang",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.Attack_bought_after_a_shot_left_only_strengthens_the_next_shot"
+  },
+  {
+   "at": "2026-11-25 11:40:48",
+   "id": "edge-mua-nang-mau-khi-thanh-con-1-mau",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleBodyTests.Health_level_bought_at_one_health_leaves_the_castle_at_151"
+  },
+  {
+   "at": "2026-11-25 11:40:50",
+   "id": "edge-co-vu-vuot-100-mau-toi-da-cap",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSkillsTests.Rally_at_skills_level_thirteen_asks_for_more_than_full_health_and_heroes_cap_it"
+  },
+  {
+   "at": "2026-11-25 11:40:51",
+   "id": "edge-tam-dung-hoac-thanh-da-bi-pha",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleUpgradesTests.Fallen_castle_takes_no_level, CastleSessionTests.Fallen_castle_does_not_pop_on_a_level"
+  },
+  {
+   "at": "2026-11-25 11:40:52",
+   "id": "edge-khong-co-hoan-tien-khong-co-ha-cap",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleUpgradesTests.A_lower_or_same_level_never_takes_strength_away"
+  },
+  {
+   "at": "2026-11-25 11:40:53",
+   "id": "params",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Upgrade_numbers_match_the_design, CastleSessionTests.Buying_a_castle_level_pops_the_castle_for_a_moment, CastleUpgradesTests.Items_level_independently"
+  }
+ ]
+}

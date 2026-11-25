@@ -1,0 +1,296 @@
+{
+ "items": {
+  "distance-gap": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.A_hero_stops_once_the_enemy_is_in_range_and_hits_at_once_then_every_attack_period",
+    "HeroEdgeCaseTests.A_hero_overlapping_an_enemy_hits_it_without_stepping_back",
+    "HeroEdgeCaseTests.An_archer_hit_takes_health_at_once_at_full_range"
+   ],
+   "play": "",
+   "hash": "037b868bd5a9",
+   "text": "Khoảng cách giữa hai bên là khoảng trống theo trục x giữa hai mép hộp, tính bằng u; chồng lên nhau thì là 0u\nMọi tầm đánh (hero, quái, thành) và vùng kĩ năng dùng cách đo này. Hiệp sĩ tầm 1.2u đánh được quái khi mép hai hộp cách nhau không quá 1.2u. Đã loại: đo từ tâm (unit to như Trùm 3u sẽ đánh hụt).",
+   "title": "Khoảng cách giữa hai bên là khoảng trống theo trục x giữa hai mép hộp, tính bằng u; chồng lên nhau thì là 0u",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:04"
+  },
+  "attack-interval": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.A_hero_stops_once_the_enemy_is_in_range_and_hits_at_once_then_every_attack_period"
+   ],
+   "play": "",
+   "hash": "e7627cd6e3e0",
+   "text": "\"Giây mỗi đòn\" là thời gian chờ giữa hai đòn; đòn đầu ra ngay khi có mục tiêu trong tầm nếu đã chờ đủ\nBộ đếm chạy cả lúc đi. Ví dụ Cung thủ 0.8s: đòn 1 ở giây 0, đòn 2 ở giây 0.8. Áp cho hero, quái và thành.",
+   "title": "\"Giây mỗi đòn\" là thời gian chờ giữa hai đòn; đòn đầu ra ngay khi có mục tiêu trong tầm nếu đã chờ đủ",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:04"
+  },
+  "damage-instant": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.An_archer_hit_takes_health_at_once_at_full_range",
+    "HeroSquadTests.A_single_target_hero_hits_only_its_target"
+   ],
+   "play": "",
+   "hash": "4760dc4838a4",
+   "text": "Sát thương trừ ngay lúc ra đòn, đúng bằng sức đánh; hình đạn bay 0.15s chỉ để nhìn\nKhông trượt, không giáp. Đòn đánh xa không bay thật, nên không có đạn trúng quái đã chết.",
+   "title": "Sát thương trừ ngay lúc ra đòn, đúng bằng sức đánh; hình đạn bay 0.15s chỉ để nhìn",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:05"
+  },
+  "level-formula": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.Level_5_knight_has_the_designed_stats",
+    "HeroSquadTests.Level_10_archer_has_the_designed_stats_and_range_and_speed_stay",
+    "HeroSquadTests.Attack_speed_stops_rising_at_level_21_while_health_and_damage_keep_rising"
+   ],
+   "play": "",
+   "hash": "d93da35b2829",
+   "text": "Cấp n: máu và sát thương = lv1 × (1 + 0.15×(n-1)); tốc độ đánh = lv1 × (1 + min(0.03×(n-1), 0.6))\nGiây mỗi đòn ở cấp n = giây mỗi đòn lv1 / (1 + min(0.03×(n-1), 0.6)). Hiệp sĩ cấp 5: 480 máu, 19.2 sát thương, 0.893s mỗi đòn. Tốc độ đánh chạm trần ở cấp 21. Tầm và tốc độ chạy không đổi.",
+   "title": "Cấp n: máu và sát thương = lv1 × (1 + 0.15×(n-1)); tốc độ đánh = lv1 × (1 + min(0.03×(n-1), 0.6))",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:07"
+  },
+  "level-hp-gain": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.Levelling_a_wounded_hero_adds_the_max_health_gained"
+   ],
+   "play": "",
+   "hash": "e972d66c8286",
+   "text": "Lên cấp khi đang đứng: máu hiện tại cộng đúng phần máu tối đa vừa tăng\nHiệp sĩ 100/300 lên cấp 2 thành 145/345. Lên cấp khi đang gục: hồi sinh với đầy máu của cấp mới.",
+   "title": "Lên cấp khi đang đứng: máu hiện tại cộng đúng phần máu tối đa vừa tăng",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:08"
+  },
+  "decimal-stats": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.A_hero_with_less_than_one_health_left_still_stands_and_numbers_stay_real",
+    "HeroSquadTests.A_hero_hit_to_zero_health_falls_and_enemies_stop_seeing_it"
+   ],
+   "play": "",
+   "hash": "5bfc643e1e74",
+   "text": "Máu và sát thương giữ số thực; máu hiện ra làm tròn lên, sát thương hiện ra làm tròn xuống\nCòn 0.4 máu thì hiện 1 và chưa gục; máu ≤ 0 mới là gục hay bị hạ.",
+   "title": "Máu và sát thương giữ số thực; máu hiện ra làm tròn lên, sát thương hiện ra làm tròn xuống",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:09"
+  },
+  "edge-hai-unit-chong-hinh": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.A_hero_overlapping_an_enemy_hits_it_without_stepping_back"
+   ],
+   "play": "",
+   "hash": "3a5959d15c31",
+   "text": "Hai unit chồng hình: khoảng cách 0, luôn trong tầm của nhau.",
+   "title": "Hai unit chồng hình",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:10"
+  },
+  "edge-len-cap-trong-luc-dang-cho-don": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.Levelling_while_waiting_for_the_next_hit_keeps_the_wait_then_uses_the_new_rhythm"
+   ],
+   "play": "",
+   "hash": "a57fec656569",
+   "text": "Lên cấp trong lúc đang chờ đòn: thời gian chờ còn lại không đổi; đòn sau dùng nhịp mới.",
+   "title": "Lên cấp trong lúc đang chờ đòn",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:11"
+  },
+  "edge-len-cap-khi-hero-dang-guc": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.A_hero_levelled_while_fallen_respawns_at_the_new_full_health",
+    "HeroEdgeCaseTests.Levelling_a_fallen_hero_raises_its_level_at_once_and_keeps_its_wait"
+   ],
+   "play": "",
+   "hash": "9d801a889f47",
+   "text": "Lên cấp khi hero đang gục: chỉ tăng cấp; lúc hồi sinh lấy máu tối đa của cấp mới (`feature-hero/hero-respawn/respawn-values`).",
+   "title": "Lên cấp khi hero đang gục",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:12"
+  },
+  "edge-mua-nhieu-cap-lien-tiep-trong-mot-khung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.Buying_levels_one_by_one_ends_the_same_as_one_jump",
+    "HeroParticipantTests.Buying_two_levels_in_one_frame_pops_once_per_level"
+   ],
+   "play": "",
+   "hash": "c91bece3ebe3",
+   "text": "Mua nhiều cấp liên tiếp trong một khung hình: áp từng cấp một, kết quả như mua lần lượt.",
+   "title": "Mua nhiều cấp liên tiếp trong một khung hình",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:13"
+  },
+  "edge-sat-thuong-lam-mau-xuong-duoi-0": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.Damage_beyond_the_health_left_leaves_the_hero_at_zero"
+   ],
+   "play": "",
+   "hash": "006708e6026a",
+   "text": "Sát thương làm máu xuống dưới 0: máu coi là 0; phần thừa không chuyển sang mục tiêu khác.",
+   "title": "Sát thương làm máu xuống dưới 0",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:14"
+  },
+  "edge-tam-dung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroParticipantTests.While_paused_a_hitting_hero_keeps_its_target_and_its_wait"
+   ],
+   "play": "",
+   "hash": "da8d78573ef9",
+   "text": "Tạm dừng: bộ đếm đòn dừng, không mua được cấp.",
+   "title": "Tạm dừng",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:15"
+  },
+  "edge-khong-co-cap-toi-da-toc-do-danh": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.Attack_speed_stops_rising_at_level_21_while_health_and_damage_keep_rising"
+   ],
+   "play": "",
+   "hash": "2c41ac793c7a",
+   "text": "Không có cấp tối đa; tốc độ đánh dừng tăng ở cấp 21, máu và sát thương vẫn tăng.",
+   "title": "Không có cấp tối đa; tốc độ đánh dừng tăng ở cấp 21, máu và sát thương vẫn tăng.",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:16"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroConfigValuesTests.Each_level_adds_15_percent_health_and_damage_and_3_percent_attack_speed_up_to_60_percent",
+    "HeroSquadTests.The_level_up_pop_grows_to_1_2_then_returns_within_0_3_seconds",
+    "HeroParticipantTests.Buying_a_level_shows_the_level_up_pop"
+   ],
+   "play": "",
+   "hash": "b7652c686bcb",
+   "text": "## Làm gì\n- Định nghĩa cách đo khoảng cách, nhịp đánh, sát thương cho cả game. Hero, quái (`feature-enemy/enemy-stats/enemy-stat-values`) và thành (`feature-castle/castle-attack/auto-shot-values`) cùng theo node này.\n- Giữ cấp của từng hero trong đội (bắt đầu lượt ở cấp 1) và tính chỉ số theo cấp.\n- Khi `feature-upgrade` báo mua cấp cho một hero: tăng cấp 1, tính lại chỉ số ngay.\n- Chỉ số lv1 của từng hero ở `feature-hero/hero-list/hero-roster-values`.\n\n## Thông số\n| Thông số | Công thức / giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Khoảng cách | khoảng trống trục x giữa hai mép hộp; chồng nhau = 0 | u | Unit to nhỏ khác nhau (0.8u tới 3.5u) |\n| Máu tối đa cấp n | lv1 × (1 + 0.15×(n-1)) | máu | Bộ số chung |\n| Sát thương cấp n | lv1 × (1 + 0.15×(n-1)) | máu/đòn | Bộ số chung |\n| Tăng tốc độ đánh cấp n | min(0.03×(n-1), 0.6) | tỉ lệ | Bộ số chung; trần ở cấp 21 |\n| Giây mỗi đòn cấp n | lv1 / (1 + tăng tốc độ đánh) | s | Tốc độ đánh tăng thì thời gian chờ giảm |\n| Tầm, tốc độ chạy | không đổi theo cấp | u, u/s | Luật vòng 3 |\n| Hình đạn bay (đòn xa) | 0.15 | s | Chỉ để nhìn |\n| Làm tròn hiển thị | máu làm tròn lên, sát thương làm tròn xuống | | Không hiện 0 máu khi chưa gục |\n\nVí dụ (dự kiến):\n| Hero | Cấp 1 | Cấp 5 | Cấp 10 |\n|---|---|---|---|\n| Hiệp sĩ máu / sát thương / s mỗi đòn | 300 / 12 / 1.0 | 480 / 19.2 / 0.893 | 705 / 28.2 / 0.787 |\n| Cung thủ | 120 / 14 / 0.8 | 192 / 22.4 / 0.714 | 282 / 32.9 / 0.630 |\n\nCân bằng dự kiến: Lính đợt n có 40×(1+0.1×(n-1)) máu, tăng 10%/đợt; hero tăng 15% lv1 mỗi cấp. Mua khoảng 2 cấp cho cả đội mỗi 3 đợt là theo kịp.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Máu, sát thương mỗi cấp | +15% lv1 | +15% lv1 | theo số đã chỉnh sau chơi thử |\n| Tốc độ đánh mỗi cấp | +3%, trần 60% | +3%, trần 60% | theo số đã chỉnh |\n| Phản hồi lên cấp | hero phóng to 1.2 lần rồi về trong 0.3s | như IDEA, hiện số cấp mới 1s | hiệu ứng và âm thanh riêng |\n| Hình đạn đòn xa | 1 sprite bay thẳng 0.15s | như IDEA | hiệu ứng riêng từng hero |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Hero",
+   "at": "2026-11-25 11:41:18"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:41:04",
+   "id": "distance-gap",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_hero_stops_once_the_enemy_is_in_range_and_hits_at_once_then_every_attack_period, HeroEdgeCaseTests.A_hero_overlapping_an_enemy_hits_it_without_stepping_back, HeroEdgeCaseTests.An_archer_hit_takes_health_at_once_at_full_range"
+  },
+  {
+   "at": "2026-11-25 11:41:04",
+   "id": "attack-interval",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_hero_stops_once_the_enemy_is_in_range_and_hits_at_once_then_every_attack_period"
+  },
+  {
+   "at": "2026-11-25 11:41:05",
+   "id": "damage-instant",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.An_archer_hit_takes_health_at_once_at_full_range, HeroSquadTests.A_single_target_hero_hits_only_its_target"
+  },
+  {
+   "at": "2026-11-25 11:41:07",
+   "id": "level-formula",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.Level_5_knight_has_the_designed_stats, HeroSquadTests.Level_10_archer_has_the_designed_stats_and_range_and_speed_stay, HeroSquadTests.Attack_speed_stops_rising_at_level_21_while_health_and_damage_keep_rising"
+  },
+  {
+   "at": "2026-11-25 11:41:08",
+   "id": "level-hp-gain",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.Levelling_a_wounded_hero_adds_the_max_health_gained"
+  },
+  {
+   "at": "2026-11-25 11:41:09",
+   "id": "decimal-stats",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_hero_with_less_than_one_health_left_still_stands_and_numbers_stay_real, HeroSquadTests.A_hero_hit_to_zero_health_falls_and_enemies_stop_seeing_it"
+  },
+  {
+   "at": "2026-11-25 11:41:10",
+   "id": "edge-hai-unit-chong-hinh",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_hero_overlapping_an_enemy_hits_it_without_stepping_back"
+  },
+  {
+   "at": "2026-11-25 11:41:11",
+   "id": "edge-len-cap-trong-luc-dang-cho-don",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.Levelling_while_waiting_for_the_next_hit_keeps_the_wait_then_uses_the_new_rhythm"
+  },
+  {
+   "at": "2026-11-25 11:41:12",
+   "id": "edge-len-cap-khi-hero-dang-guc",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_hero_levelled_while_fallen_respawns_at_the_new_full_health, HeroEdgeCaseTests.Levelling_a_fallen_hero_raises_its_level_at_once_and_keeps_its_wait"
+  },
+  {
+   "at": "2026-11-25 11:41:13",
+   "id": "edge-mua-nhieu-cap-lien-tiep-trong-mot-khung",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.Buying_levels_one_by_one_ends_the_same_as_one_jump, HeroParticipantTests.Buying_two_levels_in_one_frame_pops_once_per_level"
+  },
+  {
+   "at": "2026-11-25 11:41:14",
+   "id": "edge-sat-thuong-lam-mau-xuong-duoi-0",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.Damage_beyond_the_health_left_leaves_the_hero_at_zero"
+  },
+  {
+   "at": "2026-11-25 11:41:15",
+   "id": "edge-tam-dung",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.While_paused_a_hitting_hero_keeps_its_target_and_its_wait"
+  },
+  {
+   "at": "2026-11-25 11:41:16",
+   "id": "edge-khong-co-cap-toi-da-toc-do-danh",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.Attack_speed_stops_rising_at_level_21_while_health_and_damage_keep_rising"
+  },
+  {
+   "at": "2026-11-25 11:41:18",
+   "id": "params",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Each_level_adds_15_percent_health_and_damage_and_3_percent_attack_speed_up_to_60_percent, HeroSquadTests.The_level_up_pop_grows_to_1_2_then_returns_within_0_3_seconds, HeroParticipantTests.Buying_a_level_shows_the_level_up_pop"
+  }
+ ]
+}

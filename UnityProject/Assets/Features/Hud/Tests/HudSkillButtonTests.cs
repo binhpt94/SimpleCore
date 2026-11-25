@@ -125,13 +125,78 @@ namespace Game.Hud.Tests
         }
 
         [Test]
-        public void ZeroCooldownSkillShowsNoSecondsAndNoCover()
+        public void ZeroCooldownSkillTheCastleReportsReadyStaysReadyAndATapUsesIt()
+        {
+            _skills.SetRaw(CastleSkill.Rally, true, 0f, 0f);
+            _buttons.Tick(0.016f);
+
+            Assert.IsTrue(_view.Skills[2].Ready);
+            Assert.AreEqual(string.Empty, _view.Skills[2].Seconds);
+            Assert.AreEqual(0f, _view.Skills[2].Cover);
+
+            _view.Press(2);
+
+            CollectionAssert.AreEqual(new[] { CastleSkill.Rally }, _skills.Used);
+        }
+
+        [Test]
+        public void ZeroCooldownWithMismatchedDataShowsNoSecondsAndNoCover()
         {
             _skills.SetRaw(CastleSkill.Rally, false, 5f, 0f);
             _buttons.Tick(0.016f);
 
             Assert.AreEqual(string.Empty, _view.Skills[2].Seconds);
             Assert.AreEqual(0f, _view.Skills[2].Cover);
+            Assert.IsFalse(float.IsNaN(_view.Skills[2].Cover));
+        }
+
+        [Test]
+        public void TwoButtonsTappedTogetherEachUseTheirOwnSkill()
+        {
+            _view.Press(0);
+            _view.Press(2);
+
+            CollectionAssert.AreEqual(new[] { CastleSkill.Thunder, CastleSkill.Rally }, _skills.Used);
+            Assert.IsFalse(_view.Skills[0].Ready);
+            Assert.IsFalse(_view.Skills[2].Ready);
+            Assert.IsTrue(_view.Skills[1].Ready);
+        }
+
+        [Test]
+        public void TapInTheFrameTheCastleTurnsReadyUsesTheSkill()
+        {
+            _skills.SetCooling(CastleSkill.Thunder, 0.01f, 20f);
+            _buttons.Tick(0.016f);
+            _skills.SetReady(CastleSkill.Thunder);
+
+            _view.Press(0);
+
+            CollectionAssert.AreEqual(new[] { CastleSkill.Thunder }, _skills.Used);
+        }
+
+        [Test]
+        public void TapInTheFrameTheCastleStillCoolsIsIgnored()
+        {
+            _skills.SetCooling(CastleSkill.Thunder, 0.01f, 20f);
+            _buttons.Tick(0.016f);
+
+            _view.Press(0);
+
+            CollectionAssert.IsEmpty(_skills.Used);
+        }
+
+        [Test]
+        public void RefusedUseKeepsTheButtonAsTheCastleReportsIt()
+        {
+            _skills.Refuse = true;
+
+            _view.Press(0);
+            _buttons.Tick(0.016f);
+
+            CollectionAssert.AreEqual(new[] { CastleSkill.Thunder }, _skills.Used);
+            Assert.IsTrue(_view.Skills[0].Ready);
+            Assert.AreEqual(string.Empty, _view.Skills[0].Seconds);
+            Assert.AreEqual(0f, _view.Skills[0].Cover);
         }
 
         [Test]

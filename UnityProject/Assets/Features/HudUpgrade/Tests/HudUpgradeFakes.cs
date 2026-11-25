@@ -70,6 +70,13 @@ namespace Game.HudUpgrade.Tests
             Changed();
         }
 
+        public void SetLevel(int index, int level)
+        {
+            var it = _items[index];
+            _items[index] = (it.kind, it.slot, it.code, level, it.basePrice);
+            Changed();
+        }
+
         public void Changed() => ItemsChanged?.Invoke();
 
         public UpgradeItem Get(int index)

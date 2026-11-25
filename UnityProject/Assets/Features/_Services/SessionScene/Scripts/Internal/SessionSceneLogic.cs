@@ -16,14 +16,19 @@ namespace Game.Services.SessionScene
         private readonly ILoadTimer timer;
         private readonly TimeSpan loadLimit;
 
+        /// <summary>Null outside dev builds: nothing is counted after the dispose step.</summary>
+        private readonly IParticipantUsage usage;
+
         private bool endRequested;
         private bool startingParticipants;
 
         /// <summary>How many participants, from the first, must be disposed when the session ends or fails.</summary>
         private int toDispose;
 
-        internal SessionSceneLogic(Action<Exception> reportError, ILoadTimer timer, TimeSpan loadLimit)
+        internal SessionSceneLogic(
+            Action<Exception> reportError, ILoadTimer timer, TimeSpan loadLimit, IParticipantUsage usage = null)
         {
+            this.usage = usage;
             this.reportError = reportError ?? throw new ArgumentNullException(nameof(reportError));
             this.timer = timer ?? throw new ArgumentNullException(nameof(timer));
             if (loadLimit <= TimeSpan.Zero)
@@ -215,6 +220,7 @@ namespace Game.Services.SessionScene
             reportError(failure);
             Set(SessionState.Failed);
             await DisposeReachedAsync();
+            ReportLeftovers();
             finished.TrySetResult();
         }
 
@@ -222,6 +228,7 @@ namespace Game.Services.SessionScene
         {
             Set(SessionState.Disposing);
             await DisposeReachedAsync();
+            ReportLeftovers();
             Set(SessionState.Disposed);
             finished.TrySetResult();
         }
@@ -240,6 +247,37 @@ namespace Game.Services.SessionScene
                     // One participant failing to clean up must not keep the others from doing so.
                     reportError(Describe(participants[i], "dispose", e));
                 }
+            }
+        }
+
+        /// <summary>
+        /// After everyone reached was disposed: each participant that still holds views or running jobs is
+        /// reported by feature name with what it left. Nothing is cleaned up on its behalf.
+        /// </summary>
+        private void ReportLeftovers()
+        {
+            if (usage == null) return;
+
+            for (var i = toDispose - 1; i >= 0; i--)
+            {
+                var participant = participants[i];
+                ParticipantUsage left;
+                try
+                {
+                    left = usage.CountFor(participant);
+                }
+                catch (Exception e)
+                {
+                    reportError(Describe(participant, "be counted after the dispose step", e));
+                    continue;
+                }
+
+                if (left.IsEmpty) continue;
+
+                var type = participant.GetType();
+                reportError(new InvalidOperationException(
+                    $"Session participant {FeatureNameOf(type)} ({type.Name}) left {left.Views} view(s) and " +
+                    $"{left.RunningJobs} running job(s) after the dispose step."));
             }
         }
 

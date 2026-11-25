@@ -16,6 +16,7 @@ namespace Game.Upgrade.Tests
     public class UpgradeInstallerTests
     {
         private const string InstallerPath = "Assets/Features/Upgrade/FeatureAssets/Public/UpgradeInstaller.asset";
+        private const string ConfigPath = "Assets/Features/Upgrade/FeatureAssets/Private/UpgradeConfig.asset";
 
         [Test]
         public void The_real_installer_publishes_the_shop_and_joins_the_session()
@@ -37,6 +38,25 @@ namespace Game.Upgrade.Tests
             Assert.IsTrue(registry.TryResolve<IUpgradeShop>(out var shop));
             Assert.AreEqual(0, shop.Count);
             Assert.AreEqual(1, session.Joined.Count);
+        }
+
+        [Test]
+        public void The_real_config_holds_the_design_team_size_and_prices()
+        {
+            var config = AssetDatabase.LoadAssetAtPath<UpgradeConfig>(ConfigPath);
+            Assert.IsNotNull(config, $"Missing {ConfigPath}");
+
+            var prices = config.ToPrices();
+
+            Assert.AreEqual(3, prices.TeamSize);
+            Assert.AreEqual(30, prices.Hero.PriceAt(1));
+            Assert.AreEqual(41, prices.Hero.PriceAt(2));
+            Assert.AreEqual(40, prices.CastleHealth.PriceAt(1));
+            Assert.AreEqual(56, prices.CastleHealth.PriceAt(2));
+            Assert.AreEqual(40, prices.CastleAttack.PriceAt(1));
+            Assert.AreEqual(56, prices.CastleAttack.PriceAt(2));
+            Assert.AreEqual(60, prices.CastleSkills.PriceAt(1));
+            Assert.AreEqual(90, prices.CastleSkills.PriceAt(2));
         }
 
         [Test]

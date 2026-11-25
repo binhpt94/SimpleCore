@@ -72,6 +72,21 @@ namespace Game.PopupLose.Tests
         }
 
         [Test]
+        public void ScoreEqualToTheOldBestShowsNoNewRecordLine()
+        {
+            _score.Score = 15;
+            _score.Best = 15;
+            _score.IsNewBest = false;
+            _participant.Run();
+            _flow.GoTo(RunStep.Lost);
+
+            var shown = _popups.View.Shown.Value;
+            Assert.That(shown.Score, Is.EqualTo("Trụ được 15 đợt"));
+            Assert.That(shown.Best, Is.EqualTo("Kỉ lục: 15 đợt"));
+            Assert.That(shown.ShowNewRecord, Is.False);
+        }
+
+        [Test]
         public void ZeroScoreReadsZeroWaves()
         {
             _score.Score = 0;
@@ -118,6 +133,30 @@ namespace Game.PopupLose.Tests
             _popups.View.PressReplay();
 
             Assert.That(_flow.ReplayCalls, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void SecondTouchReachingThePopupBeforeTheLockIsNotReported()
+        {
+            _participant.Run();
+            _flow.GoTo(RunStep.Lost);
+
+            _popups.View.RaiseReplayIgnoringLock();
+            _popups.View.RaiseReplayIgnoringLock();
+
+            Assert.That(_flow.ReplayCalls, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TouchesInTheSameFrameCountOnlyTheFirst()
+        {
+            _participant.Run();
+            _flow.GoTo(RunStep.Lost);
+
+            for (var i = 0; i < 3; i++) _popups.View.RaiseReplayIgnoringLock();
+
+            Assert.That(_flow.ReplayCalls, Is.EqualTo(1));
+            Assert.That(_popups.View.Locked, Is.True);
         }
 
         [Test]
@@ -276,6 +315,9 @@ namespace Game.PopupLose.Tests
             {
                 if (!Locked) ReplayPressed?.Invoke();
             }
+
+            /// <summary>Fires the touch even when locked, like two touches landing in the same frame.</summary>
+            public void RaiseReplayIgnoringLock() => ReplayPressed?.Invoke();
         }
 
         internal sealed class FakePopups : IPopupService, IPopupViews

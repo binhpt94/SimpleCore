@@ -16,6 +16,9 @@ namespace Game.Wallet
 
         private Action<int> balanceChanged;
 
+        /// <summary>True from the end of a run until the next run puts the balance back to start coins.</summary>
+        private bool runEnded;
+
         internal WalletLogic(int startCoins, IWalletLog log)
         {
             this.startCoins = Math.Min(MaxCoins, Math.Max(0, startCoins));
@@ -51,6 +54,9 @@ namespace Game.Wallet
 
         public void Add(int amount)
         {
+            // Income that arrives after the run ended belongs to no run: the next run starts from start coins.
+            if (runEnded) return;
+
             if (amount < 0)
             {
                 log.Refused($"Wallet: adding a negative amount ({amount}) was refused; coins stay at {Coins}.");
@@ -66,7 +72,14 @@ namespace Game.Wallet
         /// <summary>Puts the balance back to the start coins of a run. Always announces, even when unchanged.</summary>
         internal void ResetToStart()
         {
+            runEnded = false;
             SetCoins(startCoins);
+        }
+
+        /// <summary>The run is over: every income call is ignored until <see cref="ResetToStart"/>.</summary>
+        internal void EndRun()
+        {
+            runEnded = true;
         }
 
         private void SetCoins(int value)

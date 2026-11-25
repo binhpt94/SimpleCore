@@ -94,6 +94,122 @@ namespace Game.Castle.Tests
         }
 
         [Test]
+        public void Pressing_a_skill_on_cooldown_does_nothing_and_keeps_its_cooldown()
+        {
+            _enemies.AddEnemy(1, 3f);
+            _skills.TryUse(CastleSkill.Thunder);
+            _skills.Tick(5f);
+
+            Assert.That(_skills.TryUse(CastleSkill.Thunder), Is.False);
+
+            Assert.That(_enemies.Damaged, Has.Count.EqualTo(1));
+            Assert.That(_skills.GetState(CastleSkill.Thunder).CooldownLeft, Is.EqualTo(15f).Within(1e-4f));
+        }
+
+        [Test]
+        public void Each_skill_has_its_own_cooldown_twenty_thirty_five_twenty_five()
+        {
+            _skills.TryUse(CastleSkill.Thunder);
+            _skills.TryUse(CastleSkill.Frost);
+            _skills.TryUse(CastleSkill.Rally);
+
+            Assert.That(_skills.GetState(CastleSkill.Thunder).CooldownLeft, Is.EqualTo(20f));
+            Assert.That(_skills.GetState(CastleSkill.Frost).CooldownLeft, Is.EqualTo(35f));
+            Assert.That(_skills.GetState(CastleSkill.Rally).CooldownLeft, Is.EqualTo(25f));
+        }
+
+        [Test]
+        public void Two_skills_pressed_in_one_frame_both_work_independently()
+        {
+            _enemies.AddEnemy(1, 3f);
+
+            Assert.That(_skills.TryUse(CastleSkill.Thunder), Is.True);
+            Assert.That(_skills.TryUse(CastleSkill.Frost), Is.True);
+
+            Assert.That(_enemies.Damaged, Has.Count.EqualTo(1));
+            Assert.That(_enemies.Slows, Has.Count.EqualTo(1));
+            Assert.That(_skills.GetState(CastleSkill.Rally).Ready, Is.True);
+        }
+
+        [Test]
+        public void Frost_on_already_slowed_enemies_asks_for_a_fresh_full_slow_not_a_bigger_one()
+        {
+            _skills.TryUse(CastleSkill.Frost);
+            _skills.Tick(35f);
+
+            _skills.TryUse(CastleSkill.Frost);
+
+            Assert.That(_enemies.Slows, Is.EqualTo(new[] { 5f, 5f }));
+        }
+
+        [Test]
+        public void Rally_and_frost_with_no_target_still_start_their_cooldown()
+        {
+            Assert.That(_skills.TryUse(CastleSkill.Frost), Is.True);
+            Assert.That(_skills.TryUse(CastleSkill.Rally), Is.True);
+
+            Assert.That(_skills.GetState(CastleSkill.Frost).Ready, Is.False);
+            Assert.That(_skills.GetState(CastleSkill.Rally).Ready, Is.False);
+        }
+
+        [Test]
+        public void Thunder_never_hurts_the_castle()
+        {
+            _enemies.AddEnemy(1, 2f);
+
+            _skills.TryUse(CastleSkill.Thunder);
+
+            Assert.That(_body.Health, Is.EqualTo(1000f));
+        }
+
+        [Test]
+        public void Skill_with_no_cooldown_is_ready_again_right_after_use()
+        {
+            var settings = new UnityEditor.SerializedObject(_config);
+            settings.FindProperty("thunderCooldown").floatValue = 0f;
+            settings.ApplyModifiedPropertiesWithoutUndo();
+
+            Assert.That(_skills.TryUse(CastleSkill.Thunder), Is.True);
+
+            var state = _skills.GetState(CastleSkill.Thunder);
+            Assert.That(state.Ready, Is.True);
+            Assert.That(state.CooldownLeft, Is.EqualTo(0f));
+            Assert.That(_skills.TryUse(CastleSkill.Thunder), Is.True, "pressing again works without any tick");
+        }
+
+        [Test]
+        public void Skills_level_bought_while_on_cooldown_keeps_the_cooldown_and_strengthens_the_next_use()
+        {
+            var upgrades = new CastleUpgrades(_body, _skills);
+            _enemies.AddEnemy(1, 3f);
+            _skills.TryUse(CastleSkill.Thunder);
+            _skills.TryUse(CastleSkill.Frost);
+            _skills.Tick(5f);
+
+            upgrades.ApplyLevel(CastleUpgrade.Skills, 2);
+
+            Assert.That(_skills.GetState(CastleSkill.Thunder).CooldownLeft, Is.EqualTo(15f).Within(1e-4f));
+            Assert.That(_enemies.Slows, Is.EqualTo(new[] { 5f }), "enemies already slowed keep their old time");
+            _skills.Tick(30f);
+            _skills.TryUse(CastleSkill.Thunder);
+            _skills.TryUse(CastleSkill.Frost);
+            Assert.That(_enemies.Damaged[1].amount, Is.EqualTo(96f).Within(1e-4f));
+            Assert.That(_enemies.Slows[1], Is.EqualTo(6f).Within(1e-4f));
+        }
+
+        [Test]
+        public void Rally_at_skills_level_thirteen_asks_for_more_than_full_health_and_heroes_cap_it()
+        {
+            var upgrades = new CastleUpgrades(_body, _skills);
+            upgrades.ApplyLevel(CastleUpgrade.Skills, 13);
+
+            _skills.TryUse(CastleSkill.Rally);
+
+            // 30% × (1 + 0.2 × 12) = 102%; IHeroSquad.HealAll caps at max health.
+            Assert.That(_heroes.Heals[0], Is.EqualTo(1.02f).Within(1e-4f));
+        }
+
+        [Test]
         public void Skills_level_strengthens_all_three_effects_by_a_fifth_per_level()
         {
             var upgrades = new CastleUpgrades(_body, _skills);

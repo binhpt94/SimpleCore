@@ -1,0 +1,180 @@
+{
+ "items": {
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam",
+    "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
+    "RunSkipMenusTests.ThereIsNoBackToStartOnTheLosePopup",
+    "RunSkipMenusTests.ThereIsNoGivingUp",
+    "RunSkipMenusTests.BattleStartsOnTheFrameAfterTheSessionRuns",
+    "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay"
+   ],
+   "play": "",
+   "hash": "5f5e6cc631c6",
+   "text": "## Làm gì\n- Giữ một trạng thái màn hiện tại trong scene Game: màn bắt đầu, màn chọn đội, trận (đang đánh / tạm dừng / đã kết thúc).\n- Nhận báo bấm nút từ `feature-home`, `feature-team-select`, `feature-popup-lose`, `feature-popup-pause` và báo thành bị phá từ `feature-castle`; quyết định màn tiếp theo theo bảng ở node cha.\n- Khi vào trận: dựng trận mới, báo lượt mới (`feature-run/run-start`).\n- Khi thành bị phá: dừng trận ngay, chốt điểm (`feature-run/run-score`), chờ 1 giây, nhờ `feature-popup` hiện popup thua.\n- Khi rời trận (chơi lại, về màn bắt đầu, bỏ lượt): đóng popup đang mở, huỷ mọi thứ của trận, hiện màn đích.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số scene | 2 (Loading, Game) | scene | Theo `feature-scene-flow/scene-list` |\n| Màn đầu tiên trong scene Game | Màn bắt đầu | | `flow-order` |\n| Độ trễ trước popup thua | 1 (dự kiến) | giây | Đủ thấy thành bị phá, không làm chậm chơi lại |\n| Số lần bấm có tác dụng trong lúc đổi màn | 1 | lần | Tránh mở trận hai lần |\n| Thời gian đổi màn | 0 (đổi ngay) | giây | Mức đơn giản nhất; hiệu ứng ở bảng giai đoạn |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Màn sau Loading | Vào thẳng trận với đội mặc định (`feature-team-select/team-memory/memory-rules`) | Màn bắt đầu | Màn bắt đầu |\n| Chơi lại ở popup thua | Vào thẳng trận mới với đội mặc định | Sang màn chọn đội | Sang màn chọn đội |\n| Về màn bắt đầu ở popup thua | Không có (chưa có màn bắt đầu) | Có | Có |\n| Bỏ lượt | Không có (chưa có tạm dừng) | Không bắt buộc | Có |\n| Độ trễ trước popup thua | 1 giây | 1 giây | 1 giây |\n| Bước hồi sinh (popup hồi sinh, quảng cáo) | Không có: thành bị phá lần đầu vào thẳng popup thua sau 1 giây | Có, mỗi lượt 1 lần | Có, mỗi lượt 1 lần |\n| Hiệu ứng đổi màn | Không | Không | Mờ dần ra rồi vào, 0.3 giây mỗi chiều (dự kiến) |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Run",
+   "at": "2026-11-25 11:34:11"
+  },
+  "replay-path": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
+    "RunFlowTests.PlayAgainClearsTheBattleAndGoesToTeamSelect",
+    "RunFlowTests.BackToStartClearsTheBattleAndGoesHome"
+   ],
+   "play": "",
+   "hash": "e59094bf4cce",
+   "text": "Chơi lại ở popup thua: huỷ trận, sang màn chọn đội; về màn bắt đầu: huỷ trận, sang màn bắt đầu\nChơi lại không đi qua màn bắt đầu.",
+   "title": "Chơi lại ở popup thua: huỷ trận, sang màn chọn đội; về màn bắt đầu: huỷ trận, sang màn bắt đầu",
+   "by": "Run",
+   "at": "2026-11-25 11:34:14"
+  },
+  "lose-stop-same-moment": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay",
+    "RunFlowTests.SecondCastleDestroyedReportIsIgnored",
+    "RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount"
+   ],
+   "play": "",
+   "hash": "16fb9e578d28",
+   "text": "Thành báo bị phá thì trong cùng khung hình trận dừng hẳn\nQuái thôi ra, mọi unit thôi đi và thôi đánh, nút kĩ năng và thanh nâng cấp thôi nhận bấm, nút tạm dừng thôi tác dụng. Báo dọn sạch đợt tới sau lúc này bị bỏ qua. Điểm chốt khi lượt thật sự kết thúc (thua không hồi sinh, hoặc bỏ lượt), không chốt ở lần bị phá đầu.",
+   "title": "Thành báo bị phá thì trong cùng khung hình trận dừng hẳn",
+   "by": "Run",
+   "at": "2026-11-25 11:34:16"
+  },
+  "lose-popup-delay": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay",
+    "RunFlowTests.NothingCanBePressedDuringTheWaitBeforeTheLosePopup"
+   ],
+   "play": "",
+   "hash": "678a0fc1e59f",
+   "text": "Popup sau khi thành bị phá hiện sau 1 giây kể từ lúc trận dừng\n1 giây (dự kiến) để người chơi thấy thành vừa bị phá. Lần bị phá đầu trong lượt: hiện popup hồi sinh; lần sau: hiện popup thua. Trong 1 giây này không có gì bấm được.",
+   "title": "Popup sau khi thành bị phá hiện sau 1 giây kể từ lúc trận dừng",
+   "by": "Run",
+   "at": "2026-11-25 11:34:17"
+  },
+  "transition-lock": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunFlowTests.OnlyTheFirstPressCountsWhileTheScreenIsChanging",
+    "RunSkipMenusTests.BeginningTwiceStartsOnlyOneBattle"
+   ],
+   "play": "",
+   "hash": "9d26d1c5984d",
+   "text": "Trong lúc đổi màn chỉ lần bấm đầu tiên có tác dụng\nBấm thêm nút ở màn cũ trong lúc đang đổi màn thì bỏ qua, để không mở hai trận hay chuyển màn hai lần.",
+   "title": "Trong lúc đổi màn chỉ lần bấm đầu tiên có tác dụng",
+   "by": "Run",
+   "at": "2026-11-25 11:34:18"
+  },
+  "edge-thanh-bi-pha-cung-khung-hinh-voi-luc": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount"
+   ],
+   "play": "",
+   "hash": "b71929e1354a",
+   "text": "**Thành bị phá cùng khung hình với lúc dọn sạch đợt:** xử lí thành bị phá trước; đợt đó không được tính vào điểm.",
+   "title": "Thành bị phá cùng khung hình với lúc dọn sạch đợt",
+   "by": "Run",
+   "at": "2026-11-25 11:34:19"
+  },
+  "boot-to-home": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunFlowTests.GameSceneOpensOnTheStartScreen",
+    "RunSkipMenusTests.WithMenusTheGameStaysOnTheStartScreen",
+    "RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam"
+   ],
+   "play": "",
+   "hash": "36de003e0c3d",
+   "text": "Mở game: scene Loading tải xong tự sang scene Game, màn đầu tiên là màn bắt đầu\nKhông có nút ở Loading. Đã vào scene Game thì không quay lại Loading; mọi đổi màn sau đó là đổi trong scene Game, không tải scene.",
+   "title": "Mở game: scene Loading tải xong tự sang scene Game, màn đầu tiên là màn bắt đầu",
+   "by": "Run",
+   "at": "2026-11-25 11:34:20"
+  },
+  "quit-path": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunFlowTests.GivingUpStopsAndClearsTheBattleAndGoesHomeWithoutLosePopup",
+    "RunFlowTests.GivingUpSettlesTheScoreLikeLosing"
+   ],
+   "play": "",
+   "hash": "89aec6b4ce50",
+   "text": "Đồng ý bỏ lượt: chốt điểm như thua, huỷ trận, về thẳng màn bắt đầu, không hiện popup thua\nKỉ lục cập nhật như thua; màn bắt đầu hiện kỉ lục đã cập nhật.",
+   "title": "Đồng ý bỏ lượt: chốt điểm như thua, huỷ trận, về thẳng màn bắt đầu, không hiện popup thua",
+   "by": "Run",
+   "at": "2026-11-25 11:34:21"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:34:11",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam, RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam, RunSkipMenusTests.ThereIsNoBackToStartOnTheLosePopup, RunSkipMenusTests.ThereIsNoGivingUp, RunSkipMenusTests.BattleStartsOnTheFrameAfterTheSessionRuns, RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay"
+  },
+  {
+   "at": "2026-11-25 11:34:14",
+   "id": "replay-path",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam, RunFlowTests.PlayAgainClearsTheBattleAndGoesToTeamSelect, RunFlowTests.BackToStartClearsTheBattleAndGoesHome"
+  },
+  {
+   "at": "2026-11-25 11:34:16",
+   "id": "lose-stop-same-moment",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay, RunFlowTests.SecondCastleDestroyedReportIsIgnored, RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount"
+  },
+  {
+   "at": "2026-11-25 11:34:17",
+   "id": "lose-popup-delay",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay, RunFlowTests.NothingCanBePressedDuringTheWaitBeforeTheLosePopup"
+  },
+  {
+   "at": "2026-11-25 11:34:18",
+   "id": "transition-lock",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.OnlyTheFirstPressCountsWhileTheScreenIsChanging, RunSkipMenusTests.BeginningTwiceStartsOnlyOneBattle"
+  },
+  {
+   "at": "2026-11-25 11:34:19",
+   "id": "edge-thanh-bi-pha-cung-khung-hinh-voi-luc",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount"
+  },
+  {
+   "at": "2026-11-25 11:34:20",
+   "id": "boot-to-home",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.GameSceneOpensOnTheStartScreen, RunSkipMenusTests.WithMenusTheGameStaysOnTheStartScreen, RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam"
+  },
+  {
+   "at": "2026-11-25 11:34:21",
+   "id": "quit-path",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.GivingUpStopsAndClearsTheBattleAndGoesHomeWithoutLosePopup, RunFlowTests.GivingUpSettlesTheScoreLikeLosing"
+  }
+ ]
+}

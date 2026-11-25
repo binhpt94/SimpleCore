@@ -67,6 +67,52 @@ namespace Game.Wave.Tests
         }
 
         [Test]
+        public void UnlockedKindWhoseShareRoundsDownToZero_StillGetsOne_TakenFromSoldiers()
+        {
+            var rules = new WaveRules();
+            rules.Tiers[1] = new WaveMixTier(3, 95, 5, 0, 0);
+
+            var plan = new WaveFormula(rules).Plan(3);
+
+            Assert.That(plan.Wolves, Is.EqualTo(1), "5% of 12 places is 0.6");
+            Assert.That(plan.Soldiers, Is.EqualTo(11));
+            Assert.That(plan.Count, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void HardKindsTakingEveryPlace_AreTrimmedFromTheLowestShare_KeepingOneSoldier()
+        {
+            var rules = new WaveRules { WolfFromWave = 1, GiantFromWave = 1, ArcherFromWave = 1 };
+            rules.Tiers[0] = new WaveMixTier(1, 0, 50, 49, 1);
+
+            var plan = new WaveFormula(rules).Plan(1);
+
+            Assert.That(plan.Soldiers, Is.EqualTo(1));
+            Assert.That(plan.Wolves, Is.EqualTo(4));
+            Assert.That(plan.Giants, Is.EqualTo(3));
+            Assert.That(plan.Archers, Is.EqualTo(0), "the 1% kind is the one trimmed");
+            Assert.That(plan.Count, Is.EqualTo(8));
+        }
+
+        [TestCase(2, 1.1f)]
+        [TestCase(16, 2.5f)]
+        public void HealthAndDamageScale_StaysFractional_NotRounded(int wave, float scale)
+        {
+            Assert.That(Full().Plan(wave).StatScale, Is.EqualTo(scale).Within(1e-5));
+        }
+
+        [Test]
+        public void BossWave_TakesOnePlace_TheOtherKindsShareTheRest()
+        {
+            var plan = Full().Plan(10);
+
+            Assert.That(plan.Bosses, Is.EqualTo(1));
+            Assert.That(plan.Count - plan.Bosses, Is.EqualTo(25));
+            Assert.That(Full().Plan(9).Bosses, Is.EqualTo(0));
+            Assert.That(Full().Plan(11).Bosses, Is.EqualTo(0));
+        }
+
+        [Test]
         public void ConfigWhoseTierDoesNotAddUpTo100_IsRefusedNamingTheTier()
         {
             var rules = new WaveRules();

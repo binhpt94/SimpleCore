@@ -1,6 +1,6 @@
 ---
 based-on: ff4b78bc4b2c
-refs: feature-session-scene/session-steps/participant-order@741dae9e43c1, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-popup-lose/lose-result@e06499689b32, feature-popup-pause/pause-popup@25d160950007
+refs: feature-session-scene/session-steps/participant-order@f45d732dc921, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-popup-lose/lose-result@e06499689b32, feature-popup-pause/pause-popup@25d160950007
 frame: none
 ---
 # Luật mở, đóng popup và danh sách id
@@ -9,8 +9,8 @@ Chốt danh sách id popup của scene Game, việc popup được chuẩn bị 
 
 ## Ý cốt lõi
 
-### id-list | AI 8 | Scene Game có 2 id popup: `PopupLose/Main`, `PopupPause/Main`
-Lần lượt là popup thua và popup tạm dừng. Hộp xác nhận bỏ lượt là một bước bên trong popup tạm dừng, không phải popup riêng (`feature-popup-pause/pause-popup`). Tên `Name` do feature sở hữu đặt; đây là tên dự kiến.
+### id-list | AI 8 | Scene Game có 1 id popup: `PopupLose/Main` (popup thua)
+Chưa có popup tạm dừng và popup hồi sinh. Tên `Name` do feature sở hữu đặt; đây là tên dự kiến.
 
 ### preload | AI 8 | Mọi popup có id trong danh sách của scene được chuẩn bị ở bước tải, nên xin mở là popup hiện ngay trong khung hình đó
 

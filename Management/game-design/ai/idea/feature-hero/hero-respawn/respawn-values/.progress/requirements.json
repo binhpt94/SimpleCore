@@ -1,0 +1,279 @@
+{
+ "items": {
+  "enter-spawn": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.A_new_run_puts_the_team_at_the_castle_edges_by_slot_at_full_health",
+    "HeroParticipantTests.A_new_run_shows_each_hero_of_the_team_at_its_spawn_point"
+   ],
+   "play": "",
+   "hash": "c7c5f1f232fb",
+   "text": "Vào trận cả 3 hero sinh trong cùng khung hình: chỗ 1 và 3 ở x=-1.5u, chỗ 2 ở x=+1.5u, đầy máu, cấp 1\nĐiểm xuất phát lấy từ `feature-castle/castle-core/castle-body-values`. Sinh xong hero đứng chờ tới khi có quái (`feature-hero/hero-targeting`).",
+   "title": "Vào trận cả 3 hero sinh trong cùng khung hình: chỗ 1 và 3 ở x=-1.5u, chỗ 2 ở x=+1.5u, đầy máu, cấp 1",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:45"
+  },
+  "down-rule": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.A_hero_hit_to_zero_health_falls_and_enemies_stop_seeing_it",
+    "HeroEdgeCaseTests.A_hero_that_falls_before_its_turn_does_not_hit_that_frame",
+    "HeroParticipantTests.A_hit_shows_a_strike_and_the_enemy_side_sees_hurt_and_fall",
+    "HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+   ],
+   "play": "",
+   "hash": "b9bf92015a81",
+   "text": "Máu hiện tại ≤ 0 thì hero gục: thu nhỏ về 0 trong 0.3s rồi biến mất, không đánh, không bị đánh, không bị nhắm\nNgay khung hình gục, hero thôi là mục tiêu của quái và không nhận đòn nào nữa; 0.3s thu nhỏ chỉ để nhìn.",
+   "title": "Máu hiện tại ≤ 0 thì hero gục: thu nhỏ về 0 trong 0.3s rồi biến mất, không đánh, không bị đánh, không bị nhắm",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:46"
+  },
+  "respawn-time": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.A_fallen_hero_respawns_after_8s_at_its_spawn_point_at_full_health",
+    "HeroSquadTests.A_hero_levelled_while_fallen_respawns_at_the_new_full_health"
+   ],
+   "play": "",
+   "hash": "f03753268bf8",
+   "text": "Hồi sinh sau 8s tính từ lúc gục, ở điểm xuất phát của chỗ mình, đầy máu theo cấp hiện tại\n8s bằng khoảng 1/4 thời gian một đợt đầu (dự kiến 25-35s), đủ thấy đội thiếu người nhưng không mất cả đợt. Như nhau với mọi hero, mọi cấp.",
+   "title": "Hồi sinh sau 8s tính từ lúc gục, ở điểm xuất phát của chỗ mình, đầy máu theo cấp hiện tại",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:47"
+  },
+  "respawn-entry": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.A_respawning_hero_cannot_be_hit_or_seen_while_it_grows_back",
+    "HeroEdgeCaseTests.A_growing_hero_does_not_hit_until_the_grow_ends",
+    "HeroParticipantTests.A_fallen_hero_reappears_with_the_respawn_animation"
+   ],
+   "play": "",
+   "hash": "ff92a094b1ba",
+   "text": "Hồi sinh thì phóng to từ 0 lên đủ trong 0.3s; trong 0.3s đó hero chưa đánh và chưa bị đánh\nTránh hero bị đánh gục lại ngay lúc vừa hiện khi quái đứng sát thành. Hết 0.3s hero nhắm và đánh như bình thường.",
+   "title": "Hồi sinh thì phóng to từ 0 lên đủ trong 0.3s; trong 0.3s đó hero chưa đánh và chưa bị đánh",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:49"
+  },
+  "edge-ca-3-hero-cung-guc": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.When_all_three_heroes_fall_they_all_come_back_after_8s"
+   ],
+   "play": "",
+   "hash": "f297582a13d5",
+   "text": "Cả 3 hero cùng gục: trận vẫn tiếp tục, chỉ thành bắn và kĩ năng; không thua (chỉ thành bị phá mới thua).",
+   "title": "Cả 3 hero cùng gục",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:50"
+  },
+  "edge-mua-cap-cho-hero-dang-guc": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.Levelling_a_fallen_hero_raises_its_level_at_once_and_keeps_its_wait",
+    "HeroSquadTests.A_hero_levelled_while_fallen_respawns_at_the_new_full_health"
+   ],
+   "play": "",
+   "hash": "1a7b361ab5a2",
+   "text": "Mua cấp cho hero đang gục: cấp tăng ngay; hồi sinh với máu tối đa của cấp mới; 8s chờ không đổi.",
+   "title": "Mua cấp cho hero đang gục",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:51"
+  },
+  "edge-co-vu-bam-khi-hero-dang-guc": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.Cheering_does_not_heal_a_fallen_hero_or_shorten_its_wait",
+    "HeroSquadTests.Cheer_heals_standing_heroes_up_to_their_max_and_not_fallen_ones"
+   ],
+   "play": "",
+   "hash": "474a8d12e19a",
+   "text": "Cổ vũ bấm khi hero đang gục: hero đó không được hồi, thời gian chờ không ngắn đi.",
+   "title": "Cổ vũ bấm khi hero đang gục",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:52"
+  },
+  "edge-hero-guc-cung-khung-hinh-voi-thanh-bi": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroParticipantTests.Once_the_battle_stopped_a_fallen_hero_does_not_respawn"
+   ],
+   "play": "",
+   "hash": "4c95bfdbf408",
+   "text": "Hero gục cùng khung hình với thành bị phá: không cần xử lý hồi sinh; `feature-run` dừng trận.",
+   "title": "Hero gục cùng khung hình với thành bị phá",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:53"
+  },
+  "edge-hero-guc-dung-luc-don-cua-no-dang": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.A_hero_that_falls_before_its_turn_does_not_hit_that_frame"
+   ],
+   "play": "",
+   "hash": "06a764f801d8",
+   "text": "Hero gục đúng lúc đòn của nó đang ra: đòn đó không ra (gục xử lý trước khi ra đòn trong khung hình).",
+   "title": "Hero gục đúng lúc đòn của nó đang ra",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:54"
+  },
+  "edge-hoi-sinh-khi-dang-nghi-giua-hai-dot": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroEdgeCaseTests.A_hero_respawning_with_no_enemy_around_waits_at_its_spawn_point"
+   ],
+   "play": "",
+   "hash": "f1dec5d399ad",
+   "text": "Hồi sinh khi đang nghỉ giữa hai đợt: hồi sinh bình thường, đứng chờ ở điểm xuất phát.",
+   "title": "Hồi sinh khi đang nghỉ giữa hai đợt",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:56"
+  },
+  "edge-tam-dung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroParticipantTests.While_paused_the_respawn_wait_stands_still",
+    "HeroParticipantTests.While_paused_heroes_and_their_animations_stand_still"
+   ],
+   "play": "",
+   "hash": "a0c5f263dba3",
+   "text": "Tạm dừng: đồng hồ 8s và anim 0.3s đứng yên.",
+   "title": "Tạm dừng",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:57"
+  },
+  "edge-het-luot-feature-run": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroSquadTests.Leaving_the_battle_removes_every_hero",
+    "HeroEdgeCaseTests.A_new_run_brings_the_team_back_at_level_1_and_full_health",
+    "HeroParticipantTests.A_replay_replaces_the_team_on_screen"
+   ],
+   "play": "",
+   "hash": "5c54ce500f93",
+   "text": "Hết lượt (`feature-run`): mọi hero bị gỡ, không hồi sinh; lượt mới sinh lại ở cấp 1.",
+   "title": "Hết lượt (`feature-run`)",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:58"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges",
+    "HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+   ],
+   "play": "",
+   "hash": "7f8dac45b0bb",
+   "text": "## Làm gì\n- Lúc trận bắt đầu: nhận đội 3 hero theo thứ tự chỗ từ `feature-team-select`; sinh mỗi hero ở điểm xuất phát của chỗ đó, đầy máu, cấp 1.\n- Mỗi khung hình: hero nào máu ≤ 0 thì chuyển sang gục, bắt đầu đếm 8s.\n- Hết 8s: hồi sinh ở điểm xuất phát của chỗ đó, máu = máu tối đa của cấp hiện tại.\n- Báo cho `feature-hud` trạng thái từng hero (đang đứng, đang gục và số giây còn lại) để hiện nếu HUD cần.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số hero sinh lúc vào trận | 3 | hero | Đội 3 chỗ |\n| Điểm xuất phát chỗ 1 / 2 / 3 | -1.5 / +1.5 / -1.5 | x (u) | Mép thành, theo `feature-castle/castle-core/castle-body-values` |\n| Thời gian chờ hồi sinh | 8 | s | Bộ số chung |\n| Thu nhỏ khi gục | 0.3 | s | Thấy được lúc gục |\n| Phóng to khi hồi sinh (không đánh, không bị đánh) | 0.3 | s | Tránh gục lại ngay |\n| Máu khi hồi sinh | 100% máu tối đa cấp hiện tại | máu | Luật vòng 3 |\n\nCân bằng dự kiến: đợt 1 có 8 Lính thả mỗi 1.0s, đi 14.5u ở 1.5u/s mất khoảng 10s; một đợt đầu kéo dài khoảng 25-35s. Một hero gục mất 8s, đội còn 2/3 sức đánh trong khoảng 1/4 đợt.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Thời gian chờ hồi sinh | 8s | 8s (chỉnh sau chơi thử) | theo số đã chỉnh |\n| Gục | thu nhỏ 0.3s | như IDEA | anim gục riêng, âm thanh |\n| Hồi sinh | phóng to 0.3s | như IDEA | hiệu ứng hồi sinh riêng |\n| Hiện thời gian chờ còn lại | không bắt buộc | có (qua `feature-hud`) | có |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Hero",
+   "at": "2026-11-25 11:40:59"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:40:45",
+   "id": "enter-spawn",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_new_run_puts_the_team_at_the_castle_edges_by_slot_at_full_health, HeroParticipantTests.A_new_run_shows_each_hero_of_the_team_at_its_spawn_point"
+  },
+  {
+   "at": "2026-11-25 11:40:46",
+   "id": "down-rule",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_hero_hit_to_zero_health_falls_and_enemies_stop_seeing_it, HeroEdgeCaseTests.A_hero_that_falls_before_its_turn_does_not_hit_that_frame, HeroParticipantTests.A_hit_shows_a_strike_and_the_enemy_side_sees_hurt_and_fall, HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+  },
+  {
+   "at": "2026-11-25 11:40:47",
+   "id": "respawn-time",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_fallen_hero_respawns_after_8s_at_its_spawn_point_at_full_health, HeroSquadTests.A_hero_levelled_while_fallen_respawns_at_the_new_full_health"
+  },
+  {
+   "at": "2026-11-25 11:40:49",
+   "id": "respawn-entry",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_respawning_hero_cannot_be_hit_or_seen_while_it_grows_back, HeroEdgeCaseTests.A_growing_hero_does_not_hit_until_the_grow_ends, HeroParticipantTests.A_fallen_hero_reappears_with_the_respawn_animation"
+  },
+  {
+   "at": "2026-11-25 11:40:50",
+   "id": "edge-ca-3-hero-cung-guc",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.When_all_three_heroes_fall_they_all_come_back_after_8s"
+  },
+  {
+   "at": "2026-11-25 11:40:51",
+   "id": "edge-mua-cap-cho-hero-dang-guc",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.Levelling_a_fallen_hero_raises_its_level_at_once_and_keeps_its_wait, HeroSquadTests.A_hero_levelled_while_fallen_respawns_at_the_new_full_health"
+  },
+  {
+   "at": "2026-11-25 11:40:52",
+   "id": "edge-co-vu-bam-khi-hero-dang-guc",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.Cheering_does_not_heal_a_fallen_hero_or_shorten_its_wait, HeroSquadTests.Cheer_heals_standing_heroes_up_to_their_max_and_not_fallen_ones"
+  },
+  {
+   "at": "2026-11-25 11:40:53",
+   "id": "edge-hero-guc-cung-khung-hinh-voi-thanh-bi",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.Once_the_battle_stopped_a_fallen_hero_does_not_respawn"
+  },
+  {
+   "at": "2026-11-25 11:40:54",
+   "id": "edge-hero-guc-dung-luc-don-cua-no-dang",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_hero_that_falls_before_its_turn_does_not_hit_that_frame"
+  },
+  {
+   "at": "2026-11-25 11:40:56",
+   "id": "edge-hoi-sinh-khi-dang-nghi-giua-hai-dot",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroEdgeCaseTests.A_hero_respawning_with_no_enemy_around_waits_at_its_spawn_point"
+  },
+  {
+   "at": "2026-11-25 11:40:57",
+   "id": "edge-tam-dung",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.While_paused_the_respawn_wait_stands_still, HeroParticipantTests.While_paused_heroes_and_their_animations_stand_still"
+  },
+  {
+   "at": "2026-11-25 11:40:58",
+   "id": "edge-het-luot-feature-run",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.Leaving_the_battle_removes_every_hero, HeroEdgeCaseTests.A_new_run_brings_the_team_back_at_level_1_and_full_health, HeroParticipantTests.A_replay_replaces_the_team_on_screen"
+  },
+  {
+   "at": "2026-11-25 11:40:59",
+   "id": "params",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges, HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+  }
+ ]
+}

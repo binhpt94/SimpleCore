@@ -104,6 +104,67 @@ namespace Game.Castle.Tests
         }
 
         [Test]
+        public void Target_is_picked_again_for_every_shot_so_a_nearer_newcomer_is_shot_first()
+        {
+            _enemies.AddEnemy(1, 6f);
+            _shot.Tick(1f);
+            _enemies.AddEnemy(2, -2.5f);
+
+            _shot.Tick(1f);
+
+            Assert.That(_enemies.Damaged[0].handle, Is.EqualTo(1));
+            Assert.That(_enemies.Damaged[1].handle, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void With_nothing_in_range_the_timer_waits_ready_and_fires_as_soon_as_an_enemy_comes_in()
+        {
+            _shot.Tick(1f);
+            _shot.Tick(2.5f);
+            Assert.That(_enemies.Damaged, Is.Empty);
+
+            _enemies.AddEnemy(1, 4f);
+            _shot.Tick(0.016f);
+
+            Assert.That(_enemies.Damaged, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void Slowed_enemies_change_nothing_for_the_auto_shot()
+        {
+            _enemies.AddEnemy(1, 4f);
+            _enemies.SlowAll(5f);
+
+            _shot.Tick(0.01f);
+            _shot.Tick(1f);
+
+            Assert.That(_enemies.Damaged, Is.EqualTo(new[] { (1, 10f), (1, 10f) }));
+        }
+
+        [Test]
+        public void Attack_bought_after_a_shot_left_only_strengthens_the_next_shot()
+        {
+            _enemies.AddEnemy(1, 4f);
+            _shot.Tick(0.01f);
+
+            _upgrades.ApplyLevel(CastleUpgrade.Attack, 2);
+            _shot.Tick(1f);
+
+            Assert.That(_enemies.Damaged[0].amount, Is.EqualTo(10f));
+            Assert.That(_enemies.Damaged[1].amount, Is.EqualTo(12f).Within(1e-4f));
+        }
+
+        [Test]
+        public void Castle_shot_never_hurts_the_castle()
+        {
+            _enemies.AddEnemy(1, 4f);
+
+            _shot.Tick(1f);
+
+            Assert.That(_body.Health, Is.EqualTo(1000f));
+        }
+
+        [Test]
         public void Shot_flies_from_the_castle_edge_on_the_target_side()
         {
             float from = 0f, to = 0f;

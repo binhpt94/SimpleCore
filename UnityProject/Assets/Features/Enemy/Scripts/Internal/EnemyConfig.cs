@@ -75,7 +75,11 @@ namespace Game.Enemy
         [SerializeField] private float _moveSpeed = 1.5f;
         [SerializeField] private int _coins = 5;
 
+        [Tooltip("Off: this type is not in the game at the current stage; asking to spawn it is an error.")]
+        [SerializeField] private bool _available = true;
+
         public EnemyType Type => _type;
+        public bool Available => _available;
         public float Width => _width;
         public float Height => _height;
         public float Health => _health;

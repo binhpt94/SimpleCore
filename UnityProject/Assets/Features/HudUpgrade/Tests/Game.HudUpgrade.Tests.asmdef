@@ -8,7 +8,6 @@
     "Game.Hero.Contracts",
     "Game.Wallet.Contracts",
     "Game.Run.Contracts",
-    "Game.Services.SessionScene.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

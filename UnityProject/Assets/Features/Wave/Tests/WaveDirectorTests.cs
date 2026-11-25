@@ -248,6 +248,139 @@ namespace Game.Wave.Tests
         }
 
         [Test]
+        public void WaveOne_SendsHalfOfItsEnemiesToEachSide()
+        {
+            _run.StartBattle();
+            _director.Tick(7.01f);
+
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(8));
+            Assert.That(_enemies.Spawned.FindAll(s => s.Side == EnemySide.Left).Count, Is.EqualTo(4));
+            Assert.That(_enemies.Spawned.FindAll(s => s.Side == EnemySide.Right).Count, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void PauseMidInterval_ResumesTheRestOfTheInterval_WithoutCatchingUp()
+        {
+            _run.StartBattle();
+            _director.Tick(0.4f);
+            _run.IsPaused = true;
+            _director.Tick(10f);
+            _run.IsPaused = false;
+
+            _director.Tick(0.59f);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(1), "0.6 s of the interval were still left");
+            _director.Tick(0.02f);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(2), "one enemy, no make-up for the paused time");
+        }
+
+        [Test]
+        public void PauseDuringTheBreak_KeepsTheRestOfTheThreeSeconds()
+        {
+            _run.StartBattle();
+            ClearWaveOne();
+            _director.Tick(1.2f);
+            _run.IsPaused = true;
+            _director.Tick(10f);
+            _run.IsPaused = false;
+
+            _director.Tick(1.75f);
+            Assert.That(_log, Has.No.Member("started 2"), "1.8 s were left when paused at 1.2 s");
+            _director.Tick(0.1f);
+            Assert.That(_log, Has.Member("started 2"));
+        }
+
+        [Test]
+        public void PauseRightAtTheClear_PaysAndScoresAtOnce_TheBreakCountsAfterResume()
+        {
+            _run.StartBattle();
+            _director.Tick(7.01f);
+            _enemies.DefeatAll();
+            _run.IsPaused = true;
+            _director.Tick(0.01f);
+
+            Assert.That(_log, Has.Member("coins 25"));
+            Assert.That(_log, Has.Member("score 1"));
+            _director.Tick(10f);
+            Assert.That(_log, Has.No.Member("started 2"), "the break does not count while paused");
+
+            _run.IsPaused = false;
+            _director.Tick(3.01f);
+            Assert.That(_log, Has.Member("started 2"));
+        }
+
+        [Test]
+        public void CastleFallingDuringTheBreak_KeepsTheClearedWave_AndStartsNoNewWave()
+        {
+            _run.StartBattle();
+            ClearWaveOne();
+            _director.Tick(1f);
+            var sent = _enemies.Spawned.Count;
+
+            _run.Lose();
+            _director.Tick(10f);
+
+            Assert.That(_log, Has.Member("coins 25"));
+            Assert.That(_log, Has.Member("score 1"));
+            Assert.That(_log, Has.No.Member("started 2"));
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(sent));
+        }
+
+        [Test]
+        public void CastleFallingWhileHeldAtTheCap_DropsTheWaitingEnemies_AndNeverClears()
+        {
+            var rules = new WaveRules { AliveCap = 3 };
+            _director.Detach();
+            _director = new WaveDirector(rules, _run, _enemies, new FakeIncome(_log), new FirstRandom());
+            _director.Attach();
+            _director.WaveCleared += w => _log.Add("cleared " + w);
+            _run.StartBattle();
+            _director.Tick(10f);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(3));
+
+            _run.Lose();
+            _enemies.DefeatAll();
+            _director.Tick(10f);
+
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(3), "the 5 waiting enemies are dropped");
+            Assert.That(_log, Has.No.Member("cleared 1"));
+        }
+
+        [Test]
+        public void Boss_WaitsUnderTheAliveCapLikeEveryEnemy_AndStillComesLast()
+        {
+            // Wave 10 has 25 enemies then the Boss; with the wave-1 enemy left on the field a cap of 26 is reached
+            // just before the Boss.
+            var rules = new WaveRules { AliveCap = 26 };
+            _director.Detach();
+            _director = new WaveDirector(rules, _run, _enemies, new FakeIncome(_log), new FirstRandom());
+            _director.Attach();
+            _run.StartBattle();
+            _director.StartWave(10);
+
+            _director.Tick(100f);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(26));
+            Assert.That(_enemies.Spawned.Exists(s => s.Type == EnemyType.Boss), Is.False, "the Boss waits at the cap");
+
+            _enemies.Defeat(1);
+            _director.Tick(0.01f);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(27));
+            Assert.That(_enemies.Spawned[26].Type, Is.EqualTo(EnemyType.Boss));
+        }
+
+        [Test]
+        public void NextWave_StartsOnTime_WithoutWaitingForAnythingElse()
+        {
+            // Wave never waits for heroes coming back or upgrades: only the 3 s clock starts the next wave.
+            _run.StartBattle();
+            ClearWaveOne();
+
+            _director.Tick(3.01f);
+
+            Assert.That(_log, Has.Member("started 2"));
+            Assert.That(_director.CurrentWave, Is.EqualTo(2));
+        }
+
+        [Test]
         public void NewRun_StartsAgainFromWaveOne()
         {
             _run.StartBattle();

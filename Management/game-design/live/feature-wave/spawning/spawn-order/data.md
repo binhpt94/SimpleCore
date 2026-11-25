@@ -1,6 +1,6 @@
 ---
 based-on: 8c9e1c247bf1
-refs: feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-wave/wave-gap@d9d4c35f6907, feature-enemy/enemy-list/enemy-type-values@1782de2d557d, feature-enemy/enemy-behavior/enemy-move-values@820f944e332f, feature-castle/castle-core/castle-body-values@b648ec300023
+refs: feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-wave/wave-gap@d9d4c35f6907, feature-enemy/enemy-list/enemy-type-values@96f77fbbafff, feature-enemy/enemy-behavior/enemy-move-values@820f944e332f, feature-castle/castle-core/castle-body-values@b648ec300023
 ---
 # Thứ tự và cách thả quái
 

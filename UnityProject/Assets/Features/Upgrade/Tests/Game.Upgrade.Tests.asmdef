@@ -9,7 +9,6 @@
     "Game.Hero.Contracts",
     "Game.Castle.Contracts",
     "Game.Run.Contracts",
-    "Game.Services.SessionScene.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

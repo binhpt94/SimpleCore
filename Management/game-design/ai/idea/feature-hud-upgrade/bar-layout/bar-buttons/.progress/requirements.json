@@ -1,0 +1,286 @@
+{
+ "items": {
+  "six-buttons": {
+   "state": "done",
+   "note": "gắn test có sẵn của UpgradeBarPresenter",
+   "tests": [
+    "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills",
+    "HudUpgradeSessionTests.Bar_opens_when_session_runs_and_is_removed_when_session_ends"
+   ],
+   "play": "",
+   "hash": "f4b1826f2643",
+   "text": "Thanh có đúng 6 nút, mỗi nút ứng với một trong 6 mục nâng cấp\nKhông có nút nào khác trên thanh (không nút đóng, không nút mở rộng).",
+   "title": "Thanh có đúng 6 nút, mỗi nút ứng với một trong 6 mục nâng cấp",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:08"
+  },
+  "hero-group": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills",
+    "UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups"
+   ],
+   "play": "",
+   "hash": "a5d376dd525b",
+   "text": "Nhóm hero có 3 nút theo thứ tự chỗ 1, 2, 3 của đội\nNút hero chỗ 1 nằm ở đầu nhóm.",
+   "title": "Nhóm hero có 3 nút theo thứ tự chỗ 1, 2, 3 của đội",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:09"
+  },
+  "castle-group": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills",
+    "UpgradeBarTests.Each_button_picture_is_its_own_hero_or_castle_icon"
+   ],
+   "play": "",
+   "hash": "4e995fe85d16",
+   "text": "Nhóm thành có 3 nút theo thứ tự máu, sức đánh, kĩ năng\nMáu: máu thành. Sức đánh: đòn tự bắn của thành. Kĩ năng: cả ba kĩ năng thành.",
+   "title": "Nhóm thành có 3 nút theo thứ tự máu, sức đánh, kĩ năng",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:10"
+  },
+  "group-gap": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups",
+    "HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
+   ],
+   "play": "",
+   "hash": "03b92cea688f",
+   "text": "Giữa 2 nhóm có một khoảng trống rộng hơn khoảng cách giữa hai nút trong cùng nhóm\nLiếc là thấy hai nhóm; kiểm bằng ảnh chụp màn hình. Độ rộng cụ thể do người làm giao diện quyết.",
+   "title": "Giữa 2 nhóm có một khoảng trống rộng hơn khoảng cách giữa hai nút trong cùng nhóm",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:12"
+  },
+  "show-when": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus",
+    "HudUpgradeSessionTests.Bar_shows_when_run_starts_a_frame_after_the_session_runs",
+    "HudUpgradeSessionTests.Bar_shows_when_the_step_turns_playing_before_the_items_arrive",
+    "HudUpgradeSessionTests.Bar_shows_when_items_arrive_after_step_changed_but_before_its_event"
+   ],
+   "play": "",
+   "hash": "40933e6343d2",
+   "text": "Thanh hiện từ khung hình đầu của trận tới khi popup kết thúc lượt hiện, kể cả lúc nghỉ giữa đợt và lúc tạm dừng, 0 lần ẩn giữa chừng\nLúc tạm dừng thanh vẫn hiện, các nút ở trạng thái không mua được.",
+   "title": "Thanh hiện từ khung hình đầu của trận tới khi popup kết thúc lượt hiện, kể cả lúc nghỉ giữa đợt và lúc tạm dừng, 0 lần ẩn giữa chừng",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:13"
+  },
+  "no-cover": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Play scene Game, chụp màn hình ở 16:9: thanh nằm ở dải dưới y 900-1080, dải đất chiến trường nằm trên y 900, không phần nào dưới thanh",
+   "hash": "726026270a8a",
+   "text": "Thanh không che dải đất chiến trường: 0 phần của dải đất nằm dưới thanh\nKiểm bằng ảnh chụp màn hình ở tỉ lệ 16:9 và 20:9.",
+   "title": "Thanh không che dải đất chiến trường: 0 phần của dải đất nằm dưới thanh",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:17"
+  },
+  "edge-doi-khong-du-3-hero": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Bar_keeps_one_button_per_shop_item_even_for_a_hero_it_has_no_name_for",
+    "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills"
+   ],
+   "play": "",
+   "hash": "b1ff9d2022ba",
+   "text": "**Đội không đủ 3 hero** (lỗi dữ liệu): `item-set` đã báo lỗi; thanh không tự tạo ít nút hơn.",
+   "title": "Đội không đủ 3 hero",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:19"
+  },
+  "edge-hero-guc": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level",
+    "UpgradeBarTests.Level_or_price_change_does_not_rebuild_the_buttons"
+   ],
+   "play": "",
+   "hash": "4dae20dccb14",
+   "text": "**Hero gục**: nút hero vẫn ở nguyên chỗ, vẫn bấm được nếu đủ tiền.",
+   "title": "Hero gục",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:20"
+  },
+  "edge-tam-dung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus",
+    "UpgradeBarTests.Every_button_dims_while_shop_is_closed_by_pause"
+   ],
+   "play": "",
+   "hash": "c483f978f680",
+   "text": "**Tạm dừng**: thanh vẫn hiện, mọi nút ở trạng thái mờ.",
+   "title": "Tạm dừng",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:21"
+  },
+  "edge-luot-ket-thuc": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus",
+    "UpgradeBarTests.Tapping_a_dim_button_sends_no_purchase_and_no_bounce",
+    "UpgradeBarTests.Rejected_purchase_does_not_bounce"
+   ],
+   "play": "",
+   "hash": "65102754b5b0",
+   "text": "**Lượt kết thúc**: thanh ẩn khi popup kết thúc lượt hiện; chạm trong khoảng giữa thành về 0 máu và lúc popup hiện không mua được (`purchase-rules`).",
+   "title": "Lượt kết thúc",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:23"
+  },
+  "edge-luot-moi": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.New_run_with_another_team_rebuilds_the_hero_buttons"
+   ],
+   "play": "",
+   "hash": "732e9daf76a3",
+   "text": "**Lượt mới**: thanh tạo lại 6 nút theo đội mới.",
+   "title": "Lượt mới",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:24"
+  },
+  "edge-nghi-giua-dot": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Between_waves_the_bar_stays_up_and_buttons_follow_the_coins"
+   ],
+   "play": "",
+   "hash": "0f8987233823",
+   "text": "**Nghỉ giữa đợt**: thanh hiện, nút sáng/mờ như thường.",
+   "title": "Nghỉ giữa đợt",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:27"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills",
+    "UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups",
+    "UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus",
+    "HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
+   ],
+   "play": "",
+   "hash": "024ea6eb98dc",
+   "text": "## Làm gì\n- Khi trận bắt đầu, nhận danh sách 6 mục theo thứ tự từ `feature-upgrade/upgrade-list/item-set` và tạo đúng 6 nút theo thứ tự đó.\n- Xếp hai nhóm dọc theo mép dưới màn hình (`feature-hud-upgrade/bar-layout`):\n  - Nhóm hero: `hero-1`, `hero-2`, `hero-3`.\n  - Nhóm thành: `castle-health`, `castle-attack`, `castle-skill`.\n- Giữa hai nhóm có khoảng trống. Chỗ cụ thể của từng nhóm trên mép dưới, cỡ nút: do người làm giao diện quyết.\n- Thanh hiện suốt trận; ẩn khi popup kết thúc lượt hiện.\n- Nội dung từng nút (hình, cấp, giá, sáng/mờ): `feature-hud-upgrade/button-state/button-display`.\n\nMỗi nút đại diện cho:\n| Nút | Đại diện cho | Mua xong thì |\n|---|---|---|\n| Hero 1, 2, 3 | Hero ở chỗ đó trong đội | Hero đó lên một cấp: máu, sát thương, tốc độ đánh tăng |\n| Máu | Máu thành | Máu tối đa và máu hiện tại của thành +150 |\n| Sức đánh | Đòn tự bắn của thành | Sát thương mỗi phát tự bắn tăng |\n| Kĩ năng | Cả ba kĩ năng thành (Sấm sét, Băng giá, Cổ vũ) | Cả ba kĩ năng mạnh hơn, hồi chiêu không đổi |\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số nút | 6 | nút | 3 hero + 3 thành (bộ số chung) |\n| Số nhóm | 2 | nhóm | Vòng 3 |\n| Khoảng trống giữa hai nhóm | rộng hơn khoảng cách giữa hai nút cùng nhóm | | Đủ thấy hai nhóm; độ rộng cụ thể là việc giao diện |\n| Số lần thanh ẩn trong trận | 0 | lần | Luôn hiện (vòng 3) |\n| Tỉ lệ màn hình phải kiểm | 16:9 và 20:9 | | Hai tỉ lệ điện thoại cầm ngang phổ biến |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số nút | 6 | 6 | 6 |\n| Tỉ lệ màn hình được kiểm | 16:9 | 16:9 và 20:9 | 16:9, 20:9 và 4:3 |\n| Khoảng trống giữa hai nhóm | có | có | có, đủ art |\n| Nhãn tên nhóm (\"Hero\", \"Thành\") | không | không | tuỳ người làm giao diện |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "HudUpgrade",
+   "at": "2026-11-25 11:38:29"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:37:45",
+   "id": "six-buttons",
+   "state": "doing",
+   "by": "HudUpgrade",
+   "note": "gắn test có sẵn của UpgradeBarPresenter"
+  },
+  {
+   "at": "2026-11-25 11:38:08",
+   "id": "six-buttons",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills, HudUpgradeSessionTests.Bar_opens_when_session_runs_and_is_removed_when_session_ends"
+  },
+  {
+   "at": "2026-11-25 11:38:09",
+   "id": "hero-group",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills, UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups"
+  },
+  {
+   "at": "2026-11-25 11:38:10",
+   "id": "castle-group",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills, UpgradeBarTests.Each_button_picture_is_its_own_hero_or_castle_icon"
+  },
+  {
+   "at": "2026-11-25 11:38:12",
+   "id": "group-gap",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
+  },
+  {
+   "at": "2026-11-25 11:38:13",
+   "id": "show-when",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus, HudUpgradeSessionTests.Bar_shows_when_run_starts_a_frame_after_the_session_runs, HudUpgradeSessionTests.Bar_shows_when_the_step_turns_playing_before_the_items_arrive, HudUpgradeSessionTests.Bar_shows_when_items_arrive_after_step_changed_but_before_its_event"
+  },
+  {
+   "at": "2026-11-25 11:38:17",
+   "id": "no-cover",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "Play scene Game, chụp màn hình ở 16:9: thanh nằm ở dải dưới y 900-1080, dải đất chiến trường nằm trên y 900, không phần nào dưới thanh"
+  },
+  {
+   "at": "2026-11-25 11:38:19",
+   "id": "edge-doi-khong-du-3-hero",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_keeps_one_button_per_shop_item_even_for_a_hero_it_has_no_name_for, UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills"
+  },
+  {
+   "at": "2026-11-25 11:38:20",
+   "id": "edge-hero-guc",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level, UpgradeBarTests.Level_or_price_change_does_not_rebuild_the_buttons"
+  },
+  {
+   "at": "2026-11-25 11:38:21",
+   "id": "edge-tam-dung",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus, UpgradeBarTests.Every_button_dims_while_shop_is_closed_by_pause"
+  },
+  {
+   "at": "2026-11-25 11:38:23",
+   "id": "edge-luot-ket-thuc",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus, UpgradeBarTests.Tapping_a_dim_button_sends_no_purchase_and_no_bounce, UpgradeBarTests.Rejected_purchase_does_not_bounce"
+  },
+  {
+   "at": "2026-11-25 11:38:24",
+   "id": "edge-luot-moi",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.New_run_with_another_team_rebuilds_the_hero_buttons"
+  },
+  {
+   "at": "2026-11-25 11:38:27",
+   "id": "edge-nghi-giua-dot",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Between_waves_the_bar_stays_up_and_buttons_follow_the_coins"
+  },
+  {
+   "at": "2026-11-25 11:38:29",
+   "id": "params",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills, UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups, UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
+  }
+ ]
+}

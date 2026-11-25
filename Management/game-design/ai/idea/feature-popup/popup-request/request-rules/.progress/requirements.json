@@ -1,7 +1,7 @@
 {
  "items": {
   "preload": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.Participant_LoadsByPreparingThePopups_RunsThenDisposes",
@@ -11,11 +11,11 @@
    "hash": "fb1903e00112",
    "text": "Mọi popup có id trong danh sách của scene được chuẩn bị ở bước tải, nên xin mở là popup hiện ngay trong khung hình đó",
    "title": "Mọi popup có id trong danh sách của scene được chuẩn bị ở bước tải, nên xin mở là popup hiện ngay trong khung hình đó",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:54:51"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "unknown-id": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.Show_IdTheSceneDoesNotHave_ShowsNothingAndLogsAnErrorNamingTheId"
@@ -24,11 +24,11 @@
    "hash": "41386dd18afe",
    "text": "Xin mở id không có trong danh sách của scene thì không hiện gì và ghi lỗi nêu id đó\nKhông âm thầm bỏ qua.",
    "title": "Xin mở id không có trong danh sách của scene thì không hiện gì và ghi lỗi nêu id đó",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:54:52"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "close-twice": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.Close_ClosedUnknownOrDefaultHandle_IsIgnored"
@@ -37,11 +37,11 @@
    "hash": "b9d0aac9ac0f",
    "text": "Xin đóng một popup đã đóng thì bỏ qua, không lỗi\nHai đường đóng cùng lúc (ví dụ bấm nút và lượt kết thúc) không gây lỗi.",
    "title": "Xin đóng một popup đã đóng thì bỏ qua, không lỗi",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:54:53"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "edge-xin-dong-popup-da-dong-hoac-chua-tung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.Close_ClosedUnknownOrDefaultHandle_IsIgnored"
@@ -50,11 +50,11 @@
    "hash": "17154c1eff29",
    "text": "**Xin đóng popup đã đóng hoặc chưa từng mở**: bỏ qua, không lỗi.",
    "title": "Xin đóng popup đã đóng hoặc chưa từng mở",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:54:58"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "dispose-silent": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.SessionEnds_EveryPopupGoes_AndNoneOpensAfterwards",
@@ -64,11 +64,11 @@
    "hash": "3bea0e877b97",
    "text": "Rời scene thì mọi popup đang mở bị huỷ, không popup nào báo bấm nút cho feature gọi",
    "title": "Rời scene thì mọi popup đang mở bị huỷ, không popup nào báo bấm nút cho feature gọi",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:54:59"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "edge-roi-scene-khi-co-popup-mo": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.SessionEnds_EveryPopupGoes_AndNoneOpensAfterwards",
@@ -78,11 +78,11 @@
    "hash": "25abbf10beb7",
    "text": "**Rời scene khi có popup mở**: popup bị huỷ, không báo bấm nút; feature gọi không nhận gì thêm từ popup đó.",
    "title": "Rời scene khi có popup mở",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:55:01"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "edge-xin-mo-id-dang-mo": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.Show_IdThatIsAlreadyOpen_IsRefusedWithAWarning_AndDoesNotComeToTheTop"
@@ -91,11 +91,11 @@
    "hash": "8efd9411c854",
    "text": "**Xin mở id đang mở**: từ chối (`same-id-once` ở `feature-popup/popup-layer/stack-rules`).",
    "title": "Xin mở id đang mở",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:55:02"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "edge-feature-goi-xin-mo-truoc-khi-scene-vao": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.Show_BeforeTheSceneRuns_IsRefusedWithAnError",
@@ -105,11 +105,11 @@
    "hash": "96f811392600",
    "text": "**Feature gọi xin mở trước khi scene vào bước chạy**: từ chối, ghi lỗi; popup chỉ mở được khi scene đang chạy.",
    "title": "Feature gọi xin mở trước khi scene vào bước chạy",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:55:05"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "edge-id-sai-dang-khong-co-thieu-owner-hay": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.CatalogPrefabs_Prepare_FailsNamingTheId_ForABadIdANonPrefabOrADuplicate",
@@ -119,11 +119,11 @@
    "hash": "d1444e4fccf3",
    "text": "**Id sai dạng (không có `/`, thiếu `Owner` hay `Name`)**: lỗi ngay ở bước tải, nêu id.",
    "title": "Id sai dạng (không có `/`, thiếu `Owner` hay `Name`)",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:55:06"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "edge-hai-feature-khai-cung-mot-id": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupServiceTests.CatalogPrefabs_Prepare_FailsNamingTheId_ForABadIdANonPrefabOrADuplicate"
@@ -132,11 +132,11 @@
    "hash": "15ca575d4424",
    "text": "**Hai feature khai cùng một id**: lỗi ở bước tải, nêu id trùng.",
    "title": "Hai feature khai cùng một id",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:55:07"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "caller-one-press": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupCheatTests.SamplePopup_CloseButton_ClosesItLikeAnyCaller_AndASecondClickIsIgnored"
@@ -145,11 +145,11 @@
    "hash": "48e27fae557e",
    "text": "Feature gọi chỉ xử lí lần bấm nút đầu tiên của mỗi lần mở popup, các lần bấm sau tới khi đóng đều bỏ qua\nChặn bấm đúp làm chơi lại hai lần. Dịch vụ chỉ chuyển lần bấm, việc bỏ qua là của feature gọi.",
    "title": "Feature gọi chỉ xử lí lần bấm nút đầu tiên của mỗi lần mở popup, các lần bấm sau tới khi đóng đều bỏ qua",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:55:08"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "edge-bam-nut-ngay-roi-bam-tiep-nut-khac": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupCheatTests.SamplePopup_CloseButton_ClosesItLikeAnyCaller_AndASecondClickIsIgnored"
@@ -158,19 +158,22 @@
    "hash": "29ca82ca6813",
    "text": "**Bấm nút ngay rồi bấm tiếp nút khác trước khi popup đóng**: feature gọi chỉ xử lí lần đầu.",
    "title": "Bấm nút ngay rồi bấm tiếp nút khác trước khi popup đóng",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:55:09"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:25"
   },
   "edge-id-co-nhung-asset-thieu": {
-   "state": "doing",
+   "state": "done",
    "note": "viết test mới cho mục catalog không có asset, chờ gỡ chặn worktree",
-   "tests": [],
+   "tests": [
+    "PopupServiceTests.CatalogPrefabs_Prepare_IdListedWithoutItsAsset_FailsTheLoadNamingTheId",
+    "PopupServiceTests.Participant_LoadFails_WhenAPopupOfTheSceneHasNoAsset"
+   ],
    "play": "",
    "hash": "0059c5a8c513",
    "text": "**Id có nhưng asset thiếu**: lỗi ngay ở bước tải, scene Game không chạy; không chờ tới lúc mở mới báo.",
    "title": "Id có nhưng asset thiếu",
    "by": "_Services/Popup",
-   "at": "2026-11-25 10:55:25"
+   "at": "2026-11-25 11:36:02"
   }
  },
  "log": [
@@ -264,6 +267,97 @@
    "state": "doing",
    "by": "_Services/Popup",
    "note": "viết test mới cho mục catalog không có asset, chờ gỡ chặn worktree"
+  },
+  {
+   "at": "2026-11-25 11:36:02",
+   "id": "edge-id-co-nhung-asset-thieu",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupServiceTests.CatalogPrefabs_Prepare_IdListedWithoutItsAsset_FailsTheLoadNamingTheId, PopupServiceTests.Participant_LoadFails_WhenAPopupOfTheSceneHasNoAsset"
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "preload",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "unknown-id",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "close-twice",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "dispose-silent",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "caller-one-press",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "edge-id-sai-dang-khong-co-thieu-owner-hay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "edge-hai-feature-khai-cung-mot-id",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "edge-xin-mo-id-dang-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "edge-xin-dong-popup-da-dong-hoac-chua-tung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "edge-bam-nut-ngay-roi-bam-tiep-nut-khac",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "edge-roi-scene-khi-co-popup-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:25",
+   "id": "edge-feature-goi-xin-mo-truoc-khi-scene-vao",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

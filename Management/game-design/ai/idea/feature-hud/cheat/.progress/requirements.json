@@ -1,7 +1,7 @@
 {
  "items": {
   "mid-battle": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test có sẵn của cheat mid-battle",
    "tests": [
     "HudSessionTests.CheatButtonShowsTheWholeMidBattleState",
@@ -14,11 +14,11 @@
    "hash": "9d31746133cb",
    "text": "Đợt 7 vừa bắt đầu, thành còn 30% máu, Băng giá đang hồi\nÉp: máu thành 300/1000, tiền 245, đợt 7 vừa bắt đầu (thông báo \"Đợt 7\" đang hiện); Sấm sét sẵn sàng, Băng giá đang hồi còn 12 trên 35 giây, Cổ vũ sẵn sàng. Có đủ mọi thành phần của HUD: nút tạm dừng, ô tiền, thanh máu kèm số, ô đợt, thông báo đợt, 3 nút kĩ năng ở cả hai trạng thái sẵn sàng và đang hồi.",
    "title": "Đợt 7 vừa bắt đầu, thành còn 30% máu, Băng giá đang hồi",
-   "by": "Hud",
-   "at": "2026-11-25 10:54:57"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSessionTests.CheatDoesNothingOutsideARunningBattle",
@@ -29,8 +29,8 @@
    "hash": "68183bb3c0da",
    "text": "## Làm gì\n- Ở bản dev, chọn state `mid-battle` thì game dựng trận với máu thành, tiền, đợt và hồi chiêu như ép, không cần chơi tới.\n- Giá trị ép đi qua đúng đường của game: máu và hồi chiêu qua `feature-castle`, tiền qua `feature-wallet`, đợt qua `feature-wave`; HUD chỉ hiện như thường (`feature-hud/hud-status/status-spec`, `feature-hud/hud-skill-button/skill-button-spec`).\n- Code cheat nằm trong thư mục `Hud`, sau cờ dev; không lọt vào bản phát hành.",
    "title": "Số và việc của node (Làm gì)",
-   "by": "Hud",
-   "at": "2026-11-25 10:55:01"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:09"
   }
  },
  "log": [
@@ -54,6 +54,20 @@
    "state": "done",
    "by": "Hud",
    "note": "HudSessionTests.CheatDoesNothingOutsideARunningBattle, HudSessionTests.CheatStartsTheWaveBeforeSettingHealthAndCooldowns, HudSessionTests.CheatButtonShowsTheWholeMidBattleState"
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "mid-battle",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:09",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

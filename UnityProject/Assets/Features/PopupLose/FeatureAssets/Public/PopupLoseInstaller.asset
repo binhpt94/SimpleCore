@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6852d8f5d79719849b0860c0f193629d, type: 3}
   m_Name: PopupLoseInstaller
   m_EditorClassIdentifier: Game.PopupLose.Internal::Game.PopupLose.PopupLoseInstaller
-  _cheat: 1
+  _cheat: 0

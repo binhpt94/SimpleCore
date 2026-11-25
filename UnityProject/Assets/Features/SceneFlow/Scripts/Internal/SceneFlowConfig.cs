@@ -12,8 +12,11 @@ namespace Game.SceneFlow
         [Tooltip("Shown when one feature fails to load; {0} is replaced by the feature's name.")]
         [SerializeField] private string featureFailedMessage;
         [SerializeField, Min(0f)] private float minLoadingScreenSeconds;
+        [Tooltip("A switch still going after this many seconds logs a performance warning. It does not stop the switch.")]
+        [SerializeField, Min(0f)] private float slowSwitchWarningSeconds;
 
         internal SceneFlowSettings Settings => new SceneFlowSettings(loadingScene, gameScene, loadFailedMessage,
-            featureFailedMessage, TimeSpan.FromSeconds(minLoadingScreenSeconds));
+            featureFailedMessage, TimeSpan.FromSeconds(minLoadingScreenSeconds),
+            TimeSpan.FromSeconds(slowSwitchWarningSeconds));
     }
 }

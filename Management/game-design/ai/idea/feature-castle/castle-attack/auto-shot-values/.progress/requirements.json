@@ -1,0 +1,250 @@
+{
+ "items": {
+  "shot-values": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleAutoShotTests.First_enemy_in_range_is_shot_at_once_for_ten_damage",
+    "CastleAutoShotTests.Castle_shoots_once_per_second",
+    "CastleAutoShotTests.Enemies_beyond_six_units_from_the_castle_edge_are_not_shot"
+   ],
+   "play": "",
+   "hash": "ec3db968c0e4",
+   "text": "Mỗi phát trừ 10 máu, 1 phát mỗi 1.0s, tầm 6u tính từ mép thành\nTầm 6u phủ x từ 1.5u tới 7.5u mỗi bên, chưa tới một nửa khoảng đất 14.5u mỗi bên, nên quái ở xa vẫn là việc của hero. 10 sát thương hạ Lính đợt 1 (40 máu) sau 4 phát.",
+   "title": "Mỗi phát trừ 10 máu, 1 phát mỗi 1.0s, tầm 6u tính từ mép thành",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:06"
+  },
+  "shot-target-rule": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleAutoShotTests.Castle_shoots_the_enemy_nearest_its_edge_on_either_side",
+    "CastleAutoShotTests.Target_is_picked_again_for_every_shot_so_a_nearer_newcomer_is_shot_first"
+   ],
+   "play": "",
+   "hash": "a3547b3f8739",
+   "text": "Mục tiêu là quái còn sống có khoảng cách tới mép thành nhỏ nhất, không quá 6u, xét cả hai bên\nKhoảng cách theo định nghĩa chung ở `feature-hero/hero-stats/hero-level-values` (khoảng trống giữa hai mép hộp). Bằng nhau thì chọn quái ra trước. Mỗi lần sắp bắn thì chọn lại, nên quái mới tới gần hơn được bắn trước. Đã loại: giữ mục tiêu tới khi chết (quái sát thành bị bỏ mặc).",
+   "title": "Mục tiêu là quái còn sống có khoảng cách tới mép thành nhỏ nhất, không quá 6u, xét cả hai bên",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:10"
+  },
+  "shot-timer": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleAutoShotTests.First_enemy_in_range_is_shot_at_once_for_ten_damage",
+    "CastleAutoShotTests.With_nothing_in_range_the_timer_waits_ready_and_fires_as_soon_as_an_enemy_comes_in"
+   ],
+   "play": "",
+   "hash": "3023741b3a93",
+   "text": "Bộ đếm 1.0s chạy liên tục; có mục tiêu và đã đủ 1.0s kể từ phát trước thì bắn ngay\nPhát đầu tiên của trận bắn ngay khi có quái đầu tiên vào tầm. Không có quái trong tầm thì không bắn và bộ đếm dừng ở mức sẵn sàng.",
+   "title": "Bộ đếm 1.0s chạy liên tục; có mục tiêu và đã đủ 1.0s kể từ phát trước thì bắn ngay",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:13"
+  },
+  "edge-hai-quai-cung-khoang-cach-hai-ben-hoac": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleAutoShotTests.Equal_distance_goes_to_the_enemy_that_came_first"
+   ],
+   "play": "",
+   "hash": "d40b2165b6bb",
+   "text": "Hai quái cùng khoảng cách (hai bên, hoặc chồng nhau): chọn quái ra trước (thứ tự sinh nhỏ hơn).",
+   "title": "Hai quái cùng khoảng cách (hai bên, hoặc chồng nhau)",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:14"
+  },
+  "edge-quai-bi-bang-gia-lam-cham": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleAutoShotTests.Slowed_enemies_change_nothing_for_the_auto_shot"
+   ],
+   "play": "",
+   "hash": "87d4d343ee12",
+   "text": "Quái bị Băng giá làm chậm: không đổi gì với đòn tự bắn.",
+   "title": "Quái bị Băng giá làm chậm",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:16"
+  },
+  "edge-thanh-bi-pha": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleAutoShotTests.Castle_does_not_shoot_after_it_fell"
+   ],
+   "play": "",
+   "hash": "735bb03bc720",
+   "text": "Thành bị phá: ngừng bắn ngay, kể cả đã đủ thời gian chờ trong cùng khung hình.",
+   "title": "Thành bị phá",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:18"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleConfigTests.Auto_shot_numbers_match_the_design"
+   ],
+   "play": "",
+   "hash": "089612c2e64c",
+   "text": "## Làm gì\n- Mỗi khung hình: nếu thành còn đứng, không tạm dừng, đã đủ thời gian chờ và có quái trong tầm thì bắn.\n- Chọn mục tiêu: quái còn sống, trên màn (tâm |x| ≤ 16u), khoảng cách tới mép thành gần nhất ≤ 6u; nhỏ nhất thì chọn.\n- Trừ máu mục tiêu ngay lúc bắn bằng sức đánh hiện tại của thành (lv1 là 10, cộng nâng cấp ở `feature-castle/castle-upgrade-effects`).\n- Hiện hình viên đạn bay từ mép thành phía mục tiêu tới mục tiêu trong 0.15s; hình biến mất khi tới nơi hoặc khi mục tiêu đã biến mất.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Sát thương lv1 | 10 | máu/phát | Bộ số chung; Lính đợt 1 cần 4 phát |\n| Giây mỗi phát | 1.0 | s | Bộ số chung; đủ chậm để không thay hero |\n| Tầm | 6 | u, tính từ mép thành | Phủ x 1.5→7.5u mỗi bên; ngắn hơn khoảng đất 14.5u mỗi bên |\n| Số mục tiêu mỗi phát | 1 | quái | Luật vòng 3 |\n| Thời gian hình đạn bay | 0.15 | s | Dự kiến; chỉ để nhìn |\n| Phạm vi chọn | tâm quái |x| ≤ 16 | u | Không bắn quái chưa vào màn |\n\nCân bằng dự kiến: 10 sát thương/s ở lv1. Đợt 10, Lính 76 máu cần 8 phát; thành một mình không giữ được nếu hero dồn hết về một bên, đúng ý \"tuyến cuối\".\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Sát thương lv1 | 10 | 10 (chỉnh sau chơi thử) | theo số đã chỉnh |\n| Giây mỗi phát | 1.0 | 1.0 | theo số đã chỉnh |\n| Tầm | 6u | 6u | theo số đã chỉnh |\n| Hình đạn | 1 sprite di chuyển thẳng 0.15s | như IDEA, thêm nháy ở mục tiêu khi trúng | hiệu ứng bắn và trúng riêng, âm thanh |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:20"
+  },
+  "edge-phat-ban-lam-quai-ve-0-mau": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Khi Play: thanh ban ha mot Linh, vi tang tien nhu khi hero ha. Phan cua thanh la goi IEnemyField.Damage, tra tien do Enemy",
+   "hash": "9f309e012321",
+   "text": "Phát bắn làm quái về ≤0 máu: quái bị hạ và cho tiền như mọi quái (`feature-enemy/enemy-reward`).",
+   "title": "Phát bắn làm quái về ≤0 máu",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:22"
+  },
+  "shot-instant": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSessionTests.Shot_drawing_flies_for_fifteen_hundredths_of_a_second_after_the_damage_was_dealt",
+    "CastleAutoShotTests.Shot_flies_from_the_castle_edge_on_the_target_side"
+   ],
+   "play": "",
+   "hash": "fbd0ccf4fa25",
+   "text": "Sát thương tính ngay lúc bắn; hình viên đạn bay tới mục tiêu trong 0.15s chỉ để nhìn\nKhông có đạn trượt, không có đạn bay tới quái đã chết. Đã loại: đạn bay thật có thời gian (thêm trường hợp mục tiêu chết giữa đường).",
+   "title": "Sát thương tính ngay lúc bắn; hình viên đạn bay tới mục tiêu trong 0.15s chỉ để nhìn",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:52"
+  },
+  "edge-muc-tieu-bi-hero-ha-trong-0-15s": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSessionTests.Shot_drawing_vanishes_when_its_target_is_defeated_by_someone_else"
+   ],
+   "play": "",
+   "hash": "a1c85a3e880d",
+   "text": "Mục tiêu bị hero hạ trong 0.15s hình đạn đang bay: sát thương đã tính lúc bắn; hình đạn biến mất ngay, không chuyển sang quái khác.",
+   "title": "Mục tiêu bị hero hạ trong 0.15s hình đạn đang bay",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:53"
+  },
+  "edge-tam-dung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSessionTests.Nothing_moves_while_paused",
+    "CastleSessionTests.Shot_timer_stands_still_while_paused_and_goes_on_from_there"
+   ],
+   "play": "",
+   "hash": "ca44fc701858",
+   "text": "Tạm dừng: bộ đếm dừng, hình đạn đứng yên; bỏ tạm dừng thì chạy tiếp từ chỗ dừng.",
+   "title": "Tạm dừng",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:54"
+  },
+  "edge-giua-hai-dot-con-quai-sot-trong-tam": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSessionTests.Castle_keeps_shooting_through_the_rest_between_two_waves"
+   ],
+   "play": "",
+   "hash": "e611226104f3",
+   "text": "Giữa hai đợt còn quái sót trong tầm: vẫn bắn.",
+   "title": "Giữa hai đợt còn quái sót trong tầm",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:55"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:39:06",
+   "id": "shot-values",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.First_enemy_in_range_is_shot_at_once_for_ten_damage, CastleAutoShotTests.Castle_shoots_once_per_second, CastleAutoShotTests.Enemies_beyond_six_units_from_the_castle_edge_are_not_shot"
+  },
+  {
+   "at": "2026-11-25 11:39:10",
+   "id": "shot-target-rule",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.Castle_shoots_the_enemy_nearest_its_edge_on_either_side, CastleAutoShotTests.Target_is_picked_again_for_every_shot_so_a_nearer_newcomer_is_shot_first"
+  },
+  {
+   "at": "2026-11-25 11:39:13",
+   "id": "shot-timer",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.First_enemy_in_range_is_shot_at_once_for_ten_damage, CastleAutoShotTests.With_nothing_in_range_the_timer_waits_ready_and_fires_as_soon_as_an_enemy_comes_in"
+  },
+  {
+   "at": "2026-11-25 11:39:14",
+   "id": "edge-hai-quai-cung-khoang-cach-hai-ben-hoac",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.Equal_distance_goes_to_the_enemy_that_came_first"
+  },
+  {
+   "at": "2026-11-25 11:39:16",
+   "id": "edge-quai-bi-bang-gia-lam-cham",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.Slowed_enemies_change_nothing_for_the_auto_shot"
+  },
+  {
+   "at": "2026-11-25 11:39:18",
+   "id": "edge-thanh-bi-pha",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.Castle_does_not_shoot_after_it_fell"
+  },
+  {
+   "at": "2026-11-25 11:39:20",
+   "id": "params",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Auto_shot_numbers_match_the_design"
+  },
+  {
+   "at": "2026-11-25 11:39:22",
+   "id": "edge-phat-ban-lam-quai-ve-0-mau",
+   "state": "done",
+   "by": "Castle",
+   "note": "Khi Play: thanh ban ha mot Linh, vi tang tien nhu khi hero ha. Phan cua thanh la goi IEnemyField.Damage, tra tien do Enemy"
+  },
+  {
+   "at": "2026-11-25 11:39:52",
+   "id": "shot-instant",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSessionTests.Shot_drawing_flies_for_fifteen_hundredths_of_a_second_after_the_damage_was_dealt, CastleAutoShotTests.Shot_flies_from_the_castle_edge_on_the_target_side"
+  },
+  {
+   "at": "2026-11-25 11:39:53",
+   "id": "edge-muc-tieu-bi-hero-ha-trong-0-15s",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSessionTests.Shot_drawing_vanishes_when_its_target_is_defeated_by_someone_else"
+  },
+  {
+   "at": "2026-11-25 11:39:54",
+   "id": "edge-tam-dung",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSessionTests.Nothing_moves_while_paused, CastleSessionTests.Shot_timer_stands_still_while_paused_and_goes_on_from_there"
+  },
+  {
+   "at": "2026-11-25 11:39:55",
+   "id": "edge-giua-hai-dot-con-quai-sot-trong-tam",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSessionTests.Castle_keeps_shooting_through_the_rest_between_two_waves"
+  }
+ ]
+}

@@ -6,7 +6,6 @@
     "Game.TeamSelect.Internal",
     "Game.Hero.Contracts",
     "Game.Run.Contracts",
-    "Game.Services.SessionScene.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

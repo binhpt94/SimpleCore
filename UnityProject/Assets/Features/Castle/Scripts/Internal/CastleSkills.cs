@@ -53,7 +53,9 @@ namespace Game.Castle
             if (index < 0 || _cooldownLeft[index] > 0f || !CanAct()) return false;
 
             Apply(skill);
-            _cooldownLeft[index] = CooldownOf(skill);
+            // A skill with no cooldown is ready again at once: Ready stays the one source the buttons read.
+            var cooldown = CooldownOf(skill);
+            _cooldownLeft[index] = cooldown <= CastleReach.TimeEpsilon ? 0f : cooldown;
             return true;
         }
 

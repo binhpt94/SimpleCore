@@ -66,6 +66,64 @@ namespace Game.Hero.Tests
         }
 
         [Test]
+        public void While_paused_a_hitting_hero_keeps_its_target_and_its_wait()
+        {
+            _run.StartRun("knight");
+            var enemy = _field.Add(0f);
+            _participant.Step(0.05f);              // first hit, then 1.0s to wait
+            _run.IsPaused = true;
+
+            for (var i = 0; i < 10; i++) _participant.Step(0.5f);
+
+            var hero = _squad.Units[0];
+            Assert.That(_field.Taken(enemy), Is.EqualTo(12f));
+            Assert.That(hero.TargetHandle, Is.EqualTo(enemy));
+            Assert.That(hero.Mode, Is.EqualTo(HeroMode.Attacking));
+            Assert.That(hero.Cooldown, Is.EqualTo(1f).Within(1e-4f));
+        }
+
+        [Test]
+        public void While_paused_the_respawn_wait_stands_still()
+        {
+            _run.StartRun("knight");
+            _squad.Hit(0, 1000f);
+            _run.IsPaused = true;
+
+            for (var i = 0; i < 20; i++) _participant.Step(1f);
+
+            Assert.That(_squad.Units[0].IsStanding, Is.False);
+            Assert.That(_squad.Units[0].RespawnLeft, Is.EqualTo(8f).Within(1e-4f));
+
+            _run.IsPaused = false;
+            _participant.Step(8.05f);
+            Assert.That(_squad.Units[0].IsStanding, Is.True);
+        }
+
+        [Test]
+        public void Once_the_battle_stopped_a_fallen_hero_does_not_respawn()
+        {
+            _run.StartRun("knight");
+            _squad.Hit(0, 1000f);
+            _run.StopBattle();                     // the castle fell the same frame
+
+            for (var i = 0; i < 10; i++) _participant.Step(1f);
+
+            Assert.That(_squad.Units[0].IsStanding, Is.False);
+            Assert.That(_displays.Made[0].Respawns, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void An_enemy_left_over_between_waves_is_still_fought()
+        {
+            _run.StartRun("knight");
+            var leftover = _field.Add(0f);         // no wave signal reaches the heroes; any living enemy counts
+
+            _participant.Step(0.05f);
+
+            Assert.That(_field.Taken(leftover), Is.EqualTo(12f));
+        }
+
+        [Test]
         public void Once_the_battle_stopped_heroes_no_longer_act()
         {
             _run.StartRun("knight");

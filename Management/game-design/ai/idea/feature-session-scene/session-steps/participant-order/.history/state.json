@@ -1,13 +1,13 @@
 {
- "hash": "741dae9e43c1",
+ "hash": "f45d732dc921",
  "items": {
   "loading-list": {
    "hash": "ec6f826570ce",
    "text": "Scene Loading chỉ có một feature tham gia: `feature-scene-flow` (màn Loading)"
   },
   "game-list": {
-   "hash": "fefc7f4eb85f",
-   "text": "Scene Game có 15 feature tham gia theo thứ tự: popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, home, team-select, hud, hud-upgrade, popup-lose, popup-pause\nDịch vụ và luật trận đứng trước, màn hình và popup đứng sau, để feature đứng sau dùng được thứ feature đứng trước đã chuẩn bị. `feature-balance` không tham gia: nó chỉ là số liệu nằm trong cấu hình của từng feature."
+   "hash": "7d50fffd5508",
+   "text": "Scene Game có 12 feature tham gia theo thứ tự: popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose\nDịch vụ và luật trận đứng trước, HUD và popup đứng sau. Không có màn bắt đầu, màn chọn đội, popup tạm dừng: mở game và chơi lại vào thẳng trận với đội mặc định. `feature-balance` chỉ là số liệu, không tham gia."
   },
   "load-timeout": {
    "hash": "af81b03fe983",

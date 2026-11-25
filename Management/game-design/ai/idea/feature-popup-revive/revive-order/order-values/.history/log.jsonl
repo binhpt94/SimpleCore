@@ -1,2 +1,3 @@
 {"at": "2026-11-25 01:22:29", "event": "data", "hash": "80126913acc8", "previous": "", "added": ["popup-after-1s", "revive-anim", "resume-after-anim", "fail-to-lose-now", "held-clear", "offer-flag"], "removed": [], "rewritten": []}
 {"at": "2026-11-25 01:23:28", "event": "promote", "by": "người (Sync)", "hash": "80126913acc8"}
+{"at": "2026-11-25 11:45:01", "event": "promote", "by": "người (Sync)", "hash": "80126913acc8"}

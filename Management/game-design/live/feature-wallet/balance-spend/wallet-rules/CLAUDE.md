@@ -33,7 +33,7 @@ Tiền đầu lượt là số cấu hình của ví (asset cấu hình), không
 - **Tiền vừa đủ đúng bằng giá**: trừ được, số dư về 0, báo số 0.
 - **Cộng và trừ trong cùng khung hình**: xử lí theo thứ tự tới; mỗi lần đổi báo một lần (bên theo dõi có thể nhận hai số trong một khung hình, số cuối là đúng).
 - **Cộng làm vượt 999.999.999**: số dư dừng ở 999.999.999, báo số đó.
-- **Tiền vào sau khi lượt kết thúc** (ví dụ quái gục cùng lúc thành bị phá): ví vẫn cộng bình thường; không ảnh hưởng gì vì lượt mới sẽ đặt lại về 50. Ví không cần biết lượt đã kết thúc.
+- **Tiền vào sau khi lượt kết thúc** (ví dụ quái gục cùng lúc thành bị phá): ví bỏ qua lời gọi cộng, số dư giữ nguyên, không báo số mới; tới lệnh đặt lại của lượt mới thì ví nhận cộng trở lại. Ví biết lượt đã kết thúc qua trạng thái lượt do `feature-run` cấp.
 - **Đặt lại khi số dư đang đúng bằng 50**: vẫn báo một lần để HUD lượt mới chắc chắn hiện đúng.
 - **Yêu cầu trừ giá 0**: số dư >= 0 luôn đúng nên trả "được", số dư không đổi, không báo. Trong game không có món giá 0.
 
@@ -42,6 +42,7 @@ Tiền đầu lượt là số cấu hình của ví (asset cấu hình), không
 - **Xử lí tuần tự, không khoá theo thời gian.** Chặn chi quá tay bằng thứ tự xử lí, không bằng thời gian chờ giữa hai chạm. Đã loại: khoá nút 0.5 s sau mỗi chạm (làm chậm người mua liên tiếp khi đủ tiền).
 - **Số âm là lỗi, không phải "trừ ngược".** Giữ hai thao tác rõ nghĩa. Đã loại: cho phép cộng số âm thay cho trừ.
 - **Có trần số dư.** Chỉ để an toàn số học. Đã loại: không trần.
+- **Tiền vào sau khi lượt kết thúc thì bỏ qua (2026-11-25, sửa lệch, theo @CodeLead qua @Manager).** Bản trước ghi "ví vẫn cộng bình thường", ngược với ý bỏ qua lời gọi sau khi lượt kết thúc ở node mức tiền thu của nhánh nguồn thu, với `feature-run/run-start/start-values` ("tiền tới sau khi lượt cũ kết thúc: bỏ qua, không cộng vào lượt mới") và với nhánh tiền hạ quái của `feature-enemy` ("thành bị phá xử lí trước, không cộng tiền"). Chốt bên bỏ qua: ba node nói cùng một luật. Đã loại: vẫn cộng (tiền lượt cũ có thể lọt vào lượt mới nếu tới sau lệnh đặt lại).
 
 ## Chưa rõ
 - Không có điểm chặn. Tiền đầu lượt 50 hợp lí với giá 30/40/60.

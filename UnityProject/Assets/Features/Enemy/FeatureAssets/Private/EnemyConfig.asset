@@ -25,6 +25,7 @@ MonoBehaviour:
     _range: 1
     _moveSpeed: 1.5
     _coins: 5
+    _available: 1
   - _type: 1
     _width: 1.2
     _height: 0.8
@@ -34,6 +35,7 @@ MonoBehaviour:
     _range: 1
     _moveSpeed: 3
     _coins: 4
+    _available: 1
   - _type: 2
     _width: 2
     _height: 2.5
@@ -43,6 +45,7 @@ MonoBehaviour:
     _range: 1.2
     _moveSpeed: 0.8
     _coins: 15
+    _available: 1
   - _type: 3
     _width: 1
     _height: 1.2
@@ -52,6 +55,7 @@ MonoBehaviour:
     _range: 5
     _moveSpeed: 1.5
     _coins: 6
+    _available: 0
   - _type: 4
     _width: 3
     _height: 3.5
@@ -61,3 +65,4 @@ MonoBehaviour:
     _range: 1.5
     _moveSpeed: 0.6
     _coins: 100
+    _available: 0

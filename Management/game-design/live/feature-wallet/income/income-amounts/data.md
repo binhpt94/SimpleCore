@@ -1,28 +1,25 @@
 ---
 based-on: d2e78e0c80dc
-refs: feature-wallet/balance-spend/wallet-rules@1367fdb78322
+refs: feature-wallet/balance-spend/wallet-rules@1367fdb78322, feature-enemy/enemy-reward/reward-values@30a4a6c88e50, feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-run/run-start/start-values@04f1a45bba47
 frame: none
 ---
 # Mức tiền thu
 
-Bảng tiền hạ từng loại quái và công thức thưởng dọn đợt, cùng các trường hợp quái gục mà có hay không có tiền.
+Ví nhận tiền thu thế nào: cộng đúng số bên báo đưa, ngay khi được gọi, theo thứ tự tới. Mức tiền hạ quái và thưởng dọn đợt do nhánh quái và nhánh đợt quyết, ví không giữ bảng.
 
 ## Ý cốt lõi
 
-### kill-table | AI 8 | Tiền hạ quái: Lính 5, Sói 4, Cung thủ quái 6, Khổng lồ 15, Trùm 100 tiền
-Mức tiền không nhân theo số đợt; đợt sau cho nhiều tiền hơn vì có nhiều quái hơn. Mức tiền là số liệu của từng loại quái trong `feature-enemy`, ví chỉ cộng.
+### amounts-from-caller | AI 8 | Ví không giữ bảng tiền hạ quái hay công thức thưởng dọn đợt; mức tiền do bên báo đưa vào
+Tiền hạ từng loại quái ở `feature-enemy/enemy-reward/reward-values`, thưởng dọn đợt ở `feature-wave/wave-clear/clear-rules`. Đã loại: ví tra bảng theo loại quái hay tự tính thưởng theo số đợt.
 
-### kill-once | AI 8 | Mỗi con quái cho tiền đúng một lần, lúc máu của nó về 0
-Nhiều đòn trúng cùng lúc làm nó gục vẫn chỉ một lần cộng. Ai ra đòn cuối (hero, đòn tự bắn, kĩ năng thành) cũng như nhau.
+### add-once-per-call | AI 8 | Mỗi lần bên báo gọi cộng tiền là đúng một lần cộng, đúng bằng số được đưa
+Ví không gộp, không bỏ, không nhân. Việc mỗi quái hay mỗi đợt chỉ báo một lần là của bên báo.
 
-### kill-only-defeat | AI 7 | Quái biến mất mà không bị hạ thì cho 0 tiền
-Ví dụ quái bị xoá khi lượt kết thúc.
+### income-same-frame | AI 7 | Tiền vào số dư trong cùng khung hình ví được gọi cộng
+Không có độ trễ, không có tiền rơi phải nhặt. Số dư mới được báo ngay theo `feature-wallet/balance-spend/wallet-rules`.
 
-### wave-formula | AI 8 | Thưởng dọn đợt = 20 + 5 × số đợt vừa dọn, tính bằng tiền
-Đợt 1 được 25, đợt 2 được 30, đợt 10 được 70. Đợt đánh số từ 1.
+### add-in-call-order | AI 7 | Nhiều lần cộng trong cùng khung hình được cộng lần lượt theo thứ tự gọi tới
+Ví dụ con quái cuối của đợt gục: tiền con quái tới trước, thưởng dọn đợt tới sau, theo thứ tự của `feature-wave/wave-clear/clear-rules`.
 
-### wave-once | AI 8 | Mỗi đợt cho thưởng đúng một lần, lúc con quái cuối cùng của đợt gục
-Tiền của con quái cuối cộng trước, rồi tới thưởng dọn đợt.
-
-### income-same-frame | AI 7 | Tiền vào số dư trong cùng khung hình quái gục hoặc đợt được dọn
-Không có độ trễ, không có tiền rơi phải nhặt.
+### ignore-after-run-end | AI 6 | Lời gọi cộng tới sau khi lượt đã kết thúc thì ví bỏ qua, số dư giữ nguyên
+Quái gục cùng khung hình thành bị phá không được cộng, theo `feature-enemy/enemy-reward/reward-values` (thành bị phá xử lí trước). Tiền của lượt cũ tới muộn cũng không vào lượt mới (`feature-run/run-start/start-values`).

@@ -1,7 +1,7 @@
 {
  "items": {
   "edge-feature-thu-k-tai-loi": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test EditMode đã có",
    "tests": [
     "SessionSceneLogicTests.WhenAParticipantFailsToLoad_LaterOnesNeverLoad_ThoseReachedCleanUpInReverse_SessionFails",
@@ -12,11 +12,11 @@
    "hash": "8b771feb0575",
    "text": "**Feature thứ k tải lỗi**: không tải feature k+1 trở đi; huỷ feature k (phần đã tải được) rồi k-1 về 1; báo lỗi nêu tên feature k.",
    "title": "Feature thứ k tải lỗi",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 10:53:48"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:17"
   },
   "edge-feature-loi-o-buoc-huy": {
-   "state": "done",
+   "state": "verified",
    "note": "gắn test EditMode đã có",
    "tests": [
     "SessionSceneLogicTests.WhenOneParticipantFailsToCleanUp_TheOthersStillDo_AndSessionIsDisposed"
@@ -25,13 +25,14 @@
    "hash": "9041c44bbbde",
    "text": "**Feature lỗi ở bước huỷ**: ghi lỗi, huỷ tiếp feature đứng trước nó; bước huỷ luôn đi hết danh sách.",
    "title": "Feature lỗi ở bước huỷ",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 10:53:55"
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:39:17"
   },
   "edge-yeu-cau-huy-den-khi-scene-dang-tai": {
-   "state": "rejected",
+   "state": "done",
    "note": "Thiếu thứ tự ngược: cả hai test chỉ có một participant đã tới nên không thấy được huỷ ngược. Thêm ca a và b đã tải, c đang tải thì EndAsync: c không bị bỏ qua, b sau c, a cuối, log đúng dispose c, dispose b, dispose a, và không có load nào sau c",
    "tests": [
+    "SessionSceneLogicTests.EndingWhileTheThirdIsLoading_DisposesTheOneLoadingFirst_ThenTheLoadedOnesInReverse_AndLoadsNoMore",
     "SessionSceneLogicTests.EndingWhileLoading_CancelsTheLoad_LaterOnesNeverLoad_OnlyThoseReachedCleanUp",
     "SessionSceneLogicTests.EndingWhileLoading_WaitsForAParticipantThatIgnoresTheCancel_AtMostUntilTheLimit"
    ],
@@ -39,8 +40,8 @@
    "hash": "ee1993b51a03",
    "text": "**Yêu cầu huỷ đến khi scene đang tải**: chờ feature đang tải xong (hoặc quá 10 giây), rồi huỷ các feature đã tải theo thứ tự ngược.",
    "title": "Yêu cầu huỷ đến khi scene đang tải",
-   "by": "@CodeLead",
-   "at": "2026-11-25 10:55:12"
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 11:36:53"
   },
   "edge-nguoi-choi-roi-game-luc-dang-tai": {
    "state": "done",
@@ -52,6 +53,77 @@
    "title": "Người chơi rời game lúc đang tải",
    "by": "_Services/SessionScene",
    "at": "2026-11-25 10:54:12"
+  },
+  "load-timeout": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "SessionSceneLogicTests.EachParticipantGetsTheConfiguredTimeLimit",
+    "SessionSceneLogicTests.WhenAParticipantLoadsLongerThanTheLimit_ItIsTold_ToStop_LaterOnesNeverLoad_SessionFails",
+    "SessionSceneLogicTests.InstallerAsset_GivesEachParticipantTenSecondsToLoad"
+   ],
+   "play": "",
+   "hash": "af81b03fe983",
+   "text": "Mỗi feature tải tối đa 10 giây (dự kiến); quá thì coi là tải lỗi\nCác feature tải lần lượt theo thứ tự danh sách.",
+   "title": "Mỗi feature tải tối đa 10 giây (dự kiến); quá thì coi là tải lỗi",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 11:36:57"
+  },
+  "run-no-wait": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "SessionSceneLogicTests.RunStep_EveryoneRunsInTheSameCallThatFinishedTheLastLoad_WithoutAnyNewLoadTimer",
+    "SessionSceneLogicTests.WhenEveryoneLoaded_ParticipantsRunInJoinOrder_AndSessionIsRunning"
+   ],
+   "play": "",
+   "hash": "2556f16c88de",
+   "text": "Bước chạy không tải thêm gì và xong trong cùng khung hình\nMọi thứ cần cho view đã có từ bước tải, nên view hiện ra cùng lúc, không thiếu hình.",
+   "title": "Bước chạy không tải thêm gì và xong trong cùng khung hình",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 11:37:00"
+  },
+  "load-or-run-fail": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "SessionSceneLogicTests.WhenAParticipantFailsToLoad_LaterOnesNeverLoad_ThoseReachedCleanUpInReverse_SessionFails",
+    "SessionSceneLogicTests.WhenAParticipantFailsToLoad_ItsFeatureNameIsReportedForTheLoadingScreen",
+    "SessionSceneLogicTests.WhenTheKthParticipantFailsToRun_LaterOnesNeverRun_EveryoneCleansUpFromTheLast_AndTheErrorNamesIt"
+   ],
+   "play": "",
+   "hash": "652033320af5",
+   "text": "Một feature lỗi ở bước tải hoặc chạy thì scene dừng, các feature đã qua bước đó được huỷ theo thứ tự ngược, lỗi nêu tên feature lỗi\nKhông feature nào sau nó được tải hay chạy. Đã loại: bỏ qua feature lỗi rồi chạy tiếp (scene thiếu thứ, lỗi khó lần).",
+   "title": "Một feature lỗi ở bước tải hoặc chạy thì scene dừng, các feature đã qua bước đó được huỷ theo thứ tự ngược, lỗi nêu tên feature lỗi",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 11:37:04"
+  },
+  "edge-feature-thu-k-chay-loi": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "SessionSceneLogicTests.WhenTheKthParticipantFailsToRun_LaterOnesNeverRun_EveryoneCleansUpFromTheLast_AndTheErrorNamesIt"
+   ],
+   "play": "",
+   "hash": "5392f37e45b1",
+   "text": "**Feature thứ k chạy lỗi**: không chạy k+1 trở đi; huỷ từ cuối danh sách về đầu (mọi feature đều đã tải); báo lỗi nêu tên feature k.",
+   "title": "Feature thứ k chạy lỗi",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 11:37:05"
+  },
+  "dispose-never-stops": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "SessionSceneLogicTests.WhenAParticipantFailsToCleanUp_TheErrorNamesIt_AndTheOnesBeforeItStillCleanUpInReverse",
+    "SessionSceneLogicTests.WhenOneParticipantFailsToCleanUp_TheOthersStillDo_AndSessionIsDisposed"
+   ],
+   "play": "",
+   "hash": "704c2558048e",
+   "text": "Một feature lỗi ở bước huỷ thì ghi lỗi nêu tên nó, vẫn huỷ tiếp các feature còn lại\nBước huỷ phải đi hết danh sách để không còn gì sống sót.",
+   "title": "Một feature lỗi ở bước huỷ thì ghi lỗi nêu tên nó, vẫn huỷ tiếp các feature còn lại",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 11:37:06"
   }
  },
  "log": [
@@ -117,6 +189,62 @@
    "state": "rejected",
    "by": "@CodeLead",
    "note": "Thiếu thứ tự ngược: cả hai test chỉ có một participant đã tới nên không thấy được huỷ ngược. Thêm ca a và b đã tải, c đang tải thì EndAsync: c không bị bỏ qua, b sau c, a cuối, log đúng dispose c, dispose b, dispose a, và không có load nào sau c"
+  },
+  {
+   "at": "2026-11-25 11:36:53",
+   "id": "edge-yeu-cau-huy-den-khi-scene-dang-tai",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.EndingWhileTheThirdIsLoading_DisposesTheOneLoadingFirst_ThenTheLoadedOnesInReverse_AndLoadsNoMore, SessionSceneLogicTests.EndingWhileLoading_CancelsTheLoad_LaterOnesNeverLoad_OnlyThoseReachedCleanUp, SessionSceneLogicTests.EndingWhileLoading_WaitsForAParticipantThatIgnoresTheCancel_AtMostUntilTheLimit"
+  },
+  {
+   "at": "2026-11-25 11:36:57",
+   "id": "load-timeout",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.EachParticipantGetsTheConfiguredTimeLimit, SessionSceneLogicTests.WhenAParticipantLoadsLongerThanTheLimit_ItIsTold_ToStop_LaterOnesNeverLoad_SessionFails, SessionSceneLogicTests.InstallerAsset_GivesEachParticipantTenSecondsToLoad"
+  },
+  {
+   "at": "2026-11-25 11:37:00",
+   "id": "run-no-wait",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.RunStep_EveryoneRunsInTheSameCallThatFinishedTheLastLoad_WithoutAnyNewLoadTimer, SessionSceneLogicTests.WhenEveryoneLoaded_ParticipantsRunInJoinOrder_AndSessionIsRunning"
+  },
+  {
+   "at": "2026-11-25 11:37:04",
+   "id": "load-or-run-fail",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.WhenAParticipantFailsToLoad_LaterOnesNeverLoad_ThoseReachedCleanUpInReverse_SessionFails, SessionSceneLogicTests.WhenAParticipantFailsToLoad_ItsFeatureNameIsReportedForTheLoadingScreen, SessionSceneLogicTests.WhenTheKthParticipantFailsToRun_LaterOnesNeverRun_EveryoneCleansUpFromTheLast_AndTheErrorNamesIt"
+  },
+  {
+   "at": "2026-11-25 11:37:05",
+   "id": "edge-feature-thu-k-chay-loi",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.WhenTheKthParticipantFailsToRun_LaterOnesNeverRun_EveryoneCleansUpFromTheLast_AndTheErrorNamesIt"
+  },
+  {
+   "at": "2026-11-25 11:37:06",
+   "id": "dispose-never-stops",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.WhenAParticipantFailsToCleanUp_TheErrorNamesIt_AndTheOnesBeforeItStillCleanUpInReverse, SessionSceneLogicTests.WhenOneParticipantFailsToCleanUp_TheOthersStillDo_AndSessionIsDisposed"
+  },
+  {
+   "at": "2026-11-25 11:39:17",
+   "id": "edge-feature-thu-k-tai-loi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 11:39:17",
+   "id": "edge-feature-loi-o-buoc-huy",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

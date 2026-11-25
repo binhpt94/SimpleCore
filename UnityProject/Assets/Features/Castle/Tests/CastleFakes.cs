@@ -62,6 +62,34 @@ namespace Game.Castle.Tests
             => Alive.Add(new EnemyTarget(handle, default(EnemySide), x, halfWidth, handle));
     }
 
+    internal sealed class FakeView : ICastleView
+    {
+        public readonly List<string> Calls = new List<string>();
+        public bool Visible;
+        public float FlashSeconds, CollapseSeconds, ShotSeconds, ThunderSeconds;
+        public event Action<float> Ticked;
+        public void Tick(float seconds) => Ticked?.Invoke(seconds);
+        public void Place(float halfWidth, float height) => Calls.Add($"place {halfWidth} {height}");
+        public void SetVisible(bool visible) => Visible = visible;
+        public void ResetBody() => Calls.Add("reset");
+        public void FlashHit(float seconds) { FlashSeconds = seconds; Calls.Add("flash"); }
+        public void PopLevelUp(float scale, float seconds) => Calls.Add($"pop {scale} {seconds}");
+        public void Collapse(float seconds) { CollapseSeconds = seconds; Calls.Add("collapse"); }
+        public void ShowShot(int targetHandle, float fromX, float toX, float seconds) { ShotSeconds = seconds; Calls.Add($"shot {targetHandle}"); }
+        public void DropShotsAt(int targetHandle) => Calls.Add($"drop {targetHandle}");
+        public void ShowThunder(float x, float seconds) { ThunderSeconds = seconds; Calls.Add($"thunder {x}"); }
+        public void Advance(float seconds) => Calls.Add("advance");
+        public void ClearEffects() => Calls.Add("clear");
+    }
+
+    internal sealed class FakeSpawner : ICastleViewSpawner
+    {
+        public readonly FakeView View = new FakeView();
+        public bool Despawned;
+        public ICastleView Spawn() => View;
+        public void Despawn(ICastleView view) => Despawned = true;
+    }
+
     internal sealed class FakeHeroSquad : IHeroSquad
     {
         public readonly List<float> Heals = new List<float>();

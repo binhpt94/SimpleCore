@@ -12,81 +12,104 @@
    "at": "2026-11-25 10:56:09"
   },
   "skills-bottom-right": {
-   "state": "doing",
+   "state": "done",
    "note": "cần test vị trí cụm kĩ năng góc dưới phải trên prefab",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.SkillButtonsSitSideBySideInTheBottomRightCornerThunderFrostRally",
+    "HudSkillSlotTests.SlotsSitInTheBottomRightClusterAndTheTrayKeepsAllThree",
+    "HudSkillSlotTests.ThunderAloneStaysInTheLeftSlotAndTheOthersStayEmpty"
+   ],
    "play": "",
    "hash": "aa8f1e97ee75",
    "text": "3 nút kĩ năng gom thành một cụm ở góc dưới bên phải, xếp ngang theo thứ tự Sấm sét, Băng giá, Cổ vũ\nNgón cái phải chạm tới. Cụm này không đổi chỗ trong trận.",
    "title": "3 nút kĩ năng gom thành một cụm ở góc dưới bên phải, xếp ngang theo thứ tự Sấm sét, Băng giá, Cổ vũ",
    "by": "Hud",
-   "at": "2026-11-25 10:56:10"
+   "at": "2026-11-25 11:36:49"
   },
   "strip-never-covered": {
-   "state": "doing",
+   "state": "done",
    "note": "cần test khung các phần HUD không giao dải chiến trường ở 16:9 và 21:9",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.NoHudPartCoversTheBattleStrip"
+   ],
    "play": "",
    "hash": "38dcf83b90f9",
    "text": "Không phần HUD nào chồng lên dải chiến trường, ở mọi tỉ lệ màn hình ngang từ 16:9 tới 21:9\nKiểm bằng cách so khung của từng phần HUD với khung dải chiến trường: không giao nhau.",
    "title": "Không phần HUD nào chồng lên dải chiến trường, ở mọi tỉ lệ màn hình ngang từ 16:9 tới 21:9",
    "by": "Hud",
-   "at": "2026-11-25 10:56:14"
+   "at": "2026-11-25 11:36:54"
   },
   "upgrade-gets-rest": {
-   "state": "doing",
+   "state": "done",
    "note": "cần test mép dưới bên trái cụm kĩ năng để trống cho thanh nâng cấp",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.BottomEdgeLeftOfTheSkillClusterIsLeftFreeForTheUpgradeBar"
+   ],
    "play": "",
    "hash": "27265827682e",
    "text": "Thanh nâng cấp (`feature-hud-upgrade`) dùng phần mép dưới từ cạnh trái tới sát cụm kĩ năng\nHai bên không chồng lên nhau ở bất kì tỉ lệ màn hình nào.",
    "title": "Thanh nâng cấp (`feature-hud-upgrade`) dùng phần mép dưới từ cạnh trái tới sát cụm kĩ năng",
    "by": "Hud",
-   "at": "2026-11-25 10:56:15"
+   "at": "2026-11-25 11:36:53"
   },
   "edge-man-hinh-rat-rong-21-9": {
-   "state": "doing",
+   "state": "done",
    "note": "cần test thứ tự và chỗ các phần ở màn rộng 2520x1080",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.TopRowGoesMoneyThenHealthThenWaveFromLeftToRight",
+    "HudLayoutTests.EveryHudPartStaysOnScreen",
+    "HudLayoutTests.NoHudPartCoversTheBattleStrip"
+   ],
    "play": "",
    "hash": "44bb4aa3e171",
    "text": "**Màn hình rất rộng (21:9):** mép trên giãn ra; tiền và đợt bám về phía máu hay về hai mép là việc của phiên code, miễn thứ tự giữ nguyên và không che dải chiến trường.",
    "title": "Màn hình rất rộng (21:9)",
    "by": "Hud",
-   "at": "2026-11-25 10:56:18"
+   "at": "2026-11-25 11:36:57"
   },
   "edge-popup-mo": {
-   "state": "doing",
+   "state": "done",
    "note": "canvas HUD sortingOrder 10, cần test, popup phải cao hơn",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.HudCanvasSitsAboveTheGameButBelowPopups"
+   ],
    "play": "",
    "hash": "ae1ee5ba9a01",
    "text": "**Popup mở:** popup che lên mọi phần HUD (`feature-popup/popup-layer`).",
    "title": "Popup mở",
    "by": "Hud",
-   "at": "2026-11-25 10:56:19"
+   "at": "2026-11-25 11:37:03"
   },
   "edge-thong-bao-dot-n": {
-   "state": "doing",
+   "state": "done",
    "note": "cần test thông báo nằm trong dải trên dưới máu và không chặn chạm",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.WaveBannerSitsInTheTopBandUnderTheHealthBar",
+    "HudLayoutTests.StatusBoxesAndBannerTakeNoTaps",
+    "HudStatusTests.WaveStartShowsTheBannerForOneAndAHalfSeconds"
+   ],
    "play": "",
    "hash": "5bb57e0ec246",
    "text": "**Thông báo \"Đợt N\":** nằm trong mép trên, ngay dưới máu thành, không lấn xuống dải chiến trường; không chặn chạm, tự tắt sau 1.5 giây (`feature-hud/hud-status/status-spec`).",
    "title": "Thông báo \"Đợt N\"",
    "by": "Hud",
-   "at": "2026-11-25 10:56:24"
+   "at": "2026-11-25 11:36:58"
   },
   "params": {
-   "state": "doing",
+   "state": "done",
    "note": "cần test bố cục trên prefab cho các phần có ở IDEA",
-   "tests": [],
+   "tests": [
+    "HudLayoutTests.NoHudPartCoversTheBattleStrip",
+    "HudLayoutTests.TopRowGoesMoneyThenHealthThenWaveFromLeftToRight",
+    "HudLayoutTests.SkillButtonsSitSideBySideInTheBottomRightCornerThunderFrostRally",
+    "HudSkillSlotTests.ThunderAloneStaysInTheLeftSlotAndTheOthersStayEmpty"
+   ],
    "play": "",
    "hash": "96e46bf5e2aa",
    "text": "## Làm gì\n- Đặt từng phần HUD theo bảng dưới, bám mép và góc màn hình (không bám toạ độ cố định) để chạy đúng ở nhiều tỉ lệ màn hình.\n- Chừa phần mép dưới bên trái cho `feature-hud-upgrade`.\n- Đặt mọi phần trong vùng an toàn của máy.\n\n## Thông số\n| Phần | Mép / góc | Thứ tự | Lí do |\n|---|---|---|---|\n| Nút tạm dừng | Góc trên bên trái | 1 (trái nhất) | Xa cụm kĩ năng (góc dưới phải) và đầu thanh nâng cấp |\n| Tiền | Mép trên, bên trái máu | 2 | Gần thanh nâng cấp hơn để liếc tiền rồi mua |\n| Máu thành | Giữa mép trên | 3 | Thẳng phía trên thành |\n| Đợt | Mép trên, bên phải | 4 (phải nhất) | |\n| Thông báo \"Đợt N\" | Mép trên, ngay dưới máu thành | | Thoáng qua 1.5 giây, không che dải chiến trường |\n| 3 nút kĩ năng | Góc dưới bên phải, xếp ngang | Sấm sét, Băng giá, Cổ vũ | Ngón cái phải |\n| Thanh nâng cấp | Mép dưới, từ cạnh trái tới sát cụm kĩ năng | | `feature-hud-upgrade/bar-layout` |\n\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Tỉ lệ màn hình hỗ trợ | 16:9 tới 21:9, cầm ngang | | Điện thoại phổ biến |\n| Hướng màn hình | chỉ ngang | | Node gốc |\n| Số phần HUD giao với dải chiến trường | 0 | | `layout-clear-strip` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Phần có mặt | Máu, tiền, đợt, cụm kĩ năng giữ đủ 3 chỗ nhưng chỉ có nút Sấm sét (`feature-hud/hud-skill-button/skill-button-spec`) | Thêm thông báo đợt (nút tạm dừng không bắt buộc) | Đủ, có nút tạm dừng |\n| Tỉ lệ màn hình phải kiểm | 16:9 | 16:9 và 20:9 | 16:9 tới 21:9 |\n| Vùng an toàn | Không bắt buộc | Có | Có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "Hud",
-   "at": "2026-11-25 10:56:25"
+   "at": "2026-11-25 11:37:03"
   }
  },
  "log": [
@@ -145,6 +168,55 @@
    "state": "doing",
    "by": "Hud",
    "note": "cần test bố cục trên prefab cho các phần có ở IDEA"
+  },
+  {
+   "at": "2026-11-25 11:36:49",
+   "id": "skills-bottom-right",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.SkillButtonsSitSideBySideInTheBottomRightCornerThunderFrostRally, HudSkillSlotTests.SlotsSitInTheBottomRightClusterAndTheTrayKeepsAllThree, HudSkillSlotTests.ThunderAloneStaysInTheLeftSlotAndTheOthersStayEmpty"
+  },
+  {
+   "at": "2026-11-25 11:36:53",
+   "id": "upgrade-gets-rest",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.BottomEdgeLeftOfTheSkillClusterIsLeftFreeForTheUpgradeBar"
+  },
+  {
+   "at": "2026-11-25 11:36:54",
+   "id": "strip-never-covered",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.NoHudPartCoversTheBattleStrip"
+  },
+  {
+   "at": "2026-11-25 11:36:57",
+   "id": "edge-man-hinh-rat-rong-21-9",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.TopRowGoesMoneyThenHealthThenWaveFromLeftToRight, HudLayoutTests.EveryHudPartStaysOnScreen, HudLayoutTests.NoHudPartCoversTheBattleStrip"
+  },
+  {
+   "at": "2026-11-25 11:36:58",
+   "id": "edge-thong-bao-dot-n",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.WaveBannerSitsInTheTopBandUnderTheHealthBar, HudLayoutTests.StatusBoxesAndBannerTakeNoTaps, HudStatusTests.WaveStartShowsTheBannerForOneAndAHalfSeconds"
+  },
+  {
+   "at": "2026-11-25 11:37:03",
+   "id": "params",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.NoHudPartCoversTheBattleStrip, HudLayoutTests.TopRowGoesMoneyThenHealthThenWaveFromLeftToRight, HudLayoutTests.SkillButtonsSitSideBySideInTheBottomRightCornerThunderFrostRally, HudSkillSlotTests.ThunderAloneStaysInTheLeftSlotAndTheOthersStayEmpty"
+  },
+  {
+   "at": "2026-11-25 11:37:03",
+   "id": "edge-popup-mo",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.HudCanvasSitsAboveTheGameButBelowPopups"
   }
  ]
 }

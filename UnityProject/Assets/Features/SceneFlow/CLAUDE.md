@@ -9,11 +9,13 @@ Thiết kế: `live/feature-scene-flow/scene-list/boot-loading` (màn Loading), 
 - Dùng `ISessionLoadProgress` (contract của SessionScene) của scene Game cho thanh tiến độ và tên feature tải lỗi.
 - Chưa có Contracts: chưa feature nào cần gọi SceneFlow. Ai cần thì đề xuất.
 - Một lớp installer, hai asset trong `FeatureAssets/Public`: `SceneFlowLoadingInstaller` và `SceneFlowGameInstaller`.
-- Bên Loading (`LoadingToGameFlow`): hiện màn hình chờ (thanh ở 0%), nạp Game chồng lên, cho thanh chạy theo `LoadedCount / ParticipantCount` của scene Game, chờ cổng và chờ màn đã hiện đủ thời gian ít nhất (tính từ lúc hiện), rồi kết thúc phiên Loading và gỡ scene Loading.
+- Một lần chuyển (`SceneSwitcher`, theo `scene-request/switch-rules`): kiểm tên (lạ: lỗi; đang chuyển: cảnh báo, không xếp hàng; trùng scene đang chạy: bỏ qua) → hiện lớp che → kết thúc phiên scene cũ → nạp scene mới bằng `LoadSceneMode.Single` (Unity gỡ scene cũ) → chờ cổng của scene mới và thời gian ít nhất → bỏ lớp che. Lớp che chính là `LoadingScreen.prefab`, `DontDestroyOnLoad`, nên sống qua lúc gỡ scene Loading. Chuyển quá `slowSwitchWarningSeconds` (5) thì ghi cảnh báo hiệu năng, vẫn chuyển tiếp. Lỗi thì lớp che ở lại với dòng lỗi, không quay về.
+- Bên Loading (`LoadingToGameFlow`): tham gia duy nhất của scene Loading; ở `Run` xin chuyển sang Game. Không đóng lớp che khi phiên Loading kết thúc.
+- Prefab màn Loading phải có `GraphicRaycaster` ở gốc và `Background` phủ kín, đục, `raycastTarget` bật: đó là thứ chặn chạm (có test).
 - Bên Game (`GameReadySignal`): đặt Game làm scene chính ngay ở `LoadAsync` (để view các feature tạo trong `Run` không rơi vào scene Loading), mở cổng khi tới `Run`, báo lỗi khi phiên Failed. Phải cài SAU CÙNG trong Boot của scene Game; installer bên Game đòi `ISessionLoadProgress` đã đăng ký.
 - Hai scene có registry riêng. `SceneGate` (mang cả `ISessionLoadProgress` của Game) đi qua object `SceneGateCarrier`; bên Loading tìm nó trong các scene đã nạp.
 - Game lỗi: scene Loading ở lại, thanh đứng yên, tên game vẫn hiện, dòng lỗi "Lỗi tải: <tên>" khi biết feature lỗi, không thì thông báo chung. Giới hạn 10 giây mỗi feature là của SessionScene, không phải ở đây.
-- `SceneFlowConfig.asset` (`FeatureAssets/Private`, lúc chạy chỉ đọc): tên scene, thông báo chung, mẫu `featureFailedMessage` ("{0}" là tên feature), `minLoadingScreenSeconds`.
+- `SceneFlowConfig.asset` (`FeatureAssets/Private`, lúc chạy chỉ đọc): tên scene (cũng là danh sách scene được xin chuyển), thông báo chung, mẫu `featureFailedMessage` ("{0}" là tên feature), `minLoadingScreenSeconds`, `slowSwitchWarningSeconds`.
 - Việc đụng Unity (nạp scene, tạo prefab, chờ thời gian thật) nằm sau các interface trong `UnityPorts.cs`.
 - `LoadingScreen.prefab`: Title (tên game), ProgressBar/Fill (Image Filled, cần sprite để fill có tác dụng), Error; bố cục theo frame `boot-loading/main.frame`. Hình nền và logo để giai đoạn FULL.
 - Phải được cài sau SessionScene.

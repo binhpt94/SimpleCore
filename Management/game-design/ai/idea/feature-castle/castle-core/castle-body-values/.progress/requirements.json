@@ -1,0 +1,233 @@
+{
+ "items": {
+  "castle-box": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleBodyTests.Enemies_see_the_castle_centred_at_zero_with_its_half_width",
+    "CastleSessionTests.Castle_appears_full_size_when_a_run_starts",
+    "CastleConfigTests.Castle_body_numbers_match_the_design"
+   ],
+   "play": "",
+   "hash": "4e0c5807c1e2",
+   "text": "Thành là khối 2D đứng yên, tâm ở x=0u, rộng 3u, cao 4u; mép thành ở x=-1.5u và x=+1.5u\nMọi khoảng cách tới thành (tầm quái, tầm tự bắn, vùng Sấm sét) tính từ mép thành, không từ tâm. Đã loại: tính từ tâm (tầm thay đổi khi đổi kích thước hình).",
+   "title": "Thành là khối 2D đứng yên, tâm ở x=0u, rộng 3u, cao 4u; mép thành ở x=-1.5u và x=+1.5u",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:56"
+  },
+  "castle-hp-value": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleBodyTests.Castle_starts_at_full_health",
+    "CastleBodyTests.New_run_puts_the_castle_back_to_full_health_standing"
+   ],
+   "play": "",
+   "hash": "abfb267ba822",
+   "text": "Máu tối đa lúc vào trận là 1000, máu hiện tại bắt đầu bằng 1000\nMột con Lính đợt 1 (5 sát thương/1.0s) phải đứng đánh 200s mới phá được thành; áp lực đến từ số đông và các đợt sau. Không tự hồi; chỉ nâng cấp máu (`feature-castle/castle-upgrade-effects`) làm máu tăng.",
+   "title": "Máu tối đa lúc vào trận là 1000, máu hiện tại bắt đầu bằng 1000",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:57"
+  },
+  "castle-destroyed-once": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleBodyTests.Castle_falling_tells_the_run_it_is_lost_once_before_destroyed",
+    "CastleBodyTests.Destroyed_castle_is_no_longer_a_foe",
+    "CastleAutoShotTests.Castle_does_not_shoot_after_it_fell",
+    "CastleSkillsTests.Skills_cannot_be_used_after_the_castle_fell"
+   ],
+   "play": "",
+   "hash": "52f1771b2c08",
+   "text": "Máu hiện tại nhỏ hơn hoặc bằng 0 thì thành bị phá, báo `feature-run` đúng 1 lần\nSau khi bị phá, thành không nhận thêm sát thương, không tự bắn, không cho dùng kĩ năng, cho tới khi được hồi sinh. Nhiều đòn cùng lúc đưa máu xuống dưới 0 vẫn chỉ báo 1 lần; máu hiện ra là 0, không âm. Hồi sinh rồi bị phá lần nữa thì báo thêm 1 lần.",
+   "title": "Máu hiện tại nhỏ hơn hoặc bằng 0 thì thành bị phá, báo `feature-run` đúng 1 lần",
+   "by": "Castle",
+   "at": "2026-11-25 11:39:59"
+  },
+  "castle-hit-feedback": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSessionTests.Enemy_hit_flashes_the_castle_and_its_fall_collapses_it",
+    "CastleSessionTests.Hit_flash_lasts_a_tenth_of_a_second_and_the_fall_shrinks_over_half_a_second"
+   ],
+   "play": "",
+   "hash": "596acd6245c9",
+   "text": "Thành bị đánh thì nháy 0.1s; bị phá thì thu nhỏ còn 0 trong 0.5s\nNgười chơi thấy ngay thành đang bị đánh dù không nhìn thanh máu. Nháy nhiều đòn liên tiếp thì đặt lại 0.1s, không cộng dồn.",
+   "title": "Thành bị đánh thì nháy 0.1s; bị phá thì thu nhỏ còn 0 trong 0.5s",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:00"
+  },
+  "edge-nhieu-quai-danh-trung-cung-mot-khung-hinh": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleBodyTests.Castle_falling_tells_the_run_it_is_lost_once_before_destroyed"
+   ],
+   "play": "",
+   "hash": "2a2e08cbee56",
+   "text": "Nhiều quái đánh trúng cùng một khung hình: trừ lần lượt; lần đưa máu về ≤0 là lần báo bị phá; các lần sau bị bỏ qua.",
+   "title": "Nhiều quái đánh trúng cùng một khung hình",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:01"
+  },
+  "edge-nang-mau-dung-luc-mau-ve-0-cung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleBodyTests.Health_bought_in_the_frame_the_castle_fell_is_not_applied",
+    "CastleUpgradesTests.Fallen_castle_takes_no_level"
+   ],
+   "play": "",
+   "hash": "f66b696a3547",
+   "text": "Nâng máu đúng lúc máu về 0 cùng khung hình: bị phá xử lý trước; đã bị phá thì không mua được nữa (`feature-run` dừng trận).",
+   "title": "Nâng máu đúng lúc máu về 0 cùng khung hình",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:03"
+  },
+  "edge-mau-hien-tai-co-so-le-sat-thuong": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleBodyTests.Fraction_of_health_left_keeps_the_castle_standing"
+   ],
+   "play": "",
+   "hash": "ed8e802b1b2d",
+   "text": "Máu hiện tại có số lẻ (sát thương quái nhân hệ số đợt): giữ số thực; còn 0.4 máu thì thành chưa bị phá. Cách hiện số là việc của `feature-hud` (làm tròn xuống, nên hiện \"0/1000\" và thanh còn một vệt).",
+   "title": "Máu hiện tại có số lẻ (sát thương quái nhân hệ số đợt)",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:04"
+  },
+  "edge-tam-dung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleSessionTests.Nothing_moves_while_paused"
+   ],
+   "play": "",
+   "hash": "9f7b7337b944",
+   "text": "Tạm dừng: thành không nhận sát thương vì mọi quái đứng yên; hiệu ứng nháy đang chạy cũng dừng.",
+   "title": "Tạm dừng",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:04"
+  },
+  "edge-hero-va-don-cua-chinh-thanh-ki-nang": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleAutoShotTests.Castle_shot_never_hurts_the_castle",
+    "CastleSkillsTests.Thunder_never_hurts_the_castle"
+   ],
+   "play": "",
+   "hash": "2363b4d6662b",
+   "text": "Hero và đòn của chính thành, kĩ năng thành không bao giờ trừ máu thành.",
+   "title": "Hero và đòn của chính thành, kĩ năng thành không bao giờ trừ máu thành.",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:09"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleConfigTests.Castle_body_numbers_match_the_design"
+   ],
+   "play": "",
+   "hash": "e6214ac3bb02",
+   "text": "## Làm gì\n- Đặt một thành 2D đứng yên ở giữa dải đất, chân trên mặt đất (y=0).\n- Giữ máu tối đa và máu hiện tại; nhận sát thương từ quái; báo `feature-run` khi bị phá.\n- Cho `feature-hero/hero-respawn` biết điểm xuất phát của từng chỗ trong đội.\n- Nhận lệnh \"tăng máu\" từ `feature-castle/castle-upgrade-effects` (cộng vào cả máu tối đa và máu hiện tại).\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Tâm thành | x=0 | u | Thành ở giữa màn hình (màn thấy x=-16u tới +16u) |\n| Kích thước | rộng 3 × cao 4 | u | Bộ số chung; đủ lớn để nhận ra giữa các unit cao 0.8-3.5u |\n| Mép thành | x=-1.5 và x=+1.5 | u | Mọi tầm tính từ đây |\n| Máu tối đa lúc vào trận | 1000 | máu | Dự kiến; xem cân bằng ở \"Chưa rõ\" |\n| Tự hồi | 0 | máu/s | Luật vòng 3 |\n| Điểm xuất phát chỗ 1, 2, 3 | -1.5 / +1.5 / -1.5 | x (u) | Chia hai bên, không chồng toàn bộ |\n| Nháy khi bị đánh | 0.1 | s | Đủ thấy, không nhấp nháy liên tục khó chịu |\n| Thu nhỏ khi bị phá | 0.5 | s | Cho người chơi thấy khoảnh khắc thua trước khi `feature-run` báo |\n| Máu khi hồi sinh | 30% máu tối đa lúc đó, làm tròn lên | máu | Người chọn (2026-11-24); 1000 máu tối đa → 300 |\n| Số lần hồi sinh mỗi lượt | 1 | lần | Giữ nghĩa của thua và kỉ lục |\n| Hiện lại khi hồi sinh | phóng từ 0 lên đủ cỡ trong 0.5 | s | Ngược với lúc bị phá, cùng thời gian |\n\nCân bằng dự kiến: đợt 10 có 26 quái, Lính 40×1.9=76 máu, 5×1.9=9.5 sát thương/1.0s. 10 Lính đứng đánh thành cùng lúc trừ 95 máu/s, thành 1000 máu trụ khoảng 10.5s: đủ để người chơi kịp bấm Sấm sét và mua máu.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Máu tối đa lúc vào trận | 1000 | 1000 (chỉnh sau khi chơi thử) | theo số đã chỉnh |\n| Hình thành | 1 sprite gen bằng AI | 1 sprite, có hình khi máu dưới 50% | đủ hình theo mức máu (100%, 50%, 25%) |\n| Phản hồi bị đánh | nháy 0.1s | nháy 0.1s + rung nhẹ 0.1s | đủ hiệu ứng và âm thanh |\n| Phản hồi bị phá | thu nhỏ còn 0 trong 0.5s | như IDEA | hiệu ứng sụp đổ riêng |\n| Hồi sinh 30% máu | không có (chưa có quảng cáo); bị phá là thua | có, mỗi lượt 1 lần | có, mỗi lượt 1 lần |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Castle",
+   "at": "2026-11-25 11:40:10"
+  },
+  "castle-hero-points": {
+   "state": "doing",
+   "note": "cho contract cua CodeLead: Castle dua diem xuat phat va hoi sinh cho Hero, dung sau khi choi duoc IDEA",
+   "tests": [],
+   "play": "",
+   "hash": "fa4fa02ddee5",
+   "text": "Hero xuất phát và hồi sinh ở mép thành: chỗ 1 và 3 ở x=-1.5u, chỗ 2 ở x=+1.5u\nChỗ theo thứ tự hero trong đội đã chọn ở `feature-team-select`. Hai hero ở bên trái, một bên phải; hero sẽ tự đi theo quái gần nhất nên chỗ đứng ban đầu chỉ để đội không chồng lên nhau. Đã loại: cả đội ở x=0 (chồng hình, khó đếm hero).",
+   "title": "Hero xuất phát và hồi sinh ở mép thành: chỗ 1 và 3 ở x=-1.5u, chỗ 2 ở x=+1.5u",
+   "by": "Castle",
+   "at": "2026-11-25 11:42:33"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:39:56",
+   "id": "castle-box",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleBodyTests.Enemies_see_the_castle_centred_at_zero_with_its_half_width, CastleSessionTests.Castle_appears_full_size_when_a_run_starts, CastleConfigTests.Castle_body_numbers_match_the_design"
+  },
+  {
+   "at": "2026-11-25 11:39:57",
+   "id": "castle-hp-value",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleBodyTests.Castle_starts_at_full_health, CastleBodyTests.New_run_puts_the_castle_back_to_full_health_standing"
+  },
+  {
+   "at": "2026-11-25 11:39:59",
+   "id": "castle-destroyed-once",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleBodyTests.Castle_falling_tells_the_run_it_is_lost_once_before_destroyed, CastleBodyTests.Destroyed_castle_is_no_longer_a_foe, CastleAutoShotTests.Castle_does_not_shoot_after_it_fell, CastleSkillsTests.Skills_cannot_be_used_after_the_castle_fell"
+  },
+  {
+   "at": "2026-11-25 11:40:00",
+   "id": "castle-hit-feedback",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSessionTests.Enemy_hit_flashes_the_castle_and_its_fall_collapses_it, CastleSessionTests.Hit_flash_lasts_a_tenth_of_a_second_and_the_fall_shrinks_over_half_a_second"
+  },
+  {
+   "at": "2026-11-25 11:40:01",
+   "id": "edge-nhieu-quai-danh-trung-cung-mot-khung-hinh",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleBodyTests.Castle_falling_tells_the_run_it_is_lost_once_before_destroyed"
+  },
+  {
+   "at": "2026-11-25 11:40:03",
+   "id": "edge-nang-mau-dung-luc-mau-ve-0-cung",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleBodyTests.Health_bought_in_the_frame_the_castle_fell_is_not_applied, CastleUpgradesTests.Fallen_castle_takes_no_level"
+  },
+  {
+   "at": "2026-11-25 11:40:04",
+   "id": "edge-mau-hien-tai-co-so-le-sat-thuong",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleBodyTests.Fraction_of_health_left_keeps_the_castle_standing"
+  },
+  {
+   "at": "2026-11-25 11:40:04",
+   "id": "edge-tam-dung",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSessionTests.Nothing_moves_while_paused"
+  },
+  {
+   "at": "2026-11-25 11:40:09",
+   "id": "edge-hero-va-don-cua-chinh-thanh-ki-nang",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.Castle_shot_never_hurts_the_castle, CastleSkillsTests.Thunder_never_hurts_the_castle"
+  },
+  {
+   "at": "2026-11-25 11:40:10",
+   "id": "params",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Castle_body_numbers_match_the_design"
+  },
+  {
+   "at": "2026-11-25 11:42:33",
+   "id": "castle-hero-points",
+   "state": "doing",
+   "by": "Castle",
+   "note": "cho contract cua CodeLead: Castle dua diem xuat phat va hoi sinh cho Hero, dung sau khi choi duoc IDEA"
+  }
+ ]
+}

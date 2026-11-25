@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="120" height="60">
+  <!-- da det thap xam, chan cham mep duoi (y=60), chiem ~88% be rong, can giua; vien toi 4 px -->
+  <path d="M9 58 Q11 30 41 20 Q75 10 99 28 Q111 38 111 58 Z" fill="#9AA3AD" stroke="#2A2F36" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M22 42 Q26 30 45 26 Q62 22 70 28 Q51 32 37 44 Z" fill="#C6CDD4"/>
+</svg>

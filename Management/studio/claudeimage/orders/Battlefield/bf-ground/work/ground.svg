@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 183" width="1920" height="183">
+  <!-- dai dat: dai co phang mong o tren, dat nau ben duoi; phu kin khung; hoa tiet chu ki 240 px, xa hai mep de lap ngang lien -->
+  <rect x="0" y="0" width="1920" height="183" fill="#A0673A"/>
+  <rect x="0" y="0" width="1920" height="22" fill="#6CB648"/>
+  <rect x="0" y="22" width="1920" height="8" fill="#4E8E34"/>
+  <rect x="0" y="0" width="1920" height="4" fill="#2A1A0D"/>
+  <rect x="0" y="30" width="1920" height="2" fill="#3B2614"/>
+  <!-- soi phang, chu ki 240 px -->
+  <g fill="#7E4E2A">
+    <ellipse cx="60" cy="80" rx="16" ry="7"/><ellipse cx="170" cy="130" rx="12" ry="6"/>
+    <ellipse cx="300" cy="80" rx="16" ry="7"/><ellipse cx="410" cy="130" rx="12" ry="6"/>
+    <ellipse cx="540" cy="80" rx="16" ry="7"/><ellipse cx="650" cy="130" rx="12" ry="6"/>
+    <ellipse cx="780" cy="80" rx="16" ry="7"/><ellipse cx="890" cy="130" rx="12" ry="6"/>
+    <ellipse cx="1020" cy="80" rx="16" ry="7"/><ellipse cx="1130" cy="130" rx="12" ry="6"/>
+    <ellipse cx="1260" cy="80" rx="16" ry="7"/><ellipse cx="1370" cy="130" rx="12" ry="6"/>
+    <ellipse cx="1500" cy="80" rx="16" ry="7"/><ellipse cx="1610" cy="130" rx="12" ry="6"/>
+    <ellipse cx="1740" cy="80" rx="16" ry="7"/><ellipse cx="1850" cy="130" rx="12" ry="6"/>
+  </g>
+</svg>

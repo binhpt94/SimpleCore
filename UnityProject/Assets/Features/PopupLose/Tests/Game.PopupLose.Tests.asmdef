@@ -6,7 +6,6 @@
     "Game.PopupLose.Internal",
     "Game.Run.Contracts",
     "Game.Services.Popup.Contracts",
-    "Game.Services.SessionScene.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

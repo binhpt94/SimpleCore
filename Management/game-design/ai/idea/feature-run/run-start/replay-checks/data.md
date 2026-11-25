@@ -1,6 +1,6 @@
 ---
 based-on: d386ccae4d88
-refs: feature-run/run-start/start-values@04f1a45bba47, feature-run/run-score/score-rules@54a8417a7ccd, feature-popup/popup-request/request-rules@9e6b3fbcf68a, feature-team-select/team-memory@4a24db16dcc6
+refs: feature-run/run-start/start-values@04f1a45bba47, feature-run/run-score/score-rules@54a8417a7ccd, feature-popup/popup-request/request-rules@a51eb270271a, feature-team-select/team-memory@4a24db16dcc6
 frame: none
 ---
 # Kiểm tra chơi lại nhiều lượt
