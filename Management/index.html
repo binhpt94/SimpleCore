@@ -40,22 +40,6 @@
   #topnav a:hover { color: var(--text); }
   #topnav a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
   #topnav a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  .app { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 56px); }
-  #nav {
-    background: var(--panel); border-right: 1px solid var(--line);
-    padding: 8px 12px 20px; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
-  }
-  .group { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 14px 10px 4px; }
-  #nav a {
-    display: flex; justify-content: space-between; gap: 8px; align-items: center;
-    padding: 6px 10px; border-radius: 6px; color: var(--text); text-decoration: none; white-space: nowrap;
-  }
-  #nav a:hover { background: var(--bg); }
-  #nav a[aria-current="page"] { background: var(--accent); color: var(--panel); }
-  #nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex: none; }
-  .dot.bad { background: var(--bad); }
-  #nav a[aria-current="page"] .dot { background: var(--panel); }
   main { padding: 32px 40px 64px; min-width: 0; }
   h1 { margin: 0 0 4px; font-size: 26px; line-height: 1.25; text-wrap: balance; }
   h2 { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0 0 12px; }
@@ -123,12 +107,6 @@
   @media (max-width: 700px) {
     .top { padding: 0 16px; gap: 0; }
     .brand { display: none; }
-    .app { display: block; }
-    #nav {
-      position: sticky; top: 56px; height: auto; display: flex; gap: 4px; align-items: center;
-      overflow-x: auto; padding: 8px 16px; border-right: 0; border-bottom: 1px solid var(--line); z-index: 1;
-    }
-    .group { display: none; }
     main { padding: 20px 16px 48px; }
     .cols { grid-template-columns: 1fr; }
   }
@@ -140,7 +118,6 @@
   <nav id="topnav" aria-label="Tab chung"></nav>
 </header>
 <div class="app">
-  <nav id="nav" aria-label="Tab feature"></nav>
   <main id="main">
     <div id="notice" class="notice" hidden></div>
     <div id="panes"></div>
@@ -218,9 +195,9 @@
 
   // ---------------------------------------------------------------- tabs
   // needs: các bộ dữ liệu tab cần (khoá của KINDS); tab chỉ được dựng sau khi chúng nạp xong.
-  var tabs = [], adding = tabs;   // {key, label, group, bad, build, needs}
-  var tab = function (key, label, group, build, bad, needs) {
-    adding.push({ key: key, label: label, group: group, build: build, bad: bad, needs: needs || [] });
+  var tabs = [], adding = tabs;   // {key, label, build, needs}
+  var tab = function (key, label, build, needs) {
+    adding.push({ key: key, label: label, build: build, needs: needs || [] });
   };
 
   // Dữ liệu lớn, mỗi bộ nạp một lần khi có tab cần tới. Mở qua setup_server.py: server dựng mới đúng bộ đó.
@@ -251,7 +228,7 @@
   };
 
   // Tổng quan
-  tab("tong-quan", "Tổng quan", "", function (pane) {
+  tab("tong-quan", "Tổng quan", function (pane) {
     add(pane, el("h1", "", idea && idea.title ? idea.title : "Chưa đặt tên game"));
     var sub = el("p", "sub", project ? "Dữ liệu feature cập nhật lúc " + project.generatedAt.replace("T", " ") : "");
     add(pane, sub);
@@ -285,8 +262,7 @@
     add(table, add(el("thead"), head));
     var body = put(table, el("tbody"));
     project.features.forEach(function (f) {
-      var link = el("a", "", f.id);
-      link.href = "#" + f.id;
+      var link = el("span", "", f.id);
       var v = el("td", "num " + (f.violations.length ? "bad-text" : "ok-text"), String(f.violations.length));
       add(body, add(el("tr"), add(el("td"), link), el("td", "", f.kind === "service" ? "Services" : "Features"),
         f.scenes.length ? el("td", "", f.scenes.join(", ")) : el("td", "bad-text", "chưa scene nào"),
@@ -297,15 +273,13 @@
     if (project.otherViolations.length) {
       add(fs, el("p", "gap bad-text", project.otherViolations.length + " vi phạm ngoài feature (Core, _Composition, rules.json): chạy python Management/tools/validate.py để xem."));
     }
-  }, false, ["project"]);
+  }, ["project"]);
 
   // ---------------------------------------------------------------- scene, Boot, catalog
   var fileName = function (path) { return path ? path.split("/").pop().replace(/\.[^.]+$/, "") : "(trống)"; };
   var featureLink = function (id) {
     if (!id) return el("span", "bad-text", "(không thuộc feature nào)");
-    var a = el("a", "", id);
-    a.href = "#" + id;
-    return a;
+    return el("span", "", id);
   };
   var row = function (cells) {
     var tr = el("tr");
@@ -316,7 +290,7 @@
     return add(el("thead"), add.apply(null, [el("tr")].concat(names.map(function (n) { return el("th", "", n); }))));
   };
 
-  // Các tab sinh ra từ dữ liệu project (Scene, Báo cáo, mỗi feature một tab): đăng ký khi project nạp xong.
+  // Các tab sinh ra từ dữ liệu project (Scene, Báo cáo): đăng ký khi project nạp xong.
   var projectTabs = function () {
   // Id khai báo trong code (Contracts/Internal của chủ): value -> feature.
   var declared = {};
@@ -339,7 +313,7 @@
   };
 
   if (project && project.scenes) {
-    tab("scene", "Scene", "", function (pane) {
+    tab("scene", "Scene", function (pane) {
       add(pane, el("h1", "", "Scene và Boot"));
       add(pane, el("p", "sub", "Mỗi scene đặt một variant của Boot.prefab (_Composition). Variant giữ thứ tự cài và catalog asset (id → asset) của scene đó; scene không override."));
       var cols = put(pane, el("div", "cols"));
@@ -374,7 +348,7 @@
 
   // ---------------------------------------------------------------- báo cáo cho @Manager
   if (project && project.reports) {
-    tab("bao-cao", "Báo cáo", "", function (pane) {
+    tab("bao-cao", "Báo cáo", function (pane) {
       add(pane, el("h1", "", "Báo cáo cho @CodeLead và @Manager"));
       add(pane, el("p", "sub", "Nhóm Basic, Features, Services kết thúc mỗi lượt có sửa file bằng một báo cáo; Stop hook lưu vào " +
         "Management/reports, @CodeLead (kiểm code) và @Manager (điều phối) đều thấy. Mới nhất trước, tối đa 50."));
@@ -395,95 +369,26 @@
     });
   }
 
-  // Mỗi feature một tab
-  var violList = function (list, ex) {
-    var wrap = el("div", "gap");
-    list.forEach(function (v) {
-      var box = add(el("div", ex ? "viol ex" : "viol"), el("strong", "", v.rule + " "), document.createTextNode(v.message));
-      add(box, el("code", "", v.line ? v.file + ":" + v.line : v.file));
-      if (ex) add(box, el("p", "muted", "Đã duyệt: " + v.reason + " (" + v.approvedBy + ")"));
-      add(wrap, box);
-    });
-    return wrap;
-  };
-
-  if (project) {
-    project.features.forEach(function (f) {
-      tab(f.id, f.id.replace("_Services/", ""), f.kind === "service" ? "Services" : "Features", function (pane) {
-        add(pane, el("h1", "", f.id));
-        add(pane, el("p", "sub", (f.kind === "service" ? "Nhóm Services" : "Nhóm Features") + " · UnityProject/Assets/Features/" + f.id +
-          " · Scene: " + (f.scenes.length ? f.scenes.join(", ") : "chưa scene nào cài")));
-
-        var cols = put(pane, el("div", "cols"));
-        var left = put(cols, el("div"));
-        var cmd = put(left, section("Lệnh"));
-        add(cmd, el("p", "muted", "Gán chat (gõ thêm PIN rồi Enter):"));
-        add(cmd, commandBlock("FEATURE=" + f.id + " <PIN>", false, "FEATURE=" + f.id + " "));
-        add(cmd, el("p", "muted gap", "Kiểm tra ranh giới:"));
-        add(cmd, commandBlock("python Management/tools/validate.py --feature " + f.id));
-
-        var st = put(left, section("Ranh giới"));
-        st.style.marginTop = "16px";
-        if (f.violations.length) {
-          add(st, el("p", "bad-text", f.violations.length + " vi phạm"));
-          add(st, violList(f.violations, false));
-        } else {
-          add(st, el("p", "ok-text", "0 vi phạm"));
-        }
-        if (f.excepted.length) {
-          add(st, el("p", "muted gap", f.excepted.length + " ngoại lệ đã duyệt"));
-          add(st, violList(f.excepted, true));
-        }
-
-        var ids = put(left, section("Asset id"));
-        ids.style.marginTop = "16px";
-        if (!f.assetIds.length) {
-          add(ids, el("p", "muted", "Chưa khai báo id nào."));
-        } else {
-          var table = put(ids, el("table"));
-          add(table, headRow(["Id", "Kiểu", "Khai báo", "Catalog của scene"]));
-          var tbody = put(table, el("tbody"));
-          f.assetIds.forEach(function (d) {
-            add(tbody, row([el("code", "", d.value), d.type, d.file + ":" + d.line,
-              d.scenes.length ? el("span", "", d.scenes.join(", ")) : el("span", "bad-text", "chưa có trong catalog nào")]));
-          });
-        }
-
-        var files = put(left, section("File theo lớp"));
-        files.style.marginTop = "16px";
-        Object.keys(f.files).forEach(function (layer) {
-          var box = put(files, el("div", "layer"));
-          add(box, el("h3", "", layer + " (" + f.files[layer].length + ")"));
-          if (!f.files[layer].length) { add(box, el("p", "muted", "—")); return; }
-          var ul = put(box, el("ul"));
-          f.files[layer].forEach(function (name) { add(ul, el("li", "", name)); });
-        });
-
-        var doc = put(cols, section("CLAUDE.md"));
-        add(doc, f.claude ? el("pre", "doc", f.claude) : el("p", "muted", "Feature chưa có CLAUDE.md ở gốc."));
-      }, f.violations.length > 0);
-    });
-  }
   };
 
   // ---------------------------------------------------------------- game design: code vẽ nằm ở view/gamedesign.js
   var views = window.CORESIMPLE_VIEWS || {};
   if (views.gamedesign) {
-    tab("game-design", "Game design", "", function (pane) {
+    tab("game-design", "Game design", function (pane) {
       views.gamedesign(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
-    }, false, ["gamedesign", "studio"]);      // studio: phiếu nợ art hiện ở node
+    }, ["gamedesign", "studio"]);      // studio: phiếu nợ art hiện ở node
   }
 
   // ---------------------------------------------------------------- studio: order ảnh, art, model; phiếu nợ (view/studio.js)
   if (views.studio) {
-    tab("studio", "Studio", "", function (pane) {
+    tab("studio", "Studio", function (pane) {
       views.studio(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
-    }, false, ["studio"]);
+    }, ["studio"]);
   }
 
   // ---------------------------------------------------------------- setup: tạo và gán đủ bộ thread
   // Chạy qua Management/tools/setup_server.py (127.0.0.1). Tên thread = giá trị FEATURE.
-  tab("setup", "Setup", "", function (pane) {
+  tab("setup", "Setup", function (pane) {
     add(pane, el("h1", "", "Setup thread"));
     add(pane, el("p", "sub", "Mỗi thread là một chat Claude Code của project, tên đúng bằng giá trị FEATURE. " +
       "Thread trùng tên đã có thì chỉ gán; chưa có thì tạo mới với model và effort chọn bên dưới (tốn một câu trả lời ngắn). Thread đã archive bị bỏ qua."));
@@ -927,7 +832,7 @@
   // Cài đặt máy (Windows, Linux, macOS): nội dung ở data/sessions.js, mục config
   var config = sessions && sessions.config;
   if (config && Array.isArray(config.sections)) {
-    tab("cai-dat", "Cài đặt", "", function (pane) {
+    tab("cai-dat", "Cài đặt", function (pane) {
       add(pane, el("h1", "", config.title || "Cài đặt máy"));
       if (config.intro) add(pane, el("p", "", config.intro));
       config.sections.forEach(function (sec) {
@@ -942,55 +847,17 @@
     });
   }
 
-  // Gán chat
-  if (sessions) {
-    tab("gan-chat", "Gán chat", "", function (pane) {
-      add(pane, el("h1", "", "Gán chat theo feature"));
-      var s = put(pane, section(""));
-      add(s, el("p", "", sessions.intro || ""));
-      if (sessions.pinCommand) {
-        var pin = put(s, el("div", "session"));
-        add(pin, el("h3", "", sessions.pinTitle || "Đặt PIN"), el("p", "muted", sessions.pinHint || ""), commandBlock(sessions.pinCommand));
-      }
-      (Array.isArray(sessions.features) ? sessions.features : []).forEach(function (feature) {
-        var box = put(s, el("div", "session"));
-        add(box, el("h3", "", (feature.group ? "[" + feature.group + "] " : "") + (feature.label || feature.id)));
-        if (feature.note) add(box, el("p", "muted", feature.note));
-        // Chỉ chép phần trước PIN: PIN do người tự gõ, không nằm trong trang.
-        var bind = "FEATURE=" + feature.id + " ";
-        add(box, commandBlock(bind + "<PIN>", false, feature.copy || bind));
-      });
-      var notes = put(s, el("ul", "gap muted"));
-      (Array.isArray(sessions.notes) ? sessions.notes : []).forEach(function (t) { add(notes, el("li", "", t)); });
-    });
-    if (sessions.brief) {
-      tab("giao-viec", sessions.briefTitle || "Giao việc", "", function (pane) {
-        add(pane, el("h1", "", sessions.briefTitle || "Mẫu lệnh giao việc"));
-        var s = put(pane, section(""));
-        add(s, el("p", "muted", sessions.briefHint || ""), commandBlock(sessions.brief, true));
-      });
-    }
-  }
-
   // ---------------------------------------------------------------- render
-  // Tab không có group (dữ liệu chung) nằm trên thanh ngang; tab feature nằm ở cột trái.
-  var nav = $("nav"), topnav = $("topnav"), panes = $("panes"), links = {}, built = {};
+  // Mọi tab nằm trên thanh ngang.
+  var topnav = $("topnav"), panes = $("panes"), links = {}, built = {};
   var renderNav = function () {
-    var lastGroup = null;
-    nav.textContent = "";
     topnav.textContent = "";
     tabs.forEach(function (t) {
       var a = add(el("a"), el("span", "", t.label));
       a.href = "#" + t.key;
       links[t.key] = a;
-      if (!t.group) { add(topnav, a); return; }
-      if (t.group !== lastGroup) add(nav, el("div", "group", t.group));
-      lastGroup = t.group;
-      add(a, el("span", t.bad ? "dot bad" : "dot"));
-      add(nav, a);
+      add(topnav, a);
     });
-    nav.hidden = !nav.children.length;
-    document.querySelector(".app").style.display = nav.hidden ? "block" : "";
   };
 
   // Dựng tab đang mở. Tab cần dữ liệu thì hiện "Đang tải…" rồi dựng khi dữ liệu về; tab khác vẫn bấm được trong lúc chờ.
@@ -1033,7 +900,7 @@
     $("notice").textContent = notices.join(" ");
     $("notice").hidden = false;
   };
-  // Project nạp nền: trang hiện ngay, các tab Scene, Báo cáo và tab feature thêm vào thanh khi dữ liệu về.
+  // Project nạp nền: trang hiện ngay, các tab Scene và Báo cáo thêm vào thanh khi dữ liệu về.
   var gotProject = function (data) {
     project = data;
     if (!project) { notice("Chưa có data/project.js. Chạy: python Management/tools/sync_page.py (Stop hook tự chạy sau mỗi lượt chat)."); return; }
@@ -1042,7 +909,7 @@
     tabs.splice.apply(tabs, [1, 0].concat(adding));
     adding = tabs;
     renderNav();
-    show(true);      // thanh tab vừa dựng lại; trang mở thẳng vào một tab vừa thêm (ví dụ #Wallet) thì mở tab đó
+    show(true);      // thanh tab vừa dựng lại; trang mở thẳng vào một tab vừa thêm (ví dụ #scene) thì mở tab đó
   };
   load("project").then(null, function (e) { notice("Không tải được dữ liệu project: " + e.message); });
 
