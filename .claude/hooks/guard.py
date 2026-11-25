@@ -45,7 +45,8 @@ judged by the human on the management page). rules.json and deleting folders ask
 unity-mcp (UNITY_RULES): code sessions read through it, change assets of their own area (write), compile
 (shared) and change the open scene or a prefab stage (state); play, tests and project settings are @CodeLead's.
 state/play/lead take the Editor lock (LOCK_FILE in STORE_DIR): one chat at a time, renewed on every call, freed
-by the Stop hook (stop_unlock.py) or after LOCK_SECONDS. Writing code through unity-mcp is denied: Edit/Write.
+by the Stop hook (stop_unlock.py) or after LOCK_SECONDS; every chat may Read the lock file (only that file of
+STORE_DIR). Writing code through unity-mcp is denied: Edit/Write.
 The skeleton (the public gates and base classes; only @CodeLead edits it, the owner reads it and codes subclasses):
     in a feature or service   Scripts/Contracts/**, Scripts/Internal/Base/**, Scripts/View/Base/**, every *.asmdef,
                               AssemblyInfo.cs (the one place for InternalsVisibleTo: other files may not write it)
@@ -753,8 +754,35 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         # @CodeLead owns the skeleton folders and everything below _Composition: it deletes a folder there itself.
         if mode == "codelead" and os.path.isdir(full) and not same(full, under(root, "UnityProject", "Assets", LEAD_AREA)):
             return "allow", f"@CodeLead deletes a folder of its own inside {name}"
-        return "ask", "deleting a folder (or a path that is not a file) needs human approval"
+        # An empty folder of its own (its files were deleted one by one, each checked above) loses nothing; the
+        # folders of the layout (the feature or area itself, Scripts, Tests, FeatureAssets and their layers) stay.
+        if os.path.isdir(full) and not layout_folder(full, root) and empty_folder(full):
+            return "allow", f"delete an empty folder inside {name}"
+        return "ask", ("deleting a folder that still holds files, a folder of the layout, or a path that is not a file "
+                       "needs human approval: delete its files one by one first, then the empty folder")
     return "allow", f"delete inside {name}"
+
+
+def layout_folder(full, root):
+    """True for a folder the layout needs: a feature, a service, Core or _Composition itself, and in a feature or
+    service Scripts, Tests, FeatureAssets and the folders right below Scripts and FeatureAssets."""
+    seg = rel_segments(full, root)[2:]      # below UnityProject/Assets
+    if len(seg) < 2 or seg[0].lower() != "features":
+        return len(seg) < 2
+    rest = seg[3:] if seg[1].lower() == "_services" else seg[2:]
+    return len(rest) < 2 or (len(rest) == 2 and rest[0].lower() in ("scripts", "featureassets"))
+
+
+def empty_folder(full):
+    """True when a folder holds no file but the .meta files of its own subfolders, and no link."""
+    for here, dirs, files in os.walk(full):
+        if any(is_link(os.path.join(here, d)) for d in dirs):
+            return False
+        for f in files:
+            path = os.path.join(here, f)
+            if is_link(path) or not f.endswith(".meta") or not os.path.isdir(path[:-5]):
+                return False
+    return True
 
 
 def gamedesign_module(root):
@@ -1115,8 +1143,8 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
     if (needs_lock or shared) and other:
         until = time.strftime("%H:%M", time.localtime(other["until"]))
         return "deny", (f"the Unity Editor is held by {other.get('who') or 'another chat'} until {until} (scene, play, "
-                        "tests or settings); wait until that chat is done. The human can free it: "
-                        "python .claude/hooks/stop_unlock.py --release")
+                        "tests or settings); wait until that chat is done. The lock file (Read it): "
+                        f"{lock_path(store)}. The human can free it: python .claude/hooks/stop_unlock.py --release")
     if needs_lock:
         write_lock(store, {"session": session, "who": who, "until": time.time() + LOCK_SECONDS, **work})
     if "ask" in decisions:
@@ -1305,6 +1333,8 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all, store=No
         return "deny", "path goes through a link or junction"
     if own_session_zone(full, session_id):
         return "allow", "this session's own tool output or scratch file"
+    if same(full, canonical_root(lock_path(store))):      # who holds the Editor, until when: every chat reads it
+        return "allow", "the Unity Editor lock (who holds it, until when, scene and prefab open)"
     if mode in PEER_READERS:
         peer = peer_feature(full, session_id, root, store)
         if peer:

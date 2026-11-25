@@ -418,6 +418,26 @@ def run_cases():
     d(W, "ask", "Assets/Features/Wallet/Scripts/Internal")
     d(W, "ask", "Assets/Features/Wallet")
     d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Missing.cs")
+    # an empty folder of its own (files deleted one by one first) goes without asking; the layout folders stay
+    cheat = F + "/Wallet/Scripts/Internal/Cheat"
+    os.makedirs(cheat + "/Sub", exist_ok=True)
+    Path(cheat + "/Sub.meta").write_text("x")
+    Path(cheat + "/Gone.cs.meta").write_text("x")      # a .meta left without its file is not empty
+    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Cheat")
+    os.remove(cheat + "/Gone.cs.meta")
+    d(W, "allow", "Assets/Features/Wallet/Scripts/Internal/Cheat")
+    d(W, "allow", "Assets/Features/Wallet/Scripts/Internal/Cheat/Sub")
+    Path(cheat + "/Sub/C.cs").write_text("x")
+    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Cheat")
+    os.makedirs(F + "/Wallet/Tests/Empty", exist_ok=True)
+    d(W, "allow", "Assets/Features/Wallet/Tests/Empty")
+    os.makedirs(F + "/Wallet/FeatureAssets/Private", exist_ok=True)
+    os.makedirs(F + "/Wallet/Empty", exist_ok=True)
+    for layout in ("Assets/Features/Wallet/FeatureAssets/Private", "Assets/Features/Wallet/FeatureAssets",
+                   "Assets/Features/Wallet/Empty", "Assets/Features/Wallet/Tests/Empty/../../Tests"):
+        d(W, "ask", layout)
+    os.makedirs(F + "/Shop/Scripts/Internal/Empty", exist_ok=True)
+    d(W, "deny", "Assets/Features/Shop/Scripts/Internal/Empty")      # not its own
     d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/AssemblyInfo.cs")
     d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
     d(W, "allow", "Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
@@ -2057,6 +2077,16 @@ def run_unity_cases():
     check(g, "", True, "the human frees any lock", p.returncode == 0 and guard.read_lock(STORE) is None)
     Path(guard.lock_path(STORE)).write_text("{ broken")
     u(g, W, "allow", "read_console", session="a", action="clear")      # a broken lock file is no lock
+
+    g = "unity: reading the lock file"
+    u("unity: the Editor lock", W, "allow", "manage_scene", session="a", action="create", path=own + "/Scenes", name="R")
+    for who in (W, "@Manager", "@GameDesigner", "@Codex", "@DesignAdvisor", "@UnityAutoPlay", None):
+        r(g, who, "allow", guard.lock_path(STORE))
+    r(g, W, "deny", STORE + "/pins.json")      # the rest of the store stays closed (PIN, bindings)
+    r(g, W, "deny", STORE)
+    t(g, W, "deny", "Grep", {"pattern": "x", "path": STORE})
+    t(g, W, "deny", "Edit", {"file_path": guard.lock_path(STORE)})
+    t(g, W, "deny", "Write", {"file_path": guard.lock_path(STORE)})
 
     g = "unity: batch_execute"
     guard.release_lock(STORE)
