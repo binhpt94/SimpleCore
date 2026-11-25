@@ -18,6 +18,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
+import reqbook  # noqa: E402
 
 LIVE = "Management/game-design/live"
 PACK_NOTE = ("Trước khi code một phần: đọc đủ các node vòng 4 và mục CHEAT của phần đó, cùng các node refs mà nó nhắc "
@@ -63,7 +64,7 @@ def parts_total(branch):
     return out
 
 
-def full_lines(node, out, doc=True):
+def full_lines(node, out, doc=True, book=None):
     out.append("")
     if node.get("cheat"):
         out.append(f"## {node['path']}  ·  CHEAT (chỉ bản dev)  ·  {node['title']}")
@@ -79,7 +80,14 @@ def full_lines(node, out, doc=True):
         out.append(f"- {it['title']}{gd.by_label(it)}")
         for line in it["detail"].split("\n") if it["detail"] else []:
             out.append(f"    {line}")
-    if node["priority"].get("leaf"):
+    entry = (book or {}).get(node["path"])
+    if entry:
+        out.append("- Tiến độ: " + reqbook.progress_note(entry))
+        out.append("")
+        out.append(f"### Yêu cầu ({entry['met']}/{len(entry['reqs'])} đã kiểm; ghi bằng gd_req.py, xem đủ ở gd_req.py <Tên>)")
+        for r in sorted(entry["reqs"], key=lambda r: reqbook.ORDER.index(r["state"])):
+            out.append(f"- [{reqbook.STATE_NAMES[r['state']]}] {r['ref']}" + (f" ({r['why']})" if r["why"] else ""))
+    elif node["priority"].get("leaf"):
         names = {x["key"]: x["name"] for x in gd.PHASES}
         out.append("- Tiến độ: " + " · ".join(f"{names[k]} {c['state']}" for k, c in node["progress"].items()))
     if node["frames"]:
@@ -136,8 +144,12 @@ def pack(root, name):
         top = nodes.get(key)
         if top:
             branch += list(gd.walk(top))
+    try:
+        book = {n["path"]: n for n in reqbook.view(root, name)["nodes"]}
+    except (ValueError, OSError):
+        book = {}
     for n in branch:
-        full_lines(n, out)
+        full_lines(n, out, book=book)
     out += parts_total(branch)
     inside = {n["path"] for n in branch}
     refs, terms = [], []

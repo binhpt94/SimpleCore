@@ -6,6 +6,7 @@
 
 guard.py lets only a @CodeLead session run this command; it is the one thing @CodeLead writes. The human sets
 the same thing from the Game design tab. The path must be a leaf of the proposed tree (gamedesign.save_progress).
+`done` is refused while the live leaf still has a requirement that is not verified or waived (gd_req.py, reqbook.py).
 See what is open with: python Management/tools/gd_status.py
 """
 import sys

@@ -15,6 +15,9 @@ about it on its next prompt (bind_session.py) and the management page lists it.
 Missing report: the agent is sent back once (a "pending" mark in the store keeps the check on even if the
 hook's own message starts a new turn in the transcript); if it stops again without one, a "no report" note
 is saved so the Manager still sees that the session changed files. A broken transcript lets the agent stop.
+Requirement book (Management/tools/gd_req.py): the saved report gets a line "- Sổ yêu cầu:" with every doing / done /
+verify / reject the turn ran. A Features/Services chat that edited its Scripts/ or Tests/ without writing any of them
+is sent back once to write doing or done for what it worked on (REQ_REMINDER); stopping again lets it go.
 """
 import json
 import os.path
@@ -41,6 +44,65 @@ REPORT_FORMAT = HEADER + "\n" + "\n".join([
     "- Kiểm tra: <kết quả validate.py; test cần người chạy>",
     "- Ghi chú: <rủi ro, câu hỏi cho người; hoặc không>",
 ])
+
+
+REQ_CMD_RX = re.compile(r"gd_req\.py (\S+) (doing|done|verify|reject) (\S+)")
+REQ_REMINDER = ("This turn changed the code of {f} but wrote nothing in its requirement book. Before you stop, run "
+                "python Management/tools/gd_req.py {f} doing <node>#<id> \"<what you are at>\" for each requirement you "
+                "worked on, or done <node>#<id> <Class.Method>[,...] when its test is written (see the line 'Sổ yêu cầu' at "
+                "the start of the message, and python Management/tools/gd_req.py {f}). A renewed chat learns from the book "
+                "where it left off. Then end with the report again.")
+
+
+def turn_tools(path):
+    """[(tool name, input)] of the agent's tool calls in this turn, from the transcript."""
+    entries = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            try:
+                entries.append(json.loads(line))
+            except ValueError:
+                continue
+    start = 0
+    for i, e in enumerate(entries):
+        if not isinstance(e, dict) or e.get("type") != "user" or e.get("isMeta"):
+            continue
+        content = (e.get("message") or {}).get("content")
+        if isinstance(content, list) and any(isinstance(x, dict) and x.get("type") == "tool_result" for x in content):
+            continue
+        start = i + 1
+    out = []
+    for e in entries[start:]:
+        content = (e.get("message") or {}).get("content") if isinstance(e, dict) and e.get("type") == "assistant" else None
+        for x in content if isinstance(content, list) else []:
+            if isinstance(x, dict) and x.get("type") == "tool_use":
+                out.append((x.get("name") if isinstance(x.get("name"), str) else "",
+                            x.get("input") if isinstance(x.get("input"), dict) else {}))
+    return out
+
+
+def req_changes(tools):
+    """["Wallet doing wallet-rules#cap-max", ...]: the requirement-book writes the turn ran."""
+    out = []
+    for name, ti in tools:
+        if name in guard.SHELL_TOOLS:
+            for m in REQ_CMD_RX.finditer(str(ti.get("command") or "")):
+                out.append(" ".join(m.groups()))
+    return out
+
+
+def edited_code(tools, feature, root):
+    """Did the turn edit a file under Scripts/ or Tests/ of the feature folder?"""
+    base = os.path.join(root, "UnityProject", "Assets", "Features", *feature.split("/"))
+    for name, ti in tools:
+        if name not in CHANGE_TOOLS:
+            continue
+        p = str(ti.get("file_path") or ti.get("notebook_path") or "")
+        full = os.path.normcase(os.path.abspath(os.path.join(root, p)))
+        for sub in ("Scripts", "Tests"):
+            if full.startswith(os.path.normcase(os.path.join(base, sub)) + os.sep):
+                return True
+    return False
 
 
 def read_turn(path):
@@ -71,6 +133,7 @@ def read_turn(path):
             if x.get("type") == "tool_use":
                 name = x.get("name") if isinstance(x.get("name"), str) else ""
                 ti = x.get("input") if isinstance(x.get("input"), dict) else {}
+                name = guard.unity_name(name)
                 if name in CHANGE_TOOLS or (name.startswith(guard.UNITY_PREFIX) and guard.unity_changes(name, ti)):
                     changed = True
             elif x.get("type") == "text":
@@ -147,8 +210,18 @@ def main(argv):
             text += "\n" + data["last_assistant_message"]
         block, problem = find_report(text)
         if block:
-            save(root, who, block)
+            try:
+                tools = turn_tools(path)
+            except (OSError, ValueError):
+                tools = []
+            reqs = req_changes(tools)
+            save(root, who, block + ("\n- Sổ yêu cầu: " + "; ".join(reqs) if reqs else ""))
             done()
+            # saved first: the reminder's own message may start a new turn, after which this turn's report is not seen
+            if (not role and not reqs and not data.get("stop_hook_active") and not was_pending
+                    and edited_code(tools, raw, root)):
+                sys.stdout.buffer.write(json.dumps({"decision": "block", "reason": REQ_REMINDER.format(f=raw)},
+                                                   ensure_ascii=False).encode("utf-8"))
             return 0
         if data.get("stop_hook_active") or was_pending:
             save(root, who, f"{HEADER}\n- Phiên: FEATURE={who}\n- Việc: (phiên dừng mà không báo cáo)\n"

@@ -111,6 +111,7 @@ def build_fixture():
         Path(live + d + "/data.md").write_text("# x\n")
     Path(live + "/feature-code/code.json").write_text('{"unity": ["Wallet", "_Services/Popup"]}')
     shutil.copy2(HERE.parent.parent / "Management" / "tools" / "gamedesign.py", FX + "/Management/tools/gamedesign.py")
+    shutil.copy2(HERE.parent.parent / "Management" / "tools" / "reqbook.py", FX + "/Management/tools/reqbook.py")
 
 
 def run_cases():
@@ -315,6 +316,64 @@ def run_cases():
     t(g, W, "deny", "Glob", {"pattern": "*", "path": FX + "/UnityProject/Library"})
     t(g, W, "allow", "Glob", {"pattern": "*", "path": A + "/Core"})
 
+    # ---- read-only search commands (this CLI has no Glob and Grep tools: ls, find, grep, rg in Bash)
+    g = "search: shell"
+    def sh(f, x, cmd, cwd=None): t(g, f, x, "Bash", {"command": cmd}, cwd)
+    WF = "UnityProject/Assets/Features/Wallet"
+    sh(W, "allow", "grep -rn 'class' " + WF)
+    sh(W, "allow", 'grep -rn "class Wallet" ' + WF + " --include='*.cs'")
+    sh(W, "allow", "grep -rniE -A3 'a|b$' " + WF + "/Scripts " + WF + "/Tests")
+    sh(W, "allow", "grep -rn -e 'x' -e 'y' " + WF)
+    sh(W, "allow", "grep -rn 'IShop' UnityProject/Assets/Features/Shop/Scripts/Contracts")
+    sh(W, "allow", "grep -rn 'x' Management/game-design/live")
+    sh(W, "deny", "grep -rn 'class' UnityProject/Assets/Features/Shop")
+    sh(W, "deny", "grep -rn 'class' UnityProject/Assets/Features")
+    sh(W, "deny", "grep -rn 'class' .")
+    sh(W, "deny", "grep -rn 'class'")
+    sh(W, "deny", "grep -rn class " + WF + " | head")
+    sh(W, "deny", "grep -rn class " + WF + " > out.txt")
+    sh(W, "deny", "grep -rn class " + WF + "; rm -rf x")
+    sh(W, "deny", 'grep -rn "$(id)" ' + WF)
+    sh(W, "deny", "grep -rn `id` " + WF)
+    sh(W, "deny", "grep -R class " + WF)
+    sh(W, "deny", "grep -f /etc/passwd " + WF)
+    sh(W, "deny", "grep -rn class " + WF + "/../Shop")
+    sh(W, "deny", "grep -rn class " + WF + " --include='../Shop/*'")
+    sh(W, "deny", "grep -rn class ~/x")
+    sh(W, "deny", "grep -rn class UnityProject/Library")
+    sh(W, "allow", "rg -n 'class' " + WF)
+    sh(W, "allow", "rg --files " + WF)
+    sh(W, "allow", "rg -n 'x' -g '*.cs' " + WF)
+    sh(W, "deny", "rg --pre cat 'x' " + WF)
+    sh(W, "deny", "rg -L 'x' " + WF)
+    sh(W, "deny", "rg -z 'x' " + WF)
+    sh(W, "allow", "find " + WF + " -name '*.cs'")
+    sh(W, "allow", "find " + WF + " " + WF + "/Tests -type f -iname '*test*' -maxdepth 3")
+    sh(W, "deny", "find " + WF + " -name *.cs")      # an unquoted glob: the shell would expand it
+    sh(W, "deny", "find " + WF + " -exec rm {} \\;")
+    sh(W, "deny", "find " + WF + " -delete")
+    sh(W, "deny", "find " + WF + " -fprint x")
+    sh(W, "deny", "find -L " + WF)
+    sh(W, "deny", "find UnityProject/Assets/Features -name '*.cs'")
+    sh(W, "allow", "ls -la " + WF)
+    sh(W, "allow", "ls " + WF + "/Scripts UnityProject/Assets/Core")
+    sh(W, "allow", "ls Scripts", F + "/Wallet")      # relative to the cwd of the shell
+    sh(W, "deny", "ls")
+    sh(W, "deny", "ls ../x")
+    sh(W, "deny", "ls --color=always " + WF)
+    sh(W, "deny", "ls UnityProject/Assets/Features/Shop/Scripts/Internal")
+    sh(W, "deny", "ls " + WF + " && rm x")
+    sh("@GameDesigner", "allow", "ls Management/game-design/ai")
+    sh("@GameDesigner", "deny", "ls UnityProject/Assets")
+    sh("@CodeLead", "allow", "grep -rn 'IWallet' UnityProject/Assets/Features")
+    sh("@CodeLead", "allow", "find UnityProject/Assets/Features/Shop/Scripts/Internal -name '*.cs'")
+    sh("@UnityAutoPlay", "allow", "ls UnityProject/Assets/Features/Shop/Scripts/Internal")
+    sh("@UnityAutoPlay", "allow", "ls Tester/UnityAutoPlay/Archive")
+    sh("@CodeLead", "deny", "ls Tester/UnityAutoPlay/Archive")
+    sh("@Codex", "deny", "ls Tester")
+    sh("", "allow", "ls Management/tools")
+    t(g, W, "deny", "PowerShell", {"command": "ls " + WF})
+
     # ---- shell and other tools
     g = "shell"
     t(g, W, "deny", "Bash", {"command": "ls"})
@@ -422,6 +481,7 @@ def run_cases():
     run_designer_cases()
     run_advisor_cases()
     run_progress_cases()
+    run_req_cases()
     run_unity_cases()
     run_tool_cases()
     run_tester_cases()
@@ -894,6 +954,20 @@ def run_report_cases():
         [human, edit, result, say_text("Xong."), human, say_text("Đã xong rồi mà.")], keep_pending=True)
     rep("pass, +0 report", "the mark is gone after that", "rep-wallet", [human, say_text("hỏi đáp")], keep_pending=True)
 
+    # The requirement book: a feature chat that edited its code must have written doing / done (asked once).
+    code_edit = use("Edit", file_path=F + "/Wallet/Scripts/Internal/Old.cs")
+    req_cmd = use("Bash", command='python Management/tools/gd_req.py Wallet doing wallet-rules#start-50 "viết"')
+    rep("block, +1 report", "edited its code, no book write: report saved, asked to write the book", "rep-wallet",
+        [human, code_edit, result, say_text(REPORT_OK)])
+    rep("pass, +1 report", "asked once only (second stop)", "rep-wallet", [human, code_edit, result, say_text(REPORT_OK)], active=True)
+    rep("pass, +1 report", "edited its code and wrote the book", "rep-wallet",
+        [human, code_edit, result, req_cmd, result, say_text(REPORT_OK)])
+    check("stop report", "", True, "the saved report lists the book writes of the turn",
+          any("- Sổ yêu cầu: Wallet doing wallet-rules#start-50" in Path(reports, n).read_text(encoding="utf-8")
+              for n in os.listdir(reports)))
+    rep("pass, +1 report", "@Core is not asked for a book", "rep-core", [human, edit, result, say_text(REPORT_OK)])
+    rep("pass, +1 report", "@CodeLead is not asked for a book", "rep-lead",
+        [human, use("Edit", file_path=F + "/Wallet/Scripts/Contracts/IWallet.cs"), result, say_text(REPORT_OK)])
     saved = sorted(os.listdir(reports))
     text = Path(reports, saved[0]).read_text(encoding="utf-8")
     check("stop report", "", True, "saved file holds the block and who wrote it",
@@ -1506,6 +1580,49 @@ def run_progress_cases():
 
 
 
+def run_req_cases():
+    """The requirement book (gd_req.py): reading for all; doing / done only for the chat of that feature; verify /
+    reject for @CodeLead; status for the Leaders."""
+    REQ = "python Management/tools/gd_req.py "
+    g = "requirement book"
+    for who in ("Wallet", "_Services/Popup", "@CodeLead", "@Manager", "@GameDesigner", "@Core"):
+        t(g + ": read", who, "allow", "Bash", {"command": REQ + "Wallet"})
+    t(g + ": read (like gd_pack)", "", "allow", "Bash", {"command": REQ + "Wallet"})
+    own = ('Wallet doing wallet-rules#start-50 "đang viết WalletLogic.Reset"',
+           "Wallet doing feature-code/detail/tech#cap-max \"x\"".replace("\\", ""),
+           "Wallet done wallet-rules#start-50 WalletLogicTests.StartsWithConfiguredCoins",
+           "Wallet done wallet-rules#start-50 WalletLogicTests.A,WalletLogicTests.B_c",
+           'Wallet done wallet-rules#edge-tien-vua-du play "mua khi đủ đúng giá, số về 0"')
+    for tail in own:
+        t(g + ": own book", "Wallet", "allow", "Bash", {"command": REQ + tail})
+    for tail in own:
+        t(g + ": another feature's book", "_Services/Popup", "deny", "Bash", {"command": REQ + tail})
+        t(g + ": doing / done are the feature's", "@CodeLead", "deny", "Bash", {"command": REQ + tail})
+        t(g + ": doing / done are the feature's", "@Manager", "deny", "Bash", {"command": REQ + tail})
+    t(g + ": service's own book", "_Services/Popup", "allow", "Bash",
+      {"command": REQ + '_Services/Popup doing popup-queue#one-at-a-time "x"'})
+    for tail in ('Wallet doing wallet-rules#start-50 "a $(rm -rf x)"', 'Wallet doing wallet-rules#start-50 "a"; ls',
+                 "Wallet doing wallet-rules#start-50", "Wallet done wallet-rules#start-50", "Wallet done wallet-rules#start-50 Tests",
+                 "Wallet done ../x#y A.B", "Wallet done wallet-rules#start-50 A.B --root /tmp", 'Wallet doing Wallet-Rules#x "y"',
+                 "Wallet verify wallet-rules#start-50", 'Wallet reject wallet-rules#start-50 "x"'):
+        t(g + ": refused shapes", "Wallet", "deny", "Bash", {"command": REQ + tail})
+    for tail in ("Wallet verify wallet-rules#start-50", "Wallet verify wallet-rules#start-50,income-amounts#kill-once",
+                 'Wallet reject wallet-rules#start-50 "test không kiểm trần số dư"', "status"):
+        t(g + ": @CodeLead", "@CodeLead", "allow", "Bash", {"command": REQ + tail})
+    for tail in ('Wallet reject wallet-rules#start-50', 'Wallet reject wallet-rules#start-50 "a|b"', "Wallet verify wallet-rules"):
+        t(g + ": @CodeLead refused shapes", "@CodeLead", "deny", "Bash", {"command": REQ + tail})
+    for who in ("@Manager", "@GameDesigner"):
+        t(g + ": status for Leaders", who, "allow", "Bash", {"command": REQ + "status"})
+        t(g + ": verify is @CodeLead's", who, "deny", "Bash", {"command": REQ + "Wallet verify wallet-rules#start-50"})
+    for who in ("Wallet", "@Core"):
+        t(g + ": status is the Leaders'", who, "deny", "Bash", {"command": REQ + "status"})
+    t(g + ": a Leader may chain status", "@Manager", "allow", "Bash", {"command": REQ + "status; " + VALIDATE})
+    w(g + ": the book file only through the command", "Wallet", "deny",
+      FX + "/Management/game-design/ai/idea/feature-code/detail/tech/.progress/requirements.json")
+    w(g + ": the book file only through the command", "@CodeLead", "deny",
+      FX + "/Management/game-design/ai/idea/feature-code/detail/tech/.progress/requirements.json")
+
+
 def run_tool_cases():
     """@Codex and @Blender: take orders from the features, write only their lessons and the work of an order, run
     their tool through studio.py; everybody reads Management/studio and Resources."""
@@ -1751,6 +1868,14 @@ def run_unity_cases():
 
     g = "unity: read"
     u(g, W, "allow", "read_console", action="get", types=["error"])
+    # the same server under the name of its stdio registration (UnityMCP, local scope of the CLI)
+    t(g, W, "allow", "mcp__UnityMCP__read_console", {"action": "get"})
+    t(g, W, "deny", "mcp__UnityMCP__create_script", {"path": "Assets/Features/Wallet/X.cs"})
+    t(g, W, "deny", "mcp__UnityMCP__manage_asset", {"action": "get_info", "path": "Assets/Features/Shop/FeatureAssets/Private/s.asset"})
+    t(g, W, "allow", "mcp__UnityMCP__batch_execute", {"commands": [{"tool": "mcp__UnityMCP__read_console", "params": {"action": "get"}}]})
+    t(g, W, "allow", "ReadMcpResourceTool", {"server": "UnityMCP", "uri": "mcpforunity://editor/state"})
+    t(g, W, "deny", "ReadMcpResourceTool", {"server": "blender", "uri": "x"})
+    t(g, "@Manager", "deny", "mcp__UnityMCP__read_console", {"action": "get"})
     u(g, W, "allow", "read_console")
     u(g, W, "allow", "find_gameobjects", search_term="Coin")
     u(g, W, "allow", "manage_scene", action="get_hierarchy")

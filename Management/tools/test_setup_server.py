@@ -129,8 +129,13 @@ def job_cases(check):
 
 def live_cases(check):
     """Live: a thread runs on as a background session (claude --bg --resume), so ListAgents shows it."""
-    real = (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep)
+    real = (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep, ss.transcripts_dir)
     live, calls = {}, []
+    tdir = Path(tempfile.mkdtemp(prefix="livefx-"))
+    (tdir / "99999999-aaaa.jsonl").write_text("{}\n", encoding="utf-8")      # the copy the CLI makes for copy0000
+    ss.transcripts_dir = lambda: tdir
+
+    flaky = []
 
     def fake(args):
         calls.append(args)
@@ -138,7 +143,12 @@ def live_cases(check):
             sid = args[2]
             if not sid.startswith("dead"):      # a thread whose background session never shows up
                 live[sid] = {"kind": "background", "status": "busy", "short": sid[:8]}
+            if sid.startswith("flak") and not flaky:      # the first try overlaps another job change: a copy
+                flaky.append(sid)
+                return "Starting background service…\nbackgrounded · 88888888 · x"
             return f"Starting background service…\nbackgrounded · {('99999999' if sid.startswith('copy') else sid[:8])} · x"
+        if "--no-session-persistence" in args:      # the helper that relays a message into a chat open in VS Code
+            return "ĐÃ GỬI"
         if args[0] == "stop":
             for k in [k for k, v in live.items() if v["short"] == args[1]]:
                 del live[k]
@@ -148,6 +158,7 @@ def live_cases(check):
     def listed():
         out = [thread("aaaa1111", "CodeLead", binding="@CodeLead"), thread("bbbb2222", "Wallet", binding="Wallet"),
                thread("cccc3333", "Shop"), thread("dead0000", "Hud", binding="Hud"), thread("copy0000", "Wave", binding="Wave"),
+               thread("flak0000", "Hero", binding="Hero"),
                thread("eeee5555", "human", binding="@human"), thread("ffff6666", "human", binding="@human")]
         for t in out:
             t["live"] = (live.get(t["id"]) or {}).get("kind", "")
@@ -160,28 +171,48 @@ def live_cases(check):
         check("live: a thread that is not bound is refused", (res["ok"], calls), (False, []))
         res = ss.go_live("eeee5555")
         check("live: a chat open in VS Code is left as it is", (res["ok"], "live sẵn" in res["answer"], calls), (True, True, []))
+        res = ss.reread("eeee5555")
+        check("reread: a chat open in VS Code gets the prompt as a message (a relay helper calls SendMessage), nothing else runs",
+              (res["ok"], len(calls), calls[0][:4], 'to="human"' in calls[0][-1], ss.REREAD_PROMPT in calls[0][-1] and "KHÔNG trả lời" in calls[0][-1], "eeee5555" in live),
+              (True, 1, ["-p", "--model", ss.RELAY_MODEL, "--no-session-persistence"], True, True, True))
+        calls.clear()
+        for name, fn in (("compact", lambda: ss.compact("eeee5555")), ("renew", lambda: ss.renew("eeee5555", "sai-pin"))):
+            res = fn()
+            check(f"{name}: a chat open in VS Code is refused before anything runs (its process would not see the turn)",
+                  (res["ok"], res.get("open"), "mở trong VS Code" in res.get("error", ""), res.get("pin"), calls), (False, True, True, None, []))
         res = ss.go_live("aaaa1111")
         check("live: runs the thread on in the background under its id and its name (else the CLI makes one up), with its model and effort",
               (res["ok"], calls[-1], live["aaaa1111"]["kind"]),
               (True, ["--bg", "--resume", "aaaa1111", "-n", "CodeLead", "--model", "claude-opus-x", "--effort", "medium", ss.LIVE_PROMPT], "background"))
+        check("live: an ended job of the thread is removed first (else the CLI starts a copy)", calls[-2], ["rm", "aaaa1111"])
         before = len(calls)
         check("live: pressing it again starts nothing", (ss.go_live("aaaa1111")["ok"], len(calls)), (True, before))
         res = ss.reread("aaaa1111")
         check("live: reread on a background thread stops it, then runs the prompt as a background session again (no -p)",
-              (res["ok"], calls[before][0], calls[before + 1][:3], calls[before + 1][-1], "-p" in calls[before + 1], "aaaa1111" in live),
+              (res["ok"], calls[before][0], calls[-1][:3], calls[-1][-1], "-p" in calls[-1], "aaaa1111" in live),
               (True, "stop", ["--bg", "--resume", "aaaa1111"], ss.REREAD_PROMPT, False, True))
+        check("live: between stop and resume, the stopped job is removed",
+              [c for c in calls[before + 1:-1]], [["rm", "aaaa1111"], ["rm", "aaaa1111"]])
         res = ss.reread("bbbb2222")
         check("live: reread on a thread that is not live stays a headless turn", (res["ok"], calls[-1][-2], "bbbb2222" in live), (True, "-p", False))
         res = ss.go_live("dead0000")
         check("live: a background session that never shows up is reported", (res["ok"], "chưa thấy phiên nền" in res["error"]), (False, True))
         res = ss.go_live("copy0000")
         check("live: a copy under another id is reported", (res["ok"], "bản sao" in res["error"]), (False, True))
+        check("live: and the copy is stopped, its job removed, its transcript moved to the trash",
+              (calls[-2:], (tdir / "99999999-aaaa.jsonl").exists(), len(list((tdir / ss.TRASH).glob("*-copy/99999999-aaaa.jsonl")))),
+              ([["stop", "99999999"], ["rm", "99999999"]], False, 1))
+        res = ss.go_live("flak0000")
+        check("live: a copy on the first try is dropped and the thread itself runs on the second",
+              (res["ok"], [c[:3] for c in calls if c[0] == "--bg" and c[2] == "flak0000"].__len__(), "flak0000" in live,
+               ["stop", "88888888"] in calls), (True, 2, True, True))
         before = len(calls)
         res = ss.stop_live("eeee5555")
         check("stop: a chat open in VS Code is not touched", (res["ok"], len(calls), "eeee5555" in live), (True, before, True))
         res = ss.stop_live("aaaa1111")
-        check("stop: ends the background session", (res["ok"], calls[-1], "aaaa1111" in live), (True, ["stop", "aaaa1111"], False))
-        check("stop: a thread with no background session runs nothing", (ss.stop_live("aaaa1111")["ok"], len(calls)), (True, before + 1))
+        check("stop: ends the background session and removes its job", (res["ok"], calls[-2:], "aaaa1111" in live),
+              (True, [["stop", "aaaa1111"], ["rm", "aaaa1111"]], False))
+        check("stop: a thread with no background session runs nothing", (ss.stop_live("aaaa1111")["ok"], len(calls)), (True, before + 2))
         before = len(calls)
         res = ss.go_live("ffff6666")
         check("live: the human's own chat is never run in the background (VS Code could not open it)",
@@ -193,10 +224,28 @@ def live_cases(check):
         finally:
             ss.bind_session.check_pin = real_pin
         check("live: renewing the human's chat keeps its last turn headless", (calls[-1][0], calls[-1][-2], "ffff6666" in live), ("--resume", "-p", False))
+        # compact and renew on a thread that runs in the background: stop, remove the ended job, resume under the same id
+        live["aaaa1111"] = {"kind": "background", "status": "idle", "short": "aaaa1111"}
+        before = len(calls)
+        res = ss.compact("aaaa1111")
+        check("compact on a background thread: stop, rm, then /compact as a background turn under its id",
+              (res["ok"], [c[0] for c in calls[before:]], calls[-1][:3], calls[-1][-1], "aaaa1111" in live),
+              (True, ["stop", "rm", "rm", "--bg"], ["--bg", "--resume", "aaaa1111"], ss.COMPACT_PROMPT, True))
+        before = len(calls)
+        ss.bind_session.check_pin = lambda store_, pin: ""
+        try:
+            res = ss.renew("aaaa1111", "1234")
+        finally:
+            ss.bind_session.check_pin = real_pin
+        check("renew on a background thread: stop, rm, the wipe headless, then rm and back live under its id",
+              (res["ok"], [c[0] if c[0] != "--resume" else c[-2] for c in calls[before:]], calls[-1][:3], "aaaa1111" in live),
+              (True, ["stop", "rm", "-p", "rm", "--bg"], ["--bg", "--resume", "aaaa1111"], True))
+        check("renew: no copy was made on the way", any(c[0] == "--bg" and not c[2].startswith("aaaa1111") for c in calls[before:]), False)
         check("the page may post to the live and stop paths",
               ("/api/sessions/live" in ss.POST_PATHS, "/api/sessions/stop" in ss.POST_PATHS), (True, True))
     finally:
-        (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep) = real
+        (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep, ss.transcripts_dir) = real
+        shutil.rmtree(tdir, ignore_errors=True)
 
 
 def delete_cases(check):
@@ -263,7 +312,7 @@ def delete_cases(check):
         con.close()
         check("delete: its id is out of the VS Code state, the others stay",
               (state["hiddenSessionIds"], state["sessionGroups:/p"][0]["sessionIds"]), (["zz"], ["bbbb2222"]))
-        check("delete: its background session was stopped first", stopped, [["stop", "aaaa1111"]])
+        check("delete: its background session was stopped first, and its job removed", stopped, [["stop", "aaaa1111"], ["rm", "aaaa1111"]])
         check("delete: the other thread is untouched", (folder / "bbbb2222.jsonl").exists())
         check("the page may post to the delete path", "/api/sessions/delete" in ss.POST_PATHS)
     finally:
@@ -404,6 +453,16 @@ def main():
     finally:
         ss.run_claude, ss.threads, ss.guard.STORE_DIR, ss.start_bg = real
         shutil.rmtree(store, ignore_errors=True)
+    seen = {}
+    real_run = ss.subprocess.run
+    try:
+        ss.subprocess.run = lambda cmd, **kw: (seen.update(kw.get("env") or {}),
+                                               ss.subprocess.CompletedProcess(cmd, 0, "ok", ""))[1]
+        ss.run_claude(["--bg", "--resume", "x"])
+    finally:
+        ss.subprocess.run = real_run
+    check("every claude run (a --bg thread too) edits the shared checkout: no worktree isolation",
+          seen.get("CLAUDE_BG_ISOLATION"), "none")
     page_cases(check)
     job_cases(check)
     live_cases(check)

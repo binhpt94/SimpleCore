@@ -143,7 +143,7 @@ LIVE_LOCK = threading.Lock()
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
-              "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY,
+              "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/gamedesign/requirement": 64 * 1024, "/api/vscode-groups": MAX_BODY,
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
               "/api/sessions/delete": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY}
@@ -291,27 +291,73 @@ def wait_live(session_id, present):
         time.sleep(1)
 
 
+def forget_bg(short):
+    """`claude rm` of a background job that has ended. `claude stop` keeps the job in the CLI's list (state done), and
+    while it is there `claude --bg --resume <id>` takes the thread for running and starts a COPY under a new id
+    (unbound, so guard blocks it) instead of running the thread on. Nothing when there is no such job."""
+    try:
+        run_claude(["rm", short])
+    except Exception:
+        pass      # "No session matching": never live, or already removed
+
+
+def drop_copy(short):
+    """Undoes a copy the CLI made anyway: stops and removes its background job and moves its transcript into the
+    trash of the transcripts folder (it would be listed as a second thread of the same name, with no binding)."""
+    try:
+        run_claude(["stop", short])
+    except Exception:
+        pass
+    forget_bg(short)
+    folder = transcripts_dir()
+    for src in folder.glob(f"{short}*.jsonl") if re.fullmatch(r"[0-9a-f]{6,}", short) else []:
+        trash = folder / TRASH / f"{time.strftime('%Y%m%d-%H%M%S')}-{src.stem}-copy"
+        trash.mkdir(parents=True, exist_ok=True)
+        for part in (src, folder / src.stem):
+            if part.exists():
+                shutil.move(str(part), str(trash / part.name))
+
+
+# The CLI's background service takes one job change at a time badly: the page runs several threads at once, and a
+# `--bg --resume` that overlaps another thread's `stop` / `rm` sometimes finds the thread's ended job still there and
+# opens a COPY. Every start and stop of a background job goes through this lock, and a copy is retried once.
+BG_LOCK = threading.Lock()
+COPY_RETRY_SECONDS = 2
+
+
 def start_bg(session_id, extra, prompt):
     """Runs the thread on as a background session under the same id, with that first prompt (one turn), and waits
     until the session list shows it. `extra` starts with `-n <thread name>`: without it a resumed background session
     is listed under a name the CLI makes up from the conversation, and SendMessage to the thread's name misses it.
-    Raises when the CLI opened a copy instead or the session does not show up."""
-    out = run_claude(["--bg", "--resume", session_id] + extra + [prompt])
-    m = re.search(r"backgrounded\s*·\s*([0-9a-f]{6,})", out)
-    if m and not session_id.startswith(m.group(1)):
-        raise RuntimeError(f"CLI mở bản sao {m.group(1)} thay vì chạy tiếp thread này (thread đang chạy ở nơi khác?)")
+    An ended job of the thread is removed first (forget_bg). Raises when the CLI opened a copy anyway (the copy is
+    dropped) or the session does not show up."""
+    with BG_LOCK:
+        for attempt in (1, 2):
+            forget_bg(session_id[:8])
+            out = run_claude(["--bg", "--resume", session_id] + extra + [prompt])
+            m = re.search(r"backgrounded\s*·\s*([0-9a-f]{6,})", out)
+            if not m or session_id.startswith(m.group(1)):
+                break
+            drop_copy(m.group(1))
+            if attempt == 2:
+                raise RuntimeError(f"CLI mở bản sao {m.group(1)} thay vì chạy tiếp thread này (thread đang mở ở nơi "
+                                   "khác?); bản sao đã được tắt và dời vào thùng rác")
+            time.sleep(COPY_RETRY_SECONDS)      # the job of the old process was not gone yet: once more
     if not wait_live(session_id, True):
         raise RuntimeError(f"chưa thấy phiên nền của thread trong `claude agents` sau {LIVE_SECONDS}s")
 
 
 def stop_bg(session_id):
-    """Ends the thread's background session (`claude stop`) and waits until it is gone; nothing when it has none."""
+    """Ends the thread's background session (`claude stop`), waits until it is gone, and removes its ended job
+    (forget_bg), so the next `--bg --resume` runs the thread itself; nothing more when it has none."""
     s = live_sessions(fresh=True).get(session_id)
     if not s or s["kind"] != "background":
         return
-    run_claude(["stop", s["short"]])
-    if not wait_live(session_id, False):
-        raise RuntimeError(f"phiên nền vẫn chạy sau {LIVE_SECONDS}s: claude stop {s['short']}")
+    with BG_LOCK:
+        run_claude(["stop", s["short"]])
+        if not wait_live(session_id, False):
+            raise RuntimeError(f"phiên nền vẫn chạy sau {LIVE_SECONDS}s: claude stop {s['short']}")
+        forget_bg(s["short"])
 
 
 def turn_args(t):
@@ -324,10 +370,15 @@ def turn_args(t):
     return args
 
 
+# A background thread (claude --bg) edits the shared checkout: the one Unity has open. Without this the CLI blocks its
+# Edit and Write until it calls EnterWorktree (worktree.bgIsolation, also set in .claude/settings.json).
+CLAUDE_ENV = {"CLAUDE_CODE_ENTRYPOINT": VSCODE_ENTRY, "CLAUDE_BG_ISOLATION": "none"}
+
+
 def run_claude(args):
     """Runs the claude CLI in the project (one headless turn) and returns what it printed; raises with its error."""
     p = subprocess.run(["claude"] + args, cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace",
-                       env=dict(os.environ, CLAUDE_CODE_ENTRYPOINT=VSCODE_ENTRY),
+                       env=dict(os.environ, **CLAUDE_ENV),
                        timeout=CLAUDE_SECONDS, shell=(os.name == "nt"))
     if p.returncode != 0:
         raise RuntimeError((p.stderr or p.stdout or f"exit {p.returncode}").strip()[:300])
@@ -362,6 +413,39 @@ def eligible(session_id):
     if why:
         return None, {"ok": False, "id": t["id"], "title": t["title"], "error": why}
     return t, None
+
+
+OPEN_ELSEWHERE = ("thread đang mở trong VS Code (hoặc một terminal): trang không chạy lượt vào nó, vì tiến trình đó không "
+                  "thấy lượt này (ngữ cảnh của nó giữ nguyên) và transcript tách nhánh; một lệnh / nhắn qua SendMessage chỉ là chữ. "
+                  "Làm ngay trong chat đó: {what}")
+
+
+def open_elsewhere(t, what):
+    """The refusal for a thread a VS Code or terminal chat holds (claude agents: interactive), or None."""
+    if t.get("live") != "interactive":
+        return None
+    return {"ok": False, "id": t["id"], "title": t["title"], "error": OPEN_ELSEWHERE.format(what=what), "open": True}
+
+
+RELAY_MODEL = "claude-haiku-5-5"
+RELAY_DONE = "ĐÃ GỬI"
+
+
+RELAY_HEAD = ("Tin của người, gửi từ trang Setup qua một phiên trung chuyển đã thoát ngay sau khi gửi: KHÔNG trả lời "
+              "bằng SendMessage (địa chỉ đó không còn). Làm việc dưới đây và trả lời ngay trong chat này.\n\n")
+
+
+def relay(t, text):
+    """Delivers `text` to a chat open in VS Code (or a terminal) as a cross-session message, so the turn runs IN that
+    chat (same session, no split transcript). The server cannot send one itself: a short headless helper turn
+    (cheap model, nothing saved) calls SendMessage to the thread's name. A slash command sent this way is only text
+    (/compact is not run), so only plain prompts go through here."""
+    order = (f'Gọi đúng một lần tool SendMessage với to="{t["title"]}" và message là toàn bộ đoạn giữa hai dòng '
+             f'<<< và >>> dưới đây, giữ nguyên từng chữ. Không làm gì khác. Gửi được thì in đúng: {RELAY_DONE}\n<<<\n{RELAY_HEAD}{text}\n>>>')
+    out = run_claude(["-p", "--model", RELAY_MODEL, "--no-session-persistence", order])
+    if RELAY_DONE not in out:
+        raise RuntimeError("không chuyển được tin vào chat đang mở: " + out[:200])
+    return f"đã nhắn vào chat đang mở ở VS Code (SendMessage tới {t['title']}); chat đó tự chạy lượt này"
 
 
 def busy(session_id, on):
@@ -445,7 +529,7 @@ def reread(session_id):
     if no:
         return no
     try:
-        answer = turn(t, REREAD_PROMPT)
+        answer = relay(t, REREAD_PROMPT) if t.get("live") == "interactive" else turn(t, REREAD_PROMPT)
     except Exception as ex:
         return {"ok": False, "id": t["id"], "title": t["title"], "error": str(ex)[:300]}
     return {"ok": True, "id": t["id"], "title": t["title"], "answer": answer[:300]}
@@ -454,6 +538,9 @@ def reread(session_id):
 def compact(session_id):
     """Compacts one existing, bound thread: one headless turn that runs /compact. It binds nothing."""
     t, no = eligible(session_id)
+    if no:
+        return no
+    no = open_elsewhere(t, "gõ /compact")
     if no:
         return no
     try:
@@ -472,6 +559,9 @@ def renew(session_id, pin):
     them."""
     t, no = eligible(session_id)
     if no:
+        return no
+    no = open_elsewhere(t, "đóng chat đó trong VS Code rồi bấm Renew lại (hoặc gõ /clear trong chat, rồi nhắn nó đọc lại quy trình)")
+    if no:      # before the PIN: closing the chat must not cost a try
         return no
     error = bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
     if error:
@@ -669,6 +759,18 @@ def progress(path, phase, state, note):
     return {"ok": True, "data": sync_page.write_gamedesign(ROOT)}
 
 
+def requirement(ref, action, note):
+    """The human waives one requirement of a feature's book (with a reason), or takes the waiver back. No PIN."""
+    if action not in ("waive", "todo"):
+        return {"ok": False, "error": "chỉ nhận waive hoặc todo"}
+    try:
+        import reqbook
+        reqbook.mark_by_ref(ROOT, ref, action, "người", note if isinstance(note, str) else None)
+    except (ValueError, OSError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "data": sync_page.write_gamedesign(ROOT)}
+
+
 def sync_live(pin):
     """The Sync button: every passing idea node that differs from live is copied into live. Needs the PIN: it
     rewrites many fixed nodes at once."""
@@ -832,6 +934,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, review(data.get("path"), data.get("items"), data.get("table")))
             if self.path == "/api/gamedesign/progress":
                 return self.send_json(200, progress(data.get("path"), data.get("phase"), data.get("state"), data.get("note")))
+            if self.path == "/api/gamedesign/requirement":
+                return self.send_json(200, requirement(data.get("ref"), data.get("action"), data.get("note")))
             if self.path == "/api/gamedesign/priority":
                 return self.send_json(200, priority(data.get("path"), data.get("score")))
             if self.path == "/api/gamedesign/sync":

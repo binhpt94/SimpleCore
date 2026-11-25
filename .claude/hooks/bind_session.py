@@ -207,9 +207,19 @@ def code_gate(root, feature):
         return ("Thiết kế của feature này đã tới vòng 4 trong live nên được code; bám theo gói thiết kế: "
                 f"python Management/tools/gd_pack.py {feature} (node feature, các node con, node nhánh khác mà refs "
                 "trỏ tới, thuật ngữ). Lệnh in đường dẫn file gói và mục lục có số dòng: đọc bằng Read (offset, limit) "
-                "hoặc Grep; trước khi code một phần, đọc đủ node vòng 4 và mục CHEAT của phần đó.")
+                "hoặc Grep; trước khi code một phần, đọc đủ node vòng 4 và mục CHEAT của phần đó. " + req_brief(root, feature))
     return ("SỬA CODE ĐANG KHOÁ: " + reason + ". Đọc thì vẫn được. Dừng và báo người; thiết kế là việc của "
             "@GameDesigner, người chốt sang live.")
+
+
+def req_brief(root, feature):
+    """The one line of the feature's requirement book (Management/tools/reqbook.py): what is met, what it is doing.
+    A chat just renewed learns from it where it left off."""
+    try:
+        import reqbook
+        return reqbook.brief(root, feature)
+    except Exception as ex:
+        return f"Sổ yêu cầu: không đọc được ({ex}); chạy python Management/tools/gd_req.py {feature}."
 
 
 def designer_mode(root):

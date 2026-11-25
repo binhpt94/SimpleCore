@@ -31,7 +31,7 @@ Chỉ làm khi bước 1 qua. Xong cả hai Leader rồi mới sang bước 3.
 Tools → Testers → Basic → Services → Features. Chỉ nhắn phiên có trong `ListAgents`; phiên tầng dưới không live thì ghi lại, không dừng.
 - **Testers**: `python Management/tools/tester.py status` (các đợt chơi thử đang mở, mục đích và kết quả); đợt nào `không đạt` thì lỗi thuộc feature nào, đã có phiên sửa chưa.
 - **Tools**: `studio.py status` (order đang chờ, item bị chấm làm lại, phiếu nợ art); lần hỏi GPT còn nợ thì thấy ở `gd_status.py`.
-- **Basic, Services, Features**: báo cáo mới của từng phiên (trạng thái dở, bị chặn, "Cần bên khác"), `validate.py` (vi phạm), feature ĐƯỢC CODE mà chưa có phiên làm (feature ĐANG KHOÁ thì không giao code, xem "Chuỗi của một feature"), thư mục còn thiếu (`scaffold.py --dry-run`).
+- **Basic, Services, Features**: `python Management/tools/gd_req.py status` (sổ yêu cầu: đã kiểm/tổng, chờ kiểm, bị trả, đổi thiết kế, mất test của từng feature; chờ kiểm thì nhắc `CodeLead`, bị trả, đổi thiết kế, mất test thì nhắn phiên feature đó kèm id yêu cầu), báo cáo mới của từng phiên (trạng thái dở, bị chặn, "Cần bên khác"), `validate.py` (vi phạm), feature ĐƯỢC CODE mà chưa có phiên làm (feature ĐANG KHOÁ thì không giao code, xem "Chuỗi của một feature"), thư mục còn thiếu (`scaffold.py --dry-run`).
 
 ### Bước 4. Bản tổng hợp cho người
 Một tin, theo thứ tự tầng: Leader (live, tiến độ, đang chờ gì) → Tools → Testers → Basic → Services → Features → việc bị chặn và ai gỡ được → đề xuất bước tiếp. Sau tin này mới làm việc người giao và điều phối tiếp, theo "Giao việc theo đợt".
@@ -64,7 +64,7 @@ Mặc định là song song; chỉ nối tiếp khi việc thuộc danh sách "p
 
 ## Giao việc theo đợt
 1. Lập bảng theo feature: `live` tới vòng mấy, ĐƯỢC CODE hay ĐANG KHOÁ, đang ở bước nào của chuỗi, phiên nào đang làm, đang chờ ai.
-2. Với mỗi feature, lấy đúng một việc kế tiếp theo chuỗi.
+2. Với mỗi feature, lấy đúng một việc kế tiếp theo chuỗi. Ở bước Code, giao theo sổ yêu cầu (`gd_req.py <Tên>`): nêu id yêu cầu cần làm, không giao "làm tiếp feature".
 3. Bỏ các việc vướng danh sách "phải nối tiếp". **Nhắn cùng lúc** mọi phiên còn lại: nhiều `SendMessage` trong một lượt. Không chờ phiên này trả lời rồi mới nhắn phiên kia.
 4. Báo người bảng đó và các việc đang chờ người (chấm, chọn xung đột, chốt): đây thường là thứ đang chặn nhiều feature nhất.
 5. Có báo cáo mới thì lập lại bảng và giao đợt tiếp.

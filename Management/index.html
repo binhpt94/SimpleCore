@@ -585,7 +585,8 @@
     var rereadable = [];       // id của thread đủ điều kiện, theo thứ tự trong bảng
     var rereadCells = {};      // id -> { btns, note } của lần vẽ hiện tại
     var refreshTimer = null;
-    var humanIds = {};      // thread của người: "Bật live: tất cả" bỏ qua
+    var humanIds = {};
+    var openIds = {};      // đang mở trong VS Code/terminal: Compact, Renew "tất cả" bỏ qua (Đọc lại thì nhắn vào chat)      // thread của người: "Bật live: tất cả" bỏ qua
     var paintReread = function (id) {
       var cell = rereadCells[id], st = rereadState[id];
       if (!cell) return;
@@ -622,7 +623,9 @@
       });
     };
     var runAll = function (kind) {
-      var act = ACTIONS[kind], queue = rereadable.filter(function (id) { return kind !== "live" || !humanIds[id]; }), total = queue.length, done = 0, good = 0, stopped = false;
+      var act = ACTIONS[kind], queue = rereadable.filter(function (id) {
+        return !humanIds[id] && (kind !== "compact" && kind !== "renew" || !openIds[id]);      // chat của người: chỉ bấm từng hàng
+      }), total = queue.length, done = 0, good = 0, stopped = false;
       if (!total) { rereadStatus.className = "gap bad-text"; rereadStatus.textContent = "Không có thread nào đã gán."; return; }
       if (act.pin && !pin.value) { rereadStatus.className = "gap bad-text"; rereadStatus.textContent = "Nhập PIN ở ô phía trên rồi bấm lại."; return; }
       ACTION_KEYS.forEach(function (k) { allBtns[k].disabled = true; });
@@ -747,6 +750,7 @@
       rereadable = [];
       rereadCells = {};
       humanIds = {};
+      openIds = {};
       sorted.forEach(function (t) {
         var tier = tierOf(t);
         if (tier !== lastTier) {
@@ -757,11 +761,16 @@
         }
         var why = t.archived ? "thread đã archive" : t.unlisted ? "VS Code không hiện thread này"
           : !t.binding ? "thread chưa gán FEATURE: chạy Setup trước" : "";
+        // Chat đang mở trong VS Code (hoặc terminal): tiến trình đó không thấy lượt trang chạy vào, nên không chạy.
+        // Đọc lại vẫn chạy: server nhắn vào chat đó (SendMessage). Compact, Renew thì không: lệnh / qua tin nhắn chỉ là chữ.
+        var openWhy = t.live === "interactive" ? "đang mở trong VS Code (hoặc terminal): Compact thì gõ /compact trong chat đó; Renew thì đóng chat rồi bấm" : "";
         var rereadBox = el("span"), rowBtns = ROW_KEYS.map(function (k) {
           var b = put(rereadBox, el("button", "copy", ACTIONS[k].label));
           b.type = "button";
           b.style.marginRight = "4px";
-          if (why) { b.disabled = true; b.title = why; b.dataset.off = "1"; }
+          var off = why || (k !== "reread" ? openWhy : "");
+          if (k === "reread" && openWhy && !why) b.title = "đang mở trong VS Code: trang nhắn tin vào chat đó (SendMessage), chat tự đọc lại";
+          if (off) { b.disabled = true; b.title = off; b.dataset.off = "1"; }
           else b.addEventListener("click", (function (kind, id) { return function () { runOne(kind, id); }; })(k, t.id));
           return b;
         });
@@ -791,6 +800,7 @@
         if (!why) {
           rereadable.push(t.id);
           if (isHuman) humanIds[t.id] = true;
+          if (openWhy) openIds[t.id] = true;
           rereadCells[t.id] = { btns: rowBtns, note: rereadNote };
           paintReread(t.id);
         }

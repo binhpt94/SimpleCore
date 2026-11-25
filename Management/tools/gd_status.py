@@ -20,6 +20,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
+import reqbook  # noqa: E402
 
 PREFIX = "/".join(gd.TABLES["idea"])
 STATUS_NOTE = ("Đọc trước: các node mà mục lục ghi Kết luận CHƯA ĐẠT, và các mục cuối file (Lỗi cấu trúc, Chưa hỏi GPT, Thiếu..., "
@@ -190,7 +191,7 @@ def report(root, arg=""):
     if path:
         out += context_lines(snap, node)
     else:
-        out += ["", f"## Cổng code theo feature (chỉ code khi thiết kế tới vòng {len(gd.ROUNDS)} trong live)"] + gate_lines(snap) + [""]
+        out += ["", f"## Cổng code theo feature (chỉ code khi thiết kế tới vòng {len(gd.ROUNDS)} trong live)"] + gate_lines(snap, root) + [""]
     lines_for(root, node, out)
     problems = [p for p in snap["problems"]["idea"] if not path or p["path"] == path or p["path"].startswith(path + "/")]
     if problems:
@@ -210,7 +211,16 @@ def report(root, arg=""):
     return "\n".join(out)
 
 
-def gate_lines(snap):
+def req_tail(root, name):
+    """' · yêu cầu: 3/29 đã kiểm · ...' from the requirement book of a code folder (reqbook.py)."""
+    try:
+        v = reqbook.view(root, name)
+    except (ValueError, OSError):
+        return ""
+    return f" · yêu cầu: {reqbook.counts_line(v)}" if v["total"] else ""
+
+
+def gate_lines(snap, root=None):
     """The code gate of every feature, one line each: what @Manager reads before it hands out work. A feature may be
     coded only when its branch reached the last round in live (gamedesign.code_allowed)."""
     out = []
@@ -225,7 +235,8 @@ def gate_lines(snap):
         tail = (f" · thiết kế đề xuất: {design}" + (f", {clash} nhóm ý trái nhau chờ người chọn" if clash else "")
                 + (f" · {gd.PHASES[0]['name']}: {done}/{len(leaves)} node lá done" if leaves else ""))
         for gate in node["codeGate"]:
-            out.append(f"- {gate['unity']} ({node['path']}): " + ("ĐƯỢC CODE" if gate["ok"] else "ĐANG KHOÁ, " + gate["reason"]) + tail)
+            out.append(f"- {gate['unity']} ({node['path']}): " + ("ĐƯỢC CODE" if gate["ok"] else "ĐANG KHOÁ, " + gate["reason"]) + tail
+                       + (req_tail(root, gate["unity"]) if root is not None and gate["ok"] else ""))
         if not node["codeGate"]:
             out.append(f"- (chưa khai thư mục code) ({node['path']}): ĐANG KHOÁ" + tail)
     return out

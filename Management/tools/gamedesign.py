@@ -614,6 +614,13 @@ def save_progress(root, path, phase, state, by, note=None):
         raise ValueError(f"trạng thái phải là một trong {WORK_STATES}")
     if note is not None and (not isinstance(note, str) or len(note) > MAX_TEXT):
         raise ValueError(f"ghi chú phải là chữ, tối đa {MAX_TEXT} kí tự")
+    if state == "done":      # only when every requirement of the live leaf is verified or waived (reqbook.py)
+        import reqbook
+        _, left = reqbook.leaf_status(root, path)
+        if left:
+            raise ValueError(f"node '{path}' còn {len(left)} yêu cầu chưa được @CodeLead kiểm (hoặc người bỏ qua): "
+                             + ", ".join(left[:8]) + (" …" if len(left) > 8 else "")
+                             + f". Xem: python Management/tools/gd_req.py <Tên feature>")
     target = folder / PROGRESS_DIR / PROGRESS_FILE
     saved = read_dict(target, "phases")
     old = saved.get(phase) if isinstance(saved.get(phase), dict) else {}
@@ -2404,6 +2411,22 @@ def snapshot(root):
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
     for n in walk(idea):
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
+    import reqbook      # the requirement book of every feature: shown on its live leaves and on the same idea leaves
+    books = {}
+    for folder, _, _ in live_feature_names(root):
+        try:
+            for bn in reqbook.view(root, folder)["nodes"]:
+                books[bn["path"]] = {"met": bn["met"], "open": len(bn["open"]), "hasBook": bn["hasBook"], "feature": folder,
+                                     "items": [{"ref": r["ref"], "id": r["id"], "kind": r["kind"], "title": r["title"],
+                                                "state": r["state"], "why": r["why"], "hint": r.get("hint", ""),
+                                                "note": (r["saved"] or {}).get("note", ""), "tests": (r["saved"] or {}).get("tests", []),
+                                                "play": (r["saved"] or {}).get("play", ""), "by": (r["saved"] or {}).get("by", ""),
+                                                "at": (r["saved"] or {}).get("at", "")} for r in bn["reqs"]]}
+        except (ValueError, OSError):
+            continue
+    for tree in (idea, live):
+        for n in walk(tree):
+            n["reqs"] = books.get(n["path"])
     art, art_pending = read_art(root, live)
     for name, tree in (("idea", idea), ("live", live)):
         for n in walk(tree):
@@ -2413,6 +2436,6 @@ def snapshot(root):
         glossary[name], term_notes[name] = glossary_view(tree)
         for n in walk(tree):
             n.pop("refText", None)      # read by glossary_view only; the page does not need a second copy
-    return {"rounds": ROUNDS, "mode": mode, "frameCss": font_css(embed=False) + "\n" + FRAME_CSS,"screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "live": live, "idea": idea,
+    return {"rounds": ROUNDS, "mode": mode, "frameCss": font_css(embed=False) + "\n" + FRAME_CSS,"screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "reqStates": __import__("reqbook").STATE_NAMES, "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
             "missingCode": missing_code(idea)}

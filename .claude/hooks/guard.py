@@ -72,6 +72,7 @@ import ntpath
 import os
 import posixpath
 import re
+import shlex
 import stat
 import tempfile
 import time
@@ -211,6 +212,20 @@ TOOL_COMMANDS = {
 # and no backslash inside; SHELL_META_RX refuses the shell characters). Only the feature that ordered runs it.
 FEATURE_STUDIO_RX = re.compile(r"^python3? Management/tools/studio\.py (review) (" + STUDIO_REF + r") " + STUDIO_ID
                                + r' [0-3]( "[^"\\]*")?$')
+# The requirement book of a feature (Management/tools/gd_req.py, reqbook.py). Reading one book: any chat; the line
+# per feature: the Leaders. doing / done: only the chat of that feature (FEATURE_REQ_RX, checked below), with its note
+# or the play text in double quotes, or the names of its tests. verify / reject: @CodeLead. The human waives on the page.
+REQ_FEATURE = r"(_Services/)?[A-Za-z][A-Za-z0-9]*"
+REQ_REF = r"[a-z0-9]+(-[a-z0-9]+)*(/[a-z0-9]+(-[a-z0-9]+)*)*#[a-z0-9]+(-[a-z0-9]+)*"
+REQ_TEST = r"[A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*"
+GD_REQ = PY + r"Management/tools/gd_req\.py "
+ALLOWED_COMMANDS.append(GD_REQ + "(?!status$)" + REQ_FEATURE)
+for _commands in (DESIGNER_COMMANDS, CODELEAD_COMMANDS, MANAGER_COMMANDS):
+    _commands.append(GD_REQ + "status")
+CODELEAD_COMMANDS.append(GD_REQ + REQ_FEATURE + " verify " + REQ_REF + "(," + REQ_REF + ")*")
+CODELEAD_COMMANDS.append(GD_REQ + REQ_FEATURE + " reject " + REQ_REF + r' "[^"\\]+"')
+FEATURE_REQ_RX = re.compile(r"^python3? Management/tools/gd_req\.py (" + REQ_FEATURE + ") (doing " + REQ_REF
+                            + r' "[^"\\]+"|done ' + REQ_REF + " (" + REQ_TEST + "(," + REQ_TEST + r')*|play "[^"\\]+"))$')
 ROLE_AREAS = {"@Core": "Core"}
 # The wiring (Boot, scenes, asset catalogs): @CodeLead edits all of it, not only its skeleton; no code gate.
 LEAD_AREA = "_Composition"
@@ -234,6 +249,15 @@ UNITY_TOOL_ROLES = ("@Codex", "@Blender")      # the tool chats that have an out
 TESTER_UNITY = {"execute_menu_item", "manage_camera", "execute_code"}
 UNITY_ASSET_TOOL = UNITY_PREFIX + "manage_asset"
 UNITY_SERVER = "unityMCP"
+
+
+def unity_name(tool):
+    """The same unity-mcp server is registered as unityMCP (.mcp.json, http) or UnityMCP (stdio, local scope of the
+    CLI): both name the one Editor, so a tool of either is read as mcp__unityMCP__<tool>."""
+    tool = text_of(tool)
+    if tool.lower().startswith(UNITY_PREFIX.lower()):
+        return UNITY_PREFIX + tool[len(UNITY_PREFIX):]
+    return tool
 UNITY_RESOURCE_TOOLS = {"ReadMcpResourceTool", "ListMcpResourcesTool", "ReadMcpResourceDirTool"}
 ANY = "*"
 _READ_ONLY = ("find_gameobjects", "get_test_job", "unity_docs", "unity_reflect", "manage_script_capabilities",
@@ -861,6 +885,7 @@ def unity_commands(tool, ti):
     for c in cmds:
         name = text_of(c.get("tool")) if isinstance(c, dict) else ""
         params = c.get("params") if isinstance(c, dict) else None
+        name = unity_name(name)
         out.append((name if name.startswith(UNITY_PREFIX) else UNITY_PREFIX + name, params if isinstance(params, dict) else {}))
     return out
 
@@ -1023,7 +1048,7 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
         return "deny", (f"{who or 'this chat'} does not use unity-mcp" if mode != "none"
                         else "FEATURE is not set or is not an existing feature folder; unity-mcp is blocked")
     if tool in UNITY_RESOURCE_TOOLS:
-        if text_of(ti.get("server")) not in ("", UNITY_SERVER):
+        if text_of(ti.get("server")).lower() not in ("", UNITY_SERVER.lower()):
             return "deny", f"tool '{tool}' is allowed only for the {UNITY_SERVER} server"
         return "allow", "reads a unity-mcp resource"
     cmds = unity_commands(tool, ti)
@@ -1090,9 +1115,182 @@ def edit_texts(ti):
     return texts
 
 
+# Read-only search commands: this CLI has no Glob and Grep tools, a session lists and searches files with ls, find,
+# grep and rg in Bash. Each is taken only in a plain form (no pipe, redirection, substitution, -exec, a file of
+# patterns, a preprocessor or following links) and every path it names must be readable by the session, exactly
+# like a Read; a search names its folder, as Grep had to (the project root is not a readable zone).
+SEARCH_HELP = ("ls -la <folder>, find <folder> -name '*.cs', grep -rn 'pattern' <folder> [--include='*.cs'], "
+               "rg -n 'pattern' <folder>: one command, no pipe, quote patterns, name a folder you may read")
+SEARCH_UNQUOTED_BAD = set(";&|<>(){}`$*?[]\r\n")
+GREP_FLAGS, GREP_ARG = set("rnilLwcEFHhsvox"), set("ABCem")
+GREP_LONG = ("--include", "--exclude", "--exclude-dir")
+RG_FLAGS, RG_ARG = set("nilwcFSHNv"), set("ABCegtm")
+RG_LONG_ARG, RG_LONG_FLAG = ("--glob", "--type", "--iglob"), ("--files", "--files-with-matches", "--line-number",
+                                                             "--ignore-case", "--fixed-strings", "--count", "--hidden")
+FIND_ARG = {"-name", "-iname", "-path", "-ipath", "-type", "-maxdepth", "-mindepth"}
+FIND_FLAG = {"-not", "!", "-o", "-or", "-a", "-and", "-print", "-empty", "-prune"}
+
+
+def search_tokens(cmd):
+    """The words of cmd, or raises ValueError when the shell would do more than run one plain command: an unquoted
+    operator, glob or brace, a substitution, a newline. Inside single quotes everything is literal; inside double
+    quotes only $ and ` are refused."""
+    quote, i = None, 0
+    while i < len(cmd):
+        c = cmd[i]
+        if quote == "'":
+            quote = None if c == "'" else quote
+        elif c in "\r\n":
+            raise ValueError("a newline in the command")
+        elif quote == '"':
+            if c in "$`":
+                raise ValueError("$ or ` inside double quotes: use single quotes for a pattern")
+            if c == "\\":
+                i += 1
+            elif c == '"':
+                quote = None
+        elif c in "'\"":
+            quote = c
+        elif c == "\\":
+            i += 1
+        elif c in SEARCH_UNQUOTED_BAD or c == "~" and (i == 0 or cmd[i - 1] in " \t="):
+            raise ValueError(f"unquoted {c!r}: no pipe, redirection, substitution or shell glob; quote a pattern")
+        i += 1
+    if quote:
+        raise ValueError("an unclosed quote")
+    return shlex.split(cmd, posix=True)
+
+
+def check_glob(g):
+    if ".." in g or re.match(r"^([a-zA-Z]:|[\\/~])", g):
+        raise ValueError('a file glob may not be absolute or contain ".."')
+
+
+def search_paths(cmd):
+    """The paths a read-only search command reads, or None when cmd is not ls, find, grep or rg.
+    Raises ValueError when it is one of them in a form the guard does not take."""
+    words = cmd.split(None, 1)
+    if not words or words[0] not in ("ls", "find", "grep", "rg"):
+        return None
+    tokens = search_tokens(cmd)
+    name, args, paths = tokens[0], tokens[1:], []
+    if name == "ls":
+        for a in args:
+            if a.startswith("-"):
+                if not re.fullmatch(r"-[a-zA-Z1]+", a):
+                    raise ValueError(f"ls takes short flags only, not {a}")
+            else:
+                paths.append(a)
+    elif name == "find":
+        i = 0
+        while i < len(args) and not args[i].startswith("-") and args[i] != "!":
+            paths.append(args[i])
+            i += 1
+        while i < len(args):
+            a = args[i]
+            if a in FIND_ARG:
+                if i + 1 >= len(args):
+                    raise ValueError(f"find {a} needs a value")
+                v = args[i + 1]
+                if a == "-type" and v not in ("f", "d", "l"):
+                    raise ValueError("find -type takes f, d or l")
+                if a in ("-maxdepth", "-mindepth") and not v.isdigit():
+                    raise ValueError(f"find {a} takes a number")
+                if a in ("-path", "-ipath"):
+                    check_glob(v)
+                i += 2
+            elif a in FIND_FLAG:
+                i += 1
+            else:
+                raise ValueError(f"find takes only {', '.join(sorted(FIND_ARG | FIND_FLAG))}; not {a}")
+    else:
+        flags, arg_flags = (GREP_FLAGS, GREP_ARG) if name == "grep" else (RG_FLAGS, RG_ARG)
+        pattern, files_only, i = False, False, 0
+        while i < len(args):
+            a = args[i]
+            if a == "--":
+                paths += args[i + 1:]
+                break
+            if a.startswith("--"):
+                key, eq, val = a.partition("=")
+                if name == "grep" and key in GREP_LONG or name == "rg" and key in RG_LONG_ARG:
+                    if not eq:
+                        if i + 1 >= len(args):
+                            raise ValueError(f"{key} needs a value")
+                        val, i = args[i + 1], i + 1
+                    if key != "--type":
+                        check_glob(val)
+                elif name == "rg" and a in RG_LONG_FLAG:
+                    files_only = files_only or a == "--files"
+                else:
+                    raise ValueError(f"{name} does not take {key} here")
+            elif a.startswith("-") and len(a) > 1:
+                j = 1
+                while j < len(a):
+                    c = a[j]
+                    if c in arg_flags:
+                        val = a[j + 1:]
+                        if not val:
+                            if i + 1 >= len(args):
+                                raise ValueError(f"{name} -{c} needs a value")
+                            val, i = args[i + 1], i + 1
+                        if c == "e":
+                            pattern = True
+                        elif c == "g":
+                            check_glob(val)
+                        elif c in "ABCm" and not val.isdigit():
+                            raise ValueError(f"{name} -{c} takes a number")
+                        break
+                    if c not in flags:
+                        raise ValueError(f"{name} does not take -{c} here (allowed: -{''.join(sorted(flags | arg_flags))})")
+                    j += 1
+            elif not pattern and not files_only:
+                pattern = True
+            else:
+                paths.append(a)
+            i += 1
+        if not pattern and not files_only:
+            raise ValueError(f"{name} without a pattern")
+    if not paths:
+        raise ValueError(f"{name} must name the folder or file it reads (the project root is not a readable zone)")
+    for p in paths:
+        if ".." in p.replace("\\", "/").split("/"):
+            raise ValueError(f'path with "..": {p}')
+    return paths
+
+
+def read_verdict(full, root, session_id, mode, feature, area, read_all):
+    """(decision, reason) of reading the canonical path `full`: Read, Grep, Glob and the read-only search commands."""
+    if goes_through_link(full, root):
+        return "deny", "path goes through a link or junction"
+    if own_session_zone(full, session_id):
+        return "allow", "this session's own tool output or scratch file"
+    name, readable, _ = zone(full, root, feature, area, read_all)
+    if mode == "gamedesigner":      # sees the design tree, its own rules and the studio, nothing else
+        readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
+            same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
+            and bool(DESIGNER_RULES_RX.match(posixpath.basename(full))))
+    if mode == "advisor":      # the design tree, the studio, the root CLAUDE.md, its rules and the designer's
+        readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or name == "root CLAUDE.md" or (
+            same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
+            and bool(ADVISOR_RULES_RX.match(posixpath.basename(full))))
+    if name == TESTER_ZONE:      # the test runs: the Leaders, the code tiers and the testers
+        readable = mode in TESTER_READERS
+    if name == TESTER_ARCHIVE_ZONE:      # old runs: the testers only
+        if mode != "tester":
+            return "deny", ("may not read: archived test runs. They were moved out so that they do not fill your "
+                            "context; ask the tester (or the human) when you need one.")
+        readable = True
+    if readable:
+        return "allow", f"read inside {name}"
+    return "deny", (f"may not read: {name}. Search and read only inside your own area or a readable zone"
+                    + (" (outside the project only this session's own tool-results, tasks and scratchpad folders "
+                       "are readable; another session's are not)." if name == "outside the project" else "."))
+
+
 def decide(data, session_value, root, store=None):
     """Returns (decision, reason), or None to leave the call to the normal permission flow."""
-    tool = text_of(data.get("tool_name"))
+    tool = unity_name(data.get("tool_name"))
     if not tool:
         raise ValueError("no tool_name in hook input")
     ti = data.get("tool_input")
@@ -1161,6 +1359,28 @@ def decide(data, session_value, root, store=None):
             if ordered.startswith("_design/"):
                 return "deny", "art concepts are judged by the human on the management page (tab Game design)"
             return "deny", f"only the chat of {ordered} judges its own orders"
+        m = FEATURE_REQ_RX.match(cmd)
+        # doing / done in a requirement book: only the chat of that feature. The note may hold "..", the rest may not.
+        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
+            if mode == "feature" and m.group(1).lower() == feature.lower():
+                return "allow", f"requirement book of {feature}: doing / done"
+            return "deny", (f"only the chat of {m.group(1)} writes doing / done in its requirement book; @CodeLead "
+                            "verifies or rejects (gd_req.py <F> verify | reject), the human waives on the page")
+        try:
+            search = search_paths(cmd) if tool == "Bash" else None
+        except ValueError as ex:
+            return "deny", f"read-only search refused: {ex}. {SEARCH_HELP}"
+        if search is not None:
+            for p in search:
+                try:
+                    full = resolve_target(p, cwd)
+                except ValueError as ex:
+                    return "deny", f"read-only search refused: {ex}"
+                verdict = read_verdict(full, root, data.get("session_id"), mode, feature, area, read_all)
+                if verdict[0] != "allow":
+                    return "deny", f"read-only search refused at {p}: {verdict[1]}"
+            return "allow", "read-only search inside readable zones"
+
         def listed(one):
             return any(re.fullmatch(rx, one) for rx in commands) and not SHELL_META_RX.search(one) and ".." not in one
 
@@ -1169,7 +1389,8 @@ def decide(data, session_value, root, store=None):
         parts = CHAIN_SPLIT_RX.split(cmd)
         if mode in CHAIN_MODES and 1 < len(parts) <= CHAIN_MAX and all(listed(p) and '"' not in p for p in parts):
             return "allow", "every command of the chain is on the allow-list"
-        return "deny", "shell command is not on the allow-list in guard.py. Stop and tell the human."
+        return "deny", ("shell command is not on the allow-list in guard.py (python Management/tools/... commands of "
+                        "CLAUDE.md, and the read-only searches: " + SEARCH_HELP + "). Stop and tell the human.")
 
     if tool in EDIT_TOOLS:
         if not edit_path:
@@ -1258,32 +1479,7 @@ def decide(data, session_value, root, store=None):
             glob = text_of(ti.get("pattern") if tool == "Glob" else ti.get("glob"))
             if ".." in glob or re.match(r"^([a-zA-Z]:|[\\/~])", glob):
                 return "deny", 'glob may not be absolute or contain ".."; set the search folder with path instead'
-        full = resolve_target(target, cwd)
-        if goes_through_link(full, root):
-            return "deny", "path goes through a link or junction"
-        if own_session_zone(full, data.get("session_id")):
-            return "allow", "this session's own tool output or scratch file"
-        name, readable, _ = zone(full, root, feature, area, read_all)
-        if mode == "gamedesigner":      # sees the design tree, its own rules and the studio, nothing else
-            readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
-                same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
-                and bool(DESIGNER_RULES_RX.match(posixpath.basename(full))))
-        if mode == "advisor":      # the design tree, the studio, the root CLAUDE.md, its rules and the designer's
-            readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or name == "root CLAUDE.md" or (
-                same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
-                and bool(ADVISOR_RULES_RX.match(posixpath.basename(full))))
-        if name == TESTER_ZONE:      # the test runs: the Leaders, the code tiers and the testers
-            readable = mode in TESTER_READERS
-        if name == TESTER_ARCHIVE_ZONE:      # old runs: the testers only
-            if mode != "tester":
-                return "deny", ("may not read: archived test runs. They were moved out so that they do not fill your "
-                                "context; ask the tester (or the human) when you need one.")
-            readable = True
-        if readable:
-            return "allow", f"read inside {name}"
-        return "deny", (f"may not read: {name}. Search and read only inside your own area or a readable zone"
-                        + (" (outside the project only this session's own tool-results, tasks and scratchpad folders "
-                           "are readable; another session's are not)." if name == "outside the project" else "."))
+        return read_verdict(resolve_target(target, cwd), root, data.get("session_id"), mode, feature, area, read_all)
 
     if tool.startswith(BLENDER_PREFIX):      # soft gate: the guard cannot read the Python it runs (.claude/rules/studio.md)
         if mode == "tool" and TOOL_ROLES[role] == "blender":

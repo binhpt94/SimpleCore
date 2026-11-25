@@ -247,6 +247,17 @@
     ".gd-cell.doing { border-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); }",
     ".gd-cell.done { border-color: var(--ok); background: var(--ok); color: var(--panel); }",
     ".gd-cell:disabled { opacity: .6; cursor: default; }",
+    ".gd-cell.redo { border-color: var(--bad); background: transparent; color: var(--bad); }",
+    ".gd-reqs { padding: 4px 0 8px; }",
+    ".gd-req { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--line); }",
+    ".gd-req-title { flex: 1; min-width: 200px; }",
+    ".gd-req-ref { color: var(--muted); font-size: 12px; word-break: break-all; }",
+    ".gd-req-more { flex-basis: 100%; color: var(--muted); font-size: 12px; padding-left: 4px; }",
+    ".gd-req-state { padding: 1px 8px; border: 1px solid var(--line); border-radius: 4px; font-size: 12px; white-space: nowrap; color: var(--muted); }",
+    ".gd-req-state.verified, .gd-req-state.waived { border-color: var(--ok); background: var(--ok); color: var(--panel); }",
+    ".gd-req-state.done { border-color: var(--ok); color: var(--ok); }",
+    ".gd-req-state.doing { border-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); }",
+    ".gd-req-state.rejected, .gd-req-state.changed, .gd-req-state.no-test { border-color: var(--bad); color: var(--bad); font-weight: 600; }",
     ".gd-gate { margin: 8px 0 0; font-size: 13.5px; }",
     ".gd-gate.ok { color: var(--ok); }",
     ".gd-gate.bad { color: var(--bad); }",
@@ -1267,16 +1278,64 @@
       phases().filter(function (p) { return node.progress[p.key]; }).forEach(function (p) {
         var cell = node.progress[p.key];
         var next = states[(states.indexOf(cell.state) + 1) % states.length];
-        var b = put(row, button(p.name + ": " + (WORK[cell.state] || cell.state), function () {
+        var left = node.reqs ? node.reqs.open : 0;
+        var redo = cell.state === "done" && left > 0;
+        var label = p.name + ": " + (WORK[cell.state] || cell.state) +
+          (redo ? (node.reqs.hasBook ? " → cần làm lại (" + left + " yêu cầu)" : " (chưa đối chiếu " + left + " yêu cầu)") : "");
+        var b = put(row, button(label, function () {
           state.message = null;
           send("/api/gamedesign/progress", { path: node.path, phase: p.key, state: next },
             function () { return "Đã ghi tiến độ " + p.name + " của node " + where(node) + ": " + (WORK[next] || next) + "."; });
-        }, null, "gd-cell " + cell.state + (rank(node).phase === p.key ? " own" : "")));
+        }, null, "gd-cell " + cell.state + (redo ? " redo" : "") + (rank(node).phase === p.key ? " own" : "")));
         b.title = (cell.by ? "Đánh dấu bởi " + cell.by + " lúc " + cell.at + ". " : "") + (cell.note ? cell.note + ". " : "") +
           "Bấm để đổi sang: " + (WORK[next] || next) + "." + (rank(node).phase === p.key ? " Đây là giai đoạn của node này theo độ quan trọng." : "");
         if (!ctx.setup) b.disabled = true;
       });
       if (!ctx.setup) add(row, el("span", "gd-id", SERVER_HINT));
+    };
+
+    // Sổ yêu cầu của node lá (Management/tools/reqbook.py): mỗi ý, mỗi trường hợp biên và phần thông số là một yêu cầu.
+    // Feature ghi doing/done (kèm test), @CodeLead kiểm; người chỉ bỏ qua một yêu cầu, kèm lí do.
+    var REQ_ORDER = ["doing", "rejected", "changed", "no-test", "todo", "done", "verified", "waived"];
+    var renderRequirements = function (body, node) {
+      var book = node.reqs;
+      if (!book || !book.items.length) return;
+      var names = data.reqStates || {};
+      var box = fold(body, "Yêu cầu cho code: " + book.met + "/" + book.items.length + " đã kiểm" +
+        (book.open ? " · còn " + book.open : "") + " (" + book.feature + ")");
+      if (book.open) box.open = book.items.some(function (r) { return ["rejected", "changed", "no-test"].indexOf(r.state) >= 0; });
+      add(box, el("p", "gd-note", "Mỗi ý, mỗi trường hợp biên và phần thông số của node là một yêu cầu. Phiên " + book.feature +
+        " ghi đang làm và xong (kèm tên test) bằng gd_req.py; @CodeLead chạy test rồi mới tính đã kiểm. Thiết kế đổi hoặc test mất " +
+        "thì yêu cầu tự về chưa xong. Node chỉ được đánh xong khi mọi yêu cầu đã kiểm hoặc đã bỏ qua."));
+      var list = put(box, el("div", "gd-reqs"));
+      book.items.slice().sort(function (a, b) { return REQ_ORDER.indexOf(a.state) - REQ_ORDER.indexOf(b.state); }).forEach(function (r) {
+        var row = put(list, el("div", "gd-req"));
+        add(row, el("span", "gd-req-state " + r.state, names[r.state] || r.state));
+        var t = put(row, el("span", "gd-req-title", r.title));
+        add(t, el("div", "gd-req-ref", r.ref));
+        var more = [];
+        if (r.why) more.push(r.why);
+        if (r.note) more.push("ghi chú: " + r.note);
+        if (r.tests && r.tests.length) more.push("test: " + r.tests.join(", "));
+        if (r.play) more.push("Play: " + r.play);
+        if (r.hint) more.push(r.hint);
+        if (r.by) more.push(r.by + " · " + r.at);
+        var waived = r.state === "waived";
+        var b = put(row, button(waived ? "Bỏ bỏ qua" : "Bỏ qua", function () {
+          var note = null;
+          if (!waived) {
+            note = window.prompt("Lí do bỏ qua yêu cầu " + r.ref + " (bắt buộc):", "");
+            if (!note || !note.trim()) return;
+          }
+          state.message = null;
+          send("/api/gamedesign/requirement", { ref: r.ref, action: waived ? "todo" : "waive", note: note },
+            function () { return (waived ? "Đã đưa lại yêu cầu " : "Đã bỏ qua yêu cầu ") + r.ref + "."; });
+        }, null, "gd-link"));
+        b.title = waived ? "Đưa yêu cầu về chưa làm" : "Không đòi code cho yêu cầu này (người quyết, kèm lí do)";
+        if (!ctx.setup) b.disabled = true;
+        if (more.length) add(row, el("div", "gd-req-more", more.join(" · ")));
+      });
+      if (!ctx.setup) add(box, el("p", "gd-id", SERVER_HINT));
     };
 
     // Node feature: thư mục code đã khai và có được code chưa (đúng điều kiện guard áp cho phiên feature).
@@ -1388,6 +1447,7 @@
         "Đây là nơi duy nhất đặt ảnh art của feature (tối đa 3 state, mỗi state một frame và một ảnh)."));
       renderPriority(body, node);
       renderProgress(body, node);
+      renderRequirements(body, node);
       renderCode(body, node);
       // Ý cốt lõi: bấm vào một ý để hiện chi tiết, hàng nút chấm điểm và ô nhập ý kiến.
       if (state.table === "idea") renderVerdict(body, node);
