@@ -190,6 +190,8 @@ LIVE_LOCK = threading.Lock()
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/gamedesign/requirement": 64 * 1024, "/api/vscode-groups": MAX_BODY,
+              "/api/references/upload": 12 * 1024 * 1024, "/api/references/note": 64 * 1024,
+              "/api/references/delete": MAX_BODY,
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
               "/api/sessions/delete": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY}
@@ -869,6 +871,25 @@ def review(path, items, table):
     return {"ok": True, "saved": count, "data": sync_page.write_gamedesign(ROOT)}
 
 
+def reference_call(action, data):
+    """The tab Tham chiếu: upload a picture (base64), change its note, kind and tags, or delete it. No PIN, like the
+    scores: the human's own notes."""
+    import references
+    try:
+        if action == "upload":
+            references.upload(ROOT, data.get("name"), data.get("data"), data.get("note") or "", data.get("kind") or references.KINDS[0],
+                              data.get("tags") or [])
+        elif action == "note":
+            references.update(ROOT, str(data.get("id") or ""), data.get("note"), data.get("kind"), data.get("tags"))
+        elif action == "delete":
+            references.delete(ROOT, str(data.get("id") or ""))
+        else:
+            return {"ok": False, "error": f"không có lệnh '{action}'"}
+    except (ValueError, OSError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "data": sync_page.write_references(ROOT)}
+
+
 def studio_call(fn, *args):
     """Runs one studio.py command for the page; its printed lines become the message."""
     import contextlib
@@ -943,6 +964,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, sync_page.write_gamedesign(ROOT))
             if path == "/api/studio":
                 return self.send_json(200, sync_page.write_studio(ROOT))
+            if path == "/api/references":
+                return self.send_json(200, sync_page.write_references(ROOT))
             return self.send_error(404)
         if path in ("/", "/index.html"):
             page = (ROOT / "Management" / "index.html").read_text(encoding="utf-8")
@@ -986,6 +1009,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, promote(data.get("path"), data.get("deep") is True))
             if self.path == "/api/gamedesign/review":
                 return self.send_json(200, review(data.get("path"), data.get("items"), data.get("table")))
+            if self.path.startswith("/api/references/"):
+                return self.send_json(200, reference_call(self.path.rsplit("/", 1)[1], data))
             if self.path == "/api/gamedesign/progress":
                 return self.send_json(200, progress(data.get("path"), data.get("phase"), data.get("state"), data.get("note")))
             if self.path == "/api/gamedesign/requirement":

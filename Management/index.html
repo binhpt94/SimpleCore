@@ -132,6 +132,7 @@
 <!-- Mỗi tab lớn một file trong view/, đăng ký vào window.CORESIMPLE_VIEWS. -->
 <script src="view/gamedesign.js"></script>
 <script src="view/studio.js"></script>
+<script src="view/references.js"></script>
 <script>
 (function () {
   var idea = window.CORESIMPLE_IDEA || null;
@@ -202,7 +203,8 @@
 
   // Dữ liệu lớn, mỗi bộ nạp một lần khi có tab cần tới. Mở qua setup_server.py: server dựng mới đúng bộ đó.
   // Mở thẳng từ file: đọc file trong data/ (Stop hook sinh lại sau mỗi lượt chat); thiếu file thì trả null.
-  var KINDS = { project: "CORESIMPLE_PROJECT", gamedesign: "CORESIMPLE_GAMEDESIGN", studio: "CORESIMPLE_STUDIO" };
+  var KINDS = { project: "CORESIMPLE_PROJECT", gamedesign: "CORESIMPLE_GAMEDESIGN", studio: "CORESIMPLE_STUDIO",
+                references: "CORESIMPLE_REFERENCES" };
   var loads = {};
   var load = function (kind) {
     if (loads[kind]) return loads[kind];
@@ -384,6 +386,13 @@
     tab("studio", "Studio", function (pane) {
       views.studio(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
     }, ["studio"]);
+  }
+
+  // ---------------------------------------------------------------- tham chiếu: ảnh người nạp, kèm nhận định (view/references.js)
+  if (views.references) {
+    tab("tham-chieu", "Tham chiếu", function (pane) {
+      views.references(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
+    }, ["references"]);
   }
 
   // ---------------------------------------------------------------- setup: tạo và gán đủ bộ thread

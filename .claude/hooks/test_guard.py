@@ -539,6 +539,23 @@ def run_uidesigner_cases():
                 "python Management/tools/gd_advise.py feature-hero q1", "python Management/tools/scaffold.py"):
         t(g, U, "deny", "Bash", {"command": cmd})
     t(g, "@GameDesigner", "allow", "Bash", {"command": "python Management/tools/gd_delete.py ai/idea/feature-hero"})
+    for who in (U, "@GameDesigner", "Wallet", "@CodeLead"):
+        t(g + " (frames drawn into PNGs to look at)", who, "allow", "Bash",
+          {"command": "python Management/tools/gd_frame.py ai/idea/feature-hero/hero-list/x --png"})
+    t(g, U, "deny", "Bash", {"command": "python Management/tools/gd_frame.py ai/idea/feature-hero --png --html x.html"})
+    g = "uidesigner: its lessons, the reference pictures"
+    w(g, U, "allow", base + "/ai/ui-lessons.md")
+    e(g, U, "allow", base + "/ai/ui-lessons.md")
+    for who in ("@GameDesigner", "Wallet", "@DesignAdvisor"):
+        w(g, who, "deny", base + "/ai/ui-lessons.md")
+    for p in (base + "/ai/idea/ui-lessons.md", base + "/ai/lessons.md"):
+        w(g, U, "deny", p)
+    refs = FX + "/Management/references"
+    for who in (U, "@GameDesigner", "@DesignAdvisor", "@CodeLead", "Wallet", "@Manager"):
+        r(g + " (everyone reads the references)", who, "allow", refs + "/hud-1.png")
+        t(g + " (everyone reads the references)", who, "allow", "Grep", {"pattern": "x", "path": refs})
+    for who in (U, "@GameDesigner", "@Manager", "@CodeLead", "Wallet"):
+        w(g + " (only the page writes them)", who, "deny", refs + "/index.json")
     g = "uidesigner: no unity-mcp, no code, may message the tester"
     t(g, U, "deny", "mcp__unityMCP__read_console", {"action": "get"})
     t(g, U, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})

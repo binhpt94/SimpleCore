@@ -193,6 +193,12 @@ UI_LEVELS = ("chính", "phụ")
 UI_SECTIONS = ("Phần tử", "Tương tác", "Flow")
 UI_MAIN = UI_LEVELS[0]
 FRAME_ITEM = "frame:"            # the id a frame is scored under: frame:<file name without .frame>
+# The design scale of the layout (uidesigner.md): spacing steps, and how much bigger each button level is than the
+# one below. A frame of a node with ui.md is checked against it (frame_smells: warnings, they do not block).
+UI_SPACING = (8, 16, 24, 40, 64)
+UI_SPACING_SLACK = 2              # px either side of a step still counts as on the scale
+UI_SIZE_STEP = 1.4                # the main button's area over any other button's, at least
+UI_KIND_BUTTON = "nút"
 # Styles: the art direction of the game, decided in round 1 (.art-style/ of the root, in its data hash).
 STYLE_DIR = ".art-style"
 STYLE_IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp")
@@ -901,7 +907,8 @@ def frame_comment(line):
 
 def parse_frame(text):
     """{kind, title, view, lets, uses, shapes, errors} of one .frame file, values still as written."""
-    f = {"kind": "", "title": "", "view": "", "lets": {}, "uses": {}, "shapes": [], "errors": [], "ai": None, "ui": "", "why": []}
+    f = {"kind": "", "title": "", "view": "", "lets": {}, "uses": {}, "shapes": [], "errors": [], "ai": None, "ui": "", "why": [],
+         "alt": ""}
     err = f["errors"].append
     ids = set()
     for n, raw in enumerate((text or "").split("\n"), 1):
@@ -965,6 +972,12 @@ def parse_frame(text):
                 err(f"{at}: ai phải là số nguyên từ 0 tới 10")
         elif sep and key.strip() == "ui":      # the hash of the ui.md the layout was made for
             f["ui"] = value.strip()
+        elif sep and key.strip() == "alt":     # this frame is another option for the screen of frame <name>
+            v = value.strip()
+            if FRAME_NAME_RX.match(v):
+                f["alt"] = v
+            else:
+                err(f"{at}: alt phải là tên một frame khác của node (không có .frame)")
         elif sep and key.strip() == "why":     # one reason of the layout, shown to the human who scores it
             if value.strip():
                 f["why"].append(value.strip())
@@ -1228,7 +1241,7 @@ def read_frames(folder, where, problems, screen, lookup):
         for e in r["errors"]:
             problems.append({"path": where, "text": f"{FRAME_DIR}/{name}: {e}"})
         r.update(file=name, text=text, uses=[f"{p}#{n}" for p, n in f["uses"].values()],
-                 ai=f["ai"], uiHash=f["ui"], why=f["why"], ids=[sh["id"] for sh in f["shapes"]],
+                 ai=f["ai"], uiHash=f["ui"], why=f["why"], alt=f["alt"], ids=[sh["id"] for sh in f["shapes"]],
                  buttons=[sh["id"] for sh in f["shapes"] if sh["shape"] == "button"])
         roles = frame_roles(f, r)
         for shape in r["shapes"]:
@@ -1795,18 +1808,32 @@ def cheat_problems(folder, where, depth, data, items, frames, problems, notes):
 def frame_items(frames):
     """The frames of a node with ui.md as items the human scores: [{id: frame:<name>, title, text, ai, hash}]."""
     return [{"id": FRAME_ITEM + fr["file"][:-len(FRAME_EXT)], "title": fr.get("title") or fr["file"], "text": fr["text"],
-             "ai": fr.get("ai"), "hash": short_hash(fr["text"]), "why": fr.get("why") or [], "file": fr["file"]}
+             "ai": fr.get("ai"), "hash": short_hash(fr["text"]), "why": fr.get("why") or [], "file": fr["file"],
+             "alt": fr.get("alt") or ""}
             for fr in frames]
+
+
+def frame_groups(items):
+    """{screen name: [items]}: a frame and the frames that are another option for it (`alt: <name>`)."""
+    names = {it["file"][:-len(FRAME_EXT)] for it in items}
+    groups = {}
+    for it in items:
+        own = it["file"][:-len(FRAME_EXT)]
+        groups.setdefault(it["alt"] if it.get("alt") in names else own, []).append(it)
+    return groups
 
 
 def ui_checks(ui, frames, items, mode):
     """(waiting for @UIDesigner, waiting for the human) of a round-4 node with ui.md: frames missing, laid out for an
-    older ui.md, a main element not placed, a button ui.md does not list, a frame with no or a low score."""
+    older ui.md, a main element not placed, a button ui.md does not list, a frame with no or a low score. A screen
+    laid out in several options (`alt:`) waits for the human to pick one (a score from PASS_MIN), then for
+    @UIDesigner to delete the others; an option scored low is not a redo while the screen has one picked."""
     owed, human = [], []
     if not frames:
         owed.append(f"chưa có frame cho danh sách UI ({UI_FILE}): chờ @UIDesigner")
     placed = {i for fr in frames for i in fr.get("ids") or []}
     known = {e["id"] for e in ui["elements"]}
+    names = {fr["file"][:-len(FRAME_EXT)] for fr in frames}
     for fr in frames:
         if fr.get("uiHash") != ui["hash"]:
             owed.append(f"frame '{fr['file']}' vẽ cho {UI_FILE} " + (f"bản {fr['uiHash']}" if fr.get("uiHash") else "chưa ghi 'ui:'")
@@ -1814,19 +1841,83 @@ def ui_checks(ui, frames, items, mode):
         extra = [b for b in fr.get("buttons") or [] if b not in known]
         if extra:
             owed.append(f"frame '{fr['file']}' có nút không có trong {UI_FILE}: {', '.join(extra)}")
+        if fr.get("alt") and fr["alt"] not in names:
+            owed.append(f"frame '{fr['file']}' là phương án của '{fr['alt']}' nhưng node không có frame đó")
     missing = [e["id"] for e in ui["elements"] if e["level"] == UI_MAIN and e["id"] not in placed]
     if frames and missing:
         owed.append(f"phần tử chính chưa có trong frame nào: {', '.join(missing)}")
-    for it in items:
-        if it["ai"] is None and it["user"] is None:
-            owed.append(f"frame '{it['file']}' chưa có điểm (thêm 'ai: <0-10>' vào phần đầu)")
+    for name, group in frame_groups(items).items():
+        for it in group:
+            if it["ai"] is None and it["user"] is None:
+                owed.append(f"frame '{it['file']}' chưa có điểm (thêm 'ai: <0-10>' vào phần đầu)")
+        if len(group) > 1:
+            picked = [it for it in group if it["user"] is not None and it["user"] >= PASS_MIN]
+            files = ", ".join(it["file"] for it in group)
+            if not picked:
+                human.append(f"màn '{name}' có {len(group)} phương án ({files}): chọn một (chấm từ {PASS_MIN}), các phương án kia chấm thấp hơn")
+            else:
+                best = max(picked, key=lambda it: it["user"])
+                owed.append(f"màn '{name}': người đã chọn {best['file']}; @UIDesigner xoá các phương án còn lại "
+                            f"({', '.join(it['file'] for it in group if it is not best)})")
             continue
-        if mode == "user" and it["user"] is None:
-            human.append(f"frame '{it['file']}': người chưa chấm")
-        elif it["effective"] is not None and it["effective"] < PASS_MIN:
-            who = "người" if it["user"] is not None else "AI"
-            owed.append(f"frame '{it['file']}': {who} chấm {it['effective']}, cần từ {PASS_MIN} trở lên: @UIDesigner làm lại")
+        for it in group:
+            if it["ai"] is None and it["user"] is None:
+                continue
+            if mode == "user" and it["user"] is None:
+                human.append(f"frame '{it['file']}': người chưa chấm")
+            elif it["effective"] is not None and it["effective"] < PASS_MIN:
+                who = "người" if it["user"] is not None else "AI"
+                owed.append(f"frame '{it['file']}': {who} chấm {it['effective']}, cần từ {PASS_MIN} trở lên: @UIDesigner làm lại")
     return owed, human
+
+
+def frame_smells(fr, ui):
+    """Warnings of a ui frame against the design scale and the hierarchy of ui.md (uidesigner.md): more than one main
+    button, the main button not the biggest, many buttons of one size, gaps off the spacing scale or all alike."""
+    if fr.get("kind") != "ui":
+        return []
+    out = []
+    level = {e["id"]: e["level"] for e in ui["elements"]}
+    kind = {e["id"]: e["kind"] for e in ui["elements"]}
+    shapes = [sh for sh in fr.get("shapes") or [] if "w" in sh and "h" in sh]
+    buttons = [sh for sh in shapes if sh["shape"] == "button"]
+    area = lambda sh: sh["w"] * sh["h"]      # noqa: E731
+    mains = [b for b in buttons if level.get(b["id"]) == UI_MAIN and kind.get(b["id"]) == UI_KIND_BUTTON]
+    if len(mains) > 1:
+        out.append(f"có {len(mains)} nút chính ({', '.join(b['id'] for b in mains)}): mỗi màn chỉ nên có một nút hành động chính")
+    if len(mains) == 1:
+        main, others = mains[0], [b for b in buttons if b is not mains[0]]
+        bigger = [b["id"] for b in others if area(b) * UI_SIZE_STEP > area(main)]
+        if bigger:
+            out.append(f"nút chính '{main['id']}' không lớn hơn hẳn ({UI_SIZE_STEP}x diện tích) các nút: {', '.join(bigger)}")
+    sizes = {}
+    for b in buttons:
+        sizes.setdefault((round(b["w"]), round(b["h"])), []).append(b["id"])
+    for (w, h), ids in sizes.items():
+        if len(ids) >= 3:
+            out.append(f"{len(ids)} nút cùng cỡ {w}x{h} ({', '.join(ids)}): không có tương phản cỡ, khó thấy nút nào quan trọng")
+    gaps = []
+    for i, a in enumerate(shapes):
+        for b in shapes[i + 1:]:
+            if a.get("parent") != b.get("parent"):
+                continue
+            ax1, ay1, ax2, ay2 = a["bbox"]
+            bx1, by1, bx2, by2 = b["bbox"]
+            if min(ay2, by2) > max(ay1, by1):      # side by side: the horizontal gap
+                gap = max(bx1 - ax2, ax1 - bx2)
+            elif min(ax2, bx2) > max(ax1, bx1):    # one above the other: the vertical gap
+                gap = max(by1 - ay2, ay1 - by2)
+            else:
+                continue
+            if 0 < gap <= UI_SPACING[-1] * 1.5:
+                gaps.append((round(gap), a["id"], b["id"]))
+    off = [g for g in gaps if not any(abs(g[0] - step) <= UI_SPACING_SLACK for step in UI_SPACING)]
+    if off:
+        out.append("khoảng cách không theo thang " + "/".join(map(str, UI_SPACING)) + ": "
+                   + ", ".join(f"{a}–{b} {g}px" for g, a, b in off[:4]) + (" ..." if len(off) > 4 else ""))
+    if len(gaps) >= 4 and len({g for g, _, _ in gaps}) == 1:
+        out.append(f"mọi khoảng cách đều {gaps[0][0]}px: lưới đều tăm tắp trông máy móc; gom nhóm (khoảng trong nhóm nhỏ hẳn khoảng giữa nhóm)")
+    return out
 
 
 def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None, review=None, cache=None):
@@ -1918,6 +2009,9 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
         if depth != FRAME_ROUND or cheat:
             problems.append({"path": where, "text": f"{UI_FILE} chỉ đặt ở node vòng {FRAME_ROUND}"})
         else:
+            for fr in frames:
+                fr["smells"] = frame_smells(fr, ui)
+                fr["warnings"] = fr["warnings"] + fr["smells"]
             ui_items = frame_items(frames)
             merge_review(review or folder, ui_items)
             ui_owed, ui_human = ui_checks(ui, frames, ui_items, mode)
@@ -2358,7 +2452,8 @@ def save_review(root, path, items, table="idea"):
         raise ValueError(f"node '{path or '(gốc)'}' không còn ở bảng đề xuất nên không lưu điểm được")
     known = {it["id"]: it for it in data["items"]}
     if (source / UI_FILE).is_file():      # the frames of a node with ui.md are scored like its ideas
-        for fi in frame_items([{"file": n, "text": t, "title": parse_frame(t)["title"], "ai": parse_frame(t)["ai"]}
+        for fi in frame_items([{"file": n, "text": t, "title": parse_frame(t)["title"], "ai": parse_frame(t)["ai"],
+                                "alt": parse_frame(t)["alt"]}
                                for n, t in frame_files(source)]):
             known[fi["id"]] = fi
     if not isinstance(items, dict) or not items:

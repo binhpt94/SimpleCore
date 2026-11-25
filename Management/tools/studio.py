@@ -595,9 +595,17 @@ def frame_png(root, path, frame, dest):
     if fr is None:
         return None
     # As a concept shows it: the texts the player reads in the project's font, no numbers and no notes to copy.
-    svg = gd.frame_svg(fr, concept=True).replace("</defs>", f"</defs><style>{frame_css()}</style>", 1)
+    return frame_png_file(fr, dest, f"{frame}.frame", concept=True)
+
+
+def frame_png_file(fr, dest, stem, concept=True):
+    """One resolved frame drawn into dest/<stem>.png (and the .svg beside it), colours fixed and the font inside.
+    concept: only what the player reads (how a concept shows it); otherwise with the numbers and the notes.
+    Returns the PNG path, or None when this machine cannot draw an SVG into a PNG."""
+    svg = gd.frame_svg(fr, concept=concept).replace("</defs>", f"</defs><style>{frame_css()}</style>", 1)
+    dest = Path(dest)
     dest.mkdir(parents=True, exist_ok=True)
-    svg_path, png_path = dest / f"{frame}.frame.svg", dest / f"{frame}.frame.png"
+    svg_path, png_path = dest / f"{stem}.svg", dest / f"{stem}.png"
     svg_path.write_text(svg, encoding="utf-8")
     return png_path if svg_to_png(svg_path, png_path) else None
 

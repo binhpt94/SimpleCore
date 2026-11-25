@@ -32,6 +32,7 @@ Style quyết định cảm nhận của cả game, nên là quyết định c�
   - góc nhìn, bảng màu, nét viền, độ chi tiết, ánh sáng;
   - làm gì và không làm gì (ví dụ "không gradient", "viền tối thiểu 3 px ở 1080p").
 - Ảnh tham chiếu do người bỏ vào, đặt tên `<id>-<tên>.png|jpg|webp`. Ảnh không thuộc style nào là lỗi cấu trúc.
+- Trước khi viết hay sửa style, chạy `python Management/tools/references.py` và Read các ảnh loại `style art` người nạp ở tab Tham chiếu (thư mục `Management/references`), cùng nhận định của người dưới mỗi ảnh: đó là hướng người muốn. Ảnh ở đó chỉ là gợi ý; style chính thức vẫn là `.art-style` của node gốc.
 - Được mix style: mỗi style cho một nhóm thứ (ví dụ `ui-flat` cho giao diện, `chars-chibi` cho nhân vật). Order art khai một hay nhiều style.
 - Chưa có style nào trong `live` thì không đặt được order art (xem `gamedesigner.md`, mục "Ảnh art-concept").
 

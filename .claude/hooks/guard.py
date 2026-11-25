@@ -92,7 +92,8 @@ ALLOWED_COMMANDS = [
     # Management/game-design/.pack/, which every session that reads the design may read, and the command prints its path)
     PY + r"Management/tools/gd_pack\.py (_Services/)?[A-Za-z][A-Za-z0-9]*",
     # the frames of one design node, resolved (reads only; --html writes a file, so it is left to the human)
-    PY + r"Management/tools/gd_frame\.py (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)+",
+    PY + r"Management/tools/gd_frame\.py (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)+( --png)?",
+    PY + r"Management/tools/references\.py",      # the reference pictures and the human's notes on them
 ]
 
 # One more command, for @GameDesigner only: delete a file or a node inside Management/game-design/ai.
@@ -139,7 +140,8 @@ DESIGN_AI, DESIGN_LIVE, DESIGN_BASE = ("Management/game-design/ai", "Management/
                                        "Management/game-design")
 DESIGN_ADVICE = "Management/game-design/advice"      # GPT's points about the design, asked by @DesignAdvisor; each becomes an idea
 DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE, DESIGN_ADVICE}
-READ_ALL_ZONES = {"Management/studio", "Resources"}      # the orders and what was delivered: every bound chat reads
+REFERENCES_ZONE = "Management/references"      # pictures the human uploads on the page (layout, art style), with notes
+READ_ALL_ZONES = {"Management/studio", "Resources", REFERENCES_ZONE}      # the orders and what was delivered: every bound chat reads
 # Inside ai: the proposed tree; the human's answers file that sits beside each node's questions; and the folders
 # only the page and the history code write (the human's scores, the node's history).
 DESIGN_TREE, DESIGN_CHOOSE, DESIGN_ANSWERS = "idea", ".ai-need-user-choose", "answers.json"
@@ -351,6 +353,7 @@ DESIGNER_RULES_RX = re.compile(r"^(designadvisor|uidesigner)\.md$|^gamedesigner(
 UIDESIGNER_RULES_RX = re.compile(r"^(uidesigner|gamedesigner(\.round[1-4])?)\.md$", CASE)
 FRAME_DIR_NAME = ".frame-concept"      # the frames of a node (gamedesign.py FRAME_DIR): @UIDesigner's
 FRAME_FILE_RX = re.compile(r"^[a-z][a-z0-9-]*\.frame$")
+UI_LESSONS = "ui-lessons.md"      # Management/game-design/ai/ui-lessons.md: what @UIDesigner learned from the scores
 ADVISOR_RULES_RX = re.compile(r"^(designadvisor|gamedesigner(\.round[1-4])?)\.md$", CASE)
 # What @DesignAdvisor writes below advice/<node>/: its question and its own note. The answer is gd_advise.py's.
 ADVICE_FILE_RX = re.compile(r"^" + ADVICE_ID + r"\.(q|note)\.md$")
@@ -629,6 +632,8 @@ def zone(full, root, feature, area=None, read_all=False):
             if exact(seg[:2], "Management/proposals"):
                 return "Management/proposals", True, "create"
             return "Management", True, "deny"
+        if n >= 2 and low[1] == "references":      # only the page (setup_server.py) writes it
+            return (REFERENCES_ZONE if exact(seg[:2], REFERENCES_ZONE) else "Management"), True, "deny"
         if n >= 2 and low[1] == "studio":
             if exact(seg[:2], STUDIO_ZONE):
                 return STUDIO_ZONE, True, "studio"
@@ -887,8 +892,8 @@ def decide_designer_edit(full, root, name):
         return "deny", (".user-review (the human's scores and feedback), .history (the node's history) and "
                         ".progress (what is built) are written only by the management page and its tools. "
                         "Read them; do not write them.")
-    if FRAME_DIR_NAME in low:
-        return "deny", ("frames (.frame-concept) are @UIDesigner's: you list the UI the node needs in ui.md (elements, "
+    if FRAME_DIR_NAME in low or low == [UI_LESSONS]:
+        return "deny", ("frames (.frame-concept) and ui-lessons.md are @UIDesigner's: you list the UI the node needs in ui.md (elements, "
                         "interactions, flow), then message UIDesigner to lay it out")
     if seg[:1] and same(seg[0], DESIGN_TREE):
         keys = []
@@ -910,6 +915,8 @@ def decide_uidesigner_edit(full, root, name):
     """@UIDesigner writing inside Management/game-design/ai: only the frames of the proposed tree
     (idea/<node>/.frame-concept/<name>.frame), and only where the same write gate as @GameDesigner's lets it."""
     seg = rel_segments(full, root)[3:]      # below Management/game-design/ai
+    if seg == [UI_LESSONS]:
+        return "allow", "its lessons from the human's feedback"
     if not (len(seg) >= 3 and seg[0] == DESIGN_TREE and seg[-2] == FRAME_DIR_NAME and FRAME_FILE_RX.match(seg[-1])
             and all(not s.startswith(".") for s in seg[1:-2])):
         return "deny", ("@UIDesigner writes only frames: Management/game-design/ai/idea/<node>/.frame-concept/<name>.frame "

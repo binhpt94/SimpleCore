@@ -358,6 +358,7 @@
 
   // Bấm một ảnh (hoặc hình frame) để xem to: lớp phủ toàn màn, đóng bằng Esc, bấm nền hoặc nút ×.
   var lightbox = function (source, caption) {
+    addStyle();      // other tabs (Studio, Tham chiếu) call it before this tab was ever opened
     var box = document.createElement("div");
     box.className = "gd-lightbox";
     box.setAttribute("role", "dialog");
@@ -2308,8 +2309,19 @@
             var src = put(shown, el("details", "gd-frame-src"));
             add(src, el("summary", "", "Xem nguồn"), el("pre", "", fr.text));
           };
+          // Phương án của cùng một màn (alt:) mang nhãn "Phương án A/B…" để bạn chọn một (chấm từ 5).
+          var optionLabel = {};
+          node.frames.forEach(function (fr) {
+            var screen = fr.alt || fr.file.replace(/\.frame$/, "");
+            optionLabel[screen] = optionLabel[screen] || [];
+            optionLabel[screen].push(fr.file);
+          });
+          var tabLabel = function (fr) {
+            var screen = fr.alt || fr.file.replace(/\.frame$/, ""), list = optionLabel[screen];
+            return list.length > 1 ? screen + " · phương án " + "ABCDEFGH".charAt(list.indexOf(fr.file)) : fr.file;
+          };
           if (tabs) node.frames.forEach(function (fr, i) {
-            var b = put(tabs, el("button", "gd-btn", fr.file));
+            var b = put(tabs, el("button", "gd-btn", tabLabel(fr)));
             b.type = "button";
             b.onclick = function () { show(i); };
           });

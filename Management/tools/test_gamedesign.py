@@ -554,6 +554,53 @@ def run_ui(root):
     gd.sync_live(root)
     check("ui.md goes to live with the node", folder(root, "live/feature-a/a1/a1x/ui.md").is_file())
 
+    # ---- options: another frame for the same screen (alt:), the human picks one, @UIDesigner deletes the others
+    h = node()["ui"]["hash"]
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/main.frame", frame.replace(ui_hash, h))
+    bold = frame.replace(ui_hash, h).replace("kind: ui\n", "kind: ui\nalt: main\n", 1).replace("ai: 7", "ai: 6")
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/main-bold.frame", bold)
+    n = node()
+    check("alt: is read, and two options wait for the human to pick one (even in Full Auto)",
+          (sorted(i["alt"] for i in n["frameItems"]), n["passed"], any("có 2 phương án" in x for x in n["reasons"]), n["uiWait"]),
+          (["", "main"], False, True, []))
+    gd.save_review(root, "feature-a/a1/a1x", {"frame:main-bold": {"score": 9, "feedback": "bản này"}, "frame:main": {"score": 3, "feedback": ""}})
+    n = node()
+    check("picked: @UIDesigner deletes the other option; the low score of the loser is no redo",
+          (n["passed"], [x for x in n["uiWait"] if "xoá các phương án còn lại (main.frame)" in x] != [], any("người chấm 3" in x for x in n["uiWait"])),
+          (False, True, False))
+    folder(root, "idea/feature-a/a1/a1x/.frame-concept/main.frame").unlink()
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/main-bold.frame", bold.replace("alt: main\n", ""))
+    check("the loser deleted: the node passes again", node()["passed"])
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/x.frame", f"kind: ui\nai: 6\nui: {h}\nalt: nowhere\n- a rect x=0 y=0 w=10 h=10\n")
+    check("alt: naming no frame waits for @UIDesigner", any("không có frame đó" in x for x in node()["uiWait"]))
+    folder(root, "idea/feature-a/a1/a1x/.frame-concept/x.frame").unlink()
+    check("a bad alt: is an error", bool(gd.parse_frame("kind: ui\nalt: Bad Name\n")["errors"]))
+
+    # ---- smells: the design scale and the hierarchy (warnings only)
+    ui = gd.parse_ui("## Phần tử\n- go | nút | chính | đi\n- back | nút | phụ | về\n- a | nút | phụ | x\n- b | nút | phụ | y\n")
+    def smells(text):
+        f = gd.parse_frame("kind: ui\n" + text)
+        return gd.frame_smells(gd.resolve_frame(f, gd.SCREENS["landscape"], lambda p, n: (None, "x")), ui)
+    good = smells("- go button x=100 y=100 w=400 h=160\n- back button x=524 y=100 w=200 h=120\n")
+    check("smell: a big main button, a smaller one 24px away: no warning", good, [])
+    check("smell: the main button not clearly bigger", any("không lớn hơn hẳn" in x for x in
+          smells("- go button x=100 y=100 w=200 h=120\n- back button x=324 y=100 w=200 h=120\n")))
+    check("smell: three buttons of one size", any("3 nút cùng cỡ" in x for x in
+          smells("- back button x=0 y=0 w=200 h=120\n- a button x=224 y=0 w=200 h=120\n- b button x=448 y=0 w=200 h=120\n")))
+    check("smell: a gap off the spacing scale", any("không theo thang" in x for x in
+          smells("- go button x=100 y=100 w=400 h=160\n- back button x=531 y=100 w=200 h=120\n")))
+    ui2 = gd.parse_ui("## Phần tử\n- go | nút | chính | đi\n- go2 | nút | chính | đi nữa\n")
+    two = gd.frame_smells(gd.resolve_frame(gd.parse_frame("kind: ui\n- go button x=0 y=0 w=300 h=150\n- go2 button x=400 y=0 w=300 h=150\n"),
+                                           gd.SCREENS["landscape"], lambda p, n: (None, "x")), ui2)
+    check("smell: two main buttons on one screen", any("2 nút chính" in x for x in two))
+    grid = smells("".join(f"- c{i} rect x={i * 116} y=0 w=100 h=100\n" for i in range(5)))
+    check("smell: every gap alike is a grid that looks mechanical", any("tăm tắp" in x for x in grid))
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/main-bold.frame",
+        f"kind: ui\nai: 6\nui: {h}\n- replay button x=100 y=100 w=200 h=120\n- home button x=324 y=100 w=200 h=120\n"
+        "- best label x=100 y=300 w=300 h=60\n")
+    fr = node()["frames"][0]
+    check("smells of a node with ui.md show among its frame warnings", (bool(fr["smells"]), set(fr["smells"]) <= set(fr["warnings"])), (True, True))
+
 
 def run_infra(root):
     """Round 2 always owes the infrastructure features; the reminder blocks nothing."""

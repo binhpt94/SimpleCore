@@ -4,6 +4,7 @@ The claude CLI is replaced by a fake and the binding store is a temp folder; no 
 
     python Management/tools/test_setup_server.py
 """
+import json
 import os
 import shutil
 import sys
@@ -40,7 +41,7 @@ def page_cases(check):
     import urllib.request
     from http.server import ThreadingHTTPServer
     built = []
-    names = ("main", "write_project", "write_gamedesign", "write_studio")
+    names = ("main", "write_project", "write_gamedesign", "write_studio", "write_references")
     real = [getattr(ss.sync_page, n) for n in names]
     for n in names:
         setattr(ss.sync_page, n, lambda *a, n=n: built.append(n) or {"kind": n})
@@ -66,6 +67,40 @@ def page_cases(check):
               [('{"kind": "write_project"}', ["write_project"]), ('{"kind": "write_gamedesign"}', ["write_gamedesign"]),
                ('{"kind": "write_studio"}', ["write_studio"])])
         check("the data paths need the token", (get("/api/project")[0], get("/api/project", "no")[0], built), (403, 403, []))
+        check("the references tab's data is built when asked for", (get("/api/references", "tok")[1], built), ('{"kind": "write_references"}', ["write_references"]))
+        built.clear()
+
+        def post(path, body, token="tok"):
+            raw = json.dumps(body).encode("utf-8")
+            req = urllib.request.Request(f"http://127.0.0.1:{ss.Handler.port}{path}", data=raw, method="POST",
+                                         headers={"X-Setup-Token": token, "Content-Type": "application/json"})
+            try:
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    return r.status, json.loads(r.read().decode("utf-8"))
+            except urllib.error.HTTPError as ex:
+                return ex.code, None
+        import base64
+        import shutil
+        import tempfile
+        tmp, real_root = Path(tempfile.mkdtemp(prefix="refsrv-")), ss.ROOT
+        ss.ROOT = tmp
+        try:
+            png = base64.b64encode(b"\x89PNG\r\n\x1a\n" + b"\0" * 16).decode()
+            code, res = post("/api/references/upload", {"name": "hud.png", "data": png, "note": "nút to", "kind": "bố cục", "tags": ["HUD"]})
+            files = sorted(x.name for x in (tmp / "Management" / "references").iterdir())
+            check("references: upload stores the picture and the index, and answers with fresh data",
+                  (code, res["ok"], res["data"], len(files), "index.json" in files), (200, True, {"kind": "write_references"}, 2, True))
+            rid = [x for x in files if x.endswith(".png")][0][:-4]
+            check("references: a note is saved", post("/api/references/note", {"id": rid, "note": "đổi", "kind": "style art", "tags": []})[1]["ok"])
+            check("references: a bad upload answers why", post("/api/references/upload", {"name": "a.gif", "data": base64.b64encode(b"GIF89a").decode()})[1],
+                  {"ok": False, "error": "chỉ nhận ảnh png, jpg hoặc webp"})
+            check("references: an unknown action is refused", post("/api/references/rename", {"id": rid})[0], 403)
+            check("references: the paths need the token", post("/api/references/delete", {"id": rid}, token="no")[0], 403)
+            check("references: delete", (post("/api/references/delete", {"id": rid})[1]["ok"],
+                                         [x.name for x in (tmp / "Management" / "references").iterdir()]), (True, ["index.json"]))
+        finally:
+            ss.ROOT = real_root
+            shutil.rmtree(tmp, ignore_errors=True)
     finally:
         server.shutdown()
         server.server_close()

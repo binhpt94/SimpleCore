@@ -6,6 +6,9 @@ and what is measurably wrong. Reads only, unless --html is given.
     python Management/tools/gd_frame.py live/<node>               the fixed node
     python Management/tools/gd_frame.py <node path> --html <file> also writes one self-contained HTML page
                                                                   (the drawing, data-* numbers on every shape)
+    python Management/tools/gd_frame.py <node path> --png         also draws every frame into PNGs to look at:
+        Management/game-design/.pack/frames/<node, '/' as '.'>/<frame>.png          as a concept shows it (no numbers)
+                                                              .../<frame>.measure.png  with the numbers and notes
 The frame syntax is at the top of the frames part of gamedesign.py and in .claude/rules/gamedesigner.round4.md.
 """
 import html
@@ -66,12 +69,34 @@ def html_page(table, node):
             f"<p>{html.escape('/'.join(gd.TABLES[table]) + '/' + node['path'])}</p>" + "".join(blocks) + "</body></html>")
 
 
+PNG_DIR = ("Management", "game-design", ".pack", "frames")
+
+
+def write_pngs(root, table, node):
+    """Draws every frame of the node twice (as a concept, and with the numbers); returns the printed lines."""
+    import studio      # the SVG to PNG ways of the studio
+    dest = Path(root).joinpath(*PNG_DIR, (table + "." + node["path"].replace("/", ".")) if node["path"] else table)
+    out, failed = [], False
+    for fr in node["frames"]:
+        stem = Path(fr["file"]).stem
+        for name, concept in ((stem, True), (stem + ".measure", False)):
+            png = studio.frame_png_file(fr, dest, name, concept=concept)
+            if png is None:
+                failed = True
+                continue
+            out.append(f"- {png.relative_to(Path(root)).as_posix()}")
+    if failed:
+        out.append("Không đổi được SVG sang PNG trên máy này: cần rsvg-convert, inkscape, magick, Chrome hoặc Edge.")
+    return (["", "Ảnh để xem (Read từng file; .measure có số):"] + out) if out else out
+
+
 def main(argv):
     root = HERE.parent.parent
     if len(argv) >= 3 and argv[-2] == "--root":      # test-only override
         root, argv = Path(argv[-1]), argv[:-2]
     args = argv[1:]
-    out_file = None
+    out_file, png = None, "--png" in args
+    args = [a for a in args if a != "--png"]
     if "--html" in args:
         i = args.index("--html")
         if i + 1 >= len(args):
@@ -87,6 +112,8 @@ def main(argv):
         print(f"Không đọc được: {e}", file=sys.stderr)
         return 2
     print(text_report(table, node))
+    if png:
+        print("\n".join(write_pngs(root, table, node)))
     if out_file:
         Path(out_file).write_text(html_page(table, node), encoding="utf-8")
         print(f"\nĐã ghi {out_file}")

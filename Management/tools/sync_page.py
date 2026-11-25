@@ -211,6 +211,15 @@ def write_gamedesign(root=None):
     return data
 
 
+def write_references(root=None):
+    """Writes Management/data/references.js (the reference pictures and the human's notes) for the tab Tham chiếu."""
+    import references
+    root = Path(root) if root else HERE.parent.parent
+    data = references.snapshot(root)
+    write_js(root / "Management" / "data" / "references.js", "CORESIMPLE_REFERENCES", data)
+    return data
+
+
 def write_studio(root=None):
     """Writes Management/data/studio.js (orders, runs, quality, art debts) for the Studio tab and returns it."""
     import studio      # here: studio imports gamedesign, which this module already has
@@ -238,6 +247,10 @@ def main():
         write_studio(root)
     except Exception as ex:
         print(f"sync_page.py: studio failed: {type(ex).__name__}: {ex}", file=sys.stderr)
+    try:
+        write_references(root)
+    except Exception as ex:
+        print(f"sync_page.py: references failed: {type(ex).__name__}: {ex}", file=sys.stderr)
     try:
         write_project(root)
     except Exception as ex:   # keep the old file; never write half a page
