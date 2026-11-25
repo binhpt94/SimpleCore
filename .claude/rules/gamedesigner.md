@@ -81,7 +81,8 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
   - Thẻ node mang nhãn `Đổi +mới ✎sửa −bỏ`, hoặc `Mới` khi `live` chưa có node.
   - Ý có nhãn `Mới` hoặc `Đã sửa`. Ý sửa hiện chữ cũ gạch, chữ mới tô, cả ở tiêu đề lẫn chi tiết.
   - Ý bị xoá nằm ở mục "Ý đã bỏ so với live".
-  - Tên node, tóm tắt và frame đổi cũng được báo.
+  - Mọi file của node (`CLAUDE.md`, `code.json`, frame, ảnh, style, phần đầu `data.md`) và điểm AI của từng ý đều có bản live đặt cạnh để so: so từng dòng, xem được hai bản cạnh nhau.
+  - Vì vậy chỉnh `CLAUDE.md` hay đổi điểm AI cũng là thứ người phải đọc lại.
   - Ý đổi mà người chưa chấm được đánh dấu để người xem trước.
 
   Hệ quả:

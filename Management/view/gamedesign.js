@@ -174,6 +174,23 @@
     ".gd-changes { margin: 12px 0 0; padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--warn-text); background: var(--warn-bg); color: var(--warn-text); font-size: 13px; }",
     ".gd-changes p { margin: 2px 0; }",
     ".gd-changes .gd-btn { margin-top: 6px; padding: 4px 10px; font-size: 12.5px; }",
+    ".gd-files { margin: 8px 0 0; color: var(--text); }",
+    ".gd-files details { margin: 6px 0; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }",
+    ".gd-files summary { padding: 6px 10px; cursor: pointer; font-size: 13px; }",
+    ".gd-files .gd-btn { margin: 0 10px 8px; }",
+    ".gd-filediff { margin: 0; padding: 6px 0; overflow-x: auto; font: inherit; font-size: 13px; line-height: 1.55; white-space: pre; }",
+    ".gd-filediff div { padding: 0 10px; }",
+    ".gd-filediff .del { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--bad); }",
+    ".gd-filediff .add { background: var(--warn-bg); color: var(--warn-text); }",
+    ".gd-filediff .skip { color: var(--muted); font-style: italic; }",
+    ".gd-filediff del { text-decoration: line-through; font-weight: 600; }",
+    ".gd-filediff ins { text-decoration: none; font-weight: 700; outline: 1px solid currentColor; border-radius: 2px; }",
+    ".gd-sbs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 10px 10px; }",
+    ".gd-sbs > div { min-width: 0; }",
+    ".gd-sbs b { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }",
+    ".gd-sbs pre { margin: 0; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; overflow: auto; max-height: 480px; font: inherit; font-size: 13px; line-height: 1.55; white-space: pre-wrap; }",
+    ".gd-sbs img { max-width: 100%; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); }",
+    "@media (max-width: 720px) { .gd-sbs { grid-template-columns: 1fr; } }",
     ".gd-removed { margin: 8px 0 0; padding: 0; list-style: none; }",
     ".gd-removed li { padding: 6px 0; border-bottom: 1px solid var(--line); color: var(--muted); }",
     ".gd-removed li span { text-decoration: line-through; }",
@@ -601,7 +618,13 @@
       if (d.title) out.push("đổi tên");
       if (d.summary) out.push("đổi tóm tắt");
       if (d.frames) out.push("đổi frame");
-      if (!out.length && n.state === "changed") out.push("chỉ đổi diễn giải (CLAUDE.md), ảnh hoặc code.json");
+      var ai = n.items.filter(function (i) { return i.liveAi !== null && i.liveAi !== undefined; }).length;
+      if (ai) out.push("điểm AI của " + ai + " ý");
+      var word = { added: "thêm", removed: "bỏ", changed: "sửa" };
+      ((n.diff || {}).files || []).forEach(function (f) {
+        if (f.name === "data.md" && (out.length || ai)) return;      // đã kể qua các ý, tên, tóm tắt, điểm
+        out.push(f.name + " " + word[f.status]);
+      });
       return out;
     };
     var diffShort = function (n) {
@@ -633,6 +656,109 @@
       for (; i < n; i++) push("-", x[i]);
       for (; j < m; j++) push("+", y[j]);
       return out;
+    };
+    // So theo dòng: [{op, text}] mỗi phần tử một dòng.
+    var lineOps = function (a, b) {
+      var x = a === null || a === undefined ? [] : a.split("\n"), y = b === null || b === undefined ? [] : b.split("\n");
+      var n = x.length, m = y.length, i, j, t = [];
+      if (n * m > 4000000) return x.map(function (l) { return { op: "-", text: l }; }).concat(y.map(function (l) { return { op: "+", text: l }; }));
+      for (i = 0; i <= n; i++) t.push(new Int32Array(m + 1));
+      for (i = n - 1; i >= 0; i--) for (j = m - 1; j >= 0; j--) t[i][j] = x[i] === y[j] ? t[i + 1][j + 1] + 1 : Math.max(t[i + 1][j], t[i][j + 1]);
+      var out = [];
+      i = 0; j = 0;
+      while (i < n && j < m) {
+        if (x[i] === y[j]) { out.push({ op: "=", text: x[i] }); i++; j++; }
+        else if (t[i + 1][j] >= t[i][j + 1]) { out.push({ op: "-", text: x[i] }); i++; }
+        else { out.push({ op: "+", text: y[j] }); j++; }
+      }
+      for (; i < n; i++) out.push({ op: "-", text: x[i] });
+      for (; j < m; j++) out.push({ op: "+", text: y[j] });
+      return out;
+    };
+    // Khung so dòng: dòng bỏ đỏ (−), dòng thêm vàng (+), một khối bỏ đứng ngay trước khối thêm cùng số dòng thì tô
+    // từng chữ; dòng giống nhau chỉ giữ 2 dòng quanh chỗ đổi.
+    var lineDiff = function (box, before, after) {
+      var ops = lineOps(before, after), pre = put(box, el("div", "gd-filediff")), CONTEXT = 2;
+      var near = ops.map(function () { return false; });
+      ops.forEach(function (o, k) {
+        if (o.op === "=") return;
+        for (var q = Math.max(0, k - CONTEXT); q <= Math.min(ops.length - 1, k + CONTEXT); q++) near[q] = true;
+      });
+      var row = function (o, parts) {
+        var line = put(pre, el("div", o.op === "-" ? "del" : o.op === "+" ? "add" : ""));
+        line.appendChild(document.createTextNode((o.op === "=" ? "  " : o.op === "-" ? "− " : "+ ")));
+        if (!parts) { line.appendChild(document.createTextNode(o.text)); return; }
+        parts.forEach(function (p) {
+          if (p.op === "=") line.appendChild(document.createTextNode(p.text));
+          else if (p.op === (o.op === "-" ? "-" : "+")) add(line, el(o.op === "-" ? "del" : "ins", "", p.text));
+        });
+      };
+      var k = 0;
+      while (k < ops.length) {
+        if (ops[k].op === "=" && !near[k]) {
+          var start = k;
+          while (k < ops.length && ops[k].op === "=" && !near[k]) k++;
+          add(pre, el("div", "skip", "  … " + (k - start) + " dòng giống …"));
+          continue;
+        }
+        if (ops[k].op === "-") {
+          var dels = [], adds = [];
+          while (k < ops.length && ops[k].op === "-") dels.push(ops[k++]);
+          while (k < ops.length && ops[k].op === "+") adds.push(ops[k++]);
+          var paired = dels.length === adds.length;
+          var words = paired ? dels.map(function (d, q) { return wordDiff(d.text, adds[q].text); }) : null;
+          dels.forEach(function (d, q) { row(d, words ? words[q] : null); });
+          adds.forEach(function (a, q) { row(a, words ? words[q] : null); });
+          continue;
+        }
+        row(ops[k]);
+        k++;
+      }
+      return pre;
+    };
+    var IMAGE_RX = /\.(png|jpe?g|gif|webp|svg)$/i;
+    // Mỗi file của node khác live: một khung so sánh. File chữ: so dòng, và nút xem hai bản cạnh nhau. Ảnh: hai ảnh.
+    var renderFiles = function (box, node) {
+      var files = (node.diff || {}).files || [];
+      if (!files.length) return;
+      var wrap = put(box, el("div", "gd-files"));
+      var word = { added: "thêm mới (live chưa có)", removed: "bỏ (live còn)", changed: "sửa" };
+      var src = function (key, name) {
+        var t = TABLES.filter(function (x) { return x.key === key; })[0];
+        return t.dir + (node.path ? node.path + "/" : "") + name.split("/").map(encodeURIComponent).join("/");
+      };
+      files.forEach(function (f) {
+        var det = put(wrap, el("details"));
+        det.open = f.name !== "data.md";
+        add(det, el("summary", "", f.name + " · " + word[f.status] + (f.name === "data.md" ? " (toàn văn; các ý đã so ở dưới)" : "")));
+        var text = f.live !== null || f.idea !== null;
+        if (text) {
+          lineDiff(det, f.live, f.idea);
+          var sbs = null;
+          var both = put(det, button("Xem hai bản cạnh nhau", function () {
+            if (sbs) { sbs.hidden = !sbs.hidden; return; }
+            sbs = put(det, el("div", "gd-sbs"));
+            [["Live", f.live], ["Đề xuất", f.idea]].forEach(function (side) {
+              var col = put(sbs, el("div"));
+              add(col, el("b", "", side[0]), el("pre", "", side[1] === null ? "(không có file)" : side[1]));
+            });
+          }));
+          both.className = "gd-btn";
+        } else if (IMAGE_RX.test(f.name)) {
+          var pics = put(det, el("div", "gd-sbs"));
+          [["Live", "live", f.status !== "added"], ["Đề xuất", "idea", f.status !== "removed"]].forEach(function (side) {
+            var col = put(pics, el("div"));
+            add(col, el("b", "", side[0]));
+            if (!side[2]) { add(col, el("p", "muted", "(không có ảnh)")); return; }
+            var img = put(col, el("img"));
+            img.src = src(side[1], f.name);
+            img.alt = side[0] + ": " + f.name;
+            img.loading = "lazy";
+          });
+        } else {
+          add(det, el("p", "gd-note", "File nhị phân: nội dung đổi, không so được bằng chữ."));
+        }
+      });
     };
     var diffLine = function (box, label, before, after) {
       var line = put(box, el("p", "gd-diff"));
@@ -1054,6 +1180,7 @@
       if (d.summary !== null && d.summary !== undefined) diffLine(box, "Tóm tắt:", d.summary, node.summary);
       var look = toLook(node), changed = changedItems(node).length;
       if (look) add(box, el("p", "", look + " ý mới hoặc sửa bạn chưa chấm (vạch vàng bên trái). Full Auto không bắt chấm, nhưng đây là chỗ AI vừa đổi."));
+      renderFiles(box, node);
       if (changed && changed < node.items.length) {
         add(box, button(state.onlyChanged ? "Hiện mọi ý" : "Chỉ hiện " + changed + " ý đổi", function () {
           state.onlyChanged = !state.onlyChanged; render();
@@ -1156,8 +1283,9 @@
             group.ids.forEach(function (id) { group.setters[id](id === it.id ? PICK_KEEP : PICK_DROP); });
           });
         }
-        var aiMark = put(marks, el("span", "gd-mark " + band(it.ai).key, "AI: " + it.ai));
-        aiMark.title = "AI chấm " + it.ai + " · " + band(it.ai).label;
+        var aiMoved = idea && it.liveAi !== null && it.liveAi !== undefined;
+        var aiMark = put(marks, el("span", "gd-mark " + band(it.ai).key, "AI: " + (aiMoved ? it.liveAi + " → " : "") + it.ai));
+        aiMark.title = "AI chấm " + it.ai + " · " + band(it.ai).label + (aiMoved ? " · live: " + it.liveAi : "");
         var userMark = put(marks, el("span", "gd-mark", ""));
         var said = put(marks, el("span", "gd-said", ""));
         var showMarks = function () {

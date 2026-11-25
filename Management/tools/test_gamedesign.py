@@ -1036,6 +1036,26 @@ def run_diff(root):
     check("diff: a node live has not", [it["change"] for it in snap_node(root, "feature-new")["items"]], ["new"])
     put(root, "idea/feature-shop/.frame-concept/main.frame", "kind: ui\n- a rect x=0 y=0 w=10 h=10\n")
     check("diff: a frame changed against live", snap_node(root, "feature-shop")["diff"]["frames"], True)
+    files = {f["name"]: f for f in snap_node(root, "feature-shop")["diff"]["files"]}
+    check("diff: the new frame file with its text", (files[".frame-concept/main.frame"]["status"], files[".frame-concept/main.frame"]["live"],
+                                                    files[".frame-concept/main.frame"]["idea"].startswith("kind: ui")), ("added", None, True))
+    before = gd.own_hash(folder(root, "idea/feature-shop"))
+    put(root, "idea/feature-shop/CLAUDE.md", "# feature-shop\n\nDữ liệu cốt lõi: data.md\n\nGiải thích mới.\n")
+    put(root, "idea/feature-shop/code.json", '{"unity": ["Shop2"]}')
+    img = folder(root, "idea/feature-shop/.images/a.png")
+    img.parent.mkdir(parents=True, exist_ok=True)
+    img.write_bytes(b"\x89PNG\x00\xff")
+    put(root, "idea/feature-shop/.images/index.md", "- a.png: ảnh thử\n")
+    mk(root, "feature-shop", items=(("buy", 7, "Mua bằng xu."),), doc="Giải thích mới.")
+    shop = snap_node(root, "feature-shop")
+    files = {f["name"]: f for f in shop["diff"]["files"]}
+    check("diff: CLAUDE.md has the live and the new text", ("Chi tiết." in files["CLAUDE.md"]["live"], "Giải thích mới." in files["CLAUDE.md"]["idea"]), (True, True))
+    check("diff: code.json added with its text", (files["code.json"]["status"], files["code.json"]["idea"]), ("added", '{"unity": ["Shop2"]}'))
+    check("diff: a picture is binary: no text", (files[".images/a.png"]["status"], files[".images/a.png"]["live"], files[".images/a.png"]["idea"]), ("added", None, None))
+    check("diff: data.md differs (the AI score)", files["data.md"]["status"], "changed")
+    check("diff: an AI score changed: the idea stays the same, the live score is kept", [(it["change"], it["liveAi"]) for it in shop["items"]], [("same", 9)])
+    check("own_hash still hashes the node's files", before != gd.own_hash(folder(root, "idea/feature-shop")), True)
+    check("the page carries no raw files", any("_files" in n for t in ("idea", "live") for n in gd.walk(gd.snapshot(root)[t])), False)
 
 
 def main():

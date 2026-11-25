@@ -1606,16 +1606,44 @@ def ancestors(tree, path):
 
 
 # ---------------------------------------------------------------- one node
-def own_hash(folder):
-    """Hash of what belongs to the node itself (data.md, CLAUDE.md, .images, .frame-concept): what promote copies
-    into live."""
-    h = hashlib.sha1()
+def node_files(folder):
+    """The files that belong to the node itself (data.md, CLAUDE.md, code.json, .images, .frame-concept,
+    .art-style): what promote copies into live and own_hash hashes. Some of the first three may not exist."""
     items = [folder / name for name in NODE_FILES + (CODE_FILE,)]
     for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR):
         d = folder / extra
         if d.is_dir():
             items += sorted(p for p in d.iterdir() if p.is_file())
-    for p in items:
+    return items
+
+
+TEXT_SUFFIXES = (".md", ".json", ".frame", ".txt", ".svg")
+TEXT_SHOWN_MAX = 200_000      # bytes of one file the page may carry to compare
+
+
+def file_versions(folder):
+    """{name relative to the node: {"text": ...} or {"sha": ...}} of node_files, to compare a node with live."""
+    out = {}
+    for p in node_files(folder):
+        if not p.is_file():
+            continue
+        name = p.relative_to(folder).as_posix()
+        raw = p.read_bytes()
+        if p.suffix.lower() in TEXT_SUFFIXES and len(raw) <= TEXT_SHOWN_MAX:
+            try:
+                out[name] = {"text": raw.decode("utf-8").replace("\r", "")}
+                continue
+            except UnicodeDecodeError:
+                pass
+        out[name] = {"sha": hashlib.sha1(raw).hexdigest()}
+    return out
+
+
+def own_hash(folder):
+    """Hash of what belongs to the node itself (data.md, CLAUDE.md, .images, .frame-concept): what promote copies
+    into live."""
+    h = hashlib.sha1()
+    for p in node_files(folder):
         h.update(p.name.encode("utf-8") + b"\0")
         if p.is_file():
             data = p.read_bytes()
@@ -1769,7 +1797,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
             "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
             "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "gptOwed": gpt_owed, "clashOpen": open_clashes(items), "nodeBy": data.get("nodeBy"),
-            "refText": raw + "\n" + doc, "children": []}
+            "refText": raw + "\n" + doc, "_files": file_versions(folder), "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
         if not KEY_RX.match(child.name):
@@ -1975,6 +2003,7 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
             # change against live: new (live has no such id), rewritten (live has another text), same
             it["change"] = "same" if it["fixed"] else "new" if was is None else "rewritten"
             it["live"] = {"title": was["title"], "detail": was["detail"]} if it["change"] == "rewritten" else None
+            it["liveAi"] = was["ai"] if was is not None and was["ai"] != it["ai"] else None
         ids = {it["id"] for it in node["items"]}
         node["diff"] = {
             "added": sum(1 for it in node["items"] if it["change"] == "new"),
@@ -1984,6 +2013,7 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
             "title": other["title"] if other and other["title"] != node["title"] else None,
             "summary": other["summary"] if other and other["summary"] != node["summary"] else None,
             "frames": bool(other) and other.get("frameHash") != node.get("frameHash"),
+            "files": file_changes(other.get("_files", {}), node.get("_files", {})) if other else [],
         }
         node["approved"] = node["passed"] and not node.get("clashOpen") and (mode != "user" or node["state"] == "same")
         below = [visit(c) for c in node["children"]]
@@ -1994,6 +2024,21 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
 
     if idea:
         visit(idea)
+    for n in list(walk(idea)) + list(walk(live)):      # the page carries only the files that differ
+        n.pop("_files", None)
+
+
+def file_changes(live, idea):
+    """[{name, status: added|removed|changed, live, idea}] of the node's files that differ from live; live and idea
+    are the texts, or None for a binary file or a side that has no such file."""
+    out = []
+    for name in sorted(set(live) | set(idea), key=lambda n: (n.count("/"), n)):
+        a, b = live.get(name), idea.get(name)
+        if a == b:
+            continue
+        out.append({"name": name, "status": "added" if a is None else "removed" if b is None else "changed",
+                    "live": (a or {}).get("text"), "idea": (b or {}).get("text")})
+    return out
 
 
 def check_path(path):
