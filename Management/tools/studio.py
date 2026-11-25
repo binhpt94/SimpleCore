@@ -692,7 +692,7 @@ def tool_exe(name):
     """The command that starts a tool, as a list. STUDIO_<NAME> overrides it (a .py file runs with this Python)."""
     exe = os.environ.get(f"STUDIO_{name.upper()}") or shutil.which(name)
     if not exe:
-        raise ValueError(f"không tìm thấy lệnh {name}: cài {name} hoặc đi đường dự phòng (.claude/rules/studio.md)")
+        raise ValueError(f"không tìm thấy lệnh {name}: cài {name} hoặc đi đường dự phòng (mục Ba đường chạy của skill studio-fulfill-order)")
     return [sys.executable, exe] if exe.endswith(".py") else [exe]
 
 
@@ -928,7 +928,7 @@ def cmd_codex(root, ref, item):
             keep_attempt(work, item, attempt)
             print(f"Codex (chỉ đọc, lấy ảnh ở {gen}, lượt {attempt}): {msg}")
             return 0
-        print(f"Codex không tạo được ảnh ({msg}). Đi gián tiếp qua unity-mcp theo .claude/rules/studio.md, rồi để "
+        print(f"Codex không tạo được ảnh ({msg}). Đi gián tiếp qua unity-mcp theo mục Ba đường chạy của skill studio-fulfill-order, rồi để "
               f"kết quả ở work/out/{item}.png và chạy deliver.", file=sys.stderr)
         return 1
 
@@ -975,7 +975,7 @@ def read_parts(root, tree, node, fr, frame, work):
     raw = gd._json(work / f"{frame}.parts.json")
     if not isinstance(raw, dict) or not isinstance(raw.get("parts"), list):
         return [], [f"thiếu work/{frame}.parts.json, hoặc nó không có dạng {{\"parts\": [...]}} (bảng phần của frame; xem "
-                    ".claude/rules/studio.md)"]
+                    "skill studio-claude-concept)"]
     shapes = {r["id"]: r for r in fr["shapes"]}
     need = [r["id"] for r in fr["shapes"] if r["role"] == gd.ROLE_OWN and r["shape"] in gd.PART_SHAPES]
     parts, problems, taken, cache = [], [], {}, {}
@@ -1483,7 +1483,7 @@ def cmd_blender(root, ref, item):
         log(folder, "run", tool="blender", item=item, mode="headless", exit=code, result=msg,
             files=[p.name for p in made] if ok else [], error=err if not ok else "")
         print(f"Blender (headless): {msg}" if ok else f"Blender (headless): {msg}. Thử blender MCP, rồi unity-mcp "
-              f"(.claude/rules/studio.md); kết quả để ở work/out/{item}.<đuôi> rồi chạy deliver.",
+              f"(mục Ba đường chạy của skill studio-fulfill-order); kết quả để ở work/out/{item}.<đuôi> rồi chạy deliver.",
               file=sys.stdout if ok else sys.stderr)
         return 0 if ok else 1
 

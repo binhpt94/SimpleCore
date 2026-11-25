@@ -53,8 +53,13 @@ ROLE_RULES = {"@Manager": ("manager.md",), "@CodeLead": ("codelead.md",), "@UIDe
 # at them where the procedure used to be.
 SKILLS_DIR = ".claude/skills"
 GD_ROUNDS = ("gd-round-1", "gd-round-2", "gd-round-3", "gd-round-4")
-ROLE_SKILLS = {"@Manager": ("manager-startup-check",), "@GameDesigner": GD_ROUNDS, "@DesignAdvisor": GD_ROUNDS,
-               "@UIDesigner": ("ui-frame-syntax", "gd-round-4"), "@ClaudeImage": ("studio-claude-concept",),
+ROLE_SKILLS = {"@Manager": ("manager-startup-check",),
+               "@CodeLead": ("codelead-scaffold-feature", "codelead-resolve-issue"),
+               "@GameDesigner": GD_ROUNDS + ("gd-rework-node", "gd-integrate-advice"),
+               "@DesignAdvisor": ("advisor-ask-gpt", "gd-integrate-advice") + GD_ROUNDS,
+               "@UIDesigner": ("ui-layout-screen", "ui-frame-syntax", "ui-claude-concept-order", "gd-round-4"),
+               **{r: ("studio-fulfill-order",) for r in guard.TOOL_ROLES},
+               "@ClaudeImage": ("studio-fulfill-order", "studio-claude-concept"),
                **{r: ("tester-playtest-session",) for r in guard.TESTER_ROLES}}
 RULES_READ_DIR = "rules-read"      # in the store: <session id>.json, {"role": ...} once the chat was told to read
 
@@ -306,7 +311,8 @@ def context(data, root, store):
                 "Thứ còn lại được ghi là tiến độ của node thiết kế lá, sau khi đã biên dịch và test qua: python "
                 "Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done> (xem bằng "
                 "python Management/tools/gd_status.py). gd_status.py và gd_pack.py in đường dẫn file và mục lục có số "
-                "dòng khi bản in dài: đọc phần cần bằng Read (offset, limit) hoặc Grep. Quy trình ở .claude/rules/codelead.md."
+                "dòng khi bản in dài: đọc phần cần bằng Read (offset, limit) hoặc Grep. Luật ở .claude/rules/codelead.md; dựng khung "
+                "theo skill codelead-scaffold-feature, xử lý vấn đề theo skill codelead-resolve-issue."
                 + editor_status(store) + unread_reports(root, store, role))
     if role in guard.TESTER_ROLES:
         name = guard.TESTER_ROLES[role]
@@ -353,7 +359,7 @@ def context(data, root, store):
                 f"work/<item>.check.md (kích thước, nền trong suốt, % khung: đo bằng studio.py measure <F>/<id> <item>, "
                 f"không ước bằng mắt); hết lượt thì pick bản gần nhất và giao với nhãn chưa chuẩn, không tìm đường vòng. "
                 f"Phản hồi là một luật chung thì thêm một mục vào lessons.md. "
-                f"Luật ở .claude/rules/studio.md." + studio_pending(root, tool) + editor_status(store))
+                f"Luật ở .claude/rules/studio.md; mỗi order làm theo skill studio-fulfill-order." + studio_pending(root, tool) + editor_status(store))
     if role == "@GameDesigner":
         return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Lượt có sửa file "
                 "phải kết thúc bằng khối '## Báo cáo cho @Manager' (8 dòng, xem gamedesigner.md; Stop hook ép): @Manager "
@@ -380,7 +386,7 @@ def context(data, root, store):
                 "ý cũ; làm rõ <ý>: viết lại chính ý đó), chỉ được tóm gọn câu chữ, KHÔNG ĐƯỢC BỎ; khai nguồn ở phần đầu data.md: "
                 "by: <id ý>=gpt@<id lần hỏi>#<id góp ý>. Loại một ý của GPT chỉ khi nó bị chấm dưới 5, và khai gpt-dropped: "
                 "<id lần hỏi>#<id góp ý>=<id ý>. Node do GPT đề xuất: node-by: gpt@<id lần hỏi>. Mỗi ý một quyết định, không gộp dài. "
-                + advice_mode(root) + " Xem mục 'Bên @GameDesigner' của .claude/rules/designadvisor.md."
+                + advice_mode(root) + " Đưa góp ý vào node theo skill gd-integrate-advice."
                 " UI: ở node vòng 4 có giao diện bạn viết ui.md (phần tử: id, loại, chính/phụ, dùng để, trạng thái; tương "
                 "tác; flow; xem skill gd-round-4); bố cục (frame .frame-concept, vị trí, kích thước) và order "
                 "claude-concept là việc của @UIDesigner: viết hoặc đổi ui.md xong thì nhắn UIDesigner (to: \"UIDesigner\"). "
@@ -429,7 +435,7 @@ def context(data, root, store):
                 "'### <id> | <thêm | làm rõ <id ý> | thay <id ý>> | <ý>'; không trần lượt. Xem thiết kế: python "
                 "Management/tools/gd_status.py [ai/idea/<node>]. Xong thì nhắn bên hỏi (SendMessage, to: \"GameDesigner\") đường "
                 "dẫn file. Ý của GPT ngang hàng ý của Claude: @GameDesigner phải đưa mọi góp ý vào node, không được bỏ; người "
-                "chốt lên live. " + advice_mode(root) + " Làm theo .claude/rules/designadvisor.md.")
+                "chốt lên live. " + advice_mode(root) + " Làm theo .claude/rules/designadvisor.md; mỗi lần hỏi theo skill advisor-ask-gpt.")
     if role == "@Manager":
         return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "
                 "file mới trong Management/proposals và nhắn các phiên bằng SendMessage. Báo cáo của các phiên ở "

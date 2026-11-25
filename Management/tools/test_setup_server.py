@@ -426,11 +426,13 @@ def main():
               calls[-1], ["--resume", "aaaa1111", "--model", "claude-opus-x", "--effort", "medium", "-p", RP("@CodeLead")])
         check("reread: a thread not told before is told every file of its role, not those of other roles",
               ss.bind_session.rule_files("@CodeLead", str(ss.ROOT)),
-              ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/codelead.md", ".claude/rules/unity.md"])
+              ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/codelead.md", ".claude/rules/unity.md",
+               ".claude/skills/codelead-scaffold-feature/SKILL.md", ".claude/skills/codelead-resolve-issue/SKILL.md"])
         check("reread: a role with skills is told about them too (each SKILL.md is followed for changes)",
               ss.bind_session.rule_files("@UIDesigner", str(ss.ROOT)),
               ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/uidesigner.md",
-               ".claude/skills/ui-frame-syntax/SKILL.md", ".claude/skills/gd-round-4/SKILL.md"])
+               ".claude/skills/ui-layout-screen/SKILL.md", ".claude/skills/ui-frame-syntax/SKILL.md",
+               ".claude/skills/ui-claude-concept-order/SKILL.md", ".claude/skills/gd-round-4/SKILL.md"])
         sp = ss.reread_prompt([".claude/rules/uidesigner.md", ".claude/skills/ui-frame-syntax/SKILL.md"])
         check("reread: a changed rule file is Read again, a changed skill is only named (called again when used)",
               ("Read lại toàn bộ đúng các file đó" in sp, ".claude/rules/uidesigner.md" in sp, "Skill sau vừa đổi: ui-frame-syntax" in sp,

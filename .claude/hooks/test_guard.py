@@ -525,7 +525,8 @@ def run_uidesigner_cases():
     for p in (idea + "/feature-hero/data.md", base + "/live/data.md", FX + "/Management/studio/claudeimage/lessons.md",
               FX + "/.claude/rules/uidesigner.md", FX + "/.claude/rules/gamedesigner.md",
               FX + "/.claude/skills/ui-frame-syntax/SKILL.md", FX + "/.claude/skills/ui-frame-syntax/button-rects.png",
-              FX + "/.claude/skills/gd-round-4/SKILL.md"):
+              FX + "/.claude/skills/gd-round-4/SKILL.md", FX + "/.claude/skills/ui-layout-screen/SKILL.md",
+              FX + "/.claude/skills/ui-claude-concept-order/SKILL.md"):
         r(g, U, "allow", p)
     for p in (F + "/Wallet/Scripts/Internal/W.cs", FX + "/.claude/rules/codelead.md", FX + "/Management/tools/guard.py",
               FX + "/.claude/skills/gd-round-1/SKILL.md", FX + "/.claude/skills/codelead-scaffold-feature/SKILL.md",
@@ -617,7 +618,7 @@ def run_advisor_cases():
     for p in (idea + "/data.md", live + "/data.md", advice + "/feature-hero/q1.md", base, base + "/mode.json",
               FX + "/Management/studio/codex/lessons.md", FX + "/CLAUDE.md", FX + "/.claude/rules/designadvisor.md",
               FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/skills/gd-round-3/SKILL.md",
-              FX + "/.claude/skills/advisor-ask-gpt/SKILL.md"):
+              FX + "/.claude/skills/advisor-ask-gpt/SKILL.md", FX + "/.claude/skills/gd-integrate-advice/SKILL.md"):
         r(g, V, "allow", p)
     t(g, V, "allow", "Grep", {"pattern": "hero", "path": base})
     for p in (FX + "/.claude/rules/codelead.md", FX + "/.claude/rules/studio.md", FX + "/.claude/hooks/guard.py",
@@ -1400,6 +1401,7 @@ def run_designer_cases():
               idea + choose + "/answers.json", idea + "/.user-review/review.json", idea + "/.history/log.jsonl",
               FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/skills/gd-round-1/SKILL.md",
               FX + "/.claude/skills/gd-round-4/SKILL.md", FX + "/.claude/skills/gd-rework-node/notes/a.md",
+              FX + "/.claude/skills/gd-integrate-advice/SKILL.md",
               FX + "/.claude/rules/designadvisor.md"):
         r(g, D, "allow", p)
     r(g, D, "allow" if WIN else "deny", FX + "/.claude/rules/GameDesigner.md")      # same file only on Windows
@@ -1408,7 +1410,8 @@ def run_designer_cases():
               FX + "/.claude/rules/sub/gamedesigner.md", FX + "/.claude/hooks/gamedesigner.md",
               FX + "/.claude/skills/ui-frame-syntax/SKILL.md", FX + "/.claude/skills/gd-round-1",
               FX + "/.claude/skills/gd-round-1/../codelead-x/SKILL.md", FX + "/.claude/skills/gd-/SKILL.md",
-              FX + "/.claude/skills/x/gd-round-1/SKILL.md"):
+              FX + "/.claude/skills/x/gd-round-1/SKILL.md", FX + "/.claude/skills/advisor-ask-gpt/SKILL.md",
+              FX + "/.claude/skills/codelead-resolve-issue/SKILL.md"):
         r(g + " (of the rules only its own)", D, "deny", p)
     t(g, D, "allow", "Glob", {"pattern": "**/node.md", "path": base})
     t(g, D, "allow", "Grep", {"pattern": "hero", "path": live})

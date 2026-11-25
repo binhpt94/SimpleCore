@@ -7,7 +7,7 @@ Nhóm Leaders. GD không code, không đụng Unity. GD biến ý tưởng từ 
 Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, để các phiên khác (Manager, CodeLead, Basic, Features, Services) bám theo.
 
 ## Quyền (guard ép)
-- Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, skill từng vòng `gd-round-1`…`gd-round-4` (`.claude/skills/gd-round-<N>/`) và `.claude/rules/designadvisor.md` (GPT cùng thiết kế qua `DesignAdvisor`: **vòng 1 và 2 bắt buộc hỏi GPT**, mỗi node ít nhất một lần, node cũ chưa hỏi thì hỏi bù; không tự dặn GPT "đừng thêm feature, node mới" (vòng 1-3 GPT được đề xuất); ý của GPT ngang hàng ý của bạn, mỗi góp ý phải thành một ý của node, chỉ được tóm gọn câu chữ, không được bỏ; mục "Bên @GameDesigner" của file đó ghi cách đưa vào và cách khai nguồn: đọc trước khi viết một node đã có góp ý).
+- Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, skill từng vòng `gd-round-1`…`gd-round-4` (`.claude/skills/gd-round-<N>/`) và `.claude/rules/designadvisor.md` (GPT cùng thiết kế qua `DesignAdvisor`: **vòng 1 và 2 bắt buộc hỏi GPT**, mỗi node ít nhất một lần, node cũ chưa hỏi thì hỏi bù; không tự dặn GPT "đừng thêm feature, node mới" (vòng 1-3 GPT được đề xuất); ý của GPT ngang hàng ý của bạn, mỗi góp ý phải thành một ý của node, chỉ được tóm gọn câu chữ, không được bỏ; skill `gd-integrate-advice` ghi cách đưa vào và cách khai nguồn: dùng trước khi viết một node đã có góp ý).
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
 - Lệnh shell, chạy từ gốc project (nối được các lệnh đã cho phép bằng `;`, tối đa 6, không nối lệnh có chuỗi trong ngoặc kép; thêm `scaffold.py --dry-run` để xem thư mục còn thiếu):
@@ -75,7 +75,7 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
   - Ý viết theo dạng cũ (không có tiêu đề) vẫn đọc được nhưng `gd_status.py` sẽ nhắc "THIẾU TIÊU ĐỀ": lần tới sửa node đó thì thêm tiêu đề. Thêm tiêu đề làm đổi hash data.
 - Danh sách ý cốt lõi chỉ nằm ở `data.md`. Không chép lại thành mục "Cốt lõi" trong `CLAUDE.md`: hai danh sách sẽ lệch nhau và người duyệt sẽ thấy hai thứ khác nhau.
 - Không thêm mục `##` nào khác vào `data.md`: giải thích, ví dụ, trường hợp biên, bảng số, mục "Chưa rõ" để ở `CLAUDE.md`.
-- Phần đầu còn hai dòng không bắt buộc, không tính vào hash: `screen: landscape|portrait` (chỉ ở node gốc, xem skill `gd-round-1`) và `frame: none` (node vòng 4 không có bố cục, xem skill `gd-round-4`). Ba dòng về ý của GPT, `by:`, `gpt-dropped:` và `node-by:`, cũng không tính vào hash; xem `.claude/rules/designadvisor.md`.
+- Phần đầu còn hai dòng không bắt buộc, không tính vào hash: `screen: landscape|portrait` (chỉ ở node gốc, xem skill `gd-round-1`) và `frame: none` (node vòng 4 không có bố cục, xem skill `gd-round-4`). Ba dòng về ý của GPT, `by:`, `gpt-dropped:` và `node-by:`, cũng không tính vào hash; xem skill `gd-integrate-advice`.
 - **Hash data** tính từ tiêu đề node, tóm tắt, id, tiêu đề, chi tiết của các ý, và nội dung các file `.frame-concept/*.frame`. Đổi một trong các thứ đó là đổi hash: mọi node con thành "cần làm lại". Đổi điểm AI, `based-on` hay `CLAUDE.md` thì không. Vì vậy chỉ sửa `data.md` khi quyết định thật sự đổi; sửa câu chữ cho hay thì đừng.
 - **Trang hiện mọi thay đổi so với `live`** (bản chốt gần nhất), tới khi node được chốt lại:
   - Thẻ node mang nhãn `Đổi +mới ✎sửa −bỏ` (`Mới` khi `live` chưa có node). Ý có nhãn `Mới` hoặc `Đã sửa`, chữ cũ gạch, chữ mới tô; ý bị xoá nằm ở mục "Ý đã bỏ so với live"; ý đổi mà người chưa chấm được đánh dấu.
@@ -120,14 +120,7 @@ Node **đạt** khi có ít nhất một ý, `based-on` khớp hash data của c
 
 Node chưa đạt thì các node con bị guard khoá. Chính node đó vẫn sửa được. Node còn ý trái nhau mà người chưa chọn ("XUNG ĐỘT CHƯA GIẢI QUYẾT" trong `gd_status.py`) cũng khoá node con, ở cả hai mode: không tự chọn thay người, báo người rồi chờ.
 ## Làm lại một node
-`gd_status.py` ghi rõ node nào "bạn cần làm lại" và vì sao. Có ba lí do:
-1. **Ý bị chấm dưới 5** (người hoặc AI): đọc phản hồi của người, viết lại đúng ý đó trong `data.md` (giữ `id`), chấm lại điểm AI. Đừng đụng các ý đã đạt.
-2. **Lệch hash với cha** (data của cha đã đổi): đọc data mới của cha, rà từng ý của node, sửa ý nào không còn khớp, rồi ghi `based-on` bằng hash mới của cha. Nếu rà xong không phải sửa ý nào thì chỉ đổi `based-on`.
-3. **Chưa có ý nào**: viết các ý cốt lõi và chấm điểm.
-4. **Ref đã đổi hoặc thiếu ref**: đọc node đích (cả `CLAUDE.md`) hoặc từ trong glossary, rà các ý dùng nó, sửa ý nào không còn khớp (con số, tên, luật), rồi ghi hash mới vào `refs`. Rà xong không phải sửa gì thì chỉ đổi hash.
-
-Trước khi viết lại, **đọc lịch sử của node** (mục "Đã bị người loại" trong `gd_status.py`, hoặc `.history/log.jsonl`): không đề xuất lại ý đã bị loại hay một biến thể gần giống; nếu thấy vẫn cần ý đó thì hỏi người, nêu rõ nó đã bị loại lúc nào và vì sao lần này khác.
-Làm lại từ trên xuống: node cha đạt rồi mới tới node con.
+`gd_status.py` ghi node nào "bạn cần làm lại" và vì sao (ý dưới 5, lệch hash với cha, chưa có ý, ref đổi). Làm theo skill `gd-rework-node`: đọc lịch sử ý đã bị loại trước, làm từ trên xuống.
 
 ## Bảng thuật ngữ chung (`glossary`)
 - Node `ai/idea/glossary/` nằm ngang hàng các feature (vòng 2) và là nơi duy nhất định nghĩa thuật ngữ. Nó không phải feature: không `code.json`, không node con, không `priority.json`, không tiến độ.

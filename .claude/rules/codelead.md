@@ -29,10 +29,7 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic 
   - `python Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done>`: ghi tiến độ của một node lá.
 
 ## Dựng khung cho một feature
-1. Đọc thiết kế của feature: `python Management/tools/gd_pack.py <Tên>` (node feature, các node bên dưới, node nhánh khác mà refs trỏ tới, thuật ngữ; đọc đủ các node vòng 4 trong file gói, không chỉ mục lục), và Contracts của các feature nó dùng.
-2. Viết Contracts chỉ cho thứ feature khác đang cần (nêu tên), asmdef đúng ma trận của validator, `AssemblyInfo.cs` (View/Tests của chính nó).
-3. Lớp base trong `Scripts/Internal/Base` và `Scripts/View/Base`: `internal abstract`, giữ khuôn riêng của feature (cổng vào ra, chỗ để lớp con điền luật); không chứa luật game cụ thể của feature. Luật game nằm ở lớp con do phiên feature viết. Vòng đời phiên scene không viết lại ở đây: lớp con kế thừa thẳng `Game.Core.SessionParticipantBase`. Feature không có khuôn riêng thì để trống `Base`.
-4. Chạy `validate.py --feature <Tên>`, biên dịch; rồi báo cáo và nhắn phiên feature khung đã sẵn.
+Dùng skill `codelead-scaffold-feature` (gd_pack, Contracts, asmdef, `AssemblyInfo.cs`, lớp base, validate, biên dịch, nhắn phiên feature).
 
 ## Nối dây (`Assets/_Composition`)
 - Vùng này chỉ nối dây: `Boot.cs`, các variant của `Boot.prefab` (danh sách installer theo thứ tự cài, catalog asset id → asset), scene. Không chứa luật game.
@@ -69,12 +66,7 @@ Bắt buộc gửi khi cần đổi khung (bảng trên) hoặc xoá, đổi tê
 - Một tin cho mỗi lần bị chặn; nhắn lại khi tình trạng đổi. Lượt có sửa file thì khối báo cáo vẫn phải có, với `Trạng thái: bị chặn` và "Cần bên khác" ghi đúng bên gỡ được.
 
 ## Quy trình
-1. Nhận vấn đề hoặc báo cáo xong việc (thấy ở đầu mỗi tin).
-2. Xét phạm vi ảnh hưởng: đọc code các bên liên quan, ai dùng contract, asset id, asmdef nào.
-3. Nhắn các phiên liên quan; chấp nhận đề xuất hoặc đưa đề xuất khác. Các bên thống nhất một cách tốt nhất.
-4. Đổi khung: @CodeLead tự sửa, báo cáo, rồi nhắn mọi phiên dùng thứ vừa đổi. Phần còn lại: bên sở hữu tự sửa. @CodeLead biên dịch, chạy test, Play; có lỗi thì báo về đúng phiên kèm lỗi và file.
-5. Lỗi kéo dài (sửa 2 lần chưa xong hoặc nhiều phiên đổ lỗi nhau): phân tích sâu, gửi từng bên yêu cầu chính xác (file, thay đổi, thứ tự).
-Xoá thư mục: @CodeLead tự xoá thư mục khung (`Scripts/Contracts`, `Scripts/Internal/Base`, `Scripts/View/Base` và bên dưới) và thư mục bên trong `Assets/_Composition`, qua `manage_asset delete`, không cần hỏi. Không thuộc @CodeLead: `rules.json`, xoá cả `Assets/_Composition` (hỏi người); đổi luật hay ranh giới (đề xuất cho người).
+Nhận vấn đề hay báo cáo xong việc: dùng skill `codelead-resolve-issue` (phạm vi ảnh hưởng, thống nhất, ai sửa, biên dịch, test, lỗi kéo dài, xoá thư mục).
 
 ## Tiêu chí mặc định (từ chối khi không thoả)
 - Contract đã có feature khác dùng: không đổi nghĩa, không đổi chữ ký; chỉ thêm. Đổi phá vỡ thì đòi đề xuất.

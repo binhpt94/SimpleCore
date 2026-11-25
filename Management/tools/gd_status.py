@@ -110,8 +110,8 @@ def lines_for(root, node, out):
     if node.get("nodeBy"):
         out.append(f"- Node do GPT đề xuất (lần hỏi {node['nodeBy']['advice']})")
     if asked:
-        out.append("- Góp ý của GPT (ngang hàng ý của bạn: mỗi góp ý phải thành một ý, không được bỏ; xem mục "
-                   "'Bên @GameDesigner' của .claude/rules/designadvisor.md): " + ", ".join(f"{where}/{a}.md" for a in asked))
+        out.append("- Góp ý của GPT (ngang hàng ý của bạn: mỗi góp ý phải thành một ý, không được bỏ; xem "
+                   "skill gd-integrate-advice): " + ", ".join(f"{where}/{a}.md" for a in asked))
     if node.get("gptOwed"):
         out.append(f"- CHƯA HỎI GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}): nhắn DesignAdvisor "
                    f"(SendMessage, to: DesignAdvisor) hỏi GPT về node này; câu trả lời sẽ nằm ở {where}/<id>.md")

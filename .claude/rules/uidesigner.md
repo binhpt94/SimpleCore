@@ -8,11 +8,11 @@ Nhóm Leaders. Không code, không đụng Unity, không viết thiết kế. @G
 ## Quyền (guard ép)
 - Đọc: `Management/game-design/` (ai, live, advice), `Management/studio`, `Resources`, `Management/references` (ảnh tham chiếu người nạp), file này, `gamedesigner.md`, và các skill `ui-*`, `gd-round-4` trong `.claude/skills`.
 - Ghi: **chỉ** `Management/game-design/ai/idea/<node>/.frame-concept/<tên>.frame` (tên: chữ thường, số, gạch nối), qua cùng cổng khoá node như @GameDesigner (node phía trên chưa đạt thì không ghi được); và `order.md` mới của claude-concept trong `Management/studio/claudeimage/orders/_design/<node, '/' thay bằng '.'>/<id>/`.
-- Ghi thêm: `Management/game-design/ai/ui-lessons.md` (bài học từ điểm và phản hồi của người, mục "Bài học").
+- Ghi thêm: `Management/game-design/ai/ui-lessons.md` (bài học từ điểm và phản hồi của người, skill `ui-layout-screen`).
 - Không ghi được: `data.md`, `ui.md`, `CLAUDE.md` của node, `live/`, điểm và lịch sử. Art-concept của @Codex là của @GameDesigner.
 - Lệnh (nối được bằng `;`, tối đa 6, như mọi Leader):
   - `python Management/tools/gd_status.py [ai/idea/<node>]`: chạy đầu mỗi lượt; dòng `CHỜ @UIDesigner` là việc của bạn, `UI cần có` in `ui.md` kèm hash.
-  - `python Management/tools/gd_frame.py ai/idea/<node> [--png]`: frame đã giải ra số tuyệt đối, kèm cảnh báo; `--png` vẽ mỗi frame ra hai ảnh để Read (mục "Vòng tự xem").
+  - `python Management/tools/gd_frame.py ai/idea/<node> [--png]`: frame đã giải ra số tuyệt đối, kèm cảnh báo; `--png` vẽ mỗi frame ra hai ảnh để Read (vòng tự xem của skill `ui-layout-screen`).
   - `python Management/tools/references.py`: ảnh tham chiếu, loại, tag và nhận định của người.
   - `python Management/tools/gd_delete.py ai/idea/<node>/.frame-concept/<tên>.frame`: xoá một frame của bạn.
   - `python Management/tools/studio.py check`, `status claudeimage`, `redo <ref> <frame> "<lí do>"`; `scaffold.py --dry-run`.
@@ -40,26 +40,8 @@ Loại: nút, nhãn, thanh, ô, icon, danh sách, khung. Mức: chính (bắt bu
 - Người chấm frame dưới 5 (hoặc AI dưới 5): bạn làm lại theo phản hồi của người (`gd_status.py` in điểm và phản hồi). User control: frame đổi thì người phải chấm lại.
 - Node vòng 4 có frame mà chưa có `ui.md`: chỉ bị nhắc (việc của @GameDesigner); frame cũ giữ nguyên tới khi có `ui.md`, rồi bạn nhận lại: thêm `ui:`, `ai:`, `why:` và sửa id cho khớp.
 
-## Quy trình một màn (để bố cục không máy móc)
-1. **Đầu lượt** đọc `Management/game-design/ai/ui-lessons.md` và chạy `references.py`; Read ảnh `bố cục` cùng tag với màn (HUD trận, popup thưởng...) cùng nhận định của người.
-2. **Phương án**: màn mới hoặc đổi nhiều thì làm 2 frame: một bản an toàn theo luật và tham chiếu, một bản táo bạo hơn (nhấn mạnh hơn, bất đối xứng, bố cục khác hẳn). Bản thứ hai ghi `alt: <tên frame thứ nhất>` ở phần đầu, tên file khác (`main-bold.frame`). Màn đổi nhỏ thì một frame. Người chọn một bằng cách chấm từ 5; sau đó `gd_status.py` ghi `CHỜ @UIDesigner: … xoá các phương án còn lại`: xoá bằng `gd_delete.py`, và bỏ dòng `alt:` của bản được chọn nếu nó là bản `alt`.
-3. **Vòng tự xem** (bắt buộc, 2–3 vòng trước khi báo xong): `gd_frame.py ai/idea/<node> --png`, Read `<tên>.png` (như concept sẽ thấy) và `<tên>.measure.png` (có số), trả lời bốn câu rồi sửa:
-   - Mắt rơi vào đâu đầu tiên, có đúng phần tử chính không?
-   - Nút hành động chính có nổi nhất không (cỡ, vị trí, khoảng trống quanh nó)?
-   - Có chỗ nào chật, hay trống vô lý?
-   - Nhóm có rõ không: khoảng trong nhóm nhỏ hẳn khoảng giữa các nhóm?
-4. Ghi câu trả lời cuối thành các dòng `why:`, có một dòng `why: theo tham chiếu <id>: …` (hoặc `why: không có tham chiếu phù hợp`). Báo cáo ghi số vòng đã xem ở dòng "Kiểm tra".
-
-## Thang và thứ bậc (gamedesign.py kiểm, cảnh báo không chặn: xử lý hoặc giải thích ở `why:`)
-- Khoảng cách theo thang **8 / 16 / 24 / 40 / 64 px** (lệch tối đa 2 px). Trong nhóm dùng bậc nhỏ, giữa các nhóm nhảy ít nhất hai bậc.
-- Ba cấp nút: chính > phụ > nhỏ, mỗi cấp hơn cấp dưới **ít nhất 1,4 lần diện tích**. Cỡ chữ theo thang 24 / 32 / 40 / 56 / 72 px (chữ chính, giá trị lớn, tiêu đề).
-- Mỗi màn **đúng một nút hành động chính**; chừa khoảng thở quanh nó (ít nhất một bậc 40). Bất đối xứng được, khi có lý do ở `why:`.
-- Số chung (thang, cỡ nút từng cấp, lề an toàn) khai `let` một lần ở node bố cục chung, node khác `use` và khai refs; không chép số.
-- Cảnh báo tự động: hơn một nút chính; nút chính không lớn hơn hẳn các nút khác; từ 3 nút cùng cỡ; khoảng cách lệch thang; mọi khoảng cách bằng nhau (lưới tăm tắp, trông máy móc).
-
-## Bài học (`Management/game-design/ai/ui-lessons.md`)
-- Mỗi frame bị người chấm dưới 5, hoặc có phản hồi, thì thêm một dòng: `- <ngày> · <node>/<frame> · người: "<phản hồi>" · bài học: <luật ngắn, làm theo được>`.
-- Bài học lặp lại 2–3 lần: nhắn `Manager` đề xuất đưa thành luật trong file này (file `.claude` chỉ người sửa); vẫn giữ dòng trong `ui-lessons.md`.
+## Xếp một màn
+Mỗi màn: dùng skill `ui-layout-screen` (tham chiếu, phương án, vòng tự xem `--png` bắt buộc 2–3 vòng, thang 8/16/24/40/64 và thứ bậc nút, `why:`, `ui-lessons.md`).
 
 ## Luật bố cục
 - Mỗi màn hay popup một frame; popup chồng lên màn thì frame popup vẽ cả lớp nền mờ (`rect` phủ màn, cờ `overlap`).
@@ -72,11 +54,6 @@ Loại: nút, nhãn, thanh, ô, icon, danh sách, khung. Mức: chính (bắt bu
 ## Cú pháp frame
 Viết hay sửa frame: dùng skill `ui-frame-syntax` (cú pháp `kind`, `let`/`use`, các hình, cảnh báo tự động, trang trí `outline` `shadow` `aura` `cut` và các rect cảm nhận, vùng chạm, dùng, an toàn; kèm ảnh minh hoạ).
 
-## Claude-concept (bạn đặt và theo dõi)
-- Đặt cho mọi node vòng 4 đã ở `live` có frame, mỗi frame một ảnh, khi vòng 1 trong `live` đã có style. Node vòng 4 trước, node cheat sau (cheat do tool ghép từ phần của các node kia; thiếu phần thì dòng `Order art:` nêu node cần đặt thêm).
-- @ClaudeImage chỉ vẽ hình mà node tự định (dùng `let` của chính frame); hình `use` số node khác giữ hình cơ bản; nền phủ kín màn bị bỏ qua. `gd_frame.py` in hình nào thuộc loại nào: xếp sai thì sửa `let`/`use`.
-- Order ở `Management/studio/claudeimage/orders/_design/<node, '/' thay bằng '.'>/<id>/order.md`, phần đầu `tool: claudeimage`, `kind: art`, `count: 1`, `deliver: concept`, `format: png 1920x1080`, `style: <id style vòng 1>`; mỗi dòng Danh sách là tên một frame. Chạy `studio.py check`, qua thì nhắn ngay `ClaudeImage`.
-- Claude-concept không ai chấm. Nhãn "chờ ghép lại" (frame đổi mà phần còn vừa): nhắn @ClaudeImage ghép lại. Nhãn "CẦN LÀM LẠI · cần vẽ: …" hoặc muốn sửa hình: `studio.py redo <ref> <frame> "<lí do>"` rồi nhắn @ClaudeImage.
+## Claude-concept và node cheat
+Đặt, theo dõi claude-concept và vẽ frame của node cheat: dùng skill `ui-claude-concept-order`.
 
-## Node cheat
-Frame của node `<feature>/cheat` cũng do bạn vẽ: đúng một frame cho mỗi state, tên `<id của ý>.frame`, `use` mọi số từ node vòng 4 sở hữu bố cục. State (ý) do @GameDesigner viết; node cheat không có `ui.md` và frame của nó không chấm điểm.
