@@ -90,9 +90,13 @@ def full_lines(node, out, doc=True, book=None):
     elif node["priority"].get("leaf"):
         names = {x["key"]: x["name"] for x in gd.PHASES}
         out.append("- Tiến độ: " + " · ".join(f"{names[k]} {c['state']}" for k, c in node["progress"].items()))
+    if node.get("ui"):
+        out.append("")
+        out.append(f"### UI cần có ({LIVE}/{node['path']}/{gd.UI_FILE}: phần tử, tương tác, flow; id trùng id hình trong frame)")
+        out += gd.ui_lines(node["ui"])[1:]
     if node["frames"]:
         out.append("")
-        out.append(f"### Frame (bố cục ước lượng; nguồn {LIVE}/{node['path']}/{gd.FRAME_DIR}/)")
+        out.append(f"### Frame (bố cục ước lượng của @UIDesigner; nguồn {LIVE}/{node['path']}/{gd.FRAME_DIR}/)")
         for fr in node["frames"]:
             out += gd.frame_brief(fr)
     for tool, head in ((gd.ART_TOOL, "### Art concept (ảnh @Codex gen theo frame; xem phong cách, không đo kích thước từ ảnh)"),

@@ -19,7 +19,11 @@ The value, by group:
                                           file), writes only in Management/game-design/ai, deletes there with
                                           gd_delete.py, reads its status with gd_status.py; live, mode.json, the
                                           answers, the scores and the history are not its to write. A node is
-                                          writable only when every node above it is approved (gamedesign.py)
+                                          writable only when every node above it is approved (gamedesign.py).
+                                          It lists the UI a round-4 node needs (ui.md); the layout is @UIDesigner's
+              @UIDesigner                 lays the UI out: writes only the frames of the proposed tree
+                                          (ai/idea/**/.frame-concept/<name>.frame, same write gate as @GameDesigner) and
+                                          the claude-concept orders (claudeimage/orders/_design); reads like @GameDesigner
     Tools     @Codex / @Blender /         take orders from the features (Management/studio, studio.py): write only their
               @ClaudeImage                lessons.md and the work folder of an order; run Codex / Blender through
                                           studio.py; blender MCP (@Blender) and unity-mcp custom tools are a soft gate.
@@ -96,6 +100,12 @@ DESIGNER_COMMANDS = [
     PY + r"Management/tools/gd_delete\.py ai(/[A-Za-z0-9._-]+)+",
     PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
 ]
+# For @UIDesigner only: delete one of its frames, and look at the design's status.
+FRAME_FILE = r"[a-z][a-z0-9-]*\.frame"
+UIDESIGNER_COMMANDS = [
+    PY + r"Management/tools/gd_delete\.py ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)+/\.frame-concept/" + FRAME_FILE,
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+]
 # For @DesignAdvisor only: ask GPT one question about a design node (the question is the file
 # Management/game-design/advice/<node>/<id>.q.md it wrote; the answer lands beside it), and look at the design's status.
 ADVICE_ID = r"[a-z0-9]+(-[a-z0-9]+)*"
@@ -137,8 +147,8 @@ DESIGN_KEPT = {".user-review", ".history", ".progress"}
 DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per round
 HUMAN_ASK_ZONES = set()      # zone names where the human chat is still asked before an edit; the human emptied it
 # FEATURE values that are not feature folders.
-ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@DesignAdvisor", "@Codex", "@Blender",
-         "@ClaudeImage", "@UnityAutoPlay")
+ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@Codex",
+         "@Blender", "@ClaudeImage", "@UnityAutoPlay")
 # Testers: they play the game in the Editor and write what they saw. They read all the code of UnityProject and
 # change none of it; each writes only its own folder Tester/<name> (.claude/rules/tester.md). A new tester is one
 # more line here.
@@ -150,15 +160,17 @@ TESTER_IMAGES = "images"
 TESTER_DATA_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".md", ".txt", ".json", ".csv", ".log")
 # Who reads Tester/: the Leaders, the code tiers and the testers. Old runs moved to Tester/<name>/Archive are read by
 # the testers only, so the other chats do not fill their context with them.
-TESTER_READERS = ("manager", "codelead", "gamedesigner", "area", "feature", "tester")
+TESTER_READERS = ("manager", "codelead", "gamedesigner", "uidesigner", "area", "feature", "tester")
 # Who may message a tester (SendMessage): it holds the Unity Editor while it plays, so only @Manager hands it a test
 # run (and the human, whose chat the guard lets through); the other Leaders may ask it to act one thing out as a
 # player to confirm a feature (.claude/rules/tester.md). Everybody else asks @Manager.
-TESTER_CALLERS = ("manager", "codelead", "gamedesigner")
+TESTER_CALLERS = ("manager", "codelead", "gamedesigner", "uidesigner")
 # Tools: they take orders from the features and make images (Codex; ClaudeImage draws them itself as SVG) or 3D
 # models (Blender); they never code.
 TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender", "@ClaudeImage": "claudeimage"}
-ART_ORDER_TOOLS = ("codex", "claudeimage")      # whose orders/_design/ @GameDesigner writes art orders into
+ART_ORDER_TOOLS = ("codex", "claudeimage")      # whose orders/_design/ design orders go into
+# Who orders for a design node: art concepts (Codex) @GameDesigner, claude-concepts (drawn from the frames) @UIDesigner.
+DESIGN_ORDERER = {"codex": "gamedesigner", "claudeimage": "uidesigner"}
 STUDIO_ZONE, RESOURCES_ZONE = "Management/studio", "Resources"
 # What studio.py alone writes in an order folder; the one who orders writes order.md, once.
 STUDIO_SCRIPT_FILES = {"status.json", "log.jsonl", ".run.lock", "review.json", "anchors.json"}
@@ -175,10 +187,10 @@ ALLOWED_COMMANDS.append(STUDIO + r"(check|status( (codex|blender|claudeimage|" +
 # quotes). Drawing after a delivery is never the tool chat's own decision; the human runs it too.
 LEADER_REDO = (STUDIO + r"redo _design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*/" + STUDIO_ID + " " + STUDIO_ID
                + r' "[^"\\]+"')
-for _commands in (DESIGNER_COMMANDS, CODELEAD_COMMANDS, MANAGER_COMMANDS):
+for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS, CODELEAD_COMMANDS, MANAGER_COMMANDS):
     _commands.append(LEADER_REDO)
 # Every Leader may look at what scaffold.py would create (it prints, it creates nothing); creating is @Manager's.
-for _commands in (DESIGNER_COMMANDS, CODELEAD_COMMANDS):
+for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS, CODELEAD_COMMANDS):
     _commands.append(PY + r"Management/tools/scaffold\.py --dry-run")
 # A Leader may run several allowed commands in one call, joined by ';' or '&&' (its checks at the start of a session:
 # studio status, validate, scaffold --dry-run). Every part must pass alone, so a chain grants nothing a single call
@@ -203,7 +215,7 @@ def tester_commands(name):
             TESTER_TOOL + "archive " + name + TESTER_ARCHIVE_ARGS]
 
 
-CHAIN_MODES = ("manager", "codelead", "gamedesigner")
+CHAIN_MODES = ("manager", "codelead", "gamedesigner", "uidesigner")
 CHAIN_SPLIT_RX = re.compile(r"\s*(?:;|&&)\s*")
 CHAIN_MAX = 6
 TOOL_COMMANDS = {
@@ -335,7 +347,10 @@ SESSION_RX = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 # --- the file system this hook runs on
 WINDOWS = os.name == "nt"
 CASE = re.I if WINDOWS else 0                    # regex flag for zones that grant something
-DESIGNER_RULES_RX = re.compile(r"^designadvisor\.md$|^gamedesigner(\.round[1-4])?\.md$", CASE)
+DESIGNER_RULES_RX = re.compile(r"^(designadvisor|uidesigner)\.md$|^gamedesigner(\.round[1-4])?\.md$", CASE)
+UIDESIGNER_RULES_RX = re.compile(r"^(uidesigner|gamedesigner(\.round[1-4])?)\.md$", CASE)
+FRAME_DIR_NAME = ".frame-concept"      # the frames of a node (gamedesign.py FRAME_DIR): @UIDesigner's
+FRAME_FILE_RX = re.compile(r"^[a-z][a-z0-9-]*\.frame$")
 ADVISOR_RULES_RX = re.compile(r"^(designadvisor|gamedesigner(\.round[1-4])?)\.md$", CASE)
 # What @DesignAdvisor writes below advice/<node>/: its question and its own note. The answer is gd_advise.py's.
 ADVICE_FILE_RX = re.compile(r"^" + ADVICE_ID + r"\.(q|note)\.md$")
@@ -730,7 +745,7 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         return "deny", "unity-mcp manage_asset: a feature session may use only action 'delete'"
     if mode == "none":
         return "deny", "FEATURE is not set or is not an existing feature folder; deleting is blocked"
-    if mode in ("manager", "gamedesigner", "advisor"):
+    if mode in ("manager", "gamedesigner", "uidesigner", "advisor"):
         return "deny", f"{who} does not change the project; ask the session that owns the file"
     path = text_of(ti.get("path")).replace("\\", "/")      # a Unity asset path: '/' on every OS
     if not re.match(r"^Assets/[^/]", path):
@@ -832,7 +847,10 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
         if locked:
             return "deny", locked
         return "allow", f"new {name} for {seg[0]}"
-    if mode == "gamedesigner" and len(seg) == 6 and seg[0] in ART_ORDER_TOOLS and seg[1:3] == ["orders", "_design"]:
+    if mode in ("gamedesigner", "uidesigner") and len(seg) == 6 and seg[0] in ART_ORDER_TOOLS and seg[1:3] == ["orders", "_design"]:
+        if DESIGN_ORDERER[seg[0]] != mode:
+            return "deny", ("art concepts (codex/orders/_design) are ordered by @GameDesigner, claude-concepts "
+                            "(claudeimage/orders/_design, drawn from the frames) by @UIDesigner")
         owner, oid, name = "/".join(seg[2:4]), seg[4], seg[5]
         if not DESIGN_OWNER_RX.match(owner) or not re.fullmatch(STUDIO_ID, oid) or not STUDIO_FEATURE_FILE_RX.match(name):
             return "deny", ("an art order lives in <codex|claudeimage>/orders/_design/<node path with '.' for '/'>/<id>/ and "
@@ -841,8 +859,8 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
             return "deny", "order.md is written once: a change is a new order"
         return "allow", f"new {name} of an art order"
     return "deny", ("Management/studio: the tool chats write their lessons and work, the features their orders, "
-                    "@GameDesigner the art orders (codex/orders/_design, claudeimage/orders/_design), studio.py and "
-                    "the page the rest")
+                    "@GameDesigner the art orders (codex/orders/_design), @UIDesigner the claude-concept orders "
+                    "(claudeimage/orders/_design), studio.py and the page the rest")
 
 
 def decide_advice_edit(full, root):
@@ -869,6 +887,9 @@ def decide_designer_edit(full, root, name):
         return "deny", (".user-review (the human's scores and feedback), .history (the node's history) and "
                         ".progress (what is built) are written only by the management page and its tools. "
                         "Read them; do not write them.")
+    if FRAME_DIR_NAME in low:
+        return "deny", ("frames (.frame-concept) are @UIDesigner's: you list the UI the node needs in ui.md (elements, "
+                        "interactions, flow), then message UIDesigner to lay it out")
     if seg[:1] and same(seg[0], DESIGN_TREE):
         keys = []
         for s in seg[1:-1]:      # the node folders between the tree root and the file
@@ -883,6 +904,22 @@ def decide_designer_edit(full, root, name):
     elif low[:1] == [DESIGN_TREE]:      # 'Idea' on a case-sensitive system: not the tree, refuse
         return "deny", f"'{seg[0]}' is not the design tree '{DESIGN_TREE}'"
     return "allow", f"edit inside {name}"
+
+
+def decide_uidesigner_edit(full, root, name):
+    """@UIDesigner writing inside Management/game-design/ai: only the frames of the proposed tree
+    (idea/<node>/.frame-concept/<name>.frame), and only where the same write gate as @GameDesigner's lets it."""
+    seg = rel_segments(full, root)[3:]      # below Management/game-design/ai
+    if not (len(seg) >= 3 and seg[0] == DESIGN_TREE and seg[-2] == FRAME_DIR_NAME and FRAME_FILE_RX.match(seg[-1])
+            and all(not s.startswith(".") for s in seg[1:-2])):
+        return "deny", ("@UIDesigner writes only frames: Management/game-design/ai/idea/<node>/.frame-concept/<name>.frame "
+                        "(lower case, digits, '-'). data.md and ui.md are @GameDesigner's: message GameDesigner when the "
+                        "list of UI is missing something or contradicts itself")
+    ok, reason = gamedesign_module(root).can_write_node(root, seg[1:-2])
+    if not ok:
+        return "deny", ("this node is locked because a node above it is not approved yet "
+                        f"({reason}). Stop and tell the human; do not lay out this round until then.")
+    return "allow", f"frame inside {name}"
 
 
 def design_gate(root, feature):
@@ -1145,7 +1182,7 @@ def decide_unity_one(tool, ti, ctx, work):
 def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
     """unity-mcp for every session but @human: see UNITY_RULES. The Editor lock is taken only when every command
     of the call is allowed."""
-    if mode in ("none", "manager", "gamedesigner", "advisor"):
+    if mode in ("none", "manager", "gamedesigner", "uidesigner", "advisor"):
         return "deny", (f"{who or 'this chat'} does not use unity-mcp" if mode != "none"
                         else "FEATURE is not set or is not an existing feature folder; unity-mcp is blocked")
     if tool in UNITY_RESOURCE_TOOLS:
@@ -1377,6 +1414,10 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all, store=No
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
             same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
             and bool(DESIGNER_RULES_RX.match(posixpath.basename(full))))
+    if mode == "uidesigner":      # the same as @GameDesigner, with its own rules and the designer's
+        readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
+            same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
+            and bool(UIDESIGNER_RULES_RX.match(posixpath.basename(full))))
     if mode == "advisor":      # the design tree, the studio, the root CLAUDE.md, its rules and the designer's
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or name == "root CLAUDE.md" or (
             same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
@@ -1419,6 +1460,8 @@ def decide(data, session_value, root, store=None):
         mode, area = "codelead", LEAD_AREA
     elif role == "@GameDesigner":
         mode = "gamedesigner"
+    elif role == "@UIDesigner":
+        mode = "uidesigner"
     elif role == "@DesignAdvisor":
         mode = "advisor"
     elif role in ROLE_AREAS:
@@ -1453,6 +1496,7 @@ def decide(data, session_value, root, store=None):
     if tool in SHELL_TOOLS:
         cmd = text_of(ti.get("command")).strip()
         commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else []) + (
+            UIDESIGNER_COMMANDS if mode == "uidesigner" else []) + (
             ADVISOR_COMMANDS if mode == "advisor" else []) + (
             CODELEAD_COMMANDS if mode == "codelead" else []) + (MANAGER_COMMANDS if mode == "manager" else []) + (
             TOOL_COMMANDS[TOOL_ROLES[role]] if mode == "tool" else []) + (
@@ -1541,6 +1585,11 @@ def decide(data, session_value, root, store=None):
                 return decide_designer_edit(full, root, name)
             return "deny", ("@GameDesigner writes only inside Management/game-design/ai. live is fixed by the human "
                             "(the promote button of the management page). See .claude/rules/gamedesigner.md.")
+        if mode == "uidesigner":
+            if edit == "design":
+                return decide_uidesigner_edit(full, root, name)
+            return "deny", ("@UIDesigner writes only frames in Management/game-design/ai/idea (and claude-concept "
+                            "orders in Management/studio/claudeimage/orders/_design). See .claude/rules/uidesigner.md.")
         if mode == "advisor":
             if edit == "advice":
                 return decide_advice_edit(full, root)
@@ -1551,8 +1600,8 @@ def decide(data, session_value, root, store=None):
             return "deny", (f"FEATURE={who} may not edit {name}: only @DesignAdvisor writes there (questions and "
                             "notes); the answers are written by gd_advise.py.")
         if edit == "design":
-            return "deny", (f"FEATURE={who} may not edit {name}: only @GameDesigner writes there. Ask @GameDesigner "
-                            "(or the human) for a design change.")
+            return "deny", (f"FEATURE={who} may not edit {name}: only @GameDesigner writes there (and @UIDesigner the "
+                            "frames). Ask @GameDesigner (or the human) for a design change.")
         if mode == "manager" and edit != "create":
             return "deny", ("@Manager does not edit code, assets or settings; it may only create new files in "
                             "Management/proposals. Ask the session that owns the area.")

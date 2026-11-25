@@ -481,6 +481,80 @@ def run_progress(root):
     check("the gate lines are the rows, one each", (len(lines), any(x.startswith("- (chưa khai thư mục code) (feature-shop)") for x in lines)), (4, True))
 
 
+UI_MD = """## Phần tử
+- replay | nút | chính | chơi lại trận | trạng thái: bật, khoá
+- home | nút | phụ | về màn chính
+- best | nhãn | chính | kỉ lục
+## Tương tác
+- replay chạm: chơi lại từ đợt 1
+## Flow
+- Trận → popup thua (chồng lên)
+"""
+
+
+def run_ui(root):
+    """ui.md (@GameDesigner: what the UI needs) against the frames (@UIDesigner: the layout), and frames scored."""
+    u = gd.parse_ui(UI_MD)
+    check("ui.md: elements, interactions and flow parse",
+          (u["errors"], [(e["id"], e["kind"], e["level"]) for e in u["elements"]], u["elements"][0]["states"], u["interactions"], u["flow"]),
+          ([], [("replay", "nút", "chính"), ("home", "nút", "phụ"), ("best", "nhãn", "chính")], ["bật", "khoá"],
+           ["replay chạm: chơi lại từ đợt 1"], ["Trận → popup thua (chồng lên)"]))
+    for label, text in (("unknown section", "## Màu\n- a\n"), ("a line outside sections", "- a | nút | chính | x\n"),
+                        ("too few cells", "## Phần tử\n- a | nút | chính\n"), ("unknown kind", "## Phần tử\n- a | nút bấm | chính | x\n"),
+                        ("unknown level", "## Phần tử\n- a | nút | quan trọng | x\n"), ("duplicate id", "## Phần tử\n- a | nút | chính | x\n- a | nhãn | phụ | y\n"),
+                        ("no element", "## Flow\n- a → b\n"), ("a bad extra cell", "## Phần tử\n- a | nút | chính | x | màu: đỏ\n")):
+        check("ui.md error: " + label, bool(gd.parse_ui(text)["errors"]))
+    mk(root, ""), mk(root, "feature-a"), mk(root, "feature-a/a1"), mk(root, "feature-a/a1/a1x"), mk(root, "feature-a/cheat")
+    put(root, "idea/feature-a/cheat/.frame-concept/core.frame", "kind: ui\nai: 7\n- panel rect x=560 y=190 w=800 h=700\n")
+    node = lambda: snap_node(root, "feature-a/a1/a1x")      # noqa: E731
+    before = gd.read_data(folder(root, "idea/feature-a/a1/a1x"))["hash"]
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/main.frame", UI_FRAME)
+    n = node()
+    check("a frame without ui.md: only a reminder for @GameDesigner, the node still passes",
+          (n["passed"], n["uiWait"], any("chưa có ui.md" in x for x in n["frameNotes"]), n["frameItems"]), (True, [], True, []))
+    put(root, "idea/feature-a/a1/a1x/ui.md", UI_MD)
+    check("ui.md is in the data hash", gd.read_data(folder(root, "idea/feature-a/a1/a1x"))["hash"] != before)
+    n = node()
+    ui_hash = n["ui"]["hash"]
+    check("frames laid out before ui.md wait for @UIDesigner: no 'ui:', a main element not placed, no score",
+          (n["passed"], any("chưa ghi 'ui:'" in x for x in n["uiWait"]), any("phần tử chính chưa có trong frame nào: best" in x for x in n["uiWait"]),
+           any("chưa có điểm" in x for x in n["uiWait"]), n["redo"]), (False, True, True, True, False))
+    frame = UI_FRAME.replace("let tap = 120", f"let tap = 120\nai: 7\nui: {ui_hash}\nwhy: nút chính ở giữa, dễ chạm\nwhy: kỉ lục trên cùng") + \
+        '- best label x=40 y=20 w=300 h=60 parent=panel label="Kỉ lục"\n'
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/main.frame", frame)
+    n = node()
+    check("a frame for this ui.md, every main element placed, scored by @UIDesigner: the node passes (Full Auto)",
+          (n["passed"], n["uiWait"], [(i["id"], i["ai"], i["why"]) for i in n["frameItems"]]),
+          (True, [], [("frame:main", 7, ["nút chính ở giữa, dễ chạm", "kỉ lục trên cùng"])]))
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/extra.frame", f"kind: ui\nai: 6\nui: {ui_hash}\n- close button x=0 y=0 w=120 h=120\n")
+    check("a button ui.md does not list waits for @UIDesigner", any("nút không có trong ui.md: close" in x for x in node()["uiWait"]))
+    folder(root, "idea/feature-a/a1/a1x/.frame-concept/extra.frame").unlink()
+    gd.save_review(root, "feature-a/a1/a1x", {"frame:main": {"score": 3, "feedback": "nút chơi lại quá nhỏ"}})
+    n = node()
+    check("the human scores a frame like an idea: a low score sends it back to @UIDesigner",
+          (n["passed"], n["frameItems"][0]["user"], any("người chấm 3" in x and "@UIDesigner" in x for x in n["uiWait"])), (False, 3, True))
+    gd.save_review(root, "feature-a/a1/a1x", {"frame:main": {"score": 8, "feedback": ""}})
+    check("a good score passes it again", node()["passed"])
+    check("a frame that is not there cannot be scored", refused(gd.save_review, root, "feature-a/a1/a1x", {"frame:none": {"score": 8}}))
+    put(root, "idea/feature-a/a1/a1x/ui.md", UI_MD + "- home chạm: về màn chính\n")
+    n = node()
+    check("ui.md changed: the frame is stale and waits for @UIDesigner", (n["passed"], any("xếp lại" in x for x in n["uiWait"])), (False, True))
+    gd.write_mode(root, "user")
+    put(root, "idea/feature-a/a1/a1x/.frame-concept/main.frame", frame.replace(ui_hash, node()["ui"]["hash"]))
+    n = node()
+    check("User control: a frame changed since the human scored it waits for the human",
+          (n["passed"], any("người chưa chấm" in x for x in n["reasons"]), n["uiWait"]), (False, True, []))
+    gd.write_mode(root, "auto")
+    put(root, "idea/feature-a/a1/ui.md", UI_MD)
+    check("ui.md outside round 4 is a structure problem", any(p["path"] == "feature-a/a1" and "ui.md chỉ đặt" in p["text"]
+                                                             for p in gd.read_tree(root, "idea")[1]))
+    folder(root, "idea/feature-a/a1/ui.md").unlink()
+    rows = {r["unity"]: r for r in gd.snapshot(root)["features"]}
+    check("the feature row is the same shape with ui.md around", sorted(rows), [""])
+    gd.sync_live(root)
+    check("ui.md goes to live with the node", folder(root, "live/feature-a/a1/a1x/ui.md").is_file())
+
+
 def run_infra(root):
     """Round 2 always owes the infrastructure features; the reminder blocks nothing."""
     owed = lambda: [(m["path"], "chưa có node" in m["text"]) for m in gd.snapshot(root)["missing"]]      # noqa: E731
@@ -1078,7 +1152,7 @@ def run_diff(root):
 
 
 def main():
-    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_cheat, run_styles):
+    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

@@ -68,6 +68,13 @@ def lines_for(root, node, out):
         out.append(f"- Node cheat: {len(node['items'])}/{gd.CHEAT_MAX} state, mỗi state một frame trùng id; "
                    "state dựng nhanh ở bản dev, và là node duy nhất đặt order art-concept của Codex (mỗi state một ảnh); "
                    "claude-concept của nó do tool dựng từ phần của các node vòng 4")
+    if node.get("ui"):
+        out += gd.ui_lines(node["ui"], "- ")
+    for text in node.get("uiWait") or []:
+        out.append(f"- CHỜ @UIDesigner: {text}")
+    for fi in node.get("frameItems") or []:
+        out.append(f"- Điểm frame {fi['file']}: AI {fi['ai'] if fi['ai'] is not None else '–'}, người "
+                   f"{fi['user'] if fi['user'] is not None else 'chưa chấm'}" + (f" ({fi['feedback']})" if fi.get("feedback") else ""))
     for fr in node["frames"]:
         out += ["- " + line.lstrip() if i == 0 else "  " + line for i, line in enumerate(gd.frame_brief(fr))]
     if node["frameNone"]:

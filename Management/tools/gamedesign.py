@@ -178,6 +178,21 @@ FRAME_SHAPES = BOX_SHAPES + ROUND_SHAPES + LINE_SHAPES + ("grid",)
 FRAME_NUM_RX = re.compile(r"^(-?\d+(?:\.\d+)?)(u?)$")
 FRAME_NAME_RX = re.compile(r"^[a-z][a-z0-9-]*$")
 FRAME_TOKEN_RX = re.compile(r'(\w[\w-]*)="([^"]*)"|(\w[\w-]*)=(\S+)|(\S+)')
+# The UI a round-4 node needs (ui.md, @GameDesigner's): what is on screen, how it reacts, which screen opens which.
+# The layout of those elements is @UIDesigner's: the frames. A frame names the ui.md it was laid out for (`ui:` its
+# hash), gives its own score (`ai:`) and why it is laid out so (`why:`); the human scores each frame like an idea.
+#     ## Phần tử
+#     - <id> | <loại> | <chính|phụ> | <dùng để làm gì> [| trạng thái: <a>, <b>]
+#     ## Tương tác
+#     - <id> <thao tác>: <kết quả>
+#     ## Flow
+#     - <màn> → <màn hoặc popup> (<cách mở>)
+UI_FILE = "ui.md"
+UI_KINDS = ("nút", "nhãn", "thanh", "ô", "icon", "danh sách", "khung")
+UI_LEVELS = ("chính", "phụ")
+UI_SECTIONS = ("Phần tử", "Tương tác", "Flow")
+UI_MAIN = UI_LEVELS[0]
+FRAME_ITEM = "frame:"            # the id a frame is scored under: frame:<file name without .frame>
 # Styles: the art direction of the game, decided in round 1 (.art-style/ of the root, in its data hash).
 STYLE_DIR = ".art-style"
 STYLE_IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp")
@@ -437,6 +452,87 @@ def frame_files(folder):
             if p.is_file() and p.suffix == FRAME_EXT]
 
 
+def parse_ui(text):
+    """{elements: [{id, kind, level, use, states}], interactions: [text], flow: [text], errors} of a ui.md."""
+    out = {"elements": [], "interactions": [], "flow": [], "errors": []}
+    err = out["errors"].append
+    section, ids = None, set()
+    for n, raw in enumerate((text or "").replace("\r", "").split("\n"), 1):
+        line = raw.strip()
+        if not line:
+            continue
+        at = f"dòng {n}"
+        if line.startswith("## "):
+            section = line[3:].strip()
+            if section not in UI_SECTIONS:
+                err(f"{at}: mục '{section}' không có (chỉ: {', '.join(UI_SECTIONS)})")
+                section = ""
+            continue
+        if line.startswith("#"):
+            continue
+        if not line.startswith("- "):
+            err(f"{at}: mỗi dòng là một gạch đầu dòng '- ...'")
+            continue
+        body = line[2:].strip()
+        if section is None or section == "":
+            if section is None:
+                err(f"{at}: dòng nằm ngoài mục nào (## {' · ## '.join(UI_SECTIONS)})")
+            continue
+        if section == UI_SECTIONS[0]:
+            cells = [c.strip() for c in body.split("|")]
+            if len(cells) < 4 or not all(cells[:4]):
+                err(f"{at}: phần tử phải có dạng '- <id> | <loại> | <chính|phụ> | <dùng để> [| trạng thái: ...]'")
+                continue
+            eid, kind, level, use = cells[:4]
+            states = []
+            for extra in cells[4:]:
+                key, sep, value = extra.partition(":")
+                if sep and key.strip() == "trạng thái":
+                    states += [x.strip() for x in value.split(",") if x.strip()]
+                elif extra:
+                    err(f"{at}: không hiểu '{extra[:30]}' (chỉ thêm được 'trạng thái: a, b')")
+            if not KEY_RX.match(eid) or eid in ids:
+                err(f"{at}: id '{eid}' phải là chữ thường, số, gạch nối và không trùng")
+                continue
+            if kind not in UI_KINDS:
+                err(f"{at}: loại '{kind}' không có (chỉ: {', '.join(UI_KINDS)})")
+            if level not in UI_LEVELS:
+                err(f"{at}: mức '{level}' phải là {' hoặc '.join(UI_LEVELS)}")
+            ids.add(eid)
+            out["elements"].append({"id": eid, "kind": kind, "level": level, "use": use, "states": states})
+        elif section == UI_SECTIONS[1]:
+            out["interactions"].append(body)
+        else:
+            out["flow"].append(body)
+    if not out["elements"]:
+        err(f"chưa có phần tử nào trong '## {UI_SECTIONS[0]}'")
+    return out
+
+
+def read_ui(folder):
+    """parse_ui of the node's ui.md plus its `hash` (what a frame's `ui:` names), or None when it has none."""
+    path = Path(folder) / UI_FILE
+    if not path.is_file():
+        return None
+    text = tidy(read_text(path).replace("\r", ""))
+    ui = parse_ui(text)
+    ui["hash"] = short_hash(text)
+    ui["text"] = text
+    return ui
+
+
+def ui_lines(ui, lead=""):
+    """ui.md as lines: the elements (id, kind, main or not, what for, states), the interactions, the flow."""
+    out = [f"{lead}UI cần có ({UI_FILE}, hash {ui['hash']}): {len(ui['elements'])} phần tử"]
+    for e in ui["elements"]:
+        out.append(f"  - {e['id']} | {e['kind']} | {e['level']} | {e['use']}" + (f" | trạng thái: {', '.join(e['states'])}" if e["states"] else ""))
+    for head, key in (("Tương tác", "interactions"), ("Flow", "flow")):
+        if ui[key]:
+            out.append(f"  {head}:")
+            out += [f"  - {x}" for x in ui[key]]
+    return out
+
+
 def read_data(folder):
     """parse_data of the node's data.md; the data hash also covers its frames (a node without frames keeps the
     hash of its data.md alone)."""
@@ -450,6 +546,9 @@ def read_data(folder):
     styles = style_parts(folder)
     if styles:
         data["hash"] = short_hash(data["hash"], STYLE_DIR, *styles)
+    ui = Path(folder) / UI_FILE
+    if ui.is_file():      # a node without ui.md keeps the hash it had
+        data["hash"] = short_hash(data["hash"], UI_FILE, tidy(read_text(ui).replace("\r", "")))
     return data
 
 
@@ -802,7 +901,7 @@ def frame_comment(line):
 
 def parse_frame(text):
     """{kind, title, view, lets, uses, shapes, errors} of one .frame file, values still as written."""
-    f = {"kind": "", "title": "", "view": "", "lets": {}, "uses": {}, "shapes": [], "errors": []}
+    f = {"kind": "", "title": "", "view": "", "lets": {}, "uses": {}, "shapes": [], "errors": [], "ai": None, "ui": "", "why": []}
     err = f["errors"].append
     ids = set()
     for n, raw in enumerate((text or "").split("\n"), 1):
@@ -858,6 +957,17 @@ def parse_frame(text):
                     f["uses"][name] = (path, ref)
         elif sep and key.strip() in ("kind", "title", "view"):
             f[key.strip()] = value.strip()
+        elif sep and key.strip() == "ai":      # @UIDesigner's own score of the layout
+            v = value.strip()
+            if v.isdigit() and 0 <= int(v) <= 10:
+                f["ai"] = int(v)
+            else:
+                err(f"{at}: ai phải là số nguyên từ 0 tới 10")
+        elif sep and key.strip() == "ui":      # the hash of the ui.md the layout was made for
+            f["ui"] = value.strip()
+        elif sep and key.strip() == "why":     # one reason of the layout, shown to the human who scores it
+            if value.strip():
+                f["why"].append(value.strip())
         else:
             err(f"{at}: không hiểu dòng '{line[:40]}'")
     if f["kind"] not in FRAME_KINDS:
@@ -1117,7 +1227,9 @@ def read_frames(folder, where, problems, screen, lookup):
             r["warnings"].insert(0, "node gốc chưa khai screen: nên vẽ theo màn ngang 1920x1080")
         for e in r["errors"]:
             problems.append({"path": where, "text": f"{FRAME_DIR}/{name}: {e}"})
-        r.update(file=name, text=text, uses=[f"{p}#{n}" for p, n in f["uses"].values()])
+        r.update(file=name, text=text, uses=[f"{p}#{n}" for p, n in f["uses"].values()],
+                 ai=f["ai"], uiHash=f["ui"], why=f["why"], ids=[sh["id"] for sh in f["shapes"]],
+                 buttons=[sh["id"] for sh in f["shapes"] if sh["shape"] == "button"])
         roles = frame_roles(f, r)
         for shape in r["shapes"]:
             shape["role"], shape["sources"] = roles.get(shape["id"], (ROLE_OWN, []))
@@ -1610,6 +1722,8 @@ def node_files(folder):
     """The files that belong to the node itself (data.md, CLAUDE.md, code.json, .images, .frame-concept,
     .art-style): what promote copies into live and own_hash hashes. Some of the first three may not exist."""
     items = [folder / name for name in NODE_FILES + (CODE_FILE,)]
+    if (folder / UI_FILE).is_file():      # only when there: a node without ui.md keeps its own hash
+        items.append(folder / UI_FILE)
     for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR):
         d = folder / extra
         if d.is_dir():
@@ -1676,6 +1790,43 @@ def cheat_problems(folder, where, depth, data, items, frames, problems, notes):
     for n, fr in names.items():
         if not fr["uses"]:
             notes.append(f"frame cheat '{n}' chưa use số nào: use số từ node sở hữu (kèm refs) để không lệch")
+
+
+def frame_items(frames):
+    """The frames of a node with ui.md as items the human scores: [{id: frame:<name>, title, text, ai, hash}]."""
+    return [{"id": FRAME_ITEM + fr["file"][:-len(FRAME_EXT)], "title": fr.get("title") or fr["file"], "text": fr["text"],
+             "ai": fr.get("ai"), "hash": short_hash(fr["text"]), "why": fr.get("why") or [], "file": fr["file"]}
+            for fr in frames]
+
+
+def ui_checks(ui, frames, items, mode):
+    """(waiting for @UIDesigner, waiting for the human) of a round-4 node with ui.md: frames missing, laid out for an
+    older ui.md, a main element not placed, a button ui.md does not list, a frame with no or a low score."""
+    owed, human = [], []
+    if not frames:
+        owed.append(f"chưa có frame cho danh sách UI ({UI_FILE}): chờ @UIDesigner")
+    placed = {i for fr in frames for i in fr.get("ids") or []}
+    known = {e["id"] for e in ui["elements"]}
+    for fr in frames:
+        if fr.get("uiHash") != ui["hash"]:
+            owed.append(f"frame '{fr['file']}' vẽ cho {UI_FILE} " + (f"bản {fr['uiHash']}" if fr.get("uiHash") else "chưa ghi 'ui:'")
+                        + f", {UI_FILE} hiện là {ui['hash']}: chờ @UIDesigner xếp lại")
+        extra = [b for b in fr.get("buttons") or [] if b not in known]
+        if extra:
+            owed.append(f"frame '{fr['file']}' có nút không có trong {UI_FILE}: {', '.join(extra)}")
+    missing = [e["id"] for e in ui["elements"] if e["level"] == UI_MAIN and e["id"] not in placed]
+    if frames and missing:
+        owed.append(f"phần tử chính chưa có trong frame nào: {', '.join(missing)}")
+    for it in items:
+        if it["ai"] is None and it["user"] is None:
+            owed.append(f"frame '{it['file']}' chưa có điểm (thêm 'ai: <0-10>' vào phần đầu)")
+            continue
+        if mode == "user" and it["user"] is None:
+            human.append(f"frame '{it['file']}': người chưa chấm")
+        elif it["effective"] is not None and it["effective"] < PASS_MIN:
+            who = "người" if it["user"] is not None else "AI"
+            owed.append(f"frame '{it['file']}': {who} chấm {it['effective']}, cần từ {PASS_MIN} trở lên: @UIDesigner làm lại")
+    return owed, human
 
 
 def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None, review=None, cache=None):
@@ -1759,6 +1910,20 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
         feature = path.split("/")[0]
         problems.append({"path": where, "text": f"feature '{feature}' có frame giao diện mà chưa có node {CHEAT_KEY}: "
                                                 f"thêm {feature}/{CHEAT_KEY}/ (tối đa {CHEAT_MAX} state, mỗi state một frame)"})
+    ui = read_ui(folder)
+    ui_items, ui_owed, ui_human = [], [], []
+    if ui is not None:
+        for e in ui["errors"]:
+            problems.append({"path": where, "text": f"{UI_FILE}: {e}"})
+        if depth != FRAME_ROUND or cheat:
+            problems.append({"path": where, "text": f"{UI_FILE} chỉ đặt ở node vòng {FRAME_ROUND}"})
+        else:
+            ui_items = frame_items(frames)
+            merge_review(review or folder, ui_items)
+            ui_owed, ui_human = ui_checks(ui, frames, ui_items, mode)
+    elif depth == FRAME_ROUND and frames and not cheat:
+        frame_notes.append(f"chưa có {UI_FILE}: @GameDesigner liệt kê phần tử UI, tương tác và flow; bố cục (frame) là "
+                           "việc của @UIDesigner")
     styles, style_errors = read_styles(folder)
     if path and (folder / STYLE_DIR).is_dir():
         problems.append({"path": where, "text": f"{STYLE_DIR} chỉ đặt ở node gốc (style là quyết định của vòng 1)"})
@@ -1766,6 +1931,8 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     for text in refs["unknown"]:
         problems.append({"path": where, "text": text})
     passed, reasons = verdict(items, pending, stale, mode, refs)
+    reasons += ui_owed + ui_human
+    passed = passed and not ui_owed and not ui_human
     # redo: @GameDesigner has work to do here. Not passing without it means the node only waits for the human.
     low = [it for it in items if (it["user"] if mode == "user" else it["effective"]) is not None
            and (it["user"] if mode == "user" else it["effective"]) < PASS_MIN]
@@ -1795,7 +1962,8 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "code": read_code(folder, where, depth, problems), "refs": refs["refs"],
             "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
-            "frames": frames, "frameNotes": frame_notes, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
+            "frames": frames, "frameNotes": frame_notes, "frameItems": ui_items, "uiWait": ui_owed,
+            "ui": {k: ui[k] for k in ("elements", "interactions", "flow", "hash")} if ui else None, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
             "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "gptOwed": gpt_owed, "clashOpen": open_clashes(items), "nodeBy": data.get("nodeBy"),
             "refText": raw + "\n" + doc, "_files": file_versions(folder), "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
@@ -1997,9 +2165,10 @@ def feature_rows(idea, live, views):
         # The human is waited for at any node of the branch that waits for a score, an answer, a pick between ideas or
         # a lock (the same as the page's own(): not passed and not redo, or passed and unlike live); @GameDesigner at
         # any node to redo. A score the mode does not ask for (Full Auto) waits for nobody.
-        human = bool(clash) or any(n.get("pending") or (not n["passed"] and not n["redo"]) or (n["passed"] and n.get("state") != "same")
-                                   for n in below)
+        human = bool(clash) or any(n.get("pending") or (not n["passed"] and not n["redo"] and not n.get("uiWait"))
+                                   or (n["passed"] and n.get("state") != "same") for n in below)
         redo = any(n["redo"] for n in below)
+        layout = any(n.get("uiWait") for n in below)
         base = {"path": node["path"], "key": node["key"], "title": node["title"], "design": design, "clash": clash,
                 "roundIdea": max(n["round"] for n in below),
                 "roundLive": max((n["round"] for n in walk(live_node)), default=0) if live_node else 0,
@@ -2008,7 +2177,7 @@ def feature_rows(idea, live, views):
             v = views.get(gate["unity"]) if gate["unity"] else None
             reqs = ({"met": v["met"], "total": v["total"], "counts": v["counts"], "dropped": len(v["dropped"])}
                     if v and v["total"] else None)
-            waiting = (["@GameDesigner"] if redo else []) + (["người"] if human else [])
+            waiting = (["@GameDesigner"] if redo else []) + (["@UIDesigner"] if layout else []) + (["người"] if human else [])
             if reqs and gate["ok"]:
                 c = reqs["counts"]
                 if c.get("done"):
@@ -2188,6 +2357,10 @@ def save_review(root, path, items, table="idea"):
     if not (folder / DATA_FILE).is_file():
         raise ValueError(f"node '{path or '(gốc)'}' không còn ở bảng đề xuất nên không lưu điểm được")
     known = {it["id"]: it for it in data["items"]}
+    if (source / UI_FILE).is_file():      # the frames of a node with ui.md are scored like its ideas
+        for fi in frame_items([{"file": n, "text": t, "title": parse_frame(t)["title"], "ai": parse_frame(t)["ai"]}
+                               for n, t in frame_files(source)]):
+            known[fi["id"]] = fi
     if not isinstance(items, dict) or not items:
         raise ValueError("không có điểm hay phản hồi nào")
     clean = {}
@@ -2250,8 +2423,9 @@ def promote(root, path, deep, by="người"):
         tmp.mkdir(parents=True)
         for name in NODE_FILES:
             shutil.copy2(src / name, tmp / name)
-        if (src / CODE_FILE).is_file():
-            shutil.copy2(src / CODE_FILE, tmp / CODE_FILE)
+        for name in (CODE_FILE, UI_FILE):
+            if (src / name).is_file():
+                shutil.copy2(src / name, tmp / name)
         for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR):
             if (src / extra).is_dir():
                 shutil.copytree(src / extra, tmp / extra)

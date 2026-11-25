@@ -107,6 +107,9 @@
     ".gd-mini .gd-mini-tags .bad { color: var(--bad); }",
     ".gd-mini .gd-mini-tags .need { color: var(--clash); font-weight: 600; }",
     // Chế độ Bảng: mỗi feature một dòng.
+    ".gd-frame-score { margin: 10px 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }",
+    ".gd-frame-score textarea { width: 100%; margin-top: 8px; }",
+    ".gd-why { margin: 6px 0; font-size: 13.5px; }",
     ".gd-ftable-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }",
     ".gd-ftable { min-width: 860px; }",
     ".gd-ftable th button { padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }",
@@ -518,12 +521,13 @@
         state.expandAll = saved.expandAll === true;
         state.query = typeof saved.query === "string" ? saved.query : "";
         state.focus = typeof saved.focus === "string" ? saved.focus : null;
+        state.selected = typeof saved.selected === "string" ? saved.selected : null;
       }
     } catch (e) { /* không có localStorage */ }
     var savePrefs = function () {
       try {
         window.localStorage.setItem(PREFS_KEY, JSON.stringify({ table: state.table, view: state.view, expandAll: state.expandAll,
-                                                               query: state.query, focus: state.focus }));
+                                                               query: state.query, focus: state.focus, selected: state.selected }));
       } catch (e) { /* không có localStorage */ }
     };
 
@@ -608,10 +612,12 @@
     };
     // Trạng thái duyệt, chỉ để hiển thị (tính lại mỗi lần vẽ, không lưu, không ảnh hưởng tới khoá hay Sync).
     // Của node: "ok" (đạt và giống live), "redo" (việc của @GameDesigner), "todo" (chờ bạn chấm, trả lời hoặc chốt).
-    var own = function (n) { return !n.passed ? (n.redo ? "redo" : "todo") : n.state === "same" ? "ok" : "todo"; };
+    // "ui": chưa đạt chỉ vì frame (việc của @UIDesigner: thiếu, cũ so với ui.md, bị chấm thấp).
+    var uiOwed = function (n) { return !!(n.uiWait && n.uiWait.length); };
+    var own = function (n) { return !n.passed ? (n.redo ? "redo" : uiOwed(n) ? "ui" : "todo") : n.state === "same" ? "ok" : "todo"; };
     // Của nhánh: đếm mọi node bên dưới (kể cả node đang ẩn trên bản đồ) theo trạng thái của chúng.
     var branch = function (n) {
-      var out = { total: 0, todo: 0, redo: 0 };
+      var out = { total: 0, todo: 0, redo: 0, ui: 0 };
       var visit = function (c) {
         out.total++;
         var st = own(c);
@@ -695,7 +701,7 @@
         var clash = openClashes(n);
         if (clash) push("clash", n, clash + " nhóm ý trái nhau");
         else if (n.pending) push("ask", n, n.pending + " câu hỏi");
-        else if (!n.passed && !n.redo) push("score", n, (n.reasons || [])[0] || "chờ bạn chấm");
+        else if (own(n) === "todo" && !n.passed) push("score", n, (n.reasons || [])[0] || "chờ bạn chấm");
         else if (lockable[n.path]) push("lock", n, "đạt, chờ chốt · " + diffShort(n));
       });
       if (data.live) {
@@ -1153,7 +1159,7 @@
         grid.textContent = "";
         visible().forEach(function (n) {
           var below = idea ? branch(n) : null;
-          var kind = !idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || below.todo ? " wait" : " done";
+          var kind = !idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || own(n) === "ui" || below.todo || below.ui ? " wait" : " done";
           var card = put(grid, button("", function () { select(n); }, null, "gd-mini" + kind + (n.path === state.selected ? " sel" : "") + (needed(n) ? "" : " dim")));
           card.title = n.title + (n.summary ? "\n" + n.summary : "");
           add(card, el("strong", "", n.title || n.key));
@@ -1299,6 +1305,10 @@
         var redo = el("span", "gd-tag bad", "Cần làm lại");
         redo.title = n.reasons.join("\n");
         out.push(redo);
+      } else if (own(n) === "ui") {
+        var layout = el("span", "gd-tag clash", "Chờ @UIDesigner");
+        layout.title = n.uiWait.join("\n");
+        out.push(layout);
       } else if (!n.passed) {
         out.push(todo("Đang chờ bạn chấm hoặc trả lời; bấm để mở node.\n" + n.reasons.join("\n")));
       } else if (n.state === "same") {
@@ -1322,12 +1332,12 @@
       }
       // Nhánh: mọi node bên dưới. Chỉ là hiển thị; node cha "đã duyệt" mà nhánh còn việc thì thấy ngay ở đây.
       var b = branch(n);
-      if (b.total && !b.todo && !b.redo) {
+      if (b.total && !b.todo && !b.redo && !b.ui) {
         var all = el("span", "gd-tag ok branch", "Nhánh ✓");
         all.title = "Cả " + b.total + " node bên dưới đã duyệt";
         out.push(all);
       } else if (b.total) {
-        var text = "Nhánh: " + [b.redo ? b.redo + " cần làm lại" : "", b.todo ? b.todo + " chưa duyệt" : ""].filter(Boolean).join(", ");
+        var text = "Nhánh: " + [b.redo ? b.redo + " cần làm lại" : "", b.ui ? b.ui + " chờ UI" : "", b.todo ? b.todo + " chưa duyệt" : ""].filter(Boolean).join(", ");
         var more = button(text, function () { goTo(n); }, null, "gd-chip branch" + (b.redo ? " redo" : ""));
         more.title = "Trong " + b.total + " node bên dưới: " + b.todo + " chưa duyệt, " + b.redo + " cần làm lại. Bấm để mở nhánh.";
         out.push(more);
@@ -1390,7 +1400,7 @@
         }
         var nodeFixed = !idea || n.state === "same";      // bảng live: mọi node đã chốt
         var below = idea ? branch(n) : null;
-        var kind = (!idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || below.todo ? " wait" : " done") + (needed(n) ? "" : " dim") +
+        var kind = (!idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || own(n) === "ui" || below.todo || below.ui ? " wait" : " done") + (needed(n) ? "" : " dim") +
           (nodeFixed ? " fixed" : " loose") + (n.nodeBy && !nodeFixed ? " by-gpt" : "");
         var card = el("button", "gd-card" + (n.path === state.selected ? " sel" : "") + kind);
         card.type = "button";
@@ -1448,7 +1458,8 @@
     // ---------------------------------------------------------------- các phần của node đang chọn (vẽ dưới bản đồ)
     var renderVerdict = function (body, node) {
       var box = put(body, el("div", "gd-verdict " + (node.passed ? "ok" : "bad")));
-      add(box, el("strong", "", node.passed ? "Đạt" : node.redo ? "Chưa đạt, @GameDesigner cần làm lại" : "Chưa đạt, đang chờ bạn"));
+      add(box, el("strong", "", node.passed ? "Đạt" : node.redo ? "Chưa đạt, @GameDesigner cần làm lại" :
+        uiOwed(node) ? "Chưa đạt, chờ @UIDesigner xếp bố cục" : "Chưa đạt, đang chờ bạn"));
       add(box, el("span", "", node.passed
         ? (node.state === "same" ? "Đã chốt, giống live." : "Chưa ở live.")
         : node.reasons.join(" · ")));
@@ -1667,6 +1678,56 @@
           function (text) { saveNote.textContent = "Không lưu: " + text; saveBtn.disabled = false; });
       }, null, "gd-btn main"));
       refresh();
+    };
+
+    // Chấm một frame như chấm một ý (node có ui.md): điểm 0-10 và ý kiến, lưu chung với điểm của các ý.
+    var renderFrameScore = function (box, node, fr) {
+      var it = (node.frameItems || []).filter(function (x) { return x.file === fr.file; })[0];
+      if (!it) return;
+      var wrap = put(box, el("div", "gd-frame-score"));
+      var head = put(wrap, el("p", ""));
+      add(head, el("b", "", "Chấm frame này "), num(it.ai, "Điểm AI của @UIDesigner"),
+          el("span", "muted", it.user !== null ? " · bạn đã chấm " + it.user : " · bạn chưa chấm"));
+      if (it.why && it.why.length) {
+        var why = put(wrap, el("ul", "gd-why"));
+        it.why.forEach(function (w) { add(why, el("li", "", w)); });
+      }
+      if (it.previous) add(wrap, el("p", "gd-note", "Bản trước của frame bạn chấm " + (it.previous.score === null ? "–" : it.previous.score) +
+        (it.previous.feedback ? " · " + it.previous.feedback : "") + ". Frame đã đổi nên cần chấm lại."));
+      var draft = { score: it.user, feedback: it.feedback || "" };
+      var row = put(wrap, el("div", "gd-score"));
+      var buttons = [];
+      for (var s = 0; s <= 10; s++) (function (value) {
+        var b = button(String(value), function () {
+          draft.score = value;
+          buttons.forEach(function (x, i) { x.setAttribute("aria-pressed", i === value ? "true" : "false"); });
+          sync();
+        }, it.user === value, "");
+        b.title = value + " · " + band(value).label;
+        if (!ctx.setup) b.disabled = true;
+        buttons.push(put(row, b));
+      })(s);
+      var area = put(wrap, el("textarea"));
+      area.value = draft.feedback;
+      area.placeholder = "Ý kiến về bố cục (to, nhỏ, xa ngón cái, thiếu gì); @UIDesigner đọc khi làm lại.";
+      area.setAttribute("aria-label", "Ý kiến của bạn về frame " + fr.file);
+      area.addEventListener("input", function () { grow(area); draft.feedback = area.value || ""; sync(); });
+      var foot = put(wrap, el("div", "gd-row gd-save"));
+      var note = put(foot, el("span", "", ""));
+      var save = put(foot, button("Lưu điểm frame", function () {
+        var items = {};
+        items[it.id] = { score: draft.score, feedback: draft.feedback.trim() };
+        save.disabled = true;
+        send("/api/gamedesign/review", { path: node.path, table: state.table, items: items },
+          function () { return "Đã lưu điểm frame " + fr.file + " của node " + where(node) + "."; },
+          function (text) { note.textContent = "Không lưu: " + text; save.disabled = false; });
+      }, null, "gd-btn main"));
+      var sync = function () {
+        var changed = draft.score !== it.user || draft.feedback.trim() !== (it.feedback || "");
+        save.disabled = !changed || !ctx.setup;
+        note.textContent = !ctx.setup ? SERVER_HINT : changed ? "Có thay đổi chưa lưu." : "";
+      };
+      sync();
     };
 
     var renderQuestions = function (body, node) {
@@ -2189,8 +2250,33 @@
       }
       });
       // Frame: bố cục dạng chữ trong .frame-concept, đã được gamedesign.py giải số và vẽ sẵn thành SVG.
+      if (node.ui) {
+        add(body, el("h3", "", "UI cần có (ui.md, của @GameDesigner)"));
+        add(body, el("p", "gd-note", "Danh sách phần tử, tương tác và flow; @UIDesigner xếp bố cục trong frame bên dưới. Hash " + node.ui.hash + "."));
+        var uiWrap = put(body, el("div", "gd-ftable-wrap"));
+        var uiTable = put(uiWrap, el("table"));
+        var uiHead = put(put(uiTable, el("thead")), el("tr"));
+        ["Id", "Loại", "Mức", "Dùng để", "Trạng thái"].forEach(function (h) { add(uiHead, el("th", "", h)); });
+        var uiBody = put(uiTable, el("tbody"));
+        node.ui.elements.forEach(function (e) {
+          var tr = put(uiBody, el("tr"));
+          add(tr, add(el("td"), el("code", "", e.id)), el("td", "", e.kind), el("td", e.level === "chính" ? "ok-text" : "", e.level),
+              el("td", "", e.use), el("td", "", e.states.join(", ") || "—"));
+        });
+        [["Tương tác", node.ui.interactions], ["Flow", node.ui.flow]].forEach(function (x) {
+          if (!x[1].length) return;
+          add(body, el("h4", "", x[0]));
+          var ul = put(body, el("ul"));
+          x[1].forEach(function (t) { add(ul, el("li", "", t)); });
+        });
+      }
+      if (node.uiWait && node.uiWait.length) {
+        add(body, el("p", "bad-text", "Chờ @UIDesigner:"));
+        var waitUl = put(body, el("ul", "gd-frame-warn"));
+        node.uiWait.forEach(function (t) { add(waitUl, el("li", "", t)); });
+      }
       if (node.frames && node.frames.length || node.frameNotes && node.frameNotes.length || node.frameNone) {
-        add(body, el("h3", "", "Frame (bố cục ước lượng)"));
+        add(body, el("h3", "", "Frame (bố cục của @UIDesigner)"));
         if (node.frameNone) add(body, el("p", "gd-note", "Node này không có bố cục (frame: none)."));
         if (node.frames && node.frames.length && !node.cheat) add(body, el("p", "gd-note", "Ảnh art không đặt ở đây: order art chỉ đặt ở node cheat của feature."));
         (node.frameNotes || []).forEach(function (t) { add(body, el("p", "gd-note", t)); });
@@ -2218,6 +2304,7 @@
               var ul = put(shown, el("ul", "gd-frame-warn"));
               notes.forEach(function (w) { add(ul, el("li", "", w)); });
             }
+            renderFrameScore(shown, node, fr);
             var src = put(shown, el("details", "gd-frame-src"));
             add(src, el("summary", "", "Xem nguồn"), el("pre", "", fr.text));
           };

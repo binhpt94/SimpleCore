@@ -499,6 +499,7 @@ def run_cases():
     run_report_cases()
     run_codelead_cases()
     run_designer_cases()
+    run_uidesigner_cases()
     run_advisor_cases()
     run_progress_cases()
     run_req_cases()
@@ -510,6 +511,41 @@ def run_cases():
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + "/x.txt"}, "cwd": real}), root=None)
     cli("real root", "", "allow", "Read <real root>\\CLAUDE.md, no --root",
         json.dumps({"tool_name": "Read", "tool_input": {"file_path": real + "/CLAUDE.md"}, "cwd": real}), root=None)
+
+
+def run_uidesigner_cases():
+    """@UIDesigner lays the UI out: reads like @GameDesigner (design tree, studio, its rules and the designer's), writes
+    frames only (the write gate is tested with @GameDesigner's), runs gd_status, gd_frame, deletes its frames, chains
+    commands and may ask the tester to act one thing out, like the other Leaders; no unity-mcp, no code."""
+    U = "@UIDesigner"
+    base = FX + "/Management/game-design"
+    idea = base + "/ai/idea"
+    os.makedirs(idea + "/feature-hero", exist_ok=True)
+    g = "uidesigner: reads the design, its rules, never the code"
+    for p in (idea + "/feature-hero/data.md", base + "/live/data.md", FX + "/Management/studio/claudeimage/lessons.md",
+              FX + "/.claude/rules/uidesigner.md", FX + "/.claude/rules/gamedesigner.round4.md"):
+        r(g, U, "allow", p)
+    for p in (F + "/Wallet/Scripts/Internal/W.cs", FX + "/.claude/rules/codelead.md", FX + "/Management/tools/guard.py"):
+        r(g, U, "deny", p)
+    g = "uidesigner: commands"
+    for cmd in ("python Management/tools/gd_status.py", "python Management/tools/gd_status.py ai/idea/feature-hero",
+                "python Management/tools/gd_frame.py ai/idea/feature-hero/hero-list/x",
+                "python Management/tools/gd_delete.py ai/idea/feature-hero/hero-list/.frame-concept/main.frame",
+                "python Management/tools/gd_status.py; python Management/tools/gd_frame.py live/feature-hero",
+                "python Management/tools/scaffold.py --dry-run"):
+        t(g, U, "allow", "Bash", {"command": cmd})
+    for cmd in ("python Management/tools/gd_delete.py ai/idea/feature-hero", "python Management/tools/gd_delete.py ai/idea/feature-hero/data.md",
+                "python Management/tools/gd_delete.py ai/idea/feature-hero/.frame-concept/../data.md",
+                "python Management/tools/gd_advise.py feature-hero q1", "python Management/tools/scaffold.py"):
+        t(g, U, "deny", "Bash", {"command": cmd})
+    t(g, "@GameDesigner", "allow", "Bash", {"command": "python Management/tools/gd_delete.py ai/idea/feature-hero"})
+    g = "uidesigner: no unity-mcp, no code, may message the tester"
+    t(g, U, "deny", "mcp__unityMCP__read_console", {"action": "get"})
+    t(g, U, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
+    t(g, U, "pass", "SendMessage", {"to": "UnityAutoPlay", "message": "XÁC NHẬN · Feature: Hud · Thao tác: bấm II"})
+    t(g, U, "pass", "SendMessage", {"to": "GameDesigner", "message": "ui.md thiếu nút đóng"})
+    for p in (F + "/Wallet/Scripts/Internal/W.cs", FX + "/Management/proposals/new.md", FX + "/CLAUDE.md"):
+        w(g, U, "deny", p)
 
 
 def run_advisor_cases():
@@ -1411,10 +1447,19 @@ def run_designer_cases():
     node(hero_dir, based=new_hash)
     w(g + " (auto)", D, "allow", skills)
     w(g + " (auto)", D, "allow", hero_dir + "/skills/.images/index.md")
-    w(g + " (auto)", D, "allow", hero_dir + "/skills/.frame-concept/main.frame")
+    U = "@UIDesigner"
+    w(g + " (frames are @UIDesigner's)", D, "deny", hero_dir + "/skills/.frame-concept/main.frame")
+    w(g + " (auto)", D, "allow", hero_dir + "/skills/ui.md")      # the list of UI is @GameDesigner's
+    w(g + " (frames are @UIDesigner's)", U, "allow", hero_dir + "/skills/.frame-concept/main.frame")
+    e(g + " (frames are @UIDesigner's)", U, "allow", hero_dir + "/skills/.frame-concept/pause-popup.frame")
+    for p in (skills, hero_dir + "/skills/ui.md", hero_dir + "/skills/CLAUDE.md", hero_dir + "/skills/.frame-concept/Main.frame",
+              hero_dir + "/skills/.frame-concept/main.txt", hero_dir + "/skills/.frame-concept/sub/main.frame",
+              hero_dir + "/skills/.images/index.md", hero_dir + "/skills/.user-review/review.json",
+              live + "/feature-hero/.frame-concept/main.frame", ai + "/idea/.frame-concept/../data.md"):
+        w(g + " (@UIDesigner: frames only)", U, "deny", p)
     node(hero_dir, based="")
     w(g + " (auto)", D, "deny", skills)                         # no based-on at all
-    w(g + " (auto)", D, "deny", hero_dir + "/skills/.frame-concept/main.frame")      # a frame follows its node's lock
+    w(g + " (auto)", U, "deny", hero_dir + "/skills/.frame-concept/main.frame")      # a frame follows its node's lock
     node(hero_dir, based=new_hash)
     os.remove(idea + "/data.md")
     w(g + " (auto)", D, "deny", hero)                           # the root has no data.md
@@ -1916,10 +1961,12 @@ def run_tool_cases():
     w(g + " (a feature orders from it)", W, "allow", studio + "/claudeimage/orders/Wallet/new-claude/order.md")
     w(g + " (a feature orders from it)", W, "deny", studio + "/claudeimage/orders/Shop/x/order.md")
     w(g + " (a feature orders from it)", W, "deny", studio + "/claudeimage/orders/Wallet/new-claude/work/a.svg")
-    w(g + " (@GameDesigner orders a claude concept)", "@GameDesigner", "allow", cart + "/order.md")
+    w(g + " (@UIDesigner orders a claude concept)", "@UIDesigner", "allow", cart + "/order.md")
+    w(g + " (@GameDesigner no longer does)", "@GameDesigner", "deny", cart + "/order.md")
+    w(g + " (@UIDesigner orders no Codex art)", "@UIDesigner", "deny", studio + "/codex/orders/_design/feature-a.cheat/a/order.md")
     for p in (cart + "/work/main.svg", cart + "/review.json", studio + "/claudeimage/orders/Wallet/x/order.md",
               studio + "/claudeimage/lessons.md", studio + "/claudeimage/orders/_design/Feature.A/x/order.md"):
-        w(g + " (@GameDesigner orders a claude concept)", "@GameDesigner", "deny", p)
+        w(g + " (@UIDesigner orders a claude concept)", "@UIDesigner", "deny", p)
     t(g, CI, "deny", "mcp__blender__execute_blender_code", {"code": "import bpy"})
     guard.release_lock(STORE)
     t(g, CI, "allow", "mcp__unityMCP__read_console", {"action": "get"}, session="t-ci")
