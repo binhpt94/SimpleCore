@@ -192,9 +192,15 @@ TESTER_ARCHIVE_ARGS = r" (\d{8}-\d{6}|--keep [0-9]{1,3})"
 MANAGER_COMMANDS.append(TESTER_TOOL + "archive " + TESTER_NAME + TESTER_ARCHIVE_ARGS)
 
 
+TESTER_SHOT = r"[A-Za-z0-9_-][A-Za-z0-9._-]*\.([pP][nN][gG]|[jJ][pP][eE]?[gG])"      # a picture's name in UnityProject/Captures: no '/'
+
+
 def tester_commands(name):
-    """What the tester `name` may run on its own runs: start one (its title in double quotes), archive old ones."""
-    return [TESTER_TOOL + "new " + name + r' "[^"\\]+"', TESTER_TOOL + "archive " + name + TESTER_ARCHIVE_ARGS]
+    """What the tester `name` may run on its own runs: start one (its title in double quotes), move a screenshot
+    from UnityProject/Captures into one, archive old ones."""
+    return [TESTER_TOOL + "new " + name + r' "[^"\\]+"',
+            TESTER_TOOL + "shot " + name + r" \d{8}-\d{6} " + TESTER_SHOT + "( " + TESTER_SHOT + ")?",
+            TESTER_TOOL + "archive " + name + TESTER_ARCHIVE_ARGS]
 
 
 CHAIN_MODES = ("manager", "codelead", "gamedesigner")

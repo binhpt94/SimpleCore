@@ -13,6 +13,9 @@
 
 Commands (run from the project root; the guard decides who may run which):
     python Management/tools/tester.py new <Tester> "<title>"       start a run: the folder, its README, images/
+    python Management/tools/tester.py shot <Tester> <run> <file> [<new name>]
+                                                                   move a picture from UnityProject/Captures (where
+                                                                   manage_camera saves it) into images/ of the run
     python Management/tools/tester.py archive <Tester> <run>       move one run to Archive
     python Management/tools/tester.py archive <Tester> --keep <N>  move all but the N newest runs to Archive
     python Management/tools/tester.py status [<Tester>]            the open runs, their purpose and result
@@ -34,6 +37,9 @@ RUN_RX = re.compile(r"^\d{8}-\d{6}$")
 # The sections every run README has, in this order.
 SECTIONS = ("Mục đích", "Test gì", "Môi trường", "Các bước", "Kết quả", "Lỗi tìm thấy", "Cấu trúc thư mục")
 EMPTY = "(chưa ghi)"
+# manage_camera saves screenshots here (the guard allows no other folder); `shot` moves one into a run.
+CAPTURES = ("UnityProject", "Captures")
+SHOT_RX = re.compile(r"^[A-Za-z0-9_-][A-Za-z0-9._-]*\.(png|jpe?g)$", re.IGNORECASE)
 
 
 def now():
@@ -97,7 +103,32 @@ def cmd_new(root, name, title):
     print(f"Đã tạo đợt test: {BASE}/{name}/{run}/")
     print(f"- Ghi {BASE}/{name}/{run}/{README}: đủ các mục {', '.join(SECTIONS)}.")
     print(f"- Ảnh và dữ liệu phụ để trong {BASE}/{name}/{run}/{IMAGES}/, mỗi file một dòng ở mục 'Cấu trúc thư mục'.")
+    print(f"- Ảnh: chụp bằng manage_camera screenshot (output_folder: \"Captures\", screenshot_file_name), rồi "
+          f"python Management/tools/tester.py shot {name} {run} <file> [<tên mới>]")
     print("- Xong thì chạy: python Management/tools/tester.py check")
+    return 0
+
+
+def cmd_shot(root, name, run, file, new_name=None):
+    """Moves one picture from UnityProject/Captures into images/ of an open run."""
+    folder = tester_dir(root, name)
+    if not RUN_RX.match(run or "") or not (folder / run).is_dir():
+        raise ValueError(f"không có đợt đang mở {BASE}/{name}/{run} (đợt đã dời vào {ARCHIVE} thì không thêm ảnh)")
+    new_name = new_name or file
+    for n in (file, new_name):
+        if not SHOT_RX.match(n or ""):
+            raise ValueError(f"tên ảnh không hợp lệ: {n} (chỉ chữ, số, '.', '_', '-', đuôi .png .jpg .jpeg, không '/')")
+    src = Path(root).joinpath(*CAPTURES) / file
+    if src.is_symlink() or not src.is_file():
+        raise ValueError(f"không có ảnh {'/'.join(CAPTURES)}/{file}")
+    images = folder / run / IMAGES
+    images.mkdir(exist_ok=True)
+    dst = images / new_name
+    if dst.exists():
+        raise ValueError(f"đã có {BASE}/{name}/{run}/{IMAGES}/{new_name}; đặt tên khác")
+    shutil.move(str(src), str(dst))
+    print(f"Đã dời ảnh vào {BASE}/{name}/{run}/{IMAGES}/{new_name}")
+    print(f"- Thêm vào mục 'Cấu trúc thư mục' của README đợt: - {IMAGES}/{new_name}: <là gì>")
     return 0
 
 
@@ -218,6 +249,8 @@ def main(argv, root=None):
     try:
         if len(args) == 3 and args[0] == "new":
             return cmd_new(root, args[1], args[2])
+        if len(args) in (4, 5) and args[0] == "shot":
+            return cmd_shot(root, *args[1:])
         if len(args) == 3 and args[0] == "archive":
             return cmd_archive(root, args[1], args[2])
         if len(args) == 4 and args[0] == "archive" and args[2] == "--keep":

@@ -14,13 +14,13 @@ Tester chơi game trong Unity Editor như một người chơi, đối chiếu v
 | Không ghi | mọi thứ khác: `UnityProject`, `Management`, `.claude`, `Resources`, `Tester/<tên>/Archive` (chỉ lệnh `archive` dời vào), thư mục của tester khác |
 | unity-mcp | đọc (console, hierarchy, component, asset); `manage_editor` play/pause/stop; `run_tests`; `manage_scene load` (mở scene để chơi; **không** save, không create); `refresh_unity`; `execute_menu_item` (menu cheat của feature); `manage_camera` (chụp màn hình, `output_folder: "Captures"`); `execute_code` |
 | unity-mcp bị cấm | ghi hay sửa asset, object, component, prefab, material; lưu scene; package, tag/layer, cài đặt project; mọi lệnh viết code |
-| Shell | `tester.py` (bảng dưới), `gd_pack.py <Tên>`, `gd_frame.py live/<node>`, `validate.py`, `studio.py status` |
+| Shell | `tester.py` (bảng dưới, cả `shot` để dời ảnh), `gd_pack.py <Tên>`, `gd_frame.py live/<node>`, `validate.py`, `studio.py status` |
 
 - **Khoá Editor**: play, test, load scene, menu, camera, `execute_code` đều giữ khoá Editor tới hết lượt (cùng khoá với @CodeLead). Phiên khác đang giữ thì chờ, không tìm đường vòng. Trước khi hết lượt: Stop Play.
 - **`execute_code` và `execute_menu_item` là cổng mềm**: guard không đọc được code hay menu chạy gì. Luật:
-  - chỉ dùng để thao tác lúc Play: bấm nút, kéo thả, gọi cheat, đọc trạng thái object, đợi một điều kiện, chụp ảnh;
+  - chỉ dùng để thao tác lúc Play: bấm nút, kéo thả, gọi cheat, đọc trạng thái object, đợi một điều kiện;
   - **không** ghi, sửa, xoá file hay asset (`File.*`, `AssetDatabase.Create/Delete/Move/SaveAssets`, `EditorSceneManager.SaveScene`, `PrefabUtility.Save*`, `PlayerSettings`...), không đổi cài đặt project, không cài package;
-  - ngoại lệ duy nhất được ghi file: ảnh chụp và dữ liệu đo, vào đúng `Tester/<tên mình>/<đợt đang chạy>/images/`;
+  - không ghi file nào, kể cả ảnh: ảnh chụp bằng `manage_camera` rồi `tester.py shot` (bước 5 của "Một đợt test"); dữ liệu đo dạng chữ ghi bằng Write vào `images/`;
   - không dùng nó để làm việc mà guard đã chặn ở lệnh khác.
 - Bị guard chặn thì dừng và báo người, không tìm đường vòng.
 
@@ -45,6 +45,7 @@ Mọi thư mục có `README.md` nói thư mục chứa gì. README của một 
 | `new <Tester> "<tên đợt>"` | tạo thư mục đợt theo giờ hiện tại, `README.md` khung đủ 7 mục, `images/` | tester đó |
 | `check` | mọi thư mục có README, đợt đủ mục và đã ghi, file phụ nằm trong `images/` và có dòng mô tả | mọi phiên đọc được `Tester/` |
 | `status [<Tester>]` | các đợt đang mở, mục đích và kết quả từng đợt | mọi phiên đọc được `Tester/` |
+| `shot <Tester> <đợt> <file> [<tên mới>]` | dời một ảnh từ `UnityProject/Captures` (chỗ `manage_camera` lưu) vào `images/` của đợt đang mở; in dòng cần thêm vào "Cấu trúc thư mục" | tester đó |
 | `archive <Tester> <đợt>` | dời một đợt vào `Archive/`, cập nhật danh mục | tester đó, @Manager |
 | `archive <Tester> --keep <N>` | giữ N đợt mới nhất, dời phần còn lại | tester đó, @Manager |
 Tên đợt viết trong ngoặc kép, không có dấu ngoặc kép hay `\` bên trong.
@@ -63,7 +64,10 @@ Tester giữ khoá Unity Editor suốt lúc chơi, nên chỉ vài bên được
 2. `tester.py new <Tên mình> "<tên đợt>"`. Ghi ngay mục Mục đích, Test gì, Môi trường.
 3. Đọc thiết kế đã chốt: `python Management/tools/gd_pack.py <Tên feature>` (đọc đủ node vòng 4 và mục CHEAT của phần sẽ test). Đọc code khi cần hiểu vì sao game chạy như vậy; không sửa.
 4. Chơi: mở scene, Play, dựng state bằng cheat của feature (menu hoặc `execute_code`), thao tác như người chơi, đọc console. Mỗi điều kiểm được ghi thành một bước: làm gì, mong thấy gì theo thiết kế, thực tế thấy gì.
-5. Chụp ảnh chỗ đáng xem (state đạt, lỗi) vào `images/`; mỗi ảnh một dòng trong mục "Cấu trúc thư mục".
+5. Chụp ảnh chỗ đáng xem (state đạt, lỗi):
+   - `manage_camera` action `screenshot`, `output_folder: "Captures"`, `screenshot_file_name: "<tên>.png"`, `include_image: true` (thấy ảnh ngay); guard chặn folder khác;
+   - `python Management/tools/tester.py shot <Tên mình> <đợt> <tên>.png [<tên mới>]`: dời ảnh vào `images/` của đợt (Captures không commit, chỉ `images/` được giữ);
+   - mỗi ảnh một dòng trong mục "Cấu trúc thư mục". Không chép ảnh bằng đường khác.
 6. Stop Play. Ghi Kết quả và Lỗi tìm thấy. Lỗi phải tái hiện được: bước, ảnh, câu lỗi console, feature sở hữu.
 7. `tester.py check` tới khi không còn lỗi cấu trúc.
 8. Báo cáo cuối lượt (dưới). Lỗi của feature nào thì nhắn thêm @CodeLead (`SendMessage`, to: `CodeLead`) đường dẫn đợt test và danh sách lỗi; không nhắn thẳng yêu cầu sửa cho phiên feature, không sửa hộ.

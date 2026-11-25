@@ -1534,16 +1534,22 @@ def run_tester_cases():
     TOOL = "python Management/tools/tester.py "
     for cmd in (TOOL + 'new UnityAutoPlay "Chơi thử Hud mức IDEA"', TOOL + "archive UnityAutoPlay 20261120-101500",
                 TOOL + "archive UnityAutoPlay --keep 10", TOOL + "status", TOOL + "status UnityAutoPlay", TOOL + "check",
+                TOOL + "shot UnityAutoPlay 20261125-131408 screenshot-1.png", TOOL + "shot UnityAutoPlay 20261125-131408 a.PNG 01-pause.jpg",
                 "python Management/tools/gd_pack.py Hud", "python Management/tools/validate.py"):
         t(g, T, "allow", "Bash", {"command": cmd})
     for cmd in (TOOL + 'new Other "x"', TOOL + 'new UnityAutoPlay "x"; ls', TOOL + "new UnityAutoPlay x", TOOL + "archive Other --keep 1",
                 TOOL + "archive UnityAutoPlay ../x", TOOL + "archive UnityAutoPlay --keep", TOOL + "status; ls",
-                "python Management/tools/scaffold.py", "python Management/tools/gd_status.py", "git status"):
+                "python Management/tools/scaffold.py", "python Management/tools/gd_status.py", "git status",
+                TOOL + "shot Other 20261125-131408 a.png", TOOL + "shot UnityAutoPlay 20261125-131408 ../x.png",
+                TOOL + "shot UnityAutoPlay 20261125-131408 a/b.png", TOOL + "shot UnityAutoPlay 20261125-131408 .x.png",
+                TOOL + "shot UnityAutoPlay 20261125-131408 x.cs", TOOL + "shot UnityAutoPlay x a.png",
+                TOOL + "shot UnityAutoPlay 20261125-131408 a.png; ls", TOOL + "shot UnityAutoPlay 20261125-131408 a.png b.png c.png"):
         t(g, T, "deny", "Bash", {"command": cmd})
     for cmd in (TOOL + "archive UnityAutoPlay 20261120-101500", TOOL + "archive UnityAutoPlay --keep 3", TOOL + "status", TOOL + "check",
                 TOOL + "status; " + TOOL + "check"):
         t(g + " (@Manager archives and looks)", M, "allow", "Bash", {"command": cmd})
     t(g + " (@Manager starts no run)", M, "deny", "Bash", {"command": TOOL + 'new UnityAutoPlay "x"'})
+    t(g + " (@Manager moves no picture)", M, "deny", "Bash", {"command": TOOL + "shot UnityAutoPlay 20261125-131408 a.png"})
     for who in (L, "@GameDesigner", "@Core", W):
         t(g + " (readers look)", who, "allow", "Bash", {"command": TOOL + "status"})
         t(g + " (readers look)", who, "allow", "Bash", {"command": TOOL + "check"})

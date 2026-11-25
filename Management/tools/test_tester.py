@@ -66,6 +66,34 @@ def main():
             "## Cấu trúc thư mục\nđã ghi", "## Cấu trúc thư mục\n- images/hud.png: màn Hud giữa trận"), encoding="utf-8")
         check("check: described pictures pass", tester.check(root), [])
 
+        caps = root.joinpath(*tester.CAPTURES)
+        caps.mkdir(parents=True)
+        (caps / "screenshot-1.png").write_bytes(b"png")
+        (caps / "two.jpg").write_bytes(b"jpg")
+        (caps / "note.txt").write_text("x", encoding="utf-8")
+        code, out = call(root, "shot", name, run.name, "screenshot-1.png")
+        check("shot: the picture moves from Captures into images/ of the run, and the line to add is printed",
+              (code, (run / tester.IMAGES / "screenshot-1.png").read_bytes(), (caps / "screenshot-1.png").exists(),
+               "- images/screenshot-1.png: <là gì>" in out), (0, b"png", False, True))
+        code, out = call(root, "shot", name, run.name, "two.jpg", "02-pause.jpg")
+        check("shot: with a new name", (code, (run / tester.IMAGES / "02-pause.jpg").is_file(), (caps / "two.jpg").exists()), (0, True, False))
+        (caps / "again.png").write_bytes(b"x")
+        refused = [call(root, "shot", *a)[0] for a in (
+            (name, run.name, "missing.png"), (name, run.name, "note.txt"), (name, run.name, "../x.png"),
+            (name, run.name, "again.png", "a/b.png"), (name, run.name, "again.png", ".hidden.png"),
+            (name, run.name, "again.png", "screenshot-1.png"), (name, "20991231-000000", "again.png"),
+            ("Nobody", run.name, "again.png"), (name, "nope", "again.png"))]
+        check("shot: a missing picture, not a picture, a path, a name taken, a run not open and another tester are refused",
+              (refused, (caps / "again.png").exists()), ([2] * 9, True))
+        if hasattr(Path, "symlink_to"):
+            try:
+                (caps / "link.png").symlink_to(caps / "again.png")
+                check("shot: a link is refused", call(root, "shot", name, run.name, "link.png")[0], 2)
+            except OSError:
+                pass
+        (run / tester.IMAGES / "screenshot-1.png").unlink(), (run / tester.IMAGES / "02-pause.jpg").unlink()
+        check("shot: the run still passes the check once the moved pictures are gone again", tester.check(root), [])
+
         status = call(root, "status", name)[1]
         check("status: the open runs with their purpose and result",
               (f"# {name}: 1 đợt đang mở, 0 đợt đã lưu trữ" in status, "Kết quả: đạt: mọi nút bấm được" in status, "Chơi thử Hud" in status),
