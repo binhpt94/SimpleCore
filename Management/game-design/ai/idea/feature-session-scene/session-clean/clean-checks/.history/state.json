@@ -1,21 +1,17 @@
 {
- "hash": "65e78af0f55e",
+ "hash": "9ae623c09fe5",
  "items": {
   "after-dispose-zero": {
    "hash": "14039678effd",
    "text": "Sau bước huỷ, scene không còn view nào, không còn việc hẹn giờ hay việc đang chạy nào của feature tham gia\nNgoại lệ duy nhất là lớp che của `feature-scene-flow`, vì nó chỉ sống trong lúc chuyển."
   },
-  "replay-no-growth": {
-   "hash": "ef794811f3a4",
-   "text": "Chơi 10 lượt liền trong scene Game, số view và số việc đang chạy ở đầu lượt thứ 10 bằng ở đầu lượt thứ 1\nKiểm cho đặt lại lượt (`feature-run/run-start`) không để lại quái, hero, hiệu ứng hay popup của lượt trước."
+  "count-per-participant": {
+   "hash": "4be943dec5e2",
+   "text": "Dịch vụ đếm được số view và số việc đang chạy của từng feature tham gia, bất kì lúc nào trong scene\nChỉ ở bản dev. Việc đang chạy gồm hẹn giờ, việc chờ và việc lặp mỗi khung hình. Feature khác dùng lại số đếm này để tự kiểm, ví dụ kiểm chơi lại nhiều lượt của `feature-run`."
   },
-  "popup-cleared-on-reset": {
-   "hash": "bce43d19ed59",
-   "text": "Đầu lượt mới không còn popup nào đang mở\nPopup thua đã đóng khi bấm nút; nếu vì lỗi còn popup mở thì đó là lỗi cần báo, không tự đóng âm thầm."
-  },
-  "only-record-saved": {
-   "hash": "4629274109d5",
-   "text": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game\nKỉ lục do `feature-run` lưu. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống trong scene Game lúc game đang mở. Dịch vụ này không ghi gì."
+  "leak-names-owner": {
+   "hash": "9764eaed9499",
+   "text": "Sau bước huỷ còn sót thì ghi lỗi nêu tên feature tham gia còn sót và số view, số việc còn lại\nKhông tự dọn hộ âm thầm; thứ sót là lỗi của feature sở hữu."
   }
  }
 }

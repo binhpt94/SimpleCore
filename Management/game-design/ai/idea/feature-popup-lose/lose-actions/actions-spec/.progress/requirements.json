@@ -1,0 +1,176 @@
+{
+ "items": {
+  "replay-report": {
+   "state": "done",
+   "note": "gắn test có sẵn cho code đã có",
+   "tests": [
+    "LosePopupTests.ReplayTouchAsksTheRunToReplayAndLocksButtons",
+    "LosePopupTests.PopupClosesWhenTheRunLeavesTheLostStep"
+   ],
+   "play": "",
+   "hash": "4a2e2a40af7e",
+   "text": "Chạm \"Chơi lại\" thì báo `feature-run` chọn chơi lại; `feature-run` đóng popup và sang màn chọn đội",
+   "title": "Chạm \"Chơi lại\" thì báo `feature-run` chọn chơi lại; `feature-run` đóng popup và sang màn chọn đội",
+   "by": "PopupLose",
+   "at": "2026-11-25 10:54:37"
+  },
+  "first-tap-only": {
+   "state": "rejected",
+   "note": "FakeView.PressReplay tự bỏ lần bấm khi Locked, nên OnlyTheFirstReplayTouchIsReported đúng nhờ đồ giả, không nhờ LosePopupParticipant. Cần test bắn ReplayPressed hai lần thẳng vào participant, không qua cờ Locked của view, rồi kiểm Replay chỉ được gọi một lần",
+   "tests": [
+    "LosePopupTests.OnlyTheFirstReplayTouchIsReported",
+    "LosePopupTests.ReplayTouchAsksTheRunToReplayAndLocksButtons"
+   ],
+   "play": "",
+   "hash": "72a2322c7130",
+   "text": "Chỉ lần chạm nút đầu tiên được báo; sau đó cả 2 nút không nhận chạm\nTránh chạm cả hai nút hay chạm một nút hai lần.",
+   "title": "Chỉ lần chạm nút đầu tiên được báo; sau đó cả 2 nút không nhận chạm",
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:01:51"
+  },
+  "edge-popup-khac-chong-len-popup-thua-khong-nen": {
+   "state": "done",
+   "note": "gắn test có sẵn cho code đã có",
+   "tests": [
+    "LosePopupTests.ReplayTouchIsIgnoredWhileAnotherPopupIsOnTop"
+   ],
+   "play": "",
+   "hash": "00f842351d46",
+   "text": "**Popup khác chồng lên popup thua (không nên xảy ra):** chỉ popup trên cùng nhận chạm (`feature-popup/popup-layer`); 2 nút này chờ tới khi popup trên đóng.",
+   "title": "Popup khác chồng lên popup thua (không nên xảy ra)",
+   "by": "PopupLose",
+   "at": "2026-11-25 10:54:50"
+  },
+  "no-other-close": {
+   "state": "done",
+   "note": "chuyển sang kiểm bằng Play: nền che, ngoài popup, nút quay lại",
+   "tests": [],
+   "play": "Play scene Game với cheat new-record của PopupLoseInstaller. Khi popup thua mở: chạm nền che tối ở góc màn, chạm vùng ngoài khung popup, bấm Escape là nút quay lại của máy trong Editor. Mong thấy popup vẫn mở, nút Chơi lại vẫn bấm được, console không lỗi. Chỉ chạm Chơi lại mới làm popup đóng khi lượt rời bước thua.",
+   "hash": "0c826fb2f22c",
+   "text": "Chạm nền che, chạm ngoài popup hay nút quay lại của máy đều không đóng popup",
+   "title": "Chạm nền che, chạm ngoài popup hay nút quay lại của máy đều không đóng popup",
+   "by": "PopupLose",
+   "at": "2026-11-25 11:02:16"
+  },
+  "edge-cham-hai-nut-gan-nhu-cung-luc": {
+   "state": "rejected",
+   "note": "Test gắn là OnlyTheFirstReplayTouchIsReported, chỉ đúng nhờ FakeView tự chặn khi Locked. Cần test hai lần báo chạm tới participant trong cùng lời gọi, không qua cờ khoá của view, và chỉ lần đầu được báo cho run",
+   "tests": [
+    "LosePopupTests.OnlyTheFirstReplayTouchIsReported"
+   ],
+   "play": "",
+   "hash": "ab827e1a0a11",
+   "text": "**Chạm hai nút gần như cùng lúc:** chỉ nút được xử lí trước tính.",
+   "title": "Chạm hai nút gần như cùng lúc",
+   "by": "@CodeLead",
+   "at": "2026-11-25 11:01:53"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 10:54:33",
+   "id": "replay-report",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "gắn test có sẵn cho code đã có"
+  },
+  {
+   "at": "2026-11-25 10:54:37",
+   "id": "replay-report",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.ReplayTouchAsksTheRunToReplayAndLocksButtons, LosePopupTests.PopupClosesWhenTheRunLeavesTheLostStep"
+  },
+  {
+   "at": "2026-11-25 10:54:40",
+   "id": "first-tap-only",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "gắn test có sẵn cho code đã có"
+  },
+  {
+   "at": "2026-11-25 10:54:44",
+   "id": "first-tap-only",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.OnlyTheFirstReplayTouchIsReported, LosePopupTests.ReplayTouchAsksTheRunToReplayAndLocksButtons"
+  },
+  {
+   "at": "2026-11-25 10:54:46",
+   "id": "edge-popup-khac-chong-len-popup-thua-khong-nen",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "gắn test có sẵn cho code đã có"
+  },
+  {
+   "at": "2026-11-25 10:54:50",
+   "id": "edge-popup-khac-chong-len-popup-thua-khong-nen",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.ReplayTouchIsIgnoredWhileAnotherPopupIsOnTop"
+  },
+  {
+   "at": "2026-11-25 10:54:53",
+   "id": "no-other-close",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "gắn test có sẵn: popup chỉ đóng khi lượt rời bước thua"
+  },
+  {
+   "at": "2026-11-25 10:54:58",
+   "id": "no-other-close",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.PopupDoesNotCloseByItself, LosePopupTests.PopupClosesWhenTheRunLeavesTheLostStep"
+  },
+  {
+   "at": "2026-11-25 10:55:01",
+   "id": "edge-cham-hai-nut-gan-nhu-cung-luc",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "gắn test có sẵn: lần chạm đầu được tính, sau đó khoá"
+  },
+  {
+   "at": "2026-11-25 10:55:05",
+   "id": "edge-cham-hai-nut-gan-nhu-cung-luc",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.OnlyTheFirstReplayTouchIsReported"
+  },
+  {
+   "at": "2026-11-25 11:01:51",
+   "id": "first-tap-only",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "FakeView.PressReplay tự bỏ lần bấm khi Locked, nên OnlyTheFirstReplayTouchIsReported đúng nhờ đồ giả, không nhờ LosePopupParticipant. Cần test bắn ReplayPressed hai lần thẳng vào participant, không qua cờ Locked của view, rồi kiểm Replay chỉ được gọi một lần"
+  },
+  {
+   "at": "2026-11-25 11:01:53",
+   "id": "edge-cham-hai-nut-gan-nhu-cung-luc",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test gắn là OnlyTheFirstReplayTouchIsReported, chỉ đúng nhờ FakeView tự chặn khi Locked. Cần test hai lần báo chạm tới participant trong cùng lời gọi, không qua cờ khoá của view, và chỉ lần đầu được báo cho run"
+  },
+  {
+   "at": "2026-11-25 11:01:55",
+   "id": "no-other-close",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "PopupDoesNotCloseByItself chỉ kiểm popup còn mở sau khi chạm Chơi lại. Chưa có ca chạm nền che, chạm ngoài popup hay nút quay lại của máy. Thêm test cho nút quay lại hoặc ghi play kèm cách thấy khi Play cho ba cách đó"
+  },
+  {
+   "at": "2026-11-25 11:02:12",
+   "id": "no-other-close",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "chuyển sang kiểm bằng Play: nền che, ngoài popup, nút quay lại"
+  },
+  {
+   "at": "2026-11-25 11:02:16",
+   "id": "no-other-close",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "Play scene Game với cheat new-record của PopupLoseInstaller. Khi popup thua mở: chạm nền che tối ở góc màn, chạm vùng ngoài khung popup, bấm Escape là nút quay lại của máy trong Editor. Mong thấy popup vẫn mở, nút Chơi lại vẫn bấm được, console không lỗi. Chỉ chạm Chơi lại mới làm popup đóng khi lượt rời bước thua."
+  }
+ ]
+}

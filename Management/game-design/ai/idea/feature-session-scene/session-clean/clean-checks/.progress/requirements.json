@@ -1,0 +1,45 @@
+{
+ "items": {
+  "after-dispose-zero": {
+   "state": "rejected",
+   "note": "Test chỉ chứng minh dịch vụ gọi huỷ mỗi participant đúng một lần và không để timer của chính nó chờ. Yêu cầu là đếm view và việc đang chạy của các feature tham gia sau bước huỷ bằng 0, trừ lớp che của scene-flow, điều participant giả không kiểm được. Giữ các test này và thêm cách kiểm thật, ví dụ bước play: rời scene rồi đếm GameObject và việc hẹn giờ còn lại bằng 0",
+   "tests": [],
+   "play": "Play từ scene Loading tới khi sang scene Game. Ngay sau bước huỷ của scene Loading, đếm GameObject còn lại do các feature tham gia tạo ra, bỏ qua lớp che của scene-flow, phải bằng 0. Console không có lỗi dispose. Khi Profiler hoặc UniTask Tracker đang mở, không còn task hay việc hẹn giờ nào của scene Loading.",
+   "hash": "14039678effd",
+   "text": "Sau bước huỷ, scene không còn view nào, không còn việc hẹn giờ hay việc đang chạy nào của feature tham gia\nNgoại lệ duy nhất là lớp che của `feature-scene-flow`, vì nó chỉ sống trong lúc chuyển.",
+   "title": "Sau bước huỷ, scene không còn view nào, không còn việc hẹn giờ hay việc đang chạy nào của feature tham gia",
+   "by": "@CodeLead",
+   "at": "2026-11-25 10:55:52"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 10:54:15",
+   "id": "after-dispose-zero",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "gắn test EditMode đã có, phần của dịch vụ: mọi participant đã tới được huỷ đúng một lần, không còn hẹn giờ tải"
+  },
+  {
+   "at": "2026-11-25 10:54:19",
+   "id": "after-dispose-zero",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.AfterTheSessionEnds_EveryoneReachedIsCleanedUpOnce_AndNoLoadTimerIsLeftWaiting, SessionSceneLogicTests.ALoadThatFinishesInTime_StopsItsTimer, SessionSceneLogicTests.TheNextScenesSession_StartsClean_AndNeverTouchesTheParticipantsOfTheSceneBefore"
+  },
+  {
+   "at": "2026-11-25 10:55:39",
+   "id": "after-dispose-zero",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "Play từ scene Loading tới khi sang scene Game. Ngay sau bước huỷ của scene Loading, đếm GameObject còn lại do các feature tham gia tạo ra, bỏ qua lớp che của scene-flow, phải bằng 0. Console không có lỗi dispose. Khi Profiler hoặc UniTask Tracker đang mở, không còn task hay việc hẹn giờ nào của scene Loading."
+  },
+  {
+   "at": "2026-11-25 10:55:52",
+   "id": "after-dispose-zero",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test chỉ chứng minh dịch vụ gọi huỷ mỗi participant đúng một lần và không để timer của chính nó chờ. Yêu cầu là đếm view và việc đang chạy của các feature tham gia sau bước huỷ bằng 0, trừ lớp che của scene-flow, điều participant giả không kiểm được. Giữ các test này và thêm cách kiểm thật, ví dụ bước play: rời scene rồi đếm GameObject và việc hẹn giờ còn lại bằng 0"
+  }
+ ]
+}

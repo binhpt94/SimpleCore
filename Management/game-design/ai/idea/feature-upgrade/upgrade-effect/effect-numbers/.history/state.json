@@ -1,33 +1,25 @@
 {
- "hash": "8e92f84a02aa",
+ "hash": "687e3349a36c",
  "items": {
-  "hero-plus-15": {
-   "hash": "124a3a2c5ff6",
-   "text": "Mỗi cấp hero cộng 15% máu tối đa và 15% sát thương của cấp 1\nHero cấp L có máu và sát thương = chỉ số cấp 1 × (1 + 0,15 × (L − 1)). Ví dụ cấp 5 là 160% cấp 1."
+  "numbers-at-owner": {
+   "hash": "a9aba69eeb76",
+   "text": "Nâng cấp không tính chỉ số; mức tăng mỗi cấp do bên giữ chỉ số quyết\nHero: `feature-hero/hero-stats/hero-level-values`. Thành (máu, sức đánh, kĩ năng): `feature-castle/castle-upgrade-effects/upgrade-effect-values`. Đã loại: nâng cấp giữ bảng mức tăng của mọi mục."
   },
-  "hero-speed-3": {
-   "hash": "c185c3dac6db",
-   "text": "Mỗi cấp hero cộng 3% tốc độ đánh của cấp 1, cộng tối đa 60%\nChạm trần ở cấp 21; từ đó lên cấp chỉ còn tăng máu và sát thương."
+  "report-same-frame": {
+   "hash": "14624535c1de",
+   "text": "Mua thành công một cấp thì báo \"mục X lên cấp L\" trong cùng khung hình mua\nBên nhận áp hiệu lực ngay trong khung hình đó, nên người chơi thấy mạnh lên liền."
   },
-  "hero-hp-gain": {
-   "hash": "bac970fad7fc",
-   "text": "Hero đang sống lên cấp thì máu hiện tại tăng thêm đúng phần máu tối đa vừa tăng (15% máu cấp 1)\nVí dụ hero cấp 1 máu tối đa 200, đang còn 80: lên cấp 2 thành tối đa 230, hiện tại 110."
+  "report-right-owner": {
+   "hash": "049e6e249674",
+   "text": "Mục hero báo cho `feature-hero` kèm đúng hero được mua; mục máu, sức đánh, kĩ năng thành báo cho `feature-castle`\nMỗi lần mua chỉ báo cho một bên, một mục."
   },
-  "hero-fallen": {
-   "hash": "f4d7512808d4",
-   "text": "Hero đang gục lên cấp thì chỉ đổi cấp, hồi sinh với 100% máu tối đa theo cấp mới\nThời gian chờ hồi sinh không đổi."
+  "report-each-level": {
+   "hash": "c09a3927880a",
+   "text": "Mua nhiều cấp liên tiếp trong một khung hình thì báo từng cấp một theo thứ tự mua, mỗi lần tăng đúng 1\nKết quả như mua lần lượt ở các khung hình khác nhau (`feature-upgrade/upgrade-purchase/purchase-rules`: mỗi chạm một yêu cầu, xử lí lần lượt)."
   },
-  "castle-hp-150": {
-   "hash": "5409e7020229",
-   "text": "Mỗi cấp máu thành cộng 150 máu tối đa và 150 máu hiện tại\nThành cấp 1 có 1000 máu tối đa; cấp L có 1000 + 150 × (L − 1)."
-  },
-  "castle-attack-20": {
-   "hash": "0dee00860db6",
-   "text": "Mỗi cấp sức đánh thành cộng 20% sát thương đòn tự bắn của cấp 1\nCấp 1 bắn 10 sát thương mỗi 1,0 giây; cấp L bắn 10 × (1 + 0,2 × (L − 1)). Nhịp bắn và tầm không đổi."
-  },
-  "castle-skill-20": {
-   "hash": "03a079c13d8a",
-   "text": "Mỗi cấp kĩ năng thành cộng 20% hiệu lực cấp 1 cho cả ba kĩ năng, hồi chiêu không đổi\nSấm sét: 80 sát thương cộng 16 mỗi cấp. Băng giá: chậm 50% trong 5 giây, thời gian chậm cộng 1 giây mỗi cấp. Cổ vũ: hồi 30% máu tối đa hero, cộng 6 điểm phần trăm mỗi cấp."
+  "report-only-up": {
+   "hash": "6087993375ff",
+   "text": "Cấp được báo luôn lớn hơn cấp trước đúng 1; nâng cấp không bao giờ báo cấp thấp hơn hay báo lại cấp cũ\nKhông có hạ cấp, không có hoàn tiền."
   }
  }
 }

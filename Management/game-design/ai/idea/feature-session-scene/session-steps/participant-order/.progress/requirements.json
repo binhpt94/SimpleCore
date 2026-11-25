@@ -1,0 +1,122 @@
+{
+ "items": {
+  "edge-feature-thu-k-tai-loi": {
+   "state": "done",
+   "note": "gắn test EditMode đã có",
+   "tests": [
+    "SessionSceneLogicTests.WhenAParticipantFailsToLoad_LaterOnesNeverLoad_ThoseReachedCleanUpInReverse_SessionFails",
+    "SessionSceneLogicTests.WhenAParticipantLoadsLongerThanTheLimit_ItIsTold_ToStop_LaterOnesNeverLoad_SessionFails",
+    "SessionSceneLogicTests.WhenAParticipantFailsToLoad_ItsFeatureNameIsReportedForTheLoadingScreen"
+   ],
+   "play": "",
+   "hash": "8b771feb0575",
+   "text": "**Feature thứ k tải lỗi**: không tải feature k+1 trở đi; huỷ feature k (phần đã tải được) rồi k-1 về 1; báo lỗi nêu tên feature k.",
+   "title": "Feature thứ k tải lỗi",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 10:53:48"
+  },
+  "edge-feature-loi-o-buoc-huy": {
+   "state": "done",
+   "note": "gắn test EditMode đã có",
+   "tests": [
+    "SessionSceneLogicTests.WhenOneParticipantFailsToCleanUp_TheOthersStillDo_AndSessionIsDisposed"
+   ],
+   "play": "",
+   "hash": "9041c44bbbde",
+   "text": "**Feature lỗi ở bước huỷ**: ghi lỗi, huỷ tiếp feature đứng trước nó; bước huỷ luôn đi hết danh sách.",
+   "title": "Feature lỗi ở bước huỷ",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 10:53:55"
+  },
+  "edge-yeu-cau-huy-den-khi-scene-dang-tai": {
+   "state": "rejected",
+   "note": "Thiếu thứ tự ngược: cả hai test chỉ có một participant đã tới nên không thấy được huỷ ngược. Thêm ca a và b đã tải, c đang tải thì EndAsync: c không bị bỏ qua, b sau c, a cuối, log đúng dispose c, dispose b, dispose a, và không có load nào sau c",
+   "tests": [
+    "SessionSceneLogicTests.EndingWhileLoading_CancelsTheLoad_LaterOnesNeverLoad_OnlyThoseReachedCleanUp",
+    "SessionSceneLogicTests.EndingWhileLoading_WaitsForAParticipantThatIgnoresTheCancel_AtMostUntilTheLimit"
+   ],
+   "play": "",
+   "hash": "ee1993b51a03",
+   "text": "**Yêu cầu huỷ đến khi scene đang tải**: chờ feature đang tải xong (hoặc quá 10 giây), rồi huỷ các feature đã tải theo thứ tự ngược.",
+   "title": "Yêu cầu huỷ đến khi scene đang tải",
+   "by": "@CodeLead",
+   "at": "2026-11-25 10:55:12"
+  },
+  "edge-nguoi-choi-roi-game-luc-dang-tai": {
+   "state": "done",
+   "note": "FrameLoadTimer chặn mỗi khung tối đa maximumDeltaTime, kiểm khi Play",
+   "tests": [],
+   "play": "Play scene Loading với một participant tải chậm, giữa lúc tải chuyển sang cửa sổ khác hoặc tạm dừng app khoảng 30 giây rồi quay lại: tải tiếp, phiên không thành Failed vì quá 10 giây",
+   "hash": "86f88eb4ee6d",
+   "text": "**Người chơi rời game lúc đang tải**: tải tiếp khi quay lại; thời gian rời game không tính vào 10 giây.",
+   "title": "Người chơi rời game lúc đang tải",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-25 10:54:12"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 10:53:44",
+   "id": "edge-feature-thu-k-tai-loi",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "gắn test EditMode đã có"
+  },
+  {
+   "at": "2026-11-25 10:53:48",
+   "id": "edge-feature-thu-k-tai-loi",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.WhenAParticipantFailsToLoad_LaterOnesNeverLoad_ThoseReachedCleanUpInReverse_SessionFails, SessionSceneLogicTests.WhenAParticipantLoadsLongerThanTheLimit_ItIsTold_ToStop_LaterOnesNeverLoad_SessionFails, SessionSceneLogicTests.WhenAParticipantFailsToLoad_ItsFeatureNameIsReportedForTheLoadingScreen"
+  },
+  {
+   "at": "2026-11-25 10:53:52",
+   "id": "edge-feature-loi-o-buoc-huy",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "gắn test EditMode đã có"
+  },
+  {
+   "at": "2026-11-25 10:53:55",
+   "id": "edge-feature-loi-o-buoc-huy",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.WhenOneParticipantFailsToCleanUp_TheOthersStillDo_AndSessionIsDisposed"
+  },
+  {
+   "at": "2026-11-25 10:53:58",
+   "id": "edge-yeu-cau-huy-den-khi-scene-dang-tai",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "gắn test EditMode đã có"
+  },
+  {
+   "at": "2026-11-25 10:54:01",
+   "id": "edge-yeu-cau-huy-den-khi-scene-dang-tai",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.EndingWhileLoading_CancelsTheLoad_LaterOnesNeverLoad_OnlyThoseReachedCleanUp, SessionSceneLogicTests.EndingWhileLoading_WaitsForAParticipantThatIgnoresTheCancel_AtMostUntilTheLimit"
+  },
+  {
+   "at": "2026-11-25 10:54:08",
+   "id": "edge-nguoi-choi-roi-game-luc-dang-tai",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "FrameLoadTimer chặn mỗi khung tối đa maximumDeltaTime, kiểm khi Play"
+  },
+  {
+   "at": "2026-11-25 10:54:12",
+   "id": "edge-nguoi-choi-roi-game-luc-dang-tai",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "Play scene Loading với một participant tải chậm, giữa lúc tải chuyển sang cửa sổ khác hoặc tạm dừng app khoảng 30 giây rồi quay lại: tải tiếp, phiên không thành Failed vì quá 10 giây"
+  },
+  {
+   "at": "2026-11-25 10:55:12",
+   "id": "edge-yeu-cau-huy-den-khi-scene-dang-tai",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Thiếu thứ tự ngược: cả hai test chỉ có một participant đã tới nên không thấy được huỷ ngược. Thêm ca a và b đã tải, c đang tải thì EndAsync: c không bị bỏ qua, b sau c, a cuối, log đúng dispose c, dispose b, dispose a, và không có load nào sau c"
+  }
+ ]
+}

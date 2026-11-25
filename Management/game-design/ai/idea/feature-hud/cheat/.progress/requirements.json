@@ -1,0 +1,59 @@
+{
+ "items": {
+  "mid-battle": {
+   "state": "done",
+   "note": "gắn test có sẵn của cheat mid-battle",
+   "tests": [
+    "HudSessionTests.CheatButtonShowsTheWholeMidBattleState",
+    "HudSessionTests.CheatStartsTheWaveBeforeSettingHealthAndCooldowns",
+    "HudSessionTests.CheatReportsSkillsTheBattleDoesNotHaveInsteadOfSettingThem",
+    "HudSessionTests.CheatWarnsAboutSkippedPartsWhenPressed",
+    "HudSessionTests.CheatBringsCoinsDownThroughSpendingWhenThereAreMore"
+   ],
+   "play": "",
+   "hash": "9d31746133cb",
+   "text": "Đợt 7 vừa bắt đầu, thành còn 30% máu, Băng giá đang hồi\nÉp: máu thành 300/1000, tiền 245, đợt 7 vừa bắt đầu (thông báo \"Đợt 7\" đang hiện); Sấm sét sẵn sàng, Băng giá đang hồi còn 12 trên 35 giây, Cổ vũ sẵn sàng. Có đủ mọi thành phần của HUD: nút tạm dừng, ô tiền, thanh máu kèm số, ô đợt, thông báo đợt, 3 nút kĩ năng ở cả hai trạng thái sẵn sàng và đang hồi.",
+   "title": "Đợt 7 vừa bắt đầu, thành còn 30% máu, Băng giá đang hồi",
+   "by": "Hud",
+   "at": "2026-11-25 10:54:57"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HudSessionTests.CheatDoesNothingOutsideARunningBattle",
+    "HudSessionTests.CheatStartsTheWaveBeforeSettingHealthAndCooldowns",
+    "HudSessionTests.CheatButtonShowsTheWholeMidBattleState"
+   ],
+   "play": "",
+   "hash": "68183bb3c0da",
+   "text": "## Làm gì\n- Ở bản dev, chọn state `mid-battle` thì game dựng trận với máu thành, tiền, đợt và hồi chiêu như ép, không cần chơi tới.\n- Giá trị ép đi qua đúng đường của game: máu và hồi chiêu qua `feature-castle`, tiền qua `feature-wallet`, đợt qua `feature-wave`; HUD chỉ hiện như thường (`feature-hud/hud-status/status-spec`, `feature-hud/hud-skill-button/skill-button-spec`).\n- Code cheat nằm trong thư mục `Hud`, sau cờ dev; không lọt vào bản phát hành.",
+   "title": "Số và việc của node (Làm gì)",
+   "by": "Hud",
+   "at": "2026-11-25 10:55:01"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 10:54:33",
+   "id": "mid-battle",
+   "state": "doing",
+   "by": "Hud",
+   "note": "gắn test có sẵn của cheat mid-battle"
+  },
+  {
+   "at": "2026-11-25 10:54:57",
+   "id": "mid-battle",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSessionTests.CheatButtonShowsTheWholeMidBattleState, HudSessionTests.CheatStartsTheWaveBeforeSettingHealthAndCooldowns, HudSessionTests.CheatReportsSkillsTheBattleDoesNotHaveInsteadOfSettingThem, HudSessionTests.CheatWarnsAboutSkippedPartsWhenPressed, HudSessionTests.CheatBringsCoinsDownThroughSpendingWhenThereAreMore"
+  },
+  {
+   "at": "2026-11-25 10:55:01",
+   "id": "params",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSessionTests.CheatDoesNothingOutsideARunningBattle, HudSessionTests.CheatStartsTheWaveBeforeSettingHealthAndCooldowns, HudSessionTests.CheatButtonShowsTheWholeMidBattleState"
+  }
+ ]
+}

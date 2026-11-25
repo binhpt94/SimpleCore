@@ -1,29 +1,25 @@
 {
- "hash": "d5cc2169a782",
+ "hash": "f36980378e51",
  "items": {
-  "kill-table": {
-   "hash": "2cd081cc76c9",
-   "text": "Tiền hạ quái: Lính 5, Sói 4, Cung thủ quái 6, Khổng lồ 15, Trùm 100 tiền\nMức tiền không nhân theo số đợt; đợt sau cho nhiều tiền hơn vì có nhiều quái hơn. Mức tiền là số liệu của từng loại quái trong `feature-enemy`, ví chỉ cộng."
+  "amounts-from-caller": {
+   "hash": "a5bc6afffc76",
+   "text": "Ví không giữ bảng tiền hạ quái hay công thức thưởng dọn đợt; mức tiền do bên báo đưa vào\nTiền hạ từng loại quái ở `feature-enemy/enemy-reward/reward-values`, thưởng dọn đợt ở `feature-wave/wave-clear/clear-rules`. Đã loại: ví tra bảng theo loại quái hay tự tính thưởng theo số đợt."
   },
-  "kill-once": {
-   "hash": "4aea7cd2226c",
-   "text": "Mỗi con quái cho tiền đúng một lần, lúc máu của nó về 0\nNhiều đòn trúng cùng lúc làm nó gục vẫn chỉ một lần cộng. Ai ra đòn cuối (hero, đòn tự bắn, kĩ năng thành) cũng như nhau."
-  },
-  "kill-only-defeat": {
-   "hash": "c93d5e2f1e8e",
-   "text": "Quái biến mất mà không bị hạ thì cho 0 tiền\nVí dụ quái bị xoá khi lượt kết thúc."
-  },
-  "wave-formula": {
-   "hash": "d70fdf2f898f",
-   "text": "Thưởng dọn đợt = 20 + 5 × số đợt vừa dọn, tính bằng tiền\nĐợt 1 được 25, đợt 2 được 30, đợt 10 được 70. Đợt đánh số từ 1."
-  },
-  "wave-once": {
-   "hash": "01ba736b0605",
-   "text": "Mỗi đợt cho thưởng đúng một lần, lúc con quái cuối cùng của đợt gục\nTiền của con quái cuối cộng trước, rồi tới thưởng dọn đợt."
+  "add-once-per-call": {
+   "hash": "054e913a18bf",
+   "text": "Mỗi lần bên báo gọi cộng tiền là đúng một lần cộng, đúng bằng số được đưa\nVí không gộp, không bỏ, không nhân. Việc mỗi quái hay mỗi đợt chỉ báo một lần là của bên báo."
   },
   "income-same-frame": {
-   "hash": "23c3bafbab83",
-   "text": "Tiền vào số dư trong cùng khung hình quái gục hoặc đợt được dọn\nKhông có độ trễ, không có tiền rơi phải nhặt."
+   "hash": "d2966a7704dd",
+   "text": "Tiền vào số dư trong cùng khung hình ví được gọi cộng\nKhông có độ trễ, không có tiền rơi phải nhặt. Số dư mới được báo ngay theo `feature-wallet/balance-spend/wallet-rules`."
+  },
+  "add-in-call-order": {
+   "hash": "bb2bc97a5758",
+   "text": "Nhiều lần cộng trong cùng khung hình được cộng lần lượt theo thứ tự gọi tới\nVí dụ con quái cuối của đợt gục: tiền con quái tới trước, thưởng dọn đợt tới sau, theo thứ tự của `feature-wave/wave-clear/clear-rules`."
+  },
+  "ignore-after-run-end": {
+   "hash": "fccaae610a4a",
+   "text": "Lời gọi cộng tới sau khi lượt đã kết thúc thì ví bỏ qua, số dư giữ nguyên\nQuái gục cùng khung hình thành bị phá không được cộng, theo `feature-enemy/enemy-reward/reward-values` (thành bị phá xử lí trước). Tiền của lượt cũ tới muộn cũng không vào lượt mới (`feature-run/run-start/start-values`)."
   }
  }
 }

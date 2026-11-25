@@ -1,0 +1,60 @@
+{
+ "items": {
+  "new-record": {
+   "state": "done",
+   "note": "gắn test có sẵn cho cheat đã có",
+   "tests": [
+    "LosePopupTests.NewRecordCheatOpensThePopupWithForcedValuesAtOnce"
+   ],
+   "play": "",
+   "hash": "13c640dca109",
+   "text": "Popup thua đang mở, lượt vừa phá kỉ lục\nÉp: điểm 16, kỉ lục 16, cờ kỉ lục mới bật; trận đứng yên phía sau. Có đủ mọi thành phần của popup: tiêu đề, điểm, kỉ lục, dòng \"Kỉ lục mới!\", nút \"Chơi lại\", nút \"Về màn bắt đầu\".",
+   "title": "Popup thua đang mở, lượt vừa phá kỉ lục",
+   "by": "PopupLose",
+   "at": "2026-11-25 10:55:11"
+  },
+  "params": {
+   "state": "done",
+   "note": "gắn test có sẵn: cheat đi qua đúng đường của popup",
+   "tests": [
+    "LosePopupTests.NewRecordCheatOpensThePopupWithForcedValuesAtOnce"
+   ],
+   "play": "",
+   "hash": "ac4a0fab0231",
+   "text": "## Làm gì\n- Ở bản dev, chọn state `new-record` thì game dựng ngay popup thua với các giá trị ép, không cần chơi tới lúc thành bị phá.\n- Giá trị ép đi qua đúng đường của game: điểm, kỉ lục, cờ kỉ lục mới như `feature-run/run-score/score-rules` sẽ chốt; popup đọc chúng như bình thường (`feature-popup-lose/lose-result/result-spec`).\n- Code cheat nằm trong thư mục `PopupLose`, sau cờ dev; không lọt vào bản phát hành.",
+   "title": "Số và việc của node (Làm gì)",
+   "by": "PopupLose",
+   "at": "2026-11-25 10:55:17"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 10:55:07",
+   "id": "new-record",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "gắn test có sẵn cho cheat đã có"
+  },
+  {
+   "at": "2026-11-25 10:55:11",
+   "id": "new-record",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.NewRecordCheatOpensThePopupWithForcedValuesAtOnce"
+  },
+  {
+   "at": "2026-11-25 10:55:14",
+   "id": "params",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "gắn test có sẵn: cheat đi qua đúng đường của popup"
+  },
+  {
+   "at": "2026-11-25 10:55:17",
+   "id": "params",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.NewRecordCheatOpensThePopupWithForcedValuesAtOnce"
+  }
+ ]
+}

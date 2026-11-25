@@ -1,0 +1,302 @@
+{
+ "items": {
+  "stack-max": {
+   "state": "done",
+   "note": "gắn test EditMode đã có của PopupService",
+   "tests": [
+    "PopupServiceTests.Show_FourthPopup_IsRefusedWithAnErrorNamingTheId_AndTheThreeStay"
+   ],
+   "play": "",
+   "hash": "660a745e6c30",
+   "text": "Tối đa 3 popup chồng cùng lúc; mở cái thứ 4 thì bị từ chối và ghi lỗi nêu id\nGame hiện chỉ mở một popup mỗi lúc (popup tạm dừng hoặc popup thua; xác nhận bỏ lượt nằm trong popup tạm dừng); dư chỗ cho popup sau này. Đã loại: không giới hạn (lỗi mở lặp không bị phát hiện).",
+   "title": "Tối đa 3 popup chồng cùng lúc; mở cái thứ 4 thì bị từ chối và ghi lỗi nêu id",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:54:23"
+  },
+  "edge-mo-popup-thu-4": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "PopupServiceTests.Show_FourthPopup_IsRefusedWithAnErrorNamingTheId_AndTheThreeStay"
+   ],
+   "play": "",
+   "hash": "f23452313fae",
+   "text": "**Mở popup thứ 4**: từ chối, ghi lỗi nêu id; ba popup đang mở giữ nguyên.",
+   "title": "Mở popup thứ 4",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:54:26"
+  },
+  "same-id-once": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "PopupServiceTests.Show_IdThatIsAlreadyOpen_IsRefusedWithAWarning_AndDoesNotComeToTheTop"
+   ],
+   "play": "",
+   "hash": "87d95b853a64",
+   "text": "Một id popup chỉ mở một bản mỗi lúc; xin mở id đang mở thì bị từ chối, popup đang mở giữ nguyên\nBấm nút tạm dừng hai lần nhanh không ra hai popup.",
+   "title": "Một id popup chỉ mở một bản mỗi lúc; xin mở id đang mở thì bị từ chối, popup đang mở giữ nguyên",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:54:41"
+  },
+  "edge-mo-id-dang-mo": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "PopupServiceTests.Show_IdThatIsAlreadyOpen_IsRefusedWithAWarning_AndDoesNotComeToTheTop"
+   ],
+   "play": "",
+   "hash": "73b189d0ce76",
+   "text": "**Mở id đang mở**: từ chối, ghi cảnh báo; không đưa popup đó lên trên cùng.",
+   "title": "Mở id đang mở",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:54:42"
+  },
+  "input-instant": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "PopupServiceTests.Show_OpensThePopupOnTopAtOnce",
+    "PopupServiceTests.Close_TopPopup_GivesTopBackToThePopupBelow"
+   ],
+   "play": "",
+   "hash": "c32a7410b1d3",
+   "text": "Popup hiện và đóng tức thì; popup trên cùng nhận bấm ngay khung hình nó hiện",
+   "title": "Popup hiện và đóng tức thì; popup trên cùng nhận bấm ngay khung hình nó hiện",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:54:43"
+  },
+  "edge-dong-popup-khong-o-tren-cung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "PopupServiceTests.Close_PopupInTheMiddle_LeavesTheTopOneOnTop"
+   ],
+   "play": "",
+   "hash": "e43ebed5aba8",
+   "text": "**Đóng popup không ở trên cùng**: chỉ popup đó và nền của nó mất; popup phía trên vẫn ở trên cùng và vẫn nhận bấm.",
+   "title": "Đóng popup không ở trên cùng",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:54:44"
+  },
+  "back-key-nothing": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "PopupServiceTests.Show_WhileAnotherIsOpen_StacksTheNewOneOnTop",
+    "PopupServiceTests.Close_TopPopup_GivesTopBackToThePopupBelow"
+   ],
+   "play": "",
+   "hash": "70553b2fa589",
+   "text": "Khi có popup mở, nút quay lại của điện thoại chỉ chuyển cho feature của popup trên cùng; dịch vụ không tự đóng popup và không chuyển xuống phần bên dưới\nFeature của popup tự quyết nút quay lại làm gì (ví dụ `feature-popup-pause/pause-popup/pause-popup-spec`); không khai thì nút không có tác dụng. Popup vẫn chỉ đóng khi feature gọi yêu cầu (`feature-popup/popup-request`).",
+   "title": "Khi có popup mở, nút quay lại của điện thoại chỉ chuyển cho feature của popup trên cùng; dịch vụ không tự đóng popup và không chuyển xuống phần bên dưới",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:54:45"
+  },
+  "edge-bam-hai-nut-cua-popup-tren-cung-trong": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "PopupCheatTests.SamplePopup_CloseButton_ClosesItLikeAnyCaller_AndASecondClickIsIgnored",
+    "PopupServiceTests.Close_ClosedUnknownOrDefaultHandle_IsIgnored"
+   ],
+   "play": "",
+   "hash": "6fe3a2c23a17",
+   "text": "**Bấm hai nút của popup trên cùng trong cùng khung hình (hai ngón)**: chỉ lần bấm đầu được chuyển cho feature gọi; feature gọi chịu trách nhiệm bỏ qua bấm sau khi đã xử lí (xem `feature-popup/popup-request/request-rules`).",
+   "title": "Bấm hai nút của popup trên cùng trong cùng khung hình (hai ngón)",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:54:49"
+  },
+  "edge-nguoi-choi-roi-game-luc-co-popup": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Bật cheat sample-popup rồi Play, rời app rồi quay lại: popup mẫu và nền che vẫn y như cũ, nút Đóng vẫn đóng được",
+   "hash": "7d086ae89ba6",
+   "text": "**Người chơi rời game lúc có popup**: quay lại thì chồng popup y như cũ.",
+   "title": "Người chơi rời game lúc có popup",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:54:57"
+  },
+  "backdrop-dim": {
+   "state": "doing",
+   "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree",
+   "tests": [],
+   "play": "",
+   "hash": "336d33fe10ee",
+   "text": "Nền che làm tối phần bên dưới 60% (dự kiến); mỗi popup một nền, nền chồng thì tối thêm\nKhi có popup chồng lên, popup bên dưới cũng bị tối đi, người chơi biết đang ở popup nào.",
+   "title": "Nền che làm tối phần bên dưới 60% (dự kiến); mỗi popup một nền, nền chồng thì tối thêm",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:55:17"
+  },
+  "backdrop-tap-nothing": {
+   "state": "doing",
+   "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree",
+   "tests": [],
+   "play": "",
+   "hash": "8b326f0b4c54",
+   "text": "Bấm vào nền che không làm gì: không đóng popup, không xuống phần bên dưới",
+   "title": "Bấm vào nền che không làm gì: không đóng popup, không xuống phần bên dưới",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:55:18"
+  },
+  "edge-khong-co-popup": {
+   "state": "doing",
+   "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree",
+   "tests": [],
+   "play": "",
+   "hash": "47d97d7bc32e",
+   "text": "**Không có popup**: lớp popup không chặn bấm, không làm tối gì.",
+   "title": "Không có popup",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:55:19"
+  },
+  "params": {
+   "state": "doing",
+   "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree",
+   "tests": [],
+   "play": "",
+   "hash": "c265d454211e",
+   "text": "## Làm gì\n- Lớp popup của scene Game giữ một chồng popup, từ 0 tới 3 cái.\n- Mở popup: kiểm id chưa mở và chồng chưa đủ 3; đặt nền che rồi popup lên trên cùng; popup cũ trên cùng thôi nhận bấm.\n- Đóng popup: bỏ popup và nền che của nó; popup ngay dưới (nếu có) nhận bấm lại; không còn popup thì lớp popup không chặn gì.\n- Khi có popup mở: HUD, màn chơi và các popup không ở trên cùng không nhận bấm. Nút quay lại của điện thoại chỉ được chuyển cho feature của popup trên cùng.\n\nCác tình huống trong game hiện tại:\n\n| Tình huống | Chồng popup (dưới → trên) | Nhận bấm |\n|---|---|---|\n| Đang đánh | (trống) | HUD, màn chơi |\n| Tạm dừng (cả bước hỏi xác nhận bỏ lượt) | popup tạm dừng | popup tạm dừng |\n| Thua | popup thua | popup thua |\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số popup chồng tối đa | 3 | popup | Game hiện cần 1; dư cho popup sau này, quá 3 là dấu hiệu lỗi |\n| Số bản mỗi id cùng lúc | 1 | bản | Chặn mở trùng do bấm nhanh |\n| Độ tối của một nền che | 60 (dự kiến) | % | Đủ thấy đang có popup mà vẫn nhận ra trận phía sau |\n| Thời gian hiện, đóng popup | 0 | giây | Tức thì, nhận bấm ngay |\n| Tác dụng khi bấm nền che | không | — | Tránh bấm nhầm mất popup thua |\n| Tác dụng nút quay lại của điện thoại khi có popup | chuyển cho feature của popup trên cùng; dịch vụ không tự làm gì | — | Mỗi popup tự quyết (popup tạm dừng: như \"Tiếp tục\"/\"Không\"; popup thua: không tác dụng) |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Hiệu ứng mở popup | Không, hiện tức thì | Phóng to từ 90% lên 100% trong 0,15 giây (dự kiến) | Như PROTOTYPE, chỉnh theo art |\n| Hiệu ứng đóng popup | Không, mất tức thì | Mất tức thì | Thu nhỏ và mờ 0,1 giây (dự kiến) |\n| Nhận bấm trong lúc hiệu ứng mở | Không có hiệu ứng | Chặn bấm tới khi hiệu ứng xong | Như PROTOTYPE |\n| Độ tối nền che | 60% (dự kiến) | 60% | Chỉnh theo art |\n| Số popup chồng tối đa | 3 | 3 | 3 |\n| Nút quay lại của điện thoại | Chuyển cho popup trên cùng | Chuyển cho popup trên cùng | Chuyển cho popup trên cùng |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:55:21"
+  },
+  "runs-while-frozen": {
+   "state": "doing",
+   "note": "viết test mới với Time.timeScale bằng 0, chờ gỡ chặn worktree",
+   "tests": [],
+   "play": "",
+   "hash": "1acef0975a2d",
+   "text": "Popup hiện, nhận bấm và đóng được cả khi trận đang đứng yên\nPopup tạm dừng và popup thua đều mở lúc trận đã dừng.",
+   "title": "Popup hiện, nhận bấm và đóng được cả khi trận đang đứng yên",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:55:23"
+  },
+  "edge-tran-dung-yen-tam-dung-thua": {
+   "state": "doing",
+   "note": "viết test mới với Time.timeScale bằng 0, chờ gỡ chặn worktree",
+   "tests": [],
+   "play": "",
+   "hash": "534ba32d8680",
+   "text": "**Trận đứng yên (tạm dừng, thua)**: popup và hiệu ứng của popup không đứng theo; popup không dựa vào đồng hồ của trận.",
+   "title": "Trận đứng yên (tạm dừng, thua)",
+   "by": "_Services/Popup",
+   "at": "2026-11-25 10:55:24"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 10:53:47",
+   "id": "stack-max",
+   "state": "doing",
+   "by": "_Services/Popup",
+   "note": "gắn test EditMode đã có của PopupService"
+  },
+  {
+   "at": "2026-11-25 10:54:23",
+   "id": "stack-max",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupServiceTests.Show_FourthPopup_IsRefusedWithAnErrorNamingTheId_AndTheThreeStay"
+  },
+  {
+   "at": "2026-11-25 10:54:26",
+   "id": "edge-mo-popup-thu-4",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupServiceTests.Show_FourthPopup_IsRefusedWithAnErrorNamingTheId_AndTheThreeStay"
+  },
+  {
+   "at": "2026-11-25 10:54:41",
+   "id": "same-id-once",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupServiceTests.Show_IdThatIsAlreadyOpen_IsRefusedWithAWarning_AndDoesNotComeToTheTop"
+  },
+  {
+   "at": "2026-11-25 10:54:42",
+   "id": "edge-mo-id-dang-mo",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupServiceTests.Show_IdThatIsAlreadyOpen_IsRefusedWithAWarning_AndDoesNotComeToTheTop"
+  },
+  {
+   "at": "2026-11-25 10:54:43",
+   "id": "input-instant",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupServiceTests.Show_OpensThePopupOnTopAtOnce, PopupServiceTests.Close_TopPopup_GivesTopBackToThePopupBelow"
+  },
+  {
+   "at": "2026-11-25 10:54:44",
+   "id": "edge-dong-popup-khong-o-tren-cung",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupServiceTests.Close_PopupInTheMiddle_LeavesTheTopOneOnTop"
+  },
+  {
+   "at": "2026-11-25 10:54:45",
+   "id": "back-key-nothing",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupServiceTests.Show_WhileAnotherIsOpen_StacksTheNewOneOnTop, PopupServiceTests.Close_TopPopup_GivesTopBackToThePopupBelow"
+  },
+  {
+   "at": "2026-11-25 10:54:49",
+   "id": "edge-bam-hai-nut-cua-popup-tren-cung-trong",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "PopupCheatTests.SamplePopup_CloseButton_ClosesItLikeAnyCaller_AndASecondClickIsIgnored, PopupServiceTests.Close_ClosedUnknownOrDefaultHandle_IsIgnored"
+  },
+  {
+   "at": "2026-11-25 10:54:57",
+   "id": "edge-nguoi-choi-roi-game-luc-co-popup",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "Bật cheat sample-popup rồi Play, rời app rồi quay lại: popup mẫu và nền che vẫn y như cũ, nút Đóng vẫn đóng được"
+  },
+  {
+   "at": "2026-11-25 10:55:17",
+   "id": "backdrop-dim",
+   "state": "doing",
+   "by": "_Services/Popup",
+   "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree"
+  },
+  {
+   "at": "2026-11-25 10:55:18",
+   "id": "backdrop-tap-nothing",
+   "state": "doing",
+   "by": "_Services/Popup",
+   "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree"
+  },
+  {
+   "at": "2026-11-25 10:55:19",
+   "id": "edge-khong-co-popup",
+   "state": "doing",
+   "by": "_Services/Popup",
+   "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree"
+  },
+  {
+   "at": "2026-11-25 10:55:21",
+   "id": "params",
+   "state": "doing",
+   "by": "_Services/Popup",
+   "note": "viết test mới PopupLayerAssetTests, chờ gỡ chặn worktree"
+  },
+  {
+   "at": "2026-11-25 10:55:23",
+   "id": "runs-while-frozen",
+   "state": "doing",
+   "by": "_Services/Popup",
+   "note": "viết test mới với Time.timeScale bằng 0, chờ gỡ chặn worktree"
+  },
+  {
+   "at": "2026-11-25 10:55:24",
+   "id": "edge-tran-dung-yen-tam-dung-thua",
+   "state": "doing",
+   "by": "_Services/Popup",
+   "note": "viết test mới với Time.timeScale bằng 0, chờ gỡ chặn worktree"
+  }
+ ]
+}

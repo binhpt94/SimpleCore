@@ -1,0 +1,383 @@
+{
+ "items": {
+  "hero-price": {
+   "state": "done",
+   "note": "gan test co san",
+   "tests": [
+    "UpgradeShopTests.Hero_price_follows_the_design_table",
+    "UpgradeShopTests.Start_prices_are_30_for_heroes_40_for_castle_health_and_attack_60_for_skills"
+   ],
+   "play": "",
+   "hash": "007accb1aa44",
+   "text": "Giá lên cấp hero = 30 × 1,35^(cấp hiện tại − 1) tiền, làm tròn lên\nCấp 1→2 giá 30, 2→3 giá 41, 3→4 giá 55, 5→6 giá 100. Mỗi hero tính giá riêng theo cấp của chính nó.",
+   "title": "Giá lên cấp hero = 30 × 1,35^(cấp hiện tại − 1) tiền, làm tròn lên",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:55:06"
+  },
+  "castle-hp-attack-price": {
+   "state": "done",
+   "note": "gan test co san",
+   "tests": [
+    "UpgradeShopTests.Castle_health_and_attack_price_follows_the_design_table",
+    "UpgradeShopTests.Each_item_has_its_own_price_by_its_own_level"
+   ],
+   "play": "",
+   "hash": "9bc5ce6678e5",
+   "text": "Giá máu thành và sức đánh thành = 40 × 1,4^(cấp hiện tại − 1) tiền, làm tròn lên\nCấp 1→2 giá 40, 2→3 giá 56, 3→4 giá 79, 5→6 giá 154. Hai mục tính giá riêng.",
+   "title": "Giá máu thành và sức đánh thành = 40 × 1,4^(cấp hiện tại − 1) tiền, làm tròn lên",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:55:08"
+  },
+  "castle-skill-price": {
+   "state": "done",
+   "note": "gan test co san",
+   "tests": [
+    "UpgradeShopTests.Castle_skills_price_follows_the_design_table"
+   ],
+   "play": "",
+   "hash": "202456ae0a3f",
+   "text": "Giá kĩ năng thành = 60 × 1,5^(cấp hiện tại − 1) tiền, làm tròn lên\nCấp 1→2 giá 60, 2→3 giá 90, 3→4 giá 135, 5→6 giá 304.",
+   "title": "Giá kĩ năng thành = 60 × 1,5^(cấp hiện tại − 1) tiền, làm tròn lên",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:55:10"
+  },
+  "buy-sequence": {
+   "state": "done",
+   "note": "gan test co san",
+   "tests": [
+    "UpgradeShopTests.Two_fast_taps_with_coins_for_one_buy_once_and_refuse_the_second",
+    "UpgradeShopTests.Buying_pays_the_price_raises_the_level_and_shows_the_next_price"
+   ],
+   "play": "",
+   "hash": "9d83f361d7f9",
+   "text": "Mỗi chạm là một yêu cầu mua đúng một cấp, xử lí lần lượt; yêu cầu sau dùng số dư và giá mới\nBấm hai lần rất nhanh khi chỉ đủ tiền một lần: lần đầu mua được, lần sau bị từ chối.",
+   "title": "Mỗi chạm là một yêu cầu mua đúng một cấp, xử lí lần lượt; yêu cầu sau dùng số dư và giá mới",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:55:15"
+  },
+  "edge-bam-mua-hai-lan-rat-nhanh-chi-du": {
+   "state": "done",
+   "note": "gan test co san",
+   "tests": [
+    "UpgradeShopTests.Two_fast_taps_with_coins_for_one_buy_once_and_refuse_the_second"
+   ],
+   "play": "",
+   "hash": "3b9b32519c6c",
+   "text": "**Bấm mua hai lần rất nhanh, chỉ đủ tiền một lần**: hai yêu cầu xử lí lần lượt; lần đầu thành công, lần sau xin ví trừ giá mới (cao hơn) với số dư đã giảm, ví trả \"không đủ\", không đổi gì.",
+   "title": "Bấm mua hai lần rất nhanh, chỉ đủ tiền một lần",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:55:17"
+  },
+  "edge-so-du-dung-bang-gia": {
+   "state": "done",
+   "note": "gan test co san",
+   "tests": [
+    "UpgradeShopTests.Exactly_enough_coins_buys_and_leaves_zero"
+   ],
+   "play": "",
+   "hash": "586568981b54",
+   "text": "**Số dư đúng bằng giá**: mua được, số dư về 0.",
+   "title": "Số dư đúng bằng giá",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:55:19"
+  },
+  "edge-hero-dang-guc": {
+   "state": "done",
+   "note": "gan test co san",
+   "tests": [
+    "UpgradeShopTests.Buying_a_hero_level_tells_the_hero_in_that_slot_at_once"
+   ],
+   "play": "",
+   "hash": "e1aefb1f7837",
+   "text": "**Hero đang gục**: mua được như thường; chỉ cấp đổi (`effect-numbers`).",
+   "title": "Hero đang gục",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:55:25"
+  },
+  "edge-thua-dung-luc-dang-mua": {
+   "state": "done",
+   "note": "gan test co san",
+   "tests": [
+    "UpgradeShopTests.After_the_castle_falls_buying_is_refused"
+   ],
+   "play": "",
+   "hash": "af29cdb5a419",
+   "text": "**Thua đúng lúc đang mua**: từ khung hình thành về 0 máu, lượt đã kết thúc, mọi yêu cầu mua sau đó bị từ chối. Yêu cầu tới trước khung hình đó đã xử lí xong; mua máu thành không cứu được thành đã về 0 máu.",
+   "title": "Thua đúng lúc đang mua",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:55:26"
+  },
+  "edge-dang-tam-dung": {
+   "state": "done",
+   "note": "gan test co san",
+   "tests": [
+    "UpgradeShopTests.Buying_while_paused_is_refused_even_with_enough_coins"
+   ],
+   "play": "",
+   "hash": "e8458960f7bc",
+   "text": "**Đang tạm dừng**: từ chối, kể cả khi đủ tiền; thanh nâng cấp hiện mọi nút ở trạng thái không mua được.",
+   "title": "Đang tạm dừng",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:55:28"
+  },
+  "edge-gia-rat-lon": {
+   "state": "doing",
+   "note": "them ca hero cap 30 = 180635, cho go chan worktree",
+   "tests": [
+    "UpgradeShopTests.A_huge_level_price_stays_a_whole_number_without_overflow"
+   ],
+   "play": "",
+   "hash": "2880a4169e2a",
+   "text": "**Giá rất lớn** (ví dụ hero cấp 30 lên 31 giá khoảng 181.000 tiền): giá vẫn là số nguyên; cách rút gọn khi hiển thị thuộc `feature-hud-upgrade/button-state/button-display`.",
+   "title": "Giá rất lớn",
+   "by": "Upgrade",
+   "at": "2026-11-25 11:03:20"
+  },
+  "buy-when": {
+   "state": "doing",
+   "note": "test moi da soan, cho go chan worktree",
+   "tests": [],
+   "play": "",
+   "hash": "a2c44682ba76",
+   "text": "Mua được khi trận đang chạy, kể cả lúc nghỉ giữa đợt; không mua được khi tạm dừng hoặc lượt đã kết thúc\nLượt kết thúc là từ khung hình thành về 0 máu.",
+   "title": "Mua được khi trận đang chạy, kể cả lúc nghỉ giữa đợt; không mua được khi tạm dừng hoặc lượt đã kết thúc",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:56:21"
+  },
+  "no-cap-no-refund": {
+   "state": "doing",
+   "note": "test moi da soan, cho go chan worktree",
+   "tests": [],
+   "play": "",
+   "hash": "d5a55bc4c6a2",
+   "text": "Mục nào cũng mua tiếp được không giới hạn cấp, và cấp đã mua hoàn lại 0 tiền\nKhông bán lại. Mua thành công thì cấp và giá mới được báo ngay trong khung hình đó.",
+   "title": "Mục nào cũng mua tiếp được không giới hạn cấp, và cấp đã mua hoàn lại 0 tiền",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:56:22"
+  },
+  "edge-luc-nghi-giua-hai-dot": {
+   "state": "doing",
+   "note": "test moi da soan, cho go chan worktree",
+   "tests": [],
+   "play": "",
+   "hash": "820e3bafc769",
+   "text": "**Lúc nghỉ giữa hai đợt**: mua được.",
+   "title": "Lúc nghỉ giữa hai đợt",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:56:23"
+  },
+  "edge-tien-vao-cung-khung-hinh-voi-yeu-cau": {
+   "state": "doing",
+   "note": "test moi da soan, cho go chan worktree",
+   "tests": [],
+   "play": "",
+   "hash": "e3aeb737627d",
+   "text": "**Tiền vào cùng khung hình với yêu cầu mua**: theo thứ tự ví nhận; không bao giờ trừ khi chưa đủ.",
+   "title": "Tiền vào cùng khung hình với yêu cầu mua",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:56:24"
+  },
+  "params": {
+   "state": "doing",
+   "note": "test moi da soan, cho go chan worktree",
+   "tests": [],
+   "play": "",
+   "hash": "360b3e3e6e22",
+   "text": "## Làm gì\n- Mỗi mục (`feature-upgrade/upgrade-list/item-set`) có giá cấp sau tính từ cấp hiện tại L theo công thức của loại mục.\n- Nhận một yêu cầu mua (một chạm từ `feature-hud-upgrade`) cho một mục:\n  1. Trận không chạy (đang tạm dừng, hoặc lượt đã kết thúc): từ chối, không đổi gì.\n  2. Xin ví trừ giá cấp sau (`feature-wallet/balance-spend/wallet-rules`).\n  3. Ví trả \"không đủ\": từ chối, không đổi gì.\n  4. Ví trả \"được\": mục lên L + 1, báo bên giữ chỉ số (`feature-upgrade/upgrade-effect/effect-numbers`), tính giá cấp sau mới.\n- Xử lí yêu cầu lần lượt theo thứ tự tới; yêu cầu sau luôn thấy số dư và giá đã đổi của yêu cầu trước.\n- Đưa cho thanh nâng cấp, với mỗi mục: cấp hiện tại, giá cấp sau, mua được hay không. Gửi lại cho mọi mục mỗi khi số dư đổi, một cấp đổi, hoặc trạng thái tạm dừng/kết thúc đổi.\n- **Mua được** = trận đang chạy (không tạm dừng, chưa kết thúc) và số dư >= giá cấp sau.\n\n## Thông số\nCông thức (giá trị dự kiến; nằm trong asset cấu hình của `feature-balance`, không viết cứng):\n\n| Mục | Giá cấp L → L+1 | Lí do |\n|---|---|---|\n| Cấp hero (mỗi hero riêng) | làm tròn lên 30 × 1,35^(L − 1) | Rẻ nhất, tăng chậm nhất: hero là trọng tâm |\n| Máu thành | làm tròn lên 40 × 1,4^(L − 1) | Đắt hơn hero một chút |\n| Sức đánh thành | làm tròn lên 40 × 1,4^(L − 1) | Cùng giá máu để chọn theo nhu cầu, không theo giá |\n| Kĩ năng thành | làm tròn lên 60 × 1,5^(L − 1) | Một cấp tăng cả ba kĩ năng nên đắt và tăng nhanh nhất |\n\nBảng giá (tiền):\n\n| Lên cấp | Hero | Máu / Sức đánh thành | Kĩ năng thành |\n|---|---|---|---|\n| 1 → 2 | 30 | 40 | 60 |\n| 2 → 3 | 41 | 56 | 90 |\n| 3 → 4 | 55 | 79 | 135 |\n| 4 → 5 | 74 | 110 | 203 |\n| 5 → 6 | 100 | 154 | 304 |\n| 6 → 7 | 135 | 216 | 456 |\n| 7 → 8 | 182 | 302 | 684 |\n| 8 → 9 | 246 | 422 | 1026 |\n| 9 → 10 | 331 | 591 | 1538 |\n| Tổng từ cấp 1 lên cấp 10 | 1194 | 1970 | 4496 |\n\nCách tính: tính số thực, làm tròn tới 6 chữ số thập phân để bỏ sai số dấu phẩy động, rồi làm tròn lên số nguyên (ví dụ 40 × 1,4 tính ra 56,00000000000001 phải ra 56, không ra 57).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Giá gốc hero / máu, sức đánh / kĩ năng | 30 / 40 / 60 | như IDEA, chỉnh theo chơi thử | Chốt theo `feature-balance` |\n| Hệ số tăng giá hero / máu, sức đánh / kĩ năng | 1,35 / 1,4 / 1,5 | như IDEA, chỉnh theo chơi thử | Chốt |\n| Cấp tối đa | không | không | không |\n| Mua lúc nghỉ giữa đợt | được | được | được |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Upgrade",
+   "at": "2026-11-25 10:56:25"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 10:55:05",
+   "id": "hero-price",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:06",
+   "id": "hero-price",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Hero_price_follows_the_design_table, UpgradeShopTests.Start_prices_are_30_for_heroes_40_for_castle_health_and_attack_60_for_skills"
+  },
+  {
+   "at": "2026-11-25 10:55:07",
+   "id": "castle-hp-attack-price",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:08",
+   "id": "castle-hp-attack-price",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Castle_health_and_attack_price_follows_the_design_table, UpgradeShopTests.Each_item_has_its_own_price_by_its_own_level"
+  },
+  {
+   "at": "2026-11-25 10:55:09",
+   "id": "castle-skill-price",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:10",
+   "id": "castle-skill-price",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Castle_skills_price_follows_the_design_table"
+  },
+  {
+   "at": "2026-11-25 10:55:14",
+   "id": "buy-sequence",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:15",
+   "id": "buy-sequence",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Two_fast_taps_with_coins_for_one_buy_once_and_refuse_the_second, UpgradeShopTests.Buying_pays_the_price_raises_the_level_and_shows_the_next_price"
+  },
+  {
+   "at": "2026-11-25 10:55:16",
+   "id": "edge-bam-mua-hai-lan-rat-nhanh-chi-du",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:17",
+   "id": "edge-bam-mua-hai-lan-rat-nhanh-chi-du",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Two_fast_taps_with_coins_for_one_buy_once_and_refuse_the_second"
+  },
+  {
+   "at": "2026-11-25 10:55:18",
+   "id": "edge-so-du-dung-bang-gia",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:19",
+   "id": "edge-so-du-dung-bang-gia",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Exactly_enough_coins_buys_and_leaves_zero"
+  },
+  {
+   "at": "2026-11-25 10:55:24",
+   "id": "edge-hero-dang-guc",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:25",
+   "id": "edge-hero-dang-guc",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Buying_a_hero_level_tells_the_hero_in_that_slot_at_once"
+  },
+  {
+   "at": "2026-11-25 10:55:25",
+   "id": "edge-thua-dung-luc-dang-mua",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:26",
+   "id": "edge-thua-dung-luc-dang-mua",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.After_the_castle_falls_buying_is_refused"
+  },
+  {
+   "at": "2026-11-25 10:55:27",
+   "id": "edge-dang-tam-dung",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:28",
+   "id": "edge-dang-tam-dung",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Buying_while_paused_is_refused_even_with_enough_coins"
+  },
+  {
+   "at": "2026-11-25 10:55:29",
+   "id": "edge-gia-rat-lon",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "gan test co san"
+  },
+  {
+   "at": "2026-11-25 10:55:30",
+   "id": "edge-gia-rat-lon",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.A_huge_level_price_stays_a_whole_number_without_overflow"
+  },
+  {
+   "at": "2026-11-25 10:56:21",
+   "id": "buy-when",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "test moi da soan, cho go chan worktree"
+  },
+  {
+   "at": "2026-11-25 10:56:22",
+   "id": "no-cap-no-refund",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "test moi da soan, cho go chan worktree"
+  },
+  {
+   "at": "2026-11-25 10:56:23",
+   "id": "edge-luc-nghi-giua-hai-dot",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "test moi da soan, cho go chan worktree"
+  },
+  {
+   "at": "2026-11-25 10:56:24",
+   "id": "edge-tien-vao-cung-khung-hinh-voi-yeu-cau",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "test moi da soan, cho go chan worktree"
+  },
+  {
+   "at": "2026-11-25 10:56:25",
+   "id": "params",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "test moi da soan, cho go chan worktree"
+  },
+  {
+   "at": "2026-11-25 11:02:50",
+   "id": "edge-gia-rat-lon",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test chỉ kiểm cấp 500 bị chặn ở int.MaxValue, mức chặn này thiết kế không nêu. Thiết kế nêu ví dụ hero cấp 30 lên 31 giá khoảng 181.000 tiền và vẫn là số nguyên. Thêm ca PriceCurve 30 và 1,35 ở cấp 30 ra đúng số nguyên theo công thức làm tròn lên"
+  },
+  {
+   "at": "2026-11-25 11:03:20",
+   "id": "edge-gia-rat-lon",
+   "state": "doing",
+   "by": "Upgrade",
+   "note": "them ca hero cap 30 = 180635, cho go chan worktree"
+  }
+ ]
+}

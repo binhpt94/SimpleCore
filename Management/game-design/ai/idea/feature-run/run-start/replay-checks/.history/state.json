@@ -1,0 +1,17 @@
+{
+ "hash": "cc2084b931e2",
+ "items": {
+  "replay-no-growth": {
+   "hash": "f1e89923db75",
+   "text": "Chơi 10 lượt liền trong scene Game, số view và số việc đang chạy ở đầu lượt thứ 10 bằng ở đầu lượt thứ 1\nKiểm cho việc đặt lại lượt (`feature-run/run-start/start-values`) không để lại quái, hero, hiệu ứng hay popup của lượt trước. Số đếm lấy từ bộ đếm theo feature của `feature-session-scene`."
+  },
+  "popup-cleared-on-reset": {
+   "hash": "694859bc541f",
+   "text": "Đầu lượt mới không còn popup nào đang mở\nPopup thua đã đóng khi bấm nút; nếu vì lỗi còn popup mở thì lượt chơi ghi lỗi nêu id popup (`feature-popup/popup-request/request-rules`), không tự đóng âm thầm."
+  },
+  "only-record-saved": {
+   "hash": "f10ab1f79ffa",
+   "text": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game\nKỉ lục do `feature-run/run-score/score-rules` lưu. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống lúc game đang mở."
+  }
+ }
+}

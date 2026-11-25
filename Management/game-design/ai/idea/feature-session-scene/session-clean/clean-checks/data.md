@@ -1,22 +1,18 @@
 ---
 based-on: d8d13ced1680
-refs: feature-run/run-start@d386ccae4d88, feature-team-select/team-memory@4a24db16dcc6
 frame: none
 ---
-# Kiểm tra dọn sạch và chơi lại nhiều lượt
+# Kiểm tra dọn sạch sau bước huỷ
 
-Cách kiểm được rằng rời scene không để lại gì và chơi lại nhiều lượt trong scene Game không dồn rác: số view, số việc đang chạy trước và sau phải bằng nhau.
+Cách kiểm được rằng rời scene không để lại gì: dịch vụ đếm view và việc đang chạy của từng feature tham gia, và sau bước huỷ số đó phải bằng 0.
 
 ## Ý cốt lõi
 
 ### after-dispose-zero | AI 8 | Sau bước huỷ, scene không còn view nào, không còn việc hẹn giờ hay việc đang chạy nào của feature tham gia
 Ngoại lệ duy nhất là lớp che của `feature-scene-flow`, vì nó chỉ sống trong lúc chuyển.
 
-### replay-no-growth | AI 7 | Chơi 10 lượt liền trong scene Game, số view và số việc đang chạy ở đầu lượt thứ 10 bằng ở đầu lượt thứ 1
-Kiểm cho đặt lại lượt (`feature-run/run-start`) không để lại quái, hero, hiệu ứng hay popup của lượt trước.
+### count-per-participant | AI 7 | Dịch vụ đếm được số view và số việc đang chạy của từng feature tham gia, bất kì lúc nào trong scene
+Chỉ ở bản dev. Việc đang chạy gồm hẹn giờ, việc chờ và việc lặp mỗi khung hình. Feature khác dùng lại số đếm này để tự kiểm, ví dụ kiểm chơi lại nhiều lượt của `feature-run`.
 
-### popup-cleared-on-reset | AI 7 | Đầu lượt mới không còn popup nào đang mở
-Popup thua đã đóng khi bấm nút; nếu vì lỗi còn popup mở thì đó là lỗi cần báo, không tự đóng âm thầm.
-
-### only-record-saved | AI 7 | Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game
-Kỉ lục do `feature-run` lưu. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống trong scene Game lúc game đang mở. Dịch vụ này không ghi gì.
+### leak-names-owner | AI 7 | Sau bước huỷ còn sót thì ghi lỗi nêu tên feature tham gia còn sót và số view, số việc còn lại
+Không tự dọn hộ âm thầm; thứ sót là lỗi của feature sở hữu.

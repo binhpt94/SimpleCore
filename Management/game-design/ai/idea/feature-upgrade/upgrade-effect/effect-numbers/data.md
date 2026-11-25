@@ -1,31 +1,25 @@
 ---
 based-on: b9bcec737959
-refs: feature-castle/castle-upgrade-effects@2c1e443d0ced, feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09, feature-castle/castle-skills/skill-values@ad45ef4fdcc9, feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-stats/enemy-stat-values@7016e0fe183b, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-castle/castle-upgrade-effects/upgrade-effect-values@b16439440823, feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09
 frame: none
 ---
-# Mức tăng mỗi cấp
+# Báo lên cấp cho bên giữ chỉ số
 
-Mỗi cấp của từng mục làm hero hoặc thành mạnh thêm bao nhiêu. Mọi mức tăng tính theo chỉ số cấp 1, cộng dồn đều theo cấp, có hiệu lực ngay khung hình mua xong.
+Mua xong một cấp thì nâng cấp báo "mục X lên cấp L" cho đúng bên giữ chỉ số, ngay trong khung hình mua. Mỗi cấp làm hero hay thành mạnh thêm bao nhiêu là của nhánh hero và nhánh thành.
 
 ## Ý cốt lõi
 
-### hero-plus-15 | AI 8 | Mỗi cấp hero cộng 15% máu tối đa và 15% sát thương của cấp 1
-Hero cấp L có máu và sát thương = chỉ số cấp 1 × (1 + 0,15 × (L − 1)). Ví dụ cấp 5 là 160% cấp 1.
+### numbers-at-owner | AI 8 | Nâng cấp không tính chỉ số; mức tăng mỗi cấp do bên giữ chỉ số quyết
+Hero: `feature-hero/hero-stats/hero-level-values`. Thành (máu, sức đánh, kĩ năng): `feature-castle/castle-upgrade-effects/upgrade-effect-values`. Đã loại: nâng cấp giữ bảng mức tăng của mọi mục.
 
-### hero-speed-3 | AI 7 | Mỗi cấp hero cộng 3% tốc độ đánh của cấp 1, cộng tối đa 60%
-Chạm trần ở cấp 21; từ đó lên cấp chỉ còn tăng máu và sát thương.
+### report-same-frame | AI 8 | Mua thành công một cấp thì báo "mục X lên cấp L" trong cùng khung hình mua
+Bên nhận áp hiệu lực ngay trong khung hình đó, nên người chơi thấy mạnh lên liền.
 
-### hero-hp-gain | AI 7 | Hero đang sống lên cấp thì máu hiện tại tăng thêm đúng phần máu tối đa vừa tăng (15% máu cấp 1)
-Ví dụ hero cấp 1 máu tối đa 200, đang còn 80: lên cấp 2 thành tối đa 230, hiện tại 110.
+### report-right-owner | AI 8 | Mục hero báo cho `feature-hero` kèm đúng hero được mua; mục máu, sức đánh, kĩ năng thành báo cho `feature-castle`
+Mỗi lần mua chỉ báo cho một bên, một mục.
 
-### hero-fallen | AI 8 | Hero đang gục lên cấp thì chỉ đổi cấp, hồi sinh với 100% máu tối đa theo cấp mới
-Thời gian chờ hồi sinh không đổi.
+### report-each-level | AI 7 | Mua nhiều cấp liên tiếp trong một khung hình thì báo từng cấp một theo thứ tự mua, mỗi lần tăng đúng 1
+Kết quả như mua lần lượt ở các khung hình khác nhau (`feature-upgrade/upgrade-purchase/purchase-rules`: mỗi chạm một yêu cầu, xử lí lần lượt).
 
-### castle-hp-150 | AI 8 | Mỗi cấp máu thành cộng 150 máu tối đa và 150 máu hiện tại
-Thành cấp 1 có 1000 máu tối đa; cấp L có 1000 + 150 × (L − 1).
-
-### castle-attack-20 | AI 8 | Mỗi cấp sức đánh thành cộng 20% sát thương đòn tự bắn của cấp 1
-Cấp 1 bắn 10 sát thương mỗi 1,0 giây; cấp L bắn 10 × (1 + 0,2 × (L − 1)). Nhịp bắn và tầm không đổi.
-
-### castle-skill-20 | AI 7 | Mỗi cấp kĩ năng thành cộng 20% hiệu lực cấp 1 cho cả ba kĩ năng, hồi chiêu không đổi
-Sấm sét: 80 sát thương cộng 16 mỗi cấp. Băng giá: chậm 50% trong 5 giây, thời gian chậm cộng 1 giây mỗi cấp. Cổ vũ: hồi 30% máu tối đa hero, cộng 6 điểm phần trăm mỗi cấp.
+### report-only-up | AI 7 | Cấp được báo luôn lớn hơn cấp trước đúng 1; nâng cấp không bao giờ báo cấp thấp hơn hay báo lại cấp cũ
+Không có hạ cấp, không có hoàn tiền.

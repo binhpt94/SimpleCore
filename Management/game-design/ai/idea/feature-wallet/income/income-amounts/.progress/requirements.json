@@ -1,0 +1,33 @@
+{
+ "items": {
+  "income-same-frame": {
+   "state": "done",
+   "note": "gắn test đã có: phía ví cộng và báo ngay trong lần gọi Add",
+   "tests": [
+    "WalletLogicTests.Add_IncreasesCoins_AndAnnouncesTheNewBalance"
+   ],
+   "play": "",
+   "hash": "23c3bafbab83",
+   "text": "Tiền vào số dư trong cùng khung hình quái gục hoặc đợt được dọn\nKhông có độ trễ, không có tiền rơi phải nhặt.",
+   "title": "Tiền vào số dư trong cùng khung hình quái gục hoặc đợt được dọn",
+   "by": "Wallet",
+   "at": "2026-11-25 10:55:01"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 10:54:58",
+   "id": "income-same-frame",
+   "state": "doing",
+   "by": "Wallet",
+   "note": "gắn test đã có: phía ví cộng và báo ngay trong lần gọi Add"
+  },
+  {
+   "at": "2026-11-25 10:55:01",
+   "id": "income-same-frame",
+   "state": "done",
+   "by": "Wallet",
+   "note": "WalletLogicTests.Add_IncreasesCoins_AndAnnouncesTheNewBalance"
+  }
+ ]
+}
