@@ -31,6 +31,14 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   ~/.claude/projects/<project>/.deleted/<time>-<id>/ (with its binding and an info.json), takes its id out of the
   VS Code state (vscode_groups.forget_session) and removes its binding. Restore: move the files back to
   ~/.claude/projects/<project>/ and run Setup to bind it again.
+- Live (other sessions see the thread in ListAgents and can message it): a thread is live while a process runs it;
+  a headless -p turn exits when done. GET /api/threads gives each thread `live` ("interactive": open in VS Code or a
+  terminal; "background"; "") from `claude agents --json`. POST /api/sessions/live {id} (no PIN) runs a bound,
+  not yet live thread on as a background session, `claude --bg --resume <id> <LIVE_PROMPT>` (one short turn);
+  /api/sessions/stop {id} ends it (`claude stop`). Setup does that after a new thread's first turn. Reread, compact
+  and the last turn of renew go into the background session of a thread that has one (stopped, then started again
+  with that prompt), so it stays live. `claude attach <name>` opens a background thread in a terminal (to answer a
+  permission question); stop it before opening the thread in VS Code. Delete stops it first.
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
   enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
@@ -122,13 +130,23 @@ COMPACT_PROMPT = "/compact"
 WIPE_PROMPT = ("/compact Session này được làm mới: KHÔNG giữ lại bất kì nội dung, con số, file, việc dở dang hay quyết định nào "
                "của cuộc trò chuyện. Bản tóm tắt chỉ gồm đúng một câu: 'Session đã được làm mới, không còn ngữ cảnh cũ.'")
 CLAUDE_SECONDS = 300      # one headless turn that reads the rules
+# Live: a thread other sessions see in ListAgents has a running process (the CLI's session list, `claude agents --json`).
+# A headless turn (-p) exits when it is done, so the page keeps a thread live with `claude --bg --resume <id> <prompt>`:
+# a background session under the same id (`claude attach <name>` opens it in a terminal, `claude stop <id>` ends it).
+# A new thread's first turn stays a -p turn: a session started by --bg records the entry point "cli", and the VS Code
+# extension may not list it.
+LIVE_PROMPT = ("Thread này vừa được bật live từ trang Setup: nó chạy nền để các phiên khác nhắn được (SendMessage). "
+               "Chưa làm việc gì khác. Trả lời đúng một từ: sẵn sàng.")
+LIVE_SECONDS = 30      # how long to wait for a background session to show up (or to go) in the session list
+LIVE_CACHE = {"at": 0.0, "value": {}}
+LIVE_LOCK = threading.Lock()
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY,
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
-              "/api/sessions/delete": MAX_BODY}
+              "/api/sessions/delete": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY}
 TRASH = ".deleted"      # inside the transcripts folder: threads() reads only *.jsonl at its top
 # Threads that run a headless turn right now (renew, reread, compact, a thread setup is creating): not deleted.
 BUSY = set()
@@ -180,6 +198,7 @@ def threads():
     that have a name. feature: the FEATURE value the name stands for; legacy: a role named with its '@' (rename it).
     model: of the last answer; effort: of the last request (both as the transcript recorded them)."""
     hidden = archived_ids()
+    live = live_sessions()
     out = []
     folder = transcripts_dir()
     for p in folder.glob("*.jsonl") if folder.is_dir() else []:
@@ -209,6 +228,7 @@ def threads():
                         "unlisted": entries == {HEADLESS_ENTRY},
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
                         "binding": guard.bound_feature(sid, guard.STORE_DIR) or "",
+                        "live": (live.get(sid) or {}).get("kind", ""), "live_status": (live.get(sid) or {}).get("status", ""),
                         "modified": time.strftime("%Y-%m-%d %H:%M", time.localtime(p.stat().st_mtime))})
     return sorted(out, key=lambda t: (t["title"].lower(), t["modified"]))
 
@@ -236,6 +256,72 @@ def sets():
 def bind(session_id, value):
     bind_session.write_json(guard.binding_path(session_id, guard.STORE_DIR),
                             {"feature": value, "bound_at": time.strftime("%Y-%m-%d %H:%M:%S"), "by": "setup_server"})
+
+
+def live_sessions(fresh=False):
+    """{session id: {kind, status, short}} of the Claude sessions that run now (`claude agents --json`: the list
+    ListAgents reads): kind "interactive" (VS Code, a terminal) or "background" (--bg). {} when the CLI cannot say.
+    Kept for two seconds, as the page asks for every row."""
+    with LIVE_LOCK:
+        if not fresh and time.time() - LIVE_CACHE["at"] < 2:
+            return dict(LIVE_CACHE["value"])
+    value = {}
+    try:
+        p = subprocess.run(["claude", "agents", "--json"], cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8",
+                           errors="replace", timeout=20, shell=(os.name == "nt"))
+        for s in json.loads(p.stdout or "[]") if p.returncode == 0 else []:
+            if isinstance(s, dict) and isinstance(s.get("sessionId"), str):
+                value[s["sessionId"]] = {"kind": str(s.get("kind") or ""), "status": str(s.get("status") or ""),
+                                         "short": str(s.get("id") or s["sessionId"][:8])}
+    except (OSError, ValueError, subprocess.SubprocessError):
+        value = {}
+    with LIVE_LOCK:
+        LIVE_CACHE.update(at=time.time(), value=value)
+    return dict(value)
+
+
+def wait_live(session_id, present):
+    """Waits until the thread is (present) or is no longer (not present) in the session list; True when it got there."""
+    end = time.time() + LIVE_SECONDS
+    while True:
+        if (session_id in live_sessions(fresh=True)) == present:
+            return True
+        if time.time() > end:
+            return False
+        time.sleep(1)
+
+
+def start_bg(session_id, extra, prompt):
+    """Runs the thread on as a background session under the same id, with that first prompt (one turn), and waits
+    until the session list shows it. `extra` starts with `-n <thread name>`: without it a resumed background session
+    is listed under a name the CLI makes up from the conversation, and SendMessage to the thread's name misses it.
+    Raises when the CLI opened a copy instead or the session does not show up."""
+    out = run_claude(["--bg", "--resume", session_id] + extra + [prompt])
+    m = re.search(r"backgrounded\s*·\s*([0-9a-f]{6,})", out)
+    if m and not session_id.startswith(m.group(1)):
+        raise RuntimeError(f"CLI mở bản sao {m.group(1)} thay vì chạy tiếp thread này (thread đang chạy ở nơi khác?)")
+    if not wait_live(session_id, True):
+        raise RuntimeError(f"chưa thấy phiên nền của thread trong `claude agents` sau {LIVE_SECONDS}s")
+
+
+def stop_bg(session_id):
+    """Ends the thread's background session (`claude stop`) and waits until it is gone; nothing when it has none."""
+    s = live_sessions(fresh=True).get(session_id)
+    if not s or s["kind"] != "background":
+        return
+    run_claude(["stop", s["short"]])
+    if not wait_live(session_id, False):
+        raise RuntimeError(f"phiên nền vẫn chạy sau {LIVE_SECONDS}s: claude stop {s['short']}")
+
+
+def turn_args(t):
+    """The model and effort a thread last used, as CLI flags."""
+    args = []
+    if t["model"]:
+        args += ["--model", t["model"]]
+    if t["effort"] in EFFORTS:
+        args += ["--effort", t["effort"]]
+    return args
 
 
 def run_claude(args):
@@ -283,18 +369,73 @@ def busy(session_id, on):
         (BUSY.add if on else BUSY.discard)(session_id)
 
 
-def turn(t, prompt):
-    """One headless turn in thread t, on the model and effort it last used; what it printed."""
-    args = ["--resume", t["id"]]
-    if t["model"]:
-        args += ["--model", t["model"]]
-    if t["effort"] in EFFORTS:
-        args += ["--effort", t["effort"]]
+BG_ANSWER = "đã gửi vào phiên nền (thread vẫn live; xem câu trả lời: claude attach {title})"
+
+
+def turn(t, prompt, bg=None):
+    """One turn in thread t, on the model and effort it last used. A thread that runs in the background is stopped
+    first (two processes must not write one session). bg: run the turn as a background session, so the thread stays
+    live (default: when it ran in the background). What it printed, or BG_ANSWER for a background turn."""
+    running_bg = t.get("live") == "background"
+    bg = running_bg if bg is None else bg
     busy(t["id"], True)
     try:
-        return run_claude(args + ["-p", prompt])
+        if running_bg:
+            stop_bg(t["id"])
+            t["live"] = ""
+        if bg:
+            start_bg(t["id"], ["-n", t["title"]] + turn_args(t), prompt)
+            t["live"] = "background"
+            return BG_ANSWER.format(title=t["title"])
+        return run_claude(["--resume", t["id"]] + turn_args(t) + ["-p", prompt])
     finally:
         busy(t["id"], False)
+
+
+HUMAN = "@human"      # the human's own chat: never run in the background, VS Code could not open it any more
+
+
+def human_thread(t):
+    return t.get("binding") == HUMAN or t.get("feature") == HUMAN
+
+
+def go_live(session_id):
+    """The Bật live button: runs one existing, bound thread on as a background session (one short turn), so other
+    sessions see it in ListAgents and can message it. A thread that already runs (VS Code, terminal, background) is
+    left as it is."""
+    t, no = eligible(session_id)
+    if no:
+        return no
+    if human_thread(t) and not t.get("live"):
+        return {"ok": False, "id": t["id"], "title": t["title"],
+                "error": "thread của người: không chạy nền (VS Code sẽ không mở được nó); mở nó trong VS Code là live"}
+    if t.get("live"):
+        where = "nền" if t["live"] == "background" else "VS Code hoặc terminal"
+        return {"ok": True, "id": t["id"], "title": t["title"], "answer": f"đã live sẵn ({where})"}
+    try:
+        turn(t, LIVE_PROMPT, bg=True)
+    except Exception as ex:
+        return {"ok": False, "id": t["id"], "title": t["title"], "error": "chưa bật live được: " + str(ex)[:260]}
+    return {"ok": True, "id": t["id"], "title": t["title"], "answer": f"đã live nền (claude attach {t['title']})"}
+
+
+def stop_live(session_id):
+    """The Tắt live button: ends the thread's background session. A chat open in VS Code or a terminal is not
+    touched (close it there)."""
+    t = next((t for t in threads() if t["id"] == session_id), None) if isinstance(session_id, str) else None
+    if t is None:
+        return {"ok": False, "error": "không có thread này"}
+    head = {"id": t["id"], "title": t["title"]}
+    if t.get("live") != "background":
+        return dict(head, ok=True, answer="đang mở ở VS Code hoặc terminal: tắt ở đó" if t.get("live") else "không chạy nền")
+    with BUSY_LOCK:
+        if t["id"] in BUSY:
+            return dict(head, ok=False, error="thread đang chạy một lượt từ trang này: chờ xong")
+    try:
+        stop_bg(t["id"])
+    except Exception as ex:
+        return dict(head, ok=False, error=str(ex)[:300])
+    return dict(head, ok=True, answer="đã tắt live")
 
 
 def reread(session_id):
@@ -335,13 +476,16 @@ def renew(session_id, pin):
     error = bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
     if error:
         return {"ok": False, "id": t["id"], "title": t["title"], "error": error, "pin": True}
+    # a renewed thread is live; a chat open in VS Code stays there, and the human's own chat is never put in the background
+    live_after = t.get("live") != "interactive" and not human_thread(t)
     try:
-        turn(t, WIPE_PROMPT)
+        turn(t, WIPE_PROMPT, bg=False)
     except Exception as ex:      # nothing was changed
         return {"ok": False, "id": t["id"], "title": t["title"], "error": "chưa làm mới được: " + str(ex)[:260]}
     bind(t["id"], t["binding"])
     try:
-        answer = turn(t, f"Thread {t['title']} vừa được làm mới (renew) từ trang Setup: ngữ cảnh cũ đã bỏ. {REREAD_PROMPT}")
+        answer = turn(t, f"Thread {t['title']} vừa được làm mới (renew) từ trang Setup: ngữ cảnh cũ đã bỏ. {REREAD_PROMPT}",
+                      bg=live_after)
     except Exception as ex:
         return {"ok": False, "id": t["id"], "title": t["title"], "renewed": True,
                 "error": "đã làm mới và gán lại, CHƯA đọc quy trình (bấm Đọc lại quy trình): " + str(ex)[:200]}
@@ -383,6 +527,16 @@ def run_job(job, model, effort):
             else:
                 sid = create(thread_name(name), name, model, effort)
                 done = {"state": "created", "ids": [sid], "model": model, "effort": effort}
+                with JOB_LOCK:
+                    item.update(done, detail="đã đọc quy trình, đang bật live…")
+                try:      # then run it on in the background, so the other sessions see it (one more short turn)
+                    busy(sid, True)
+                    start_bg(sid, ["-n", thread_name(name), "--model", model, "--effort", effort], LIVE_PROMPT)
+                    done.update(live=True, detail="")
+                except Exception as ex:
+                    done.update(live=False, detail="chưa bật live (bấm Bật live): " + str(ex)[:240])
+                finally:
+                    busy(sid, False)
         except Exception as ex:
             done = {"state": "error", "detail": str(ex)[:300]}
         with JOB_LOCK:
@@ -455,9 +609,15 @@ def delete_thread(session_id, pin):
         return dict(head, error="thread đang chạy một lượt từ trang này: chờ xong rồi xoá")
     if vscode_groups.vscode_running():      # before the PIN: closing VS Code must not cost a try
         return dict(head, error="VS Code đang chạy: tắt hẳn VS Code (mọi cửa sổ) rồi bấm lại", vscode=True)
+    if t.get("live") == "interactive":
+        return dict(head, error="thread đang mở trong một terminal: thoát chat đó rồi bấm lại")
     error = bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
     if error:
         return dict(head, error=error, pin=True)
+    try:
+        stop_bg(t["id"])      # a background session would write its transcript back
+    except Exception as ex:
+        return dict(head, error="chưa xoá: chưa tắt được phiên nền: " + str(ex)[:220])
     try:
         was_in = vscode_groups.forget_session(t["id"], running=vscode_groups.vscode_running)
     except (ValueError, OSError, sqlite3.Error) as ex:      # nothing moved yet
@@ -686,6 +846,10 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, compact(data.get("id")))
             if self.path == "/api/sessions/renew":
                 return self.send_json(200, renew(data.get("id"), data.get("pin")))
+            if self.path == "/api/sessions/live":
+                return self.send_json(200, go_live(data.get("id")))
+            if self.path == "/api/sessions/stop":
+                return self.send_json(200, stop_live(data.get("id")))
             if self.path == "/api/sessions/delete":
                 return self.send_json(200, delete_thread(data.get("id"), data.get("pin")))
             if self.path == "/api/vscode-groups":

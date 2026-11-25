@@ -72,8 +72,9 @@ def page_cases(check):
 def job_cases(check):
     """Setup runs in the background: each name shows waiting, running, then bound, created or error."""
     import threading
-    real = (ss.run_claude, ss.threads, ss.sets, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB)
+    real = (ss.run_claude, ss.threads, ss.sets, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB, ss.start_bg)
     store = tempfile.mkdtemp(prefix="setup-job-")
+    went_live = []
     gate = threading.Event()
     try:
         ss.guard.STORE_DIR = store
@@ -89,6 +90,7 @@ def job_cases(check):
             return "ok"
 
         ss.run_claude = slow
+        ss.start_bg = lambda sid, extra, prompt: went_live.append((sid, extra, prompt))
         res = ss.setup_start("0000", "basic")
         check("job: a wrong PIN starts nothing", (res["ok"], res["error"], ss.JOB), (False, "PIN sai", None))
         res = ss.setup_start("1234", "basic")
@@ -111,6 +113,9 @@ def job_cases(check):
         check("job: ends with created and error, the error kept",
               (view["done"], [i["state"] for i in view["items"]], view["items"][2]["detail"]),
               (True, ["bound", "created", "error"], "claude: not logged in"))
+        check("job: a new thread is then run on in the background (live), on the model and effort picked",
+              (view["items"][1]["live"], went_live, view["items"][1]["detail"]),
+              (True, [(view["items"][1]["ids"][0], ["-n", "CodeLead", "--model", "opus", "--effort", "medium"], ss.LIVE_PROMPT)], ""))
         check("job: the page reads it from GET /api/setup/job", "/api/setup" in ss.POST_PATHS)
         ss.run_claude = lambda args: "ok"
         res = ss.setup("1234", "basic")
@@ -118,8 +123,80 @@ def job_cases(check):
               [(r["name"], r["action"]) for r in res["results"]], [("@human", "bound"), ("@CodeLead", "created"), ("Wallet", "created")])
     finally:
         gate.set()
-        (ss.run_claude, ss.threads, ss.sets, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB) = real
+        (ss.run_claude, ss.threads, ss.sets, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB, ss.start_bg) = real
         shutil.rmtree(store, ignore_errors=True)
+
+
+def live_cases(check):
+    """Live: a thread runs on as a background session (claude --bg --resume), so ListAgents shows it."""
+    real = (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep)
+    live, calls = {}, []
+
+    def fake(args):
+        calls.append(args)
+        if args[0] == "--bg":
+            sid = args[2]
+            if not sid.startswith("dead"):      # a thread whose background session never shows up
+                live[sid] = {"kind": "background", "status": "busy", "short": sid[:8]}
+            return f"Starting background service…\nbackgrounded · {('99999999' if sid.startswith('copy') else sid[:8])} · x"
+        if args[0] == "stop":
+            for k in [k for k, v in live.items() if v["short"] == args[1]]:
+                del live[k]
+            return "stopped " + args[1]
+        return "Đã đọc CLAUDE.md"
+
+    def listed():
+        out = [thread("aaaa1111", "CodeLead", binding="@CodeLead"), thread("bbbb2222", "Wallet", binding="Wallet"),
+               thread("cccc3333", "Shop"), thread("dead0000", "Hud", binding="Hud"), thread("copy0000", "Wave", binding="Wave"),
+               thread("eeee5555", "human", binding="@human"), thread("ffff6666", "human", binding="@human")]
+        for t in out:
+            t["live"] = (live.get(t["id"]) or {}).get("kind", "")
+        return out
+    try:
+        ss.run_claude, ss.threads, ss.live_sessions = fake, listed, lambda fresh=False: dict(live)
+        ss.LIVE_SECONDS, ss.time.sleep = 0, lambda s: None
+        live["eeee5555"] = {"kind": "interactive", "status": "busy", "short": "eeee5555"}
+        res = ss.go_live("cccc3333")
+        check("live: a thread that is not bound is refused", (res["ok"], calls), (False, []))
+        res = ss.go_live("eeee5555")
+        check("live: a chat open in VS Code is left as it is", (res["ok"], "live sẵn" in res["answer"], calls), (True, True, []))
+        res = ss.go_live("aaaa1111")
+        check("live: runs the thread on in the background under its id and its name (else the CLI makes one up), with its model and effort",
+              (res["ok"], calls[-1], live["aaaa1111"]["kind"]),
+              (True, ["--bg", "--resume", "aaaa1111", "-n", "CodeLead", "--model", "claude-opus-x", "--effort", "medium", ss.LIVE_PROMPT], "background"))
+        before = len(calls)
+        check("live: pressing it again starts nothing", (ss.go_live("aaaa1111")["ok"], len(calls)), (True, before))
+        res = ss.reread("aaaa1111")
+        check("live: reread on a background thread stops it, then runs the prompt as a background session again (no -p)",
+              (res["ok"], calls[before][0], calls[before + 1][:3], calls[before + 1][-1], "-p" in calls[before + 1], "aaaa1111" in live),
+              (True, "stop", ["--bg", "--resume", "aaaa1111"], ss.REREAD_PROMPT, False, True))
+        res = ss.reread("bbbb2222")
+        check("live: reread on a thread that is not live stays a headless turn", (res["ok"], calls[-1][-2], "bbbb2222" in live), (True, "-p", False))
+        res = ss.go_live("dead0000")
+        check("live: a background session that never shows up is reported", (res["ok"], "chưa thấy phiên nền" in res["error"]), (False, True))
+        res = ss.go_live("copy0000")
+        check("live: a copy under another id is reported", (res["ok"], "bản sao" in res["error"]), (False, True))
+        before = len(calls)
+        res = ss.stop_live("eeee5555")
+        check("stop: a chat open in VS Code is not touched", (res["ok"], len(calls), "eeee5555" in live), (True, before, True))
+        res = ss.stop_live("aaaa1111")
+        check("stop: ends the background session", (res["ok"], calls[-1], "aaaa1111" in live), (True, ["stop", "aaaa1111"], False))
+        check("stop: a thread with no background session runs nothing", (ss.stop_live("aaaa1111")["ok"], len(calls)), (True, before + 1))
+        before = len(calls)
+        res = ss.go_live("ffff6666")
+        check("live: the human's own chat is never run in the background (VS Code could not open it)",
+              (res["ok"], "thread của người" in res["error"], len(calls), "ffff6666" in live), (False, True, before, False))
+        real_pin = ss.bind_session.check_pin
+        ss.bind_session.check_pin = lambda store_, pin: ""
+        try:
+            res = ss.renew("ffff6666", "1234")
+        finally:
+            ss.bind_session.check_pin = real_pin
+        check("live: renewing the human's chat keeps its last turn headless", (calls[-1][0], calls[-1][-2], "ffff6666" in live), ("--resume", "-p", False))
+        check("the page may post to the live and stop paths",
+              ("/api/sessions/live" in ss.POST_PATHS, "/api/sessions/stop" in ss.POST_PATHS), (True, True))
+    finally:
+        (ss.run_claude, ss.threads, ss.live_sessions, ss.LIVE_SECONDS, ss.time.sleep) = real
 
 
 def delete_cases(check):
@@ -127,7 +204,7 @@ def delete_cases(check):
     import json
     import sqlite3
     real = (ss.threads, ss.transcripts_dir, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB,
-            ss.vscode_groups.vscode_running, ss.vscode_groups.vscode_state)
+            ss.vscode_groups.vscode_running, ss.vscode_groups.vscode_state, ss.live_sessions, ss.run_claude)
     tmp = Path(tempfile.mkdtemp(prefix="setup-del-"))
     tries = []
     try:
@@ -147,6 +224,10 @@ def delete_cases(check):
         con.close()
         ss.guard.STORE_DIR = str(store)
         ss.JOB = None
+        live = {"aaaa1111": {"kind": "background", "status": "idle", "short": "aaaa1111"}}
+        stopped = []
+        ss.live_sessions = lambda fresh=False: dict(live)
+        ss.run_claude = lambda args: (stopped.append(args), live.clear(), "stopped")[2]
         ss.transcripts_dir = lambda: folder
         ss.vscode_groups.vscode_state = lambda: db
         ss.bind_session.check_pin = lambda store_, pin: tries.append(pin) or ("" if pin == "1234" else "PIN sai")
@@ -182,20 +263,22 @@ def delete_cases(check):
         con.close()
         check("delete: its id is out of the VS Code state, the others stay",
               (state["hiddenSessionIds"], state["sessionGroups:/p"][0]["sessionIds"]), (["zz"], ["bbbb2222"]))
+        check("delete: its background session was stopped first", stopped, [["stop", "aaaa1111"]])
         check("delete: the other thread is untouched", (folder / "bbbb2222.jsonl").exists())
         check("the page may post to the delete path", "/api/sessions/delete" in ss.POST_PATHS)
     finally:
         (ss.threads, ss.transcripts_dir, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB,
-         ss.vscode_groups.vscode_running, ss.vscode_groups.vscode_state) = real
+         ss.vscode_groups.vscode_running, ss.vscode_groups.vscode_state, ss.live_sessions, ss.run_claude) = real
         shutil.rmtree(tmp, ignore_errors=True)
 
 
 def main():
     store = tempfile.mkdtemp(prefix="setup-store-")
-    real = (ss.run_claude, ss.threads, ss.guard.STORE_DIR)
+    real = (ss.run_claude, ss.threads, ss.guard.STORE_DIR, ss.start_bg)
     calls = []
     try:
         ss.guard.STORE_DIR = store
+        ss.start_bg = lambda sid, extra, prompt: ss.run_claude(["--bg", "--resume", sid] + extra + [prompt])
         bound_at_run = []
 
         def fake(args):
@@ -292,9 +375,9 @@ def main():
             check("renew: first the context is emptied in the same thread (a /compact told to keep nothing, not /clear)",
                   (first[:2], first[-2], first[-1] == ss.WIPE_PROMPT, first[-1].startswith("/compact "), "KHÔNG giữ lại" in first[-1]),
                   (["--resume", "aaaa1111"], "-p", True, True, True))
-            check("renew: then it is told it was renewed and to read the rules",
-                  (second[:2], second[-1].startswith("Thread CodeLead vừa được làm mới"), ss.REREAD_PROMPT in second[-1], len(calls) - before),
-                  (["--resume", "aaaa1111"], True, True, 2))
+            check("renew: then it is told it was renewed and to read the rules, as a background session (live)",
+                  (second[:3], second[-1].startswith("Thread CodeLead vừa được làm mới"), ss.REREAD_PROMPT in second[-1], len(calls) - before),
+                  (["--bg", "--resume", "aaaa1111"], True, True, 2))
             check("renew: it is bound again to the FEATURE it had", (res["ok"], ss.guard.bound_feature("aaaa1111", store)), (True, "@CodeLead"))
             os.remove(ss.guard.binding_path("aaaa1111", store))
             ss.run_claude = failing
@@ -319,10 +402,11 @@ def main():
         check("the page may post to the compact and renew paths",
               ("/api/sessions/compact" in ss.POST_PATHS, "/api/sessions/renew" in ss.POST_PATHS), (True, True))
     finally:
-        ss.run_claude, ss.threads, ss.guard.STORE_DIR = real
+        ss.run_claude, ss.threads, ss.guard.STORE_DIR, ss.start_bg = real
         shutil.rmtree(store, ignore_errors=True)
     page_cases(check)
     job_cases(check)
+    live_cases(check)
     delete_cases(check)
     failed = [r for r in results if not r[0]]
     for _, label, expect, got in failed:

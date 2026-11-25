@@ -110,6 +110,13 @@
   button.copy.danger { border-color: var(--bad); color: var(--bad); }
   button.copy.danger:hover:not(:disabled) { background: var(--bad); color: var(--panel); }
   button.copy.danger:focus-visible { outline-color: var(--bad); }
+  /* Nút Live bật/tắt: nền đặc xanh = đang chạy nền; viền xanh = mở ở VS Code (chỉ hiện); viền xám = không live */
+  button.copy.live { padding: 4px 10px; font-size: 13px; white-space: nowrap; }
+  button.copy.live.on { background: var(--ok); border-color: var(--ok); color: var(--panel); }
+  button.copy.live.on:hover:not(:disabled) { background: transparent; color: var(--ok); }
+  button.copy.live.vscode, button.copy.live.vscode:disabled, button.copy.live.vscode:hover { border-color: var(--ok); color: var(--ok); background: transparent; opacity: 1; cursor: default; }
+  button.copy.live.off { border-color: var(--line); color: var(--muted); }
+  button.copy.live.off:hover:not(:disabled) { border-color: var(--ok); background: transparent; color: var(--ok); }
   .gap { margin-top: 16px; }
   footer { margin-top: 24px; font-size: 13px; color: var(--muted); }
 
@@ -552,9 +559,12 @@
     var ACTIONS = {
       reread: { label: "Đọc lại quy trình", path: "/api/sessions/reread", done: "đã đọc" },
       compact: { label: "Compact", path: "/api/sessions/compact", done: "đã compact" },
-      renew: { label: "Renew", path: "/api/sessions/renew", done: "đã làm mới", pin: true }
+      renew: { label: "Renew", path: "/api/sessions/renew", done: "đã làm mới", pin: true },
+      live: { label: "Bật live", path: "/api/sessions/live", done: "đã live" },
+      stop: { label: "Tắt live", path: "/api/sessions/stop", done: "đã tắt" }
     };
-    var ACTION_KEYS = ["reread", "compact", "renew"];
+    var ACTION_KEYS = ["reread", "compact", "renew", "live", "stop"];      // nút "tất cả"
+    var ROW_KEYS = ["reread", "compact", "renew"];      // nút của từng dòng; Live là nút bật/tắt ở cột Live
     var BATCH = 10;     // số thread chạy cùng lúc của các nút "tất cả"
     var rereadRow = put(listBox, el("div", "gap"));
     var allBtns = {};
@@ -566,15 +576,20 @@
     var rereadStatus = put(listBox, el("p", "gap muted",
       "Mỗi thao tác tốn lượt của thread. Nút \"tất cả\" chạy " + BATCH + " thread cùng lúc. Chat đang mở trong VS Code có thể chưa thấy lượt này: mở lại chat đó. " +
       "Renew cần PIN (ô PIN ở trên), bỏ toàn bộ ngữ cảnh của thread rồi gán lại và nhắc đọc quy trình: việc dở dang chưa ghi ra file sẽ mất, chỉ bấm khi thread đang rảnh. " +
-      "Xoá cần PIN và VS Code tắt hẳn: dời transcript của thread vào ~/.claude/projects/<project>/.deleted/ (khôi phục được), bỏ nó khỏi danh sách chat và bỏ gán."));
+      "Xoá cần PIN và VS Code tắt hẳn: dời transcript của thread vào ~/.claude/projects/<project>/.deleted/ (khôi phục được), bỏ nó khỏi danh sách chat và bỏ gán. " +
+      "Live: phiên khác chỉ thấy thread trong ListAgents (và nhắn được) khi có tiến trình chạy nó. Bật live chạy thread thành phiên nền (một lượt ngắn); " +
+      "Setup tự bật live cho thread vừa tạo; Đọc lại, Compact, Renew giữ thread live. Phiên nền hỏi quyền thì vào duyệt bằng claude attach <tên> trong terminal. " +
+      "Muốn mở thread đó trong VS Code thì Tắt live trước, để hai tiến trình không cùng ghi một session."));
     var confirmRow = put(listBox, el("p", "gap", ""));      // dòng xác nhận của "Renew: tất cả" (không dùng hộp thoại trình duyệt)
     var rereadState = {};      // id -> { cls, text, running }: giữ qua các lần vẽ lại bảng
     var rereadable = [];       // id của thread đủ điều kiện, theo thứ tự trong bảng
     var rereadCells = {};      // id -> { btns, note } của lần vẽ hiện tại
+    var refreshTimer = null;
+    var humanIds = {};      // thread của người: "Bật live: tất cả" bỏ qua
     var paintReread = function (id) {
       var cell = rereadCells[id], st = rereadState[id];
       if (!cell) return;
-      cell.btns.forEach(function (b) { b.disabled = !!(st && st.running); });
+      cell.btns.forEach(function (b) { b.disabled = !!(st && st.running) || b.dataset.off === "1"; });
       cell.note.className = st ? st.cls : "muted";
       cell.note.textContent = st ? " " + st.text : "";
       cell.note.title = st && st.full ? st.full : "";
@@ -599,10 +614,15 @@
           : { cls: "bad-text", text: "lỗi: " + res.error };
       }, function (e) {
         rereadState[id] = { cls: "bad-text", text: "lỗi gọi server: " + e.message };
-      }).then(function () { paintReread(id); return out; });
+      }).then(function () {
+        paintReread(id);
+        clearTimeout(refreshTimer);      // cột Live có thể đã đổi: vẽ lại bảng một lần khi các thao tác lắng xuống
+        refreshTimer = setTimeout(function () { refresh(); }, 800);
+        return out;
+      });
     };
     var runAll = function (kind) {
-      var act = ACTIONS[kind], queue = rereadable.slice(), total = queue.length, done = 0, good = 0, stopped = false;
+      var act = ACTIONS[kind], queue = rereadable.filter(function (id) { return kind !== "live" || !humanIds[id]; }), total = queue.length, done = 0, good = 0, stopped = false;
       if (!total) { rereadStatus.className = "gap bad-text"; rereadStatus.textContent = "Không có thread nào đã gán."; return; }
       if (act.pin && !pin.value) { rereadStatus.className = "gap bad-text"; rereadStatus.textContent = "Nhập PIN ở ô phía trên rồi bấm lại."; return; }
       ACTION_KEYS.forEach(function (k) { allBtns[k].disabled = true; });
@@ -639,6 +659,9 @@
     };
     allBtns.reread.addEventListener("click", function () { runAll("reread"); });
     allBtns.compact.addEventListener("click", function () { runAll("compact"); });
+    allBtns.stop.classList.add("danger");      // tắt mọi phiên nền: màu đỏ như Xoá
+    allBtns.live.addEventListener("click", function () { runAll("live"); });
+    allBtns.stop.addEventListener("click", function () { runAll("stop"); });
     allBtns.renew.addEventListener("click", function () {
       confirmRow.textContent = "";
       confirmRow.className = "gap bad-text";
@@ -719,28 +742,43 @@
         vsStatus.textContent = vs.running ? "VS Code đang chạy: tắt hẳn VS Code rồi chạy lệnh trên trong terminal ngoài." : "VS Code đang tắt: bấm nút để gom nhóm.";
       }
       var table = put(listBody, el("table"));
-      add(table, headRow(["Tên", "Đang gán", "Nhóm VS Code", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Id", "Session"]));
+      add(table, headRow(["Tên", "Đang gán", "Nhóm VS Code", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Live", "Id", "Session"]));
       var body = put(table, el("tbody")), lastTier = null;
       rereadable = [];
       rereadCells = {};
+      humanIds = {};
       sorted.forEach(function (t) {
         var tier = tierOf(t);
         if (tier !== lastTier) {
           lastTier = tier;
           var head = el("tr"), cell = add(el("th", "", tier || "Ngoài các tầng"));
-          cell.colSpan = 9;
+          cell.colSpan = 10;
           add(body, add(head, cell));
         }
         var why = t.archived ? "thread đã archive" : t.unlisted ? "VS Code không hiện thread này"
           : !t.binding ? "thread chưa gán FEATURE: chạy Setup trước" : "";
-        var rereadBox = el("span"), rowBtns = ACTION_KEYS.map(function (k) {
+        var rereadBox = el("span"), rowBtns = ROW_KEYS.map(function (k) {
           var b = put(rereadBox, el("button", "copy", ACTIONS[k].label));
           b.type = "button";
           b.style.marginRight = "4px";
-          if (why) { b.disabled = true; b.title = why; }
+          if (why) { b.disabled = true; b.title = why; b.dataset.off = "1"; }
           else b.addEventListener("click", (function (kind, id) { return function () { runOne(kind, id); }; })(k, t.id));
           return b;
         });
+        // Nút Live bật/tắt: màu theo trạng thái. Nền: bấm để tắt; không live: bấm để bật; VS Code/terminal: chỉ hiện.
+        var liveState = t.live === "background" ? "on" : t.live ? "vscode" : "off";
+        var liveBtn = el("button", "copy live " + liveState, liveState === "on" ? "● Live" + (t.live_status ? " · " + t.live_status : "")
+          : liveState === "vscode" ? "● VS Code" : "○ Live");
+        liveBtn.type = "button";
+        liveBtn.setAttribute("aria-pressed", liveState === "off" ? "false" : "true");
+        var isHuman = t.binding === "@human" || t.feature === "@human";
+        var liveOff = liveState === "vscode" ? "đang mở ở VS Code hoặc terminal (live): tắt ở đó"
+          : liveState === "off" ? (why || (isHuman ? "thread của người không chạy nền (VS Code sẽ không mở được nó): mở nó trong VS Code là live" : "")) : "";
+        liveBtn.title = liveOff || (liveState === "on" ? "đang chạy nền, phiên khác nhắn được; bấm để tắt live (xem, duyệt quyền: claude attach " + t.title + ")"
+          : "phiên khác không thấy thread này; bấm để bật live (một lượt ngắn)");
+        if (liveOff) { liveBtn.disabled = true; liveBtn.dataset.off = "1"; }
+        else liveBtn.addEventListener("click", (function (kind, id) { return function () { runOne(kind, id); }; })(liveState === "on" ? "stop" : "live", t.id));
+        if (!why || liveState === "on") rowBtns.push(liveBtn);
         var delBtn = put(rereadBox, el("button", "copy danger", "Xoá"));
         delBtn.type = "button";
         delBtn.style.marginRight = "4px";
@@ -752,6 +790,7 @@
         } else delBtn.addEventListener("click", (function (t, note) { return function () { askDelete(t, note); }; })(t, rereadNote));
         if (!why) {
           rereadable.push(t.id);
+          if (isHuman) humanIds[t.id] = true;
           rereadCells[t.id] = { btns: rowBtns, note: rereadNote };
           paintReread(t.id);
         }
@@ -765,7 +804,7 @@
         var vsCell = !wanted[key(t)] || t.archived || t.unlisted ? el("span", "muted", inGroup || "—")
           : (inGroup === wantGroup ? el("span", "ok-text", inGroup) : el("span", "bad-text", (inGroup || "chưa nhóm") + " → " + wantGroup));
         add(body, row([t.title, t.binding || "—", vsCell, (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
-          t.modified, state, el("code", "", t.id.slice(0, 8)), rereadBox]));
+          t.modified, state, liveBtn, el("code", "", t.id.slice(0, 8)), rereadBox]));
       });
       var made = {};
       data.threads.forEach(function (t) { if (!t.archived && !t.unlisted) made[key(t)] = true; });
@@ -798,7 +837,12 @@
         var text;
         if (r.state === "waiting") text = el("span", "muted", "chờ");
         else if (r.state === "running") { current.push(r.name); text = el("span", "", "đang chạy… (" + secs(r.started) + ")"); }
-        else if (r.state === "created") { done++; text = el("span", "ok-text", "tạo mới (" + r.model + ", " + r.effort + ") và gán · " + secs(r.started, r.ended)); }
+        else if (r.state === "created" && !r.ended) { current.push(r.name); text = el("span", "", "tạo mới và gán, " + r.detail + " (" + secs(r.started) + ")"); }
+        else if (r.state === "created") {
+          done++;
+          text = r.live ? el("span", "ok-text", "tạo mới (" + r.model + ", " + r.effort + "), gán, live nền · " + secs(r.started, r.ended))
+            : el("span", "bad-text", "tạo mới (" + r.model + ", " + r.effort + ") và gán; " + (r.detail || "chưa live") + " · " + secs(r.started, r.ended));
+        }
         else if (r.state === "bound") { done++; text = el("span", "ok-text", "đã có, chỉ gán (" + r.ids.length + " thread)"); }
         else { done++; bad++; text = el("span", "bad-text", "lỗi: " + r.detail); }
         add(body, row([r.name, text]));
@@ -807,7 +851,7 @@
       if (job.done) {
         status.className = "gap " + (bad ? "bad-text" : "ok-text");
         status.textContent = label + ": xong " + done + "/" + total + (bad ? ", lỗi " + bad : "") +
-          ". Mở thread trong danh sách chat của VS Code (có thể phải tải lại danh sách).";
+          ". Thread vừa tạo chạy nền (live, phiên khác nhắn được); muốn mở trong VS Code thì Tắt live trước. Thread đã có mà chưa live: bấm Bật live.";
       } else {
         status.className = "gap muted";
         status.textContent = label + ": đang chạy… xong " + done + "/" + total + (bad ? ", lỗi " + bad : "") +
