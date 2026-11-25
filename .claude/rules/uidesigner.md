@@ -91,7 +91,25 @@ view: x=-20u..20u y=-2u..8u  # phần chiến trường được vẽ; y=0 là m
 - Giá trị là số, `<số>u` (chỉ field), hoặc tên `let`/`use`. Không có phép tính: số tính ra thì ghi kết quả và cách tính ở `CLAUDE.md`.
 - Một con số đã có ở frame node khác thì `use`, không chép lại. Node có `use` phải khai node kia trong refs; node kia đổi thì node này phải làm lại.
 - Cảnh báo tự động: hình tràn màn hoặc tràn khung nhìn; hình con tràn hình cha; hai hình cùng cấp chồng nhau mà không có `overlap`; nút có cạnh ngắn dưới 96 px. Vòng tầm (`ring`) không bị kiểm tràn. Cảnh báo không chặn chốt nhưng phải xử lý hoặc giải thích ở `CLAUDE.md`. Lỗi cú pháp là lỗi cấu trúc: phải sửa.
-- Frame chỉ ghi kích thước và vị trí ước lượng. Màu, hình dáng, phong cách vẫn không ghi.
+- Frame chỉ ghi kích thước và vị trí ước lượng. Màu, hình dáng, phong cách vẫn không ghi, trừ phần trang trí dưới đây.
+
+### Trang trí và các rect của một phần tử (chỉ kind: ui, hình hộp)
+Nút (hay khung) có viền, bóng, aura, hoa văn góc thì `x y w h` là **rect cảm nhận**: mặt chính mắt đọc là nút, không gồm viền, bóng. Chữ căn giữa rect này, bấm thì cả nhóm scale quanh tâm của nó. Khai thêm (px, số hoặc tên `let`/`use`):
+```
+- play button x=150 y=300 w=300 h=90 label="Chơi" outline=3,0,10 shadow=0,14,7,0.4 aura=150,top cut=40,22 outline-color=#7a3410 aura-color=#ffd65a>#ffaa00
+```
+- `outline=<dày>[,<dx>,<dy>]`: viền nở quanh mặt, lệch dx,dy (lệch dưới: `3,0,10`).
+- `shadow=<dx>,<dy>,<mờ>[,<alpha 0..1>]`: bóng dưới mặt và viền (alpha mặc định 0.3).
+- `aura=<bán kính>[,top|center|bottom]`: quầng sau nút, tâm ở giữa mép trên, tâm hay mép dưới của mặt.
+- `cut=<rộng>,<cao>`: hoa văn cắt ở góc mặt; chữ phải tránh.
+- `outline-color=`, `shadow-color=`, `aura-color=`: `#rrggbb` (đặc) hoặc `#rrggbb>#rrggbb` (gradient trên xuống). Không ghi thì theo style vòng 1.
+
+Tool tự tính (in ở `gd_frame.py`, `gd_pack.py`; ảnh `.measure.png` vẽ nét đứt):
+- **vùng chạm** = mặt + viền (không gồm bóng, aura): cỡ bấm tối thiểu đo trên rect này; phần thừa ra ngoài mặt là raycast padding của nút.
+- **rect dùng** = mọi thứ được vẽ (ảnh sau khi trim): ảnh claude-concept của phần tử đứng ở rect này; pivot ảnh = tâm cảm nhận trong rect dùng.
+- **an toàn max X** (rộng hết mặt, thụt trên dưới theo `cut`), **an toàn max Y** (cao hết mặt, thụt trái phải), **an toàn trong** (thụt cả hai). Cả ba cùng tâm với rect cảm nhận. Chữ đạt khi lọt max X hoặc max Y; cỡ chữ mặc định chọn theo an toàn trong.
+- Cảnh báo: vùng chạm của hai nút chồng nhau, aura hoặc bóng đè lên hình cùng cấp (cờ `overlap` nếu cố ý), vùng chạm tràn màn. Lỗi: `cut` chiếm hết mặt, số sai dạng.
+- Khoảng cách giữa các nút (thang 8/16/24/40/64) vẫn đo giữa các rect cảm nhận.
 
 ## Claude-concept (bạn đặt và theo dõi)
 - Đặt cho mọi node vòng 4 đã ở `live` có frame, mỗi frame một ảnh, khi vòng 1 trong `live` đã có style. Node vòng 4 trước, node cheat sau (cheat do tool ghép từ phần của các node kia; thiếu phần thì dòng `Order art:` nêu node cần đặt thêm).

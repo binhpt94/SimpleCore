@@ -178,6 +178,24 @@ FRAME_SHAPES = BOX_SHAPES + ROUND_SHAPES + LINE_SHAPES + ("grid",)
 FRAME_NUM_RX = re.compile(r"^(-?\d+(?:\.\d+)?)(u?)$")
 FRAME_NAME_RX = re.compile(r"^[a-z][a-z0-9-]*$")
 FRAME_TOKEN_RX = re.compile(r'(\w[\w-]*)="([^"]*)"|(\w[\w-]*)=(\S+)|(\S+)')
+# The rects of one element of a ui frame (a button with its outline, shadow, glow and corner ornaments). x y w h of a
+# box shape is its perceived rect: the face the eye reads as the element, the text centred in it, the press scales
+# about its centre. The decoration keys give the rest (px, numbers or let/use names, kind: ui only):
+#     outline=<thick>[,<dx>,<dy>]        the rim around the face, grown by thick, pushed by dx,dy (a lip below: 3,0,10)
+#     shadow=<dx>,<dy>,<blur>[,<alpha>]  under the face and rim, alpha 0..1 (default 0.3)
+#     aura=<r>[,top|center|bottom]       a glow behind, centred on that point of the face's top edge, middle or bottom
+#     cut=<w>,<h>                        the ornament cut in the corners of the face: the text keeps clear of it
+#     outline-color= shadow-color= aura-color=   #rrggbb, or #rrggbb>#rrggbb for a gradient top to bottom
+# What comes out (deco_rects): perceived · touch (face and rim: what takes the tap) · used (everything drawn, the
+# trimmed picture) · safe-x (as wide as the face, clear of the ornaments in height) · safe-y (as tall as the face,
+# clear of them in width) · safe (clear both ways); each with its centre, and the pivot of the picture for Unity.
+DECO_KEYS = ("outline", "shadow", "aura", "cut")
+DECO_COLOR_KEYS = ("outline-color", "shadow-color", "aura-color")
+AURA_AT = ("top", "center", "bottom")
+DECO_ALPHA = 0.3
+DECO_COLOR_RX = re.compile(r"^#[0-9a-fA-F]{6}(>#[0-9a-fA-F]{6})?$")
+RECT_NAMES = {"perceived": "cảm nhận", "touch": "vùng chạm", "used": "dùng", "safe-x": "an toàn max X",
+              "safe-y": "an toàn max Y", "safe": "an toàn trong"}
 # The UI a round-4 node needs (ui.md, @GameDesigner's): what is on screen, how it reacts, which screen opens which.
 # The layout of those elements is @UIDesigner's: the frames. A frame names the ui.md it was laid out for (`ui:` its
 # hash), gives its own score (`ai:`) and why it is laid out so (`why:`); the human scores each frame like an idea.
@@ -1075,6 +1093,8 @@ def resolve_frame(f, screen, lookup):
 
         try:
             ox = oy = 0.0
+            if s["shape"] not in BOX_SHAPES and any(k in p for k in DECO_KEYS + DECO_COLOR_KEYS):
+                raise ValueError(f"{label}: {', '.join(DECO_KEYS)} chỉ dùng cho hình hộp ({', '.join(BOX_SHAPES)})")
             if "parent" in p:
                 parent = placed.get(p["parent"][1])
                 if parent is None or parent["shape"] not in BOX_SHAPES + ("grid",):
@@ -1082,6 +1102,9 @@ def resolve_frame(f, screen, lookup):
                 r["parent"], ox, oy = parent["id"], parent["x"], parent["y"]
             if s["shape"] in BOX_SHAPES:
                 r.update(x=get("x") + ox, y=get("y") + oy, w=get("w"), h=get("h"))
+                deco = read_deco(p, num, label, s["shape"], field)
+                if deco:
+                    r["deco"] = deco
                 if s["shape"] == "bar":
                     fill = get("fill", False, 1.0)
                     if not 0 <= fill <= 1:
@@ -1109,6 +1132,11 @@ def resolve_frame(f, screen, lookup):
             for key in ("w", "h", "r", "cw", "ch"):
                 if key in r and r[key] <= 0:
                     raise ValueError(f"{label}: {key} phải lớn hơn 0")
+            if "deco" in r:
+                cw, chh = r["deco"].get("cut", (0, 0))
+                if 2 * cw >= r["w"] or 2 * chh >= r["h"]:
+                    raise ValueError(f"{label}: cut={cw:g},{chh:g} chiếm hết mặt {r['w']:g}x{r['h']:g}: không còn chỗ cho chữ")
+                r["rects"] = deco_rects(r["bbox"], r["deco"])
         except ValueError as e:
             err(f"dòng {s['line']}: {e}")
             continue
@@ -1128,17 +1156,152 @@ def resolve_frame(f, screen, lookup):
             warn(f"{r['id']}: tràn ra ngoài {'khung nhìn' if field else 'màn hình'}")
         elif r["parent"] and not inside(r["bbox"], placed[r["parent"]]["bbox"]):
             warn(f"{r['id']}: tràn ra ngoài '{r['parent']}'")
-        if r["shape"] == "button" and not field and min(r["w"], r["h"]) < TAP_MIN:
-            warn(f"{r['id']}: nút {fmt(r['w'])}x{fmt(r['h'])} px, cạnh ngắn nhỏ hơn cỡ bấm tối thiểu {TAP_MIN} px")
+        touch = r.get("rects", {}).get("touch")
+        if touch and inside(r["bbox"], view) and not inside(touch, view):
+            warn(f"{r['id']}: vùng chạm (mặt và viền) tràn ra ngoài màn hình")
+        tw, th = (touch[2] - touch[0], touch[3] - touch[1]) if touch else (r.get("w"), r.get("h"))
+        if r["shape"] == "button" and not field and min(tw, th) < TAP_MIN:
+            warn(f"{r['id']}: nút {fmt(tw)}x{fmt(th)} px" + (" (vùng chạm)" if touch else "")
+                 + f", cạnh ngắn nhỏ hơn cỡ bấm tối thiểu {TAP_MIN} px")
+    def hit(p, q):
+        return min(p[2], q[2]) - max(p[0], q[0]) > 1e-9 and min(p[3], q[3]) - max(p[1], q[1]) > 1e-9
+
+    def touch_of(r):
+        return r.get("rects", {}).get("touch", r["bbox"])
+
     solid = [r for r in out["shapes"] if r["shape"] not in ROUND_SHAPES[1:] + LINE_SHAPES]
     for i, a in enumerate(solid):
         for b in solid[i + 1:]:
             if a["parent"] != b["parent"] or a["overlap"] or b["overlap"]:
                 continue
-            ba, bb = a["bbox"], b["bbox"]
-            if min(ba[2], bb[2]) - max(ba[0], bb[0]) > 1e-9 and min(ba[3], bb[3]) - max(ba[1], bb[1]) > 1e-9:
+            if hit(a["bbox"], b["bbox"]):
                 warn(f"{a['id']} và {b['id']} chồng lên nhau (thêm cờ overlap nếu cố ý)")
+            elif hit(touch_of(a), touch_of(b)):
+                warn(f"vùng chạm (mặt và viền) của {a['id']} và {b['id']} chồng lên nhau (thêm cờ overlap nếu cố ý)")
+            else:
+                for x, y in ((a, b), (b, a)):
+                    if "rects" in x and hit(x["rects"]["used"], touch_of(y)):
+                        warn(f"aura hoặc bóng của {x['id']} đè lên {y['id']} (thêm cờ overlap nếu cố ý)")
+                        break
     return out
+
+
+def read_deco(p, num, label, shape, field):
+    """{outline: (thick, dx, dy), shadow: (dx, dy, blur, alpha), aura: (r, at), cut: (w, h), colors: {key: text}} of
+    the decoration keys of one box shape (only those given); {} when it has none."""
+    given = [k for k in DECO_KEYS + DECO_COLOR_KEYS if k in p]
+    if not given:
+        return {}
+    if field:
+        raise ValueError(f"{label}: {', '.join(given)} chỉ dùng cho kind: ui")
+    out = {}
+
+    def nums(key, sizes, words=()):
+        kind_, raw = p[key]
+        parts = raw.split(",")
+        if kind_ == "text" or len(parts) not in sizes:
+            raise ValueError(f"{label}: {key}= cần {' hoặc '.join(str(n) for n in sizes)} số cách nhau bởi dấu phẩy")
+        return [x if x in words else num(x, f"{label} {key}") for x in parts]
+
+    if "outline" in p:
+        v = nums("outline", (1, 3))
+        thick, dx, dy = (v + [0.0, 0.0])[:3]
+        if thick < 0:
+            raise ValueError(f"{label}: outline dày phải từ 0")
+        out["outline"] = (thick, dx, dy)
+    if "shadow" in p:
+        v = nums("shadow", (3, 4))
+        dx, dy, blur, alpha = (v + [DECO_ALPHA])[:4]
+        if blur < 0 or not 0 <= alpha <= 1:
+            raise ValueError(f"{label}: shadow mờ phải từ 0, alpha từ 0 tới 1")
+        out["shadow"] = (dx, dy, blur, alpha)
+    if "aura" in p:
+        kind_, raw = p["aura"]
+        parts = raw.split(",")
+        if kind_ == "text" or len(parts) not in (1, 2) or (len(parts) == 2 and parts[1] not in AURA_AT):
+            raise ValueError(f"{label}: aura= cần <bán kính>[,{'|'.join(AURA_AT)}]")
+        radius = num(parts[0], f"{label} aura")
+        if radius <= 0:
+            raise ValueError(f"{label}: aura bán kính phải lớn hơn 0")
+        out["aura"] = (radius, parts[1] if len(parts) == 2 else "center")
+    if "cut" in p:
+        cw, ch = nums("cut", (2,))
+        if cw < 0 or ch < 0:
+            raise ValueError(f"{label}: cut phải từ 0")
+        out["cut"] = (cw, ch)
+    colors = {}
+    for key in DECO_COLOR_KEYS:
+        if key in p:
+            if not DECO_COLOR_RX.match(p[key][1]):
+                raise ValueError(f"{label}: {key} phải là #rrggbb hoặc #rrggbb>#rrggbb (gradient trên xuống)")
+            if key.split("-")[0] not in out:
+                raise ValueError(f"{label}: {key} cần {key.split('-')[0]}=")
+            colors[key] = p[key][1]
+    if colors:
+        out["colors"] = colors
+    return out
+
+
+def _union(a, b):
+    return [min(a[0], b[0]), min(a[1], b[1]), max(a[2], b[2]), max(a[3], b[3])]
+
+
+def deco_rects(box, deco):
+    """{name: [x1, y1, x2, y2]} of the rects of one decorated box (RECT_NAMES), y down, plus 'centers' {name: [x, y]},
+    'pivot' [x, y] (the perceived centre in the used rect, 0..1, y up as Unity reads it) and 'padding' {left, right,
+    top, bottom} (how far the touch rect reaches past the face: the raycast padding of the button)."""
+    x1, y1, x2, y2 = box
+    thick, dx, dy = deco.get("outline", (0.0, 0.0, 0.0))
+    grown = [x1 - thick, y1 - thick, x2 + thick, y2 + thick]
+    touch = _union(grown, [grown[0] + dx, grown[1] + dy, grown[2] + dx, grown[3] + dy]) if "outline" in deco else list(box)
+    used = list(touch)
+    if "shadow" in deco:
+        sx, sy, blur, _ = deco["shadow"]
+        used = _union(used, [touch[0] + sx - blur, touch[1] + sy - blur, touch[2] + sx + blur, touch[3] + sy + blur])
+    if "aura" in deco:
+        radius, at = deco["aura"]
+        ax, ay = (x1 + x2) / 2, {"top": y1, "center": (y1 + y2) / 2, "bottom": y2}[at]
+        used = _union(used, [ax - radius, ay - radius, ax + radius, ay + radius])
+    cw, ch = deco.get("cut", (0.0, 0.0))
+    rects = {"perceived": list(box), "touch": touch, "used": used, "safe-x": [x1, y1 + ch, x2, y2 - ch],
+             "safe-y": [x1 + cw, y1, x2 - cw, y2], "safe": [x1 + cw, y1 + ch, x2 - cw, y2 - ch]}
+    rects = {k: [round(v, 3) for v in r] for k, r in rects.items()}
+    out = dict(rects)
+    out["centers"] = {k: [round((r[0] + r[2]) / 2, 3), round((r[1] + r[3]) / 2, 3)] for k, r in rects.items()}
+    cx, cy = out["centers"]["perceived"]
+    out["pivot"] = [round((cx - used[0]) / (used[2] - used[0]), 4), round((used[3] - cy) / (used[3] - used[1]), 4)]
+    out["padding"] = {"left": round(x1 - touch[0], 3), "right": round(touch[2] - x2, 3),
+                      "top": round(y1 - touch[1], 3), "bottom": round(touch[3] - y2, 3)}
+    return out
+
+
+def deco_brief(r):
+    """Lines for an AI (and the code of the feature) on the rects of one decorated shape."""
+    rc, d = r["rects"], r["deco"]
+    def box(k):
+        a = rc[k]
+        return f"{a[0]:g},{a[1]:g} {a[2] - a[0]:g}x{a[3] - a[1]:g} tâm {rc['centers'][k][0]:g},{rc['centers'][k][1]:g}"
+    parts = []
+    if "outline" in d:
+        parts.append("viền dày {:g} lệch {:g},{:g}".format(*d["outline"]))
+    if "shadow" in d:
+        parts.append("bóng lệch {:g},{:g} mờ {:g} alpha {:g}".format(*d["shadow"]))
+    if "aura" in d:
+        parts.append(f"aura r={d['aura'][0]:g} tâm ở {d['aura'][1]} mặt")
+    if "cut" in d:
+        parts.append("hoa văn góc {:g}x{:g}".format(*d["cut"]))
+    parts += [f"{k.split('-')[0]} màu {v}" for k, v in (d.get("colors") or {}).items()]
+    pad = rc["padding"]
+    lines = ["      trang trí: " + "; ".join(parts)]
+    to_face = [k for k in ("touch", "safe-x", "safe-y", "safe") if rc[k] == rc["perceived"]]
+    to_touch = ["used"] if rc["used"] == rc["touch"] else []
+    lines += [f"      rect {RECT_NAMES[k]}: {box(k)}" for k in RECT_NAMES if k not in to_face + to_touch]
+    same = ([", ".join(RECT_NAMES[k] for k in to_face) + " = cảm nhận"] if to_face else []) + (["dùng = vùng chạm"] if to_touch else [])
+    if same:
+        lines.append("      (" + "; ".join(same) + ")")
+    lines.append(f"      Unity: pivot ảnh {rc['pivot'][0]:g},{rc['pivot'][1]:g}; raycast padding trái {pad['left']:g} phải {pad['right']:g} "
+                 f"trên {pad['top']:g} dưới {pad['bottom']:g}")
+    return lines
 
 
 # What a claude concept does with each shape of a frame (see frame_roles).
@@ -1192,6 +1355,9 @@ def shape_slots(fr, r):
         return (round((x - x1) * k, 3), round(((y2 - y - h) if field else (y - y1)) * k, 3), round(w * k, 3), round(h * k, 3))
     if r["shape"] == "circle":
         return [at(r["cx"] - r["r"], r["cy"] - r["r"], 2 * r["r"], 2 * r["r"])]
+    if "rects" in r:      # the picture holds the rim, the shadow and the glow too: it stands in the used rect
+        u = r["rects"]["used"]
+        return [at(u[0], u[1], u[2] - u[0], u[3] - u[1])]
     if r["shape"] == "grid":
         step_x, step_y = r["cw"] + r["gap"], r["ch"] + r["gap"]
         return [at(r["x"] + i * step_x, (r["y"] + (r["rows"] - 1 - j) * step_y) if field else (r["y"] + j * step_y), r["cw"], r["ch"])
@@ -1294,6 +1460,54 @@ def font_css(embed=True, prefix="view/fonts/", weights=(400, 700)):
     return "\n".join(rules)
 
 
+def _deco_box(cls, a, X, Y, L, extra=""):
+    return f'<rect class="{cls}" x="{X(a[0]):g}" y="{Y(a[1]):g}" width="{L(a[2] - a[0]):g}" height="{L(a[3] - a[1]):g}"{extra}/>'
+
+
+def deco_back_svg(r, X, Y, L, rx):
+    """What a decorated box draws behind its face: the glow, the shadow, the rim."""
+    d, rc, out = r["deco"], r["rects"], []
+    x1, y1, x2, y2 = r["bbox"]
+    if "aura" in d:
+        radius, at = d["aura"]
+        ay = {"top": y1, "center": (y1 + y2) / 2, "bottom": y2}[at]
+        out.append(f'<circle class="fr-aura" cx="{X((x1 + x2) / 2):g}" cy="{Y(ay):g}" r="{L(radius):g}"/>')
+    if "shadow" in d:
+        sx, sy, blur, alpha = d["shadow"]
+        t = rc["touch"]
+        out.append(_deco_box("fr-shadow", [t[0] + sx, t[1] + sy, t[2] + sx, t[3] + sy], X, Y, L,
+                             f'{rx} style="opacity:{max(0.12, alpha):g}"'))
+    if "outline" in d:
+        thick, dx, dy = d["outline"]
+        g = [x1 - thick, y1 - thick, x2 + thick, y2 + thick]
+        out.append(_deco_box("fr-outline", g, X, Y, L, rx))
+        if dx or dy:
+            out.append(_deco_box("fr-outline", [g[0] + dx, g[1] + dy, g[2] + dx, g[3] + dy], X, Y, L, rx))
+    return out
+
+
+def deco_front_svg(r, X, Y, L, concept):
+    """What a decorated box draws over its face: the corner ornaments; and, unless as a concept, the safe rects
+    (dashed) and the centre the press scales about."""
+    d, rc, out = r["deco"], r["rects"], []
+    x1, y1, x2, y2 = r["bbox"]
+    if "cut" in d:
+        cw, ch = d["cut"]
+        for cx, sx in ((x1, 1), (x2, -1)):
+            for cy, sy in ((y1, 1), (y2, -1)):
+                pts = f"{X(cx):g},{Y(cy):g} {X(cx + sx * cw):g},{Y(cy):g} {X(cx):g},{Y(cy + sy * ch):g}"
+                out.append(f'<polygon class="fr-cut" points="{pts}"/>')
+    if not concept:
+        for k in ("safe-x", "safe-y", "safe"):
+            if rc[k] != rc["perceived"]:
+                out.append(_deco_box("fr-safe fr-" + k, rc[k], X, Y, L))
+        if rc["touch"] != rc["perceived"]:
+            out.append(_deco_box("fr-touch", rc["touch"], X, Y, L))
+        cx, cy = rc["centers"]["perceived"]
+        out.append(f'<circle class="fr-center" cx="{X(cx):g}" cy="{Y(cy):g}" r="6"/>')
+    return out
+
+
 def frame_svg(fr, only=None, bare=False, concept=False):
     """The resolved frame drawn as one <svg> (classes fr-*: the page and gd_frame.py --html give the colours).
     ui is drawn in px, y down; field in u, y up, scaled to px here. Every shape carries a <title> with its numbers
@@ -1345,7 +1559,11 @@ def frame_svg(fr, only=None, bare=False, concept=False):
                         body.append(f'<rect class="fr-cell" x="{cx:g}" y="{cy:g}" width="{L(r["cw"]):g}" height="{L(r["ch"]):g}"/>')
             else:
                 rx = f' rx="{min(w, h) * 0.12:g}"' if r["shape"] in ("round-rect", "button") else ""
+                if "rects" in r:
+                    body += deco_back_svg(r, X, Y, L, rx)
                 body.append(f'<rect class="{cls}" x="{left:g}" y="{top:g}" width="{w:g}" height="{h:g}"{rx}/>')
+                if "rects" in r:
+                    body += deco_front_svg(r, X, Y, L, concept)
                 if r["shape"] == "bar":
                     body.append(f'<rect class="fr-fill" x="{left:g}" y="{top:g}" width="{w * r["fill"]:g}" height="{h:g}"/>')
                     tip += f" fill={r['fill']:g}"
@@ -1372,6 +1590,8 @@ def frame_svg(fr, only=None, bare=False, concept=False):
             text = display_text(r)
             if text and "w" in r:
                 tx, ty, size = left + w / 2, top + h / 2, fit_text(text, w, h)
+                if "rects" in r:      # clear of the corner ornaments: the bigger size that fits safe-x or safe-y
+                    size = max(fit_text(text, L(a[2] - a[0]), L(a[3] - a[1])) for a in (r["rects"]["safe-x"], r["rects"]["safe-y"]))
                 tcls += " fr-strong" if r["shape"] == "button" else ""
         label = (f'<text class="{tcls}" x="{tx:g}" y="{ty:g}" font-size="{size:g}" text-anchor="middle" '
                  f'dominant-baseline="middle">{_esc(text)}</text>') if text else ""
@@ -1393,6 +1613,14 @@ FRAME_CSS = """.fr-svg { width: 100%; height: auto; display: block; }
 .fr-line, .fr-arrow { stroke: var(--fr-ink, #44546a); stroke-width: 5; }
 .fr-text { fill: var(--fr-ink, #44546a); font-family: Roboto, system-ui, sans-serif; pointer-events: none; }
 .fr-strong { font-weight: 700; }
+.fr-aura { fill: var(--fr-warn, #d07a18); opacity: .14; }
+.fr-shadow { fill: #000; }
+.fr-outline { fill: var(--fr-ink, #44546a); }
+.fr-cut { fill: var(--fr-bg, #f6f7f9); stroke: var(--fr-ink, #44546a); stroke-width: 2; }
+.fr-safe { fill: none; stroke: #d63cd6; stroke-width: 3; stroke-dasharray: 10 6; }
+.fr-safe-x { stroke: #e08a00; } .fr-safe-y { stroke: #8a6cf0; }
+.fr-touch { fill: none; stroke: #d84040; stroke-width: 3; stroke-dasharray: 4 4; }
+.fr-center { fill: #20b050; }
 .fr-shape:hover > :not(text) { stroke-width: 8; }"""
 
 
@@ -1409,6 +1637,11 @@ def frame_brief(fr):
     lines = [head + (f": {fr['title']}" if fr["title"] else "")]
     if fr["values"]:
         lines.append("  số: " + ", ".join(f"{k}={v:g}" for k, v in fr["values"].items()))
+    if any("rects" in r for r in fr["shapes"]):
+        lines.append("  (hình có trang trí: x y w h là rect cảm nhận = RectTransform của phần tử, chữ căn giữa nó, bấm thì scale "
+                     "quanh tâm nó; ảnh của phần tử là rect dùng, đặt pivot ảnh như dòng Unity; vùng chạm = mặt và viền, "
+                     "raycast padding là phần vùng chạm thừa ra ngoài mặt (Image.raycastPadding ghi số âm); chữ phải lọt an "
+                     "toàn max X hoặc max Y, cỡ chữ mặc định theo rect an toàn trong)")
     for r in fr["shapes"]:
         if "w" in r:
             pos = f"x={r['x']:g} y={r['y']:g} w={r['w']:g} h={r['h']:g}"
@@ -1422,6 +1655,8 @@ def frame_brief(fr):
             pos = f"từ {r['x1']:g},{r['y1']:g} tới {r['x2']:g},{r['y2']:g} (dài {r['length']:g})"
         extra = (f" trong {r['parent']}" if r["parent"] else "") + (f" \"{r['label']}\"" if r["label"] else "")
         lines.append(f"  - {r['id']} {r['shape']} {pos}{extra}")
+        if "rects" in r:
+            lines += deco_brief(r)
     lines += [f"  ! {w}" for w in fr["warnings"]]
     lines += [f"  LỖI {e}" for e in fr["errors"]]
     return lines

@@ -1198,8 +1198,56 @@ def run_diff(root):
     check("the page carries no raw files", any("_files" in n for t in ("idea", "live") for n in gd.walk(gd.snapshot(root)[t])), False)
 
 
+def run_deco(root):
+    """The rects of a decorated element: x y w h is the perceived rect, outline/shadow/aura/cut give the rest."""
+    def res(text, kind="ui"):
+        return gd.resolve_frame(gd.parse_frame(f"kind: {kind}\n" + text), gd.SCREENS["landscape"], lambda p, n: (None, "x"))
+    r = res("let rim = 3\n- play button x=170 y=170 w=300 h=90 label=\"CHƠI\" outline=rim,0,10 shadow=0,14,7,0.4 aura=150,top cut=40,22 "
+            "outline-color=#7a3410 aura-color=#ffd65a>#ffaa00\n")
+    rc = r["shapes"][0]["rects"]
+    check("deco: the six rects of the button of the example",
+          (rc["perceived"], rc["touch"], rc["safe-x"], rc["safe-y"], rc["safe"]),
+          ([170, 170, 470, 260], [167, 167, 473, 273], [170, 192, 470, 238], [210, 170, 430, 260], [210, 192, 430, 238]))
+    check("deco: used holds the shadow and the glow centred on the top edge (r=150 reaches past the shadow)", rc["used"], [160, 20, 480, 320])
+    check("deco: every safe rect is centred on the perceived centre",
+          {tuple(rc["centers"][k]) for k in ("perceived", "safe-x", "safe-y", "safe")}, {(320, 215)})
+    check("deco: pivot (y up) and raycast padding", (rc["pivot"], rc["padding"]),
+          ([0.5, round((320 - 215) / 300, 4)], {"left": 3, "right": 3, "top": 3, "bottom": 13}))
+    check("deco: the colours are kept", r["shapes"][0]["deco"]["colors"], {"outline-color": "#7a3410", "aura-color": "#ffd65a>#ffaa00"})
+    check("deco: a picture of the button stands in the used rect", gd.shape_slots(r, r["shapes"][0]), [(160, 20, 320, 300)])
+    plain = res("- b button x=0 y=0 w=200 h=120\n")
+    check("deco: a shape without decoration has no rects and keeps its slot", ("rects" in plain["shapes"][0], gd.shape_slots(plain, plain["shapes"][0])),
+          (False, [(0, 0, 200, 120)]))
+    for label, text in (("cut eats the face", "- a button x=0 y=0 w=100 h=100 cut=50,10"),
+                        ("not on a ring", "- a ring cx=0 cy=0 r=5 aura=3"),
+                        ("outline needs 1 or 3 numbers", "- a button x=0 y=0 w=100 h=100 outline=1,2"),
+                        ("a colour without its decoration", "- a button x=0 y=0 w=100 h=100 aura-color=#ffffff"),
+                        ("a bad colour", "- a button x=0 y=0 w=100 h=100 aura=5 aura-color=red"),
+                        ("aura at an unknown point", "- a button x=0 y=0 w=100 h=100 aura=10,left"),
+                        ("shadow alpha above 1", "- a button x=0 y=0 w=100 h=100 shadow=0,2,3,2")):
+        check("deco error: " + label, bool(res(text)["errors"]))
+    check("deco error: ui only", bool(res("view: x=0..10 y=0..10\n- a rect x=0 y=0 w=1u h=1u outline=1", "field")["errors"]))
+    w = res("- a button x=100 y=100 w=300 h=100 outline=3,0,10\n- b button x=100 y=212 w=300 h=100\n")["warnings"]
+    check("deco: a lip reaching into the next button's touch rect", any("vùng chạm" in x and "chồng" in x for x in w))
+    w = res("- a button x=100 y=100 w=300 h=100 aura=200,top\n- b button x=100 y=-60 w=300 h=100 overlap\n- c button x=420 y=100 w=300 h=100\n")["warnings"]
+    check("deco: a glow over a neighbour warns; overlap silences it", (any("aura hoặc bóng của a đè lên c" in x for x in w), any("đè lên b" in x for x in w)), (True, False))
+    w = res("- a button x=0 y=0 w=300 h=88 outline=4,0,10\n- b button x=400 y=1000 w=300 h=80 outline=0,0,20\n")["warnings"]
+    check("deco: the tap size is measured on the touch rect; a rim off screen warns",
+          (any(x.startswith("a: nút") for x in w), any(x.startswith("b: nút") for x in w), any("b: vùng chạm" in x and "tràn" in x for x in w)),
+          (False, False, True))
+    r["file"], r["uses"] = "t.frame", []
+    brief = "\n".join(gd.frame_brief(r))
+    check("deco: the brief gives the rects, the pivot and the padding once explained",
+          ("rect an toàn max X: 170,192 300x46" in brief, "pivot ảnh 0.5" in brief, brief.count("hình có trang trí"), "raycast padding trái 3 phải 3 trên 3 dưới 13" in brief),
+          (True, True, 1, True))
+    measure, concept = gd.frame_svg(r), gd.frame_svg(r, concept=True)
+    check("deco: drawn with glow, shadow, rim, corner cuts; the safe rects only when measuring",
+          (all(c in measure for c in ("fr-aura", "fr-shadow", "fr-outline", "fr-cut", "fr-safe-x", "fr-safe-y", "fr-center")),
+           "fr-safe" in concept, "fr-cut" in concept), (True, False, True))
+
+
 def main():
-    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui):
+    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)
