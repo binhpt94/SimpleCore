@@ -495,6 +495,34 @@ namespace Game.Enemy.Tests
             Assert.That(_castle.Hits.Count, Is.GreaterThan(0));
         }
 
+        [Test]
+        public void After_losing_and_replaying_the_stage_is_not_left_frozen_and_defeated_enemies_shrink_away()
+        {
+            var runFlow = new FakeRunFlow();
+            var stage = new FakeStage();
+            using var presenter = new EnemyPresenter(_field, runFlow, stage);
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            stage.RaiseFrame(Step);
+
+            // Run 1 is lost: the castle fell. EnemyParticipant answers BattleStopped with Stop.
+            _field.Stop();
+            runFlow.RaiseStepChanged(RunStep.Ending);
+            runFlow.RaiseStepChanged(RunStep.Lost);
+            Assert.That(stage.Paused, Is.True, "frozen while the run is over");
+
+            // Replay, in RunFlow's order: StepChanged(Playing) comes before RunStarted.
+            runFlow.RaiseStepChanged(RunStep.Playing);
+            _field.ResetForRun();                  // EnemyParticipant answers RunStarted with ResetForRun
+            stage.RaiseFrame(Step);
+
+            Assert.That(stage.Paused, Is.False, "run 2 is playing");
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.Damage(Handle(), 1000f);
+            stage.RaiseFrame(Step);
+            Assert.That(stage.Defeated.Count, Is.EqualTo(1), "the enemy defeated in run 2 is shrunk away");
+            Assert.That(stage.Paused, Is.False);
+        }
+
         private static EnemyConfig AllTypesConfig()
         {
             var real = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);
@@ -562,18 +590,27 @@ namespace Game.Enemy.Tests
             public void Flash(int handle) => Flashed.Add(handle);
             public void Defeat(int handle) => Defeated.Add(handle);
             public void RemoveAll() { }
-            public void SetPaused(bool paused) { }
+            public bool Paused { get; private set; }
+            public void SetPaused(bool paused) => Paused = paused;
             public void Close() { }
         }
 
         private sealed class FakeRunFlow : IRunFlow
         {
             public bool Paused;
-            public RunStep Step => Paused ? RunStep.Paused : RunStep.Playing;
+            private RunStep _step = RunStep.Playing;
+            public RunStep Step => Paused ? RunStep.Paused : _step;
             public RunTeam Team => default;
             public bool IsPaused => Paused;
-#pragma warning disable 67
+
+            public void RaiseStepChanged(RunStep step)
+            {
+                _step = step;
+                StepChanged?.Invoke(step);
+            }
+
             public event Action<RunStep> StepChanged;
+#pragma warning disable 67
             public event Action<RunTeam> RunStarted;
             public event Action BattleStarted;
             public event Action BattleStopped;

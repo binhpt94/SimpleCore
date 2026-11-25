@@ -34,14 +34,15 @@
    "tests": [
     "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it",
     "EnemyCombatTests.The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones",
-    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers",
+    "EnemyCombatTests.After_losing_and_replaying_the_stage_is_not_left_frozen_and_defeated_enemies_shrink_away"
    ],
    "play": "",
    "hash": "817d2243d753",
    "text": "Máu ≤ 0 thì quái bị hạ ngay khung hình đó: không đánh, không bị nhắm, cho tiền, thu nhỏ về 0 trong 0.3s rồi biến mất\n0.3s thu nhỏ chỉ để nhìn; quái không chắn đòn khác trong lúc đó. Đòn vùng không tính quái đã bị hạ.",
    "title": "Máu ≤ 0 thì quái bị hạ ngay khung hình đó: không đánh, không bị nhắm, cho tiền, thu nhỏ về 0 trong 0.3s rồi biến mất",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:06:26"
+   "at": "2026-11-25 13:13:47"
   },
   "no-regen-enemy": {
    "state": "verified",
@@ -320,6 +321,20 @@
   {
    "at": "2026-11-25 12:06:26",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:12:59",
+   "id": "defeated-values",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it, EnemyCombatTests.The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers, EnemyCombatTests.After_losing_and_replaying_the_stage_is_not_left_frozen_and_defeated_enemies_shrink_away"
+  },
+  {
+   "at": "2026-11-25 13:13:47",
+   "id": "defeated-values",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

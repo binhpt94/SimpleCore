@@ -164,14 +164,15 @@
    "note": "",
    "tests": [
     "HeroConfigValuesTests.Heroes_target_enemies_within_16u_and_walk_within_15u_of_the_castle_centre",
-    "HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges"
+    "HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges",
+    "HeroEdgeCaseTests.Each_hero_walks_at_its_own_run_speed"
    ],
    "play": "",
-   "hash": "c4aa8cb8f34c",
-   "text": "## Làm gì\nMỗi khung hình, với mỗi hero đang đứng (không gục, không trong 0.3s hồi sinh):\n1. Trạng thái **Đánh**: mục tiêu còn sống và khoảng cách ≤ tầm thì giữ mục tiêu, ra đòn theo nhịp; không thì sang bước 2.\n2. Chọn mục tiêu: quái còn sống, tâm trong [-16u, +16u], khoảng cách nhỏ nhất.\n3. Có mục tiêu: khoảng cách ≤ tầm thì sang **Đánh** (đứng yên); không thì **Đi tới** mục tiêu với tốc độ chạy, không vượt [-15u, +15u].\n4. Không có mục tiêu: **Đứng chờ**: đi về điểm xuất phát của chỗ mình rồi đứng yên.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Vùng quái được nhắm | tâm x từ -16 tới +16 | u | Bằng màn hình; không đánh thứ người chơi chưa thấy |\n| Vùng hero đi được | tâm x từ -15 tới +15 | u | Bộ số chung; hero luôn nằm trọn trong màn |\n| Tốc độ chạy | theo từng hero (2.2-3.5) | u/s | `feature-hero/hero-list/hero-roster-values` |\n| Điểm đứng chờ | -1.5 / +1.5 / -1.5 theo chỗ 1 / 2 / 3 | x (u) | Trùng điểm xuất phát |\n| Chọn khi bằng khoảng cách | gần thành hơn, rồi ra trước | | Ưu tiên con nguy hơn cho thành |\n| Hero chắn nhau | không | | Luật vòng 3; hero đi xuyên qua nhau |\n\nThời gian dự kiến: Hiệp sĩ từ x=1.5u đi tới quái mới vào ở x=16u (mép trong 15.5u) mất khoảng (15.5-1.2-2)/2.5 ≈ 4.9s; quái cũng đi vào nên gặp sớm hơn, khoảng 3s.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Luật nhắm | như bảng | như bảng | như bảng |\n| Vùng nhắm / vùng đi | ±16u / ±15u | ±16u / ±15u | chỉnh nếu đổi khung màn |\n| Quay mặt | lật sprite theo hướng đi hoặc hướng mục tiêu | như IDEA | như IDEA, có anim quay |",
+   "hash": "d54623b9b9b1",
+   "text": "## Làm gì\nMỗi khung hình, với mỗi hero đang đứng (không gục, không trong 0.3s hồi sinh):\n1. Trạng thái **Đánh**: mục tiêu còn sống và khoảng cách ≤ tầm thì giữ mục tiêu, ra đòn theo nhịp; không thì sang bước 2.\n2. Chọn mục tiêu: quái còn sống, tâm trong [-16u, +16u], khoảng cách nhỏ nhất.\n3. Có mục tiêu: khoảng cách ≤ tầm thì sang **Đánh** (đứng yên); không thì **Đi tới** mục tiêu với tốc độ chạy, không vượt [-15u, +15u].\n4. Không có mục tiêu: **Đứng chờ**: đi về điểm xuất phát của chỗ mình rồi đứng yên.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Vùng quái được nhắm | tâm x từ -16 tới +16 | u | Bằng màn hình; không đánh thứ người chơi chưa thấy |\n| Vùng hero đi được | tâm x từ -15 tới +15 | u | Bộ số chung; hero luôn nằm trọn trong màn |\n| Tốc độ chạy | theo từng hero, mỗi hero một mức (2.0-3.5) | u/s | Giữ ở `feature-hero/hero-list/hero-roster-values`; node này chỉ dùng |\n| Điểm đứng chờ | -1.5 / +1.5 / -1.5 theo chỗ 1 / 2 / 3 | x (u) | Trùng điểm xuất phát |\n| Chọn khi bằng khoảng cách | gần thành hơn, rồi ra trước | | Ưu tiên con nguy hơn cho thành |\n| Hero chắn nhau | không | | Luật vòng 3; hero đi xuyên qua nhau |\n\nThời gian dự kiến: Hiệp sĩ (2.0u/s) từ x=1.5u đi tới quái mới vào ở x=16u (mép trong 15.5u) mất khoảng (15.5-1.2-2)/2.0 ≈ 6.2s; quái cũng đi vào nên gặp sớm hơn, khoảng 3.5s. Kiếm khách (3.5u/s) cùng quãng đó mất khoảng 3.5s, gặp quái sau khoảng 2.5s. Trong đội cùng lượt, hero nhanh tới quái trước và đứng chắn một mình một lúc.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Luật nhắm | như bảng | như bảng | như bảng |\n| Vùng nhắm / vùng đi | ±16u / ±15u | ±16u / ±15u | chỉnh nếu đổi khung màn |\n| Quay mặt | lật sprite theo hướng đi hoặc hướng mục tiêu | như IDEA | như IDEA, có anim quay |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:00"
+   "at": "2026-11-25 13:03:33"
   }
  },
  "log": [
@@ -360,6 +361,20 @@
   {
    "at": "2026-11-25 12:07:37",
    "id": "retarget-check",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 13:02:52",
+   "id": "params",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Heroes_target_enemies_within_16u_and_walk_within_15u_of_the_castle_centre, HeroConfigValuesTests.The_team_has_three_slots_spawning_at_the_castle_edges, HeroEdgeCaseTests.Each_hero_walks_at_its_own_run_speed"
+  },
+  {
+   "at": "2026-11-25 13:03:33",
+   "id": "params",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

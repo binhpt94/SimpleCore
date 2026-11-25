@@ -45,9 +45,15 @@ namespace Game.Enemy
         }
 
         /// <summary>One frame: nothing moves while paused or after the battle stopped.</summary>
+        /// <remarks>
+        /// The stage's frozen state is worked out again on every frame, so it never depends on the order in which
+        /// the run's signals arrive (on replay StepChanged comes before RunStarted resets the field).
+        /// </remarks>
         public void OnFrame(float seconds)
         {
-            if (_runFlow.IsPaused || _field.IsStopped) return;
+            var frozen = _runFlow.IsPaused || _field.IsStopped;
+            _stage.SetPaused(frozen);
+            if (frozen) return;
             _field.Tick(seconds);
             _field.GetLooks(_looks);
             for (var i = 0; i < _looks.Count; i++) _stage.Move(_looks[i]);
