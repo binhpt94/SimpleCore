@@ -395,6 +395,34 @@
     }, ["references"]);
   }
 
+  // ---------------------------------------------------------------- tài liệu: khái niệm chung, ảnh nằm ở docs/
+  tab("tai-lieu", "Tài liệu", function (pane) {
+    add(pane, el("h1", "", "Tài liệu"));
+    add(pane, el("p", "sub", "Khái niệm dùng chung cho thiết kế và code. Ảnh nằm ở Management/docs/."));
+    var s = put(pane, section("Các rect của một nút (frame: outline, shadow, aura, cut)"));
+    var link = put(s, el("a"));
+    link.href = "docs/button-rects.png";
+    link.target = "_blank";
+    var img = put(link, el("img"));
+    img.src = "docs/button-rects.png";
+    img.alt = "Nút mẫu với các rect vẽ bằng màu khác nhau";
+    img.style.cssText = "max-width:100%;height:auto;display:block;border-radius:6px;margin:4px 0 12px";
+    var table = put(s, el("table"));
+    add(table, headRow(["Rect", "Gồm", "Dùng để"]));
+    var body = put(table, el("tbody"));
+    [["Image", "cả ảnh, kể cả phần trong suốt", "không dùng để xếp"],
+     ["Dùng", "ảnh sau khi trim alpha: mặt, viền, bóng, aura", "chỗ đặt ảnh; pivot ảnh = tâm cảm nhận trong rect này"],
+     ["Vùng chạm", "mặt + viền (lệch dưới); không gồm bóng, aura", "nhận bấm; phần thừa ra ngoài mặt là raycast padding; cỡ bấm tối thiểu đo ở đây"],
+     ["Cảm nhận", "mặt chính, không gồm viền, bóng (x y w h của frame)", "RectTransform; chữ căn giữa; bấm thì cả nhóm scale quanh tâm này"],
+     ["An toàn max X", "rộng hết mặt, thụt trên dưới bằng chiều cao hoa văn góc", "chữ dài, thấp lọt rect này là đạt"],
+     ["An toàn max Y", "cao hết mặt, thụt trái phải bằng chiều rộng hoa văn góc", "chữ hẹp, cao lọt rect này là đạt"],
+     ["An toàn trong", "thụt cả hai chiều", "lọt rect này thì chữ nào cũng an toàn; chọn cỡ chữ mặc định"]
+    ].forEach(function (r) { add(body, row(r)); });
+    add(s, el("p", "gap muted", "Ba rect an toàn cùng tâm với rect cảm nhận. Tâm aura đặt theo mặt (ở ví dụ: giữa mép trên). " +
+      "Cú pháp trong frame: outline=dày[,dx,dy] shadow=dx,dy,mờ[,alpha] aura=r[,top|center|bottom] cut=rộng,cao, " +
+      "màu #rrggbb hoặc #a>#b (xem .claude/rules/uidesigner.md)."));
+  });
+
   // ---------------------------------------------------------------- setup: tạo và gán đủ bộ thread
   // Chạy qua Management/tools/setup_server.py (127.0.0.1). Tên thread = giá trị FEATURE.
   tab("setup", "Setup", function (pane) {
