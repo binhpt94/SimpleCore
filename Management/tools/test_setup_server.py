@@ -589,6 +589,43 @@ def takeover_cases(check):
         check("deliver now: a full pool is passed for this message; the thread is told the request may be old",
               (res["ok"], len(given) - n_given, "LƯU Ý: tin này gửi lúc" in given[-1][1]), (True, 1, True))
         check("deliver now: a message that is not waiting is refused", ss.inbox_call("deliver", {"id": d["id"]})["ok"], False)
+        # a tester plays: code work is held back, tools and testers still get theirs
+        store = Path(tempfile.mkdtemp(prefix="take-store-"))
+        real_store = ss.guard.STORE_DIR
+        ss.guard.STORE_DIR = str(store)
+        try:
+            live.clear()
+            for m in ss.dispatch.pending(root):
+                ss.dispatch.mark(root, m, "delivered")
+            ss.dispatch.set_config(root, limits={"feature": 8})
+            ss.guard.write_lock(str(store), {"session": "t1", "who": "@UnityAutoPlay", "until": time.time() + 600})
+            f = ss.dispatch.send(root, "Wallet", "Việc code", "@Manager", now=time.time() - 900)
+            n_given, n_notes = len(given), len(notes())
+            ss.courier_tick(time.time())
+            check("tester plays: code work for a feature is held back, with why and until when; no note is written for it",
+                  (msg(f["id"])["state"], "đang chơi thử tới khoảng" in msg(f["id"])["why"], len(given) - n_given, len(notes()) - n_notes),
+                  ("waiting", True, 0, 0))
+            check("tester plays: Giao ngay still sends it", (ss.inbox_call("deliver", {"id": f["id"]})["ok"], given[-1][0]), (True, "w0000000"))
+            (store / ss.guard.TESTER_BLOCKED_DIR).mkdir()
+            (root / "UnityProject/Assets/Features/Hud").mkdir(parents=True)
+            for name, target in (("a", "Hud"), ("b", "Hud"), ("c", "@CodeLead"), ("d", "Nope")):
+                (store / ss.guard.TESTER_BLOCKED_DIR / f"{name}.json").write_text(json.dumps({"session": name, "target": target}), encoding="utf-8")
+            check("tester plays: the chats it blocked are not woken yet", (ss.wake_blocked(), len(list((store / ss.guard.TESTER_BLOCKED_DIR).glob("*.json")))), ([], 4))
+            ss.guard.write_lock(str(store), {"session": "b", "who": "@CodeLead", "until": time.time() + 600})
+            did = ss.wake_blocked()
+            woke = [m for m in ss.dispatch.messages(root, "Hud") if m.get("key") == "tester-done:Hud"]
+            check("tester done: each blocked chat that runs on demand gets one message to go on; the marks are gone",
+                  (did, len(woke), "làm tiếp phần còn lại" in woke[0]["text"], list((store / ss.guard.TESTER_BLOCKED_DIR).glob("*.json")), ss.wake_blocked()),
+                  ([("woken", "Hud")], 1, True, [], []))
+            h2 = ss.dispatch.send(root, "Shop", "Việc code khác", "@Manager")
+            ss.courier_tick(time.time())
+            check("another chat holding the Editor holds no code work back", msg(h2["id"])["state"], "delivering")
+        finally:
+            ss.guard.STORE_DIR = real_store
+            shutil.rmtree(store, ignore_errors=True)
+        live.clear()
+        for m in ss.dispatch.pending(root):
+            ss.dispatch.mark(root, m, "delivered")
         e = ss.dispatch.send(root, "@UnityAutoPlay", "Chơi thử", "@Manager")
         chat("u0000000", minutes=600)
         n_closed = len(closed)
@@ -1061,6 +1098,7 @@ def main():
     job_cases(check)
     live_cases(check)
     delete_cases(check)
+    ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)
     watch_cases(check)

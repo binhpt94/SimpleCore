@@ -6,8 +6,9 @@ made when the human types `FEATURE=<value> <PIN>` in the chat; see bind_session.
 PIN live outside the project, in STORE_DIR. The FEATURE environment variable is not used.
 The value, by group:
     Master    @human                      no feature limits and no questions: every edit passes (HUMAN_ASK_ZONES)
-    Leaders   @Manager                    coordinator: edits nothing but new files in Management/proposals; runs
-                                          scaffold.py, which makes the folders the live design names (no code)
+    Leaders   @Manager                    coordinator: edits nothing (what needs the human it asks in its chat; tool
+                                          work the human decided goes to toolwork.py); runs scaffold.py, which makes
+                                          the folders the live design names (no code)
               @CodeLead                   checks code, settles conflicts and owns the SKELETON: edits only the
                                           skeleton (below), of a feature once its code gate is open, of Core always; and
                                           all of Assets/_Composition (the wiring: Boot, scenes, catalogs; LEAD_AREA), its
@@ -137,6 +138,21 @@ MANAGER_COMMANDS = [
     PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
 ]
 
+# The list of tool work (Management/tools/toolwork.py): what the human decided and only the human's session can do
+# (tools, guard, rules). It replaced Management/proposals. Looking: every chat. Adding: a Leader, naming itself, with
+# the human's decision. done / drop: the human's session only (it is on no list here).
+TOOLWORK = PY + r"Management/tools/toolwork\.py "
+ALLOWED_COMMANDS.append(TOOLWORK + r"list( --all)?")
+for _commands, _name in ((MANAGER_COMMANDS, "Manager"), (CODELEAD_COMMANDS, "CodeLead"), (DESIGNER_COMMANDS, "GameDesigner"),
+                         (UIDESIGNER_COMMANDS, "UIDesigner")):
+    _commands.append(TOOLWORK + r'add "[^"\\]+" --from @?' + _name + r' --decided "[^"\\]+"')
+PROPOSALS_ZONE = "Management/proposals"
+PROPOSALS_MSG = ("Management/proposals is closed (2026-11-26): it is kept to be read, nothing new is written there. What needs "
+                 "the human's decision is asked in the chat (the problem, the options, the one you advise, who is blocked). "
+                 "Once the human decided: work for a Leader, a feature or a tool is handed out as usual; a change to a tool, "
+                 "the guard or a rule goes to the list: python Management/tools/toolwork.py add \"<việc>\" --from <vai> "
+                 "--decided \"<người quyết gì, ngày nào>\" (Leaders).")
+
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
 READ_TOOLS = {"Read", "Grep", "Glob"}
 SHELL_TOOLS = {"Bash", "PowerShell"}
@@ -243,6 +259,8 @@ TOOL_COMMANDS = {
 # and no backslash inside; SHELL_META_RX refuses the shell characters). Only the feature that ordered runs it.
 FEATURE_STUDIO_RX = re.compile(r"^python3? Management/tools/studio\.py (review) (" + STUDIO_REF + r") " + STUDIO_ID
                                + r' [0-3]( "[^"\\]*")?$')
+# Dropping an order (studio.py cancel <F>/<id> "<why>"): the feature that ordered it, @Manager for any order, the human.
+STUDIO_CANCEL_RX = re.compile(r"^python3? Management/tools/studio\.py cancel (" + STUDIO_REF + r') "[^"\\]+"$')
 # The requirement book of a feature (Management/tools/gd_req.py, reqbook.py). Reading one book: any chat; the line
 # per feature: the Leaders. doing / done: only the chat of that feature (FEATURE_REQ_RX, checked below), with its note
 # or the play text in double quotes, or the names of its tests. verify / reject: @CodeLead. The human waives on the page.
@@ -674,8 +692,8 @@ def zone(full, root, feature, area=None, read_all=False):
         if not same(seg[0], "Management"):
             return "Management", True, "deny"
         if n >= 2 and low[1] == "proposals":
-            if exact(seg[:2], "Management/proposals"):
-                return "Management/proposals", True, "create"
+            if exact(seg[:2], "Management/proposals"):      # the old proposals: read only
+                return "Management/proposals", True, "deny"
             return "Management", True, "deny"
         if n >= 2 and low[1] == "references":      # only the page (setup_server.py) writes it
             return (REFERENCES_ZONE if exact(seg[:2], REFERENCES_ZONE) else "Management"), True, "deny"
@@ -1022,6 +1040,38 @@ def read_lock(store):
     if not isinstance(lock, dict) or not isinstance(lock.get("until"), (int, float)) or lock["until"] < time.time():
         return None
     return lock
+
+
+# While a tester plays (it holds the Editor lock), nothing is written into UnityProject/Assets by another chat: a
+# .cs or an asset saved then makes Unity reload in the middle of Play and the test run loses what it measured.
+TESTER_BLOCKED_DIR = "tester-blocked"      # in the store: the chats refused for that reason, for the server to wake
+
+
+def tester_playing(store, session):
+    """The Editor lock when a tester holds it now and this chat is not that tester, else None."""
+    lock = read_lock(store)
+    if lock and lock.get("session") != session and lock.get("who") in TESTER_ROLES:
+        return lock
+    return None
+
+
+def tester_block(store, session, target, lock):
+    """The refusal of a write while a tester plays; leaves a mark so the server gives the chat its work again when
+    the tester is done (setup_server.wake_blocked)."""
+    try:
+        folder = os.path.join(store or STORE_DIR, TESTER_BLOCKED_DIR)
+        os.makedirs(folder, exist_ok=True)
+        name = re.sub(r"[^A-Za-z0-9_-]", "_", str(session or "none"))[:128]
+        with open(os.path.join(folder, name + ".json"), "w", encoding="utf-8") as f:
+            json.dump({"session": session, "target": target, "at": time.time()}, f)
+    except OSError:
+        pass      # the mark only saves a nudge; the refusal stands without it
+    until = time.strftime("%H:%M", time.localtime(lock["until"]))
+    return "deny", (f"{lock.get('who')} is play-testing in the Unity Editor until about {until} (longer while it keeps "
+                    "playing): a file written into UnityProject/Assets now makes Unity reload in the middle of Play and "
+                    "the test run is lost. Stop here, do not look for another way: say in your report what is left to "
+                    "write. When the tester is done the server gives this chat a message to go on. The lock (Read it): "
+                    f"{lock_path(store)}. Urgent: tell @Manager.")
 
 
 def write_lock(store, lock):
@@ -1375,7 +1425,7 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
     work = {"scene": text_of(mine.get("scene")), "prefab": text_of(mine.get("prefab"))}
     ctx = {"mode": mode, "feature": feature, "area": area, "who": who, "root": root,
            "read_all": mode in ("codelead", "tester")}
-    decisions, reasons, needs_lock, shared = [], [], False, False
+    decisions, reasons, needs_lock, shared, writes = [], [], False, False, False
     for t, p in cmds:
         if t == UNITY_PREFIX + "batch_execute":
             return "deny", "batch_execute may not hold another batch_execute"
@@ -1384,8 +1434,11 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
         reasons.append(why)
         needs_lock = needs_lock or lock
         shared = shared or unity_kind(t, p)[2] == "shared"
+        writes = writes or unity_kind(t, p)[2] == "write"
     if "deny" in decisions:
         return "deny", reasons[decisions.index("deny")]
+    if writes and other and other.get("who") in TESTER_ROLES:      # an asset written or deleted reloads Unity too
+        return tester_block(store, session, who, other)
     if (needs_lock or shared) and other:
         until = time.strftime("%H:%M", time.localtime(other["until"]))
         return "deny", (f"the Unity Editor is held by {other.get('who') or 'another chat'} until {until} (scene, play, "
@@ -1696,6 +1749,13 @@ def decide(data, session_value, root, store=None):
             if ordered.startswith("_design/"):
                 return "deny", "art concepts are judged by the human on the management page (tab Game design)"
             return "deny", f"only the chat of {ordered} judges its own orders"
+        m = STUDIO_CANCEL_RX.match(cmd)
+        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
+            ordered = m.group(1).rpartition("/")[0]
+            if mode == "manager" or (mode == "feature" and ordered == feature):
+                return "allow", f"studio: {who} cancels the order {m.group(1)}"
+            return "deny", (f"only the chat that ordered ({ordered}) or @Manager cancels an order; tell @Manager which "
+                            "order and why")
         m = DISPATCH_SEND_RX.match(cmd)
         # send to the inbox: a Leader, to its own part, naming itself; the text may hold "..", the rest may not.
         if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
@@ -1755,6 +1815,9 @@ def decide(data, session_value, root, store=None):
         if mode == "none":
             return "deny", ("this chat has no valid FEATURE, so all edits are blocked. Only the human can set it "
                             "(by typing FEATURE=<name> <PIN> in the chat). Stop and tell the human.")
+        playing = tester_playing(store, data.get("session_id")) if inside(full, under(root, "UnityProject", "Assets")) else None
+        if playing:
+            return tester_block(store, data.get("session_id"), raw if mode == "feature" else who, playing)
         # Files that define the boundary itself.
         if is_asmref(full):
             return "deny", ".asmref files are forbidden: they put code into another assembly"
@@ -1804,9 +1867,11 @@ def decide(data, session_value, root, store=None):
         if edit == "design":
             return "deny", (f"FEATURE={who} may not edit {name}: only @GameDesigner writes there (and @UIDesigner the "
                             "frames). Ask @GameDesigner (or the human) for a design change.")
+        if name == PROPOSALS_ZONE:
+            return "deny", PROPOSALS_MSG
         if mode == "manager" and edit != "create":
-            return "deny", ("@Manager does not edit code, assets or settings; it may only create new files in "
-                            "Management/proposals. Ask the session that owns the area.")
+            return "deny", ("@Manager does not edit code, assets or settings. Ask the session that owns the area; what "
+                            "needs the human, ask in the chat.")
         if edit == "skeleton":
             return "deny", SKELETON_MSG.format(name=name)
         if edit == "allow" and any("InternalsVisibleTo" in s for s in edit_texts(ti)):

@@ -1,0 +1,10 @@
+{
+ "id": "w20261126-bfb0",
+ "text": "Thêm lệnh studio.py cancel để huỷ order không cần nữa",
+ "source": "người",
+ "decided": "Người chọn lệnh cancel ngày 2026-11-26, thay đề xuất studio-huy-order",
+ "state": "done",
+ "note": "Đã thêm studio.py cancel, tab Studio hiện order đã huỷ kèm lí do, guard cho feature đặt order và Manager chạy. Chưa commit.",
+ "created": 1795629507.8162775,
+ "closed": 1795629514.9136848
+}

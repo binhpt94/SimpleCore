@@ -276,9 +276,30 @@ def run_stage(root):
     v = rb.view(root, W)
     other = next(n for n in v["nodes"] if n["path"] == OTHER)
     check("stage IDEA: the requirements of the FULL node that nobody started wait and are in no count; the one already done stays",
-          (v["later"], v["total"], other["later"], len(other["open"]), [r["state"] for r in other["reqs"] if not r["later"]],
-           {r["deferred"] for r in other["reqs"]}), (len(other["reqs"]) - 1, total - (len(other["reqs"]) - 1), len(other["reqs"]) - 1, 1, ["done"], {"full"}))
-    check("the node of this stage is untouched", {r["later"] for n in v["nodes"] if n["path"] == NODE for r in n["reqs"]}, {False})
+          (v["later"] - 2, v["total"] - 1, other["later"], len(other["open"]), [r["state"] for r in other["reqs"] if not r["later"]],
+           {r["deferred"] for r in other["reqs"]}), (len(other["reqs"]) - 1, total - (len(other["reqs"]) - 2), len(other["reqs"]) - 1, 1, ["done"], {"full"}))
+    mine = next(n for n in v["nodes"] if n["path"] == NODE)
+    check("the node of this stage is untouched", {r["later"] for r in mine["reqs"] if r["kind"] != "stage"}, {False})
+    # the table '## Thông số theo giai đoạn': one requirement per phase, from the phase the project is in onwards
+    cols = {r["id"]: r for r in mine["reqs"] if r["kind"] == "stage"}
+    check("phase columns: the column of the stage is work, the later ones wait; only what a phase asks anew is in it",
+          ({k: (r["later"], r["deferred"]) for k, r in cols.items()},
+           "Tiền đầu lượt: 50" in cols["stage-idea"]["text"] and "Số dư lớn nhất: 999.999.999" in cols["stage-idea"]["text"],
+           cols["stage-prototype"]["text"].split("\n")[1:], cols["stage-full"]["text"].split("\n")[1:]),
+          ({"stage-idea": (False, ""), "stage-prototype": (True, "prototype"), "stage-full": (True, "full")}, True,
+           ["- Tiền đầu lượt: 50, chỉnh theo chơi thử"], ["- Tiền đầu lượt: Chốt theo `feature-balance`"]))
+    check("phase columns: a node whose columns are all the same asks only once (its first phase)",
+          [r["id"] for r in other["reqs"] if r["kind"] == "stage"], ["stage-idea"])
+    check("phase columns: a waiting one takes no done", refused(lambda: rb.mark(root, W, "wallet-rules#stage-prototype", "doing", W, note="x")))
+    S = rb.stage_requirements
+    table = "| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n"
+    check("phase columns: empty, 'Không có', 'như IDEA' and the same value ask for nothing",
+          ([r["id"] for r in S(table + "| Quảng cáo | Không có | Nhà cung cấp giả | như PROTOTYPE |\n| Log | | Có | Có |\n")],
+           [r["id"] for r in S(table + "| A | không kiểm | Như IDEA | chốt |\n")], S("Ba cột của bảng `ShotParams`."), S("")),
+          (["stage-prototype"], ["stage-full"], [], []))
+    h = S(table + "| A | 1 | 2 | 3 |\n")
+    check("phase columns: a changed cell changes only its phase's requirement",
+          [a["hash"] == b["hash"] for a, b in zip(h, S(table + "| A | 1 | 5 | 3 |\n"))], [True, False, True])
     later = next(r["id"] for r in other["reqs"] if r["later"])
     check("a requirement that waits takes no doing and no done",
           (refused(lambda: rb.mark(root, W, f"income-amounts#{later}", "doing", W, note="x")),
@@ -304,7 +325,15 @@ def run_stage(root):
     rows = {r["id"]: r for n in rb.view(root, W)["nodes"] if n["path"] == NODE for r in n["reqs"]}
     check("a row of a list whose stage is later waits, in a node that does not",
           (rows["enemies-soldier"]["later"], rows["enemies-boss"]["later"], rows["enemies-boss"]["deferred"]), (False, True, "full"))
+    gd.write_stage(root, "prototype")
+    rb.mark(root, W, "wallet-rules#stage-prototype", "done", W, tests=["WalletLogicTests.StartsWithConfiguredCoins"])
+    ids_now = [r["id"] for n in rb.view(root, W)["nodes"] if n["path"] == NODE for r in n["reqs"] if r["kind"] == "stage"]
+    check("phase columns: the column of a phase the project left is no requirement, unless the book holds it",
+          (ids_now, state(root, "stage-prototype")), (["stage-prototype", "stage-full"], "done"))
     gd.write_stage(root, "full")
+    check("phase columns: what was done in its phase stays in the book afterwards",
+          [(r["id"], r["state"]) for n in rb.view(root, W)["nodes"] if n["path"] == NODE for r in n["reqs"] if r["kind"] == "stage"],
+          [("stage-prototype", "done"), ("stage-full", "todo")])
     v = rb.view(root, W)
     check("the stage moved on: everything is work again", (v["later"], rb.mark(root, W, f"income-amounts#{later}", "doing", W, note="làm")[0][:7]), (0, "Đã ghi "))
 

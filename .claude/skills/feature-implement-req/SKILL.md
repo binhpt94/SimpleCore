@@ -8,6 +8,7 @@ Quyền và ranh giới ở bảng của `CLAUDE.md` gốc; luật code ở `.cl
 ## Các bước
 1. **Việc tới bằng hộp thư:** phiên chạy theo việc; việc ở đầu tin, dạng `[tin <id> · từ <ai>]`. Tin có mã đã làm rồi (giao lại sau sự cố) thì bỏ qua. Cần @CodeLead hay @Manager thì nhắn bằng `SendMessage` (Leader, luôn sống).
 2. **Đọc sổ:** `python Management/tools/gd_req.py <Tên>`. Mỗi ý, trường hợp biên và phần thông số của node vòng 4 (và node cheat) trong `live` là một yêu cầu `<node>#<id>`, tự sinh, không viết tay. Làm trước: yêu cầu bị trả (`reject`, kèm lỗi của @CodeLead), yêu cầu đổi thiết kế hoặc mất test, rồi tới yêu cầu @Manager giao, rồi yêu cầu chưa làm. Phiên vừa renew đọc sổ để biết đã làm, đang làm gì (dòng `Sổ yêu cầu` ở đầu mỗi tin).
+   - Yêu cầu `<node>#stage-<giai đoạn>` là một cột của bảng `## Thông số theo giai đoạn` của node: nội dung yêu cầu liệt kê các dòng giai đoạn đó đòi mới hoặc khác giai đoạn trước. Làm đủ từng dòng, test nêu đúng giá trị của giai đoạn đó; dòng chỉ kiểm được bằng chơi thử thì ghi `done ... play`. `#params` vẫn là cả phần thông số của node.
 3. **Ghi đang làm:** `python Management/tools/gd_req.py <Tên> doing <node>#<id> "<đang làm gì>"`.
 4. **Đọc thiết kế:** `python Management/tools/gd_pack.py <Tên>` ghi gói ra `Management/game-design/.pack/` và in mục lục có số dòng. Đọc đủ node vòng 4 của yêu cầu và mục CHEAT của phần đó bằng Read (offset, limit) hoặc Grep, không chỉ đọc mục lục. Bám đúng con số, tên, trường hợp biên của gói; thiết kế thiếu hay mâu thuẫn thì hỏi, không tự bịa.
 5. **Code:** trong vùng của mình, trên lớp con của lớp base (khung chỉ đọc). Luật game ở lớp C# thuần trong `Internal`; View chỉ hiển thị. Cần đổi khung: skill `feature-request-framework-change`, rồi chờ. Cần ảnh hay model: skill `feature-order-asset`.
@@ -18,8 +19,8 @@ Quyền và ranh giới ở bảng của `CLAUDE.md` gốc; luật code ở `.cl
 9. **Kiểm ranh giới:** `python Management/tools/validate.py --feature <Tên>`; còn vi phạm thì chưa xong.
 10. **Báo cáo:** kết thúc lượt bằng khối `## Báo cáo cho @Manager` (`report.md`). Dòng "Việc" nêu các id `<node>#<id>` đã làm và đã ghi `doing`/`done`. "Công khai đổi" ghi rõ Contracts, `FeatureAssets/Public`, id asset nào đã đổi.
 
-## Việc không có id (đề xuất người đã duyệt)
-Việc kỹ thuật do khung đòi (ví dụ gọi `TrackView`, `TrackJob` của `SessionParticipantBase` theo đề xuất `session-usage-tracking`) có thể tới không kèm id sổ: tin nêu tên đề xuất. Làm trong vùng mình, viết test EditMode trong `Tests` của mình, biên dịch, `validate.py`, rồi báo cáo ("Việc" nêu tên đề xuất). Không ghi `doing`/`done` vào sổ.
+## Việc không có id (người đã quyết)
+Việc kỹ thuật do khung đòi (ví dụ gọi `TrackView`, `TrackJob` của `SessionParticipantBase` ) có thể tới không kèm id sổ: tin nêu "người quyết ngày <ngày>: <câu quyết định>". Làm trong vùng mình, viết test EditMode trong `Tests` của mình, biên dịch, `validate.py`, rồi báo cáo ("Việc" nêu câu quyết định đó). Không ghi `doing`/`done` vào sổ.
 
 ## Lưu ý
 - Thiết kế đổi, test mất hay ý bị xoá thì sổ tự báo, yêu cầu không còn tính xong: làm lại từ bước 2.

@@ -243,7 +243,7 @@
     } else if (idea.summary) {
       add(s, el("p", "", idea.summary));
     } else {
-      add(s, el("p", "muted", "Chưa có ý tưởng được duyệt. Người duyệt điền vào data/idea.js; AI chỉ được đề xuất trong proposals/."));
+      add(s, el("p", "muted", "Chưa có ý tưởng được duyệt. Người duyệt điền vào data/idea.js; AI không sửa file đó."));
     }
     var pillars = idea && Array.isArray(idea.pillars) ? idea.pillars : [];
     if (pillars.length) {
@@ -355,7 +355,23 @@
       add(pane, el("h1", "", "Báo cáo cho @CodeLead và @Manager"));
       add(pane, el("p", "sub", "Nhóm Basic, Features, Services kết thúc mỗi lượt có sửa file bằng một báo cáo; Stop hook lưu vào " +
         "Management/reports, @CodeLead (kiểm code) và @Manager (điều phối) đều thấy. Mới nhất trước, tối đa 50."));
-      var s = put(pane, section(""));
+      // Việc công cụ người đã quyết (toolwork.py): thay cho Management/proposals. Chỉ để xem; phiên @human làm và đóng.
+      var tw = project.toolwork || [];
+      var ts = put(pane, section("Việc công cụ người đã quyết (" + tw.filter(function (x) { return x.state === "open"; }).length + " chờ làm)"));
+      add(ts, el("p", "muted", "Leader hỏi bạn trong chat; việc bạn đã quyết mà phải sửa công cụ, guard hay luật thì nằm ở đây cho phiên @human làm. " +
+        "Xem bằng lệnh: python Management/tools/toolwork.py list --all"));
+      if (!tw.length) add(ts, el("p", "muted", "Chưa có việc nào."));
+      else {
+        var tt = put(ts, el("table"));
+        add(tt, headRow(["Mã", "Lúc ghi", "Từ", "Trạng thái", "Việc", "Bạn đã quyết", "Kết quả"]));
+        var tb = put(tt, el("tbody"));
+        tw.forEach(function (x) {
+          var tr = put(tb, el("tr"));
+          add(tr, el("td", "", x.id), el("td", "", x.created), el("td", "", x.source),
+            el("td", x.state === "open" ? "bad-text" : "muted", x.stateName), el("td", "", x.text), el("td", "", x.decided), el("td", "", x.note));
+        });
+      }
+      var s = put(pane, section("Báo cáo"));
       if (!project.reports.length) { add(s, el("p", "muted", "Chưa có báo cáo nào.")); return; }
       var table = put(s, el("table"));
       add(table, headRow(["Thời gian", "Phiên", "Trạng thái", "Việc", "Cần bên khác"]));

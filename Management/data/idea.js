@@ -1,4 +1,4 @@
-// Ý tưởng game đã được người duyệt. AI không sửa file này; đề xuất thì ghi vào ../proposals/.
+// Ý tưởng game đã được người duyệt. AI không sửa file này; cần đổi thì hỏi người trong chat.
 // index.html nạp file này bằng thẻ <script> nên phải gán vào window.
 window.CORESIMPLE_IDEA = {
   title: "",          // tên game

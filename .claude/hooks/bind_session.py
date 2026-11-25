@@ -266,6 +266,29 @@ def req_brief(root, feature):
         return f"Sổ yêu cầu: không đọc được ({ex}); chạy python Management/tools/gd_req.py {feature}."
 
 
+def toolwork_line(root, human):
+    """The list of tool work the human decided on (Management/tools/toolwork.py). The human's session: what waits for
+    it. @Manager: what waits, and what was done or dropped in the last day."""
+    try:
+        tools = os.path.join(root, "Management", "tools")
+        if tools not in sys.path:
+            sys.path.insert(0, tools)
+        import toolwork
+        s = toolwork.summary(root)
+    except Exception:      # the list never breaks a prompt
+        return ""
+    out = ""
+    if s["open"]:
+        heads = "; ".join(f"{x['id']} ({x['source']}): {x['text'][:90]}" for x in s["open"][:6])
+        out += (f" Việc công cụ người đã quyết, chờ phiên @human làm: {len(s['open'])} ({heads})"
+                + (". Xem đủ: python Management/tools/toolwork.py list; làm xong ghi toolwork.py done <id> \"<đã làm gì>\"." if human
+                   else ". Việc nào đang chặn feature thì nêu đầu danh sách chờ người."))
+    if not human and s["recent"]:
+        out += " Việc công cụ vừa đóng: " + "; ".join(
+            f"{x['id']} {toolwork.STATE_NAMES[x['state']]}: {x['text'][:60]} ({x['note'][:80]})" for x in s["recent"][:6]) + "."
+    return out
+
+
 def stage_line(root):
     """The phase the project is being built for (Management/game-design/stage.json, set by the human on the page);
     read on every prompt."""
@@ -312,7 +335,7 @@ def context(data, root, store):
     if role == "@human":
         return ("guard: chat này gán FEATURE=@human (phiên của người): không giới hạn feature; guard không hỏi ở "
                 "vùng nào (cả Core, _Composition, .claude, CLAUDE.md gốc, thiết kế live, toàn bộ Management). "
-                ".claude/settings.json chỉ còn hỏi khi sửa Packages, ProjectSettings.")
+                ".claude/settings.json chỉ còn hỏi khi sửa Packages, ProjectSettings." + toolwork_line(root, True))
     worker = (" Khung (Scripts/Contracts, Scripts/Internal/Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs; ở "
               "Core/_Composition thêm các interface I*.cs và lớp base *Base.cs) chỉ đọc: viết code mới trên lớp con ở phần còn lại của "
               "Internal/View; muốn đổi khung thì nhắn @CodeLead (ngữ cảnh, file, đề xuất) và chờ. Xung đột code do "
@@ -477,8 +500,10 @@ def context(data, root, store):
                 "dẫn file. Ý của GPT ngang hàng ý của Claude: @GameDesigner phải đưa mọi góp ý vào node, không được bỏ; người "
                 "chốt lên live. " + advice_mode(root) + " Làm theo .claude/rules/designadvisor.md; mỗi lần hỏi theo skill advisor-ask-gpt.")
     if role == "@Manager":
-        return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code hay asset; chỉ tạo "
-                "file mới trong Management/proposals; nhắn Leader và tester bằng SendMessage, giao feature, service, @Core và tool "
+        return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối, không sửa code, asset hay file nào; cần người "
+                "quyết thì hỏi ngay trong chat (vấn đề, phương án, đề nghị, ai bị chặn), không viết đề xuất; việc người đã quyết mà "
+                "phải sửa công cụ, guard, luật thì ghi python Management/tools/toolwork.py add \"<việc>\" --from Manager --decided "
+                "\"<người quyết gì, ngày nào>\"; nhắn Leader và tester bằng SendMessage, giao feature, service, @Core và tool "
                 "bằng hộp thư: python Management/tools/dispatch.py send <tên> --from Manager \"<việc>\" (chúng chạy theo việc, "
                 "không có trong ListAgents khi rảnh là bình thường; xem dispatch.py list). Báo cáo của các phiên ở "
                 "Management/reports/. Làm theo .claude/rules/manager.md. Lượt làm việc đầu tiên sau khi được tạo mới hoặc "
@@ -490,7 +515,7 @@ def context(data, root, store):
                 "phiên CÙNG LÚC trong một lượt, không tuần tự từng phiên (skill manager-dispatch). Nhận tin BÁO CHẶN của một Leader: điều phối lại ngay "
                 "(dừng việc phụ thuộc, giao việc không phụ thuộc, gom việc chờ người thành một danh sách cho người). Chỉ bạn và "
                 "người giao đợt chơi thử cho tester UnityAutoPlay (nó giữ khoá Unity Editor): gom thành một đợt, không giao "
-                "khi CodeLead đang Play hay test. Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from Manager \"<việc>\", tin đó bật thread lên." + stage_line(root) + " Đầu phiên (tạo mới, renew): nêu giai đoạn đang ghi và hỏi người xác nhận còn đúng trước khi giao việc dev; chỉ giao việc của node tới hạn." + inbox_line(root) + unread_reports(root, store, role))
+                "khi CodeLead đang Play hay test. Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from Manager \"<việc>\", tin đó bật thread lên." + stage_line(root) + " Đầu phiên (tạo mới, renew): nêu giai đoạn đang ghi và hỏi người xác nhận còn đúng trước khi giao việc dev; chỉ giao việc của node tới hạn." + toolwork_line(root, False) + inbox_line(root) + unread_reports(root, store, role))
     if raw and guard.valid_feature(raw, root):
         group = "Services" if raw.startswith("_Services/") else "Features"
         return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "

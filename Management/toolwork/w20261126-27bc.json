@@ -1,0 +1,10 @@
+{
+ "id": "w20261126-27bc",
+ "text": "Tester đang chơi thì guard chặn ghi vào UnityProject/Assets và hộp thư giữ việc code",
+ "source": "người",
+ "decided": "Người chọn chặn ghi và hoãn giao ngày 2026-11-26, thay đề xuất khoa-ghi-code-khi-tester-choi",
+ "state": "done",
+ "note": "Đã làm: guard chặn Edit, Write và unity-mcp ghi asset vào Assets khi tester giữ khoá; hộp thư giữ việc code; server gửi tin làm tiếp khi tester xong. Chưa commit.",
+ "created": 1795629508.145622,
+ "closed": 1795629515.2304718
+}

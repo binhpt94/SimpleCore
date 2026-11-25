@@ -1198,6 +1198,45 @@ def watch_tick(now=None):
     return did
 
 
+def tester_lock():
+    """The Editor lock while a tester holds it (guard.read_lock: missing, broken or expired is no lock), else None.
+    While it plays, code work is not handed out (the guard refuses writes into Assets anyway)."""
+    lock = guard.read_lock(guard.STORE_DIR)
+    return lock if lock and lock.get("who") in guard.TESTER_ROLES else None
+
+
+def wake_blocked(now=None):
+    """The chats the guard refused a write to while a tester played (its marks in the store) get one message to go on,
+    once the tester is done. Only the chats that run on demand have an inbox; a Leader tries again itself. Returns
+    what it did."""
+    did = []
+    folder = Path(guard.STORE_DIR) / guard.TESTER_BLOCKED_DIR
+    if not folder.is_dir() or tester_lock():
+        return did
+    now = time.time() if now is None else now
+    seen = set()
+    for p in sorted(folder.glob("*.json")):
+        try:
+            target = str(json.loads(p.read_text(encoding="utf-8")).get("target") or "")
+        except (OSError, ValueError):
+            target = ""
+        try:
+            p.unlink()
+        except OSError:
+            continue      # not removed: tried again at the next pass, the message is not sent twice (same key)
+        if target in seen or dispatch.pool_of(target) not in dispatch.ON_DEMAND or not can_create(target):
+            continue
+        seen.add(target)
+        try:
+            dispatch.send(ROOT, target, "Tester đã chơi thử xong, Unity nhận code lại được. Lượt trước của thread này bị guard chặn "
+                          "khi ghi vào UnityProject/Assets: kiểm lại file nào đã ghi, file nào chưa, rồi làm tiếp phần còn lại "
+                          "của việc đó, không làm lại từ đầu.", HUNG_SOURCE, key=f"tester-done:{target}", now=now)
+            did.append(("woken", target))
+        except (ValueError, OSError) as ex:
+            did.append(("wake-failed", target, str(ex)[:120]))
+    return did
+
+
 def thread_for(target, listed):
     """The thread bound to `target` that the courier gives messages to (the most recently used one), or None."""
     same = [t for t in listed if t["binding"] == target and not t["archived"] and not t["unlisted"]]
@@ -1294,6 +1333,7 @@ def _courier_tick(now):
     open_targets = {m["target"] for m in open_}
 
     made = []      # the targets a thread was made for in this pass (one a pass: making one costs a whole turn)
+    playing = tester_lock()
 
     def running(pool):
         return sum(1 for sid, s in live.items() if sid in by_id and dispatch.pool_of(by_id[sid]["binding"]) == pool)
@@ -1326,10 +1366,10 @@ def _courier_tick(now):
 
         forced = any(m.get("force") for m in ms)      # the Giao ngay button
 
-        def wait(why):
+        def wait(why, tell=True):
             for m in ms:
                 extra = {}
-                if not m.get("noted") and now - m["created"] >= WAIT_NOTE_SECONDS:      # nobody would know otherwise
+                if tell and not m.get("noted") and now - m["created"] >= WAIT_NOTE_SECONDS:      # nobody would know otherwise
                     extra["noted"] = True
                     wait_note(m, why, now)
                     did.append(("wait-noted", m["id"]))
@@ -1349,6 +1389,10 @@ def _courier_tick(now):
             continue
         pool = dispatch.pool_of(target)
         s = None
+        if playing and pool == "feature" and not forced:      # features, services, @Core: their work is code
+            wait(f"{playing.get('who')} đang chơi thử tới khoảng {time.strftime('%H:%M', time.localtime(playing['until']))}: việc code "
+                 "được giữ lại để Unity không nạp lại giữa lúc Play, tự giao khi tester xong (hoặc bấm Giao ngay)", tell=False)
+            continue
         if t is None:
             if not can_create(target):
                 wait("không có feature hay vai này để tạo thread (thư mục feature chưa có?)")
@@ -1558,7 +1602,7 @@ def courier_loop():
         try:
             for step in courier_tick():
                 print("hộp thư:", *step, flush=True)
-            for step in watch_tick():
+            for step in watch_tick() + wake_blocked():
                 print("canh phiên:", *step, flush=True)
         except Exception as ex:      # the loop must survive anything a tick meets
             print(f"hộp thư: lỗi {ex}", file=sys.stderr, flush=True)

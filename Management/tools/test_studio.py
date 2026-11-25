@@ -280,6 +280,32 @@ def run_deliver(root):
            (gen.parent / "ask").exists()), (0, 0, False))
 
 
+def run_cancel(root):
+    """studio.py cancel: the order is dropped; no tool runs for it, check and the tool's line leave it out."""
+    folder = order(root, feature="Shop", oid="drop-me", items=("a", "b"))
+    check("cancel: needs a reason", call(root, "cancel", "Shop/drop-me", " ")[0], 1)
+    code, out = call(root, "cancel", "Shop/drop-me", "Trùng sprite đã đạt")
+    status = studio.read_status(folder)
+    check("cancel: the order is cancelled, with why", (code, status["state"], status["reason"], "Đã huỷ order codex Shop/drop-me" in out),
+          (0, "cancelled", "Trùng sprite đã đạt", True))
+    check("cancel: logged", log_of(folder)[-1].get("event"), "cancel")
+    check("cancel: not twice", call(root, "cancel", "Shop/drop-me", "lần hai")[0], 1)
+    rows = {r[0]: r for r in studio.summary(root)}
+    check("cancel: its state, and none of its items may be made again",
+          (rows["Shop/drop-me"][2], [i["redo"] for i in rows["Shop/drop-me"][7]]), ("cancelled", [False, False]))
+    check("cancel: the tool chat is no longer told of it", "Shop/drop-me" in studio.pending_line(root, "codex"), False)
+    code, out = call(root, "status", "Shop/drop-me")
+    check("cancel: status says so", (code, "đã huỷ: Trùng sprite đã đạt" in out), (0, True))
+    check("cancel: no tool runs for it, nothing is delivered or judged",
+          [call(root, *a)[0] for a in (("codex", "Shop/drop-me", "a"), ("deliver", "codex", "Shop/drop-me"),
+                                       ("review", "Shop/drop-me", "a", "3"), ("pick", "Shop/drop-me", "a", "1"))], [1, 1, 1, 1])
+    check("cancel: check leaves it out", "Shop/drop-me" in call(root, "check")[1], False)
+    snap = next(o for o in studio.snapshot(root)["orders"] if o["ref"] == "Shop/drop-me")
+    check("cancel: the Studio tab gets the state and the reason", (snap["state"], snap["stateName"], snap["reason"]),
+          ("cancelled", "đã huỷ", "Trùng sprite đã đạt"))
+    check("cancel: an unknown order is refused", call(root, "cancel", "Shop/none", "x")[0], 1)
+
+
 def run_blender(root):
     os.environ["STUDIO_BLENDER"] = str(Path(root) / "fake_blender.py")
     folder = order(root, tool="blender", oid="coin-model", kind="model", items=("coin",))
@@ -991,7 +1017,7 @@ def main():
         (root / "fake_codex.py").write_text(FAKE_CODEX, encoding="utf-8")
         (root / "fake_blender.py").write_text(FAKE_BLENDER, encoding="utf-8")
         studio.RUNS_FIRST = 99      # the older cases run an item many times; run_budget checks the real limits
-        for case in (run_check, run_codex, run_deliver, run_blender):
+        for case in (run_check, run_codex, run_deliver, run_blender, run_cancel):
             case(root)
         studio.RUNS_FIRST = 2
         for case in (run_art, run_budget, run_measure, run_claude):

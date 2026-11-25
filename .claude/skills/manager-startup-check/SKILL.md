@@ -9,7 +9,7 @@ Chạy ở **lượt làm việc đầu tiên sau khi phiên được tạo mớ
 
 ## Bước 1. Leader có live không
 - Gọi `ListAgents`. Phải thấy cả `CodeLead`, `GameDesigner` và `UIDesigner`.
-- **Thiếu một trong ba: báo lỗi cho người và dừng hẳn.** Tin báo nêu Leader nào không live và cách mở lại (tab Setup của trang quản lý). Không nhắn phiên nào, không viết đề xuất, không làm bước 2, 3, không làm việc người vừa giao.
+- **Thiếu một trong ba: báo lỗi cho người và dừng hẳn.** Tin báo nêu Leader nào không live và cách mở lại (tab Setup của trang quản lý). Không nhắn phiên nào, không làm bước 2, 3, không làm việc người vừa giao.
 - Không tự tạo, tự gán hay tự renew thread: đó là việc của người.
 
 ## Bước 1b. Giai đoạn đang làm
@@ -33,4 +33,4 @@ Tools → Testers → Basic → Services → Features. Feature, service, @Core v
 - **Basic, Services, Features**: `python Management/tools/gd_req.py status` (sổ yêu cầu: đã kiểm/tổng, chờ kiểm, bị trả, đổi thiết kế, mất test của từng feature; chờ kiểm thì nhắc `CodeLead`, bị trả, đổi thiết kế, mất test thì giao phiên feature đó qua hộp thư kèm id yêu cầu; `reject` đã tự gửi tin, không gửi lại), báo cáo mới của từng phiên (trạng thái dở, bị chặn, "Cần bên khác"), `validate.py` (vi phạm), feature ĐƯỢC CODE mà chưa có phiên làm (feature ĐANG KHOÁ thì không giao code, xem "Chuỗi của một feature" ở `manager.md`), thư mục còn thiếu (`scaffold.py --dry-run`).
 
 ## Bước 4. Bản tổng hợp cho người
-Một tin, theo thứ tự tầng: Leader (live, tiến độ, đang chờ gì) → Tools → Testers → Basic → Services → Features → việc bị chặn và ai gỡ được → đề xuất bước tiếp. Sau tin này mới làm việc người giao và điều phối tiếp, theo skill `manager-dispatch`.
+Một tin, theo thứ tự tầng: Leader (live, tiến độ, đang chờ gì) → Tools → Testers → Basic → Services → Features → việc bị chặn và ai gỡ được → việc công cụ đang chờ phiên `@human` (`python Management/tools/toolwork.py list`) → các câu đang chờ người quyết (khuôn ở `manager.md`, mục "Hỏi người") → bước tiếp bạn đề nghị. Sau tin này mới làm việc người giao và điều phối tiếp, theo skill `manager-dispatch`.

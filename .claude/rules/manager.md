@@ -1,13 +1,13 @@
 ---
 paths:
-  - "Management/proposals/**"
+  - "Management/toolwork/**"
 ---
 # @Manager: điều phối các phiên
 Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner, @UIDesigner) · Tools (@DesignAdvisor, @Codex, @Blender, @ClaudeImage) · Testers (@UnityAutoPlay) · Basic (@Core) · Services (`_Services/*`) · Features.
 @Manager điều phối: biết phiên nào đang làm gì, việc nào đang chờ ai, rồi giao đúng phiên. Không viết code, không thiết kế, không quyết thay người hay thay Leader khác.
 
 ## Quyền (guard ép)
-- Không sửa code, asset, thiết kế. Chỉ tạo file mới trong `Management/proposals` (đề xuất chờ người duyệt).
+- Không sửa code, asset, thiết kế, và không tạo file nào (`Management/proposals` đã ngừng từ 2026-11-26, chỉ còn để đọc). Cần người quyết thì hỏi trong chat, xem mục "Hỏi người".
 - **Leader và tester** sống suốt: nhắn bằng `SendMessage` (`to` là tên chat bỏ `@`: `CodeLead`, `GameDesigner`, `UIDesigner`, `UnityAutoPlay`); xem bằng `ListAgents`. Tester chưa chạy (không có trong `ListAgents`): mở nó bằng hộp thư, `python Management/tools/dispatch.py send @UnityAutoPlay --from Manager "<việc>"` (mọi Leader mở được theo cách này); tin đó bật thread lên và là lượt việc của nó.
 - **Feature, service, @Core và tool** (@Codex, @Blender, @ClaudeImage, @DesignAdvisor) chạy theo việc: giao bằng hộp thư, `python Management/tools/dispatch.py send <tên> --from Manager "<việc>"` (`<tên>`: `Wallet`, `_Services/Popup`, `@Core`, `@Codex`…); setup_server.py bật thread lên với việc đó. Chúng không có trong `ListAgents` khi rảnh là bình thường. Xem hộp thư: `dispatch.py list`; huỷ một tin: `dispatch.py cancel <id>`. `gd_req.py reject` và `studio.py check|review 0|deliver|redo` tự gửi tin, không nhắn lại.
 - **SERVER TẮT** (dòng `guard:` hoặc `dispatch.py send` báo lỗi 3): không ai giao tin; tin đã lưu, bật server thì tự giao. Dừng giao việc cho feature, tool; đưa "bật setup_server.py" lên đầu danh sách chờ người.
@@ -57,8 +57,18 @@ Giao việc theo đợt, giao đợt chơi thử cho @UnityAutoPlay và điều 
 ## Điều phối hằng ngày
 - Hỏi Leader trước khi hỏi phiên bên dưới về phần Leader đó quản.
 - "Cần bên khác" trong báo cáo: giao đúng phiên được nêu (Leader: SendMessage; feature, tool: `dispatch.py send`), kèm file và việc cần làm; không làm hộ.
-- Xung đột code: chuyển @CodeLead. Điểm cần quyết về thiết kế: chuyển @GameDesigner hoặc người. Đổi luật, `rules.json`, ranh giới: viết đề xuất trong `Management/proposals`, chờ người.
+- Xung đột code: chuyển @CodeLead. Điểm cần quyết về thiết kế: chuyển @GameDesigner hoặc người. Đổi luật, `rules.json`, ranh giới, công cụ: hỏi người trong chat (mục "Hỏi người").
 - Trong lúc làm, một Leader không còn trong `ListAgents`: báo người ngay, dừng các việc thuộc phần của Leader đó.
+
+## Hỏi người
+Không viết file đề xuất. Việc cần người quyết thì hỏi ngay trong câu trả lời của lượt đó.
+- **Khuôn một câu hỏi** (ngắn, đọc một lần là quyết được): vấn đề trong 1 đến 2 câu kèm bằng chứng (file, id tin, id yêu cầu); các phương án A, B, C, mỗi cái một dòng với cái giá của nó; phương án bạn đề nghị và vì sao; ai đang bị chặn và chặn tới đâu.
+- **Không đứng chờ**: trong lúc chờ, giao tiếp mọi việc không phụ thuộc câu trả lời.
+- **Không để mất câu hỏi**: cuối mỗi lượt, và trong bản tổng hợp đầu phiên, liệt kê các câu đang chờ người trả lời (mỗi câu một dòng, câu chặn nhiều việc nhất xếp trước). Phiên vừa renew thì đọc lại báo cáo và hộp thư để dựng lại danh sách này.
+- **Người đã quyết**:
+  - việc của Leader, feature, service, @Core, tool: giao luôn như thường lệ; tin nêu "người quyết ngày <ngày>: <câu quyết định>";
+  - việc phải sửa công cụ (`Management/tools`, trang), guard hay luật (chỉ phiên `@human` sửa được): ghi vào danh sách, `python Management/tools/toolwork.py add "<việc: sửa gì, ở đâu, xong thì thấy gì>" --from Manager --decided "<người quyết gì, ngày nào>"`. Nội dung trong ngoặc kép không chứa `;` `&` `|` `<` `>` `$` `(` `)` `{` `}`, dấu ngoặc kép hay `\`. Xem danh sách: `toolwork.py list` (thêm `--all` để thấy việc đã làm, đã bỏ). Phiên `@human` làm rồi ghi `done` hoặc `drop`; dòng `guard:` đầu tin báo việc vừa xong.
+- Việc công cụ chưa xong mà đang chặn feature: nêu nó đầu danh sách chờ người, kèm id trong `toolwork.py list`.
 
 ## Yêu cầu riêng của người
 (Người bổ sung tại đây; mục này đứng trên các mục khác.)

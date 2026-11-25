@@ -142,6 +142,21 @@ REPORT_FIELDS = ("Phiên", "Việc", "Trạng thái", "Đã đổi", "Công khai
 MAX_REPORTS = 50
 
 
+def toolwork_rows(root):
+    """The list of tool work the human decided on (toolwork.py): what waits for the human's session first, then what
+    was closed, newest first, 30 at most."""
+    try:
+        import toolwork
+        rows = toolwork.items(root)
+    except Exception:
+        return []
+    rows = [r for r in rows if r["state"] == "open"] + sorted((r for r in rows if r["state"] != "open"),
+                                                              key=lambda r: r.get("closed", 0), reverse=True)
+    return [{"id": r["id"], "text": r["text"], "source": r["source"], "decided": r["decided"], "state": r["state"],
+             "stateName": toolwork.STATE_NAMES[r["state"]], "note": r["note"],
+             "created": time.strftime("%Y-%m-%d %H:%M", time.localtime(r["created"]))} for r in rows[:30]]
+
+
 def reports(root):
     """Reports written by .claude/hooks/stop_report.py, newest first."""
     folder = Path(root) / "Management" / "reports"
@@ -189,7 +204,7 @@ def build(root, cfg):
         })
     others = [v for v in result["violations"] if v["owner"] not in ids]
     return {"generatedAt": result["generatedAt"], "features": features, "scenes": scene_list,
-            "reports": reports(root), "otherViolations": others}
+            "reports": reports(root), "toolwork": toolwork_rows(root), "otherViolations": others}
 
 
 def write_js(out, name, data):

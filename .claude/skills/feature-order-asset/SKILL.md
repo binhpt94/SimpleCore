@@ -24,3 +24,4 @@ Khung `order.md`, bảng mức chấm và phiếu nợ art nằm ở `.claude/ru
    - Phản hồi trong ngoặc kép, không dùng `;` `&` `|` `<` `>` `$` `(` `)` `{` `}` hay dấu ngoặc kép bên trong.
 3. Mức 1–3 được chép ngay vào `FeatureAssets/<deliver>/Generated/<id>/`: `refresh_unity` để có `.meta`. Mức 1, 2 ghi vào `QUALITY.md` ở đó.
 4. Có item mức 0: chính lệnh `review … 0` tự đưa tin làm lại vào hộp thư của tool, không nhắn thêm.
+5. Order không cần nữa (đặt trùng, thiết kế đổi): `python Management/tools/studio.py cancel <Tên>/<id> "<lí do>"`, không để nó nằm ở trạng thái mới.

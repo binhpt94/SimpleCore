@@ -8,6 +8,9 @@ node) gives
     <node path>#<idea id>     each idea of its data.md                     hash: the idea's own hash (title and detail)
     <node path>#edge-<slug>   each line under '## Trường hợp biên' of CLAUDE.md   hash: the line and its sub-lines
     <node path>#params        the sections '## Làm gì', '## Thông số', '## Thông số theo giai đoạn' together
+    <node path>#stage-<phase> one column of the table '## Thông số theo giai đoạn' (| Thông số | IDEA | PROTOTYPE | FULL |):
+                              what that phase asks for. Only from the phase the project is in onwards (a later one waits
+                              like any requirement of a later phase); #params still holds the whole section
 Ids are names, never positions: moving an idea or a node's children around changes nothing.
 
 What the sessions did is kept beside the leaf's progress, in the PROPOSED table (live is a copy and is replaced on
@@ -104,6 +107,44 @@ def edge_items(text):
     return out
 
 
+STAGE_TITLE = "Thông số theo giai đoạn"
+STAGE_ID = "stage-"
+# A cell of a phase column that asks for nothing new in that phase.
+STAGE_EMPTY_RX = re.compile(r"^(|-|—|không( có| kiểm| bắt buộc| dùng)?|chưa( có)?|như (idea|prototype|full)|giữ nguyên)\.?$", re.I)
+
+
+def stage_requirements(text):
+    """[{id: stage-<phase>, kind: stage, stage, title, text, hash}] of a '## Thông số theo giai đoạn' section written
+    as a table with one column per phase (| Thông số | IDEA | PROTOTYPE | FULL |): one requirement per phase, its
+    text the cells of that column that ask for something: not empty or 'Không có', and, after the first phase, not
+    the same as the phase before ('như IDEA', or the very same value: nothing new to build). A phase with no such
+    cell gives none. A section that only points at a config table gives none: the rows of that table are
+    requirements already."""
+    rows = [[c.strip() for c in line.strip().strip("|").split("|")] for line in text.replace("\r", "").split("\n")
+            if line.strip().startswith("|")]
+    rows = [r for r in rows if not all(re.fullmatch(r":?-+:?", c or "-") for c in r)]
+    if len(rows) < 2:
+        return []
+    head = [c.lower() for c in rows[0]]
+    out, before = [], None
+    for key in gd.stages():
+        if key not in head:
+            continue
+        at, was = head.index(key), before
+        before = at
+        cells = [(r[0], r[at], r[was] if was is not None and len(r) > was else None) for r in rows[1:] if len(r) > at and r[0]]
+        asked = [(name, value) for name, value, old in cells
+                 if not STAGE_EMPTY_RX.match(value) and gd.tidy(value).lower() != gd.tidy(old or "\0").lower()]
+        if not asked:
+            continue
+        name = gd.stage_name(key) or key.upper()
+        out.append({"id": STAGE_ID + key, "kind": "stage", "stage": key, "title": f"Thông số của giai đoạn {name}",
+                    "text": f"Cột {name} của bảng '{STAGE_TITLE}' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n"
+                            + "\n".join(f"- {n}: {v}" for n, v in asked),
+                    "hash": gd.short_hash(key, *[p for pair in asked for p in pair])})
+    return out
+
+
 def table_requirements(tables):
     """[{id, kind, title, text, hash, ...}] of the config tables of a node (gd_excel.view): a row of a list, params
     or formula table is one requirement ('row', with its key and the table's kind); a levels or map table is one
@@ -162,6 +203,10 @@ def node_requirements(data, doc, tables=None):
                     "text": "\n\n".join(f"## {t}\n{x}" for t, x in found),
                     "hash": gd.short_hash(*[p for t, x in found for p in (t, x)])})
         seen.add(rid)
+    for r in stage_requirements(secs.get(STAGE_TITLE, "")):
+        if r["id"] not in seen:
+            seen.add(r["id"])
+            out.append(r)
     for r in table_requirements(tables):
         base, n = r["id"], 1
         while r["id"] in seen:
@@ -328,6 +373,12 @@ def node_view(root, path, folder, tests, phase="", stage=""):
     node_later = not gd.is_due(phase, stage)
     shallow = len(path.split("/")) + 1 < len(gd.ROUNDS) and folder.name != gd.CHEAT_KEY      # the root is round 1
     found = [] if node_later and shallow else node_requirements(data, doc, gd.gd_excel.view(folder))
+    order = gd.stages()
+    at = order.index(stage) if stage in order else 0
+    # The column of a phase the project has left is history: what it asked for was built and checked under #params.
+    # It is a requirement only when the book already holds a line for it.
+    # With no stage set the project is not built by phase: no column is a requirement of its own.
+    found = [r for r in found if r["kind"] != "stage" or r["id"] in book["items"] or (stage in order and order.index(r["stage"]) >= at)]
     for r in found:
         saved = book["items"].get(r["id"])
         state, why = check_one(r, saved, tests)

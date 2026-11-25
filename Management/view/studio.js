@@ -34,7 +34,8 @@
     { key: "doing", label: "Tool đang làm" },
     { key: "review", label: "Đã giao, còn ảnh chưa duyệt" },
     { key: "redo", label: "Có item bị chấm Làm lại ngay" },
-    { key: "done", label: "Xong: mọi item đã chấm, không item nào phải làm lại" }
+    { key: "done", label: "Xong: mọi item đã chấm, không item nào phải làm lại" },
+    { key: "cancelled", label: "Đã huỷ" }
   ];
   var IMAGE = /\.(png|jpe?g|webp)$/i;
 
@@ -141,6 +142,7 @@
           var meta = put(row, el("p", "st-meta"));
           add(meta, el("span", "st-tag", o.tool + " · " + o.kind));
           if (o.version) add(meta, el("span", "st-tag", "đã giao v" + o.version));
+          if (o.state === "cancelled") { row.style.opacity = "0.6"; add(meta, el("span", "st-tag wait", "đã huỷ: " + (o.reason || "không ghi lí do"))); }
           if (o.design && o.state === "review") add(meta, el("span", "st-tag wait", "chờ bạn chấm (tab Game design, node " + o.node + ")"));
           var ul = put(row, el("ul", "st-items"));
           o.items.forEach(function (it) {

@@ -33,4 +33,4 @@ Báo cáo đi tới cả @CodeLead (kiểm code, biên dịch, chạy test) và 
 - Hook lưu khối vào `Management/reports/<thời gian>-<vai trò>.md` (không commit).
 - Phiên @CodeLead và @Manager mỗi bên thấy danh sách báo cáo mới ở đầu mỗi tin; trang quản lý có tab Báo cáo.
 - @CodeLead kiểm code rồi nhắn lỗi về đúng phiên; phiên đó tự sửa.
-- @Manager điều phối bằng SendMessage (Leader, tester), hộp thư `dispatch.py send` (feature, service, @Core, tool) và đề xuất trong `Management/proposals`; không sửa code.
+- @Manager điều phối bằng SendMessage (Leader, tester), hộp thư `dispatch.py send` (feature, service, @Core, tool) ; cần người quyết thì hỏi trong chat của nó (`manager.md`, mục "Hỏi người"); không sửa code.

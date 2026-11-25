@@ -1,0 +1,10 @@
+{
+ "id": "w20261126-a36f",
+ "text": "Sổ yêu cầu sinh yêu cầu riêng cho mỗi cột của bảng Thông số theo giai đoạn",
+ "source": "người",
+ "decided": "Người chọn yêu cầu riêng mỗi giai đoạn ngày 2026-11-26 và đồng ý bật ngay, thay đề xuất gd-req-cot-giai-doan",
+ "state": "done",
+ "note": "Đã bật: node có bảng giai đoạn sinh yêu cầu stage-<giai đoạn> từ giai đoạn đang làm trở đi. Sổ thật thêm 42 việc PROTOTYPE ở 19 feature, 50 việc FULL để sau. Chưa commit.",
+ "created": 1795629507.995987,
+ "closed": 1795629515.066619
+}

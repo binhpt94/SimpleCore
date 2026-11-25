@@ -4,7 +4,7 @@
 Applies to the groups Basic (@Core), Features and Services, to @CodeLead (it edits the skeleton and _Composition) and
 to @GameDesigner (it edits the design tree: @Manager must know when it is done and what waits for the human) and
 to the testers (@UnityAutoPlay: a turn that wrote a test run reports where it is and what it found).
-Not to @human, @Manager (it only creates proposals), @DesignAdvisor (its work is the advice files), the tool chats
+Not to @human, @Manager (it edits nothing), @DesignAdvisor (its work is the advice files), the tool chats
 @Codex, @Blender and @ClaudeImage (studio.py keeps their history) or unbound chats.
 @CodeLead and @Manager are both shown new reports (bind_session.py).
 "Changed files" = an Edit/Write/MultiEdit/NotebookEdit, or a unity-mcp call that changes something (an asset, the

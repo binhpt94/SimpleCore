@@ -15,6 +15,7 @@ way Codex and Blender are run. Every run, delivery and refusal is kept, so a mis
     python Management/tools/studio.py anchor <_design/...>/<id> <item> the human: an art that passed guides its style (toggle)
     python Management/tools/studio.py pick <F>/<id> <item> <n>         the tool chat: take run n of an item as its result
     python Management/tools/studio.py debt close <n-k>                 the human: accept an art debt as it is
+    python Management/tools/studio.py cancel <F>/<id> "<why>"          the one who ordered, @Manager, the human: the order is dropped
 
 Layout (see .claude/rules/studio.md):
     Management/studio/<tool>/lessons.md                    mistakes met and how to avoid them; put before every prompt
@@ -651,14 +652,20 @@ def read_status(folder):
     value = value if isinstance(value, dict) else {}
     version = int(value.get("version") or 0)
     state = value.get("state") or "new"
-    if state not in ("new", "doing", "delivered"):      # written before judging replaced take/reject/approve/accept
+    if state not in ("new", "doing", "delivered", CANCELLED):      # written before judging replaced take/reject/approve/accept
         state = "delivered" if version else "new"
-    return {"state": state, "version": version, "at": value.get("at") or ""}
+    out = {"state": state, "version": version, "at": value.get("at") or ""}
+    if state == CANCELLED:
+        out["reason"] = str(value.get("reason") or "")
+    return out
+
+
+CANCELLED = "cancelled"      # dropped by the one who ordered, @Manager or the human: nobody works on it any more
 
 
 def view_state(status, items, reviews, unjudged=False):
     """What an order waits for, from its status and the judgement of its items:
-    new | doing | review (an item is not judged yet) | redo (an item is judged REDO) | done."""
+    new | doing | review (an item is not judged yet) | redo (an item is judged REDO) | done | cancelled."""
     if status["state"] != "delivered":
         return status["state"]
     if unjudged:      # a claude concept: nobody judges it, a delivery is the end
@@ -672,7 +679,35 @@ def no_judging(tool, feature):
     return tool == CLAUDE and bool(DESIGN_RX.match(feature))
 
 
-VIEW_STATES = {"new": "mới", "doing": "đang làm", "review": "chờ duyệt", "redo": "cần làm lại", "done": "xong"}
+VIEW_STATES = {"new": "mới", "doing": "đang làm", "review": "chờ duyệt", "redo": "cần làm lại", "done": "xong", CANCELLED: "đã huỷ"}
+
+
+def not_cancelled(root, ref):
+    """Raises ValueError when the order `ref` was cancelled: no tool runs for it, nothing of it is delivered or judged."""
+    _, _, _, folder = find_order(root, ref)
+    status = read_status(folder)
+    if status["state"] == CANCELLED:
+        raise ValueError(f"order {ref} đã bị huỷ ({status.get('reason') or 'không ghi lí do'}): không làm gì thêm cho nó; cần lại thì đặt order mới với id khác")
+
+
+def cmd_cancel(root, ref, text):
+    """Drops an order: the one who ordered it, @Manager or the human (the guard checks who). Its tool chat is no
+    longer told of it, `check` and the tool's list leave it out, the Studio tab shows why. What was already
+    delivered stays in Resources. An order whose every item is done is not cancelled: there is nothing left to stop."""
+    tool, feature, oid, folder = find_order(root, ref)
+    text = " ".join(str(text or "").split())
+    if not text or len(text) > REVIEW_TEXT_MAX:
+        raise ValueError(f"cần lí do huỷ, tối đa {REVIEW_TEXT_MAX} kí tự")
+    status = read_status(folder)
+    if status["state"] == CANCELLED:
+        raise ValueError(f"order {ref} đã huỷ rồi ({status.get('reason')})")
+    data = parse_order(read_text(folder / ORDER_FILE))
+    if view_state(status, [i for i, _ in data["items"]], read_reviews(folder), no_judging(tool, feature)) == "done":
+        raise ValueError(f"order {ref} đã xong (mọi item đã giao và đã chấm): không còn gì để huỷ")
+    save_status(folder, state=CANCELLED, reason=text)
+    log(folder, "cancel", reason=text)
+    print(f"Đã huỷ order {tool} {ref}: {text}. Tin của order này còn trong hộp thư sẽ tự huỷ; bản đã giao (nếu có) vẫn ở Resources.")
+    return 0
 
 
 def save_status(folder, **changes):
@@ -1982,6 +2017,7 @@ def item_rows(folder, data):
     made again now (judged REDO with a feedback text, rounds left) or is being made again."""
     reviews = read_reviews(folder)
     delivered = read_status(folder)["version"] > 0
+    dropped = read_status(folder)["state"] == CANCELLED      # nothing of a cancelled order is made again
     rows = []
     for i, text in data["items"]:
         b = budget(folder, i)
@@ -1991,7 +2027,7 @@ def item_rows(folder, data):
             r = dict(r, text=said[-1] if said else "")
         rows.append({"id": i, "text": text, "level": r["level"] if delivered else None, "feedback": r["text"] if delivered else "",
                      "used": b["used"], "allowed": b["allowed"], "left": b["left"], "round": b["round"], "why": b["why"],
-                     "redo": delivered and b["left"] > 0})
+                     "redo": delivered and b["left"] > 0 and not dropped})
     return rows
 
 
@@ -2083,7 +2119,7 @@ def snapshot(root):
         state = view_state(status, [i["id"] for i in items], read_reviews(folder), no_judging(tool, feature))
         orders.append({"ref": f"{feature}/{oid}", "tool": tool, "kind": data["fields"].get("kind", ""), "title": data["title"],
                        "owner": feature, "design": design, "node": node_of(feature) if design else "",
-                       "state": state, "stateName": VIEW_STATES[state], "version": status["version"],
+                       "state": state, "stateName": VIEW_STATES[state], "version": status["version"], "reason": status.get("reason", ""),
                        "maxRedos": MAX_REDOS, "items": items, "problems": problems, "at": status["at"]})
     return {"orders": orders, "debts": read_debts(root), "levels": list(REVIEW_LEVELS), "levelNone": REVIEW_NONE,
             "states": VIEW_STATES, "limits": {"first": RUNS_FIRST, "redo": RUNS_REDO, "maxRedos": MAX_REDOS,
@@ -2105,6 +2141,9 @@ def cmd_status(root, arg=""):
             print(f"- {d['id']} {d['tool']} {d['owner']} · {d['item']} (v{d['version']}): {d['kind']}: {d['reason']}")
     for ref, tool, state, version, count, title, problems, items in rows:
         print(f"- {tool} {ref}: {VIEW_STATES[state]}" + (f", đã giao v{version}" if version else "") + f", {count} item · {title}")
+        if state == CANCELLED:
+            print(f"    đã huỷ: {read_status(find_order(root, ref, tool)[3]).get('reason')}")
+            continue
         for i in items:
             line = f"    {i['id']}: đã chạy {i['used']} lượt, còn {i['left']}, làm lại {i['round']}/{MAX_REDOS}"
             if version:
@@ -2132,9 +2171,11 @@ def inbox(root, target, text, key, check, once=True):
 def cmd_check(root):
     bad = 0
     for ref, tool, state, _, count, title, problems, _ in summary(root):
-        for p in problems:
+        for p in problems if state != CANCELLED else []:
             print(f"{tool} {ref}: {p}")
             bad += 1
+        if state == CANCELLED:
+            continue
         if not problems and state == "new":      # a valid order nobody has started: its tool chat is told once
             print(inbox(root, INBOX_TOOLS[tool], f"Order mới {tool} {ref} ({count} item: {title}). Làm theo skill "
                         f"studio-fulfill-order; xem: python Management/tools/studio.py status {ref}",
@@ -2154,6 +2195,11 @@ def main(argv):
             return cmd_check(root)
         if args[:1] == ["status"] and len(args) <= 2:
             return cmd_status(root, args[1] if len(args) == 2 else "")
+        if len(args) == 3 and args[0] == "cancel":
+            return cmd_cancel(root, args[1], args[2])
+        acting = {"redo": 1, "codex": 1, "consult": 1, "blender": 1, "claude": 1, "deliver": 2, "review": 1, "pick": 1, "anchor": 1}
+        if args[:1] and args[0] in acting and len(args) > acting[args[0]]:
+            not_cancelled(root, args[acting[args[0]]])
         if len(args) == 4 and args[0] == "redo":
             return cmd_redo(root, args[1], args[2], args[3])
         if args[:1] == ["measure"] and len(args) in (2, 3):

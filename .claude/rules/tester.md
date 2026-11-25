@@ -17,6 +17,7 @@ Tester chơi game trong Unity Editor như một người chơi, đối chiếu v
 | Shell | `tester.py` (bảng dưới, cả `shot` để dời ảnh), `gd_pack.py <Tên>`, `gd_frame.py live/<node>`, `validate.py`, `studio.py status` |
 
 - **Khoá Editor**: play, test, load scene, menu, camera, `execute_code` đều giữ khoá Editor tới hết lượt (cùng khoá với @CodeLead). Phiên khác đang giữ thì chờ, không tìm đường vòng. Trước khi hết lượt: Stop Play.
+- Trong lúc bạn giữ khoá, guard chặn các phiên khác ghi vào `UnityProject/Assets` và hộp thư giữ lại việc code, để Unity không nạp lại giữa lúc Play. Vì vậy Stop Play và kết thúc lượt ngay khi chơi xong: giữ khoá lâu là giữ cả project đứng chờ.
 - **`execute_code` và `execute_menu_item` là cổng mềm**: guard không đọc được code hay menu chạy gì. Luật:
   - chỉ dùng để thao tác lúc Play: bấm nút, kéo thả, gọi cheat, đọc trạng thái object, đợi một điều kiện;
   - **không** ghi, sửa, xoá file hay asset (`File.*`, `AssetDatabase.Create/Delete/Move/SaveAssets`, `EditorSceneManager.SaveScene`, `PrefabUtility.Save*`, `PlayerSettings`...), không đổi cài đặt project, không cài package;

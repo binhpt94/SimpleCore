@@ -168,7 +168,7 @@ def run_cases():
 
     g = "7 proposals"
     r(g, W, "allow", FX + "/Management/proposals/old.md")
-    w(g, W, "allow", FX + "/Management/proposals/new.md")
+    w(g, W, "deny", FX + "/Management/proposals/new.md")      # closed: asked in the chat, tool work goes to toolwork.py
     w(g, W, "deny", FX + "/Management/proposals/old.md")
     e(g, W, "deny", FX + "/Management/proposals/old.md")
 
@@ -843,7 +843,7 @@ def run_role_cases(payload):
         r(g, role, "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
         r(g, role, "allow", F + "/Wallet/CLAUDE.md")
         r(g, role, "allow", A + other + "/Old.cs")
-        w(g, role, "allow", FX + "/Management/proposals/new.md")
+        w(g, role, "deny", FX + "/Management/proposals/new.md")
         e(g, role, "ask", FX + "/Management/tools/rules.json")
         e(g, role, "deny", FX + "/.claude/settings.json")
         t(g, role, "allow", "Bash", sh(VALIDATE + " --feature " + owner))
@@ -857,8 +857,27 @@ def run_role_cases(payload):
     for p in (own_w, A + "/Core/Old.cs", A + "/_Composition/Old.cs", F + "/Wallet/Scripts/Contracts/IWallet.cs",
               FX + "/Management/tools/rules.json", FX + "/Management/data/x.js", FX + "/.claude/settings.json"):
         e(g, M, "deny", p)
-    w(g, M, "allow", FX + "/Management/proposals/plan.md")
+    w(g, M, "deny", FX + "/Management/proposals/plan.md")
     e(g, M, "deny", FX + "/Management/proposals/old.md")
+    r(g, M, "allow", FX + "/Management/proposals/old.md")
+    TW = "python Management/tools/toolwork.py "
+    t(g + ": tool work the human decided", M, "allow", "Bash", sh(TW + 'add "Thêm lệnh huỷ order" --from Manager --decided "Người chọn A ngày 2026-11-26"'))
+    t(g + ": names itself", M, "deny", "Bash", sh(TW + 'add "Thêm lệnh huỷ order" --from CodeLead --decided "Người chọn A"'))
+    t(g + ": needs the decision", M, "deny", "Bash", sh(TW + 'add "Thêm lệnh huỷ order" --from Manager'))
+    t(g + ": reads the list", M, "allow", "Bash", sh(TW + "list"))
+    SC = "python Management/tools/studio.py cancel "
+    t(g + ": cancels any order", M, "allow", "Bash", sh(SC + 'Hud/hud-sprites "Trùng sprite đã đạt, style cũ"'))
+    t(g + ": cancel needs a reason", M, "deny", "Bash", sh(SC + "Hud/hud-sprites"))
+    t(g + ": no shell characters in the reason", M, "deny", "Bash", sh(SC + 'Hud/hud-sprites "x; rm -rf ."'))
+    t(g + ": a feature cancels its own order", "Wallet", "allow", "Bash", sh(SC + 'Wallet/coin-icons "Không cần nữa"'))
+    t(g + ": not another feature's", "Wallet", "deny", "Bash", sh(SC + 'Hud/hud-sprites "Không cần nữa"'))
+    t(g + ": a tool chat does not cancel", "@ClaudeImage", "deny", "Bash", sh(SC + 'Hud/hud-sprites "Không cần nữa"'))
+    t(g + ": @CodeLead does not cancel", "@CodeLead", "deny", "Bash", sh(SC + 'Hud/hud-sprites "Không cần nữa"'))
+    t(g + ": only the human closes", M, "deny", "Bash", sh(TW + 'done w20261126-ab12 "xong"'))
+    t(g + ": only the human drops", M, "deny", "Bash", sh(TW + 'drop w20261126-ab12 "thôi"'))
+    t(g + ": a Leader adds", "@CodeLead", "allow", "Bash", sh(TW + 'add "Sổ nhận test chéo" --from CodeLead --decided "Người chọn B"'))
+    t(g + ": a feature reads", "Wallet", "allow", "Bash", sh(TW + "list --all"))
+    t(g + ": a feature does not add", "Wallet", "deny", "Bash", sh(TW + 'add "x" --from Manager --decided "y"'))
     r(g, M, "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
     r(g, M, "allow", A + "/Core/Old.cs")
     r(g, M, "deny", own_w)
@@ -1872,7 +1891,7 @@ def run_progress_cases():
     t(g + " (no design names Shop)", S, "deny", "MultiEdit", {"file_path": own, "edits": []})
     t(g + " (no design names Shop)", S, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Features/Shop/Scripts/Internal/S.cs"})
     r(g + ": reading is not gated", S, "allow", own)
-    w(g + ": proposals are not gated", S, "allow", FX + "/Management/proposals/shop-gate.md")
+    w(g + ": proposals are closed for everyone", S, "deny", FX + "/Management/proposals/shop-gate.md")
     t(g + ": validate is not gated", S, "allow", "Bash", {"command": VALIDATE})
     os.makedirs(live + "/feature-shop/detail")
     for d in ("/feature-shop", "/feature-shop/detail"):
@@ -2338,6 +2357,27 @@ def run_unity_cases():
     check(g, "", True, "the human frees any lock", p.returncode == 0 and guard.read_lock(STORE) is None)
     Path(guard.lock_path(STORE)).write_text("{ broken")
     u(g, W, "allow", "read_console", session="a", action="clear")      # a broken lock file is no lock
+
+    g = "tester plays: no writes into Assets"
+    guard.write_lock(STORE, {"session": "tester-1", "who": "@UnityAutoPlay", "until": time.time() + 600})
+    t(g, W, "deny", "Write", {"file_path": F + "/Wallet/Scripts/Internal/New.cs"}, session="a")
+    t(g, W, "deny", "Edit", {"file_path": F + "/Wallet/Scripts/Internal/W.cs"}, session="a")
+    t(g + ": @CodeLead too", L, "deny", "Edit", {"file_path": A + "/_Composition/Boot.cs"}, session="c")
+    t(g + ": @Core too", "@Core", "deny", "Write", {"file_path": A + "/Core/New.cs"}, session="d")
+    u(g + ": assets through unity-mcp too", W, "deny", "manage_asset", session="a", action="create", path=own + "/FeatureAssets/Private/c.asset")
+    u(g + ": reading goes on", W, "allow", "read_console", session="a", action="get")
+    t(g + ": reading goes on", W, "allow", "Read", {"file_path": F + "/Wallet/Scripts/Internal/W.cs"}, session="a")
+    t(g + ": outside Assets is not held", "@GameDesigner", "allow", "Write", {"file_path": FX + "/Management/game-design/ai/idea/data.md"}, session="e")
+    t(g + ": the human is never held", "@human", "pass", "Write", {"file_path": F + "/Wallet/Scripts/Internal/New.cs"}, session="h")
+    marks = sorted(p.name for p in Path(STORE, guard.TESTER_BLOCKED_DIR).glob("*.json"))
+    check(g, "", True, "the refused chats are marked for the server to wake", marks == ["a.json", "c.json", "d.json"])
+    check(g, "", True, "the mark names who to wake", json.loads(Path(STORE, guard.TESTER_BLOCKED_DIR, "a.json").read_text())["target"] == "Wallet")
+    guard.write_lock(STORE, {"session": "b", "who": "@CodeLead", "until": time.time() + 600})
+    t(g + ": another chat holding the Editor does not stop writes", W, "allow", "Write", {"file_path": F + "/Wallet/Scripts/Internal/New.cs"}, session="a")
+    guard.write_lock(STORE, {"session": "tester-1", "who": "@UnityAutoPlay", "until": time.time() - 1})
+    t(g + ": an expired lock holds nothing", W, "allow", "Write", {"file_path": F + "/Wallet/Scripts/Internal/New.cs"}, session="a")
+    Path(guard.lock_path(STORE)).unlink()
+    shutil.rmtree(Path(STORE, guard.TESTER_BLOCKED_DIR), ignore_errors=True)
 
     g = "unity: reading the lock file"
     u("unity: the Editor lock", W, "allow", "manage_scene", session="a", action="create", path=own + "/Scenes", name="R")
