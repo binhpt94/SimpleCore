@@ -1009,8 +1009,37 @@ def run_styles(root):
     check("style: gd_status prints the styles", "- Style ui-flat: UI phẳng (1 ảnh tham chiếu)" in gd_status.report(root))
 
 
+def run_diff(root):
+    """What the page shows against live: new, rewritten and removed ideas, title, summary, frames, when."""
+    mk(root, "", items=(("loop", 8, "Vòng lặp."), ("win", 6, "Thắng sau 10 đợt."), ("map", 7, "Một bản đồ.")))
+    mk(root, "feature-shop", items=(("buy", 9, "Mua bằng xu."),))
+    gd.record_versions(root), gd.sync_live(root)
+    node = snap_node(root)
+    check("diff: a node the same as live has no change", (node["diff"]["added"], node["diff"]["rewritten"], node["diff"]["removed"],
+                                                         node["diff"]["title"], node["diff"]["summary"], node["diff"]["frames"]), (0, 0, [], None, None, False))
+    check("diff: every idea of it is the same", [it["change"] for it in node["items"]], ["same"] * 3)
+    mk(root, "", title="Game mới", summary="Tóm tắt khác.",
+       items=(("loop", 8, "Vòng lặp."), ("win", 7, "Chơi vô tận."), ("score", 6, "Tính điểm theo đợt.")))
+    gd.record_versions(root)
+    node = snap_node(root)
+    check("diff: each idea against live", [(it["id"], it["change"]) for it in node["items"]],
+          [("loop", "same"), ("win", "rewritten"), ("score", "new")])
+    check("diff: a rewritten idea carries the live text", next(it for it in node["items"] if it["id"] == "win")["live"],
+          {"title": "Thắng sau 10 đợt.", "detail": ""})
+    check("diff: counts and the removed idea", (node["diff"]["added"], node["diff"]["rewritten"], [r["id"] for r in node["diff"]["removed"]]),
+          (1, 1, ["map"]))
+    check("diff: title and summary as they are in live", (node["diff"]["title"], node["diff"]["summary"]), ("Game", "Tóm tắt."))
+    check("diff: when an idea was last added or rewritten", [bool(it["changedAt"]) for it in node["items"]], [True, True, True])
+    shop = snap_node(root, "feature-shop")
+    check("diff: a child that did not change stays the same", (shop["state"], [it["change"] for it in shop["items"]]), ("same", ["same"]))
+    mk(root, "feature-new")
+    check("diff: a node live has not", [it["change"] for it in snap_node(root, "feature-new")["items"]], ["new"])
+    put(root, "idea/feature-shop/.frame-concept/main.frame", "kind: ui\n- a rect x=0 y=0 w=10 h=10\n")
+    check("diff: a frame changed against live", snap_node(root, "feature-shop")["diff"]["frames"], True)
+
+
 def main():
-    for case in (run_data, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_cheat, run_styles):
+    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_cheat, run_styles):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

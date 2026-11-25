@@ -1749,11 +1749,20 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
         problems.extend({"path": where, "text": f"{GLOSSARY_KEY}: {t}"} for t in errors)
         if any(p.is_dir() and not p.name.startswith(".") for p in folder.iterdir()):
             problems.append({"path": where, "text": f"node {GLOSSARY_KEY} không có node con"})
+    history = read_history(folder)
+    touched = {}      # id of an idea -> when data.md last added or rewrote it
+    for e in history:
+        if e.get("event") == "data":
+            for i in list(e.get("added") or []) + [r.get("id") for r in e.get("rewritten") or [] if isinstance(r, dict)]:
+                touched[i] = str(e.get("at") or "")
+    for it in items:
+        it["changedAt"] = touched.get(it["id"], "")
     node = {"key": folder.name if path else "", "redo": redo, "path": path, "round": depth, "title": data["title"] or (folder.name if path else ""),
             "summary": data["summary"], "body": doc, "items": items, "dataHash": data["hash"], "basedOn": data["based_on"],
             "parentHash": parent_hash or "", "stale": stale, "passed": passed, "reasons": reasons,
             "images": images, "imagesNote": images_note, "questions": questions, "pending": pending,
-            "history": read_history(folder)[-HISTORY_SHOWN:][::-1], "hash": own_hash(folder),
+            "history": history[-HISTORY_SHOWN:][::-1], "hash": own_hash(folder),
+            "frameHash": short_hash(*[part for name, text in frame_files(folder) for part in (name, text)]),
             "priority": read_priority(folder), "progress": read_progress(folder),
             "code": read_code(folder, where, depth, problems), "refs": refs["refs"],
             "refMissing": refs["missing"], "refNotes": refs["notes"], "refLine": ref_line(refs),
@@ -1959,9 +1968,23 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
     def visit(node):
         other = in_live.get(node["path"])
         node["state"] = "new" if other is None else ("same" if other["hash"] == node["hash"] else "changed")
-        fixed = {it["id"]: it["hash"] for it in other["items"]} if other else {}
+        held = {it["id"]: it for it in other["items"]} if other else {}
         for it in node["items"]:      # an idea is fixed when live holds it with this very content
-            it["fixed"] = fixed.get(it["id"]) == it["hash"]
+            was = held.get(it["id"])
+            it["fixed"] = was is not None and was["hash"] == it["hash"]
+            # change against live: new (live has no such id), rewritten (live has another text), same
+            it["change"] = "same" if it["fixed"] else "new" if was is None else "rewritten"
+            it["live"] = {"title": was["title"], "detail": was["detail"]} if it["change"] == "rewritten" else None
+        ids = {it["id"] for it in node["items"]}
+        node["diff"] = {
+            "added": sum(1 for it in node["items"] if it["change"] == "new"),
+            "rewritten": sum(1 for it in node["items"] if it["change"] == "rewritten"),
+            "removed": [{"id": it["id"], "title": it["title"], "detail": it["detail"]}
+                        for it in (other["items"] if other else []) if it["id"] not in ids],
+            "title": other["title"] if other and other["title"] != node["title"] else None,
+            "summary": other["summary"] if other and other["summary"] != node["summary"] else None,
+            "frames": bool(other) and other.get("frameHash") != node.get("frameHash"),
+        }
         node["approved"] = node["passed"] and not node.get("clashOpen") and (mode != "user" or node["state"] == "same")
         below = [visit(c) for c in node["children"]]
         live_keys = {c["key"] for c in other["children"]} if other else set()

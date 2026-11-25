@@ -163,6 +163,20 @@
     ".gd-save .gd-btn { padding: 4px 10px; font-size: 12.5px; }",
     ".gd-detail textarea { display: block; width: 100%; min-height: 40px; margin-top: 6px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; resize: none; overflow: hidden; }",
     ".gd-note { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }",
+    // So với live: ý mới, ý sửa (chữ cũ gạch, chữ mới tô), ý bị bỏ; ý đổi mà bạn chưa chấm có vạch trái.
+    ".gd-tag.diff, .gd-chip.diff { border-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); font-weight: 600; text-decoration: none; }",
+    ".gd-mark.change { border-color: var(--warn-text); background: var(--warn-bg); color: var(--warn-text); font-weight: 600; }",
+    ".gd-item.look { box-shadow: inset 3px 0 0 var(--warn-text); padding-left: 8px; }",
+    ".gd-diff { margin: 2px 0 8px; font-size: 13.5px; line-height: 1.5; color: var(--muted); }",
+    ".gd-diff del { color: var(--bad); text-decoration: line-through; }",
+    ".gd-diff ins { text-decoration: none; background: var(--warn-bg); color: var(--warn-text); border-radius: 3px; padding: 0 2px; }",
+    ".gd-diff b { font-weight: 600; color: var(--text); margin-right: 6px; }",
+    ".gd-changes { margin: 12px 0 0; padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--warn-text); background: var(--warn-bg); color: var(--warn-text); font-size: 13px; }",
+    ".gd-changes p { margin: 2px 0; }",
+    ".gd-changes .gd-btn { margin-top: 6px; padding: 4px 10px; font-size: 12.5px; }",
+    ".gd-removed { margin: 8px 0 0; padding: 0; list-style: none; }",
+    ".gd-removed li { padding: 6px 0; border-bottom: 1px solid var(--line); color: var(--muted); }",
+    ".gd-removed li span { text-decoration: line-through; }",
     ".gd-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }",
     ".gd-row span { flex: 1; min-width: 120px; font-size: 13px; color: var(--muted); }",
     ".gd-q h4 { margin: 0 0 4px; font-size: 15px; }",
@@ -435,7 +449,7 @@
     // selected: path của node đang chọn; mọi thứ của node đó (duyệt ý, câu hỏi, chốt, diễn giải) hiện dưới bản đồ.
     // ask: việc đang chờ nhập PIN để xác nhận ({kind: "sync"} hoặc {kind: "mode", key}).
     // phase: giai đoạn đang lọc trên bản đồ (khoá trong data.phases), null là tất cả.
-    var state = { table: "live", focus: null, selected: null, message: null, ask: null, phase: null };
+    var state = { table: "live", focus: null, selected: null, message: null, ask: null, phase: null, onlyChanged: false };
 
     add(pane, el("h1", "", "Game design"));
     add(pane, el("p", "sub", "Bản đồ thiết kế, từ ý tưởng sơ khai tới quyết định chi tiết. Bấm một node, phần dưới bản đồ hiện các ý cốt lõi của nó: bấm vào từng ý để xem chi tiết, chấm điểm và ghi ý kiến; bấm một feature (vòng " +
@@ -568,6 +582,65 @@
       if (!p) return true;
       var e = rank(node).effective;
       return e !== null && e !== undefined && e >= p.min;
+    };
+    // So với live (bảng đề xuất): gamedesign.py tính sẵn n.diff và it.change ("new" | "rewritten" | "same").
+    var diffOf = function (n) {
+      var d = n.diff || {};
+      return { added: d.added || 0, rewritten: d.rewritten || 0, removed: (d.removed || []).length,
+               title: d.title !== null && d.title !== undefined, summary: d.summary !== null && d.summary !== undefined, frames: !!d.frames };
+    };
+    var changedItems = function (n) { return n.items.filter(function (i) { return i.change && i.change !== "same"; }); };
+    // Ý đổi so với live mà bạn chưa chấm bản hiện tại: thứ nên xem trước.
+    var toLook = function (n) { return changedItems(n).filter(function (i) { return i.user === null; }).length; };
+    var diffParts = function (n) {
+      if (n.state === "new") return ["node mới, chưa có trong live"];
+      var d = diffOf(n), out = [];
+      if (d.added) out.push(d.added + " ý mới");
+      if (d.rewritten) out.push(d.rewritten + " ý sửa");
+      if (d.removed) out.push(d.removed + " ý bỏ");
+      if (d.title) out.push("đổi tên");
+      if (d.summary) out.push("đổi tóm tắt");
+      if (d.frames) out.push("đổi frame");
+      if (!out.length && n.state === "changed") out.push("chỉ đổi diễn giải (CLAUDE.md), ảnh hoặc code.json");
+      return out;
+    };
+    var diffShort = function (n) {
+      if (n.state === "new") return "Mới";
+      var d = diffOf(n), out = [];
+      if (d.added) out.push("+" + d.added);
+      if (d.rewritten) out.push("✎" + d.rewritten);
+      if (d.removed) out.push("−" + d.removed);
+      if (d.title || d.summary || d.frames || !out.length) out.push("…");
+      return "Đổi " + out.join(" ");
+    };
+    // So sánh theo từ (LCS): [{op: "=" | "-" | "+", text}]. Chữ của một ý ngắn nên đủ nhanh.
+    var wordDiff = function (a, b) {
+      var x = (a || "").split(/(\s+)/), y = (b || "").split(/(\s+)/), n = x.length, m = y.length, i, j;
+      if (n * m > 250000) return [{ op: "-", text: a }, { op: "+", text: b }];
+      var t = [];
+      for (i = 0; i <= n; i++) { t.push(new Array(m + 1).fill(0)); }
+      for (i = n - 1; i >= 0; i--) for (j = m - 1; j >= 0; j--) t[i][j] = x[i] === y[j] ? t[i + 1][j + 1] + 1 : Math.max(t[i + 1][j], t[i][j + 1]);
+      var out = [], push = function (op, text) {
+        var last = out[out.length - 1];
+        if (last && last.op === op) last.text += text; else out.push({ op: op, text: text });
+      };
+      i = 0; j = 0;
+      while (i < n && j < m) {
+        if (x[i] === y[j]) { push("=", x[i]); i++; j++; }
+        else if (t[i + 1][j] >= t[i][j + 1]) { push("-", x[i]); i++; }
+        else { push("+", y[j]); j++; }
+      }
+      for (; i < n; i++) push("-", x[i]);
+      for (; j < m; j++) push("+", y[j]);
+      return out;
+    };
+    var diffLine = function (box, label, before, after) {
+      var line = put(box, el("p", "gd-diff"));
+      add(line, el("b", "", label));
+      wordDiff(before, after).forEach(function (part) {
+        line.appendChild(part.op === "=" ? document.createTextNode(part.text) : el(part.op === "-" ? "del" : "ins", "", part.text));
+      });
+      return line;
     };
     // Ý bạn đã chấm dưới mức đạt (dùng cho thẻ ở bảng live).
     var turnedDown = function (node) { return node.items.filter(function (i) { return i.user !== null && i.user < passMin(); }).length; };
@@ -717,9 +790,24 @@
         var waitBox = put(noticeBox, el("div", "gd-wait-list"));
         add(waitBox, el("b", "", "Chờ bạn chốt (" + syncable() + "):"));
         syncList().forEach(function (n) {
-          var link = put(waitBox, button(trail(n), function () { goTo(n); }, null, "gd-chip todo"));
-          link.title = "Tới node này (mở nhánh của nó trên bản đồ)";
+          var link = put(waitBox, button(trail(n) + " · " + diffShort(n), function () { goTo(n); }, null, "gd-chip todo"));
+          link.title = "Đạt, chờ chốt. So với live: " + diffParts(n).join(", ") + ". Bấm để tới node.";
         });
+      }
+      // Mọi node khác live mà chưa đạt: AI đã đổi, đang chờ bạn chấm hoặc chờ @GameDesigner làm lại.
+      if (state.table === "idea" && data && data.idea) {
+        var drift = [];
+        each(data.idea, function (n) { if (n.state !== "same" && !n.passed) drift.push(n); });
+        if (drift.length) {
+          var driftBox = put(noticeBox, el("div", "gd-wait-list"));
+          add(driftBox, el("b", "", "Đổi so với live, chưa đạt (" + drift.length + "):"));
+          drift.forEach(function (n) {
+            var look = toLook(n), redo = own(n) === "redo";
+            var link = put(driftBox, button(trail(n) + " · " + diffShort(n) + (look ? " · " + look + " chưa chấm" : "") + (redo ? " · AI làm lại" : ""),
+              function () { goTo(n); }, null, "gd-chip diff"));
+            link.title = "So với live: " + diffParts(n).join(", ") + ".\n" + (redo ? "Đang chờ @GameDesigner làm lại: " : "Đang chờ bạn: ") + n.reasons.join("\n");
+          });
+        }
       }
       if (state.table === "live" && data && data.idea) {
         var waiting = 0;
@@ -813,6 +901,12 @@
           go.setAttribute("aria-label", "Duyệt và chốt node " + (n.title || where(n)) + " sang live");
           out.push(go);
         }
+      }
+      if (n.state !== "same") {
+        var look = toLook(n);
+        var diffChip = button(diffShort(n), open, null, "gd-chip diff");
+        diffChip.title = "So với live: " + diffParts(n).join(", ") + (look ? ". " + look + " ý mới hoặc sửa bạn chưa chấm." : ".") + " Bấm để xem.";
+        out.push(diffChip);
       }
       // Nhánh: mọi node bên dưới. Chỉ là hiển thị; node cha "đã duyệt" mà nhánh còn việc thì thấy ngay ở đây.
       var b = branch(n);
@@ -950,6 +1044,23 @@
         : "Các node con đang bị khoá với @GameDesigner cho tới khi node này đạt" + (mode() === "user" ? " và được chốt." : ".");
     };
 
+    // Khung "So với live": node đổi gì so với bản đã chốt, và bao nhiêu ý đổi bạn chưa chấm.
+    var renderChanges = function (body, node) {
+      if (node.state === "same") return;
+      var box = put(body, el("div", "gd-changes"));
+      add(box, el("p", "", "So với live: " + diffParts(node).join(" · ") + "."));
+      var d = node.diff || {};
+      if (d.title !== null && d.title !== undefined) diffLine(box, "Tên:", d.title, node.title);
+      if (d.summary !== null && d.summary !== undefined) diffLine(box, "Tóm tắt:", d.summary, node.summary);
+      var look = toLook(node), changed = changedItems(node).length;
+      if (look) add(box, el("p", "", look + " ý mới hoặc sửa bạn chưa chấm (vạch vàng bên trái). Full Auto không bắt chấm, nhưng đây là chỗ AI vừa đổi."));
+      if (changed && changed < node.items.length) {
+        add(box, button(state.onlyChanged ? "Hiện mọi ý" : "Chỉ hiện " + changed + " ý đổi", function () {
+          state.onlyChanged = !state.onlyChanged; render();
+        }, state.onlyChanged));
+      }
+    };
+
     var renderItems = function (body, node) {
       add(body, el("h3", "", "Ý cốt lõi"));
       if (!node.items.length) { add(body, el("p", "muted", "Node chưa có ý nào trong data.md.")); return; }
@@ -988,7 +1099,9 @@
         g.placed = true;
         g.ids.forEach(function (id) { order.push(byId[id]); });
       });
+      var idea = state.table === "idea";
       order.forEach(function (it) {
+        if (idea && state.onlyChanged && it.change === "same" && !groupOf[it.id]) return;
         // Chữ của ý là chính. Dưới nó chỉ có hai khung nhỏ (điểm AI, điểm của bạn). Bấm vào ý mới mở phần cập nhật:
         // hàng nút chấm điểm và ô nhập phản hồi.
         var group = groupOf[it.id] && groupOf[it.id].ids.length > 1 ? groupOf[it.id] : null;
@@ -998,7 +1111,9 @@
           add(pickHead, el("b", "", "Chọn 1 trong " + group.ids.length), el("span", "", "Các ý này trái nhau, chỉ giữ một. " +
             "\"Chọn ý này\" chấm ý đó " + PICK_KEEP + " và các ý còn lại " + PICK_DROP + "; vẫn sửa được, bấm Lưu chấm điểm để ghi."));
         }
-        var block = put(group ? group.box : body, el("div", "gd-item"));
+        var change = idea && it.change && it.change !== "same" ? it.change : "";
+        var look = change && it.user === null;
+        var block = put(group ? group.box : body, el("div", "gd-item" + (look ? " look" : "")));
         var draft = { score: it.user, feedback: it.feedback || "" };
         var head = put(block, el("div", "gd-head"));
         head.tabIndex = 0;
@@ -1015,6 +1130,11 @@
         add(head, inline(ctx, el("p", "text" + (clash ? " clash" : itemFixed ? "" : " " + who)), it.title));
         var marks = put(head, el("div", "gd-marks"));
         var sources = (it.sources || []).map(function (x) { return x.advice + "#" + x.point; }).join(", ");
+        if (change) {
+          var changeMark = put(marks, el("span", "gd-mark change", change === "new" ? "Mới" : "Đã sửa"));
+          changeMark.title = (change === "new" ? "Ý mới, live chưa có" : "Ý đã sửa so với live: chữ cũ gạch đỏ, chữ mới tô vàng") +
+            (it.changedAt ? " · đổi lúc " + it.changedAt : "") + (look ? " · bạn chưa chấm bản này" : "");
+        }
         var byMark = put(marks, el("span", "gd-mark by " + who, BY_NAMES[who]));
         byMark.title = who === "gpt" ? "GPT đề xuất (góp ý " + sources + "); Claude chỉ rút gọn câu chữ" : "Claude (@GameDesigner) đề xuất";
         if (it.clarified) {
@@ -1047,8 +1167,15 @@
           userMark.title = scored ? "Bạn chấm " + draft.score + " · " + band(draft.score).label : "Bạn chưa chấm ý này";
           said.textContent = editor.hidden ? draft.feedback.trim() : "";
         };
+        if (change === "rewritten" && it.live) {
+          if (it.live.title !== it.title) diffLine(block, "So với live:", it.live.title, it.title);
+          else add(block, el("p", "gd-diff", "Tiêu đề giữ nguyên; phần chi tiết đã sửa (bấm ý để xem)."));
+        }
         var editor = put(block, el("div", "gd-edit"));
         editor.hidden = true;
+        if (change === "rewritten" && it.live && (it.live.detail || "") !== (it.detail || "")) {
+          diffLine(editor, "Chi tiết so với live:", it.live.detail || "", it.detail || "");
+        }
         if (it.detail) renderText(ctx, put(editor, el("div", "gd-more")), it.detail);      // chi tiết của ý chỉ hiện khi đã bấm mở
         (it.sources || []).forEach(function (src) {      // lời của chính GPT, không qua tóm gọn của Claude
           if (!src.text) return;
@@ -1105,6 +1232,16 @@
           value: function () { return { score: draft.score, feedback: draft.feedback.trim() }; }
         });
       });
+      var removed = idea && node.diff ? node.diff.removed || [] : [];
+      if (removed.length) {
+        add(body, el("h4", "", "Ý đã bỏ so với live (" + removed.length + ")"));
+        var gone = put(body, el("ul", "gd-removed"));
+        removed.forEach(function (r) {
+          var li = put(gone, el("li"));
+          add(li, el("span", "", r.title));
+          li.title = "Mã " + r.id + (r.detail ? "\n" + r.detail : "") + "\nChốt node này thì ý này mất khỏi live.";
+        });
+      }
       var foot = put(body, el("div", "gd-row gd-save"));
       saveNote = put(foot, el("span", "", ""));
       saveBtn = put(foot, button("Lưu chấm điểm", function () {
@@ -1450,7 +1587,7 @@
       renderRequirements(body, node);
       renderCode(body, node);
       // Ý cốt lõi: bấm vào một ý để hiện chi tiết, hàng nút chấm điểm và ô nhập ý kiến.
-      if (state.table === "idea") renderVerdict(body, node);
+      if (state.table === "idea") { renderVerdict(body, node); renderChanges(body, node); }
       renderItems(body, node);
       renderQuestions(body, node);
       renderPromote(body, node);
