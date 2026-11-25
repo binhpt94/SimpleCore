@@ -75,6 +75,44 @@
     ".gd-tag.branch { font-weight: 600; }",
     ".gd-chip.branch { border-color: var(--bad); color: var(--bad); font-weight: 600; text-decoration: none; }",
     ".gd-chip.branch.redo { background: color-mix(in srgb, var(--bad) 10%, var(--panel)); }",
+    // Ô "Cần tôi": việc của người, xếp theo số feature bị chặn; bấm để tới node.
+    ".gd-need { margin: 0 0 16px; padding: 12px 16px; border: 1px solid var(--clash); border-radius: 8px; background: var(--panel); }",
+    ".gd-need h3 { margin: 0 0 8px; font-size: 15px; }",
+    ".gd-need ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }",
+    ".gd-need-row { display: flex; gap: 10px; align-items: baseline; width: 100%; padding: 5px 8px; border: 0; border-radius: 6px; background: none; color: var(--text); font: inherit; font-size: 14px; text-align: left; cursor: pointer; }",
+    ".gd-need-row:hover { background: var(--bg); }",
+    ".gd-need-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }",
+    ".gd-need-kind { flex: none; min-width: 84px; font-size: 12px; font-weight: 600; color: var(--clash); }",
+    ".gd-need-what { flex: 1; min-width: 0; overflow-wrap: anywhere; }",
+    ".gd-need-blocks { flex: none; font-size: 12.5px; color: var(--muted); white-space: nowrap; }",
+    ".gd-need-blocks.hot { color: var(--bad); font-weight: 600; }",
+    ".gd-need .gd-note { margin-top: 8px; }",
+    // Toàn cảnh: lưới thẻ nhỏ, mỗi feature một thẻ; ô tìm dùng chung với chế độ Bảng.
+    ".gd-search { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 0 0 12px; }",
+    ".gd-search input { flex: 1; min-width: 0; max-width: 420px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }",
+    ".gd-search span { color: var(--muted); font-size: 13px; }",
+    ".gd-root { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 12px; }",
+    ".gd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }",
+    ".gd-mini { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-left: 5px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; text-align: left; cursor: pointer; }",
+    ".gd-mini:hover { border-color: var(--accent); }",
+    ".gd-mini:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }",
+    ".gd-mini.sel { box-shadow: 0 0 0 2px var(--accent); }",
+    ".gd-mini.redo { border-left-color: var(--bad); }",
+    ".gd-mini.wait { border-left-color: var(--clash); }",
+    ".gd-mini.done { border-left-color: var(--ok); }",
+    ".gd-mini strong { font-size: 14px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }",
+    ".gd-mini .gd-mini-tags { display: flex; flex-wrap: wrap; gap: 4px; font-size: 12px; }",
+    ".gd-mini .gd-mini-tags span { padding: 0 6px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); }",
+    ".gd-mini .gd-mini-tags .ok { color: var(--ok); }",
+    ".gd-mini .gd-mini-tags .bad { color: var(--bad); }",
+    ".gd-mini .gd-mini-tags .need { color: var(--clash); font-weight: 600; }",
+    // Chế độ Bảng: mỗi feature một dòng.
+    ".gd-ftable-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }",
+    ".gd-ftable { min-width: 860px; }",
+    ".gd-ftable th button { padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }",
+    ".gd-ftable tbody tr { cursor: pointer; }",
+    ".gd-ftable tbody tr:hover { background: var(--bg); }",
+    ".gd-ftable td small { display: block; color: var(--muted); font-size: 12px; }",
     ".gd-wait-list { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 8px 0; font-size: 13px; }",
     ".gd-wait-list b { font-weight: 600; margin-right: 2px; }",
     ".gd-wait-list .gd-chip { text-decoration: none; }",
@@ -466,11 +504,33 @@
     // selected: path của node đang chọn; mọi thứ của node đó (duyệt ý, câu hỏi, chốt, diễn giải) hiện dưới bản đồ.
     // ask: việc đang chờ nhập PIN để xác nhận ({kind: "sync"} hoặc {kind: "mode", key}).
     // phase: giai đoạn đang lọc trên bản đồ (khoá trong data.phases), null là tất cả.
-    var state = { table: "live", focus: null, selected: null, message: null, ask: null, phase: null, onlyChanged: false };
+    // view: "tree" (bản đồ) | "table" (mỗi feature một dòng); expandAll: bản đồ cả cây, mọi vòng; query: chữ lọc
+    // feature (lưới và bảng); needAll: ô "Cần tôi" hiện mọi dòng; sort: cột đang xếp của bảng.
+    var state = { table: "live", focus: null, selected: null, message: null, ask: null, phase: null, onlyChanged: false,
+                  view: "tree", expandAll: false, query: "", needAll: false, sort: null };
+    // Chỉ là tiện lợi của người xem (trình duyệt này): thiếu hay lỗi thì trang vẫn chạy với mặc định.
+    var PREFS_KEY = "coresimple.gamedesign.view";
+    try {
+      var saved = JSON.parse(window.localStorage.getItem(PREFS_KEY) || "null");
+      if (saved && typeof saved === "object") {
+        if (saved.table === "idea" || saved.table === "live") state.table = saved.table;
+        if (saved.view === "table") state.view = "table";
+        state.expandAll = saved.expandAll === true;
+        state.query = typeof saved.query === "string" ? saved.query : "";
+        state.focus = typeof saved.focus === "string" ? saved.focus : null;
+      }
+    } catch (e) { /* không có localStorage */ }
+    var savePrefs = function () {
+      try {
+        window.localStorage.setItem(PREFS_KEY, JSON.stringify({ table: state.table, view: state.view, expandAll: state.expandAll,
+                                                               query: state.query, focus: state.focus }));
+      } catch (e) { /* không có localStorage */ }
+    };
 
     add(pane, el("h1", "", "Game design"));
-    add(pane, el("p", "sub", "Bản đồ thiết kế, từ ý tưởng sơ khai tới quyết định chi tiết. Bấm một node, phần dưới bản đồ hiện các ý cốt lõi của nó: bấm vào từng ý để xem chi tiết, chấm điểm và ghi ý kiến; bấm một feature (vòng " +
-      FOCUS_ROUND + ") thì bản đồ chỉ còn nhánh của nó tới vòng cuối."));
+    add(pane, el("p", "sub", "Thiết kế từ ý tưởng sơ khai tới quyết định chi tiết. Ô \"Cần tôi\" gom việc của bạn, việc chặn nhiều feature nhất lên đầu. " +
+      "Toàn cảnh là lưới feature (vòng " + FOCUS_ROUND + "): bấm một feature để mở nhánh của nó tới vòng cuối, bấm một node để xem, chấm và ghi ý kiến bên dưới. " +
+      "Chế độ Bảng: mỗi feature một dòng."));
     var bar = put(pane, el("div", "gd-bar"));
     var noticeBox = put(pane, el("div"));
     var mapBox = put(pane, el("div"));
@@ -573,12 +633,90 @@
     // Tới một node của bảng đề xuất: mở nhánh feature của nó rồi chọn nó.
     var goTo = function (n) {
       state.table = "idea";
+      state.view = "tree";
       state.focus = n.path ? n.path.split("/")[0] : null;
       state.selected = n.path;
       state.message = null;
       state.ask = null;
       render();
     };
+    // ---------------------------------------------------------------- feature: hàng của bảng, khoá, "Cần tôi"
+    // data.features (gamedesign.feature_rows): mỗi thư mục code của mỗi feature một hàng.
+    var GLOSSARY = "glossary";
+    var featureRows = function () { return data && Array.isArray(data.features) ? data.features : []; };
+    var rowsOf = function (key) { return featureRows().filter(function (r) { return r.key === key; }); };
+    var gateOpen = function (key) { return rowsOf(key).some(function (r) { return r.gate.ok; }); };
+    // Feature còn khoá code (không thư mục nào của nó được code): thứ một việc của người có thể đang chặn.
+    var lockedKeys = function () {
+      var out = {};
+      featureRows().forEach(function (r) { if (r.key !== GLOSSARY && !gateOpen(r.key)) out[r.key] = true; });
+      return out;
+    };
+    var plain = function (text) {
+      return String(text || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+    };
+    // Feature khớp chữ lọc: theo tên, key hoặc thư mục code.
+    var matches = function (key, title) {
+      var q = plain(state.query).trim();
+      if (!q) return true;
+      var words = [key, title].concat(rowsOf(key).map(function (r) { return r.unity; }));
+      return words.some(function (w) { return plain(w).indexOf(q) >= 0; });
+    };
+    var NEED_KINDS = [
+      { key: "clash", label: "Chọn ý" }, { key: "ask", label: "Trả lời" }, { key: "score", label: "Chấm ý" },
+      { key: "lock", label: "Chốt" }, { key: "art", label: "Duyệt ảnh" }
+    ];
+    // Mọi việc của người: [{kind, node, feature, text, blocks, table}], việc chặn nhiều feature (đang khoá code) nhất
+    // lên đầu. Một node một dòng, theo việc đứng trước trong NEED_KINDS. "Chặn": feature của node, cộng các feature
+    // có node refs trỏ vào node này, vào node cha hay node con của nó; việc ở gốc chặn mọi feature đang khoá.
+    var needsMe = function () {
+      if (!data || !data.idea) return [];
+      var locked = lockedKeys(), refsOf = {};
+      data.idea.children.forEach(function (f) {
+        var list = refsOf[f.key] = [];
+        each(f, function (n) { (n.refs || []).forEach(function (r) { if (r.path) list.push(r.path); }); });
+      });
+      var blocking = function (path) {
+        var own = path ? path.split("/")[0] : "", hit = {};
+        Object.keys(locked).forEach(function (k) {
+          if (!path || k === own) { hit[k] = true; return; }
+          if (refsOf[k] && refsOf[k].some(function (r) { return r === path || path.indexOf(r + "/") === 0 || r.indexOf(path + "/") === 0; })) hit[k] = true;
+        });
+        return Object.keys(hit).length;
+      };
+      var out = [];
+      var push = function (kind, node, text, tableKey) {
+        out.push({ kind: kind, node: node, feature: node.path ? node.path.split("/")[0] : "", text: text,
+                   blocks: blocking(node.path), table: tableKey || "idea" });
+      };
+      var lockable = {};
+      syncList().forEach(function (n) { lockable[n.path] = true; });
+      each(data.idea, function (n) {
+        var clash = openClashes(n);
+        if (clash) push("clash", n, clash + " nhóm ý trái nhau");
+        else if (n.pending) push("ask", n, n.pending + " câu hỏi");
+        else if (!n.passed && !n.redo) push("score", n, (n.reasons || [])[0] || "chờ bạn chấm");
+        else if (lockable[n.path]) push("lock", n, "đạt, chờ chốt · " + diffShort(n));
+      });
+      if (data.live) {
+        each(data.live, function (n) {
+          var seen = {}, count = 0;
+          (n.art || []).forEach(function (a) {
+            var k = (a.tool || "codex") + "/" + a.frame;
+            if (seen[k]) return;
+            seen[k] = true;
+            if (a.reviewable && a.level === null && !a.stale.length) count++;
+          });
+          if (count) push("art", n, count + " ảnh concept chưa duyệt", "live");
+        });
+      }
+      var order = NEED_KINDS.map(function (k) { return k.key; });
+      out.sort(function (a, b) {
+        return b.blocks - a.blocks || order.indexOf(a.kind) - order.indexOf(b.kind) || (a.node.path < b.node.path ? -1 : a.node.path > b.node.path ? 1 : 0);
+      });
+      return out;
+    };
+    var needCount = function (needs, key) { return needs.filter(function (x) { return x.feature === key; }).length; };
     var failingBelow = function (node) { var n = 0; each(node, function (x) { if (!x.passed) n++; }); return n; };
     // Độ quan trọng: giai đoạn của một điểm, nhãn "IDEA 9", và node có cần cho giai đoạn đang lọc không.
     var phases = function () { return data && data.phases || []; };
@@ -843,10 +981,17 @@
         add(tables, button(t.label, function () { state.table = t.key; state.message = null; render(); }, state.table === t.key));
       });
 
+      var views = group("Xem", "Cây: bản đồ node. Bảng: mỗi feature một dòng (vòng, cổng code, yêu cầu, đang chờ ai).");
+      add(views, button("Cây", function () { state.view = "tree"; render(); }, state.view === "tree"),
+          button("Bảng", function () { state.view = "table"; render(); }, state.view === "table"));
+
       var map = group("Bản đồ");
-      var whole = put(map, button("Tất cả feature", function () { state.focus = null; render(); }));
-      whole.title = "Bỏ chế độ xem một nhánh, hiện lại mọi feature";
-      whole.disabled = state.focus === null;
+      var whole = put(map, button("Tất cả feature", function () { state.focus = null; state.expandAll = false; state.view = "tree"; render(); }));
+      whole.title = "Về toàn cảnh: mỗi feature một thẻ nhỏ; bấm một thẻ để mở nhánh của nó";
+      whole.disabled = state.view === "tree" && state.focus === null && !state.expandAll;
+      var open = put(map, button("Mở tất cả", function () { state.expandAll = !state.expandAll; state.focus = null; state.view = "tree"; render(); },
+                                 state.expandAll && state.focus === null));
+      open.title = "Vẽ cả cây, mọi feature tới vòng cuối (chậm và dài khi có nhiều feature)";
       var again = put(map, button("Reload", reload));
       again.title = "Đọc lại dữ liệu từ Management/game-design";
 
@@ -912,21 +1057,16 @@
         add(confirmBox, button(target ? "Đổi mode" : "Sync", go, null, "gd-btn main"), button("Thôi", function () { state.ask = null; render(); }));
       }
       if (state.message) add(noticeBox, el("p", state.message.bad ? "bad-text" : "ok-text", state.message.text));
-      if (state.table === "idea" && data && data.idea && syncable()) {
-        var waitBox = put(noticeBox, el("div", "gd-wait-list"));
-        add(waitBox, el("b", "", "Chờ bạn chốt (" + syncable() + "):"));
-        syncList().forEach(function (n) {
-          var link = put(waitBox, button(trail(n) + " · " + diffShort(n), function () { goTo(n); }, null, "gd-chip todo"));
-          link.title = "Đạt, chờ chốt. So với live: " + diffParts(n).join(", ") + ". Bấm để tới node.";
-        });
-      }
-      // Mọi node khác live mà chưa đạt: AI đã đổi, đang chờ bạn chấm hoặc chờ @GameDesigner làm lại.
+      renderNeeds();
+      // Mọi node khác live mà chưa đạt: AI đã đổi, đang chờ bạn chấm hoặc chờ @GameDesigner làm lại. Gập sẵn: việc
+      // của bạn trong đó đã có ở ô "Cần tôi".
       if (state.table === "idea" && data && data.idea) {
         var drift = [];
         each(data.idea, function (n) { if (n.state !== "same" && !n.passed) drift.push(n); });
         if (drift.length) {
-          var driftBox = put(noticeBox, el("div", "gd-wait-list"));
-          add(driftBox, el("b", "", "Đổi so với live, chưa đạt (" + drift.length + "):"));
+          var driftFold = put(noticeBox, el("details", "gd-fold"));
+          add(driftFold, el("summary", "", "Đổi so với live, chưa đạt (" + drift.length + ")"));
+          var driftBox = put(driftFold, el("div", "gd-wait-list"));
           drift.forEach(function (n) {
             var look = toLook(n), redo = own(n) === "redo";
             var link = put(driftBox, button(trail(n) + " · " + diffShort(n) + (look ? " · " + look + " chưa chấm" : "") + (redo ? " · AI làm lại" : ""),
@@ -934,37 +1074,6 @@
             link.title = "So với live: " + diffParts(n).join(", ") + ".\n" + (redo ? "Đang chờ @GameDesigner làm lại: " : "Đang chờ bạn: ") + n.reasons.join("\n");
           });
         }
-      }
-      if (state.table === "live" && data && data.idea) {
-        var waiting = 0;
-        each(data.idea, function (n) { if (n.pending || (mode() === "user" && unscored(n)) || openClashes(n) || (n.passed && n.state !== "same")) waiting++; });
-        if (waiting) {
-          add(put(noticeBox, el("div", "gd-inline")), button(waiting + " node ở bảng Đề xuất đang chờ bạn", function () {
-            state.table = "idea"; state.message = null; render();
-          }));
-        }
-      }
-      // Ảnh concept bản mới nhất chưa được chấm: gom theo node, bấm để tới node đó.
-      var unjudged = {};
-      if (data && data.live) {
-        each(data.live, function (n) {
-          var seen = {};
-          (n.art || []).forEach(function (a) {
-            var seenKey = (a.tool || "codex") + "/" + a.frame;
-            if (seen[seenKey]) return;
-            seen[seenKey] = true;
-            if (a.reviewable && a.level === null && !a.stale.length) unjudged[n.path] = (unjudged[n.path] || 0) + 1;
-          });
-        });
-      }
-      if (Object.keys(unjudged).length) {
-        add(noticeBox, el("p", "", "Ảnh concept chưa duyệt:"));
-        var artList = put(noticeBox, el("div", "gd-inline"));
-        Object.keys(unjudged).forEach(function (path) {
-          add(artList, button(path + " (" + unjudged[path] + " ảnh)", function () {
-            state.table = "live"; state.selected = path; state.message = null; render();
-          }));
-        });
       }
       var missing = data && state.table === "idea" ? data.missing || [] : [];
       if (missing.length) {
@@ -983,6 +1092,183 @@
       add(noticeBox, el("p", "bad-text", list.length + " lỗi cấu trúc trong bảng " + state.table + ":"));
       var ul = put(noticeBox, el("ul", "gd-problems"));
       list.forEach(function (p) { add(ul, el("li", "", p.path + ": " + p.text)); });
+    };
+
+    // Ô "Cần tôi": mọi việc của bạn ở một chỗ, việc chặn nhiều feature nhất lên đầu; bấm một dòng để tới node.
+    var NEED_SHOWN = 10;
+    var renderNeeds = function () {
+      var needs = needsMe();
+      if (!needs.length) return;
+      var box = put(noticeBox, el("div", "gd-need"));
+      add(box, el("h3", "", "Cần tôi (" + needs.length + ")"));
+      var list = put(box, el("ol"));
+      var names = {};
+      NEED_KINDS.forEach(function (k) { names[k.key] = k.label; });
+      (state.needAll ? needs : needs.slice(0, NEED_SHOWN)).forEach(function (x) {
+        var li = put(list, el("li"));
+        var row = put(li, button("", function () {
+          if (x.table === "live") {
+            state.table = "live"; state.view = "tree"; state.focus = x.feature || null; state.selected = x.node.path; state.message = null; render();
+          } else goTo(x.node);
+          detailBox.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, null, "gd-need-row"));
+        add(row, el("span", "gd-need-kind", names[x.kind]), el("span", "gd-need-what", trail(x.node) + " · " + x.text),
+            el("span", "gd-need-blocks" + (x.blocks ? " hot" : ""), x.blocks ? "chặn " + x.blocks + " feature" : "không chặn code"));
+        row.title = "Bấm để tới node " + where(x.node);
+      });
+      if (needs.length > NEED_SHOWN) {
+        add(box, button(state.needAll ? "Thu gọn" : "Xem cả " + needs.length, function () { state.needAll = !state.needAll; render(); }, null, "gd-link"));
+      }
+      add(box, el("p", "gd-note", "\"Chặn\": số feature còn khoá code mà việc này đứng trước (feature của node, và feature có refs trỏ vào node). " +
+        "Bỏ qua yêu cầu của sổ yêu cầu không có ở đây: bạn tự quyết ở node lá, trong mục Yêu cầu."));
+    };
+
+    // Ô tìm feature: dùng chung cho lưới và bảng; gõ chỉ vẽ lại phần danh sách, không mất con trỏ.
+    var searchBox = function (box, count, refill) {
+      var line = put(box, el("div", "gd-search"));
+      var input = put(line, el("input"));
+      input.type = "search";
+      input.placeholder = "Tìm feature (tên, key, thư mục code)";
+      input.setAttribute("aria-label", "Tìm feature");
+      input.value = state.query;
+      var shown = put(line, el("span", "", ""));
+      var update = function () { shown.textContent = count(); };
+      input.addEventListener("input", function () { state.query = input.value || ""; savePrefs(); refill(); update(); });
+      update();
+      return input;
+    };
+
+    // Toàn cảnh: gốc trên cùng, mỗi feature một thẻ nhỏ trong lưới; bấm thẻ để mở nhánh của nó (bản đồ cột).
+    var renderGrid = function (root) {
+      var idea = state.table === "idea", needs = idea ? needsMe() : [];
+      var head = put(mapBox, el("div", "gd-root"));
+      var rootBtn = put(head, button("Gốc · " + (root.title || "(chưa đặt tên)"), function () { state.selected = root.path; render(); },
+                                     state.selected === root.path));
+      rootBtn.title = root.summary || "";
+      if (idea) statusChips(root).forEach(function (c) { add(head, c); });
+      var features = root.children.filter(function (c) { return c.round === FOCUS_ROUND; });
+      var grid = el("div", "gd-grid");
+      var visible = function () { return features.filter(function (f) { return matches(f.key, f.title); }); };
+      var fill = function () {
+        grid.textContent = "";
+        visible().forEach(function (n) {
+          var below = idea ? branch(n) : null;
+          var kind = !idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || below.todo ? " wait" : " done";
+          var card = put(grid, button("", function () { select(n); }, null, "gd-mini" + kind + (n.path === state.selected ? " sel" : "") + (needed(n) ? "" : " dim")));
+          card.title = n.title + (n.summary ? "\n" + n.summary : "");
+          add(card, el("strong", "", n.title || n.key));
+          var tags = put(card, el("span", "gd-mini-tags"));
+          if (n.key !== GLOSSARY) {
+            var rows = rowsOf(n.key);
+            var gate = add(tags, el("span", gateOpen(n.key) ? "ok" : "bad", gateOpen(n.key) ? "được code" : "khoá"));
+            gate.title = rows.map(function (r) { return (r.unity || "(chưa khai thư mục code)") + ": " + (r.gate.ok ? "ĐƯỢC CODE" : "ĐANG KHOÁ, " + r.gate.reason); }).join("\n");
+            var reqs = rows.filter(function (r) { return r.reqs; });
+            if (reqs.length) {
+              var met = reqs.reduce(function (a, r) { return a + r.reqs.met; }, 0), total = reqs.reduce(function (a, r) { return a + r.reqs.total; }, 0);
+              add(tags, el("span", "", "yêu cầu " + met + "/" + total));
+            }
+          }
+          var count = needCount(needs, n.key);
+          if (count) add(tags, el("span", "need", count + " cần tôi"));
+        });
+        if (!grid.children.length) add(grid, el("p", "muted", "Không feature nào khớp."));
+      };
+      searchBox(mapBox, function () { return visible().length + "/" + features.length + " feature"; }, fill);
+      put(put(mapBox, el("div", "gd-scroll")), grid);
+      fill();
+    };
+
+    // Chế độ Bảng: mỗi thư mục code của mỗi feature một dòng; bấm dòng để mở nhánh trên cây.
+    var threads = null;      // /api/threads (chỉ khi mở qua setup_server.py): phiên đang gán cho từng thư mục
+    var DESIGN_TEXT = { redo: "cần làm lại", scoring: "chờ chấm, trả lời", lock: "đạt, chờ chốt", live: "đã chốt" };
+    var renderTable = function () {
+      var rows = featureRows().filter(function (r) { return r.key !== GLOSSARY; });
+      var needs = needsMe();
+      var withSession = !!ctx.setup;
+      if (withSession && threads === null) {
+        threads = [];
+        api("GET", "/api/threads").then(function (res) { threads = res.threads || []; if (state.view === "table") render(); },
+                                       function () { threads = []; });
+      }
+      var sessionOf = function (r) {
+        if (!r.unity) return "";
+        var hit = (threads || []).filter(function (t) { return !t.archived && (t.feature === r.unity || t.binding === r.unity); });
+        return hit.map(function (t) { return t.title + (t.live ? " · " + (t.live_status || "đang chạy") : ""); }).join(", ");
+      };
+      var cols = [
+        { key: "feature", label: "Feature", value: function (r) { return plain(r.title); } },
+        { key: "round", label: "Vòng đề xuất / live", value: function (r) { return r.roundLive * 10 + r.roundIdea; } },
+        { key: "gate", label: "Cổng code", value: function (r) { return r.gate.ok ? 1 : 0; } },
+        { key: "reqs", label: "Yêu cầu", value: function (r) { return r.reqs ? r.reqs.met / Math.max(r.reqs.total, 1) : -1; } },
+        { key: "clash", label: "Ý trái nhau", value: function (r) { return r.clash; } },
+        { key: "waiting", label: "Đang chờ", value: function (r) { return r.waiting.join(", "); } },
+        { key: "needs", label: "Cần tôi", value: function (r) { return needCount(needs, r.key); } }
+      ];
+      if (withSession) cols.push({ key: "session", label: "Phiên", value: function (r) { return sessionOf(r); } });
+      var sort = state.sort || { key: "needs", dir: -1 };
+      var by = cols.filter(function (c) { return c.key === sort.key; })[0] || cols[cols.length - 1];
+      rows = rows.slice().sort(function (a, b) {
+        var x = by.value(a), y = by.value(b);
+        if (x < y) return -sort.dir;
+        if (x > y) return sort.dir;
+        return (a.gate.ok ? 1 : 0) - (b.gate.ok ? 1 : 0) || (plain(a.title) < plain(b.title) ? -1 : 1);
+      });
+      var tbody = el("tbody");
+      var visible = function () { return rows.filter(function (r) { return matches(r.key, r.title); }); };
+      var fill = function () {
+        tbody.textContent = "";
+        visible().forEach(function (r) {
+          var tr = put(tbody, el("tr"));
+          tr.tabIndex = 0;
+          var open = function () {
+            var node = data.idea ? find(data.idea, r.path) : null;
+            state.view = "tree"; state.expandAll = false;
+            if (node) goTo(node); else render();
+          };
+          tr.addEventListener("click", open);
+          tr.addEventListener("keydown", function (e) { if (e.key === "Enter") open(); });
+          var cell = function (main, sub, className) {
+            var td = put(tr, el("td", className || "", main));
+            if (sub) add(td, el("small", "", sub));
+            return td;
+          };
+          cell(r.title, r.unity || "(chưa khai thư mục code)");
+          cell(r.roundIdea + " / " + r.roundLive, DESIGN_TEXT[r.design] || "");
+          var gate = cell(r.gate.ok ? "ĐƯỢC CODE" : "ĐANG KHOÁ", "", r.gate.ok ? "ok-text" : "bad-text");
+          gate.title = r.gate.reason || "";
+          if (r.reqs) {
+            var c = r.reqs.counts, extra = [];
+            if (c.done) extra.push(c.done + " chờ kiểm");
+            if (c.rejected) extra.push(c.rejected + " bị trả");
+            if (c.changed) extra.push(c.changed + " đổi thiết kế");
+            if (c["no-test"]) extra.push(c["no-test"] + " mất test");
+            cell(r.reqs.met + "/" + r.reqs.total, extra.join(", "));
+          } else cell("—");
+          cell(r.clash ? String(r.clash) : "—", "", r.clash ? "bad-text" : "");
+          cell(r.waiting.length ? r.waiting.join(", ") : "—");
+          var n = needCount(needs, r.key);
+          cell(n ? String(n) : "—", "", n ? "bad-text" : "");
+          if (withSession) cell(threads === null ? "…" : sessionOf(r) || "—");
+        });
+        if (!tbody.children.length) add(put(tbody, el("tr")), el("td", "muted", "Không feature nào khớp."));
+      };
+      searchBox(mapBox, function () { return visible().length + "/" + rows.length + " dòng"; }, fill);
+      var wrap = put(mapBox, el("div", "gd-ftable-wrap"));
+      var tableEl = put(wrap, el("table", "gd-ftable"));
+      var tr = put(put(tableEl, el("thead")), el("tr"));
+      cols.forEach(function (c) {
+        var th = put(tr, el("th"));
+        var on = sort.key === c.key;
+        var b = put(th, button(c.label + (on ? (sort.dir < 0 ? " ↓" : " ↑") : ""), function () {
+          state.sort = { key: c.key, dir: on ? -sort.dir : -1 };
+          render();
+        }, null, "gd-sort"));
+        b.title = "Xếp theo " + c.label;
+        if (on) th.setAttribute("aria-sort", sort.dir < 0 ? "descending" : "ascending");
+      });
+      tableEl.appendChild(tbody);
+      fill();
+      if (!rows.length) add(mapBox, el("p", "muted gap", "Chưa có feature nào (vòng 2 của bảng đề xuất)."));
     };
 
     // ---------------------------------------------------------------- bản đồ
@@ -1060,7 +1346,7 @@
     var renderMap = function (root) {
       mapBox.textContent = "";
       var rounds = data.rounds || [];
-      var lastRound = state.focus !== null ? rounds.length : Math.min(OVERVIEW_LAST_ROUND, rounds.length);
+      var lastRound = state.focus !== null || state.expandAll ? rounds.length : Math.min(OVERVIEW_LAST_ROUND, rounds.length);
       var plan = layout(root, state.focus, lastRound);
       var colX = function (round) { return (round - 1) * (CARD_W + GAP_X); };
       var rowY = function (row) { return HEAD_H + row * (CARD_H + GAP_Y); };
@@ -1986,8 +2272,10 @@
         add(mapBox, el("p", "muted", "Chưa có " + DATA_FILE + ". Chạy: python Management/tools/sync_page.py (Stop hook tự chạy sau mỗi lượt chat)."));
         return;
       }
+      savePrefs();
+      if (state.view === "table") { renderTable(); return; }
       if (!root) { add(mapBox, el("p", "muted", table().empty)); return; }
-      renderMap(root);
+      if (state.focus === null && !state.expandAll) renderGrid(root); else renderMap(root);
       renderTerms();
       renderDetail(root);
     };

@@ -461,6 +461,25 @@ def run_progress(root):
             saved[path].unlink()
     code("feature-wallet", ["Wallet"])
 
+    # ---- one row per feature folder: the page's table and the gate lines of gd_status
+    mk(root, "feature-shop")
+    rows = gd.snapshot(root)["features"]
+    by = {r["unity"]: r for r in rows}
+    check("feature rows: one per folder named in code.json, and one for a feature that names none",
+          sorted(r["unity"] for r in rows), ["", "Hero", "Wallet", "_Services/Popup"])
+    check("feature rows: the gate and how far each tree reached",
+          ((by["Hero"]["gate"]["ok"], by["Hero"]["roundIdea"], by["Hero"]["roundLive"]),
+           (by["Wallet"]["roundIdea"], by["Wallet"]["roundLive"]), (by[""]["declared"], by[""]["gate"]["ok"], by[""]["roundLive"])),
+          ((True, 4, 4), (4, 4), (False, False, 0)))
+    check("feature rows: the leaves done in the first phase, the design state, the requirement book",
+          (by["Hero"]["leaves"], by["Hero"]["design"] in ("redo", "scoring", "lock", "live"),
+           (by["Hero"]["reqs"]["met"], by["Hero"]["reqs"]["total"], by["Hero"]["reqs"]["counts"]["todo"]), by[""]["reqs"]),
+          ([1, 1], True, (0, 2, 2), None))
+    check("feature rows: open requirements of a folder that may be coded wait for its session; a locked one waits for nobody's code",
+          ("Hero" in by["Hero"]["waiting"], "Shop" in by[""]["waiting"]), (True, False))
+    lines = gd_status.gate_lines(gd.snapshot(root))
+    check("the gate lines are the rows, one each", (len(lines), any(x.startswith("- (chưa khai thư mục code) (feature-shop)") for x in lines)), (4, True))
+
 
 def run_infra(root):
     """Round 2 always owes the infrastructure features; the reminder blocks nothing."""

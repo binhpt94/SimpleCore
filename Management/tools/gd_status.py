@@ -220,25 +220,26 @@ def req_tail(root, name):
     return f" · yêu cầu: {reqbook.counts_line(v)}" if v["total"] else ""
 
 
+DESIGN_TEXT = {"redo": "cần làm lại (@GameDesigner)", "scoring": "chờ người chấm hoặc trả lời",
+               "lock": "đạt, chờ người chốt", "live": "đã chốt"}
+
+
 def gate_lines(snap, root=None):
     """The code gate of every feature, one line each: what @Manager reads before it hands out work. A feature may be
-    coded only when its branch reached the last round in live (gamedesign.code_allowed)."""
+    coded only when its branch reached the last round in live (gamedesign.code_allowed). The rows are
+    gamedesign.feature_rows, the same the page's table shows."""
     out = []
-    idea_key = gd.PHASES[0]["key"]
-    for node in (snap["idea"] or {}).get("children", []):
-        design = ("cần làm lại (@GameDesigner)" if node["redo"] else "chờ người chấm hoặc trả lời" if not node["passed"]
-                  else "đạt, chờ người chốt" if node["dirty"] else "đã chốt")
-        below = [n for n in gd.walk(node)]
-        clash = sum(n.get("clashOpen") or 0 for n in below)
-        leaves = [n for n in below if n["priority"]["leaf"] and n["round"] == len(gd.ROUNDS)]
-        done = sum(1 for n in leaves if n["progress"][idea_key]["state"] == "done")
-        tail = (f" · thiết kế đề xuất: {design}" + (f", {clash} nhóm ý trái nhau chờ người chọn" if clash else "")
-                + (f" · {gd.PHASES[0]['name']}: {done}/{len(leaves)} node lá done" if leaves else ""))
-        for gate in node["codeGate"]:
-            out.append(f"- {gate['unity']} ({node['path']}): " + ("ĐƯỢC CODE" if gate["ok"] else "ĐANG KHOÁ, " + gate["reason"]) + tail
-                       + (req_tail(root, gate["unity"]) if root is not None and gate["ok"] else ""))
-        if not node["codeGate"]:
-            out.append(f"- (chưa khai thư mục code) ({node['path']}): ĐANG KHOÁ" + tail)
+    for row in snap.get("features") or []:
+        done, total = row["leaves"]
+        tail = (f" · thiết kế đề xuất: {DESIGN_TEXT[row['design']]}"
+                + (f", {row['clash']} nhóm ý trái nhau chờ người chọn" if row["clash"] else "")
+                + (f" · {gd.PHASES[0]['name']}: {done}/{total} node lá done" if total else ""))
+        if not row["declared"]:
+            out.append(f"- (chưa khai thư mục code) ({row['path']}): ĐANG KHOÁ" + tail)
+            continue
+        gate = row["gate"]
+        out.append(f"- {row['unity']} ({row['path']}): " + ("ĐƯỢC CODE" if gate["ok"] else "ĐANG KHOÁ, " + gate["reason"]) + tail
+                   + (req_tail(root, row["unity"]) if root is not None and gate["ok"] else ""))
     return out
 
 

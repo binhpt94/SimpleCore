@@ -1981,6 +1981,45 @@ def read_tree(root, table, mode=None):
     return tree, problems
 
 
+def feature_rows(idea, live, views):
+    """One row per feature folder of every feature node (round 2) of the proposed tree, what the page's table and
+    gd_status.py show: the design state, the code gate, how far each tree reached, the requirement book and who is
+    being waited for. `views`: {folder: reqbook.view(...)}; a folder missing there has no book yet."""
+    lives = {n["path"]: n for n in walk(live)}
+    idea_key = PHASES[0]["key"]
+    rows = []
+    for node in (idea or {}).get("children", []):
+        below = list(walk(node))
+        live_node = lives.get(node["path"])
+        leaves = [n for n in below if n["priority"].get("leaf") and n["round"] == len(ROUNDS)]
+        clash = sum(n.get("clashOpen") or 0 for n in below)
+        design = ("redo" if node["redo"] else "scoring" if not node["passed"] else "lock" if node["dirty"] else "live")
+        # The human is waited for at any node of the branch that waits for a score, an answer, a pick between ideas or
+        # a lock (the same as the page's own(): not passed and not redo, or passed and unlike live); @GameDesigner at
+        # any node to redo. A score the mode does not ask for (Full Auto) waits for nobody.
+        human = bool(clash) or any(n.get("pending") or (not n["passed"] and not n["redo"]) or (n["passed"] and n.get("state") != "same")
+                                   for n in below)
+        redo = any(n["redo"] for n in below)
+        base = {"path": node["path"], "key": node["key"], "title": node["title"], "design": design, "clash": clash,
+                "roundIdea": max(n["round"] for n in below),
+                "roundLive": max((n["round"] for n in walk(live_node)), default=0) if live_node else 0,
+                "leaves": [sum(1 for n in leaves if n["progress"][idea_key]["state"] == "done"), len(leaves)]}
+        for gate in node["codeGate"] or [{"unity": "", "ok": False, "reason": "chưa khai thư mục code"}]:
+            v = views.get(gate["unity"]) if gate["unity"] else None
+            reqs = ({"met": v["met"], "total": v["total"], "counts": v["counts"], "dropped": len(v["dropped"])}
+                    if v and v["total"] else None)
+            waiting = (["@GameDesigner"] if redo else []) + (["người"] if human else [])
+            if reqs and gate["ok"]:
+                c = reqs["counts"]
+                if c.get("done"):
+                    waiting.append("@CodeLead")
+                if any(c.get(k) for k in ("doing", "rejected", "changed", "no-test", "todo")):
+                    waiting.append(gate["unity"])
+            rows.append(dict(base, unity=gate["unity"], gate={"ok": gate["ok"], "reason": gate["reason"]},
+                             declared=bool(node["codeGate"]), reqs=reqs, waiting=waiting))
+    return rows
+
+
 def walk(node):
     if node:
         yield node
@@ -2480,10 +2519,11 @@ def snapshot(root):
     for n in walk(idea):
         n["codeGate"] = [{"unity": name, "ok": ok, "reason": reason} for name in n["code"] for ok, reason in [code_allowed(root, name)]]
     import reqbook      # the requirement book of every feature: shown on its live leaves and on the same idea leaves
-    books = {}
+    books, views = {}, {}
     for folder, _, _ in live_feature_names(root):
         try:
-            for bn in reqbook.view(root, folder)["nodes"]:
+            views[folder] = reqbook.view(root, folder)
+            for bn in views[folder]["nodes"]:
                 books[bn["path"]] = {"met": bn["met"], "open": len(bn["open"]), "hasBook": bn["hasBook"], "feature": folder,
                                      "items": [{"ref": r["ref"], "id": r["id"], "kind": r["kind"], "title": r["title"],
                                                 "state": r["state"], "why": r["why"], "hint": r.get("hint", ""),
@@ -2504,6 +2544,7 @@ def snapshot(root):
         glossary[name], term_notes[name] = glossary_view(tree)
         for n in walk(tree):
             n.pop("refText", None)      # read by glossary_view only; the page does not need a second copy
-    return {"rounds": ROUNDS, "mode": mode, "frameCss": font_css(embed=False) + "\n" + FRAME_CSS,"screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "reqStates": __import__("reqbook").STATE_NAMES, "live": live, "idea": idea,
+    features = feature_rows(idea, live, views)
+    return {"features": features, "rounds": ROUNDS, "mode": mode, "frameCss": font_css(embed=False) + "\n" + FRAME_CSS,"screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "reqStates": __import__("reqbook").STATE_NAMES, "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
             "missingCode": missing_code(idea)}
