@@ -44,5 +44,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **HUD không tự đếm giờ.** Theo node cha; thời gian chỉ có một nguồn ở `feature-castle`.
 - **IDEA chỉ hiện nút của kĩ năng có trong trận (2026-11-24, sửa lệch, theo @CodeLead qua @Manager).** Nhánh kĩ năng thành ghi IDEA chỉ có Sấm sét; bảng này trước ghi 3 nút ở IDEA. Nút đọc danh sách kĩ năng `feature-castle` báo, nên IDEA có 1 nút Sấm sét ở đúng chỗ của nó trong cụm, hai chỗ còn lại để trống. Cheat `mid-battle` ép Băng giá đang hồi: ở IDEA phần đó bỏ qua; từ PROTOTYPE dựng đủ. Đã loại: hiện 3 nút ở IDEA, hai nút khoá (nút không bấm được mà không có kĩ năng sau nó).
 
+- **`ui.md` (2026-11-25, quy trình mới):** 3 nút là chính (thao tác chính của trận), mỗi nút ba trạng thái sẵn sàng, đang hồi, khoá; lớp phủ và số giây là phụ. Giữ hoặc kéo trên nút không có thao tác riêng. Đã loại: giữ để xem mô tả kĩ năng (trận không dừng, thêm thao tác ngoài vòng 1).
+
 ## Chưa rõ
 - `feature-castle` cần cấp cho mỗi kĩ năng: tên, biểu tượng, trạng thái, thời gian còn lại, tổng hồi chiêu.

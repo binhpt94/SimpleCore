@@ -25,7 +25,7 @@ namespace Game.Run
             var score = new RunScore(new PlayerPrefsBestScoreStore());
             var delay = new UniTaskRunDelay();
             var flow = new RunFlow(score, delay, config.LoseDelaySeconds, config.TeamSize,
-                config.SkipMenus, config.DefaultTeam, config.ReviveOnce);
+                config.SkipMenus, config.DefaultTeam, config.ReviveOnce, config.PauseEnabled);
 
             registry.Register<IRunFlow>(flow);
             registry.Register<IRunRevive>(flow);

@@ -10,6 +10,7 @@ Không biết feature nào; feature tự xin tham gia bằng `ISessionScene.Join
 - Một feature có hai participant (cùng kiểu, ví dụ installer có hai lần trong Boot): lúc Begin, trước bước tải, phiên thành Failed (Init → Failed), ghi `FailedParticipant`, không tải ai. Danh sách rỗng: vẫn qua ba bước, ghi cảnh báo (`reportWarning`).
 - Running: gọi `Run` theo thứ tự tham gia. View của feature chỉ được tạo từ đây.
 - Disposing: gọi `DisposeAsync` theo thứ tự ngược, từng cái một. Failed cũng dọn như vậy rồi dừng ở Failed.
+- Kiểm dọn sạch: sau bước huỷ, `ParticipantUsageCounter` đọc `ISessionParticipantUsage` (Core, `SessionParticipantBase` hiện thực; participant không hiện thực thì coi là 0) của từng participant đã tới; còn view hay việc thì ghi lỗi nêu tên feature và số. Chỉ bật ở Editor và bản dev (installer). Lớp che chuyển scene không được `TrackView` nên không bị đếm.
 - Logic nằm trong `SessionSceneLogic` (C# thuần). `SessionSceneDriver` (View) chỉ chuyển `Start`/`OnDestroy` thành tín hiệu.
 - Installer tạo driver từ `SessionSceneDriver.prefab`; chỉ tạo khi đang Play.
 - Phải được cài trước mọi feature gọi `Join`.

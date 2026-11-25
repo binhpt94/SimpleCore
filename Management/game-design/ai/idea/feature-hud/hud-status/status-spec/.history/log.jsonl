@@ -6,3 +6,6 @@
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "a8c3a9a04e86"}
 {"at": "2026-11-23 17:30:54", "event": "data", "hash": "dce5f10fbfa2", "previous": "a8c3a9a04e86", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "dce5f10fbfa2"}
+{"at": "2026-11-25 16:17:21", "event": "data", "hash": "8af5b34a3b5c", "previous": "dce5f10fbfa2", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-25 16:19:59", "event": "data", "hash": "339ea3c8f938", "previous": "8af5b34a3b5c", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-25 18:21:39", "event": "promote", "by": "người (Sync)", "hash": "339ea3c8f938"}

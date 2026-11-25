@@ -1,0 +1,22 @@
+H1 Hero hero-roster-values#hero-feedback: đo hiệu ứng của 3 hero (Hiệp sĩ, Đấu sĩ rìu, Cung thủ)
+Play lần 3 (18:53:35), 60 khung/giây (unscaledDeltaTime khoảng 0.016-0.018). Ghi mỗi khung bằng Application.onBeforeRender.
+
+Lần đo 1 (1206 khung, khoảng 20 giây, đợt 2-3): màu SpriteRenderer của Body và Effect.
+- Nháy khi bị đánh: Body đổi màu 1.00/0.35/0.35 (đỏ).
+  - Hiệp sĩ: 1 lần 0.116s.
+  - Đấu sĩ rìu: 10 lần, 0.100-0.167s; một lần 0.663s là nhiều đòn liền nhau.
+  - Cung thủ: không bị đánh trong lúc đo.
+  - Mỗi khung 0.0167s, nên 0.100-0.117s là 0.1s cộng 1 khung.
+- Vệt chém của Đấu sĩ rìu (Effect bật): 6 lần, 0.184-0.200s (thiết kế 0.2s).
+- Đạn của Cung thủ (Effect bật): 17 lần, 0.133-0.149s (thiết kế 0.15s, lệch dưới 1 khung).
+
+Lần đo 2 (1886 khung, khoảng 31 giây, đợt 3-4): vị trí gốc của HeroView so với _x (vị trí logic), và cờ _moving.
+| Hero | Khung đang đi | Đỉnh nhún y | Chu kì nhún trung bình | Số đòn | Nhích lớn nhất | Thời gian mỗi lần nhích |
+|---|---|---|---|---|---|---|
+| Hiệp sĩ | 1322 | 0.100u | 0.400s (48 chu kì) | 10 | 0.198u (khoảng 0.20u) | 0.136-0.168s |
+| Đấu sĩ rìu | 743 | 0.100u | 0.400s (25 chu kì) | 9 | 0.198u | 0.150-0.166s |
+| Cung thủ | 531 | 0.100u | 0.400s (11 chu kì) | 25 | 0.198u | 0.150-0.167s |
+- Thiết kế: nhún 0.1u mỗi 0.4s; ra đòn nhích 0.2u trong 0.15s; nháy 0.1s. Các đoạn 0.165s là 0.15s cộng 1 khung (đo từ khung trước khi bắt đầu).
+- Nhích tính bằng 0.2 × sin(π × phần đã qua), nên đỉnh đo được 0.198u ở khung gần giữa.
+
+Kết luận: đạt.

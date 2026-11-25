@@ -1,6 +1,6 @@
 ---
 based-on: aebbf6890808
-refs: feature-popup-pause/pause-popup/pause-popup-spec@4db8a9f181fd, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@ebefd7f8b116, feature-run/run-pause/pause-rules@2f184465270c
+refs: feature-popup-pause/pause-popup/pause-popup-spec@4db8a9f181fd, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c, feature-run/run-pause/pause-rules@2f184465270c
 ---
 # Cheat: popup tạm dừng
 

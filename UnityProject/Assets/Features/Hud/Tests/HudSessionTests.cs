@@ -33,8 +33,36 @@ namespace Game.Hud.Tests
             _run = new FakeRun();
         }
 
-        private HudSession NewSession(HudCheat cheat = null) =>
-            new HudSession(_spawner, _clock, _castle, _skills, _wallet, _waves, _run, HudTestTimings.Default, cheat);
+        private HudSession NewSession(HudCheat cheat = null, bool pauseButton = true) =>
+            new HudSession(_spawner, _clock, _castle, _skills, _wallet, _waves, _run, HudTestTimings.Default, pauseButton, cheat);
+
+        private const string ConfigPath = "Assets/Features/Hud/FeatureAssets/Private/HudConfig.asset";
+
+        [Test]
+        public void AtIdeaTheHudHasNoPauseButtonAndAPauseTapDoesNothing()
+        {
+            var config = AssetDatabase.LoadAssetAtPath<HudConfig>(ConfigPath);
+            Assert.IsNotNull(config, "missing " + ConfigPath);
+            Assert.IsFalse(config.ShowsPauseButton, "IDEA: 'Có nút tạm dừng' is 'Không'");
+
+            var session = NewSession(pauseButton: config.ShowsPauseButton);
+            session.Run();
+            _spawner.View.PressPause();
+
+            Assert.IsFalse(_spawner.View.PauseShown);
+            Assert.AreEqual(0, _spawner.View.PauseListeners);
+            Assert.AreEqual(0, _run.PauseRequests);
+        }
+
+        [Test]
+        public void WithThePauseButtonOnItIsShownAndReportsPause()
+        {
+            NewSession(pauseButton: true).Run();
+            _spawner.View.PressPause();
+
+            Assert.IsTrue(_spawner.View.PauseShown);
+            Assert.AreEqual(1, _run.PauseRequests);
+        }
 
         private FakeCastleCheat _castleCheat;
 

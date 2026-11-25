@@ -1,5 +1,6 @@
 ---
 based-on: d8d13ced1680
+refs: feature-session-scene/session-steps/participant-order@10e1bf396998
 frame: none
 ---
 # Kiểm tra dọn sạch sau bước huỷ
@@ -13,6 +14,9 @@ Ngoại lệ duy nhất là lớp che của `feature-scene-flow`, vì nó chỉ 
 
 ### count-per-participant | AI 7 | Dịch vụ đếm được số view và số việc đang chạy của từng feature tham gia, bất kì lúc nào trong scene
 Chỉ ở bản dev. Việc đang chạy gồm hẹn giờ, việc chờ và việc lặp mỗi khung hình. Feature khác dùng lại số đếm này để tự kiểm, ví dụ kiểm chơi lại nhiều lượt của `feature-run`.
+
+### running-views-nonzero | AI 7 | Lúc trận đang chạy, mỗi feature có view báo số view lớn hơn 0; báo 0 là lỗi nêu tên feature đó
+Chỉ ở bản dev. Kiểm ngay sau bước chạy, với feature tạo view ở bước chạy (ví dụ HUD, thanh nâng cấp, nền chiến trường, thành). Chốt chặn: feature quên báo view thì lỗi đúng tên nó, thay vì bộ đếm sau bước huỷ báo 0 sai.
 
 ### leak-names-owner | AI 7 | Sau bước huỷ còn sót thì ghi lỗi nêu tên feature tham gia còn sót và số view, số việc còn lại
 Không tự dọn hộ âm thầm; thứ sót là lỗi của feature sở hữu.

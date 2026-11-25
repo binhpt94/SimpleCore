@@ -1,7 +1,7 @@
 {
  "items": {
   "full-team": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.CheatFullTeamOpensScreenWithKnightAxemanArcherAndLitButton"
@@ -10,11 +10,11 @@
    "hash": "abf37775f25f",
    "text": "Màn chọn đội đang mở, đội nhớ đã điền đủ 3 chỗ, nút \"Vào trận\" sáng\nÉp: đội nhớ là Hiệp sĩ, Đấu sĩ rìu, Cung thủ (theo thứ tự chỗ 1, 2, 3); 3 thẻ đó mang dấu đã chọn, Kiếm khách và Pháp sư chưa chọn. Có đủ mọi thành phần của màn: tiêu đề, 5 thẻ (thẻ chọn và chưa chọn), 3 chỗ có hero, nút \"Vào trận\" bấm được.",
    "title": "Màn chọn đội đang mở, đội nhớ đã điền đủ 3 chỗ, nút \"Vào trận\" sáng",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:50"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.CheatParamsStateNameIsFullTeam",
@@ -24,8 +24,8 @@
    "hash": "b3016002a66a",
    "text": "## Làm gì\n- Ở bản dev, chọn state `full-team` thì game hiện ngay màn chọn đội với đội nhớ ép là Hiệp sĩ, Đấu sĩ rìu, Cung thủ.\n- Đội ép đi qua đúng đường của game: đổ vào 3 chỗ như đội nhớ thật (`feature-team-select/team-memory/memory-rules`), thẻ và nút tự đổi trạng thái theo luật (`feature-team-select/team-slots/slots-spec`, `feature-team-select/hero-cards/card-spec`).\n- Code cheat nằm trong thư mục `TeamSelect`, sau cờ dev; không lọt vào bản phát hành.",
    "title": "Số và việc của node (Làm gì)",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:51"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   }
  },
  "log": [
@@ -42,6 +42,20 @@
    "state": "done",
    "by": "TeamSelect",
    "note": "TeamMemoryTests.CheatParamsStateNameIsFullTeam, TeamMemoryTests.CheatFullTeamOpensScreenWithKnightAxemanArcherAndLitButton"
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "full-team",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

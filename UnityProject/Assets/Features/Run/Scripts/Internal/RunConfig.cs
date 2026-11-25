@@ -18,6 +18,11 @@ namespace Game.Run
         [Tooltip("Hero codes of the team used when menus are skipped, slot 1 first.")]
         [SerializeField] private string[] defaultTeam = { "knight", "axeman", "archer" };
 
+        [Tooltip("The run takes pause requests at all (pause button, back key, leaving the game). IDEA: off, there is no pause.")]
+        [SerializeField] private bool pauseEnabled;
+
+        public bool PauseEnabled => pauseEnabled;
+
         [Tooltip("The battle pauses when the game leaves the screen (pause-rules). IDEA: off, the battle keeps running.")]
         [SerializeField] private bool pauseOnLeavingApp;
 

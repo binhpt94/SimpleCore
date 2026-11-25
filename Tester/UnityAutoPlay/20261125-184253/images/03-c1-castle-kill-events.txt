@@ -1,0 +1,18 @@
+C1 Castle auto-shot-values#edge-phat-ban-lam-quai-ve-0-mau
+Nhật kí sự kiện đo bằng execute_code lúc Play (lượt 1, đợt 3, 60 khung/giây).
+Mỗi dòng: khung hình, bước của Run, đợt, đang thở, số quái sống, số quái chờ thả, tiền ví, máu thành, điểm, kỉ lục | sự kiện.
+CastleFired <handle quái> <x mép thành> <x quái> là sự kiện Fired của CastleAutoShot; Rewarded, Defeated là sự kiện của EnemyField.
+
+f1761 step=Playing w=3 brk=False alive=5 wait=0 coins=227 hp=979.9/1000 score=2 best=8 | Hurt 24
+f1761 step=Playing w=3 brk=False alive=5 wait=0 coins=227 hp=979.9/1000 score=2 best=8 | CastleFired 24 1.5 4.149871
+f1765 step=Playing w=3 brk=False alive=4 wait=0 coins=232 hp=979.9/1000 score=2 best=8 | Rewarded {Handle=24 X=4.098911 Top=1.2 Coins=5 }
+f1765 step=Playing w=3 brk=False alive=4 wait=0 coins=232 hp=979.9/1000 score=2 best=8 | Defeated {Handle=24 Type=Soldier Side=Right }
+f1862 step=Playing w=3 brk=False alive=3 wait=0 coins=237 hp=979.9/1000 score=2 best=8 | Hurt 25
+f1863 step=Playing w=3 brk=False alive=3 wait=0 coins=237 hp=973.9/1000 score=2 best=8 | Struck 25 -1
+f1883 step=Playing w=3 brk=False alive=2 wait=0 coins=242 hp=973.9/1000 score=2 best=8 | Rewarded {Handle=25 X=2.976755 Top=1.2 Coins=5 }
+f1883 step=Playing w=3 brk=False alive=2 wait=0 coins=242 hp=973.9/1000 score=2 best=8 | Defeated {Handle=25 Type=Soldier Side=Right }
+f1883 step=Playing w=3 brk=False alive=2 wait=0 coins=242 hp=973.9/1000 score=2 best=8 | CastleFired 25 1.5 2.976755
+
+Đọc: ở khung 1883 phát bắn của thành vào Lính handle 25 (x 2.98u, cách mép thành 1.48u) đưa nó về 0 máu.
+Cùng khung đó EnemyField trả thưởng 5 xu (Rewarded Coins=5), ví 237 thành 242, rồi báo Defeated.
+Giống hệt khi hero hạ quái (ví dụ handle 30 ở khung 1796: Rewarded Coins=5, ví 232 thành 237).

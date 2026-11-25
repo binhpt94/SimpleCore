@@ -59,6 +59,29 @@ namespace Game.Run.Tests
         }
 
         [Test]
+        public void IdeaRunHasNoPauseSoEveryPauseRequestIsIgnored()
+        {
+            // pause-rules "Thông số theo giai đoạn": IDEA has no pause button, no auto pause, no back key pause.
+            var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
+            Assert.IsNotNull(config, $"Missing {ConfigPath}");
+            Assert.IsFalse(config.PauseEnabled);
+
+            var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IPopupStack>(new FakePopupStack());
+            installer.Install(registry);
+            var flow = (RunFlow)registry.Resolve<IRunFlow>();
+            Assert.IsFalse(flow.PauseEnabled);
+
+            flow.Begin();
+            flow.Pause();
+            Assert.AreEqual(RunStep.Playing, flow.Step);
+            Assert.IsFalse(flow.IsPaused);
+            flow.Shutdown();
+        }
+
+        [Test]
         public void IdeaRunHasNoReviveSoTheFirstCastleFallLoses()
         {
             // flow-rules "Thông số theo giai đoạn": IDEA has no revive step.

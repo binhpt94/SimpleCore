@@ -1,6 +1,6 @@
 ---
 based-on: 628a4bda5a29
-refs: feature-hud/hud-layout/layout-spec@ebefd7f8b116, feature-hud/hud-pause-button/pause-button-spec@0b9219193214, feature-hud/hud-status/status-spec@dce5f10fbfa2, feature-hud/hud-skill-button/skill-button-spec@693755b379ea, feature-castle/castle-skills/skill-values@ad45ef4fdcc9
+refs: feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c, feature-hud/hud-pause-button/pause-button-spec@ca9ec145e69e, feature-hud/hud-status/status-spec@339ea3c8f938, feature-hud/hud-skill-button/skill-button-spec@62838fe48a2d, feature-castle/castle-skills/skill-values@ad45ef4fdcc9
 ---
 # Cheat: HUD trận
 

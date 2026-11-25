@@ -1,7 +1,7 @@
 {
  "items": {
   "memory-default-team": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.WithoutRememberedTeamSlotsHoldDefaultTeam"
@@ -10,11 +10,11 @@
    "hash": "68c5fd67bfa9",
    "text": "Chưa có đội nhớ thì 3 chỗ xếp sẵn đội mặc định: Hiệp sĩ, Đấu sĩ rìu, Cung thủ\nNgười chơi mới bấm \"Vào trận\" ngay được, không phải hiểu luật chọn trước. Đã loại: để trống 3 chỗ (người mới không biết bắt đầu từ đâu).",
    "title": "Chưa có đội nhớ thì 3 chỗ xếp sẵn đội mặc định: Hiệp sĩ, Đấu sĩ rìu, Cung thủ",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:41"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "memory-save-on-start": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.EnterBattleRemembersTeamInSlotOrder"
@@ -23,11 +23,11 @@
    "hash": "fb991a4733c3",
    "text": "Bấm \"Vào trận\" thì 3 hero đang ở 3 chỗ thành đội nhớ, giữ đúng thứ tự chỗ",
    "title": "Bấm \"Vào trận\" thì 3 hero đang ở 3 chỗ thành đội nhớ, giữ đúng thứ tự chỗ",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:41"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "memory-prefill-order": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.OpeningFillsSlotsFromRememberedTeamInOrder"
@@ -36,11 +36,11 @@
    "hash": "305398daa9e9",
    "text": "Mở màn chọn đội thì chỗ 1, 2, 3 lấy đúng hero ở chỗ 1, 2, 3 của đội nhớ\nNgười chơi đổi được như bình thường; đổi xong không bấm \"Vào trận\" thì đội nhớ không đổi.",
    "title": "Mở màn chọn đội thì chỗ 1, 2, 3 lấy đúng hero ở chỗ 1, 2, 3 của đội nhớ",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:42"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "memory-forget-on-quit": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.NewGameForgetsTeamAndUsesDefault"
@@ -49,11 +49,11 @@
    "hash": "5776904ad1c6",
    "text": "Tắt game thì đội nhớ mất; mở lại thì dùng đội mặc định\nKhông ghi đội xuống máy.",
    "title": "Tắt game thì đội nhớ mất; mở lại thì dùng đội mặc định",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:43"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-bo-luot-roi-bam-choi-lai": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.AbandonThenPlayAgainKeepsAbandonedRunTeam"
@@ -62,11 +62,11 @@
    "hash": "b2d5eb925621",
    "text": "**Bỏ lượt rồi bấm \"Chơi\" lại:** đội nhớ là đội của lượt vừa bỏ (đã vào trận).",
    "title": "Bỏ lượt rồi bấm \"Chơi\" lại",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:44"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-doi-doi-o-man-chon-doi": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.ChangingTeamOnScreenOnlyRemembersAtEnterBattle"
@@ -75,11 +75,11 @@
    "hash": "74123aed50ac",
    "text": "**Đổi đội ở màn chọn đội:** màn này chỉ rời được bằng \"Vào trận\", nên đội đã đổi thành đội nhớ ngay khi vào trận. Tắt game giữa lúc đổi thì đội nhớ cũ cũng mất.",
    "title": "Đổi đội ở màn chọn đội",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:46"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-doi-nho-co-hero-khong-con-trong-danh": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.RememberedHeroMissingFromRosterLeavesSlotEmpty"
@@ -88,11 +88,11 @@
    "hash": "4ab4f74ef1d5",
    "text": "**Đội nhớ có hero không còn trong danh sách (hero bị bỏ khỏi `feature-hero`):** chỗ đó để trống, người chơi chọn thêm cho đủ 3.",
    "title": "Đội nhớ có hero không còn trong danh sách (hero bị bỏ khỏi `feature-hero`)",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:47"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-doi-mac-dinh-co-hero-khong-con-trong": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.DefaultHeroMissingFromRosterLeavesSlotEmpty"
@@ -101,11 +101,11 @@
    "hash": "e9e173d66d2e",
    "text": "**Đội mặc định có hero không còn trong danh sách:** chỗ đó để trống như trên.",
    "title": "Đội mặc định có hero không còn trong danh sách",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:48"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamMemoryTests.DesignValuesOneTeamDefaultKnightAxemanArcher"
@@ -114,8 +114,8 @@
    "hash": "8d931aba1e17",
    "text": "## Làm gì\n- Giữ một đội nhớ (3 hero theo thứ tự chỗ) trong lúc game đang mở; ban đầu chưa có.\n- Khi màn chọn đội mở: có đội nhớ thì đổ vào 3 chỗ; chưa có thì đổ đội mặc định.\n- Khi bấm \"Vào trận\": ghi đội đang chọn thành đội nhớ.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số đội nhớ | 1 | đội | `memory-which-team` |\n| Đội mặc định | Hiệp sĩ (chỗ 1), Đấu sĩ rìu (chỗ 2), Cung thủ (chỗ 3) | | 2 cận chiến chắn và dọn đông, 1 bắn xa |\n| Lúc ghi đội nhớ | khi bấm \"Vào trận\" | | Luôn là đội đủ đã từng đánh |\n| Lưu khi tắt game | không | | Chỉ kỉ lục được lưu |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Đội vào trận | Luôn là đội mặc định (chưa có màn chọn đội) | Đội nhớ hoặc đội mặc định đổ sẵn, người chơi đổi được | Như PROTOTYPE |\n| Đội mặc định | Hiệp sĩ, Đấu sĩ rìu, Cung thủ | Như IDEA | Như IDEA (chỉnh theo `feature-balance` nếu cần) |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:49"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   }
  },
  "log": [
@@ -181,6 +181,69 @@
    "state": "done",
    "by": "TeamSelect",
    "note": "TeamMemoryTests.DesignValuesOneTeamDefaultKnightAxemanArcher"
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "memory-default-team",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "memory-save-on-start",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "memory-prefill-order",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "memory-forget-on-quit",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-bo-luot-roi-bam-choi-lai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-doi-doi-o-man-chon-doi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-doi-nho-co-hero-khong-con-trong-danh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-doi-mac-dinh-co-hero-khong-con-trong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

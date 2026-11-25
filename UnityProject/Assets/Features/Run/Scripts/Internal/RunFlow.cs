@@ -18,6 +18,7 @@ namespace Game.Run
         private readonly bool _skipMenus;
         private readonly RunTeam _defaultTeam;
         private readonly bool _reviveOnce;
+        private readonly bool _pauseEnabled;
 
         // Set when the revive is offered (the castle's first fall); cleared when a new run starts.
         private bool _reviveOffered;
@@ -40,9 +41,10 @@ namespace Game.Run
         /// shows after <paramref name="loseDelaySeconds"/>. Off: every fall loses the run.
         /// </param>
         public RunFlow(RunScore score, IRunDelay delay, float loseDelaySeconds, int teamSize,
-            bool skipMenus = false, RunTeam defaultTeam = default, bool reviveOnce = false)
+            bool skipMenus = false, RunTeam defaultTeam = default, bool reviveOnce = false, bool pauseEnabled = true)
         {
             _reviveOnce = reviveOnce;
+            _pauseEnabled = pauseEnabled;
             _score = score ?? throw new ArgumentNullException(nameof(score));
             _delay = delay ?? throw new ArgumentNullException(nameof(delay));
             if (loseDelaySeconds < 0f) throw new ArgumentOutOfRangeException(nameof(loseDelaySeconds));
@@ -85,6 +87,8 @@ namespace Game.Run
 
         internal bool ReviveOnce => _reviveOnce;
 
+        internal bool PauseEnabled => _pauseEnabled;
+
         public RunTeam Team { get; private set; }
 
         public bool IsPaused =>
@@ -115,7 +119,8 @@ namespace Game.Run
 
         public void Pause()
         {
-            if (!CanChange(RunStep.Playing)) return;
+            // pause-rules "Thông số theo giai đoạn": IDEA has no pause, every pause request is ignored.
+            if (!_pauseEnabled || !CanChange(RunStep.Playing)) return;
             Change(() => SetStep(RunStep.Paused));
         }
 

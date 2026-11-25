@@ -29,6 +29,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Đã tự quyết
 - **Không có chữ trên nút.** Biểu tượng đã đủ hiểu, tiết kiệm chỗ mép trên.
 - **Nút vẫn hiện khi lượt kết thúc.** Không cần ẩn, chỉ bỏ qua chạm; popup thua che lên sau 1 giây.
+- **`ui.md` (2026-11-25, quy trình mới):** một nút, mức chính trong node này (phần tử duy nhất); trong cả HUD nó là phụ (`feature-hud/hud-layout/layout-spec`). Hai trạng thái bật và vô tác dụng. Giữ hoặc kéo không có thao tác riêng.
 
 ## Chưa rõ
 - Không có điểm chặn.

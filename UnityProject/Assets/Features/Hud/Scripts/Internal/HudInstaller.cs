@@ -38,10 +38,10 @@ namespace Game.Hud
             var cheat = new HudCheat(run, wallet, registry.Resolve<IWalletIncome>(), registry.Resolve<IWalletService>(),
                 skills, registry.Resolve<ICastleCheat>(), registry.Resolve<IWaveCheat>());
             session.Join(new HudSession(new PrefabHudViewSpawner(viewPrefab), new UnityHudClock(),
-                castle, skills, wallet, waves, run, config.Timings, cheat));
+                castle, skills, wallet, waves, run, config.Timings, config.ShowsPauseButton, cheat));
 #else
             session.Join(new HudSession(new PrefabHudViewSpawner(viewPrefab), new UnityHudClock(),
-                castle, skills, wallet, waves, run, config.Timings));
+                castle, skills, wallet, waves, run, config.Timings, config.ShowsPauseButton));
 #endif
         }
     }

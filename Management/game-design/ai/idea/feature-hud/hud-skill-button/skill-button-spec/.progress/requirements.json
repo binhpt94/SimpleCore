@@ -179,7 +179,7 @@
    "at": "2026-11-25 12:02:23"
   },
   "edge-nang-cap-ki-nang": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSkillButtonTests.SkillUpgradesLeaveTheButtonsAndTheirCooldownAsTheyAre"
@@ -188,8 +188,8 @@
    "hash": "95a10c788d94",
    "text": "**Nâng cấp kĩ năng:** không đổi hồi chiêu (`feature-castle/castle-skills`), nút không đổi.",
    "title": "Nâng cấp kĩ năng",
-   "by": "Hud",
-   "at": "2026-11-25 13:40:01"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   }
  },
  "log": [
@@ -423,6 +423,13 @@
    "state": "done",
    "by": "Hud",
    "note": "HudSkillButtonTests.SkillUpgradesLeaveTheButtonsAndTheirCooldownAsTheyAre"
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "edge-nang-cap-ki-nang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

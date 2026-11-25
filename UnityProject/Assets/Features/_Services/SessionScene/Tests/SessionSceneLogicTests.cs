@@ -36,7 +36,7 @@ namespace Game.Services.SessionScene.Tests
         private SessionSceneLogic NewSession(IParticipantUsage usage = null)
         {
             return new SessionSceneLogic(errors.Add, warnings.Add, timer, Limit, usage,
-                participant => ((FakeParticipant)participant).Name);
+                participant => participant is FakeParticipant fake ? fake.Name : (object)participant.GetType());
         }
 
         [Test]
@@ -807,6 +807,175 @@ namespace Game.Services.SessionScene.Tests
 
             Assert.That(limit, Is.Not.Null, "SessionSceneInstaller has no loadTimeLimitSeconds field");
             Assert.That(limit.floatValue, Is.EqualTo(10f));
+        }
+
+        // clean-checks#count-per-participant: the real counter reads views and running jobs of each participant,
+        // at any moment of the scene, from what it tracked through SessionParticipantBase.
+        [Test]
+        public void Counter_ReadsTheViewsAndJobsAParticipantHolds_AtAnyMoment()
+        {
+            var counter = new ParticipantUsageCounter();
+            var participant = new TrackingParticipant();
+            var view = NewView();
+
+            participant.HoldView(view);
+            participant.HoldView(NewView());
+            var job = participant.StartJob();
+            var whileRunning = counter.CountFor(participant);
+            job.Dispose();
+            participant.ReleaseViews();
+            var afterRelease = counter.CountFor(participant);
+
+            Assert.That(whileRunning.Views, Is.EqualTo(2));
+            Assert.That(whileRunning.RunningJobs, Is.EqualTo(1));
+            Assert.That(afterRelease.IsEmpty, Is.True);
+        }
+
+        [Test]
+        public void Counter_ADestroyedViewIsNoLongerCounted()
+        {
+            var counter = new ParticipantUsageCounter();
+            var participant = new TrackingParticipant();
+            var view = NewView();
+            participant.HoldView(view);
+
+            UnityEngine.Object.DestroyImmediate(view);
+
+            Assert.That(counter.CountFor(participant).Views, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Counter_AParticipantThatCannotBeCounted_HoldsNothing()
+        {
+            var counter = new ParticipantUsageCounter();
+
+            Assert.That(counter.CountFor(new FakeParticipant("plain", log)).IsEmpty, Is.True);
+        }
+
+        // clean-checks#after-dispose-zero: with the real counter, a participant that lets go of everything in
+        // its dispose step leaves zero views and zero jobs, and nothing is reported.
+        [Test]
+        public void WithTheRealCounter_AParticipantThatLetsGoOnDispose_LeavesNothing_AndNothingIsReported()
+        {
+            session = NewSession(new ParticipantUsageCounter());
+            var participant = new TrackingParticipant { View = NewView(), ReleaseOnDispose = true };
+            session.Join(participant);
+            session.BeginAsync().Forget();
+
+            session.EndAsync().Forget();
+
+            Assert.That(session.State, Is.EqualTo(SessionState.Disposed));
+            Assert.That(errors, Is.Empty);
+            Assert.That(new ParticipantUsageCounter().CountFor(participant).IsEmpty, Is.True);
+        }
+
+        [Test]
+        public void WithTheRealCounter_AParticipantThatKeepsAViewAndAJob_IsReportedAfterTheDisposeStep()
+        {
+            session = NewSession(new ParticipantUsageCounter());
+            session.Join(new TrackingParticipant { View = NewView(), KeepsAJob = true });
+            session.BeginAsync().Forget();
+
+            session.EndAsync().Forget();
+
+            Assert.That(errors, Has.Count.EqualTo(1));
+            Assert.That(errors[0].Message, Does.Contain("SessionScene").And.Contain("1 view(s)")
+                .And.Contain("1 running job(s)"));
+        }
+
+        // clean-checks#edge-lop-che-cua-chuyen-scene-con-hien-luc: the scene-transition cover is never tracked,
+        // so a cover still showing when the session counts is not reported.
+        [Test]
+        public void TheSceneTransitionCover_StillShowingWhenCounted_IsNotReported()
+        {
+            session = NewSession(new ParticipantUsageCounter());
+            var flow = new TrackingParticipant { View = NewView(), ReleaseOnDispose = true, Cover = NewView() };
+            session.Join(flow);
+            session.BeginAsync().Forget();
+
+            session.EndAsync().Forget();
+
+            Assert.That(flow.Cover != null, Is.True, "the cover is still showing while the session counts");
+            Assert.That(errors, Is.Empty);
+        }
+
+        // clean-checks#params: 0 views and 0 jobs are the only accepted counts, and the counter is on in the
+        // Editor and development builds (the installer leaves it out of release builds).
+        [Test]
+        public void InstallerAsset_InTheEditor_CountsWhatParticipantsHoldAfterTheDisposeStep()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<SessionSceneInstaller>(
+                "Assets/Features/_Services/SessionScene/FeatureAssets/Public/SessionSceneInstaller.asset");
+            Assert.That(installer, Is.Not.Null);
+            var registry = new ServiceRegistry();
+
+            installer.Install(registry);
+
+            var logic = registry.Resolve<ISessionScene>() as SessionSceneLogic;
+            Assert.That(logic, Is.Not.Null);
+            Assert.That(logic.CountsWhatParticipantsHold, Is.True);
+        }
+
+        [Test]
+        public void ASingleViewOrASingleJobLeft_IsEnoughToBeReported()
+        {
+            session = NewSession(new ParticipantUsageCounter());
+            session.Join(new TrackingParticipant { KeepsAJob = true });
+            session.BeginAsync().Forget();
+
+            session.EndAsync().Forget();
+
+            Assert.That(errors, Has.Count.EqualTo(1));
+            Assert.That(errors[0].Message, Does.Contain("0 view(s)").And.Contain("1 running job(s)"));
+        }
+
+        private readonly List<UnityEngine.Object> views = new List<UnityEngine.Object>();
+
+        private UnityEngine.GameObject NewView()
+        {
+            var view = new UnityEngine.GameObject("session-test-view");
+            views.Add(view);
+            return view;
+        }
+
+        [TearDown]
+        public void DestroyViews()
+        {
+            foreach (var view in views)
+            {
+                if (view != null) UnityEngine.Object.DestroyImmediate(view);
+            }
+
+            views.Clear();
+        }
+
+        /// <summary>A participant built on the real base class, which tracks what it holds.</summary>
+        private sealed class TrackingParticipant : SessionParticipantBase
+        {
+            private readonly List<IDisposable> held = new List<IDisposable>();
+
+            public UnityEngine.Object View;
+            public UnityEngine.Object Cover;
+            public bool ReleaseOnDispose;
+            public bool KeepsAJob;
+
+            public void HoldView(UnityEngine.Object view) => held.Add(TrackView(view));
+
+            public IDisposable StartJob() => TrackJob();
+
+            public void ReleaseViews()
+            {
+                foreach (var handle in held) handle.Dispose();
+                held.Clear();
+            }
+
+            protected override void OnRun()
+            {
+                if (View != null) HoldView(View);
+                if (KeepsAJob) TrackJob();
+                // The cover is shown but, as the base class asks, never tracked.
+                if (ReleaseOnDispose) WhenDisposed(ReleaseViews);
+            }
         }
 
         private FakeParticipant Join(string name)

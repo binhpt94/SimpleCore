@@ -1,6 +1,6 @@
 ---
 based-on: 25d160950007
-refs: feature-run/run-pause@331cbd30e30e, feature-run/run-pause/pause-rules@2f184465270c, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@ebefd7f8b116
+refs: feature-run/run-pause@331cbd30e30e, feature-run/run-pause/pause-rules@2f184465270c, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
 ---
 # Hai bước của popup tạm dừng
 

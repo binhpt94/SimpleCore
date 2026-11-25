@@ -42,6 +42,7 @@ namespace Game.Hud
         private Canvas _canvas;
         private RectTransform _root;
         private RectTransform _safe;
+        private GameObject _pauseButton;
         private Rect _lastSafeArea;
         private Vector2Int _lastScreen;
         private Font _font;
@@ -277,9 +278,16 @@ namespace Game.Hud
             _banner.gameObject.SetActive(false);
         }
 
+        public void ShowPauseButton(bool shown)
+        {
+            Build();
+            _pauseButton.SetActive(shown);
+        }
+
         private void BuildPauseButton()
         {
             var rect = Rect("Pause", _safe, new Vector2(0f, 1f), 40f, 10f, 120f, 120f);
+            _pauseButton = rect.gameObject;
             var back = rect.gameObject.AddComponent<Image>();
             back.sprite = pauseSprite;
             back.preserveAspect = pauseSprite != null;

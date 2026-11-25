@@ -1,0 +1,32 @@
+F1, F2, S1: rời app giữa lúc Loading (giả lập)
+Cách làm:
+- Play từ Assets/_Composition/Loading.unity với Editor đang Pause, nên dừng ở khung 1.
+- Ghi mỗi khung bằng Application.onBeforeRender: khung, realtimeSinceStartup, scene đang mở, fillAmount của LoadingScreen/ProgressBar/Fill, chữ của dòng Error.
+- Ở khung 1 (thanh còn 0.00), execute_code gửi OnApplicationFocus(false) rồi OnApplicationPause(true) tới mọi GameObject có MonoBehaviour (9 object). Sau đó Step từng khung.
+- Khoảng 13 giây sau, gửi OnApplicationPause(false) rồi OnApplicationFocus(true) (60 object), rồi bỏ Pause.
+- Giới hạn:
+  - đồng hồ thật vẫn chạy, không dừng như khi app ra nền thật;
+  - scene thật tải xong trong 1 khung, nên không có "participant tải chậm" như sổ S1 ghi.
+
+Nhật kí:
+1 rt=8.189 scenes=Game, fa=0.00 err=''
+1 rt=8.261 scenes=Game, fa=0.00 err=''
+1 rt=12.247 scenes=Game, fa=0.00 err=''
+1 rt=13.643 scenes=Game, fa=0.00 err=''
+SEND leave to 9 objects; 1 rt=21.935 scenes=Game, fa=0.00 err=''
+2 rt=21.995 scenes=Game, fa=1.00 err=''
+2 rt=24.001 scenes=Game, fa=1.00 err=''
+3 rt=27.576 scenes=Game, fa=1.00 err=''
+3 rt=29.585 scenes=Game, fa=1.00 err=''
+SEND back to 60 objects; 3 rt=35.053 scenes=Game, fa=1.00 err=''
+4 rt=35.084 scenes=Game, noLS err=''        (màn Loading đã gỡ, trận chạy)
+5 rt=36.089 scenes=Game, noLS err=''
+...
+10 rt=41.095 scenes=Game, noLS err=''
+
+Kết luận:
+- Thanh tải đi tiếp 0.00 lên 1.00 sau khi "rời app", không về 0, không tải lại từ đầu.
+- Dòng Error luôn trống. Phiên không Failed dù 27 giây thật nằm giữa lúc bắt đầu tải và lúc trận chạy.
+- Đồng hồ tải của SessionScene là FrameLoadTimer, tính theo khung hình.
+- Console: chỉ một cảnh báo "[SceneFlow] Switch to 'Game' still going after 5 s (performance target). It keeps going." Cảnh báo này đúng ý switch-rules vì lần chuyển bị giữ 27 giây; không có lỗi.
+- Sau khi bỏ Pause, trận chạy với đủ EnemyStage, Heroes, CastleView, HudView, UpgradeBar (ảnh 01).

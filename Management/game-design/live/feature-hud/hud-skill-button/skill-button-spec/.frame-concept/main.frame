@@ -1,5 +1,12 @@
 kind: ui
 title: Ba nút kĩ năng thành ở góc dưới bên phải
+ui: 9694a2eaeb83
+ai: 6
+why: góc dưới phải dưới ngón cái phải; xếp ngang theo thứ tự Sấm sét, Băng giá, Cổ vũ như danh sách kĩ năng của feature-castle
+why: 3 nút chính cùng cỡ 140 là cố ý: 3 kĩ năng ngang hàng, không cái nào quan trọng hơn; nút tạm dừng 120 ở góc đối diện nên cụm này vẫn là thứ to nhất HUD
+why: khe giữa các nút 20 (lệch thang): cụm rộng 460 cố định bởi feature-hud/hud-layout/layout-spec và feature-hud-upgrade/bar-buttons; lên 24 phải dời cả thanh nâng cấp
+why: số giây đặt giữa nút đang hồi, chồng lên lớp phủ, để liếc là thấy nút nào còn bao lâu
+why: không có tham chiếu phù hợp (chưa có ảnh tham chiếu nào)
 use skill = feature-hud/hud-layout/layout-spec#skill
 use bottom-h = feature-hud/hud-layout/layout-spec#bottom-h
 let bottom-y = 900

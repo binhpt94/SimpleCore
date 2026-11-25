@@ -1,7 +1,7 @@
 {
  "items": {
   "slots-three": {
-   "state": "done",
+   "state": "verified",
    "note": "TeamSlots: 3 chỗ, luật chạm thẻ/chỗ, nút Vào trận",
    "tests": [
     "TeamSlotsTests.TeamHasThreeSlotsPickedFromFiveHeroes",
@@ -11,11 +11,11 @@
    "hash": "afac915b4f7e",
    "text": "Đội có đúng 3 chỗ, chọn từ 5 hero; mỗi lượt bỏ lại 2 hero",
    "title": "Đội có đúng 3 chỗ, chọn từ 5 hero; mỗi lượt bỏ lại 2 hero",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:14"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "tap-add-first-empty": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.TappingUnpickedHeroFillsLowestEmptySlot"
@@ -24,11 +24,11 @@
    "hash": "c0d72582a6da",
    "text": "Chạm thẻ hero chưa chọn khi còn chỗ trống: hero vào chỗ trống có số nhỏ nhất\nBỏ hero ở chỗ 2 rồi chọn hero khác thì hero mới vào chỗ 2.",
    "title": "Chạm thẻ hero chưa chọn khi còn chỗ trống: hero vào chỗ trống có số nhỏ nhất",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:15"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "tap-remove": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.TappingPickedCardOrItsSlotRemovesHeroWithoutShifting"
@@ -37,11 +37,11 @@
    "hash": "21987a8b26f7",
    "text": "Chạm thẻ hero đã chọn, hoặc chạm chỗ đang có hero: hero rời đội, chỗ đó trống\nCác hero khác giữ nguyên chỗ, không dồn lên.",
    "title": "Chạm thẻ hero đã chọn, hoặc chạm chỗ đang có hero: hero rời đội, chỗ đó trống",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:16"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "tap-full-ignored": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.TappingUnpickedHeroWhenFullChangesNothing"
@@ -50,11 +50,11 @@
    "hash": "6dd28727cce2",
    "text": "Đội đã đủ 3 mà chạm thẻ hero chưa chọn thì không có gì đổi\nPhải bỏ một hero trước.",
    "title": "Đội đã đủ 3 mà chạm thẻ hero chưa chọn thì không có gì đổi",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:17"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "start-button-gate": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.StartButtonIsLockedAndDoesNothingUntilThreeSlotsFilled"
@@ -63,11 +63,11 @@
    "hash": "5a3e9bf2f9e4",
    "text": "Nút \"Vào trận\" chỉ có tác dụng khi đủ 3 chỗ; thiếu thì nút ở trạng thái khoá, chạm không làm gì\nTrạng thái khoá phải nhìn khác trạng thái bấm được.",
    "title": "Nút \"Vào trận\" chỉ có tác dụng khi đủ 3 chỗ; thiếu thì nút ở trạng thái khoá, chạm không làm gì",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:18"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "start-button-once": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.StartWithFullTeamReportsTeamOnceThenIgnoresTaps"
@@ -76,11 +76,11 @@
    "hash": "2fdc359a0882",
    "text": "Chạm \"Vào trận\" khi đủ 3: báo đội cho `feature-run` đúng một lần, rồi màn không nhận chạm nữa",
    "title": "Chạm \"Vào trận\" khi đủ 3: báo đội cho `feature-run` đúng một lần, rồi màn không nhận chạm nữa",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:19"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "screen-parts": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.ScreenShowsFiveCardsThreeSlotsAndOneStartButton"
@@ -89,11 +89,11 @@
    "hash": "7cc0620308f8",
    "text": "Màn chọn đội có 3 phần: 5 thẻ hero, 3 chỗ trong đội, 1 nút \"Vào trận\"\nKhông có nút quay lại màn bắt đầu.",
    "title": "Màn chọn đội có 3 phần: 5 thẻ hero, 3 chỗ trong đội, 1 nút \"Vào trận\"",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:20"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-cham-cung-luc-hai-the-khi-con-mot": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.TwoCardsTappedAtOnceWithOneSlotLeftOnlyFirstGetsIn"
@@ -102,11 +102,11 @@
    "hash": "29694108970e",
    "text": "**Chạm cùng lúc hai thẻ khi còn một chỗ:** thẻ được xử lí trước vào chỗ; thẻ sau bị bỏ qua vì đội đã đủ.",
    "title": "Chạm cùng lúc hai thẻ khi còn một chỗ",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:21"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-cham-cho-trong": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.TappingEmptySlotDoesNothing"
@@ -115,11 +115,11 @@
    "hash": "994afd42d63c",
    "text": "**Chạm chỗ trống:** không làm gì.",
    "title": "Chạm chỗ trống",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:22"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-bo-hero-ra-roi-chon-lai-chinh-hero": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.RemovedHeroPickedAgainGoesToLowestEmptySlot"
@@ -128,11 +128,11 @@
    "hash": "566b2735cecc",
    "text": "**Bỏ hero ra rồi chọn lại chính hero đó:** vào chỗ trống có số nhỏ nhất, có thể khác chỗ cũ.",
    "title": "Bỏ hero ra rồi chọn lại chính hero đó",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:23"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-doi-nho-do-vao-thieu-cho-hero-khong": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.RememberedTeamWithMissingHeroLeavesStartLockedUntilFull"
@@ -141,11 +141,11 @@
    "hash": "6a5a8c089c02",
    "text": "**Đội nhớ đổ vào thiếu chỗ (hero không còn trong danh sách):** nút \"Vào trận\" khoá tới khi đủ 3.",
    "title": "Đội nhớ đổ vào thiếu chỗ (hero không còn trong danh sách)",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:24"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-nut-quay-lai-cua-may": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.DeviceBackKeyDoesNothing"
@@ -154,11 +154,11 @@
    "hash": "28026891385b",
    "text": "**Nút quay lại của máy:** không làm gì.",
    "title": "Nút quay lại của máy",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:25"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "TeamSlotsTests.DesignValuesAreThreeSlotsAndDefaultTeam"
@@ -167,8 +167,8 @@
    "hash": "2abecce37b9d",
    "text": "## Làm gì\n- Giữ 3 chỗ, mỗi chỗ một hero hoặc trống. Lúc mở màn, chỗ được đổ từ `feature-team-select/team-memory/memory-rules`.\n- Nhận chạm từ thẻ (`feature-team-select/hero-cards/card-spec`) và từ chỗ; áp luật thêm, bỏ.\n- Nút \"Vào trận\": khoá khi thiếu, mở khi đủ 3; bấm thì ghi đội nhớ và báo đội cho `feature-run/run-start`.\n- Mỗi chỗ hiện hình và tên hero đang ở đó, hoặc trống.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số chỗ | 3 | chỗ | Bộ số chung; 5 hero bỏ lại 2 là có lựa chọn |\n| Số hero chọn được | 5 | hero | `feature-hero/hero-list` |\n| Số nút | 1 (\"Vào trận\") | nút | |\n| Số lần một hero ở trong đội | tối đa 1 | lần | Không trùng |\n| Số cách đội có thể ghép | 10 | đội | Chọn 3 trong 5, không tính thứ tự |\n| Số chạm có tác dụng của nút \"Vào trận\" mỗi lần màn mở | 1 | lần | Tránh vào trận hai lần |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Màn chọn đội | Không có; đội cố định Hiệp sĩ, Đấu sĩ rìu, Cung thủ | Có đủ luật chọn | Có đủ luật chọn |\n| Số chỗ | 3 | 3 | 3 (chỉnh qua `feature-balance` nếu cần) |\n| Hiệu ứng hero vào chỗ | Không | Không | Hình hero bay từ thẻ vào chỗ, 0.2 giây (dự kiến) |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:26"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   }
  },
  "log": [
@@ -269,6 +269,97 @@
    "state": "done",
    "by": "TeamSelect",
    "note": "TeamSlotsTests.DesignValuesAreThreeSlotsAndDefaultTeam"
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "slots-three",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "tap-add-first-empty",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "tap-remove",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "tap-full-ignored",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "start-button-gate",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "start-button-once",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "screen-parts",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-cham-cung-luc-hai-the-khi-con-mot",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-cham-cho-trong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-bo-hero-ra-roi-chon-lai-chinh-hero",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-doi-nho-do-vao-thieu-cho-hero-khong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-nut-quay-lai-cua-may",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

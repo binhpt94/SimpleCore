@@ -1,7 +1,7 @@
 namespace Game.Combat
 {
-    /// <summary>Something that moves and attacks on the battlefield (heroes, enemies, the castle).</summary>
-    internal interface ICombatActor
+    /// <summary>Something that moves and attacks on the battlefield.</summary>
+    public interface ICombatActor
     {
         /// <summary>First part of a tick: move and pick targets, from the state at the start of the tick.</summary>
         void Aim(float stepSeconds);

@@ -1,0 +1,29 @@
+R4 Run start-values#edge-tien-thuong-dot-hay-tien-ha-quai-toi, P1 (lần bấm Chơi lại sau khi rời app), R1 Run replay-checks#edge-luot-ket-thuc-luc-dang-co-hieu-ung
+Play lần 5 (18:59:43). Editor phần lớn chạy 1 khung/giây (không focus).
+Mỗi dòng: khung, thời gian thật, bước Run, đợt, đang thở, quái sống, quái chờ, tiền, máu thành, điểm, kỉ lục | sự kiện.
+stageChildren là số con của EnemyStage(Clone), tức số hình quái.
+
+R4. Ép thành 1 máu từ lúc quái cuối của đợt 1. Quái cuối bị hero hạ trước, thành vỡ ở đợt 2.
+f48  w=1 alive=1 wait=0 coins=85 hp=995/1000 | R4 last enemy of wave: force castle 1 hp
+f85  w=1 alive=0 coins=90 hp=1/1000 | Rewarded Handle=7 Coins=5 ; Defeated Handle=7
+f553 t=81.44 step=Ending w=2 alive=5 coins=140 hp=0/1000 score=1 best=9 | STEP Playing->Ending stageChildren=5
+f554 step=Lost w=2 alive=5 coins=140 | STEP Ending->Lost, PopupLayer hiện
+(từ Ending tới lúc bấm Chơi lại không có Rewarded nào; tiền giữ 140)
+f566 t=95.14 step=Lost | P1b SEND leave (34 GameObject) rồi SEND back
+f566 step=Lost w=2 alive=0 coins=140 | Cleared   (EnemyField dọn quái lượt cũ khi bấm Chơi lại)
+f566 t=95.15 step=Playing w=1 alive=1 wait=7 coins=50 hp=1000/1000 score=0 best=9 | P1b clicked Replay
+f567 step=Playing w=1 coins=50 hp=1000/1000 | STEP Lost->Playing stageChildren=1, PopupLayer:1/1 (lớp rỗng, popup đã đóng)
+f569 step=Playing w=1 coins=50 | NEWRUN+2f stageChildren=1 (= số quái sống 1)
+f640 step=Playing w=1 alive=4 wait=4 coins=50 | SlowLeft của mọi quái = 0; stage=4 (Soldier #19-#22); popupLayer có 0 con
+Kết luận:
+- R4 đạt: tiền đầu lượt mới đúng 50, không có tiền nào của lượt cũ cộng vào.
+  - Giới hạn: không dựng được thua đúng khung dọn đợt; phần Run có RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount.
+- P1 đạt: sau khi rời app và quay lại, nút Chơi lại vẫn hoạt động, popup đóng, nền che mất.
+
+R1. Ép thành 1 máu suốt lượt; hook bấm Sấm sét khi quái gần mép thành dưới 2.5u, để thành vỡ lúc hiệu ứng Sấm sét (0.3s), quái thu nhỏ hay chữ tiền còn chạy.
+f794 t=122.93 w=1 alive=1 coins=85 hp=1/1000 | R1 thunder pressed, nearest gap=1.90
+f855 t=183.31 w=2 alive=0 coins=165 hp=1/1000 | R1 thunder pressed, nearest gap=2.00
+f877 t=206.34 w=3 alive=4 wait=7 coins=200 hp=1/1000 score=2 (19:02:59)
+Thành chưa vỡ thì @Manager báo dừng đợt (người sắp tắt máy); Stop Play lúc khoảng 19:03. R1: dở.
+Ghi thêm từ lần thua ở L1 (Play lần 3, f13250, bước Ending): EnemyStage có 11 hình nhưng chỉ 10 quái sống, tức có 1 quái đang chết dở lúc thành vỡ.
+Lần đó dừng Play thay vì bấm Chơi lại, nên chưa xem đầu lượt mới.

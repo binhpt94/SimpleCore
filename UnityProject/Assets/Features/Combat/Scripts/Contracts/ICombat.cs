@@ -6,7 +6,7 @@ namespace Game.Combat
     /// Settles every hit landed in one fixed step of the battle together, so the result does not depend on which
     /// side is handled first.
     /// </summary>
-    internal interface ICombat
+    public interface ICombat
     {
         /// <summary>Adds an owner of sides that can be hit; returns the number its hits carry as <see cref="CombatHit.Receiver"/>.</summary>
         int AddReceiver(ICombatReceiver receiver);

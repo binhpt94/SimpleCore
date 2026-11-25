@@ -84,6 +84,25 @@ namespace Game.Hud.Tests
 
         [TestCase(Wide16By9)]
         [TestCase(Wide21By9)]
+        public void WithoutThePauseButtonTheTopRowIsMoneyHealthWaveAndTheCornerStaysEmpty(float width)
+        {
+            // IDEA: parts on screen are health, money, wave and the Thunder button; no pause button.
+            _view.ShowPauseButton(false);
+            var parts = Parts(width);
+
+            Assert.IsFalse(parts.ContainsKey("Pause"));
+            foreach (var part in parts)
+            {
+                if (part.Key == "Band") continue;
+                Assert.IsFalse(part.Value.Overlaps(Rect.MinMaxRect(40f, 10f, 160f, 130f)), part.Key + " sits in the pause corner");
+            }
+
+            Assert.Less(Box("Coins", width).xMax, Box("Health", width).xMin);
+            Assert.Less(Box("Health", width).xMax, Box("Wave", width).xMin);
+        }
+
+        [TestCase(Wide16By9)]
+        [TestCase(Wide21By9)]
         public void PauseButtonSitsInTheTopLeftCornerOnTheOtherEdgeFromTheSkills(float width)
         {
             var pause = Box("Pause", width);

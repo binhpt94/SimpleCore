@@ -26,8 +26,15 @@ namespace Game.Services.SessionScene
                     $"SessionSceneInstaller: loadTimeLimitSeconds must be positive, it is {loadTimeLimitSeconds}.");
             }
 
+            // The clean-up check counts what participants hold only in the Editor and development builds.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            IParticipantUsage usage = new ParticipantUsageCounter();
+#else
+            IParticipantUsage usage = null;
+#endif
             var logic = new SessionSceneLogic(
-                Debug.LogException, Debug.LogWarning, new FrameLoadTimer(), TimeSpan.FromSeconds(loadTimeLimitSeconds));
+                Debug.LogException, Debug.LogWarning, new FrameLoadTimer(), TimeSpan.FromSeconds(loadTimeLimitSeconds),
+                usage);
             registry.Register<ISessionScene>(logic);
             registry.Register<ISessionLoadProgress>(logic);
 

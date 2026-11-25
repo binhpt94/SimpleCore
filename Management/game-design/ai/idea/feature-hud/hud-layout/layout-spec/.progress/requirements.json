@@ -1,7 +1,7 @@
 {
  "items": {
   "top-row-order": {
-   "state": "done",
+   "state": "verified",
    "note": "tiền, máu, đợt đã đặt, chưa có nút tạm dừng vì không thuộc IDEA, cần test vị trí",
    "tests": [
     "HudLayoutTests.TopRowGoesPauseThenMoneyThenHealthThenWaveFromLeftToRight",
@@ -11,8 +11,8 @@
    "hash": "c434090b25bd",
    "text": "Mép trên từ trái sang phải: nút tạm dừng, tiền, máu thành, đợt\nMáu thành ở giữa, thẳng phía trên thành. Nút tạm dừng ở góc trên bên trái, xa góc dưới bên phải nơi có nút kĩ năng.",
    "title": "Mép trên từ trái sang phải: nút tạm dừng, tiền, máu thành, đợt",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:45"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   },
   "skills-bottom-right": {
    "state": "verified",
@@ -101,22 +101,24 @@
   },
   "params": {
    "state": "verified",
-   "note": "cần test bố cục trên prefab cho các phần có ở IDEA",
+   "note": "IDEA: mép trên chỉ máu, tiền, đợt khi cờ nút tạm dừng tắt",
    "tests": [
+    "HudLayoutTests.WithoutThePauseButtonTheTopRowIsMoneyHealthWaveAndTheCornerStaysEmpty",
     "HudLayoutTests.NoHudPartCoversTheBattleStrip",
     "HudLayoutTests.TopRowGoesMoneyThenHealthThenWaveFromLeftToRight",
     "HudLayoutTests.SkillButtonsSitSideBySideInTheBottomRightCornerThunderFrostRally",
-    "HudSkillSlotTests.ThunderAloneStaysInTheLeftSlotAndTheOthersStayEmpty"
+    "HudSkillSlotTests.ThunderAloneStaysInTheLeftSlotAndTheOthersStayEmpty",
+    "HudSessionTests.AtIdeaTheHudHasNoPauseButtonAndAPauseTapDoesNothing"
    ],
    "play": "",
    "hash": "96e46bf5e2aa",
    "text": "## Làm gì\n- Đặt từng phần HUD theo bảng dưới, bám mép và góc màn hình (không bám toạ độ cố định) để chạy đúng ở nhiều tỉ lệ màn hình.\n- Chừa phần mép dưới bên trái cho `feature-hud-upgrade`.\n- Đặt mọi phần trong vùng an toàn của máy.\n\n## Thông số\n| Phần | Mép / góc | Thứ tự | Lí do |\n|---|---|---|---|\n| Nút tạm dừng | Góc trên bên trái | 1 (trái nhất) | Xa cụm kĩ năng (góc dưới phải) và đầu thanh nâng cấp |\n| Tiền | Mép trên, bên trái máu | 2 | Gần thanh nâng cấp hơn để liếc tiền rồi mua |\n| Máu thành | Giữa mép trên | 3 | Thẳng phía trên thành |\n| Đợt | Mép trên, bên phải | 4 (phải nhất) | |\n| Thông báo \"Đợt N\" | Mép trên, ngay dưới máu thành | | Thoáng qua 1.5 giây, không che dải chiến trường |\n| 3 nút kĩ năng | Góc dưới bên phải, xếp ngang | Sấm sét, Băng giá, Cổ vũ | Ngón cái phải |\n| Thanh nâng cấp | Mép dưới, từ cạnh trái tới sát cụm kĩ năng | | `feature-hud-upgrade/bar-layout` |\n\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Tỉ lệ màn hình hỗ trợ | 16:9 tới 21:9, cầm ngang | | Điện thoại phổ biến |\n| Hướng màn hình | chỉ ngang | | Node gốc |\n| Số phần HUD giao với dải chiến trường | 0 | | `layout-clear-strip` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Phần có mặt | Máu, tiền, đợt, cụm kĩ năng giữ đủ 3 chỗ nhưng chỉ có nút Sấm sét (`feature-hud/hud-skill-button/skill-button-spec`) | Thêm thông báo đợt (nút tạm dừng không bắt buộc) | Đủ, có nút tạm dừng |\n| Tỉ lệ màn hình phải kiểm | 16:9 | 16:9 và 20:9 | 16:9 tới 21:9 |\n| Vùng an toàn | Không bắt buộc | Có | Có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:23"
+   "at": "2026-11-25 18:46:03"
   },
   "safe-area": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSafeAreaTests.NotchNarrowerThanTheSideMarginMovesNothing",
@@ -129,11 +131,11 @@
    "hash": "affc4f8dd18f",
    "text": "Mọi phần HUD nằm trong vùng an toàn của máy (không bị tai thỏ, góc bo hay thanh điều hướng che)",
    "title": "Mọi phần HUD nằm trong vùng an toàn của máy (không bị tai thỏ, góc bo hay thanh điều hướng che)",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:49"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   },
   "edge-thanh-nang-cap-can-nhieu-cho-hon-doi": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudLayoutTests.UpgradeBarAlwaysGetsAtLeastItsFrameWidthLeftOfTheSkills",
@@ -144,8 +146,8 @@
    "hash": "e7ffedfb9add",
    "text": "**Thanh nâng cấp cần nhiều chỗ hơn (đội 3 hero + 3 nút thành = 6 nút):** thanh tự co nút trong phần của nó; không lấn sang cụm kĩ năng.",
    "title": "Thanh nâng cấp cần nhiều chỗ hơn (đội 3 hero + 3 nút thành = 6 nút)",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:51"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   }
  },
  "log": [
@@ -337,6 +339,48 @@
    "state": "done",
    "by": "Hud",
    "note": "HudLayoutTests.UpgradeBarAlwaysGetsAtLeastItsFrameWidthLeftOfTheSkills, HudLayoutTests.BottomEdgeLeftOfTheSkillClusterIsLeftFreeForTheUpgradeBar, HudSkillSlotTests.SlotsSitInTheBottomRightClusterAndTheTrayKeepsAllThree"
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "top-row-order",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "safe-area",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "edge-thanh-nang-cap-can-nhieu-cho-hon-doi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:42:13",
+   "id": "params",
+   "state": "doing",
+   "by": "Hud",
+   "note": "IDEA: mép trên chỉ máu, tiền, đợt khi cờ nút tạm dừng tắt"
+  },
+  {
+   "at": "2026-11-25 18:43:21",
+   "id": "params",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudLayoutTests.WithoutThePauseButtonTheTopRowIsMoneyHealthWaveAndTheCornerStaysEmpty, HudLayoutTests.NoHudPartCoversTheBattleStrip, HudLayoutTests.TopRowGoesMoneyThenHealthThenWaveFromLeftToRight, HudLayoutTests.SkillButtonsSitSideBySideInTheBottomRightCornerThunderFrostRally, HudSkillSlotTests.ThunderAloneStaysInTheLeftSlotAndTheOthersStayEmpty, HudSessionTests.AtIdeaTheHudHasNoPauseButtonAndAPauseTapDoesNothing"
+  },
+  {
+   "at": "2026-11-25 18:46:03",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

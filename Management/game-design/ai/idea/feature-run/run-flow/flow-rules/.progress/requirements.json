@@ -151,7 +151,7 @@
    "at": "2026-11-25 12:03:29"
   },
   "revive-step": {
-   "state": "done",
+   "state": "verified",
    "note": "RunFlow cai IRunRevive: ReviveWait, ReviveOffer, Reviving, giu tin don dot, co trong config",
    "tests": [
     "RunReviveTests.FirstCastleFallFreezesTheBattleAndOffersTheReviveAfterTheDelay",
@@ -167,11 +167,11 @@
    "hash": "9c249309dfb0",
    "text": "Chọn hồi sinh và xem xong quảng cáo: đóng popup hồi sinh, thành có lại máu, trận chạy tiếp ngay từ chỗ dừng\nKhông đếm ngược; quái, hero, đợt, tiền, cấp, hồi chiêu giữ đúng như lúc dừng. Bỏ qua đề nghị, hoặc quảng cáo không xem hết hay không tải được: đóng popup hồi sinh, chốt điểm, hiện popup thua ngay (không chờ thêm 1 giây). Mỗi lượt chỉ một lần hồi sinh.",
    "title": "Chọn hồi sinh và xem xong quảng cáo: đóng popup hồi sinh, thành có lại máu, trận chạy tiếp ngay từ chỗ dừng",
-   "by": "Run",
-   "at": "2026-11-25 13:42:59"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-thanh-bi-pha-khi-popup-tam-dung-dang": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.CastleFallingWhilePausedStillEndsTheRun",
@@ -181,11 +181,11 @@
    "hash": "da1ccc06bca4",
    "text": "**Thành bị phá khi popup tạm dừng đang mở:** không xảy ra, vì lúc tạm dừng quái không đánh (`feature-run/run-pause`).",
    "title": "Thành bị phá khi popup tạm dừng đang mở",
-   "by": "Run",
-   "at": "2026-11-25 13:43:00"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-roi-game-dung-luc-thanh-vua-bi-pha": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.LeavingAfterTheCastleFellDoesNotPauseAndTheLosePopupStillShows",
@@ -195,11 +195,11 @@
    "hash": "159140d34854",
    "text": "**Rời game đúng lúc thành vừa bị phá (trong 1 giây chờ):** không mở popup tạm dừng; quay lại thì popup thua hiện (lượt đã kết thúc, tạm dừng không áp dụng).",
    "title": "Rời game đúng lúc thành vừa bị phá (trong 1 giây chờ)",
-   "by": "Run",
-   "at": "2026-11-25 13:43:01"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-dang-o-man-bat-dau-hoac-man-chon": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.LeavingOrBackKeyOnTheStartScreenOrTeamSelectDoesNothing"
@@ -208,11 +208,11 @@
    "hash": "c75eea164d45",
    "text": "**Đang ở màn bắt đầu hoặc màn chọn đội mà rời game:** không có gì dừng; quay lại vẫn ở màn đó.",
    "title": "Đang ở màn bắt đầu hoặc màn chọn đội mà rời game",
-   "by": "Run",
-   "at": "2026-11-25 13:43:02"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-nut-quay-lai-cua-may-android": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.BackKeyPausesARunningBattle",
@@ -224,8 +224,8 @@
    "hash": "1d56bb0b8c24",
    "text": "**Nút quay lại của máy (Android):** ở màn bắt đầu, màn chọn đội, popup thua và trong 1 giây chờ: không làm gì. Trong trận đang đánh: như bấm nút tạm dừng. Trên popup tạm dừng: theo `feature-popup-pause/pause-popup/pause-popup-spec`.",
    "title": "Nút quay lại của máy (Android)",
-   "by": "Run",
-   "at": "2026-11-25 13:43:04"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   }
  },
  "log": [
@@ -487,6 +487,41 @@
    "state": "done",
    "by": "Run",
    "note": "RunPauseTests.BackKeyPausesARunningBattle, RunPauseTests.BackKeyOnThePausePopupIsLeftToThePopup, RunPauseTests.LeavingOrBackKeyOnTheStartScreenOrTeamSelectDoesNothing, RunPauseTests.LeavingAfterTheCastleFellDoesNotPauseAndTheLosePopupStillShows"
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "revive-step",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-thanh-bi-pha-khi-popup-tam-dung-dang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-roi-game-dung-luc-thanh-vua-bi-pha",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-dang-o-man-bat-dau-hoac-man-chon",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-nut-quay-lai-cua-may-android",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

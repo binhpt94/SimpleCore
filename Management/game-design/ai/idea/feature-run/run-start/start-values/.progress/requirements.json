@@ -149,7 +149,7 @@
    "at": "2026-11-25 11:47:24"
   },
   "start-revive-1": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunReviveTests.EveryRunHasItsOneReviveAgainEvenAfterTheLastRunUsedIt",
@@ -159,8 +159,8 @@
    "hash": "024f224d4b06",
    "text": "Đầu lượt còn đúng 1 lần hồi sinh thành, kể cả khi lượt trước đã dùng",
    "title": "Đầu lượt còn đúng 1 lần hồi sinh thành, kể cả khi lượt trước đã dùng",
-   "by": "Run",
-   "at": "2026-11-25 13:43:08"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   }
  },
  "log": [
@@ -338,6 +338,13 @@
    "state": "done",
    "by": "Run",
    "note": "RunReviveTests.EveryRunHasItsOneReviveAgainEvenAfterTheLastRunUsedIt, RunReviveTests.ARunThatDeclinedStartsTheNextRunWithItsReviveAndNoFailFlag"
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "start-revive-1",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

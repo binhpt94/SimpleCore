@@ -1,7 +1,7 @@
 {
  "items": {
   "cards-five-order": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.FiveCardsInFixedRosterOrderWhateverTheTeam"
@@ -10,11 +10,11 @@
    "hash": "e45c87a76b40",
    "text": "Có 5 thẻ theo thứ tự cố định: Hiệp sĩ, Đấu sĩ rìu, Kiếm khách, Cung thủ, Pháp sư\nCận chiến trước, bắn xa sau. Thứ tự không đổi theo đội đã chọn.",
    "title": "Có 5 thẻ theo thứ tự cố định: Hiệp sĩ, Đấu sĩ rìu, Kiếm khách, Cung thủ, Pháp sư",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:29"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "card-four-parts": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.EachCardHasPortraitNameStyleLineAndRoleMark"
@@ -23,11 +23,11 @@
    "hash": "a43608dda1c3",
    "text": "Mỗi thẻ có 4 phần: hình hero, tên hero, dòng cách đánh, dấu vai trò\nHình hero là sprite 2D gen bằng AI, cùng hình hero dùng trong trận.",
    "title": "Mỗi thẻ có 4 phần: hình hero, tên hero, dòng cách đánh, dấu vai trò",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:30"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "card-role-text": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.StyleLineIsGroupAndAttackWord"
@@ -36,11 +36,11 @@
    "hash": "7bade907cb51",
    "text": "Dòng cách đánh ghi nhóm và kiểu đòn, ví dụ \"Cận chiến · Chém vùng\"\nHiệp sĩ \"Cận chiến · Chắn\", Đấu sĩ rìu \"Cận chiến · Chém vùng\", Kiếm khách \"Cận chiến · Đánh nhanh\", Cung thủ \"Bắn xa · Tầm xa\", Pháp sư \"Bắn xa · Nổ vùng\".",
    "title": "Dòng cách đánh ghi nhóm và kiểu đòn, ví dụ \"Cận chiến · Chém vùng\"",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:31"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "card-role-mark-two": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.TwoRoleMarksThreeMeleeTwoRanged"
@@ -49,11 +49,11 @@
    "hash": "e0fdadc6b4f6",
    "text": "Có 2 dấu vai trò: một dấu cho cận chiến (3 thẻ), một dấu cho bắn xa (2 thẻ)\nHai hero cùng nhóm có cùng dấu.",
    "title": "Có 2 dấu vai trò: một dấu cho cận chiến (3 thẻ), một dấu cho bắn xa (2 thẻ)",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:32"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "card-selected-mark": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.PickedMarkFollowsTeamAtOnce"
@@ -62,11 +62,11 @@
    "hash": "2f41c23bb694",
    "text": "Thẻ của hero đã vào đội có dấu \"đã chọn\"; bỏ chọn thì dấu mất ngay trong khung hình đó",
    "title": "Thẻ của hero đã vào đội có dấu \"đã chọn\"; bỏ chọn thì dấu mất ngay trong khung hình đó",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:33"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "card-no-stats": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.CardShowsNoStatNumbers"
@@ -75,11 +75,11 @@
    "hash": "481e2476a3fd",
    "text": "Thẻ không có con số chỉ số nào\nChỉ chữ cách đánh; chỉ số ở `feature-hero` và `feature-balance`.",
    "title": "Thẻ không có con số chỉ số nào",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:34"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-hero-moi-them-vao-feature-hero": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.NewRosterHeroGetsCardAtItsRosterPlaceWithStyleFromGroupAndAttack"
@@ -88,11 +88,11 @@
    "hash": "1574fc02e4b3",
    "text": "**Hero mới thêm vào `feature-hero`:** tự có thẻ mới ở cuối nhóm của nó; dòng cách đánh lấy theo nhóm và kiểu đòn.",
    "title": "Hero mới thêm vào `feature-hero`",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:35"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-hinh-hero-chua-co": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.HeroWithoutPictureStillShowsTextAndCanBePicked"
@@ -101,11 +101,11 @@
    "hash": "dacbbd84f67a",
    "text": "**Hình hero chưa có:** thẻ vẫn hiện tên và dòng cách đánh, chỗ hình để trống; không chặn chọn.",
    "title": "Hình hero chưa có",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:36"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "edge-cham-the-khi-doi-da-du-3-va": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.TappingUnpickedCardWhenTeamFullLeavesCardUnchanged"
@@ -114,11 +114,11 @@
    "hash": "f6ad19b0bdfb",
    "text": "**Chạm thẻ khi đội đã đủ 3 và hero chưa chọn:** thẻ không đổi (luật ở `slots-spec`).",
    "title": "Chạm thẻ khi đội đã đủ 3 và hero chưa chọn",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:37"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroCardTests.DesignValuesFiveCardsTwoMarksStyleTable"
@@ -127,8 +127,8 @@
    "hash": "23b3a55013d8",
    "text": "## Làm gì\n- Lấy danh sách hero (tên, hình, nhóm, kiểu đòn) từ `feature-hero`; tạo một thẻ cho mỗi hero, theo thứ tự danh sách.\n- Mỗi thẻ hiện 4 phần và dấu đã chọn theo trạng thái ở `feature-team-select/team-slots/slots-spec`.\n- Chạm thẻ: báo \"đã chạm hero X\" cho luật chọn; thẻ không tự quyết thêm hay bỏ.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số thẻ | 5 | thẻ | Danh sách 5 hero (`feature-hero/hero-list`) |\n| Số phần trên thẻ | 4 + dấu đã chọn | | `card-content` |\n| Số loại dấu vai trò | 2 (cận chiến, bắn xa) | | Hai nhóm hero |\n| Dòng cách đánh | xem bảng dưới | | Ngắn, đọc được trên điện thoại |\n\n| Hero | Dòng cách đánh | Dấu |\n|---|---|---|\n| Hiệp sĩ | Cận chiến · Chắn | Cận chiến |\n| Đấu sĩ rìu | Cận chiến · Chém vùng | Cận chiến |\n| Kiếm khách | Cận chiến · Đánh nhanh | Cận chiến |\n| Cung thủ | Bắn xa · Tầm xa | Bắn xa |\n| Pháp sư | Bắn xa · Nổ vùng | Bắn xa |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Có màn chọn đội và thẻ | Không (đội mặc định cố định) | Có: hình, tên, dòng cách đánh, dấu đã chọn | Có đủ 4 phần và dấu |\n| Dấu vai trò | Không | Có thể chỉ là chữ trong dòng cách đánh | Biểu tượng riêng cho từng nhóm |\n| Hiệu ứng khi chọn | Không | Không | Thẻ nảy nhẹ (phóng to rồi về, 0.2 giây, dự kiến) |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "TeamSelect",
-   "at": "2026-11-25 13:39:38"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:30:56"
   }
  },
  "log": [
@@ -201,6 +201,76 @@
    "state": "done",
    "by": "TeamSelect",
    "note": "HeroCardTests.DesignValuesFiveCardsTwoMarksStyleTable"
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "cards-five-order",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "card-four-parts",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "card-role-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "card-role-mark-two",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "card-selected-mark",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "card-no-stats",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-hero-moi-them-vao-feature-hero",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-hinh-hero-chua-co",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "edge-cham-the-khi-doi-da-du-3-va",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:30:56",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

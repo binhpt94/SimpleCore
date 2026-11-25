@@ -1,7 +1,7 @@
 namespace Game.Combat
 {
     /// <summary>Who dealt a hit.</summary>
-    internal enum CombatSource
+    public enum CombatSource
     {
         Hero,
         Enemy,
@@ -12,7 +12,7 @@ namespace Game.Combat
     /// One landed hit: who dealt it, who takes it and its damage, fixed when the hit was dealt. The dealer
     /// chooses every side it hits; an area hit is one <see cref="CombatHit"/> per side hit.
     /// </summary>
-    internal readonly struct CombatHit
+    public readonly struct CombatHit
     {
         public CombatHit(int receiver, int targetKey, float damage, CombatSource source)
         {

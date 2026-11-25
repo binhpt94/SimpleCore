@@ -1,7 +1,7 @@
 {
  "items": {
   "table-hero": {
-   "state": "done",
+   "state": "verified",
    "note": "Bảng số chuẩn trong Tests, test đối chiếu",
    "tests": [
     "BalanceNumberTableTests.FiveHeroesHaveTheLevelOneStatsOfTheTable",
@@ -11,11 +11,11 @@
    "hash": "0013961feda0",
    "text": "Chỉ số lv1 của 5 hero nằm ở cấu hình `feature-hero`, ví dụ Hiệp sĩ 300 máu, 12 sát thương mỗi 1.0 s, tầm 1.2u, đi 2.0 u/s\nGồm máu, sát thương, giây mỗi đòn, tầm, tốc độ (mỗi hero một mức, 2.0 tới 3.5 u/s), kiểu đòn; hồi sinh 8 s; mỗi cấp +15% máu và sát thương của lv1, +3% tốc độ đánh tới tối đa +60%.",
    "title": "Chỉ số lv1 của 5 hero nằm ở cấu hình `feature-hero`, ví dụ Hiệp sĩ 300 máu, 12 sát thương mỗi 1.0 s, tầm 1.2u, đi 2.0 u/s",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:03"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "table-castle": {
-   "state": "done",
+   "state": "verified",
    "note": "Bảng số chuẩn trong Tests, test đối chiếu",
    "tests": [
     "BalanceNumberTableTests.CastleHasThousandHpAndShootsTenEverySecondWithinSixUnits",
@@ -25,11 +25,11 @@
    "hash": "5ad8014901ef",
    "text": "Chỉ số thành nằm ở cấu hình `feature-castle`: 1000 máu, 10 sát thương mỗi 1.0 s, tầm 6u từ mép thành\nCùng 3 kĩ năng: Sấm sét 80 sát thương hồi 20 s, Băng giá chậm 50% trong 5 s hồi 35 s, Cổ vũ hồi 30% máu hero hồi 25 s; mức tăng mỗi cấp của máu (+150), sức đánh (+20% lv1), kĩ năng (+20% hiệu lực lv1).",
    "title": "Chỉ số thành nằm ở cấu hình `feature-castle`: 1000 máu, 10 sát thương mỗi 1.0 s, tầm 6u từ mép thành",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:04"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "table-enemy": {
-   "state": "done",
+   "state": "verified",
    "note": "Bảng số chuẩn trong Tests, test đối chiếu",
    "tests": [
     "BalanceNumberTableTests.FiveEnemyTypesHaveBaseStatsAndGoldOfTheTable"
@@ -38,11 +38,11 @@
    "hash": "8bf1a9025b3b",
    "text": "Chỉ số gốc và tiền của 5 loại quái nằm ở cấu hình `feature-enemy`, ví dụ Lính 40 máu, 5 sát thương, 5 xu\nHệ số nhân theo đợt không nằm ở đây mà ở `feature-wave`.",
    "title": "Chỉ số gốc và tiền của 5 loại quái nằm ở cấu hình `feature-enemy`, ví dụ Lính 40 máu, 5 sát thương, 5 xu",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:05"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "table-wave": {
-   "state": "done",
+   "state": "verified",
    "note": "Bảng số chuẩn trong Tests, test đối chiếu",
    "tests": [
     "BalanceNumberTableTests.WaveParametersMatchTheTable",
@@ -52,11 +52,11 @@
    "hash": "5acc50c2eabd",
    "text": "Tham số đợt nằm ở cấu hình `feature-wave`: số quái 6 + 2×đợt, nhịp 1.0 s giảm 0.05 s mỗi đợt tới 0.3 s, hệ số +10% mỗi đợt\nCùng mốc mở loại, chu kì Trùm 10 đợt, bảng phần trăm loại, giới hạn 40 quái sống, lúc thở 3 s, thưởng dọn đợt 20 + 5×đợt xu.",
    "title": "Tham số đợt nằm ở cấu hình `feature-wave`: số quái 6 + 2×đợt, nhịp 1.0 s giảm 0.05 s mỗi đợt tới 0.3 s, hệ số +10% mỗi đợt",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:07"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "table-upgrade": {
-   "state": "done",
+   "state": "verified",
    "note": "Bảng số chuẩn trong Tests, test đối chiếu",
    "tests": [
     "BalanceNumberTableTests.UpgradePricesAndStartMoneyMatchTheTable"
@@ -65,11 +65,11 @@
    "hash": "a42832670652",
    "text": "Giá nâng cấp nằm ở cấu hình `feature-upgrade`: hero 30×1.35^(cấp−1) xu, máu và sức đánh thành 40×1.4^(cấp−1) xu, kĩ năng 60×1.5^(cấp−1) xu\nLàm tròn lên, không cấp tối đa.",
    "title": "Giá nâng cấp nằm ở cấu hình `feature-upgrade`: hero 30×1.35^(cấp−1) xu, máu và sức đánh thành 40×1.4^(cấp−1) xu, kĩ năng 60×1.5^(cấp−1) xu",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:09"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "table-wallet": {
-   "state": "done",
+   "state": "verified",
    "note": "Bảng số chuẩn trong Tests, test đối chiếu",
    "tests": [
     "BalanceNumberTableTests.UpgradePricesAndStartMoneyMatchTheTable"
@@ -78,11 +78,11 @@
    "hash": "fd1b719a7b0c",
    "text": "Tiền đầu lượt 50 xu nằm ở cấu hình `feature-wallet`",
    "title": "Tiền đầu lượt 50 xu nằm ở cấu hình `feature-wallet`",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:11"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "table-links": {
-   "state": "done",
+   "state": "verified",
    "note": "Cột Xem lại khi đổi trong bảng, test mỗi số có quan hệ",
    "tests": [
     "BalanceNumberTableTests.EveryNumberHasOneOwnerAUnitAndNumbersToReviewOnChange",
@@ -92,11 +92,11 @@
    "hash": "484311f69281",
    "text": "Mỗi số có danh sách số quan hệ phải xem lại khi đổi, ví dụ đổi tiền quái thì xem lại giá nâng cấp và đợt gãy dự kiến\nDanh sách quan hệ ghi ở cột \"Xem lại khi đổi\" của bảng.",
    "title": "Mỗi số có danh sách số quan hệ phải xem lại khi đổi, ví dụ đổi tiền quái thì xem lại giá nâng cấp và đợt gãy dự kiến",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:12"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "edge-so-trong-cau-hinh-cua-mot-feature-khac": {
-   "state": "done",
+   "state": "verified",
    "note": "Test so bảng với giá trị mong đợi",
    "tests": [
     "BalanceNumberTableTests.NumbersBelongToTheOwningFeature",
@@ -106,11 +106,11 @@
    "hash": "70aa1a7a11a3",
    "text": "**Số trong cấu hình của một feature khác số trong bảng:** bảng là đúng; feature sửa cấu hình. Nếu số trong cấu hình là số mới đã thống nhất với người thì sửa bảng.",
    "title": "Số trong cấu hình của một feature khác số trong bảng",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:12"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "edge-mot-so-khong-co-feature-so-huu-ro": {
-   "state": "done",
+   "state": "verified",
    "note": "Dải đất ghi ở feature-castle",
    "tests": [
     "BalanceNumberTableTests.NumberWithoutClearOwnerLikeTheVisibleStripGoesToCastle"
@@ -119,11 +119,11 @@
    "hash": "efbc04052510",
    "text": "**Một số không có feature sở hữu rõ** (ví dụ bề rộng dải đất thấy được): ghi ở `feature-castle` vì thành là mốc của bản đồ; hỏi lại nếu một feature khác cần đổi nó.",
    "title": "Một số không có feature sở hữu rõ",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:13"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "edge-hai-feature-cung-can-mot-so": {
-   "state": "done",
+   "state": "verified",
    "note": "Mỗi số đúng một sở hữu",
    "tests": [
     "BalanceNumberTableTests.CastleEdgeNeededByTwoFeaturesIsHeldOnlyByCastle"
@@ -132,11 +132,11 @@
    "hash": "ddbcceb68fee",
    "text": "**Hai feature cùng cần một số** (ví dụ mép thành x = ±1.5 dùng cho tầm bắn và cho quái dừng lại): chỉ `feature-castle` giữ, feature khác lấy qua dịch vụ của thành, không chép số.",
    "title": "Hai feature cùng cần một số",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:15"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "Bảng số đủ đơn vị, không cấp tối đa",
    "tests": [
     "BalanceNumberTableTests.EveryNumberHasOneOwnerAUnitAndNumbersToReviewOnChange",
@@ -146,8 +146,8 @@
    "hash": "d3efd1ec11e9",
    "text": "## Làm gì\n- Giữ bảng dưới đây làm bản đối chiếu duy nhất của bộ số chuẩn (dự kiến).\n- Mỗi phiên feature ghi các số của mình vào cấu hình riêng (asset cấu hình ở `FeatureAssets/Private` của feature đó), đúng giá trị trong bảng.\n- Đổi một số: sửa ở đây trước, xem lại các số ở cột \"Xem lại khi đổi\", rồi báo feature sở hữu sửa cấu hình.\n- `feature-balance` không có code và không có cấu hình riêng.\n\n## Thông số\nĐơn vị: độ dài u; thời gian s; tiền xu. Mọi số là dự kiến.\n\n### Bản đồ và thành (`feature-castle`, bản đồ chung của trận)\n| Số | Giá trị | Sở hữu | Xem lại khi đổi |\n|---|---|---|---|\n| Dải đất thấy được | x = −16 … +16 u, một làn | `feature-castle` (vị trí thành), màn hình chung | điểm ra quái, tầm ra của hero |\n| Thành | x = 0, rộng 3u, cao 4u (mép ở x = ±1.5) | `feature-castle` | tầm đòn tự bắn, tầm Sấm sét |\n| Máu thành lv1 | 1000, không tự hồi | `feature-castle` | sát thương quái, đợt gãy |\n| Đòn tự bắn | 10 sát thương / 1.0 s, tầm 6u từ mép, 1 mục tiêu | `feature-castle` | máu Lính, Sói |\n| Sấm sét | 80 sát thương mọi quái trong 6u từ mép hai bên, hồi 20 s | `feature-castle` | máu Lính, Sói, Cung thủ quái theo đợt |\n| Băng giá | mọi quái chậm 50% di chuyển và tốc độ đánh trong 5 s, hồi 35 s | `feature-castle` | nhịp thả |\n| Cổ vũ | hồi 30% máu tối đa mọi hero đang đứng, hồi 25 s | `feature-castle` | máu hero, sát thương quái |\n| Mỗi cấp máu thành | +150 máu tối đa | `feature-castle` | giá nâng máu thành |\n| Mỗi cấp sức đánh thành | +20% sát thương lv1 (+2 mỗi cấp) | `feature-castle` | giá nâng sức đánh |\n| Mỗi cấp kĩ năng | +20% hiệu lực lv1, hồi chiêu không đổi | `feature-castle` | giá nâng kĩ năng |\n\n\"Hiệu lực\" của kĩ năng: Sấm sét là sát thương (80 → 96 → 112…); Băng giá là thời gian chậm (5 → 6 → 7 s, mức chậm giữ 50%); Cổ vũ là phần trăm hồi (30% → 36% → 42%…).\n\n### Hero (`feature-hero`), lv1\n| Hero | Máu | Sát thương | s mỗi đòn | Tầm (u) | Đi (u/s) | Kiểu đòn | Sát thương mỗi giây |\n|---|---|---|---|---|---|---|---|\n| Hiệp sĩ | 300 | 12 | 1.0 | 1.2 | 2.0 | 1 mục tiêu | 12.0 |\n| Đấu sĩ rìu | 240 | 14 | 1.4 | 1.3 | 2.4 | chém vùng 1.5u trước mặt | 10.0 mỗi mục tiêu |\n| Kiếm khách | 180 | 16 | 0.7 | 1.2 | 3.5 | 1 mục tiêu | 22.9 |\n| Cung thủ | 120 | 14 | 0.8 | 7 | 3.0 | 1 mục tiêu | 17.5 |\n| Pháp sư | 100 | 18 | 1.6 | 6 | 2.6 | nổ bán kính 1.5u | 11.25 mỗi mục tiêu |\n\nChung: đội 3 hero, chọn từ 5, không trùng; nhắm quái gần nhất cả hai bên, ra tối đa x = ±15u; hồi sinh 8 s, đầy máu, giữ cấp. Mỗi cấp: máu và sát thương +15% của lv1 (cấp L: ×(1 + 0.15×(L−1))); tốc độ đánh +3% mỗi cấp, tối đa +60% (cấp 21). Xem lại khi đổi: giá nâng hero, `feature-balance/balance-team/hero-compare`.\n\n### Quái (`feature-enemy`), gốc ở đợt 1\n| Loại | Máu | Sát thương | s mỗi đòn | Tầm (u) | Đi (u/s) | Tiền (xu) | Sát thương mỗi giây |\n|---|---|---|---|---|---|---|---|\n| Lính | 40 | 5 | 1.0 | 1.0 | 1.5 | 5 | 5.0 |\n| Sói | 20 | 3 | 0.8 | 1.0 | 3.0 | 4 | 3.75 |\n| Khổng lồ | 150 | 15 | 1.5 | 1.2 | 0.8 | 15 | 10.0 |\n| Cung thủ quái | 25 | 6 | 1.2 | 5 | 1.5 | 6 | 5.0 |\n| Trùm | 400 | 40 | 2.0 | 1.5 | 0.6 | 100 | 20.0 |\n\nXem lại khi đổi: hệ số đợt, đòn tự bắn và Sấm sét của thành, đợt gãy dự kiến.\n\n### Đợt (`feature-wave`)\n| Số | Giá trị | Xem lại khi đổi |\n|---|---|---|\n| Số quái đợt w | 6 + 2×w (có Trùm thì tính trong số này) | tiền mỗi đợt, đợt gãy |\n| Nhịp thả | max(0.3, 1.0 − 0.05×(w−1)) s | đợt gãy, giới hạn quái sống |\n| Hệ số máu, sát thương | 1 + 0.10×(w−1); tiền không nhân | đợt gãy |\n| Mở loại | Lính 1, Sói 3, Khổng lồ 5, Cung thủ quái 7 | `feature-balance/balance-team/hero-compare` |\n| Trùm | 1 con ở đợt chia hết cho 10 | đợt gãy |\n| Bảng phần trăm loại | xem `feature-wave/difficulty-scaling/wave-formula` | tiền mỗi đợt |\n| Giới hạn quái sống | 40 | hiệu năng |\n| Lúc thở | 3 s | độ dài lượt |\n| Thưởng dọn đợt | 20 + 5×w xu | `feature-balance/balance-economy/income-and-prices` |\n\n### Nâng cấp (`feature-upgrade`) và ví (`feature-wallet`)\n| Số | Giá trị | Xem lại khi đổi |\n|---|---|---|\n| Giá nâng hero từ cấp c | ⌈30×1.35^(c−1)⌉ xu | thu mỗi đợt |\n| Giá nâng máu thành từ cấp c | ⌈40×1.4^(c−1)⌉ xu | thu mỗi đợt |\n| Giá nâng sức đánh thành từ cấp c | ⌈40×1.4^(c−1)⌉ xu | thu mỗi đợt |\n| Giá nâng mỗi kĩ năng từ cấp c | ⌈60×1.5^(c−1)⌉ xu | thu mỗi đợt |\n| Cấp tối đa | không có | |\n| Tiền đầu lượt | 50 xu | đợt 1–2 dễ |\n\nKhác: điểm = số đợt đã dọn sạch; tạm dừng thì mọi thứ đứng yên.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Bộ số dùng | bộ số chuẩn ở trên | bộ số chuẩn, chỉnh theo chơi thử | chốt sau chơi thử |\n| Số nằm trong cấu hình, không viết cứng | có | có | có |\n| Bảng đối chiếu cập nhật khi đổi số | có | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Balance",
-   "at": "2026-11-25 13:41:16"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   }
  },
  "log": [
@@ -304,6 +304,83 @@
    "state": "done",
    "by": "Balance",
    "note": "BalanceNumberTableTests.EveryNumberHasOneOwnerAUnitAndNumbersToReviewOnChange, BalanceNumberTableTests.UpgradePricesAndStartMoneyMatchTheTable"
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "table-hero",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "table-castle",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "table-enemy",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "table-wave",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "table-upgrade",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "table-wallet",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "table-links",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "edge-so-trong-cau-hinh-cua-mot-feature-khac",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "edge-mot-so-khong-co-feature-so-huu-ro",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "edge-hai-feature-cung-can-mot-so",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

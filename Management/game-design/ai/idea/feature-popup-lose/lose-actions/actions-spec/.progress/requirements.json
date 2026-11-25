@@ -66,7 +66,7 @@
    "at": "2026-11-25 12:02:55"
   },
   "home-report": {
-   "state": "done",
+   "state": "verified",
    "note": "Nút Về màn bắt đầu báo IRunFlow.GoHome, khoá cả 2 nút",
    "tests": [
     "LosePopupTests.HomeTouchAsksTheRunToGoHomeAndLocksButtons",
@@ -78,11 +78,11 @@
    "hash": "5e52b387a6ee",
    "text": "Chạm \"Về màn bắt đầu\" thì báo `feature-run` chọn về màn bắt đầu; `feature-run` đóng popup và sang màn bắt đầu",
    "title": "Chạm \"Về màn bắt đầu\" thì báo `feature-run` chọn về màn bắt đầu; `feature-run` đóng popup và sang màn bắt đầu",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:38:44"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:11"
   },
   "two-buttons-text": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupLoseInstallerTests.PopupPrefabHasReplayAsTheMainButtonAndHomeAsTheSecond"
@@ -91,11 +91,11 @@
    "hash": "b1d3627dd69f",
    "text": "Có 2 nút: \"Chơi lại\" là nút chính, \"Về màn bắt đầu\" là nút phụ\nNút chính đặt trước và nổi hơn nút phụ; cách làm nổi do chuyên gia giao diện quyết.",
    "title": "Có 2 nút: \"Chơi lại\" là nút chính, \"Về màn bắt đầu\" là nút phụ",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:38:45"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:11"
   },
   "edge-roi-game-khi-popup-thua-dang-mo": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "LosePopupTests.ComingBackToTheGameKeepsTheLosePopupAsItWasAndNeverPauses"
@@ -104,11 +104,11 @@
    "hash": "d4a7f4abfa89",
    "text": "**Rời game khi popup thua đang mở:** quay lại popup vẫn như cũ; không mở popup tạm dừng.",
    "title": "Rời game khi popup thua đang mở",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:38:46"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:11"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "PopupLoseInstallerTests.PopupPrefabHasReplayAsTheMainButtonAndHomeAsTheSecond",
@@ -121,8 +121,8 @@
    "hash": "f74a068855bb",
    "text": "## Làm gì\n- Hiện 2 nút dưới phần kết quả (`feature-popup-lose/lose-result/result-spec`).\n- Chạm nút: báo lựa chọn cho `feature-run/run-flow/flow-rules` một lần, rồi khoá cả 2 nút.\n- Popup không tự đóng và không tự chuyển màn; `feature-run` đóng nó qua `feature-popup`.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số nút | 2 | nút | `actions-two` |\n| Nút chính | \"Chơi lại\" | | Vòng lặp thua rồi chơi lại ngay |\n| Nút phụ | \"Về màn bắt đầu\" | | |\n| Số lần báo mỗi lần popup mở | 1 | lần | `first-tap-only` |\n| Cách đóng khác | không có | | `actions-only-exit` |\n| Nút hồi sinh | không có | | Hồi sinh nằm ở popup hồi sinh, hiện trước popup thua |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Nút \"Chơi lại\" | Có; vào thẳng trận mới với đội mặc định | Có; sang màn chọn đội | Có; sang màn chọn đội |\n| Nút \"Về màn bắt đầu\" | Không có (chưa có màn bắt đầu) | Có | Có |\n| Hiệu ứng chạm nút | Không | Không | Nút lún nhẹ (thu 0.95 lần, 0.1 giây, dự kiến) |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:38:48"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:11"
   },
   "edge-tat-game-khi-popup-dang-mo": {
    "state": "done",
@@ -346,6 +346,34 @@
    "state": "done",
    "by": "PopupLose",
    "note": "Play scene Game, thua với điểm vượt kỉ lục cũ. Khi popup thua đang mở thì dừng Play, rồi Play lại: kỉ lục mới vẫn còn. Kỉ lục do Run ghi xuống máy trước khi popup hiện, popup thua chỉ đọc, không ghi gì."
+  },
+  {
+   "at": "2026-11-25 18:31:11",
+   "id": "two-buttons-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:11",
+   "id": "home-report",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:11",
+   "id": "edge-roi-game-khi-popup-thua-dang-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:11",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

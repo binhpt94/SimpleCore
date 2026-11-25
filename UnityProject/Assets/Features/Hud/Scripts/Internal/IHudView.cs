@@ -37,6 +37,9 @@ namespace Game.Hud
         /// <summary>The player tapped the pause button (two vertical bars, top-left corner, shown all battle).</summary>
         event Action PausePressed;
 
+        /// <summary>Shows or removes the pause button; a removed button takes no taps and leaves its corner empty.</summary>
+        void ShowPauseButton(bool shown);
+
         /// <summary>
         /// Keeps every HUD part inside the device safe area: <paramref name="insets"/> in reference units
         /// (see <see cref="HudSafeArea"/>), zero when nothing is cut off.

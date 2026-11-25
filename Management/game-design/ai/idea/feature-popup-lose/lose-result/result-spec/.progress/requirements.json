@@ -94,7 +94,7 @@
    "at": "2026-11-25 12:02:55"
   },
   "result-new-record-line": {
-   "state": "done",
+   "state": "verified",
    "note": "Dải nền + chữ Kỉ lục mới! nảy 1.0-1.15-1.0 chu kì 1 giây",
    "tests": [
     "LosePopupTests.NewRecordLinePulsesFromOneTo115AndBackEverySecond",
@@ -105,11 +105,11 @@
    "hash": "a8f2886db1cd",
    "text": "Cờ kỉ lục mới bật thì có thêm dòng \"Kỉ lục mới!\" và dòng này phóng to 1.0 → 1.15 → 1.0 lặp lại mỗi 1 giây\nDòng này nằm trên một dải nền nổi bật cùng cỡ (400x70 px), để lượt phá kỉ lục trông vui hơn hẳn. Cờ tắt thì không có cả dòng lẫn dải nền, không có câu nào thay vào.",
    "title": "Cờ kỉ lục mới bật thì có thêm dòng \"Kỉ lục mới!\" và dòng này phóng to 1.0 → 1.15 → 1.0 lặp lại mỗi 1 giây",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:38:50"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:11"
   },
   "edge-ghi-ki-luc-xuong-may-that-bai": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "LosePopupTests.PopupShowsTheBestTheRunHoldsWithoutReportingAnyError"
@@ -118,11 +118,11 @@
    "hash": "292cb2ef9a05",
    "text": "**Ghi kỉ lục xuống máy thất bại:** popup vẫn hiện đúng kỉ lục trong lúc game mở, không báo lỗi.",
    "title": "Ghi kỉ lục xuống máy thất bại",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:38:51"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:11"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "LosePopupTests.PopupShowsTitleScoreAndBestWithoutNewRecordLine",
@@ -134,11 +134,11 @@
    "hash": "c03bddf3dc3e",
    "text": "## Làm gì\n- Khi `feature-run` nhờ mở popup thua (qua `feature-popup`): đọc điểm, kỉ lục, cờ kỉ lục mới từ `feature-run/run-score/score-rules`.\n- Điền 3 dòng chữ; cờ bật thì thêm dòng \"Kỉ lục mới!\" kèm hiệu ứng nảy lặp.\n- Nút bấm của popup ở `feature-popup-lose/lose-actions/actions-spec`.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số popup thua mỗi lượt | tối đa 1 | popup | Chỉ khi thua, không khi bỏ lượt |\n| Dòng luôn hiện | 3 (tiêu đề, điểm, kỉ lục) | dòng | `lose-result` |\n| Dòng có điều kiện | 1 (\"Kỉ lục mới!\") | dòng | Chỉ khi cờ bật |\n| Chữ tiêu đề | \"Thành đã bị phá\" | | Nói vì sao thua |\n| Chữ điểm | \"Trụ được N đợt\" | | Điểm = số đợt dọn sạch |\n| Chữ kỉ lục | \"Kỉ lục: M đợt\" | | Cùng cách viết với màn bắt đầu |\n| Hiệu ứng \"Kỉ lục mới!\" | phóng 1.0 → 1.15 → 1.0, chu kì 1 giây, lặp tới khi popup đóng (dự kiến) | giây | Anim bằng scale |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Tiêu đề, điểm, kỉ lục | Có, chữ đơn giản | Có | Có |\n| Dòng \"Kỉ lục mới!\" | Có, trên dải nền nổi bật, không cần hiệu ứng | Có, kèm nảy lặp | Có, kèm nảy lặp và hiệu ứng pháo giấy |\n| Popup hiện ra | Hiện ngay | Hiện ngay | Phóng từ nhỏ ra đủ cỡ trong 0.2 giây (dự kiến) |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:38:53"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:11"
   },
   "result-ad-failed-text": {
-   "state": "done",
+   "state": "verified",
    "note": "Đọc IRunRevive.LostAfterFailedRevive lúc mở, hiện Quảng cáo chưa hoàn tất ở chỗ dòng kỉ lục mới",
    "tests": [
     "LosePopupTests.FailedReviveAdShowsTheAdNotCompletedLine",
@@ -149,11 +149,11 @@
    "hash": "0a53a77f77b6",
    "text": "Quảng cáo hồi sinh không xem hết hoặc không tải được thì có dòng \"Quảng cáo chưa hoàn tất\" ở chỗ dòng \"Kỉ lục mới!\"\nChữ trơn, không dải nền. Phá kỉ lục thì chỉ hiện \"Kỉ lục mới!\".",
    "title": "Quảng cáo hồi sinh không xem hết hoặc không tải được thì có dòng \"Quảng cáo chưa hoàn tất\" ở chỗ dòng \"Kỉ lục mới!\"",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:41:25"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:11"
   },
   "edge-quang-cao-hoi-sinh-khong-xem-het-hoac": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "LosePopupTests.FailedReviveAdShowsTheAdNotCompletedLine",
@@ -165,8 +165,8 @@
    "hash": "c1284b7998d5",
    "text": "**Quảng cáo hồi sinh không xem hết hoặc không tải được:** dòng \"Quảng cáo chưa hoàn tất\" ở chỗ dòng \"Kỉ lục mới!\"; phá kỉ lục thì chỉ hiện \"Kỉ lục mới!\". Không thêm frame: chung chỗ, chung cỡ với dòng kỉ lục mới.",
    "title": "Quảng cáo hồi sinh không xem hết hoặc không tải được",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:41:27"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:11"
   }
  },
  "log": [
@@ -365,6 +365,41 @@
    "state": "done",
    "by": "PopupLose",
    "note": "LosePopupTests.FailedReviveAdShowsTheAdNotCompletedLine, LosePopupTests.FailedReviveAdWithANewBestShowsOnlyTheNewRecordLine, LosePopupTests.ANewLossAfterAFailedAdReadsTheFlagAgain, PopupLoseInstallerTests.AdNotCompletedLineSitsInTheNewRecordPlaceAsPlainTextHiddenByDefault"
+  },
+  {
+   "at": "2026-11-25 18:31:11",
+   "id": "result-new-record-line",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:11",
+   "id": "result-ad-failed-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:11",
+   "id": "edge-quang-cao-hoi-sinh-khong-xem-het-hoac",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:11",
+   "id": "edge-ghi-ki-luc-xuong-may-that-bai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:11",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

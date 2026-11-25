@@ -210,6 +210,8 @@ namespace Game.Hud.Tests
         public HudInsets Insets;
 
         public void ApplySafeArea(HudInsets insets) => Insets = insets;
+        public bool PauseShown = true;
+        public void ShowPauseButton(bool shown) => PauseShown = shown;
         public void PressPause() => PausePressed?.Invoke();
         public int PauseListeners => PausePressed?.GetInvocationList().Length ?? 0;
 

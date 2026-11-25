@@ -41,6 +41,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Kèm con số với thanh máu.** Trả lời "Có kèm con số hay không" của node cha; bộ số chung yêu cầu cả số và thanh.
 - **Thông báo "Đợt N" thuộc HUD.** `feature-wave/wave-gap` để việc báo đợt mới cho `feature-hud`. Không chặn bấm vì trận không dừng.
 - **Làm tròn xuống.** Người chơi thấy "0" là biết rất nguy. Đã loại: làm tròn lên (thấy "1" mà thành đã bị phá ở khung sau).
+- **`ui.md` (2026-11-25, quy trình mới):** 6 phần tử, trùng id hình trong `main.frame`. Máu (thanh và số) và số tiền là chính, vì là thứ người chơi liếc để quyết bấm kĩ năng hay mua; biểu tượng xu, ô đợt, thông báo đợt là phụ. Không phần tử nào nhận chạm.
 
 ## Chưa rõ
 - `feature-wave` cần báo hai việc riêng: "đợt hiện tại/sắp tới là N" (đổi ngay khi dọn sạch) và "đợt N bắt đầu ra quái" (để hiện thông báo).

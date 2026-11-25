@@ -19,6 +19,7 @@ MonoBehaviour:
   - knight
   - axeman
   - archer
+  pauseEnabled: 0
   pauseOnLeavingApp: 0
   backKeyPauses: 0
   reviveOnce: 0

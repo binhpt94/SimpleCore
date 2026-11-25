@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04dcf32a67ae04044b771aaa9cb497cd, type: 3}
+  m_Name: Game.Popups.Prototype
+  m_EditorClassIdentifier: Game.Core::Game.Core.AssetCatalog
+  kind: Popup
+  entries:
+  - id: PopupLose/Main
+    asset: {fileID: 1000000000000000001, guid: d5f03cb0cea3eb74cafe8bb9995fa12c, type: 3}
+  - id: PopupPause/Main
+    asset: {fileID: 4853534459870735822, guid: cb5a385711c2ef01db669daccc11230e, type: 3}
+  - id: PopupRevive/Main
+    asset: {fileID: 8127480987781378051, guid: b8fec04754017556589012e8c8bce428, type: 3}

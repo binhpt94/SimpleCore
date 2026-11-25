@@ -1,9 +1,14 @@
 kind: ui
 title: Nút tạm dừng ở góc trên bên trái
+ui: 427976c1a003
+ai: 7
+why: góc trên trái, chéo hẳn với cụm kĩ năng (góc dưới phải) và khác mép với thanh nâng cấp: bấm nhầm tạm dừng làm đứt nhịp trận
+why: cỡ 120x120 (tap của layout-spec), là nút duy nhất của node nên là nút chính ở đây; trong cả HUD nó nhỏ hơn nút kĩ năng 140, đúng mức phụ
+why: không có tham chiếu phù hợp (chưa có ảnh tham chiếu nào)
 use tap = feature-hud/hud-layout/layout-spec#tap
 use safe = feature-hud/hud-layout/layout-spec#safe
 use top-h = feature-hud/hud-layout/layout-spec#top-h
 let pause-y = 10
 - top    rect   x=0    y=0  w=1920 h=top-h label="Mép trên"
 - pause  button x=safe y=pause-y w=tap  h=tap   parent=top label="II (Tạm dừng)"
-- money  label  x=220  y=10 w=300  h=60    parent=top label="Tiền (ô kế bên)"
+- money  label  x=224  y=10 w=300  h=60    parent=top label="Tiền (ô kế bên)"

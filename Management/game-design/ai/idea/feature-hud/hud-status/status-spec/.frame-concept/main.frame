@@ -1,12 +1,19 @@
 kind: ui
 title: Ba ô thông tin trận và thông báo đợt
+ui: a7c5b98de905
+ai: 7
+why: thanh máu giữa mép trên, rộng nhất nên mắt rơi vào trước; chữ "1000/1000" căn giữa trên thanh, đọc số và tỉ lệ một lần liếc
+why: xu và số tiền là một nhóm (cách 8), đứng bên trái máu; ô đợt ở mép phải, cùng hàng và cùng cao 60 để mép trên đọc thành một dòng
+why: banner "Đợt N" dưới thanh máu, cách 8, vẫn trong dải trên 140 nên không che chiến trường; chạm đi xuyên
+why: chỗ từng ô theo feature-hud/hud-layout/layout-spec (tiền từ 224 đến 524, máu 660–1260, đợt 1580–1880)
+why: không có tham chiếu phù hợp (chưa có ảnh tham chiếu nào)
 use top-h = feature-hud/hud-layout/layout-spec#top-h
 let info-y = 10
 let info-h = 60
-let coin-x = 220
+let coin-x = 224
 let coin-w = 60
-let money-x = 290
-let money-w = 230
+let money-x = 292
+let money-w = 232
 let hp-x = 660
 let hp-w = 600
 let hp-num-x = 180
@@ -16,7 +23,7 @@ let hp-num-h = 50
 let wave-x = 1580
 let wave-w = 300
 let banner-x = 760
-let banner-y = 76
+let banner-y = 78
 let banner-w = 400
 let banner-h = 56
 - top        rect  x=0    y=0  w=1920 h=top-h label="Mép trên"

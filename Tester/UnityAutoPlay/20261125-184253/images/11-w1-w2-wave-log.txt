@@ -1,0 +1,35 @@
+W1 Wave spawn-order#edge-hai-con-ra-cung-cho, W2 Wave gap-timer#gap-same-rules
+Play lần 3 (18:53:35), lượt 1, đợt 1-10. Sự kiện Spawned của EnemyField, vị trí X trong EnemyField._alive mỗi khung.
+
+W1, con liền nhau ra cùng một bên (trích):
+SAME L: f1331 Soldier -> f1388 Soldier -> f1425 Soldier   (đợt 2: 3 con liền bên trái, mỗi con ra ở x=-17)
+SAME R: f2567 Soldier -> f2621 Soldier -> f2674 Soldier
+SAME L: f3813 Soldier -> f3864 Wolf
+SAME R: f6452 Giant -> f6498 Giant -> f6543 Wolf
+SAME L: f6969 Wolf -> f7981 Giant -> f8023 Soldier
+...
+- Không bên nào có quá 3 con liền trong cùng một đợt. Con thứ hai vẫn ra đủ, Wave không chặn.
+Quái cùng bên chồng hình (cách nhau dưới 0.3u, ngoài vùng thành |x|>3u), rồi tách (trích từ 90 dòng):
+f10695 overlap 117&120 Giant@14.10 Giant@14.11 walking=True/True
+f10739 overlap 109&118 Giant@-7.31 Soldier@-7.61 walking=True/True
+f10787 apart 109&118 after 1.13s          (Lính đi 1.5u/s vượt Khổng lồ 0.8u/s)
+f11263 overlap 121&123 Soldier@14.08 Wolf@14.36 -> f11287 apart after 0.40s (Sói 3.0u/s vượt)
+f11656 overlap 134&135 Soldier@-15.50 Wolf@-15.80 -> f11680 apart after 0.40s
+f11943 overlap 140&142 Soldier@-13.70 Wolf@-14.00 -> f11967 apart after 0.72s
+f10695 overlap 117&120 Giant@14.10 Giant@14.11 -> f10814 apart after 10.84s (hai Khổng lồ cùng tốc độ, tới khi một con bị hạ)
+- Quái chồng nhau vẫn đi tiếp, không đẩy nhau. Khác tốc độ thì tách sau 0.2-1.1 giây.
+- Giới hạn: không thấy hai con ra đúng cùng một khung (nhịp thả tối thiểu 0.6 giây ở đợt 9).
+  Chồng hình thấy được là do con nhanh đuổi kịp con chậm, hoặc hai con ra cách nhau một nhịp lúc Editor tụt khung.
+
+W2, 3 giây thở (hook bấm như người chơi bằng ExecuteEvents.pointerClickHandler):
+f4388 t=80.59 w=5 brk=True coins=393 hp=974.3/1000 score=3 | W2 break start #1
+f4418 t=81.09 w=5 brk=True coins=363 hp=974.3/1000 score=4 | W2 click UpgradeBar/Bar/Button 1 level=Cấp 2   (mua Hiệp sĩ cấp 2: -30 xu)
+f4449 t=81.61 w=5 brk=True coins=363 hp=974.3/1000 score=4 | W2 click HudView/Safe/Skill Sấm sét
+f4567 t=83.59 w=5 brk=False alive=1 wait=15 coins=363 hp=974.3/1000 | W2 break end, game dur=2.998
+f6292 t=113.80 w=6 brk=True coins=504 hp=863.70/1000 score=4 | W2 break start #2
+f6323 t=114.30 w=6 brk=True coins=463 hp=863.70/1000 score=5 | W2 click Button 1 level=Cấp 3   (-41 xu = 30 x 1.35 làm tròn lên)
+f6352 t=114.79 w=6 brk=True coins=463 hp=863.70/1000 score=5 | W2 click Skill Sấm sét
+  CastleSkills._cooldownLeft đọc lúc t=115.91: [19.55], tức Sấm sét đã dùng lúc khoảng t=114.8, trong lúc thở; hồi chiêu chạy.
+f6452 t=117.11 w=6 brk=False alive=1 wait=17 coins=463 hp=863.70/1000 | W2 break end, game dur=2.984
+- Mua nâng cấp được, dùng kĩ năng được, hồi chiêu chạy, máu thành không hồi (974.3 và 863.7 giữ nguyên suốt lúc thở), lúc thở dài 3.0 giây.
+- Chưa thấy: hero gục trong lúc thở để xem hồi sinh 8 giây chạy tiếp. Ở 3 lần thở đầu không hero nào gục.

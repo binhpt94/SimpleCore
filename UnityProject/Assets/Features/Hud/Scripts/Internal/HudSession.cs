@@ -22,6 +22,7 @@ namespace Game.Hud
         private readonly IWaveProgress _waves;
         private readonly IRunFlow _run;
         private readonly HudTimings _timings;
+        private readonly bool _hasPauseButton;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         private readonly HudCheat _cheat;
 #endif
@@ -31,7 +32,7 @@ namespace Game.Hud
         private HudPausePresenter _pauseButton;
 
         public HudSession(IHudViewSpawner spawner, IHudClock clock, ICastle castle, ICastleSkills skills,
-            IWalletBalance wallet, IWaveProgress waves, IRunFlow run, HudTimings timings
+            IWalletBalance wallet, IWaveProgress waves, IRunFlow run, HudTimings timings, bool pauseButton = true
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             , HudCheat cheat = null
 #endif
@@ -45,6 +46,7 @@ namespace Game.Hud
             _waves = waves ?? throw new ArgumentNullException(nameof(waves));
             _run = run ?? throw new ArgumentNullException(nameof(run));
             _timings = timings;
+            _hasPauseButton = pauseButton;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             _cheat = cheat;
 #endif
@@ -71,9 +73,14 @@ namespace Game.Hud
             _skillButtons.Start();
             WhenDisposed(_skillButtons.Stop);
 
-            _pauseButton = new HudPausePresenter(view, _run, _castle);
-            _pauseButton.Start();
-            WhenDisposed(_pauseButton.Stop);
+            // Stages without a pause button (IDEA) show none and take no pause taps.
+            view.ShowPauseButton(_hasPauseButton);
+            if (_hasPauseButton)
+            {
+                _pauseButton = new HudPausePresenter(view, _run, _castle);
+                _pauseButton.Start();
+                WhenDisposed(_pauseButton.Stop);
+            }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (_cheat != null)

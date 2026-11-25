@@ -1,15 +1,19 @@
 {
  "items": {
   "after-dispose-zero": {
-   "state": "doing",
+   "state": "verified",
    "note": "Logic đã đếm sau bước huỷ qua IParticipantUsage, có test EveryParticipantReached_IsCountedOnlyAfterEveryoneDisposed. Chờ bộ đếm thật trong Core mà CodeLead đã đồng ý, viết khi có Editor",
-   "tests": [],
-   "play": "Play từ scene Loading tới khi sang scene Game. Ngay sau bước huỷ của scene Loading, đếm GameObject còn lại do các feature tham gia tạo ra, bỏ qua lớp che của scene-flow, phải bằng 0. Console không có lỗi dispose. Khi Profiler hoặc UniTask Tracker đang mở, không còn task hay việc hẹn giờ nào của scene Loading.",
+   "tests": [
+    "SessionSceneLogicTests.WithTheRealCounter_AParticipantThatLetsGoOnDispose_LeavesNothing_AndNothingIsReported",
+    "SessionSceneLogicTests.WithTheRealCounter_AParticipantThatKeepsAViewAndAJob_IsReportedAfterTheDisposeStep",
+    "SessionSceneLogicTests.EveryParticipantReached_IsCountedOnlyAfterEveryoneDisposed"
+   ],
+   "play": "",
    "hash": "14039678effd",
    "text": "Sau bước huỷ, scene không còn view nào, không còn việc hẹn giờ hay việc đang chạy nào của feature tham gia\nNgoại lệ duy nhất là lớp che của `feature-scene-flow`, vì nó chỉ sống trong lúc chuyển.",
    "title": "Sau bước huỷ, scene không còn view nào, không còn việc hẹn giờ hay việc đang chạy nào của feature tham gia",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 13:59:15"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:36:51"
   },
   "leak-names-owner": {
    "state": "verified",
@@ -52,37 +56,47 @@
    "at": "2026-11-25 12:02:58"
   },
   "count-per-participant": {
-   "state": "doing",
+   "state": "verified",
    "note": "Cổng đếm nội bộ IParticipantUsage đã có. CodeLead đã đồng ý TrackView, TrackJob trong SessionParticipantBase và contract đọc số ở Core, chỉ ở bản dev. Chờ CodeLead viết khi có Editor rồi gửi tên API",
-   "tests": [],
+   "tests": [
+    "SessionSceneLogicTests.Counter_ReadsTheViewsAndJobsAParticipantHolds_AtAnyMoment",
+    "SessionSceneLogicTests.Counter_ADestroyedViewIsNoLongerCounted",
+    "SessionSceneLogicTests.Counter_AParticipantThatCannotBeCounted_HoldsNothing"
+   ],
    "play": "",
    "hash": "4be943dec5e2",
    "text": "Dịch vụ đếm được số view và số việc đang chạy của từng feature tham gia, bất kì lúc nào trong scene\nChỉ ở bản dev. Việc đang chạy gồm hẹn giờ, việc chờ và việc lặp mỗi khung hình. Feature khác dùng lại số đếm này để tự kiểm, ví dụ kiểm chơi lại nhiều lượt của `feature-run`.",
    "title": "Dịch vụ đếm được số view và số việc đang chạy của từng feature tham gia, bất kì lúc nào trong scene",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 13:59:13"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:36:51"
   },
   "edge-lop-che-cua-chuyen-scene-con-hien-luc": {
-   "state": "doing",
+   "state": "verified",
    "note": "Cần bộ đếm thật bỏ qua view đánh dấu lớp che chuyển scene, chờ CodeLead chốt khung đếm trong Core",
-   "tests": [],
+   "tests": [
+    "SessionSceneLogicTests.TheSceneTransitionCover_StillShowingWhenCounted_IsNotReported"
+   ],
    "play": "",
    "hash": "028bc0c0d1cc",
    "text": "**Lớp che của chuyển scene còn hiện lúc đếm**: không tính.",
    "title": "Lớp che của chuyển scene còn hiện lúc đếm",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 13:38:03"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:36:51"
   },
   "params": {
    "state": "doing",
-   "note": "Ngưỡng 0 view, 0 việc đã có trong logic. Còn bộ đếm chỉ ở bản dev và bỏ lớp che, chờ khung đếm của CodeLead",
-   "tests": [],
+   "note": "Bản mới thêm số view tối thiểu 1 sau bước chạy và đếm view từ IDEA. Test cũ chỉ phủ ngưỡng 0 sau bước huỷ và bộ đếm bản dev, chưa phủ dòng mới. Làm cùng running-views-nonzero ở đợt TrackView sau",
+   "tests": [
+    "SessionSceneLogicTests.InstallerAsset_InTheEditor_CountsWhatParticipantsHoldAfterTheDisposeStep",
+    "SessionSceneLogicTests.ASingleViewOrASingleJobLeft_IsEnoughToBeReported",
+    "SessionSceneLogicTests.AfterTheDisposeStep_ParticipantsThatHoldNothing_AreNotReported"
+   ],
    "play": "",
-   "hash": "58e08322f61f",
-   "text": "## Làm gì\n- Giữ một bộ đếm cho mỗi feature tham gia: số view đang có và số việc đang chạy (hẹn giờ, việc chờ, việc lặp mỗi khung hình). Chỉ bật ở bản dev.\n- Sau bước huỷ của một scene: đọc bộ đếm của mọi feature tham gia; phải bằng 0. Lớp che của `feature-scene-flow` không tính.\n- Còn sót: ghi lỗi nêu tên feature và số còn lại.\n- Cho feature khác đọc số đếm bất kì lúc nào trong scene để tự kiểm.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| View còn lại sau bước huỷ | 0 | view | `nothing-survives` của node cha |\n| Việc đang chạy còn lại sau bước huỷ | 0 | việc | `nothing-survives` của node cha |\n| Hình không tính | lớp che của `feature-scene-flow` | | Chỉ sống trong lúc chuyển |\n| Bộ đếm có ở bản phát hành | không | | Chỉ để kiểm ở bản dev |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Kiểm sau bước huỷ | Không bắt buộc (chỉ một lần chuyển, Loading → Game) | Đếm view và việc đang chạy | Như PROTOTYPE |\n| Bộ đếm theo feature tham gia | Không bắt buộc | Có | Có |",
+   "hash": "baed02dac074",
+   "text": "## Làm gì\n- Giữ một bộ đếm cho mỗi feature tham gia: số view đang có và số việc đang chạy (hẹn giờ, việc chờ, việc lặp mỗi khung hình). Chỉ bật ở bản dev.\n- Sau bước huỷ của một scene: đọc bộ đếm của mọi feature tham gia; phải bằng 0. Lớp che của `feature-scene-flow` không tính.\n- Còn sót: ghi lỗi nêu tên feature và số còn lại.\n- Cho feature khác đọc số đếm bất kì lúc nào trong scene để tự kiểm.\n- Ngay sau bước chạy: đọc số view của mọi feature tham gia tạo view ở bước chạy; số nào bằng 0 thì ghi lỗi nêu tên feature đó.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| View còn lại sau bước huỷ | 0 | view | `nothing-survives` của node cha |\n| Việc đang chạy còn lại sau bước huỷ | 0 | việc | `nothing-survives` của node cha |\n| Hình không tính | lớp che của `feature-scene-flow` | | Chỉ sống trong lúc chuyển |\n| Bộ đếm có ở bản phát hành | không | | Chỉ để kiểm ở bản dev |\n| Số view tối thiểu ngay sau bước chạy, mỗi feature tạo view ở bước chạy | 1 | view | `running-views-nonzero`: báo 0 là quên báo view |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Kiểm sau bước huỷ | Không bắt buộc (chỉ một lần chuyển, Loading → Game) | Đếm view và việc đang chạy | Như PROTOTYPE |\n| Bộ đếm theo feature tham gia | Đếm view (cần cho kiểm sau bước chạy) | Đếm view và việc đang chạy | Như PROTOTYPE |\n| Kiểm view lớn hơn 0 sau bước chạy | Có | Có | Có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "_Services/SessionScene",
-   "at": "2026-11-25 13:38:04"
+   "at": "2026-11-25 18:51:20"
   }
  },
  "log": [
@@ -197,6 +211,69 @@
    "state": "doing",
    "by": "_Services/SessionScene",
    "note": "Logic đã đếm sau bước huỷ qua IParticipantUsage, có test EveryParticipantReached_IsCountedOnlyAfterEveryoneDisposed. Chờ bộ đếm thật trong Core mà CodeLead đã đồng ý, viết khi có Editor"
+  },
+  {
+   "at": "2026-11-25 18:35:29",
+   "id": "count-per-participant",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.Counter_ReadsTheViewsAndJobsAParticipantHolds_AtAnyMoment, SessionSceneLogicTests.Counter_ADestroyedViewIsNoLongerCounted, SessionSceneLogicTests.Counter_AParticipantThatCannotBeCounted_HoldsNothing"
+  },
+  {
+   "at": "2026-11-25 18:35:31",
+   "id": "after-dispose-zero",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.WithTheRealCounter_AParticipantThatLetsGoOnDispose_LeavesNothing_AndNothingIsReported, SessionSceneLogicTests.WithTheRealCounter_AParticipantThatKeepsAViewAndAJob_IsReportedAfterTheDisposeStep, SessionSceneLogicTests.EveryParticipantReached_IsCountedOnlyAfterEveryoneDisposed"
+  },
+  {
+   "at": "2026-11-25 18:35:32",
+   "id": "edge-lop-che-cua-chuyen-scene-con-hien-luc",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.TheSceneTransitionCover_StillShowingWhenCounted_IsNotReported"
+  },
+  {
+   "at": "2026-11-25 18:35:34",
+   "id": "params",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.InstallerAsset_InTheEditor_CountsWhatParticipantsHoldAfterTheDisposeStep, SessionSceneLogicTests.ASingleViewOrASingleJobLeft_IsEnoughToBeReported, SessionSceneLogicTests.AfterTheDisposeStep_ParticipantsThatHoldNothing_AreNotReported"
+  },
+  {
+   "at": "2026-11-25 18:36:51",
+   "id": "after-dispose-zero",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:36:51",
+   "id": "count-per-participant",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:36:51",
+   "id": "edge-lop-che-cua-chuyen-scene-con-hien-luc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:36:51",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:51:20",
+   "id": "params",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "Bản mới thêm số view tối thiểu 1 sau bước chạy và đếm view từ IDEA. Test cũ chỉ phủ ngưỡng 0 sau bước huỷ và bộ đếm bản dev, chưa phủ dòng mới. Làm cùng running-views-nonzero ở đợt TrackView sau"
   }
  ]
 }

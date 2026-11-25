@@ -41,7 +41,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Kĩ năng góc dưới bên phải, thanh nâng cấp phía trái.** Trả lời "Chưa rõ" của node cha. Phần đông người chơi thuận tay phải; kĩ năng là thao tác cần canh đúng lúc nên giao cho ngón cái phải. Đã loại: kĩ năng bên trái.
 - **Nút tạm dừng góc trên bên trái.** Chéo hẳn với cụm kĩ năng, khác mép với thanh nâng cấp.
 - **Kích thước chỉ ước lượng, nằm trong frame `main.frame` (2026-11-23, luật frame mới).** Trên 1920x1080: dải trên cao 140 px, dải dưới cao 180 px, dải chiến trường ở giữa (y 140–900) không HUD nào chạm. Cạnh nút chạm tối thiểu 120 px (trên ngưỡng 96 px), lề trái phải 40 px, nút kĩ năng 140 px, nút nâng cấp 200x140 px. Các số này đặt bằng `let` ở đây để các node HUD và popup khác `use`, không chép lại. Kích thước cuối cùng vẫn do chuyên gia giao diện chỉnh. Đã loại: mỗi node tự đặt cỡ nút (dễ lệch).
-- **Thông báo "Đợt N" nằm trong dải trên, dưới thanh máu** (y 76–132), vì dải trên 140 px đủ chỗ cho cả hai mà không lấn chiến trường.
+- **Thông báo "Đợt N" nằm trong dải trên, dưới thanh máu** (y 78–134, cách thanh máu 8 px theo thang của @UIDesigner, 2026-11-25), vì dải trên 140 px đủ chỗ cho cả hai mà không lấn chiến trường.
+- **`ui.md` (2026-11-25, quy trình mới):** liệt kê mọi phần HUD trận, trùng id hình trong `main.frame`. Mức chính: máu, tiền, cụm kĩ năng, chỗ thanh nâng cấp (phải thấy và dùng ngay); phụ: đợt, thông báo đợt, nút tạm dừng (nút này chỉ có ở FULL). Tương tác của từng phần thuộc node sở hữu nó; node này chỉ chia chỗ.
 
 ## Chưa rõ
 - `feature-hud-upgrade` cần đồng ý dùng phần mép dưới bên trái, chừa góc dưới phải cho cụm kĩ năng.

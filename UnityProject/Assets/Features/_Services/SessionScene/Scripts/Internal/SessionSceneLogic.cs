@@ -53,6 +53,9 @@ namespace Game.Services.SessionScene
 
         public int ParticipantCount => participants.Count;
 
+        /// <summary>True when what participants hold is counted after the dispose step (dev builds only).</summary>
+        internal bool CountsWhatParticipantsHold => usage != null;
+
         public int LoadedCount { get; private set; }
 
         public string FailedParticipant { get; private set; }

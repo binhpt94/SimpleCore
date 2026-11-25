@@ -1,7 +1,7 @@
 {
  "items": {
   "power-formula": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: công thức S",
    "tests": [
     "BalanceHeroCompareTests.PowerIsRootOfEffectiveHpTimesEffectiveDps"
@@ -10,11 +10,11 @@
    "hash": "a4a99bb961a3",
    "text": "Sức tổng S = căn bậc hai của (máu hiệu dụng × sát thương mỗi giây hiệu dụng); đòn vùng tính trúng 2 con, hero tầm từ 5u tính máu ×2\nHero bắn xa ít bị đánh nên máu hiệu dụng gấp đôi. Đây là số so sánh, không phải số trong cấu hình.",
    "title": "Sức tổng S = căn bậc hai của (máu hiệu dụng × sát thương mỗi giây hiệu dụng); đòn vùng tính trúng 2 con, hero tầm từ 5u tính máu ×2",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:22"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "power-close": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: S trong 10 phần trăm quanh trung bình",
    "tests": [
     "BalanceHeroCompareTests.AllHeroPowersAreWithinTenPercentOfTheAverage"
@@ -23,11 +23,11 @@
    "hash": "0358ce228dca",
    "text": "Sức tổng lv1 của 5 hero nằm trong khoảng ±10% quanh trung bình 65 (thấp nhất Hiệp sĩ 60, cao nhất Đấu sĩ rìu 69)\nKiếm khách 64, Cung thủ 65, Pháp sư 67.",
    "title": "Sức tổng lv1 của 5 hero nằm trong khoảng ±10% quanh trung bình 65 (thấp nhất Hiệp sĩ 60, cao nhất Đấu sĩ rìu 69)",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:23"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "stat-tradeoff": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: chỉ số mạnh và yếu",
    "tests": [
     "BalanceHeroCompareTests.EveryHeroHasAStrongStatAndAWeakStat"
@@ -36,11 +36,11 @@
    "hash": "5568f8d206cb",
    "text": "Mỗi hero có ít nhất 1 chỉ số cao nhất hoặc nhì và 1 chỉ số thấp nhất hoặc nhì trong 5 hero\nVí dụ Hiệp sĩ máu cao nhất (300) mà sát thương mỗi đòn thấp nhất (12); Pháp sư nổ vùng mà máu thấp nhất (100).",
    "title": "Mỗi hero có ít nhất 1 chỉ số cao nhất hoặc nhì và 1 chỉ số thấp nhất hoặc nhì trong 5 hero",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:25"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "counter-table": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: bảng hợp khó",
    "tests": [
     "BalanceHeroCompareTests.EveryHeroHasAnEnemyItFitsAndAnEnemyItStruggles"
@@ -49,11 +49,11 @@
    "hash": "d28aa2bd503d",
    "text": "Mỗi hero có ít nhất 1 loại quái nó hợp và 1 loại nó khó, theo bảng hợp khó\nVí dụ Cung thủ hợp Cung thủ quái (tầm 7u lớn hơn 5u của quái) và khó với Sói (đi 3.0 u/s, tới sát nhanh).",
    "title": "Mỗi hero có ít nhất 1 loại quái nó hợp và 1 loại nó khó, theo bảng hợp khó",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:26"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "equal-growth": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: tăng cùng tỉ lệ",
    "tests": [
     "BalanceHeroCompareTests.EveryHeroGrowsByTheSameRatioForTheSamePrice"
@@ -62,11 +62,11 @@
    "hash": "9c15f1277af0",
    "text": "Mỗi hero nhận cùng mức tăng +15% máu và sát thương lv1 mỗi cấp với cùng giá, nên sức tổng tăng cùng tỉ lệ\nKhông hero nào là chỗ đổ tiền rẻ nhất.",
    "title": "Mỗi hero nhận cùng mức tăng +15% máu và sát thương lv1 mỗi cấp với cùng giá, nên sức tổng tăng cùng tỉ lệ",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:27"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "mono-team-ok": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: đội cận chiến 55 so với 52",
    "tests": [
     "BalanceHeroCompareTests.MeleeOnlyTeamDealsAboutAsMuchAsTheMixedTeam"
@@ -75,11 +75,11 @@
    "hash": "785a46246cf5",
    "text": "Đội toàn cận chiến (Hiệp sĩ, Đấu sĩ rìu, Kiếm khách) có sát thương mỗi giây lv1 55, gần đội trộn 52, nên vẫn qua các đợt đầu\nGặp khó từ đợt 7 khi Cung thủ quái mở, vì phải đuổi quái bắn xa.",
    "title": "Đội toàn cận chiến (Hiệp sĩ, Đấu sĩ rìu, Kiếm khách) có sát thương mỗi giây lv1 55, gần đội trộn 52, nên vẫn qua các đợt đầu",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:29"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "edge-don-vung-trung-1-con": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: đòn vùng trúng 1 con",
    "tests": [
     "BalanceHeroCompareTests.AreaHeroesAreWeakerWhenTheirBlowHitsOnlyOneEnemy"
@@ -88,11 +88,11 @@
    "hash": "24e918b4ea2f",
    "text": "**Đòn vùng trúng 1 con** (quái thưa ở đợt đầu): Đấu sĩ rìu và Pháp sư yếu hơn bảng; chấp nhận vì đợt đầu dễ.",
    "title": "Đòn vùng trúng 1 con",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:30"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "edge-don-vung-trung-hon-2-con": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: đòn vùng trúng nhiều con",
    "tests": [
     "BalanceHeroCompareTests.AreaHeroesShineWhenTheirBlowHitsMoreThanTwoEnemies"
@@ -101,11 +101,11 @@
    "hash": "1ddc58e9a47d",
    "text": "**Đòn vùng trúng hơn 2 con** (quái dồn ở đợt sau): Đấu sĩ rìu và Pháp sư mạnh hơn bảng; đây là chỗ hai hero này tỏa sáng, đúng ý `team-counter`.",
    "title": "Đòn vùng trúng hơn 2 con",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:31"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "edge-hero-ban-xa-bi-soi-toi-sat": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: bắn xa bị Sói tới sát",
    "tests": [
     "BalanceHeroCompareTests.RangedHeroLosesItsHpBonusWhenAWolfReachesIt"
@@ -114,11 +114,11 @@
    "hash": "1a9686689d89",
    "text": "**Hero bắn xa bị Sói tới sát:** máu hiệu dụng ×2 không còn đúng; bảng hợp khó đã ghi Sói là loại khó của Cung thủ.",
    "title": "Hero bắn xa bị Sói tới sát",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:33"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "edge-cap-21-tro-len": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: cấp 21 trở lên",
    "tests": [
     "BalanceHeroCompareTests.AboveLevelTwentyAttackSpeedStopsButHeroesStayEven"
@@ -127,11 +127,11 @@
    "hash": "a0d0e42dd7c7",
    "text": "**Cấp 21 trở lên:** tốc độ đánh chạm +60%, chỉ máu và sát thương còn tăng; mọi hero chạm cùng lúc nên vẫn cân.",
    "title": "Cấp 21 trở lên",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:34"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "BalanceHeroCompareTests: bảng kết quả và đội",
    "tests": [
     "BalanceHeroCompareTests.AllHeroPowersAreWithinTenPercentOfTheAverage",
@@ -141,8 +141,8 @@
    "hash": "c8a3f48d78a5",
    "text": "## Làm gì\n- Tính sức tổng S của mỗi hero mỗi khi đổi chỉ số hero ở `feature-hero`; giữ mọi hero trong ±10% quanh trung bình.\n- Giữ bảng hợp khó; mỗi khi thêm hay đổi loại quái (`feature-enemy`) thì rà lại để mỗi hero vẫn có ít nhất một loại hợp, một loại khó.\n- Số chuẩn lấy ở `feature-balance/balance-config/number-table`.\n\n## Thông số\n### Công thức (dự kiến)\n- Sát thương mỗi giây = sát thương ÷ giây mỗi đòn.\n- Sát thương mỗi giây hiệu dụng = sát thương mỗi giây × 2 nếu đòn vùng, × 1 nếu một mục tiêu.\n- Máu hiệu dụng = máu × 2 nếu tầm ≥ 5u, × 1 nếu cận chiến.\n- S = √(máu hiệu dụng × sát thương mỗi giây hiệu dụng).\n\n### Kết quả lv1 (dự kiến)\n| Hero | Máu | Máu hiệu dụng | Sát thương/giây | Hiệu dụng | S | So trung bình 65 |\n|---|---|---|---|---|---|---|\n| Hiệp sĩ | 300 | 300 | 12.0 | 12.0 | 60.0 | −8% |\n| Đấu sĩ rìu | 240 | 240 | 10.0 | 20.0 | 69.3 | +6% |\n| Kiếm khách | 180 | 180 | 22.9 | 22.9 | 64.1 | −1% |\n| Cung thủ | 120 | 240 | 17.5 | 17.5 | 64.8 | 0% |\n| Pháp sư | 100 | 200 | 11.25 | 22.5 | 67.1 | +3% |\n\n### Mạnh và yếu (so trong 5 hero)\n| Hero | Mạnh | Yếu |\n|---|---|---|\n| Hiệp sĩ | máu cao nhất (300) | sát thương mỗi đòn thấp nhất (12), tầm ngắn nhất (1.2u, bằng Kiếm khách), đi chậm nhất (2.0 u/s) |\n| Đấu sĩ rìu | đòn vùng cận chiến, máu cao nhì (240) | đánh chậm nhì (1.4 s), sát thương mỗi mục tiêu thấp nhất (10) |\n| Kiếm khách | sát thương mỗi giây cao nhất (22.9), đi nhanh nhất (3.5 u/s) | máu thấp nhất trong cận chiến (180) |\n| Cung thủ | tầm xa nhất (7u) | máu thấp nhì (120), một mục tiêu |\n| Pháp sư | nổ vùng bán kính 1.5u, tầm 6u | máu thấp nhất (100), đánh chậm nhất (1.6 s) |\n\n### Bảng hợp khó với loại quái (dự kiến, ở cùng cấp)\n| Hero | Hợp | Lí do | Khó | Lí do |\n|---|---|---|---|---|\n| Hiệp sĩ | Khổng lồ, Trùm | chịu được: Khổng lồ 10 sát thương/giây cần 30 s để hạ Hiệp sĩ | Cung thủ quái | tầm 1.2u, phải đi tới quái đứng cách 5u |\n| Đấu sĩ rìu | Lính, Sói theo đám | chém vùng 1.5u trúng nhiều con | Cung thủ quái, Trùm | đánh chậm, sát thương một con thấp |\n| Kiếm khách | Cung thủ quái, Khổng lồ | đi 3.5 u/s đuổi kịp; hạ Khổng lồ 150 máu trong khoảng 6.3 s | đám Sói, Lính đông | một mục tiêu, 180 máu bị vây |\n| Cung thủ | Cung thủ quái, Trùm | tầm 7u bắn trước tầm 5u của quái; 17.5 sát thương/giây vào một con | Sói | đi 3.0 u/s, tới sát nhanh, Cung thủ chỉ 120 máu |\n| Pháp sư | đám Lính, Sói | nổ 1.5u trúng nhiều con, 18 sát thương hạ Sói 20 máu trong 2 đòn | Khổng lồ, Trùm | 11.25 sát thương/giây vào một con, cần khoảng 12.8 s cho một Khổng lồ |\n\n### Tăng theo cấp\nMọi hero: cấp L nhân máu và sát thương với (1 + 0.15×(L−1)), tốc độ đánh với (1 + min(0.03×(L−1), 0.6)). S tăng cùng tỉ lệ cho mọi hero: S(L) = S(1) × √((1 + 0.15×(L−1)) × m(L)), với m(L) như ở `feature-balance/balance-difficulty-curve/break-forecast`. Cấp 5: √(1.6 × 1.792) = ×1.69; cấp 9: √(2.2 × 2.728) = ×2.45.\n\n### Đội và sát thương mỗi giây hiệu dụng lv1 (dự kiến)\n| Đội | Tổng | Ghi chú |\n|---|---|---|\n| Hiệp sĩ + Cung thủ + Pháp sư | 52.0 | đội mẫu của dự đoán đợt gãy |\n| Kiếm khách + Cung thủ + Pháp sư | 62.9 | đánh mạnh, ít người chắn |\n| Hiệp sĩ + Đấu sĩ rìu + Kiếm khách | 54.9 | đội lệch toàn cận chiến |\n| Hiệp sĩ + Đấu sĩ rìu + Pháp sư | 54.5 | mạnh với đám đông, yếu với Trùm |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số hero cân | 5 | 5 | 5 |\n| Ngưỡng lệch S quanh trung bình | không kiểm | ±10% | ±10%, kiểm lại bằng chơi thử nhiều đội |\n| Bảng hợp khó | không kiểm | rà theo bảng | rà theo bảng và đợt gãy thật của từng đội |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Balance",
-   "at": "2026-11-25 13:44:35"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:06"
   }
  },
  "log": [
@@ -299,6 +299,83 @@
    "state": "done",
    "by": "Balance",
    "note": "BalanceHeroCompareTests.AllHeroPowersAreWithinTenPercentOfTheAverage, BalanceHeroCompareTests.MeleeOnlyTeamDealsAboutAsMuchAsTheMixedTeam"
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "power-formula",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "power-close",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "stat-tradeoff",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "counter-table",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "equal-growth",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "mono-team-ok",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "edge-don-vung-trung-1-con",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "edge-don-vung-trung-hon-2-con",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "edge-hero-ban-xa-bi-soi-toi-sat",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "edge-cap-21-tro-len",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:06",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

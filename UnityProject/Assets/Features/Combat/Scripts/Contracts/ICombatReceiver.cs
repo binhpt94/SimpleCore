@@ -1,10 +1,10 @@
 namespace Game.Combat
 {
     /// <summary>
-    /// The owner of sides that can be hit (heroes, enemies, the castle). Combat never keeps health: it asks the
-    /// owner who can still be hit, hands it one total per side, then lets it report the sides that fell.
+    /// The owner of sides that can be hit. Combat never keeps health: it asks the owner who can still be hit,
+    /// hands it one total per side, then lets it report the sides that fell.
     /// </summary>
-    internal interface ICombatReceiver
+    public interface ICombatReceiver
     {
         /// <summary>
         /// False when the side named <paramref name="key"/> no longer takes hits (fallen, appearing on revive,

@@ -1,0 +1,23 @@
+L1 PopupLose actions-spec#edge-tat-game-khi-popup-dang-mo, P1 Popup stack-rules#edge-nguoi-choi-roi-game-luc-co-popup (bằng popup thua thật, không dùng SamplePopup), R2 Run replay-checks#edge-tat-game-giua-tran
+Play lần 3 (18:53:35). Mỗi dòng: khung, thời gian thật, bước Run, đợt, đang thở, quái sống, quái chờ, tiền, máu thành, điểm, kỉ lục trong RunScore | sự kiện.
+prefsBest là PlayerPrefs.GetInt("Run/Best") đọc ngay lúc đó.
+
+L1. Kỉ lục cũ 8. Chơi tới khi điểm 9 (dọn xong đợt 9), rồi ép thành 1 máu (CastleBody.ForceHealth, cùng đường với ICastleCheat.SetHealth) để quái phá thành ở đợt 10.
+f12714 t=272.31 step=Playing w=10 brk=True alive=0 wait=0 coins=126 hp=427.2/1750 score=9 best=8 | L1 force castle to 1 hp
+f13250 t=281.89 step=Ending w=10 alive=10 coins=135 hp=0/1750 score=9 best=9 | STEP Playing->Ending prefsBest=9
+f13310 t=282.99 step=Lost w=10 alive=10 coins=135 hp=0/1750 score=9 best=9 | STEP Ending->Lost prefsBest=9   (popup hiện sau 1.1 giây)
+- Kỉ lục 9 đã nằm trong PlayerPrefs ngay ở bước Ending, trước khi popup hiện (bước Lost).
+- Popup: "Thành đã bị phá", "Trụ được 9 đợt", "Kỉ lục: 9 đợt", "Kỉ lục mới!" (ảnh 06).
+- Dừng Play lúc popup đang mở (18:58:5x). Ngoài Play đọc PlayerPrefs Run/Best = 9.
+- Play lại (18:59:14): f416 step=Playing w=1 coins=65 hp=1000/1000 score=0 best=9 prefsBest=9. Kỉ lục mới vẫn còn. Đạt.
+
+P1. Popup thua đang mở. execute_code gửi OnApplicationFocus(false), OnApplicationPause(true) tới 36 GameObject; 6 giây sau gửi chiều ngược lại.
+Trước:     PopupBackdrop(Clone) alpha=0.60 raycast=True sibling=0; LoseMain(Clone) sibling=1; btn Replay interactable=True; btn Home interactable=True
+Lúc rời:   y như trước
+Sau khi về: y như trước; bước Run vẫn Lost, không mở thêm popup tạm dừng (Pause tắt ở IDEA). Ảnh 07.
+Bấm "Chơi lại" sau lần rời app thứ hai (lượt sau): xem 10-r1-r4-p1-replay-log.txt.
+
+R2. Lượt mới sau L1. Dừng Play giữa trận ở f1088 (18:59:26): step=Playing w=2 alive=2 wait=8 coins=115 hp=1000/1000 score=1 best=9 prefsBest=9.
+Ngoài Play: prefsBest=9. Play lại (18:59:43): f7 step=Playing w=1 coins=50 hp=1000/1000 score=0 best=9 prefsBest=9.
+- Chỉ kỉ lục đã lưu trước đó (9) còn; lượt dở (điểm 1, tiền 115, đợt 2) không lưu gì. Đạt.
+- Giới hạn: điểm lượt dở (1) thấp hơn kỉ lục, nên không thấy trường hợp lượt dở có điểm cao hơn kỉ lục. Theo score-rules, kỉ lục chỉ chốt khi lượt kết thúc.

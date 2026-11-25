@@ -1,7 +1,7 @@
 {
  "items": {
   "pause-tap-report": {
-   "state": "done",
+   "state": "verified",
    "note": "HudPausePresenter: chạm khi Playing gọi IRunFlow.Pause một lần",
    "tests": [
     "HudPauseButtonTests.TapDuringTheBattleReportsPauseToTheRunOnce",
@@ -11,11 +11,11 @@
    "hash": "2ef28236670f",
    "text": "Trận đang đánh: chạm 1 lần là báo \"đã bấm tạm dừng\" cho `feature-run/run-pause` đúng một lần\nNút không tự dừng trận hay mở popup.",
    "title": "Trận đang đánh: chạm 1 lần là báo \"đã bấm tạm dừng\" cho `feature-run/run-pause` đúng một lần",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:53"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   },
   "pause-icon": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudLayoutTests.PauseButtonIsOnePressableButtonWithTwoVerticalBarsAndNoText"
@@ -24,11 +24,11 @@
    "hash": "118a66302bdb",
    "text": "Có đúng 1 nút, biểu tượng hai vạch đứng, đại diện cho \"tạm dừng trận\"; không có chữ",
    "title": "Có đúng 1 nút, biểu tượng hai vạch đứng, đại diện cho \"tạm dừng trận\"; không có chữ",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:52"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   },
   "pause-inactive": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudPauseButtonTests.TapWhilePausedReportsNothing",
@@ -38,11 +38,11 @@
    "hash": "0e8f644c1e7e",
    "text": "Trận đang tạm dừng hoặc lượt đã kết thúc: chạm nút không báo gì\nLúc tạm dừng popup che nút; lúc kết thúc nút vẫn hiện nhưng vô tác dụng.",
    "title": "Trận đang tạm dừng hoặc lượt đã kết thúc: chạm nút không báo gì",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:54"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   },
   "pause-shown-all-battle": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudSessionTests.PauseButtonWorksFromBattleStartUntilTheBattleIsRemoved",
@@ -52,11 +52,11 @@
    "hash": "459aafdbedb0",
    "text": "Nút hiện suốt trận, từ lúc trận dựng xong tới lúc trận bị huỷ",
    "title": "Nút hiện suốt trận, từ lúc trận dựng xong tới lúc trận bị huỷ",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:55"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   },
   "edge-cham-hai-lan-rat-nhanh": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudPauseButtonTests.TwoQuickTapsReportPauseOnlyOnce"
@@ -65,11 +65,11 @@
    "hash": "c980b687c646",
    "text": "**Chạm hai lần rất nhanh:** lần đầu báo tạm dừng; lần sau rơi vào nền che popup hoặc bị bỏ qua vì trận đã tạm dừng.",
    "title": "Chạm hai lần rất nhanh",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:56"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   },
   "edge-cham-trong-1-giay-cho-truoc-popup-thua": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudPauseButtonTests.TapInTheOneSecondWaitBeforeTheLosePopupReportsNothing"
@@ -78,11 +78,11 @@
    "hash": "2a0c57189ef4",
    "text": "**Chạm trong 1 giây chờ trước popup thua:** lượt đã kết thúc, không báo.",
    "title": "Chạm trong 1 giây chờ trước popup thua",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:58"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   },
   "edge-cham-cung-khung-hinh-thanh-bi-pha": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HudPauseButtonTests.TapInTheFrameTheCastleFallsIsDropped"
@@ -91,23 +91,24 @@
    "hash": "11ac02540133",
    "text": "**Chạm cùng khung hình thành bị phá:** thành bị phá xử lí trước; chạm bị bỏ qua.",
    "title": "Chạm cùng khung hình thành bị phá",
-   "by": "Hud",
-   "at": "2026-11-25 13:39:59"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:10"
   },
   "params": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Cờ showPauseButton trong HudConfig, IDEA tắt: không có nút, không nhận chạm",
    "tests": [
+    "HudSessionTests.AtIdeaTheHudHasNoPauseButtonAndAPauseTapDoesNothing",
+    "HudSessionTests.WithThePauseButtonOnItIsShownAndReportsPause",
     "HudLayoutTests.PauseButtonIsOnePressableButtonWithTwoVerticalBarsAndNoText",
-    "HudPauseButtonTests.TwoQuickTapsReportPauseOnlyOnce",
-    "HudLayoutTests.PauseButtonSitsInTheTopLeftCornerOnTheOtherEdgeFromTheSkills"
+    "HudPauseButtonTests.TwoQuickTapsReportPauseOnlyOnce"
    ],
    "play": "",
    "hash": "0f80b57179e5",
    "text": "## Làm gì\n- Hiện một nút biểu tượng hai vạch đứng suốt trận, ở chỗ ghi trong `feature-hud/hud-layout/layout-spec`.\n- Chạm khi trận đang đánh: báo `feature-run/run-pause` một lần.\n- Biết trạng thái trận (đang đánh, tạm dừng, đã kết thúc) từ `feature-run` để bỏ qua chạm khi không đang đánh.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số nút | 1 | nút | `pause-button-one` |\n| Biểu tượng | hai vạch đứng | | Người chơi điện thoại đã quen |\n| Số lần báo mỗi lần chạm | 1 | lần | |\n| Khoảng cách tới nút kĩ năng và thanh nâng cấp | khác mép (nút ở mép trên, hai thứ kia ở mép dưới) | | `pause-button-apart` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Có nút tạm dừng | Không | Không bắt buộc | Có |\n| Biểu tượng | | Chữ hoặc hai vạch | Sprite hai vạch hoàn thiện |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Hud",
-   "at": "2026-11-25 13:40:00"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:46:03"
   }
  },
  "log": [
@@ -173,6 +174,83 @@
    "state": "done",
    "by": "Hud",
    "note": "HudLayoutTests.PauseButtonIsOnePressableButtonWithTwoVerticalBarsAndNoText, HudPauseButtonTests.TwoQuickTapsReportPauseOnlyOnce, HudLayoutTests.PauseButtonSitsInTheTopLeftCornerOnTheOtherEdgeFromTheSkills"
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "pause-icon",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "pause-tap-report",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "pause-inactive",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "pause-shown-all-battle",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "edge-cham-hai-lan-rat-nhanh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "edge-cham-trong-1-giay-cho-truoc-popup-thua",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "edge-cham-cung-khung-hinh-thanh-bi-pha",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:10",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:42:12",
+   "id": "params",
+   "state": "doing",
+   "by": "Hud",
+   "note": "Cờ showPauseButton trong HudConfig, IDEA tắt: không có nút, không nhận chạm"
+  },
+  {
+   "at": "2026-11-25 18:43:18",
+   "id": "params",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSessionTests.AtIdeaTheHudHasNoPauseButtonAndAPauseTapDoesNothing, HudSessionTests.WithThePauseButtonOnItIsShownAndReportsPause, HudLayoutTests.PauseButtonIsOnePressableButtonWithTwoVerticalBarsAndNoText, HudPauseButtonTests.TwoQuickTapsReportPauseOnlyOnce"
+  },
+  {
+   "at": "2026-11-25 18:46:03",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

@@ -1,7 +1,7 @@
 {
  "items": {
   "title-text": {
-   "state": "done",
+   "state": "verified",
    "note": "RevivePopupTexts + presenter điền tiêu đề",
    "tests": [
     "RevivePopupTests.TitleSaysCastleWasDestroyed"
@@ -10,11 +10,11 @@
    "hash": "455333fb241a",
    "text": "Tiêu đề là \"Thành đã bị phá\"\nGiống tiêu đề popup thua: người chơi biết ngay chuyện gì vừa xảy ra.",
    "title": "Tiêu đề là \"Thành đã bị phá\"",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:42:49"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   },
   "gain-text": {
-   "state": "done",
+   "state": "verified",
    "note": "RevivePopupTexts + presenter điền dòng hồi sinh",
    "tests": [
     "RevivePopupTests.GainLineSaysCastleGetsThirtyPercentAndPlayContinues"
@@ -23,11 +23,11 @@
    "hash": "ee510edeab7d",
    "text": "Dòng hồi sinh ghi \"Xem quảng cáo để thành hồi 30% máu và chơi tiếp\"\nSố 30% lấy từ nhánh thân thành; đổi số ở đó thì sửa chữ ở đây.",
    "title": "Dòng hồi sinh ghi \"Xem quảng cáo để thành hồi 30% máu và chơi tiếp\"",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:42:50"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   },
   "wait-state": {
-   "state": "done",
+   "state": "verified",
    "note": "presenter sang trạng thái chờ, view khoá và làm mờ nút",
    "tests": [
     "RevivePopupTests.PopupOpensWaitingForChoiceWithWaitLineHidden",
@@ -39,11 +39,11 @@
    "hash": "01762b318848",
    "text": "Chờ quảng cáo: hiện dòng \"Đang chờ quảng cáo...\" ở y=340 trong khung, hai nút mờ và không nhận chạm\nHết chờ (có kết quả) thì popup đóng ngay, không quay về trạng thái chờ chọn.",
    "title": "Chờ quảng cáo: hiện dòng \"Đang chờ quảng cáo...\" ở y=340 trong khung, hai nút mờ và không nhận chạm",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:42:52"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   },
   "one-tap-each": {
-   "state": "done",
+   "state": "verified",
    "note": "presenter chỉ nhận chạm đầu mỗi lần mở",
    "tests": [
     "RevivePopupTests.TapsWhileWaitingForAdDoNothing",
@@ -54,11 +54,11 @@
    "hash": "1be99b7e5dbb",
    "text": "Mỗi lần popup mở, chỉ lần chạm nút đầu tiên có tác dụng\nChạm \"Xem quảng cáo\" sang trạng thái chờ; chạm \"Kết thúc lượt\" đóng popup.",
    "title": "Mỗi lần popup mở, chỉ lần chạm nút đầu tiên có tác dụng",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:42:53"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   },
   "popup-id": {
-   "state": "done",
+   "state": "verified",
    "note": "PopupReviveIds.Main, mở qua IPopupService theo RunStep.ReviveOffer",
    "tests": [
     "RevivePopupTests.PopupIdIsPopupReviveMain",
@@ -68,11 +68,11 @@
    "hash": "bb5977f9855e",
    "text": "Id popup là `PopupRevive/Main`, hiện qua dịch vụ popup",
    "title": "Id popup là `PopupRevive/Main`, hiện qua dịch vụ popup",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:42:54"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   },
   "edge-cham-hai-nut-gan-nhu-cung-luc": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RevivePopupTests.EndTapThenWatchTapInSameMomentOnlyEndsRun",
@@ -82,11 +82,11 @@
    "hash": "a6b7df9fec68",
    "text": "**Chạm hai nút gần như cùng lúc:** chạm được xử lí trước tính.",
    "title": "Chạm hai nút gần như cùng lúc",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:42:55"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   },
   "edge-roi-game-khi-dang-cho-quang-cao": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RevivePopupTests.PopupKeepsWaitingForAdUntilResultArrivesHoweverLong"
@@ -95,11 +95,11 @@
    "hash": "9e47f63ef149",
    "text": "**Rời game khi đang chờ quảng cáo:** quảng cáo là ứng dụng ngoài; quay lại thì popup vẫn ở trạng thái chờ tới khi có kết quả.",
    "title": "Rời game khi đang chờ quảng cáo",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:42:57"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   },
   "edge-roi-game-khi-dang-cho-chon": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RevivePopupTests.PopupStaysAsItWasWhileWaitingForChoice"
@@ -108,11 +108,11 @@
    "hash": "dc061a7a7461",
    "text": "**Rời game khi đang chờ chọn:** quay lại popup y như cũ; không mở popup tạm dừng.",
    "title": "Rời game khi đang chờ chọn",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:42:58"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   },
   "edge-ket-qua-toi-khi-popup-da-dong-khong": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RevivePopupTests.ResultWithAnOldOfferIdIsIgnored",
@@ -122,19 +122,24 @@
    "hash": "3c31e08c2c05",
    "text": "**Kết quả tới khi popup đã đóng (không xảy ra vì nút khoá):** bỏ qua theo mã đề nghị.",
    "title": "Kết quả tới khi popup đã đóng (không xảy ra vì nút khoá)",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:42:59"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   },
   "watch-button": {
-   "state": "doing",
+   "state": "verified",
    "note": "test PopupReviveAssetTests đã viết, chờ lượt Editor để dựng PopupReviveMain.prefab",
-   "tests": [],
+   "tests": [
+    "PopupReviveAssetTests.WatchButtonIs400WideAtX50Y540",
+    "PopupReviveAssetTests.EndButtonIs260WideAtX490Y540",
+    "PopupReviveAssetTests.TitleGainAndWaitLinesSitAtTheirRows",
+    "PopupReviveAssetTests.PanelIs800By700"
+   ],
    "play": "",
    "hash": "ff04831806cd",
    "text": "Nút chính \"Xem quảng cáo\" rộng 400 px; nút \"Kết thúc lượt\" rộng 260 px; cùng hàng y=540 trong khung\nCùng chỗ với hai nút của popup thua nên tay người chơi quen vị trí.",
    "title": "Nút chính \"Xem quảng cáo\" rộng 400 px; nút \"Kết thúc lượt\" rộng 260 px; cùng hàng y=540 trong khung",
-   "by": "PopupRevive",
-   "at": "2026-11-25 13:59:14"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:31:09"
   }
  },
  "log": [
@@ -242,6 +247,83 @@
    "state": "doing",
    "by": "PopupRevive",
    "note": "test PopupReviveAssetTests đã viết, chờ lượt Editor để dựng PopupReviveMain.prefab"
+  },
+  {
+   "at": "2026-11-25 18:28:53",
+   "id": "watch-button",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "PopupReviveAssetTests.WatchButtonIs400WideAtX50Y540, PopupReviveAssetTests.EndButtonIs260WideAtX490Y540, PopupReviveAssetTests.TitleGainAndWaitLinesSitAtTheirRows, PopupReviveAssetTests.PanelIs800By700"
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "title-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "gain-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "watch-button",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "wait-state",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "one-tap-each",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "popup-id",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "edge-cham-hai-nut-gan-nhu-cung-luc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "edge-roi-game-khi-dang-cho-quang-cao",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "edge-roi-game-khi-dang-cho-chon",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:31:09",
+   "id": "edge-ket-qua-toi-khi-popup-da-dong-khong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

@@ -78,7 +78,7 @@
    "at": "2026-11-25 11:47:35"
   },
   "edge-bo-luot-tu-popup-tam-dung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.GivingUpFromThePauseClearsTheStillBattleAndTheNextRunStartsClean"
@@ -87,11 +87,11 @@
    "hash": "cb18361d726d",
    "text": "**Bỏ lượt từ popup tạm dừng**: popup xác nhận và popup tạm dừng đều đóng trước khi về màn bắt đầu; trận đứng yên lúc tạm dừng vẫn phải được dọn khi lượt mới bắt đầu.",
    "title": "Bỏ lượt từ popup tạm dừng",
-   "by": "Run",
-   "at": "2026-11-25 13:43:11"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-luot-moi-bat-dau-ma-con-popup-mo": {
-   "state": "done",
+   "state": "verified",
    "note": "LeftoverPopupCheck xong, cho ref Popup.Contracts trong Tests asmdef de sua RunInstallerTests",
    "tests": [
     "RunLeftoverPopupTests.NewRunWithAPopupStillOpenLogsAnErrorNamingIt",
@@ -104,8 +104,8 @@
    "hash": "a1a3699f7792",
    "text": "**Lượt mới bắt đầu mà còn popup mở (lỗi)**: ghi lỗi nêu id popup; không tự đóng âm thầm.",
    "title": "Lượt mới bắt đầu mà còn popup mở (lỗi)",
-   "by": "Run",
-   "at": "2026-11-25 14:07:55"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   }
  },
  "log": [
@@ -220,6 +220,20 @@
    "state": "done",
    "by": "Run",
    "note": "RunLeftoverPopupTests.NewRunWithAPopupStillOpenLogsAnErrorNamingIt, RunLeftoverPopupTests.NewRunWithNoPopupOpenLogsNothing, RunLeftoverPopupTests.PopupClosedByThePressThatStartedTheRunIsNotAnError, RunLeftoverPopupTests.EveryNewRunIsChecked, RunInstallerTests.InstallWithoutPopupStackFailsNamingIt"
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-bo-luot-tu-popup-tam-dung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-luot-moi-bat-dau-ma-con-popup-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

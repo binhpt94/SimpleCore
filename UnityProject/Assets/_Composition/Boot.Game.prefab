@@ -58,7 +58,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: installers.Array.size
-      value: 17
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'catalogs.Array.data[0]'
@@ -127,11 +127,59 @@ PrefabInstance:
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[15]'
       value:
-      objectReference: {fileID: 11400000, guid: 61e8d4b2f0a94c37a5d9e2b7c4f1068d, type: 2}
+      objectReference: {fileID: 11400000, guid: 0b6051f441a4db31287295485ea5411c, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[16]'
       value:
+      objectReference: {fileID: 11400000, guid: 61e8d4b2f0a94c37a5d9e2b7c4f1068d, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'installers.Array.data[17]'
+      value:
+      objectReference: {fileID: 11400000, guid: 4815f009cfc28749489506dd1e13ffea, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'installers.Array.data[18]'
+      value:
+      objectReference: {fileID: 11400000, guid: 77b692e007ef4328c96d1c1d8d4db9c9, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'installers.Array.data[19]'
+      value:
       objectReference: {fileID: 11400000, guid: 5cef1000000000000000000000000009, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: fromPrototype.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: prototypeCatalogs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'prototypeCatalogs.Array.data[0]'
+      value:
+      objectReference: {fileID: 11400000, guid: 7a3c9e15b2d84f60a1e5c7d9b3f20864, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'fromPrototype.Array.data[0]'
+      value:
+      objectReference: {fileID: 11400000, guid: a7b44f8653e3d749eb418d02ddedc6dd, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'fromPrototype.Array.data[1]'
+      value:
+      objectReference: {fileID: 11400000, guid: 2d83099768f095edb9ef931107375c28, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'fromPrototype.Array.data[2]'
+      value:
+      objectReference: {fileID: 11400000, guid: 0b6051f441a4db31287295485ea5411c, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'fromPrototype.Array.data[3]'
+      value:
+      objectReference: {fileID: 11400000, guid: 61e8d4b2f0a94c37a5d9e2b7c4f1068d, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'fromPrototype.Array.data[4]'
+      value:
+      objectReference: {fileID: 11400000, guid: 4815f009cfc28749489506dd1e13ffea, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'fromPrototype.Array.data[5]'
+      value:
+      objectReference: {fileID: 11400000, guid: 77b692e007ef4328c96d1c1d8d4db9c9, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

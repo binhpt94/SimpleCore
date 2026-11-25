@@ -3,6 +3,7 @@
   "rootNamespace": "Game.Combat.Tests",
   "references": [
     "Game.Core",
+    "Game.Combat.Contracts",
     "Game.Combat.Internal",
     "Game.Run.Contracts",
     "UniTask",

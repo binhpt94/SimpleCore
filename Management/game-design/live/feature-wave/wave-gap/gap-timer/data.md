@@ -1,6 +1,6 @@
 ---
 based-on: d9d4c35f6907
-refs: feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/spawning/spawn-order@5884f63cfa93, feature-hud/hud-status/status-spec@dce5f10fbfa2
+refs: feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/spawning/spawn-order@5884f63cfa93, feature-hud/hud-status/status-spec@339ea3c8f938
 frame: none
 ---
 # Đồng hồ lúc thở

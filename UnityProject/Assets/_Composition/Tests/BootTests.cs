@@ -14,7 +14,7 @@ namespace Game.Composition.Tests
         private static readonly object[] Scenes =
         {
             new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 2 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 17 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 20 },
         };
 
         [Test]
@@ -58,8 +58,66 @@ namespace Game.Composition.Tests
             Assert.That(names, Is.EqualTo(new[] { SessionScene, "SceneFlowLoadingInstaller" }));
         }
 
+        // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 13 participants
+        // in this order: 12 features, then scene-flow last (a participant with no view). SessionScene installs first
+        // and runs the session; it is not a participant.
         [Test]
-        public void GameScene_AtIdea_JoinsItsFeaturesInTheDesignedOrder()
+        public void GameScene_AtIdea_HasThirteenParticipantsInTheDesignedOrder_SceneFlowLast()
+        {
+            var names = Load("Assets/_Composition/Boot.Game.prefab").InstallersAt(GameStage.Idea).Select(i => i.name).ToList();
+
+            Assert.That(names, Is.EqualTo(new[]
+            {
+                SessionScene,
+                "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
+                "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
+                "HudUpgradeInstaller", "PopupLoseInstaller",
+                "SceneFlowGameInstaller",
+            }));
+            Assert.That(names.Skip(1).Count(), Is.EqualTo(13), "participants after SessionScene");
+        }
+
+        [Test]
+        public void EveryScene_IsAtIdea_SetOnceOnTheBasePrefab()
+        {
+            Assert.That(Load(BasePath).Stage, Is.EqualTo(GameStage.Idea));
+            foreach (var scene in Scenes)
+            {
+                var variant = (string)((object[])scene)[0];
+                Assert.That(Load(variant).Stage, Is.EqualTo(GameStage.Idea), variant);
+            }
+        }
+
+        [TestCaseSource(nameof(Scenes))]
+        public void Variant_FromPrototypeListsOnlyInstallersOfItsOwnList(string variant, string scene, string last, int count)
+        {
+            var boot = Load(variant);
+
+            Assert.That(boot.FromPrototype, Has.None.Null);
+            Assert.That(boot.FromPrototype, Is.SubsetOf(boot.Installers));
+            Assert.That(boot.FromPrototype.Select(i => i.name), Has.None.EqualTo(SessionScene).And.None.EqualTo(last));
+        }
+
+        [Test]
+        public void GameScene_FromPrototype_HoldsTheFeaturesThatStartAtPrototype()
+        {
+            var names = Load("Assets/_Composition/Boot.Game.prefab").FromPrototype.Select(i => i.name).ToList();
+
+            Assert.That(names, Is.EquivalentTo(new[]
+            {
+                "PopupPauseInstaller", "AdsInstaller", "PopupReviveInstaller", "HomeInstaller", "TeamSelectInstaller",
+                "GameFlowInstaller",
+            }));
+        }
+
+        [TestCaseSource(nameof(Scenes))]
+        public void Variant_AtPrototype_RunsEveryInstallerWithoutMissingDependencies(string variant, string scene, string last, int count)
+        {
+            Assert.DoesNotThrow(() => Load(variant).Run(GameStage.Prototype));
+        }
+
+        [Test]
+        public void GameScene_AtPrototype_JoinsItsFeaturesInTheDesignedOrder()
         {
             var names = Load("Assets/_Composition/Boot.Game.prefab").Installers.Select(i => i.name).ToList();
 
@@ -68,8 +126,8 @@ namespace Game.Composition.Tests
                 SessionScene,
                 "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
                 "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
-                "HudUpgradeInstaller", "PopupLoseInstaller", "PopupPauseInstaller", "AdsInstaller", "HomeInstaller",
-                "SceneFlowGameInstaller",
+                "HudUpgradeInstaller", "PopupLoseInstaller", "PopupPauseInstaller", "AdsInstaller", "PopupReviveInstaller",
+                "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "SceneFlowGameInstaller",
             }));
         }
 
@@ -103,12 +161,49 @@ namespace Game.Composition.Tests
             Assert.That(prefab, Is.InstanceOf<GameObject>());
         }
 
+        // feature-popup/popup-request/request-rules#params: the Game scene's popup ids by stage.
+        // IDEA has 1 (PopupLose/Main); PROTOTYPE adds the pause and revive popups.
+        [Test]
+        public void GameScene_AtIdea_PopupCatalogHasOnlyTheLosePopup()
+        {
+            var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").CatalogsAt(GameStage.Idea));
+
+            Assert.That(catalogs.Get("Popup").Ids, Is.EquivalentTo(new[] { "PopupLose/Main" }));
+        }
+
+        [Test]
+        public void GameScene_AtPrototype_PopupCatalogHasTheThreePopups()
+        {
+            var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").CatalogsAt(GameStage.Prototype));
+
+            Assert.That(catalogs.Get("Popup").Ids,
+                Is.EquivalentTo(new[] { "PopupLose/Main", "PopupPause/Main", "PopupRevive/Main" }));
+        }
+
+        [TestCaseSource(nameof(Scenes))]
+        public void Variant_PrototypeCatalogsHaveNoEmptySlot_AndRegisterOnePerKind(string variant, string scene, string last, int count)
+        {
+            var boot = Load(variant);
+
+            Assert.That(boot.PrototypeCatalogs, Has.None.Null);
+            Assert.DoesNotThrow(() => new AssetCatalogs(boot.CatalogsAt(GameStage.Prototype)));
+        }
+
         [Test]
         public void GameScene_PopupCatalogHasThePausePopup()
         {
-            var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").Catalogs);
+            var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").CatalogsAt(GameStage.Prototype));
 
             Assert.That(catalogs.Get("Popup").TryGet("PopupPause/Main", out var prefab), Is.True);
+            Assert.That(prefab, Is.InstanceOf<GameObject>());
+        }
+
+        [Test]
+        public void GameScene_PopupCatalogHasTheRevivePopup()
+        {
+            var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").CatalogsAt(GameStage.Prototype));
+
+            Assert.That(catalogs.Get("Popup").TryGet("PopupRevive/Main", out var prefab), Is.True);
             Assert.That(prefab, Is.InstanceOf<GameObject>());
         }
 

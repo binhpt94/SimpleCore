@@ -1,6 +1,6 @@
 ---
 based-on: 9564590ae47a
-refs: feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@ebefd7f8b116, feature-castle/castle-core/castle-body-values@b648ec300023
+refs: feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c, feature-castle/castle-core/castle-body-values@b648ec300023
 ---
 # Chữ, nút và trạng thái của popup hồi sinh
 

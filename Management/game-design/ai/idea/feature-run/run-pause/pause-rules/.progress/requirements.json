@@ -2,8 +2,11 @@
  "items": {
   "params": {
    "state": "verified",
-   "note": "",
+   "note": "Co pauseEnabled trong RunConfig, IDEA tat: Pause bi bo qua",
    "tests": [
+    "RunInstallerTests.IdeaRunHasNoPauseSoEveryPauseRequestIsIgnored",
+    "RunSkipMenusTests.WithPauseOffNoPauseRequestStopsTheBattle",
+    "RunInstallerTests.ConfigAssetKeepsTheIdeaBattleRunningWhenLeavingTheGameOrPressingBack",
     "RunSkipMenusTests.ThereIsNoGivingUp"
    ],
    "play": "",
@@ -11,7 +14,7 @@
    "text": "## Làm gì\n- Giữ trạng thái trận: đang đánh, tạm dừng, đã kết thúc.\n- Vào tạm dừng: dừng thời gian trận, báo `feature-wave`, `feature-enemy`, `feature-hero`, `feature-castle` đứng yên; nhờ `feature-popup` hiện popup tạm dừng (`feature-popup-pause`).\n- Nhận lựa chọn từ popup: tiếp tục (chạy lại ngay) hoặc bỏ lượt (kết thúc lượt qua `feature-run/run-flow/flow-rules`).\n- Theo dõi game rời khỏi màn hình (mất tiêu điểm hoặc bị ẩn) để tự vào tạm dừng.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Hồi chiêu đứng yên | Sấm sét 20, Băng giá 35, Cổ vũ 25 | giây | Bộ số chung; đều đứng khi dừng |\n| Nghỉ giữa hai đợt đứng yên | 3 | giây | Bộ số chung |\n| Đếm ngược khi tiếp tục | 0 | giây | Chạy lại ngay |\n| Số popup tạm dừng mở cùng lúc | tối đa 1 | popup | Không mở chồng |\n| Điểm khi bỏ lượt | số đợt đã dọn sạch | đợt | Giống thua |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Nút tạm dừng và popup tạm dừng | Không có | Không bắt buộc | Có |\n| Tự tạm dừng khi rời game | Không có (trận cứ chạy) | Không bắt buộc | Có |\n| Nút quay lại của máy mở tạm dừng | Không có | Không bắt buộc | Có |\n| Bỏ lượt | Không có | Không bắt buộc | Có, có hỏi xác nhận |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:03:29"
+   "at": "2026-11-25 18:46:03"
   },
   "pause-quit-ends": {
    "state": "verified",
@@ -41,7 +44,7 @@
    "at": "2026-11-25 12:03:29"
   },
   "pause-enter": {
-   "state": "done",
+   "state": "verified",
    "note": "RunInterrupts: roi game va nut quay lai goi Pause, co cau hinh bat tat",
    "tests": [
     "RunPauseTests.PauseButtonPausesARunningBattle",
@@ -53,11 +56,11 @@
    "hash": "5d40e51c9c10",
    "text": "Trận vào tạm dừng khi bấm nút tạm dừng, bấm nút quay lại của máy, hoặc game rời khỏi màn hình\nChỉ áp dụng khi trận đang đánh. Đang tạm dừng hay lượt đã kết thúc thì ba cách này không làm gì.",
    "title": "Trận vào tạm dừng khi bấm nút tạm dừng, bấm nút quay lại của máy, hoặc game rời khỏi màn hình",
-   "by": "Run",
-   "at": "2026-11-25 13:40:07"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "pause-resume-instant": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.ContinueRunsTheBattleAgainAtOnceWithoutCountdown"
@@ -66,11 +69,11 @@
    "hash": "b19e43780169",
    "text": "Bấm tiếp tục thì trận chạy lại ngay trong khung hình đó, không đếm ngược\nĐã loại: đếm ngược 3 giây (thêm chờ cho người chơi phổ thông).",
    "title": "Bấm tiếp tục thì trận chạy lại ngay trong khung hình đó, không đếm ngược",
-   "by": "Run",
-   "at": "2026-11-25 13:40:08"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "pause-return-stays": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.ComingBackAfterLeavingStaysPausedUntilContinue"
@@ -79,11 +82,11 @@
    "hash": "3ffccf17b0e9",
    "text": "Quay lại game sau khi rời thì trận vẫn tạm dừng, popup tạm dừng đang mở chờ bấm",
    "title": "Quay lại game sau khi rời thì trận vẫn tạm dừng, popup tạm dừng đang mở chờ bấm",
-   "by": "Run",
-   "at": "2026-11-25 13:40:09"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-dang-tam-dung-ma-game-lai-roi-khoi": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.LeavingAgainWhilePausedOpensNothingMore"
@@ -92,11 +95,11 @@
    "hash": "1519675d2632",
    "text": "**Đang tạm dừng mà game lại rời khỏi màn hình:** không mở thêm popup; vẫn một popup tạm dừng.",
    "title": "Đang tạm dừng mà game lại rời khỏi màn hình",
-   "by": "Run",
-   "at": "2026-11-25 13:40:10"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-roi-game-khi-luot-da-ket-thuc-dang": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.LeavingAfterTheCastleFellDoesNotPauseAndTheLosePopupStillShows"
@@ -105,11 +108,11 @@
    "hash": "db4afd811d32",
    "text": "**Rời game khi lượt đã kết thúc (đang chờ hoặc đang có popup thua):** không tạm dừng; popup thua vẫn như cũ.",
    "title": "Rời game khi lượt đã kết thúc (đang chờ hoặc đang có popup thua)",
-   "by": "Run",
-   "at": "2026-11-25 13:40:12"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-roi-game-khi-dang-o-man-bat-dau": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunPauseTests.LeavingOrBackKeyOnTheStartScreenOrTeamSelectDoesNothing"
@@ -118,11 +121,11 @@
    "hash": "d26557eb21f6",
    "text": "**Rời game khi đang ở màn bắt đầu hoặc chọn đội:** không có gì xảy ra.",
    "title": "Rời game khi đang ở màn bắt đầu hoặc chọn đội",
-   "by": "Run",
-   "at": "2026-11-25 13:40:13"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-bam-tam-dung-hai-lan-lien": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunFlowTests.PausingTwiceDoesNothingMore",
@@ -132,11 +135,11 @@
    "hash": "3ffd9e786145",
    "text": "**Bấm tạm dừng hai lần liền:** lần hai rơi vào nền che của popup, không có tác dụng.",
    "title": "Bấm tạm dừng hai lần liền",
-   "by": "Run",
-   "at": "2026-11-25 13:40:14"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-roi-game-luc-popup-hoi-sinh-dang-mo": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunReviveTests.LeavingTheGameOrBackKeyDuringTheReviveOpensNoPause",
@@ -146,11 +149,11 @@
    "hash": "c37526cd0022",
    "text": "**Rời game lúc popup hồi sinh đang mở hoặc quảng cáo đang chạy:** không tạm dừng, không mở popup tạm dừng; trận đã đứng yên từ lúc thành bị phá (`pause-not-during-revive` ở node cha).",
    "title": "Rời game lúc popup hồi sinh đang mở hoặc quảng cáo đang chạy",
-   "by": "Run",
-   "at": "2026-11-25 13:43:09"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "edge-hoi-sinh-xong": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "RunReviveTests.PauseIsIgnoredInEveryReviveStepAndWorksAgainAfterTheRevive",
@@ -160,8 +163,8 @@
    "hash": "ea7396e770a7",
    "text": "**Hồi sinh xong:** trận về trạng thái đang đánh; nút tạm dừng có tác dụng lại.",
    "title": "Hồi sinh xong",
-   "by": "Run",
-   "at": "2026-11-25 13:43:10"
+   "by": "@CodeLead",
+   "at": "2026-11-25 18:32:07"
   },
   "pause-block-input": {
    "state": "done",
@@ -348,6 +351,90 @@
    "state": "done",
    "by": "Run",
    "note": "Bat backKeyPauses trong RunConfig, Play, giua dot bam nut quay lai: quai, hero, dan, hoi sinh hero, hoi chieu ki nang, nghi giua dot dung yen, Tiep tuc thi chay tiep tu dung gia tri. Run chi giu IsPaused va StepChanged, feature tran tu dung"
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "pause-enter",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "pause-resume-instant",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "pause-return-stays",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-dang-tam-dung-ma-game-lai-roi-khoi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-roi-game-khi-luot-da-ket-thuc-dang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-roi-game-khi-dang-o-man-bat-dau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-bam-tam-dung-hai-lan-lien",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-roi-game-luc-popup-hoi-sinh-dang-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:32:07",
+   "id": "edge-hoi-sinh-xong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 18:42:25",
+   "id": "params",
+   "state": "doing",
+   "by": "Run",
+   "note": "Co pauseEnabled trong RunConfig, IDEA tat: Pause bi bo qua"
+  },
+  {
+   "at": "2026-11-25 18:43:12",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.IdeaRunHasNoPauseSoEveryPauseRequestIsIgnored, RunSkipMenusTests.WithPauseOffNoPauseRequestStopsTheBattle, RunInstallerTests.ConfigAssetKeepsTheIdeaBattleRunningWhenLeavingTheGameOrPressingBack, RunSkipMenusTests.ThereIsNoGivingUp"
+  },
+  {
+   "at": "2026-11-25 18:46:03",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }
