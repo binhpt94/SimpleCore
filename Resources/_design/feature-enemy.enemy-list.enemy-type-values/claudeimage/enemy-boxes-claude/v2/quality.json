@@ -1,0 +1,9 @@
+{
+ "enemy-boxes": {
+  "ok": true,
+  "note": "",
+  "runs": 2,
+  "round": 1,
+  "file": "enemy-boxes.png"
+ }
+}

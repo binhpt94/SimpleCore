@@ -140,6 +140,78 @@ namespace Game.Hero.Tests
             public void AddFoes(IEnemyFoes foes) => Foes.Add(foes);
         }
 
+        /// <summary>The enemies' side of the shared combat: a fixed receiver number and the foes added to it.</summary>
+        public sealed class EnemyCombat : IEnemyCombat
+        {
+            public const int Receiver = 7;
+            public readonly List<(IEnemyFoes Foes, int Receiver)> CombatFoes = new List<(IEnemyFoes, int)>();
+
+            public int CombatReceiver => Receiver;
+
+            public void AddCombatFoes(IEnemyFoes foes, int combatReceiver) => CombatFoes.Add((foes, combatReceiver));
+        }
+
+        /// <summary>
+        /// The shared combat: keeps the hits of the step; <see cref="Settle"/> runs one tick (filter, total per side,
+        /// owners take health, report the fallen) like live feature-combat/combat-tick/tick-values.
+        /// </summary>
+        public sealed class Combat : Game.Combat.ICombat
+        {
+            public readonly List<Game.Combat.CombatHit> Hits = new List<Game.Combat.CombatHit>();
+            public readonly List<Game.Combat.ICombatReceiver> Receivers = new List<Game.Combat.ICombatReceiver>();
+
+            public int AddReceiver(Game.Combat.ICombatReceiver receiver)
+            {
+                Receivers.Add(receiver);
+                return Receivers.Count;            // 1, 2, ...: never the enemies' fixed number
+            }
+
+            public const float Step = 0.025f;
+
+            public readonly List<Game.Combat.ICombatActor> Actors = new List<Game.Combat.ICombatActor>();
+
+            /// <summary>False stands for steps the run does not let play (paused, waiting for a revive): no tick runs.</summary>
+            public bool Gameplay = true;
+
+            public void AddActor(Game.Combat.ICombatActor actor) => Actors.Add(actor);
+
+            public void Hit(in Game.Combat.CombatHit hit) => Hits.Add(hit);
+
+            public event Action TickDone;
+
+            /// <summary>Runs <paramref name="count"/> steps of 0.025 s: each gameplay step is one tick (aim, strike, settle).</summary>
+            public void RunSteps(int count)
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    if (!Gameplay) continue;
+                    foreach (var actor in Actors.ToArray()) actor.Aim(Step);
+                    foreach (var actor in Actors.ToArray()) actor.Strike(Step);
+                    Settle();
+                }
+            }
+
+            /// <summary>Runs as many whole steps as fit in <paramref name="seconds"/>.</summary>
+            public void Run(float seconds) => RunSteps((int)Math.Round(seconds / Step));
+
+            /// <summary>Settles the hits on receivers added here; hits on other receivers stay in <see cref="Hits"/>.</summary>
+            public void Settle()
+            {
+                var totals = new Dictionary<(int, int), float>();
+                foreach (var hit in Hits)
+                {
+                    if (hit.Receiver < 1 || hit.Receiver > Receivers.Count) continue;
+                    if (!Receivers[hit.Receiver - 1].CanBeHit(hit.TargetKey)) continue;
+                    var key = (hit.Receiver, hit.TargetKey);
+                    totals[key] = (totals.TryGetValue(key, out var sum) ? sum : 0f) + hit.Damage;
+                }
+                foreach (var pair in totals) Receivers[pair.Key.Item1 - 1].TakeTotal(pair.Key.Item2, pair.Value);
+                foreach (var receiver in Receivers) receiver.ReportFallen();
+                Hits.RemoveAll(h => h.Receiver >= 1 && h.Receiver <= Receivers.Count);
+                TickDone?.Invoke();
+            }
+        }
+
         public sealed class Display : IHeroDisplay
         {
             public string HeroCode;
@@ -172,6 +244,17 @@ namespace Game.Hero.Tests
                 PopScale = peakScale;
                 PopSeconds = seconds;
             }
+            public int ShownLevel;
+            public float ShownLevelSeconds;
+            public int LevelLabels;
+
+            public void ShowLevel(int level, float seconds)
+            {
+                LevelLabels++;
+                ShownLevel = level;
+                ShownLevelSeconds = seconds;
+            }
+
             public void Remove() => Removed = true;
         }
 
@@ -189,7 +272,7 @@ namespace Game.Hero.Tests
             public void RemoveAll() { }
         }
 
-        /// <summary>A clock that never ticks by itself; tests call the participant's Step.</summary>
+        /// <summary>A frame clock that never ticks by itself; tests redraw the view by hand.</summary>
         public sealed class StillClock : IFrameClock
         {
             public UniTask NextFrame(CancellationToken cancellation) =>

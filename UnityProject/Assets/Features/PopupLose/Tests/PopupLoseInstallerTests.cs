@@ -72,6 +72,7 @@ namespace Game.PopupLose.Tests
         {
             var installer = LoadInstaller();
             Assert.That(installer.Cheat, Is.EqualTo(LoseCheatState.None), "the shipped asset keeps the cheat off");
+            Assert.That(installer.HomeButton, Is.True, "PROTOTYPE: Về màn bắt đầu is on (actions-spec, Thông số theo giai đoạn)");
             var session = new FakeSession();
 
             installer.Install(FullRegistry(session, new LosePopupTests.FakeFlow()));

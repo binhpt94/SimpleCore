@@ -17,6 +17,7 @@ namespace Game.Hud.Tests
         private const string PrefabPath = "Assets/Features/Hud/FeatureAssets/Private/HudView.prefab";
         private const float Height = 1080f;
         private const float Wide16By9 = 1920f;
+        private const float Wide20By9 = 2400f; // PROTOTYPE checks 16:9 and 20:9
         private const float Wide21By9 = 2520f;
         private const float StripTop = 140f;
         private const float StripBottom = 900f;
@@ -51,6 +52,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void DevCheatButtonSitsInTheTopBandBetweenHealthAndWave(float width)
         {
@@ -68,6 +70,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void TopRowGoesPauseThenMoneyThenHealthThenWaveFromLeftToRight(float width)
         {
@@ -83,10 +86,11 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void WithoutThePauseButtonTheTopRowIsMoneyHealthWaveAndTheCornerStaysEmpty(float width)
         {
-            // IDEA: parts on screen are health, money, wave and the Thunder button; no pause button.
+            // A stage with the pause button off (IDEA, or PROTOTYPE where it is optional): no pause button.
             _view.ShowPauseButton(false);
             var parts = Parts(width);
 
@@ -102,6 +106,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void PauseButtonSitsInTheTopLeftCornerOnTheOtherEdgeFromTheSkills(float width)
         {
@@ -141,6 +146,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void WithASafeAreaEveryPartStaysInsideItAndKeepsItsOrder(float width)
         {
@@ -161,6 +167,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void UpgradeBarAlwaysGetsAtLeastItsFrameWidthLeftOfTheSkills(float width)
         {
@@ -172,6 +179,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void TopRowGoesMoneyThenHealthThenWaveFromLeftToRight(float width)
         {
@@ -187,6 +195,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void SkillButtonsSitSideBySideInTheBottomRightCornerThunderFrostRally(float width)
         {
@@ -203,6 +212,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void BottomEdgeLeftOfTheSkillClusterIsLeftFreeForTheUpgradeBar(float width)
         {
@@ -215,6 +225,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void NoHudPartCoversTheBattleStrip(float width)
         {
@@ -227,6 +238,7 @@ namespace Game.Hud.Tests
         }
 
         [TestCase(Wide16By9)]
+        [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
         public void EveryHudPartStaysOnScreen(float width)
         {

@@ -37,11 +37,14 @@ namespace Game.Battlefield.Tests
         [Test]
         public void SkyFarAndGround_CoverXMinus21To21()
         {
-            foreach (var layer in new[] { BackdropLayer.Sky, BackdropLayer.Far, BackdropLayer.Ground })
+            var covering = Pieces().Where(p =>
+                p.Layer == BackdropLayer.Sky || p.Layer == BackdropLayer.Far || p.Layer == BackdropLayer.Ground).ToList();
+
+            Assert.That(covering.Count, Is.EqualTo(4), "sky, two far strips, ground");
+            foreach (var piece in covering)
             {
-                var piece = Layer(layer);
-                Assert.That(piece.Left, Is.EqualTo(-21f).Within(Eps), layer.ToString());
-                Assert.That(piece.Right, Is.EqualTo(21f).Within(Eps), layer.ToString());
+                Assert.That(piece.Left, Is.EqualTo(-21f).Within(Eps), piece.Id);
+                Assert.That(piece.Right, Is.EqualTo(21f).Within(Eps), piece.Id);
             }
         }
 
@@ -57,11 +60,17 @@ namespace Game.Battlefield.Tests
         [Test]
         public void FarScenery_IsOneStripStandingOnTheGround_2Point5High_BelowTheCastle()
         {
-            var far = Layer(BackdropLayer.Far);
+            // The IDEA column of LayerParams: one far strip, 2.5u high. The real config holds the PROTOTYPE column
+            // (two strips), checked in LayerParamsTests.
+            var config = ScriptableObject.CreateInstance<BattlefieldConfig>();
+            config.FarBands = new List<FarBand> { new FarBand("far", 2.5f, 1f, Color.green, 0f) };
+
+            var far = new BackdropLayout(config).Build().Single(p => p.Layer == BackdropLayer.Far);
 
             Assert.That(far.Bottom, Is.EqualTo(0f).Within(Eps));
             Assert.That(far.Height, Is.EqualTo(2.5f).Within(Eps));
             Assert.That(far.Height, Is.LessThan(4f), "castle is 4u high");
+            Object.DestroyImmediate(config);
         }
 
         [Test]
@@ -78,11 +87,11 @@ namespace Game.Battlefield.Tests
         {
             var config = BattlefieldTestAssets.Config();
             var sky = Layer(BackdropLayer.Sky).SortingOrder;
-            var far = Layer(BackdropLayer.Far).SortingOrder;
+            var far = Pieces().Where(p => p.Layer == BackdropLayer.Far).Select(p => p.SortingOrder).ToList();
             var ground = Layer(BackdropLayer.Ground).SortingOrder;
 
-            Assert.That(sky, Is.LessThan(far));
-            Assert.That(far, Is.LessThan(ground));
+            Assert.That(far, Has.All.GreaterThan(sky));
+            Assert.That(far, Has.All.LessThan(ground));
             Assert.That(Decor().Select(d => d.SortingOrder), Has.All.GreaterThan(ground));
             Assert.That(Pieces().Select(p => p.SortingOrder), Has.All.LessThan(config.LowestBattleOrder));
         }
@@ -133,7 +142,7 @@ namespace Game.Battlefield.Tests
             Assert.That(config.HudTopEdge, Is.EqualTo(11.7f).Within(Eps));
             Assert.That(config.HudBottomEdge, Is.EqualTo(-1.3f).Within(Eps));
             Assert.That(new BackdropLayout(config).HudCoversOnlySkyAndGround(), Is.True);
-            Assert.That(Layer(BackdropLayer.Far).Top, Is.LessThan(config.HudTopEdge));
+            Assert.That(new BackdropLayout(config).FarTop, Is.LessThan(config.HudTopEdge));
             Assert.That(4f, Is.LessThan(config.HudTopEdge), "castle top stays below the top HUD band");
         }
 
@@ -141,7 +150,7 @@ namespace Game.Battlefield.Tests
         public void Hud_FarSceneryReachingUnderTheTopBand_IsNotClear()
         {
             var config = ScriptableObject.CreateInstance<BattlefieldConfig>();
-            config.FarHeight = 12f;
+            config.FarBands = new List<FarBand> { new FarBand("far", 12f, 1f, Color.green, 0f) };
 
             Assert.That(new BackdropLayout(config).HudCoversOnlySkyAndGround(), Is.False);
             Object.DestroyImmediate(config);

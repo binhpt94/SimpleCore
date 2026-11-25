@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56">
+  <!-- dau Da chon: tron xanh la kieu keo, dau tich trang; vien #1D6B0C 4 px, bong lech xuong 4 px -->
+  <defs>
+    <linearGradient id="pickBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9BEA5C"/>
+      <stop offset="0.5" stop-color="#4CC21E"/>
+      <stop offset="1" stop-color="#2E9414"/>
+    </linearGradient>
+  </defs>
+  <circle cx="28" cy="30" r="22" fill="#1D6B0C"/>
+  <circle cx="28" cy="26" r="22" fill="url(#pickBody)" stroke="#1D6B0C" stroke-width="4"/>
+  <ellipse cx="21" cy="13" rx="9" ry="4" fill="#FFFFFF" opacity="0.6"/>
+  <path d="M17 27 L25 35 L40 19" stroke="#1D6B0C" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M17 27 L25 35 L40 19" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

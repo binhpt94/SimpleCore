@@ -44,6 +44,7 @@ Cân bằng dự kiến: Sấm sét dùng được 3 lần mỗi phút, mỗi l�
 - Cổ vũ trên hero đầy máu: không đổi gì, hiệu ứng vẫn hiện.
 - Tạm dừng: không bấm được; hồi chiêu và thời gian chậm còn lại đứng yên.
 - Thành bị phá: không bấm được nữa; quái đang chậm giữ nguyên tới khi `feature-run` dừng trận.
+- Băng giá đang làm chậm quái khi thành bị phá lần đầu (luồng hồi sinh thành): thời gian chậm còn lại và hồi chiêu đứng yên suốt luồng, chạy tiếp khi trận chạy tiếp. (Chuyển từ nhánh thứ tự hồi sinh ở popup hồi sinh, 2026-11-26.)
 - Hồi chiêu đang chạy khi chuyển sang đợt mới: không đặt lại; hồi chiêu chạy suốt trận, kể cả lúc nghỉ 3s giữa hai đợt.
 
 ## Đã tự quyết

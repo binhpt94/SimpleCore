@@ -1,74 +1,67 @@
 using System;
 using Game.Run;
+using Game.SimClock;
 
 namespace Game.Combat
 {
     /// <summary>
-    /// Runs combat ticks from frame time while the battle is on: from BattleStarted until BattleStopped or
-    /// BattleCleared, and never while the run is paused (pause popup, waiting for a revive).
+    /// Runs exactly one combat tick on every step of the shared battle clock (feature-sim-clock), at the place of
+    /// <see cref="Owner"/> in the clock's step order. Combat keeps no clock of its own: the step length comes from
+    /// the clock. No tick runs before BattleStarted, after BattleStopped or BattleCleared, on a step that is not
+    /// gameplay, or while the run is paused (pause popup, waiting for a revive).
     /// </summary>
     internal sealed class CombatLoop : IDisposable
     {
+        /// <summary>Name of combat in the shared clock's step order.</summary>
+        public const string Owner = "Combat";
+
         private readonly CombatTick _tick;
-        private readonly FixedStepClock _clock;
         private readonly IRunFlow _run;
-        private readonly ITime _time;
+        private readonly IDisposable _step;
         private bool _inBattle;
 
-        public CombatLoop(CombatTick tick, FixedStepClock clock, IRunFlow run, ITime time)
+        public CombatLoop(CombatTick tick, ISimClock clock, IRunFlow run)
         {
             _tick = tick ?? throw new ArgumentNullException(nameof(tick));
-            _clock = clock ?? throw new ArgumentNullException(nameof(clock));
             _run = run ?? throw new ArgumentNullException(nameof(run));
-            _time = time ?? throw new ArgumentNullException(nameof(time));
+            if (clock == null) throw new ArgumentNullException(nameof(clock));
             _run.RunStarted += OnRunStarted;
             _run.BattleStarted += OnBattleStarted;
             _run.BattleStopped += OnBattleEnded;
             _run.BattleCleared += OnBattleEnded;
+            _step = clock.OnStep(Owner, OnStep);
         }
 
-        /// <summary>Called once per frame; returns how many ticks ran.</summary>
-        public int Frame()
-        {
-            if (!CanTick) return 0;
-            var steps = _clock.Advance(_time.DeltaTime);
-            var ran = 0;
-            // A tick can end the run or freeze it (castle destroyed): no further tick in this frame.
-            while (ran < steps && CanTick)
-            {
-                _tick.Run(_clock.StepSeconds);
-                ran++;
-            }
-            return ran;
-        }
+        /// <summary>Ticks run since this loop was made; read by tests and dev tools only.</summary>
+        public long TicksRun { get; private set; }
 
         public void Dispose()
         {
+            _step?.Dispose();
             _run.RunStarted -= OnRunStarted;
             _run.BattleStarted -= OnBattleStarted;
             _run.BattleStopped -= OnBattleEnded;
             _run.BattleCleared -= OnBattleEnded;
         }
 
-        private bool CanTick => _inBattle && !_run.IsPaused;
+        private void OnStep(SimStep step)
+        {
+            if (!step.Gameplay || !_inBattle || _run.IsPaused) return;
+            _tick.Run(step.Seconds);
+            TicksRun++;
+        }
 
         private void OnRunStarted(RunTeam team)
         {
             _inBattle = false;
-            _clock.Reset();
             _tick.ClearPending();
         }
 
-        private void OnBattleStarted()
-        {
-            _inBattle = true;
-            _clock.Reset();
-        }
+        private void OnBattleStarted() => _inBattle = true;
 
         private void OnBattleEnded()
         {
             _inBattle = false;
-            _clock.Reset();
             _tick.ClearPending();
         }
     }

@@ -15,15 +15,18 @@ namespace Game.Castle
         private readonly ICastle _castle;
         private readonly IEnemyField _enemies;
         private readonly CastleUpgrades _upgrades;
+        private readonly ICastleEnemyHits _hits;
         private readonly List<EnemyTarget> _alive = new List<EnemyTarget>();
-        private float _sinceShot;
+        // Double so tens of thousands of 0.025 s clock steps add up without drifting past a shot.
+        private double _sinceShot;
 
-        public CastleAutoShot(CastleConfig config, ICastle castle, IEnemyField enemies, CastleUpgrades upgrades)
+        public CastleAutoShot(CastleConfig config, ICastle castle, IEnemyField enemies, CastleUpgrades upgrades, ICastleEnemyHits hits)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _castle = castle ?? throw new ArgumentNullException(nameof(castle));
             _enemies = enemies ?? throw new ArgumentNullException(nameof(enemies));
             _upgrades = upgrades ?? throw new ArgumentNullException(nameof(upgrades));
+            _hits = hits ?? throw new ArgumentNullException(nameof(hits));
             Reset();
         }
 
@@ -36,7 +39,10 @@ namespace Game.Castle
         /// <summary>A new run: ready to shoot at once.</summary>
         public void Reset() => _sinceShot = _config.SecondsPerShot;
 
-        /// <summary>Advances time; the caller does not call this while paused or outside a battle.</summary>
+        /// <summary>
+        /// One gameplay step of the shared clock (or any length of battle time in tests); the caller does not call
+        /// this while paused or outside a battle. A shot is due on the first step at which a full interval has passed.
+        /// </summary>
         public void Tick(float deltaSeconds)
         {
             if (_castle.IsDestroyed || deltaSeconds < 0f) return;
@@ -47,7 +53,7 @@ namespace Game.Castle
 
             _sinceShot = 0f;
             var fromX = target.X < 0f ? -_config.HalfWidth : _config.HalfWidth;
-            _enemies.Damage(target.Handle, Damage);
+            _hits.Hit(target.Handle, Damage);
             Fired?.Invoke(target.Handle, fromX, target.X);
         }
 

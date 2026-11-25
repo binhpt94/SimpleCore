@@ -23,7 +23,7 @@ Ví dụ: đợt 1: 25 xu; đợt 5: 45 xu; đợt 10: 70 xu; đợt 15: 95 xu; 
 | Báo dọn sạch cho `feature-hud` | không bắt buộc | có | có |
 
 ## Trường hợp biên
-- **Thành bị phá cùng lúc con cuối bị hạ** (ví dụ con cuối đánh thành rồi chết vì Sấm sét trong cùng một bước cập nhật): thua; không thưởng, không điểm.
+- **Thành bị phá cùng lúc con cuối bị hạ** (ví dụ con cuối đánh thành rồi chết vì Sấm sét trong cùng một bước cập nhật): đợt chưa được tính; tin dọn sạch do `feature-run` giữ. Lượt chốt thua (không hồi sinh): không thưởng, không điểm. Hồi sinh thành công: `feature-run` thả tin, feature này cộng thưởng dọn đợt và bắt đầu lúc thở 3 giây như mọi lần dọn sạch. (Sửa 2026-11-26 khi chuyển ý held-clear từ nhánh thứ tự hồi sinh ở popup hồi sinh về lượt chơi; ý đó nay ở `feature-run/run-flow/flow-rules`.)
 - **Con cuối bị hạ trước khi ra hết** (đang hoãn vì đủ 40 hoặc còn mục chưa tới nhịp): chưa dọn sạch, chờ mục cuối ra và bị hạ.
 - **Đạn của quái bắn xa còn bay sau khi đợt đã dọn sạch:** vẫn gây sát thương. Nếu nó phá thành trong lúc thở thì lượt thua, nhưng đợt vừa dọn vẫn được tính (điểm và thưởng đã cộng).
 - **Tạm dừng đúng lúc dọn sạch:** việc cộng thưởng, báo điểm đã xảy ra trước khi dừng; đồng hồ lúc thở bắt đầu đếm khi bỏ tạm dừng.

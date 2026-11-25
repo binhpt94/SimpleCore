@@ -3,6 +3,8 @@
   "rootNamespace": "Game.Castle",
   "references": [
     "Game.Core",
+    "Game.SimClock.Contracts",
+    "Game.Combat.Contracts",
     "Game.Castle.Contracts",
     "Game.Enemy.Contracts",
     "Game.Hero.Contracts",

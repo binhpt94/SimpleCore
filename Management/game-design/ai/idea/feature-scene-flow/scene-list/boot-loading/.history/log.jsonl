@@ -14,3 +14,5 @@
 {"at": "2026-11-25 11:42:10", "event": "data", "hash": "cf7c99a185e0", "previous": "2c5b95cc6e9d", "added": [], "removed": [], "rewritten": [{"id": "loading-max-time", "old": "Từ lúc mở game tới lúc thấy màn bắt đầu không quá 5 giây trên điện thoại tầm trung (dự kiến)\nQuá 5 giây là lỗi hiệu năng cần báo, không chặn người chơi.", "new": "Từ lúc mở game tới lúc thấy màn đầu tiên của scene Game không quá 5 giây trên điện thoại tầm trung (dự kiến)\nQuá 5 giây là lỗi hiệu năng cần báo, không chặn người chơi."}]}
 {"at": "2026-11-25 11:45:01", "event": "promote", "by": "người (Sync)", "hash": "cf7c99a185e0"}
 {"at": "2026-11-25 18:49:12", "event": "promote", "by": "người (Sync)", "hash": "cf7c99a185e0"}
+{"at": "2026-11-25 23:05:57", "event": "promote", "by": "tự chốt theo feature-session-scene/session-steps/participant-order", "hash": "cf7c99a185e0"}
+{"at": "2026-11-26 01:17:50", "event": "promote", "by": "người (Sync)", "hash": "cf7c99a185e0"}

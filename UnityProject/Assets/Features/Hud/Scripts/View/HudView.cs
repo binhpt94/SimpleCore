@@ -189,6 +189,8 @@ namespace Game.Hud
         }
 #endif
 
+        public UnityEngine.Object Root => gameObject;
+
         public void Destroy()
         {
             if (this != null) Destroy(gameObject);

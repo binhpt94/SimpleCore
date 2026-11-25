@@ -5,6 +5,7 @@
     "Game.Core",
     "Game.Home.Internal",
     "Game.Run.Contracts",
+    "Game.Home.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

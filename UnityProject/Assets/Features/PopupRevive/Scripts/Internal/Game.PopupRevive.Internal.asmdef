@@ -3,6 +3,7 @@
   "rootNamespace": "Game.PopupRevive",
   "references": [
     "Game.Core",
+    "Game.SimClock.Contracts",
     "Game.Run.Contracts",
     "Game.Ads.Contracts",
     "Game.Services.Popup.Contracts",

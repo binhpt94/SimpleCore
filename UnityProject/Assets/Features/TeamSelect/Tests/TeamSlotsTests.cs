@@ -1,5 +1,4 @@
 using NUnit.Framework;
-using Game.Run;
 using static Game.TeamSelect.Tests.Fakes;
 
 namespace Game.TeamSelect.Tests
@@ -76,41 +75,58 @@ namespace Game.TeamSelect.Tests
             s.Presenter.TapSlot(2);
             Assert.IsFalse(s.View.StartEnabled);
             Assert.IsFalse(s.Presenter.TapStart());
-            Assert.AreEqual(0, s.Run.Entered.Count);
-            Assert.AreEqual(RunStep.TeamSelect, s.Run.Step);
+            Assert.AreEqual(0, s.Entered.Count);
+            Assert.IsTrue(s.Presenter.IsOpen);
 
             s.Presenter.TapCard(Mage);
             Assert.IsTrue(s.View.StartEnabled);
         }
 
         [Test]
-        public void StartWithFullTeamReportsTeamOnceThenIgnoresTaps()
+        public void StartWithFullTeamReportsTeamToFlowOnceAndLocksTapsUntilBuildResult()
         {
             var s = new TestScreen().Open();
-            s.Run.MoveToPlayingOnEnter = false;
+            s.BuildSucceeds = false; // the battle is still being built
             Assert.IsTrue(s.Presenter.TapStart());
             Assert.IsFalse(s.Presenter.TapStart());
             s.Presenter.TapSlot(0);
             s.Presenter.TapCard(Mage);
 
-            Assert.AreEqual(1, s.Run.Entered.Count);
-            CollectionAssert.AreEqual(DefaultTeam, s.Run.Entered[0].HeroCodes);
-            CollectionAssert.AreEqual(DefaultTeam, s.SlotCodes(), "taps after Enter battle are ignored");
+            Assert.AreEqual(1, s.Entered.Count, "team reported to the screen flow once");
+            CollectionAssert.AreEqual(DefaultTeam, s.Entered[0]);
+            CollectionAssert.AreEqual(DefaultTeam, s.SlotCodes(), "taps while waiting are ignored");
             Assert.IsFalse(s.View.StartEnabled);
+
+            // Result: build failed, the flow unlocks the screen; taps count again.
+            s.Presenter.SetEnterBattleEnabled(true);
+            s.Presenter.TapSlot(0);
+            CollectionAssert.AreEqual(new string[] { null, Axeman, Archer }, s.SlotCodes());
+
+            // Result: build done, the flow hides the screen.
+            s.Presenter.TapCard(Knight);
+            s.BuildSucceeds = true;
+            Assert.IsTrue(s.Presenter.TapStart());
+            Assert.IsFalse(s.View.Visible);
         }
 
         [Test]
-        public void ScreenShowsFiveCardsThreeSlotsAndOneStartButton()
+        public void ScreenHasFourPartsCardsSlotsStartAndBack()
         {
             var s = new TestScreen();
-            Assert.IsFalse(s.View.Visible, "hidden outside the team select step");
+            Assert.IsFalse(s.View.Visible, "hidden until the screen flow shows it");
             s.Open();
             Assert.IsTrue(s.View.Visible);
-            Assert.AreEqual(5, s.View.Cards.Count);
-            Assert.AreEqual(3, s.View.Slots.Count);
-            Assert.IsTrue(s.View.StartEnabled);
-            s.Presenter.TapStart();
-            Assert.IsFalse(s.View.Visible, "the run moved to battle");
+            Assert.AreEqual(5, s.View.Cards.Count, "5 hero cards");
+            Assert.AreEqual(3, s.View.Slots.Count, "3 team slots");
+            Assert.IsTrue(s.View.StartEnabled, "Enter battle button");
+            Assert.AreEqual(2, TeamSelectScreenSpec.ButtonCount, "Enter battle and Back");
+            Assert.AreEqual(40f, TeamSelectScreenSpec.BackX, "Back sits in the top left corner");
+            Assert.AreEqual(40f, TeamSelectScreenSpec.BackY);
+            Assert.GreaterOrEqual(TeamSelectScreenSpec.BackW, 120f);
+            Assert.GreaterOrEqual(TeamSelectScreenSpec.BackH, 120f);
+
+            s.View.Input.TapBack();
+            Assert.AreEqual(1, s.BackCount, "the Back button reaches the screen flow");
         }
 
         [Test]
@@ -157,13 +173,23 @@ namespace Game.TeamSelect.Tests
         }
 
         [Test]
-        public void DeviceBackKeyDoesNothing()
+        public void DeviceBackKeyActsAsBackButton()
         {
+            // feature-game-flow/flow-routes/routes-values#back-key-map: on the team select screen the device back
+            // key does what the Back button does (live slots-spec still says "nothing"; the routing node replaces it).
             var s = new TestScreen().Open();
-            s.Presenter.TapBack();
-            Assert.AreEqual(RunStep.TeamSelect, s.Run.Step);
-            Assert.IsTrue(s.Presenter.IsOpen);
-            CollectionAssert.AreEqual(DefaultTeam, s.SlotCodes());
+            s.Presenter.TapSlot(0);
+            s.View.Input.TapBack(); // the view sends the device key and the Back button the same way
+            Assert.AreEqual(1, s.BackCount);
+            Assert.IsFalse(s.Presenter.IsOpen);
+            Assert.IsFalse(s.Memory.HasTeam, "remembered team unchanged");
+            s.Open();
+            CollectionAssert.AreEqual(DefaultTeam, s.SlotCodes(), "half-picked slots were dropped");
+
+            s.BuildSucceeds = false;
+            s.Presenter.TapStart();
+            s.View.Input.TapBack();
+            Assert.AreEqual(1, s.BackCount, "ignored while waiting for the battle to be built");
         }
 
         [Test]
@@ -177,6 +203,19 @@ namespace Game.TeamSelect.Tests
             Assert.AreEqual(3, fromConfig.SlotCount);
             Assert.AreEqual(3, fromConfig.DefaultTeam.Count);
             UnityEngine.Object.DestroyImmediate(config);
+
+            Assert.AreEqual(2, TeamSelectScreenSpec.ButtonCount, "Enter battle and Back");
+            Assert.AreEqual(120f, TeamSelectScreenSpec.BackMinSide);
+            Assert.AreEqual("Không vào được trận, thử lại", TeamSelectScreenSpec.BuildErrorText);
+            Assert.AreEqual(1, TeamSelectScreenSpec.StartTapsPerOpening);
+            Assert.AreEqual(10, TeamCount(5, rules.SlotCount), "10 teams from 5 heroes");
+        }
+
+        private static int TeamCount(int heroes, int slots)
+        {
+            var n = 1;
+            for (var i = 0; i < slots; i++) n = n * (heroes - i) / (i + 1);
+            return n;
         }
     }
 }

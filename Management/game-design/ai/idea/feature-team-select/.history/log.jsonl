@@ -7,3 +7,4 @@
 {"at": "2026-11-24 22:56:39", "event": "data", "hash": "f88fd51d3a36", "previous": "40435eb1a61f", "added": ["team-memory-prefill"], "removed": [], "rewritten": []}
 {"at": "2026-11-24 23:10:02", "event": "data", "hash": "6da99ea96860", "previous": "f88fd51d3a36", "added": ["team-valid-before-start"], "removed": [], "rewritten": []}
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "6da99ea96860"}
+{"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "6da99ea96860"}

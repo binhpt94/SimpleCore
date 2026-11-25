@@ -45,15 +45,15 @@
    "at": "2026-11-25 12:23:21"
   },
   "edge-luot-ket-thuc-luc-dang-co-hieu-ung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play: thua luc ki nang thanh dang chay hoac quai chet do, choi lai: hieu ung cu khong chay sang luot moi",
    "hash": "07c756681b68",
    "text": "**Lượt kết thúc lúc đang có hiệu ứng (kĩ năng thành, quái chết dở)**: hiệu ứng của lượt cũ bị dừng và bỏ khi lượt mới bắt đầu, không chạy tiếp sang lượt mới.",
    "title": "Lượt kết thúc lúc đang có hiệu ứng (kĩ năng thành, quái chết dở)",
-   "by": "Run",
-   "at": "2026-11-25 11:47:33"
+   "by": "@CodeLead",
+   "at": "2026-11-25 21:11:33"
   },
   "edge-tien-nang-cap-dot-mau-thanh-cua-luot": {
    "state": "verified",
@@ -67,15 +67,15 @@
    "at": "2026-11-25 12:23:21"
   },
   "edge-tat-game-giua-tran": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play: dung Play giua tran roi Play lai: chi ki luc da luu truoc do con, luot do khong luu",
    "hash": "447a9ad70ef9",
    "text": "**Tắt game giữa trận**: chỉ kỉ lục đã lưu trước đó còn lại; lượt dở không được lưu.",
    "title": "Tắt game giữa trận",
-   "by": "Run",
-   "at": "2026-11-25 11:47:35"
+   "by": "@CodeLead",
+   "at": "2026-11-25 20:39:27"
   },
   "edge-bo-luot-tu-popup-tam-dung": {
    "state": "verified",
@@ -106,6 +106,19 @@
    "title": "Lượt mới bắt đầu mà còn popup mở (lỗi)",
    "by": "@CodeLead",
    "at": "2026-11-25 18:32:07"
+  },
+  "stage-prototype": {
+   "state": "done",
+   "note": "Test 10 luot lien khong don viec cua Run, play kiem choi lai duoi 0.5 giay",
+   "tests": [
+    "RunUsageTrackingTests.ReplayChecksStagePrototype_TenRunsInARowLeaveTheRunHoldingNoMoreThanAtTheStartOfTheFirst"
+   ],
+   "play": "",
+   "hash": "45a60d691d58",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Số lượt liền để kiểm rò rỉ: 10\n- Thời gian từ bấm chơi lại tới màn chọn đội: dưới 0,5 giây",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "Run",
+   "at": "2026-11-26 01:03:13"
   }
  },
  "log": [
@@ -234,6 +247,34 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-25 20:39:27",
+   "id": "edge-tat-game-giua-tran",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 21:11:33",
+   "id": "edge-luot-ket-thuc-luc-dang-co-hieu-ung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:02:27",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Run",
+   "note": "Test 10 luot lien khong don viec cua Run, play kiem choi lai duoi 0.5 giay"
+  },
+  {
+   "at": "2026-11-26 01:03:13",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Run",
+   "note": "RunUsageTrackingTests.ReplayChecksStagePrototype_TenRunsInARowLeaveTheRunHoldingNoMoreThanAtTheStartOfTheFirst"
   }
  ]
 }

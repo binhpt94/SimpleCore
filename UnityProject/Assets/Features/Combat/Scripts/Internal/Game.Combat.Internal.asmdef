@@ -3,6 +3,7 @@
   "rootNamespace": "Game.Combat",
   "references": [
     "Game.Core",
+    "Game.SimClock.Contracts",
     "Game.Combat.Contracts",
     "Game.Run.Contracts",
     "UniTask"

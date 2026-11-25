@@ -4,6 +4,9 @@
   "references": [
     "Game.Core",
     "Game.Run.Contracts",
+    "Game.Home.Contracts",
+    "Game.TeamSelect.Contracts",
+    "Game.SceneFlow.Contracts",
     "UniTask"
   ],
   "includePlatforms": [],

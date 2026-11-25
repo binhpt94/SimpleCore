@@ -42,6 +42,7 @@ Cân bằng dự kiến: đợt 10 có 26 quái, Lính 40×1.9=76 máu, 5×1.9=9
 - Hero và đòn của chính thành, kĩ năng thành không bao giờ trừ máu thành.
 - Hồi sinh mà quái vẫn đứng sát thành: không có lúc bất tử; quái đánh lại ngay khi trận chạy tiếp. 300 máu chịu được khoảng 3s trước 10 Lính đợt 10, đủ để bấm Sấm sét. Đã loại: bất tử vài giây (thêm luật, che mất áp lực).
 - Hồi sinh rồi bị phá lần hai: báo `feature-run` thêm 1 lần; lần này là thua.
+- **Hồi sinh: thành phóng từ 0 lên đủ cỡ trong 0.5 giây; máu đặt 30% máu tối đa ngay đầu 0.5 giây đó.** Ngược với lúc bị phá (thu nhỏ còn 0 trong 0.5 giây). `feature-run` chờ thành hiện xong rồi mới cho trận chạy tiếp. (Chuyển từ ý revive-anim của nhánh thứ tự hồi sinh ở popup hồi sinh, 2026-11-26: việc này do thành làm.)
 
 ## Đã tự quyết
 - **Mọi tầm tính từ mép thành.** Khớp bộ số chung ("tầm 6u tính từ mép thành"). Đã loại: tính từ tâm.

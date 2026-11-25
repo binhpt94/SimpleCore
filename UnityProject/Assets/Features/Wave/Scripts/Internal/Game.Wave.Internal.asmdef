@@ -3,6 +3,7 @@
   "rootNamespace": "Game.Wave",
   "references": [
     "Game.Core",
+    "Game.SimClock.Contracts",
     "Game.Wave.Contracts",
     "Game.Enemy.Contracts",
     "Game.Wallet.Contracts",

@@ -12,3 +12,4 @@
 {"at": "2026-11-24 23:43:16", "event": "data", "hash": "33792179d7fe", "previous": "de2adee6717e", "added": [], "removed": [{"id": "balance-curve", "text": "Quái mạnh lên nhanh hơn sức mạnh mua được, nên lượt nào rồi cũng thua\nChơi vô tận cần một điểm gãy; người chơi giỏi chọn đội và chi tiền khéo thì gãy muộn hơn."}, {"id": "balance-tunable", "text": "Chỉnh được số liệu mà không sửa code\nMỗi feature giữ số của mình trong cấu hình riêng; feature này quyết các số đó cùng nhau."}], "rewritten": []}
 {"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "33792179d7fe"}
 {"at": "2026-11-25 00:11:02", "event": "promote", "by": "người", "hash": "33792179d7fe"}
+{"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "33792179d7fe"}

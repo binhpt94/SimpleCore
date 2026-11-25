@@ -19,9 +19,14 @@ namespace Game.Enemy
         [Tooltip("Seconds-per-hit multiplier while slowed by the castle's Frost.")]
         [SerializeField] private float _slowHitFactor = 2f;
 
+        [Tooltip("Distance from the castle centre where an enemy comes on screen (u): a type with an entrance plays it " +
+                 "when its centre first reaches this.")]
+        [SerializeField] private float _entranceDistance = 16f;
+
         [SerializeField] private EnemyKind[] _kinds = Array.Empty<EnemyKind>();
 
         public float SpawnDistance => _spawnDistance;
+        public float EntranceDistance => _entranceDistance;
         public float SlowMoveFactor => _slowMoveFactor;
         public float SlowHitFactor => _slowHitFactor;
 
@@ -81,7 +86,11 @@ namespace Game.Enemy
         [Tooltip("Off: this type is not in the game at the current stage; asking to spawn it is an error.")]
         [SerializeField] private bool _available = true;
 
+        [Tooltip("On: plays an entrance when its centre comes on screen (the boss grows and shrinks back).")]
+        [SerializeField] private bool _entrance;
+
         public EnemyType Type => _type;
+        public bool Entrance => _entrance;
         public bool Available => _available;
         public float Width => _width;
         public float Height => _height;

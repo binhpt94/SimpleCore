@@ -5,9 +5,9 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Quan hệ
 - Một lượt gồm đúng một lần đi qua màn chọn đội và đúng một trận.
 - Một trận kết thúc theo một trong hai cách: thành bị phá (thua) hoặc người chơi bỏ lượt.
-- Feature này là bên duy nhất quyết định sang màn nào; các màn khác chỉ báo người chơi đã bấm gì.
+- Ở IDEA (chỉ có màn trận) feature này tự đổi màn. Từ PROTOTYPE, `feature-game-flow` là bên duy nhất chọn màn chính (bắt đầu, chọn đội, trận); feature này lo các bước trong trận (tạm dừng, hồi sinh, popup thua), dọn trận rồi chuyển lựa chọn rời trận cho điều hướng màn.
 - `feature-castle` báo thành bị phá; `feature-wave`, `feature-hero`, `feature-enemy`, `feature-castle` nhận lệnh dừng khi lượt kết thúc.
-- `feature-home`, `feature-team-select`, `feature-popup-lose`, `feature-popup-pause` báo nút đã bấm; feature này chuyển màn.
+- `feature-popup-lose`, `feature-popup-pause` báo nút đã bấm cho feature này. Từ PROTOTYPE `feature-home`, `feature-team-select` báo thẳng cho `feature-game-flow`.
 - `feature-scene-flow` làm việc chuyển scene khi feature này xin.
 
 ## Định nghĩa
@@ -38,7 +38,7 @@ Các bước chuyển:
 - Hồi sinh chỉ có ở popup hồi sinh (`feature-popup-revive`), mỗi lượt một lần; từ popup thua chỉ có chơi lại hoặc về màn bắt đầu.
 
 ## Đã tự quyết (thêm, 2026-11-25)
-- **Từ PROTOTYPE, bảng đường đi giữa các màn chính chuyển sang `feature-game-flow`** (nhánh đường đi của nó). Ở IDEA chỉ có màn trận nên node này giữ nguyên. Khi vào PROTOTYPE, ý "bên duy nhất quyết định sang màn nào" của node này sẽ được sửa thành "dọn trận rồi chuyển lựa chọn cho điều hướng màn" (đổi hash, phiên Run sửa code).
+- **Từ PROTOTYPE, bảng đường đi giữa các màn chính chuyển sang `feature-game-flow`** (nhánh đường đi của nó). Đã sửa mục Quan hệ (2026-11-26, khi vào PROTOTYPE). Câu "bên duy nhất quyết định" chỉ nằm ở mục Quan hệ, không nằm trong ý nào, nên hash không đổi; việc của phiên Run ghi ở mục Làm gì và bảng giai đoạn của node vòng 4 `flow-rules`.
 
 ## Đã tự quyết (thêm, 2026-11-24)
 - **Bước hồi sinh đứng trước popup thua** (ý `flow-revive-step`, người yêu cầu thêm hồi sinh bằng quảng cáo). Thay luật cũ "không có hồi sinh khi thua".

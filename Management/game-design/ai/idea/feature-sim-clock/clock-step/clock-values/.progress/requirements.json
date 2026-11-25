@@ -1,0 +1,834 @@
+{
+ "items": {
+  "tick-40": {
+   "state": "verified",
+   "note": "Viết SimClockCore, config ClockParams, installer và test EditMode",
+   "tests": [
+    "ClockStepTests.Step_Lasts0025Seconds_And40StepsMakeOneSecond"
+   ],
+   "play": "",
+   "hash": "4e84a876ed44",
+   "text": "Bước nhịp dài 0.025 giây, 40 bước mỗi giây\nNgười yêu cầu (2026-11-25). Nhịp đòn nhanh nhất của game là 0.7 giây nên 40 bước mỗi giây đủ mịn.",
+   "title": "Bước nhịp dài 0.025 giây, 40 bước mỗi giây",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "default-fixed": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.DefaultMode_IsFixedTick",
+    "ClockStepTests.FrameMode_IsChosenByConfigOnly"
+   ],
+   "play": "",
+   "hash": "0a1a2700fb37",
+   "text": "Cách chạy mặc định là bước cố định, cho cả chơi thường lẫn test; theo khung hình chỉ là lựa chọn trong config\nNgười quyết (2026-11-25): chơi thường và test cùng một nhịp.",
+   "title": "Cách chạy mặc định là bước cố định, cho cả chơi thường lẫn test; theo khung hình chỉ là lựa chọn trong config",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "cap-5": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.LongFrame_RunsAtMost5Steps_AndDropsTheRest",
+    "ClockStepTests.Frame100ms_StillKeepsUpWith4Steps"
+   ],
+   "play": "",
+   "hash": "dcfafba17148",
+   "text": "Một khung hình chạy tối đa 5 bước; thời gian dư quá 0.125 giây bị bỏ, trận chậm lại chứ không nhảy\nKhung hình 0.1 giây vẫn theo kịp đủ 4 bước. Máy chậm hơn mức đó thì trận chạy chậm hơn giờ thật.",
+   "title": "Một khung hình chạy tối đa 5 bước; thời gian dư quá 0.125 giây bị bỏ, trận chậm lại chứ không nhảy",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "frame-mode-clamp": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.FrameMode_OneStepAsLongAsTheFrame_ClampedAt0125"
+   ],
+   "play": "",
+   "hash": "393d0d403a2b",
+   "text": "Ở cách theo khung hình, mỗi khung là một bước dài bằng thời gian khung, tối đa 0.125 giây\nCùng trần với cách bước cố định để hai cách cho cảm giác gần nhau trên máy chậm.",
+   "title": "Ở cách theo khung hình, mỗi khung là một bước dài bằng thời gian khung, tối đa 0.125 giây",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "steps-counted": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.StepCounts_AreWholeNumbers_GameplayStepsStopWhilePaused",
+    "ClockStepTests.BattleTime_DoesNotDriftAfterManySteps"
+   ],
+   "play": "",
+   "hash": "d3ca9faee00c",
+   "text": "Nhịp đếm số bước chung và số bước gameplay bằng số nguyên; giờ của trận bằng số bước gameplay nhân 0.025 giây\nSố bước chung tăng ở mọi bước; số bước gameplay chỉ tăng ở bước lượt cho trận chạy. Thao tác ghi theo số bước chung; mọi chờ giờ đếm theo số bước gameplay nên đứng yên lúc tạm dừng. Không cộng dồn số lẻ, chạy lâu không lệch.",
+   "title": "Nhịp đếm số bước chung và số bước gameplay bằng số nguyên; giờ của trận bằng số bước gameplay nhân 0.025 giây",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "timer-in-steps": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Wait_EndsOnFirstStepReachingTheTime"
+   ],
+   "play": "",
+   "hash": "b720987bbf37",
+   "text": "Một chờ giờ t giây của gameplay hết ở bước đầu tiên mà giờ đã đếm từ lúc bắt đầu chờ đạt hoặc vượt t\nVí dụ hồi chiêu 20 giây hết sau đúng 800 bước; chờ 0.7 giây hết sau 28 bước.",
+   "title": "Một chờ giờ t giây của gameplay hết ở bước đầu tiên mà giờ đã đếm từ lúc bắt đầu chờ đạt hoặc vượt t",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "input-next-step": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.PlayerAction_IsAppliedAtStartOfNextStep_InOrderQueued",
+    "ClockStepTests.PlayerAction_WaitsWhenTheFrameRunsNoStep",
+    "ClockStepTests.PlayerAction_IsAppliedOnceEvenWhenTheFrameRunsSeveralSteps"
+   ],
+   "play": "",
+   "hash": "e45c5e410e55",
+   "text": "Thao tác của người chơi trong một khung hình được áp vào đầu bước nhịp đầu tiên chạy sau khung đó\nKhung không chạy bước nào thì thao tác chờ sang bước kế tiếp. Nhiều thao tác cùng chờ thì áp theo thứ tự bấm.",
+   "title": "Thao tác của người chơi trong một khung hình được áp vào đầu bước nhịp đầu tiên chạy sau khung đó",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "dev-speed": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.DevSpeed_MultipliesTheStepCapOfAFrame",
+    "ClockStepTests.DevSpeed_OutsideTheList_IsRefused"
+   ],
+   "play": "",
+   "hash": "00f997b94f99",
+   "text": "Bản dev cho tester chọn tốc độ tua 1, 2, 4, 8 hoặc 16 lần; trần số bước mỗi khung nhân theo tốc độ\nTốc độ 16 lần: tối đa 80 bước một khung.",
+   "title": "Bản dev cho tester chọn tốc độ tua 1, 2, 4, 8 hoặc 16 lần; trần số bước mỗi khung nhân theo tốc độ",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "dev-run-steps": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.DevRunSteps_RunsNStepsAtOnce_LikeRealTime",
+    "ClockStepTests.DevFreeze_StopsFrames_AndStepOnceRunsOneStep"
+   ],
+   "play": "",
+   "hash": "297191867fa7",
+   "text": "Bản dev có lệnh chạy ngay N bước không chờ khung hình, lệnh đóng băng và lệnh chạy một bước\nChạy N bước nhanh cho đúng kết quả như chạy N bước theo giờ thật ở cách bước cố định.",
+   "title": "Bản dev có lệnh chạy ngay N bước không chờ khung hình, lệnh đóng băng và lệnh chạy một bước",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "view-latest": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.View_SeesTheStateAfterTheLastStepOfTheFrame"
+   ],
+   "play": "",
+   "hash": "a70a7cb3a5f5",
+   "text": "Màn hình vẽ trạng thái sau bước cuối cùng của khung, không nội suy giữa hai bước\n40 bước trên khung 60 hình có thể hơi giật; làm mượt là việc của phần nhìn, ghi ở bảng giai đoạn.",
+   "title": "Màn hình vẽ trạng thái sau bước cuối cùng của khung, không nội suy giữa hai bước",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "edge-khung-dau-tien-sau-khi-tai-scene-dai": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Edge_FirstFrameAfterLongSceneLoad_IsClampedTo5Steps"
+   ],
+   "play": "",
+   "hash": "dd5b56eb3d0f",
+   "text": "**Khung đầu tiên sau khi tải scene dài bất thường** (vài giây): bị kẹp ở 0.125 giây, chạy tối đa 5 bước; trận không nhảy.",
+   "title": "Khung đầu tiên sau khi tải scene dài bất thường",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "edge-game-roi-khoi-man-hinh-roi-quay-lai": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Edge_GameLeftAndBack_StepsRunButGameplayStandsStill"
+   ],
+   "play": "",
+   "hash": "4f0cf4c91a70",
+   "text": "**Game rời khỏi màn hình rồi quay lại:** lượt tự tạm dừng theo `feature-run`; nhịp vẫn chạy nhưng gameplay đứng yên; thời gian ngoài game bị kẹp như trên.",
+   "title": "Game rời khỏi màn hình rồi quay lại",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "edge-khung-khong-du-0-025-giay": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Edge_FrameShorterThanAStep_KeepsTheTimeForNextFrame"
+   ],
+   "play": "",
+   "hash": "a949826c7788",
+   "text": "**Khung không đủ 0.025 giây:** không chạy bước nào; phần thời gian giữ lại cho khung sau.",
+   "title": "Khung không đủ 0.025 giây",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "edge-thao-tac-bam-dung-luc-luot-vua-ket": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Edge_ActionAfterRunEnded_ReachesTheFeatureWhichRefusesIt"
+   ],
+   "play": "",
+   "hash": "2affc6159907",
+   "text": "**Thao tác bấm đúng lúc lượt vừa kết thúc trong bước trước:** thao tác bị bỏ theo luật của feature nhận nó (ví dụ nút kĩ năng đã khoá).",
+   "title": "Thao tác bấm đúng lúc lượt vừa kết thúc trong bước trước",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "edge-doi-cach-chay-trong-luc-dang-choi": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Edge_ModeChangedWhilePlaying_IsReadOnlyAtNextRun"
+   ],
+   "play": "",
+   "hash": "2f4dae3caa9f",
+   "text": "**Đổi cách chạy trong lúc đang chơi:** không hỗ trợ; config đọc một lần khi vào trận.",
+   "title": "Đổi cách chạy trong lúc đang chơi",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "edge-tua-16-lan-tren-may-cham": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Edge_Speed16OnSlowMachine_ClampsFrameAndRuns80Steps_SameResult"
+   ],
+   "play": "",
+   "hash": "17094c12fb3c",
+   "text": "**Tua 16 lần trên máy chậm:** vẫn kẹp ở 0.125 giây thời gian khung; chạy tối đa 80 bước. Kết quả gameplay không đổi vì mỗi bước vẫn dài 0.025 giây.",
+   "title": "Tua 16 lần trên máy chậm",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "edge-chay-n-buoc-khi-dang-tam-dung": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Edge_RunNStepsWhilePaused_StepsRunGameplayStill"
+   ],
+   "play": "",
+   "hash": "cbfa87423d4c",
+   "text": "**Chạy N bước khi đang tạm dừng:** bước vẫn chạy, gameplay vẫn đứng yên theo luật tạm dừng.",
+   "title": "Chạy N bước khi đang tạm dừng",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "edge-o-cach-theo-khung-hinh": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Edge_FrameMode_StepsFollowFrameLengths"
+   ],
+   "play": "",
+   "hash": "1fae20a3c5f2",
+   "text": "**Ở cách theo khung hình:** kết quả không lặp lại giữa các máy; dùng khi cần thử cảm giác theo khung hình, không dùng để kiểm cân bằng.",
+   "title": "Ở cách theo khung hình",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "params": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.Params_RealConfigIsValid_AndKeepsTheStepOrder",
+    "ClockParamsTests.Params_BrokenConfig_StopsWithTheFieldName",
+    "ClockStepTests.Owners_RunInConfigOrder_NotInSubscribeOrder",
+    "ClockStepTests.NoStep_RunsBeforeTheRunStarted",
+    "ClockStepTests.ClearRun_DropsQueuedActionsAndLeftover"
+   ],
+   "play": "",
+   "hash": "d8a1ff3f610a",
+   "text": "## Làm gì\n1. Đọc config chung: cách chạy (bước cố định hoặc theo khung hình), số bước mỗi giây, trần số bước mỗi khung, cờ dev.\n2. Mỗi khung hình:\n   - Bước cố định: cộng thời gian khung (kẹp ở 0.125 giây) vào phần chờ; còn đủ 0.025 giây thì chạy một bước, tối đa 5 bước.\n   - Theo khung hình: chạy đúng một bước dài bằng thời gian khung (kẹp ở 0.125 giây).\n3. Mỗi bước: áp các thao tác trong hàng chờ chung theo thứ tự đã đưa vào (mỗi thao tác ghi kèm số bước nó được áp), rồi gọi các feature theo thứ tự ở `feature-sim-clock/clock-step` (mục Danh sách), tăng số bước đã chạy thêm 1.\n4. Phần nhìn đọc trạng thái sau bước cuối của khung.\n5. Bản dev: nhận tốc độ tua, lệnh chạy N bước, đóng băng, chạy một bước.\n\n## Thông số\nBảng `ClockParams` trong `.excel/` (loại `params`): `tick_rate`, `step_seconds`, `default_mode`, `modes`, `max_steps_per_frame`, `max_frame_seconds`, các thông số `dev_*` và `view_interpolation`. Cột `reason` ghi lí do từng số.\n\n## Thông số theo giai đoạn\nBa cột `idea`, `prototype`, `full` của bảng `ClockParams`. Chỉ `view_interpolation` đổi theo giai đoạn: FULL làm mượt hình giữa hai bước.",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:21"
+  },
+  "clockparams-tick-rate": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.tick_rate_Is40StepsASecond"
+   ],
+   "play": "",
+   "hash": "a892326cf695",
+   "text": "Bảng ClockParams (params), dòng tick_rate\nkey (string): tick_rate\nname (string): Số bước nhịp mỗi giây\nunit (string): bước/giây\nidea (string): 40\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người yêu cầu 40 lần mỗi giây; nhịp đòn nhanh nhất 0.7 giây nên đủ mịn",
+   "title": "ClockParams: Số bước nhịp mỗi giây (tick_rate)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-step-seconds": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.step_seconds_Is1OverTickRate_0025"
+   ],
+   "play": "",
+   "hash": "841b4e91a1e1",
+   "text": "Bảng ClockParams (params), dòng step_seconds\nkey (string): step_seconds\nname (string): Độ dài một bước\nunit (string): giây\nidea (string): 0.025\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Bằng 1 chia tick_rate",
+   "title": "ClockParams: Độ dài một bước (step_seconds)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-default-mode": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.default_mode_IsFixedTick"
+   ],
+   "play": "",
+   "hash": "981ae6d57d00",
+   "text": "Bảng ClockParams (params), dòng default_mode\nkey (string): default_mode\nname (string): Cách chạy mặc định\nunit (string): \nidea (string): fixed_tick\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người quyết: chơi thường và test cùng một nhịp",
+   "title": "ClockParams: Cách chạy mặc định (default_mode)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-modes": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.modes_FixedTickAndFrame_BothRun"
+   ],
+   "play": "",
+   "hash": "5512fd8c5bf7",
+   "text": "Bảng ClockParams (params), dòng modes\nkey (string): modes\nname (string): Các cách chạy chọn được trong config\nunit (string): \nidea (string): fixed_tick hoặc frame\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người yêu cầu chọn được Update hay TickUpdate bằng một config chung",
+   "title": "ClockParams: Các cách chạy chọn được trong config (modes)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-max-steps-per-frame": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.max_steps_per_frame_Is5"
+   ],
+   "play": "",
+   "hash": "165b27511fd9",
+   "text": "Bảng ClockParams (params), dòng max_steps_per_frame\nkey (string): max_steps_per_frame\nname (string): Số bước tối đa một khung hình\nunit (string): bước\nidea (string): 5\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Giữ như trần cũ của giao chiến; khung 0.1 giây vẫn theo kịp",
+   "title": "ClockParams: Số bước tối đa một khung hình (max_steps_per_frame)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-max-frame-seconds": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.max_frame_seconds_Is0125"
+   ],
+   "play": "",
+   "hash": "ca8e0ba137bc",
+   "text": "Bảng ClockParams (params), dòng max_frame_seconds\nkey (string): max_frame_seconds\nname (string): Thời gian khung tối đa được tính\nunit (string): giây\nidea (string): 0.125\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Bằng 5 bước; phần dư bị bỏ để trận chậm lại chứ không nhảy",
+   "title": "ClockParams: Thời gian khung tối đa được tính (max_frame_seconds)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-dev-speeds": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.dev_speeds_Are1_2_4_8_16"
+   ],
+   "play": "",
+   "hash": "7f547b822323",
+   "text": "Bảng ClockParams (params), dòng dev_speeds\nkey (string): dev_speeds\nname (string): Các tốc độ tua của bản dev\nunit (string): lần\nidea (string): 1 2 4 8 16\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Dự kiến; đủ để tester chạy một lượt dài trong vài phút",
+   "title": "ClockParams: Các tốc độ tua của bản dev (dev_speeds)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-dev-max-steps-per-frame": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.dev_max_steps_per_frame_Is5TimesSpeed_80At16"
+   ],
+   "play": "",
+   "hash": "194abfc13be2",
+   "text": "Bảng ClockParams (params), dòng dev_max_steps_per_frame\nkey (string): dev_max_steps_per_frame\nname (string): Trần bước một khung khi tua\nunit (string): bước\nidea (string): 5 nhân tốc độ tua\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Tốc độ 16 lần cho tối đa 80 bước một khung",
+   "title": "ClockParams: Trần bước một khung khi tua (dev_max_steps_per_frame)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-dev-run-steps": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.dev_run_steps_IsOn_AndRunsNSteps"
+   ],
+   "play": "",
+   "hash": "a08b339ff7e8",
+   "text": "Bảng ClockParams (params), dòng dev_run_steps\nkey (string): dev_run_steps\nname (string): Lệnh chạy ngay N bước\nunit (string): \nidea (string): có\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Tester chạy tới một mốc mà không chờ khung hình",
+   "title": "ClockParams: Lệnh chạy ngay N bước (dev_run_steps)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-dev-freeze-step": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.dev_freeze_step_IsOn_AndFreezesAndSteps"
+   ],
+   "play": "",
+   "hash": "722b32d8d3cd",
+   "text": "Bảng ClockParams (params), dòng dev_freeze_step\nkey (string): dev_freeze_step\nname (string): Lệnh đóng băng và chạy một bước\nunit (string): \nidea (string): có\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Tester xem từng bước khi bắt lỗi",
+   "title": "ClockParams: Lệnh đóng băng và chạy một bước (dev_freeze_step)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  },
+  "clockparams-view-interpolation": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "ClockParamsTests.view_interpolation_IsOffAtIdea"
+   ],
+   "play": "",
+   "hash": "480b57641fac",
+   "text": "Bảng ClockParams (params), dòng view_interpolation\nkey (string): view_interpolation\nname (string): Nội suy hình giữa hai bước\nunit (string): \nidea (string): không\nprototype (string): không\nfull (string): có\nreason (string): IDEA và PROTOTYPE chấp nhận hơi giật; FULL làm mượt trong phần nhìn",
+   "title": "ClockParams: Nội suy hình giữa hai bước (view_interpolation)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:22"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 22:44:51",
+   "id": "tick-40",
+   "state": "doing",
+   "by": "SimClock",
+   "note": "Viết SimClockCore, config ClockParams, installer và test EditMode"
+  },
+  {
+   "at": "2026-11-25 22:51:31",
+   "id": "tick-40",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Step_Lasts0025Seconds_And40StepsMakeOneSecond"
+  },
+  {
+   "at": "2026-11-25 22:51:32",
+   "id": "default-fixed",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.DefaultMode_IsFixedTick, ClockStepTests.FrameMode_IsChosenByConfigOnly"
+  },
+  {
+   "at": "2026-11-25 22:51:37",
+   "id": "cap-5",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.LongFrame_RunsAtMost5Steps_AndDropsTheRest, ClockStepTests.Frame100ms_StillKeepsUpWith4Steps"
+  },
+  {
+   "at": "2026-11-25 22:51:38",
+   "id": "frame-mode-clamp",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.FrameMode_OneStepAsLongAsTheFrame_ClampedAt0125"
+  },
+  {
+   "at": "2026-11-25 22:51:39",
+   "id": "steps-counted",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.StepCounts_AreWholeNumbers_GameplayStepsStopWhilePaused, ClockStepTests.BattleTime_DoesNotDriftAfterManySteps"
+  },
+  {
+   "at": "2026-11-25 22:51:40",
+   "id": "timer-in-steps",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Wait_EndsOnFirstStepReachingTheTime"
+  },
+  {
+   "at": "2026-11-25 22:51:42",
+   "id": "input-next-step",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.PlayerAction_IsAppliedAtStartOfNextStep_InOrderQueued, ClockStepTests.PlayerAction_WaitsWhenTheFrameRunsNoStep, ClockStepTests.PlayerAction_IsAppliedOnceEvenWhenTheFrameRunsSeveralSteps"
+  },
+  {
+   "at": "2026-11-25 22:51:42",
+   "id": "dev-speed",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.DevSpeed_MultipliesTheStepCapOfAFrame, ClockStepTests.DevSpeed_OutsideTheList_IsRefused"
+  },
+  {
+   "at": "2026-11-25 22:51:44",
+   "id": "dev-run-steps",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.DevRunSteps_RunsNStepsAtOnce_LikeRealTime, ClockStepTests.DevFreeze_StopsFrames_AndStepOnceRunsOneStep"
+  },
+  {
+   "at": "2026-11-25 22:51:44",
+   "id": "view-latest",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.View_SeesTheStateAfterTheLastStepOfTheFrame"
+  },
+  {
+   "at": "2026-11-25 22:51:49",
+   "id": "edge-khung-dau-tien-sau-khi-tai-scene-dai",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Edge_FirstFrameAfterLongSceneLoad_IsClampedTo5Steps"
+  },
+  {
+   "at": "2026-11-25 22:51:50",
+   "id": "edge-game-roi-khoi-man-hinh-roi-quay-lai",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Edge_GameLeftAndBack_StepsRunButGameplayStandsStill"
+  },
+  {
+   "at": "2026-11-25 22:51:51",
+   "id": "edge-khung-khong-du-0-025-giay",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Edge_FrameShorterThanAStep_KeepsTheTimeForNextFrame"
+  },
+  {
+   "at": "2026-11-25 22:51:52",
+   "id": "edge-thao-tac-bam-dung-luc-luot-vua-ket",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Edge_ActionAfterRunEnded_ReachesTheFeatureWhichRefusesIt"
+  },
+  {
+   "at": "2026-11-25 22:51:53",
+   "id": "edge-doi-cach-chay-trong-luc-dang-choi",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Edge_ModeChangedWhilePlaying_IsReadOnlyAtNextRun"
+  },
+  {
+   "at": "2026-11-25 22:51:54",
+   "id": "edge-tua-16-lan-tren-may-cham",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Edge_Speed16OnSlowMachine_ClampsFrameAndRuns80Steps_SameResult"
+  },
+  {
+   "at": "2026-11-25 22:51:55",
+   "id": "edge-chay-n-buoc-khi-dang-tam-dung",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Edge_RunNStepsWhilePaused_StepsRunGameplayStill"
+  },
+  {
+   "at": "2026-11-25 22:51:56",
+   "id": "edge-o-cach-theo-khung-hinh",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Edge_FrameMode_StepsFollowFrameLengths"
+  },
+  {
+   "at": "2026-11-25 22:52:04",
+   "id": "params",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.Params_RealConfigIsValid_AndKeepsTheStepOrder, ClockParamsTests.Params_BrokenConfig_StopsWithTheFieldName, ClockStepTests.Owners_RunInConfigOrder_NotInSubscribeOrder, ClockStepTests.NoStep_RunsBeforeTheRunStarted, ClockStepTests.ClearRun_DropsQueuedActionsAndLeftover"
+  },
+  {
+   "at": "2026-11-25 22:52:05",
+   "id": "clockparams-tick-rate",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.tick_rate_Is40StepsASecond"
+  },
+  {
+   "at": "2026-11-25 22:52:06",
+   "id": "clockparams-step-seconds",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.step_seconds_Is1OverTickRate_0025"
+  },
+  {
+   "at": "2026-11-25 22:52:07",
+   "id": "clockparams-default-mode",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.default_mode_IsFixedTick"
+  },
+  {
+   "at": "2026-11-25 22:52:08",
+   "id": "clockparams-modes",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.modes_FixedTickAndFrame_BothRun"
+  },
+  {
+   "at": "2026-11-25 22:52:08",
+   "id": "clockparams-max-steps-per-frame",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.max_steps_per_frame_Is5"
+  },
+  {
+   "at": "2026-11-25 22:52:09",
+   "id": "clockparams-max-frame-seconds",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.max_frame_seconds_Is0125"
+  },
+  {
+   "at": "2026-11-25 22:52:10",
+   "id": "clockparams-dev-speeds",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.dev_speeds_Are1_2_4_8_16"
+  },
+  {
+   "at": "2026-11-25 22:52:11",
+   "id": "clockparams-dev-max-steps-per-frame",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.dev_max_steps_per_frame_Is5TimesSpeed_80At16"
+  },
+  {
+   "at": "2026-11-25 22:52:12",
+   "id": "clockparams-dev-run-steps",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.dev_run_steps_IsOn_AndRunsNSteps"
+  },
+  {
+   "at": "2026-11-25 22:52:13",
+   "id": "clockparams-dev-freeze-step",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.dev_freeze_step_IsOn_AndFreezesAndSteps"
+  },
+  {
+   "at": "2026-11-25 22:52:14",
+   "id": "clockparams-view-interpolation",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockParamsTests.view_interpolation_IsOffAtIdea"
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "tick-40",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "default-fixed",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "cap-5",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "frame-mode-clamp",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "steps-counted",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "timer-in-steps",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "input-next-step",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "dev-speed",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "dev-run-steps",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "view-latest",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "edge-khung-dau-tien-sau-khi-tai-scene-dai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "edge-game-roi-khoi-man-hinh-roi-quay-lai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "edge-khung-khong-du-0-025-giay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "edge-thao-tac-bam-dung-luc-luot-vua-ket",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "edge-doi-cach-chay-trong-luc-dang-choi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "edge-tua-16-lan-tren-may-cham",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "edge-chay-n-buoc-khi-dang-tam-dung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "edge-o-cach-theo-khung-hinh",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:21",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-tick-rate",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-step-seconds",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-default-mode",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-modes",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-max-steps-per-frame",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-max-frame-seconds",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-dev-speeds",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-dev-max-steps-per-frame",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-dev-run-steps",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-dev-freeze-step",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:22",
+   "id": "clockparams-view-interpolation",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  }
+ ]
+}

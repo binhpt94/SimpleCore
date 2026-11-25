@@ -2,6 +2,7 @@ using System;
 using Game.Ads;
 using Game.Run;
 using Game.Services.Popup;
+using Game.SimClock;
 
 namespace Game.PopupRevive
 {
@@ -10,9 +11,15 @@ namespace Game.PopupRevive
     /// run enters <see cref="RunStep.ReviveOffer"/>. Only the first tap of each opening counts: "Xem quảng cáo" sends
     /// one ad request and waits with both buttons locked; "Kết thúc lượt" closes. A result closes the popup at once.
     /// The popup always closes first and reports to the run after. The back key does nothing: no handler is given.
+    /// The choice goes to the run through the shared clock's queue (feature-sim-clock#revive-result-queued): it is
+    /// applied at the start of the next step and recorded with that step's number, so a replay hands the run the
+    /// recorded result at the same step. The popup has no timer of its own: the ad wait has no time limit.
     /// </summary>
     internal sealed class RevivePopupPresenter : IDisposable
     {
+        /// <summary>Owner name of the revive result in the clock's action record.</summary>
+        internal const string ClockOwner = "PopupRevive";
+
         private enum State
         {
             Closed,
@@ -25,6 +32,7 @@ namespace Game.PopupRevive
         private readonly IRewardedAds _ads;
         private readonly IPopupService _popups;
         private readonly IPopupViews _views;
+        private readonly ISimClock _clock;
 
         private State _state = State.Closed;
         private PopupHandle _handle;
@@ -33,8 +41,10 @@ namespace Game.PopupRevive
         private bool _disposed;
 
         public RevivePopupPresenter(
-            IRunFlow flow, IRunRevive revive, IRewardedAds ads, IPopupService popups, IPopupViews views)
+            IRunFlow flow, IRunRevive revive, IRewardedAds ads, IPopupService popups, IPopupViews views,
+            ISimClock clock)
         {
+            _clock = clock ?? throw new ArgumentNullException(nameof(clock));
             _flow = flow ?? throw new ArgumentNullException(nameof(flow));
             _revive = revive ?? throw new ArgumentNullException(nameof(revive));
             _ads = ads ?? throw new ArgumentNullException(nameof(ads));
@@ -117,7 +127,7 @@ namespace Game.PopupRevive
             if (_state != State.Choosing) return;
 
             ClosePopup();
-            _revive.DeclineRevive();
+            _clock.Enqueue(ClockOwner, _revive.DeclineRevive);
         }
 
         private void OnAdReply(AdReply reply)
@@ -125,8 +135,8 @@ namespace Game.PopupRevive
             if (_state != State.WaitingAd || reply.OfferId != _lastOfferId) return;
 
             ClosePopup();
-            if (reply.Result == AdResult.Watched) _revive.Revive();
-            else _revive.FailRevive();
+            if (reply.Result == AdResult.Watched) _clock.Enqueue(ClockOwner, _revive.Revive);
+            else _clock.Enqueue(ClockOwner, _revive.FailRevive);
         }
 
         private void CloseWithoutReport()

@@ -22,7 +22,7 @@ namespace Game.HudUpgrade.Tests
             var shop = new FakeShop(wallet);
             shop.SetTeam("knight", "archer", "mage");
             var views = new FakeViewFactory();
-            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), new FakeRun(), views);
+            var participant = new HudUpgradeParticipant(shop, new FakeOrders(shop), new FakeRoster(), new FakeRun(), new FakeDownState(), views);
 
             participant.Run();
             Assert.AreEqual(1, views.Created);
@@ -36,6 +36,29 @@ namespace Game.HudUpgrade.Tests
         }
 
         [Test]
+        public void Session_counts_the_bar_as_held_while_it_runs_and_nothing_once_it_ended()
+        {
+            var shop = new FakeShop(new FakeWallet());
+            shop.SetTeam("knight", "axeman", "archer");
+            var views = new GameObjectViewFactory();
+            var participant = new HudUpgradeParticipant(shop, new FakeOrders(shop), new FakeRoster(), new FakeRun(), new FakeDownState(), views);
+            var usage = (ISessionParticipantUsage)participant;
+            Assert.IsFalse(usage.OpensViewsOnRun,
+                "the game opens on the start screen; the bar only shows once a battle is built, so the session must not require a view right after Run");
+            Assert.AreEqual(0, usage.HeldViews);
+            Assert.AreEqual(0, usage.RunningJobs);
+
+            participant.Run();
+            Assert.AreEqual(1, usage.HeldViews, "the bar is the one view");
+            Assert.AreEqual(0, usage.RunningJobs, "the bar runs no timer or loop of its own");
+
+            participant.DisposeAsync().GetAwaiter().GetResult();
+            Assert.AreEqual(0, usage.HeldViews);
+            Assert.AreEqual(0, usage.RunningJobs);
+            Assert.IsTrue(views.Last == null, "the bar's GameObject is gone");
+        }
+
+        [Test]
         public void Bar_shows_when_run_starts_a_frame_after_the_session_runs()
         {
             // Session reaches Running with no run yet: the shop is empty, the step is Home.
@@ -43,7 +66,7 @@ namespace Game.HudUpgrade.Tests
             var shop = new FakeShop(wallet);
             var run = new FakeRun();
             var views = new FakeViewFactory();
-            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views);
+            var participant = new HudUpgradeParticipant(shop, new FakeOrders(shop), new FakeRoster(), run, new FakeDownState(), views);
             participant.Run();
             Assert.IsFalse(views.View.Visible);
 
@@ -64,7 +87,7 @@ namespace Game.HudUpgrade.Tests
             var shop = new FakeShop(wallet);
             var run = new FakeRun();
             var views = new FakeViewFactory();
-            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views);
+            var participant = new HudUpgradeParticipant(shop, new FakeOrders(shop), new FakeRoster(), run, new FakeDownState(), views);
             participant.Run();
 
             run.GoTo(RunStep.Playing);
@@ -82,7 +105,7 @@ namespace Game.HudUpgrade.Tests
             var shop = new FakeShop(wallet);
             var run = new FakeRun();
             var views = new FakeViewFactory();
-            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views);
+            var participant = new HudUpgradeParticipant(shop, new FakeOrders(shop), new FakeRoster(), run, new FakeDownState(), views);
             participant.Run();
 
             run.SetStepQuietly(RunStep.Playing);
@@ -106,7 +129,7 @@ namespace Game.HudUpgrade.Tests
             var views = new FakeViewFactory();
             var cheat = new HudUpgradeParticipant.CheatSetup(HudUpgradeCheatState.MixedButtons, 120,
                 levelsOfState, wallet, wallet, wallet, new[] { "knight", "axeman", "archer" });
-            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, views, cheat);
+            var participant = new HudUpgradeParticipant(shop, new FakeOrders(shop), new FakeRoster(), run, new FakeDownState(), views, cheat);
 
             participant.Run();
             run.StartBattle();
@@ -168,7 +191,7 @@ namespace Game.HudUpgrade.Tests
             var shop = new FakeShop(wallet);
             shop.SetTeam("knight", "archer", "mage");
             var run = new FakeRun();
-            var participant = new HudUpgradeParticipant(shop, new FakeRoster(), run, new FakeViewFactory());
+            var participant = new HudUpgradeParticipant(shop, new FakeOrders(shop), new FakeRoster(), run, new FakeDownState(), new FakeViewFactory());
 
             participant.Run();
             run.StartBattle();
@@ -229,9 +252,12 @@ namespace Game.HudUpgrade.Tests
             var session = new FakeSession();
             var wallet = new FakeWallet();
             registry.Register<ISessionScene>(session);
-            registry.Register<IUpgradeShop>(new FakeShop(wallet));
+            var shop = new FakeShop(wallet);
+            registry.Register<IUpgradeShop>(shop);
+            registry.Register<IUpgradeOrders>(new FakeOrders(shop));
             registry.Register<IHeroRoster>(new FakeRoster());
             registry.Register<IRunFlow>(new FakeRun());
+            registry.Register<IHeroDownState>(new FakeDownState());
             registry.Register<IWalletBalance>(wallet);
             registry.Register<IWalletIncome>(wallet);
             registry.Register<IWalletService>(wallet);
@@ -249,6 +275,17 @@ namespace Game.HudUpgrade.Tests
             registry.Register<ISessionScene>(new FakeSession());
             var error = Assert.Throws<System.InvalidOperationException>(() => installer.Install(registry));
             StringAssert.Contains("IUpgradeShop", error.Message);
+        }
+
+        [Test]
+        public void Installer_fails_at_once_naming_the_missing_buy_orders()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
+            var registry = new FakeRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IUpgradeShop>(new FakeShop(new FakeWallet()));
+            var error = Assert.Throws<System.InvalidOperationException>(() => installer.Install(registry));
+            StringAssert.Contains("IUpgradeOrders", error.Message);
         }
     }
 }

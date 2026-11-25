@@ -4,6 +4,7 @@ using Game.Ads;
 using Game.Core;
 using Game.Run;
 using Game.Services.Popup;
+using Game.SimClock;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -33,6 +34,7 @@ namespace Game.PopupRevive.Tests
             var popups = new NullPopups();
             registry.Register<IPopupService>(popups);
             registry.Register<IPopupViews>(popups);
+            registry.Register<ISimClock>(new NullClock());
 
             installer.Install(registry);
 
@@ -150,6 +152,22 @@ namespace Game.PopupRevive.Tests
         {
             public void Show(int offerId, Action<AdReply> onReply) { }
             public void Cancel(int offerId) { }
+        }
+
+        private sealed class NullClock : ISimClock
+        {
+            public SimMode Mode => SimMode.FixedTick;
+            public float StepSeconds => 0.025f;
+            public long StepCount => 0;
+            public long GameplayStepCount => 0;
+            public double GameplaySeconds => 0;
+            public IDisposable OnStep(string owner, Action<SimStep> onStep) => new Nothing();
+            public void Enqueue(string owner, Action apply) { }
+
+            private sealed class Nothing : IDisposable
+            {
+                public void Dispose() { }
+            }
         }
 
         private sealed class NullPopups : IPopupService, IPopupViews

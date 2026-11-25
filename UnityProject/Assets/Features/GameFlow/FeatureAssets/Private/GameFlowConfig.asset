@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea7cf8b2547afae60ae7006ed63f122f, type: 3}
   m_Name: GameFlowConfig
   m_EditorClassIdentifier: Game.GameFlow.Internal::Game.GameFlow.GameFlowConfig
-  _routeScreens: 0
+  _routeScreens: 1
   _switchSeconds: 0
   _buildLimitSeconds: 3
   _buildFailedText: "Kh\xF4ng v\xE0o \u0111\u01B0\u1EE3c tr\u1EADn, th\u1EED l\u1EA1i"

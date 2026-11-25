@@ -3,13 +3,17 @@ using System;
 namespace Game.Enemy
 {
     /// <summary>
-    /// Where enemies are drawn, and the frame clock that moves them. Implemented by the view; the presenter pushes
-    /// what to draw. Positions are battlefield units (u), ground at y = 0.
+    /// Where enemies are drawn. Implemented by the view; the presenter pushes what to draw after each step of the
+    /// shared clock. The view only animates between those states (bob, lunge, flash, shrink); it moves no enemy.
+    /// Positions are battlefield units (u), ground at y = 0.
     /// </summary>
     internal interface IEnemyStage
     {
-        /// <summary>Raised once per rendered frame with the seconds since the last one.</summary>
-        event Action<float> Frame;
+        /// <summary>
+        /// Reports to the session every object the stage holds: the stage itself now, then each enemy, shot and coin
+        /// text as it is created. The stage disposes each handle when it destroys that object.
+        /// </summary>
+        void TrackWith(Func<UnityEngine.Object, IDisposable> trackView);
 
         /// <summary>Starts drawing an enemy.</summary>
         void Show(EnemyLook look);
@@ -28,6 +32,9 @@ namespace Game.Enemy
 
         /// <summary>The enemy was hit: flash it.</summary>
         void Flash(int handle);
+
+        /// <summary>The enemy came on screen with an entrance: grow it and shrink it back to its size.</summary>
+        void Enter(int handle);
 
         /// <summary>The enemy was defeated: shrink it away, then stop drawing it.</summary>
         void Defeat(int handle);

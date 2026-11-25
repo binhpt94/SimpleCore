@@ -13,5 +13,12 @@ namespace Game.Core
 
         /// <summary>Jobs tracked and not yet finished.</summary>
         int RunningJobs { get; }
+
+        /// <summary>
+        /// The participant opens its views in the run step (a HUD, a bar, the battlefield, the castle), so right after
+        /// the run step it must hold at least one view. False for participants with no view, and for those whose views
+        /// only come later (enemies when a wave sends them, a popup when it opens).
+        /// </summary>
+        bool OpensViewsOnRun { get; }
     }
 }

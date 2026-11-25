@@ -5,12 +5,12 @@ frame: none
 ---
 # Thông số nhịp giao chiến
 
-Một nhịp giao chiến ứng với một bước cập nhật cố định của trận, 50 bước mỗi giây. Node này chốt bước đó, thứ tự xử lí trong nhịp, và cách làm tròn sát thương.
+Một nhịp giao chiến ứng với một bước nhịp chung của trận, 40 bước mỗi giây. Node này chốt thứ tự xử lí trong nhịp và cách làm tròn sát thương.
 
 ## Ý cốt lõi
 
-### fixed-step | AI 6 | Trận cập nhật theo bước cố định 0.02 giây (50 bước mỗi giây); mỗi bước một nhịp giao chiến
-Bước cố định cho kết quả giống nhau trên máy nhanh và máy chậm. Khung hình chậm thì chạy nhiều bước trong một khung, tối đa 5 bước.
+### fixed-step | AI 7 | Mỗi bước nhịp chung của trận (0.025 giây, 40 bước mỗi giây) chạy đúng một nhịp giao chiến
+Bước, trần số bước mỗi khung và cách chạy do `feature-sim-clock` giữ; giao chiến không có đồng hồ riêng. Người yêu cầu nhịp chung 40 lần mỗi giây (2026-11-25).
 
 ### tick-order | AI 7 | Trong một nhịp: đi và nhắm, ra đòn, gom đòn, lọc, cộng, chủ trừ máu, báo hết máu, báo nhịp xong
 Mọi bên ra đòn trong bước dựa trên vị trí và trạng thái đầu bước.

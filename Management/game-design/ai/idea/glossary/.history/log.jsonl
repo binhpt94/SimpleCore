@@ -5,3 +5,6 @@
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "1d3ef58a6e65"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "1d3ef58a6e65"}
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "1d3ef58a6e65"}
+{"at": "2026-11-25 21:15:45", "event": "data", "hash": "82bb29fa21ee", "previous": "1d3ef58a6e65", "added": ["sim-step", "seed"], "removed": [], "rewritten": []}
+{"at": "2026-11-25 21:54:05", "event": "promote", "by": "người", "hash": "82bb29fa21ee"}
+{"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "82bb29fa21ee"}

@@ -1,0 +1,20 @@
+{
+ "node": "feature-home/home-screen/home-screen-spec",
+ "nodeHash": "eecc5b73afde",
+ "frames": {
+  "main": "96454648a1b1"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99"
+ },
+ "order": "_design/feature-home.home-screen.home-screen-spec/home-screen-claude",
+ "version": 2,
+ "at": "2026-11-25 23:21:32",
+ "stamp": 1795623692.1571038,
+ "sources": [
+  [
+   "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+   2
+  ]
+ ]
+}

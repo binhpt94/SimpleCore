@@ -8,52 +8,17 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Hiện hero bằng sprite 2D gen bằng AI, chân trên mặt đất (y=0), quay mặt về phía mục tiêu hoặc hướng đang đi.
 
 ## Thông số
-| Hero | Nhóm | Máu | Sát thương | s mỗi đòn | Tầm (u) | Chạy (u/s) | Hộp (u) | Kiểu đòn | Sát thương/s |
-|---|---|---|---|---|---|---|---|---|---|
-| Hiệp sĩ | Cận chiến | 300 | 12 | 1.0 | 1.2 | 2.0 | 1×1.5 | Một mục tiêu | 12.0 |
-| Đấu sĩ rìu | Cận chiến | 240 | 14 | 1.4 | 1.3 | 2.4 | 1×1.5 | Chém 1.5u phía trước | 10.0 mỗi quái |
-| Kiếm khách | Cận chiến | 180 | 16 | 0.7 | 1.2 | 3.5 | 1×1.5 | Một mục tiêu | 22.9 |
-| Cung thủ | Bắn xa | 120 | 14 | 0.8 | 7 | 3.0 | 1×1.5 | Một mục tiêu | 17.5 |
-| Pháp sư | Bắn xa | 100 | 18 | 1.6 | 6 | 2.6 | 1×1.5 | Nổ bán kính 1.5u | 11.25 mỗi quái |
+Số liệu nằm ở các bảng trong `.excel/` (xem: `python Management/tools/gd_excel.py show ai/idea/feature-hero/hero-list/hero-roster-values`):
+- `Heroes` (loại `list`): năm hero, mỗi hero một dòng: nhóm, máu, sát thương, giây mỗi đòn, tầm, tốc độ chạy và lí do, hộp, kiểu đòn, cỡ vùng đòn, sát thương/s. Cột `stage` là giai đoạn hero bắt đầu có.
+- `AttackKinds` (loại `list`): ba kiểu đòn và đòn trúng ai; cột `attack_kind` của `Heroes` trỏ tới bảng này.
+- `Effects` (loại `list`): hiệu ứng tối thiểu, khi nào hiện, khi nào mất.
 
 Mọi giá trị là cấp 1, dự kiến, theo bộ số chung.
 
-Tốc độ chạy theo vai (dự kiến):
-| Hero | Chạy (u/s) | Lí do |
-|---|---|---|
-| Hiệp sĩ | 2.0 | Giáp nặng; đứng chắn gần thành nên ít phải đi xa |
-| Đấu sĩ rìu | 2.4 | Rìu nặng; vẫn kịp ra gặp cụm quái |
-| Pháp sư | 2.6 | Áo choàng nhẹ, tầm 6u nên không cần chạy nhanh |
-| Cung thủ | 3.0 | Đồ nhẹ; chạy nhanh tới chỗ bắn, tầm 7u |
-| Kiếm khách | 3.5 | Nhanh nhất (vòng 3); lao tới hạ từng con |
-
 So với quái: Lính 1.5, Sói 3.0 u/s (`feature-enemy`). Chỉ Kiếm khách chạy nhanh hơn Sói; Cung thủ bằng Sói. Lí do chung: cận chiến máu 180-300, bắn xa 100-120; hero đánh vùng có sát thương/s mỗi quái thấp hơn hero một mục tiêu (luật `hero-tradeoff` vòng 3).
 
-Kiểu đòn:
-| Kiểu | Trúng ai |
-|---|---|
-| Một mục tiêu | Chỉ mục tiêu |
-| Chém phía trước | Mục tiêu và mọi quái có hộp chạm đoạn dài 1.5u bắt đầu từ mép trước của hero, về phía mục tiêu |
-| Nổ quanh mục tiêu | Mục tiêu và mọi quái có mép hộp cách tâm mục tiêu không quá 1.5u, cả hai phía của mục tiêu |
-
-Hiệu ứng (mức tối thiểu):
-| Hiệu ứng | Xuất hiện | Biến mất |
-|---|---|---|
-| Nhún khi đi (0.1u, chu kì 0.4s) | bắt đầu đi | dừng đi |
-| Nhích khi ra đòn (0.2u về phía mục tiêu, 0.15s) | mỗi đòn | sau 0.15s |
-| Nháy khi bị đánh | mỗi đòn trúng | sau 0.1s, đòn mới đặt lại |
-| Vệt chém (Đấu sĩ rìu) | mỗi đòn, phủ đoạn 1.5u | sau 0.2s |
-| Vòng nổ (Pháp sư) | lúc trúng, bán kính 1.5u quanh mục tiêu | sau 0.3s |
-
 ## Thông số theo giai đoạn
-| Thông số | IDEA | PROTOTYPE | FULL |
-|---|---|---|---|
-| Số hero trong danh sách | 3 (Hiệp sĩ, Đấu sĩ rìu, Cung thủ) | 5 | 5 |
-| Số chỗ trong đội | 3 (cả 3 hero, không cần chọn; đúng đội mặc định của `feature-team-select/team-memory/memory-rules`) | 3 chọn từ 5 | 3 chọn từ 5 |
-| Kiểu đòn có | Một mục tiêu, Chém phía trước | cả ba | cả ba |
-| Chỉ số | như bảng | như bảng | theo số đã chỉnh sau chơi thử |
-| Tốc độ chạy riêng từng hero | có: Hiệp sĩ 2.0, Đấu sĩ rìu 2.4, Cung thủ 3.0 u/s | cả 5 hero như bảng | theo số đã chỉnh sau chơi thử |
-| Hình | 1 sprite mỗi hero, anim bằng move/scale/nháy | như IDEA, thêm sprite khi đánh | đủ anim đi, đánh, gục; âm thanh |
+Bảng `StageParams` trong `.excel/` (loại `params`): danh sách hero có gì ở IDEA, PROTOTYPE, FULL. Hero và kiểu đòn nào có từ giai đoạn nào: cột `stage` của `Heroes` và `AttackKinds`.
 
 ## Trường hợp biên
 - Đấu sĩ rìu chém: chỉ trúng quái phía trước (bên có mục tiêu); quái chồng lên chính Đấu sĩ rìu (khoảng cách 0) cũng tính là phía trước nếu ở cùng bên với mục tiêu theo tâm.

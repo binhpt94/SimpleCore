@@ -5,6 +5,7 @@
     "Game.Core",
     "Game.SceneFlow.Internal",
     "Game.Services.SessionScene.Contracts",
+    "Game.SceneFlow.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

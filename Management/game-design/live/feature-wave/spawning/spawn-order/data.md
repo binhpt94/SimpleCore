@@ -1,6 +1,6 @@
 ---
 based-on: 8c9e1c247bf1
-refs: feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-wave/wave-gap@d9d4c35f6907, feature-enemy/enemy-list/enemy-type-values@96f77fbbafff, feature-enemy/enemy-behavior/enemy-move-values@820f944e332f, feature-castle/castle-core/castle-body-values@b648ec300023
+refs: feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-wave/wave-gap@d9d4c35f6907, feature-enemy/enemy-list/enemy-type-values@96f77fbbafff, feature-enemy/enemy-behavior/enemy-move-values@820f944e332f, feature-castle/castle-core/castle-body-values@b648ec300023, feature-sim-clock/seeded-random@493ba40160e7
 ---
 # Thứ tự và cách thả quái
 
@@ -28,3 +28,6 @@ Giữ màn hình đọc được và máy không quá tải. Đồng hồ nhịp
 
 ### stop-on-end | AI 8 | Thành bị phá thì ngừng thả ngay, các con chưa ra bị bỏ
 Đợt đó không được tính là dọn sạch.
+
+### seeded-shuffle | AI 7 | Xáo thứ tự loại quái và gán bên ra đều lấy số từ dòng ngẫu nhiên của đợt quái, sinh từ seed của lượt
+Cùng seed thì mọi đợt của lượt ra cùng thứ tự và cùng bên; luật dòng ngẫu nhiên ở `feature-sim-clock/seeded-random`. Nhịp thả và lúc hoãn đếm theo bước nhịp chung.

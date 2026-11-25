@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: enemy-wave-clear=gpt@r2-1#enemy-wave-clear, enemy-type-threats=gpt@r2-1#enemy-type-threats
 ---
 # Quái

@@ -51,6 +51,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Lính đi khoảng 9.3 s tới mép thành (2026-11-23).** Lấy theo `feature-enemy/enemy-behavior/enemy-move-values`; bản cũ ghi khoảng 10 s.
 - **Chuỗi cùng bên tối đa 3.** Ý `spawn-both-sides` cần cả hai bên luôn có áp lực. Đã loại: xen kẽ trái phải tuyệt đối (dễ đoán), ngẫu nhiên hoàn toàn (có lúc 6 con cùng bên).
 - **Hoãn khi đủ 40 rồi thả ngay khi bớt.** Không mất quái nào của đợt, đợt vẫn đủ số. Đã loại: bỏ con thừa (đợt nhẹ đi khi đội yếu, thưởng người chơi kém).
+- **Xáo theo seed của lượt (2026-11-25, người yêu cầu ngẫu nhiên tất định theo seed).** Ý `seeded-shuffle`: hai bước "xáo thứ tự" và "gán bên" ở mục "Làm gì" lấy số từ dòng ngẫu nhiên của đợt quái (`feature-sim-clock/seeded-random`), không dùng bộ ngẫu nhiên của engine. Không đổi luật xáo nào. Đã loại: ghi vào node thả quái vòng 3 (luật chung ở đó không đổi, chỉ nguồn số đổi).
 - **Không có đếm ngược trước đợt 1.** Node `feature-wave/wave-gap` chỉ có lúc thở sau dọn sạch; quãng đi của quái đã đủ làm lúc chuẩn bị.
 
 ## Chưa rõ

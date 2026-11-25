@@ -5,6 +5,7 @@
     "Game.Core",
     "Game.Upgrade.Contracts",
     "Game.Upgrade.Internal",
+    "Game.SimClock.Contracts",
     "Game.Wallet.Contracts",
     "Game.Hero.Contracts",
     "Game.Castle.Contracts",

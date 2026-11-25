@@ -1,3 +1,4 @@
+using System;
 using Game.Core;
 using Game.Run;
 
@@ -13,6 +14,7 @@ namespace Game.Battlefield
         private readonly BackdropLayout _layout;
         private readonly IBackdropViewFactory _views;
         private IBackdropView _view;
+        private IDisposable _viewTracking;
 
         public BattlefieldParticipant(IRunFlow run, BackdropLayout layout, IBackdropViewFactory views)
         {
@@ -22,6 +24,9 @@ namespace Game.Battlefield
         }
 
         internal bool IsShown => _view != null;
+
+        // OpensViewsOnRun stays false (the base default): the Game scene opens on the home screen and the backdrop
+        // comes only when the battle is set up, so the participant holds no view right after the run step.
 
         protected override void OnRun()
         {
@@ -44,6 +49,7 @@ namespace Game.Battlefield
         {
             if (_view != null) return;
             _view = _views.Create();
+            _viewTracking = TrackView(_view.Root);
             _view.Show(_layout.Build());
         }
 
@@ -52,6 +58,8 @@ namespace Game.Battlefield
             if (_view == null) return;
             var view = _view;
             _view = null;
+            _viewTracking?.Dispose();
+            _viewTracking = null;
             _views.Destroy(view);
         }
     }

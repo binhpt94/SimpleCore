@@ -1,3 +1,5 @@
 {"at": "2026-11-25 01:22:29", "event": "data", "hash": "9b193c130653", "previous": "", "added": ["fixed-step", "tick-order", "damage-real", "skill-is-hit", "kill-credit", "pause-no-tick"], "removed": [], "rewritten": []}
 {"at": "2026-11-25 01:23:28", "event": "promote", "by": "người (Sync)", "hash": "9b193c130653"}
 {"at": "2026-11-25 12:55:20", "event": "promote", "by": "người", "hash": "9b193c130653"}
+{"at": "2026-11-25 21:15:45", "event": "data", "hash": "0b863ec78d17", "previous": "9b193c130653", "added": [], "removed": [], "rewritten": [{"id": "fixed-step", "old": "Trận cập nhật theo bước cố định 0.02 giây (50 bước mỗi giây); mỗi bước một nhịp giao chiến\nBước cố định cho kết quả giống nhau trên máy nhanh và máy chậm. Khung hình chậm thì chạy nhiều bước trong một khung, tối đa 5 bước.", "new": "Mỗi bước nhịp chung của trận (0.025 giây, 40 bước mỗi giây) chạy đúng một nhịp giao chiến\nBước, trần số bước mỗi khung và cách chạy do `feature-sim-clock` giữ; giao chiến không có đồng hồ riêng. Người yêu cầu nhịp chung 40 lần mỗi giây (2026-11-25)."}]}
+{"at": "2026-11-25 21:53:19", "event": "promote", "by": "người", "hash": "0b863ec78d17"}

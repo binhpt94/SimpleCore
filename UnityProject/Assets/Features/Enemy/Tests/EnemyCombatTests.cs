@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Game.Combat;
 using Game.Run;
+using Game.SimClock;
 using Game.Wallet;
 using NUnit.Framework;
 using UnityEditor;
@@ -11,7 +13,8 @@ namespace Game.Enemy.Tests
     public sealed class EnemyCombatTests
     {
         private const string ConfigPath = "Assets/Features/Enemy/FeatureAssets/Private/EnemyConfig.asset";
-        private const float Step = 0.02f;
+        // One step of the shared clock (live/feature-sim-clock/clock-step/clock-values: 40 steps a second).
+        private const float Step = 0.025f;
 
         private EnemyConfig _config;
         private EnemyField _field;
@@ -219,15 +222,16 @@ namespace Game.Enemy.Tests
         {
             var runFlow = new FakeRunFlow();
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, runFlow, stage);
+            var clock = new FakeClock();
+            using var presenter = Present(runFlow, clock, stage);
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
 
             runFlow.Paused = true;
-            stage.RaiseFrame(2f);
+            clock.Run(2f, gameplay: false);
             Assert.That(X(), Is.EqualTo(17f));
 
             runFlow.Paused = false;
-            stage.RaiseFrame(1f);
+            clock.Run(1f);
             Assert.That(X(), Is.EqualTo(15.5f).Within(0.001f));
         }
 
@@ -235,7 +239,7 @@ namespace Game.Enemy.Tests
         public void The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones()
         {
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            using var presenter = Present(new FakeRunFlow(), new FakeClock(), stage);
 
             _field.Spawn(new EnemySpawn(EnemyType.Wolf, EnemySide.Left, 1f));
             var handle = Handle();
@@ -251,11 +255,12 @@ namespace Game.Enemy.Tests
         public void The_stage_lunges_the_enemy_toward_its_foe_when_it_hits()
         {
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            var clock = new FakeClock();
+            using var presenter = Present(new FakeRunFlow(), clock, stage);
             _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
 
-            stage.RaiseFrame(Step);
+            clock.StepOnce();
 
             Assert.That(stage.Lunges, Is.EqualTo(new[] { -1 }));
         }
@@ -264,19 +269,20 @@ namespace Game.Enemy.Tests
         public void An_enemy_archer_shows_a_shot_flying_to_its_foe_on_every_hit_while_the_damage_lands_at_once()
         {
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            var clock = new FakeClock();
+            using var presenter = Present(new FakeRunFlow(), clock, stage);
             _heroes.Foes.Add(new EnemyFoe(7, 12f, 0.5f));        // gap 17 - 0.5 - 0.5 - 12 = 4u, within 5u
             _field.Spawn(new EnemySpawn(EnemyType.Archer, EnemySide.Right, 1f));
 
-            stage.RaiseFrame(Step);
+            clock.StepOnce();
 
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "damage lands in the frame of the hit");
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "damage lands in the step of the hit");
             Assert.That(stage.Shots.Count, Is.EqualTo(1));
             Assert.That(stage.Shots[0].FromX, Is.EqualTo(17f).Within(1e-4f));
             Assert.That(stage.Shots[0].ToX, Is.EqualTo(12f).Within(1e-4f));
             Assert.That(stage.Shots[0].Y, Is.EqualTo(0.6f).Within(1e-4f), "from the middle of its 1.2u box");
 
-            for (var i = 0; i < 60; i++) stage.RaiseFrame(Step);  // 1.2s later: next hit
+            clock.Run(1.2f);                                     // 1.2s later: next hit
             Assert.That(stage.Shots.Count, Is.EqualTo(_heroes.Hits.Count));
         }
 
@@ -287,11 +293,12 @@ namespace Game.Enemy.Tests
         public void A_melee_enemy_hits_without_a_shot(EnemyType type)
         {
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            var clock = new FakeClock();
+            using var presenter = Present(new FakeRunFlow(), clock, stage);
             _heroes.Foes.Add(new EnemyFoe(7, 15f, 0.5f));
             _field.Spawn(new EnemySpawn(type, EnemySide.Right, 1f));
 
-            for (var i = 0; i < 200; i++) stage.RaiseFrame(Step);
+            clock.Run(5f);
 
             Assert.That(_heroes.Hits.Count, Is.GreaterThan(0));
             Assert.That(stage.Shots, Is.Empty);
@@ -301,7 +308,7 @@ namespace Game.Enemy.Tests
         public void A_defeated_enemy_shows_the_coins_it_paid_where_it_stood()
         {
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            using var presenter = Present(new FakeRunFlow(), new FakeClock(), stage);
             _field.Spawn(new EnemySpawn(EnemyType.Giant, EnemySide.Left, 1f));
             var handle = Handle();
 
@@ -322,7 +329,7 @@ namespace Game.Enemy.Tests
         public void Leaving_the_battle_shows_no_coins_for_the_enemies_removed()
         {
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), stage);
+            using var presenter = Present(new FakeRunFlow(), new FakeClock(), stage);
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
 
             _field.Clear();
@@ -335,7 +342,8 @@ namespace Game.Enemy.Tests
         {
             var runFlow = new FakeRunFlow();
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, runFlow, stage);
+            var clock = new FakeClock();
+            using var presenter = Present(runFlow, clock, stage);
             _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
             _field.Spawn(new EnemySpawn(EnemyType.Wolf, EnemySide.Left, 1f));
@@ -343,7 +351,7 @@ namespace Game.Enemy.Tests
             Assert.That(stage.Coins.Count, Is.EqualTo(1));
 
             runFlow.Paused = true;
-            stage.RaiseFrame(3f);
+            clock.Run(3f, gameplay: false);
 
             Assert.That(stage.Paused, Is.True, "the stage freezes everything it plays, the coin text too");
             Assert.That(stage.Coins.Count, Is.EqualTo(1), "nothing defeated, nothing paid while paused");
@@ -415,14 +423,15 @@ namespace Game.Enemy.Tests
         {
             var runFlow = new FakeRunFlow();
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, runFlow, stage);
+            var clock = new FakeClock();
+            using var presenter = Present(runFlow, clock, stage);
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
             _field.SlowAll(2f);
 
             runFlow.Paused = true;
-            stage.RaiseFrame(5f);
+            clock.Run(5f, gameplay: false);
             runFlow.Paused = false;
-            stage.RaiseFrame(1f);
+            clock.Run(1f);
 
             Assert.That(X(), Is.EqualTo(17f - 0.75f).Within(0.001f), "still slowed after the pause");
         }
@@ -471,14 +480,14 @@ namespace Game.Enemy.Tests
             _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
             _field.Tick(Step);                     // first hit at once, next due after 1.0s
-            Run(0.48f);                            // 0.5s gone, 0.5s left
+            Run(0.5f);                             // 0.5s gone, 0.5s left
 
             _field.SlowAll(10f);                   // 0.5s left becomes 1.0s
 
-            Run(0.94f);
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "not yet at 1.44s");
-            Run(0.1f);
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "second hit at 1.5s");
+            Run(0.95f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "not yet 0.95s after Frost");
+            Run(0.05f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "second hit 1.0s after Frost");
         }
 
         [Test]
@@ -486,18 +495,18 @@ namespace Game.Enemy.Tests
         {
             _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
-            _field.Tick(Step);                     // hit at 0, next due at 1.0s
-            Run(0.48f);                            // 0.5s gone, 0.5s left
+            _field.Tick(Step);                     // first hit, next due after 1.0s
+            Run(0.5f);                             // 0.5s gone, 0.5s left
 
             _field.SlowAll(0.4f);                  // 0.5s left -> 1.0s; after 0.4s slowed 0.6s left -> halves to 0.3s
-            Run(0.64f);
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "not yet at 1.14s");
-            Run(0.1f);
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "second hit at 1.2s");
+            Run(0.65f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "not yet 0.65s after Frost");
+            Run(0.05f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "second hit 0.7s after Frost");
 
-            Run(0.9f);
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "not yet at 2.14s");
-            Run(0.1f);
+            Run(0.95f);
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "not yet 0.95s after the second");
+            Run(0.05f);
             Assert.That(_heroes.Hits.Count, Is.EqualTo(3), "third hit 1.0s after the second");
         }
 
@@ -545,21 +554,22 @@ namespace Game.Enemy.Tests
         {
             var runFlow = new FakeRunFlow();
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, runFlow, stage);
+            var clock = new FakeClock();
+            using var presenter = Present(runFlow, clock, stage);
             _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
-            stage.RaiseFrame(Step);                // hit at once, next due after 1.0s
-            stage.RaiseFrame(0.4f);                // 0.6s left
+            clock.StepOnce();                      // hit at once, next due after 1.0s
+            clock.Run(0.4f);                       // 0.6s left
             Assert.That(_heroes.Hits.Count, Is.EqualTo(1));
 
             runFlow.Paused = true;
-            stage.RaiseFrame(3f);
+            clock.Run(3f, gameplay: false);
             Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "no hit while paused, even past 1.0s");
 
             runFlow.Paused = false;
-            stage.RaiseFrame(0.5f);
+            clock.Run(0.5f);
             Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "0.1s still left");
-            stage.RaiseFrame(0.1f);
+            clock.Run(0.1f);
             Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "next hit when the time left runs out");
         }
 
@@ -576,7 +586,7 @@ namespace Game.Enemy.Tests
 
             Run(30f);
 
-            // Frames are 0.02s: an enemy may step into its range by up to one frame of walking.
+            // Steps are 0.025s: an enemy may step into its range by up to one step of walking.
             var tolerance = _config.Kind(type).MoveSpeed * Step + 0.001f;
             var alive = new List<EnemyTarget>();
             _field.GetAlive(alive);
@@ -590,9 +600,10 @@ namespace Game.Enemy.Tests
         {
             var runFlow = new FakeRunFlow();
             var stage = new FakeStage();
-            using var presenter = new EnemyPresenter(_field, runFlow, stage);
+            var clock = new FakeClock();
+            using var presenter = Present(runFlow, clock, stage);
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
-            stage.RaiseFrame(Step);
+            clock.StepOnce();
 
             // Run 1 is lost: the castle fell. EnemyParticipant answers BattleStopped with Stop.
             _field.Stop();
@@ -603,14 +614,324 @@ namespace Game.Enemy.Tests
             // Replay, in RunFlow's order: StepChanged(Playing) comes before RunStarted.
             runFlow.RaiseStepChanged(RunStep.Playing);
             _field.ResetForRun();                  // EnemyParticipant answers RunStarted with ResetForRun
-            stage.RaiseFrame(Step);
+            clock.StepOnce();
 
             Assert.That(stage.Paused, Is.False, "run 2 is playing");
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
             _field.Damage(Handle(), 1000f);
-            stage.RaiseFrame(Step);
+            clock.StepOnce();
             Assert.That(stage.Defeated.Count, Is.EqualTo(1), "the enemy defeated in run 2 is shrunk away");
             Assert.That(stage.Paused, Is.False);
+        }
+
+        [Test]
+        public void Enemies_walk_and_hit_only_on_steps_of_the_shared_clock_as_the_Enemy_owner()
+        {
+            var stage = new FakeStage();
+            var clock = new FakeClock();
+            using var presenter = Present(new FakeRunFlow(), clock, stage);
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            Assert.That(clock.Owners, Is.EqualTo(new[] { "Enemy" }), "takes its place in the step order by name");
+            Assert.That(X(), Is.EqualTo(17f), "nothing moves until the clock steps");
+
+            clock.StepOnce();
+            Assert.That(X(), Is.EqualTo(17f - 1.5f * Step).Within(1e-5f), "one step walks 1.5u/s x 0.025s");
+            Assert.That(stage.Moves, Is.EqualTo(1), "the stage gets the state after the step");
+
+            clock.Run(1f);
+            Assert.That(X(), Is.EqualTo(17f - 1.5f * (1f + Step)).Within(1e-3f));
+        }
+
+        [Test]
+        public void A_step_that_is_not_gameplay_moves_no_enemy_and_freezes_the_stage()
+        {
+            // For example while the castle waits to revive: the clock steps, but the run does not let the battle play.
+            var stage = new FakeStage();
+            var clock = new FakeClock();
+            using var presenter = Present(new FakeRunFlow(), clock, stage);
+            _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            clock.Run(3f, gameplay: false);
+
+            Assert.That(_heroes.Hits, Is.Empty);
+            Assert.That(stage.Paused, Is.True);
+
+            clock.StepOnce();
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1));
+            Assert.That(stage.Paused, Is.False);
+        }
+
+        [TestCase(EnemyType.Wolf, 32)]      // 0.8s per hit
+        [TestCase(EnemyType.Soldier, 40)]   // 1.0s
+        [TestCase(EnemyType.Archer, 48)]    // 1.2s
+        [TestCase(EnemyType.Giant, 60)]     // 1.5s
+        [TestCase(EnemyType.Boss, 80)]      // 2.0s
+        public void The_next_hit_lands_on_the_first_step_where_its_seconds_per_hit_are_reached(EnemyType type,
+            int steps)
+        {
+            var clock = new FakeClock();
+            using var presenter = Present(new FakeRunFlow(), clock, new FakeStage());
+            _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
+            _field.Spawn(new EnemySpawn(type, EnemySide.Right, 1f));
+            clock.StepOnce();
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "first hit at once");
+
+            for (var i = 0; i < steps - 1; i++) clock.StepOnce();
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), $"not yet after {steps - 1} steps");
+
+            clock.StepOnce();
+            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), $"next hit after exactly {steps} steps");
+        }
+
+        [Test]
+        public void After_the_battle_view_is_closed_it_no_longer_follows_the_clock_or_the_combat_ticks()
+        {
+            var clock = new FakeClock();
+            var stage = new FakeStage();
+            var presenter = Present(new FakeRunFlow(), clock, stage);
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            presenter.Dispose();
+            clock.Run(1f);
+
+            Assert.That(clock.Subscribers, Is.Zero);
+            Assert.That(clock.TickDoneListeners, Is.Zero);
+            Assert.That(stage.Moves, Is.Zero);
+        }
+
+        // ---- Through the shared combat (live/feature-combat/combat-tick/tick-values) ----
+
+        [Test]
+        public void An_enemy_hits_its_combat_foes_through_combat_with_their_receiver_and_key()
+        {
+            var clock = new FakeClock();
+            _field.JoinCombat(clock);
+            var heroes = new FakeFoes();
+            heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
+            var heroReceiver = clock.AddReceiver(new FakeReceiver());
+            _field.AddCombatFoes(heroes, heroReceiver);
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1.9f));
+
+            clock.StepOnce();
+
+            Assert.That(heroes.Hits, Is.Empty, "no health taken by the enemy itself");
+            Assert.That(clock.Hits.Count, Is.EqualTo(1));
+            Assert.That(clock.Hits[0].Receiver, Is.EqualTo(heroReceiver));
+            Assert.That(clock.Hits[0].TargetKey, Is.EqualTo(7));
+            Assert.That(clock.Hits[0].Damage, Is.EqualTo(9.5f).Within(1e-4f), "damage fixed when dealt, scaled");
+            Assert.That(clock.Hits[0].Source, Is.EqualTo(CombatSource.Enemy));
+        }
+
+        [Test]
+        public void Foes_moved_to_combat_keep_their_place_in_the_order_enemies_try_them()
+        {
+            // Heroes were added first the old way, then moved to combat: a hero in range still wins over the castle.
+            var clock = new FakeClock();
+            _field.JoinCombat(clock);
+            _heroes.Foes.Add(new EnemyFoe(7, 2.5f, 0.5f));
+            var heroReceiver = clock.AddReceiver(new FakeReceiver());
+            _field.AddCombatFoes(_heroes, heroReceiver);
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            clock.Run(15f);
+
+            Assert.That(clock.Hits.Count, Is.GreaterThan(0));
+            Assert.That(clock.Hits.TrueForAll(h => h.Receiver == heroReceiver), Is.True);
+            Assert.That(_castle.Hits, Is.Empty);
+        }
+
+        [Test]
+        public void Every_enemy_aims_before_any_enemy_strikes_in_a_combat_tick()
+        {
+            var clock = new FakeClock();
+            _field.JoinCombat(clock);
+            _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
+            _field.AddCombatFoes(_heroes, clock.AddReceiver(new FakeReceiver()));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            clock.StepOnce();
+
+            Assert.That(clock.Calls, Is.EqualTo(new[] { "aim", "strike" }), "aim then strike, once each per tick");
+            Assert.That(clock.Hits.Count, Is.EqualTo(2), "both hit in the tick they reached the hero");
+        }
+
+        [Test]
+        public void Hits_on_enemies_go_through_combat_and_an_enemy_takes_one_total_per_tick()
+        {
+            var income = new FakeIncome();
+            var field = new EnemyField(_config, income);
+            var clock = new FakeClock();
+            field.JoinCombat(clock);
+            var defeats = new List<EnemyDefeat>();
+            field.Defeated += d => defeats.Add(d);
+            field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));   // 40 health
+            var alive = new List<EnemyTarget>();
+            field.GetAlive(alive);
+            var handle = alive[0].Handle;
+
+            // A hero and the castle each hit for 25 in the same tick: one total of 50.
+            clock.Hit(new CombatHit(field.CombatReceiver, handle, 25f, CombatSource.Hero));
+            clock.Hit(new CombatHit(field.CombatReceiver, handle, 25f, CombatSource.Castle));
+            clock.StepOnce();
+
+            Assert.That(field.AliveCount, Is.Zero);
+            Assert.That(defeats.Count, Is.EqualTo(1), "defeated once");
+            Assert.That(income.Added, Is.EqualTo(new[] { 5 }), "coins once, not split by side");
+        }
+
+        [Test]
+        public void An_enemy_hit_below_its_health_by_combat_is_hurt_and_stays()
+        {
+            var clock = new FakeClock();
+            _field.JoinCombat(clock);
+            var stage = new FakeStage();
+            using var presenter = new EnemyPresenter(_field, new FakeRunFlow(), clock, clock, stage);
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            clock.Hit(new CombatHit(_field.CombatReceiver, Handle(), 39.5f, CombatSource.Hero));
+            clock.StepOnce();
+
+            Assert.That(_field.AliveCount, Is.EqualTo(1), "0.5 health left keeps it on the field");
+            Assert.That(stage.Flashed, Is.EqualTo(new[] { Handle() }));
+            Assert.That(stage.Defeated, Is.Empty);
+        }
+
+        [Test]
+        public void A_defeated_enemy_takes_no_more_hits_and_after_the_battle_stopped_no_enemy_can_be_hit()
+        {
+            var clock = new FakeClock();
+            _field.JoinCombat(clock);
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            _field.Spawn(new EnemySpawn(EnemyType.Wolf, EnemySide.Left, 1f));
+            var alive = new List<EnemyTarget>();
+            _field.GetAlive(alive);
+
+            clock.Hit(new CombatHit(_field.CombatReceiver, alive[0].Handle, 100f, CombatSource.Hero));
+            clock.StepOnce();
+            Assert.That(_field.CanBeHit(alive[0].Handle), Is.False, "defeated");
+            Assert.That(_field.CanBeHit(alive[1].Handle), Is.True);
+
+            _field.Stop();
+            Assert.That(_field.CanBeHit(alive[1].Handle), Is.False, "battle stopped");
+        }
+
+        [Test]
+        public void Enemy_and_hero_that_finish_each_other_in_one_tick_both_fall()
+        {
+            // The enemy strikes from the state at the start of the tick, so it hits even though it falls in that tick.
+            var clock = new FakeClock();
+            _field.JoinCombat(clock);
+            var heroSide = new FakeReceiver();
+            var heroes = new FakeFoes();
+            heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
+            _field.AddCombatFoes(heroes, clock.AddReceiver(heroSide));
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+
+            clock.Hit(new CombatHit(_field.CombatReceiver, Handle(), 100f, CombatSource.Hero));
+            clock.StepOnce();
+
+            Assert.That(heroSide.Totals, Is.EqualTo(new[] { (7, 5f) }), "the hero took the enemy's hit");
+            Assert.That(_field.AliveCount, Is.Zero, "the enemy fell too");
+        }
+
+        [Test]
+        public void Joining_combat_adds_the_enemies_once_as_receiver_and_actor()
+        {
+            var clock = new FakeClock();
+            _field.JoinCombat(clock);
+
+            Assert.That(clock.Receivers, Is.EqualTo(new object[] { _field }));
+            Assert.That(clock.Actors, Is.EqualTo(new object[] { _field }));
+            Assert.That(_field.CombatReceiver, Is.EqualTo(0));
+            Assert.Throws<InvalidOperationException>(() => _field.JoinCombat(clock));
+        }
+
+        [TestCase(EnemySide.Right)]
+        [TestCase(EnemySide.Left)]
+        public void A_boss_plays_its_entrance_once_on_the_step_its_centre_reaches_16u(EnemySide side)
+        {
+            // From x=±17u at 0.6u/s, 0.015u a step: 66 steps leave it at 16.01u, the 67th at 15.995u.
+            var stage = new FakeStage();
+            var clock = new FakeClock();
+            using var presenter = Present(new FakeRunFlow(), clock, stage);
+            _field.Spawn(new EnemySpawn(EnemyType.Boss, side, 1f));
+
+            for (var i = 0; i < 66; i++) clock.StepOnce();
+            Assert.That(stage.Entered, Is.Empty, "still off screen");
+
+            clock.StepOnce();
+            Assert.That(stage.Entered, Is.EqualTo(new[] { Handle() }));
+
+            clock.Run(10f);
+            Assert.That(stage.Entered.Count, Is.EqualTo(1), "once per boss");
+        }
+
+        [TestCase(EnemyType.Soldier)]
+        [TestCase(EnemyType.Wolf)]
+        [TestCase(EnemyType.Giant)]
+        [TestCase(EnemyType.Archer)]
+        public void Other_enemy_types_come_on_screen_without_an_entrance(EnemyType type)
+        {
+            var stage = new FakeStage();
+            var clock = new FakeClock();
+            using var presenter = Present(new FakeRunFlow(), clock, stage);
+            _field.Spawn(new EnemySpawn(type, EnemySide.Right, 1f));
+
+            clock.Run(5f);
+
+            Assert.That(X(), Is.LessThan(16f), "it is on screen");
+            Assert.That(stage.Entered, Is.Empty);
+        }
+
+        [Test]
+        public void A_boss_blocked_off_screen_plays_its_entrance_only_when_it_walks_in()
+        {
+            // A hero at x=18.8u (half width 0.5) is within the boss's 1.5u range: it stands at 17u and hits.
+            var stage = new FakeStage();
+            var clock = new FakeClock();
+            using var presenter = Present(new FakeRunFlow(), clock, stage);
+            _heroes.Foes.Add(new EnemyFoe(7, 18.8f, 0.5f));
+            _field.Spawn(new EnemySpawn(EnemyType.Boss, EnemySide.Right, 1f));
+
+            clock.Run(3f);
+            Assert.That(stage.Entered, Is.Empty);
+
+            _heroes.Foes.Clear();
+            clock.Run(3f);
+            Assert.That(stage.Entered.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void A_slowed_enemy_shows_the_slow_mark_for_exactly_as_long_as_it_is_slowed()
+        {
+            // PROTOTYPE (enemy-move-values, Thông số theo giai đoạn): the slow mark shows all the time Frost lasts.
+            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
+            var looks = new List<EnemyLook>();
+
+            _field.GetLooks(looks);
+            Assert.That(looks[0].Slowed, Is.False, "not slowed yet");
+
+            _field.SlowAll(1f);
+            _field.GetLooks(looks);
+            Assert.That(looks[0].Slowed, Is.True, "marked as soon as Frost lands");
+
+            Run(1f - Step);
+            _field.GetLooks(looks);
+            Assert.That(looks[0].Slowed, Is.True, "still marked one step before Frost ends");
+
+            Run(Step);
+            _field.GetLooks(looks);
+            Assert.That(looks[0].Slowed, Is.False, "the mark goes when Frost ends");
+        }
+
+        /// <summary>As the installer wires it: the enemies join combat (the fake clock plays combat too), then the presenter shows them.</summary>
+        private EnemyPresenter Present(IRunFlow runFlow, FakeClock clock, IEnemyStage stage)
+        {
+            _field.JoinCombat(clock);
+            return new EnemyPresenter(_field, runFlow, clock, clock, stage);
         }
 
         private static EnemyConfig AllTypesConfig()
@@ -662,7 +983,17 @@ namespace Game.Enemy.Tests
 
         private sealed class FakeIncome : IWalletIncome
         {
-            public void Add(int amount) { }
+            public readonly List<int> Added = new List<int>();
+            public void Add(int amount) => Added.Add(amount);
+        }
+
+        /// <summary>Another owner of sides combat can hit (a hero squad): every side can be hit, totals are recorded.</summary>
+        private sealed class FakeReceiver : ICombatReceiver
+        {
+            public readonly List<(int Key, float Total)> Totals = new List<(int, float)>();
+            public bool CanBeHit(int key) => true;
+            public void TakeTotal(int key, float total) => Totals.Add((key, total));
+            public void ReportFallen() { }
         }
 
         private sealed class FakeStage : IEnemyStage
@@ -674,19 +1005,124 @@ namespace Game.Enemy.Tests
             public readonly List<EnemyShot> Shots = new List<EnemyShot>();
             public readonly List<EnemyReward> Coins = new List<EnemyReward>();
 
-            public event Action<float> Frame;
-            public void RaiseFrame(float seconds) => Frame?.Invoke(seconds);
+            public int Moves;
+            public void TrackWith(Func<UnityEngine.Object, IDisposable> trackView) { }
             public void Show(EnemyLook look) => Shown.Add(look.Handle);
-            public void Move(EnemyLook look) { }
+            public void Move(EnemyLook look) => Moves++;
             public void Lunge(int handle, int direction) => Lunges.Add(direction);
             public void Shoot(EnemyShot shot) => Shots.Add(shot);
             public void ShowCoins(EnemyReward reward) => Coins.Add(reward);
             public void Flash(int handle) => Flashed.Add(handle);
+            public readonly List<int> Entered = new List<int>();
+            public void Enter(int handle) => Entered.Add(handle);
             public void Defeat(int handle) => Defeated.Add(handle);
             public void RemoveAll() { }
             public bool Paused { get; private set; }
             public void SetPaused(bool paused) => Paused = paused;
             public void Close() { }
+        }
+
+        /// <summary>
+        /// The shared clock, stepped by hand (0.025s steps, subscribers called in the order they joined), and the
+        /// shared combat it runs after them on each gameplay step: aim, strike, filter, one total per side, report
+        /// fallen, tick done (live/feature-combat/combat-tick/tick-values, tick-order).
+        /// </summary>
+        private sealed class FakeClock : ISimClock, ICombat
+        {
+            private readonly List<(string Owner, Action<SimStep> OnStep)> _subscribers =
+                new List<(string, Action<SimStep>)>();
+            private readonly List<CombatHit> _pending = new List<CombatHit>();
+
+            public readonly List<ICombatReceiver> Receivers = new List<ICombatReceiver>();
+            public readonly List<ICombatActor> Actors = new List<ICombatActor>();
+            public readonly List<CombatHit> Hits = new List<CombatHit>();
+            public readonly List<string> Calls = new List<string>();
+            public event Action TickDone;
+            public int TickDoneListeners => TickDone?.GetInvocationList().Length ?? 0;
+
+            public int AddReceiver(ICombatReceiver receiver)
+            {
+                Receivers.Add(receiver);
+                return Receivers.Count - 1;
+            }
+
+            public void AddActor(ICombatActor actor) => Actors.Add(actor);
+
+            public void Hit(in CombatHit hit)
+            {
+                Hits.Add(hit);
+                _pending.Add(hit);
+            }
+
+            private void RunCombatTick()
+            {
+                foreach (var actor in Actors) { Calls.Add("aim"); actor.Aim(Step); }
+                foreach (var actor in Actors) { Calls.Add("strike"); actor.Strike(Step); }
+
+                var totals = new Dictionary<(int, int), float>();
+                foreach (var hit in _pending)
+                {
+                    if (!Receivers[hit.Receiver].CanBeHit(hit.TargetKey)) continue;
+                    totals.TryGetValue((hit.Receiver, hit.TargetKey), out var sum);
+                    totals[(hit.Receiver, hit.TargetKey)] = sum + hit.Damage;
+                }
+
+                _pending.Clear();
+                var hitReceivers = new HashSet<int>();
+                foreach (var pair in totals)
+                {
+                    Receivers[pair.Key.Item1].TakeTotal(pair.Key.Item2, pair.Value);
+                    hitReceivers.Add(pair.Key.Item1);
+                }
+
+                foreach (var receiver in hitReceivers) Receivers[receiver].ReportFallen();
+                TickDone?.Invoke();
+            }
+
+            public readonly List<string> Owners = new List<string>();
+            public SimMode Mode => SimMode.FixedTick;
+            public float StepSeconds => Step;
+            public long StepCount { get; private set; }
+            public long GameplayStepCount { get; private set; }
+            public double GameplaySeconds => GameplayStepCount * (double)Step;
+            public int Subscribers => _subscribers.Count;
+
+            public IDisposable OnStep(string owner, Action<SimStep> onStep)
+            {
+                var entry = (owner, onStep);
+                _subscribers.Add(entry);
+                Owners.Add(owner);
+                return new Handle(() => _subscribers.Remove(entry));
+            }
+
+            public void Enqueue(string owner, Action apply) => throw new NotSupportedException();
+
+            public void StepOnce(bool gameplay = true)
+            {
+                StepCount++;
+                if (gameplay) GameplayStepCount++;
+                var step = new SimStep(StepCount, GameplayStepCount, Step, gameplay);
+                foreach (var subscriber in _subscribers.ToArray()) subscriber.OnStep(step);
+                if (gameplay) RunCombatTick();
+            }
+
+            public void Run(float seconds, bool gameplay = true)
+            {
+                var steps = (int)Math.Round(seconds / Step);
+                for (var i = 0; i < steps; i++) StepOnce(gameplay);
+            }
+
+            private sealed class Handle : IDisposable
+            {
+                private Action _dispose;
+                public Handle(Action dispose) => _dispose = dispose;
+
+                public void Dispose()
+                {
+                    _dispose?.Invoke();
+                    _dispose = null;
+                }
+            }
         }
 
         private sealed class FakeRunFlow : IRunFlow

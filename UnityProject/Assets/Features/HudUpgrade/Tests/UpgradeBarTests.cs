@@ -10,6 +10,8 @@ namespace Game.HudUpgrade.Tests
         private FakeShop _shop;
         private FakeRun _run;
         private FakeBarView _view;
+        private FakeOrders _orders;
+        private FakeDownState _down;
         private UpgradeBarPresenter _presenter;
 
         [SetUp]
@@ -20,7 +22,9 @@ namespace Game.HudUpgrade.Tests
             _shop.SetTeam("knight", "archer", "mage");
             _run = new FakeRun();
             _view = new FakeBarView();
-            _presenter = new UpgradeBarPresenter(_shop, new FakeRoster(), _run, _view);
+            _orders = new FakeOrders(_shop);
+            _down = new FakeDownState();
+            _presenter = new UpgradeBarPresenter(_shop, _orders, new FakeRoster(), _run, _down, _view);
             _presenter.Start();
         }
 
@@ -78,6 +82,12 @@ namespace Game.HudUpgrade.Tests
         public void Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level()
         {
             _view.Tap(0);
+            CollectionAssert.AreEqual(new[] { 0 }, _orders.Ordered, "one tap queues exactly one order");
+            Assert.AreEqual(0, _shop.BuyCalls, "the tap only queues; the shop buys at the next step");
+            Assert.IsEmpty(_view.Bounces);
+
+            _orders.Step();
+
             Assert.AreEqual(1, _shop.BuyCalls);
             CollectionAssert.AreEqual(new[] { 0 }, _view.Bounces);
             Assert.AreEqual("Cấp 2", _view.Looks[0].LevelText);
@@ -88,6 +98,8 @@ namespace Game.HudUpgrade.Tests
         public void Tapping_a_dim_button_sends_no_purchase_and_no_bounce()
         {
             _view.Tap(5);
+            _orders.Step();
+            Assert.IsEmpty(_orders.Ordered);
             Assert.AreEqual(0, _shop.BuyCalls);
             Assert.IsEmpty(_view.Bounces);
         }
@@ -99,7 +111,9 @@ namespace Game.HudUpgrade.Tests
             _shop.Changed();
             _view.Tap(0);
             _view.Tap(0);
+            _orders.Step();
             Assert.AreEqual(1, _view.Bounces.Count);
+            Assert.AreEqual("Cấp 2", _view.Looks[0].LevelText);
             Assert.IsFalse(_view.Looks[0].Lit);
         }
 
@@ -108,7 +122,135 @@ namespace Game.HudUpgrade.Tests
         {
             _shop.RejectBuys = true;
             _view.Tap(0);
+            _orders.Step();
             Assert.AreEqual(1, _shop.BuyCalls);
+            Assert.IsEmpty(_view.Bounces);
+        }
+
+        [Test]
+        public void Bounce_lands_on_the_button_whose_order_was_bought()
+        {
+            _wallet.Coins = 1000;
+            _shop.Changed();
+            _view.Tap(3);
+            _view.Tap(1);
+            _orders.Step();
+            CollectionAssert.AreEqual(new[] { 3, 1 }, _view.Bounces);
+        }
+
+        [Test]
+        public void Applied_order_that_was_not_bought_or_is_off_the_bar_does_not_bounce()
+        {
+            _orders.Raise(0, Game.Upgrade.PurchaseResult.NotEnoughCoins);
+            _orders.Raise(0, Game.Upgrade.PurchaseResult.Unavailable);
+            _orders.Raise(9, Game.Upgrade.PurchaseResult.Bought);
+            Assert.IsEmpty(_view.Bounces);
+        }
+
+        [Test]
+        public void Bought_level_flashes_the_new_level_number_once_on_that_button()
+        {
+            _view.Tap(2);
+            Assert.IsEmpty(_view.Flashes, "nothing flashes before the purchase is applied");
+            _orders.Step();
+            CollectionAssert.AreEqual(new[] { 2 }, _view.Flashes);
+            Assert.AreEqual("Cấp 2", _view.Looks[2].LevelText, "the flashing number is the new level");
+        }
+
+        [Test]
+        public void Rejected_or_dim_tap_does_not_flash_the_level()
+        {
+            _view.Tap(5); // dim: 60 > 50
+            _shop.RejectBuys = true;
+            _view.Tap(0);
+            _orders.Step();
+            Assert.IsEmpty(_view.Flashes);
+        }
+
+        [Test]
+        public void Tapping_a_dim_button_shakes_it_once_and_sends_no_purchase()
+        {
+            _view.Tap(5); // 60 > 50
+            CollectionAssert.AreEqual(new[] { 5 }, _view.Shakes);
+            Assert.IsEmpty(_orders.Ordered);
+        }
+
+        [Test]
+        public void Tapping_a_lit_button_does_not_shake()
+        {
+            _view.Tap(0);
+            _orders.Step();
+            Assert.IsEmpty(_view.Shakes);
+        }
+
+        [Test]
+        public void Every_button_shakes_on_tap_while_the_shop_is_closed_by_pause()
+        {
+            _shop.Open = false;
+            _shop.Changed();
+            _view.Tap(0);
+            _view.Tap(3);
+            CollectionAssert.AreEqual(new[] { 0, 3 }, _view.Shakes);
+            Assert.IsEmpty(_orders.Ordered);
+        }
+
+        [Test]
+        public void Downed_hero_button_shows_the_down_mark_and_clears_it_when_the_hero_stands_up()
+        {
+            Assert.IsFalse(_view.Down[1]);
+
+            _down.Set(1, true);
+            Assert.IsTrue(_view.Down[1]);
+            Assert.IsFalse(_view.Down[0]);
+            Assert.IsFalse(_view.Down[2]);
+
+            _down.Set(1, false);
+            Assert.IsFalse(_view.Down[1]);
+        }
+
+        [Test]
+        public void Castle_buttons_never_get_a_down_mark()
+        {
+            _down.Set(0, true);
+            _shop.Changed();
+            CollectionAssert.AreEquivalent(new[] { 0, 1, 2 }, _view.Down.Keys);
+        }
+
+        [Test]
+        public void Downed_hero_button_stays_lit_and_buyable_when_coins_are_enough()
+        {
+            _down.Set(0, true);
+            Assert.IsTrue(_view.Looks[0].Lit);
+            _view.Tap(0);
+            _orders.Step();
+            CollectionAssert.AreEqual(new[] { 0 }, _view.Bounces);
+            Assert.IsTrue(_view.Down[0], "buying does not clear the mark");
+        }
+
+        [Test]
+        public void Rebuilt_bar_for_a_new_team_shows_the_marks_of_heroes_already_down()
+        {
+            _down.Set(2, true);
+            _shop.SetTeam("axeman", "archer", "mage");
+            Assert.IsTrue(_view.Down[2]);
+            Assert.IsFalse(_view.Down[0]);
+        }
+
+        [Test]
+        public void Bar_stops_hearing_down_changes_after_dispose()
+        {
+            Assert.AreEqual(1, _down.Listeners);
+            _presenter.Dispose();
+            Assert.AreEqual(0, _down.Listeners);
+        }
+
+        [Test]
+        public void Bar_stops_hearing_order_outcomes_after_dispose()
+        {
+            Assert.AreEqual(1, _orders.Listeners);
+            _presenter.Dispose();
+            Assert.AreEqual(0, _orders.Listeners);
+            _orders.Raise(0, Game.Upgrade.PurchaseResult.Bought);
             Assert.IsEmpty(_view.Bounces);
         }
 
@@ -142,6 +284,7 @@ namespace Game.HudUpgrade.Tests
         {
             var builds = _view.Builds;
             _view.Tap(0);
+            _orders.Step();
             Assert.AreEqual(builds, _view.Builds);
         }
 
@@ -179,6 +322,7 @@ namespace Game.HudUpgrade.Tests
             Assert.IsTrue(_view.Looks[0].Lit);
 
             _view.Tap(0);
+            _orders.Step();
 
             Assert.AreEqual(0, _wallet.Coins);
             Assert.IsFalse(_view.Looks[0].Lit);

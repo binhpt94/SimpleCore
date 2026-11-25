@@ -1,0 +1,362 @@
+{
+ "items": {
+  "popup-after-1s": {
+   "state": "verified",
+   "note": "phần popup chỉ mở ở ReviveOffer, không mở trong ReviveWait · trễ 1 giây theo số bước chung là việc của Run",
+   "tests": [],
+   "play": "Lượt thật, để quái phá thành lần đầu · trận đứng yên, thành thu nhỏ, popup hồi sinh mở đúng 1 giây sau, trong 1 giây đó không bấm được gì · test Run RunReviveOrderTests, popup RevivePopupTests.PopupOpensOnceWhenTheOfferComesAfterTheWait",
+   "hash": "266d6c7ad928",
+   "text": "Popup hồi sinh mở sau 1 giây kể từ lúc trận dừng, cùng độ trễ với popup thua\nTrong 1 giây này thành thu nhỏ còn 0 (0.5 giây) và không có gì bấm được.",
+   "title": "Popup hồi sinh mở sau 1 giây kể từ lúc trận dừng, cùng độ trễ với popup thua",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:36"
+  },
+  "revive-anim": {
+   "state": "verified",
+   "note": "việc của Castle · thành phóng 0.5 giây và máu 30 phần trăm khi ReviveStarted · popup không có phần, chờ Castle",
+   "tests": [],
+   "play": "Bật cheatWaitingAd trên RunInstaller hoặc lượt thật, bấm Xem quảng cáo, nhà cung cấp giả trả đã xem đủ · thành phóng từ 0 lên đủ cỡ trong 0.5 giây, thanh máu nhảy ngay về 30 phần trăm máu tối đa · test Castle CastleSessionTests.Revive_anim_sets_thirty_percent_health_at_once_then_grows_back_over_half_a_second_and_tells_the_run",
+   "hash": "ff81958053c5",
+   "text": "Hồi sinh: thành phóng từ 0 lên đủ cỡ trong 0.5 giây, máu đặt 30% máu tối đa ngay đầu 0.5 giây đó",
+   "title": "Hồi sinh: thành phóng từ 0 lên đủ cỡ trong 0.5 giây, máu đặt 30% máu tối đa ngay đầu 0.5 giây đó",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:36"
+  },
+  "resume-after-anim": {
+   "state": "verified",
+   "note": "phần popup không mở lại sau hồi sinh · trận chạy tiếp khi ReviveShown là việc của Run và Castle",
+   "tests": [],
+   "play": "Hồi sinh bằng quảng cáo · ngay khi thành hiện đủ cỡ, quái và hero chạy tiếp từ đúng chỗ dừng, không đếm ngược, quái sát thành đánh lại ngay · test Run RunReviveOrderTests, popup RevivePopupTests.PopupDoesNotOpenAgainWhileCastleStandsUpOrWhenBattleRunsAgain",
+   "hash": "d5f18d20e0d9",
+   "text": "Trận chạy tiếp ngay khi thành hiện xong, không đếm ngược\nQuái đứng sát thành đánh lại ngay; không có lúc bất tử.",
+   "title": "Trận chạy tiếp ngay khi thành hiện xong, không đếm ngược",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:36"
+  },
+  "fail-to-lose-now": {
+   "state": "verified",
+   "note": "phần popup đóng rồi báo DeclineRevive hoặc FailRevive ở bước kế tiếp · mở popup thua ngay là việc của Run",
+   "tests": [],
+   "play": "Ở popup hồi sinh bấm Kết thúc lượt, lần khác cho nhà cung cấp giả trả không xem được · popup hồi sinh đóng, popup thua hiện ngay không chờ thêm 1 giây, lần quảng cáo lỗi có dòng Quảng cáo chưa hoàn tất · test Run RunReviveOrderTests, popup RevivePopupTests.EndTapClosesPopupThenReportsNoRevive, RevivePopupTests.NotWatchedAdClosesPopupThenReportsFailedRevive",
+   "hash": "26bbaa48b830",
+   "text": "Không hồi sinh hoặc quảng cáo lỗi: chốt điểm và hiện popup thua ngay, không chờ thêm 1 giây",
+   "title": "Không hồi sinh hoặc quảng cáo lỗi: chốt điểm và hiện popup thua ngay, không chờ thêm 1 giây",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:36"
+  },
+  "held-clear": {
+   "state": "done",
+   "note": "việc của Run và Wave · giữ tin dọn đợt khi đang đề nghị, cộng điểm và lúc thở 3 giây khi hồi sinh · popup không có phần",
+   "tests": [],
+   "play": "Để thành bị phá đúng lúc hạ con quái cuối đợt · lúc popup hồi sinh mở điểm và tiền chưa cộng đợt đó · hồi sinh thì cộng điểm, thưởng tiền và bắt đầu lúc thở 3 giây · kết thúc lượt thì điểm không cộng đợt đó · test Wave HeldClearTests, Run RunReviveOrderTests",
+   "hash": "deef309cce3f",
+   "text": "Tin dọn sạch đợt tới cùng khung hình thành bị phá được giữ; hồi sinh xong thì cộng điểm và bắt đầu lúc thở 3 giây\nChốt thua thì bỏ tin, không cộng điểm, không thưởng tiền dọn đợt.",
+   "title": "Tin dọn sạch đợt tới cùng khung hình thành bị phá được giữ; hồi sinh xong thì cộng điểm và bắt đầu lúc thở 3 giây",
+   "by": "PopupRevive",
+   "at": "2026-11-26 00:33:34"
+  },
+  "offer-flag": {
+   "state": "verified",
+   "note": "phần popup chỉ mở khi Run vào ReviveOffer, lần phá sau Run vào thẳng Ending · cờ đã đề nghị là việc của Run",
+   "tests": [],
+   "play": "Hồi sinh bằng quảng cáo rồi để thành bị phá lần hai · lần hai không hiện popup hồi sinh, vào thẳng popup thua sau 1 giây · lượt mới bắt đầu thì lần phá đầu lại có popup hồi sinh · test Run RunReviveOrderTests, popup RevivePopupTests.SecondCastleFallAfterReviveGoesToLoseWithoutRevivePopup",
+   "hash": "488cb224cce9",
+   "text": "Lượt chơi giữ một cờ \"đã đề nghị hồi sinh\" bật ngay lúc mở popup; cờ chỉ tắt khi lượt mới bắt đầu\nLần bị phá sau khi cờ đã bật vào thẳng popup thua.",
+   "title": "Lượt chơi giữ một cờ \"đã đề nghị hồi sinh\" bật ngay lúc mở popup; cờ chỉ tắt khi lượt mới bắt đầu",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:36"
+  },
+  "edge-hero-dang-cho-hoi-sinh-khi-thanh-bi": {
+   "state": "verified",
+   "note": "việc của Hero · đồng hồ hồi sinh hero đếm bước Gameplay nên đứng yên lúc chờ hồi sinh · popup không có phần",
+   "tests": [],
+   "play": "Để một hero gục rồi thành bị phá trong lúc hero đang chờ hồi sinh, đứng ở popup vài giây · hero không hồi sinh lúc popup mở, hồi sinh khi trận chạy tiếp với đúng phần thời gian còn lại · test Hero HeroParticipantTests.A_hero_respawn_wait_counts_gameplay_steps_stands_still_while_the_castle_waits_for_revive_and_goes_on_after",
+   "hash": "267f02d7f20d",
+   "text": "**Hero đang chờ hồi sinh khi thành bị phá:** đồng hồ 8 giây của hero đứng yên suốt luồng, chạy tiếp khi trận chạy tiếp.",
+   "title": "Hero đang chờ hồi sinh khi thành bị phá",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:36"
+  },
+  "edge-bang-gia-dang-lam-cham-quai": {
+   "state": "verified",
+   "note": "việc của Castle hoặc Enemy · thời gian chậm còn lại đếm bước Gameplay · popup không có phần",
+   "tests": [],
+   "play": "Bấm Băng giá rồi để thành bị phá khi quái còn chậm, đứng ở popup vài giây rồi hồi sinh · quái vẫn chậm đúng phần thời gian còn lại sau khi trận chạy tiếp, hồi chiêu kĩ năng đứng yên lúc chờ · test Castle CastleSessionTests.Edge_bang_gia_dang_lam_cham_quai_while_waiting_for_the_revive_the_castle_slows_nothing_more_and_its_cooldowns_stand_still",
+   "hash": "30d7f9a93722",
+   "text": "**Băng giá đang làm chậm quái:** thời gian chậm còn lại đứng yên, chạy tiếp sau đó.",
+   "title": "Băng giá đang làm chậm quái",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:36"
+  },
+  "edge-thanh-bi-pha-lan-hai-ngay-sau-khi": {
+   "state": "verified",
+   "note": "phần popup không mở khi Run vào Ending sau lần phá thứ hai · popup thua sau 1 giây là việc của Run",
+   "tests": [],
+   "play": "Hồi sinh rồi để quái đứng sát thành phá thành ngay trong vài khung hình · không có popup hồi sinh lần hai, popup thua hiện sau 1 giây · test Run RunReviveOrderTests, popup RevivePopupTests.SecondCastleFallAfterReviveGoesToLoseWithoutRevivePopup",
+   "hash": "20472780f905",
+   "text": "**Thành bị phá lần hai ngay sau khi hồi sinh (trong vài khung hình):** vào thẳng popup thua sau 1 giây.",
+   "title": "Thành bị phá lần hai ngay sau khi hồi sinh (trong vài khung hình)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:56"
+  },
+  "edge-roi-game-trong-1-giay-tre": {
+   "state": "done",
+   "note": "phần popup mở đúng một lần khi Run vào ReviveOffer dù có yêu cầu tạm dừng · trễ không tính lúc ở ngoài là việc của Run",
+   "tests": [],
+   "play": "Ngay khi thành bị phá lần đầu, rời game hay đổi cửa sổ trong 1 giây trễ rồi quay lại · popup hồi sinh mở, không phải popup tạm dừng, trễ không tính lúc ở ngoài · test Run RunReviveOrderTests, popup RevivePopupTests.PopupOpensOnceWhenTheOfferComesAfterTheWait",
+   "hash": "419e7e1b2fec",
+   "text": "**Rời game trong 1 giây trễ:** quay lại thì popup hồi sinh mở (trễ không tính lúc ở ngoài).",
+   "title": "Rời game trong 1 giây trễ",
+   "by": "PopupRevive",
+   "at": "2026-11-26 00:33:43"
+  },
+  "edge-tien-ha-quai-toi-cung-khung-hinh-thanh": {
+   "state": "done",
+   "note": "việc của Run, Enemy, Wallet · tiền của quái bị hạ trước lúc dừng · popup không có phần",
+   "tests": [],
+   "play": "Để thành bị phá đúng lúc hero hạ một con quái · tiền của con đó vẫn cộng, sau khi trận dừng không có đòn và không có tiền mới, hồi sinh thì tiền cộng tiếp · test Wallet WalletLogicTests.EnemyFallingInTheFrameTheCastleFirstFalls_StillPays_AndIncomeCountsAfterRevive, WalletLogicTests.EnemyFallingBeforeTheRunStops_KeepsItsCoins_NothingIsPaidAfterTheStop",
+   "hash": "a2f8cd6bc08d",
+   "text": "**Tiền hạ quái tới cùng khung hình thành bị phá:** quái bị hạ trước khi trận dừng vẫn cho tiền; sau khi dừng thì không có đòn nào.",
+   "title": "Tiền hạ quái tới cùng khung hình thành bị phá",
+   "by": "PopupRevive",
+   "at": "2026-11-26 00:33:45"
+  },
+  "params": {
+   "state": "done",
+   "note": "thông số dòng thời gian thuộc Run và Castle · popup không giữ số nào của node này",
+   "tests": [],
+   "play": "Đo khi Play một lượt có hồi sinh · trễ trước popup hồi sinh 1 giây, thành hiện lại 0.5 giây, máu 30 phần trăm máu tối đa, không đếm ngược, từ chối thì popup thua 0 giây, lúc thở 3 giây sau đợt dọn cùng lúc · test Run RunReviveOrderTests, Castle CastleSessionTests, Wave HeldClearTests",
+   "hash": "aa477bbbae24",
+   "text": "## Làm gì\nDòng thời gian từ lúc thành bị phá lần đầu (t = 0):\n| t (giây) | Việc | Ai làm |\n|---|---|---|\n| 0 | Thành báo bị phá; trận dừng; bật cờ \"đã đề nghị\" | `feature-castle`, `feature-run` |\n| 0 – 0.5 | Thành thu nhỏ còn 0 | `feature-castle` |\n| 1.0 | Mở `PopupRevive/Main` | `feature-run` nhờ dịch vụ popup |\n| (người chơi chọn, có thể xem quảng cáo) | | popup hồi sinh, `feature-ads` |\n| T | Popup đóng, báo lựa chọn | popup hồi sinh |\n| T – T+0.5 | Hồi sinh: thành phóng lên đủ cỡ, máu 30% | `feature-castle` |\n| T+0.5 | Trận chạy tiếp; tin dọn sạch đang giữ (nếu có) được xử lí | `feature-run` |\n| T (không hồi sinh) | Chốt điểm, mở popup thua ngay | `feature-run` |\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Trễ trước popup hồi sinh | 1 (dự kiến) | giây | Bằng trễ trước popup thua ở `feature-run/run-flow/flow-rules` |\n| Thành hiện lại | 0.5 | giây | Ngược lúc bị phá ở `feature-castle/castle-core/castle-body-values` |\n| Máu khi hồi sinh | 30% máu tối đa lúc đó | | Như trên |\n| Đếm ngược khi chạy tiếp | 0 | giây | Trận đứng đúng chỗ, người chơi đã thấy thế trận |\n| Trễ trước popup thua sau khi từ chối | 0 | giây | Người chơi đã thấy thành bị phá từ trước |\n| Lúc thở sau đợt dọn cùng lúc (khi hồi sinh) | 3 | giây | Như mọi lần dọn sạch |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Luồng hồi sinh | Không có: thành bị phá là thua (popup thua sau 1 giây) | Có đủ dòng thời gian trên | Như PROTOTYPE, thêm hiệu ứng hồi sinh riêng |\n| Thành hiện lại | | Phóng từ 0 lên, 0.5 giây | Hiệu ứng dựng lại thành, âm thanh |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "PopupRevive",
+   "at": "2026-11-26 00:33:47"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-26 00:09:20",
+   "id": "popup-after-1s",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "phần popup chỉ mở ở ReviveOffer, không mở trong ReviveWait · trễ 1 giây theo số bước chung là việc của Run"
+  },
+  {
+   "at": "2026-11-26 00:09:25",
+   "id": "revive-anim",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "việc của Castle · thành phóng 0.5 giây và máu 30 phần trăm khi ReviveStarted · popup không có phần, chờ Castle"
+  },
+  {
+   "at": "2026-11-26 00:09:26",
+   "id": "resume-after-anim",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "phần popup không mở lại sau hồi sinh · trận chạy tiếp khi ReviveShown là việc của Run và Castle"
+  },
+  {
+   "at": "2026-11-26 00:09:27",
+   "id": "fail-to-lose-now",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "phần popup đóng rồi báo DeclineRevive hoặc FailRevive ở bước kế tiếp · mở popup thua ngay là việc của Run"
+  },
+  {
+   "at": "2026-11-26 00:09:28",
+   "id": "held-clear",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "việc của Run và Wave · giữ tin dọn đợt khi đang đề nghị, cộng điểm và lúc thở 3 giây khi hồi sinh · popup không có phần"
+  },
+  {
+   "at": "2026-11-26 00:09:29",
+   "id": "offer-flag",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "phần popup chỉ mở khi Run vào ReviveOffer, lần phá sau Run vào thẳng Ending · cờ đã đề nghị là việc của Run"
+  },
+  {
+   "at": "2026-11-26 00:09:31",
+   "id": "edge-hero-dang-cho-hoi-sinh-khi-thanh-bi",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "việc của Hero · đồng hồ hồi sinh hero đếm bước Gameplay nên đứng yên lúc chờ hồi sinh · popup không có phần"
+  },
+  {
+   "at": "2026-11-26 00:09:37",
+   "id": "edge-bang-gia-dang-lam-cham-quai",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "việc của Castle hoặc Enemy · thời gian chậm còn lại đếm bước Gameplay · popup không có phần"
+  },
+  {
+   "at": "2026-11-26 00:09:38",
+   "id": "edge-thanh-bi-pha-lan-hai-ngay-sau-khi",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "phần popup không mở khi Run vào Ending sau lần phá thứ hai · popup thua sau 1 giây là việc của Run"
+  },
+  {
+   "at": "2026-11-26 00:09:39",
+   "id": "edge-roi-game-trong-1-giay-tre",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "phần popup mở đúng một lần khi Run vào ReviveOffer dù có yêu cầu tạm dừng · trễ không tính lúc ở ngoài là việc của Run"
+  },
+  {
+   "at": "2026-11-26 00:09:41",
+   "id": "edge-tien-ha-quai-toi-cung-khung-hinh-thanh",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "việc của Run, Enemy, Wallet · tiền của quái bị hạ trước lúc dừng · popup không có phần"
+  },
+  {
+   "at": "2026-11-26 00:09:42",
+   "id": "params",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "thông số dòng thời gian thuộc Run và Castle · popup không giữ số nào của node này"
+  },
+  {
+   "at": "2026-11-26 00:33:25",
+   "id": "popup-after-1s",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Lượt thật, để quái phá thành lần đầu · trận đứng yên, thành thu nhỏ, popup hồi sinh mở đúng 1 giây sau, trong 1 giây đó không bấm được gì · test Run RunReviveOrderTests, popup RevivePopupTests.PopupOpensOnceWhenTheOfferComesAfterTheWait"
+  },
+  {
+   "at": "2026-11-26 00:33:27",
+   "id": "revive-anim",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Bật cheatWaitingAd trên RunInstaller hoặc lượt thật, bấm Xem quảng cáo, nhà cung cấp giả trả đã xem đủ · thành phóng từ 0 lên đủ cỡ trong 0.5 giây, thanh máu nhảy ngay về 30 phần trăm máu tối đa · test Castle CastleSessionTests.Revive_anim_sets_thirty_percent_health_at_once_then_grows_back_over_half_a_second_and_tells_the_run"
+  },
+  {
+   "at": "2026-11-26 00:33:29",
+   "id": "resume-after-anim",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Hồi sinh bằng quảng cáo · ngay khi thành hiện đủ cỡ, quái và hero chạy tiếp từ đúng chỗ dừng, không đếm ngược, quái sát thành đánh lại ngay · test Run RunReviveOrderTests, popup RevivePopupTests.PopupDoesNotOpenAgainWhileCastleStandsUpOrWhenBattleRunsAgain"
+  },
+  {
+   "at": "2026-11-26 00:33:32",
+   "id": "fail-to-lose-now",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Ở popup hồi sinh bấm Kết thúc lượt, lần khác cho nhà cung cấp giả trả không xem được · popup hồi sinh đóng, popup thua hiện ngay không chờ thêm 1 giây, lần quảng cáo lỗi có dòng Quảng cáo chưa hoàn tất · test Run RunReviveOrderTests, popup RevivePopupTests.EndTapClosesPopupThenReportsNoRevive, RevivePopupTests.NotWatchedAdClosesPopupThenReportsFailedRevive"
+  },
+  {
+   "at": "2026-11-26 00:33:34",
+   "id": "held-clear",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Để thành bị phá đúng lúc hạ con quái cuối đợt · lúc popup hồi sinh mở điểm và tiền chưa cộng đợt đó · hồi sinh thì cộng điểm, thưởng tiền và bắt đầu lúc thở 3 giây · kết thúc lượt thì điểm không cộng đợt đó · test Wave HeldClearTests, Run RunReviveOrderTests"
+  },
+  {
+   "at": "2026-11-26 00:33:36",
+   "id": "offer-flag",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Hồi sinh bằng quảng cáo rồi để thành bị phá lần hai · lần hai không hiện popup hồi sinh, vào thẳng popup thua sau 1 giây · lượt mới bắt đầu thì lần phá đầu lại có popup hồi sinh · test Run RunReviveOrderTests, popup RevivePopupTests.SecondCastleFallAfterReviveGoesToLoseWithoutRevivePopup"
+  },
+  {
+   "at": "2026-11-26 00:33:38",
+   "id": "edge-hero-dang-cho-hoi-sinh-khi-thanh-bi",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Để một hero gục rồi thành bị phá trong lúc hero đang chờ hồi sinh, đứng ở popup vài giây · hero không hồi sinh lúc popup mở, hồi sinh khi trận chạy tiếp với đúng phần thời gian còn lại · test Hero HeroParticipantTests.A_hero_respawn_wait_counts_gameplay_steps_stands_still_while_the_castle_waits_for_revive_and_goes_on_after"
+  },
+  {
+   "at": "2026-11-26 00:33:39",
+   "id": "edge-bang-gia-dang-lam-cham-quai",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Bấm Băng giá rồi để thành bị phá khi quái còn chậm, đứng ở popup vài giây rồi hồi sinh · quái vẫn chậm đúng phần thời gian còn lại sau khi trận chạy tiếp, hồi chiêu kĩ năng đứng yên lúc chờ · test Castle CastleSessionTests.Edge_bang_gia_dang_lam_cham_quai_while_waiting_for_the_revive_the_castle_slows_nothing_more_and_its_cooldowns_stand_still"
+  },
+  {
+   "at": "2026-11-26 00:33:41",
+   "id": "edge-thanh-bi-pha-lan-hai-ngay-sau-khi",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Hồi sinh rồi để quái đứng sát thành phá thành ngay trong vài khung hình · không có popup hồi sinh lần hai, popup thua hiện sau 1 giây · test Run RunReviveOrderTests, popup RevivePopupTests.SecondCastleFallAfterReviveGoesToLoseWithoutRevivePopup"
+  },
+  {
+   "at": "2026-11-26 00:33:43",
+   "id": "edge-roi-game-trong-1-giay-tre",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Ngay khi thành bị phá lần đầu, rời game hay đổi cửa sổ trong 1 giây trễ rồi quay lại · popup hồi sinh mở, không phải popup tạm dừng, trễ không tính lúc ở ngoài · test Run RunReviveOrderTests, popup RevivePopupTests.PopupOpensOnceWhenTheOfferComesAfterTheWait"
+  },
+  {
+   "at": "2026-11-26 00:33:45",
+   "id": "edge-tien-ha-quai-toi-cung-khung-hinh-thanh",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Để thành bị phá đúng lúc hero hạ một con quái · tiền của con đó vẫn cộng, sau khi trận dừng không có đòn và không có tiền mới, hồi sinh thì tiền cộng tiếp · test Wallet WalletLogicTests.EnemyFallingInTheFrameTheCastleFirstFalls_StillPays_AndIncomeCountsAfterRevive, WalletLogicTests.EnemyFallingBeforeTheRunStops_KeepsItsCoins_NothingIsPaidAfterTheStop"
+  },
+  {
+   "at": "2026-11-26 00:33:47",
+   "id": "params",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Đo khi Play một lượt có hồi sinh · trễ trước popup hồi sinh 1 giây, thành hiện lại 0.5 giây, máu 30 phần trăm máu tối đa, không đếm ngược, từ chối thì popup thua 0 giây, lúc thở 3 giây sau đợt dọn cùng lúc · test Run RunReviveOrderTests, Castle CastleSessionTests, Wave HeldClearTests"
+  },
+  {
+   "at": "2026-11-26 01:15:36",
+   "id": "popup-after-1s",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:15:36",
+   "id": "revive-anim",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:15:36",
+   "id": "resume-after-anim",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:15:36",
+   "id": "fail-to-lose-now",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:15:36",
+   "id": "offer-flag",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:15:36",
+   "id": "edge-hero-dang-cho-hoi-sinh-khi-thanh-bi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:15:36",
+   "id": "edge-bang-gia-dang-lam-cham-quai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:15:56",
+   "id": "edge-thanh-bi-pha-lan-hai-ngay-sau-khi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  }
+ ]
+}

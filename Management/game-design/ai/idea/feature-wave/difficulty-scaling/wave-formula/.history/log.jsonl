@@ -6,3 +6,4 @@
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "4ec2cc7f93ed"}
 {"at": "2026-11-24 12:46:14", "event": "promote", "by": "người (Sync)", "hash": "4ec2cc7f93ed"}
 {"at": "2026-11-25 11:45:01", "event": "promote", "by": "người (Sync)", "hash": "4ec2cc7f93ed"}
+{"at": "2026-11-25 21:52:52", "event": "promote", "by": "tự chốt theo feature-wave/spawning/spawn-order", "hash": "4ec2cc7f93ed"}

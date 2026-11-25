@@ -19,7 +19,7 @@
     "frame": "main",
     "part": "band",
     "ref": "_design/feature-hud-upgrade.bar-layout.bar-buttons/upgrade-bar-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -41,7 +41,7 @@
     "frame": "main",
     "part": "upgrade",
     "ref": "_design/feature-hud-upgrade.bar-layout.bar-buttons/upgrade-bar-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -64,7 +64,7 @@
     "frame": "main",
     "part": "group",
     "ref": "_design/feature-hud-upgrade.bar-layout.bar-buttons/upgrade-bar-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -86,7 +86,7 @@
     "frame": "main",
     "part": "btn",
     "ref": "_design/feature-hud-upgrade.bar-layout.bar-buttons/upgrade-bar-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -108,7 +108,7 @@
     "frame": "main",
     "part": "pic",
     "ref": "_design/feature-hud-upgrade.button-state.button-display/upgrade-button-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -130,7 +130,7 @@
     "frame": "main",
     "part": "coin",
     "ref": "_design/feature-hud-upgrade.button-state.button-display/upgrade-button-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   }

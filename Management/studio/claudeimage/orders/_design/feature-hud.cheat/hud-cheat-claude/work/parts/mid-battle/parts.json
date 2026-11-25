@@ -20,7 +20,7 @@
     "frame": "main",
     "part": "band",
     "ref": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -37,7 +37,7 @@
     "frame": "main",
     "part": "btn",
     "ref": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -54,7 +54,7 @@
     "frame": "main",
     "part": "coin",
     "ref": "_design/feature-hud.hud-status.status-spec/hud-status-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -76,7 +76,7 @@
     "frame": "main",
     "part": "hp",
     "ref": "_design/feature-hud.hud-status.status-spec/hud-status-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -98,7 +98,7 @@
     "frame": "main",
     "part": "tray",
     "ref": "_design/feature-hud.hud-skill-button.skill-button-spec/skill-buttons-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -115,7 +115,7 @@
     "frame": "main",
     "part": "skill-thunder",
     "ref": "_design/feature-hud.hud-skill-button.skill-button-spec/skill-buttons-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -132,7 +132,7 @@
     "frame": "main",
     "part": "skill-frost",
     "ref": "_design/feature-hud.hud-skill-button.skill-button-spec/skill-buttons-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -149,7 +149,7 @@
     "frame": "main",
     "part": "skill-rally",
     "ref": "_design/feature-hud.hud-skill-button.skill-button-spec/skill-buttons-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   }

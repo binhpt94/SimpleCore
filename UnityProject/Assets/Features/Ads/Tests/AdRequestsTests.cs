@@ -400,6 +400,8 @@ namespace Game.Ads.Tests
             }
 
             public void Abort() => AbortCount++;
+
+            public bool EndOnCancel() => false;
         }
 
         private sealed class RecordingLog : IAdsLog

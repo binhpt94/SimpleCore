@@ -1,0 +1,20 @@
+{
+ "node": "feature-hud/hud-status/status-spec",
+ "nodeHash": "339ea3c8f938",
+ "frames": {
+  "main": "0666aef1b687"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99"
+ },
+ "order": "_design/feature-hud.hud-status.status-spec/hud-status-claude",
+ "version": 2,
+ "at": "2026-11-25 23:21:05",
+ "stamp": 1795623665.8925614,
+ "sources": [
+  [
+   "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+   2
+  ]
+ ]
+}

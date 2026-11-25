@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game.Combat;
 using Game.Enemy;
 using Game.Run;
 
@@ -8,14 +9,19 @@ namespace Game.Hero
     /// <summary>
     /// The team on the battlefield, by slot, and its rules: spawn, target, walk, hit, fall, respawn, level
     /// (live: feature-hero/*). Enemies see the targetable heroes through <see cref="IEnemyFoes"/> (key = slot).
-    /// Pure C#: time comes in through <see cref="Tick"/>.
+    /// Pure C#: time comes in through <see cref="Aim"/> and <see cref="Strike"/>, once per combat tick (one per gameplay
+    /// step of the shared clock), or through <see cref="Tick"/> without the shared combat.
     /// </summary>
-    internal sealed class HeroSquad : IHeroSquad, IEnemyFoes, IHeroSpawnPoints
+    internal sealed class HeroSquad : IHeroSquad, IEnemyFoes, IHeroSpawnPoints, IHeroDownState, IHeroRespawnTime, ICombatReceiver
     {
         private const float Epsilon = 1e-4f;
 
         private readonly HeroConfig _config;
         private readonly IEnemyField _field;
+        private readonly IHeroHits _hits;
+
+        /// <summary>Heroes whose health reached 0 this combat tick, not yet reported as fallen.</summary>
+        private readonly List<HeroUnit> _emptied = new List<HeroUnit>();
         private readonly List<HeroUnit> _units = new List<HeroUnit>();
         private readonly List<EnemyTarget> _alive = new List<EnemyTarget>();
         private readonly HashSet<int> _defeatedThisFrame = new HashSet<int>();
@@ -24,12 +30,17 @@ namespace Game.Hero
         /// <summary>Start and respawn x by slot for the next run; the config's values until the castle gives its own.</summary>
         private readonly List<float> _spawnX = new List<float>();
 
-        public HeroSquad(HeroConfig config, IEnemyField field)
+        /// <param name="hits">Where the heroes' hits go; null: straight onto the enemy field (no shared combat).</param>
+        public HeroSquad(HeroConfig config, IEnemyField field, IHeroHits hits = null)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _field = field ?? throw new ArgumentNullException(nameof(field));
+            _hits = hits ?? new DirectHeroHits(field);
             _spawnX.AddRange(_config.SlotSpawnX);
         }
+
+        /// <summary>Raised with the slot when its hero goes down or stands up again (IHeroDownState).</summary>
+        public event Action<int> DownChanged;
 
         /// <summary>The team was replaced (a run started) or removed (battle cleared).</summary>
         public event Action TeamChanged;
@@ -56,7 +67,9 @@ namespace Game.Hero
         /// <summary>A run starts: the team spawns at its slots' spawn points, at level 1 and full health.</summary>
         public void Begin(RunTeam team)
         {
+            var wereDown = DownSlots();
             _units.Clear();
+            _emptied.Clear();
             var codes = team.HeroCodes;
             for (var slot = 0; slot < codes.Count; slot++)
             {
@@ -67,14 +80,47 @@ namespace Game.Hero
                 _units.Add(new HeroUnit(slot, hero, _spawnX[slot], HeroLevelStats.At(hero, 1, _config)));
             }
             TeamChanged?.Invoke();
+            RaiseDownChanged(wereDown);
         }
 
         /// <summary>The battle is cleared: every hero leaves.</summary>
         public void Clear()
         {
             if (_units.Count == 0) return;
+            var wereDown = DownSlots();
             _units.Clear();
+            _emptied.Clear();
             TeamChanged?.Invoke();
+            RaiseDownChanged(wereDown);
+        }
+
+        // ------------------------------------------------------------------ IHeroDownState
+
+        public bool IsDown(int slot)
+        {
+            var unit = FindSlot(slot);
+            return unit != null && !unit.IsStanding;
+        }
+
+        // ------------------------------------------------------------------ IHeroRespawnTime
+
+        public float RespawnSecondsLeft(int slot)
+        {
+            var unit = FindSlot(slot);
+            return unit == null || unit.IsStanding ? 0f : Math.Max(0f, unit.RespawnLeft);
+        }
+
+        private List<int> DownSlots()
+        {
+            var slots = new List<int>();
+            foreach (var unit in _units)
+                if (!unit.IsStanding) slots.Add(unit.Slot);
+            return slots;
+        }
+
+        private void RaiseDownChanged(List<int> slots)
+        {
+            foreach (var slot in slots) DownChanged?.Invoke(slot);
         }
 
         // ------------------------------------------------------------------ IHeroSpawnPoints
@@ -136,51 +182,114 @@ namespace Game.Hero
                 if (unit.IsTargetable) into.Add(new EnemyFoe(unit.Slot, unit.X, HalfWidth));
         }
 
+        /// <summary>An enemy hit a hero directly, without the shared combat: health is taken and a fall reported at once.</summary>
         public void Hit(int key, float damage)
         {
+            TakeTotal(key, damage);
+            ReportFallen();
+        }
+
+        // ------------------------------------------------------------------ ICombatReceiver (shared combat)
+
+        /// <summary>Only a standing hero that finished growing back takes hits.</summary>
+        public bool CanBeHit(int key)
+        {
             var unit = FindSlot(key);
-            if (unit == null || !unit.IsTargetable || damage <= 0f) return;
-            unit.Health -= damage;
+            return unit != null && unit.IsTargetable;
+        }
+
+        /// <summary>Takes the step's total from the hero; a hero left at 0 falls when <see cref="ReportFallen"/> comes.</summary>
+        public void TakeTotal(int key, float total)
+        {
+            var unit = FindSlot(key);
+            if (unit == null || !unit.IsTargetable || total <= 0f || _emptied.Contains(unit)) return;
+            unit.Health -= total;
             if (unit.Health > 0f)
             {
                 Hurt?.Invoke(unit);
                 return;
             }
             unit.Health = 0f;
-            unit.IsStanding = false;
-            unit.IsMoving = false;
-            unit.TargetHandle = HeroUnit.NoTarget;
-            unit.RespawnLeft = _config.RespawnSeconds;
-            Fell?.Invoke(unit);
+            _emptied.Add(unit);
+        }
+
+        public void ReportFallen()
+        {
+            if (_emptied.Count == 0) return;
+            var fallen = _emptied.ToArray();
+            _emptied.Clear();
+            foreach (var unit in fallen)
+            {
+                if (!_units.Contains(unit)) continue;
+                unit.IsStanding = false;
+                unit.IsMoving = false;
+                unit.TargetHandle = HeroUnit.NoTarget;
+                unit.RespawnLeft = _config.RespawnSeconds;
+                Fell?.Invoke(unit);
+                DownChanged?.Invoke(unit.Slot);
+            }
         }
 
         // ------------------------------------------------------------------ battle step
 
-        /// <summary>Moves the battle on by <paramref name="deltaSeconds"/>: every hero waits, walks or hits.</summary>
+        /// <summary>
+        /// Moves the battle on by <paramref name="deltaSeconds"/> without the shared combat: each hero in turn waits,
+        /// walks and hits, so a hero sees enemies defeated by the heroes before it in the same step.
+        /// </summary>
         public void Tick(float deltaSeconds)
         {
             if (deltaSeconds <= 0f || _units.Count == 0) return;
             _field.GetAlive(_alive);
             _defeatedThisFrame.Clear();
-            foreach (var unit in _units) TickUnit(unit, deltaSeconds);
+            foreach (var unit in _units)
+            {
+                AimUnit(unit, deltaSeconds);
+                StrikeUnit(unit);
+            }
         }
 
-        private void TickUnit(HeroUnit unit, float dt)
+        /// <summary>
+        /// First part of a combat tick (ICombatActor.Aim): every hero counts its waits, respawns, picks its target and
+        /// walks, all from the enemies as they stand at the start of the tick.
+        /// </summary>
+        public void Aim(float deltaSeconds)
+        {
+            if (deltaSeconds <= 0f || _units.Count == 0) return;
+            _field.GetAlive(_alive);
+            _defeatedThisFrame.Clear();
+            foreach (var unit in _units) AimUnit(unit, deltaSeconds);
+        }
+
+        /// <summary>Second part of a combat tick (ICombatActor.Strike): every hero in range whose wait is over hits.</summary>
+        public void Strike()
+        {
+            foreach (var unit in _units) StrikeUnit(unit);
+        }
+
+        private void StrikeUnit(HeroUnit unit)
+        {
+            if (!unit.IsStanding || unit.GrowLeft > 0f || unit.Mode != HeroMode.Attacking || unit.Cooldown > 0f) return;
+            if (TryFindAlive(unit.TargetHandle, out var target)) Strike(unit, target);
+        }
+
+        private void AimUnit(HeroUnit unit, float dt)
         {
             if (!unit.IsStanding)
             {
+                // A wait of t seconds ends on the first step whose counted time reaches t (feature-sim-clock clock-values);
+                // Epsilon absorbs the float error of adding up 0.025 s steps.
                 unit.RespawnLeft -= dt;
-                if (unit.RespawnLeft <= 0f) Respawn(unit);
+                if (unit.RespawnLeft <= Epsilon) Respawn(unit);
                 return;
             }
             if (unit.GrowLeft > 0f)
             {
-                unit.GrowLeft = Math.Max(0f, unit.GrowLeft - dt);
+                unit.GrowLeft = Done(unit.GrowLeft - dt);
                 unit.IsMoving = false;
                 return;
             }
 
-            unit.Cooldown = Math.Max(0f, unit.Cooldown - dt);
+            unit.Cooldown = Done(unit.Cooldown - dt);
             var range = unit.Hero.range;
 
             var target = default(EnemyTarget);
@@ -213,7 +322,6 @@ namespace Game.Hero
             }
 
             unit.Mode = HeroMode.Attacking;
-            if (unit.Cooldown <= 0f) Strike(unit, target);
         }
 
         private void WalkHome(HeroUnit unit, float dt)
@@ -266,7 +374,7 @@ namespace Game.Hero
 
             var damage = unit.Stats.Damage;
             foreach (var handle in _struck)
-                if (_field.Damage(handle, damage)) _defeatedThisFrame.Add(handle);
+                if (_hits.Hit(handle, damage)) _defeatedThisFrame.Add(handle);
 
             var area = hero.attack == HeroAttack.SingleTarget ? 0f : hero.areaSize;
             var front = unit.X + unit.Facing * HalfWidth;
@@ -285,6 +393,7 @@ namespace Game.Hero
             unit.TargetHandle = HeroUnit.NoTarget;
             unit.IsMoving = false;
             Respawned?.Invoke(unit);
+            DownChanged?.Invoke(unit.Slot);
         }
 
         // ------------------------------------------------------------------ targeting helpers
@@ -333,6 +442,9 @@ namespace Game.Hero
             }
             return found;
         }
+
+        /// <summary>Time left of a wait; 0 once it is within <see cref="Epsilon"/> of the end.</summary>
+        private static float Done(float left) => left <= Epsilon ? 0f : left;
 
         private static float Clamp(float x, float halfRange) => Math.Max(-halfRange, Math.Min(halfRange, x));
 

@@ -4,34 +4,41 @@
    "state": "verified",
    "note": "Độ trễ 1 giây, đội mặc định và việc bỏ màn bắt đầu ở IDEA đều do test tự truyền vào RunFlow. Thêm test nạp RunConfig asset thật kiểm loseDelaySeconds 1, teamSize 3, skipMenus bật, đội knight, axeman, archer",
    "tests": [
-    "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues",
-    "RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam",
+    "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues",
+    "RunInstallerTests.InstalledRunUsesTheConfigAndOpensOnTheStartScreen",
+    "RunInstallerTests.InstalledPrototypeRunBuildsTheBattleTheScreenFlowAsksForAndHandsBackTheLeaveChoice",
+    "RunInstallerTests.PrototypeRunOffersOneReviveOnTheFirstCastleFall",
+    "RunInstallerTests.PrototypeRunHasBackToStartAndGivingUp",
+    "RunBattleTests.BuildingABattleStartsTheRunAndAnswersBattleBuiltOnceItIsReady",
+    "RunBattleTests.PlayAgainOnTheLosePopupClearsTheBattleThenTellsTheFlow",
+    "RunBattleTests.BackToStartOnTheLosePopupClearsTheBattleThenTellsTheFlow",
+    "RunBattleTests.GivingUpOnThePausePopupSettlesClearsThenTellsTheFlow",
     "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
-    "RunSkipMenusTests.ThereIsNoBackToStartOnTheLosePopup",
-    "RunSkipMenusTests.ThereIsNoGivingUp",
     "RunFlowTests.OnlyTheFirstPressCountsWhileTheScreenIsChanging"
    ],
    "play": "",
-   "hash": "44990ba9f1cc",
-   "text": "## Làm gì\n- Giữ một trạng thái màn hiện tại trong scene Game: màn bắt đầu, màn chọn đội, trận (đang đánh / tạm dừng / đã kết thúc).\n- Nhận báo bấm nút từ `feature-home`, `feature-team-select`, `feature-popup-lose`, `feature-popup-pause` và báo thành bị phá từ `feature-castle`; quyết định màn tiếp theo theo bảng ở node cha.\n- Khi vào trận: dựng trận mới, báo lượt mới (`feature-run/run-start`).\n- Khi thành bị phá: dừng trận ngay, chốt điểm (`feature-run/run-score`), chờ 1 giây, nhờ `feature-popup` hiện popup thua.\n- Khi rời trận (chơi lại, về màn bắt đầu, bỏ lượt): đóng popup đang mở, huỷ mọi thứ của trận, hiện màn đích.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số scene | 2 (Loading, Game) | scene | Theo `feature-scene-flow/scene-list` |\n| Màn đầu tiên trong scene Game | Trận, đội mặc định | | `boot-to-home`; từ PROTOTYPE là màn bắt đầu (bảng giai đoạn) |\n| Độ trễ trước popup thua | 1 (dự kiến) | giây | Đủ thấy thành bị phá, không làm chậm chơi lại |\n| Số lần bấm có tác dụng trong lúc đổi màn | 1 | lần | Tránh mở trận hai lần |\n| Thời gian đổi màn | 0 (đổi ngay) | giây | Mức đơn giản nhất; hiệu ứng ở bảng giai đoạn |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Màn sau Loading | Vào thẳng trận với đội mặc định (`feature-team-select/team-memory/memory-rules`) | Màn bắt đầu | Màn bắt đầu |\n| Chơi lại ở popup thua | Vào thẳng trận mới với đội mặc định | Sang màn chọn đội | Sang màn chọn đội |\n| Về màn bắt đầu ở popup thua | Không có (chưa có màn bắt đầu) | Có | Có |\n| Bỏ lượt | Không có (chưa có tạm dừng) | Không bắt buộc | Có |\n| Độ trễ trước popup thua | 1 giây | 1 giây | 1 giây |\n| Bước hồi sinh (popup hồi sinh, quảng cáo) | Không có: thành bị phá lần đầu vào thẳng popup thua sau 1 giây | Có, mỗi lượt 1 lần | Có, mỗi lượt 1 lần |\n| Hiệu ứng đổi màn | Không | Không | Mờ dần ra rồi vào, 0.3 giây mỗi chiều (dự kiến) |",
+   "hash": "27f605d1873b",
+   "text": "## Làm gì\nIDEA (chỉ có màn trận; feature này tự đổi màn):\n- Mở game và chơi lại: dựng trận mới với đội mặc định, báo lượt mới (`feature-run/run-start`).\n- Khi thành bị phá: dừng trận ngay, chốt điểm (`feature-run/run-score`), chờ 1 giây, nhờ `feature-popup` hiện popup hồi sinh hoặc popup thua.\n\nPROTOTYPE trở đi (bảng đường đi giữa ba màn chính thuộc `feature-game-flow`, nhánh đường đi của nó; feature này không hiện màn bắt đầu hay màn chọn đội, không giữ trạng thái màn chính):\n- **Vào trận:** điều hướng màn giao đội và xin dựng trận. Feature này dựng trận mới, báo lượt mới, rồi báo điều hướng màn \"dựng xong\" (hoặc \"lỗi\"); điều hướng màn mới hiện màn trận.\n- **Trong trận:** feature này giữ mọi bước trong trận: tạm dừng, thành bị phá, chờ 1 giây, popup hồi sinh, popup thua.\n- **Rời trận:** nhận lựa chọn từ `feature-popup-lose` (chơi lại, về màn bắt đầu) hoặc `feature-popup-pause` (bỏ lượt). Feature này chốt điểm nếu chưa chốt, đóng popup đang mở, huỷ mọi thứ của trận, rồi chuyển đúng lựa chọn đó cho điều hướng màn. Màn đích do điều hướng màn chọn và hiện.\n- Các báo nút của `feature-home` (Chơi) và `feature-team-select` (Vào trận, Quay lại) đi thẳng tới điều hướng màn, không qua feature này.\n\nCác tin cần có giữa các feature ở PROTOTYPE (tên và hình thức contract do @CodeLead đặt):\n| Từ | Tới | Tin |\n|---|---|---|\n| `feature-scene-flow` | `feature-game-flow` | scene Game sẵn sàng |\n| `feature-home` | `feature-game-flow` | người chơi bấm Chơi |\n| `feature-team-select` | `feature-game-flow` | bấm Vào trận kèm đội đã chọn; bấm Quay lại |\n| `feature-game-flow` | `feature-run` | xin dựng trận với đội này |\n| `feature-run` | `feature-game-flow` | trận đã dựng xong; dựng trận lỗi |\n| `feature-popup-lose`, `feature-popup-pause` | `feature-run` | lựa chọn rời trận (chơi lại, về màn bắt đầu, bỏ lượt) |\n| `feature-run` | `feature-game-flow` | đã dọn trận xong, kèm lựa chọn rời trận |\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số scene | 2 (Loading, Game) | scene | Theo `feature-scene-flow/scene-list` |\n| Màn đầu tiên trong scene Game | Trận, đội mặc định | | `boot-to-home`; từ PROTOTYPE là màn bắt đầu (bảng giai đoạn) |\n| Độ trễ trước popup thua | 1 (dự kiến) | giây | Đủ thấy thành bị phá, không làm chậm chơi lại |\n| Số lần bấm có tác dụng trong lúc đổi màn | 1 | lần | Tránh mở trận hai lần |\n| Thời gian đổi màn | 0 (đổi ngay) | giây | Mức đơn giản nhất; hiệu ứng ở bảng giai đoạn |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Màn sau Loading | Vào thẳng trận với đội mặc định (`feature-team-select/team-memory/memory-rules`) | Màn bắt đầu | Màn bắt đầu |\n| Chơi lại ở popup thua | Vào thẳng trận mới với đội mặc định | Sang màn chọn đội | Sang màn chọn đội |\n| Về màn bắt đầu ở popup thua | Không có (chưa có màn bắt đầu) | Có | Có |\n| Bỏ lượt | Không có (chưa có tạm dừng) | Không bắt buộc | Có |\n| Độ trễ trước popup thua | 1 giây | 1 giây | 1 giây |\n| Bước hồi sinh (popup hồi sinh, quảng cáo) | Không có: thành bị phá lần đầu vào thẳng popup thua sau 1 giây | Có, mỗi lượt 1 lần | Có, mỗi lượt 1 lần |\n| Hiệu ứng đổi màn | Không | Không | Mờ dần ra rồi vào, 0.3 giây mỗi chiều (dự kiến) |\n| Ai chọn và hiện màn đích (bắt đầu, chọn đội, trận) | Feature này (chỉ có màn trận) | `feature-game-flow`; feature này chỉ dựng trận, dọn trận và chuyển lựa chọn rời trận | Như PROTOTYPE |\n| Trạng thái màn chính (bắt đầu, chọn đội, trận) | Không cần (luôn là trận) | Giữ ở `feature-game-flow`, không giữ ở đây | Như PROTOTYPE |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:06:48"
+   "at": "2026-11-26 01:03:28"
   },
   "replay-path": {
    "state": "verified",
    "note": "",
    "tests": [
     "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
-    "RunFlowTests.PlayAgainClearsTheBattleAndGoesToTeamSelect",
-    "RunFlowTests.BackToStartClearsTheBattleAndGoesHome"
+    "RunFlowTests.PlayAgainClearsTheBattleAndHandsPlayAgainToTheScreenFlow",
+    "RunFlowTests.BackToStartClearsTheBattleAndGoesHome",
+    "RunBattleTests.PlayAgainOnTheLosePopupClearsTheBattleThenTellsTheFlow",
+    "RunBattleTests.BackToStartOnTheLosePopupClearsTheBattleThenTellsTheFlow"
    ],
    "play": "",
    "hash": "e59094bf4cce",
    "text": "Chơi lại ở popup thua: huỷ trận, sang màn chọn đội; về màn bắt đầu: huỷ trận, sang màn bắt đầu\nChơi lại không đi qua màn bắt đầu.",
    "title": "Chơi lại ở popup thua: huỷ trận, sang màn chọn đội; về màn bắt đầu: huỷ trận, sang màn bắt đầu",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:03:29"
+   "at": "2026-11-26 01:03:28"
   },
   "lose-stop-same-moment": {
    "state": "verified",
@@ -52,17 +59,18 @@
    "state": "verified",
    "note": "Số 1 giây là tham số test tự truyền vào RunFlow, nên test qua với mọi giá trị cấu hình. Thêm test nạp RunConfig asset thật kiểm loseDelaySeconds bằng 1 và installer dựng RunFlow với giá trị đó",
    "tests": [
-    "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues",
-    "RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam",
+    "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues",
+    "RunInstallerTests.InstalledRunDrivesTheSharedClockAndWaitsOnItsSteps",
     "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay",
-    "RunFlowTests.NothingCanBePressedDuringTheWaitBeforeTheLosePopup"
+    "RunFlowTests.NothingCanBePressedDuringTheWaitBeforeTheLosePopup",
+    "RunSimClockTests.LosingStopsTheBattleOnTheClockAndTheLosePopupWaitsOneSecondOfSteps"
    ],
    "play": "",
    "hash": "678a0fc1e59f",
    "text": "Popup sau khi thành bị phá hiện sau 1 giây kể từ lúc trận dừng\n1 giây (dự kiến) để người chơi thấy thành vừa bị phá. Lần bị phá đầu trong lượt: hiện popup hồi sinh; lần sau: hiện popup thua. Trong 1 giây này không có gì bấm được.",
    "title": "Popup sau khi thành bị phá hiện sau 1 giây kể từ lúc trận dừng",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:06:48"
+   "at": "2026-11-26 00:29:49"
   },
   "transition-lock": {
    "state": "verified",
@@ -97,8 +105,8 @@
    "state": "verified",
    "note": "Test tự truyền skipMenus true và đội mặc định vào RunFlow, nên chỉ qua nhờ tham số của test. Thêm test nạp RunConfig asset thật, kiểm skipMenus bật và đội mặc định knight, axeman, archer, và installer dựng RunFlow từ đó",
    "tests": [
-    "RunInstallerTests.InstalledRunUsesTheConfigAndGoesStraightIntoBattleWithTheDefaultTeam",
-    "RunInstallerTests.ConfigAssetHoldsTheIdeaRunValues",
+    "RunInstallerTests.InstalledRunUsesTheConfigAndOpensOnTheStartScreen",
+    "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues",
     "RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam",
     "RunSkipMenusTests.BattleStartsOnTheFrameAfterTheSessionRuns"
    ],
@@ -107,7 +115,7 @@
    "text": "Mở game: scene Loading tải xong tự sang scene Game, vào thẳng trận với đội mặc định\nChưa có màn bắt đầu và màn chọn đội; đội mặc định theo `feature-team-select/team-memory/memory-rules`. Không có nút ở Loading. Đã vào scene Game thì không quay lại Loading; mọi đổi màn sau đó là đổi trong scene Game, không tải scene.",
    "title": "Mở game: scene Loading tải xong tự sang scene Game, vào thẳng trận với đội mặc định",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:06:48"
+   "at": "2026-11-26 00:29:49"
   },
   "quit-path": {
    "state": "verified",
@@ -128,14 +136,15 @@
    "note": "",
    "tests": [
     "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
-    "RunFlowTests.PlayAgainClearsTheBattleAndGoesToTeamSelect"
+    "RunFlowTests.PlayAgainClearsTheBattleAndHandsPlayAgainToTheScreenFlow",
+    "RunBattleTests.ANewBattleCanBeBuiltAfterLeavingTheLastOne"
    ],
    "play": "",
    "hash": "33bded91ba45",
    "text": "Mỗi lần bấm vào trận, trận được dựng mới hoàn toàn; không giữ gì của trận trước\nThành, hero, quái, HUD, thanh nâng cấp của trận trước bị huỷ hết khi rời trận. Vào trận là dựng lại từ đầu rồi báo \"lượt mới\" (`feature-run/run-start`).",
    "title": "Mỗi lần bấm vào trận, trận được dựng mới hoàn toàn; không giữ gì của trận trước",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:03:29"
+   "at": "2026-11-26 01:03:28"
   },
   "edge-bam-choi-lai-va-ve-man-bat-dau": {
    "state": "verified",
@@ -161,14 +170,15 @@
     "RunReviveTests.SecondCastleFallInTheRunGoesStraightToTheLosePopup",
     "RunReviveTests.NothingCanBePressedDuringTheWaitBeforeTheRevivePopup",
     "RunReviveTests.OnlyTheFirstChoiceOnTheRevivePopupCounts",
-    "RunInstallerTests.IdeaRunHasNoReviveSoTheFirstCastleFallLoses"
+    "RunInstallerTests.PrototypeRunOffersOneReviveOnTheFirstCastleFall",
+    "RunSimClockTests.WaitingForTheReviveStopsTheBattleAndTheReviveGoesOnWithoutResettingTheClock"
    ],
    "play": "",
    "hash": "9c249309dfb0",
    "text": "Chọn hồi sinh và xem xong quảng cáo: đóng popup hồi sinh, thành có lại máu, trận chạy tiếp ngay từ chỗ dừng\nKhông đếm ngược; quái, hero, đợt, tiền, cấp, hồi chiêu giữ đúng như lúc dừng. Bỏ qua đề nghị, hoặc quảng cáo không xem hết hay không tải được: đóng popup hồi sinh, chốt điểm, hiện popup thua ngay (không chờ thêm 1 giây). Mỗi lượt chỉ một lần hồi sinh.",
    "title": "Chọn hồi sinh và xem xong quảng cáo: đóng popup hồi sinh, thành có lại máu, trận chạy tiếp ngay từ chỗ dừng",
    "by": "@CodeLead",
-   "at": "2026-11-25 18:32:07"
+   "at": "2026-11-26 00:29:49"
   },
   "edge-thanh-bi-pha-khi-popup-tam-dung-dang": {
    "state": "verified",
@@ -226,6 +236,24 @@
    "title": "Nút quay lại của máy (Android)",
    "by": "@CodeLead",
    "at": "2026-11-25 18:32:07"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues",
+    "RunInstallerTests.InstalledRunUsesTheConfigAndOpensOnTheStartScreen",
+    "RunInstallerTests.InstalledPrototypeRunBuildsTheBattleTheScreenFlowAsksForAndHandsBackTheLeaveChoice",
+    "RunInstallerTests.PrototypeRunOffersOneReviveOnTheFirstCastleFall",
+    "RunInstallerTests.PrototypeRunHasBackToStartAndGivingUp",
+    "RunFlowTests.PlayAgainClearsTheBattleAndHandsPlayAgainToTheScreenFlow"
+   ],
+   "play": "",
+   "hash": "786045e3a57e",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Màn sau Loading: Màn bắt đầu\n- Chơi lại ở popup thua: Sang màn chọn đội\n- Về màn bắt đầu ở popup thua: Có\n- Bước hồi sinh (popup hồi sinh, quảng cáo): Có, mỗi lượt 1 lần\n- Ai chọn và hiện màn đích (bắt đầu, chọn đội, trận): `feature-game-flow`; feature này chỉ dựng trận, dọn trận và chuyển lựa chọn rời trận\n- Trạng thái màn chính (bắt đầu, chọn đội, trận): Giữ ở `feature-game-flow`, không giữ ở đây",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:03:28"
   }
  },
  "log": [
@@ -519,6 +547,125 @@
   {
    "at": "2026-11-25 18:32:07",
    "id": "edge-nut-quay-lai-cua-may-android",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:17:28",
+   "id": "boot-to-home",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.InstalledRunUsesTheConfigAndOpensOnTheStartScreen, RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues, RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam, RunSkipMenusTests.BattleStartsOnTheFrameAfterTheSessionRuns"
+  },
+  {
+   "at": "2026-11-26 00:17:29",
+   "id": "lose-popup-delay",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues, RunInstallerTests.InstalledRunDrivesTheSharedClockAndWaitsOnItsSteps, RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay, RunFlowTests.NothingCanBePressedDuringTheWaitBeforeTheLosePopup, RunSimClockTests.LosingStopsTheBattleOnTheClockAndTheLosePopupWaitsOneSecondOfSteps"
+  },
+  {
+   "at": "2026-11-26 00:17:31",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues, RunInstallerTests.InstalledRunUsesTheConfigAndOpensOnTheStartScreen, RunInstallerTests.PrototypeRunOffersOneReviveOnTheFirstCastleFall, RunInstallerTests.PrototypeRunHasBackToStartAndGivingUp, RunFlowTests.PlayAgainClearsTheBattleAndGoesToTeamSelect, RunFlowTests.OnlyTheFirstPressCountsWhileTheScreenIsChanging"
+  },
+  {
+   "at": "2026-11-26 00:17:44",
+   "id": "revive-step",
+   "state": "done",
+   "by": "Run",
+   "note": "RunReviveTests.FirstCastleFallFreezesTheBattleAndOffersTheReviveAfterTheDelay, RunReviveTests.WatchedAdStandsTheCastleUpAndTheBattleGoesOnFromWhereItStopped, RunReviveTests.DecliningTheReviveLosesAtOnceWithoutAnotherWait, RunReviveTests.AdNotWatchedLosesAtOnceAndTellsTheLosePopup, RunReviveTests.SecondCastleFallInTheRunGoesStraightToTheLosePopup, RunReviveTests.NothingCanBePressedDuringTheWaitBeforeTheRevivePopup, RunReviveTests.OnlyTheFirstChoiceOnTheRevivePopupCounts, RunInstallerTests.PrototypeRunOffersOneReviveOnTheFirstCastleFall, RunSimClockTests.WaitingForTheReviveStopsTheBattleAndTheReviveGoesOnWithoutResettingTheClock"
+  },
+  {
+   "at": "2026-11-26 00:24:58",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues, RunInstallerTests.InstalledRunUsesTheConfigAndOpensOnTheStartScreen, RunInstallerTests.PrototypeRunOffersOneReviveOnTheFirstCastleFall, RunInstallerTests.PrototypeRunHasBackToStartAndGivingUp, RunFlowTests.PlayAgainClearsTheBattleAndGoesToTeamSelect, RunFlowTests.OnlyTheFirstPressCountsWhileTheScreenIsChanging, RunBattleTests.PlayAgainOnTheLosePopupClearsTheBattleThenTellsTheFlow, RunBattleTests.BackToStartOnTheLosePopupClearsTheBattleThenTellsTheFlow, RunBattleTests.GivingUpOnThePausePopupSettlesClearsThenTellsTheFlow"
+  },
+  {
+   "at": "2026-11-26 00:29:49",
+   "id": "boot-to-home",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:29:49",
+   "id": "lose-popup-delay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:29:49",
+   "id": "revive-step",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:29:49",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:41:34",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues, RunInstallerTests.InstalledRunUsesTheConfigAndOpensOnTheStartScreen, RunInstallerTests.InstalledPrototypeRunBuildsTheBattleTheScreenFlowAsksForAndHandsBackTheLeaveChoice, RunInstallerTests.PrototypeRunOffersOneReviveOnTheFirstCastleFall, RunInstallerTests.PrototypeRunHasBackToStartAndGivingUp, RunBattleTests.BuildingABattleStartsTheRunAndAnswersBattleBuiltOnceItIsReady, RunBattleTests.PlayAgainOnTheLosePopupClearsTheBattleThenTellsTheFlow, RunBattleTests.BackToStartOnTheLosePopupClearsTheBattleThenTellsTheFlow, RunBattleTests.GivingUpOnThePausePopupSettlesClearsThenTellsTheFlow, RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam, RunFlowTests.OnlyTheFirstPressCountsWhileTheScreenIsChanging"
+  },
+  {
+   "at": "2026-11-26 00:57:15",
+   "id": "fresh-battle",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam, RunFlowTests.PlayAgainClearsTheBattleAndHandsPlayAgainToTheScreenFlow, RunBattleTests.ANewBattleCanBeBuiltAfterLeavingTheLastOne"
+  },
+  {
+   "at": "2026-11-26 00:57:17",
+   "id": "replay-path",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam, RunFlowTests.PlayAgainClearsTheBattleAndHandsPlayAgainToTheScreenFlow, RunFlowTests.BackToStartClearsTheBattleAndGoesHome, RunBattleTests.PlayAgainOnTheLosePopupClearsTheBattleThenTellsTheFlow, RunBattleTests.BackToStartOnTheLosePopupClearsTheBattleThenTellsTheFlow"
+  },
+  {
+   "at": "2026-11-26 00:57:19",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues, RunInstallerTests.InstalledRunUsesTheConfigAndOpensOnTheStartScreen, RunInstallerTests.InstalledPrototypeRunBuildsTheBattleTheScreenFlowAsksForAndHandsBackTheLeaveChoice, RunInstallerTests.PrototypeRunOffersOneReviveOnTheFirstCastleFall, RunInstallerTests.PrototypeRunHasBackToStartAndGivingUp, RunFlowTests.PlayAgainClearsTheBattleAndHandsPlayAgainToTheScreenFlow"
+  },
+  {
+   "at": "2026-11-26 01:03:28",
+   "id": "fresh-battle",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:03:28",
+   "id": "replay-path",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:03:28",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:03:28",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

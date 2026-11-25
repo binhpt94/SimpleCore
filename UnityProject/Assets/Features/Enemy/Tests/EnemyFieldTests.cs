@@ -43,8 +43,17 @@ namespace Game.Enemy.Tests
         [TestCase(EnemyType.Boss)]
         public void Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing(EnemyType type)
         {
-            var real = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);
-            var field = new EnemyField(real, new FakeIncome());
+            // Every type is in the game from PROTOTYPE on (live: enemy-type-values), so take a config of a stage
+            // where this type is not yet in the game, as at IDEA.
+            var kinds = new SerializedObject(_config).FindProperty("_kinds");
+            for (var i = 0; i < kinds.arraySize; i++)
+            {
+                var kind = kinds.GetArrayElementAtIndex(i);
+                if (kind.FindPropertyRelative("_type").intValue == (int)type)
+                    kind.FindPropertyRelative("_available").boolValue = false;
+            }
+            kinds.serializedObject.ApplyModifiedPropertiesWithoutUndo();
+            var field = new EnemyField(_config, new FakeIncome());
 
             var error = Assert.Throws<System.InvalidOperationException>(
                 () => field.Spawn(new EnemySpawn(type, EnemySide.Left, 1f)));
@@ -53,10 +62,13 @@ namespace Game.Enemy.Tests
             Assert.That(field.AliveCount, Is.Zero);
         }
 
+        // PROTOTYPE: all five types are in the game (live: enemy-type-values, Thông số theo giai đoạn).
         [TestCase(EnemyType.Soldier)]
         [TestCase(EnemyType.Wolf)]
         [TestCase(EnemyType.Giant)]
-        public void Soldiers_wolves_and_giants_can_be_spawned_in_this_stage(EnemyType type)
+        [TestCase(EnemyType.Archer)]
+        [TestCase(EnemyType.Boss)]
+        public void Every_enemy_type_can_be_spawned_in_this_stage(EnemyType type)
         {
             var real = AssetDatabase.LoadAssetAtPath<EnemyConfig>(ConfigPath);
             var field = new EnemyField(real, new FakeIncome());

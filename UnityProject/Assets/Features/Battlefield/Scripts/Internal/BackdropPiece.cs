@@ -2,11 +2,12 @@ using UnityEngine;
 
 namespace Game.Battlefield
 {
-    /// <summary>The four backdrop layers, back to front.</summary>
+    /// <summary>The backdrop layers, back to front: sky, far scenery strips, standing decor, ground, flat decor.</summary>
     internal enum BackdropLayer
     {
         Sky,
         Far,
+        StandDecor,
         Ground,
         Decor,
     }
@@ -22,10 +23,18 @@ namespace Game.Battlefield
         public readonly float Height;
         public readonly int SortingOrder;
         public readonly Sprite Sprite;
+
+        /// <summary>The colour of the box drawn when <see cref="Sprite"/> is empty, already mixed towards the sky.</summary>
         public readonly Color FallbackColor;
 
+        /// <summary>How far the piece's colour is mixed towards the sky colour (0 to 1), to read as farther away.</summary>
+        public readonly float FadeToSky;
+
+        /// <summary>Size of the shapes drawn in the piece, relative to the front far strip (1).</summary>
+        public readonly float ArtScale;
+
         public BackdropPiece(string id, BackdropLayer layer, float left, float bottom, float width, float height,
-            int sortingOrder, Sprite sprite, Color fallbackColor)
+            int sortingOrder, Sprite sprite, Color fallbackColor, float fadeToSky = 0f, float artScale = 1f)
         {
             Id = id;
             Layer = layer;
@@ -36,6 +45,8 @@ namespace Game.Battlefield
             SortingOrder = sortingOrder;
             Sprite = sprite;
             FallbackColor = fallbackColor;
+            FadeToSky = fadeToSky;
+            ArtScale = artScale;
         }
 
         public float Right => Left + Width;

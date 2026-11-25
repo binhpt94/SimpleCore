@@ -10,6 +10,14 @@ namespace Game.Hero
     /// </summary>
     internal sealed class HeroConfig : ScriptableObject
     {
+        /// <summary>Development stage a hero or attack kind is in the game from (column `stage` of the design tables).</summary>
+        internal enum Stage
+        {
+            Idea = 0,
+            Prototype = 1,
+            Full = 2,
+        }
+
         /// <summary>One hero of the roster at level 1.</summary>
         [Serializable]
         internal sealed class HeroEntry
@@ -17,6 +25,8 @@ namespace Game.Hero
             [Tooltip("Stable key, for example knight.")]
             public string code;
             public string displayName;
+            [Tooltip("First development stage this hero is in the roster.")]
+            public Stage stage;
             public HeroGroup group;
             public HeroAttack attack;
             [Tooltip("Max health at level 1.")]
@@ -80,6 +90,9 @@ namespace Game.Hero
         [Tooltip("Level-up pop: seconds from start back to normal size.")]
         [SerializeField] private float levelUpPopSeconds;
 
+        [Tooltip("Seconds the new level number shows above the hero after a level up (PROTOTYPE).")]
+        [SerializeField] private float levelUpLabelSeconds;
+
         public IReadOnlyList<HeroEntry> Heroes => heroes;
         public GameObject HeroPrefab => heroPrefab;
         public float TargetHalfRange => targetHalfRange;
@@ -95,6 +108,17 @@ namespace Game.Hero
         public float LevelAttackSpeedCap => levelAttackSpeedCap;
         public float LevelUpPopScale => levelUpPopScale;
         public float LevelUpPopSeconds => levelUpPopSeconds;
+        public float LevelUpLabelSeconds => levelUpLabelSeconds;
+
+        /// <summary>Heroes in the game at <paramref name="stage"/>: those whose own stage is that one or earlier, in roster order.</summary>
+        public List<HeroEntry> HeroesAt(Stage stage)
+        {
+            var result = new List<HeroEntry>();
+            if (heroes == null) return result;
+            foreach (var hero in heroes)
+                if (hero != null && hero.stage <= stage) result.Add(hero);
+            return result;
+        }
 
         public HeroEntry Find(string code)
         {
@@ -129,6 +153,7 @@ namespace Game.Hero
             if (respawnSeconds < 0f || fallSeconds < 0f || respawnGrowSeconds < 0f) return "negative respawn timing";
             if (levelStatStep < 0f || levelAttackSpeedStep < 0f || levelAttackSpeedCap < 0f) return "negative level step";
             if (levelUpPopScale < 1f || levelUpPopSeconds <= 0f) return "no level-up pop scale or seconds";
+            if (levelUpLabelSeconds < 0f) return "negative level-up label seconds";
             return null;
         }
     }

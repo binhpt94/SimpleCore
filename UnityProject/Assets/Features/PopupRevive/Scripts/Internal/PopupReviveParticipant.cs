@@ -2,6 +2,7 @@ using Game.Ads;
 using Game.Core;
 using Game.Run;
 using Game.Services.Popup;
+using Game.SimClock;
 
 namespace Game.PopupRevive
 {
@@ -11,9 +12,10 @@ namespace Game.PopupRevive
         private readonly RevivePopupPresenter _presenter;
 
         public PopupReviveParticipant(
-            IRunFlow flow, IRunRevive revive, IRewardedAds ads, IPopupService popups, IPopupViews views)
+            IRunFlow flow, IRunRevive revive, IRewardedAds ads, IPopupService popups, IPopupViews views,
+            ISimClock clock)
         {
-            _presenter = new RevivePopupPresenter(flow, revive, ads, popups, views);
+            _presenter = new RevivePopupPresenter(flow, revive, ads, popups, views, clock);
         }
 
         internal RevivePopupPresenter Presenter => _presenter;

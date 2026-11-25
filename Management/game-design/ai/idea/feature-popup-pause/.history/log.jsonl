@@ -8,3 +8,4 @@
 {"at": "2026-11-24 23:39:13", "event": "review", "table": "idea", "item": "pause-run-ownership", "text": "Popup chuyển lựa chọn tiếp tục hoặc bỏ lượt cho `feature-run` xử lí\nPopup là nơi người chơi chọn; kết thúc lượt, tính điểm và xét kỉ lục thuộc `feature-run`.", "ai": 7, "score": 8, "feedback": "", "rejected": false}
 {"at": "2026-11-24 23:43:16", "event": "data", "hash": "aebbf6890808", "previous": "924311121b2f", "added": [], "removed": [{"id": "pause-actions", "text": "Popup tạm dừng cho tiếp tục trận hoặc bỏ lượt về màn bắt đầu\nBỏ lượt thì không tính kỉ lục cho đợt đang đánh dở."}], "rewritten": []}
 {"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "aebbf6890808"}
+{"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "aebbf6890808"}

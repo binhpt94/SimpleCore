@@ -18,9 +18,9 @@ namespace Game.Castle.Tests
             var run = new FakeRunFlow();
             _enemies = new FakeEnemyField();
             _body = new CastleBody(_config, run);
-            var skills = new CastleSkills(_config, _body, run, _enemies, new FakeHeroSquad());
+            var skills = new CastleSkills(_config, _body, run, _enemies, new FakeHeroSquad(), _enemies);
             _upgrades = new CastleUpgrades(_body, skills);
-            _shot = new CastleAutoShot(_config, _body, _enemies, _upgrades);
+            _shot = new CastleAutoShot(_config, _body, _enemies, _upgrades, _enemies);
         }
 
         [TearDown]
@@ -200,6 +200,74 @@ namespace Game.Castle.Tests
 
             Assert.That(from, Is.EqualTo(-1.5f));
             Assert.That(to, Is.EqualTo(-4f));
+        }
+
+        private void Steps(int count)
+        {
+            for (var i = 0; i < count; i++) _shot.Tick(0.025f);
+        }
+
+        [Test]
+        public void Shot_damage_lv1_takes_ten_health_so_a_forty_health_soldier_falls_after_four_shots()
+        {
+            // ShotParams shot_damage_lv1 = 10
+            _enemies.AddEnemy(1, 4f);
+
+            Steps(1 + 3 * 40);
+
+            Assert.That(_enemies.Damaged, Is.EqualTo(new[] { (1, 10f), (1, 10f), (1, 10f), (1, 10f) }));
+        }
+
+        [Test]
+        public void Shot_interval_of_one_second_is_forty_steps_of_the_shared_clock()
+        {
+            // ShotParams shot_interval = 1.0 s: the next shot leaves on the 40th step after the last one, not the 39th.
+            _enemies.AddEnemy(1, 4f);
+            Steps(1);
+
+            Steps(39);
+            Assert.That(_enemies.Damaged, Has.Count.EqualTo(1));
+            Steps(1);
+            Assert.That(_enemies.Damaged, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void Shot_range_reaches_six_units_beyond_each_castle_edge_and_no_further()
+        {
+            // ShotParams shot_range = 6 u from the edge: an enemy whose near edge is at x = 7.5 is in, at x = 7.625 it is out.
+            _enemies.AddEnemy(1, 7.75f, 0.25f);   // near edge 7.5, gap 6.0
+            _enemies.AddEnemy(2, -7.875f, 0.25f); // near edge -7.625, gap 6.125
+
+            _shot.Tick(1f);
+            _shot.Tick(1f);
+
+            Assert.That(_enemies.Damaged, Is.EqualTo(new[] { (1, 10f), (1, 10f) }));
+        }
+
+        [Test]
+        public void Targets_per_shot_is_one_so_only_the_nearest_of_several_in_range_is_hit()
+        {
+            // ShotParams targets_per_shot = 1
+            _enemies.AddEnemy(1, 3f);
+            _enemies.AddEnemy(2, -3.5f);
+            _enemies.AddEnemy(3, 5f);
+
+            _shot.Tick(1f);
+
+            Assert.That(_enemies.Damaged, Is.EqualTo(new[] { (1, 10f) }));
+        }
+
+        [Test]
+        public void Target_scope_skips_an_enemy_whose_centre_is_beyond_sixteen_units()
+        {
+            // ShotParams target_scope: centre |x| <= 16. A very wide enemy still off screen is in range but not shot.
+            _enemies.AddEnemy(1, 16.5f, 9f); // gap 16.5 - 9 - 1.5 = 6.0, centre off screen
+            _enemies.AddEnemy(2, -16f, 8.5f); // gap 16 - 8.5 - 1.5 = 6.0, centre on the screen edge
+
+            _shot.Tick(1f);
+            _shot.Tick(1f);
+
+            Assert.That(_enemies.Damaged, Is.EqualTo(new[] { (2, 10f), (2, 10f) }));
         }
     }
 }

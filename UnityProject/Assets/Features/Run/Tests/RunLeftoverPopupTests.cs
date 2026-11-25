@@ -76,7 +76,7 @@ namespace Game.Run.Tests
             _delay.Fire();
             _open.Add("PopupLose/Main");
             _flow.Replay();
-            _flow.EnterBattle(Team);
+            _flow.BuildBattle(Team);
             _delay.NextFrameArrives();
 
             Assert.AreEqual(1, _log.Errors.Count);

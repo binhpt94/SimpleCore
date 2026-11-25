@@ -89,29 +89,50 @@
    "note": "",
    "tests": [
     "EnemyFieldTests.Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing",
-    "EnemyFieldTests.Soldiers_wolves_and_giants_can_be_spawned_in_this_stage"
+    "EnemyFieldTests.Every_enemy_type_can_be_spawned_in_this_stage"
    ],
    "play": "",
    "hash": "c9851d581197",
    "text": "**Yêu cầu thả một loại chưa có ở giai đoạn đang làm** (ví dụ Cung thủ quái ở IDEA): lỗi nêu mã loại, không sinh; cấu hình của `feature-wave` sai.",
    "title": "Yêu cầu thả một loại chưa có ở giai đoạn đang làm",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:13"
+   "at": "2026-11-26 00:18:14"
   },
   "params": {
    "state": "verified",
-   "note": "",
+   "note": "Hiệu ứng Trùm vào màn: phóng to 1.2 lần trong 0.5s lúc tâm vào x=±16u, theo bước SimClock",
    "tests": [
     "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type",
-    "EnemyFieldTests.Soldiers_wolves_and_giants_can_be_spawned_in_this_stage",
-    "EnemyFieldTests.Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing"
+    "EnemyInstallerTests.The_real_config_has_every_enemy_type_in_the_game_at_PROTOTYPE",
+    "EnemyFieldTests.Every_enemy_type_can_be_spawned_in_this_stage",
+    "EnemyFieldTests.Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing",
+    "EnemyCombatTests.A_boss_plays_its_entrance_once_on_the_step_its_centre_reaches_16u",
+    "EnemyCombatTests.Other_enemy_types_come_on_screen_without_an_entrance",
+    "EnemyCombatTests.A_boss_blocked_off_screen_plays_its_entrance_only_when_it_walks_in",
+    "EnemyInstallerTests.Only_the_boss_has_an_entrance_at_16u_in_the_real_config",
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
    ],
    "play": "",
    "hash": "7e88fd0ac272",
    "text": "## Làm gì\n- Giữ danh sách loại quái: mã, tên tạm, hộp, cận chiến hay bắn xa, tầm. Sinh một con khi `feature-wave` gửi yêu cầu thả kèm loại, bên và hệ số.\n- Hiện quái bằng sprite 2D gen bằng AI, vừa hộp của loại, quay mặt về phía thành.\n- Chỉ số của từng loại ở `feature-enemy/enemy-stats/enemy-stat-values`; tiền ở `feature-enemy/enemy-reward/reward-values`.\n- Không quyết loại nào ra ở đợt nào: `feature-wave/difficulty-scaling/wave-formula` (mốc mở loại, chu kì Trùm) và `feature-wave/spawning/spawn-order` (Trùm ra cuối, trần quái sống).\n\n## Thông số\n| Loại | Mã | Hộp rộng×cao (u) | Kiểu đánh | Tầm (u) | Lí do |\n|---|---|---|---|---|---|\n| Lính | soldier | 1×1.2 | Cận chiến | 1.0 | Loại chuẩn |\n| Sói | wolf | 1.2×0.8 | Cận chiến | 1.0 | Nhanh, thấp dài |\n| Khổng lồ | giant | 2×2.5 | Cận chiến | 1.2 | Trâu, to hơn hẳn hero |\n| Cung thủ quái | archer | 1×1.2 | Bắn xa | 5 | Ép đội có hero bắn xa |\n| Trùm | boss | 3×3.5 | Cận chiến | 1.5 | Đỉnh căng thẳng |\n\nSố liệu là dự kiến theo bộ số chung.\n\nHiệu ứng (mức tối thiểu, dùng chung với `feature-enemy/enemy-behavior/enemy-move-values`):\n| Hiệu ứng | Xuất hiện | Biến mất |\n|---|---|---|\n| Hình đạn Cung thủ quái | mỗi đòn | tới mục tiêu sau 0.15s |\n| Trùm vào màn: phóng to 1.2 lần rồi về | lúc tâm Trùm vào x=±16u | sau 0.5s |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Loại có trong game (có hình, sinh được) | Lính, Sói, Khổng lồ | đủ 5 loại | đủ 5 loại |\n| Hình | 1 sprite mỗi loại, anim bằng move/scale/nháy | như IDEA | anim đi, đánh, bị hạ riêng; âm thanh |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:13"
+   "at": "2026-11-26 00:18:14"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "Cột PROTOTYPE: đủ 5 loại có hình và sinh được, trỏ test config thật",
+   "tests": [
+    "EnemyInstallerTests.The_real_config_has_every_enemy_type_in_the_game_at_PROTOTYPE",
+    "EnemyFieldTests.Every_enemy_type_can_be_spawned_in_this_stage",
+    "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type"
+   ],
+   "play": "",
+   "hash": "afb3922540ba",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Loại có trong game (có hình, sinh được): đủ 5 loại",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:14"
   }
  },
  "log": [
@@ -244,6 +265,76 @@
   {
    "at": "2026-11-25 13:43:56",
    "id": "type-melee-ranged",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:12:44",
+   "id": "edge-yeu-cau-tha-mot-loai-chua-co-o",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyFieldTests.Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing, EnemyFieldTests.Every_enemy_type_can_be_spawned_in_this_stage"
+  },
+  {
+   "at": "2026-11-26 00:12:46",
+   "id": "params",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyFieldTests.Every_enemy_type_can_be_spawned_in_this_stage, EnemyFieldTests.Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing"
+  },
+  {
+   "at": "2026-11-26 00:14:04",
+   "id": "params",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyInstallerTests.The_real_config_has_every_enemy_type_in_the_game_at_PROTOTYPE, EnemyFieldTests.Every_enemy_type_can_be_spawned_in_this_stage, EnemyFieldTests.Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing"
+  },
+  {
+   "at": "2026-11-26 00:15:26",
+   "id": "params",
+   "state": "doing",
+   "by": "Enemy",
+   "note": "Hiệu ứng Trùm vào màn: phóng to 1.2 lần trong 0.5s lúc tâm vào x=±16u, theo bước SimClock"
+  },
+  {
+   "at": "2026-11-26 00:17:09",
+   "id": "params",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyInstallerTests.The_real_config_has_every_enemy_type_in_the_game_at_PROTOTYPE, EnemyFieldTests.Every_enemy_type_can_be_spawned_in_this_stage, EnemyFieldTests.Asking_for_a_type_not_in_the_game_yet_fails_naming_it_and_spawns_nothing, EnemyCombatTests.A_boss_plays_its_entrance_once_on_the_step_its_centre_reaches_16u, EnemyCombatTests.Other_enemy_types_come_on_screen_without_an_entrance, EnemyCombatTests.A_boss_blocked_off_screen_plays_its_entrance_only_when_it_walks_in, EnemyInstallerTests.Only_the_boss_has_an_entrance_at_16u_in_the_real_config, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+  },
+  {
+   "at": "2026-11-26 00:18:14",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:18:14",
+   "id": "edge-yeu-cau-tha-mot-loai-chua-co-o",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:02:54",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Enemy",
+   "note": "Cột PROTOTYPE: đủ 5 loại có hình và sinh được, trỏ test config thật"
+  },
+  {
+   "at": "2026-11-26 01:03:28",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyInstallerTests.The_real_config_has_every_enemy_type_in_the_game_at_PROTOTYPE, EnemyFieldTests.Every_enemy_type_can_be_spawned_in_this_stage, EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type"
+  },
+  {
+   "at": "2026-11-26 01:18:14",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

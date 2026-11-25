@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+  <defs>
+    <linearGradient id="mPink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF9ACB"/><stop offset="0.45" stop-color="#F24FA0"/><stop offset="1" stop-color="#C42A78"/>
+    </linearGradient>
+    <linearGradient id="mGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/><stop offset="0.45" stop-color="#FFC61F"/><stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="mBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="0.3" stop-color="#7CD0FF"/><stop offset="1" stop-color="#22A0F0"/>
+    </linearGradient>
+    <linearGradient id="mSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="0.4" stop-color="#FFF1E4"/><stop offset="1" stop-color="#F6D7C6"/>
+    </linearGradient>
+  </defs>
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <!-- gậy phép -->
+    <rect x="160" y="80" width="14" height="214" rx="6" fill="url(#mGold)" stroke="#C26A00" stroke-width="6"/>
+    <!-- áo choàng dài hồng -->
+    <path d="M56 160 L132 160 L148 294 L40 294 Z" fill="url(#mPink)" stroke="#8E1556" stroke-width="6"/>
+    <ellipse cx="84" cy="174" rx="18" ry="6" fill="#FFFFFF" opacity="0.55"/>
+    <path d="M70 252 L76 236 L82 252 L76 266 Z M110 206 L116 192 L122 206 L116 220 Z" fill="url(#mGold)" stroke="#C26A00" stroke-width="3"/>
+    <!-- tay cầm gậy -->
+    <circle cx="167" cy="196" r="15" fill="url(#mSkin)" stroke="#E0A27A" stroke-width="5"/>
+    <!-- đầu -->
+    <circle cx="92" cy="118" r="50" fill="url(#mSkin)" stroke="#E0A27A" stroke-width="6"/>
+    <!-- râu trắng -->
+    <path d="M68 140 C76 198 138 192 142 128 C118 146 94 148 68 140 Z" fill="url(#mSkin)" stroke="#E0A27A" stroke-width="5"/>
+    <ellipse cx="120" cy="118" rx="9" ry="11" fill="#FFFFFF" stroke="#3B1E4F" stroke-width="3"/>
+    <circle cx="123" cy="120" r="5.5" fill="#3B1E4F"/>
+    <circle cx="125" cy="117" r="2.5" fill="#FFFFFF"/>
+    <!-- mũ nhọn hồng, vành vàng -->
+    <path d="M28 104 L156 104 L104 4 C96 30 70 60 28 104 Z" fill="url(#mPink)" stroke="#8E1556" stroke-width="6"/>
+    <ellipse cx="88" cy="60" rx="8" ry="16" fill="#FFFFFF" opacity="0.5" transform="rotate(28 88 60)"/>
+    <rect x="26" y="94" width="132" height="18" rx="8" fill="url(#mGold)" stroke="#C26A00" stroke-width="5"/>
+    <!-- quả cầu phép xanh -->
+    <circle cx="167" cy="62" r="27" fill="url(#mBlue)" stroke="#0B4C94" stroke-width="6"/>
+    <ellipse cx="158" cy="50" rx="9" ry="6" fill="#FFFFFF" opacity="0.85"/>
+  </g>
+</svg>

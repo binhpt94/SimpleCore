@@ -19,10 +19,27 @@ MonoBehaviour:
   coverLeft: -21
   coverRight: 21
   skyTop: 14
-  farHeight: 2.5
   groundBottom: -4
+  farBase: 0
+  farBands:
+  - id: far-back
+    top: 3.2
+    artScale: 0.6
+    baseColor: {r: 0.133, g: 0.627, b: 0.941, a: 1}
+    fade: 0.45
+    sprite: {fileID: 0}
+  - id: far-front
+    top: 2
+    artScale: 1
+    baseColor: {r: 0.298, g: 0.761, b: 0.118, a: 1}
+    fade: 0.2
+    sprite: {fileID: 21300000, guid: ab8c9e7eed62cc00e9a9203c1f6c449c, type: 3}
   grassSize: {x: 0.8, y: 0.3}
   stoneSize: {x: 0.6, y: 0.3}
+  flagSize: {x: 0.5, y: 1.2}
+  fenceSize: {x: 1.4, y: 0.6}
+  standDecorBase: 0
+  standDecorFade: 0.2
   castleClearHalfWidth: 3
   decor:
   - kind: 0
@@ -45,20 +62,43 @@ MonoBehaviour:
     centerX: 11.5
   - kind: 0
     centerX: 14
+  - kind: 2
+    centerX: -12.75
+  - kind: 3
+    centerX: -10.25
+  - kind: 2
+    centerX: -7.75
+  - kind: 3
+    centerX: -5.25
+  - kind: 3
+    centerX: 5.25
+  - kind: 2
+    centerX: 7.75
+  - kind: 3
+    centerX: 10.25
+  - kind: 2
+    centerX: 12.75
+  decorSway: 0
+  backdropByWave: 0
   hudTopEdge: 11.7
   hudBottomEdge: -1.3
-  skyOrder: -400
-  farOrder: -300
+  skyOrder: -500
+  farOrder: -450
+  standDecorOrder: -300
   groundOrder: -200
   decorOrder: -100
   lowestBattleOrder: 0
   skySprite: {fileID: 21300000, guid: 4a2fff656a757449f8e97d7bae9e26f3, type: 3}
-  farSprite: {fileID: 21300000, guid: ab8c9e7eed62cc00e9a9203c1f6c449c, type: 3}
   groundSprite: {fileID: 21300000, guid: aa82d4ec5edb07bcf9cfb530f5bfcafb, type: 3}
   grassSprite: {fileID: 21300000, guid: 03e76325e96646181974b0880d7cdcf8, type: 3}
   stoneSprite: {fileID: 21300000, guid: 7ee465789919ef11fbd102ac81cce651, type: 3}
-  skyColor: {r: 0.62, g: 0.8, b: 0.93, a: 1}
-  farColor: {r: 0.33, g: 0.52, b: 0.4, a: 1}
+  flagSprite: {fileID: 0}
+  fenceSprite: {fileID: 0}
+  skyColor: {r: 0.486, g: 0.816, b: 1, a: 1}
   groundColor: {r: 0.49, g: 0.36, b: 0.24, a: 1}
   grassColor: {r: 0.36, g: 0.62, b: 0.27, a: 1}
   stoneColor: {r: 0.55, g: 0.55, b: 0.58, a: 1}
+  flagColor: {r: 0.949, g: 0.31, b: 0.627, a: 1}
+  flagPoleColor: {r: 1, g: 0.776, b: 0.122, a: 1}
+  fenceColor: {r: 1, g: 0.945, b: 0.894, a: 1}
+  fenceShadeColor: {r: 1, g: 0.776, b: 0.122, a: 1}

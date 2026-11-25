@@ -3,6 +3,8 @@
   "rootNamespace": "Game.Enemy",
   "references": [
     "Game.Core",
+    "Game.SimClock.Contracts",
+    "Game.Combat.Contracts",
     "Game.Enemy.Contracts",
     "Game.Wallet.Contracts",
     "Game.Run.Contracts",

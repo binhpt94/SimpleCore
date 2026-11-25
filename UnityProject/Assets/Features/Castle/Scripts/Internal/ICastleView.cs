@@ -11,6 +11,15 @@ namespace Game.Castle
         /// <summary>Every frame, with the frame's seconds.</summary>
         event Action<float> Ticked;
 
+        /// <summary>The Unity object the session counts as this view while it is held.</summary>
+        UnityEngine.Object ViewObject { get; }
+
+        /// <summary>Shakes the castle lightly for <paramref name="seconds"/> (PROTOTYPE hit feedback); a new shake starts over.</summary>
+        void ShakeHit(float seconds);
+
+        /// <summary>Shows the damaged picture of the castle (health under half) or the whole one.</summary>
+        void ShowDamaged(bool damaged);
+
         void Place(float halfWidth, float height);
 
         void SetVisible(bool visible);

@@ -163,15 +163,18 @@ namespace Game.Run.Tests
         }
 
         [Test]
-        public void PlayAgainClearsTheBattleAndGoesToTeamSelect()
+        public void PlayAgainClearsTheBattleAndHandsPlayAgainToTheScreenFlow()
         {
+            // PROTOTYPE: feature-game-flow shows team select; the run only leaves the battle.
+            ((IRunBattle)_flow).BattleLeft += choice => _log.Add("BattleLeft:" + choice);
             EnterBattle();
             _flow.Lose();
             _delay.Fire();
             _log.Clear();
 
             _flow.Replay();
-            CollectionAssert.AreEqual(new[] { "BattleCleared", "step:TeamSelect" }, _log);
+            CollectionAssert.AreEqual(new[] { "BattleCleared", "step:Home", "BattleLeft:PlayAgain" }, _log);
+            Assert.AreNotEqual(RunStep.TeamSelect, _flow.Step, "The run does not go to team select itself.");
         }
 
         [Test]
@@ -279,7 +282,7 @@ namespace Game.Run.Tests
             _flow.Lose();
             _delay.Fire();
             _flow.Replay();
-            _flow.EnterBattle(Team);
+            _flow.BuildBattle(Team);
             Assert.AreEqual(0, _score.Score);
             Assert.IsFalse(_score.IsNewBest);
         }
@@ -408,8 +411,8 @@ namespace Game.Run.Tests
             _flow.Replay();
             _flow.GoHome();
 
-            CollectionAssert.AreEqual(new[] { "BattleCleared", "step:TeamSelect" }, _log);
-            Assert.AreEqual(RunStep.TeamSelect, _flow.Step);
+            CollectionAssert.AreEqual(new[] { "BattleCleared", "step:Home" }, _log, "Back to start was ignored.");
+            Assert.AreEqual(RunStep.Home, _flow.Step);
         }
 
         [Test]

@@ -12,6 +12,8 @@ namespace Game.SceneFlow
 
         private bool reportedMissingBar;
 
+        Object ILoadingScreen.Root => gameObject;
+
         void ILoadingScreen.ShowProgress(float fraction)
         {
             if (progressFill == null)

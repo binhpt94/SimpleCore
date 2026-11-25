@@ -1,5 +1,5 @@
 {
- "hash": "b38ef8e31b57",
+ "hash": "3d3abad89eb9",
  "items": {
   "pressure-formula": {
    "hash": "5e9882f53397",
@@ -22,8 +22,8 @@
    "text": "Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–10.5 phút\nĐợt 20 (Trùm, P khoảng 2.9) gần như chắc gãy với cách chơi này."
   },
   "skill-gap": {
-   "hash": "e1e987e62a0f",
-   "text": "Chơi vụng gãy ở khoảng đợt 10 (Trùm đầu tiên), chơi khéo kéo tới khoảng đợt 20–25\nKhác nhau ở: đội có hero hợp loại quái, Sấm sét bắn lúc quái dồn đông, Băng giá dùng khi Trùm tới, không để tiền nằm yên."
+   "hash": "39b05c5b8aea",
+   "text": "Chơi khéo gãy muộn hơn chơi vụng ít nhất 4 đợt; vụng gãy khoảng đợt 10–12, khéo khoảng đợt 16–19\nKhéo và vụng định nghĩa bằng cách mua và cách bấm kĩ năng (ghi trong CLAUDE.md) để tester mô phỏng được. Mục tiêu cũ \"khéo tới 20–25\" bị bỏ: công thức áp lực cho đợt 20 P ≈ 2.9 cả với cách chơi thường."
   }
  }
 }

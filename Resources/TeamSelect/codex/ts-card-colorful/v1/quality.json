@@ -1,0 +1,51 @@
+{
+ "card": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "card.png"
+ },
+ "picked": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "picked.png"
+ },
+ "portrait-knight": {
+  "ok": false,
+  "note": "mũ sắt đóng kín che hết mặt, không thấy mắt và mặt như 4 chân dung kia (Tiêu chí nhận \"Năm portrait cùng cỡ đầu, cùng góc nhìn, cùng ánh sáng\")",
+  "runs": 2,
+  "round": 0,
+  "file": "portrait-knight.png"
+ },
+ "portrait-axeman": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "portrait-axeman.png"
+ },
+ "portrait-swordsman": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "portrait-swordsman.png"
+ },
+ "portrait-archer": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "portrait-archer.png"
+ },
+ "portrait-mage": {
+  "ok": true,
+  "note": "",
+  "runs": 1,
+  "round": 0,
+  "file": "portrait-mage.png"
+ }
+}

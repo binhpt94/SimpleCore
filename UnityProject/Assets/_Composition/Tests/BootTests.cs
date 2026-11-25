@@ -10,11 +10,12 @@ namespace Game.Composition.Tests
     {
         private const string BasePath = "Assets/_Composition/Boot.prefab";
         private const string SessionScene = "SessionSceneInstaller";
+        private const string SimClock = "SimClockInstaller";
 
         private static readonly object[] Scenes =
         {
             new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 2 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 20 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 22 },
         };
 
         [Test]
@@ -58,33 +59,35 @@ namespace Game.Composition.Tests
             Assert.That(names, Is.EqualTo(new[] { SessionScene, "SceneFlowLoadingInstaller" }));
         }
 
-        // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 13 participants
-        // in this order: 12 features, then scene-flow last (a participant with no view). SessionScene installs first
-        // and runs the session; it is not a participant.
+        // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 14 participants
+        // in this order: SimClock first (no view, drives the shared clock each frame, so every gameplay feature can
+        // resolve it), then 12 features, then scene-flow last (a participant with no view). SessionScene installs
+        // first and runs the session; it is not a participant.
         [Test]
-        public void GameScene_AtIdea_HasThirteenParticipantsInTheDesignedOrder_SceneFlowLast()
+        public void GameScene_AtIdea_HasFourteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast()
         {
             var names = Load("Assets/_Composition/Boot.Game.prefab").InstallersAt(GameStage.Idea).Select(i => i.name).ToList();
 
             Assert.That(names, Is.EqualTo(new[]
             {
-                SessionScene,
+                SessionScene, SimClock,
                 "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
                 "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
                 "HudUpgradeInstaller", "PopupLoseInstaller",
                 "SceneFlowGameInstaller",
             }));
-            Assert.That(names.Skip(1).Count(), Is.EqualTo(13), "participants after SessionScene");
+            Assert.That(names.Skip(1).Count(), Is.EqualTo(14), "participants after SessionScene");
         }
 
+        // The project stage (set by the human on the design page) is PROTOTYPE since 2026-11-26.
         [Test]
-        public void EveryScene_IsAtIdea_SetOnceOnTheBasePrefab()
+        public void EveryScene_IsAtPrototype_SetOnceOnTheBasePrefab()
         {
-            Assert.That(Load(BasePath).Stage, Is.EqualTo(GameStage.Idea));
+            Assert.That(Load(BasePath).Stage, Is.EqualTo(GameStage.Prototype));
             foreach (var scene in Scenes)
             {
                 var variant = (string)((object[])scene)[0];
-                Assert.That(Load(variant).Stage, Is.EqualTo(GameStage.Idea), variant);
+                Assert.That(Load(variant).Stage, Is.EqualTo(GameStage.Prototype), variant);
             }
         }
 
@@ -106,7 +109,7 @@ namespace Game.Composition.Tests
             Assert.That(names, Is.EquivalentTo(new[]
             {
                 "PopupPauseInstaller", "AdsInstaller", "PopupReviveInstaller", "HomeInstaller", "TeamSelectInstaller",
-                "GameFlowInstaller",
+                "GameFlowInstaller", "CombatInstaller",
             }));
         }
 
@@ -123,9 +126,9 @@ namespace Game.Composition.Tests
 
             Assert.That(names, Is.EqualTo(new[]
             {
-                SessionScene,
-                "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
-                "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
+                SessionScene, SimClock,
+                "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "CombatInstaller",
+                "EnemyInstaller", "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
                 "HudUpgradeInstaller", "PopupLoseInstaller", "PopupPauseInstaller", "AdsInstaller", "PopupReviveInstaller",
                 "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "SceneFlowGameInstaller",
             }));

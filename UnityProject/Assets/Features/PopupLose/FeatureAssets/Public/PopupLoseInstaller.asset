@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: PopupLoseInstaller
   m_EditorClassIdentifier: Game.PopupLose.Internal::Game.PopupLose.PopupLoseInstaller
   _cheat: 0
+  _homeButton: 1

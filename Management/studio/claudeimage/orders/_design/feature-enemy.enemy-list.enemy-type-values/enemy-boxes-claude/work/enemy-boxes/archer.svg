@@ -1,29 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 300" width="250" height="300">
-  <g stroke="#1a1a2e" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+  <defs>
+    <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9BEA5C"/><stop offset="0.45" stop-color="#4CC21E"/><stop offset="1" stop-color="#2E9414"/>
+    </linearGradient>
+    <linearGradient id="pu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C77BEA"/><stop offset="0.5" stop-color="#9B30C8"/><stop offset="1" stop-color="#6E1E99"/>
+    </linearGradient>
+    <linearGradient id="ye" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/><stop offset="0.5" stop-color="#FFC61F"/><stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="cr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F6D7C6"/>
+    </linearGradient>
+  </defs>
+  <g stroke-linejoin="round" stroke-linecap="round" stroke-width="7">
     <!-- ống tên sau lưng -->
-    <rect x="30" y="140" width="36" height="96" rx="8" fill="#6b4a2b" transform="rotate(-20 48 188)"/>
-    <path d="M30 140 L22 118 M44 136 L42 112 M56 140 L64 120" fill="none" stroke="#e8e3d0" stroke-width="6"/>
+    <rect x="28" y="140" width="38" height="96" rx="12" fill="url(#ye)" stroke="#C26A00" transform="rotate(-20 47 188)"/>
+    <path d="M30 138 L18 114 M46 134 L42 108 M60 140 L66 116" fill="none" stroke="#E0A27A" stroke-width="7"/>
     <!-- chân -->
-    <rect x="86" y="250" width="30" height="46" rx="8" fill="#2f2a44"/>
-    <rect x="134" y="250" width="30" height="46" rx="8" fill="#2f2a44"/>
+    <rect x="84" y="258" width="34" height="38" rx="14" fill="#2E9414" stroke="#1D6B0C"/>
+    <rect x="134" y="258" width="34" height="38" rx="14" fill="#2E9414" stroke="#1D6B0C"/>
     <!-- áo choàng -->
-    <path d="M78 170 L172 170 L188 262 L62 262 Z" fill="#6a4c93"/>
-    <path d="M140 172 L170 172 L186 258 L150 258 Z" fill="#533a77" stroke="none"/>
-    <path d="M78 170 L172 170 L188 262 L62 262 Z" fill="none"/>
-    <!-- mũ trùm và đầu -->
-    <path d="M60 110 Q60 40 120 22 Q100 8 90 0 Q170 10 190 110 Q190 175 125 178 Q60 175 60 110 Z" fill="#6a4c93" transform="translate(0 6)"/>
-    <circle cx="132" cy="120" r="46" fill="#7fa7b8"/>
-    <path d="M172 98 A46 46 0 0 1 96 148 A54 54 0 0 0 172 98 Z" fill="#628a9c" stroke="none"/>
-    <circle cx="132" cy="120" r="46" fill="none"/>
-    <circle cx="154" cy="116" r="8" fill="#1a1a2e"/>
-    <path d="M146 148 L168 144" fill="none" stroke-width="5"/>
-    <!-- cung phía trước -->
-    <path d="M206 120 Q250 200 206 280" fill="none" stroke="#1a1a2e" stroke-width="14"/>
-    <path d="M206 120 Q250 200 206 280" fill="none" stroke="#a0703c" stroke-width="7"/>
-    <path d="M206 120 L206 280" fill="none" stroke-width="3"/>
-    <path d="M150 200 L232 200" fill="none" stroke-width="5"/>
-    <path d="M232 192 L244 200 L232 208 Z" fill="#c9d3dd" stroke-width="4"/>
+    <path d="M76 176 L174 176 L190 266 Q126 280 60 266 Z" fill="url(#gr)" stroke="#1D6B0C"/>
+    <!-- mũ trùm nhọn, chóp gập ra sau -->
+    <path d="M56 120 Q56 52 112 34 Q80 22 66 4 Q168 8 194 118 Q194 182 126 184 Q56 182 56 120 Z" fill="url(#gr)" stroke="#1D6B0C"/>
+    <ellipse cx="104" cy="50" rx="22" ry="8" fill="#FFFFFF" opacity="0.6" stroke="none"/>
+    <!-- mặt tím -->
+    <circle cx="136" cy="126" r="46" fill="url(#pu)" stroke="#4A1070"/>
+    <ellipse cx="150" cy="120" rx="15" ry="17" fill="#FFFFFF" stroke="#4A1070" stroke-width="5"/>
+    <circle cx="156" cy="123" r="8" fill="#3B1E4F" stroke="none"/>
+    <circle cx="159" cy="118" r="3.5" fill="#FFFFFF" stroke="none"/>
+    <path d="M132 102 L166 108" fill="none" stroke="#4A1070" stroke-width="6"/>
+    <path d="M142 152 Q158 158 172 148" fill="none" stroke="#4A1070" stroke-width="5"/>
+    <!-- cung lớn phía trước -->
+    <path d="M204 112 Q252 200 204 288" fill="none" stroke="#C26A00" stroke-width="18"/>
+    <path d="M204 112 Q252 200 204 288" fill="none" stroke="#FFC61F" stroke-width="8"/>
+    <path d="M204 112 L204 288" fill="none" stroke="#E0A27A" stroke-width="4"/>
+    <!-- mũi tên -->
+    <path d="M140 200 L226 200" fill="none" stroke="#C26A00" stroke-width="6"/>
+    <path d="M222 188 L242 200 L222 212 Z" fill="url(#cr)" stroke="#E0A27A" stroke-width="5"/>
     <!-- tay -->
-    <circle cx="206" cy="202" r="13" fill="#7fa7b8"/>
+    <circle cx="204" cy="202" r="14" fill="url(#pu)" stroke="#4A1070" stroke-width="5"/>
   </g>
 </svg>

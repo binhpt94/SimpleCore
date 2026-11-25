@@ -16,6 +16,7 @@ namespace Game.Run
         private readonly IRunDelay _delay;
         private readonly IRunLog _log;
         private IDisposable _pending;
+        private IDisposable _pendingJob;
 
         public LeftoverPopupCheck(IRunFlow flow, Func<IReadOnlyList<string>> openPopups, IRunDelay delay, IRunLog log)
         {
@@ -31,20 +32,31 @@ namespace Game.Run
             WhenDisposed(() =>
             {
                 _flow.BattleStarted -= OnBattleStarted;
-                _pending?.Dispose();
-                _pending = null;
+                DropPending();
             });
         }
 
         private void OnBattleStarted()
         {
-            _pending?.Dispose();
+            DropPending();
+            // The wait for the next frame counts as a running job for the session's clean-up check.
+            _pendingJob = TrackJob();
             _pending = _delay.NextFrame(Check);
+        }
+
+        private void DropPending()
+        {
+            _pending?.Dispose();
+            _pending = null;
+            _pendingJob?.Dispose();
+            _pendingJob = null;
         }
 
         private void Check()
         {
             _pending = null;
+            _pendingJob?.Dispose();
+            _pendingJob = null;
             var open = _openPopups();
             if (open == null || open.Count == 0) return;
             _log.Error($"A new run started with popups still open: {string.Join(", ", open)}. "

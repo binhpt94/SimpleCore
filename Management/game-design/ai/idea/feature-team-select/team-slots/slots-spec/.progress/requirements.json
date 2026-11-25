@@ -68,29 +68,29 @@
   },
   "start-button-once": {
    "state": "verified",
-   "note": "",
+   "note": "Vào trận báo đội cho GameFlow qua ITeamSelectScreen, khoá chạm tới khi GameFlow mở lại hoặc ẩn màn",
    "tests": [
-    "TeamSlotsTests.StartWithFullTeamReportsTeamOnceThenIgnoresTaps"
+    "TeamSlotsTests.StartWithFullTeamReportsTeamToFlowOnceAndLocksTapsUntilBuildResult"
    ],
    "play": "",
-   "hash": "2fdc359a0882",
-   "text": "Chạm \"Vào trận\" khi đủ 3: báo đội cho `feature-run` đúng một lần, rồi màn không nhận chạm nữa",
-   "title": "Chạm \"Vào trận\" khi đủ 3: báo đội cho `feature-run` đúng một lần, rồi màn không nhận chạm nữa",
+   "hash": "9ef21d6dc290",
+   "text": "Chạm \"Vào trận\" khi đủ 3: báo đội cho `feature-game-flow` một lần, rồi khoá chạm tới khi có kết quả\nKết quả là dựng trận xong hoặc lỗi. Điều hướng màn giao đội cho lượt chơi dựng trận; dựng xong thì màn trận hiện, màn này ẩn.",
+   "title": "Chạm \"Vào trận\" khi đủ 3: báo đội cho `feature-game-flow` một lần, rồi khoá chạm tới khi có kết quả",
    "by": "@CodeLead",
-   "at": "2026-11-25 18:30:56"
+   "at": "2026-11-26 00:54:12"
   },
   "screen-parts": {
    "state": "verified",
-   "note": "",
+   "note": "Màn 4 phần có nút Quay lại theo frame main mới",
    "tests": [
-    "TeamSlotsTests.ScreenShowsFiveCardsThreeSlotsAndOneStartButton"
+    "TeamSlotsTests.ScreenHasFourPartsCardsSlotsStartAndBack"
    ],
    "play": "",
-   "hash": "7cc0620308f8",
-   "text": "Màn chọn đội có 3 phần: 5 thẻ hero, 3 chỗ trong đội, 1 nút \"Vào trận\"\nKhông có nút quay lại màn bắt đầu.",
-   "title": "Màn chọn đội có 3 phần: 5 thẻ hero, 3 chỗ trong đội, 1 nút \"Vào trận\"",
+   "hash": "d6ef82f3e2a4",
+   "text": "Màn chọn đội có 4 phần: 5 thẻ hero, 3 chỗ trong đội, nút \"Vào trận\", nút \"Quay lại\"\nNút \"Quay lại\" là phần phụ, ở góc trên trái, cạnh tối thiểu 120 px (`feature-game-flow/flow-routes/routes-values`).",
+   "title": "Màn chọn đội có 4 phần: 5 thẻ hero, 3 chỗ trong đội, nút \"Vào trận\", nút \"Quay lại\"",
    "by": "@CodeLead",
-   "at": "2026-11-25 18:30:56"
+   "at": "2026-11-26 00:54:12"
   },
   "edge-cham-cung-luc-hai-the-khi-con-mot": {
    "state": "verified",
@@ -146,29 +146,81 @@
   },
   "edge-nut-quay-lai-cua-may": {
    "state": "verified",
-   "note": "",
+   "note": "Phím back của máy như chạm Quay lại, bị bỏ khi chờ dựng trận",
    "tests": [
-    "TeamSlotsTests.DeviceBackKeyDoesNothing"
+    "TeamSlotsTests.DeviceBackKeyActsAsBackButton"
    ],
    "play": "",
-   "hash": "28026891385b",
-   "text": "**Nút quay lại của máy:** không làm gì.",
+   "hash": "10fecc070034",
+   "text": "**Nút quay lại của máy:** như chạm \"Quay lại\" (`back-key-map` của `feature-game-flow/flow-routes/routes-values`); đang chờ dựng trận thì bị bỏ.",
    "title": "Nút quay lại của máy",
    "by": "@CodeLead",
-   "at": "2026-11-25 18:30:56"
+   "at": "2026-11-26 00:54:12"
   },
   "params": {
    "state": "verified",
-   "note": "",
+   "note": "Số nút 2, cạnh Quay lại 120 px, dòng lỗi dựng trận, báo đội cho GameFlow",
    "tests": [
     "TeamSlotsTests.DesignValuesAreThreeSlotsAndDefaultTeam"
    ],
    "play": "",
-   "hash": "2abecce37b9d",
-   "text": "## Làm gì\n- Giữ 3 chỗ, mỗi chỗ một hero hoặc trống. Lúc mở màn, chỗ được đổ từ `feature-team-select/team-memory/memory-rules`.\n- Nhận chạm từ thẻ (`feature-team-select/hero-cards/card-spec`) và từ chỗ; áp luật thêm, bỏ.\n- Nút \"Vào trận\": khoá khi thiếu, mở khi đủ 3; bấm thì ghi đội nhớ và báo đội cho `feature-run/run-start`.\n- Mỗi chỗ hiện hình và tên hero đang ở đó, hoặc trống.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số chỗ | 3 | chỗ | Bộ số chung; 5 hero bỏ lại 2 là có lựa chọn |\n| Số hero chọn được | 5 | hero | `feature-hero/hero-list` |\n| Số nút | 1 (\"Vào trận\") | nút | |\n| Số lần một hero ở trong đội | tối đa 1 | lần | Không trùng |\n| Số cách đội có thể ghép | 10 | đội | Chọn 3 trong 5, không tính thứ tự |\n| Số chạm có tác dụng của nút \"Vào trận\" mỗi lần màn mở | 1 | lần | Tránh vào trận hai lần |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Màn chọn đội | Không có; đội cố định Hiệp sĩ, Đấu sĩ rìu, Cung thủ | Có đủ luật chọn | Có đủ luật chọn |\n| Số chỗ | 3 | 3 | 3 (chỉnh qua `feature-balance` nếu cần) |\n| Hiệu ứng hero vào chỗ | Không | Không | Hình hero bay từ thẻ vào chỗ, 0.2 giây (dự kiến) |",
+   "hash": "51a32d0da04c",
+   "text": "## Làm gì\n- Giữ 3 chỗ, mỗi chỗ một hero hoặc trống. Lúc mở màn, chỗ được đổ từ `feature-team-select/team-memory/memory-rules`.\n- Nhận chạm từ thẻ (`feature-team-select/hero-cards/card-spec`) và từ chỗ; áp luật thêm, bỏ.\n- Nút \"Vào trận\": khoá khi thiếu, mở khi đủ 3; bấm thì báo đội cho `feature-game-flow`, điều hướng màn giao đội cho `feature-run/run-start` dựng trận. Đội nhớ ghi khi lượt chơi xác nhận lượt đã bắt đầu (`feature-team-select/team-memory/memory-rules`).\n- Chờ kết quả dựng trận: không nhận chạm. Dựng lỗi: hiện dòng lỗi, mở lại nút \"Vào trận\" (`build-fail-retry`).\n- Nút \"Quay lại\": báo `feature-game-flow`; bỏ các chỗ đang chọn dở.\n- Mỗi chỗ hiện hình và tên hero đang ở đó, hoặc trống.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số chỗ | 3 | chỗ | Bộ số chung; 5 hero bỏ lại 2 là có lựa chọn |\n| Số hero chọn được | 5 | hero | `feature-hero/hero-list` |\n| Số nút | 2 (\"Vào trận\", \"Quay lại\") | nút | Nút \"Quay lại\" theo `feature-game-flow/flow-routes/routes-values` |\n| Cạnh tối thiểu nút \"Quay lại\" | 120 | px | Cỡ chạm tối thiểu của HUD và popup |\n| Dòng lỗi dựng trận | \"Không vào được trận, thử lại\" | | Theo `feature-game-flow/flow-routes/routes-values` |\n| Số lần một hero ở trong đội | tối đa 1 | lần | Không trùng |\n| Số cách đội có thể ghép | 10 | đội | Chọn 3 trong 5, không tính thứ tự |\n| Số chạm có tác dụng của nút \"Vào trận\" mỗi lần màn mở | 1 | lần | Tránh vào trận hai lần |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Màn chọn đội | Không có; đội cố định Hiệp sĩ, Đấu sĩ rìu, Cung thủ | Có đủ luật chọn | Có đủ luật chọn |\n| Số chỗ | 3 | 3 | 3 (chỉnh qua `feature-balance` nếu cần) |\n| Hiệu ứng hero vào chỗ | Không | Không | Hình hero bay từ thẻ vào chỗ, 0.2 giây (dự kiến) |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 18:30:56"
+   "at": "2026-11-26 00:54:12"
+  },
+  "back-button-tap": {
+   "state": "verified",
+   "note": "Chạm Quay lại báo GameFlow một lần, bỏ chỗ chọn dở, đội nhớ giữ",
+   "tests": [
+    "TeamSelectFlowTests.BackButtonReportsBackKeepsRememberedTeamAndDropsHalfPickedSlots"
+   ],
+   "play": "",
+   "hash": "cb2345196046",
+   "text": "Chạm \"Quay lại\": báo `feature-game-flow` đúng một lần; các chỗ đang chọn dở bị bỏ, đội nhớ không đổi\nĐiều hướng màn đưa về màn bắt đầu. Đang chờ dựng trận thì chạm bị bỏ.",
+   "title": "Chạm \"Quay lại\": báo `feature-game-flow` đúng một lần; các chỗ đang chọn dở bị bỏ, đội nhớ không đổi",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:12"
+  },
+  "build-fail-retry": {
+   "state": "verified",
+   "note": "Dòng lỗi dựng trận, giữ đội, mở lại nút, dòng lỗi ẩn khi chạm Vào trận",
+   "tests": [
+    "TeamSelectFlowTests.FailedBuildKeepsTeamInSlotsShowsErrorAndEnterBattleWorksAgain"
+   ],
+   "play": "",
+   "hash": "6ae16c849580",
+   "text": "Dựng trận lỗi: hiện dòng \"Không vào được trận, thử lại\", giữ đội và mở lại nút \"Vào trận\"\nĐiều hướng màn báo lỗi. Chạm \"Vào trận\" lần nữa là thử lại với cùng đội; dòng lỗi ẩn khi chạm.",
+   "title": "Dựng trận lỗi: hiện dòng \"Không vào được trận, thử lại\", giữ đội và mở lại nút \"Vào trận\"",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:12"
+  },
+  "edge-bam-quay-lai-sau-khi-dung-tran-loi": {
+   "state": "verified",
+   "note": "Quay lại sau dựng lỗi: về màn bắt đầu, đội nhớ là đội lần trước",
+   "tests": [
+    "TeamSelectFlowTests.BackAfterFailedBuildGoesHomeWithLastBuiltTeamRemembered"
+   ],
+   "play": "",
+   "hash": "abbfd1e5f0fe",
+   "text": "**Bấm \"Quay lại\" sau khi dựng trận lỗi:** về màn bắt đầu; đội nhớ vẫn là đội của lần vào trận thành công trước.",
+   "title": "Bấm \"Quay lại\" sau khi dựng trận lỗi",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:12"
+  },
+  "edge-bam-vao-tran-roi-quay-lai-ngay": {
+   "state": "verified",
+   "note": "Quay lại ngay sau Vào trận bị bỏ vì đang chờ dựng trận",
+   "tests": [
+    "TeamSelectFlowTests.BackIsIgnoredWhileTheBattleIsBeingBuilt"
+   ],
+   "play": "",
+   "hash": "978fc6005722",
+   "text": "**Bấm \"Vào trận\" rồi \"Quay lại\" ngay:** \"Quay lại\" rơi vào lúc chờ dựng trận, bị bỏ.",
+   "title": "Bấm \"Vào trận\" rồi \"Quay lại\" ngay",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:12"
   }
  },
  "log": [
@@ -356,6 +408,181 @@
   },
   {
    "at": "2026-11-25 18:30:56",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:26:46",
+   "id": "edge-nut-quay-lai-cua-may",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "Lệch thiết kế: routes-values#back-key-map của GameFlow bắt phím back của máy làm như nút Quay lại, slots-spec live còn ghi không làm gì · code theo routes-values, test DeviceBackKeyActsAsBackButton · chờ GameDesigner sửa slots-spec"
+  },
+  {
+   "at": "2026-11-26 00:40:38",
+   "id": "start-button-once",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "Vào trận báo đội cho GameFlow qua ITeamSelectScreen, khoá chạm tới khi GameFlow mở lại hoặc ẩn màn"
+  },
+  {
+   "at": "2026-11-26 00:40:39",
+   "id": "screen-parts",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "Màn 4 phần có nút Quay lại theo frame main mới"
+  },
+  {
+   "at": "2026-11-26 00:40:40",
+   "id": "edge-nut-quay-lai-cua-may",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "Phím back của máy như chạm Quay lại, bị bỏ khi chờ dựng trận"
+  },
+  {
+   "at": "2026-11-26 00:40:41",
+   "id": "params",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "Số nút 2, cạnh Quay lại 120 px, dòng lỗi dựng trận, báo đội cho GameFlow"
+  },
+  {
+   "at": "2026-11-26 00:40:42",
+   "id": "back-button-tap",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "Chạm Quay lại báo GameFlow một lần, bỏ chỗ chọn dở, đội nhớ giữ"
+  },
+  {
+   "at": "2026-11-26 00:40:43",
+   "id": "build-fail-retry",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "Dòng lỗi dựng trận, giữ đội, mở lại nút, dòng lỗi ẩn khi chạm Vào trận"
+  },
+  {
+   "at": "2026-11-26 00:40:45",
+   "id": "edge-bam-quay-lai-sau-khi-dung-tran-loi",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "Quay lại sau dựng lỗi: về màn bắt đầu, đội nhớ là đội lần trước"
+  },
+  {
+   "at": "2026-11-26 00:40:46",
+   "id": "edge-bam-vao-tran-roi-quay-lai-ngay",
+   "state": "doing",
+   "by": "TeamSelect",
+   "note": "Quay lại ngay sau Vào trận bị bỏ vì đang chờ dựng trận"
+  },
+  {
+   "at": "2026-11-26 00:42:14",
+   "id": "start-button-once",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.StartWithFullTeamReportsTeamToFlowOnceAndLocksTapsUntilBuildResult"
+  },
+  {
+   "at": "2026-11-26 00:42:15",
+   "id": "screen-parts",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.ScreenHasFourPartsCardsSlotsStartAndBack"
+  },
+  {
+   "at": "2026-11-26 00:42:16",
+   "id": "edge-nut-quay-lai-cua-may",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.DeviceBackKeyActsAsBackButton"
+  },
+  {
+   "at": "2026-11-26 00:42:17",
+   "id": "params",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSlotsTests.DesignValuesAreThreeSlotsAndDefaultTeam"
+  },
+  {
+   "at": "2026-11-26 00:42:18",
+   "id": "back-button-tap",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSelectFlowTests.BackButtonReportsBackKeepsRememberedTeamAndDropsHalfPickedSlots"
+  },
+  {
+   "at": "2026-11-26 00:42:19",
+   "id": "build-fail-retry",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSelectFlowTests.FailedBuildKeepsTeamInSlotsShowsErrorAndEnterBattleWorksAgain"
+  },
+  {
+   "at": "2026-11-26 00:42:20",
+   "id": "edge-bam-quay-lai-sau-khi-dung-tran-loi",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSelectFlowTests.BackAfterFailedBuildGoesHomeWithLastBuiltTeamRemembered"
+  },
+  {
+   "at": "2026-11-26 00:42:21",
+   "id": "edge-bam-vao-tran-roi-quay-lai-ngay",
+   "state": "done",
+   "by": "TeamSelect",
+   "note": "TeamSelectFlowTests.BackIsIgnoredWhileTheBattleIsBeingBuilt"
+  },
+  {
+   "at": "2026-11-26 00:54:12",
+   "id": "start-button-once",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:12",
+   "id": "screen-parts",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:12",
+   "id": "back-button-tap",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:12",
+   "id": "build-fail-retry",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:12",
+   "id": "edge-nut-quay-lai-cua-may",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:12",
+   "id": "edge-bam-quay-lai-sau-khi-dung-tran-loi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:12",
+   "id": "edge-bam-vao-tran-roi-quay-lai-ngay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:12",
    "id": "params",
    "state": "verified",
    "by": "@CodeLead",

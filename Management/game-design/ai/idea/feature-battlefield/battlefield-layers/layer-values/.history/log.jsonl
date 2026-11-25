@@ -1,3 +1,4 @@
 {"at": "2026-11-25 01:06:46", "event": "data", "hash": "9b7d55c81fc4", "previous": "", "added": ["view-camera", "cover-width", "sky-values", "far-values", "ground-values", "decor-ten", "decor-clear-castle", "hud-clear"], "removed": [], "rewritten": []}
 {"at": "2026-11-25 01:10:42", "event": "promote", "by": "người", "hash": "9b7d55c81fc4"}
 {"at": "2026-11-25 18:21:39", "event": "promote", "by": "người (Sync)", "hash": "9b7d55c81fc4"}
+{"at": "2026-11-26 00:39:44", "event": "promote", "by": "người (Sync)", "hash": "9b7d55c81fc4"}

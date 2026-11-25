@@ -1,0 +1,81 @@
+{
+ "frame": "main",
+ "parts": [
+  {
+   "id": "band",
+   "w": 1920,
+   "h": 140,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "bottom"
+   ],
+   "from": {
+    "node": "feature-hud/hud-layout/layout-spec",
+    "frame": "main",
+    "part": "band",
+    "ref": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+    "version": 1
+   },
+   "text": true
+  },
+  {
+   "id": "tray",
+   "w": 460,
+   "h": 140,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "cluster"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "skill-thunder",
+   "w": 140,
+   "h": 140,
+   "slice": null,
+   "shapes": [
+    "thunder"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "skill-frost",
+   "w": 140,
+   "h": 140,
+   "slice": null,
+   "shapes": [
+    "frost"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "skill-rally",
+   "w": 140,
+   "h": 140,
+   "slice": null,
+   "shapes": [
+    "rally"
+   ],
+   "from": null,
+   "text": true
+  }
+ ],
+ "kept": [
+  "cover",
+  "seconds"
+ ],
+ "skipped": []
+}

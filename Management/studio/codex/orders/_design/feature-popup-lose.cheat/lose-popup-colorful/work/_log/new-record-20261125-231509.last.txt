@@ -1,0 +1,3 @@
+Đã lưu một ảnh concept popup thua khi phá kỉ lục theo phong cách Colorful tại [out/new-record.png](D:/AI/CoreSimple/Management/studio/codex/orders/_design/feature-popup-lose.cheat/lose-popup-colorful/work/out/new-record.png).
+
+Ảnh PNG đúng 1920×1080, đủ sáu dòng tiếng Việt. Mình đã căn khung và hai nút theo frame `new-record`.

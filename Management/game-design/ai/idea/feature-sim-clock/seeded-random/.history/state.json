@@ -1,0 +1,25 @@
+{
+ "hash": "493ba40160e7",
+ "items": {
+  "run-seed": {
+   "hash": "0deb3a24c9cf",
+   "text": "Mỗi lượt có một seed; mọi dòng ngẫu nhiên của lượt sinh ra từ seed đó"
+  },
+  "stream-by-name": {
+   "hash": "01cafd1ceec8",
+   "text": "Mỗi feature có một dòng ngẫu nhiên riêng, gọi theo tên feature\nThêm một lần bốc ở feature này không làm lệch dãy số của feature khác."
+  },
+  "reset-each-run": {
+   "hash": "27813adc2119",
+   "text": "Đầu mỗi lượt mọi dòng được đặt lại từ seed của lượt\nLượt sau không mang theo dãy số dở của lượt trước."
+  },
+  "seed-recorded": {
+   "hash": "e13b3200529d",
+   "text": "Seed của lượt luôn được ghi lại để chơi lại đúng lượt đó khi báo lỗi"
+  },
+  "same-seed-same-run": {
+   "hash": "9ceee7c3c2ea",
+   "text": "Cùng seed và cùng chuỗi thao tác theo số bước thì ra cùng thứ tự quái, cùng tiền, cùng điểm\nĐây là tiêu chí kiểm của cả feature."
+  }
+ }
+}

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Run;
+using Game.SimClock;
 
 namespace Game.Combat.Tests
 {
@@ -98,9 +99,56 @@ namespace Game.Combat.Tests
         }
     }
 
-    internal sealed class FakeTime : ITime
+    /// <summary>Stand-in for the shared battle clock: tests drive its steps by hand.</summary>
+    internal sealed class FakeSimClock : ISimClock
     {
-        public float DeltaTime { get; set; }
+        private readonly List<(string owner, Action<SimStep> onStep)> _subscribers = new List<(string, Action<SimStep>)>();
+        private long _number;
+        private long _gameplayNumber;
+
+        public SimMode Mode => SimMode.FixedTick;
+        public float StepSeconds { get; set; } = 0.025f;
+        public long StepCount => _number;
+        public long GameplayStepCount => _gameplayNumber;
+        public double GameplaySeconds => _gameplayNumber * (double)StepSeconds;
+
+        public readonly List<string> Owners = new List<string>();
+        public int Subscribers => _subscribers.Count;
+
+        public IDisposable OnStep(string owner, Action<SimStep> onStep)
+        {
+            var entry = (owner, onStep);
+            Owners.Add(owner);
+            _subscribers.Add(entry);
+            return new Handle(() => _subscribers.Remove(entry));
+        }
+
+        public void Enqueue(string owner, Action apply) => apply();
+
+        /// <summary>Runs <paramref name="count"/> steps; <paramref name="gameplay"/> false is a paused step.</summary>
+        public void Step(int count = 1, bool gameplay = true)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                _number++;
+                if (gameplay) _gameplayNumber++;
+                var step = new SimStep(_number, _gameplayNumber, StepSeconds, gameplay);
+                foreach (var (_, onStep) in _subscribers.ToArray()) onStep(step);
+            }
+        }
+
+        private sealed class Handle : IDisposable
+        {
+            private Action _dispose;
+
+            public Handle(Action dispose) => _dispose = dispose;
+
+            public void Dispose()
+            {
+                _dispose?.Invoke();
+                _dispose = null;
+            }
+        }
     }
 
     /// <summary>Stand-in for the run feature: only what combat reads.</summary>

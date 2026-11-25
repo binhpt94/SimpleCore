@@ -7,7 +7,8 @@ Thiết kế: `live/feature-scene-flow/scene-list/boot-loading` (màn Loading), 
 
 - Dùng `ISessionScene` của `Game.Core`: tham gia phiên của cả hai scene, và gọi `EndAsync` của phiên Loading.
 - Dùng `ISessionLoadProgress` (contract của SessionScene) của scene Game cho thanh tiến độ và tên feature tải lỗi.
-- Chưa có Contracts: chưa feature nào cần gọi SceneFlow. Ai cần thì đề xuất.
+- Contracts: `IGameSceneReady` (`IsReady`, sự kiện `Ready`), do `GameReadySignal` hiện thực, đăng ký trong installer bên Game. `Ready` phát đúng một lần, ở bước chạy, khi cổng mở; phiên Failed thì không phát. SceneFlow cài sau cùng nên feature khác lấy nó trễ (ở `Run`), không lấy trong `Install`.
+- Sprite thanh tiến độ PROTOTYPE (style Colorful): order `codex/orders/SceneFlow/loading-bar-colorful`, đã chấm Đạt, chép ở `FeatureAssets/Private/Generated/loading-bar-colorful`; chưa gắn vào prefab.
 - Một lớp installer, hai asset trong `FeatureAssets/Public`: `SceneFlowLoadingInstaller` và `SceneFlowGameInstaller`.
 - Một lần chuyển (`SceneSwitcher`, theo `scene-request/switch-rules`): kiểm tên (lạ: lỗi; đang chuyển: cảnh báo, không xếp hàng; trùng scene đang chạy: bỏ qua) → hiện lớp che → kết thúc phiên scene cũ → nạp scene mới bằng `LoadSceneMode.Single` (Unity gỡ scene cũ) → chờ cổng của scene mới và thời gian ít nhất → bỏ lớp che. Lớp che chính là `LoadingScreen.prefab`, `DontDestroyOnLoad`, nên sống qua lúc gỡ scene Loading. Chuyển quá `slowSwitchWarningSeconds` (5) thì ghi cảnh báo hiệu năng, vẫn chuyển tiếp. Lỗi thì lớp che ở lại với dòng lỗi, không quay về.
 - Bên Loading (`LoadingToGameFlow`): tham gia duy nhất của scene Loading; ở `Run` xin chuyển sang Game. Không đóng lớp che khi phiên Loading kết thúc.

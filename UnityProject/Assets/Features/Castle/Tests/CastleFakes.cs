@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Game.Combat;
 using Game.Core;
 using Game.Enemy;
 using Game.Hero;
 using Game.Run;
+using Game.SimClock;
 
 namespace Game.Castle.Tests
 {
@@ -58,8 +60,10 @@ namespace Game.Castle.Tests
         public void StartRun() => RunStarted?.Invoke(new RunTeam(new[] { "a", "b", "c" }));
     }
 
-    internal sealed class FakeEnemyField : IEnemyField
+    /// <summary>The enemies; also stands in for the castle's hits on them, recording each in <see cref="Damaged"/>.</summary>
+    internal sealed class FakeEnemyField : IEnemyField, ICastleEnemyHits
     {
+        void ICastleEnemyHits.Hit(int enemyHandle, float damage) => Damaged.Add((enemyHandle, damage));
         public readonly List<IEnemyFoes> Foes = new List<IEnemyFoes>();
         public readonly List<EnemyTarget> Alive = new List<EnemyTarget>();
         public readonly List<(int handle, float amount)> Damaged = new List<(int, float)>();
@@ -80,8 +84,16 @@ namespace Game.Castle.Tests
     {
         public readonly List<string> Calls = new List<string>();
         public bool Visible;
-        public float FlashSeconds, CollapseSeconds, GrowBackSeconds, ShotSeconds, ThunderSeconds;
+        public float FlashSeconds, CollapseSeconds, GrowBackSeconds, ShotSeconds, ThunderSeconds, ShotFromX, ShotToX, ShakeSeconds;
+        public bool Damaged;
         public event Action<float> Ticked;
+        private UnityEngine.GameObject _object;
+
+        /// <summary>A real Unity object so the session can count the view; tests destroy it in TearDown.</summary>
+        public UnityEngine.Object ViewObject => _object ? _object : (_object = new UnityEngine.GameObject("FakeCastleView"));
+        public void DestroyObject() { if (_object) UnityEngine.Object.DestroyImmediate(_object); }
+        public void ShakeHit(float seconds) { ShakeSeconds = seconds; Calls.Add("shake"); }
+        public void ShowDamaged(bool damaged) => Damaged = damaged;
         public void Tick(float seconds) => Ticked?.Invoke(seconds);
         public void Place(float halfWidth, float height) => Calls.Add($"place {halfWidth} {height}");
         public void SetVisible(bool visible) => Visible = visible;
@@ -90,7 +102,13 @@ namespace Game.Castle.Tests
         public void PopLevelUp(float scale, float seconds) => Calls.Add($"pop {scale} {seconds}");
         public void Collapse(float seconds) { CollapseSeconds = seconds; Calls.Add("collapse"); }
         public void GrowBack(float seconds) { GrowBackSeconds = seconds; Calls.Add("grow"); }
-        public void ShowShot(int targetHandle, float fromX, float toX, float seconds) { ShotSeconds = seconds; Calls.Add($"shot {targetHandle}"); }
+        public void ShowShot(int targetHandle, float fromX, float toX, float seconds)
+        {
+            ShotSeconds = seconds;
+            ShotFromX = fromX;
+            ShotToX = toX;
+            Calls.Add($"shot {targetHandle}");
+        }
         public void DropShotsAt(int targetHandle) => Calls.Add($"drop {targetHandle}");
         public void ShowThunder(float x, float seconds) { ThunderSeconds = seconds; Calls.Add($"thunder {x}"); }
         public void Advance(float seconds) => Calls.Add("advance");
@@ -103,6 +121,78 @@ namespace Game.Castle.Tests
         public bool Despawned;
         public ICastleView Spawn() => View;
         public void Despawn(ICastleView view) => Despawned = true;
+    }
+
+    /// <summary>The shared clock, stepped by hand: 0.025 s steps, gameplay unless told otherwise.</summary>
+    internal sealed class FakeSimClock : ISimClock
+    {
+        public const float Step = 0.025f;
+        public readonly List<string> Owners = new List<string>();
+        private readonly List<Action<SimStep>> _subscribers = new List<Action<SimStep>>();
+        private long _number, _gameplayNumber;
+
+        public SimMode Mode => SimMode.FixedTick;
+        public float StepSeconds => Step;
+        public long StepCount => _number;
+        public long GameplayStepCount => _gameplayNumber;
+        public double GameplaySeconds => _gameplayNumber * (double)Step;
+        public int SubscriberCount => _subscribers.Count;
+
+        public IDisposable OnStep(string owner, Action<SimStep> onStep)
+        {
+            Owners.Add(owner);
+            _subscribers.Add(onStep);
+            return new Unsubscribe(() => _subscribers.Remove(onStep));
+        }
+
+        public void Enqueue(string owner, Action apply) => apply();
+
+        /// <summary>Runs <paramref name="count"/> steps.</summary>
+        public void Steps(int count, bool gameplay = true)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                _number++;
+                if (gameplay) _gameplayNumber++;
+                var step = new SimStep(_number, _gameplayNumber, Step, gameplay);
+                foreach (var subscriber in _subscribers.ToArray()) subscriber(step);
+            }
+        }
+
+        /// <summary>Runs as many steps as fit in <paramref name="seconds"/> (rounded to the nearest step).</summary>
+        public void Run(float seconds, bool gameplay = true) => Steps((int)Math.Round(seconds / Step), gameplay);
+
+        private sealed class Unsubscribe : IDisposable
+        {
+            private Action _undo;
+            public Unsubscribe(Action undo) => _undo = undo;
+            public void Dispose() { _undo?.Invoke(); _undo = null; }
+        }
+    }
+
+    internal sealed class FakeCombat : ICombat
+    {
+        public readonly List<ICombatReceiver> Receivers = new List<ICombatReceiver>();
+        public readonly List<CombatHit> Hits = new List<CombatHit>();
+        public event Action TickDone { add { } remove { } }
+
+        /// <summary>Receiver numbers start at 10 so a test can tell them from keys.</summary>
+        public int AddReceiver(ICombatReceiver receiver)
+        {
+            Receivers.Add(receiver);
+            return 10 + Receivers.Count - 1;
+        }
+
+        public void AddActor(ICombatActor actor) { }
+        public void Hit(in CombatHit hit) => Hits.Add(hit);
+    }
+
+    internal sealed class FakeEnemyCombat : IEnemyCombat
+    {
+        public IEnemyFoes Foes;
+        public int FoesReceiver = -1;
+        public int CombatReceiver => 7;
+        public void AddCombatFoes(IEnemyFoes foes, int combatReceiver) { Foes = foes; FoesReceiver = combatReceiver; }
     }
 
     internal sealed class FakeHeroSpawnPoints : IHeroSpawnPoints

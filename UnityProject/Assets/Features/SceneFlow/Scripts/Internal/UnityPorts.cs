@@ -50,6 +50,9 @@ namespace Game.SceneFlow
     /// <summary>What the player sees while a scene gets ready: the loading screen, which is also the switch cover.</summary>
     internal interface ILoadingScreen
     {
+        /// <summary>The Unity object of this screen, for the session's view count (not for the switch cover).</summary>
+        UnityEngine.Object Root { get; }
+
         /// <summary>Fills the bar: 0 is nothing loaded, 1 is everything loaded.</summary>
         void ShowProgress(float fraction);
 

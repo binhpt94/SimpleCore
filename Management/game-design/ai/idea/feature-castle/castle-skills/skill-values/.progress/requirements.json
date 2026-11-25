@@ -209,25 +209,42 @@
    "state": "verified",
    "note": "",
    "tests": [
-    "CastleConfigTests.Skill_numbers_match_the_design_with_only_thunder_at_the_idea_stage"
+    "CastleConfigTests.Skill_numbers_match_the_design_with_all_three_skills_at_the_prototype_stage"
    ],
    "play": "",
    "hash": "e28e1840b359",
    "text": "## Làm gì\n- Giữ trạng thái sẵn sàng và thời gian hồi còn lại của từng kĩ năng; báo cho `feature-hud` để hiện nút.\n- Nhận lệnh bấm từ `feature-hud`. Nếu kĩ năng sẵn sàng, thành còn đứng, không tạm dừng: áp hiệu lực ngay, bắt đầu hồi chiêu.\n- Sấm sét: lấy mọi quái còn sống có khoảng cách tới mép thành gần nhất ≤ 6u (hai bên), trừ máu mỗi con bằng sát thương Sấm sét hiện tại.\n- Băng giá: gắn trạng thái \"chậm\" lên mọi quái đang sống trong thời gian chậm hiện tại; quái bị chậm có tốc độ đi ×0.5 và giây mỗi đòn ×2 (`feature-enemy/enemy-behavior/enemy-move-values`).\n- Cổ vũ: mọi hero đang đứng trên chiến trường (không gục) cộng máu = tỉ lệ hồi hiện tại × máu tối đa hiện tại của nó, chặn ở máu tối đa.\n- Nhận mức tăng hiệu lực từ `feature-castle/castle-upgrade-effects`; hồi chiêu không đổi theo cấp.\n\n## Thông số\n| Kĩ năng | Hiệu lực lv1 | Vùng / đối tượng | Hồi chiêu | Lí do |\n|---|---|---|---|---|\n| Sấm sét | 80 máu mỗi quái | Quái cách mép thành ≤ 6u, cả hai bên | 20s | Giải vây sát thành; hồi ngắn nhất để là nút bấm chính |\n| Băng giá | chậm 50% đi và đánh, 5s | Mọi quái đang sống | 35s | Mạnh nhất (cả màn) nên hồi lâu nhất |\n| Cổ vũ | hồi 30% máu tối đa mỗi hero | Mọi hero đang đứng | 25s | Hiệp sĩ 300 máu hồi 90; Pháp sư 100 máu hồi 30 |\n\n| Hiệu ứng | Xuất hiện | Biến mất |\n|---|---|---|\n| Sấm sét trên quái | lúc trúng | sau 0.3s (kể cả khi quái bị hạ) |\n| Dấu chậm trên quái | lúc trúng Băng giá | hết thời gian chậm hoặc quái bị hạ |\n| Cổ vũ trên hero | lúc được hồi | sau 0.5s |\n\nCân bằng dự kiến: Sấm sét dùng được 3 lần mỗi phút, mỗi lần dọn mọi Lính/Sói sát thành tới đợt 10. Băng giá 5s trong 35s nghĩa là quái bị chậm khoảng 14% thời gian.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số kĩ năng có trong trận | 1 (Sấm sét) | 3 (Sấm sét, Băng giá, Cổ vũ) | 3 |\n| Sấm sét | 80 máu, 6u, hồi 20s | như IDEA | theo số đã chỉnh sau chơi thử |\n| Băng giá | không có | chậm 50%, 5s, hồi 35s | theo số đã chỉnh |\n| Cổ vũ | không có | 30% máu tối đa, hồi 25s | theo số đã chỉnh |\n| Hiệu ứng | sprite hiện 0.3s trên quái trúng (scale lên rồi tắt) | đủ ba hiệu ứng ở bảng trên | hiệu ứng toàn màn, âm thanh riêng từng kĩ năng |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:39"
+   "at": "2026-11-26 00:30:01"
   },
   "edge-quai-bi-cham-roi-bi-ha": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Khi Play o PROTOTYPE co Bang gia: quai dang cham bi ha thi dau cham mat cung quai. Trang thai cham va dau cham do Enemy giu, thanh chi goi IEnemyField.SlowAll",
    "hash": "7a156f180b56",
    "text": "Quái bị chậm rồi bị hạ: trạng thái chậm và dấu chậm biến mất cùng quái.",
    "title": "Quái bị chậm rồi bị hạ",
-   "by": "Castle",
-   "at": "2026-11-25 11:40:45"
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:37"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "Trỏ test cột PROTOTYPE: ba kĩ năng, số Băng giá và Cổ vũ, hiệu ứng Sấm sét",
+   "tests": [
+    "CastleConfigTests.Skill_numbers_match_the_design_with_all_three_skills_at_the_prototype_stage",
+    "CastleInstallerTests.Installer_asset_publishes_the_castle_and_joins_the_session",
+    "CastleSkillsTests.Frost_slows_every_enemy_and_rally_heals_every_hero",
+    "CastleSkillsTests.Each_skill_has_its_own_cooldown_twenty_thirty_five_twenty_five",
+    "CastleSessionTests.Thunder_effect_lasts_three_tenths_of_a_second"
+   ],
+   "play": "",
+   "hash": "df9515920c08",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Số kĩ năng có trong trận: 3 (Sấm sét, Băng giá, Cổ vũ)\n- Băng giá: chậm 50%, 5s, hồi 35s\n- Cổ vũ: 30% máu tối đa, hồi 25s\n- Hiệu ứng: đủ ba hiệu ứng ở bảng trên",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:13"
   }
  },
  "log": [
@@ -458,6 +475,48 @@
   {
    "at": "2026-11-25 13:43:56",
    "id": "edge-co-vu-tren-hero-day-mau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:24:07",
+   "id": "params",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Skill_numbers_match_the_design_with_all_three_skills_at_the_prototype_stage"
+  },
+  {
+   "at": "2026-11-26 00:30:01",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:03:01",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Trỏ test cột PROTOTYPE: ba kĩ năng, số Băng giá và Cổ vũ, hiệu ứng Sấm sét"
+  },
+  {
+   "at": "2026-11-26 01:03:10",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Skill_numbers_match_the_design_with_all_three_skills_at_the_prototype_stage, CastleInstallerTests.Installer_asset_publishes_the_castle_and_joins_the_session, CastleSkillsTests.Frost_slows_every_enemy_and_rally_heals_every_hero, CastleSkillsTests.Each_skill_has_its_own_cooldown_twenty_thirty_five_twenty_five, CastleSessionTests.Thunder_effect_lasts_three_tenths_of_a_second"
+  },
+  {
+   "at": "2026-11-26 01:15:37",
+   "id": "edge-quai-bi-cham-roi-bi-ha",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:18:13",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

@@ -1,0 +1,15 @@
+{
+ "node": "feature-castle/castle-skills/skill-values",
+ "nodeHash": "ad45ef4fdcc9",
+ "frames": {
+  "thunder-zone": "dec3947de29e"
+ },
+ "styles": {
+  "world-cartoon": "81265f8159a9"
+ },
+ "order": "_design/feature-castle.castle-skills.skill-values/thunder-zone-claude",
+ "version": 2,
+ "at": "2026-11-25 23:21:15",
+ "stamp": 1795623675.5106707,
+ "sources": []
+}

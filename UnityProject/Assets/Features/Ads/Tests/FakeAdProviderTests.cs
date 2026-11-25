@@ -118,6 +118,78 @@ namespace Game.Ads.Tests
             Assert.AreEqual(AdResult.Watched, _replies[0].Result);
         }
 
+        // ---- cheat: hold the next ad (feature-popup-revive/cheat#waiting-ad) ----
+
+        [Test]
+        public void HeldAdWaitsWithNoReplyAndNoTimeLimitAndNoScreen()
+        {
+            ((IAdsCheat)_fake).HoldNextAd();
+            _ads.Show(1, _replies.Add);
+
+            Run(60f, 0.5f);
+
+            Assert.IsEmpty(_replies, "no reply, well past the open and confirm limits");
+            Assert.IsTrue(_ads.IsBusy, "the request is still waiting");
+            Assert.AreEqual(0, _screen.ShowCount, "the caller's waiting state stays visible");
+        }
+
+        [Test]
+        public void CancellingAHeldAdEndsItAtOnceWithoutAReply()
+        {
+            ((IAdsCheat)_fake).HoldNextAd();
+            _ads.Show(1, _replies.Add);
+            Run(1f);
+
+            _ads.Cancel(1);
+
+            Assert.IsFalse(_ads.IsBusy, "the slot is free again");
+            Run(10f);
+            Assert.IsEmpty(_replies);
+        }
+
+        [Test]
+        public void SessionEndingEndsAHeldAdWithoutAReply()
+        {
+            ((IAdsCheat)_fake).HoldNextAd();
+            _ads.Show(1, _replies.Add);
+
+            _ads.Shutdown();
+            Run(10f);
+
+            Assert.IsFalse(_ads.IsBusy);
+            Assert.IsEmpty(_replies);
+        }
+
+        [Test]
+        public void OnlyTheNextAdIsHeldTheOneAfterBehavesAsUsual()
+        {
+            ((IAdsCheat)_fake).HoldNextAd();
+            _ads.Show(1, _replies.Add);
+            _ads.Cancel(1);
+
+            _fake.Outcome = FakeAdOutcome.Watched;
+            _ads.Show(2, _replies.Add);
+            Run(2.2f);
+
+            Assert.AreEqual(1, _replies.Count);
+            Assert.AreEqual(2, _replies[0].OfferId);
+            Assert.AreEqual(AdResult.Watched, _replies[0].Result);
+        }
+
+        [Test]
+        public void CancellingAnUsualAdStillLetsItFinishAndDropsTheResult()
+        {
+            _fake.Outcome = FakeAdOutcome.Watched;
+            _ads.Show(1, _replies.Add);
+
+            _ads.Cancel(1);
+            Assert.IsTrue(_ads.IsBusy, "an ad on screen keeps playing");
+
+            Run(2.2f);
+            Assert.IsFalse(_ads.IsBusy);
+            Assert.IsEmpty(_replies);
+        }
+
         private sealed class RecordingScreen : IFakeAdScreen
         {
             public bool Visible { get; private set; }

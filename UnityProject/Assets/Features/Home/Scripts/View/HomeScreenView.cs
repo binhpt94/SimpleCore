@@ -19,6 +19,8 @@ namespace Game.Home
 
         public event Action PlayPressed;
 
+        public Object Root => _root;
+
         internal void AddLabel(HomeElementId id, TextMeshProUGUI text) => _texts[id] = text;
 
         internal void AddButton(HomeElementId id, TextMeshProUGUI label) => _texts[id] = label;

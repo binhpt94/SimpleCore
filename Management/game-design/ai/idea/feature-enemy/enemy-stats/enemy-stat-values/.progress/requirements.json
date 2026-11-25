@@ -61,14 +61,15 @@
    "state": "verified",
    "note": "",
    "tests": [
-    "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it"
+    "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it",
+    "EnemyCombatTests.Hits_on_enemies_go_through_combat_and_an_enemy_takes_one_total_per_tick"
    ],
    "play": "",
    "hash": "5dd78f0b3b95",
    "text": "Nhiều đòn trúng cùng khung hình đưa máu xuống ≤ 0: quái bị hạ một lần, tiền một lần; các đòn sau trong khung hình bỏ qua quái này.",
    "title": "Nhiều đòn trúng cùng khung hình đưa máu xuống ≤ 0",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:13"
+   "at": "2026-11-26 00:30:01"
   },
   "edge-quai-da-sinh-o-x-17u-ngoai-man": {
    "state": "verified",
@@ -123,15 +124,15 @@
    "at": "2026-11-25 12:02:13"
   },
   "edge-tam-dung": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Hạ một quái rồi bấm tạm dừng ngay: hình đang thu nhỏ đứng yên tới khi tiếp tục",
    "hash": "f3863c298293",
    "text": "Tạm dừng: anim 0.3s đứng yên.",
    "title": "Tạm dừng",
-   "by": "Enemy",
-   "at": "2026-11-25 11:36:56"
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:37"
   },
   "params": {
    "state": "verified",
@@ -147,6 +148,22 @@
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
    "at": "2026-11-25 12:06:26"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "Cột PROTOTYPE: chỉ số cả 5 loại, hệ số đợt như IDEA, thu nhỏ 0.3s, trỏ test",
+   "tests": [
+    "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type",
+    "EnemyInstallerTests.The_real_config_has_every_enemy_type_in_the_game_at_PROTOTYPE",
+    "EnemyFieldTests.Wave_scale_multiplies_enemy_health",
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+   ],
+   "play": "",
+   "hash": "a2a554db6418",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Loại có chỉ số: cả 5",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:14"
   }
  },
  "log": [
@@ -335,6 +352,48 @@
   {
    "at": "2026-11-25 13:13:47",
    "id": "defeated-values",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:25:02",
+   "id": "edge-nhieu-don-trung-cung-khung-hinh-dua-mau",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it, EnemyCombatTests.Hits_on_enemies_go_through_combat_and_an_enemy_takes_one_total_per_tick"
+  },
+  {
+   "at": "2026-11-26 00:30:01",
+   "id": "edge-nhieu-don-trung-cung-khung-hinh-dua-mau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:02:57",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Enemy",
+   "note": "Cột PROTOTYPE: chỉ số cả 5 loại, hệ số đợt như IDEA, thu nhỏ 0.3s, trỏ test"
+  },
+  {
+   "at": "2026-11-26 01:03:32",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyInstallerTests.The_real_config_has_every_enemy_type_in_the_game_at_PROTOTYPE, EnemyFieldTests.Wave_scale_multiplies_enemy_health, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+  },
+  {
+   "at": "2026-11-26 01:15:37",
+   "id": "edge-tam-dung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:18:14",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

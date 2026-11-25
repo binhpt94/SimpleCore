@@ -1,6 +1,6 @@
 ---
 based-on: 8db5f61d9f6e
-refs: feature-run/run-start@d386ccae4d88, feature-run/run-score@5869f69301eb, feature-scene-flow/scene-list@78ed2dcc0859, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-run/run-pause@331cbd30e30e, feature-popup-pause/pause-popup/pause-popup-spec@4db8a9f181fd
+refs: feature-run/run-start@d386ccae4d88, feature-run/run-score@5869f69301eb, feature-scene-flow/scene-list@78ed2dcc0859, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-run/run-pause@331cbd30e30e, feature-popup-pause/pause-popup/pause-popup-spec@4db8a9f181fd, feature-game-flow/flow-routes/routes-values@66f0417d12da
 frame: none
 ---
 # Luật chuyển màn của lượt
@@ -23,6 +23,12 @@ Quái thôi ra, mọi unit thôi đi và thôi đánh, nút kĩ năng và thanh 
 
 ### revive-step | AI 7 | Chọn hồi sinh và xem xong quảng cáo: đóng popup hồi sinh, thành có lại máu, trận chạy tiếp ngay từ chỗ dừng
 Không đếm ngược; quái, hero, đợt, tiền, cấp, hồi chiêu giữ đúng như lúc dừng. Bỏ qua đề nghị, hoặc quảng cáo không xem hết hay không tải được: đóng popup hồi sinh, chốt điểm, hiện popup thua ngay (không chờ thêm 1 giây). Mỗi lượt chỉ một lần hồi sinh.
+
+### offer-flag | AI 7 | Lượt chơi giữ cờ "đã đề nghị hồi sinh", bật ngay lúc mở popup hồi sinh, chỉ tắt khi lượt mới bắt đầu
+Thành bị phá khi cờ đã bật thì vào thẳng popup thua.
+
+### held-clear | AI 6 | Tin dọn sạch đợt cùng khung hình thành bị phá được giữ; hồi sinh thì thả, chốt thua thì bỏ
+Thả tin: đợt được cộng điểm, `feature-wave` thưởng tiền và bắt đầu lúc thở. Bỏ tin: không điểm, không thưởng.
 
 ### replay-path | AI 8 | Chơi lại ở popup thua: huỷ trận, sang màn chọn đội; về màn bắt đầu: huỷ trận, sang màn bắt đầu
 Chơi lại không đi qua màn bắt đầu.

@@ -1,5 +1,5 @@
 {
- "hash": "1d3ef58a6e65",
+ "hash": "82bb29fa21ee",
  "items": {
   "run": {
    "hash": "721a2b6e316e",
@@ -120,6 +120,14 @@
   "backdrop": {
    "hash": "e3182111f30b",
    "text": "Nền che: tấm phủ toàn màn hình ngay sau một popup"
+  },
+  "sim-step": {
+   "hash": "ea2316690640",
+   "text": "Bước nhịp: một lần cập nhật logic gameplay của trận theo nhịp chung\nKhác khung hình: một khung hình có thể chạy không, một hay nhiều bước nhịp. Khác nhịp giao chiến: nhịp giao chiến là phần phân xử đòn bên trong một bước nhịp."
+  },
+  "seed": {
+   "hash": "8db59a28bcae",
+   "text": "Seed: con số khởi đầu sinh ra mọi số ngẫu nhiên của một lượt\nCùng seed thì ra cùng dãy số ngẫu nhiên."
   }
  }
 }

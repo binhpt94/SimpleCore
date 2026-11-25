@@ -39,6 +39,12 @@ namespace Game.SceneFlow.Tests
             switcher = new SceneSwitcher("Loading", scenes, screens, timer, Settings(), flowLog);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            screens.Screen?.DestroyRoot();
+        }
+
         private static SceneFlowSettings Settings()
         {
             return new SceneFlowSettings("Loading", "Game", FailedMessage, "Lỗi tải: {0}", MinTime, SlowTime);
@@ -423,6 +429,68 @@ namespace Game.SceneFlow.Tests
             Assert.That(gate.WaitAsync().Status, Is.EqualTo(UniTaskStatus.Pending));
         }
 
+        // --- IGameSceneReady (screen routing, PROTOTYPE) ---
+
+        [Test]
+        public void GameScene_IsNotReady_WhileItsSessionIsStillLoading()
+        {
+            var signal = new GameReadySignal(session, new SceneGate(progress), scenes, "Game");
+            var raised = 0;
+            signal.Ready += () => raised++;
+
+            signal.LoadAsync(CancellationToken.None).Forget();
+
+            Assert.That(signal.IsReady, Is.False);
+            Assert.That(raised, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void GameScene_RaisesReadyOnce_WhenItsSessionRunsAndTheGateOpens()
+        {
+            var gate = new SceneGate(progress);
+            var signal = new GameReadySignal(session, gate, scenes, "Game");
+            var raised = 0;
+            var gateOpenWhenRaised = false;
+            signal.Ready += () =>
+            {
+                raised++;
+                gateOpenWhenRaised = gate.WaitAsync().Status == UniTaskStatus.Succeeded;
+            };
+
+            signal.Run();
+            signal.Run();
+
+            Assert.That(raised, Is.EqualTo(1));
+            Assert.That(signal.IsReady, Is.True);
+            Assert.That(gateOpenWhenRaised, Is.True, "Ready comes with the gate opening, not before it");
+        }
+
+        [Test]
+        public void GameScene_NeverRaisesReady_WhenItsSessionFails()
+        {
+            var signal = new GameReadySignal(session, new SceneGate(progress), scenes, "Game");
+            var raised = 0;
+            signal.Ready += () => raised++;
+
+            session.Raise(SessionState.Failed);
+
+            Assert.That(signal.IsReady, Is.False);
+            Assert.That(raised, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void GameScene_DropsItsReadyListeners_WhenItsSessionEnds()
+        {
+            var signal = new GameReadySignal(session, new SceneGate(progress), scenes, "Game");
+            var raised = 0;
+            signal.Ready += () => raised++;
+
+            signal.DisposeAsync().Forget();
+            signal.Run();
+
+            Assert.That(raised, Is.EqualTo(0));
+        }
+
         // --- Cheat (feature-scene-flow/cheat) ---
 
         [Test]
@@ -446,6 +514,63 @@ namespace Game.SceneFlow.Tests
             cheat.DisposeAsync().Forget();
 
             Assert.That(screens.Screen.Closed, Is.True);
+        }
+
+        // --- Session clean-up count (proposal 2026-11-25-session-usage-tracking) ---
+
+        [Test]
+        public void CheatLoadError_ReportsItsScreenAsAHeldView_AndNothingOnceTheSessionEnds()
+        {
+            var cheat = new LoadErrorCheat(screens, Settings());
+            var usage = (ISessionParticipantUsage)cheat;
+
+            cheat.Run();
+
+            Assert.That(usage.OpensViewsOnRun, Is.True);
+            Assert.That(usage.HeldViews, Is.EqualTo(1));
+            Assert.That(usage.RunningJobs, Is.EqualTo(0));
+
+            cheat.DisposeAsync().Forget();
+
+            Assert.That(usage.HeldViews, Is.EqualTo(0));
+            Assert.That(usage.RunningJobs, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void LoadingScene_DoesNotCountTheSwitchCover_AsAHeldView()
+        {
+            // The cover outlives the Loading session on purpose; counting it would mark the clean-up as failed.
+            var flow = new LoadingToGameFlow(session, switcher, "Game");
+            var usage = (ISessionParticipantUsage)flow;
+
+            flow.Run();
+
+            Assert.That(screens.Screen, Is.Not.Null, "the switch cover is shown");
+            Assert.That(usage.HeldViews, Is.EqualTo(0));
+            Assert.That(usage.RunningJobs, Is.EqualTo(0));
+
+            flow.DisposeAsync().Forget();
+
+            Assert.That(usage.HeldViews, Is.EqualTo(0));
+            Assert.That(usage.RunningJobs, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void GameScene_HoldsNoViewAndNoJob_BeforeOrAfterItsSessionEnds()
+        {
+            var signal = new GameReadySignal(session, new SceneGate(progress), scenes, "Game");
+            var usage = (ISessionParticipantUsage)signal;
+
+            signal.LoadAsync(CancellationToken.None).Forget();
+            signal.Run();
+
+            Assert.That(usage.HeldViews, Is.EqualTo(0));
+            Assert.That(usage.RunningJobs, Is.EqualTo(0));
+
+            signal.DisposeAsync().Forget();
+
+            Assert.That(usage.HeldViews, Is.EqualTo(0));
+            Assert.That(usage.RunningJobs, Is.EqualTo(0));
         }
 
         [Test]
@@ -602,6 +727,34 @@ namespace Game.SceneFlow.Tests
             installer.Install(registry);
 
             Assert.That(session.Joined, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void GameInstallerAsset_RegistersTheGameSceneReadySignal_ThatJoinsTheSession()
+        {
+            var installer = LoadInstaller("SceneFlowGameInstaller");
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(session);
+            registry.Register<ISessionLoadProgress>(progress);
+
+            installer.Install(registry);
+
+            Assert.That(registry.TryResolve<IGameSceneReady>(out var ready), Is.True);
+            Assert.That(session.Joined, Has.Member(ready), "the ready signal is the participant whose Run opens the gate");
+            Assert.That(ready.IsReady, Is.False);
+        }
+
+        [Test]
+        public void LoadingInstallerAsset_DoesNotRegisterTheGameSceneReadySignal()
+        {
+            var installer = LoadInstaller("SceneFlowLoadingInstaller");
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(session);
+            registry.Register<ISessionLoadProgress>(progress);
+
+            installer.Install(registry);
+
+            Assert.That(registry.TryResolve<IGameSceneReady>(out _), Is.False);
         }
 
         [Test]
@@ -804,10 +957,34 @@ namespace Game.SceneFlow.Tests
         private sealed class FakeScreen : ILoadingScreen
         {
             private readonly List<string> log;
+            private UnityEngine.GameObject root;
 
             public FakeScreen(List<string> log)
             {
                 this.log = log;
+            }
+
+            /// <summary>Made only when asked for (the view count asks), hidden, and destroyed by <see cref="DestroyRoot"/>.</summary>
+            public UnityEngine.Object Root
+            {
+                get
+                {
+                    if (root == null)
+                    {
+                        root = new UnityEngine.GameObject("fake loading screen")
+                        {
+                            hideFlags = UnityEngine.HideFlags.HideAndDontSave
+                        };
+                    }
+
+                    return root;
+                }
+            }
+
+            public void DestroyRoot()
+            {
+                if (root != null) UnityEngine.Object.DestroyImmediate(root);
+                root = null;
             }
 
             public string Error { get; private set; }

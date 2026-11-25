@@ -45,6 +45,18 @@ namespace Game.HudUpgrade
         [SerializeField, Range(0, 1)] private float dimAlpha = 0.4f;
         [SerializeField] private float bounceSeconds = 0.2f;
         [SerializeField] private float bounceScale = 1.15f;
+        [Tooltip("Số cấp mới nhấp sáng khi mua thành công (PROTOTYPE: 0,2 giây).")]
+        [SerializeField] private float flashSeconds = 0.2f;
+        [SerializeField] private Color flashColor = new Color(1f, 0.92f, 0.35f);
+        [SerializeField] private float flashScale = 1.25f;
+        [Tooltip("Rung nhẹ khi chạm nút mờ (PROTOTYPE: 0,2 giây).")]
+        [SerializeField] private float shakeSeconds = 0.2f;
+        [SerializeField] private float shakeDistance = 8f;
+        [SerializeField] private int shakeCycles = 3;
+
+        [Header("Hero đang gục")]
+        [SerializeField] private Color downTint = new Color(0f, 0f, 0f, 0.6f);
+        [SerializeField] private string downLabel = "Gục";
 
         private readonly List<ButtonParts> _buttons = new List<ButtonParts>();
         private RectTransform _bar;
@@ -54,10 +66,14 @@ namespace Game.HudUpgrade
         private sealed class ButtonParts
         {
             public RectTransform Root;
+            public RectTransform Body;
             public CanvasGroup Group;
             public Text Level;
             public Text Price;
+            public GameObject DownMark;
             public Coroutine Bounce;
+            public Coroutine Shake;
+            public Coroutine Flash;
         }
 
         private void Awake()
@@ -130,7 +146,48 @@ namespace Game.HudUpgrade
             if (index < 0 || index >= _buttons.Count || !isActiveAndEnabled) return;
             var parts = _buttons[index];
             if (parts.Bounce != null) StopCoroutine(parts.Bounce);
-            parts.Bounce = StartCoroutine(BounceRoutine(parts));
+            parts.Bounce = StartCoroutine(BounceRoutine(parts));        }
+
+        public void FlashLevel(int index)
+        {
+            if (index < 0 || index >= _buttons.Count || !isActiveAndEnabled) return;
+            var parts = _buttons[index];
+            if (parts.Flash != null) StopCoroutine(parts.Flash);
+            parts.Flash = StartCoroutine(FlashRoutine(parts));
+        }
+
+        /// <summary>The level text glows bright and swells, then settles back over <see cref="flashSeconds"/>.</summary>
+        private IEnumerator FlashRoutine(ButtonParts parts)
+        {
+            var text = parts.Level;
+            var t = 0f;
+            while (t < flashSeconds)
+            {
+                t += Time.unscaledDeltaTime;
+                var k = 1f - Mathf.Clamp01(t / flashSeconds);
+                text.color = Color.Lerp(textColor, flashColor, k);
+                text.rectTransform.localScale = Vector3.one * Mathf.Lerp(1f, flashScale, k);
+                yield return null;
+            }
+
+            text.color = textColor;
+            text.rectTransform.localScale = Vector3.one;
+            parts.Flash = null;
+        }
+
+        public void Shake(int index)
+        {
+            if (index < 0 || index >= _buttons.Count || !isActiveAndEnabled) return;
+            var parts = _buttons[index];
+            if (parts.Shake != null) StopCoroutine(parts.Shake);
+            parts.Shake = StartCoroutine(ShakeRoutine(parts));
+        }
+
+        public void SetDown(int index, bool down)
+        {
+            if (index < 0 || index >= _buttons.Count) return;
+            var mark = _buttons[index].DownMark;
+            if (mark) mark.SetActive(down);
         }
 
         public void SetVisible(bool visible)
@@ -153,6 +210,23 @@ namespace Game.HudUpgrade
             parts.Bounce = null;
         }
 
+        /// <summary>Side-to-side wobble of the button's content; the button itself keeps its place and its hit area.</summary>
+        private IEnumerator ShakeRoutine(ButtonParts parts)
+        {
+            var t = 0f;
+            while (t < shakeSeconds)
+            {
+                t += Time.unscaledDeltaTime;
+                var k = Mathf.Clamp01(t / shakeSeconds);
+                var x = Mathf.Sin(k * shakeCycles * 2f * Mathf.PI) * shakeDistance * (1f - k);
+                parts.Body.anchoredPosition = new Vector2(x, 0);
+                yield return null;
+            }
+
+            parts.Body.anchoredPosition = Vector2.zero;
+            parts.Shake = null;
+        }
+
         private ButtonParts NewButton(int index, ButtonPicture picture, float x, Action<int> onTap)
         {
             var root = NewRect("Button " + (index + 1), _bar);
@@ -161,23 +235,46 @@ namespace Game.HudUpgrade
             root.sizeDelta = buttonSize;
             root.anchoredPosition = new Vector2(x + buttonSize.x / 2f, 0);
 
-            var background = root.gameObject.AddComponent<Image>();
-            background.color = buttonColor;
+            // The root keeps the hit area still; the visible body inside it is what shakes.
+            var hitArea = root.gameObject.AddComponent<Image>();
+            hitArea.color = Color.clear;
             var button = root.gameObject.AddComponent<Button>();
-            button.targetGraphic = background;
+            button.transition = Selectable.Transition.None;
             button.onClick.AddListener(() => onTap?.Invoke(index));
             var group = root.gameObject.AddComponent<CanvasGroup>();
 
+            var body = NewRect("Body", root);
+            body.anchorMin = Vector2.zero;
+            body.anchorMax = Vector2.one;
+            body.offsetMin = body.offsetMax = Vector2.zero;
+            var background = body.gameObject.AddComponent<Image>();
+            background.color = buttonColor;
+            background.raycastTarget = false;
+
             // Inner layout from button-display/main.frame (top-left of a 200x140 button).
             var sprite = SpriteOf(picture);
-            var pic = NewImage("Picture", root, 10, 10, 70, 70, sprite, sprite ? Color.white : FallbackColor(picture.Kind));
+            var pic = NewImage("Picture", body, 10, 10, 70, 70, sprite, sprite ? Color.white : FallbackColor(picture.Kind));
             if (!sprite) NewText("Caption", pic.rectTransform, 0, 0, 70, 70, picture.Caption, 16, TextAnchor.MiddleCenter);
 
-            var level = NewText("Level", root, 90, 10, 100, 70, "", 30, TextAnchor.MiddleLeft);
-            NewImage("Coin", root, 10, 90, 40, 40, coinIcon, coinIcon ? Color.white : new Color(1f, 0.8f, 0.2f));
-            var price = NewText("Price", root, 60, 90, 130, 40, "", 30, TextAnchor.MiddleLeft);
+            GameObject downMark = null;
+            if (picture.Kind == ButtonPictureKind.Hero)
+            {
+                // Over the portrait only, so level and price stay readable while the hero is down.
+                var shade = NewImage("Down", body, 10, 10, 70, 70, null, downTint);
+                shade.preserveAspect = false;
+                NewText("DownLabel", shade.rectTransform, 0, 0, 70, 70, downLabel, 20, TextAnchor.MiddleCenter);
+                downMark = shade.gameObject;
+                downMark.SetActive(false);
+            }
 
-            return new ButtonParts { Root = root, Group = group, Level = level, Price = price };
+            var level = NewText("Level", body, 90, 10, 100, 70, "", 30, TextAnchor.MiddleLeft);
+            NewImage("Coin", body, 10, 90, 40, 40, coinIcon, coinIcon ? Color.white : new Color(1f, 0.8f, 0.2f));
+            var price = NewText("Price", body, 60, 90, 130, 40, "", 30, TextAnchor.MiddleLeft);
+
+            return new ButtonParts
+            {
+                Root = root, Body = body, Group = group, Level = level, Price = price, DownMark = downMark,
+            };
         }
 
         private Sprite SpriteOf(ButtonPicture picture)

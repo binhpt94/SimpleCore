@@ -167,15 +167,15 @@
    "at": "2026-11-25 12:03:22"
   },
   "edge-nguoi-choi-roi-game-luc-dang-chuyen": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play từ Loading.unity, trong lúc màn Loading đang chạy thanh thì bỏ focus cửa sổ Game rồi quay lại: lần chuyển đi tiếp từ chỗ dở, không tải lại từ đầu",
    "hash": "473faf128b76",
    "text": "**Người chơi rời game lúc đang chuyển**: quay lại thì chuyển tiếp từ bước đang dở.",
    "title": "Người chơi rời game lúc đang chuyển",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:26"
+   "by": "@CodeLead",
+   "at": "2026-11-25 20:39:21"
   }
  },
  "log": [
@@ -378,6 +378,13 @@
   {
    "at": "2026-11-25 12:06:09",
    "id": "edge-xin-chuyen-trong-luc-dang-huy-hoac-dang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:39:21",
+   "id": "edge-nguoi-choi-roi-game-luc-dang-chuyen",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

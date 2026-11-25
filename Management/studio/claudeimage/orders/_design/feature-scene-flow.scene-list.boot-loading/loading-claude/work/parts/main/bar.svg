@@ -1,10 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 48" width="1000" height="48">
-  <!-- bong cung lech xuong 6 px -->
-  <rect x="3" y="9" width="994" height="36" rx="14" fill="#000000"/>
-  <!-- vo thanh tai: phan trong mau toi -->
-  <rect x="3" y="3" width="994" height="36" rx="14" fill="#3D405B"/>
-  <!-- phan day 40%: vang dac -->
-  <rect x="6" y="6" width="395" height="30" rx="11" fill="#FFB703"/>
-  <!-- vien den 6 px -->
-  <rect x="3" y="3" width="994" height="36" rx="14" fill="none" stroke="#000000" stroke-width="6"/>
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/>
+      <stop offset="0.45" stop-color="#FFC61F"/>
+      <stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="track" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4A1070"/>
+      <stop offset="1" stop-color="#6E1E99"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9BEA5C"/>
+      <stop offset="0.5" stop-color="#4CC21E"/>
+      <stop offset="1" stop-color="#2E9414"/>
+    </linearGradient>
+  </defs>
+  <!-- bong do lech xuong 5 px -->
+  <rect x="2" y="8" width="996" height="38" rx="13" fill="#4A1070" fill-opacity="0.5"/>
+  <!-- vo khung vang bong keo, vien vang dam 4 px -->
+  <rect x="2" y="3" width="996" height="38" rx="13" fill="url(#gold)" stroke="#C26A00" stroke-width="4"/>
+  <!-- vet bong sang mep tren cua vo -->
+  <rect x="16" y="5.5" width="968" height="3" rx="1.5" fill="#FFFFFF" fill-opacity="0.7"/>
+  <!-- ranh trong: tim dam, phan trong -->
+  <rect x="10" y="10" width="980" height="24" rx="6" fill="url(#track)"/>
+  <!-- phan day 40%: xanh la bong keo, vien xanh la dam 4 px -->
+  <rect x="12" y="12" width="388" height="20" rx="5" fill="url(#green)" stroke="#1D6B0C" stroke-width="4"/>
+  <!-- vet bong sang mep tren cua phan day -->
+  <rect x="18" y="15" width="374" height="5" rx="2.5" fill="#FFFFFF" fill-opacity="0.55"/>
 </svg>

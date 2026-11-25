@@ -46,6 +46,20 @@ Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc đi�
 - **Màn ngang (`screen: landscape`, 1920x1080).** Game nhìn ngang, thành ở giữa, quái tới từ mép trái và mép phải: dải chiến trường cần chiều ngang; người chơi cầm điện thoại ngang. Đã loại: màn dọc (dải đất hai bên thành quá hẹp, quái ra gần thành).
 - **Hai style hình ảnh (2026-11-23).** `ui-flat` cho giao diện (HUD, popup, nút, icon): phẳng, màu đặc, viền dày, đọc rõ trên điện thoại. `world-cartoon` cho thế giới trận (hero, quái, thành, nền, hiệu ứng): hoạt hình 2D nhìn ngang, viền tối, đổ bóng 2 bậc; mỗi nhân vật một hình đứng yên, chuyển động do game tạo bằng scale, move, rotate, đổi màu, hợp mức IDEA với sprite gen bằng AI. Tách hai style vì giao diện cần phẳng và tương phản cao, còn thế giới cần khối và phân biệt phe. Đã loại: một style chung cho tất cả (UI dễ chìm vào chiến trường); pixel art (khó gen đều tay bằng AI); 3D low poly (đã chọn game 2D). Chưa có ảnh tham chiếu; người bỏ ảnh `<id>-<tên>` vào `.art-style/` khi có.
 
+- **Đổi style sang Colorful (2026-11-25, người yêu cầu qua @Manager, ảnh `Management/references/20261125-225339-lose.png`: "Tôi dùng phong cách này · Colorfull").** Viết lại cả hai style theo ảnh: màu bão hoà và tươi, viền vàng dày, ruy băng tím, chữ to tròn có viền và bóng, nút viên thuốc bóng như kẹo, icon emoji, trang trí sao, nơ, lá. Thay cho bản cũ "phẳng, màu đặc, không gradient, không glow". `world-cartoon` theo cùng tông (chibi, màu tươi, bóng mềm) để trận và UI là một game. Tự quyết:
+  - **Giữ id `ui-flat`** dù tên không còn đúng nghĩa: hơn 50 order ở studio (feature, @UIDesigner, @Codex) khai `style: ui-flat`; đổi id làm hỏng các order đó. Tiêu đề file đã đổi thành "Giao diện Colorful kiểu casual mobile". Đã loại: id mới `ui-colorful` (phải sửa order của phiên khác).
+  - **Gán màu theo vai trò nút** (xanh lá chính, xanh dương về, hồng quảng cáo) theo đúng ảnh, để mọi màn đọc giống nhau.
+  - Ảnh tham chiếu nằm ở tab Tham chiếu; chưa chép vào `.art-style/` (người bỏ ảnh `ui-flat-<tên>` vào đó nếu muốn làm ảnh chính thức).
+  - Hệ quả: hash gốc đổi; các node vòng 2 cập nhật `based-on`, không đổi ý nào. Ảnh concept cũ thành "CŨ" theo style mới.
+
+- **Đưa góp ý GPT lần hỏi `style-colorful` (2026-11-25, `advice/_root/style-colorful.md`, 13 góp ý "thêm").** Mỗi góp ý thành một ý `art-*` ở node gốc (không con số, theo luật vòng 1); quy tắc cụ thể và con số (mã màu, tương phản 4,5:1 cho chữ HUD và 3:1 cho viền đơn vị, độ đục hiệu ứng tối đa 50%) ghi trong hai file `.art-style/`. Tự quyết:
+  - **Bảng màu chung** đặt trong `ui-flat.md`, `world-cartoon.md` trỏ tới đó. Mã màu dự kiến, đo bằng mắt từ ảnh tham chiếu; người sửa được thẳng trong bảng.
+  - **Nguồn sáng thống nhất "từ trên"** cho cả hai style (`art-light-from-top`); bỏ "trên bên trái" của `world-cartoon`. Đã loại: giữ lệch trái cho thế giới (hai công cụ lên khối khác nhau khi ghép).
+  - **Ngôn ngữ chữ trong game là tiếng Việt** (`art-ui-text-font`): mọi node vòng 4 có giao diện đã chốt chữ tiếng Việt ("Chơi lại", "Tạm dừng"); ảnh tham chiếu dùng tiếng Anh chỉ là ví dụ phong cách.
+  - **Khung trận mẫu** (`art-battle-reference`, AI 6): chưa có. Dựng từ concept nền chiến trường và HUD sau khi người duyệt style mới; trước đó đối chiếu với frame đã chốt.
+  - Điểm thấp hơn: `art-castle-edge-solid` (AI 5, chi tiết mức vẽ thành, gần vòng 4), `art-faction-silhouette`, `art-unit-outline-contrast`, `art-effect-overlay-limit` (AI 6, đúng nhưng là quy tắc kiểm asset hơn là quyết định định hình game).
+  - Hash gốc đổi lần nữa; 24 node vòng 2 ghim lại `based-on`, không đổi ý.
+
 - **Rà lại vòng 1 với GPT (2026-11-24), không đổi `data.md`.** Chín góp ý ở `advice/_root/root-gaps.md` và lượt phản biện `root-gaps-r2.md` đều không đổi quyết định nào ở gốc; chỉ thêm diễn giải ở đây. Giữ hash gốc để cả cây không phải làm lại.
 
 - **Làm lại vòng 1 cùng GPT (2026-11-24, lần hỏi `advice/_root/root-r1.md`).** Ba góp ý loại "thêm", đều thành ý của node (luật mới: không bỏ góp ý nào):
@@ -73,7 +87,7 @@ Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc đi�
 
 ## Chưa rõ
 - Tên chính thức: chưa có, không chặn việc thiết kế.
-- Ảnh tham chiếu cho hai style: chờ người bỏ vào.
+- Ảnh tham chiếu chính thức trong `.art-style/`: chưa có; hướng style lấy từ ảnh popup thua ở tab Tham chiếu.
 - **Đổi nhịp và đổi cánh** (từ góp ý `ap-luc-doi-canh`): `feature-wave/spawning` đang chia quái gần đều hai bên mỗi đợt. Có nên thỉnh thoảng dồn sức ép sang một cánh để người chơi phải đổi ưu tiên không: câu hỏi mở cho nhánh `feature-wave`, không đổi gốc.
 - **Chi tiền có đánh đổi** (góp ý `chi-tien-co-danh-doi`): kiểm ở `feature-balance` và `feature-upgrade` rằng không món nào luôn đáng mua trước; thứ tự mua phải đổi theo thế trận.
 - **Hồi chiêu và thời điểm** (góp ý `hoi-chieu-va-thoi-diem`): kiểm ở `feature-castle` và `feature-wave` rằng có lúc nên giữ kĩ năng cho đợt dồn sắp tới, không phải lúc nào cũng bấm ngay khi hồi xong.

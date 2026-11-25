@@ -112,10 +112,13 @@
   },
   "edge-du-lieu-luu-la-so-am-hoac-khong": {
    "state": "verified",
-   "note": "Ca số âm đạt. Ca không phải số chỉ giả bằng kho giả ném lỗi, kho thật không ném. Thêm test kho thật khi khoá kỉ lục lưu kiểu chuỗi thì kỉ lục là 0, và ca sau dữ liệu hỏng một lượt có điểm lớn hơn 0 thì kỉ lục mới được ghi đè xuống máy",
+   "note": "Sua PlayerPrefsBestScoreStore.Load nhan ra gia tri khong phai so nguyen that",
    "tests": [
     "RunBestScoreStoreTests.NegativeSavedBestCountsAsZero",
     "RunBestScoreStoreTests.SavedBestThatIsNotANumberCountsAsZero",
+    "RunBestScoreStoreTests.SavedBestThatIsANegativeNumberWrittenAsTextCountsAsZero",
+    "RunBestScoreStoreTests.SavedBestThatStartsWithDigitsButIsNotANumberCountsAsZero",
+    "RunBestScoreStoreTests.NewBestIsWrittenToTheDeviceAndReadBackNextTime",
     "RunFlowTests.BrokenSavedBestCountsAsZero"
    ],
    "play": "",
@@ -123,7 +126,7 @@
    "text": "**Dữ liệu lưu là số âm hoặc không phải số:** coi kỉ lục là 0, ghi đè ở lần phá kỉ lục kế tiếp.",
    "title": "Dữ liệu lưu là số âm hoặc không phải số",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:06:48"
+   "at": "2026-11-25 21:40:04"
   },
   "edge-ghi-xuong-may-that-bai": {
    "state": "verified",
@@ -206,6 +209,22 @@
    "title": "Đợt dọn sạch cùng khung hình thành bị phá lần đầu",
    "by": "@CodeLead",
    "at": "2026-11-25 18:32:07"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "RunBestScoreStoreTests.NewBestIsWrittenToTheDeviceAndReadBackNextTime",
+    "RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup",
+    "RunFlowTests.EachClearedWaveAddsOnePoint",
+    "RunFlowTests.ScoreBestAndNewBestCanBeReadAtAnyTime"
+   ],
+   "play": "",
+   "hash": "0af01b4e87ea",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Kỉ lục lưu khi tắt game: Có",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:03:28"
   }
  },
  "log": [
@@ -443,6 +462,48 @@
   {
    "at": "2026-11-25 18:32:07",
    "id": "edge-dot-don-sach-cung-khung-hinh-thanh-bi",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:45:33",
+   "id": "edge-du-lieu-luu-la-so-am-hoac-khong",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test RunBestScoreStoreTests.SavedBestThatIsNotANumberCountsAsZero hỏng trên Editor Windows: khoá Run/Best lưu chuỗi abc thì PlayerPrefs.GetInt trả 6513249, là byte của chuỗi, không phải 0 · PlayerPrefsBestScoreStore.Load chỉ gọi GetInt nên kỉ lục hỏng thành số lớn · sửa Load để nhận ra giá trị không phải số nguyên thật, ví dụ đọc GetString trước hoặc lưu kèm khoá kiểu, rồi coi là 0 · chạy lại cả RunBestScoreStoreTests"
+  },
+  {
+   "at": "2026-11-25 21:37:11",
+   "id": "edge-du-lieu-luu-la-so-am-hoac-khong",
+   "state": "doing",
+   "by": "Run",
+   "note": "Sua PlayerPrefsBestScoreStore.Load nhan ra gia tri khong phai so nguyen that"
+  },
+  {
+   "at": "2026-11-25 21:38:26",
+   "id": "edge-du-lieu-luu-la-so-am-hoac-khong",
+   "state": "done",
+   "by": "Run",
+   "note": "RunBestScoreStoreTests.NegativeSavedBestCountsAsZero, RunBestScoreStoreTests.SavedBestThatIsNotANumberCountsAsZero, RunBestScoreStoreTests.SavedBestThatIsANegativeNumberWrittenAsTextCountsAsZero, RunBestScoreStoreTests.SavedBestThatStartsWithDigitsButIsNotANumberCountsAsZero, RunBestScoreStoreTests.NewBestIsWrittenToTheDeviceAndReadBackNextTime, RunFlowTests.BrokenSavedBestCountsAsZero"
+  },
+  {
+   "at": "2026-11-25 21:40:04",
+   "id": "edge-du-lieu-luu-la-so-am-hoac-khong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:57:21",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Run",
+   "note": "RunBestScoreStoreTests.NewBestIsWrittenToTheDeviceAndReadBackNextTime, RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup, RunFlowTests.EachClearedWaveAddsOnePoint, RunFlowTests.ScoreBestAndNewBestCanBeReadAtAnyTime"
+  },
+  {
+   "at": "2026-11-26 01:03:28",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

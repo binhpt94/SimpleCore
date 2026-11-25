@@ -5,3 +5,4 @@
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "cdb98c5c2b2c"}
 {"at": "2026-11-24 22:43:49", "event": "data", "hash": "72f1cb81f16b", "previous": "cdb98c5c2b2c", "added": ["hien-doi-tuong-nang-cap", "hien-gia-nang-cap"], "removed": [], "rewritten": [{"id": "upgrade-bar-state", "old": "Mỗi nút cho thấy mua được hay chưa và đang nâng tới đâu", "new": "Mỗi nút cho thấy mua được hay chưa, và cấp mà mục đó đã đạt trong lượt\nHiện cấp đã đạt, không phải cấp sắp mua, để người chơi thấy mình đã đầu tư vào thành và từng hero tới đâu."}]}
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "72f1cb81f16b"}
+{"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "72f1cb81f16b"}

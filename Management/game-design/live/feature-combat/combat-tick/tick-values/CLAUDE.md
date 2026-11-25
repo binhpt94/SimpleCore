@@ -3,24 +3,15 @@
 Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Làm gì
-- Mỗi bước cố định 0.02 giây của trận: chạy một nhịp theo thứ tự ở `tick-order`.
+- Mỗi bước nhịp chung của trận (0.025 giây, theo `feature-sim-clock`): chạy một nhịp theo thứ tự ở `tick-order`.
 - Nhận đòn trúng từ hero, quái, thành (đòn tự bắn, Sấm sét), lọc theo trạng thái đầu nhịp, cộng theo bên trúng.
 - Chuyển tổng cho feature sở hữu; chờ mọi bên trừ máu và báo xong; báo nhịp xong cho `feature-wave` và `feature-run`.
 
 ## Thông số
-| Thông số | Giá trị | Đơn vị | Lí do |
-|---|---|---|---|
-| Bước cập nhật | 0.02 (50 bước/giây) | giây | Nhịp đòn nhanh nhất là 0.7 giây (Kiếm khách, `feature-hero/hero-list/hero-roster-values`); 0.02 giây đủ mịn |
-| Số bước tối đa trong một khung hình | 5 | bước | Khung hình chậm (0.1 giây) vẫn theo kịp; chậm hơn thì trận chạy chậm lại, không nhảy cóc |
-| Làm tròn sát thương | không | | Hệ số đợt cho số lẻ |
-| Đòn Sấm sét | một đòn mỗi quái trong vùng | đòn | `feature-castle/castle-skills/skill-values` |
-| Tiền khi hạ quái | một lần mỗi quái | lần | Dù nhiều bên cùng hạ |
+Bảng `TickParams` trong `.excel/` (loại `params`, chuyển từ bảng markdown cũ ngày 2026-11-25, giữ nguyên số trừ bước cập nhật): `combat_enabled`, `step_seconds`, `max_steps_per_frame`, `damage_rounding`, `lightning_hits`, `kill_reward_times`. Bước và trần lấy từ nhịp chung của `feature-sim-clock`; Sấm sét theo `feature-castle/castle-skills/skill-values`; nhịp đòn nhanh nhất theo `feature-hero/hero-list/hero-roster-values`.
 
 ## Thông số theo giai đoạn
-| Thông số | IDEA | PROTOTYPE | FULL |
-|---|---|---|---|
-| Giao chiến | Không có: mỗi bên trừ máu ngay khi trúng | Có, bước 0.02 giây | Như PROTOTYPE |
-| Bước cập nhật cố định | Không bắt buộc | 0.02 giây | Như PROTOTYPE |
+Ba cột `idea`, `prototype`, `full` của bảng `TickParams`. IDEA không có giao chiến (mỗi bên trừ máu ngay khi trúng); từ PROTOTYPE mỗi bước nhịp chung chạy một nhịp giao chiến.
 
 ## Trường hợp biên
 - **Hero và quái kết liễu nhau cùng nhịp:** cả hai hết máu; hero gục, quái bị hạ, quái vẫn cho tiền.
@@ -29,8 +20,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Cổ vũ hồi máu cùng nhịp hero nhận đòn:** Cổ vũ không qua giao chiến; hồi máu áp ở bước "đi và nhắm" trước khi trừ máu.
 
 ## Đã tự quyết
-- **Bước cố định 0.02 giây.** Kết quả lặp lại được, cần cho "hai bên cùng ra đòn thì cùng trúng". Đã loại: theo khung hình (khác nhau giữa máy).
-- **Tối đa 5 bước mỗi khung.** Tránh máy yếu rơi vào vòng chậm dần.
+- **Bước theo nhịp chung 0.025 giây (sửa 2026-11-25, người yêu cầu nhịp chung 40 lần mỗi giây).** Thay cho bước riêng 0.02 giây (50 bước mỗi giây) và trần 5 bước mỗi khung của giao chiến; nay bước, trần và cách chạy do `feature-sim-clock` giữ cho mọi logic gameplay. Giữ `id` `fixed-step`. Code của Combat bỏ đồng hồ bước riêng sau khi node chốt (@CodeLead).
 - **Cổ vũ áp trước khi trừ máu.** Người chơi bấm cứu đúng lúc thì hero được cứu.
 
 ## Chưa rõ

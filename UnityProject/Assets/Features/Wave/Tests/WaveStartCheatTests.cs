@@ -1,11 +1,13 @@
+using System;
 using System.Collections.Generic;
 using Game.Core;
 using Game.Enemy;
 using Game.Run;
+using Game.SimClock;
 using Game.Wallet;
 using NUnit.Framework;
 using UnityEditor;
-using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Game.Wave.Tests
 {
@@ -16,7 +18,8 @@ namespace Game.Wave.Tests
         private List<string> _log;
         private FakeRun _run;
         private FakeEnemies _enemies;
-        private FakeClock _clock;
+        private FakeSimClock _clock;
+        private IDisposable _steps;
         private WaveDirector _director;
         private WaveStartCheat _cheat;
 
@@ -26,12 +29,13 @@ namespace Game.Wave.Tests
             _log = new List<string>();
             _run = new FakeRun(_log);
             _enemies = new FakeEnemies();
-            _clock = new FakeClock();
+            _clock = new FakeSimClock { Paused = () => _run.IsPaused };
             _director = new WaveDirector(new WaveRules(), _run, _enemies, new FakeIncome(_log), new FirstRandom());
             _director.Attach();
+            _steps = _clock.OnStep(WaveParticipant.Owner, _director.Step);
             _director.WaveStarted += w => _log.Add("started " + w);
             _director.CurrentWaveChanged += w => _log.Add("current " + w);
-            _cheat = new WaveStartCheat(_director, _run, _clock, 5);
+            _cheat = new WaveStartCheat(_director, _run, 5);
             _cheat.Run();
         }
 
@@ -39,6 +43,7 @@ namespace Game.Wave.Tests
         public void TearDown()
         {
             _cheat.DisposeAsync().GetAwaiter().GetResult();
+            _steps.Dispose();
             _director.Detach();
         }
 
@@ -47,14 +52,14 @@ namespace Game.Wave.Tests
         {
             _run.StartBattle();
 
-            Assert.That(_director.CurrentWave, Is.EqualTo(1), "nothing happens in the frame the battle starts");
+            Assert.That(_director.CurrentWave, Is.EqualTo(1), "nothing happens before the first step of the battle");
             Assert.That(_run.IsPaused, Is.False);
 
             _log.Clear();
-            _clock.Frame();
+            _clock.Steps(1);
 
-            Assert.That(_log, Is.EqualTo(new[] { "current 5", "started 5", "pause" }),
-                "wave 5 starts through the normal path, then the run is paused");
+            Assert.That(_log, Is.EqualTo(new[] { "started 1", "current 5", "started 5", "pause" }),
+                "wave 1 begins on the first step, then wave 5 starts through the normal path and the run is paused");
             Assert.That(_director.CurrentWave, Is.EqualTo(5));
             Assert.That(_run.IsPaused, Is.True);
             Assert.That(_enemies.Spawned[_enemies.Spawned.Count - 1].StatScale, Is.EqualTo(1.4f).Within(1e-5),
@@ -65,10 +70,10 @@ namespace Game.Wave.Tests
         public void WhilePaused_TheBattleBehindStandsStill()
         {
             _run.StartBattle();
-            _clock.Frame();
+            _clock.Steps(1);
             var spawned = _enemies.Spawned.Count;
 
-            _director.Tick(10f);
+            _clock.Seconds(10);
 
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(spawned));
             Assert.That(_director.CurrentWave, Is.EqualTo(5));
@@ -77,8 +82,7 @@ namespace Game.Wave.Tests
         [Test]
         public void FramesBeforeTheBattle_DoNothing()
         {
-            _clock.Frame();
-            _clock.Frame();
+            _clock.Steps(2);
 
             Assert.That(_log, Is.Empty);
             Assert.That(_run.IsPaused, Is.False);
@@ -88,15 +92,14 @@ namespace Game.Wave.Tests
         public void Cheat_FiresOnce_TheNextBattleStartsAtWaveOneUnpaused()
         {
             _run.StartBattle();
-            _clock.Frame();
+            _clock.Steps(1);
             _run.IsPaused = false;
 
             _run.StartBattle();
-            _clock.Frame();
+            _clock.Steps(1);
 
             Assert.That(_director.CurrentWave, Is.EqualTo(1));
             Assert.That(_run.IsPaused, Is.False);
-            Assert.That(_clock.Running, Is.EqualTo(0), "the cheat stops its frame loop after firing");
         }
 
         [Test]
@@ -142,6 +145,8 @@ namespace Game.Wave.Tests
             registry.Register<IRunFlow>(new FakeRun(log));
             registry.Register<IEnemyField>(new FakeEnemies());
             registry.Register<IWalletIncome>(new FakeIncome(log));
+            registry.Register<ISimClock>(new FakeSimClock());
+            registry.Register<ISimRandom>(new FakeSimRandom(12345));
             return registry;
         }
     }

@@ -25,7 +25,7 @@
     "frame": "main",
     "part": "coin",
     "ref": "_design/feature-hud.hud-status.status-spec/hud-status-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   }

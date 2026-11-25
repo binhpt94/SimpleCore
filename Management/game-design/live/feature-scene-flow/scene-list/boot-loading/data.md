@@ -1,6 +1,6 @@
 ---
 based-on: 78ed2dcc0859
-refs: feature-scene-flow/scene-request@646c23aa767e, feature-session-scene/session-steps@70f3b17acc2e, feature-session-scene/session-steps/participant-order@10e1bf396998, feature-run/run-flow/flow-rules@c2c5ba06ffa8
+refs: feature-scene-flow/scene-request@646c23aa767e, feature-session-scene/session-steps@70f3b17acc2e, feature-session-scene/session-steps/participant-order@bdb6d08f1274, feature-run/run-flow/flow-rules@f011f018b6c5
 ---
 # Màn Loading lúc mở game
 

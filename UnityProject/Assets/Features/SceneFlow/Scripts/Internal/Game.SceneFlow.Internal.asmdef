@@ -4,6 +4,7 @@
   "references": [
     "Game.Core",
     "Game.Services.SessionScene.Contracts",
+    "Game.SceneFlow.Contracts",
     "UniTask"
   ],
   "includePlatforms": [],

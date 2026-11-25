@@ -1,6 +1,5 @@
 using System.Linq;
 using NUnit.Framework;
-using Game.Run;
 using static Game.TeamSelect.Tests.Fakes;
 
 namespace Game.TeamSelect.Tests
@@ -23,7 +22,11 @@ namespace Game.TeamSelect.Tests
             var s = new TestScreen().Open();
             s.Presenter.TapSlot(0);
             s.Presenter.TapCard(Mage);
+            s.BuildSucceeds = false;
             s.Presenter.TapStart();
+            CollectionAssert.AreEqual(new[] { Mage, Axeman, Archer }, s.Entered[0], "team reported in slot order");
+            Assert.IsFalse(s.Memory.HasTeam, "not remembered until the flow says the battle was built");
+            s.Presenter.RememberTeam(s.Entered[0]);
             CollectionAssert.AreEqual(new[] { Mage, Axeman, Archer }, s.Memory.Team);
         }
 
@@ -36,8 +39,7 @@ namespace Game.TeamSelect.Tests
             s.Presenter.TapCard(Swordsman);
             s.Presenter.TapCard(Knight);
             s.Presenter.TapStart();
-            s.Run.Lose();
-            s.Run.Replay();
+            s.Open(); // lost, then Play again: the flow shows the screen again
             CollectionAssert.AreEqual(new[] { Mage, Swordsman, Knight }, s.SlotCodes());
         }
 
@@ -60,8 +62,7 @@ namespace Game.TeamSelect.Tests
             s.Presenter.TapSlot(2);
             s.Presenter.TapCard(Swordsman);
             s.Presenter.TapStart();
-            s.Run.Abandon();
-            s.Run.Play();
+            s.Open(); // abandoned from the pause popup, home screen, then Play
             CollectionAssert.AreEqual(new[] { Knight, Axeman, Swordsman }, s.SlotCodes());
         }
 
@@ -70,8 +71,7 @@ namespace Game.TeamSelect.Tests
         {
             var s = new TestScreen().Open();
             s.Presenter.TapStart();
-            s.Run.Lose();
-            s.Run.Replay();
+            s.Open();
             s.Presenter.TapSlot(0);
             s.Presenter.TapCard(Mage);
             CollectionAssert.AreEqual(DefaultTeam, s.Memory.Team, "not remembered while still choosing");
@@ -119,8 +119,7 @@ namespace Game.TeamSelect.Tests
         [Test]
         public void CheatFullTeamOpensScreenWithKnightAxemanArcherAndLitButton()
         {
-            var s = new TestScreen();
-            s.Run.SetStep(RunStep.TeamSelect);
+            var s = new TestScreen().Open();
             s.Presenter.TapSlot(0);
             TeamSelectCheat.ApplyFullTeam(s.Presenter, s.Memory, DefaultTeam);
             CollectionAssert.AreEqual(DefaultTeam, s.SlotCodes());

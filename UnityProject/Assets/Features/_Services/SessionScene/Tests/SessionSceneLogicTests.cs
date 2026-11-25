@@ -929,6 +929,111 @@ namespace Game.Services.SessionScene.Tests
             Assert.That(errors[0].Message, Does.Contain("0 view(s)").And.Contain("1 running job(s)"));
         }
 
+        // clean-checks#running-views-nonzero: right after the run step, a participant that creates its views in
+        // that step but holds none is reported by feature name; the session keeps running.
+        [Test]
+        public void AParticipantThatCreatesItsViewsOnRun_ButHoldsNone_IsReportedByNameRightAfterTheRunStep()
+        {
+            session = NewSession(new ParticipantUsageCounter());
+            session.Join(new TrackingParticipant { OpensViews = true });
+
+            session.BeginAsync().Forget();
+
+            Assert.That(session.State, Is.EqualTo(SessionState.Running));
+            Assert.That(errors, Has.Count.EqualTo(1));
+            Assert.That(errors[0].Message, Does.Contain("SessionScene").And.Contain("TrackingParticipant")
+                .And.Contain("0 view(s)").And.Contain("run step"));
+        }
+
+        [Test]
+        public void AParticipantThatCreatesItsViewsOnRun_AndHoldsOne_IsNotReported()
+        {
+            session = NewSession(new ParticipantUsageCounter());
+            session.Join(new TrackingParticipant { OpensViews = true, View = NewView(), ReleaseOnDispose = true });
+
+            session.BeginAsync().Forget();
+            session.EndAsync().Forget();
+
+            Assert.That(errors, Is.Empty);
+        }
+
+        // clean-checks#running-views-nonzero: the check reads everyone once, only after every participant ran.
+        [Test]
+        public void RunViews_AreCountedOnlyAfterEveryoneRan_InJoinOrder()
+        {
+            CountWith();
+            Join("a");
+            Join("b");
+
+            session.BeginAsync().Forget();
+
+            Assert.That(log, Is.EqualTo(new[] { "load a", "load b", "run a", "run b", "count a", "count b" }));
+        }
+
+        // clean-checks#running-views-nonzero: when a participant fails to run, the session fails and the
+        // missing-view check is not made (the views of later participants were never created).
+        [Test]
+        public void WhenAParticipantFailsToRun_RunViewsAreNotChecked()
+        {
+            session = NewSession(new ParticipantUsageCounter());
+            session.Join(new FakeParticipant("broken", log) { RunError = new InvalidOperationException("prefab missing") });
+            session.Join(new TrackingParticipant { OpensViews = true });
+
+            session.BeginAsync().Forget();
+
+            Assert.That(session.State, Is.EqualTo(SessionState.Failed));
+            Assert.That(errors, Has.Count.EqualTo(1));
+            Assert.That(errors[0].Message, Does.Contain("failed to run"));
+        }
+
+        // clean-checks#params: the check is a dev-build check; without the counter (release builds) it is not made.
+        [Test]
+        public void WithoutTheCounter_AsInAReleaseBuild_RunViewsAreNotChecked()
+        {
+            session = NewSession();
+            session.Join(new TrackingParticipant { OpensViews = true });
+
+            session.BeginAsync().Forget();
+
+            Assert.That(errors, Is.Empty);
+        }
+
+        // clean-checks#edge-feature-chi-co-view-ve-sau: a participant whose views come later (enemies when a wave
+        // sends them, a popup when it opens) holds none right after the run step and is not reported then; the view
+        // it opens later is still counted and checked after the dispose step.
+        [Test]
+        public void AParticipantWhoseViewsComeLater_IsNotCheckedAfterTheRunStep_ButItsLaterViewIsCheckedAfterDispose()
+        {
+            session = NewSession(new ParticipantUsageCounter());
+            var later = new TrackingParticipant();
+            session.Join(later);
+
+            session.BeginAsync().Forget();
+            Assert.That(errors, Is.Empty, "a participant with views only later is not checked right after the run step");
+
+            later.HoldView(NewView());
+            session.EndAsync().Forget();
+
+            Assert.That(errors, Has.Count.EqualTo(1));
+            Assert.That(errors[0].Message, Does.Contain("1 view(s)").And.Contain("after the dispose step"));
+        }
+
+        // clean-checks#edge-feature-khong-co-view: participants with no view at all (a wallet, a rules-only
+        // service, scene-flow in the Game scene) are not part of the views-above-zero check.
+        [Test]
+        public void ParticipantsWithNoView_AreNotPartOfTheRunViewsCheck()
+        {
+            session = NewSession(new ParticipantUsageCounter());
+            session.Join(new TrackingParticipant());
+            session.Join(new FakeParticipant("rules-only", log));
+
+            session.BeginAsync().Forget();
+            session.EndAsync().Forget();
+
+            Assert.That(session.State, Is.EqualTo(SessionState.Disposed));
+            Assert.That(errors, Is.Empty);
+        }
+
         private readonly List<UnityEngine.Object> views = new List<UnityEngine.Object>();
 
         private UnityEngine.GameObject NewView()
@@ -958,6 +1063,9 @@ namespace Game.Services.SessionScene.Tests
             public UnityEngine.Object Cover;
             public bool ReleaseOnDispose;
             public bool KeepsAJob;
+            public bool OpensViews;
+
+            protected override bool OpensViewsOnRun => OpensViews;
 
             public void HoldView(UnityEngine.Object view) => held.Add(TrackView(view));
 

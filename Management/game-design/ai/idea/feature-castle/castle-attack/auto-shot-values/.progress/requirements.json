@@ -86,27 +86,27 @@
   },
   "params": {
    "state": "verified",
-   "note": "",
+   "note": "Rà số đòn tự bắn theo bảng ShotParams, test từng dòng",
    "tests": [
     "CastleConfigTests.Auto_shot_numbers_match_the_design"
    ],
    "play": "",
-   "hash": "089612c2e64c",
-   "text": "## Làm gì\n- Mỗi khung hình: nếu thành còn đứng, không tạm dừng, đã đủ thời gian chờ và có quái trong tầm thì bắn.\n- Chọn mục tiêu: quái còn sống, trên màn (tâm |x| ≤ 16u), khoảng cách tới mép thành gần nhất ≤ 6u; nhỏ nhất thì chọn.\n- Trừ máu mục tiêu ngay lúc bắn bằng sức đánh hiện tại của thành (lv1 là 10, cộng nâng cấp ở `feature-castle/castle-upgrade-effects`).\n- Hiện hình viên đạn bay từ mép thành phía mục tiêu tới mục tiêu trong 0.15s; hình biến mất khi tới nơi hoặc khi mục tiêu đã biến mất.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Sát thương lv1 | 10 | máu/phát | Bộ số chung; Lính đợt 1 cần 4 phát |\n| Giây mỗi phát | 1.0 | s | Bộ số chung; đủ chậm để không thay hero |\n| Tầm | 6 | u, tính từ mép thành | Phủ x 1.5→7.5u mỗi bên; ngắn hơn khoảng đất 14.5u mỗi bên |\n| Số mục tiêu mỗi phát | 1 | quái | Luật vòng 3 |\n| Thời gian hình đạn bay | 0.15 | s | Dự kiến; chỉ để nhìn |\n| Phạm vi chọn | tâm quái |x| ≤ 16 | u | Không bắn quái chưa vào màn |\n\nCân bằng dự kiến: 10 sát thương/s ở lv1. Đợt 10, Lính 76 máu cần 8 phát; thành một mình không giữ được nếu hero dồn hết về một bên, đúng ý \"tuyến cuối\".\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Sát thương lv1 | 10 | 10 (chỉnh sau chơi thử) | theo số đã chỉnh |\n| Giây mỗi phát | 1.0 | 1.0 | theo số đã chỉnh |\n| Tầm | 6u | 6u | theo số đã chỉnh |\n| Hình đạn | 1 sprite di chuyển thẳng 0.15s | như IDEA, thêm nháy ở mục tiêu khi trúng | hiệu ứng bắn và trúng riêng, âm thanh |",
+   "hash": "9cc70172d05c",
+   "text": "## Làm gì\n- Mỗi khung hình: nếu thành còn đứng, không tạm dừng, đã đủ thời gian chờ và có quái trong tầm thì bắn.\n- Chọn mục tiêu: quái còn sống, trên màn (tâm |x| ≤ 16u), khoảng cách tới mép thành gần nhất ≤ 6u; nhỏ nhất thì chọn.\n- Trừ máu mục tiêu ngay lúc bắn bằng sức đánh hiện tại của thành (lv1 là 10, cộng nâng cấp ở `feature-castle/castle-upgrade-effects`).\n- Hiện hình viên đạn bay từ mép thành phía mục tiêu tới mục tiêu trong 0.15s; hình biến mất khi tới nơi hoặc khi mục tiêu đã biến mất.\n\n## Thông số\nSố liệu nằm ở bảng `ShotParams` trong `.excel/` (loại `params`: mỗi thông số một dòng, có đơn vị, giá trị từng giai đoạn và lí do). Xem: `python Management/tools/gd_excel.py show ai/idea/feature-castle/castle-attack/auto-shot-values`.\n\nCân bằng dự kiến: 10 sát thương/s ở lv1. Đợt 10, Lính 76 máu cần 8 phát; thành một mình không giữ được nếu hero dồn hết về một bên, đúng ý \"tuyến cuối\".\n\n## Thông số theo giai đoạn\nCác cột `idea`, `prototype`, `full` của bảng `ShotParams`. \"như IDEA\": giai đoạn đó giữ giá trị của IDEA.",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:39"
+   "at": "2026-11-25 23:23:34"
   },
   "edge-phat-ban-lam-quai-ve-0-mau": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Khi Play: thanh ban ha mot Linh, vi tang tien nhu khi hero ha. Phan cua thanh la goi IEnemyField.Damage, tra tien do Enemy",
    "hash": "9f309e012321",
    "text": "Phát bắn làm quái về ≤0 máu: quái bị hạ và cho tiền như mọi quái (`feature-enemy/enemy-reward`).",
    "title": "Phát bắn làm quái về ≤0 máu",
-   "by": "Castle",
-   "at": "2026-11-25 11:39:22"
+   "by": "@CodeLead",
+   "at": "2026-11-25 20:39:22"
   },
   "shot-instant": {
    "state": "verified",
@@ -161,6 +161,102 @@
    "title": "Giữa hai đợt còn quái sót trong tầm",
    "by": "@CodeLead",
    "at": "2026-11-25 12:02:39"
+  },
+  "shotparams-shot-damage-lv1": {
+   "state": "verified",
+   "note": "Test dòng shot_damage_lv1",
+   "tests": [
+    "CastleConfigTests.Shot_damage_lv1_is_ten_health_per_shot",
+    "CastleAutoShotTests.Shot_damage_lv1_takes_ten_health_so_a_forty_health_soldier_falls_after_four_shots"
+   ],
+   "play": "",
+   "hash": "f120fcc52eec",
+   "text": "Bảng ShotParams (params), dòng shot_damage_lv1\nkey (string): shot_damage_lv1\nname (string): Sát thương lv1\nunit (string): máu/phát\nidea (string): 10\nprototype (string): 10 (chỉnh sau chơi thử)\nfull (string): theo số đã chỉnh\nreason (string): Bộ số chung; Lính đợt 1 cần 4 phát",
+   "title": "ShotParams: Sát thương lv1 (shot_damage_lv1)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:34"
+  },
+  "shotparams-shot-interval": {
+   "state": "verified",
+   "note": "Test dòng shot_interval",
+   "tests": [
+    "CastleConfigTests.Shot_interval_is_one_second_per_shot",
+    "CastleAutoShotTests.Shot_interval_of_one_second_is_forty_steps_of_the_shared_clock"
+   ],
+   "play": "",
+   "hash": "8f1a57e70a72",
+   "text": "Bảng ShotParams (params), dòng shot_interval\nkey (string): shot_interval\nname (string): Giây mỗi phát\nunit (string): s\nidea (string): 1.0\nprototype (string): 1.0\nfull (string): theo số đã chỉnh\nreason (string): Bộ số chung; đủ chậm để không thay hero",
+   "title": "ShotParams: Giây mỗi phát (shot_interval)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:34"
+  },
+  "shotparams-shot-range": {
+   "state": "verified",
+   "note": "Test dòng shot_range",
+   "tests": [
+    "CastleConfigTests.Shot_range_is_six_units_from_the_castle_edge",
+    "CastleAutoShotTests.Shot_range_reaches_six_units_beyond_each_castle_edge_and_no_further"
+   ],
+   "play": "",
+   "hash": "99d328107e94",
+   "text": "Bảng ShotParams (params), dòng shot_range\nkey (string): shot_range\nname (string): Tầm\nunit (string): u, tính từ mép thành\nidea (string): 6\nprototype (string): 6\nfull (string): theo số đã chỉnh\nreason (string): Phủ x 1.5→7.5u mỗi bên; ngắn hơn khoảng đất 14.5u mỗi bên",
+   "title": "ShotParams: Tầm (shot_range)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:34"
+  },
+  "shotparams-targets-per-shot": {
+   "state": "verified",
+   "note": "Test dòng targets_per_shot",
+   "tests": [
+    "CastleAutoShotTests.Targets_per_shot_is_one_so_only_the_nearest_of_several_in_range_is_hit"
+   ],
+   "play": "",
+   "hash": "e8c4964ad7a8",
+   "text": "Bảng ShotParams (params), dòng targets_per_shot\nkey (string): targets_per_shot\nname (string): Số mục tiêu mỗi phát\nunit (string): quái\nidea (string): 1\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Luật vòng 3",
+   "title": "ShotParams: Số mục tiêu mỗi phát (targets_per_shot)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:34"
+  },
+  "shotparams-bullet-fly-time": {
+   "state": "verified",
+   "note": "Test dòng bullet_fly_time",
+   "tests": [
+    "CastleConfigTests.Bullet_fly_time_is_fifteen_hundredths_of_a_second",
+    "CastleSessionTests.Bullet_fly_time_of_every_shot_drawing_is_fifteen_hundredths_of_a_second"
+   ],
+   "play": "",
+   "hash": "f5dc06b378aa",
+   "text": "Bảng ShotParams (params), dòng bullet_fly_time\nkey (string): bullet_fly_time\nname (string): Thời gian hình đạn bay\nunit (string): s\nidea (string): 0.15\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Dự kiến; chỉ để nhìn",
+   "title": "ShotParams: Thời gian hình đạn bay (bullet_fly_time)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:34"
+  },
+  "shotparams-target-scope": {
+   "state": "verified",
+   "note": "Test dòng target_scope",
+   "tests": [
+    "CastleConfigTests.Target_scope_is_enemy_centres_within_sixteen_units",
+    "CastleAutoShotTests.Target_scope_skips_an_enemy_whose_centre_is_beyond_sixteen_units"
+   ],
+   "play": "",
+   "hash": "9d1bb3dd683c",
+   "text": "Bảng ShotParams (params), dòng target_scope\nkey (string): target_scope\nname (string): Phạm vi chọn\nunit (string): u\nidea (string): tâm quái |x| ≤ 16\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Không bắn quái chưa vào màn",
+   "title": "ShotParams: Phạm vi chọn (target_scope)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:34"
+  },
+  "shotparams-bullet-visual": {
+   "state": "verified",
+   "note": "Test dòng bullet_visual",
+   "tests": [
+    "CastleSessionTests.Bullet_visual_is_one_drawing_per_shot_flying_straight_from_the_castle_edge_to_the_target"
+   ],
+   "play": "",
+   "hash": "3e5ac353ea85",
+   "text": "Bảng ShotParams (params), dòng bullet_visual\nkey (string): bullet_visual\nname (string): Hình đạn\nunit (string): \nidea (string): 1 sprite di chuyển thẳng 0.15s\nprototype (string): như IDEA, thêm nháy ở mục tiêu khi trúng\nfull (string): hiệu ứng bắn và trúng riêng, âm thanh\nreason (string): Chỉ để nhìn",
+   "title": "ShotParams: Hình đạn (bullet_visual)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:34"
   }
  },
  "log": [
@@ -349,6 +445,181 @@
   {
    "at": "2026-11-25 12:07:38",
    "id": "shot-target-rule",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:39:22",
+   "id": "edge-phat-ban-lam-quai-ve-0-mau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:16:02",
+   "id": "params",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Rà số đòn tự bắn theo bảng ShotParams, test từng dòng"
+  },
+  {
+   "at": "2026-11-25 23:16:06",
+   "id": "shotparams-shot-damage-lv1",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Test dòng shot_damage_lv1"
+  },
+  {
+   "at": "2026-11-25 23:16:07",
+   "id": "shotparams-shot-interval",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Test dòng shot_interval"
+  },
+  {
+   "at": "2026-11-25 23:16:08",
+   "id": "shotparams-shot-range",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Test dòng shot_range"
+  },
+  {
+   "at": "2026-11-25 23:16:10",
+   "id": "shotparams-targets-per-shot",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Test dòng targets_per_shot"
+  },
+  {
+   "at": "2026-11-25 23:16:11",
+   "id": "shotparams-bullet-fly-time",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Test dòng bullet_fly_time"
+  },
+  {
+   "at": "2026-11-25 23:16:11",
+   "id": "shotparams-target-scope",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Test dòng target_scope"
+  },
+  {
+   "at": "2026-11-25 23:16:13",
+   "id": "shotparams-bullet-visual",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Test dòng bullet_visual"
+  },
+  {
+   "at": "2026-11-25 23:19:43",
+   "id": "params",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Auto_shot_numbers_match_the_design"
+  },
+  {
+   "at": "2026-11-25 23:19:45",
+   "id": "shotparams-shot-damage-lv1",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Shot_damage_lv1_is_ten_health_per_shot, CastleAutoShotTests.Shot_damage_lv1_takes_ten_health_so_a_forty_health_soldier_falls_after_four_shots"
+  },
+  {
+   "at": "2026-11-25 23:19:46",
+   "id": "shotparams-shot-interval",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Shot_interval_is_one_second_per_shot, CastleAutoShotTests.Shot_interval_of_one_second_is_forty_steps_of_the_shared_clock"
+  },
+  {
+   "at": "2026-11-25 23:19:48",
+   "id": "shotparams-shot-range",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Shot_range_is_six_units_from_the_castle_edge, CastleAutoShotTests.Shot_range_reaches_six_units_beyond_each_castle_edge_and_no_further"
+  },
+  {
+   "at": "2026-11-25 23:19:49",
+   "id": "shotparams-targets-per-shot",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.Targets_per_shot_is_one_so_only_the_nearest_of_several_in_range_is_hit"
+  },
+  {
+   "at": "2026-11-25 23:19:50",
+   "id": "shotparams-bullet-fly-time",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Bullet_fly_time_is_fifteen_hundredths_of_a_second, CastleSessionTests.Bullet_fly_time_of_every_shot_drawing_is_fifteen_hundredths_of_a_second"
+  },
+  {
+   "at": "2026-11-25 23:19:51",
+   "id": "shotparams-target-scope",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Target_scope_is_enemy_centres_within_sixteen_units, CastleAutoShotTests.Target_scope_skips_an_enemy_whose_centre_is_beyond_sixteen_units"
+  },
+  {
+   "at": "2026-11-25 23:19:53",
+   "id": "shotparams-bullet-visual",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSessionTests.Bullet_visual_is_one_drawing_per_shot_flying_straight_from_the_castle_edge_to_the_target"
+  },
+  {
+   "at": "2026-11-25 23:23:34",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:34",
+   "id": "shotparams-shot-damage-lv1",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:34",
+   "id": "shotparams-shot-interval",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:34",
+   "id": "shotparams-shot-range",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:34",
+   "id": "shotparams-targets-per-shot",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:34",
+   "id": "shotparams-bullet-fly-time",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:34",
+   "id": "shotparams-target-scope",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:34",
+   "id": "shotparams-bullet-visual",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

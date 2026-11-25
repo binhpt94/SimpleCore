@@ -84,19 +84,65 @@
    "at": "2026-11-25 18:36:51"
   },
   "params": {
-   "state": "doing",
+   "state": "verified",
    "note": "Bản mới thêm số view tối thiểu 1 sau bước chạy và đếm view từ IDEA. Test cũ chỉ phủ ngưỡng 0 sau bước huỷ và bộ đếm bản dev, chưa phủ dòng mới. Làm cùng running-views-nonzero ở đợt TrackView sau",
    "tests": [
-    "SessionSceneLogicTests.InstallerAsset_InTheEditor_CountsWhatParticipantsHoldAfterTheDisposeStep",
+    "SessionSceneLogicTests.Counter_ReadsTheViewsAndJobsAParticipantHolds_AtAnyMoment",
+    "SessionSceneLogicTests.WithTheRealCounter_AParticipantThatKeepsAViewAndAJob_IsReportedAfterTheDisposeStep",
     "SessionSceneLogicTests.ASingleViewOrASingleJobLeft_IsEnoughToBeReported",
-    "SessionSceneLogicTests.AfterTheDisposeStep_ParticipantsThatHoldNothing_AreNotReported"
+    "SessionSceneLogicTests.AfterTheDisposeStep_ParticipantsThatHoldNothing_AreNotReported",
+    "SessionSceneLogicTests.TheSceneTransitionCover_StillShowingWhenCounted_IsNotReported",
+    "SessionSceneLogicTests.InstallerAsset_InTheEditor_CountsWhatParticipantsHoldAfterTheDisposeStep"
    ],
    "play": "",
-   "hash": "baed02dac074",
-   "text": "## Làm gì\n- Giữ một bộ đếm cho mỗi feature tham gia: số view đang có và số việc đang chạy (hẹn giờ, việc chờ, việc lặp mỗi khung hình). Chỉ bật ở bản dev.\n- Sau bước huỷ của một scene: đọc bộ đếm của mọi feature tham gia; phải bằng 0. Lớp che của `feature-scene-flow` không tính.\n- Còn sót: ghi lỗi nêu tên feature và số còn lại.\n- Cho feature khác đọc số đếm bất kì lúc nào trong scene để tự kiểm.\n- Ngay sau bước chạy: đọc số view của mọi feature tham gia tạo view ở bước chạy; số nào bằng 0 thì ghi lỗi nêu tên feature đó.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| View còn lại sau bước huỷ | 0 | view | `nothing-survives` của node cha |\n| Việc đang chạy còn lại sau bước huỷ | 0 | việc | `nothing-survives` của node cha |\n| Hình không tính | lớp che của `feature-scene-flow` | | Chỉ sống trong lúc chuyển |\n| Bộ đếm có ở bản phát hành | không | | Chỉ để kiểm ở bản dev |\n| Số view tối thiểu ngay sau bước chạy, mỗi feature tạo view ở bước chạy | 1 | view | `running-views-nonzero`: báo 0 là quên báo view |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Kiểm sau bước huỷ | Không bắt buộc (chỉ một lần chuyển, Loading → Game) | Đếm view và việc đang chạy | Như PROTOTYPE |\n| Bộ đếm theo feature tham gia | Đếm view (cần cho kiểm sau bước chạy) | Đếm view và việc đang chạy | Như PROTOTYPE |\n| Kiểm view lớn hơn 0 sau bước chạy | Có | Có | Có |",
+   "hash": "5554576dd06b",
+   "text": "## Làm gì\n- Giữ một bộ đếm cho mỗi feature tham gia: số view đang có và số việc đang chạy (hẹn giờ, việc chờ, việc lặp mỗi khung hình). Chỉ bật ở bản dev.\n- Sau bước huỷ của một scene: đọc bộ đếm của mọi feature tham gia; phải bằng 0. Lớp che của `feature-scene-flow` không tính.\n- Còn sót: ghi lỗi nêu tên feature và số còn lại.\n- Cho feature khác đọc số đếm bất kì lúc nào trong scene để tự kiểm.\n- Ngay sau bước chạy: đọc số view của mọi feature tham gia tạo view ở bước chạy; số nào bằng 0 thì ghi lỗi nêu tên feature đó.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| View còn lại sau bước huỷ | 0 | view | `nothing-survives` của node cha |\n| Việc đang chạy còn lại sau bước huỷ | 0 | việc | `nothing-survives` của node cha |\n| Hình không tính | lớp che của `feature-scene-flow` | | Chỉ sống trong lúc chuyển |\n| Bộ đếm có ở bản phát hành | không | | Chỉ để kiểm ở bản dev |\n| Số view tối thiểu ngay sau bước chạy, mỗi feature tạo view ở bước chạy | 1 | view | `running-views-nonzero`: báo 0 là quên báo view |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Kiểm sau bước huỷ | Không bắt buộc (chỉ một lần chuyển, Loading → Game) | Đếm view và việc đang chạy | Như PROTOTYPE |\n| Bộ đếm theo feature tham gia | Đếm view (đã làm, chưa dùng để kiểm) | Đếm view và việc đang chạy | Như PROTOTYPE |\n| Kiểm view lớn hơn 0 sau bước chạy | Không (các feature chưa báo view, TrackView để PROTOTYPE) | Có | Có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "_Services/SessionScene",
-   "at": "2026-11-25 18:51:20"
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:56:14"
+  },
+  "running-views-nonzero": {
+   "state": "verified",
+   "note": "Kiểm ngay sau bước chạy ở bản dev: participant khai OpensViewsOnRun mà giữ 0 view thì ghi lỗi nêu tên",
+   "tests": [
+    "SessionSceneLogicTests.AParticipantThatCreatesItsViewsOnRun_ButHoldsNone_IsReportedByNameRightAfterTheRunStep",
+    "SessionSceneLogicTests.AParticipantThatCreatesItsViewsOnRun_AndHoldsOne_IsNotReported",
+    "SessionSceneLogicTests.RunViews_AreCountedOnlyAfterEveryoneRan_InJoinOrder",
+    "SessionSceneLogicTests.WhenAParticipantFailsToRun_RunViewsAreNotChecked",
+    "SessionSceneLogicTests.WithoutTheCounter_AsInAReleaseBuild_RunViewsAreNotChecked"
+   ],
+   "play": "",
+   "hash": "fe3d245a0c1a",
+   "text": "Lúc trận đang chạy, mỗi feature có view báo số view lớn hơn 0; báo 0 là lỗi nêu tên feature đó\nChỉ ở bản dev. Kiểm ngay sau bước chạy, với feature tạo view ở bước chạy (ví dụ HUD, thanh nâng cấp, nền chiến trường, thành). Chốt chặn: feature quên báo view thì lỗi đúng tên nó, thay vì bộ đếm sau bước huỷ báo 0 sai.",
+   "title": "Lúc trận đang chạy, mỗi feature có view báo số view lớn hơn 0; báo 0 là lỗi nêu tên feature đó",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:30:00"
+  },
+  "edge-feature-chi-co-view-ve-sau": {
+   "state": "verified",
+   "note": "Feature có view về sau không khai OpensViewsOnRun nên không vào kiểm sau bước chạy, vẫn đếm sau bước huỷ",
+   "tests": [
+    "SessionSceneLogicTests.AParticipantWhoseViewsComeLater_IsNotCheckedAfterTheRunStep_ButItsLaterViewIsCheckedAfterDispose"
+   ],
+   "play": "",
+   "hash": "d02cb86c54d1",
+   "text": "**Feature chỉ có view về sau** (quái khi đợt thả, popup thua khi mở): không vào kiểm ngay sau bước chạy; view của nó vẫn được đếm và kiểm sau bước huỷ.",
+   "title": "Feature chỉ có view về sau",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:30:00"
+  },
+  "edge-feature-khong-co-view": {
+   "state": "verified",
+   "note": "Feature không có view không khai OpensViewsOnRun nên không vào kiểm view lớn hơn 0",
+   "tests": [
+    "SessionSceneLogicTests.ParticipantsWithNoView_AreNotPartOfTheRunViewsCheck"
+   ],
+   "play": "",
+   "hash": "600dab434e3a",
+   "text": "**Feature không có view** (ví hay dịch vụ chỉ có luật, `feature-scene-flow` trong scene Game): không vào kiểm view lớn hơn 0.",
+   "title": "Feature không có view",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:30:00"
   }
  },
  "log": [
@@ -274,6 +320,90 @@
    "state": "doing",
    "by": "_Services/SessionScene",
    "note": "Bản mới thêm số view tối thiểu 1 sau bước chạy và đếm view từ IDEA. Test cũ chỉ phủ ngưỡng 0 sau bước huỷ và bộ đếm bản dev, chưa phủ dòng mới. Làm cùng running-views-nonzero ở đợt TrackView sau"
+  },
+  {
+   "at": "2026-11-25 23:50:41",
+   "id": "params",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.Counter_ReadsTheViewsAndJobsAParticipantHolds_AtAnyMoment, SessionSceneLogicTests.WithTheRealCounter_AParticipantThatKeepsAViewAndAJob_IsReportedAfterTheDisposeStep, SessionSceneLogicTests.ASingleViewOrASingleJobLeft_IsEnoughToBeReported, SessionSceneLogicTests.AfterTheDisposeStep_ParticipantsThatHoldNothing_AreNotReported, SessionSceneLogicTests.TheSceneTransitionCover_StillShowingWhenCounted_IsNotReported, SessionSceneLogicTests.InstallerAsset_InTheEditor_CountsWhatParticipantsHoldAfterTheDisposeStep"
+  },
+  {
+   "at": "2026-11-25 23:55:42",
+   "id": "params",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.Counter_ReadsTheViewsAndJobsAParticipantHolds_AtAnyMoment, SessionSceneLogicTests.WithTheRealCounter_AParticipantThatKeepsAViewAndAJob_IsReportedAfterTheDisposeStep, SessionSceneLogicTests.ASingleViewOrASingleJobLeft_IsEnoughToBeReported, SessionSceneLogicTests.AfterTheDisposeStep_ParticipantsThatHoldNothing_AreNotReported, SessionSceneLogicTests.TheSceneTransitionCover_StillShowingWhenCounted_IsNotReported, SessionSceneLogicTests.InstallerAsset_InTheEditor_CountsWhatParticipantsHoldAfterTheDisposeStep"
+  },
+  {
+   "at": "2026-11-25 23:56:14",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:17:51",
+   "id": "running-views-nonzero",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "Kiểm ngay sau bước chạy ở bản dev: participant khai OpensViewsOnRun mà giữ 0 view thì ghi lỗi nêu tên"
+  },
+  {
+   "at": "2026-11-26 00:17:52",
+   "id": "edge-feature-chi-co-view-ve-sau",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "Feature có view về sau không khai OpensViewsOnRun nên không vào kiểm sau bước chạy, vẫn đếm sau bước huỷ"
+  },
+  {
+   "at": "2026-11-26 00:17:54",
+   "id": "edge-feature-khong-co-view",
+   "state": "doing",
+   "by": "_Services/SessionScene",
+   "note": "Feature không có view không khai OpensViewsOnRun nên không vào kiểm view lớn hơn 0"
+  },
+  {
+   "at": "2026-11-26 00:18:59",
+   "id": "running-views-nonzero",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.AParticipantThatCreatesItsViewsOnRun_ButHoldsNone_IsReportedByNameRightAfterTheRunStep, SessionSceneLogicTests.AParticipantThatCreatesItsViewsOnRun_AndHoldsOne_IsNotReported, SessionSceneLogicTests.RunViews_AreCountedOnlyAfterEveryoneRan_InJoinOrder, SessionSceneLogicTests.WhenAParticipantFailsToRun_RunViewsAreNotChecked, SessionSceneLogicTests.WithoutTheCounter_AsInAReleaseBuild_RunViewsAreNotChecked"
+  },
+  {
+   "at": "2026-11-26 00:19:00",
+   "id": "edge-feature-chi-co-view-ve-sau",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.AParticipantWhoseViewsComeLater_IsNotCheckedAfterTheRunStep_ButItsLaterViewIsCheckedAfterDispose"
+  },
+  {
+   "at": "2026-11-26 00:19:01",
+   "id": "edge-feature-khong-co-view",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "SessionSceneLogicTests.ParticipantsWithNoView_AreNotPartOfTheRunViewsCheck"
+  },
+  {
+   "at": "2026-11-26 00:30:00",
+   "id": "running-views-nonzero",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:30:00",
+   "id": "edge-feature-chi-co-view-ve-sau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:30:00",
+   "id": "edge-feature-khong-co-view",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

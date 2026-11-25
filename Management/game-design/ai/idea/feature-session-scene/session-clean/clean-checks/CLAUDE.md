@@ -22,8 +22,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
 | Kiểm sau bước huỷ | Không bắt buộc (chỉ một lần chuyển, Loading → Game) | Đếm view và việc đang chạy | Như PROTOTYPE |
-| Bộ đếm theo feature tham gia | Đếm view (cần cho kiểm sau bước chạy) | Đếm view và việc đang chạy | Như PROTOTYPE |
-| Kiểm view lớn hơn 0 sau bước chạy | Có | Có | Có |
+| Bộ đếm theo feature tham gia | Đếm view (đã làm, chưa dùng để kiểm) | Đếm view và việc đang chạy | Như PROTOTYPE |
+| Kiểm view lớn hơn 0 sau bước chạy | Không (các feature chưa báo view, TrackView để PROTOTYPE) | Có | Có |
 
 ## Trường hợp biên
 - **Feature lỗi ở bước huỷ**: vẫn huỷ tiếp các feature còn lại (luật xử lí lỗi ở nhánh ba bước của dịch vụ); số đếm của feature lỗi vẫn được đọc và ghi lỗi nếu còn sót.
@@ -38,6 +38,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Thêm bộ đếm theo feature và lỗi nêu tên.** Làm rõ "cách đếm" mà bản trước chỉ ghi ở mục Làm gì; node kiểm tra chơi lại của `feature-run` dùng lại số đếm này.
 
 - **Thêm chốt chặn view lớn hơn 0 lúc trận chạy (2026-11-25, người duyệt đề xuất session-usage-tracking theo hướng A, qua @Manager).** Ý `running-views-nonzero`. Nếu một feature quên báo view thì bộ đếm của nó luôn 0, nên kiểm sau bước huỷ báo "sạch" sai; kiểm ngay sau bước chạy bắt được lỗi đó và nêu đúng tên. Chỉ kiểm feature tạo view ở bước chạy, vì quái hay popup chưa có view lúc đó. Cần bộ đếm view từ IDEA (trước ghi "không bắt buộc"). Đã loại: kiểm ở một lúc bất kì giữa trận (lúc thở không có quái thì báo lỗi sai).
+
+- **Kiểm view lớn hơn 0 sau bước chạy dời sang PROTOTYPE (2026-11-25, người quyết qua @Manager).** Ý `running-views-nonzero` đã là việc PROTOTYPE trong sổ, và việc báo view (TrackView) của các feature người đã hoãn tới PROTOTYPE; bảng giai đoạn trước ghi "Có" từ IDEA nên lệch. Sửa dòng đó thành "Không" ở IDEA. Bộ đếm view ở IDEA vẫn giữ vì đã làm xong.
 
 ## Chưa rõ
 - Feature nào tạo view ở bước chạy: mỗi feature tự khai cho dịch vụ (phiên code cùng @CodeLead); bảng danh sách tham gia ở `feature-session-scene/session-steps/participant-order` không ghi.

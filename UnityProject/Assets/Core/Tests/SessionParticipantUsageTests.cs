@@ -122,6 +122,22 @@ namespace Game.Core.Tests
             Assert.That(usage.RunningJobs, Is.EqualTo(0));
         }
 
+        [Test]
+        public void ParticipantByDefault_DoesNotOpenViewsOnRun()
+        {
+            var usage = (ISessionParticipantUsage)new TrackingParticipant();
+
+            Assert.That(usage.OpensViewsOnRun, Is.False);
+        }
+
+        [Test]
+        public void ParticipantThatOpensViewsOnRun_ReportsIt()
+        {
+            var usage = (ISessionParticipantUsage)new ViewOnRunParticipant();
+
+            Assert.That(usage.OpensViewsOnRun, Is.True);
+        }
+
         private GameObject NewView()
         {
             var view = new GameObject("tracked-view");
@@ -134,6 +150,13 @@ namespace Game.Core.Tests
             public IDisposable ShowView(Object view) => TrackView(view);
 
             public IDisposable StartJob() => TrackJob();
+
+            protected override void OnRun() { }
+        }
+
+        private sealed class ViewOnRunParticipant : SessionParticipantBase
+        {
+            protected override bool OpensViewsOnRun => true;
 
             protected override void OnRun() { }
         }

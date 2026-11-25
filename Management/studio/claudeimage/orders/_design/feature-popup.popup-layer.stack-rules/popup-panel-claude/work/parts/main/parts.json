@@ -14,7 +14,8 @@
    "shapes": [
     "panel"
    ],
-   "from": null
+   "from": null,
+   "text": true
   }
  ],
  "kept": [],

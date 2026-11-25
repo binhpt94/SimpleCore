@@ -12,6 +12,11 @@ namespace Game.Castle
     internal sealed class CastleView : MonoBehaviour, ICastleView
     {
         [SerializeField] private Sprite castleSprite;
+        [Tooltip("PROTOTYPE: the castle under half health. Empty: the whole castle is drawn darker instead.")]
+        [SerializeField] private Sprite damagedSprite;
+        [SerializeField] private Color damagedTint = new Color(0.8f, 0.7f, 0.65f);
+        [Tooltip("How far the castle moves sideways while it shakes from a hit (u).")]
+        [SerializeField] private float shakeAmplitude = 0.08f;
         [SerializeField] private Sprite shotSprite;
         [SerializeField] private Sprite thunderSprite;
         [Tooltip("Drawn part of each sprite as a fraction of the image (x, y from bottom left, width, height); sizes apply to this part, not to the transparent margin.")]
@@ -41,8 +46,14 @@ namespace Game.Castle
         private bool _collapsed;
         private float _growLeft;
         private float _growTotal;
+        private float _shakeLeft;
+        private float _shakeTotal;
+        private Vector3 _bodyPosition;
+        private bool _damaged;
 
         public event Action<float> Ticked;
+
+        public UnityEngine.Object ViewObject => gameObject;
 
         private void Awake()
         {
@@ -65,8 +76,25 @@ namespace Game.Castle
             transform.position = Vector3.zero;
             var drawn = Drawn(_body.sprite, castleSprite ? castleContent : FullImage);
             _bodyScale = new Vector3(2f * halfWidth / Mathf.Max(drawn.width, 1e-4f), height / Mathf.Max(drawn.height, 1e-4f), 1f);
-            _body.transform.localPosition = new Vector3(-drawn.center.x * _bodyScale.x, -drawn.yMin * _bodyScale.y, 0f);
+            _bodyPosition = new Vector3(-drawn.center.x * _bodyScale.x, -drawn.yMin * _bodyScale.y, 0f);
+            _body.transform.localPosition = _bodyPosition;
             _body.transform.localScale = _bodyScale;
+        }
+
+        public void ShakeHit(float seconds)
+        {
+            if (_collapsed) return;
+            _shakeTotal = Mathf.Max(seconds, 1e-4f);
+            _shakeLeft = _shakeTotal;
+        }
+
+        public void ShowDamaged(bool damaged)
+        {
+            if (_damaged == damaged) return;
+            _damaged = damaged;
+            // The damaged picture uses the whole castle's size and content rect so swapping keeps the box.
+            _body.sprite = damaged && damagedSprite ? damagedSprite : (castleSprite ? castleSprite : Placeholder());
+            if (_flashLeft <= 0f) _body.color = BodyColor;
         }
 
         public void SetVisible(bool visible) => gameObject.SetActive(visible);
@@ -78,7 +106,9 @@ namespace Game.Castle
             _collapseLeft = 0f;
             _collapsed = false;
             _growLeft = 0f;
+            _shakeLeft = 0f;
             _body.transform.localScale = _bodyScale;
+            _body.transform.localPosition = _bodyPosition;
             _body.color = BodyColor;
         }
 
@@ -102,6 +132,8 @@ namespace Game.Castle
             _collapsed = true;
             _flashLeft = 0f;
             _popLeft = 0f;
+            _shakeLeft = 0f;
+            _body.transform.localPosition = _bodyPosition;
             _body.color = BodyColor;
             _collapseTotal = Mathf.Max(seconds, 1e-4f);
             _collapseLeft = _collapseTotal;
@@ -164,6 +196,14 @@ namespace Game.Castle
                 _body.transform.localScale = _bodyScale * Mathf.Lerp(1f, _popScale, grow);
             }
 
+            if (_shakeLeft > 0f)
+            {
+                _shakeLeft = Mathf.Max(0f, _shakeLeft - seconds);
+                // Left-right swing that fades out by the end of the shake.
+                var swing = Mathf.Sin((1f - _shakeLeft / _shakeTotal) * Mathf.PI * 6f) * (_shakeLeft / _shakeTotal);
+                _body.transform.localPosition = _bodyPosition + new Vector3(swing * shakeAmplitude, 0f, 0f);
+            }
+
             if (_collapseLeft > 0f)
             {
                 _collapseLeft = Mathf.Max(0f, _collapseLeft - seconds);
@@ -215,7 +255,15 @@ namespace Game.Castle
             _thunders.Clear();
         }
 
-        private Color BodyColor => castleSprite ? Color.white : castleColor;
+        private Color BodyColor
+        {
+            get
+            {
+                var whole = castleSprite ? Color.white : castleColor;
+                // Without a damaged picture the castle is drawn darker under half health.
+                return _damaged && !damagedSprite ? whole * damagedTint : whole;
+            }
+        }
 
         private static readonly Rect FullImage = new Rect(0f, 0f, 1f, 1f);
 

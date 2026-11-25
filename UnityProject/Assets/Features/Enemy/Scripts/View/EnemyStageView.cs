@@ -33,6 +33,10 @@ namespace Game.Enemy
         [SerializeField] private float _flashSeconds = 0.1f;
         [SerializeField] private float _defeatSeconds = 0.3f;
 
+        [Header("Entrance (the boss coming on screen)")]
+        [SerializeField] private float _entranceScale = 1.2f;
+        [SerializeField] private float _entranceSeconds = 0.5f;
+
         [Header("Shot of a ranged enemy")]
         [SerializeField] private float _shotSeconds = 0.15f;
         [SerializeField] private Vector2 _shotSize = new Vector2(0.4f, 0.08f);
@@ -54,8 +58,15 @@ namespace Game.Enemy
         private readonly List<Flying> _coins = new List<Flying>();
         private Sprite _boxSprite;
         private bool _paused;
+        private Func<UnityEngine.Object, IDisposable> _trackView;
+        private IDisposable _stageHandle;
 
-        public event Action<float> Frame;
+        public void TrackWith(Func<UnityEngine.Object, IDisposable> trackView)
+        {
+            _trackView = trackView ?? throw new ArgumentNullException(nameof(trackView));
+            _stageHandle?.Dispose();
+            _stageHandle = trackView(gameObject);
+        }
 
         public void Show(EnemyLook look)
         {
@@ -83,7 +94,8 @@ namespace Game.Enemy
             }
 
             renderer.flipX = look.Direction < 0;
-            var drawn = new Drawn(go, renderer, baseScale, renderer.color);
+            go.transform.localScale = baseScale;
+            var drawn = new Drawn(go, Track(go), renderer, baseScale, renderer.color);
             _drawn.Add(look.Handle, drawn);
             Place(drawn, look);
         }
@@ -112,7 +124,7 @@ namespace Game.Enemy
             var from = new Vector3(shot.FromX, shot.Y - _shotSize.y * 0.5f, 0f);
             var to = new Vector3(shot.ToX, from.y, 0f);
             go.transform.localPosition = from;
-            _shots.Add(new Flying(go, from, to, _shotSeconds));
+            _shots.Add(new Flying(go, Track(go), from, to, _shotSeconds));
         }
 
         public void ShowCoins(EnemyReward reward)
@@ -134,12 +146,17 @@ namespace Game.Enemy
 
             var from = new Vector3(reward.X, reward.Top, 0f);
             go.transform.localPosition = from;
-            _coins.Add(new Flying(go, from, from + Vector3.up * _coinRise, _coinSeconds));
+            _coins.Add(new Flying(go, Track(go), from, from + Vector3.up * _coinRise, _coinSeconds));
         }
 
         public void Flash(int handle)
         {
             if (_drawn.TryGetValue(handle, out var drawn)) drawn.FlashLeft = _flashSeconds;
+        }
+
+        public void Enter(int handle)
+        {
+            if (_drawn.TryGetValue(handle, out var drawn)) drawn.EntranceLeft = _entranceSeconds;
         }
 
         public void Defeat(int handle)
@@ -152,9 +169,9 @@ namespace Game.Enemy
 
         public void RemoveAll()
         {
-            foreach (var drawn in _drawn.Values) Destroy(drawn.Go);
+            foreach (var drawn in _drawn.Values) Release(drawn.Go, drawn.Handle);
             _drawn.Clear();
-            for (var i = 0; i < _dying.Count; i++) Destroy(_dying[i].Go);
+            for (var i = 0; i < _dying.Count; i++) Release(_dying[i].Go, _dying[i].Handle);
             _dying.Clear();
             ClearFlying(_shots);
             ClearFlying(_coins);
@@ -164,13 +181,17 @@ namespace Game.Enemy
 
         public void Close()
         {
-            if (this != null) Destroy(gameObject);
+            if (this == null) return;
+            RemoveAll();
+            _stageHandle?.Dispose();
+            _stageHandle = null;
+            DestroyObject(gameObject);
         }
 
+        // Display only: animates the looks the presenter pushed after the last clock step; never moves an enemy.
         private void Update()
         {
             var dt = Time.deltaTime;
-            Frame?.Invoke(dt);
             if (_paused) return;
 
             foreach (var drawn in _drawn.Values) Animate(drawn, dt);
@@ -181,7 +202,7 @@ namespace Game.Enemy
                 drawn.DefeatLeft -= dt;
                 if (drawn.DefeatLeft <= 0f)
                 {
-                    Destroy(drawn.Go);
+                    Release(drawn.Go, drawn.Handle);
                     _dying.RemoveAt(i);
                     continue;
                 }
@@ -203,7 +224,7 @@ namespace Game.Enemy
                 item.Elapsed += dt;
                 if (item.Elapsed >= item.Seconds)
                 {
-                    Destroy(item.Go);
+                    Release(item.Go, item.Handle);
                     flying.RemoveAt(i);
                     continue;
                 }
@@ -214,13 +235,32 @@ namespace Game.Enemy
 
         private static void ClearFlying(List<Flying> flying)
         {
-            for (var i = 0; i < flying.Count; i++) Destroy(flying[i].Go);
+            for (var i = 0; i < flying.Count; i++) Release(flying[i].Go, flying[i].Handle);
             flying.Clear();
         }
 
         private void OnDestroy()
         {
-            if (_boxSprite != null) Destroy(_boxSprite);
+            _stageHandle?.Dispose();
+            _stageHandle = null;
+            if (_boxSprite != null) DestroyObject(_boxSprite);
+        }
+
+        private IDisposable Track(GameObject go) => _trackView?.Invoke(go);
+
+        /// <summary>Stops counting <paramref name="go"/> for the session, then destroys it.</summary>
+        private static void Release(GameObject go, IDisposable handle)
+        {
+            handle?.Dispose();
+            DestroyObject(go);
+        }
+
+        // Outside Play (EditMode tests) Destroy is not allowed; the object goes at once instead.
+        private static void DestroyObject(UnityEngine.Object target)
+        {
+            if (target == null) return;
+            if (Application.isPlaying) Destroy(target);
+            else DestroyImmediate(target);
         }
 
         private void Animate(Drawn drawn, float dt)
@@ -228,6 +268,17 @@ namespace Game.Enemy
             drawn.BobTime = drawn.Walking ? drawn.BobTime + dt : 0f;
             drawn.LungeLeft = Mathf.Max(0f, drawn.LungeLeft - dt);
             drawn.FlashLeft = Mathf.Max(0f, drawn.FlashLeft - dt);
+            drawn.EntranceLeft = Mathf.Max(0f, drawn.EntranceLeft - dt);
+
+            // Entrance: grow to the entrance scale and back in its seconds (from the feet: pivot at the bottom).
+            var grow = 1f;
+            if (drawn.EntranceLeft > 0f && _entranceSeconds > 0f)
+            {
+                var phase = 1f - drawn.EntranceLeft / _entranceSeconds;
+                grow = 1f + (_entranceScale - 1f) * Mathf.Sin(phase * Mathf.PI);
+            }
+
+            drawn.Go.transform.localScale = drawn.BaseScale * grow;
 
             var bob = 0f;
             if (drawn.Walking && _bobPeriod > 0f)
@@ -254,7 +305,6 @@ namespace Game.Enemy
             drawn.X = look.X;
             drawn.Walking = look.Walking;
             drawn.Slowed = look.Slowed;
-            drawn.Go.transform.localScale = drawn.BaseScale;
             var p = drawn.Go.transform.localPosition;
             drawn.Go.transform.localPosition = new Vector3(look.X, p.y, 0f);
         }
@@ -281,15 +331,17 @@ namespace Game.Enemy
 
         private sealed class Flying
         {
-            public Flying(GameObject go, Vector3 from, Vector3 to, float seconds)
+            public Flying(GameObject go, IDisposable handle, Vector3 from, Vector3 to, float seconds)
             {
                 Go = go;
+                Handle = handle;
                 From = from;
                 To = to;
                 Seconds = Mathf.Max(seconds, 0.001f);
             }
 
             public GameObject Go { get; }
+            public IDisposable Handle { get; }
             public Vector3 From { get; }
             public Vector3 To { get; }
             public float Seconds { get; }
@@ -298,15 +350,17 @@ namespace Game.Enemy
 
         private sealed class Drawn
         {
-            public Drawn(GameObject go, SpriteRenderer renderer, Vector3 baseScale, Color baseColor)
+            public Drawn(GameObject go, IDisposable handle, SpriteRenderer renderer, Vector3 baseScale, Color baseColor)
             {
                 Go = go;
+                Handle = handle;
                 Renderer = renderer;
                 BaseScale = baseScale;
                 BaseColor = baseColor;
             }
 
             public GameObject Go { get; }
+            public IDisposable Handle { get; }
             public SpriteRenderer Renderer { get; }
             public Vector3 BaseScale { get; }
             public Color BaseColor { get; }
@@ -317,6 +371,7 @@ namespace Game.Enemy
             public float LungeLeft { get; set; }
             public int LungeDirection { get; set; }
             public float FlashLeft { get; set; }
+            public float EntranceLeft { get; set; }
             public float DefeatLeft { get; set; }
         }
     }

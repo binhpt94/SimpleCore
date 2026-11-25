@@ -1,0 +1,29 @@
+R1 feature-run/run-start/replay-checks#edge-luot-ket-thuc-luc-dang-co-hieu-ung
+Do bang execute_code: Application.onBeforeRender + event CastleSkills.ThunderStruck, RunFlow.StepChanged, CastleBody.Destroyed (chi trong bo nho).
+Cot: f = frameCount, t = Time.time, step = RunFlow.Step, hp = CastleBody.Health, alive = so quai song trong EnemyField._alive,
+stageViews = so con cua EnemyStage(Clone) (hinh quai, ke ca hinh dang chet do), castleFx = con cua CastleView(Clone) ngoai Body (Thunder, Shot).
+
+-- Lan 1: bam Sam set khi quai sat thanh (|x| = 3.0), thanh dang 5.8 mau, ep ForceHealth(1) ngay luc set danh
+click Thunder minX=2.998318 f=48127 t=142.048 step=Playing hp=5.799805 alive=5 stageViews=5 castleFx=0()
+ThunderStruck x=-4.199439 f=48127 t=142.048 step=Playing hp=5.799805 alive=5 stageViews=5 castleFx=1(Thunder,)
+  ForceHealth(1) f=48127 t=142.048 step=Playing hp=1 alive=5 stageViews=5 castleFx=1(Thunder,)
+ThunderStruck x=2.998318 f=48127 t=142.048 step=Playing hp=1 alive=4 stageViews=6 castleFx=2(Thunder,Thunder,)
+ThunderStruck x=2.999253 f=48127 t=142.048 step=Playing hp=1 alive=3 stageViews=7 castleFx=3(Thunder,Thunder,Thunder,)
+ThunderStruck x=3.098174 f=48127 t=142.048 step=Playing hp=1 alive=2 stageViews=8 castleFx=4(Thunder,Thunder,Thunder,Thunder,)
+ThunderStruck x=-3.499722 f=48127 t=142.048 step=Playing hp=1 alive=1 stageViews=9 castleFx=5(Thunder,Thunder,Thunder,Thunder,Thunder,)
+=> Sam set ha het quai dang danh thanh, nen thanh chua vo trong 0.3 s hieu ung set.
+
+-- Thanh vo 15 giay sau (dot 6): luc do co 1 phat ban cua thanh dang bay va 1 quai dang chet do
+Step->Ending f=53258 t=157.279 step=Ending hp=0 alive=10 stageViews=11 castleFx=1(Shot,)
+CastleDestroyed f=53258 t=157.279 step=Ending hp=0 alive=10 stageViews=11 castleFx=1(Shot,)
+frame f=53262 t=157.293 step=Ending hp=0 alive=10 stageViews=11 castleFx=0()
+Step->Lost f=53574 t=158.280 step=Lost hp=0 alive=10 stageViews=11 castleFx=0()
+(popup thua mo: "Tru duoc 6 dot", "Ki luc: 7 dot", nut Home inactive)
+
+-- Bam Choi lai tren popup (ExecuteEvents.pointerClickHandler vao PopupLayer/LoseMain(Clone)/Replay)
+before Replay f=60027 t=179.272 step=Lost hp=0 alive=10 stageViews=11 castleFx=0()
+Step->Playing f=60027 t=179.272 step=Playing hp=0 alive=0 stageViews=11 castleFx=0()
+after Replay click f=60027 t=179.272 step=Playing hp=1000 alive=1 stageViews=12 castleFx=0()
+frame f=60028 t=179.605 step=Playing hp=1000 alive=1 stageViews=1 castleFx=0()
+=> Khung +1: so hinh quai = so quai song (1), khong con hieu ung cua thanh, khong con chu tien bay.
+6 giay sau: alive=5 stageViews=5, ca 5 hinh la quai moi (#95-#99), khong con chu "+..." nao tren man.

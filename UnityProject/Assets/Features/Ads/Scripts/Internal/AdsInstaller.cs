@@ -6,7 +6,8 @@ namespace Game.Ads
 {
     /// <summary>
     /// Wires the Ads feature: publishes <see cref="IRewardedAds"/> and joins the scene session. Dev builds use the
-    /// fake provider (outcome chosen in AdsConfig); release builds have no ad network yet and always answer NotWatched.
+    /// fake provider (outcome chosen in AdsConfig) and also publish <see cref="IAdsCheat"/>; release builds have no ad
+    /// network yet and always answer NotWatched.
     /// Install after SessionScene.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Ads/Ads Installer", fileName = "AdsInstaller")]
@@ -28,6 +29,7 @@ namespace Game.Ads
             var fake = new FakeAdProvider(_config.FakeOutcome, _config.FakeScreenSeconds);
             var requests = new AdRequests(fake, new UnityAdsLog(), _config.OpenLimitSeconds, _config.ConfirmLimitSeconds);
             registry.Register<IRewardedAds>(requests);
+            registry.Register<IAdsCheat>(fake);
             session.Join(new AdsSessionParticipant(requests, _viewPrefab, fake));
 #else
             var requests = new AdRequests(new NoAdProvider(), new UnityAdsLog(),

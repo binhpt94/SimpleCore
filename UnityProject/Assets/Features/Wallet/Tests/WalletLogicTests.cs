@@ -302,6 +302,41 @@ namespace Game.Wallet.Tests
             Assert.That(wallet.Coins, Is.EqualTo(55));
         }
 
+        // feature-popup-revive/revive-order/order-values#edge-tien-ha-quai-toi-cung-khung-hinh-thanh
+        // The castle's first fall only freezes the battle for the revive offer: the run does not stop, so the coins of an
+        // enemy downed in that same frame count, and income keeps counting once the castle stood up again.
+        [Test]
+        public void EnemyFallingInTheFrameTheCastleFirstFalls_StillPays_AndIncomeCountsAfterRevive()
+        {
+            var wallet = NewWallet(50);
+            var run = new FakeRunFlow();
+            new WalletRunReset(wallet, run).Run();
+            run.StartRun();
+
+            wallet.Add(5);   // enemy downed in the frame the castle fell; the run only offers a revive, no BattleStopped
+            wallet.Add(6);   // after the revive the battle runs again
+
+            Assert.That(wallet.Coins, Is.EqualTo(61));
+        }
+
+        // feature-popup-revive/revive-order/order-values#edge-tien-ha-quai-toi-cung-khung-hinh-thanh
+        // When the run really ends (no revive, or the second fall), coins that reached the wallet before the stop stay;
+        // nothing after the stop is paid.
+        [Test]
+        public void EnemyFallingBeforeTheRunStops_KeepsItsCoins_NothingIsPaidAfterTheStop()
+        {
+            var wallet = NewWallet(50);
+            var run = new FakeRunFlow();
+            new WalletRunReset(wallet, run).Run();
+            run.StartRun();
+
+            wallet.Add(5);
+            run.StopBattle();
+            wallet.Add(6);
+
+            Assert.That(wallet.Coins, Is.EqualTo(55));
+        }
+
         [Test]
         public void IncomeFromTheOldRun_DoesNotCarryIntoTheNewRun_AndNewIncomeCountsAgain()
         {

@@ -174,6 +174,8 @@ namespace Game.Services.SessionScene
 
             startingParticipants = false;
 
+            if (failure == null) ReportMissingRunViews();
+
             if (failure != null) await FailAsync(failure);
             else if (endRequested) await ShutDownAsync();
         }
@@ -319,6 +321,37 @@ namespace Game.Services.SessionScene
                 reportError(new InvalidOperationException(
                     $"Session participant {FeatureNameOf(type)} ({type.Name}) left {left.Views} view(s) and " +
                     $"{left.RunningJobs} running job(s) after the dispose step."));
+            }
+        }
+
+        /// <summary>
+        /// Right after everyone ran (dev builds only): each participant that said it creates its views in the run
+        /// step but holds none is reported by feature name; it most likely forgot to track its views. Participants
+        /// with no view, or whose views come later, did not say so and are not checked. The session keeps running.
+        /// </summary>
+        private void ReportMissingRunViews()
+        {
+            if (usage == null) return;
+
+            foreach (var participant in participants)
+            {
+                ParticipantUsage held;
+                try
+                {
+                    held = usage.CountFor(participant);
+                }
+                catch (Exception e)
+                {
+                    reportError(Describe(participant, "be counted after the run step", e));
+                    continue;
+                }
+
+                if (!held.OpensViewsOnRun || held.Views > 0) continue;
+
+                var type = participant.GetType();
+                reportError(new InvalidOperationException(
+                    $"Session participant {FeatureNameOf(type)} ({type.Name}) creates its views in the run step " +
+                    "but holds 0 view(s) right after it; track each view it shows with TrackView."));
             }
         }
 

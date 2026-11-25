@@ -5,12 +5,16 @@ using UnityEngine.TestTools;
 
 namespace Game.Hero.Tests
 {
-    /// <summary>What the player sees of the team through the run: shown at run start, frozen on pause, gone on clear.</summary>
+    /// <summary>
+    /// What the player sees of the team through the run: shown at run start, moved on by the shared clock's steps
+    /// (0.025 s each), frozen on pause, gone on clear.
+    /// </summary>
     public sealed class HeroParticipantTests
     {
         private HeroFakes.RunFlow _run;
         private HeroFakes.EnemyField _field;
         private HeroFakes.DisplayFactory _displays;
+        private HeroFakes.Combat _combat;
         private HeroSquad _squad;
         private HeroParticipant _participant;
 
@@ -21,21 +25,142 @@ namespace Game.Hero.Tests
             _run = new HeroFakes.RunFlow();
             _field = new HeroFakes.EnemyField();
             _displays = new HeroFakes.DisplayFactory();
+            _combat = new HeroFakes.Combat();
             _squad = new HeroSquad(config, _field);
             var presenter = new HeroPresenter(_squad, config, _displays);
-            _participant = new HeroParticipant(_run, _squad, presenter, new HeroFakes.StillClock());
+            _participant = new HeroParticipant(_run, _squad, presenter, _combat, new HeroFakes.StillClock());
             _participant.Run();
         }
 
         [TearDown]
         public void TearDown() => _participant.DisposeAsync();
 
-        /// <summary>A full team whose slots 2 and 3 fall at once, so the test watches the knight (slot 1) alone.</summary>
-        private void StartWithOnlyTheKnightStanding()
+        /// <summary>A frame of <paramref name="seconds"/>: the clock runs its steps, then the view redraws.</summary>
+        private void Play(float seconds)
         {
-            _run.StartRun("knight", "axeman", "archer");
+            _combat.Run(seconds);
+            _participant.RefreshView(seconds);
+        }
+
+        /// <summary>A full team whose slots 2 and 3 fall at once, so the test watches the hero of slot 1 alone.</summary>
+        private void StartWithOnlySlot1Standing(string slot1 = "knight")
+        {
+            _run.StartRun(slot1, slot1 == "axeman" ? "knight" : "axeman", "archer");
             _squad.Hit(1, 1000f);
             _squad.Hit(2, 1000f);
+        }
+
+        [Test]
+        public void Heroes_move_and_hit_as_a_combat_actor_once_per_combat_tick()
+        {
+            Assert.That(_combat.Actors, Is.EqualTo(new Game.Combat.ICombatActor[] { _participant }));
+        }
+
+        [Test]
+        public void Heroes_aim_from_the_start_of_the_tick_and_hit_after_every_actor_aimed()
+        {
+            StartWithOnlySlot1Standing("knight");
+            var enemy = _field.Add(0f);
+
+            _participant.Aim(HeroFakes.Combat.Step);
+            Assert.That(_field.Taken(enemy), Is.EqualTo(0f), "aiming does not hit");
+            Assert.That(_squad.Units[0].TargetHandle, Is.EqualTo(enemy));
+
+            _participant.Strike(HeroFakes.Combat.Step);
+            Assert.That(_field.Taken(enemy), Is.EqualTo(12f).Within(1e-4f), "the hit lands in strike");
+        }
+
+        [Test]
+        public void A_knight_hits_at_once_then_again_exactly_40_steps_later()
+        {
+            StartWithOnlySlot1Standing("knight");
+            var enemy = _field.Add(0f);
+
+            _combat.RunSteps(1);
+            Assert.That(_field.Taken(enemy), Is.EqualTo(12f).Within(1e-4f), "first hit on the first step");
+
+            _combat.RunSteps(39);
+            Assert.That(_field.Taken(enemy), Is.EqualTo(12f).Within(1e-4f), "1.0 s not over after 39 steps");
+
+            _combat.RunSteps(1);
+            Assert.That(_field.Taken(enemy), Is.EqualTo(24f).Within(1e-4f), "second hit on step 40 after the first");
+        }
+
+        [Test]
+        public void A_target_slowed_by_frost_is_kept_and_hit_at_the_same_rhythm()
+        {
+            StartWithOnlySlot1Standing("knight");
+            var enemy = _field.Add(0f);
+            _combat.RunSteps(1);                    // first hit
+
+            _field.SlowAll(5f);                    // the castle's frost: only the enemies' own speed changes
+            _combat.RunSteps(40);
+
+            Assert.That(_squad.Units[0].TargetHandle, Is.EqualTo(enemy), "the hero keeps its target");
+            Assert.That(_squad.Units[0].Mode, Is.EqualTo(HeroMode.Attacking));
+            Assert.That(_field.Taken(enemy), Is.EqualTo(24f).Within(1e-4f), "the next hit still lands 1.0 s later");
+        }
+
+        [Test]
+        public void A_swordsman_waits_exactly_28_steps_between_hits()
+        {
+            StartWithOnlySlot1Standing("swordsman");
+            var enemy = _field.Add(0f);
+
+            _combat.RunSteps(1);
+            _combat.RunSteps(27);
+            Assert.That(_field.Taken(enemy), Is.EqualTo(16f).Within(1e-4f), "0.7 s not over after 27 steps");
+
+            _combat.RunSteps(1);
+            Assert.That(_field.Taken(enemy), Is.EqualTo(32f).Within(1e-4f), "0.7 s wait ends after 28 steps");
+        }
+
+        [Test]
+        public void A_fallen_hero_respawns_on_step_320_after_it_fell()
+        {
+            StartWithOnlySlot1Standing();
+            _squad.Hit(0, 1000f);
+
+            _combat.RunSteps(319);
+            Assert.That(_squad.Units[0].IsStanding, Is.False, "8 s not over after 319 steps");
+
+            _combat.RunSteps(1);
+            Assert.That(_squad.Units[0].IsStanding, Is.True, "8 s wait ends after 320 steps");
+        }
+
+        /// <summary>feature-popup-revive/revive-order/order-values#edge-hero-dang-cho-hoi-sinh-khi-thanh-bi</summary>
+        [Test]
+        public void A_hero_respawn_wait_counts_gameplay_steps_stands_still_while_the_castle_waits_for_revive_and_goes_on_after()
+        {
+            StartWithOnlySlot1Standing();
+            _squad.Hit(0, 1000f);
+
+            _combat.RunSteps(100);                  // 2.5 s of the 8 s wait
+            _combat.Gameplay = false;               // the castle fell: the run waits for the revive popup
+            _combat.RunSteps(400);
+            Assert.That(_squad.Units[0].IsStanding, Is.False, "the wait does not run while the castle waits for revive");
+            Assert.That(_squad.Units[0].RespawnLeft, Is.EqualTo(5.5f).Within(1e-3f));
+
+            _combat.Gameplay = true;                // the castle revived: the same run goes on
+            _combat.RunSteps(219);
+            Assert.That(_squad.Units[0].IsStanding, Is.False, "319 gameplay steps: not yet");
+            _combat.RunSteps(1);
+            Assert.That(_squad.Units[0].IsStanding, Is.True, "back after 320 gameplay steps in all");
+        }
+
+        [Test]
+        public void Steps_the_run_does_not_let_play_leave_heroes_where_they_are()
+        {
+            StartWithOnlySlot1Standing();
+            var enemy = _field.Add(10f);
+            var near = _field.Add(0f);
+            _combat.Gameplay = false;
+
+            Play(1f);
+
+            Assert.That(_squad.Units[0].X, Is.EqualTo(-1.5f));
+            Assert.That(_field.Taken(near), Is.EqualTo(0f));
+            Assert.That(_field.Taken(enemy), Is.EqualTo(0f));
         }
 
         [TestCase(0)]
@@ -50,7 +175,7 @@ namespace Game.Hero.Tests
             LogAssert.Expect(LogType.Error, new Regex(@"\[Hero\] The run brought \d+ heroes; a team needs 3"));
 
             _run.StartRun(codes);
-            _participant.Step(1f);
+            Play(1f);
 
             Assert.That(_displays.Made, Is.Empty);
             Assert.That(_squad.Units, Is.Empty);
@@ -86,10 +211,10 @@ namespace Game.Hero.Tests
         [Test]
         public void Heroes_on_screen_follow_the_battle_each_frame()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
             _field.Add(10f);
 
-            _participant.Step(1f);
+            Play(1f);
 
             Assert.That(_displays.Made[0].X, Is.EqualTo(0.5f).Within(1e-3f));
             Assert.That(_displays.Made[0].Moving, Is.True);
@@ -98,11 +223,11 @@ namespace Game.Hero.Tests
         [Test]
         public void While_paused_heroes_and_their_animations_stand_still()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
             _field.Add(10f);
             _run.IsPaused = true;
 
-            _participant.Step(1f);
+            Play(1f);
 
             Assert.That(_displays.Made[0].X, Is.EqualTo(-1.5f));
             Assert.That(_displays.Made[0].Animated, Is.EqualTo(0f));
@@ -111,12 +236,12 @@ namespace Game.Hero.Tests
         [Test]
         public void While_paused_a_hitting_hero_keeps_its_target_and_its_wait()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
             var enemy = _field.Add(0f);
-            _participant.Step(0.05f);              // first hit, then 1.0s to wait
+            _combat.RunSteps(1);                    // first hit, then 1.0 s to wait
             _run.IsPaused = true;
 
-            for (var i = 0; i < 10; i++) _participant.Step(0.5f);
+            for (var i = 0; i < 10; i++) Play(0.5f);
 
             var hero = _squad.Units[0];
             Assert.That(_field.Taken(enemy), Is.EqualTo(12f));
@@ -128,28 +253,28 @@ namespace Game.Hero.Tests
         [Test]
         public void While_paused_the_respawn_wait_stands_still()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
             _squad.Hit(0, 1000f);
             _run.IsPaused = true;
 
-            for (var i = 0; i < 20; i++) _participant.Step(1f);
+            for (var i = 0; i < 20; i++) Play(1f);
 
             Assert.That(_squad.Units[0].IsStanding, Is.False);
             Assert.That(_squad.Units[0].RespawnLeft, Is.EqualTo(8f).Within(1e-4f));
 
             _run.IsPaused = false;
-            _participant.Step(8.05f);
+            Play(8.05f);
             Assert.That(_squad.Units[0].IsStanding, Is.True);
         }
 
         [Test]
         public void Once_the_battle_stopped_a_fallen_hero_does_not_respawn()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
             _squad.Hit(0, 1000f);
             _run.StopBattle();                     // the castle fell the same frame
 
-            for (var i = 0; i < 10; i++) _participant.Step(1f);
+            for (var i = 0; i < 10; i++) Play(1f);
 
             Assert.That(_squad.Units[0].IsStanding, Is.False);
             Assert.That(_displays.Made[0].Respawns, Is.EqualTo(0));
@@ -158,10 +283,10 @@ namespace Game.Hero.Tests
         [Test]
         public void An_enemy_left_over_between_waves_is_still_fought()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
             var leftover = _field.Add(0f);         // no wave signal reaches the heroes; any living enemy counts
 
-            _participant.Step(0.05f);
+            Play(0.05f);
 
             Assert.That(_field.Taken(leftover), Is.EqualTo(12f));
         }
@@ -169,11 +294,11 @@ namespace Game.Hero.Tests
         [Test]
         public void Once_the_battle_stopped_heroes_no_longer_act()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
             var enemy = _field.Add(0f);
             _run.StopBattle();
 
-            _participant.Step(1f);
+            Play(1f);
 
             Assert.That(_field.Taken(enemy), Is.EqualTo(0f));
         }
@@ -181,10 +306,10 @@ namespace Game.Hero.Tests
         [Test]
         public void A_hit_shows_a_strike_and_the_enemy_side_sees_hurt_and_fall()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
             _field.Add(0f);
 
-            _participant.Step(0.05f);
+            Play(0.05f);
             _squad.Hit(0, 10f);
             _squad.Hit(0, 1000f);
 
@@ -197,10 +322,10 @@ namespace Game.Hero.Tests
         [Test]
         public void A_fallen_hero_reappears_with_the_respawn_animation()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
             _squad.Hit(0, 1000f);
 
-            for (var i = 0; i < 81; i++) _participant.Step(0.1f);
+            for (var i = 0; i < 81; i++) Play(0.1f);
 
             Assert.That(_displays.Made[0].Respawns, Is.EqualTo(1));
             Assert.That(_displays.Made[0].X, Is.EqualTo(-1.5f));
@@ -209,7 +334,7 @@ namespace Game.Hero.Tests
         [Test]
         public void Buying_a_level_shows_the_level_up_pop()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
 
             _squad.ApplyLevel(0, 2);
 
@@ -218,10 +343,50 @@ namespace Game.Hero.Tests
             Assert.That(_displays.Made[0].PopSeconds, Is.EqualTo(0.3f).Within(1e-4f));
         }
 
+        /// <summary>feature-hero/hero-stats/hero-level-values#stage-prototype: the new level number shows for 1 s.</summary>
+        [Test]
+        public void Buying_a_level_shows_the_new_level_number_above_the_hero_for_1_second()
+        {
+            StartWithOnlySlot1Standing();
+
+            _squad.ApplyLevel(0, 2);
+            Assert.That(_displays.Made[0].ShownLevel, Is.EqualTo(2));
+            Assert.That(_displays.Made[0].ShownLevelSeconds, Is.EqualTo(1f).Within(1e-4f));
+
+            _squad.ApplyLevel(0, 3);
+            Assert.That(_displays.Made[0].ShownLevel, Is.EqualTo(3), "a new level replaces the number shown");
+            Assert.That(_displays.Made[0].LevelLabels, Is.EqualTo(2));
+        }
+
+        /// <summary>feature-hero/hero-respawn/respawn-values#stage-prototype: the wait left is shown through the HUD.</summary>
+        [Test]
+        public void The_respawn_wait_left_counts_down_for_the_hud_and_stands_still_when_no_tick_runs()
+        {
+            StartWithOnlySlot1Standing();
+            Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(0f), "standing: nothing to wait for");
+
+            _squad.Hit(0, 1000f);
+            Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(8f).Within(1e-4f));
+
+            _combat.RunSteps(100);
+            Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(5.5f).Within(1e-3f));
+
+            _combat.Gameplay = false;              // paused or waiting for the castle's revive
+            _combat.RunSteps(200);
+            Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(5.5f).Within(1e-3f));
+
+            _combat.Gameplay = true;
+            _combat.RunSteps(220);
+            Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(0f), "back on its feet");
+
+            _run.ClearBattle();
+            Assert.That(_squad.RespawnSecondsLeft(1), Is.EqualTo(0f), "no run going");
+        }
+
         [Test]
         public void Buying_two_levels_in_one_frame_pops_once_per_level()
         {
-            StartWithOnlyTheKnightStanding();
+            StartWithOnlySlot1Standing();
 
             _squad.ApplyLevel(0, 2);
             _squad.ApplyLevel(0, 3);
@@ -261,6 +426,8 @@ namespace Game.Hero.Tests
 
             Assert.That(_displays.Made, Has.Count.EqualTo(3));
             Assert.That(_displays.Made.TrueForAll(d => d.Removed), Is.True);
+            Assert.DoesNotThrow(() => _combat.RunSteps(5), "combat may still tick the ended heroes: they do nothing");
+            Assert.That(_squad.Units, Is.Empty);
         }
     }
 }

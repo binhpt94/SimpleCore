@@ -1,0 +1,24 @@
+{
+ "node": "feature-hud-upgrade/bar-layout/bar-buttons",
+ "nodeHash": "b972ab828a57",
+ "frames": {
+  "main": "4ae4c91b05d1"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99"
+ },
+ "order": "_design/feature-hud-upgrade.bar-layout.bar-buttons/upgrade-bar-claude",
+ "version": 2,
+ "at": "2026-11-25 23:23:47",
+ "stamp": 1795623827.0140002,
+ "sources": [
+  [
+   "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+   2
+  ],
+  [
+   "_design/feature-hud.hud-skill-button.skill-button-spec/skill-buttons-claude",
+   2
+  ]
+ ]
+}

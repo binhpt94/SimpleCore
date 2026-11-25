@@ -36,11 +36,11 @@ namespace Game.Wave
         [SerializeField] private int archerFromWave = 7;
         [SerializeField] private int bossEveryWaves = 10;
 
-        [Tooltip("IDEA stage: off, Archer places go to Soldiers.")]
-        [SerializeField] private bool useArcher;
+        [Tooltip("PROTOTYPE and FULL: on (all 5 kinds). IDEA stage was off: Archer places went to Soldiers.")]
+        [SerializeField] private bool useArcher = true;
 
-        [Tooltip("IDEA stage: off, no Boss, its place goes to a Soldier.")]
-        [SerializeField] private bool useBoss;
+        [Tooltip("PROTOTYPE and FULL: on, one Boss every bossEveryWaves waves, last of the wave. IDEA stage was off.")]
+        [SerializeField] private bool useBoss = true;
 
         [Header("Kind mix (% of places after the Boss), each tier adds up to 100")]
         [SerializeField] private List<MixTier> tiers = new List<MixTier>

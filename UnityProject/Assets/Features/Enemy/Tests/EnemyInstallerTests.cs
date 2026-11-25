@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Game.Combat;
 using Game.Core;
 using Game.Run;
+using Game.SimClock;
 using Game.Wallet;
 using NUnit.Framework;
 using UnityEditor;
@@ -26,12 +28,51 @@ namespace Game.Enemy.Tests
             registry.Register<ISessionScene>(session);
             registry.Register<IRunFlow>(new FakeRunFlow());
             registry.Register<IWalletIncome>(new FakeIncome());
+            registry.Register<ISimClock>(new FakeClock());
+            var combat = new FakeCombat();
+            registry.Register<ICombat>(combat);
 
             installer.Install(registry);
 
             Assert.That(registry.TryResolve<IEnemyField>(out var field), Is.True);
             Assert.That(field.AliveCount, Is.Zero);
             Assert.That(session.Joined.Count, Is.EqualTo(1));
+
+            Assert.That(registry.TryResolve<IEnemyCombat>(out var enemyCombat), Is.True);
+            Assert.That(combat.Receivers.Count, Is.EqualTo(1), "the enemies take hits through combat");
+            Assert.That(combat.Actors.Count, Is.EqualTo(1), "the enemies walk and hit in the combat tick");
+            Assert.That(enemyCombat.CombatReceiver, Is.EqualTo(41), "the number combat gave");
+        }
+
+        [Test]
+        public void Installing_before_combat_fails_naming_the_missing_service()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
+            Assert.That(installer, Is.Not.Null, $"Missing {InstallerPath}");
+
+            var registry = new FakeRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IRunFlow>(new FakeRunFlow());
+            registry.Register<IWalletIncome>(new FakeIncome());
+            registry.Register<ISimClock>(new FakeClock());
+
+            var error = Assert.Throws<InvalidOperationException>(() => installer.Install(registry));
+            StringAssert.Contains(nameof(ICombat), error.Message);
+        }
+
+        [Test]
+        public void Installing_before_the_shared_clock_fails_naming_the_missing_service()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
+            Assert.That(installer, Is.Not.Null, $"Missing {InstallerPath}");
+
+            var registry = new FakeRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IRunFlow>(new FakeRunFlow());
+            registry.Register<IWalletIncome>(new FakeIncome());
+
+            var error = Assert.Throws<InvalidOperationException>(() => installer.Install(registry));
+            StringAssert.Contains(nameof(ISimClock), error.Message);
         }
 
         [Test]
@@ -152,6 +193,8 @@ namespace Game.Enemy.Tests
         [TestCase("_shotSeconds", 0.15f)]
         [TestCase("_coinRise", 1f)]
         [TestCase("_coinSeconds", 0.6f)]
+        [TestCase("_entranceScale", 1.2f)]
+        [TestCase("_entranceSeconds", 0.5f)]
         public void The_real_stage_plays_the_unit_motions_with_the_design_numbers(string field, float expected)
         {
             // Also: an enemy archer's shot reaches its target in 0.15s (live: enemy-type-values); the "+coins" text
@@ -181,6 +224,51 @@ namespace Game.Enemy.Tests
             Assert.That(config, Is.Not.Null, "EnemyInstaller.asset has no EnemyConfig assigned");
 
             Assert.That(config.Kind(type).Ranged, Is.EqualTo(ranged));
+        }
+
+        // PROTOTYPE: all five types are in the game (live: enemy-type-values, Thông số theo giai đoạn).
+        [TestCase(EnemyType.Soldier)]
+        [TestCase(EnemyType.Wolf)]
+        [TestCase(EnemyType.Giant)]
+        [TestCase(EnemyType.Archer)]
+        [TestCase(EnemyType.Boss)]
+        public void The_real_config_has_every_enemy_type_in_the_game_at_PROTOTYPE(EnemyType type)
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
+            var config = new SerializedObject(installer).FindProperty("_config").objectReferenceValue as EnemyConfig;
+            Assert.That(config, Is.Not.Null, "EnemyInstaller.asset has no EnemyConfig assigned");
+
+            Assert.That(config.Kind(type).Available, Is.True);
+        }
+
+        // Boss coming on screen: grows 1.2 times and back in 0.5s when its centre reaches x=±16u (live: enemy-type-values).
+        [TestCase(EnemyType.Soldier, false)]
+        [TestCase(EnemyType.Wolf, false)]
+        [TestCase(EnemyType.Giant, false)]
+        [TestCase(EnemyType.Archer, false)]
+        [TestCase(EnemyType.Boss, true)]
+        public void Only_the_boss_has_an_entrance_at_16u_in_the_real_config(EnemyType type, bool entrance)
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
+            var config = new SerializedObject(installer).FindProperty("_config").objectReferenceValue as EnemyConfig;
+            Assert.That(config, Is.Not.Null, "EnemyInstaller.asset has no EnemyConfig assigned");
+
+            Assert.That(config.Kind(type).Entrance, Is.EqualTo(entrance));
+            Assert.That(config.EntranceDistance, Is.EqualTo(16f));
+        }
+
+        [Test]
+        public void The_real_stage_tints_slowed_enemies_with_a_visible_slow_mark()
+        {
+            // PROTOTYPE (enemy-move-values): a slowed enemy shows a mark all the time it is slowed.
+            var installer = AssetDatabase.LoadAssetAtPath<EnemyInstaller>(InstallerPath);
+            var prefab = new SerializedObject(installer).FindProperty("_stagePrefab").objectReferenceValue as GameObject;
+            Assert.That(prefab, Is.Not.Null, "EnemyInstaller.asset has no stage prefab assigned");
+            var stage = prefab.GetComponent<IEnemyStage>() as Component;
+
+            var tint = new SerializedObject(stage).FindProperty("_slowTint").colorValue;
+            Assert.That(tint.a, Is.EqualTo(1f).Within(1e-4f), "the tint does not fade the enemy");
+            Assert.That(tint.r < 0.95f || tint.g < 0.95f || tint.b < 0.95f, Is.True, "the tint is not plain white");
         }
 
         [Test]
@@ -228,6 +316,40 @@ namespace Game.Enemy.Tests
         {
             public readonly List<int> Added = new List<int>();
             public void Add(int amount) => Added.Add(amount);
+        }
+
+        private sealed class FakeCombat : ICombat
+        {
+            public readonly List<ICombatReceiver> Receivers = new List<ICombatReceiver>();
+            public readonly List<ICombatActor> Actors = new List<ICombatActor>();
+#pragma warning disable 67
+            public event Action TickDone;
+#pragma warning restore 67
+
+            public int AddReceiver(ICombatReceiver receiver)
+            {
+                Receivers.Add(receiver);
+                return 40 + Receivers.Count;
+            }
+
+            public void AddActor(ICombatActor actor) => Actors.Add(actor);
+            public void Hit(in CombatHit hit) { }
+        }
+
+        private sealed class FakeClock : ISimClock
+        {
+            public SimMode Mode => SimMode.FixedTick;
+            public float StepSeconds => 0.025f;
+            public long StepCount => 0;
+            public long GameplayStepCount => 0;
+            public double GameplaySeconds => 0;
+            public IDisposable OnStep(string owner, Action<SimStep> onStep) => new Nothing();
+            public void Enqueue(string owner, Action apply) { }
+
+            private sealed class Nothing : IDisposable
+            {
+                public void Dispose() { }
+            }
         }
 
         private sealed class FakeRunFlow : IRunFlow

@@ -1,0 +1,59 @@
+B1 va SimClock: nhat ki cac luot (execute_code, chi trong bo nho)
+Toc do SimClock ban dev: SetSpeed(16) tu luc 23:58:56 (luot 1 dang o dot 5). Seed ban dev: 12345 moi luot.
+gp / gameplaySec = SimClock.GameplaySeconds (gio tran, bang gio that neu choi toc do 1). realDur = gio that luc tua x16.
+levels = cap Hiep si / Dau si riu / Cung thu / mau thanh / suc danh thanh / ki nang thanh luc thua.
+
+Cach choi cua bot (chi bam nut nhu nguoi choi; doi mac dinh Hiep si, Dau si riu, Cung thu; IDEA chi co Sam set):
+- vung-A: 8 giay tran moi mua 1 lan, xoay vong 6 nut; bam Sam set ngay khi hoi xong (khong canh).
+- vung-B: 8 giay moi mua 1 lan, chi nang hero (khong nang thanh, khong nang ki nang); Sam set ngay khi hoi xong.
+- thuong: 0.5 giay mua 1 lan, xoay vong 6 nut; Sam set khi co tu 3 quai trong |x| < 7u.
+- kheo-A: 0.5 giay mua mon re nhat dang mua duoc (rai deu theo gia); Sam set khi co tu 5 quai trong |x| < 7u.
+- kheo-B: nhu kheo-A, Sam set khi tu 4 quai.
+- kheo-A-lap: lap dung kheo-A (kiem tinh tat dinh cua seed).
+
+run1 (vung-A) hooked mid-run real=23:58:56 wave=5 gp=88.0     (truoc do: khong mua, chi 1 lan mua Hiep si o buoc kiem Freeze)
+  run1 W10 real=23:59:06 gp=234 castleHp=867.3
+run1 (vung-A) Ending real=23:59:13 realDur=17s wave=12 score=11 best=11 gameplaySec=323.2 levels=6/6/6/5/5/4
+run2 (vung-B) start real=23:59:14
+  run2 W5 real=23:59:19 gp=76 castleHp=1000
+  run2 W10 real=23:59:29 gp=213 castleHp=427.8999
+run2 (vung-B) Ending real=23:59:32 realDur=18s wave=11 score=10 best=11 gameplaySec=269.1 levels=7/7/8/1/1/1
+run3 (thuong) start real=23:59:33
+  run3 W5 real=23:59:39 gp=77 castleHp=1146.4
+  run3 W10 real=23:59:48 gp=216 castleHp=842.2
+run3 (thuong) Ending real=23:59:54 realDur=21s wave=12 score=11 best=11 gameplaySec=305.8 levels=6/7/6/5/5/3
+run4 (kheo-A) start real=23:59:55
+  run4 W5 real=00:00:01 gp=76 castleHp=1150
+  run4 W10 real=00:00:11 gp=217 castleHp=650.8998
+run4 (kheo-A) Ending real=00:00:20 realDur=25s wave=13 score=12 best=12 gameplaySec=350.3 levels=7/7/7/5/5/4
+run5 (kheo-B) start real=00:00:21
+  run5 W5 real=00:00:27 gp=76 castleHp=1150
+  run5 W10 real=00:00:36 gp=216 castleHp=795.0999
+run5 (kheo-B) Ending real=00:00:46 realDur=24s wave=13 score=12 best=12 gameplaySec=350.7 levels=7/7/7/5/5/4
+run6 (kheo-A-lap) start real=00:00:47
+  run6 W5 real=00:00:52 gp=76 castleHp=1150
+  run6 W10 real=00:01:02 gp=217 castleHp=650.8998        <- giong het run4
+run6 (kheo-A-lap) Ending real=00:01:11 realDur=24s wave=13 score=12 best=12 gameplaySec=350.3 levels=7/7/7/5/5/4   <- giong het run4
+run7 start real=00:01:12: bot kheo-A chay khoang 10 giay that dau (toi khoang dot 5) roi tat, tu do khong thao tac
+  run7 W5 real=00:01:17 gp=76 castleHp=1150
+  run7 W10 real=00:01:27 gp=229 castleHp=21.89975
+run7 Ending real=00:01:28 realDur=16s wave=10 score=9 best=12 gameplaySec=240.0 levels=4/4/4/3/2/1   <- gay o dot Trum 10
+
+== Thu tu tha quai (60 con dau moi luot, sap theo SpawnOrder; S Linh, W Soi, G Khong lo; L/R ben ra)
+run1 (bat dau ghi giua luot, tu dot 5): S R,W R,S R,G L,S R,S L,S R,G R,W L,S L,...
+run2: S L,S L,S R,S L,S R,S L,S R,S R,S R,S L,S R,S R,S L,S R,S R,S L,S L,S L,S L,S L,W R,S R,S R,W L,W R,S R,S L,S L,S L,S R,S R,S L,S L,W L,W R,W R,S L,S L,S L,S R
+run3..run7: giong het run2 tung con (da so 40 con dau ca 6 luot, va ca 60 con trong du lieu ghi).
+
+== Console (doc 2 lan: giua dot va truoc Stop Play)
+[SimClock] Seed của lượt (bản dev, từ config): 12345   x7 (luot dau luc vao tran + 6 lan Choi lai)
+Khong co dong Error hay Warning nao.
+
+== Kiem "mua nang cap ap o buoc sau" (Freeze/StepOnce cua SimClock ban dev, toc do 1, dau luot 1)
+frozen: step=1287 gp=1287 lvl0=1 price=30 canBuy=True
+after click (bam nut nang Hiep si luc dong ho dung): step=1287 lvl0=1          <- chua ap
+frames later still frozen: step=1287 lvl0=1 (them nhieu khung hinh, van chua ap)
+after StepOnce: step=1288 lvl0=2 price=41                                     <- ap o buoc ke tiep
+after 2nd StepOnce: step=1289 lvl0=2
+
+== Tam dung va hoi sinh thanh o IDEA
+RunFlow: PauseEnabled=False, ReviveOnce=False; RunSession: pauseOnLeave=False, backKeyPauses=False.

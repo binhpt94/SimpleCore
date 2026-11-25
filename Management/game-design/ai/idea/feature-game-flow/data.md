@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 node-by: gpt@r2-all-2
 by: play-opens-team=gpt@r2-1#choi-mo-chon-doi, start-hands-team=gpt@r2-1#vao-tran-ban-giao-doi, show-battle-when-ready=gpt@r2-1#hien-tran-sau-chuan-bi, replay-to-team=gpt@r2-1#choi-lai-ve-chon-doi, lose-to-home=gpt@r2-1#thua-ve-man-bat-dau, bo-luot-ve-man-bat-dau=gpt@r2-1#bo-luot-ve-man-bat-dau, back-from-team=gpt@r2-1#quay-lai-tu-chon-doi, flow-lock=gpt@r2-1#khoa-yeu-cau-chuyen-man, retry-on-build-fail=gpt@r2-1#cho-thu-lai-khi-dung-tran-loi, leave-choice-after-dispose=gpt@r2-1#nhan-lua-chon-sau-khi-don, flow-only-picks-target=gpt@r2-1#quyen-chon-man-dich, flow-owns-screens=gpt@r2-1#quyen-doi-man-chinh, flow-from-scene-ready=gpt@r2-1#ban-giao-khi-game-san-sang
 ---

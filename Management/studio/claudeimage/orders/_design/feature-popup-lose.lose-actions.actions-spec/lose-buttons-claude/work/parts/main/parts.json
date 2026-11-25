@@ -14,7 +14,8 @@
    "shapes": [
     "replay"
    ],
-   "from": null
+   "from": null,
+   "text": true
   },
   {
    "id": "btn-sub",
@@ -29,7 +30,8 @@
    "shapes": [
     "home"
    ],
-   "from": null
+   "from": null,
+   "text": true
   }
  ],
  "kept": [

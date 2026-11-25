@@ -1,0 +1,20 @@
+{
+ "node": "feature-popup-revive/revive-popup/revive-spec",
+ "nodeHash": "d5baa8be95f9",
+ "frames": {
+  "main": "68310468716a"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99"
+ },
+ "order": "_design/feature-popup-revive.revive-popup.revive-spec/revive-spec-claude",
+ "version": 2,
+ "at": "2026-11-25 23:19:42",
+ "stamp": 1795623582.3890681,
+ "sources": [
+  [
+   "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+   2
+  ]
+ ]
+}

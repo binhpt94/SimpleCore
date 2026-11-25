@@ -44,14 +44,15 @@
    "state": "verified",
    "note": "",
    "tests": [
-    "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it"
+    "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it",
+    "EnemyCombatTests.Hits_on_enemies_go_through_combat_and_an_enemy_takes_one_total_per_tick"
    ],
    "play": "",
    "hash": "e137a79d8fda",
    "text": "Hai đòn cùng khung hình hạ một quái (ví dụ Sấm sét và một mũi tên): tiền một lần.",
    "title": "Hai đòn cùng khung hình hạ một quái (ví dụ Sấm sét và một mũi tên)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:13"
+   "at": "2026-11-26 00:30:01"
   },
   "edge-don-vung-ha-nhieu-quai": {
    "state": "verified",
@@ -148,6 +149,22 @@
    "title": "Tạm dừng",
    "by": "@CodeLead",
    "at": "2026-11-25 13:43:56"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "Cột PROTOTYPE: tiền cả 5 loại, chữ tiền bay 1u trong 0.6s, trỏ test",
+   "tests": [
+    "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type",
+    "EnemyFieldTests.Defeating_an_enemy_pays_the_coins_of_its_type",
+    "EnemyCombatTests.A_defeated_enemy_shows_the_coins_it_paid_where_it_stood",
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+   ],
+   "play": "",
+   "hash": "bae28824f414",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Loại có tiền: cả 5 loại như bảng\n- Chữ tiền bay lên: có, 1u trong 0.6s",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:14"
   }
  },
  "log": [
@@ -322,6 +339,41 @@
   {
    "at": "2026-11-25 13:43:56",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:25:03",
+   "id": "edge-hai-don-cung-khung-hinh-ha-mot-quai",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyFieldTests.Defeating_an_enemy_pays_its_coins_once_then_reports_it, EnemyCombatTests.Hits_on_enemies_go_through_combat_and_an_enemy_takes_one_total_per_tick"
+  },
+  {
+   "at": "2026-11-26 00:30:01",
+   "id": "edge-hai-don-cung-khung-hinh-ha-mot-quai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:02:55",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Enemy",
+   "note": "Cột PROTOTYPE: tiền cả 5 loại, chữ tiền bay 1u trong 0.6s, trỏ test"
+  },
+  {
+   "at": "2026-11-26 01:03:30",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyInstallerTests.The_real_config_matches_the_design_table_of_each_enemy_type, EnemyFieldTests.Defeating_an_enemy_pays_the_coins_of_its_type, EnemyCombatTests.A_defeated_enemy_shows_the_coins_it_paid_where_it_stood, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+  },
+  {
+   "at": "2026-11-26 01:18:14",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

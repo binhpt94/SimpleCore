@@ -1,0 +1,1 @@
+Đã tạo đúng một sprite [out/slot.png](D:/AI/CoreSimple/Management/studio/codex/orders/TeamSelect/ts-slot-colorful/work/out/slot.png). PNG 240 × 240 có nền trong suốt ngoài khung, đối xứng trái phải, viền tím bóng và lòng tím nhạt phẳng để đặt hình hero và tên.

@@ -98,7 +98,8 @@
    "state": "verified",
    "note": "Cờ showPauseButton trong HudConfig, IDEA tắt: không có nút, không nhận chạm",
    "tests": [
-    "HudSessionTests.AtIdeaTheHudHasNoPauseButtonAndAPauseTapDoesNothing",
+    "HudSessionTests.AtPrototypeTheConfigTurnsThePauseButtonOnAndATapReportsPause",
+    "HudSessionTests.WithThePauseButtonOffTheHudHasNoneAndAPauseTapDoesNothing",
     "HudSessionTests.WithThePauseButtonOnItIsShownAndReportsPause",
     "HudLayoutTests.PauseButtonIsOnePressableButtonWithTwoVerticalBarsAndNoText",
     "HudPauseButtonTests.TwoQuickTapsReportPauseOnlyOnce"
@@ -108,7 +109,7 @@
    "text": "## Làm gì\n- Hiện một nút biểu tượng hai vạch đứng suốt trận, ở chỗ ghi trong `feature-hud/hud-layout/layout-spec`.\n- Chạm khi trận đang đánh: báo `feature-run/run-pause` một lần.\n- Biết trạng thái trận (đang đánh, tạm dừng, đã kết thúc) từ `feature-run` để bỏ qua chạm khi không đang đánh.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số nút | 1 | nút | `pause-button-one` |\n| Biểu tượng | hai vạch đứng | | Người chơi điện thoại đã quen |\n| Số lần báo mỗi lần chạm | 1 | lần | |\n| Khoảng cách tới nút kĩ năng và thanh nâng cấp | khác mép (nút ở mép trên, hai thứ kia ở mép dưới) | | `pause-button-apart` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Có nút tạm dừng | Không | Không bắt buộc | Có |\n| Biểu tượng | | Chữ hoặc hai vạch | Sprite hai vạch hoàn thiện |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 18:46:03"
+   "at": "2026-11-26 00:30:12"
   }
  },
  "log": [
@@ -247,6 +248,20 @@
   },
   {
    "at": "2026-11-25 18:46:03",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:12:01",
+   "id": "params",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSessionTests.AtPrototypeTheConfigTurnsThePauseButtonOnAndATapReportsPause, HudSessionTests.WithThePauseButtonOffTheHudHasNoneAndAPauseTapDoesNothing, HudSessionTests.WithThePauseButtonOnItIsShownAndReportsPause, HudLayoutTests.PauseButtonIsOnePressableButtonWithTwoVerticalBarsAndNoText, HudPauseButtonTests.TwoQuickTapsReportPauseOnlyOnce"
+  },
+  {
+   "at": "2026-11-26 00:30:12",
    "id": "params",
    "state": "verified",
    "by": "@CodeLead",

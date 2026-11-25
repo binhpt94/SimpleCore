@@ -1,0 +1,71 @@
+Dot PROTOTYPE 2: so do muc 1-7 (execute_code, chi trong bo nho). Dong ho SimClock 40 buoc/giay: 1 buoc = 0.025 s.
+cs = SimClock.StepCount (moi buoc, ke ca luc dung); gp = GameplayStepCount (chi buoc tran chay).
+mini: step, gp, cs, wave, mau thanh, cd (hoi chieu Sam set, Bang gia, Co vu), heroes [slot up | down resp=giay con lai], alive, slowed, slowMax.
+
+== Muc 2: Esc o man bat dau (gia lap: phat event BackPressed cua moi view dang nghe)
+back raised on: RunAppSignalsView(x1)
+truoc: step=Home btns: HomeScreen/Play ; sau (nhieu khung): step=Home btns: HomeScreen/Play, scene=Game  -> man dung yen
+
+== Muc 1: luong man
+Choi (HomeScreen/Play) -> TeamSelectView hien: 5 the (Hiep si, Dau si riu, Kiem khach, Cung thu, Phap su), 3 o, Vao tran, Quay lai (anh 01)
+Vao tran (TeamSelectView/Screen/Start) -> step=Playing, Heroes 3, console 0 loi
+Thua lan 2 (sau hoi sinh) -> popup thua: Choi lai, Ve man bat dau; "Tru duoc 7 dot", "Ki luc: 12 dot" (anh 03)
+Choi lai -> TeamSelectView hien lai (5 the, Vao tran), EnemyStage 0 hinh, khong con hero
+Luot sau: Ket thuc luot -> popup thua -> Ve man bat dau -> HomeScreen: "Thu thanh anh hung", "Ki luc: 12 dot", "Choi"; EnemyStage 0 hinh
+Luot sau: Tam dung -> popup Tam dung (Tiep tuc, Bo luot) -> Bo luot -> buoc xac nhan "Bo luot nay? Diem tinh theo so dot da don." (Khong, Bo luot)
+  -> Bo luot -> step=Home, HomeScreen/Play, EnemyStage 0 hinh, khong con hero
+
+== Muc 3: tam dung luc hero dang guc (hook tu bam Tam dung khi hero co resp 3..6 s)
+3: pause clicked  gp=3815 cs=3815 wave=5 heroes: [0 up] [1 down resp=6.000] [2 up]
+3: paused         gp=3815 cs=3817 [1 down resp=6.000]
+3: after 400 paused frames gp=3815 cs=4235 [1 down resp=6.000]     (418 buoc nen, resp dung yen)
+3: resumed        gp=3816 cs=4236 [1 down resp=5.975]
+3: hero 1 up at gp=4057 (resp luc tiep tuc 5.975 => mong +239 buoc, do duoc +241; do o toc do x8, nhieu buoc mot khung nen hook doc tre toi 2 buoc)
+
+== Muc 5: ha quai roi tam dung ngay, tiep tuc bang hook (khong co lenh execute_code chen vao khung tiep tuc)
+dying Enemy Wolf #118 sc=0.1947 max=0.2024 -> paused sc=0.1842 -> after 300 paused frames sc=0.1842
+Tiep tuc: f31689 Playing dt=0.0041 sc=0.1810, f31690 0.1775, f31691 0.1741, ... f31720 0.0951, ... f31750 0.0145, f31755 0.0019, f31756 gone
+(thu nho deu tu 0.1842 ve 0 trong 67 khung, deltaTime 0.003-0.0045)
+
+== Muc 7: luong hoi sinh
+-- Lan pha tu nhien o dot 8 (lan dau trong luot):
+7a: step=ReviveOffer gp=8329 cs=10274 castleHp=0.0/1000 heroes: [0 down resp=0.175] [1 down resp=1.150] [2 up]
+    popup: Title "Thanh da bi pha", Gain "Xem quang cao de thanh hoi 30% mau va choi tiep", Watch "Xem quang cao", End "Ket thuc luot" (anh 02)
+7 back raised on: RunAppSignalsView(x1)
+7b after Esc: step=ReviveOffer gp=8329 cs=10470, popup van mo, hai nut nhu cu   -> back-key-nothing dat
+before Watch: gp=8329 cs=11005 heroes [0 down resp=0.175] [1 down resp=1.150]   (resp dung yen suot ~730 buoc nen)
+Watch -> waiting='Dang cho quang cao...' -> sau ~1.3 s quang cao gia xong
+Step->Reviving: thanh phong tu scale 0.006 len 0.806 trong 0.498 s (132.642 -> 133.140 unscaledTime)
+Step->Playing: castleHp=300.0/1000 (30%), heroes van resp 0.175 / 1.150 luc chay tiep
+(Buoc Paused ngay sau do la hook muc 5 cua tester bam Tam dung, khong phai game.)
+Lan pha thu hai o dot 8: Step->Ending gp=8592 -> thanh thu nho 0.806 -> 0 trong khoang 0.5 s -> Step->Lost sau 1.003 s; khong co popup hoi sinh lan hai -> popup thua.
+Ghi nhan: o lan pha dau (tu nhien), luc dang ReviveOffer than thanh con scale 0.599 (chua ve 0). Lan pha bang cheat ben duoi thi thu nho deu ve 0.
+Khong dung lai duoc thoi diem lan pha dau nen chua ket luan; xem Loi tim thay.
+
+-- Lan pha lan dau bang ICastleFallCheat (CastleBody.Hit voi toan bo mau), dot 6, ngay sau khi bam Bang gia:
+frost clicked gp=4910 cd=0/35/0 alive=11 slowed=11 slowMax=5.000
+FALL cs=4911 coins=551 slowMax=4.975 cd Bang gia 34.975
+ReviveWait: than thanh 0.81 -> 0.00 trong khoang 20 buoc (0.5 s); gp giu 4911; slowMax giu 4.975; cd giu 34.975; tien giu 551
+ReviveOffer + popup mo o cs=4951 -> 40 buoc = 1.0 s sau khi thanh vo
+Ket thuc luot (cs=5622): Step->Lost sau 1 buoc, popup thua co ngay; popup hoi sinh da dong   -> fail-to-lose-now dat
+
+-- Roi game trong 1 giay tre (gia lap: SendMessage OnApplicationFocus(false), OnApplicationPause(true) toi moi GameObject):
+FALL cs=4602 (Bang gia vua bam, slowMax 4.925)
+LEAVE o +8 buoc (step=ReviveWait); trong luc "o ngoai" popup hoi sinh mo o khoang +40 buoc (Editor van chay, dong ho van dem)
+RETURN o +240 buoc: step=ReviveOffer, popup hoi sinh mo, khong co popup tam dung, gp giu 4602, slowMax giu 4.925
+Gioi han: tren may that app bi treo thi khong co khung nao chay; trong Editor gia lap roi game khong dung duoc vong lap, nen phan "tre khong tinh luc o ngoai" khong do duoc.
+
+-- Muc 4: Ket thuc luot khi Bang gia con 4.925 s -> Choi lai -> chon doi -> Vao tran:
+4: new run: step=Playing gp=55 wave=1 castleHp=1000/1000 cd=0/0/0 alive=2 slowed=0 | views=2 tinted=0 castleFx=Body   -> luot moi sach
+
+-- Cheat waiting-ad (goi dung 3 ham cua cheat: WaveDirector.StartWave(8), FakeAdProvider.HoldNextAd(), CastleBody.Hit):
+step=ReviveWait wave=8 -> ReviveOffer o cs=906 (44 buoc sau, gom 1 khung cua lenh) -> bam Xem quang cao
+Watch / End: Button.interactable=True nhung IsInteractable=False vi CanvasGroup(Buttons a=0.4 i=False br=False); dong 'Dang cho quang cao...' hien (anh 04)
+Bam End trong luc cho: khong tac dung (van ReviveOffer, popup van mo)
+
+== Muc 6: quai dang cham bi ha
+Bam Bang gia (dot 5): views=2 tinted=2 aliveSlowed=2
+f=74773 slowed #241 gone from field (slowLeft was 1.15): hinh #241 van mau xanh luc dang thu nho (sc 0.23 -> 0.17), roi mat cung quai
+Sau khi het cham: views=8 tinted=0 aliveSlowed=0 (hinh quai moi ra khong bi nhuom)
+
+== Console: 0 Error, 0 Warning trong ca lan Play (doc truoc Stop).

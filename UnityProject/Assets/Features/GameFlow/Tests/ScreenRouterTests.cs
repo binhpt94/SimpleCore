@@ -237,11 +237,16 @@ namespace Game.GameFlow.Tests
         [Test]
         public void Participant_ShowsTheStartScreenWhenTheSessionRuns()
         {
-            var participant = new GameFlowParticipant(_router);
+            // From PROTOTYPE the session's run step waits for SceneFlow's scene-ready signal, then shows the start screen.
+            var home = new GameFlowParticipantTests.FakeHome();
+            var ready = new GameFlowParticipantTests.FakeSceneReady();
+            var participant = GameFlowParticipantTests.Make(home, new GameFlowParticipantTests.FakeTeamSelect(),
+                new GameFlowParticipantTests.FakeBattle(), () => ready, new GameFlowParticipantTests.FakeClock());
 
             participant.Run();
+            ready.Raise();
 
-            Assert.That(_router.Current, Is.EqualTo(MainScreen.Home));
+            Assert.That(home.Shows, Is.EqualTo(1));
         }
 
         // ---- back-key-map ----

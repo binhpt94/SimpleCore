@@ -1,0 +1,3 @@
+Đã lưu đúng một ảnh tại [out/panel.png](D:/AI/CoreSimple/Management/studio/codex/orders/_Services/Popup/popup-panel-colorful/work/out/panel.png).
+
+PNG 800 × 700 px, khung vàng cam đối xứng, bốn góc trong suốt. Đã kiểm tra vùng giữa của 9-slice 48/48/48/56 px chỉ có nền kem chuyển sắc nhẹ theo chiều dọc.

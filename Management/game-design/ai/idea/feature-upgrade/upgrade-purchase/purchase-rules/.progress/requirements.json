@@ -46,14 +46,16 @@
    "note": "gan test co san",
    "tests": [
     "UpgradeShopTests.Two_fast_taps_with_coins_for_one_buy_once_and_refuse_the_second",
-    "UpgradeShopTests.Buying_pays_the_price_raises_the_level_and_shows_the_next_price"
+    "UpgradeShopTests.Buying_pays_the_price_raises_the_level_and_shows_the_next_price",
+    "UpgradeShopTests.Two_buy_taps_before_a_step_are_applied_in_the_order_tapped",
+    "UpgradeShopTests.A_buy_tap_pays_nothing_until_the_next_clock_step"
    ],
    "play": "",
    "hash": "9d83f361d7f9",
    "text": "Mỗi chạm là một yêu cầu mua đúng một cấp, xử lí lần lượt; yêu cầu sau dùng số dư và giá mới\nBấm hai lần rất nhanh khi chỉ đủ tiền một lần: lần đầu mua được, lần sau bị từ chối.",
    "title": "Mỗi chạm là một yêu cầu mua đúng một cấp, xử lí lần lượt; yêu cầu sau dùng số dư và giá mới",
    "by": "@CodeLead",
-   "at": "2026-11-25 11:39:14"
+   "at": "2026-11-25 23:23:32"
   },
   "edge-bam-mua-hai-lan-rat-nhanh-chi-du": {
    "state": "verified",
@@ -140,14 +142,17 @@
     "UpgradeShopTests.Buying_stays_open_the_whole_battle_including_the_break_between_waves",
     "UpgradeShopTests.Buying_while_paused_is_refused_even_with_enough_coins",
     "UpgradeShopTests.After_the_castle_falls_buying_is_refused",
-    "UpgradeShopTests.Buying_works_again_after_resuming_from_pause"
+    "UpgradeShopTests.Buying_works_again_after_resuming_from_pause",
+    "UpgradeShopTests.A_buy_tap_followed_by_a_pause_before_the_step_is_refused",
+    "UpgradeShopTests.A_buy_tap_followed_by_the_castle_falling_before_the_step_is_refused",
+    "UpgradeShopTests.A_buy_tap_is_lost_when_the_run_is_cleared_before_the_step"
    ],
    "play": "",
    "hash": "a2c44682ba76",
    "text": "Mua được khi trận đang chạy, kể cả lúc nghỉ giữa đợt; không mua được khi tạm dừng hoặc lượt đã kết thúc\nLượt kết thúc là từ khung hình thành về 0 máu.",
    "title": "Mua được khi trận đang chạy, kể cả lúc nghỉ giữa đợt; không mua được khi tạm dừng hoặc lượt đã kết thúc",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:47"
+   "at": "2026-11-25 23:23:32"
   },
   "no-cap-no-refund": {
    "state": "verified",
@@ -564,6 +569,34 @@
   {
    "at": "2026-11-25 12:07:52",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:20:12",
+   "id": "buy-sequence",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Two_fast_taps_with_coins_for_one_buy_once_and_refuse_the_second, UpgradeShopTests.Buying_pays_the_price_raises_the_level_and_shows_the_next_price, UpgradeShopTests.Two_buy_taps_before_a_step_are_applied_in_the_order_tapped, UpgradeShopTests.A_buy_tap_pays_nothing_until_the_next_clock_step"
+  },
+  {
+   "at": "2026-11-25 23:20:19",
+   "id": "buy-when",
+   "state": "done",
+   "by": "Upgrade",
+   "note": "UpgradeShopTests.Buying_stays_open_the_whole_battle_including_the_break_between_waves, UpgradeShopTests.Buying_while_paused_is_refused_even_with_enough_coins, UpgradeShopTests.After_the_castle_falls_buying_is_refused, UpgradeShopTests.Buying_works_again_after_resuming_from_pause, UpgradeShopTests.A_buy_tap_followed_by_a_pause_before_the_step_is_refused, UpgradeShopTests.A_buy_tap_followed_by_the_castle_falling_before_the_step_is_refused, UpgradeShopTests.A_buy_tap_is_lost_when_the_run_is_cleared_before_the_step"
+  },
+  {
+   "at": "2026-11-25 23:23:32",
+   "id": "buy-when",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:32",
+   "id": "buy-sequence",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

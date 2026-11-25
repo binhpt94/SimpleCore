@@ -1,6 +1,6 @@
 ---
 based-on: 6934878b1b70
-refs: feature-balance/balance-team/hero-compare@d356532cffe9, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-balance/balance-economy/income-and-prices@295cfe59ac28, feature-balance/balance-difficulty-curve/break-forecast@b38ef8e31b57, feature-castle/castle-skills/skill-values@ad45ef4fdcc9, feature-castle/castle-upgrade-effects/upgrade-effect-values@b16439440823, feature-upgrade/upgrade-effect/effect-numbers@687e3349a36c
+refs: feature-balance/balance-team/hero-compare@d356532cffe9, feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-balance/balance-economy/income-and-prices@295cfe59ac28, feature-balance/balance-difficulty-curve/break-forecast@3d3abad89eb9, feature-castle/castle-skills/skill-values@ad45ef4fdcc9, feature-castle/castle-upgrade-effects/upgrade-effect-values@b16439440823, feature-upgrade/upgrade-effect/effect-numbers@687e3349a36c
 frame: none
 ---
 # Bảng số chuẩn và nơi đặt

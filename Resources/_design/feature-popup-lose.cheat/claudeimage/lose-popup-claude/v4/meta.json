@@ -1,0 +1,29 @@
+{
+ "node": "feature-popup-lose/cheat",
+ "nodeHash": "683571cd6600",
+ "frames": {
+  "new-record": "5158c7c579e4"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99",
+  "world-cartoon": "81265f8159a9"
+ },
+ "order": "_design/feature-popup-lose.cheat/lose-popup-claude",
+ "version": 4,
+ "at": "2026-11-25 23:27:54",
+ "stamp": 1795624074.9368935,
+ "sources": [
+  [
+   "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+   2
+  ],
+  [
+   "_design/feature-popup-lose.lose-result.result-spec/lose-result-claude",
+   3
+  ],
+  [
+   "_design/feature-popup.popup-layer.stack-rules/popup-panel-claude",
+   2
+  ]
+ ]
+}

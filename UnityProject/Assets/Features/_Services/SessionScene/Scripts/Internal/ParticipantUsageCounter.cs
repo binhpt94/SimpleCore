@@ -12,7 +12,7 @@ namespace Game.Services.SessionScene
         public ParticipantUsage CountFor(ISessionParticipant participant)
         {
             return participant is ISessionParticipantUsage usage
-                ? new ParticipantUsage(usage.HeldViews, usage.RunningJobs)
+                ? new ParticipantUsage(usage.HeldViews, usage.RunningJobs, usage.OpensViewsOnRun)
                 : new ParticipantUsage(0, 0);
         }
     }

@@ -19,7 +19,7 @@
     "frame": "main",
     "part": "panel",
     "ref": "_design/feature-popup.popup-layer.stack-rules/popup-panel-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   }

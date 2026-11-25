@@ -26,6 +26,9 @@ namespace Game.Hero
         /// <summary>Grow to <paramref name="peakScale"/> and back within <paramref name="seconds"/> (<see cref="HeroLevelUpPop"/>).</summary>
         void PlayLevelUp(float peakScale, float seconds);
 
+        /// <summary>Shows the number <paramref name="level"/> above the hero for <paramref name="seconds"/>; a new call replaces it.</summary>
+        void ShowLevel(int level, float seconds);
+
         void Remove();
     }
 

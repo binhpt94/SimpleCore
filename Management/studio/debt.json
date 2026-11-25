@@ -28,5 +28,50 @@
   "at": "2026-11-24 08:15:59",
   "closedBy": "người chấp nhận nợ",
   "closedAt": "2026-11-24 08:19:51"
+ },
+ {
+  "id": "n-3",
+  "tool": "codex",
+  "ref": "_design/feature-popup-lose.cheat/lose-popup-colorful",
+  "owner": "_design/feature-popup-lose.cheat",
+  "item": "new-record",
+  "version": 1,
+  "file": "Resources/_design/feature-popup-lose.cheat/codex/lose-popup-colorful/v1/new-record.png",
+  "reason": "trận phía sau chưa tối hẳn (Tiêu chí nhận \"Trận phía sau tối hẳn\"): lính, quái, cỏ còn sáng gần như bình thường",
+  "kind": "chưa chuẩn",
+  "state": "closed",
+  "at": "2026-11-25 23:30:25",
+  "closedBy": "tự đóng: _design/feature-popup-lose.cheat/lose-popup-colorful v2 đạt",
+  "closedAt": "2026-11-25 23:44:49"
+ },
+ {
+  "id": "n-4",
+  "tool": "codex",
+  "ref": "TeamSelect/ts-card-colorful",
+  "owner": "TeamSelect",
+  "item": "portrait-knight",
+  "version": 1,
+  "file": "Resources/TeamSelect/codex/ts-card-colorful/v1/portrait-knight.png",
+  "reason": "mũ sắt đóng kín che hết mặt, không thấy mắt và mặt như 4 chân dung kia (Tiêu chí nhận \"Năm portrait cùng cỡ đầu, cùng góc nhìn, cùng ánh sáng\")",
+  "kind": "chưa chuẩn",
+  "state": "open",
+  "at": "2026-11-26 00:53:38",
+  "closedBy": "",
+  "closedAt": ""
+ },
+ {
+  "id": "n-5",
+  "tool": "codex",
+  "ref": "TeamSelect/ts-card-colorful",
+  "owner": "TeamSelect",
+  "item": "portrait-knight",
+  "version": 1,
+  "file": "Resources/TeamSelect/codex/ts-card-colorful/v1/portrait-knight.png",
+  "reason": "Dung kich thuoc va style, nhan ra hiep si mu sat giap bac. Loi: mu dong kin che het mat, khong thay mat nhu 4 chan dung kia, dau xoay nghieng manh hon, chua dong bo bo 5. Dung tam, can lam lai khi co luot",
+  "kind": "người chấm",
+  "state": "open",
+  "at": "2026-11-26 00:54:20",
+  "closedBy": "",
+  "closedAt": ""
  }
 ]

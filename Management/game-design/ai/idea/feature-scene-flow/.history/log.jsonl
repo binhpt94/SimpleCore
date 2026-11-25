@@ -5,3 +5,4 @@
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "9e167e1aa89f"}
 {"at": "2026-11-24 22:44:58", "event": "data", "hash": "47e9a9467dc9", "previous": "9e167e1aa89f", "added": [], "removed": [], "rewritten": [{"id": "scene-boot", "old": "Mở game thì đi qua màn tải rồi vào scene chơi", "new": "Mở game thì người chơi qua màn tải rồi tới màn bắt đầu\nKhông vào thẳng trận: màn bắt đầu là nơi xem kỉ lục và bấm Chơi để sang màn chọn đội."}, {"id": "scene-switch", "old": "Các feature khác xin chuyển scene qua feature này, không tự tải scene", "new": "Feature khác xin chuyển scene qua feature này; tải, chạy, huỷ từng scene thuộc `feature-session-scene`\nKhông feature nào tự tải scene, và việc tải không bị giao cho cả hai feature."}]}
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "47e9a9467dc9"}
+{"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "47e9a9467dc9"}

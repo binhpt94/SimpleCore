@@ -1,0 +1,33 @@
+{
+ "hash": "f625ef87b6a9",
+ "items": {
+  "release-seed-random": {
+   "hash": "621b9cfd3b5f",
+   "text": "Bản phát hành: mỗi lượt bốc một seed mới ngẫu nhiên lúc vào trận\nNgười quyết (2026-11-25)."
+  },
+  "release-seed-logged": {
+   "hash": "7552e8eaa2b9",
+   "text": "Bản phát hành ghi seed của lượt vào log của game lúc vào trận, để lặp lại đúng lượt khi báo lỗi\nNgười quyết (2026-11-25)."
+  },
+  "dev-seed-fixed": {
+   "hash": "89f6769b3269",
+   "text": "Bản dev: seed lấy từ config, cố định, và được in ra console lúc vào trận\nNgười quyết (2026-11-25). Tester đặt seed khác trong config để chơi lại một lượt đã báo lỗi."
+  },
+  "dev-seed-per-run": {
+   "hash": "17bb5eff74bf",
+   "text": "Bản dev: mọi lượt trong một lần mở game dùng đúng seed đang ghi trong config\nChơi lại ngay trong cùng lần mở game ra đúng lượt vừa chơi; muốn thứ tự quái khác thì đổi seed trong config."
+  },
+  "seed-range": {
+   "hash": "a5f36870c538",
+   "text": "Seed là một số nguyên từ 0 tới 2147483647\nVừa một số nguyên 32 bit không âm, dễ chép từ log."
+  },
+  "stream-from-name": {
+   "hash": "a21c800be8cb",
+   "text": "Dòng của một feature sinh từ seed của lượt và tên feature, không phụ thuộc feature nào xin dòng trước\nĐổi thứ tự cài feature không làm lệch số."
+  },
+  "wave-stream": {
+   "hash": "d5aa5987d4b0",
+   "text": "Đợt quái dùng một dòng tên Wave cho cả việc xáo thứ tự loại quái lẫn gán bên ra\nHiện là feature duy nhất cần ngẫu nhiên."
+  }
+ }
+}

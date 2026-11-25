@@ -16,6 +16,8 @@ namespace Game.Hero.Tests
         private HeroFakes.Session _session;
         private HeroFakes.RunFlow _run;
         private HeroFakes.EnemyField _field;
+        private HeroFakes.EnemyCombat _enemyCombat;
+        private HeroFakes.Combat _combat;
 
         [SetUp]
         public void SetUp()
@@ -24,6 +26,8 @@ namespace Game.Hero.Tests
             _session = new HeroFakes.Session();
             _run = new HeroFakes.RunFlow();
             _field = new HeroFakes.EnemyField();
+            _enemyCombat = new HeroFakes.EnemyCombat();
+            _combat = new HeroFakes.Combat();
         }
 
         private void RegisterAllDependencies()
@@ -31,6 +35,8 @@ namespace Game.Hero.Tests
             _registry.Register<ISessionScene>(_session);
             _registry.Register<IRunFlow>(_run);
             _registry.Register<IEnemyField>(_field);
+            _registry.Register<IEnemyCombat>(_enemyCombat);
+            _registry.Register<Game.Combat.ICombat>(_combat);
         }
 
         private static HeroInstaller LoadInstaller()
@@ -69,8 +75,52 @@ namespace Game.Hero.Tests
 
             LoadInstaller().Install(_registry);
 
-            Assert.That(_field.Foes, Has.Count.EqualTo(1));
+            // From PROTOTYPE enemies hit the heroes through the shared combat, not straight onto the squad.
+            Assert.That(_field.Foes, Is.Empty);
+            Assert.That(_combat.Receivers, Has.Count.EqualTo(1));
+            Assert.That(_enemyCombat.CombatFoes, Has.Count.EqualTo(1));
+            Assert.That(_enemyCombat.CombatFoes[0].Foes, Is.SameAs(_combat.Receivers[0]));
+            Assert.That(_enemyCombat.CombatFoes[0].Receiver, Is.EqualTo(1), "enemy hits carry the number combat gave the heroes");
             Assert.That(_session.Participants, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void Installing_publishes_which_heroes_are_down_from_the_squad()
+        {
+            RegisterAllDependencies();
+
+            LoadInstaller().Install(_registry);
+
+            Assert.That(_registry.TryResolve<IHeroDownState>(out var down), Is.True);
+            Assert.That(down, Is.SameAs(_registry.Resolve<IHeroSquad>()), "one object answers both");
+            Assert.That(down.IsDown(0), Is.False, "no run going: nobody is down");
+        }
+
+        [Test]
+        public void Installing_publishes_the_respawn_wait_left_from_the_squad()
+        {
+            RegisterAllDependencies();
+
+            LoadInstaller().Install(_registry);
+
+            Assert.That(_registry.TryResolve<IHeroRespawnTime>(out var time), Is.True);
+            Assert.That(time, Is.SameAs(_registry.Resolve<IHeroSquad>()), "one object answers both");
+            Assert.That(time.RespawnSecondsLeft(0), Is.EqualTo(0f), "no run going");
+        }
+
+        [TestCase(typeof(Game.Combat.ICombat))]
+        [TestCase(typeof(IEnemyCombat))]
+        public void Missing_shared_combat_fails_install_naming_it(Type missing)
+        {
+            _registry.Register<ISessionScene>(_session);
+            _registry.Register<IRunFlow>(_run);
+            _registry.Register<IEnemyField>(_field);
+            if (missing != typeof(IEnemyCombat)) _registry.Register<IEnemyCombat>(_enemyCombat);
+            if (missing != typeof(Game.Combat.ICombat)) _registry.Register<Game.Combat.ICombat>(_combat);
+
+            var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(_registry));
+
+            Assert.That(error.Message, Does.Contain(missing.Name));
         }
 
         [Test]
@@ -103,6 +153,7 @@ namespace Game.Hero.Tests
 
             Assert.That(error.Message, Does.Contain(nameof(IEnemyField)));
         }
+
 
         [Test]
         public void Installer_without_config_fails_install_naming_the_config()

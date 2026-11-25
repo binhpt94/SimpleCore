@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: lose-score-consistency=gpt@r2-1#lose-score-consistency
 ---
 # Popup thua

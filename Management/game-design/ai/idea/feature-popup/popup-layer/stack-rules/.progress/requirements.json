@@ -108,15 +108,15 @@
    "at": "2026-11-25 11:39:25"
   },
   "edge-nguoi-choi-roi-game-luc-co-popup": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Bật cheat sample-popup rồi Play, rời app rồi quay lại: popup mẫu và nền che vẫn y như cũ, nút Đóng vẫn đóng được",
    "hash": "7d086ae89ba6",
    "text": "**Người chơi rời game lúc có popup**: quay lại thì chồng popup y như cũ.",
    "title": "Người chơi rời game lúc có popup",
-   "by": "_Services/Popup",
-   "at": "2026-11-25 10:54:57"
+   "by": "@CodeLead",
+   "at": "2026-11-25 20:39:22"
   },
   "backdrop-dim": {
    "state": "verified",
@@ -453,6 +453,13 @@
   {
    "at": "2026-11-25 12:02:54",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:39:22",
+   "id": "edge-nguoi-choi-roi-game-luc-co-popup",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

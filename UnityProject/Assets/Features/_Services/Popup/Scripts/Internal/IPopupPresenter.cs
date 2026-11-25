@@ -8,6 +8,9 @@ namespace Game.Services.Popup
     /// </summary>
     internal interface IPopupPresenter
     {
+        /// <summary>The layer canvas every popup sits under: null until the first popup and after <see cref="DismissAll"/>.</summary>
+        GameObject Layer { get; }
+
         /// <summary>Creates the popup and its backdrop on top of everything shown so far; returns the popup's root.</summary>
         GameObject Present(GameObject prefab);
 

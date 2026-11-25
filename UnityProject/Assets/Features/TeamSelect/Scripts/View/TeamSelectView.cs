@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using S = Game.TeamSelect.TeamSelectScreenSpec;
 
 namespace Game.TeamSelect
 {
@@ -32,6 +33,7 @@ namespace Game.TeamSelect
         [Header("Text")]
         [SerializeField] private string title = "Chọn đội";
         [SerializeField] private string startLabel = "Vào trận";
+        [SerializeField] private string backLabel = "Quay lại";
         [SerializeField] private TMP_FontAsset font;
 
         [Header("Colours")]
@@ -43,6 +45,8 @@ namespace Game.TeamSelect
         [SerializeField] private Color startLockedColor = new Color(0.4f, 0.4f, 0.42f, 0.6f);
         [SerializeField] private Color meleeColor = new Color(0.85f, 0.35f, 0.3f, 1f);
         [SerializeField] private Color rangedColor = new Color(0.3f, 0.55f, 0.9f, 1f);
+        [SerializeField] private Color backColor = new Color(0.3f, 0.5f, 0.85f, 1f);
+        [SerializeField] private Color errorColor = new Color(1f, 0.45f, 0.4f, 1f);
 
         private sealed class CardWidgets
         {
@@ -68,6 +72,7 @@ namespace Game.TeamSelect
         private RectTransform _slotRow;
         private Button _start;
         private Image _startImage;
+        private TextMeshProUGUI _error;
         private ITeamSelectInput _input;
 
         public void Bind(ITeamSelectInput input) => _input = input;
@@ -134,6 +139,14 @@ namespace Game.TeamSelect
             _startImage.color = enabled ? (buttonSprite != null ? Color.white : startColor) : startLockedColor;
         }
 
+        public void ShowBuildError(string text)
+        {
+            Build();
+            var shown = !string.IsNullOrEmpty(text);
+            _error.text = shown ? text : string.Empty;
+            _error.gameObject.SetActive(shown);
+        }
+
         private Sprite FindPortrait(string heroCode)
         {
             if (heroCode == null || portraits == null) return null;
@@ -162,15 +175,15 @@ namespace Game.TeamSelect
             bg.color = background;
 
             var titleText = NewText("Title", _root, title, 56, FontStyles.Bold);
-            Place(titleText.rectTransform, 560, 40, 800, 80);
+            Place(titleText.rectTransform, S.TitleX, S.TitleY, S.TitleW, S.TitleH);
 
             _cardRow = NewRect("Cards", _root);
-            Place(_cardRow, 130, 150, 1660, 400);
+            Place(_cardRow, S.CardsX, S.CardsY, 5 * S.CardW + 4 * S.CardGap, S.CardH);
             _slotRow = NewRect("Slots", _root);
-            Place(_slotRow, 560, 600, 800, 240);
+            Place(_slotRow, S.SlotsX, S.SlotsY, 3 * S.Slot + 2 * S.SlotGap, S.Slot);
 
             var start = NewRect("Start", _root);
-            Place(start, 760, 890, 400, 120);
+            Place(start, S.StartX, S.StartY, S.StartW, S.StartH);
             _startImage = start.gameObject.AddComponent<Image>();
             SetSprite(_startImage, buttonSprite, true);
             _start = start.gameObject.AddComponent<Button>();
@@ -178,11 +191,28 @@ namespace Game.TeamSelect
             _start.onClick.AddListener(() => _input?.TapStart());
             var label = NewText("Label", start, startLabel, 44, FontStyles.Bold);
             Stretch(label.rectTransform);
+
+            // Back button: top left corner, frame main (slots-spec#screen-parts, routes-values#back-button).
+            var back = NewRect("Back", _root);
+            PlaceIn(back, S.BackX, S.BackY, Mathf.Max(S.BackW, S.BackMinSide), Mathf.Max(S.BackH, S.BackMinSide));
+            var backImage = back.gameObject.AddComponent<Image>();
+            backImage.color = backColor;
+            var backButton = back.gameObject.AddComponent<Button>();
+            backButton.targetGraphic = backImage;
+            backButton.onClick.AddListener(() => _input?.TapBack());
+            var backText = NewText("Label", back, backLabel, 36, FontStyles.Bold);
+            Stretch(backText.rectTransform);
+
+            // Build error line: right of the slots, just above the Enter battle button (frame main, build-error).
+            _error = NewText("BuildError", _root, string.Empty, 32, FontStyles.Bold);
+            Place(_error.rectTransform, S.ErrorX, S.ErrorY, S.ErrorW, S.ErrorH);
+            _error.color = errorColor;
+            _error.gameObject.SetActive(false);
         }
 
         private CardWidgets MakeCard(int index)
         {
-            const float w = 300, h = 400, gap = 40;
+            const float w = S.CardW, h = S.CardH, gap = S.CardGap;
             var rect = NewRect("Card" + (index + 1), _cardRow);
             PlaceIn(rect, index * (w + gap), 0, w, h);
             var w0 = new CardWidgets { Frame = rect.gameObject.AddComponent<Image>() };
@@ -205,7 +235,7 @@ namespace Game.TeamSelect
 
         private SlotWidgets MakeSlot(int index)
         {
-            const float size = 240, gap = 40;
+            const float size = S.Slot, gap = S.SlotGap;
             var rect = NewRect("Slot" + (index + 1), _slotRow);
             PlaceIn(rect, index * (size + gap), 0, size, size);
             var frame = rect.gameObject.AddComponent<Image>();

@@ -1,0 +1,14 @@
+{
+ "bar-track": {
+  "level": 3,
+  "text": "Dat: dung 1000x48, vien tim dam bao quanh, long tim bong ken, dang vien thuoc, khong xam khong den",
+  "version": 1,
+  "at": "2026-11-26 00:30:29"
+ },
+ "bar-fill": {
+  "level": 3,
+  "text": "Dat: dung 1000x48, cach mep 6 px vua trong vien bar-track, vang bong keo sang tren toi duoi, khong vien",
+  "version": 1,
+  "at": "2026-11-26 00:30:31"
+ }
+}

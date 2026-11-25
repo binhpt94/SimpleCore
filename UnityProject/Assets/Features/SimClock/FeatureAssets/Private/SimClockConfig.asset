@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a11f1241d1c309418c80bf227ac70ec, type: 3}
+  m_Name: SimClockConfig
+  m_EditorClassIdentifier: Game.SimClock.Internal::Game.SimClock.SimClockConfig
+  tickRate: 40
+  mode: 0
+  maxStepsPerFrame: 5
+  maxFrameSeconds: 0.125
+  devSpeeds: 0100000002000000040000000800000010000000
+  devRunSteps: 1
+  devFreezeStep: 1
+  viewInterpolation: 0
+  stepOrder:
+  - Wave
+  - Enemy
+  - Hero
+  - Castle
+  - Combat
+  - Run
+  devSeed: 12345
+  seedMin: 0
+  seedMax: 2147483647
+  streams:
+  - id: wave
+    name: Wave
+    stage: idea
+    owner: feature-wave
+    uses: "X\xE1o th\u1EE9 t\u1EF1 lo\u1EA1i qu\xE1i v\xE0 g\xE1n b\xEAn ra m\u1ED7i
+      \u0111\u1EE3t"

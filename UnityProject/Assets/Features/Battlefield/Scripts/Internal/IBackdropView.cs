@@ -5,6 +5,9 @@ namespace Game.Battlefield
     /// <summary>Draws the backdrop pieces it is given. Nothing on it blocks touches or movement.</summary>
     internal interface IBackdropView
     {
+        /// <summary>The Unity object of the view, so the session can count it as held until it is destroyed.</summary>
+        UnityEngine.Object Root { get; }
+
         void Show(IReadOnlyList<BackdropPiece> pieces);
     }
 

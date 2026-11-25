@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Ads;
 using Game.Run;
 using Game.Services.Popup;
+using Game.SimClock;
 using NUnit.Framework;
 
 namespace Game.PopupRevive.Tests
@@ -24,9 +25,12 @@ namespace Game.PopupRevive.Tests
             _ads = new FakeAds(_log);
             _view = new FakeView();
             _popups = new FakePopups(_log, _view);
-            _presenter = new RevivePopupPresenter(_run, _run, _ads, _popups, _popups);
+            _clock = new FakeClock(_log);
+            _presenter = new RevivePopupPresenter(_run, _run, _ads, _popups, _popups, _clock);
             _presenter.Start();
         }
+
+        private FakeClock _clock;
 
         [TearDown]
         public void TearDown() => _presenter.Dispose();
@@ -74,7 +78,7 @@ namespace Game.PopupRevive.Tests
             _run.SetStep(RunStep.ReviveOffer);
             _popups.Shown.Clear();
 
-            _presenter = new RevivePopupPresenter(_run, _run, _ads, _popups, _popups);
+            _presenter = new RevivePopupPresenter(_run, _run, _ads, _popups, _popups, _clock);
             _presenter.Start();
 
             Assert.AreEqual(1, _popups.Shown.Count);
@@ -163,6 +167,7 @@ namespace Game.PopupRevive.Tests
 
             _view.TapWatch();
             _view.TapEnd();
+            _clock.Step();
 
             Assert.AreEqual(1, _ads.Requests.Count);
             Assert.IsEmpty(_run.Calls);
@@ -176,6 +181,7 @@ namespace Game.PopupRevive.Tests
 
             _view.TapEnd();
             _view.TapWatch();
+            _clock.Step();
 
             Assert.AreEqual(new List<string> { "DeclineRevive" }, _run.Calls);
             Assert.IsEmpty(_ads.Requests);
@@ -188,12 +194,14 @@ namespace Game.PopupRevive.Tests
 
             _view.TapWatch();
             _view.TapEnd();
+            _clock.Step();
 
             Assert.AreEqual(1, _ads.Requests.Count);
             Assert.IsEmpty(_run.Calls);
         }
 
-        // Choice reported to the run, popup closed first (revive-popup; order-values popup side)
+        // Choice reported to the run, popup closed first (revive-popup; order-values popup side).
+        // The report goes through the shared clock's queue (feature-sim-clock#revive-result-queued).
 
         [Test]
         public void EndTapClosesPopupThenReportsNoRevive()
@@ -201,8 +209,11 @@ namespace Game.PopupRevive.Tests
             Offer();
 
             _view.TapEnd();
+            _clock.Step();
 
-            Assert.AreEqual(new List<string> { "Close PopupRevive/Main", "Run.DeclineRevive" }, Tail(2));
+            Assert.AreEqual(
+                new List<string> { "Close PopupRevive/Main", "Clock.Enqueue PopupRevive", "Clock.Step", "Run.DeclineRevive" },
+                Tail(4));
         }
 
         [Test]
@@ -212,8 +223,11 @@ namespace Game.PopupRevive.Tests
             _view.TapWatch();
 
             _ads.Reply(AdResult.Watched);
+            _clock.Step();
 
-            Assert.AreEqual(new List<string> { "Close PopupRevive/Main", "Run.Revive" }, Tail(2));
+            Assert.AreEqual(
+                new List<string> { "Close PopupRevive/Main", "Clock.Enqueue PopupRevive", "Clock.Step", "Run.Revive" },
+                Tail(4));
         }
 
         [Test]
@@ -223,8 +237,49 @@ namespace Game.PopupRevive.Tests
             _view.TapWatch();
 
             _ads.Reply(AdResult.NotWatched);
+            _clock.Step();
 
-            Assert.AreEqual(new List<string> { "Close PopupRevive/Main", "Run.FailRevive" }, Tail(2));
+            Assert.AreEqual(
+                new List<string> { "Close PopupRevive/Main", "Clock.Enqueue PopupRevive", "Clock.Step", "Run.FailRevive" },
+                Tail(4));
+        }
+
+        [Test]
+        public void ReviveResultReachesTheRunOnlyWhenTheNextStepStarts()
+        {
+            Offer();
+            _view.TapWatch();
+
+            _ads.Reply(AdResult.Watched);
+
+            Assert.IsFalse(_presenter.IsOpen);
+            Assert.IsEmpty(_run.Calls);
+            Assert.AreEqual(new List<string> { RevivePopupPresenter.ClockOwner }, _clock.QueuedOwners);
+
+            _clock.Step();
+
+            Assert.AreEqual(new List<string> { "Revive" }, _run.Calls);
+        }
+
+        [Test]
+        public void EndChoiceReachesTheRunOnlyWhenTheNextStepStarts()
+        {
+            Offer();
+
+            _view.TapEnd();
+
+            Assert.IsEmpty(_run.Calls);
+            Assert.AreEqual(1, _clock.QueuedOwners.Count);
+
+            _clock.Step();
+
+            Assert.AreEqual(new List<string> { "DeclineRevive" }, _run.Calls);
+        }
+
+        [Test]
+        public void ReviveResultIsQueuedUnderThePopupReviveOwner()
+        {
+            Assert.AreEqual("PopupRevive", RevivePopupPresenter.ClockOwner);
         }
 
         [Test]
@@ -234,6 +289,7 @@ namespace Game.PopupRevive.Tests
             _ads.ReplyAtOnce = AdResult.NotWatched;
 
             _view.TapWatch();
+            _clock.Step();
 
             Assert.AreEqual(new List<string> { "FailRevive" }, _run.Calls);
             Assert.AreEqual(1, _popups.Closed.Count);
@@ -248,6 +304,8 @@ namespace Game.PopupRevive.Tests
 
             _ads.Reply(AdResult.NotWatched);
             _view.TapEnd();
+            _clock.Step();
+            _clock.Step();
 
             Assert.AreEqual(new List<string> { "Revive" }, _run.Calls);
         }
@@ -261,6 +319,7 @@ namespace Game.PopupRevive.Tests
             _view.TapWatch();
 
             _ads.ReplyWith(_presenter.CurrentOfferId + 1, AdResult.Watched);
+            _clock.Step();
 
             Assert.IsEmpty(_run.Calls);
             Assert.IsTrue(_presenter.IsWaitingAd);
@@ -275,6 +334,7 @@ namespace Game.PopupRevive.Tests
 
             _run.SetStep(RunStep.Home);
             _ads.ReplyWith(offerId, AdResult.Watched);
+            _clock.Step();
 
             Assert.AreEqual(new List<int> { offerId }, _ads.Cancelled);
             Assert.IsEmpty(_run.Calls);
@@ -321,10 +381,70 @@ namespace Game.PopupRevive.Tests
             _view.TapWatch();
 
             _presenter.Dispose();
+            _clock.Step();
 
             Assert.AreEqual(1, _ads.Cancelled.Count);
             Assert.AreEqual(1, _popups.Closed.Count);
             Assert.IsEmpty(_run.Calls);
+        }
+
+        // order-values, popup side: the run owns the timeline, the popup only follows its steps.
+
+        [Test]
+        public void PopupOpensOnceWhenTheOfferComesAfterTheWait()
+        {
+            _run.SetStep(RunStep.ReviveWait);
+            Assert.IsEmpty(_popups.Shown);
+
+            _run.SetStep(RunStep.ReviveOffer);
+
+            Assert.AreEqual(1, _popups.Shown.Count);
+            Assert.IsTrue(_presenter.IsOpen);
+        }
+
+        [Test]
+        public void PopupDoesNotOpenAgainWhileCastleStandsUpOrWhenBattleRunsAgain()
+        {
+            Offer();
+            _view.TapWatch();
+            _ads.Reply(AdResult.Watched);
+            _clock.Step();
+
+            _run.SetStep(RunStep.Reviving);
+            _run.SetStep(RunStep.Playing);
+
+            Assert.AreEqual(1, _popups.Shown.Count);
+            Assert.IsFalse(_presenter.IsOpen);
+            Assert.AreEqual(new List<string> { "Revive" }, _run.Calls);
+        }
+
+        [Test]
+        public void SecondCastleFallAfterReviveGoesToLoseWithoutRevivePopup()
+        {
+            Offer();
+            _view.TapWatch();
+            _ads.Reply(AdResult.Watched);
+            _clock.Step();
+            _run.SetStep(RunStep.Reviving);
+            _run.SetStep(RunStep.Playing);
+
+            _run.SetStep(RunStep.Ending);
+            _run.SetStep(RunStep.Lost);
+
+            Assert.AreEqual(1, _popups.Shown.Count);
+            Assert.IsFalse(_presenter.IsOpen);
+        }
+
+        [Test]
+        public void DeclineReachesTheRunAtTheFirstStepAfterThePopupClosed()
+        {
+            Offer();
+            _view.TapEnd();
+
+            _clock.Step();
+
+            Assert.AreEqual(1, _clock.StepCount);
+            Assert.AreEqual(new List<string> { "DeclineRevive" }, _run.Calls);
         }
 
         [Test]
@@ -389,6 +509,43 @@ namespace Game.PopupRevive.Tests
             {
                 Calls.Add(call);
                 _log.Add("Run." + call);
+            }
+        }
+
+        /// <summary>Holds queued actions until the test runs the next step, like the shared clock.</summary>
+        private sealed class FakeClock : ISimClock
+        {
+            private readonly List<string> _log;
+            private readonly List<Action> _queue = new List<Action>();
+
+            public FakeClock(List<string> log) => _log = log;
+
+            public List<string> QueuedOwners { get; } = new List<string>();
+
+            public SimMode Mode => SimMode.FixedTick;
+            public float StepSeconds => 0.025f;
+            public long StepCount { get; private set; }
+            public long GameplayStepCount => 0;
+            public double GameplaySeconds => 0;
+
+            public IDisposable OnStep(string owner, Action<SimStep> onStep) =>
+                throw new InvalidOperationException("The revive popup does not step.");
+
+            public void Enqueue(string owner, Action apply)
+            {
+                QueuedOwners.Add(owner);
+                _queue.Add(apply);
+                _log.Add("Clock.Enqueue " + owner);
+            }
+
+            public void Step()
+            {
+                StepCount++;
+                _log.Add("Clock.Step");
+                var queued = _queue.ToArray();
+                _queue.Clear();
+                QueuedOwners.Clear();
+                foreach (var apply in queued) apply();
             }
         }
 

@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: hud-status=gpt@r2-1#hud-castle-damage, hud-clear-view=gpt@r2-2#phan-vung-mep-man, hud-reads-castle-hp=gpt@r2-2#nguon-mau-thanh, hud-reads-money=gpt@r2-2#nguon-so-du, hud-reads-wave=gpt@r2-2#nguon-so-dot, hud-reads-cooldown=gpt@r2-2#nguon-hoi-chieu, castle-checks-skill=gpt@r2-2#kiem-tra-khi-nhan-yeu-cau, castle-runs-skill=gpt@r2-2#thuc-hien-ki-nang, keep-upgrade-bar-apart=gpt@r2-3#giu-rieng-thanh-nang-cap, hud-resizes-bar-area=gpt@r2-3#cap-lai-vung-nang-cap, hud-pause=gpt@r2-3#gui-yeu-cau-tam-dung, hud-locks-by-run=gpt@r2-3#khoa-nut-theo-luot, hud-wave-banner-event=gpt@r2-3#bao-dot-tu-su-kien, hud-sends-skill-id=gpt@r2-3#gui-dung-ky-nang
 ---
 # HUD trận

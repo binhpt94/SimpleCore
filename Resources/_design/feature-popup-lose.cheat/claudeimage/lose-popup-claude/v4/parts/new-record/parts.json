@@ -1,0 +1,97 @@
+{
+ "frame": "new-record",
+ "parts": [
+  {
+   "id": "1-panel",
+   "w": 800,
+   "h": 700,
+   "slice": [
+    48,
+    48,
+    48,
+    56
+   ],
+   "shapes": [
+    "panel"
+   ],
+   "from": {
+    "node": "feature-popup/popup-layer/stack-rules",
+    "frame": "main",
+    "part": "panel",
+    "ref": "_design/feature-popup.popup-layer.stack-rules/popup-panel-claude",
+    "version": 2
+   },
+   "text": true
+  },
+  {
+   "id": "2-new-record-bg",
+   "w": 400,
+   "h": 70,
+   "slice": null,
+   "shapes": [
+    "new-record-bg"
+   ],
+   "from": {
+    "node": "feature-popup-lose/lose-result/result-spec",
+    "frame": "main",
+    "part": "new-record-bg",
+    "ref": "_design/feature-popup-lose.lose-result.result-spec/lose-result-claude",
+    "version": 3
+   },
+   "text": true
+  },
+  {
+   "id": "3-btn-main",
+   "w": 400,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "replay"
+   ],
+   "from": {
+    "node": "feature-popup-lose/lose-actions/actions-spec",
+    "frame": "main",
+    "part": "btn-main",
+    "ref": "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+    "version": 2
+   },
+   "text": true
+  },
+  {
+   "id": "4-btn-sub",
+   "w": 260,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "home"
+   ],
+   "from": {
+    "node": "feature-popup-lose/lose-actions/actions-spec",
+    "frame": "main",
+    "part": "btn-sub",
+    "ref": "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+    "version": 2
+   },
+   "text": true
+  }
+ ],
+ "kept": [
+  "title",
+  "score",
+  "record",
+  "new-record"
+ ],
+ "skipped": [
+  "backdrop"
+ ]
+}

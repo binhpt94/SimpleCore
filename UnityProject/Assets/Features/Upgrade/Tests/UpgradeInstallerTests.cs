@@ -5,6 +5,7 @@ using Game.Castle;
 using Game.Core;
 using Game.Hero;
 using Game.Run;
+using Game.SimClock;
 using Game.Wallet;
 using NUnit.Framework;
 using UnityEditor;
@@ -32,11 +33,14 @@ namespace Game.Upgrade.Tests
             registry.Add<IWalletBalance>(wallet);
             registry.Add<IHeroSquad>(new NullHeroes());
             registry.Add<ICastleUpgrades>(new NullCastle());
+            registry.Add<ISimClock>(new NullClock());
 
             installer.Install(registry);
 
             Assert.IsTrue(registry.TryResolve<IUpgradeShop>(out var shop));
             Assert.AreEqual(0, shop.Count);
+            Assert.IsTrue(registry.TryResolve<IUpgradeOrders>(out var orders));
+            Assert.AreSame(shop, orders);
             Assert.AreEqual(1, session.Joined.Count);
         }
 
@@ -139,6 +143,17 @@ namespace Game.Upgrade.Tests
         private sealed class NullCastle : ICastleUpgrades
         {
             public void ApplyLevel(CastleUpgrade item, int level) { }
+        }
+
+        private sealed class NullClock : ISimClock
+        {
+            public SimMode Mode => SimMode.FixedTick;
+            public float StepSeconds => 0.025f;
+            public long StepCount => 0;
+            public long GameplayStepCount => 0;
+            public double GameplaySeconds => 0;
+            public IDisposable OnStep(string owner, Action<SimStep> onStep) => null;
+            public void Enqueue(string owner, Action apply) { }
         }
     }
 }

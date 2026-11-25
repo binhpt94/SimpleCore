@@ -11,6 +11,7 @@ Không biết feature nào; feature tự xin tham gia bằng `ISessionScene.Join
 - Running: gọi `Run` theo thứ tự tham gia. View của feature chỉ được tạo từ đây.
 - Disposing: gọi `DisposeAsync` theo thứ tự ngược, từng cái một. Failed cũng dọn như vậy rồi dừng ở Failed.
 - Kiểm dọn sạch: sau bước huỷ, `ParticipantUsageCounter` đọc `ISessionParticipantUsage` (Core, `SessionParticipantBase` hiện thực; participant không hiện thực thì coi là 0) của từng participant đã tới; còn view hay việc thì ghi lỗi nêu tên feature và số. Chỉ bật ở Editor và bản dev (installer). Lớp che chuyển scene không được `TrackView` nên không bị đếm.
+- Kiểm view sau bước chạy: ngay khi mọi participant đã `Run` xong (không ai lỗi), ở bản dev, participant nào khai `OpensViewsOnRun` (Core) mà giữ 0 view thì ghi lỗi nêu tên feature; phiên vẫn chạy. Participant không view hoặc chỉ có view về sau để mặc định false nên không bị kiểm ở lúc này, view về sau vẫn được kiểm sau bước huỷ.
 - Logic nằm trong `SessionSceneLogic` (C# thuần). `SessionSceneDriver` (View) chỉ chuyển `Start`/`OnDestroy` thành tín hiệu.
 - Installer tạo driver từ `SessionSceneDriver.prefab`; chỉ tạo khi đang Play.
 - Phải được cài trước mọi feature gọi `Join`.

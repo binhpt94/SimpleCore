@@ -51,6 +51,37 @@ namespace Game.Ads.Tests
         }
 
         [Test]
+        public void DevInstallPublishesTheAdsCheat()
+        {
+            var registry = new FakeRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+
+            LoadInstaller().Install(registry);
+
+            Assert.IsTrue(registry.TryResolve<IAdsCheat>(out var cheat));
+            Assert.IsNotNull(cheat);
+        }
+
+        [Test]
+        public void HoldNextAdThroughTheInstalledCheatKeepsTheRequestWaitingUntilCancelled()
+        {
+            var registry = new FakeRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            LoadInstaller().Install(registry);
+            var ads = registry.Resolve<IRewardedAds>();
+            var replies = new List<AdReply>();
+
+            registry.Resolve<IAdsCheat>().HoldNextAd();
+            ads.Show(1, replies.Add);
+            ads.Show(2, replies.Add);
+            Assert.AreEqual(2, replies[0].OfferId, "the held request is still running: a second one is busy");
+
+            ads.Cancel(1);
+            ads.Show(3, replies.Add);
+            Assert.AreEqual(1, replies.Count, "after cancelling, a new request is accepted");
+        }
+
+        [Test]
         public void InstallWithoutSessionSceneFails()
         {
             Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(new FakeRegistry()));

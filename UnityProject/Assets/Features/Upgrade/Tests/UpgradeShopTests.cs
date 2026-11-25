@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Castle;
 using Game.Hero;
 using Game.Run;
+using Game.SimClock;
 using Game.Wallet;
 using NUnit.Framework;
 
@@ -14,6 +15,7 @@ namespace Game.Upgrade.Tests
         private FakeWallet _wallet;
         private FakeHeroes _heroes;
         private FakeCastle _castle;
+        private FakeClock _clock;
         private UpgradeShopLogic _shop;
         private int _changes;
 
@@ -24,7 +26,8 @@ namespace Game.Upgrade.Tests
             _wallet = new FakeWallet();
             _heroes = new FakeHeroes();
             _castle = new FakeCastle();
-            _shop = new UpgradeShopLogic(StandardPrices(), _run, _wallet, _wallet, _heroes, _castle);
+            _clock = new FakeClock();
+            _shop = new UpgradeShopLogic(StandardPrices(), _run, _wallet, _wallet, _heroes, _castle, _clock);
             _shop.Attach();
             _shop.ItemsChanged += () => _changes++;
         }
@@ -488,7 +491,7 @@ namespace Game.Upgrade.Tests
         [Test]
         public void The_session_follows_the_run_only_between_run_and_dispose()
         {
-            var shop = new UpgradeShopLogic(StandardPrices(), _run, _wallet, _wallet, _heroes, _castle);
+            var shop = new UpgradeShopLogic(StandardPrices(), _run, _wallet, _wallet, _heroes, _castle, _clock);
             var session = new UpgradeSession(shop);
 
             session.Run();
@@ -511,7 +514,171 @@ namespace Game.Upgrade.Tests
             Assert.AreEqual(0, _shop.Count);
         }
 
+        // ---- Taps through the shared clock's queue (feature-sim-clock clock-values#input-next-step) -----------
+
+        [Test]
+        public void A_buy_tap_pays_nothing_until_the_next_clock_step()
+        {
+            EnterBattle();
+            _wallet.Coins = 100;
+            var applied = new List<(int index, PurchaseResult result)>();
+            _shop.OrderApplied += (index, result) => applied.Add((index, result));
+
+            _shop.Order(0);
+
+            Assert.AreEqual(100, _wallet.Coins);
+            Assert.AreEqual(1, _shop.Get(0).Level);
+            Assert.IsEmpty(_heroes.Applied);
+            Assert.IsEmpty(applied);
+            Assert.AreEqual(UpgradeShopLogic.ClockOwner, _clock.Owners[0]);
+
+            _clock.Step();
+
+            Assert.AreEqual(70, _wallet.Coins);
+            Assert.AreEqual(2, _shop.Get(0).Level);
+            CollectionAssert.AreEqual(new[] { (0, 2) }, _heroes.Applied);
+            CollectionAssert.AreEqual(new[] { (0, PurchaseResult.Bought) }, applied);
+        }
+
+        [Test]
+        public void Two_buy_taps_before_a_step_are_applied_in_the_order_tapped()
+        {
+            EnterBattle();
+            _wallet.Coins = 50;
+            var applied = new List<(int index, PurchaseResult result)>();
+            _shop.OrderApplied += (index, result) => applied.Add((index, result));
+
+            _shop.Order(3);   // castle health, 40: bought
+            _shop.Order(0);   // hero slot 1, 30: only 10 left
+
+            _clock.Step();
+
+            CollectionAssert.AreEqual(
+                new[] { (3, PurchaseResult.Bought), (0, PurchaseResult.NotEnoughCoins) }, applied);
+            Assert.AreEqual(10, _wallet.Coins);
+            Assert.AreEqual(2, _shop.Get(3).Level);
+            Assert.AreEqual(1, _shop.Get(0).Level);
+        }
+
+        [Test]
+        public void A_buy_tap_followed_by_a_pause_before_the_step_is_refused()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            var applied = new List<(int index, PurchaseResult result)>();
+            _shop.OrderApplied += (index, result) => applied.Add((index, result));
+
+            _shop.Order(0);
+            _run.SetStep(RunStep.Paused);
+            _clock.Step();
+
+            CollectionAssert.AreEqual(new[] { (0, PurchaseResult.Unavailable) }, applied);
+            Assert.AreEqual(1000, _wallet.Coins);
+            Assert.AreEqual(1, _shop.Get(0).Level);
+            Assert.IsEmpty(_heroes.Applied);
+        }
+
+        [Test]
+        public void A_buy_tap_followed_by_the_castle_falling_before_the_step_is_refused()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            var applied = new List<(int index, PurchaseResult result)>();
+            _shop.OrderApplied += (index, result) => applied.Add((index, result));
+
+            _shop.Order(3);
+            _run.Stop();
+            _clock.Step();
+
+            CollectionAssert.AreEqual(new[] { (3, PurchaseResult.Unavailable) }, applied);
+            Assert.AreEqual(1000, _wallet.Coins);
+            Assert.IsEmpty(_castle.Applied);
+        }
+
+        [Test]
+        public void A_buy_tap_is_lost_when_the_run_is_cleared_before_the_step()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            var applied = 0;
+            _shop.OrderApplied += (index, result) => applied++;
+
+            _shop.Order(0);
+            _clock.ClearRun();
+            _clock.Step();
+
+            Assert.AreEqual(0, applied);
+            Assert.AreEqual(1000, _wallet.Coins);
+            Assert.AreEqual(1, _shop.Get(0).Level);
+        }
+
+        [Test]
+        public void A_buy_tap_left_from_an_earlier_run_does_not_buy_in_the_new_run()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            var applied = 0;
+            _shop.OrderApplied += (index, result) => applied++;
+
+            _shop.Order(0);
+            _run.Stop();
+            EnterBattle("mage", "priest", "archer");
+            _clock.Step();
+
+            Assert.AreEqual(0, applied);
+            Assert.AreEqual(1000, _wallet.Coins);
+            Assert.AreEqual(1, _shop.Get(0).Level);
+        }
+
+        [Test]
+        public void A_buy_tap_with_a_wrong_index_is_refused_at_the_step()
+        {
+            EnterBattle();
+            _wallet.Coins = 1000;
+            var applied = new List<(int index, PurchaseResult result)>();
+            _shop.OrderApplied += (index, result) => applied.Add((index, result));
+
+            _shop.Order(6);
+            _clock.Step();
+
+            CollectionAssert.AreEqual(new[] { (6, PurchaseResult.Unavailable) }, applied);
+            Assert.AreEqual(1000, _wallet.Coins);
+        }
+
         // ---- Fakes of the other features -------------------------------------------------------------------
+
+        private sealed class FakeClock : ISimClock
+        {
+            private readonly List<Action> _queue = new List<Action>();
+            public readonly List<string> Owners = new List<string>();
+
+            public SimMode Mode => SimMode.FixedTick;
+            public float StepSeconds => 0.025f;
+            public long StepCount { get; private set; }
+            public long GameplayStepCount => StepCount;
+            public double GameplaySeconds => StepCount * 0.025;
+
+            public IDisposable OnStep(string owner, Action<SimStep> onStep) =>
+                throw new NotSupportedException("Upgrade has no per-step logic.");
+
+            public void Enqueue(string owner, Action apply)
+            {
+                Owners.Add(owner);
+                _queue.Add(apply);
+            }
+
+            /// <summary>Starts one step: applies the queued actions in the order queued.</summary>
+            public void Step()
+            {
+                StepCount++;
+                var due = _queue.ToArray();
+                _queue.Clear();
+                foreach (var apply in due) apply();
+            }
+
+            /// <summary>Like the real clock's run clear: drops the queue.</summary>
+            public void ClearRun() => _queue.Clear();
+        }
 
         private sealed class FakeRun : IRunFlow
         {

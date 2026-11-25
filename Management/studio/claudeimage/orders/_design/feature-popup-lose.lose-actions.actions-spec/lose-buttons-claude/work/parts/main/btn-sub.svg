@@ -1,6 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 120" width="260" height="120">
-  <!-- bong do cung lech xuong 5 px -->
-  <rect x="2" y="7" width="256" height="109" rx="28" fill="#000000"/>
-  <!-- than nut phu: toi hon, vien 4 px -->
-  <rect x="2" y="2" width="256" height="109" rx="28" fill="#5E6A86" stroke="#000000" stroke-width="4"/>
+  <defs>
+    <linearGradient id="gs" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7CD0FF"/>
+      <stop offset="0.45" stop-color="#22A0F0"/>
+      <stop offset="1" stop-color="#1270C8"/>
+    </linearGradient>
+  </defs>
+  <!-- bong do lech xuong 6 px, mau vien xanh duong -->
+  <rect x="2.5" y="8.5" width="255" height="105" rx="30" fill="#0B4C94"/>
+  <!-- than vien thuoc: gradient doc, vien 5 px -->
+  <rect x="2.5" y="2.5" width="255" height="105" rx="30" fill="url(#gs)" stroke="#0B4C94" stroke-width="5"/>
+  <!-- vet bong sang mep tren -->
+  <rect x="16" y="10" width="228" height="22" rx="11" fill="#FFFFFF" fill-opacity="0.4"/>
 </svg>

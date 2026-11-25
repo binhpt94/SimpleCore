@@ -2,13 +2,14 @@ using Game.Ads;
 using Game.Core;
 using Game.Run;
 using Game.Services.Popup;
+using Game.SimClock;
 using UnityEngine;
 
 namespace Game.PopupRevive
 {
     /// <summary>
     /// Wires the revive popup: takes the run, ads and popup service from the registry and joins the session.
-    /// Install after SessionScene, Run, Ads and Popup. Publishes no contract.
+    /// Install after SessionScene, SimClock, Run, Ads and Popup. Publishes no contract.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/PopupRevive/Installer", fileName = "PopupReviveInstaller")]
     public sealed class PopupReviveInstaller : InstallerAsset
@@ -21,8 +22,9 @@ namespace Game.PopupRevive
             var ads = Require<IRewardedAds>(registry);
             var popups = Require<IPopupService>(registry);
             var views = Require<IPopupViews>(registry);
+            var clock = Require<ISimClock>(registry);
 
-            session.Join(new PopupReviveParticipant(flow, revive, ads, popups, views));
+            session.Join(new PopupReviveParticipant(flow, revive, ads, popups, views, clock));
         }
 
         private static T Require<T>(IServiceRegistry registry) where T : class

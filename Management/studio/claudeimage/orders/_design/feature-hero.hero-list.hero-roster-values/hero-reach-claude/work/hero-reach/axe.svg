@@ -1,32 +1,48 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
-  <g stroke="#2b1a0e" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+  <defs>
+    <linearGradient id="aRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF8A80"/><stop offset="0.45" stop-color="#F0383C"/><stop offset="1" stop-color="#B81E28"/>
+    </linearGradient>
+    <linearGradient id="aGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/><stop offset="0.45" stop-color="#FFC61F"/><stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="aSteel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="0.35" stop-color="#7CD0FF"/><stop offset="1" stop-color="#22A0F0"/>
+    </linearGradient>
+    <linearGradient id="aSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="0.4" stop-color="#FFF1E4"/><stop offset="1" stop-color="#F6D7C6"/>
+    </linearGradient>
+  </defs>
+  <g stroke-linejoin="round" stroke-linecap="round">
     <!-- cán rìu -->
-    <rect x="150" y="40" width="14" height="210" rx="5" fill="#8a5a2b"/>
+    <rect x="150" y="40" width="16" height="212" rx="7" fill="url(#aGold)" stroke="#C26A00" stroke-width="6"/>
     <!-- lưỡi rìu đôi -->
-    <path d="M157 50 C190 40 198 70 196 96 C190 112 172 108 157 104 Z" fill="#dfe5ea"/>
-    <path d="M157 50 C126 40 118 70 120 96 C126 112 142 108 157 104 Z" fill="#c7ced6"/>
+    <path d="M158 50 C190 38 198 70 196 98 C190 114 172 110 158 106 Z" fill="url(#aSteel)" stroke="#0B4C94" stroke-width="6"/>
+    <path d="M158 50 C126 38 118 70 120 98 C126 114 144 110 158 106 Z" fill="url(#aSteel)" stroke="#0B4C94" stroke-width="6"/>
+    <ellipse cx="178" cy="62" rx="8" ry="4" fill="#FFFFFF" opacity="0.8"/>
     <!-- chân -->
-    <rect x="44" y="250" width="34" height="44" rx="8" fill="#7a4a24"/>
-    <rect x="92" y="250" width="34" height="44" rx="8" fill="#7a4a24"/>
-    <!-- thân to, áo cam -->
-    <rect x="26" y="152" width="122" height="108" rx="26" fill="#f0892a"/>
-    <rect x="106" y="158" width="36" height="96" rx="14" fill="#cf6a16" stroke="none"/>
-    <rect x="26" y="152" width="122" height="108" rx="26" fill="none"/>
-    <path d="M40 160 L130 250" fill="none" stroke="#6b3d1a" stroke-width="12"/>
+    <rect x="44" y="248" width="34" height="46" rx="10" fill="url(#aRed)" stroke="#7E1018" stroke-width="6"/>
+    <rect x="92" y="248" width="34" height="46" rx="10" fill="url(#aRed)" stroke="#7E1018" stroke-width="6"/>
+    <!-- thân to áo đỏ -->
+    <rect x="26" y="150" width="124" height="110" rx="28" fill="url(#aRed)" stroke="#7E1018" stroke-width="6"/>
+    <ellipse cx="62" cy="166" rx="24" ry="7" fill="#FFFFFF" opacity="0.5"/>
+    <path d="M42 162 L132 250" fill="none" stroke="#C26A00" stroke-width="16"/>
+    <path d="M42 162 L132 250" fill="none" stroke="#FFC61F" stroke-width="9"/>
     <!-- tay nắm cán -->
-    <circle cx="157" cy="190" r="18" fill="#f5c99b"/>
+    <circle cx="158" cy="190" r="18" fill="url(#aSkin)" stroke="#E0A27A" stroke-width="5"/>
     <!-- đầu -->
-    <circle cx="84" cy="100" r="58" fill="#f5c99b"/>
-    <path d="M136 76 A58 58 0 0 1 30 124 A68 68 0 0 0 136 76 Z" fill="#d9a173" stroke="none"/>
-    <circle cx="84" cy="100" r="58" fill="none"/>
-    <!-- râu đỏ -->
-    <path d="M70 128 C80 168 128 166 140 120 C120 132 96 134 70 128 Z" fill="#b8461c"/>
-    <!-- mũ sừng -->
-    <path d="M28 92 A56 56 0 0 1 140 92 Z" fill="#a9b2bc"/>
-    <path d="M36 70 C14 60 10 36 22 20 C26 44 40 52 52 58 Z" fill="#fff4dc"/>
-    <path d="M132 70 C154 60 158 36 146 20 C142 44 128 52 116 58 Z" fill="#fff4dc"/>
-    <!-- mắt -->
-    <circle cx="116" cy="108" r="7" fill="#2b1a0e" stroke="none"/>
-    <path d="M104 96 L128 100" fill="none" stroke-width="5"/>
+    <circle cx="84" cy="104" r="58" fill="url(#aSkin)" stroke="#E0A27A" stroke-width="6"/>
+    <!-- râu vàng cam -->
+    <path d="M66 130 C76 172 130 170 142 120 C120 134 94 136 66 130 Z" fill="url(#aGold)" stroke="#C26A00" stroke-width="5"/>
+    <!-- mắt to -->
+    <ellipse cx="116" cy="108" rx="10" ry="12" fill="#FFFFFF" stroke="#3B1E4F" stroke-width="3"/>
+    <circle cx="119" cy="110" r="6" fill="#3B1E4F"/>
+    <circle cx="121" cy="107" r="2.5" fill="#FFFFFF"/>
+    <path d="M102 92 L130 98" fill="none" stroke="#3B1E4F" stroke-width="5"/>
+    <!-- mũ giáp vàng có sừng -->
+    <path d="M36 70 C12 60 8 34 22 16 C26 42 42 50 56 56 Z" fill="url(#aSkin)" stroke="#E0A27A" stroke-width="5"/>
+    <path d="M132 70 C156 60 160 34 146 16 C142 42 126 50 112 56 Z" fill="url(#aSkin)" stroke="#E0A27A" stroke-width="5"/>
+    <path d="M26 92 A58 58 0 0 1 142 92 Z" fill="url(#aGold)" stroke="#C26A00" stroke-width="6"/>
+    <ellipse cx="66" cy="62" rx="18" ry="7" fill="#FFFFFF" opacity="0.65" transform="rotate(-18 66 62)"/>
   </g>
 </svg>

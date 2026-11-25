@@ -73,6 +73,15 @@ namespace Game.HudUpgrade
         /// <summary>Plays the "bought" bounce once on button <paramref name="index"/>.</summary>
         void Bounce(int index);
 
+        /// <summary>Flashes the level number of button <paramref name="index"/> once, right after a level was bought.</summary>
+        void FlashLevel(int index);
+
+        /// <summary>Plays the short "cannot buy" shake once on button <paramref name="index"/>.</summary>
+        void Shake(int index);
+
+        /// <summary>Shows or clears the "hero is down" mark on hero button <paramref name="index"/>.</summary>
+        void SetDown(int index, bool down);
+
         void SetVisible(bool visible);
     }
 

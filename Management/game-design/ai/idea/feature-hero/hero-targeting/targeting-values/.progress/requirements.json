@@ -69,15 +69,17 @@
    "at": "2026-11-25 12:02:00"
   },
   "edge-muc-tieu-bi-bang-gia-lam-cham": {
-   "state": "done",
+   "state": "verified",
    "note": "",
-   "tests": [],
-   "play": "Play scene Game, bấm kĩ năng Băng giá khi hero đang đánh: hero giữ mục tiêu và nhịp đòn như cũ, chỉ quái chậm lại. Hero không đọc tốc độ quái nên cách nhắm không đổi",
+   "tests": [
+    "HeroParticipantTests.A_target_slowed_by_frost_is_kept_and_hit_at_the_same_rhythm"
+   ],
+   "play": "",
    "hash": "84ecd3009c73",
    "text": "Mục tiêu bị Băng giá làm chậm: không đổi gì với cách nhắm.",
    "title": "Mục tiêu bị Băng giá làm chậm",
-   "by": "Hero",
-   "at": "2026-11-25 11:41:25"
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:33"
   },
   "edge-cung-luc-co-quai-hai-ben-cach-bang": {
    "state": "verified",
@@ -375,6 +377,20 @@
   {
    "at": "2026-11-25 13:03:33",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:09:14",
+   "id": "edge-muc-tieu-bi-bang-gia-lam-cham",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.A_target_slowed_by_frost_is_kept_and_hit_at_the_same_rhythm"
+  },
+  {
+   "at": "2026-11-26 00:10:33",
+   "id": "edge-muc-tieu-bi-bang-gia-lam-cham",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

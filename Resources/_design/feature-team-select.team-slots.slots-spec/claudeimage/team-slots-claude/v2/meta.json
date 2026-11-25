@@ -1,0 +1,20 @@
+{
+ "node": "feature-team-select/team-slots/slots-spec",
+ "nodeHash": "f1384931ac46",
+ "frames": {
+  "main": "c370b069b40d"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99"
+ },
+ "order": "_design/feature-team-select.team-slots.slots-spec/team-slots-claude",
+ "version": 2,
+ "at": "2026-11-25 23:25:43",
+ "stamp": 1795623943.2423518,
+ "sources": [
+  [
+   "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+   2
+  ]
+ ]
+}

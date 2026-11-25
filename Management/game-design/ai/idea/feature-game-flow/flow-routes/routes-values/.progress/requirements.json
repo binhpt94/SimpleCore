@@ -158,8 +158,8 @@
    "at": "2026-11-25 13:55:35"
   },
   "params": {
-   "state": "verified",
-   "note": "RouteSettings: thời gian đổi màn 0, hạn dựng 3 giây, nút Quay lại 120 px, dòng lỗi",
+   "state": "doing",
+   "note": "PROTOTYPE: bật RouteScreens, nối adapter sang IRunBattle IHomeScreen ITeamSelectScreen IGameSceneReady",
    "tests": [
     "ScreenRouterTests.Settings_MatchTheDesignedValues",
     "ScreenRouterTests.Settings_RejectValuesThatCannotWork",
@@ -169,8 +169,8 @@
    "hash": "2f58a0ff36a6",
    "text": "## Làm gì\n- Giữ màn chính đang hiện (bắt đầu, chọn đội, trận) và cờ khoá.\n- Nhận yêu cầu theo bảng của node cha; đang khoá thì bỏ.\n- \"Vào trận\": giao đội cho `feature-run`, chờ báo dựng xong (tối đa 3 giây), rồi ẩn màn chọn đội, hiện màn trận.\n- Lựa chọn rời trận tới qua `feature-run` sau khi dọn trận: hiện màn đích ngay.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Thời gian đổi màn | 0 (cùng khung hình) | giây | Mức đơn giản nhất, khớp `feature-run/run-flow/flow-rules` |\n| Hạn dựng trận | 3 (dự kiến) | giây | Mọi thứ đã tải ở bước tải của scene; dựng trận chỉ là tạo object |\n| Số lần thử lại khi dựng lỗi | không giới hạn, mỗi lần một chạm | lần | Người chơi tự bấm lại |\n| Nút \"Quay lại\" | góc trên trái màn chọn đội, cạnh tối thiểu 120 px | px | Cỡ chạm tối thiểu của HUD và popup |\n| Dòng lỗi dựng trận | \"Không vào được trận, thử lại\" | | Người chơi biết bấm lại |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Ai đổi màn | `feature-run` (chỉ có màn trận; mở game và chơi lại vào thẳng trận) | Điều hướng màn, theo bảng của node cha | Như PROTOTYPE |\n| Nút \"Quay lại\" ở màn chọn đội | Không (chưa có màn chọn đội) | Có | Có |\n| Hiệu ứng đổi màn | Không | Không | Mờ dần ra rồi vào, 0.3 giây mỗi chiều (dự kiến), khoá trong lúc chạy |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "@CodeLead",
-   "at": "2026-11-25 13:55:35"
+   "by": "GameFlow",
+   "at": "2026-11-26 00:31:39"
   }
  },
  "log": [
@@ -425,6 +425,13 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-26 00:31:39",
+   "id": "params",
+   "state": "doing",
+   "by": "GameFlow",
+   "note": "PROTOTYPE: bật RouteScreens, nối adapter sang IRunBattle IHomeScreen ITeamSelectScreen IGameSceneReady"
   }
  ]
 }

@@ -17,9 +17,11 @@ namespace Game.Home.Tests
                 var saved = new FakeRunScore { Best = 3 };
                 var score = HomeCheat.Apply(HomeCheatState.WithRecord, saved);
                 var factory = new FakeHomeFactory();
-                var participant = new HomeParticipant(new FakeRunFlow(), score, config, factory);
+                var screen = new HomeScreenPresenter(score, config);
+                var participant = new HomeParticipant(screen, config, factory);
 
                 participant.Run();
+                screen.Show();
 
                 var shown = factory.Display.Content;
                 Assert.IsTrue(factory.Display.Visible);

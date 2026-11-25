@@ -1,0 +1,14 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,tick_rate,Số bước nhịp mỗi giây,bước/giây,40,như IDEA,như IDEA,Người yêu cầu 40 lần mỗi giây; nhịp đòn nhanh nhất 0.7 giây nên đủ mịn
+2,step_seconds,Độ dài một bước,giây,0.025,như IDEA,như IDEA,Bằng 1 chia tick_rate
+3,default_mode,Cách chạy mặc định,,fixed_tick,như IDEA,như IDEA,Người quyết: chơi thường và test cùng một nhịp
+4,modes,Các cách chạy chọn được trong config,,fixed_tick hoặc frame,như IDEA,như IDEA,Người yêu cầu chọn được Update hay TickUpdate bằng một config chung
+5,max_steps_per_frame,Số bước tối đa một khung hình,bước,5,như IDEA,như IDEA,Giữ như trần cũ của giao chiến; khung 0.1 giây vẫn theo kịp
+6,max_frame_seconds,Thời gian khung tối đa được tính,giây,0.125,như IDEA,như IDEA,Bằng 5 bước; phần dư bị bỏ để trận chậm lại chứ không nhảy
+7,dev_speeds,Các tốc độ tua của bản dev,lần,1 2 4 8 16,như IDEA,như IDEA,Dự kiến; đủ để tester chạy một lượt dài trong vài phút
+8,dev_max_steps_per_frame,Trần bước một khung khi tua,bước,5 nhân tốc độ tua,như IDEA,như IDEA,Tốc độ 16 lần cho tối đa 80 bước một khung
+9,dev_run_steps,Lệnh chạy ngay N bước,,có,như IDEA,như IDEA,Tester chạy tới một mốc mà không chờ khung hình
+10,dev_freeze_step,Lệnh đóng băng và chạy một bước,,có,như IDEA,như IDEA,Tester xem từng bước khi bắt lỗi
+11,view_interpolation,Nội suy hình giữa hai bước,,không,không,có,IDEA và PROTOTYPE chấp nhận hơi giật; FULL làm mượt trong phần nhìn

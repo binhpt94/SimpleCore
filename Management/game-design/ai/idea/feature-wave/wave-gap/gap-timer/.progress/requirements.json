@@ -41,15 +41,15 @@
    "at": "2026-11-25 13:03:34"
   },
   "gap-same-rules": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Wave chỉ ngừng thả quái trong lúc thở, không chặn feature khác. Play: trong 3 giây thở vẫn mua nâng cấp, dùng kĩ năng thành, hero gục vẫn hồi sinh, máu thành không hồi",
    "hash": "7d952949eb62",
    "text": "Trong lúc thở: mua nâng cấp, dùng kĩ năng thành, hồi chiêu, hồi sinh hero 8 giây vẫn chạy; máu thành không hồi\nNode này không đổi hành vi hero, thành hay nâng cấp; chỉ không thả quái mới.",
    "title": "Trong lúc thở: mua nâng cấp, dùng kĩ năng thành, hồi chiêu, hồi sinh hero 8 giây vẫn chạy; máu thành không hồi",
-   "by": "Wave",
-   "at": "2026-11-25 11:37:00"
+   "by": "@CodeLead",
+   "at": "2026-11-25 21:11:33"
   },
   "edge-tam-dung-trong-luc-tho": {
    "state": "verified",
@@ -121,7 +121,7 @@
    "state": "verified",
    "note": "",
    "tests": [
-    "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers",
+    "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers",
     "WaveDirectorTests.ClearingWaveOne_MakesTheWaveNumberTwoAtOnce_AndKeepsItThroughTheBreak",
     "WaveDirectorTests.BreakEnd_StartsTheUpcomingWave_WithoutChangingTheWaveNumberAgain"
    ],
@@ -130,7 +130,7 @@
    "text": "## Làm gì\n- Nhận \"đã dọn sạch đợt w\" từ `feature-wave/wave-clear/clear-rules`: số đợt thành w + 1 ngay, báo `feature-hud`; bắt đầu đếm 3 giây.\n- Trong lúc đếm không thả quái. Không chặn hay đổi bất kì luật nào của `feature-upgrade`, `feature-castle`, `feature-hero`.\n- Đếm xong: gọi `feature-wave/difficulty-scaling/wave-formula` (với số đợt w + 1) và `feature-wave/spawning/spawn-order` lập và thả đợt mới; báo `feature-hud` \"đợt w + 1 bắt đầu\" để hiện thông báo đợt.\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Độ dài lúc thở | 3 | s | Theo bộ số chuẩn; ngắn hơn hẳn đợt (đợt ngắn nhất thả trong 7 s), đủ để thấy \"đã dọn sạch\" |\n| Độ dài thay đổi theo đợt | không | | Nhịp quen thuộc, dễ đoán |\n\nƯớc tính độ dài một lượt (dự kiến): mỗi đợt mất thời gian thả cộng thời gian dọn quái tồn, khoảng 15 s ở đợt 1 tới 35–45 s ở đợt 10–20; cộng 3 s mỗi lúc thở. Một lượt gãy ở đợt 15 dài khoảng 7–8 phút.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Độ dài lúc thở | 3 s | 3 s, chỉnh sau chơi thử | chốt sau chơi thử |\n| Báo đợt mới cho `feature-hud` | không bắt buộc | có | có |\n| Tạm dừng đóng băng đồng hồ | có | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 13:03:34"
+   "at": "2026-11-26 00:30:14"
   },
   "gap-next-number": {
    "state": "verified",
@@ -145,6 +145,20 @@
    "title": "Dọn sạch đợt w thì số đợt thành w + 1 ngay khung hình đó; suốt 3 giây thở, số đợt là đợt sắp tới",
    "by": "@CodeLead",
    "at": "2026-11-25 13:03:34"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "Test báo đợt mới qua IWaveProgress cho Hud",
+   "tests": [
+    "PrototypeStageTests.ClearRulesStagePrototype_And_GapTimerStagePrototype_HudHearsTheClearAndTheNewWave",
+    "PrototypeStageTests.GapTimerStagePrototype_RealConfigBreakIsThreeSeconds"
+   ],
+   "play": "",
+   "hash": "78fe0544d7cb",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Độ dài lúc thở: 3 s, chỉnh sau chơi thử\n- Báo đợt mới cho `feature-hud`: có",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:14"
   }
  },
  "log": [
@@ -312,6 +326,48 @@
   {
    "at": "2026-11-25 13:03:34",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 21:11:33",
+   "id": "gap-same-rules",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:13:09",
+   "id": "params",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers, WaveDirectorTests.ClearingWaveOne_MakesTheWaveNumberTwoAtOnce_AndKeepsItThroughTheBreak, WaveDirectorTests.BreakEnd_StartsTheUpcomingWave_WithoutChangingTheWaveNumberAgain"
+  },
+  {
+   "at": "2026-11-26 00:30:14",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:03:00",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Wave",
+   "note": "Test báo đợt mới qua IWaveProgress cho Hud"
+  },
+  {
+   "at": "2026-11-26 01:03:41",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Wave",
+   "note": "PrototypeStageTests.ClearRulesStagePrototype_And_GapTimerStagePrototype_HudHearsTheClearAndTheNewWave, PrototypeStageTests.GapTimerStagePrototype_RealConfigBreakIsThreeSeconds"
+  },
+  {
+   "at": "2026-11-26 01:18:14",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

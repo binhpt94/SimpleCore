@@ -2,7 +2,7 @@
  "items": {
   "new-record": {
    "state": "verified",
-   "note": "gắn test có sẵn cho cheat đã có",
+   "note": "PROTOTYPE: cheat có cả nút Về màn bắt đầu, test kiểm nút hiện",
    "tests": [
     "LosePopupTests.NewRecordCheatOpensThePopupWithForcedValuesAtOnce"
    ],
@@ -11,7 +11,7 @@
    "text": "Popup thua đang mở, lượt vừa phá kỉ lục\nÉp: điểm 16, kỉ lục 16, cờ kỉ lục mới bật; trận đứng yên phía sau. Có đủ mọi thành phần của popup: tiêu đề, điểm, kỉ lục, dòng \"Kỉ lục mới!\", nút \"Chơi lại\", nút \"Về màn bắt đầu\".",
    "title": "Popup thua đang mở, lượt vừa phá kỉ lục",
    "by": "@CodeLead",
-   "at": "2026-11-25 11:39:16"
+   "at": "2026-11-26 00:30:13"
   },
   "params": {
    "state": "verified",
@@ -66,6 +66,27 @@
   {
    "at": "2026-11-25 11:39:16",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:22:59",
+   "id": "new-record",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "PROTOTYPE: cheat có cả nút Về màn bắt đầu, test kiểm nút hiện"
+  },
+  {
+   "at": "2026-11-26 00:23:00",
+   "id": "new-record",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.NewRecordCheatOpensThePopupWithForcedValuesAtOnce"
+  },
+  {
+   "at": "2026-11-26 00:30:13",
+   "id": "new-record",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

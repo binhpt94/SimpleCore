@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Game.Core;
 using Game.Hero;
-using Game.Run;
 using NUnit.Framework;
 
 namespace Game.TeamSelect.Tests
@@ -33,7 +32,6 @@ namespace Game.TeamSelect.Tests
         {
             var registry = new ServiceRegistry();
             var session = new FakeSession();
-            registry.Register<IRunFlow>(new FakeRun());
             registry.Register<IHeroRoster>(new FakeRoster());
             registry.Register<ISessionScene>(session);
 
@@ -44,13 +42,32 @@ namespace Game.TeamSelect.Tests
         }
 
         [Test]
-        public void InstallerFailsAtOnceNamingMissingRun()
+        public void InstallerAssetPublishesTheScreenForTheFlow()
         {
             var registry = new ServiceRegistry();
+            var session = new FakeSession();
             registry.Register<IHeroRoster>(new FakeRoster());
-            registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<ISessionScene>(session);
+
+            LoadInstaller().Install(registry);
+
+            var screen = registry.Resolve<ITeamSelectScreen>();
+            Assert.IsNotNull(screen);
+            var joined = (TeamSelectSession)session.Joined[0];
+            screen.Show();
+            Assert.IsTrue(joined.Presenter.IsOpen, "the published screen drives the joined session's screen");
+            screen.Hide();
+        }
+
+        [Test]
+        public void InstallerFailsAtOnceNamingMissingHeroRoster()
+        {
+            var registry = new ServiceRegistry();
+            var session = new FakeSession();
+            registry.Register<ISessionScene>(session);
             var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(registry));
-            StringAssert.Contains(nameof(IRunFlow), error.Message);
+            StringAssert.Contains(nameof(IHeroRoster), error.Message);
+            Assert.AreEqual(0, session.Joined.Count, "nothing joined when a dependency is missing");
         }
     }
 }

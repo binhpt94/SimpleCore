@@ -25,6 +25,10 @@ namespace Game.Hero
         [SerializeField] private float projectileSeconds = 0.15f;
         [SerializeField] private float projectileSize = 0.25f;
         [SerializeField] private Color effectColor = new Color(1f, 0.95f, 0.6f, 0.8f);
+        [Header("Level label")]
+        [SerializeField] private float labelDigitHeight = 0.45f;
+        [SerializeField] private float labelGap = 0.25f;
+        [SerializeField] private Color labelColor = new Color(1f, 0.85f, 0.2f, 1f);
         [Header("Drawing")]
         [SerializeField] private int sortingOrder = 10;
 
@@ -53,6 +57,9 @@ namespace Game.Hero
 
         private float _effectLeft, _effectTotal;
         private HeroStrike _strike;
+
+        private HeroLevelLabel _label;
+        private float _labelLeft;
 
         public void Setup(string heroCode, Sprite sprite, Color placeholderColor, float width, float height)
         {
@@ -108,6 +115,20 @@ namespace Game.Hero
             }
             _growLeft = Mathf.Max(0f, _growLeft - deltaSeconds);
             _effectLeft = Mathf.Max(0f, _effectLeft - deltaSeconds);
+            _labelLeft = Mathf.Max(0f, _labelLeft - deltaSeconds);
+            ApplyLook();
+        }
+
+        public void ShowLevel(int level, float seconds)
+        {
+            if (_label == null)
+            {
+                var holder = new GameObject("Level label");
+                holder.transform.SetParent(transform, false);
+                _label = new HeroLevelLabel(holder.transform, Box(), labelColor, sortingOrder + 2);
+            }
+            _label.Show(level, labelDigitHeight);
+            _labelLeft = seconds;
             ApplyLook();
         }
 
@@ -190,6 +211,11 @@ namespace Game.Hero
             _body.color = _flashLeft > 0f ? flashColor : _bodyColor;
 
             ApplyEffect();
+            if (_label != null)
+            {
+                _label.SetVisible(_labelLeft > 0f && !_hidden);
+                _label.Root.localPosition = new Vector3(0f, _height + labelGap, 0f);
+            }
         }
 
         private void ApplyEffect()

@@ -12,6 +12,8 @@ namespace Game.Battlefield
         private Sprite _blank;
         private Texture2D _blankTexture;
 
+        public Object Root => gameObject;
+
         public void Show(IReadOnlyList<BackdropPiece> pieces)
         {
             foreach (var piece in pieces)

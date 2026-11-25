@@ -19,7 +19,7 @@
     "frame": "main",
     "part": "bar",
     "ref": "_design/feature-scene-flow.scene-list.boot-loading/loading-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   }

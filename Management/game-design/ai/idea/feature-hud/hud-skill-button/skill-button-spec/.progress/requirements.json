@@ -190,6 +190,22 @@
    "title": "Nâng cấp kĩ năng",
    "by": "@CodeLead",
    "at": "2026-11-25 18:32:10"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "PROTOTYPE: 3 nut, so giay, lop phu, nay, sprite AI · doi chieu test",
+   "tests": [
+    "HudSessionTests.AtPrototypeAllThreeSkillButtonsShowCoverAndBounceFromTheRealConfig",
+    "HudSkillButtonTests.ThreeButtonsInCastleOrderAllReadyAtBattleStart",
+    "HudSkillButtonTests.CoolingButtonShowsSecondsRoundedUpAndCoverForTheShareLeft",
+    "HudSkillButtonTests.ButtonBouncesOnceWhenItsCooldownEnds"
+   ],
+   "play": "",
+   "hash": "7a7905122c18",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Số nút: 3\n- Lớp phủ vơi dần: Có\n- Hiệu ứng nảy khi hồi xong: Có\n- Biểu tượng: Sprite 2D gen bằng AI",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:14"
   }
  },
  "log": [
@@ -427,6 +443,27 @@
   {
    "at": "2026-11-25 18:32:10",
    "id": "edge-nang-cap-ki-nang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:03:08",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Hud",
+   "note": "PROTOTYPE: 3 nut, so giay, lop phu, nay, sprite AI · doi chieu test"
+  },
+  {
+   "at": "2026-11-26 01:04:09",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Hud",
+   "note": "HudSessionTests.AtPrototypeAllThreeSkillButtonsShowCoverAndBounceFromTheRealConfig, HudSkillButtonTests.ThreeButtonsInCastleOrderAllReadyAtBattleStart, HudSkillButtonTests.CoolingButtonShowsSecondsRoundedUpAndCoverForTheShareLeft, HudSkillButtonTests.ButtonBouncesOnceWhenItsCooldownEnds"
+  },
+  {
+   "at": "2026-11-26 01:18:14",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

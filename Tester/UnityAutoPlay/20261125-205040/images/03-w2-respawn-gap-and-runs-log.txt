@@ -1,0 +1,42 @@
+W2 feature-wave/wave-gap/gap-timer#gap-same-rules (phan hoi sinh) va nhat ki cac luot chay tu nhien
+Do bang execute_code: event HeroSquad.Fell/Respawned, WaveDirector.WaveCleared/WaveStarted, RunFlow.StepChanged (chi trong bo nho).
+Cot hero: [slot stand=<dang dung> resp=<so giay hoi sinh con lai>]; slot 0 Hiep si, 1 Dau si riu, 2 Cung thu. t = Time.time (game), gap = dang trong luc tho.
+Editor duoc focus suot dot (200-400 khung/giay), Time.time chay gan bang gio that.
+
+== Ba lan hero dang go khi dot vua don sach: dong ho hoi sinh dem du 3 giay trong luc tho, hero dung day dung 8.00 giay sau khi guc
+Fell slot=1 t=510.04 wave=7 gap=False [1 stand=False resp=8.00]
+WaveCleared 7 t=514.63 gap=True(0.00s) [1 stand=False resp=3.41]
+WaveStarted 8 t=517.63 gap=True(3.00s) [1 stand=False resp=0.41]      <- 3.00 s tho, resp giam 3.00
+Respawned slot=1 t=518.04 wave=8                                       <- 518.04 - 510.04 = 8.00 s
+
+Fell slot=0 t=610.61 wave=10 [0 stand=False resp=8.00]
+WaveCleared 10 t=613.83 gap=True(0.00s) [0 stand=False resp=4.78]
+WaveStarted 11 t=616.83 gap=True(3.00s) [0 stand=False resp=1.78]     <- giam 3.00
+Respawned slot=0 t=618.61 wave=11                                      <- 8.00 s
+
+Fell slot=2 t=937.54 wave=10 [2 stand=False resp=8.00]
+WaveCleared 10 t=939.70 gap=True(0.00s) [2 stand=False resp=5.85]
+WaveStarted 11 t=942.70 gap=True(3.00s) [2 stand=False resp=2.85]     <- giam 3.00
+Respawned slot=2 t=945.55 wave=11                                      <- 8.01 s
+
+(Them mot lan gan sat: Fell slot=2 t=648.58, WaveCleared 11 t=653.26 resp=3.32, WaveStarted 12 t=656.26 resp=0.32, Respawned t=656.58: 8.00 s.)
+Moi lan go khac trong dot: hoi sinh dung 8.00 s (vd 274.75 -> 282.75, 529.00 -> 537.01, 568.60 -> 576.60).
+Khong lan nao hero go roi dung day tron trong 3 giay tho (can resp duoi 3 luc don sach).
+
+== Cac luot (khong ep thua; cung doi Hiep si, Dau si riu, Cung thu)
+Luot 0 (khong mua gi, sau R1): bat dau 20:54:2x (t=179.3), Ending t=348.3 dot 7, Score=6 Best=7. Khoang 2.8 phut.
+Luot 1 (bot: mua nang cap xoay vong 6 nut moi 0.5 s, bam Sam set khi co tu 3 quai trong |x|<7):
+  Playing 20:57:31 -> Ending 21:03:02 dot 12, Score=11, Best=11 (ki luc moi). 5 phut 31 giay that.
+  Moc dot: W5 20:58:51, W10 21:01:23, W12 21:02:39.
+  Cap luc thua: Hiep si 7, Dau si riu 6, Cung thu 6, mau thanh 5, suc danh thanh 4, ki nang 4.
+Luot 2 (bot): Playing 21:03:05 -> Ending 21:08:15 dot 12, Score=11. 5 phut 10 giay that.
+  Moc dot: W5 21:04:20, W10 21:06:50, W12 21:08:02.
+  Cap luc thua: Hiep si 6, Dau si riu 6, Cung thu 7, mau thanh 5, suc danh thanh 5, ki nang 3.
+Luot 3 (bot): Playing 21:08:18, dung o dot 6 luc 21:10 vi @Manager bo viec B1 (cho tick co dinh).
+Ki luc PlayerPrefs Run/Best: 7 luc dau dot, 11 sau luot 1.
+
+== Popup cac lan thua (doc chu tren popup)
+popup: Thanh da bi pha | Tru duoc 6 dot | Ki luc: 7 dot | Choi lai |
+popup: Thanh da bi pha | Tru duoc 11 dot | Ki luc: 11 dot | Choi lai | Ki luc moi! |
+popup: Thanh da bi pha | Tru duoc 11 dot | Ki luc: 11 dot | Choi lai |
+(Chi co nut Choi lai; nut Home inactive o moi lan.)

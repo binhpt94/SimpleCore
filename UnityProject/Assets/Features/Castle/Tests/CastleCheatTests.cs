@@ -17,7 +17,8 @@ namespace Game.Castle.Tests
             _config = ScriptableObject.CreateInstance<CastleConfig>();
             _run = new FakeRunFlow();
             _body = new CastleBody(_config, _run);
-            _skills = new CastleSkills(_config, _body, _run, new FakeEnemyField(), new FakeHeroSquad());
+            var enemies = new FakeEnemyField();
+            _skills = new CastleSkills(_config, _body, _run, enemies, new FakeHeroSquad(), enemies);
             _cheat = new CastleCheat(_body, _skills);
         }
 
@@ -82,6 +83,69 @@ namespace Game.Castle.Tests
 
             _cheat.SetCooldownLeft(CastleSkill.Thunder, 0f);
             Assert.That(_skills.GetState(CastleSkill.Thunder).Ready, Is.True);
+        }
+
+        // ICastleFallCheat, for feature-popup-revive/cheat#waiting-ad.
+
+        [Test]
+        public void Fall_cheat_brings_the_castle_to_zero_and_tells_the_run_once_like_a_real_fall()
+        {
+            var destroyed = 0;
+            _body.Destroyed += () => destroyed++;
+            var fall = new CastleFallCheat(_body, () => true);
+
+            fall.Fall();
+
+            Assert.That(_body.Health, Is.EqualTo(0f));
+            Assert.That(_body.IsDestroyed, Is.True);
+            Assert.That(_run.LoseCalls, Is.EqualTo(1));
+            Assert.That(destroyed, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Fall_cheat_on_a_castle_with_a_fraction_of_health_still_falls()
+        {
+            _body.Hit(0, 999.6f);
+            var fall = new CastleFallCheat(_body, () => true);
+
+            fall.Fall();
+
+            Assert.That(_body.IsDestroyed, Is.True);
+            Assert.That(_run.LoseCalls, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Fall_cheat_does_nothing_to_a_castle_already_fallen()
+        {
+            _body.Hit(0, 5000f);
+            var fall = new CastleFallCheat(_body, () => true);
+
+            fall.Fall();
+
+            Assert.That(_run.LoseCalls, Is.EqualTo(1), "the run was told once, by the real fall");
+        }
+
+        [Test]
+        public void Fall_cheat_does_nothing_when_no_battle_is_running()
+        {
+            var fall = new CastleFallCheat(_body, () => false);
+
+            fall.Fall();
+
+            Assert.That(_body.IsDestroyed, Is.False);
+            Assert.That(_body.Health, Is.EqualTo(1000f));
+            Assert.That(_run.LoseCalls, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Fall_cheat_then_revive_stands_the_castle_up_at_thirty_percent()
+        {
+            var fall = new CastleFallCheat(_body, () => true);
+            fall.Fall();
+
+            _body.Revive();
+
+            Assert.That(_body.Health, Is.EqualTo(300f));
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Game.Wave.Tests
         private const string ConfigPath = "Assets/Features/Wave/FeatureAssets/Private/WaveConfig.asset";
 
         [Test]
-        public void RealConfig_HoldsTheDesignedIdeaNumbers()
+        public void RealConfig_HoldsTheDesignedPrototypeNumbers()
         {
             var config = AssetDatabase.LoadAssetAtPath<WaveConfig>(ConfigPath);
             Assert.That(config, Is.Not.Null, "missing " + ConfigPath);
@@ -25,8 +25,8 @@ namespace Game.Wave.Tests
             Assert.That(rules.GiantFromWave, Is.EqualTo(5));
             Assert.That(rules.ArcherFromWave, Is.EqualTo(7));
             Assert.That(rules.BossEveryWaves, Is.EqualTo(10));
-            Assert.That(rules.UseArcher, Is.False, "IDEA: no Archer, its places go to Soldiers");
-            Assert.That(rules.UseBoss, Is.False, "IDEA: no Boss");
+            Assert.That(rules.UseArcher, Is.True, "PROTOTYPE: all 5 kinds, Archer from wave 7");
+            Assert.That(rules.UseBoss, Is.True, "PROTOTYPE: all 5 kinds, Boss every 10 waves");
             Assert.That(rules.ClearRewardBase, Is.EqualTo(20), "clear reward = 20 + 5w");
             Assert.That(rules.ClearRewardPerWave, Is.EqualTo(5));
             Assert.That(rules.GapSeconds, Is.EqualTo(3f).Within(1e-5));
@@ -37,10 +37,10 @@ namespace Game.Wave.Tests
             for (var wave = 1; wave <= 200; wave++)
             {
                 var plan = formula.Plan(wave);
-                Assert.That(plan.Archers, Is.EqualTo(0), $"IDEA: no Archer in wave {wave}");
-                Assert.That(plan.Bosses, Is.EqualTo(0), $"IDEA: no Boss in wave {wave}");
-                Assert.That(plan.Soldiers + plan.Wolves + plan.Giants, Is.EqualTo(plan.Count),
-                    $"wave {wave}: only Soldier, Wolf and Giant; Archer and Boss places go to Soldiers");
+                Assert.That(plan.Archers > 0, Is.EqualTo(wave >= 7), $"PROTOTYPE: Archer from wave 7 (wave {wave})");
+                Assert.That(plan.Bosses, Is.EqualTo(wave % 10 == 0 ? 1 : 0), $"PROTOTYPE: one Boss in waves 10, 20... (wave {wave})");
+                Assert.That(plan.Soldiers + plan.Wolves + plan.Giants + plan.Archers + plan.Bosses, Is.EqualTo(plan.Count),
+                    $"wave {wave}: the 5 kinds fill every place");
             }
 
             var designed = WaveRules.DefaultTiers();

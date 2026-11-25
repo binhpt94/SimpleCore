@@ -62,6 +62,20 @@ namespace Game.Run.Tests
         }
 
         [Test]
+        public void SavedBestThatIsANegativeNumberWrittenAsTextCountsAsZero()
+        {
+            PlayerPrefs.SetString(Key, "-5");
+            Assert.AreEqual(0, LoadedScore().Best);
+        }
+
+        [Test]
+        public void SavedBestThatStartsWithDigitsButIsNotANumberCountsAsZero()
+        {
+            PlayerPrefs.SetString(Key, "12abc");
+            Assert.AreEqual(0, LoadedScore().Best);
+        }
+
+        [Test]
         public void NewBestIsWrittenToTheDeviceAndReadBackNextTime()
         {
             var score = LoadedScore();
@@ -70,7 +84,7 @@ namespace Game.Run.Tests
             score.CountClearedWave(2);
             score.Settle();
 
-            Assert.AreEqual(2, PlayerPrefs.GetInt(Key, 0));
+            Assert.AreEqual("2", PlayerPrefs.GetString(Key, null));
             Assert.AreEqual(2, LoadedScore().Best);
         }
     }

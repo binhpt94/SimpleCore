@@ -20,7 +20,7 @@ namespace Game.Castle.Tests
             _enemies = new FakeEnemyField();
             _heroes = new FakeHeroSquad();
             _body = new CastleBody(_config, _run);
-            _skills = new CastleSkills(_config, _body, _run, _enemies, _heroes);
+            _skills = new CastleSkills(_config, _body, _run, _enemies, _heroes, _enemies);
         }
 
         [TearDown]

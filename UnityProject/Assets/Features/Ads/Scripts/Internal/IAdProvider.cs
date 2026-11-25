@@ -10,6 +10,13 @@ namespace Game.Ads
 
         /// <summary>Stops the current ad if it can; events that still arrive are ignored by the caller.</summary>
         void Abort();
+
+        /// <summary>
+        /// The caller cancelled the current ad. A real ad keeps playing (its result is dropped when it comes): return
+        /// false. Return true only when this provider ended the ad here (an ad that would never end by itself); the
+        /// request is then dropped at once.
+        /// </summary>
+        bool EndOnCancel();
     }
 
     /// <summary>What a provider reports about the one ad it was asked to show.</summary>

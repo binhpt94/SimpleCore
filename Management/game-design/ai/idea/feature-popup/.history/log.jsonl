@@ -11,3 +11,4 @@
 {"at": "2026-11-24 23:38:28", "event": "review", "table": "idea", "item": "flow-routes-leave", "text": "`feature-game-flow` quyết màn đích cho mọi lựa chọn rời trận từ popup thua và popup tạm dừng\nChơi lại về màn chọn đội; về màn bắt đầu và bỏ lượt đều về màn bắt đầu.", "ai": 6, "score": 8, "feedback": "", "rejected": false}
 {"at": "2026-11-24 23:43:16", "event": "data", "hash": "d46873561735", "previous": "9cf9a7baabdc", "added": [], "removed": [{"id": "run-routes-after-lose", "text": "`feature-run` quyết màn kế tiếp từ lựa chọn mà `feature-popup-lose` gửi\nĐi về màn chọn đội hay màn bắt đầu có cùng một nơi xử lí."}], "rewritten": []}
 {"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "d46873561735"}
+{"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "d46873561735"}

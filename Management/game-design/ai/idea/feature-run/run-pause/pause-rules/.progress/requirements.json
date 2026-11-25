@@ -4,17 +4,17 @@
    "state": "verified",
    "note": "Co pauseEnabled trong RunConfig, IDEA tat: Pause bi bo qua",
    "tests": [
-    "RunInstallerTests.IdeaRunHasNoPauseSoEveryPauseRequestIsIgnored",
-    "RunSkipMenusTests.WithPauseOffNoPauseRequestStopsTheBattle",
-    "RunInstallerTests.ConfigAssetKeepsTheIdeaBattleRunningWhenLeavingTheGameOrPressingBack",
-    "RunSkipMenusTests.ThereIsNoGivingUp"
+    "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues",
+    "RunInstallerTests.ConfigAssetPausesThePrototypeBattleWhenLeavingTheGameOrPressingBack",
+    "RunInstallerTests.PrototypeRunTakesPauseRequestsThroughTheClockQueue",
+    "RunInstallerTests.PrototypeRunHasBackToStartAndGivingUp"
    ],
    "play": "",
    "hash": "40965e0e3cfb",
    "text": "## Làm gì\n- Giữ trạng thái trận: đang đánh, tạm dừng, đã kết thúc.\n- Vào tạm dừng: dừng thời gian trận, báo `feature-wave`, `feature-enemy`, `feature-hero`, `feature-castle` đứng yên; nhờ `feature-popup` hiện popup tạm dừng (`feature-popup-pause`).\n- Nhận lựa chọn từ popup: tiếp tục (chạy lại ngay) hoặc bỏ lượt (kết thúc lượt qua `feature-run/run-flow/flow-rules`).\n- Theo dõi game rời khỏi màn hình (mất tiêu điểm hoặc bị ẩn) để tự vào tạm dừng.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Hồi chiêu đứng yên | Sấm sét 20, Băng giá 35, Cổ vũ 25 | giây | Bộ số chung; đều đứng khi dừng |\n| Nghỉ giữa hai đợt đứng yên | 3 | giây | Bộ số chung |\n| Đếm ngược khi tiếp tục | 0 | giây | Chạy lại ngay |\n| Số popup tạm dừng mở cùng lúc | tối đa 1 | popup | Không mở chồng |\n| Điểm khi bỏ lượt | số đợt đã dọn sạch | đợt | Giống thua |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Nút tạm dừng và popup tạm dừng | Không có | Không bắt buộc | Có |\n| Tự tạm dừng khi rời game | Không có (trận cứ chạy) | Không bắt buộc | Có |\n| Nút quay lại của máy mở tạm dừng | Không có | Không bắt buộc | Có |\n| Bỏ lượt | Không có | Không bắt buộc | Có, có hỏi xác nhận |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 18:46:03"
+   "at": "2026-11-26 00:29:49"
   },
   "pause-quit-ends": {
    "state": "verified",
@@ -167,15 +167,15 @@
    "at": "2026-11-25 18:32:07"
   },
   "pause-block-input": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play, tam dung bang nut quay lai: bam nang cap va ki nang khong co tac dung ke ca khi lot qua nen che. Run bao IsPaused, Upgrade va Castle tu tu choi",
    "hash": "d73d31c696c8",
    "text": "Lúc tạm dừng không mua nâng cấp và không dùng kĩ năng, kể cả khi bấm lọt qua\nPopup che chặn bấm; ngoài ra `feature-upgrade` và `feature-castle` tự từ chối thao tác khi trận đang tạm dừng.",
    "title": "Lúc tạm dừng không mua nâng cấp và không dùng kĩ năng, kể cả khi bấm lọt qua",
-   "by": "Run",
-   "at": "2026-11-25 13:43:22"
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:38:03"
   },
   "edge-tam-dung-khi-ki-nang-vua-bam-trong": {
    "state": "done",
@@ -189,26 +189,26 @@
    "at": "2026-11-25 13:43:24"
   },
   "edge-tam-dung-giua-luc-nghi-3-giay": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play: don dot roi tam dung giua luc nghi 3 giay: phan giay con lai giu nguyen, Tiep tuc thi dem tiep. Run bao IsPaused, Wave dung dong ho",
    "hash": "999067e6f753",
    "text": "**Tạm dừng giữa lúc nghỉ 3 giây:** phần giây còn lại giữ nguyên; tiếp tục thì đếm tiếp phần còn lại.",
    "title": "Tạm dừng giữa lúc nghỉ 3 giây",
-   "by": "Run",
-   "at": "2026-11-25 13:43:26"
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:38:03"
   },
   "pause-freeze-all": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Bat backKeyPauses trong RunConfig, Play, giua dot bam nut quay lai: quai, hero, dan, hoi sinh hero, hoi chieu ki nang, nghi giua dot dung yen, Tiep tuc thi chay tiep tu dung gia tri. Run chi giu IsPaused va StepChanged, feature tran tu dung",
    "hash": "f84a50d67d18",
    "text": "Lúc tạm dừng thời gian trận đứng hẳn: quái, hero, đạn, hồi sinh, hồi chiêu 20s/35s/25s, nghỉ 3s giữa đợt\nMọi bộ đếm giữ nguyên giá trị lúc bắt đầu dừng; tiếp tục là chạy tiếp đúng từ giá trị đó.",
    "title": "Lúc tạm dừng thời gian trận đứng hẳn: quái, hero, đạn, hồi sinh, hồi chiêu 20s/35s/25s, nghỉ 3s giữa đợt",
-   "by": "Run",
-   "at": "2026-11-25 13:43:30"
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:36"
   }
  },
  "log": [
@@ -432,6 +432,41 @@
   {
    "at": "2026-11-25 18:46:03",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:17:32",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "RunInstallerTests.ConfigAssetHoldsThePrototypeRunValues, RunInstallerTests.ConfigAssetPausesThePrototypeBattleWhenLeavingTheGameOrPressingBack, RunInstallerTests.PrototypeRunTakesPauseRequestsThroughTheClockQueue, RunInstallerTests.PrototypeRunHasBackToStartAndGivingUp"
+  },
+  {
+   "at": "2026-11-26 00:29:49",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:38:03",
+   "id": "pause-block-input",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:38:03",
+   "id": "edge-tam-dung-giua-luc-nghi-3-giay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:15:36",
+   "id": "pause-freeze-all",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

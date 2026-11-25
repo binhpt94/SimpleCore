@@ -1,6 +1,6 @@
 ---
 based-on: c34032308bdd
-refs: feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-team-select/hero-cards/card-spec@786f5ada38ab, feature-run/run-start@d386ccae4d88, feature-hero/hero-list@1bf8998ab5a4, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+refs: feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-team-select/hero-cards/card-spec@786f5ada38ab, feature-run/run-start@d386ccae4d88, feature-hero/hero-list@1bf8998ab5a4, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c, feature-game-flow/flow-routes/routes-values@66f0417d12da
 ---
 # Ba chỗ trong đội và nút vào trận
 
@@ -22,7 +22,14 @@ Phải bỏ một hero trước.
 ### start-button-gate | AI 8 | Nút "Vào trận" chỉ có tác dụng khi đủ 3 chỗ; thiếu thì nút ở trạng thái khoá, chạm không làm gì
 Trạng thái khoá phải nhìn khác trạng thái bấm được.
 
-### start-button-once | AI 7 | Chạm "Vào trận" khi đủ 3: báo đội cho `feature-run` đúng một lần, rồi màn không nhận chạm nữa
+### start-button-once | AI 7 | Chạm "Vào trận" khi đủ 3: báo đội cho `feature-game-flow` một lần, rồi khoá chạm tới khi có kết quả
+Kết quả là dựng trận xong hoặc lỗi. Điều hướng màn giao đội cho lượt chơi dựng trận; dựng xong thì màn trận hiện, màn này ẩn.
 
-### screen-parts | AI 7 | Màn chọn đội có 3 phần: 5 thẻ hero, 3 chỗ trong đội, 1 nút "Vào trận"
-Không có nút quay lại màn bắt đầu.
+### screen-parts | AI 7 | Màn chọn đội có 4 phần: 5 thẻ hero, 3 chỗ trong đội, nút "Vào trận", nút "Quay lại"
+Nút "Quay lại" là phần phụ, ở góc trên trái, cạnh tối thiểu 120 px (`feature-game-flow/flow-routes/routes-values`).
+
+### back-button-tap | AI 7 | Chạm "Quay lại": báo `feature-game-flow` đúng một lần; các chỗ đang chọn dở bị bỏ, đội nhớ không đổi
+Điều hướng màn đưa về màn bắt đầu. Đang chờ dựng trận thì chạm bị bỏ.
+
+### build-fail-retry | AI 7 | Dựng trận lỗi: hiện dòng "Không vào được trận, thử lại", giữ đội và mở lại nút "Vào trận"
+Điều hướng màn báo lỗi. Chạm "Vào trận" lần nữa là thử lại với cùng đội; dòng lỗi ẩn khi chạm.

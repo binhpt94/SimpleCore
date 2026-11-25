@@ -33,19 +33,95 @@ namespace Game.Hud.Tests
             _run = new FakeRun();
         }
 
-        private HudSession NewSession(HudCheat cheat = null, bool pauseButton = true) =>
-            new HudSession(_spawner, _clock, _castle, _skills, _wallet, _waves, _run, HudTestTimings.Default, pauseButton, cheat);
+        private HudSession NewSession(HudCheat cheat = null, bool pauseButton = true, HudTimings? timings = null) =>
+            new HudSession(_spawner, _clock, _castle, _skills, _wallet, _waves, _run, timings ?? HudTestTimings.Default, pauseButton, cheat);
 
         private const string ConfigPath = "Assets/Features/Hud/FeatureAssets/Private/HudConfig.asset";
 
         [Test]
-        public void AtIdeaTheHudHasNoPauseButtonAndAPauseTapDoesNothing()
+        public void WhileRunningTheHudReportsItsViewAndFrameLoopAndAfterEndingNothing()
+        {
+            var session = NewSession();
+            var usage = (Game.Core.ISessionParticipantUsage)session;
+            Assert.AreEqual(0, usage.HeldViews);
+            Assert.AreEqual(0, usage.RunningJobs);
+
+            session.Run();
+            Assert.AreEqual(1, usage.HeldViews, "the HUD view");
+            Assert.AreEqual(1, usage.RunningJobs, "the per-frame clock loop");
+            // The game opens on the start screen; the HUD belongs to the battle, so the session's run step
+            // does not promise a held HUD view.
+            Assert.IsFalse(usage.OpensViewsOnRun);
+
+            session.DisposeAsync();
+            Assert.AreEqual(0, usage.HeldViews);
+            Assert.AreEqual(0, usage.RunningJobs);
+            Assert.IsFalse(_clock.Running);
+        }
+
+        [Test]
+        public void AtPrototypeTheWaveBannerShowsForOneAndAHalfSecondsFromTheRealConfig()
         {
             var config = AssetDatabase.LoadAssetAtPath<HudConfig>(ConfigPath);
             Assert.IsNotNull(config, "missing " + ConfigPath);
-            Assert.IsFalse(config.ShowsPauseButton, "IDEA: 'Có nút tạm dừng' is 'Không'");
+            Assert.AreEqual(1.5f, config.Timings.BannerSeconds, 1e-4f, "PROTOTYPE: 'Thông báo Đợt N đầu đợt' is 'Có, 1.5 giây'");
 
-            var session = NewSession(pauseButton: config.ShowsPauseButton);
+            NewSession(timings: config.Timings).Run();
+            _waves.Start(3);
+            Assert.IsTrue(_spawner.View.BannerShown);
+            Assert.AreEqual("Đợt 3", _spawner.View.Banner);
+
+            _clock.Tick(1.4f);
+            Assert.IsTrue(_spawner.View.BannerShown);
+            _clock.Tick(0.2f);
+            Assert.IsFalse(_spawner.View.BannerShown);
+        }
+
+        [Test]
+        public void AtPrototypeAllThreeSkillButtonsShowCoverAndBounceFromTheRealConfig()
+        {
+            var config = AssetDatabase.LoadAssetAtPath<HudConfig>(ConfigPath);
+            Assert.IsNotNull(config, "missing " + ConfigPath);
+            Assert.AreEqual(1.2f, config.Timings.BounceScale, 1e-4f, "PROTOTYPE: bounce to 1.2x");
+            Assert.AreEqual(0.3f, config.Timings.BounceSeconds, 1e-4f, "PROTOTYPE: bounce lasts 0.3 s");
+
+            NewSession(timings: config.Timings).Run();
+            var view = _spawner.View;
+            CollectionAssert.AreEqual(new[] { "Sấm sét", "Băng giá", "Cổ vũ" }, view.SkillNames, "PROTOTYPE: 3 buttons");
+
+            // Frost with 12 of 35 seconds left: seconds label and a cover for the share left.
+            _skills.SetCooling(CastleSkill.Frost, 12f, 35f);
+            _clock.Tick(0.016f);
+            Assert.AreEqual("12", view.Skills[1].Seconds);
+            Assert.AreEqual(12f / 35f, view.Skills[1].Cover, 1e-3f);
+
+            // Cooldown ends: the button grows towards 1.2x and is back to normal within 0.3 s.
+            _skills.SetReady(CastleSkill.Frost);
+            _clock.Tick(0.016f);
+            _clock.Tick(0.13f);
+            Assert.Greater(view.Skills[1].Scale, 1.1f);
+            _clock.Tick(0.2f);
+            Assert.AreEqual(1f, view.Skills[1].Scale);
+        }
+
+        [Test]
+        public void AtPrototypeTheConfigTurnsThePauseButtonOnAndATapReportsPause()
+        {
+            var config = AssetDatabase.LoadAssetAtPath<HudConfig>(ConfigPath);
+            Assert.IsNotNull(config, "missing " + ConfigPath);
+            Assert.IsTrue(config.ShowsPauseButton, "PROTOTYPE: 'Có nút tạm dừng' is optional; this game turns it on");
+
+            NewSession(pauseButton: config.ShowsPauseButton).Run();
+            _spawner.View.PressPause();
+
+            Assert.IsTrue(_spawner.View.PauseShown);
+            Assert.AreEqual(1, _run.PauseRequests);
+        }
+
+        [Test]
+        public void WithThePauseButtonOffTheHudHasNoneAndAPauseTapDoesNothing()
+        {
+            var session = NewSession(pauseButton: false);
             session.Run();
             _spawner.View.PressPause();
 

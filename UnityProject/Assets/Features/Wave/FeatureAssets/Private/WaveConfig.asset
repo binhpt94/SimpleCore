@@ -22,8 +22,8 @@ MonoBehaviour:
   giantFromWave: 5
   archerFromWave: 7
   bossEveryWaves: 10
-  useArcher: 0
-  useBoss: 0
+  useArcher: 1
+  useBoss: 1
   tiers:
   - fromWave: 1
     soldier: 100

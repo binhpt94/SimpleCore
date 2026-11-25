@@ -41,12 +41,35 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ### Độ dài lượt (dự kiến)
 Mỗi đợt mất T × (1 + P) (thời gian thả cộng thời gian dọn quái tồn, khoảng T × P) cộng 3 s lúc thở: đợt 1 khoảng 14 s, đợt 5 khoảng 26 s, đợt 10 khoảng 41 s, đợt 15–19 khoảng 40–47 s (P các đợt giữa hai mẫu lấy nội suy tuyến tính). Cộng dồn: hết đợt 9 khoảng 3.7 phút, hết đợt 14 khoảng 7.0 phút, hết đợt 18 khoảng 9.8 phút, hết đợt 19 khoảng 10.6 phút. Gãy ở đợt 15–19 (thua giữa đợt đó): lượt dài khoảng 7–10.5 phút. Khớp ước tính của `feature-wave/wave-gap/gap-timer` (gãy ở đợt 15: khoảng 7–8 phút).
 
+### Ba cách chơi để chơi thử (tester mô phỏng đúng như sau)
+Chung cho cả ba: đội Hiệp sĩ + Cung thủ + Pháp sư; từ chối hồi sinh; mua và bấm chỉ khi trận đang chạy.
+
+| | Vụng | Thường | Khéo |
+|---|---|---|---|
+| Lúc mua | Mỗi khi đủ tiền | Đầu mỗi lúc thở, tiêu hết | Mỗi khi đủ tiền cho món kế tiếp trong thứ tự ưu tiên; không để tiền nằm yên quá 3 giây khi đủ giá món đó |
+| Mua gì | Món rẻ nhất lúc đó | Rải đều: 55% hero, 45% thành và kĩ năng | Theo thứ tự ưu tiên ở dưới |
+| Sấm sét | Bấm ngay khi hồi xong | Bấm khi vùng quanh thành có từ 4 quái | Bấm khi vùng quanh thành có từ 6 quái (đợt 1–5: từ 4); hoặc khi máu thành dưới 30% và có quái đang đánh thành |
+| Băng giá | Bấm ngay khi hồi xong | Bấm khi có từ 15 quái sống | Đợt Trùm: giữ tới khi Trùm cách mép thành 4u rồi bấm. Đợt khác: bấm khi có từ 20 quái sống |
+| Cổ vũ | Bấm ngay khi hồi xong | Bấm khi một hero dưới 40% máu | Bấm khi từ 2 hero dưới 40% máu, hoặc Hiệp sĩ dưới 30% |
+
+Thứ tự ưu tiên mua của cách chơi khéo (mỗi lần mua lấy dòng đầu tiên còn đúng):
+1. Máu thành, nếu máu thành hiện tại dưới 50% máu tối đa.
+2. Pháp sư (đòn vùng), nếu cấp của nó không cao hơn cấp hero thấp nhất quá 1.
+3. Sức đánh thành, nếu cấp của nó thấp hơn cấp Pháp sư trừ 2.
+4. Sấm sét, nếu cấp của nó thấp hơn cấp Pháp sư chia 3, làm tròn lên.
+5. Hero có cấp thấp nhất (hoà thì Hiệp sĩ trước).
+6. Máu thành.
+Trước đợt Trùm (đợt 9, 19, …) để dành đủ giá Băng giá cấp kế nếu Băng giá còn cấp 1.
+
+Đo khoảng cách: mỗi cách chơi ít nhất 5 lượt cùng seed dev, ghi đợt gãy; so trung vị.
+
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
 | Mục tiêu đợt gãy người chơi bình thường | không kiểm | đợt 15–19 | chốt sau chơi thử |
 | Mục tiêu P đợt 1–9 | không kiểm | dưới 1.1 | chốt sau chơi thử |
-| Kiểm bằng chơi thử | không bắt buộc | ít nhất 5 lượt, ghi đợt gãy | ít nhất 20 lượt, nhiều đội khác nhau |
+| Kiểm bằng chơi thử | không bắt buộc | ít nhất 5 lượt mỗi cách chơi (vụng, thường, khéo), ghi đợt gãy | ít nhất 20 lượt, nhiều đội khác nhau |
+| Khoảng cách khéo so với vụng (trung vị đợt gãy) | không kiểm | ít nhất 4 đợt | ít nhất 6 đợt |
 
 ## Trường hợp biên
 - **Công thức P là ước lượng thô:** không tính quãng đi của quái (khoảng 10 s với Lính), không tính hero chết và hồi sinh 8 s, không tính Băng giá và Cổ vũ. Dùng để so các đợt với nhau và thấy xu hướng, không để đoán chính xác một lượt.
@@ -60,6 +83,13 @@ Mỗi đợt mất T × (1 + P) (thời gian thả cộng thời gian dọn quá
 - **Tính lại đợt 10 và 20 theo máu Trùm gốc 400 (2026-11-23).** Đợt 10: H 4151 → 3391, P 2.2 → 1.8. Đợt 20: H 9382 → 8222, P 3.4 → 2.9. Sửa ý `normal-break` cho khớp P đợt 20. Bước P đợt 9 → 10 (1.1 → 1.8) vẫn hơn 0.5: chấp nhận vì đợt Trùm là ngoại lệ có chủ đích của `curve-smooth`.
 
 - **Sửa hai số lệch công thức (2026-11-25, phiên Balance báo qua @Manager).** E đợt 19: 650 → 690; tính lại theo `feature-wave/difficulty-scaling/wave-formula` (44 con: Lính 17, Sói 11, Khổng lồ 8, Cung thủ quái 8) và `feature-enemy/enemy-stats/enemy-stat-values`: (5×17 + 3.75×11 + 10×8 + 5×8) × 2.8 = 689.5. Các hàng E khác, mọi hàng H, T, P đã rà lại và khớp. Độ dài lượt: bản cũ ghi "đợt 10 khoảng 30 s, 7–9 phút", không khớp chính công thức T × (1 + P) + 3; tính lại ra 7–10.5 phút, sửa ý `normal-break`. Không đổi bộ số chuẩn, không đổi đợt gãy dự kiến.
+
+- **Sửa `skill-gap` theo chơi thử PROTOTYPE (2026-11-26, @Manager chuyển kết quả `Tester/UnityAutoPlay/20261126-010423`: 6 lượt tua x16, vụng đợt 10–12, thường 14, khéo 12–13).** Lỗi nằm ở hai chỗ:
+  - **Dự báo:** "khéo tới 20–25" không có cơ sở trong chính bảng tính (đợt 20 P ≈ 2.9 cả với cách chơi thường; Băng giá, Cổ vũ chưa vào công thức). Sửa thành mục tiêu đo được: khéo hơn vụng ít nhất 4 đợt, khéo khoảng 16–19.
+  - **Định nghĩa khéo:** bot "khéo" mua món rẻ nhất nên chơi không khác vụng, còn kém cách chơi thường (mua rải đều). Ghi bảng ba cách chơi có thể mô phỏng được (lúc mua, mua gì, ngưỡng bấm từng kĩ năng, thứ tự ưu tiên mua).
+  - **Đợt gãy của cách chơi thường đo được 14, sát dưới khoảng 15–19:** chấp nhận, chưa đổi số.
+  - **Chưa đổi số của feature nào.** Chạy lại với ba cách chơi mới trước. Nếu khéo vẫn hơn vụng dưới 4 đợt thì chỉnh theo thứ tự, mỗi lần một bước rồi chạy lại: (1) Sấm sét sát thương gốc 80 → 110, hồi chiêu giữ 20 giây (bấm đúng lúc dồn đông được thưởng nhiều hơn bấm bừa); (2) Băng giá làm chậm 50% → 65% (giữ cho Trùm đáng hơn); (3) giá kĩ năng thành hệ số 1.5 → 1.4. Ba số đó thuộc `feature-castle` (kĩ năng) và `feature-upgrade` (giá).
+  - Đã loại: hạ độ khó chung (giảm hệ số +0.10 mỗi đợt): kéo cả vụng lẫn khéo lên, không nới khoảng cách.
 
 ## Chưa rõ
 - **Đợt Trùm vọt quá mạnh: đã áp dụng (2026-11-23).** Máu Trùm gốc giảm 800 → 400, giữ sát thương 40 (`feature-enemy/enemy-stats/enemy-stat-values`); P đợt 9 → 10 → 11 còn 1.1 → 1.8 → 1.5, đợt 20 còn 2.9. Đợt Trùm là ngoại lệ có chủ đích của `curve-smooth`. Đã loại: Trùm chiếm 5 chỗ trong số quái.

@@ -13,6 +13,9 @@ namespace Game.PopupLose
 
         void ShowResult(LoseResultText text);
 
+        /// <summary>Shows or hides "Về màn bắt đầu". Hidden at IDEA (no start screen yet, node actions-spec).</summary>
+        void ShowHomeButton(bool shown);
+
         /// <summary>After the first touch: both buttons stop taking touches.</summary>
         void LockButtons();
     }

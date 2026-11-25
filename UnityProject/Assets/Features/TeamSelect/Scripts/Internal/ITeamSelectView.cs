@@ -25,13 +25,14 @@ namespace Game.TeamSelect
 
         bool TapStart();
 
-        /// <summary>The device back key.</summary>
+        /// <summary>The Back button (top left) or the device back key.</summary>
         void TapBack();
     }
 
     /// <summary>
-    /// The team select screen as the presenter drives it (design: team-slots/slots-spec#screen-parts):
-    /// title, the hero cards, the team slots, one Enter battle button. The view only shows and forwards taps.
+    /// The team select screen as the presenter drives it (design: team-slots/slots-spec#screen-parts, plus the Back
+    /// button and build error line of feature-game-flow/flow-routes/routes-values): title, the hero cards, the team
+    /// slots, one Enter battle button. The view only shows and forwards taps.
     /// </summary>
     internal interface ITeamSelectView
     {
@@ -46,6 +47,9 @@ namespace Game.TeamSelect
 
         /// <summary>Enter battle button: true = can be pressed, false = locked (looks different).</summary>
         void ShowStartButton(bool enabled);
+
+        /// <summary>The build error line under the slots: <paramref name="text"/> shown, or hidden when null.</summary>
+        void ShowBuildError(string text);
     }
 
     /// <summary>Creates and destroys the screen's view (a prefab in the game, a fake in tests).</summary>
@@ -54,5 +58,11 @@ namespace Game.TeamSelect
         ITeamSelectView Create();
 
         void Destroy(ITeamSelectView view);
+
+        /// <summary>
+        /// The Unity object that holds <paramref name="view"/> on screen (the prefab instance), counted by the session's
+        /// clean-up check; null when the view is not a Unity object (a plain test fake).
+        /// </summary>
+        UnityEngine.Object HolderOf(ITeamSelectView view);
     }
 }

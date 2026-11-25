@@ -1,0 +1,15 @@
+{
+ "node": "feature-hero/hero-list/hero-roster-values",
+ "nodeHash": "b91d8c9d12d4",
+ "frames": {
+  "hero-reach": "e781b052ee60"
+ },
+ "styles": {
+  "world-cartoon": "81265f8159a9"
+ },
+ "order": "_design/feature-hero.hero-list.hero-roster-values/hero-reach-claude",
+ "version": 2,
+ "at": "2026-11-25 23:24:53",
+ "stamp": 1795623893.4840238,
+ "sources": []
+}

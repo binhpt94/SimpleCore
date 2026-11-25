@@ -192,6 +192,21 @@
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
    "at": "2026-11-25 12:02:00"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "hiện số cấp mới 1s trên đầu hero khi lên cấp, số trong config",
+   "tests": [
+    "HeroParticipantTests.Buying_a_level_shows_the_new_level_number_above_the_hero_for_1_second",
+    "HeroConfigValuesTests.At_prototype_the_new_level_number_shows_for_1_second_after_a_level_up",
+    "HeroConfigValuesTests.Each_level_adds_15_percent_health_and_damage_and_3_percent_attack_speed_up_to_60_percent"
+   ],
+   "play": "",
+   "hash": "a6ecac0a7b5e",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Phản hồi lên cấp: như IDEA, hiện số cấp mới 1s",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:15"
   }
  },
  "log": [
@@ -401,6 +416,27 @@
   {
    "at": "2026-11-25 12:07:37",
    "id": "attack-interval",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:04:17",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Hero",
+   "note": "hiện số cấp mới 1s trên đầu hero khi lên cấp, số trong config"
+  },
+  {
+   "at": "2026-11-26 01:17:21",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.Buying_a_level_shows_the_new_level_number_above_the_hero_for_1_second, HeroConfigValuesTests.At_prototype_the_new_level_number_shows_for_1_second_after_a_level_up, HeroConfigValuesTests.Each_level_adds_15_percent_health_and_damage_and_3_percent_attack_speed_up_to_60_percent"
+  },
+  {
+   "at": "2026-11-26 01:18:15",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: revive-offer=gpt@r2-1#nut-ket-thuc-luot, revive-ad-result=gpt@r2-1#moc-chot-thua, stop-after-break-tick=gpt@r2-1#dung-sau-nhip-vo-thanh, freeze-while-waiting=gpt@r2-1#giu-tran-dung, revive-before-pause=gpt@r2-1#uu-tien-hoi-sinh, close-then-report=gpt@r2-1#dong-popup-truoc-khi-bao, lock-while-ad=gpt@r2-1#khoa-nut-khi-cho-quang-cao, score-continues=gpt@r2-1#diem-tiep-noi, same-tick-clear=gpt@r2-1#don-dot-cung-nhip, record-on-final-lose=gpt@r2-1#xet-ki-luc-khi-thua
 ---
 # Popup hồi sinh

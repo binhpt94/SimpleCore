@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: pause-freeze=gpt@r2-1#pause-preserve-state, pause-run-ownership=gpt@r2-1#pause-run-ownership
 ---
 # Popup tạm dừng

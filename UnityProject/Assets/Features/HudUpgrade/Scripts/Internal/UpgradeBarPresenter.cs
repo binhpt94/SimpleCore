@@ -9,7 +9,8 @@ namespace Game.HudUpgrade
     /// <summary>
     /// Feeds the upgrade bar from the shop: one button per item in shop order, heroes then castle,
     /// level, shortened price and lit/dim from <see cref="UpgradeItem.CanBuy"/>. A tap on a lit button
-    /// is one purchase request; the bar is shown from the battle's start until the lose popup.
+    /// is one purchase order (<see cref="IUpgradeOrders"/>); the button bounces when that order was bought.
+    /// The bar is shown from the battle's start until the lose popup.
     /// </summary>
     internal sealed class UpgradeBarPresenter : IDisposable
     {
@@ -17,18 +18,23 @@ namespace Game.HudUpgrade
         private const int CastleGroup = 1;
 
         private readonly IUpgradeShop _shop;
+        private readonly IUpgradeOrders _orders;
         private readonly IHeroRoster _roster;
         private readonly IRunFlow _run;
         private readonly IUpgradeBarView _view;
+        private readonly IHeroDownState _down;
         private readonly List<ButtonPicture> _built = new List<ButtonPicture>();
         private readonly List<ButtonPicture> _scratch = new List<ButtonPicture>();
         private bool _started;
 
-        public UpgradeBarPresenter(IUpgradeShop shop, IHeroRoster roster, IRunFlow run, IUpgradeBarView view)
+        public UpgradeBarPresenter(IUpgradeShop shop, IUpgradeOrders orders, IHeroRoster roster, IRunFlow run,
+            IHeroDownState down, IUpgradeBarView view)
         {
             _shop = shop ?? throw new ArgumentNullException(nameof(shop));
+            _orders = orders ?? throw new ArgumentNullException(nameof(orders));
             _roster = roster ?? throw new ArgumentNullException(nameof(roster));
             _run = run ?? throw new ArgumentNullException(nameof(run));
+            _down = down ?? throw new ArgumentNullException(nameof(down));
             _view = view ?? throw new ArgumentNullException(nameof(view));
         }
 
@@ -38,6 +44,8 @@ namespace Game.HudUpgrade
             _started = true;
             _shop.ItemsChanged += Refresh;
             _run.StepChanged += OnStepChanged;
+            _orders.OrderApplied += OnOrderApplied;
+            _down.DownChanged += OnDownChanged;
             Refresh();
         }
 
@@ -47,14 +55,43 @@ namespace Game.HudUpgrade
             _started = false;
             _shop.ItemsChanged -= Refresh;
             _run.StepChanged -= OnStepChanged;
+            _orders.OrderApplied -= OnOrderApplied;
+            _down.DownChanged -= OnDownChanged;
         }
 
-        /// <summary>The player touched button <paramref name="index"/>.</summary>
+        /// <summary>
+        /// The player touched button <paramref name="index"/>: a lit button queues one purchase, applied at the
+        /// next step of the shared clock, and the bounce waits for that step's outcome. A dim button sends nothing
+        /// and shakes once.
+        /// </summary>
         public void Tap(int index)
         {
             if (index < 0 || index >= _shop.Count) return;
-            if (!_shop.Get(index).CanBuy) return;
-            if (_shop.Buy(index) == PurchaseResult.Bought) _view.Bounce(index);
+            if (!_shop.Get(index).CanBuy)
+            {
+                _view.Shake(index);
+                return;
+            }
+
+            _orders.Order(index);
+        }
+
+        private void OnDownChanged(int slot)
+        {
+            var count = Math.Min(_shop.Count, _built.Count);
+            for (var i = 0; i < count; i++)
+            {
+                var item = _shop.Get(i);
+                if (item.Kind == UpgradeKind.Hero && item.HeroSlot == slot) _view.SetDown(i, _down.IsDown(slot));
+            }
+        }
+
+        private void OnOrderApplied(int index, PurchaseResult result)
+        {
+            if (result != PurchaseResult.Bought) return;
+            if (index < 0 || index >= _built.Count) return;
+            _view.Bounce(index);
+            _view.FlashLevel(index);
         }
 
         private void Refresh()
@@ -74,6 +111,7 @@ namespace Game.HudUpgrade
             {
                 var item = _shop.Get(i);
                 _view.SetButton(i, new ButtonLook("Cấp " + item.Level, PriceText.Format(item.NextPrice), item.CanBuy));
+                if (item.Kind == UpgradeKind.Hero) _view.SetDown(i, _down.IsDown(item.HeroSlot));
             }
 
             UpdateVisibility(_run.Step);

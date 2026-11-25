@@ -5,3 +5,4 @@
 {"at": "2026-11-24 23:43:16", "event": "data", "hash": "345954ac135f", "previous": "16d5741accbc", "added": [], "removed": [{"id": "flow-buttons-send-choice", "text": "Nút Chơi, nút Vào trận và các nút rời trận của popup chỉ gửi lựa chọn cho điều hướng màn\nCác màn và popup không tự chuyển màn."}], "rewritten": []}
 {"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "345954ac135f"}
 {"at": "2026-11-25 00:37:02", "event": "promote", "by": "người", "hash": "345954ac135f"}
+{"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "345954ac135f"}

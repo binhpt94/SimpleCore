@@ -22,6 +22,8 @@ namespace Game.Services.Popup
             this.backdropPrefab = backdropPrefab;
         }
 
+        public GameObject Layer => layer;
+
         public GameObject Present(GameObject prefab)
         {
             if (layer == null)

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 420" width="360" height="420">
+  <defs>
+    <linearGradient id="pu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9B30C8"/><stop offset="0.5" stop-color="#6E1E99"/><stop offset="1" stop-color="#6E1E99"/>
+    </linearGradient>
+    <linearGradient id="pl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C77BEA"/><stop offset="0.5" stop-color="#9B30C8"/><stop offset="1" stop-color="#6E1E99"/>
+    </linearGradient>
+    <linearGradient id="rd" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF8A80"/><stop offset="0.4" stop-color="#F0383C"/><stop offset="1" stop-color="#B81E28"/>
+    </linearGradient>
+    <linearGradient id="ye" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/><stop offset="0.5" stop-color="#FFC61F"/><stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="cr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F6D7C6"/>
+    </linearGradient>
+  </defs>
+  <g stroke-linejoin="round" stroke-linecap="round" stroke-width="8">
+    <!-- áo choàng đỏ sau -->
+    <path d="M86 200 L262 200 L292 404 Q170 418 34 404 Z" fill="url(#rd)" stroke="#7E1018"/>
+    <!-- chân -->
+    <rect x="106" y="346" width="60" height="68" rx="20" fill="#6E1E99" stroke="#4A1070"/>
+    <rect x="192" y="346" width="60" height="68" rx="20" fill="#6E1E99" stroke="#4A1070"/>
+    <!-- giáp thân -->
+    <rect x="80" y="196" width="196" height="166" rx="48" fill="url(#pu)" stroke="#4A1070"/>
+    <path d="M148 226 L212 226 L200 300 L160 300 Z" fill="url(#ye)" stroke="#C26A00" stroke-width="6"/>
+    <ellipse cx="128" cy="214" rx="28" ry="8" fill="#FFFFFF" opacity="0.5" stroke="none"/>
+    <!-- sừng cong -->
+    <path d="M112 96 Q58 72 62 14 Q98 52 134 70 Z" fill="url(#cr)" stroke="#E0A27A"/>
+    <path d="M246 96 Q300 72 296 14 Q262 52 226 70 Z" fill="url(#cr)" stroke="#E0A27A"/>
+    <!-- đầu -->
+    <circle cx="180" cy="134" r="84" fill="url(#pl)" stroke="#4A1070"/>
+    <!-- vương miện vàng -->
+    <path d="M124 70 L130 26 L156 54 L180 14 L204 54 L230 26 L236 70 Q180 84 124 70 Z" fill="url(#ye)" stroke="#C26A00"/>
+    <circle cx="180" cy="58" r="8" fill="#F0383C" stroke="#7E1018" stroke-width="4"/>
+    <ellipse cx="146" cy="92" rx="22" ry="8" fill="#FFFFFF" opacity="0.55" stroke="none"/>
+    <!-- mắt to giận, quay phải -->
+    <ellipse cx="216" cy="138" rx="22" ry="24" fill="#FFFFFF" stroke="#4A1070" stroke-width="6"/>
+    <circle cx="224" cy="142" r="12" fill="#F0383C" stroke="none"/>
+    <circle cx="224" cy="142" r="6" fill="#3B1E4F" stroke="none"/>
+    <circle cx="229" cy="135" r="4" fill="#FFFFFF" stroke="none"/>
+    <path d="M186 110 L246 122" fill="none" stroke="#4A1070" stroke-width="9"/>
+    <!-- miệng, nanh -->
+    <path d="M196 182 Q226 192 252 176" fill="none" stroke="#4A1070" stroke-width="7"/>
+    <path d="M206 184 L212 202 L220 186 Z" fill="url(#cr)" stroke="#E0A27A" stroke-width="5"/>
+    <path d="M234 184 L240 200 L246 180 Z" fill="url(#cr)" stroke="#E0A27A" stroke-width="5"/>
+    <!-- rìu lớn phía trước -->
+    <path d="M300 406 L314 62" fill="none" stroke="#C26A00" stroke-width="26"/>
+    <path d="M300 406 L314 62" fill="none" stroke="#F29A0E" stroke-width="12"/>
+    <path d="M314 76 Q356 106 350 172 Q330 160 312 172 Z" fill="url(#cr)" stroke="#E0A27A"/>
+    <path d="M314 76 Q274 106 280 172 Q298 160 312 172 Z" fill="url(#cr)" stroke="#E0A27A"/>
+    <!-- tay cầm rìu -->
+    <rect x="246" y="218" width="56" height="120" rx="26" fill="url(#pu)" stroke="#4A1070"/>
+    <circle cx="302" cy="332" r="28" fill="url(#pl)" stroke="#4A1070"/>
+  </g>
+</svg>

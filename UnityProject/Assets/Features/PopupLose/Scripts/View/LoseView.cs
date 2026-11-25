@@ -61,6 +61,11 @@ namespace Game.PopupLose
             if (_adFailed != null) _adFailed.SetActive(text.ShowAdFailed);
         }
 
+        public void ShowHomeButton(bool shown)
+        {
+            if (_home != null) _home.gameObject.SetActive(shown);
+        }
+
         public void LockButtons()
         {
             if (_replay != null) _replay.interactable = false;

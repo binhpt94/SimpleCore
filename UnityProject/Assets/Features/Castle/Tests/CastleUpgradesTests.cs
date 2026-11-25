@@ -21,9 +21,9 @@ namespace Game.Castle.Tests
             _enemies = new FakeEnemyField();
             _heroes = new FakeHeroSquad();
             _body = new CastleBody(_config, run);
-            _skills = new CastleSkills(_config, _body, run, _enemies, _heroes);
+            _skills = new CastleSkills(_config, _body, run, _enemies, _heroes, _enemies);
             _upgrades = new CastleUpgrades(_body, _skills);
-            _shot = new CastleAutoShot(_config, _body, _enemies, _upgrades);
+            _shot = new CastleAutoShot(_config, _body, _enemies, _upgrades, _enemies);
         }
 
         [TearDown]

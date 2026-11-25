@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- nut tam dung: bong cung lech xuong 6 px, mau dac cung kieu nut HUD, vien den 5 px, hai vach dung -->
+  <rect x="3" y="9" width="114" height="108" rx="18" fill="#000000"/>
+  <rect x="3" y="3" width="114" height="108" rx="18" fill="#F4A261" stroke="#000000" stroke-width="5"/>
+  <rect x="36" y="29" width="16" height="50" rx="4" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+  <rect x="68" y="29" width="16" height="50" rx="4" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+</svg>

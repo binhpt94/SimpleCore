@@ -32,9 +32,9 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Đội nhận được không đủ 3 hero hoặc có hero trùng:** không vào trận; đây là lỗi của màn chọn đội, báo lỗi rõ cho phiên code (người chơi không gặp vì nút vào trận bị khoá).
 - **Chơi lại ngay sau thua:** mọi giá trị về như bảng, kể cả máu tối đa đã được nâng ở lượt trước.
 - **Hiệu ứng kĩ năng còn dở từ lượt trước (ví dụ làm chậm):** bị huỷ cùng trận cũ, không mang sang.
-- **Tiền thưởng đợt hay tiền hạ quái tới sau khi lượt cũ kết thúc:** bỏ qua, không cộng vào lượt mới.
 
 ## Đã tự quyết
+- **Bỏ trường hợp biên "tiền tới sau khi lượt cũ kết thúc" (2026-11-26, người quyết qua @Manager: việc chéo feature tách về feature làm việc đó).** Ví là bên bỏ qua lời gọi cộng; luật đã có ở `feature-wallet/income/income-amounts` ("Tiền của lượt cũ tới sau khi lượt mới đã bắt đầu: bỏ qua"). Lượt chơi chỉ báo lượt mới.
 - **Đội mặc định ở IDEA là Hiệp sĩ, Đấu sĩ rìu, Cung thủ.** Đủ hai kiểu cận chiến (chắn, dọn đông) và một bắn xa; trùng đội mặc định của `feature-team-select/team-memory/memory-rules`. Đã loại: 3 cận chiến (không thấy hero bắn xa).
 - **Đợt 1 chỉ bắt đầu sau khi đặt xong mọi giá trị.** Khoảng chờ trước đợt 1 dài bao lâu là việc của `feature-wave`.
 

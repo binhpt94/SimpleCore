@@ -27,7 +27,7 @@ namespace Game.Services.Popup
 
         protected override void OnRun()
         {
-            service.Start();
+            service.Start(TrackView);   // each open popup counts as a view held by this part of the session
         }
 
         protected override UniTask OnDisposeAsync()

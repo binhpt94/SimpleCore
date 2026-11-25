@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Game.Enemy;
+using Game.SimClock;
 
 namespace Game.Wave
 {
@@ -11,16 +12,20 @@ namespace Game.Wave
         int Next(int maxExclusive);
     }
 
-    internal sealed class SystemWaveRandom : IWaveRandom
+    /// <summary>
+    /// The run's seeded stream of Wave (feature-sim-clock/seeded-random): the same seed gives the same kind order
+    /// and sides in every wave of the run. Wave never makes a random generator of its own.
+    /// </summary>
+    internal sealed class StreamWaveRandom : IWaveRandom
     {
-        private readonly Random _random;
+        private readonly ISimRandomStream _stream;
 
-        public SystemWaveRandom(int? seed = null)
+        public StreamWaveRandom(ISimRandomStream stream)
         {
-            _random = seed.HasValue ? new Random(seed.Value) : new Random();
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
         }
 
-        public int Next(int maxExclusive) => _random.Next(maxExclusive);
+        public int Next(int maxExclusive) => _stream.Next(maxExclusive);
     }
 
     /// <summary>One entry of a wave's send list.</summary>

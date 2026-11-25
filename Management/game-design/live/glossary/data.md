@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 ---
 # Bảng thuật ngữ
 
@@ -84,3 +84,9 @@ Ví dụ màn bắt đầu, màn chọn đội, màn trận.
 Owner là feature gọi, Name là tên popup trong feature đó. Ví dụ PopupLose/Main.
 
 ### backdrop | AI 8 | Nền che: tấm phủ toàn màn hình ngay sau một popup
+
+### sim-step | AI 7 | Bước nhịp: một lần cập nhật logic gameplay của trận theo nhịp chung
+Khác khung hình: một khung hình có thể chạy không, một hay nhiều bước nhịp. Khác nhịp giao chiến: nhịp giao chiến là phần phân xử đòn bên trong một bước nhịp.
+
+### seed | AI 7 | Seed: con số khởi đầu sinh ra mọi số ngẫu nhiên của một lượt
+Cùng seed thì ra cùng dãy số ngẫu nhiên.

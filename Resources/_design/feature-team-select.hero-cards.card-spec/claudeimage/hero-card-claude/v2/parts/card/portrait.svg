@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 200" width="240" height="200">
+  <!-- chan dung Hiep si chibi quay phai, tong am (giap vang, khien do, chom long do); khung vang kieu keo vien #C26A00, bong lech xuong 6 px -->
+  <defs>
+    <linearGradient id="frameGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/>
+      <stop offset="0.5" stop-color="#FFC61F"/>
+      <stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#7CD0FF"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9BEA5C"/>
+      <stop offset="1" stop-color="#4CC21E"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/>
+      <stop offset="0.45" stop-color="#FFC61F"/>
+      <stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF8A80"/>
+      <stop offset="0.45" stop-color="#F0383C"/>
+      <stop offset="1" stop-color="#B81E28"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#FFF1E4"/>
+      <stop offset="1" stop-color="#F6D7C6"/>
+    </linearGradient>
+    <linearGradient id="blade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#7CD0FF"/>
+    </linearGradient>
+    <clipPath id="win">
+      <rect x="16" y="16" width="208" height="162" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <!-- bong khung + khung vang -->
+  <rect x="4" y="10" width="232" height="186" rx="26" fill="#C26A00"/>
+  <rect x="4" y="4" width="232" height="186" rx="26" fill="url(#frameGold)" stroke="#C26A00" stroke-width="4"/>
+  <path d="M30 12 L210 12" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- o canh: troi va co -->
+  <g clip-path="url(#win)">
+    <rect x="16" y="16" width="208" height="162" fill="url(#sky)"/>
+    <ellipse cx="60" cy="48" rx="26" ry="10" fill="#FFFFFF" opacity="0.9"/>
+    <ellipse cx="190" cy="40" rx="20" ry="8" fill="#FFFFFF" opacity="0.9"/>
+    <path d="M16 150 Q120 138 224 150 L224 178 L16 178 Z" fill="url(#grass)"/>
+    <ellipse cx="124" cy="170" rx="54" ry="8" fill="#2E9414"/>
+
+    <!-- kiem (sau nguoi, ben trai) -->
+    <rect x="58" y="34" width="18" height="86" rx="8" fill="url(#blade)" stroke="#0B4C94" stroke-width="4"/>
+    <rect x="46" y="114" width="42" height="14" rx="7" fill="url(#gold)" stroke="#C26A00" stroke-width="4"/>
+    <rect x="60" y="126" width="14" height="22" rx="6" fill="#9B30C8" stroke="#4A1070" stroke-width="4"/>
+
+    <!-- chan -->
+    <ellipse cx="104" cy="168" rx="16" ry="9" fill="#F29A0E" stroke="#C26A00" stroke-width="4"/>
+    <ellipse cx="142" cy="168" rx="16" ry="9" fill="#F29A0E" stroke="#C26A00" stroke-width="4"/>
+    <!-- than giap -->
+    <path d="M88 166 L92 124 Q122 112 152 124 L158 166 Z" fill="url(#gold)" stroke="#C26A00" stroke-width="5" stroke-linejoin="round"/>
+    <rect x="90" y="142" width="66" height="12" rx="6" fill="url(#red)" stroke="#7E1018" stroke-width="4"/>
+
+    <!-- chom long do -->
+    <path d="M108 42 Q92 14 112 10 Q130 8 136 28 Q132 34 128 42 Z" fill="url(#red)" stroke="#7E1018" stroke-width="4" stroke-linejoin="round"/>
+    <!-- mu vang (dau to) -->
+    <circle cx="120" cy="82" r="44" fill="url(#gold)" stroke="#C26A00" stroke-width="5"/>
+    <ellipse cx="102" cy="56" rx="16" ry="8" fill="#FFFFFF" opacity="0.65"/>
+    <!-- mat quay phai -->
+    <rect x="118" y="66" width="46" height="42" rx="18" fill="url(#skin)" stroke="#E0A27A" stroke-width="4"/>
+    <ellipse cx="136" cy="86" rx="5" ry="7" fill="#3B1E4F"/>
+    <ellipse cx="153" cy="86" rx="5" ry="7" fill="#3B1E4F"/>
+    <circle cx="137.5" cy="83" r="2" fill="#FFFFFF"/>
+    <circle cx="154.5" cy="83" r="2" fill="#FFFFFF"/>
+    <ellipse cx="128" cy="98" rx="5" ry="3" fill="#FF9ACB"/>
+    <path d="M140 99 Q146 104 152 99" stroke="#3B1E4F" stroke-width="3" stroke-linecap="round" fill="none"/>
+
+    <!-- khien do vien vang (truoc nguoi, ben phai) -->
+    <path d="M140 114 L196 114 L196 136 Q196 162 168 174 Q140 162 140 136 Z" fill="url(#red)" stroke="#7E1018" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M168 124 L168 162 M152 138 L184 138" stroke="#C26A00" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <path d="M168 124 L168 162 M152 138 L184 138" stroke="#FFC61F" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <ellipse cx="154" cy="121" rx="9" ry="4" fill="#FFFFFF" opacity="0.6"/>
+  </g>
+  <rect x="16" y="16" width="208" height="162" rx="16" fill="none" stroke="#C26A00" stroke-width="4"/>
+</svg>

@@ -25,7 +25,76 @@ namespace Game.PopupLose.Tests
             _score = new FakeScore { Score = 12, Best = 15 };
             _popups = new FakePopups();
             _log = new FakeLog();
-            _participant = new LosePopupParticipant(_flow, _revive, _score, _popups, _popups, _log);
+            // From PROTOTYPE on: both buttons. IDEA (no home button) has its own tests below.
+            _participant = new LosePopupParticipant(_flow, _revive, _score, _popups, _popups, _log, homeButton: true);
+        }
+
+        private LosePopupParticipant IdeaParticipant() =>
+            new LosePopupParticipant(_flow, _revive, _score, _popups, _popups, _log, homeButton: false);
+
+        [Test]
+        public void AtIdeaTheHomeButtonIsHiddenAndOnlyReplayShows()
+        {
+            var participant = IdeaParticipant();
+            participant.Run();
+            _flow.GoTo(RunStep.Lost);
+
+            Assert.That(_popups.View.HomeShown, Is.False);
+        }
+
+        [Test]
+        public void AtIdeaAHomeTouchIsNeverReportedAndReplayStillWorks()
+        {
+            var participant = IdeaParticipant();
+            participant.Run();
+            _flow.GoTo(RunStep.Lost);
+
+            _popups.View.RaiseHomeIgnoringLock();
+            Assert.That(_flow.GoHomeCalls, Is.EqualTo(0));
+            Assert.That(_popups.View.Locked, Is.False, "a stray home touch does not lock replay");
+
+            _popups.View.PressReplay();
+            Assert.That(_flow.ReplayCalls, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void OpenPopupCountsOneHeldViewAndClosingOrEndingTheSessionGoesBackToZero()
+        {
+            var unityView = UnityEngine.ScriptableObject.CreateInstance<UnityFakeView>();
+            try
+            {
+                _popups.ViewOverride = unityView;
+                var usage = (ISessionParticipantUsage)_participant;
+                Assert.That(usage.OpensViewsOnRun, Is.False, "the popup opens only when the run is lost, not at Run");
+                _participant.Run();
+                Assert.That(usage.HeldViews, Is.EqualTo(0));
+                Assert.That(usage.RunningJobs, Is.EqualTo(0), "the lose popup runs no timer or wait");
+
+                _flow.GoTo(RunStep.Lost);
+                Assert.That(usage.HeldViews, Is.EqualTo(1));
+
+                _flow.GoTo(RunStep.Playing);
+                Assert.That(usage.HeldViews, Is.EqualTo(0), "closed when the run leaves the lost step");
+
+                _flow.GoTo(RunStep.Lost);
+                Assert.That(usage.HeldViews, Is.EqualTo(1));
+                _participant.DisposeAsync().GetAwaiter().GetResult();
+                Assert.That(usage.HeldViews, Is.EqualTo(0), "cleaned up when the session ends");
+                Assert.That(usage.RunningJobs, Is.EqualTo(0));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(unityView);
+            }
+        }
+
+        [Test]
+        public void FromPrototypeTheHomeButtonShows()
+        {
+            _participant.Run();
+            _flow.GoTo(RunStep.Lost);
+
+            Assert.That(_popups.View.HomeShown, Is.True);
         }
 
         [Test]
@@ -395,7 +464,7 @@ namespace Game.PopupLose.Tests
         [Test]
         public void NewRecordCheatOpensThePopupWithForcedValuesAtOnce()
         {
-            var cheatPopup = new LosePopupParticipant(_flow, _revive, FixedRunScore.For(LoseCheatState.NewRecord), _popups, _popups, _log);
+            var cheatPopup = new LosePopupParticipant(_flow, _revive, FixedRunScore.For(LoseCheatState.NewRecord), _popups, _popups, _log, homeButton: true);
             var cheat = new LoseCheatParticipant(cheatPopup);
 
             cheatPopup.Run();
@@ -405,6 +474,7 @@ namespace Game.PopupLose.Tests
             Assert.That(shown.Score, Is.EqualTo("Trụ được 16 đợt"));
             Assert.That(shown.Best, Is.EqualTo("Kỉ lục: 16 đợt"));
             Assert.That(shown.ShowNewRecord, Is.True);
+            Assert.That(_popups.View.HomeShown, Is.True, "cheat from PROTOTYPE: every part of the popup, home button included");
         }
 
         // ---------------------------------------------------------------- fakes
@@ -466,6 +536,9 @@ namespace Game.PopupLose.Tests
             public LoseResultText? Shown;
             public int ShowCount;
             public bool Locked;
+            public bool? HomeShown;
+
+            public void ShowHomeButton(bool shown) => HomeShown = shown;
 
             public void ShowResult(LoseResultText text)
             {
@@ -511,15 +584,29 @@ namespace Game.PopupLose.Tests
                 return handle;
             }
 
+            /// <summary>When set, handed out instead of <see cref="View"/> (a real Unity object, so it can be tracked).</summary>
+            public ILoseView ViewOverride;
+
             public void Close(PopupHandle handle) => _open.Remove(handle.Id);
 
             public bool TryGetView<T>(PopupHandle handle, out T view) where T : class
             {
-                view = HasView && _open.Contains(handle.Id) ? View as T : null;
+                var source = ViewOverride ?? View;
+                view = HasView && _open.Contains(handle.Id) ? source as T : null;
                 return view != null;
             }
 
             public bool IsOnTop(PopupHandle handle) => OnTop && _open.Contains(handle.Id);
+        }
+
+        /// <summary>A view that is a Unity object, like the real LoseView, so TrackView can count it.</summary>
+        internal sealed class UnityFakeView : UnityEngine.ScriptableObject, ILoseView
+        {
+            public event Action ReplayPressed { add { } remove { } }
+            public event Action HomePressed { add { } remove { } }
+            public void ShowResult(LoseResultText text) { }
+            public void ShowHomeButton(bool shown) { }
+            public void LockButtons() { }
         }
 
         internal sealed class FakeLog : ILoseLog

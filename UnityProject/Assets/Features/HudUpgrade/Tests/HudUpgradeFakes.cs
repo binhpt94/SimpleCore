@@ -107,6 +107,43 @@ namespace Game.HudUpgrade.Tests
             : _items[index].basePrice + 10 * (_items[index].level - 1);
     }
 
+    /// <summary>
+    /// Buy taps queued until <see cref="Step"/>, then applied in tap order through the shop's own
+    /// <see cref="IUpgradeShop.Buy"/>, like the shared clock's next step.
+    /// </summary>
+    internal sealed class FakeOrders : IUpgradeOrders
+    {
+        private readonly IUpgradeShop _shop;
+        private readonly Queue<int> _queued = new Queue<int>();
+
+        public FakeOrders(IUpgradeShop shop) => _shop = shop;
+
+        public readonly List<int> Ordered = new List<int>();
+        public event Action<int, PurchaseResult> OrderApplied;
+
+        public int Pending => _queued.Count;
+        public int Listeners => OrderApplied?.GetInvocationList().Length ?? 0;
+
+        public void Order(int index)
+        {
+            Ordered.Add(index);
+            _queued.Enqueue(index);
+        }
+
+        /// <summary>Next step of the clock: applies every queued order.</summary>
+        public void Step()
+        {
+            while (_queued.Count > 0)
+            {
+                var index = _queued.Dequeue();
+                OrderApplied?.Invoke(index, _shop.Buy(index));
+            }
+        }
+
+        /// <summary>Raises an outcome without touching the shop.</summary>
+        public void Raise(int index, PurchaseResult result) => OrderApplied?.Invoke(index, result);
+    }
+
     internal sealed class FakeRoster : IHeroRoster
     {
         private readonly List<HeroInfo> _heroes = new List<HeroInfo>
@@ -176,6 +213,9 @@ namespace Game.HudUpgrade.Tests
         public readonly List<ButtonPicture> Pictures = new List<ButtonPicture>();
         public readonly Dictionary<int, ButtonLook> Looks = new Dictionary<int, ButtonLook>();
         public readonly List<int> Bounces = new List<int>();
+        public readonly List<int> Shakes = new List<int>();
+        public readonly List<int> Flashes = new List<int>();
+        public readonly Dictionary<int, bool> Down = new Dictionary<int, bool>();
         public int Builds;
         public bool Visible;
         public Action<int> OnTap;
@@ -186,11 +226,15 @@ namespace Game.HudUpgrade.Tests
             Pictures.Clear();
             Pictures.AddRange(buttons);
             Looks.Clear();
+            Down.Clear();
             OnTap = onTap;
         }
 
         public void SetButton(int index, ButtonLook look) => Looks[index] = look;
         public void Bounce(int index) => Bounces.Add(index);
+        public void FlashLevel(int index) => Flashes.Add(index);
+        public void Shake(int index) => Shakes.Add(index);
+        public void SetDown(int index, bool down) => Down[index] = down;
         public void SetVisible(bool visible) => Visible = visible;
         public void Tap(int index) => OnTap(index);
     }
@@ -208,6 +252,54 @@ namespace Game.HudUpgrade.Tests
         }
 
         public void Destroy(IUpgradeBarView view) => Destroyed++;
+    }
+
+    /// <summary>Bar view that is a real Unity object, so the session's view count can see it.</summary>
+    internal sealed class FakeBarViewBehaviour : UnityEngine.MonoBehaviour, IUpgradeBarView
+    {
+        public void Build(IReadOnlyList<ButtonPicture> buttons, Action<int> onTap) { }
+        public void SetButton(int index, ButtonLook look) { }
+        public void Bounce(int index) { }
+        public void FlashLevel(int index) { }
+        public void Shake(int index) { }
+        public void SetDown(int index, bool down) { }
+        public void SetVisible(bool visible) { }
+    }
+
+    /// <summary>Which team slots are down; <see cref="Set"/> raises DownChanged like Hero does.</summary>
+    internal sealed class FakeDownState : IHeroDownState
+    {
+        private readonly HashSet<int> _down = new HashSet<int>();
+
+        public event Action<int> DownChanged;
+
+        public int Listeners => DownChanged?.GetInvocationList().Length ?? 0;
+
+        public bool IsDown(int slot) => _down.Contains(slot);
+
+        public void Set(int slot, bool down)
+        {
+            if (down) _down.Add(slot);
+            else _down.Remove(slot);
+            DownChanged?.Invoke(slot);
+        }
+    }
+
+    /// <summary>Makes the bar on a new GameObject and removes it at once (edit mode has no deferred Destroy).</summary>
+    internal sealed class GameObjectViewFactory : IUpgradeBarViewFactory
+    {
+        public UnityEngine.GameObject Last;
+
+        public IUpgradeBarView Create()
+        {
+            Last = new UnityEngine.GameObject("UpgradeBar (test)");
+            return Last.AddComponent<FakeBarViewBehaviour>();
+        }
+
+        public void Destroy(IUpgradeBarView view)
+        {
+            if (view is UnityEngine.Component c && c) UnityEngine.Object.DestroyImmediate(c.gameObject);
+        }
     }
 
     internal sealed class FakeSession : ISessionScene

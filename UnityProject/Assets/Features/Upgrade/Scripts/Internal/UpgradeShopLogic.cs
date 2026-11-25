@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game.Castle;
 using Game.Hero;
 using Game.Run;
+using Game.SimClock;
 using Game.Wallet;
 
 namespace Game.Upgrade
@@ -11,22 +12,29 @@ namespace Game.Upgrade
     /// The upgrade shop of a run: six items (heroes by slot, then castle health, attack, skills), each at
     /// level 1 when the run starts. Buying pays through the wallet and pushes the new level to the hero or castle
     /// at once. Buying works only while the battle is running and not paused.
+    /// A player tap goes through <see cref="Order"/>: it waits in the shared clock's queue and is bought at the start
+    /// of the next step, checked again by the same rules then (feature-sim-clock clock-values#input-next-step).
     /// </summary>
-    internal sealed class UpgradeShopLogic : IUpgradeShop
+    internal sealed class UpgradeShopLogic : IUpgradeShop, IUpgradeOrders
     {
+        /// <summary>Owner name of this feature in the shared clock.</summary>
+        internal const string ClockOwner = "Upgrade";
+
         private readonly UpgradePrices _prices;
         private readonly IRunFlow _run;
         private readonly IWalletService _wallet;
         private readonly IWalletBalance _balance;
         private readonly IHeroSquad _heroes;
         private readonly ICastleUpgrades _castle;
+        private readonly ISimClock _clock;
         private readonly List<Entry> _items = new List<Entry>();
 
         private bool _battleOn;
         private bool _attached;
+        private int _runNumber;
 
         public UpgradeShopLogic(UpgradePrices prices, IRunFlow run, IWalletService wallet, IWalletBalance balance,
-            IHeroSquad heroes, ICastleUpgrades castle)
+            IHeroSquad heroes, ICastleUpgrades castle, ISimClock clock)
         {
             _prices = prices;
             _run = run ?? throw new ArgumentNullException(nameof(run));
@@ -34,9 +42,28 @@ namespace Game.Upgrade
             _balance = balance ?? throw new ArgumentNullException(nameof(balance));
             _heroes = heroes ?? throw new ArgumentNullException(nameof(heroes));
             _castle = castle ?? throw new ArgumentNullException(nameof(castle));
+            _clock = clock ?? throw new ArgumentNullException(nameof(clock));
         }
 
         public event Action ItemsChanged;
+
+        public event Action<int, PurchaseResult> OrderApplied;
+
+        /// <summary>
+        /// Queues one level of the item at <paramref name="index"/>. Nothing is paid until the next step; then the
+        /// order is bought by the usual rules (paused, battle over, coins) and <see cref="OrderApplied"/> tells the outcome.
+        /// An order left over from an earlier run is dropped without a report.
+        /// </summary>
+        public void Order(int index)
+        {
+            var runNumber = _runNumber;
+            _clock.Enqueue(ClockOwner, () =>
+            {
+                if (runNumber != _runNumber) return;
+                var result = Buy(index);
+                OrderApplied?.Invoke(index, result);
+            });
+        }
 
         public int Count => _items.Count;
 
@@ -100,6 +127,7 @@ namespace Game.Upgrade
                 throw new InvalidOperationException(
                     $"Upgrade: the run brought {team.Count} heroes, expected {_prices.TeamSize}.");
 
+            _runNumber++;
             _items.Clear();
             for (var slot = 0; slot < team.Count; slot++)
                 _items.Add(new Entry(UpgradeKind.Hero, slot, team.HeroCodes[slot]));

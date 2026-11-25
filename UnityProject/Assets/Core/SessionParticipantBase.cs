@@ -49,6 +49,15 @@ namespace Game.Core
 
         protected virtual UniTask OnDisposeAsync() => UniTask.CompletedTask;
 
+        /// <summary>
+        /// Override with true when <see cref="OnRun"/> opens views (and tracks them with <see cref="TrackView"/>):
+        /// the session then checks right after the run step that this participant holds at least one view.
+        /// Leave false when the participant has no view or opens its views only later.
+        /// </summary>
+        protected virtual bool OpensViewsOnRun => false;
+
+        bool ISessionParticipantUsage.OpensViewsOnRun => OpensViewsOnRun;
+
         /// <summary>Runs <paramref name="undo"/> when the session ends (unsubscribe, destroy a view, close a popup...).</summary>
         protected void WhenDisposed(Action undo)
         {

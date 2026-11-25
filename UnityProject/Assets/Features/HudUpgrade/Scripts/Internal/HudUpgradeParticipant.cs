@@ -11,15 +11,19 @@ namespace Game.HudUpgrade
     internal sealed class HudUpgradeParticipant : SessionParticipantBase
     {
         private readonly IUpgradeShop _shop;
+        private readonly IUpgradeOrders _orders;
         private readonly IHeroRoster _roster;
         private readonly IRunFlow _run;
+        private readonly IHeroDownState _down;
         private readonly IUpgradeBarViewFactory _views;
         private readonly CheatSetup _cheat;
 
-        public HudUpgradeParticipant(IUpgradeShop shop, IHeroRoster roster, IRunFlow run, IUpgradeBarViewFactory views,
-            CheatSetup cheat = default)
+        public HudUpgradeParticipant(IUpgradeShop shop, IUpgradeOrders orders, IHeroRoster roster, IRunFlow run,
+            IHeroDownState down, IUpgradeBarViewFactory views, CheatSetup cheat = default)
         {
+            _down = down ?? throw new ArgumentNullException(nameof(down));
             _shop = shop ?? throw new ArgumentNullException(nameof(shop));
+            _orders = orders ?? throw new ArgumentNullException(nameof(orders));
             _roster = roster ?? throw new ArgumentNullException(nameof(roster));
             _run = run ?? throw new ArgumentNullException(nameof(run));
             _views = views ?? throw new ArgumentNullException(nameof(views));
@@ -29,8 +33,14 @@ namespace Game.HudUpgrade
         protected override void OnRun()
         {
             var view = _views.Create();
-            var presenter = new UpgradeBarPresenter(_shop, _roster, _run, view);
-            WhenDisposed(() => _views.Destroy(view));
+            var presenter = new UpgradeBarPresenter(_shop, _orders, _roster, _run, _down, view);
+            // The bar is the participant's one view; its bounce coroutine lives on it and dies with it, so no job.
+            var held = view is UnityEngine.Object viewObject ? TrackView(viewObject) : null;
+            WhenDisposed(() =>
+            {
+                _views.Destroy(view);
+                held?.Dispose();
+            });
             WhenDisposed(presenter.Dispose);
             presenter.Start();
             StartCheat();

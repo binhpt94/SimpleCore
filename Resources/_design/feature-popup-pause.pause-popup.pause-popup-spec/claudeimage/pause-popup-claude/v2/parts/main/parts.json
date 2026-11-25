@@ -1,0 +1,54 @@
+{
+ "frame": "main",
+ "parts": [
+  {
+   "id": "btn-main",
+   "w": 400,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "resume"
+   ],
+   "from": {
+    "node": "feature-popup-lose/lose-actions/actions-spec",
+    "frame": "main",
+    "part": "btn-main",
+    "ref": "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+    "version": 2
+   },
+   "text": true
+  },
+  {
+   "id": "btn-sub",
+   "w": 260,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "quit"
+   ],
+   "from": {
+    "node": "feature-popup-lose/lose-actions/actions-spec",
+    "frame": "main",
+    "part": "btn-sub",
+    "ref": "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+    "version": 2
+   },
+   "text": true
+  }
+ ],
+ "kept": [
+  "panel",
+  "title"
+ ],
+ "skipped": []
+}

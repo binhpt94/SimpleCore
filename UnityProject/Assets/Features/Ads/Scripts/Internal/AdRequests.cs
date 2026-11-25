@@ -38,6 +38,9 @@ namespace Game.Ads
         /// <summary>True while a request has not yet given its result back.</summary>
         public bool IsBusy => _current != null;
 
+        /// <summary>Raised when <see cref="IsBusy"/> changes: a request starts, or it ends (result, dropped, session end).</summary>
+        public event Action BusyChanged;
+
         public void Show(int offerId, Action<AdReply> onReply)
         {
             if (onReply == null) throw new ArgumentNullException(nameof(onReply));
@@ -50,14 +53,24 @@ namespace Game.Ads
             }
 
             var request = new Request(this, offerId, onReply);
-            _current = request;
+            SetCurrent(request);
             _provider.Begin(request);
         }
 
         public void Cancel(int offerId)
         {
+            var request = _current;
+            if (request == null || request.OfferId != offerId) return;
+
             // The ad keeps running (it may already be on screen); its result is dropped when it comes.
-            if (_current != null && _current.OfferId == offerId) _current.Cancelled = true;
+            request.Cancelled = true;
+
+            // Unless the provider ended it here (an ad that never ends by itself): dropped now.
+            if (request.Step != Step.HasResult && _provider.EndOnCancel() && _current == request)
+            {
+                _log.Dropped(request.OfferId, AdResult.NotWatched);
+                SetCurrent(null);
+            }
         }
 
         /// <summary>One frame. <paramref name="deltaSeconds"/> is real time; <paramref name="gameOnScreen"/> is false while the game is hidden.</summary>
@@ -91,13 +104,20 @@ namespace Game.Ads
         public void Shutdown()
         {
             if (_current == null) return;
-            _current = null;
+            SetCurrent(null);
             _provider.Abort();
+        }
+
+        private void SetCurrent(Request request)
+        {
+            var wasBusy = _current != null;
+            _current = request;
+            if (wasBusy != (request != null)) BusyChanged?.Invoke();
         }
 
         private void Deliver(Request request)
         {
-            _current = null;
+            SetCurrent(null);
 
             if (request.Cancelled)
             {

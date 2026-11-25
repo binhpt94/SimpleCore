@@ -28,8 +28,10 @@ namespace Game.HudUpgrade
 
             var session = registry.Resolve<ISessionScene>();
             var shop = registry.Resolve<IUpgradeShop>();
+            var orders = registry.Resolve<IUpgradeOrders>();
             var roster = registry.Resolve<IHeroRoster>();
             var run = registry.Resolve<IRunFlow>();
+            var down = registry.Resolve<IHeroDownState>();
 
             var cheat = default(HudUpgradeParticipant.CheatSetup);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -39,7 +41,7 @@ namespace Game.HudUpgrade
                     registry.Resolve<IWalletService>(), config.MixedButtonsTeam);
 #endif
 
-            session.Join(new HudUpgradeParticipant(shop, roster, run, new PrefabBarViewFactory(barPrefab), cheat));
+            session.Join(new HudUpgradeParticipant(shop, orders, roster, run, down, new PrefabBarViewFactory(barPrefab), cheat));
         }
     }
 }

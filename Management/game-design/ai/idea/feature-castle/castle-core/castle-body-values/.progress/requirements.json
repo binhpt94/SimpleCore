@@ -47,18 +47,20 @@
   },
   "castle-hit-feedback": {
    "state": "verified",
-   "note": "",
+   "note": "Sửa lỗi hình thu nhỏ khi thành vỡ đứng lại ở bước ReviveOffer và Ending",
    "tests": [
     "CastleSessionTests.Enemy_hit_flashes_the_castle_and_its_fall_collapses_it",
     "CastleSessionTests.Hit_flash_lasts_a_tenth_of_a_second_and_the_fall_shrinks_over_half_a_second",
-    "CastleSessionTests.Fall_keeps_shrinking_while_the_run_waits_to_offer_a_revive_but_not_in_the_pause_popup"
+    "CastleSessionTests.Fall_keeps_shrinking_while_the_run_waits_to_offer_a_revive_but_not_in_the_pause_popup",
+    "CastleSessionTests.Fall_keeps_shrinking_after_the_revive_popup_opened_before_the_half_second_was_over",
+    "CastleSessionTests.Fall_keeps_shrinking_while_the_run_waits_before_the_lose_popup"
    ],
    "play": "",
    "hash": "596acd6245c9",
    "text": "Thành bị đánh thì nháy 0.1s; bị phá thì thu nhỏ còn 0 trong 0.5s\nNgười chơi thấy ngay thành đang bị đánh dù không nhìn thanh máu. Nháy nhiều đòn liên tiếp thì đặt lại 0.1s, không cộng dồn.",
    "title": "Thành bị đánh thì nháy 0.1s; bị phá thì thu nhỏ còn 0 trong 0.5s",
    "by": "@CodeLead",
-   "at": "2026-11-25 13:43:56"
+   "at": "2026-11-26 01:18:13"
   },
   "edge-nhieu-quai-danh-trung-cung-mot-khung-hinh": {
    "state": "verified",
@@ -201,6 +203,22 @@
    "title": "Hồi sinh rồi bị phá lần hai",
    "by": "@CodeLead",
    "at": "2026-11-25 13:43:56"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "Trỏ test cột PROTOTYPE: 1000 máu, hình dưới 50 phần trăm, nháy và rung 0.1s, hồi sinh 30 phần trăm",
+   "tests": [
+    "CastleConfigTests.Castle_body_prototype_numbers_shake_a_tenth_of_a_second_and_show_damage_under_half_health",
+    "CastleSessionTests.Hit_flashes_and_shakes_the_castle_lightly_for_a_tenth_of_a_second",
+    "CastleSessionTests.Castle_shows_its_damaged_picture_under_half_health",
+    "CastleSessionTests.Revive_anim_sets_thirty_percent_health_at_once_then_grows_back_over_half_a_second_and_tells_the_run"
+   ],
+   "play": "",
+   "hash": "adc37742bafc",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Máu tối đa lúc vào trận: 1000 (chỉnh sau khi chơi thử)\n- Hình thành: 1 sprite, có hình khi máu dưới 50%\n- Phản hồi bị đánh: nháy 0.1s + rung nhẹ 0.1s\n- Hồi sinh 30% máu: có, mỗi lượt 1 lần",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:13"
   }
  },
  "log": [
@@ -459,6 +477,48 @@
   {
    "at": "2026-11-25 13:43:56",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:03:00",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Trỏ test cột PROTOTYPE: 1000 máu, hình dưới 50 phần trăm, nháy và rung 0.1s, hồi sinh 30 phần trăm"
+  },
+  {
+   "at": "2026-11-26 01:03:08",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Castle_body_prototype_numbers_shake_a_tenth_of_a_second_and_show_damage_under_half_health, CastleSessionTests.Hit_flashes_and_shakes_the_castle_lightly_for_a_tenth_of_a_second, CastleSessionTests.Castle_shows_its_damaged_picture_under_half_health, CastleSessionTests.Revive_anim_sets_thirty_percent_health_at_once_then_grows_back_over_half_a_second_and_tells_the_run"
+  },
+  {
+   "at": "2026-11-26 01:17:03",
+   "id": "castle-hit-feedback",
+   "state": "doing",
+   "by": "Castle",
+   "note": "Sửa lỗi hình thu nhỏ khi thành vỡ đứng lại ở bước ReviveOffer và Ending"
+  },
+  {
+   "at": "2026-11-26 01:17:05",
+   "id": "castle-hit-feedback",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleSessionTests.Enemy_hit_flashes_the_castle_and_its_fall_collapses_it, CastleSessionTests.Hit_flash_lasts_a_tenth_of_a_second_and_the_fall_shrinks_over_half_a_second, CastleSessionTests.Fall_keeps_shrinking_while_the_run_waits_to_offer_a_revive_but_not_in_the_pause_popup, CastleSessionTests.Fall_keeps_shrinking_after_the_revive_popup_opened_before_the_half_second_was_over, CastleSessionTests.Fall_keeps_shrinking_while_the_run_waits_before_the_lose_popup"
+  },
+  {
+   "at": "2026-11-26 01:18:13",
+   "id": "castle-hit-feedback",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:18:13",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

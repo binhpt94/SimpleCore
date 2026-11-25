@@ -6,38 +6,6 @@ using Game.Run;
 
 namespace Game.Home.Tests
 {
-    /// <summary>Stand-in for the run's flow: the test moves the step and counts Play.</summary>
-    internal sealed class FakeRunFlow : IRunFlow
-    {
-        public RunStep Step { get; private set; } = RunStep.Home;
-        public event Action<RunStep> StepChanged;
-        public RunTeam Team => default;
-        public event Action<RunTeam> RunStarted { add { } remove { } }
-        public event Action BattleStarted { add { } remove { } }
-        public event Action BattleStopped { add { } remove { } }
-        public event Action BattleCleared { add { } remove { } }
-        public bool IsPaused => false;
-
-        public int PlayCalls { get; private set; }
-        public bool HasListeners => StepChanged != null;
-
-        public void GoTo(RunStep step)
-        {
-            Step = step;
-            StepChanged?.Invoke(step);
-        }
-
-        public void Play() => PlayCalls++;
-        public void EnterBattle(RunTeam team) { }
-        public void Pause() { }
-        public void Resume() { }
-        public void Abandon() { }
-        public void Replay() { }
-        public void GoHome() { }
-        public void Lose() { }
-        public void CountClearedWave(int wave) { }
-    }
-
     /// <summary>Stand-in for the run's score.</summary>
     internal sealed class FakeRunScore : IRunScore
     {
@@ -45,6 +13,8 @@ namespace Game.Home.Tests
         public int Best { get; set; }
         public bool IsNewBest { get; set; }
         public event Action ScoreChanged;
+
+        public bool HasListeners => ScoreChanged != null;
 
         public void SetBest(int best, bool raise = true)
         {
@@ -62,6 +32,11 @@ namespace Game.Home.Tests
         public HomeScreenContent Content { get; private set; }
         public int ShowCalls { get; private set; }
 
+        private UnityEngine.GameObject _root;
+
+        /// <summary>Made on first use, destroyed by <see cref="Dispose"/>, like the real view's canvas.</summary>
+        public UnityEngine.Object Root => _root ? _root : (_root = new UnityEngine.GameObject("FakeHomeScreen"));
+
         public void Show(HomeScreenContent content)
         {
             Content = content;
@@ -75,6 +50,7 @@ namespace Game.Home.Tests
         {
             Disposed = true;
             Visible = false;
+            if (_root) UnityEngine.Object.DestroyImmediate(_root);
         }
 
         public void PressPlay() => PlayPressed?.Invoke();

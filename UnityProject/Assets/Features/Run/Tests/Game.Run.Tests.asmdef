@@ -3,9 +3,13 @@
   "rootNamespace": "Game.Run.Tests",
   "references": [
     "Game.Core",
+    "Game.SimClock.Contracts",
     "Game.Run.Contracts",
     "Game.Run.Internal",
     "Game.Services.Popup.Contracts",
+    "Game.Castle.Contracts",
+    "Game.Wave.Contracts",
+    "Game.Ads.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

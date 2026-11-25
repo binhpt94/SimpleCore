@@ -36,6 +36,7 @@ Cân bằng dự kiến: đợt 1 có 8 Lính thả mỗi 1.0s, đi 14.5u ở 1.
 - Hero gục đúng lúc đòn của nó đang ra: đòn đó không ra (gục xử lý trước khi ra đòn trong khung hình).
 - Hồi sinh khi đang nghỉ giữa hai đợt: hồi sinh bình thường, đứng chờ ở điểm xuất phát.
 - Tạm dừng: đồng hồ 8s và anim 0.3s đứng yên.
+- Hero đang chờ hồi sinh khi thành bị phá lần đầu (luồng hồi sinh thành): đồng hồ 8s đứng yên suốt luồng (trận dừng, popup hồi sinh, thành hiện lại), chạy tiếp khi trận chạy tiếp. (Chuyển từ nhánh thứ tự hồi sinh ở popup hồi sinh, 2026-11-26.)
 - Hết lượt (`feature-run`): mọi hero bị gỡ, không hồi sinh; lượt mới sinh lại ở cấp 1.
 
 ## Đã tự quyết

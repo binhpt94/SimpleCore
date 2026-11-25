@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Game.Hero;
-using Game.Run;
 
 namespace Game.TeamSelect.Tests
 {
-    /// <summary>Fakes of Hero and Run for the team select tests, plus a recording view.</summary>
+    /// <summary>Fakes of Hero and of the screen flow for the team select tests, plus a recording view.</summary>
     internal static class Fakes
     {
         public const string Knight = "knight";
@@ -58,47 +57,10 @@ namespace Game.TeamSelect.Tests
         public bool Has(string heroCode) => !Missing.Contains(heroCode);
     }
 
-    internal sealed class FakeRun : IRunFlow
-    {
-        public readonly List<RunTeam> Entered = new List<RunTeam>();
-        public bool MoveToPlayingOnEnter = true;
-
-        public RunStep Step { get; private set; } = RunStep.Home;
-        public event Action<RunStep> StepChanged;
-        public RunTeam Team { get; private set; }
-        public event Action<RunTeam> RunStarted { add { } remove { } }
-        public event Action BattleStarted { add { } remove { } }
-        public event Action BattleStopped { add { } remove { } }
-        public event Action BattleCleared { add { } remove { } }
-        public bool IsPaused => Step == RunStep.Paused;
-
-        public void SetStep(RunStep step)
-        {
-            Step = step;
-            StepChanged?.Invoke(step);
-        }
-
-        public void Play() => SetStep(RunStep.TeamSelect);
-
-        public void EnterBattle(RunTeam team)
-        {
-            Entered.Add(team);
-            Team = team;
-            if (MoveToPlayingOnEnter) SetStep(RunStep.Playing);
-        }
-
-        public void Pause() { }
-        public void Resume() { }
-        public void Abandon() => SetStep(RunStep.Home);
-        public void Replay() => SetStep(RunStep.TeamSelect);
-        public void GoHome() => SetStep(RunStep.Home);
-        public void Lose() => SetStep(RunStep.Lost);
-        public void CountClearedWave(int wave) { }
-    }
-
     internal sealed class FakeView : ITeamSelectView
     {
         public bool Visible;
+        public string BuildError;
         public IReadOnlyList<HeroCard> Cards = Array.Empty<HeroCard>();
         public IReadOnlyList<SlotState> Slots = Array.Empty<SlotState>();
         public bool StartEnabled;
@@ -117,12 +79,20 @@ namespace Game.TeamSelect.Tests
 
         public void ShowSlots(IReadOnlyList<SlotState> slots) => Slots = slots;
         public void ShowStartButton(bool enabled) => StartEnabled = enabled;
+        public void ShowBuildError(string text) => BuildError = text;
     }
 
-    /// <summary>A screen wired to fakes; <see cref="Open"/> goes Home → TeamSelect like pressing Play.</summary>
+    /// <summary>
+    /// A screen wired to fakes, with a fake screen flow (GameFlow): <see cref="Open"/> shows the screen like pressing
+    /// Play. On Enter battle the fake flow records the team and, while <see cref="BuildSucceeds"/>, remembers it and
+    /// hides the screen (battle built); otherwise it waits, like a battle still being built. On Back it records the
+    /// tap and hides the screen (back to the home screen).
+    /// </summary>
     internal sealed class TestScreen
     {
-        public readonly FakeRun Run = new FakeRun();
+        public readonly List<string[]> Entered = new List<string[]>();
+        public int BackCount;
+        public bool BuildSucceeds = true;
         public readonly FakeRoster Roster;
         public readonly FakePortraits Portraits = new FakePortraits();
         public readonly FakeView View = new FakeView();
@@ -135,13 +105,27 @@ namespace Game.TeamSelect.Tests
             Memory = memory ?? new TeamMemory();
             Roster = roster ?? new FakeRoster();
             Rules = rules ?? Fakes.Rules();
-            Presenter = new TeamSelectPresenter(Run, Roster, Rules, Memory, Portraits);
-            Presenter.Attach(View);
+            Presenter = new TeamSelectPresenter(Roster, Rules, Memory);
+            Presenter.Attach(View, Portraits);
+            Presenter.EnterBattlePressed += team =>
+            {
+                var codes = new string[team.Count];
+                for (var i = 0; i < codes.Length; i++) codes[i] = team[i];
+                Entered.Add(codes);
+                if (!BuildSucceeds) return;
+                Presenter.RememberTeam(team);
+                Presenter.Hide();
+            };
+            Presenter.BackPressed += () =>
+            {
+                BackCount++;
+                Presenter.Hide();
+            };
         }
 
         public TestScreen Open()
         {
-            Run.Play();
+            Presenter.Show();
             return this;
         }
 

@@ -1,13 +1,18 @@
 using System;
 using Game.Core;
+using Game.Home;
+using Game.Run;
+using Game.SceneFlow;
+using Game.TeamSelect;
 using UnityEngine;
 
 namespace Game.GameFlow
 {
     /// <summary>
-    /// Wires GameFlow into the Game scene. At IDEA (config "Route screens" off) feature-run keeps switching
-    /// screens, so the installer only checks its config and joins nothing: it never shows a screen.
-    /// Routing from PROTOTYPE needs contracts with Run, Home and TeamSelect that do not exist yet.
+    /// Wires GameFlow into the Game scene. With "Route screens" on (from PROTOTYPE) it builds the router over the
+    /// start screen, team select and the run's battle, and joins the session. SceneFlow installs last, so its
+    /// scene-ready signal is taken from the registry only when the session runs. With "Route screens" off (IDEA)
+    /// it only checks its config and joins nothing.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/GameFlow/Installer", fileName = "GameFlowInstaller")]
     public sealed class GameFlowInstaller : InstallerAsset
@@ -19,14 +24,33 @@ namespace Game.GameFlow
             if (registry == null) throw new ArgumentNullException(nameof(registry));
             if (_config == null) throw new InvalidOperationException("GameFlowInstaller: GameFlowConfig is missing.");
 
-            _config.ToSettings();
+            var settings = _config.ToSettings();
 
             if (!_config.RouteScreens) return;
 
+            var session = Need<ISessionScene>(registry);
+            var home = Need<IHomeScreen>(registry);
+            var teamSelect = Need<ITeamSelectScreen>(registry);
+            var battle = Need<IRunBattle>(registry);
+
+            var router = new ScreenRouter(
+                settings,
+                new MainScreensAdapter(home, teamSelect),
+                new TeamSelectPanelAdapter(teamSelect),
+                new BattleBuilderAdapter(battle),
+                new TeamMemoryAdapter(teamSelect),
+                new UnityFlowLog());
+
+            session.Join(new GameFlowParticipant(
+                router, home, teamSelect, battle, () => Need<IGameSceneReady>(registry), new UnityFlowClock()));
+        }
+
+        private static T Need<T>(IServiceRegistry registry) where T : class
+        {
+            if (registry.TryResolve<T>(out var service)) return service;
             throw new InvalidOperationException(
-                "GameFlowInstaller: 'Route screens' is on, but GameFlow cannot route yet: the contracts with Run " +
-                "(hand the team, battle built or failed, leave choice after clearing), Home and TeamSelect do not exist. " +
-                "Keep it off; feature-run switches screens at IDEA.");
+                $"GameFlowInstaller: {typeof(T).Name} is not registered; install its feature before GameFlow " +
+                "(IGameSceneReady: SceneFlow must be in the Game scene's boot).");
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

@@ -138,6 +138,8 @@ namespace Game.Services.Popup.Tests
 
             internal Presenter(List<Object> created) => this.created = created;
 
+            public GameObject Layer => null;
+
             public GameObject Present(GameObject prefab)
             {
                 var instance = Object.Instantiate(prefab);

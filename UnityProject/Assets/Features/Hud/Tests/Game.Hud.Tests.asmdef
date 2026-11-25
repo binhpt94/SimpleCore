@@ -8,6 +8,7 @@
     "Game.Wallet.Contracts",
     "Game.Wave.Contracts",
     "Game.Run.Contracts",
+    "Game.Hero.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

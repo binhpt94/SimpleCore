@@ -1,0 +1,658 @@
+{
+ "items": {
+  "release-seed-random": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Release_PicksANewRandomSeedEachRun"
+   ],
+   "play": "",
+   "hash": "621b9cfd3b5f",
+   "text": "Bản phát hành: mỗi lượt bốc một seed mới ngẫu nhiên lúc vào trận\nNgười quyết (2026-11-25).",
+   "title": "Bản phát hành: mỗi lượt bốc một seed mới ngẫu nhiên lúc vào trận",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "release-seed-logged": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Release_WritesTheSeedToTheLogWhenTheRunStarts"
+   ],
+   "play": "",
+   "hash": "7552e8eaa2b9",
+   "text": "Bản phát hành ghi seed của lượt vào log của game lúc vào trận, để lặp lại đúng lượt khi báo lỗi\nNgười quyết (2026-11-25).",
+   "title": "Bản phát hành ghi seed của lượt vào log của game lúc vào trận, để lặp lại đúng lượt khi báo lỗi",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "dev-seed-fixed": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Dev_UsesTheConfigSeed_AndPrintsItOnStart"
+   ],
+   "play": "",
+   "hash": "89f6769b3269",
+   "text": "Bản dev: seed lấy từ config, cố định, và được in ra console lúc vào trận\nNgười quyết (2026-11-25). Tester đặt seed khác trong config để chơi lại một lượt đã báo lỗi.",
+   "title": "Bản dev: seed lấy từ config, cố định, và được in ra console lúc vào trận",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "dev-seed-per-run": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Dev_EveryRunOfOneSession_UsesTheConfigSeed"
+   ],
+   "play": "",
+   "hash": "17bb5eff74bf",
+   "text": "Bản dev: mọi lượt trong một lần mở game dùng đúng seed đang ghi trong config\nChơi lại ngay trong cùng lần mở game ra đúng lượt vừa chơi; muốn thứ tự quái khác thì đổi seed trong config.",
+   "title": "Bản dev: mọi lượt trong một lần mở game dùng đúng seed đang ghi trong config",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "seed-range": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Seed_IsAWholeNumberFrom0To2147483647"
+   ],
+   "play": "",
+   "hash": "a5f36870c538",
+   "text": "Seed là một số nguyên từ 0 tới 2147483647\nVừa một số nguyên 32 bit không âm, dễ chép từ log.",
+   "title": "Seed là một số nguyên từ 0 tới 2147483647",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "stream-from-name": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Stream_ComesFromSeedAndName_NotFromWhoAskedFirst",
+    "SeededRandomTests.Stream_ExtraDrawsOnOneStream_DoNotShiftAnother",
+    "SeededRandomTests.SameSeed_GivesSameNumbers_DifferentSeed_Differs"
+   ],
+   "play": "",
+   "hash": "a21c800be8cb",
+   "text": "Dòng của một feature sinh từ seed của lượt và tên feature, không phụ thuộc feature nào xin dòng trước\nĐổi thứ tự cài feature không làm lệch số.",
+   "title": "Dòng của một feature sinh từ seed của lượt và tên feature, không phụ thuộc feature nào xin dòng trước",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "wave-stream": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.WaveStream_IsOneStream_ForShuffleAndSide"
+   ],
+   "play": "",
+   "hash": "d5aa5987d4b0",
+   "text": "Đợt quái dùng một dòng tên Wave cho cả việc xáo thứ tự loại quái lẫn gán bên ra\nHiện là feature duy nhất cần ngẫu nhiên.",
+   "title": "Đợt quái dùng một dòng tên Wave cho cả việc xáo thứ tự loại quái lẫn gán bên ra",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "edge-choi-lai-sau-khi-thua-cung-lan-mo": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Edge_ReplayAfterLosing_DevGivesTheSameRun",
+    "SeededRandomTests.Edge_ReplayAfterLosing_ReleasePicksANewSeed"
+   ],
+   "play": "",
+   "hash": "2e831cc6d50f",
+   "text": "**Chơi lại sau khi thua (cùng lần mở game):** lượt mới. Bản phát hành bốc seed mới; bản dev dùng lại đúng seed config nên ra đúng lượt vừa chơi nếu thao tác như cũ.",
+   "title": "Chơi lại sau khi thua (cùng lần mở game)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "edge-hoi-sinh-thanh-bang-quang-cao": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Edge_CastleRevivedByAd_KeepsSeedStepsAndStreamPosition"
+   ],
+   "play": "",
+   "hash": "738a07d73218",
+   "text": "**Hồi sinh thành bằng quảng cáo:** vẫn là cùng lượt; seed giữ nguyên, các dòng chạy tiếp từ vị trí bốc hiện tại, không đặt lại.",
+   "title": "Hồi sinh thành bằng quảng cáo",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "edge-dung-tran-hong-truoc-khi-luot-bat-dau": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Edge_SetUpFailedBeforeStart_WritesNoSeed_AndNextSetUpPicksAgain"
+   ],
+   "play": "",
+   "hash": "a66c11f6ddaf",
+   "text": "**Dựng trận hỏng trước khi lượt bắt đầu:** không ghi seed; lần dựng sau chọn seed lại theo luật.",
+   "title": "Dựng trận hỏng trước khi lượt bắt đầu",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "edge-tester-muon-choi-lai-mot-luot-bat-ki": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Edge_TesterReplaysAnyRun_BySettingTheConfigSeed"
+   ],
+   "play": "",
+   "hash": "a6053a66394a",
+   "text": "**Tester muốn chơi lại một lượt bất kì:** đặt seed của config bằng seed đã in (hoặc đã ghi trong log), vào trận.",
+   "title": "Tester muốn chơi lại một lượt bất kì",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "edge-feature-xin-dong-co-ten-khong-co-trong": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Edge_StreamNameNotInStreams_IsAClearError"
+   ],
+   "play": "",
+   "hash": "9a92e268c791",
+   "text": "**Feature xin dòng có tên không có trong `Streams`:** bản dev báo lỗi rõ để thêm vào bảng; không tự tạo dòng ngầm.",
+   "title": "Feature xin dòng có tên không có trong `Streams`",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "edge-hieu-ung-chi-de-nhin-can-ngau-nhien": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Edge_VisualEffectRandom_DoesNotShiftGameplayStreams"
+   ],
+   "play": "",
+   "hash": "7294d914083a",
+   "text": "**Hiệu ứng chỉ để nhìn cần ngẫu nhiên:** dùng nguồn riêng của phần nhìn, không xin dòng ở đây.",
+   "title": "Hiệu ứng chỉ để nhìn cần ngẫu nhiên",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "edge-huy-tran": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Edge_RunCancelled_ClearsStreams_NextRunStartsFresh",
+    "ClockStepTests.ClearRun_DropsQueuedActionsAndLeftover"
+   ],
+   "play": "",
+   "hash": "c447c58b3a51",
+   "text": "**Huỷ trận:** các dòng của lượt bị dọn; lượt sau khởi tạo lại.",
+   "title": "Huỷ trận",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "params": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Params_RealConfigHoldsTheSeedNumbers"
+   ],
+   "play": "",
+   "hash": "edabab3b53e3",
+   "text": "## Làm gì\n1. Khi lượt chơi yêu cầu dựng lượt mới, chọn seed của lượt:\n   - Bản phát hành: bốc một seed ngẫu nhiên trong khoảng cho phép.\n   - Bản dev: lấy đúng seed trong config.\n2. Đặt lại mọi dòng: dòng của mỗi feature sinh từ seed của lượt và tên dòng (bảng `Streams`).\n3. Khi lượt chơi xác nhận lượt đã bắt đầu: ghi seed đúng một lần (bản phát hành vào log, bản dev ra console).\n4. Feature cần số ngẫu nhiên xin dòng theo tên của mình; mỗi lần bốc lấy số kế tiếp trong dòng đó.\n\n## Thông số\n- Bảng `SeedParams` (loại `params`): nguồn seed ở bản phát hành và bản dev, seed mặc định dev, seed mỗi lượt ở dev, khoảng giá trị.\n- Bảng `Streams` (loại `list`): mỗi dòng ngẫu nhiên một hàng; `owner` là feature xin dòng, `uses` là việc dùng nó. Feature mới cần ngẫu nhiên thì thêm một hàng ở đây.\n\n## Thông số theo giai đoạn\nBa cột `idea`, `prototype`, `full` của bảng `SeedParams` (mọi thông số giữ như IDEA); cột `stage` của bảng `Streams`.",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "seedparams-release-seed": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.release_seed_IsRandomEachRun_WithinTheRange"
+   ],
+   "play": "",
+   "hash": "6246573fd682",
+   "text": "Bảng SeedParams (params), dòng release_seed\nkey (string): release_seed\nname (string): Seed của bản phát hành\nunit (string): \nidea (string): ngẫu nhiên mỗi lượt\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người quyết: mỗi lượt một thứ tự quái mới",
+   "title": "SeedParams: Seed của bản phát hành (release_seed)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "seedparams-release-seed-log": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.release_seed_log_WritesOnStart_Once"
+   ],
+   "play": "",
+   "hash": "717f4b455f47",
+   "text": "Bảng SeedParams (params), dòng release_seed_log\nkey (string): release_seed_log\nname (string): Ghi seed ở bản phát hành\nunit (string): \nidea (string): ghi vào log lúc vào trận\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người quyết: lặp lại đúng lượt khi báo lỗi",
+   "title": "SeedParams: Ghi seed ở bản phát hành (release_seed_log)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "seedparams-dev-seed": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.dev_seed_ComesFromConfig"
+   ],
+   "play": "",
+   "hash": "8db895eed4f5",
+   "text": "Bảng SeedParams (params), dòng dev_seed\nkey (string): dev_seed\nname (string): Seed của bản dev\nunit (string): \nidea (string): lấy từ config\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người quyết: seed cố định để test lặp lại được",
+   "title": "SeedParams: Seed của bản dev (dev_seed)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "seedparams-dev-seed-default": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.dev_seed_default_Is12345"
+   ],
+   "play": "",
+   "hash": "4c5afe409085",
+   "text": "Bảng SeedParams (params), dòng dev_seed_default\nkey (string): dev_seed_default\nname (string): Seed mặc định trong config dev\nunit (string): \nidea (string): 12345\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Dự kiến; số nào cũng được miễn cố định",
+   "title": "SeedParams: Seed mặc định trong config dev (dev_seed_default)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "seedparams-dev-seed-print": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.dev_seed_print_PrintsToConsoleOnStart"
+   ],
+   "play": "",
+   "hash": "d0ce75722fe1",
+   "text": "Bảng SeedParams (params), dòng dev_seed_print\nkey (string): dev_seed_print\nname (string): In seed ở bản dev\nunit (string): \nidea (string): in ra console lúc vào trận\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người quyết",
+   "title": "SeedParams: In seed ở bản dev (dev_seed_print)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "seedparams-dev-seed-step": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.dev_seed_step_EveryRunUsesTheConfigSeed"
+   ],
+   "play": "",
+   "hash": "590d1c628098",
+   "text": "Bảng SeedParams (params), dòng dev_seed_step\nkey (string): dev_seed_step\nname (string): Seed của mỗi lượt ở bản dev\nunit (string): \nidea (string): đúng seed config\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Theo góp ý GPT seed-dev-dung-config: chơi lại trong cùng lần mở game ra đúng lượt vừa chơi",
+   "title": "SeedParams: Seed của mỗi lượt ở bản dev (dev_seed_step)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "seedparams-seed-min": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.seed_min_Is0"
+   ],
+   "play": "",
+   "hash": "55f2c744bf95",
+   "text": "Bảng SeedParams (params), dòng seed_min\nkey (string): seed_min\nname (string): Seed nhỏ nhất\nunit (string): \nidea (string): 0\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Số nguyên không âm",
+   "title": "SeedParams: Seed nhỏ nhất (seed_min)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "seedparams-seed-max": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.seed_max_Is2147483647"
+   ],
+   "play": "",
+   "hash": "1df2583ab756",
+   "text": "Bảng SeedParams (params), dòng seed_max\nkey (string): seed_max\nname (string): Seed lớn nhất\nunit (string): \nidea (string): 2147483647\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Vừa số nguyên 32 bit",
+   "title": "SeedParams: Seed lớn nhất (seed_max)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  },
+  "streams-wave": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "SeededRandomTests.Streams_wave_RowExists_AndGivesTheWaveStream"
+   ],
+   "play": "",
+   "hash": "988a1cc0d5ee",
+   "text": "Bảng Streams (list), dòng wave\nid (string): wave\nname (string): Wave\nstage (enum:idea|prototype|full): idea\nowner (string): feature-wave\nuses (string): Xáo thứ tự loại quái và gán bên ra mỗi đợt",
+   "title": "Streams: Wave (wave)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 22:54:27"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 22:52:20",
+   "id": "release-seed-random",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Release_PicksANewRandomSeedEachRun"
+  },
+  {
+   "at": "2026-11-25 22:52:21",
+   "id": "release-seed-logged",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Release_WritesTheSeedToTheLogWhenTheRunStarts"
+  },
+  {
+   "at": "2026-11-25 22:52:22",
+   "id": "dev-seed-fixed",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Dev_UsesTheConfigSeed_AndPrintsItOnStart"
+  },
+  {
+   "at": "2026-11-25 22:52:23",
+   "id": "dev-seed-per-run",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Dev_EveryRunOfOneSession_UsesTheConfigSeed"
+  },
+  {
+   "at": "2026-11-25 22:52:24",
+   "id": "seed-range",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Seed_IsAWholeNumberFrom0To2147483647"
+  },
+  {
+   "at": "2026-11-25 22:52:25",
+   "id": "stream-from-name",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Stream_ComesFromSeedAndName_NotFromWhoAskedFirst, SeededRandomTests.Stream_ExtraDrawsOnOneStream_DoNotShiftAnother, SeededRandomTests.SameSeed_GivesSameNumbers_DifferentSeed_Differs"
+  },
+  {
+   "at": "2026-11-25 22:52:26",
+   "id": "wave-stream",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.WaveStream_IsOneStream_ForShuffleAndSide"
+  },
+  {
+   "at": "2026-11-25 22:52:27",
+   "id": "edge-choi-lai-sau-khi-thua-cung-lan-mo",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Edge_ReplayAfterLosing_DevGivesTheSameRun, SeededRandomTests.Edge_ReplayAfterLosing_ReleasePicksANewSeed"
+  },
+  {
+   "at": "2026-11-25 22:52:28",
+   "id": "edge-hoi-sinh-thanh-bang-quang-cao",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Edge_CastleRevivedByAd_KeepsSeedStepsAndStreamPosition"
+  },
+  {
+   "at": "2026-11-25 22:52:29",
+   "id": "edge-dung-tran-hong-truoc-khi-luot-bat-dau",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Edge_SetUpFailedBeforeStart_WritesNoSeed_AndNextSetUpPicksAgain"
+  },
+  {
+   "at": "2026-11-25 22:52:30",
+   "id": "edge-tester-muon-choi-lai-mot-luot-bat-ki",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Edge_TesterReplaysAnyRun_BySettingTheConfigSeed"
+  },
+  {
+   "at": "2026-11-25 22:52:31",
+   "id": "edge-feature-xin-dong-co-ten-khong-co-trong",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Edge_StreamNameNotInStreams_IsAClearError"
+  },
+  {
+   "at": "2026-11-25 22:52:36",
+   "id": "edge-hieu-ung-chi-de-nhin-can-ngau-nhien",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Edge_VisualEffectRandom_DoesNotShiftGameplayStreams"
+  },
+  {
+   "at": "2026-11-25 22:52:37",
+   "id": "edge-huy-tran",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Edge_RunCancelled_ClearsStreams_NextRunStartsFresh, ClockStepTests.ClearRun_DropsQueuedActionsAndLeftover"
+  },
+  {
+   "at": "2026-11-25 22:52:37",
+   "id": "params",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Params_RealConfigHoldsTheSeedNumbers"
+  },
+  {
+   "at": "2026-11-25 22:52:38",
+   "id": "seedparams-release-seed",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.release_seed_IsRandomEachRun_WithinTheRange"
+  },
+  {
+   "at": "2026-11-25 22:52:39",
+   "id": "seedparams-release-seed-log",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.release_seed_log_WritesOnStart_Once"
+  },
+  {
+   "at": "2026-11-25 22:52:40",
+   "id": "seedparams-dev-seed",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.dev_seed_ComesFromConfig"
+  },
+  {
+   "at": "2026-11-25 22:52:41",
+   "id": "seedparams-dev-seed-default",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.dev_seed_default_Is12345"
+  },
+  {
+   "at": "2026-11-25 22:52:42",
+   "id": "seedparams-dev-seed-print",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.dev_seed_print_PrintsToConsoleOnStart"
+  },
+  {
+   "at": "2026-11-25 22:52:42",
+   "id": "seedparams-dev-seed-step",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.dev_seed_step_EveryRunUsesTheConfigSeed"
+  },
+  {
+   "at": "2026-11-25 22:52:43",
+   "id": "seedparams-seed-min",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.seed_min_Is0"
+  },
+  {
+   "at": "2026-11-25 22:52:44",
+   "id": "seedparams-seed-max",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.seed_max_Is2147483647"
+  },
+  {
+   "at": "2026-11-25 22:52:45",
+   "id": "streams-wave",
+   "state": "done",
+   "by": "SimClock",
+   "note": "SeededRandomTests.Streams_wave_RowExists_AndGivesTheWaveStream"
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "release-seed-random",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "release-seed-logged",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "dev-seed-fixed",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "dev-seed-per-run",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "seed-range",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "stream-from-name",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "wave-stream",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "edge-choi-lai-sau-khi-thua-cung-lan-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "edge-hoi-sinh-thanh-bang-quang-cao",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "edge-dung-tran-hong-truoc-khi-luot-bat-dau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "edge-tester-muon-choi-lai-mot-luot-bat-ki",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "edge-feature-xin-dong-co-ten-khong-co-trong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "edge-hieu-ung-chi-de-nhin-can-ngau-nhien",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "edge-huy-tran",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "seedparams-release-seed",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "seedparams-release-seed-log",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "seedparams-dev-seed",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "seedparams-dev-seed-default",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "seedparams-dev-seed-print",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "seedparams-dev-seed-step",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "seedparams-seed-min",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "seedparams-seed-max",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 22:54:27",
+   "id": "streams-wave",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  }
+ ]
+}

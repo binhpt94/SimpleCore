@@ -1,6 +1,6 @@
 ---
 based-on: d386ccae4d88
-refs: feature-run/run-score@5869f69301eb, feature-castle/castle-skills@8bc45d0edc8d, feature-team-select/team-memory/memory-rules@e36a9ec522a1
+refs: feature-run/run-score@5869f69301eb, feature-castle/castle-skills@8bc45d0edc8d, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-wallet/income/income-amounts@f36980378e51
 frame: none
 ---
 # Giá trị đầu lượt

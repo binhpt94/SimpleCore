@@ -209,6 +209,12 @@ namespace Game.Hud.Tests
         public int SkillButtonsCreated;
         public HudInsets Insets;
 
+        private UnityEngine.GameObject _root;
+
+        /// <summary>A hidden object standing in for the view on screen; removed again by <see cref="Destroy"/>.</summary>
+        public UnityEngine.Object Root =>
+            _root != null ? _root : _root = new UnityEngine.GameObject("FakeHudView") { hideFlags = UnityEngine.HideFlags.HideAndDontSave };
+
         public void ApplySafeArea(HudInsets insets) => Insets = insets;
         public bool PauseShown = true;
         public void ShowPauseButton(bool shown) => PauseShown = shown;
@@ -250,7 +256,11 @@ namespace Game.Hud.Tests
 
         public void ShowCheatButton(string label) => CheatLabel = label;
 
-        public void Destroy() => Destroyed = true;
+        public void Destroy()
+        {
+            Destroyed = true;
+            if (_root != null) UnityEngine.Object.DestroyImmediate(_root);
+        }
 
         public void Press(int index) => SkillPressed?.Invoke(index);
         public void PressCheat() => CheatPressed?.Invoke();

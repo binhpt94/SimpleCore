@@ -1,0 +1,29 @@
+{
+ "hash": "8ab55beebc03",
+ "items": {
+  "clock-drives-gameplay": {
+   "hash": "2c56fd64149c",
+   "text": "Mọi logic gameplay của trận chạy theo nhịp chung, không tự đọc thời gian khung hình\nHero, quái, thành, đợt quái, kĩ năng, hồi sinh, giao chiến đều lấy thời gian trôi qua từ nhịp chung. Phần chỉ để nhìn (hiệu ứng, chữ bay, nền) không bắt buộc."
+  },
+  "update-or-tick": {
+   "hash": "ded75ac0af0c",
+   "text": "Một config chung chọn logic gameplay chạy theo Update của khung hình hay theo TickUpdate cố định\nMọi logic gameplay chạy được ở cả hai cách; đổi cách chạy chỉ cần đổi config, không sửa code của feature. Người yêu cầu."
+  },
+  "seeded-rng": {
+   "hash": "031f1d9a9e5b",
+   "text": "Mọi số ngẫu nhiên của gameplay lấy từ một nguồn tất định theo seed\nHiện có ở `feature-wave` (xáo thứ tự quái, bốc bên ra). Không feature gameplay nào tự gọi bộ ngẫu nhiên riêng."
+  },
+  "rng-per-feature": {
+   "hash": "93a694ce36e9",
+   "text": "Mỗi feature lấy số ngẫu nhiên từ một dòng riêng, cùng sinh ra từ seed của trận\nMột feature thêm hay bớt một lần bốc thì số ngẫu nhiên của feature khác không lệch theo."
+  },
+  "tester-fast-run": {
+   "hash": "c4ebd76827fc",
+   "text": "Tester chạy trận nhanh hơn thời gian thật và lặp lại đúng kết quả với cùng seed và cùng thao tác\nMục đích chính của feature: giả lập nhiều lượt để kiểm luật và cân bằng mà không phải chờ thời gian thật. Người yêu cầu."
+  },
+  "clock-no-rules": {
+   "hash": "4defe6389c3c",
+   "text": "Feature này chỉ cấp nhịp và số ngẫu nhiên, không giữ luật gameplay nào\nAi làm gì trong một nhịp vẫn do feature sở hữu quyết; thứ tự trong nhịp giao chiến vẫn ở `feature-combat`."
+  }
+ }
+}

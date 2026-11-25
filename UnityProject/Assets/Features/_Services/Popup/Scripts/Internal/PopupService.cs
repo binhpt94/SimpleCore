@@ -17,6 +17,9 @@ namespace Game.Services.Popup
         private readonly List<Entry> stack = new List<Entry>();   // bottom first
         private bool running;
         private int lastHandle;
+        private Func<GameObject, IDisposable> trackView;
+        private GameObject trackedLayer;
+        private IDisposable layerTracked;
 
         internal PopupService(IPopupPresenter presenter, IPopupPrefabs prefabs, IPopupLog log, int maxOpen)
         {
@@ -30,15 +33,28 @@ namespace Game.Services.Popup
 
         internal PopupHandle Top => stack.Count > 0 ? stack[stack.Count - 1].Handle : default;
 
-        /// <summary>The session is running: popups may open from now on.</summary>
-        internal void Start() => running = true;
+        /// <summary>
+        /// The session is running: popups may open from now on. <paramref name="track"/> counts the popup layer and
+        /// each open popup as views the session holds (session clean-up check); a popup's handle is released when
+        /// it closes, the layer's when the session ends.
+        /// </summary>
+        internal void Start(Func<GameObject, IDisposable> track = null)
+        {
+            trackView = track;
+            running = true;
+        }
 
         /// <summary>The session ends: every popup goes, none reports anything more, and no popup may open again.</summary>
         internal void Stop()
         {
             running = false;
+            foreach (var entry in stack) entry.Release();
             stack.Clear();
             presenter.DismissAll();
+            layerTracked?.Dispose();
+            layerTracked = null;
+            trackedLayer = null;
+            trackView = null;
         }
 
         public PopupHandle Show(PopupId id)
@@ -67,7 +83,10 @@ namespace Game.Services.Popup
                 return default;
             }
 
-            var entry = new Entry(id, new PopupHandle(++lastHandle), presenter.Present(prefab));
+            var instance = presenter.Present(prefab);
+            TrackLayer();
+            var tracked = trackView != null && instance != null ? trackView(instance) : null;
+            var entry = new Entry(id, new PopupHandle(++lastHandle), instance, tracked);
             stack.Add(entry);
             return entry.Handle;
         }
@@ -79,6 +98,7 @@ namespace Game.Services.Popup
 
             var entry = stack[index];
             stack.RemoveAt(index);
+            entry.Release();
             presenter.Dismiss(entry.Instance);
         }
 
@@ -105,6 +125,16 @@ namespace Game.Services.Popup
             }
         }
 
+        /// <summary>Counts the layer once, from the popup that made it; a new layer replaces the old count.</summary>
+        private void TrackLayer()
+        {
+            var layer = presenter.Layer;
+            if (trackView == null || layer == null || layer == trackedLayer) return;
+            layerTracked?.Dispose();
+            trackedLayer = layer;
+            layerTracked = trackView(layer);
+        }
+
         private int IndexOf(PopupHandle handle)
         {
             if (!handle.IsValid) return -1;
@@ -122,16 +152,26 @@ namespace Game.Services.Popup
 
         private sealed class Entry
         {
-            internal Entry(PopupId id, PopupHandle handle, GameObject instance)
+            private IDisposable tracked;
+
+            internal Entry(PopupId id, PopupHandle handle, GameObject instance, IDisposable tracked)
             {
                 Id = id;
                 Handle = handle;
                 Instance = instance;
+                this.tracked = tracked;
             }
 
             internal PopupId Id { get; }
             internal PopupHandle Handle { get; }
             internal GameObject Instance { get; }
+
+            /// <summary>The session no longer counts this popup as a held view.</summary>
+            internal void Release()
+            {
+                tracked?.Dispose();
+                tracked = null;
+            }
         }
     }
 }

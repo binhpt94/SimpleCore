@@ -310,6 +310,59 @@ namespace Game.Services.Popup.Tests
             Assert.That(fresh.OpenCount, Is.EqualTo(0));
         }
 
+        [Test]
+        public void SessionUsage_OpenPopupsCountAsHeldViews_AndTheCountIsZeroAfterTheSessionIsDisposed()
+        {
+            var fresh = new PopupService(presenter, prefabs, log, 3);
+            var participant = new PopupParticipant(fresh, prefabs);
+            ISessionParticipantUsage usage = participant;
+            participant.LoadAsync(CancellationToken.None).GetAwaiter().GetResult();
+            participant.Run();
+
+            Assert.That(usage.HeldViews, Is.EqualTo(0), "no layer before the first popup");
+
+            fresh.Show(IdA);
+            fresh.Show(IdB);
+            Assert.That(usage.HeldViews, Is.EqualTo(3), "the popup layer and each open popup are views the session holds");
+
+            participant.DisposeAsync().GetAwaiter().GetResult();
+
+            Assert.That(usage.HeldViews, Is.EqualTo(0));
+            Assert.That(usage.RunningJobs, Is.EqualTo(0), "the popup service runs no timed job");
+        }
+
+        [Test]
+        public void SessionUsage_OpenThenCloseEveryPopupThenDispose_CountsAreZero()
+        {
+            var fresh = new PopupService(presenter, prefabs, log, 3);
+            var participant = new PopupParticipant(fresh, prefabs);
+            ISessionParticipantUsage usage = participant;
+            participant.Run();
+
+            fresh.Close(fresh.Show(IdA));
+            Assert.That(usage.HeldViews, Is.EqualTo(1), "the layer stays for the next popup until the session ends");
+
+            participant.DisposeAsync().GetAwaiter().GetResult();
+
+            Assert.That(usage.HeldViews, Is.EqualTo(0));
+            Assert.That(usage.RunningJobs, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void SessionUsage_ClosingAPopup_StopsCountingItAsAHeldView()
+        {
+            var fresh = new PopupService(presenter, prefabs, log, 3);
+            var participant = new PopupParticipant(fresh, prefabs);
+            ISessionParticipantUsage usage = participant;
+            participant.Run();
+
+            var first = fresh.Show(IdA);
+            fresh.Show(IdB);
+            fresh.Close(first);
+
+            Assert.That(usage.HeldViews, Is.EqualTo(2), "the layer and the popup still open");
+        }
+
         // ---- catalog
 
         [Test]
@@ -479,8 +532,15 @@ namespace Game.Services.Popup.Tests
 
             internal FakePresenter(List<Object> created) => this.created = created;
 
+            public GameObject Layer { get; private set; }
+
             public GameObject Present(GameObject prefab)
             {
+                if (Layer == null)
+                {
+                    Layer = new GameObject("FakePopupLayer");
+                    created.Add(Layer);
+                }
                 var instance = Object.Instantiate(prefab);
                 created.Add(instance);
                 Open.Add(instance);
@@ -496,6 +556,7 @@ namespace Game.Services.Popup.Tests
             public void DismissAll()
             {
                 Open.Clear();
+                Layer = null;
                 DismissedAll = true;
             }
         }

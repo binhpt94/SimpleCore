@@ -15,7 +15,7 @@ namespace Game.TeamSelect
         public static void ApplyFullTeam(TeamSelectPresenter screen, TeamMemory memory, IReadOnlyList<string> team)
         {
             memory.Remember(team);
-            screen.Open();
+            screen.Show();
         }
     }
 }

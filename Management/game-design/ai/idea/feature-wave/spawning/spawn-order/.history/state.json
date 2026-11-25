@@ -1,5 +1,5 @@
 {
- "hash": "5884f63cfa93",
+ "hash": "dbef5244fdeb",
  "items": {
   "spawn-point": {
    "hash": "f63bc768affd",
@@ -28,6 +28,10 @@
   "stop-on-end": {
    "hash": "e26952c3dbdb",
    "text": "Thành bị phá thì ngừng thả ngay, các con chưa ra bị bỏ\nĐợt đó không được tính là dọn sạch."
+  },
+  "seeded-shuffle": {
+   "hash": "e3707d8a49c2",
+   "text": "Xáo thứ tự loại quái và gán bên ra đều lấy số từ dòng ngẫu nhiên của đợt quái, sinh từ seed của lượt\nCùng seed thì mọi đợt của lượt ra cùng thứ tự và cùng bên; luật dòng ngẫu nhiên ở `feature-sim-clock/seeded-random`. Nhịp thả và lúc hoãn đếm theo bước nhịp chung."
   }
  }
 }

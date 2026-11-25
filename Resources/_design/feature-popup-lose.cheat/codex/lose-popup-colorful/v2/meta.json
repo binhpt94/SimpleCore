@@ -1,0 +1,14 @@
+{
+ "node": "feature-popup-lose/cheat",
+ "nodeHash": "683571cd6600",
+ "frames": {
+  "new-record": "5158c7c579e4"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99"
+ },
+ "order": "_design/feature-popup-lose.cheat/lose-popup-colorful",
+ "version": 2,
+ "at": "2026-11-25 23:44:49",
+ "stamp": 1795625089.6349206
+}

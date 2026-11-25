@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: team-compare=gpt@r2-1#hien-vai-tro-hero
 gpt-dropped: r2-1#chon-san-doi-mac-dinh=team-default
 ---

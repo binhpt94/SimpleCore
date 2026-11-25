@@ -8,3 +8,4 @@
 {"at": "2026-11-24 23:35:24", "event": "review", "table": "idea", "item": "cleanup-scope", "text": "Rời scene thì chỉ dọn trạng thái và tài nguyên thuộc riêng scene vừa rời\nDữ liệu đi qua các màn trong cùng lượt (như đội đã chọn) do `feature-run` giữ và đặt lại khi lượt mới bắt đầu.", "ai": 7, "score": 2, "feedback": "", "rejected": true}
 {"at": "2026-11-24 23:43:16", "event": "data", "hash": "2f0485d8eda5", "previous": "ab015c62a7ce", "added": [], "removed": [{"id": "cleanup-scope", "text": "Rời scene thì chỉ dọn trạng thái và tài nguyên thuộc riêng scene vừa rời\nDữ liệu đi qua các màn trong cùng lượt (như đội đã chọn) do `feature-run` giữ và đặt lại khi lượt mới bắt đầu."}], "rewritten": []}
 {"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "2f0485d8eda5"}
+{"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "2f0485d8eda5"}

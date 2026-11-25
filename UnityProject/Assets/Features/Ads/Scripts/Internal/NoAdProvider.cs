@@ -8,5 +8,7 @@ namespace Game.Ads
         public void Abort()
         {
         }
+
+        public bool EndOnCancel() => false;
     }
 }

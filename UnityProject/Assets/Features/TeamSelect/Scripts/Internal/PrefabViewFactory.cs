@@ -30,5 +30,7 @@ namespace Game.TeamSelect
         {
             if (view is Component component && component != null) UnityEngine.Object.Destroy(component.gameObject);
         }
+
+        public UnityEngine.Object HolderOf(ITeamSelectView view) => view is Component component ? component.gameObject : null;
     }
 }

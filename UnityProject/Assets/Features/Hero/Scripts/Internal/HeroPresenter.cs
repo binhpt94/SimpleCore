@@ -102,7 +102,9 @@ namespace Game.Hero
 
         private void OnLevelledUp(HeroUnit unit)
         {
-            if (_displays.TryGetValue(unit, out var display)) display.PlayLevelUp(_config.LevelUpPopScale, _config.LevelUpPopSeconds);
+            if (!_displays.TryGetValue(unit, out var display)) return;
+            display.PlayLevelUp(_config.LevelUpPopScale, _config.LevelUpPopSeconds);
+            if (_config.LevelUpLabelSeconds > 0f) display.ShowLevel(unit.Level, _config.LevelUpLabelSeconds);
         }
     }
 }

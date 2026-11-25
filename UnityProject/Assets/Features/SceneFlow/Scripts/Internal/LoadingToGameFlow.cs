@@ -23,6 +23,8 @@ namespace Game.SceneFlow
         protected override void OnRun()
         {
             // The switch owns the cover and outlives this scene; nothing to undo here when the session ends.
+            // The cover is the scene-transition cover, so it is not tracked as a view, and the switch's waits are
+            // the switch's, not this session's, so they are not tracked as jobs.
             switcher.Request(gameScene, session.EndAsync);
         }
     }

@@ -1,0 +1,31 @@
+B1 feature-balance/balance-difficulty-curve/break-forecast#skill-gap o PROTOTYPE (execute_code, chi trong bo nho)
+Toc do SimClock ban dev x16; seed dev 12345; doi mac dinh Hiep si, Dau si riu, Cung thu (bot bam Vao tran voi doi dien san).
+Bot chi bam nut nhu nguoi choi: Choi, Vao tran, nut nang cap, 3 nut ki nang; popup hoi sinh -> Ket thuc luot (do dot gay khong hoi sinh); popup thua -> Choi lai.
+Dot gay = dot luc thanh vo lan dau (buoc ReviveWait). score = so dot da don. gp = gio tran. real = gio that o x16.
+lv = cap Hiep si / Dau si riu / Cung thu / mau thanh / suc danh thanh / ki nang luc thua.
+
+Cach choi:
+- vung-A: 8 giay tran mua 1 lan xoay vong 6 nut; Sam set ngay khi hoi xong; khong dung Bang gia, Co vu.
+- vung-B: 8 giay mua 1 lan chi nang hero; Sam set ngay khi hoi xong; khong dung Bang gia, Co vu.
+- thuong: 0.5 giay mua xoay vong; Sam set khi tu 3 quai trong |x|<7u; Bang gia khi tu 5; Co vu khi tu 3.
+- kheo-A: 0.5 giay mua mon re nhat; Sam set tu 5 quai; Bang gia tu 6; Co vu tu 4.
+- kheo-B: mon re nhat; Sam set tu 4; Bang gia tu 5; Co vu tu 3.
+- kheo-C: mon re nhat; Sam set tu 5; Bang gia tu 4; Co vu tu 3.
+
+run1 (vung-A) start 01:11:39
+run1 (vung-A) ReviveWait wave=12 score=11 best=12 gp=336.4s real=23s lv=7/5/6/5/6/4
+run2 (vung-B) start 01:12:02
+run2 (vung-B) ReviveWait wave=10 score=9 best=12 gp=241.5s real=15s lv=7/7/7/1/1/1
+run3 (thuong) start 01:12:17
+run3 (thuong) ReviveWait wave=14 score=13 best=12 gp=398.7s real=27s lv=7/7/7/6/6/4
+run4 (kheo-A) start 01:12:43
+run4 (kheo-A) ReviveWait wave=12 score=11 best=13 gp=330.1s real=23s lv=7/7/7/5/5/3
+run5 (kheo-B) start 01:13:06
+run5 (kheo-B) ReviveWait wave=13 score=12 best=13 gp=352.3s real=23s lv=7/7/7/5/5/4
+run6 (kheo-C) start 01:13:29
+run6 (kheo-C) ReviveWait wave=13 score=12 best=13 gp=365.0s real=24s lv=7/7/7/5/5/4
+run7 bat dau 01:13:53, tester tat bot va Stop Play.
+
+So voi dot IDEA 20261125-235641 (chi co Sam set, cung bot, cung seed):
+IDEA: vung 10-12, thuong 12, kheo 13.  PROTOTYPE (them Bang gia, Co vu): vung 10-12, thuong 14, kheo 12-13.
+Console: 0 Error, 0 Warning.

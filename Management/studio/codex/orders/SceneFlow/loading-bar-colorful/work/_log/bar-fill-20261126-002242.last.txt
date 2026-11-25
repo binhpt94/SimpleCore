@@ -1,0 +1,3 @@
+Đã tạo đúng một ảnh [out/bar-fill.png](D:/AI/CoreSimple/Management/studio/codex/orders/SceneFlow/loading-bar-colorful/work/out/bar-fill.png).
+
+PNG RGBA 1000×48 px, dựng theo tọa độ pixel với hai đầu bo bán kính 18 px. Đã kiểm tra lề trong suốt 6 px ở cả bốn phía, độ đối xứng trái phải và ba màu vàng theo yêu cầu.

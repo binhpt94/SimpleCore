@@ -34,10 +34,18 @@ namespace Game.SceneFlow
             this.settings = settings;
         }
 
+        protected override bool OpensViewsOnRun => true;
+
         protected override void OnRun()
         {
             var screen = screens.Create();
-            WhenDisposed(screen.Close);
+            // Not the switch cover: this screen belongs to the Loading session, so it is counted as a held view.
+            var held = TrackView(screen.Root);
+            WhenDisposed(() =>
+            {
+                held.Dispose();
+                screen.Close();
+            });
             screen.ShowProgress(ForcedProgress);
             screen.ShowError(settings.FailedMessageFor(ForcedFailedFeature));
         }

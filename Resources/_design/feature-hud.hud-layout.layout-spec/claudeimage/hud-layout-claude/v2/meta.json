@@ -1,0 +1,15 @@
+{
+ "node": "feature-hud/hud-layout/layout-spec",
+ "nodeHash": "1a7ddf5f3b6c",
+ "frames": {
+  "main": "d877bac14934"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99"
+ },
+ "order": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+ "version": 2,
+ "at": "2026-11-25 23:19:31",
+ "stamp": 1795623571.6857917,
+ "sources": []
+}

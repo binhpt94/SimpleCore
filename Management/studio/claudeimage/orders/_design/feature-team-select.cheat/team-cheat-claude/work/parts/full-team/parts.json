@@ -2,7 +2,29 @@
  "frame": "full-team",
  "parts": [
   {
-   "id": "1-card",
+   "id": "1-btn-sub",
+   "w": 260,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "back"
+   ],
+   "from": {
+    "node": "feature-team-select/team-slots/slots-spec",
+    "frame": "main",
+    "part": "btn-sub",
+    "ref": "_design/feature-team-select.team-slots.slots-spec/team-slots-claude",
+    "version": 3
+   },
+   "text": true
+  },
+  {
+   "id": "2-card",
    "w": 300,
    "h": 400,
    "slice": null,
@@ -14,12 +36,12 @@
     "frame": "main",
     "part": "card",
     "ref": "_design/feature-team-select.team-slots.slots-spec/team-slots-claude",
-    "version": 1
+    "version": 3
    },
    "text": true
   },
   {
-   "id": "2-portrait",
+   "id": "3-portrait",
    "w": 240,
    "h": 200,
    "slice": null,
@@ -31,12 +53,12 @@
     "frame": "card",
     "part": "portrait",
     "ref": "_design/feature-team-select.hero-cards.card-spec/hero-card-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
   {
-   "id": "3-role",
+   "id": "4-role",
    "w": 48,
    "h": 48,
    "slice": null,
@@ -48,12 +70,12 @@
     "frame": "card",
     "part": "role",
     "ref": "_design/feature-team-select.hero-cards.card-spec/hero-card-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
   {
-   "id": "4-picked",
+   "id": "5-picked",
    "w": 56,
    "h": 56,
    "slice": null,
@@ -65,12 +87,12 @@
     "frame": "card",
     "part": "picked",
     "ref": "_design/feature-team-select.hero-cards.card-spec/hero-card-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
   {
-   "id": "5-slot",
+   "id": "6-slot",
    "w": 240,
    "h": 240,
    "slice": null,
@@ -82,12 +104,12 @@
     "frame": "main",
     "part": "slot",
     "ref": "_design/feature-team-select.team-slots.slots-spec/team-slots-claude",
-    "version": 1
+    "version": 3
    },
    "text": true
   },
   {
-   "id": "6-btn-main",
+   "id": "7-btn-main",
    "w": 400,
    "h": 120,
    "slice": [
@@ -104,7 +126,7 @@
     "frame": "main",
     "part": "btn-main",
     "ref": "_design/feature-team-select.team-slots.slots-spec/team-slots-claude",
-    "version": 1
+    "version": 3
    },
    "text": true
   }

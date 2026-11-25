@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70" width="70" height="70">
+  <!-- hinh muc nang cap, style Colorful: thanh kiem phong (hinh chinh) va mui ten len xanh la (chi tiet phu); vien theo cot Vien cua mau than, bong do lech xuong 4 px -->
+  <defs>
+    <linearGradient id="blade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7CD0FF"/>
+      <stop offset="0.55" stop-color="#22A0F0"/>
+      <stop offset="1" stop-color="#1270C8"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/>
+      <stop offset="0.5" stop-color="#FFC61F"/>
+      <stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="grip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C77BEA"/>
+      <stop offset="0.5" stop-color="#9B30C8"/>
+      <stop offset="1" stop-color="#6E1E99"/>
+    </linearGradient>
+    <linearGradient id="arrow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9BEA5C"/>
+      <stop offset="0.5" stop-color="#4CC21E"/>
+      <stop offset="1" stop-color="#2E9414"/>
+    </linearGradient>
+  </defs>
+
+  <!-- bong do -->
+  <g transform="translate(3 2)" fill="#3B1E4F" fill-opacity="0.3" stroke="#3B1E4F" stroke-opacity="0.3" stroke-width="4" stroke-linejoin="round">
+    <path d="M16.81 31.29 L33.78 14.32 L45.8 12.2 L43.68 24.22 L26.71 41.19 Z"/>
+    <path d="M13.27 39.07 L18.93 44.73 L11.86 51.8 L6.2 46.14 Z"/>
+    <circle cx="6.91" cy="51.09" r="5"/>
+    <path d="M11.86 26.34 L31.66 46.14 L26 51.8 L6.2 32 Z"/>
+  </g>
+  <path d="M54 37 L66 51 L59.5 51 L59.5 65 L48.5 65 L48.5 51 L42 51 Z" fill="#3B1E4F" fill-opacity="0.3" stroke="#3B1E4F" stroke-opacity="0.3" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- thanh kiem -->
+  <g transform="translate(3 -2)" stroke-width="4" stroke-linejoin="round">
+    <path d="M16.81 31.29 L33.78 14.32 L45.8 12.2 L43.68 24.22 L26.71 41.19 Z" fill="url(#blade)" stroke="#0B4C94"/>
+    <line x1="22.46" y1="31.29" x2="35.19" y2="18.57" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="3" stroke-linecap="round"/>
+    <path d="M13.27 39.07 L18.93 44.73 L11.86 51.8 L6.2 46.14 Z" fill="url(#grip)" stroke="#4A1070"/>
+    <circle cx="6.91" cy="51.09" r="5" fill="url(#gold)" stroke="#C26A00"/>
+    <path d="M11.86 26.34 L31.66 46.14 L26 51.8 L6.2 32 Z" fill="url(#gold)" stroke="#C26A00"/>
+    <circle cx="13.5" cy="31.5" r="1.8" fill="#FFFFFF" fill-opacity="0.8"/>
+  </g>
+
+  <!-- mui ten len -->
+  <path d="M54 33 L66 47 L59.5 47 L59.5 61 L48.5 61 L48.5 47 L42 47 Z" fill="url(#arrow)" stroke="#1D6B0C" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="51" y="48" width="3" height="9" rx="1.5" fill="#FFFFFF" fill-opacity="0.6"/>
+  <path d="M50 40 L54 36 L56 38.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

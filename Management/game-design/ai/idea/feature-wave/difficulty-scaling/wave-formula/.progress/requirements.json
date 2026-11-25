@@ -167,7 +167,7 @@
    "state": "verified",
    "note": "",
    "tests": [
-    "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers",
+    "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers",
     "WaveFormulaTests.Wave_IsMadeOfTheDesignedMix"
    ],
    "play": "",
@@ -175,7 +175,21 @@
    "text": "## Làm gì\n- Đầu mỗi đợt, từ số đợt w tính ra: số quái, nhịp thả, hệ số chỉ số, số con từng loại (kể cả Trùm). Kết quả giao cho `feature-wave/spawning/spawn-order` để lập danh sách thả.\n- Mọi tham số (số quái gốc, số quái thêm mỗi đợt, nhịp gốc, mức giảm, sàn, hệ số tăng, mốc mở loại, chu kì Trùm, bảng phần trăm) nằm trong cấu hình của `feature-wave`; giá trị do `feature-balance` quyết.\n- Không giữ chỉ số gốc của quái. Node này giữ công thức và tính hệ số chỉ số; hệ số đi kèm từng quái lúc sinh, `feature-enemy` nhận hệ số (không nhận số đợt) và nhân với chỉ số gốc (`feature-enemy/enemy-stats/enemy-stat-values`).\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Số quái | 6 + 2×w | con | Đợt 1 đủ ít để làm quen; tăng đều, luôn chẵn để chia đôi hai bên |\n| Nhịp thả | max(0.3, 1.0 − 0.05×(w−1)) | giây | Dày dần; sàn 0.3 s để màn hình vẫn đọc được từng con |\n| Hệ số máu, sức đánh | 1 + 0.10×(w−1) | lần | Tăng tuyến tính, nhân với số quái tăng thành áp lực tăng nhanh hơn sức đội mua được |\n| Mốc mở loại | Lính 1, Sói 3, Khổng lồ 5, Cung thủ quái 7 | đợt | Mỗi 2 đợt gặp một loại mới, kịp quen loại cũ |\n| Chu kì Trùm | w chia hết cho 10, 1 con | đợt | Đỉnh căng thẳng hiếm, dễ nhớ |\n| Bảng phần trăm | xem data.md, ý `type-mix` | % số chỗ | Phần Khổng lồ, Cung thủ quái tăng theo bậc; Lính giảm dần |\n| Làm tròn | phần nguyên, tối thiểu 1 cho loại đã mở; dư cho Lính | con | Tổng luôn đúng số quái; không loại đã mở nào vắng mặt |\n\nVí dụ kết quả (dự kiến, tính theo công thức trên):\n\n| Đợt | Số quái | Nhịp (s) | Hệ số | Lính | Sói | Khổng lồ | Cung thủ quái | Trùm | Tiền hạ quái cả đợt (xu) |\n|---|---|---|---|---|---|---|---|---|---|\n| 1 | 8 | 1.0 | 1.0 | 8 | 0 | 0 | 0 | 0 | 40 |\n| 3 | 12 | 0.9 | 1.2 | 9 | 3 | 0 | 0 | 0 | 57 |\n| 5 | 16 | 0.8 | 1.4 | 10 | 4 | 2 | 0 | 0 | 96 |\n| 7 | 20 | 0.7 | 1.6 | 9 | 5 | 3 | 3 | 0 | 128 |\n| 10 | 26 | 0.55 | 1.9 | 11 | 6 | 5 | 3 | 1 | 272 |\n| 15 | 36 | 0.3 | 2.4 | 13 | 9 | 7 | 7 | 0 | 248 |\n| 20 | 46 | 0.3 | 2.9 | 16 | 11 | 9 | 9 | 1 | 413 |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số quái | 6 + 2×w | 6 + 2×w, chỉnh sau chơi thử | chốt sau chơi thử |\n| Nhịp thả | max(0.3, 1.0 − 0.05×(w−1)) s | như IDEA, chỉnh sau chơi thử | chốt sau chơi thử |\n| Hệ số máu, sức đánh | 1 + 0.10×(w−1) | như IDEA, chỉnh sau chơi thử | chốt sau chơi thử |\n| Loại quái dùng | Lính, Sói, Khổng lồ theo mốc; không Trùm, không Cung thủ quái (chỗ của chúng dồn cho Lính) | đủ 5 loại | đủ 5 loại |\n| Bảng phần trăm | đủ 6 bậc | đủ 6 bậc, chỉnh sau chơi thử | chốt sau chơi thử |\n| Tham số đặt trong cấu hình | có | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:01:19"
+   "at": "2026-11-26 00:30:14"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "Test config thật PROTOTYPE: đủ 5 loại quái",
+   "tests": [
+    "PrototypeStageTests.WaveFormulaStagePrototype_RealConfigUsesAllFiveKinds",
+    "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers"
+   ],
+   "play": "",
+   "hash": "89d7b1d4e9d2",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Số quái: 6 + 2×w, chỉnh sau chơi thử\n- Nhịp thả: như IDEA, chỉnh sau chơi thử\n- Hệ số máu, sức đánh: như IDEA, chỉnh sau chơi thử\n- Loại quái dùng: đủ 5 loại\n- Bảng phần trăm: đủ 6 bậc, chỉnh sau chơi thử",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:14"
   }
  },
  "log": [
@@ -371,6 +385,41 @@
   {
    "at": "2026-11-25 12:06:08",
    "id": "edge-dot-rat-cao-w-100",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:13:04",
+   "id": "params",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers, WaveFormulaTests.Wave_IsMadeOfTheDesignedMix"
+  },
+  {
+   "at": "2026-11-26 00:30:14",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:02:57",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Wave",
+   "note": "Test config thật PROTOTYPE: đủ 5 loại quái"
+  },
+  {
+   "at": "2026-11-26 01:03:37",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Wave",
+   "note": "PrototypeStageTests.WaveFormulaStagePrototype_RealConfigUsesAllFiveKinds, WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers"
+  },
+  {
+   "at": "2026-11-26 01:18:14",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

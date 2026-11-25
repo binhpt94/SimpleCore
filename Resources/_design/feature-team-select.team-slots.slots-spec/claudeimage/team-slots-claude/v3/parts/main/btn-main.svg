@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <defs>
+    <linearGradient id="gm" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9BEA5C"/>
+      <stop offset="0.45" stop-color="#4CC21E"/>
+      <stop offset="1" stop-color="#2E9414"/>
+    </linearGradient>
+  </defs>
+  <!-- bong do lech xuong 8 px, mau vien xanh la -->
+  <rect x="3" y="11" width="394" height="104" rx="30" fill="#1D6B0C"/>
+  <!-- than vien thuoc: gradient doc, vien 6 px -->
+  <rect x="3" y="3" width="394" height="104" rx="30" fill="url(#gm)" stroke="#1D6B0C" stroke-width="6"/>
+  <!-- vet bong sang mep tren -->
+  <rect x="16" y="10" width="368" height="22" rx="11" fill="#FFFFFF" fill-opacity="0.45"/>
+</svg>

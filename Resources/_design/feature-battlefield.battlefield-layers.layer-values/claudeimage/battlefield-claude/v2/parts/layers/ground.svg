@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 183" width="1920" height="183">
+  <!-- dai dat Colorful: co xanh tuoi bong keo o tren, mep co uon tron; dat cam nau am ben duoi; hoa tiet chu ki 240 px de ghep lien -->
+  <defs>
+    <linearGradient id="dirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E89A52"/>
+      <stop offset="1" stop-color="#B8642A"/>
+    </linearGradient>
+    <linearGradient id="turf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8EE25A"/>
+      <stop offset="1" stop-color="#4CC21E"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1920" height="183" fill="url(#dirt)"/>
+  <!-- soi tron, chu ki 240 px -->
+  <g fill="#C97A3A" stroke="#8A4A18" stroke-width="3">
+    <ellipse cx="60" cy="96" rx="18" ry="8"/><ellipse cx="170" cy="146" rx="13" ry="6"/>
+    <ellipse cx="300" cy="96" rx="18" ry="8"/><ellipse cx="410" cy="146" rx="13" ry="6"/>
+    <ellipse cx="540" cy="96" rx="18" ry="8"/><ellipse cx="650" cy="146" rx="13" ry="6"/>
+    <ellipse cx="780" cy="96" rx="18" ry="8"/><ellipse cx="890" cy="146" rx="13" ry="6"/>
+    <ellipse cx="1020" cy="96" rx="18" ry="8"/><ellipse cx="1130" cy="146" rx="13" ry="6"/>
+    <ellipse cx="1260" cy="96" rx="18" ry="8"/><ellipse cx="1370" cy="146" rx="13" ry="6"/>
+    <ellipse cx="1500" cy="96" rx="18" ry="8"/><ellipse cx="1610" cy="146" rx="13" ry="6"/>
+    <ellipse cx="1740" cy="96" rx="18" ry="8"/><ellipse cx="1850" cy="146" rx="13" ry="6"/>
+  </g>
+  <g fill="#F4B57A">
+    <ellipse cx="54" cy="92" rx="7" ry="3"/><ellipse cx="294" cy="92" rx="7" ry="3"/>
+    <ellipse cx="534" cy="92" rx="7" ry="3"/><ellipse cx="774" cy="92" rx="7" ry="3"/>
+    <ellipse cx="1014" cy="92" rx="7" ry="3"/><ellipse cx="1254" cy="92" rx="7" ry="3"/>
+    <ellipse cx="1494" cy="92" rx="7" ry="3"/><ellipse cx="1734" cy="92" rx="7" ry="3"/>
+  </g>
+  <!-- dai co: mep duoi uon song tron chu ki 60 px -->
+  <path d="M0 0 L1920 0 L1920 34 Q1890 52 1860 34 Q1830 52 1800 34 Q1770 52 1740 34 Q1710 52 1680 34 Q1650 52 1620 34 Q1590 52 1560 34 Q1530 52 1500 34 Q1470 52 1440 34 Q1410 52 1380 34 Q1350 52 1320 34 Q1290 52 1260 34 Q1230 52 1200 34 Q1170 52 1140 34 Q1110 52 1080 34 Q1050 52 1020 34 Q990 52 960 34 Q930 52 900 34 Q870 52 840 34 Q810 52 780 34 Q750 52 720 34 Q690 52 660 34 Q630 52 600 34 Q570 52 540 34 Q510 52 480 34 Q450 52 420 34 Q390 52 360 34 Q330 52 300 34 Q270 52 240 34 Q210 52 180 34 Q150 52 120 34 Q90 52 60 34 Q30 52 0 34 Z" fill="url(#turf)" stroke="#1D6B0C" stroke-width="4" stroke-linejoin="round"/>
+  <!-- vet sang keo o mat co -->
+  <rect x="0" y="6" width="1920" height="6" fill="#C4F59A"/>
+  <!-- duong mat dat: vien xanh dam o mep tren -->
+  <line x1="0" y1="2" x2="1920" y2="2" stroke="#1D6B0C" stroke-width="4"/>
+</svg>

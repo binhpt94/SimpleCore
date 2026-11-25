@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: bo-luot-ve-man-bat-dau=gpt@r2-1#bo-luot-ve-man-bat-dau, run-scope=gpt@r2-2#moc-vao-luot, run-pause=gpt@r2-1#trang-thai-tam-dung, run-disposes-battle=gpt@r2-2#dieu-phoi-huy-tran, run-gives-team=gpt@r2-2#cap-doi-cho-hero, run-record=gpt@r2-2#pham-vi-giu-ki-luc, split-game-flow=gpt@r2-3#tach-luong-man-game, flow-switches-screens=gpt@r2-3#chu-doi-man-game, flow-locks-switch=gpt@r2-3#khoa-chuyen-man, team-handoff-via-flow=gpt@r2-3#chuyen-doi-da-chot, run-start-confirm=gpt@r2-3#xac-nhan-bat-dau-luot, flow-waits-dispose=gpt@r2-3#cho-huy-tran-xong, memory-on-start=gpt@r2-3#moc-nho-doi, memory-session=gpt@r2-3#thoi-han-nho-doi
 gpt-dropped: r2-1#pham-vi-luot-choi=run-scope-from-team, r2-3#thu-tu-chot-diem=clear-first-counts, r2-2#quyen-quyet-dinh-man-ke=run-routes, r2-2#thuc-hien-doi-man-game=run-switches-screens, r2-2#ban-giao-doi-vao-tran=team-handoff
 ---

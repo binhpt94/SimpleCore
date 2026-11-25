@@ -3,6 +3,8 @@
   "rootNamespace": "Game.Hero",
   "references": [
     "Game.Core",
+    "Game.SimClock.Contracts",
+    "Game.Combat.Contracts",
     "Game.Hero.Contracts",
     "Game.Enemy.Contracts",
     "Game.Run.Contracts",

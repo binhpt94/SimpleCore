@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game.Combat;
 using Game.Wallet;
 
 namespace Game.Enemy
@@ -7,24 +8,34 @@ namespace Game.Enemy
     /// <summary>
     /// The enemies of the battlefield (live/feature-enemy). Plain C#: every living enemy walks toward the castle
     /// centre, stops at the first foe in range and hits it on its own rhythm; it takes damage, pays its coins and
-    /// raises <see cref="Defeated"/> once. Time only moves through <see cref="Tick"/>.
+    /// raises <see cref="Defeated"/> once.
+    /// <para>
+    /// From PROTOTYPE the shared combat drives it (live/feature-combat/combat-tick/tick-values, tick-order): once per
+    /// combat tick, <see cref="Aim"/> walks and picks targets from the state at the start of the tick, then
+    /// <see cref="Strike"/> deals the hits through <see cref="ICombat.Hit"/>; combat hands each enemy hit one total in
+    /// <see cref="TakeTotal"/> and <see cref="ReportFallen"/> defeats and pays each fallen enemy once.
+    /// <see cref="Tick"/> runs Aim and Strike together for callers without combat.
+    /// </para>
     /// </summary>
     /// <remarks>
     /// Foe groups are tried in the order they were added: a group added earlier wins when foes of several groups are
     /// in range (the heroes are installed before the castle, so enemies hit a blocking hero rather than the castle).
     /// Distance is the gap along x between the two boxes, 0 when they overlap (feature-hero/hero-stats/hero-level-values).
     /// </remarks>
-    internal sealed class EnemyField : IEnemyField
+    internal sealed class EnemyField : IEnemyField, IEnemyCombat, ICombatReceiver, ICombatActor
     {
-        // Frame times summed as floats fall a hair short of whole seconds; a hit that is due within this is due now.
+        // Step lengths summed as floats fall a hair short of whole seconds; a hit that is due within this is due now,
+        // so a wait of t seconds ends on the first step where the time counted reaches t (clock-values#timer-in-steps).
         private const float HitWaitTolerance = 1e-4f;
 
         private readonly EnemyConfig _config;
         private readonly IWalletIncome _income;
         private readonly List<Unit> _alive = new List<Unit>();
         private readonly List<Unit> _tickBuffer = new List<Unit>();
-        private readonly List<IEnemyFoes> _foes = new List<IEnemyFoes>();
-        private readonly List<List<EnemyFoe>> _foeSnapshots = new List<List<EnemyFoe>>();
+        private readonly List<FoeGroup> _groups = new List<FoeGroup>();
+        private readonly List<Unit> _fallen = new List<Unit>();
+        private ICombat _combat;
+        private int _combatReceiver = -1;
         private int _nextHandle = 1;
         private int _nextSpawnOrder;
         private bool _stopped;
@@ -52,6 +63,9 @@ namespace Game.Enemy
         /// <summary>An enemy was hit and is still alive.</summary>
         public event Action<int> Hurt;
 
+        /// <summary>An enemy whose type has an entrance came on screen: its centre first reached the entrance distance.</summary>
+        public event Action<int> Entered;
+
         /// <summary>Every enemy was taken off the battlefield without being defeated.</summary>
         public event Action Cleared;
 
@@ -73,6 +87,7 @@ namespace Game.Enemy
             var unit = new Unit(_nextHandle++, _nextSpawnOrder++, spawn.Type, spawn.Side, kind, scale, x);
             _alive.Add(unit);
             Spawned?.Invoke(unit.Look());
+            CheckEntrance(unit);
         }
 
         public void GetAlive(List<EnemyTarget> into)
@@ -101,6 +116,7 @@ namespace Game.Enemy
             if (index < 0) return false;
 
             var unit = _alive[index];
+            if (unit.Health <= 0f) return false;
             unit.Health -= amount;
             if (unit.Health > 0f)
             {
@@ -108,12 +124,68 @@ namespace Game.Enemy
                 return false;
             }
 
-            _alive.RemoveAt(index);
-            unit.Alive = false;
-            _income.Add(unit.Kind.Coins);
-            Rewarded?.Invoke(new EnemyReward(unit.Handle, unit.X, unit.Kind.Height, unit.Kind.Coins));
-            Defeated?.Invoke(new EnemyDefeat(unit.Handle, unit.Type, unit.Side));
+            Defeat(unit);
             return true;
+        }
+
+        /// <summary>The number combat gave the enemies; only after <see cref="JoinCombat"/>.</summary>
+        public int CombatReceiver =>
+            _combat != null
+                ? _combatReceiver
+                : throw new InvalidOperationException("The enemies have not joined combat yet (EnemyField.JoinCombat).");
+
+        /// <summary>Adds the enemies to combat as a receiver (hits on enemies) and as an actor (enemies walk and hit).</summary>
+        public void JoinCombat(ICombat combat)
+        {
+            if (combat == null) throw new ArgumentNullException(nameof(combat));
+            if (_combat != null) throw new InvalidOperationException("The enemies already joined combat.");
+            _combat = combat;
+            _combatReceiver = combat.AddReceiver(this);
+            combat.AddActor(this);
+        }
+
+        public void AddCombatFoes(IEnemyFoes foes, int combatReceiver)
+        {
+            if (foes == null) throw new ArgumentNullException(nameof(foes));
+            if (_combat == null)
+                throw new InvalidOperationException("The enemies have not joined combat yet: combat foes cannot be added.");
+
+            // A group already added the old way moves to combat and keeps its place in the try order.
+            var group = GroupOf(foes);
+            if (group != null) group.Receiver = combatReceiver;
+            else _groups.Add(new FoeGroup(foes, combatReceiver));
+        }
+
+        public bool CanBeHit(int key)
+        {
+            if (_stopped) return false;
+            var index = IndexOf(key);
+            return index >= 0 && _alive[index].Health > 0f;
+        }
+
+        public void TakeTotal(int key, float total)
+        {
+            if (_stopped || total <= 0f) return;
+            var index = IndexOf(key);
+            if (index < 0) return;
+
+            var unit = _alive[index];
+            if (unit.Health <= 0f) return;
+            unit.Health -= total;
+            if (unit.Health > 0f) Hurt?.Invoke(unit.Handle);
+            else _fallen.Add(unit);
+        }
+
+        public void ReportFallen()
+        {
+            // Defeated once each, coins once each, however many sides the total came from (tick-values#kill-credit).
+            for (var i = 0; i < _fallen.Count; i++)
+            {
+                var unit = _fallen[i];
+                if (!_stopped && unit.Alive) Defeat(unit);
+            }
+
+            _fallen.Clear();
         }
 
         public void SlowAll(float seconds)
@@ -125,17 +197,39 @@ namespace Game.Enemy
         public void AddFoes(IEnemyFoes foes)
         {
             if (foes == null) throw new ArgumentNullException(nameof(foes));
-            if (_foes.Contains(foes)) return;
-            _foes.Add(foes);
-            _foeSnapshots.Add(new List<EnemyFoe>());
+            if (GroupOf(foes) != null) return;
+            _groups.Add(new FoeGroup(foes, -1));
         }
 
-        /// <summary>Moves the battle on by <paramref name="seconds"/>: every enemy walks, or stands and hits its foe.</summary>
+        /// <summary>Moves the battle on by <paramref name="seconds"/> without combat: <see cref="Aim"/> then <see cref="Strike"/>.</summary>
         public void Tick(float seconds)
         {
-            if (_stopped || seconds <= 0f || _alive.Count == 0) return;
+            Aim(seconds);
+            Strike(seconds);
+        }
 
-            for (var g = 0; g < _foes.Count; g++) _foes[g].GetFoes(_foeSnapshots[g]);
+        /// <summary>First part of a combat tick: every enemy walks, or stops at the foe it picks from the state at the start of the tick.</summary>
+        public void Aim(float stepSeconds)
+        {
+            if (_stopped || stepSeconds <= 0f || _alive.Count == 0) return;
+
+            for (var g = 0; g < _groups.Count; g++) _groups[g].Foes.GetFoes(_groups[g].Snapshot);
+
+            _tickBuffer.Clear();
+            _tickBuffer.AddRange(_alive);
+            for (var i = 0; i < _tickBuffer.Count; i++)
+            {
+                var unit = _tickBuffer[i];
+                if (unit.Alive) Move(unit, stepSeconds);
+            }
+
+            _tickBuffer.Clear();
+        }
+
+        /// <summary>Second part of a combat tick: every enemy standing at a foe whose hit wait ran out hits it.</summary>
+        public void Strike(float stepSeconds)
+        {
+            if (_stopped || _alive.Count == 0) return;
 
             _tickBuffer.Clear();
             _tickBuffer.AddRange(_alive);
@@ -143,8 +237,7 @@ namespace Game.Enemy
             {
                 if (_stopped) break;
                 var unit = _tickBuffer[i];
-                if (!unit.Alive) continue;
-                Step(unit, seconds);
+                if (unit.Alive && unit.Health > 0f) Hit(unit);
             }
 
             _tickBuffer.Clear();
@@ -163,17 +256,55 @@ namespace Game.Enemy
         /// <summary>The player left the battle: every enemy is removed, none counts as defeated.</summary>
         public void Clear()
         {
+            _fallen.Clear();
             if (_alive.Count == 0) return;
             for (var i = 0; i < _alive.Count; i++) _alive[i].Alive = false;
             _alive.Clear();
             Cleared?.Invoke();
         }
 
-        private void Step(Unit unit, float seconds)
+        private void Defeat(Unit unit)
+        {
+            _alive.Remove(unit);
+            unit.Alive = false;
+            _income.Add(unit.Kind.Coins);
+            Rewarded?.Invoke(new EnemyReward(unit.Handle, unit.X, unit.Kind.Height, unit.Kind.Coins));
+            Defeated?.Invoke(new EnemyDefeat(unit.Handle, unit.Type, unit.Side));
+        }
+
+        private void Hit(Unit unit)
+        {
+            if (unit.TargetGroup < 0 || unit.HitWait > HitWaitTolerance) return;
+
+            unit.HitWait = unit.Kind.SecondsPerHit;
+            var group = _groups[unit.TargetGroup];
+            if (group.Receiver >= 0)
+                _combat.Hit(new CombatHit(group.Receiver, unit.TargetKey, unit.HitDamage, CombatSource.Enemy));
+            else
+                group.Foes.Hit(unit.TargetKey, unit.HitDamage);
+
+            Struck?.Invoke(unit.Handle, unit.Direction);
+            if (unit.Kind.Ranged)
+                Shot?.Invoke(new EnemyShot(unit.Handle, unit.X, unit.Kind.Height * 0.5f, unit.TargetX));
+        }
+
+        private FoeGroup GroupOf(IEnemyFoes foes)
+        {
+            for (var i = 0; i < _groups.Count; i++)
+            {
+                if (_groups[i].Foes == foes) return _groups[i];
+            }
+
+            return null;
+        }
+
+        private void Move(Unit unit, float seconds)
         {
             var slowed = unit.SlowLeft > 0f;
             var slowedFor = slowed ? Math.Min(unit.SlowLeft, seconds) : 0f;
-            unit.SlowLeft = Math.Max(0f, unit.SlowLeft - seconds);
+            // Frost ends on the first step where the time counted reaches it, like any wait (clock-values#timer-in-steps).
+            var slowLeft = unit.SlowLeft - seconds;
+            unit.SlowLeft = slowLeft > HitWaitTolerance ? slowLeft : 0f;
 
             // The hit wait runs all the time, also while walking; slowed time counts at the slowed rate.
             var hitFactor = _config.SlowHitFactor > 0f ? _config.SlowHitFactor : 1f;
@@ -184,15 +315,7 @@ namespace Game.Enemy
                 unit.Walking = false;
                 unit.TargetGroup = group;
                 unit.TargetKey = foe.Key;
-                if (unit.HitWait <= HitWaitTolerance)
-                {
-                    unit.HitWait = unit.Kind.SecondsPerHit;
-                    _foes[group].Hit(foe.Key, unit.HitDamage);
-                    Struck?.Invoke(unit.Handle, unit.Direction);
-                    if (unit.Kind.Ranged)
-                        Shot?.Invoke(new EnemyShot(unit.Handle, unit.X, unit.Kind.Height * 0.5f, foe.X));
-                }
-
+                unit.TargetX = foe.X;
                 return;
             }
 
@@ -205,15 +328,24 @@ namespace Game.Enemy
             next = unit.Direction > 0 ? Math.Min(next, -limit) : Math.Max(next, limit);
             unit.Walking = next != unit.X;
             unit.X = next;
+            CheckEntrance(unit);
+        }
+
+        private void CheckEntrance(Unit unit)
+        {
+            if (unit.Entered || !unit.Kind.Entrance) return;
+            if (Math.Abs(unit.X) > _config.EntranceDistance) return;
+            unit.Entered = true;
+            Entered?.Invoke(unit.Handle);
         }
 
         private bool FindFoe(Unit unit, out int group, out EnemyFoe foe)
         {
             // The first group with a foe in range wins; inside that group the enemy keeps the foe it is already
             // hitting while it stays in range, otherwise it takes the nearest one.
-            for (var g = 0; g < _foeSnapshots.Count; g++)
+            for (var g = 0; g < _groups.Count; g++)
             {
-                var foes = _foeSnapshots[g];
+                var foes = _groups[g].Snapshot;
                 var best = -1;
                 var bestGap = float.MaxValue;
                 for (var i = 0; i < foes.Count; i++)
@@ -259,6 +391,20 @@ namespace Game.Enemy
             return -1;
         }
 
+        /// <summary>A group of foes; hits go through combat to <see cref="Receiver"/>, or straight to the foes when it is -1.</summary>
+        private sealed class FoeGroup
+        {
+            public FoeGroup(IEnemyFoes foes, int receiver)
+            {
+                Foes = foes;
+                Receiver = receiver;
+            }
+
+            public IEnemyFoes Foes { get; }
+            public int Receiver { get; set; }
+            public List<EnemyFoe> Snapshot { get; } = new List<EnemyFoe>();
+        }
+
         private sealed class Unit
         {
             public Unit(int handle, int spawnOrder, EnemyType type, EnemySide side, EnemyKind kind, float scale, float x)
@@ -290,7 +436,9 @@ namespace Game.Enemy
             public bool Walking { get; set; } = true;
             public int TargetGroup { get; set; } = -1;
             public int TargetKey { get; set; }
+            public float TargetX { get; set; }
             public bool Alive { get; set; } = true;
+            public bool Entered { get; set; }
 
             public EnemyLook Look() =>
                 new EnemyLook(Handle, Type, X, Kind.Width, Kind.Height, Direction, Walking, SlowLeft > 0f);

@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: doi-hinh-xuyen-luot=gpt@r2-1#doi-hinh-xuyen-luot, hero-roles=gpt@r2-1#khac-biet-khi-tu-danh, combat-arbiter=gpt@r2-3#tach-phan-xu-giao-chien, enemy-picks-target=gpt@r2-3#quai-tu-chon-muc-tieu, enemy-prefers-blocker=gpt@r2-3#quai-uu-tien-hero-chan, castle-picks-target=gpt@r2-3#thanh-tu-chon-muc-tieu, attacker-picks-hits=gpt@r2-3#nguon-xac-dinh-ben-trung, attacker-sets-damage=gpt@r2-3#nguon-xac-dinh-sat-thuong, same-tick-snapshot=gpt@r2-3#cung-nhip-cung-co-hieu-luc, same-tick-sum=gpt@r2-3#cong-sat-thuong-cung-nhip, owner-applies-hp=gpt@r2-3#ben-trung-tu-tru-mau, owner-reports-zero=gpt@r2-3#chu-so-huu-xac-nhan-het-mau, report-after-hp=gpt@r2-3#bao-ket-qua-sau-khi-tru-mau, shared-target-word=gpt@r2-3#muc-tieu-dung-chung
 gpt-dropped: r2-3#tinh-dot-cuoi-khi-thanh-vo=last-wave-counts
 ---

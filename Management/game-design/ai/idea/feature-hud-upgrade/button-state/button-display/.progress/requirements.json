@@ -56,7 +56,7 @@
    "text": "1 chạm vào nút sáng gửi đúng 1 yêu cầu mua; chạm nút mờ gửi 0 yêu cầu\nKhông xác nhận. Chạm liên tiếp nhanh thì mỗi chạm một yêu cầu; `feature-upgrade` từ chối yêu cầu không đủ tiền.",
    "title": "1 chạm vào nút sáng gửi đúng 1 yêu cầu mua; chạm nút mờ gửi 0 yêu cầu",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:19"
+   "at": "2026-11-25 23:22:08"
   },
   "buy-feedback": {
    "state": "verified",
@@ -64,6 +64,9 @@
    "tests": [
     "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level",
     "UpgradeBarTests.Rejected_purchase_does_not_bounce",
+    "UpgradeBarTests.Bounce_lands_on_the_button_whose_order_was_bought",
+    "UpgradeBarTests.Applied_order_that_was_not_bought_or_is_off_the_bar_does_not_bounce",
+    "UpgradeBarTests.Bar_stops_hearing_order_outcomes_after_dispose",
     "HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
    ],
    "play": "",
@@ -71,7 +74,7 @@
    "text": "Mua thành công thì nút nảy lên một lần trong 0,2 giây và cấp, giá trên nút đổi ngay\nNgười chơi biết chạm đã có tác dụng. Mua bị từ chối thì không nảy.",
    "title": "Mua thành công thì nút nảy lên một lần trong 0,2 giây và cấp, giá trên nút đổi ngay",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:19"
+   "at": "2026-11-25 23:22:08"
   },
   "short-number": {
    "state": "verified",
@@ -118,14 +121,15 @@
    "note": "",
    "tests": [
     "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level",
-    "UpgradeBarTests.Button_is_lit_when_affordable_and_dim_when_not"
+    "UpgradeBarTests.Button_is_lit_when_affordable_and_dim_when_not",
+    "UpgradeBarTests.Downed_hero_button_stays_lit_and_buyable_when_coins_are_enough"
    ],
    "play": "",
    "hash": "bc0f26871577",
    "text": "**Hero đang gục**: nút hero vẫn sáng nếu đủ tiền, mua được.",
    "title": "Hero đang gục",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:19"
+   "at": "2026-11-26 00:30:13"
   },
   "edge-tam-dung": {
    "state": "verified",
@@ -198,21 +202,48 @@
   },
   "params": {
    "state": "verified",
-   "note": "",
+   "note": "PROTOTYPE moi: so cap moi nhap sang 0,2s khi mua thanh cong, khong tieng",
    "tests": [
     "UpgradeBarTests.Each_button_shows_level_and_next_price",
     "UpgradeBarTests.Button_is_lit_when_affordable_and_dim_when_not",
     "UpgradeBarTests.Buttons_light_up_in_the_same_call_coins_arrive",
     "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level",
     "PriceTextTests.Price_reads_in_full_below_ten_thousand_and_cut_down_above",
+    "HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce",
+    "UpgradeBarTests.Bought_level_flashes_the_new_level_number_once_on_that_button",
+    "UpgradeBarTests.Rejected_or_dim_tap_does_not_flash_the_level",
+    "UpgradeBarTests.Tapping_a_dim_button_shakes_it_once_and_sends_no_purchase",
+    "UpgradeBarTests.Tapping_a_lit_button_does_not_shake",
+    "UpgradeBarTests.Every_button_shakes_on_tap_while_the_shop_is_closed_by_pause",
+    "UpgradeBarTests.Downed_hero_button_shows_the_down_mark_and_clears_it_when_the_hero_stands_up",
+    "UpgradeBarTests.Castle_buttons_never_get_a_down_mark",
+    "UpgradeBarTests.Rebuilt_bar_for_a_new_team_shows_the_marks_of_heroes_already_down",
+    "UpgradeBarTests.Bar_stops_hearing_down_changes_after_dispose"
+   ],
+   "play": "",
+   "hash": "66e036f09321",
+   "text": "## Làm gì\n- Mỗi nút nhận từ `feature-upgrade/upgrade-purchase/purchase-rules`: cấp hiện tại, giá cấp sau, mua được hay không. Nhận lại mỗi khi một trong ba thứ đổi, và hiện ngay trong khung hình đó.\n- Mỗi nút hiện:\n  | Thứ | Nội dung | Ví dụ |\n  |---|---|---|\n  | Hình | Chân dung hero ở chỗ đó, hoặc biểu tượng mục thành | Chân dung hero chỗ 2 |\n  | Cấp | \"Cấp N\", N là cấp hiện tại | \"Cấp 3\" |\n  | Giá | Giá cấp sau kèm biểu tượng tiền, rút gọn khi lớn | 55, \"12,3K\" |\n- Hình của mục:\n  | Nút | Hình đại diện cho |\n  |---|---|\n  | Hero 1, 2, 3 | Chính hero ở chỗ đó trong đội |\n  | Máu | Máu thành |\n  | Sức đánh | Đòn tự bắn của thành |\n  | Kĩ năng | Cả ba kĩ năng thành gộp chung |\n- Trạng thái: sáng (mua được) hoặc mờ (không mua được: không đủ tiền, đang tạm dừng, hoặc lượt đã kết thúc).\n- Chạm nút sáng: gửi một yêu cầu mua cho mục đó tới `purchase-rules`. Chạm nút mờ: không gửi gì, không có phản hồi.\n- Mua thành công: nút nảy một lần (phóng to rồi về cỡ cũ) trong 0,2 giây; cấp và giá đổi theo thông tin mới.\n- Nút không tự tính giá, không tự so tiền với giá, không tự quyết mua.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số thứ hiện trên mỗi nút | 3 | | Hình, cấp, giá (vòng 3) |\n| Số trạng thái | 2 | | Sáng, mờ (vòng 3) |\n| Độ trễ cập nhật | 0 | khung hình | Mua giữa trận cần thấy đúng ngay |\n| Thời gian nảy khi mua thành công | 0,2 (dự kiến) | giây | Đủ thấy, không cản chạm tiếp |\n| Ngưỡng rút gọn số | 10.000 | tiền | Giữ chữ ngắn trên nút; giá dưới ngưỡng đọc dễ |\n| Rút gọn | 10.000-999.999 → \"N,NK\"; >= 1.000.000 → \"N,NM\"; cắt bớt một chữ số thập phân | | Ví dụ 12.399 → \"12,3K\"; 1.250.000 → \"1,2M\" |\n| Số yêu cầu mua mỗi chạm nút sáng | 1 | yêu cầu | Vòng 3 |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Hình hero | sprite hero gen bằng AI, thu nhỏ | chân dung riêng gen bằng AI | chân dung đủ art |\n| Biểu tượng máu / sức đánh / kĩ năng | hình đơn giản gen bằng AI | biểu tượng riêng | đủ art |\n| Phản hồi mua thành công | nảy 0,2 giây | nảy 0,2 giây và số cấp mới nhấp sáng 0,2 giây; không có tiếng | thêm tiếng mua và hiệu ứng đủ art |\n| Phản hồi chạm nút mờ | không | rung nhẹ nút 0,2 giây | rung và tiếng báo không đủ tiền |\n| Dấu \"hero đang gục\" trên nút hero | không | có | có |\n| Rút gọn số | có | có | có |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:03:29"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Bought_level_flashes_the_new_level_number_once_on_that_button",
+    "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level",
+    "UpgradeBarTests.Tapping_a_dim_button_shakes_it_once_and_sends_no_purchase",
+    "UpgradeBarTests.Downed_hero_button_shows_the_down_mark_and_clears_it_when_the_hero_stands_up",
+    "UpgradeBarTests.Big_prices_read_short_on_the_button",
     "HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
    ],
    "play": "",
-   "hash": "bd2141f4df58",
-   "text": "## Làm gì\n- Mỗi nút nhận từ `feature-upgrade/upgrade-purchase/purchase-rules`: cấp hiện tại, giá cấp sau, mua được hay không. Nhận lại mỗi khi một trong ba thứ đổi, và hiện ngay trong khung hình đó.\n- Mỗi nút hiện:\n  | Thứ | Nội dung | Ví dụ |\n  |---|---|---|\n  | Hình | Chân dung hero ở chỗ đó, hoặc biểu tượng mục thành | Chân dung hero chỗ 2 |\n  | Cấp | \"Cấp N\", N là cấp hiện tại | \"Cấp 3\" |\n  | Giá | Giá cấp sau kèm biểu tượng tiền, rút gọn khi lớn | 55, \"12,3K\" |\n- Hình của mục:\n  | Nút | Hình đại diện cho |\n  |---|---|\n  | Hero 1, 2, 3 | Chính hero ở chỗ đó trong đội |\n  | Máu | Máu thành |\n  | Sức đánh | Đòn tự bắn của thành |\n  | Kĩ năng | Cả ba kĩ năng thành gộp chung |\n- Trạng thái: sáng (mua được) hoặc mờ (không mua được: không đủ tiền, đang tạm dừng, hoặc lượt đã kết thúc).\n- Chạm nút sáng: gửi một yêu cầu mua cho mục đó tới `purchase-rules`. Chạm nút mờ: không gửi gì, không có phản hồi.\n- Mua thành công: nút nảy một lần (phóng to rồi về cỡ cũ) trong 0,2 giây; cấp và giá đổi theo thông tin mới.\n- Nút không tự tính giá, không tự so tiền với giá, không tự quyết mua.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số thứ hiện trên mỗi nút | 3 | | Hình, cấp, giá (vòng 3) |\n| Số trạng thái | 2 | | Sáng, mờ (vòng 3) |\n| Độ trễ cập nhật | 0 | khung hình | Mua giữa trận cần thấy đúng ngay |\n| Thời gian nảy khi mua thành công | 0,2 (dự kiến) | giây | Đủ thấy, không cản chạm tiếp |\n| Ngưỡng rút gọn số | 10.000 | tiền | Giữ chữ ngắn trên nút; giá dưới ngưỡng đọc dễ |\n| Rút gọn | 10.000-999.999 → \"N,NK\"; >= 1.000.000 → \"N,NM\"; cắt bớt một chữ số thập phân | | Ví dụ 12.399 → \"12,3K\"; 1.250.000 → \"1,2M\" |\n| Số yêu cầu mua mỗi chạm nút sáng | 1 | yêu cầu | Vòng 3 |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Hình hero | sprite hero gen bằng AI, thu nhỏ | chân dung riêng gen bằng AI | chân dung đủ art |\n| Biểu tượng máu / sức đánh / kĩ năng | hình đơn giản gen bằng AI | biểu tượng riêng | đủ art |\n| Phản hồi mua thành công | nảy 0,2 giây | nảy 0,2 giây và tiếng mua | thêm hiệu ứng đủ art |\n| Phản hồi chạm nút mờ | không | rung nhẹ nút 0,2 giây | rung và tiếng báo không đủ tiền |\n| Dấu \"hero đang gục\" trên nút hero | không | có | có |\n| Rút gọn số | có | có | có |",
-   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "hash": "ac14da34d313",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Hình hero: chân dung riêng gen bằng AI\n- Biểu tượng máu / sức đánh / kĩ năng: biểu tượng riêng\n- Phản hồi mua thành công: nảy 0,2 giây và số cấp mới nhấp sáng 0,2 giây; không có tiếng\n- Phản hồi chạm nút mờ: rung nhẹ nút 0,2 giây\n- Dấu \"hero đang gục\" trên nút hero: có",
+   "title": "Thông số của giai đoạn PROTOTYPE",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:19"
+   "at": "2026-11-26 01:03:29"
   }
  },
  "log": [
@@ -422,6 +453,104 @@
   {
    "at": "2026-11-25 12:02:19",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:19:05",
+   "id": "tap-once",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level, UpgradeBarTests.Tapping_a_dim_button_sends_no_purchase_and_no_bounce"
+  },
+  {
+   "at": "2026-11-25 23:19:10",
+   "id": "buy-feedback",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level, UpgradeBarTests.Rejected_purchase_does_not_bounce, UpgradeBarTests.Bounce_lands_on_the_button_whose_order_was_bought, UpgradeBarTests.Applied_order_that_was_not_bought_or_is_off_the_bar_does_not_bounce, UpgradeBarTests.Bar_stops_hearing_order_outcomes_after_dispose, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
+  },
+  {
+   "at": "2026-11-25 23:22:08",
+   "id": "tap-once",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:22:08",
+   "id": "buy-feedback",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:22:20",
+   "id": "params",
+   "state": "doing",
+   "by": "HudUpgrade",
+   "note": "PROTOTYPE: rung nut mo 0,2s, tieng mua, dau hero dang guc qua IHeroDownState"
+  },
+  {
+   "at": "2026-11-26 00:25:08",
+   "id": "params",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Each_button_shows_level_and_next_price, UpgradeBarTests.Button_is_lit_when_affordable_and_dim_when_not, UpgradeBarTests.Buttons_light_up_in_the_same_call_coins_arrive, UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level, PriceTextTests.Price_reads_in_full_below_ten_thousand_and_cut_down_above, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce, UpgradeBarTests.Tapping_a_dim_button_shakes_it_once_and_sends_no_purchase, UpgradeBarTests.Tapping_a_lit_button_does_not_shake, UpgradeBarTests.Every_button_shakes_on_tap_while_the_shop_is_closed_by_pause, UpgradeBarTests.Downed_hero_button_shows_the_down_mark_and_clears_it_when_the_hero_stands_up, UpgradeBarTests.Castle_buttons_never_get_a_down_mark, UpgradeBarTests.Rebuilt_bar_for_a_new_team_shows_the_marks_of_heroes_already_down, UpgradeBarTests.Bar_stops_hearing_down_changes_after_dispose"
+  },
+  {
+   "at": "2026-11-26 00:25:14",
+   "id": "edge-hero-dang-guc",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level, UpgradeBarTests.Button_is_lit_when_affordable_and_dim_when_not, UpgradeBarTests.Downed_hero_button_stays_lit_and_buyable_when_coins_are_enough"
+  },
+  {
+   "at": "2026-11-26 00:30:13",
+   "id": "edge-hero-dang-guc",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:30:13",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:41",
+   "id": "params",
+   "state": "doing",
+   "by": "HudUpgrade",
+   "note": "PROTOTYPE moi: so cap moi nhap sang 0,2s khi mua thanh cong, khong tieng"
+  },
+  {
+   "at": "2026-11-26 00:55:46",
+   "id": "params",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Each_button_shows_level_and_next_price, UpgradeBarTests.Button_is_lit_when_affordable_and_dim_when_not, UpgradeBarTests.Buttons_light_up_in_the_same_call_coins_arrive, UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level, PriceTextTests.Price_reads_in_full_below_ten_thousand_and_cut_down_above, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce, UpgradeBarTests.Bought_level_flashes_the_new_level_number_once_on_that_button, UpgradeBarTests.Rejected_or_dim_tap_does_not_flash_the_level, UpgradeBarTests.Tapping_a_dim_button_shakes_it_once_and_sends_no_purchase, UpgradeBarTests.Tapping_a_lit_button_does_not_shake, UpgradeBarTests.Every_button_shakes_on_tap_while_the_shop_is_closed_by_pause, UpgradeBarTests.Downed_hero_button_shows_the_down_mark_and_clears_it_when_the_hero_stands_up, UpgradeBarTests.Castle_buttons_never_get_a_down_mark, UpgradeBarTests.Rebuilt_bar_for_a_new_team_shows_the_marks_of_heroes_already_down, UpgradeBarTests.Bar_stops_hearing_down_changes_after_dispose"
+  },
+  {
+   "at": "2026-11-26 00:57:15",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bought_level_flashes_the_new_level_number_once_on_that_button, UpgradeBarTests.Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level, UpgradeBarTests.Tapping_a_dim_button_shakes_it_once_and_sends_no_purchase, UpgradeBarTests.Downed_hero_button_shows_the_down_mark_and_clears_it_when_the_hero_stands_up, UpgradeBarTests.Big_prices_read_short_on_the_button, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
+  },
+  {
+   "at": "2026-11-26 01:03:29",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:03:29",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

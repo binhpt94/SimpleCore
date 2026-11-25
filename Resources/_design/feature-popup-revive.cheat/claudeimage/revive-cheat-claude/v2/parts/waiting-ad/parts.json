@@ -1,0 +1,79 @@
+{
+ "frame": "waiting-ad",
+ "parts": [
+  {
+   "id": "1-panel",
+   "w": 800,
+   "h": 700,
+   "slice": [
+    48,
+    48,
+    48,
+    56
+   ],
+   "shapes": [
+    "panel"
+   ],
+   "from": {
+    "node": "feature-popup/popup-layer/stack-rules",
+    "frame": "main",
+    "part": "panel",
+    "ref": "_design/feature-popup.popup-layer.stack-rules/popup-panel-claude",
+    "version": 2
+   },
+   "text": true
+  },
+  {
+   "id": "2-btn-main",
+   "w": 400,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "watch"
+   ],
+   "from": {
+    "node": "feature-popup-revive/revive-popup/revive-spec",
+    "frame": "main",
+    "part": "btn-main",
+    "ref": "_design/feature-popup-revive.revive-popup.revive-spec/revive-spec-claude",
+    "version": 2
+   },
+   "text": true
+  },
+  {
+   "id": "3-btn-sub",
+   "w": 260,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "end"
+   ],
+   "from": {
+    "node": "feature-popup-revive/revive-popup/revive-spec",
+    "frame": "main",
+    "part": "btn-sub",
+    "ref": "_design/feature-popup-revive.revive-popup.revive-spec/revive-spec-claude",
+    "version": 2
+   },
+   "text": true
+  }
+ ],
+ "kept": [
+  "title",
+  "gain",
+  "wait"
+ ],
+ "skipped": [
+  "backdrop"
+ ]
+}

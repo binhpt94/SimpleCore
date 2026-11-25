@@ -21,14 +21,17 @@
     "HeroSquadTests.A_hero_hit_to_zero_health_falls_and_enemies_stop_seeing_it",
     "HeroEdgeCaseTests.A_hero_that_falls_before_its_turn_does_not_hit_that_frame",
     "HeroParticipantTests.A_hit_shows_a_strike_and_the_enemy_side_sees_hurt_and_fall",
-    "HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+    "HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s",
+    "HeroCombatTests.A_hero_emptied_by_the_total_falls_only_when_combat_reports_the_fallen",
+    "HeroCombatTests.A_fallen_or_growing_hero_cannot_be_hit_through_combat",
+    "HeroParticipantTests.A_fallen_hero_respawns_on_step_320_after_it_fell"
    ],
    "play": "",
    "hash": "b9bf92015a81",
    "text": "Máu hiện tại ≤ 0 thì hero gục: thu nhỏ về 0 trong 0.3s rồi biến mất, không đánh, không bị đánh, không bị nhắm\nNgay khung hình gục, hero thôi là mục tiêu của quái và không nhận đòn nào nữa; 0.3s thu nhỏ chỉ để nhìn.",
    "title": "Máu hiện tại ≤ 0 thì hero gục: thu nhỏ về 0 trong 0.3s rồi biến mất, không đánh, không bị đánh, không bị nhắm",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:02:00"
+   "at": "2026-11-26 00:30:01"
   },
   "respawn-time": {
    "state": "verified",
@@ -181,6 +184,35 @@
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
    "at": "2026-11-25 12:02:00"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "squad đếm thời gian chờ hồi sinh còn lại theo slot, chờ CodeLead thêm vào contract IHeroDownState cho HUD đọc",
+   "tests": [
+    "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud_and_stands_still_when_no_tick_runs",
+    "HeroInstallerTests.Installing_publishes_the_respawn_wait_left_from_the_squad",
+    "HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+   ],
+   "play": "",
+   "hash": "521dc64be449",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Thời gian chờ hồi sinh: 8s (chỉnh sau chơi thử)\n- Hiện thời gian chờ còn lại: có (qua `feature-hud`)",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:15"
+  },
+  "edge-hero-dang-cho-hoi-sinh-khi-thanh-bi": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroParticipantTests.A_hero_respawn_wait_counts_gameplay_steps_stands_still_while_the_castle_waits_for_revive_and_goes_on_after",
+    "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud_and_stands_still_when_no_tick_runs"
+   ],
+   "play": "",
+   "hash": "84c81a62a317",
+   "text": "Hero đang chờ hồi sinh khi thành bị phá lần đầu (luồng hồi sinh thành): đồng hồ 8s đứng yên suốt luồng (trận dừng, popup hồi sinh, thành hiện lại), chạy tiếp khi trận chạy tiếp. (Chuyển từ nhánh thứ tự hồi sinh ở popup hồi sinh, 2026-11-26.)",
+   "title": "Hero đang chờ hồi sinh khi thành bị phá lần đầu (luồng hồi sinh thành)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:55"
   }
  },
  "log": [
@@ -362,6 +394,62 @@
   {
    "at": "2026-11-25 12:02:00",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:25:08",
+   "id": "down-rule",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_hero_hit_to_zero_health_falls_and_enemies_stop_seeing_it, HeroEdgeCaseTests.A_hero_that_falls_before_its_turn_does_not_hit_that_frame, HeroParticipantTests.A_hit_shows_a_strike_and_the_enemy_side_sees_hurt_and_fall, HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s, HeroCombatTests.A_hero_emptied_by_the_total_falls_only_when_combat_reports_the_fallen, HeroCombatTests.A_fallen_or_growing_hero_cannot_be_hit_through_combat"
+  },
+  {
+   "at": "2026-11-26 00:29:22",
+   "id": "down-rule",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroSquadTests.A_hero_hit_to_zero_health_falls_and_enemies_stop_seeing_it, HeroEdgeCaseTests.A_hero_that_falls_before_its_turn_does_not_hit_that_frame, HeroParticipantTests.A_hit_shows_a_strike_and_the_enemy_side_sees_hurt_and_fall, HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s, HeroCombatTests.A_hero_emptied_by_the_total_falls_only_when_combat_reports_the_fallen, HeroCombatTests.A_fallen_or_growing_hero_cannot_be_hit_through_combat, HeroParticipantTests.A_fallen_hero_respawns_on_step_320_after_it_fell"
+  },
+  {
+   "at": "2026-11-26 00:30:01",
+   "id": "down-rule",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:04:18",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Hero",
+   "note": "squad đếm thời gian chờ hồi sinh còn lại theo slot, chờ CodeLead thêm vào contract IHeroDownState cho HUD đọc"
+  },
+  {
+   "at": "2026-11-26 01:17:23",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud_and_stands_still_when_no_tick_runs, HeroInstallerTests.Installing_publishes_the_respawn_wait_left_from_the_squad, HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+  },
+  {
+   "at": "2026-11-26 01:18:15",
+   "id": "stage-prototype",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:18:31",
+   "id": "edge-hero-dang-cho-hoi-sinh-khi-thanh-bi",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.A_hero_respawn_wait_counts_gameplay_steps_stands_still_while_the_castle_waits_for_revive_and_goes_on_after, HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud_and_stands_still_when_no_tick_runs"
+  },
+  {
+   "at": "2026-11-26 01:18:55",
+   "id": "edge-hero-dang-cho-hoi-sinh-khi-thanh-bi",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

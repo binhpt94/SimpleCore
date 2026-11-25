@@ -207,7 +207,7 @@ namespace Game.Run.Tests
             _delay.Fire();
 
             _flow.Replay();
-            _flow.EnterBattle(Team);
+            _flow.BuildBattle(Team);
             _log.Clear();
 
             _flow.Lose();
@@ -222,7 +222,7 @@ namespace Game.Run.Tests
             _revive.FailRevive();
             _flow.Replay();
             Assert.IsFalse(_revive.LostAfterFailedRevive);
-            _flow.EnterBattle(Team);
+            _flow.BuildBattle(Team);
 
             _flow.Lose();
             Assert.AreEqual(RunStep.ReviveWait, _flow.Step);

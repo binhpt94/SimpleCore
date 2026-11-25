@@ -1,3 +1,4 @@
+using System.Linq;
 using Game.Run;
 using NUnit.Framework;
 
@@ -5,10 +6,8 @@ namespace Game.Combat.Tests
 {
     public class CombatLoopTests
     {
-        private static readonly CombatSettings Settings = new CombatSettings(0.02f, 5);
-
         private FakeRunFlow _run;
-        private FakeTime _time;
+        private FakeSimClock _clock;
         private FakeActor _actor;
         private CombatTick _tick;
         private CombatLoop _loop;
@@ -17,11 +16,11 @@ namespace Game.Combat.Tests
         public void SetUp()
         {
             _run = new FakeRunFlow();
-            _time = new FakeTime();
+            _clock = new FakeSimClock();
             _tick = new CombatTick();
             _actor = new FakeActor("Actor");
             _tick.AddActor(_actor);
-            _loop = new CombatLoop(_tick, new FixedStepClock(Settings), _run, _time);
+            _loop = new CombatLoop(_tick, _clock, _run);
             _run.StartRun();
             _run.StartBattle();
         }
@@ -29,69 +28,90 @@ namespace Game.Combat.Tests
         [TearDown]
         public void TearDown() => _loop.Dispose();
 
-        [Test]
-        public void BattleRunsFiftyTicksEachSecondOfTwoHundredthsEach()
-        {
-            _time.DeltaTime = 0.02f;
-            var ticks = 0;
-            for (var frame = 0; frame < 50; frame++) ticks += _loop.Frame();
+        // fixed-step: one combat tick per shared step, no clock of its own.
 
-            Assert.AreEqual(50, ticks);
-            Assert.That(_actor.Steps, Is.All.EqualTo(0.02f));
+        [Test]
+        public void EachSharedStepRunsExactlyOneCombatTick()
+        {
+            _clock.Step(7);
+
+            Assert.AreEqual(7, _loop.TicksRun);
+            Assert.AreEqual(7, _actor.Steps.Count);
         }
 
         [Test]
-        public void FastFramesWaitUntilAWholeStepHasPassed()
+        public void CombatStepsAtItsOwnPlaceInTheSharedStepOrder()
         {
-            _time.DeltaTime = 0.01f;
-
-            Assert.AreEqual(0, _loop.Frame());
-            Assert.AreEqual(1, _loop.Frame());
+            Assert.AreEqual(new[] { "Combat" }, _clock.Owners.ToArray());
+            Assert.AreEqual("Combat", CombatLoop.Owner);
         }
 
         [Test]
-        public void SlowFrameRunsSeveralTicks()
+        public void TickTakesTheStepLengthOfTheSharedClock()
         {
-            _time.DeltaTime = 0.1f;
+            _clock.Step(3);
 
-            Assert.AreEqual(5, _loop.Frame());
+            Assert.That(_actor.Steps, Is.All.EqualTo(0.025f));
         }
 
         [Test]
-        public void VerySlowFrameRunsAtMostFiveTicksAndTheBattleSlowsDown()
+        public void CombatKeepsNoTimeOfItsOwnAndFollowsTheSharedStepLength()
         {
-            _time.DeltaTime = 0.3f;
-            Assert.AreEqual(5, _loop.Frame());
+            // No frame time reaches combat: a tick runs only when the shared clock steps, as long as that step.
+            Assert.AreEqual(0, _loop.TicksRun);
 
-            _time.DeltaTime = 0.02f;
-            Assert.AreEqual(1, _loop.Frame(), "the time beyond five steps is dropped, not run later");
+            _clock.StepSeconds = 0.05f;
+            _clock.Step();
+            _clock.StepSeconds = 0.025f;
+            _clock.Step();
+
+            Assert.AreEqual(new[] { 0.05f, 0.025f }, _actor.Steps.ToArray());
         }
 
         [Test]
-        public void SameFrameTimesGiveTheSameTicksOnFastAndSlowDevices()
+        public void StepThatIsNotGameplayRunsNoTick()
         {
-            var fast = new FixedStepClock(Settings);
-            var slow = new FixedStepClock(Settings);
-            var fastSteps = 0;
-            var slowSteps = 0;
-            for (var i = 0; i < 60; i++) fastSteps += fast.Advance(1f / 60f);
-            for (var i = 0; i < 30; i++) slowSteps += slow.Advance(1f / 30f);
+            _clock.Step(4, gameplay: false);
 
-            Assert.AreEqual(50, fastSteps);
-            Assert.AreEqual(50, slowSteps);
+            Assert.AreEqual(0, _loop.TicksRun);
+            Assert.IsEmpty(_actor.Steps);
         }
+
+        [Test]
+        public void DisposedLoopNoLongerTicks()
+        {
+            _loop.Dispose();
+            _clock.Step(3);
+
+            Assert.AreEqual(0, _clock.Subscribers);
+            Assert.IsEmpty(_actor.Steps);
+        }
+
+        // params: step length and the cap of steps per frame belong to the shared clock.
+
+        [Test]
+        public void BattleRunsFortyTicksEachSecondOfTheSharedClock()
+        {
+            _clock.Step(40);
+
+            Assert.AreEqual(40, _loop.TicksRun);
+            Assert.AreEqual(1.0, _actor.Steps.Sum(s => (double)s), 1e-5);
+        }
+
+        // pause-no-tick
 
         [Test]
         public void NoTickRunsWhilePaused()
         {
-            _time.DeltaTime = 0.1f;
             _run.Pause();
+            _clock.Step(5, gameplay: false);
 
-            Assert.AreEqual(0, _loop.Frame());
+            Assert.AreEqual(0, _loop.TicksRun);
             Assert.IsEmpty(_actor.Steps);
 
             _run.Resume();
-            Assert.AreEqual(5, _loop.Frame());
+            _clock.Step(5);
+            Assert.AreEqual(5, _loop.TicksRun);
         }
 
         [TestCase(RunStep.ReviveWait)]
@@ -99,31 +119,34 @@ namespace Game.Combat.Tests
         [TestCase(RunStep.Reviving)]
         public void NoTickRunsWhileWaitingForARevive(RunStep step)
         {
-            _time.DeltaTime = 0.1f;
             _run.SetStep(step);
+            _clock.Step(5, gameplay: false);
+            Assert.AreEqual(0, _loop.TicksRun);
 
-            Assert.AreEqual(0, _loop.Frame());
+            // Even if a step still came marked as gameplay, the run's pause holds combat.
+            _clock.Step(1);
+            Assert.AreEqual(0, _loop.TicksRun);
         }
 
         [Test]
         public void NoTickRunsAfterTheRunEnded()
         {
-            _time.DeltaTime = 0.1f;
             _run.StopBattle();
-
-            Assert.AreEqual(0, _loop.Frame());
+            _clock.Step(5);
+            Assert.AreEqual(0, _loop.TicksRun);
 
             _run.ClearBattle();
-            Assert.AreEqual(0, _loop.Frame());
+            _clock.Step(5);
+            Assert.AreEqual(0, _loop.TicksRun);
         }
 
         [Test]
         public void NoTickRunsBeforeTheBattleStarts()
         {
             _run.StartRun();
-            _time.DeltaTime = 0.1f;
+            _clock.Step(5);
 
-            Assert.AreEqual(0, _loop.Frame());
+            Assert.AreEqual(0, _loop.TicksRun);
         }
 
         [Test]
@@ -134,9 +157,11 @@ namespace Game.Combat.Tests
             var id = _tick.AddReceiver(castle);
             castle.OnFall = (_, __) => _run.Lose();
             _tick.Hit(new CombatHit(id, 0, 5f, CombatSource.Enemy));
-            _time.DeltaTime = 0.1f;
 
-            Assert.AreEqual(1, _loop.Frame());
+            // Five steps in one frame: the castle falls in the first, the run waits for a revive.
+            _clock.Step(5);
+
+            Assert.AreEqual(1, _loop.TicksRun);
         }
 
         [Test]
@@ -149,9 +174,8 @@ namespace Game.Combat.Tests
             _run.ClearBattle();
             _run.StartRun();
             _run.StartBattle();
-            _time.DeltaTime = 0.02f;
 
-            _loop.Frame();
+            _clock.Step();
 
             Assert.AreEqual(50f, enemies.Health(1));
         }

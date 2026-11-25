@@ -187,6 +187,22 @@
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
    "at": "2026-11-25 12:26:53"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills",
+    "BarLayoutTests.On_a_16_9_screen_the_six_buttons_sit_where_the_frame_puts_them",
+    "BarLayoutTests.On_a_20_9_screen_the_bar_keeps_its_size",
+    "BarLayoutTests.Gap_between_the_groups_is_wider_than_between_buttons_of_one_group"
+   ],
+   "play": "",
+   "hash": "397daa36f271",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Tỉ lệ màn hình được kiểm: 16:9 và 20:9",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:03:29"
   }
  },
  "log": [
@@ -424,6 +440,20 @@
   {
    "at": "2026-11-25 12:26:53",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:57:10",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills, BarLayoutTests.On_a_16_9_screen_the_six_buttons_sit_where_the_frame_puts_them, BarLayoutTests.On_a_20_9_screen_the_bar_keeps_its_size, BarLayoutTests.Gap_between_the_groups_is_wider_than_between_buttons_of_one_group"
+  },
+  {
+   "at": "2026-11-26 01:03:29",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

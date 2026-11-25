@@ -4,17 +4,18 @@
    "state": "verified",
    "note": "Config BattlefieldConfig, BackdropLayout dựng 4 lớp, participant và installer mức IDEA",
    "tests": [
+    "LayerParamsTests.Params_RealConfigBreaksNoRuleOfTheTable",
     "BackdropLayoutTests.RealConfig_BreaksNoDesignRule",
     "BattlefieldParticipantTests.BattleSetUp_ShowsTheBackdropOnce_WithAllLayers",
     "BattlefieldInstallerTests.RealInstaller_WithRunAndSession_JoinsTheBackdropToTheSession",
     "BattlefieldInstallerTests.RealInstaller_WithoutTheRun_FailsAtOnceNamingIt"
    ],
    "play": "",
-   "hash": "0b4ae6c8b895",
-   "text": "## Làm gì\n- Khi màn trận dựng (bước chạy của scene Game, cùng lúc trận được dựng): tạo bốn lớp nền theo bảng dưới, ở các lớp vẽ sau thành, quái, hero.\n- Khi rời màn trận: huỷ cùng trận.\n- Không đọc gì từ trận; không đổi gì trong suốt trận.\n\n## Thông số\n| Thứ | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Quy đổi | 1u = 60 px trên màn 1920x1080 | | Camera đang có của scene Game (orthographic size 9, cao 18u), theo @CodeLead |\n| Mặt đất y=0 | px 840 từ mép trên | px | Như trên; chân thành, hero, quái đều ở đây |\n| Khung thấy ở 16:9 | x −16…+16u, y −4…+14u | u | Như trên; mép màn x khớp `feature-castle/castle-core/castle-body-values` |\n| Phủ ngang của trời, cảnh xa, đất | x −21…+21u | u | Màn 21:9 thấy khoảng ±21u |\n| Trời | y 0…14u | u | Phủ tới mép trên khung |\n| Cảnh xa | y 0…2.5u (dự kiến) | u | Thấp hơn thành 4u |\n| Dải đất | y −4…0u | u | Phủ tới mép dưới khung |\n| Decor | 10 món: mỗi bên cỏ ở ±4, ±9, ±14u; đá ở ±6.5, ±11.5u | u (tâm x) | Rải đều 2.5u, cách thành |\n| Cỡ decor | cỏ 0.8×0.3u, đá 0.6×0.3u | u | Phẳng, thấp hơn mọi unit (unit thấp nhất cao 0.8u) |\n| Vùng không decor | x −3…+3u | u | Thân thành ±1.5u và chỗ hero ±2u, chừa thêm |\n| Mép dưới dải HUD trên | y = 11.7u (px 140) | u | `feature-hud/hud-layout/layout-spec` (dải trên cao 140 px) |\n| Mép trên thanh dưới | y = −1.3u (px 920) | u | Thanh nâng cấp, khay kĩ năng (đo lúc Play, theo @CodeLead); dải dưới của layout-spec cao 180 px |\n\nThứ tự vẽ (sau ra trước, theo node cha): trời → cảnh xa → dải đất → decor → thành → quái và hero → hiệu ứng → HUD → popup.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Trời | 1 sprite @ClaudeImage, đứng yên | Art @Codex | Thêm mây trôi chậm |\n| Cảnh xa | 1 dải sprite @ClaudeImage, đứng yên | 2 dải có độ sâu (dải sau nhỏ, nhạt hơn), art @Codex | Như PROTOTYPE |\n| Dải đất | 1 sprite lặp ngang | Art @Codex | Như PROTOTYPE |\n| Decor | 10 món phẳng (cỏ, đá), đứng yên | Thêm decor đứng (cờ, hàng rào) trong dải cảnh xa, art @Codex | Cỏ lay nhẹ |\n| Đổi nền theo mốc đợt | Không | Không | Xét lại (trái \"một bản đồ\" ở vòng 1, cần người quyết) |",
+   "hash": "0da55abfa122",
+   "text": "## Làm gì\n- Khi màn trận dựng (bước chạy của scene Game, cùng lúc trận được dựng): tạo bốn lớp nền theo bảng dưới, ở các lớp vẽ sau thành, quái, hero.\n- Khi rời màn trận: huỷ cùng trận.\n- Không đọc gì từ trận; không đổi gì trong suốt trận.\n\n## Thông số\nBảng `LayerParams` (loại `params`, `.excel/`): quy đổi và khung camera, phủ ngang, trời, hai dải cảnh xa (đỉnh, chân, cỡ hình, màu gốc, độ nhạt), dải đất, decor phẳng, decor đứng (số món, tâm x, cỡ, chân, độ nhạt, màu), thứ tự vẽ, hai đường HUD, đổi nền theo đợt.\n- Vị trí tính bằng u (1u = 60 px), tâm x ghi cho một bên; bên kia đối xứng qua x=0.\n- **Độ nhạt** là phần trăm pha màu gốc về màu trời (0% là màu gốc, 100% là trùng màu trời). Màu gốc lấy tên màu trong bảng màu chung của style `ui-flat` ở node gốc, không đặt mã màu riêng.\n\n## Thông số theo giai đoạn\nBa cột `idea`, `prototype`, `full` của bảng `LayerParams`. Ở PROTOTYPE:\n- **Hai dải cảnh xa:** dải sau (núi đồi xanh dương, hình nhỏ 0.6 lần, nhạt 45%, đỉnh 3.2u) ló lên sau dải trước (đồi cây xanh lá, nhạt 20%, đỉnh 2u). Cả hai thấp hơn thành 4u để thành vẫn nổi giữa màn.\n- **Decor đứng:** 8 món (mỗi bên 2 cờ, 2 hàng rào), đứng trên mặt đất nhưng vẽ trước dải đất, cùng độ nhạt với dải cảnh xa trước, nên đọc là cảnh phía xa, không phải vật cản. Tâm x nằm giữa các decor phẳng và ngoài khoảng ±3u quanh thành.\n- Trời, cảnh xa, dải đất chuyển sang art @Codex theo style Colorful.",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:10:47"
+   "at": "2026-11-26 00:54:02"
   },
   "view-camera": {
    "state": "verified",
@@ -177,6 +178,565 @@
    "title": "Rời màn trận rồi vào lại",
    "by": "@CodeLead",
    "at": "2026-11-25 12:10:47"
+  },
+  "layerparams-unit-px": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.UnitPx_OneUnitIs60Pixels"
+   ],
+   "play": "",
+   "hash": "b0f071249862",
+   "text": "Bảng LayerParams (params), dòng unit_px\nkey (string): unit_px\nname (string): Quy đổi đơn vị chiến trường\nunit (string): px mỗi u\nidea (string): 60\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Camera đang có của scene Game (orthographic size 9, cao 18u), theo @CodeLead",
+   "title": "LayerParams: Quy đổi đơn vị chiến trường (unit_px)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-ground-line-px": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.GroundLinePx_GroundLineIsAtPixel840FromTheTop"
+   ],
+   "play": "",
+   "hash": "835176bfa8c7",
+   "text": "Bảng LayerParams (params), dòng ground_line_px\nkey (string): ground_line_px\nname (string): Mặt đất y=0 tính từ mép trên màn 1920x1080\nunit (string): px\nidea (string): 840\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Như trên; chân thành, hero, quái đều ở đây",
+   "title": "LayerParams: Mặt đất y=0 tính từ mép trên màn 1920x1080 (ground_line_px)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-view-x-half": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.ViewXHalf_A16By9ScreenShows16UnitsEachSide"
+   ],
+   "play": "",
+   "hash": "04fa9ac244f4",
+   "text": "Bảng LayerParams (params), dòng view_x_half\nkey (string): view_x_half\nname (string): Nửa bề ngang khung thấy ở 16:9\nunit (string): u\nidea (string): 16\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Mép màn khớp feature-castle/castle-core/castle-body-values",
+   "title": "LayerParams: Nửa bề ngang khung thấy ở 16:9 (view_x_half)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-view-y-min": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.ViewYMin_BottomOfTheViewIsYMinus4"
+   ],
+   "play": "",
+   "hash": "4d0059536c08",
+   "text": "Bảng LayerParams (params), dòng view_y_min\nkey (string): view_y_min\nname (string): Mép dưới khung thấy\nunit (string): u\nidea (string): -4\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Camera cao 18u",
+   "title": "LayerParams: Mép dưới khung thấy (view_y_min)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-view-y-max": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.ViewYMax_TopOfTheViewIsY14"
+   ],
+   "play": "",
+   "hash": "bbebd3f281be",
+   "text": "Bảng LayerParams (params), dòng view_y_max\nkey (string): view_y_max\nname (string): Mép trên khung thấy\nunit (string): u\nidea (string): 14\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Camera cao 18u",
+   "title": "LayerParams: Mép trên khung thấy (view_y_max)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-cover-x-half": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.CoverXHalf_SkyFarAndGroundReach21UnitsEachSide"
+   ],
+   "play": "",
+   "hash": "13f761d77bc5",
+   "text": "Bảng LayerParams (params), dòng cover_x_half\nkey (string): cover_x_half\nname (string): Nửa bề ngang phủ của trời, cảnh xa, dải đất\nunit (string): u\nidea (string): 21\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Màn 21:9 thấy khoảng ±21u",
+   "title": "LayerParams: Nửa bề ngang phủ của trời, cảnh xa, dải đất (cover_x_half)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-sky-top": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.SkyTop_SkyReachesY14"
+   ],
+   "play": "",
+   "hash": "cc96a1720c63",
+   "text": "Bảng LayerParams (params), dòng sky_top\nkey (string): sky_top\nname (string): Đỉnh lớp trời\nunit (string): u\nidea (string): 14\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Phủ tới mép trên khung",
+   "title": "LayerParams: Đỉnh lớp trời (sky_top)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-sky-art": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.SkyArt_SkyIsOneStillSprite_InTheLightBlueOfThePalette"
+   ],
+   "play": "",
+   "hash": "8239d2a9d65b",
+   "text": "Bảng LayerParams (params), dòng sky_art\nkey (string): sky_art\nname (string): Hình lớp trời\nunit (string): \nidea (string): 1 sprite @ClaudeImage đứng yên\nprototype (string): 1 sprite art @Codex đứng yên\nfull (string): Thêm mây trôi chậm\nreason (string): Trời Colorful: xanh dương sáng (vùng sáng của Xanh dương trong bảng màu chung)",
+   "title": "LayerParams: Hình lớp trời (sky_art)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-band-count": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarBandCount_TwoFarStrips"
+   ],
+   "play": "",
+   "hash": "65640d968a5a",
+   "text": "Bảng LayerParams (params), dòng far_band_count\nkey (string): far_band_count\nname (string): Số dải cảnh xa\nunit (string): dải\nidea (string): 1\nprototype (string): 2\nfull (string): như PROTOTYPE\nreason (string): PROTOTYPE tạo độ sâu bằng hai dải khác cỡ, khác độ nhạt (camera đứng yên nên không có parallax chuyển động)",
+   "title": "LayerParams: Số dải cảnh xa (far_band_count)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-front-top": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarFrontTop_FrontStripTopIsY2"
+   ],
+   "play": "",
+   "hash": "395d00394b65",
+   "text": "Bảng LayerParams (params), dòng far_front_top\nkey (string): far_front_top\nname (string): Đỉnh dải cảnh xa trước\nunit (string): u\nidea (string): 2.5\nprototype (string): 2\nfull (string): như PROTOTYPE\nreason (string): Dự kiến; hạ dải trước xuống để dải sau ló lên phía sau, vẫn thấp hơn thành 4u",
+   "title": "LayerParams: Đỉnh dải cảnh xa trước (far_front_top)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-back-top": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarBackTop_BackStripTopIsY3Point2_AboveTheFrontStrip_BelowTheCastle"
+   ],
+   "play": "",
+   "hash": "31dfa1d398ad",
+   "text": "Bảng LayerParams (params), dòng far_back_top\nkey (string): far_back_top\nname (string): Đỉnh dải cảnh xa sau\nunit (string): u\nidea (string): \nprototype (string): 3.2\nfull (string): như PROTOTYPE\nreason (string): Dự kiến; cao hơn dải trước để thấy được, thấp hơn thành 4u để thành vẫn nổi",
+   "title": "LayerParams: Đỉnh dải cảnh xa sau (far_back_top)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-base": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarBase_EveryFarStripStandsOnTheGroundLine"
+   ],
+   "play": "",
+   "hash": "cffe44327eab",
+   "text": "Bảng LayerParams (params), dòng far_base\nkey (string): far_base\nname (string): Chân của mọi dải cảnh xa\nunit (string): u\nidea (string): 0\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Đứng trên mặt đất; phần dưới y=0 bị dải đất che",
+   "title": "LayerParams: Chân của mọi dải cảnh xa (far_base)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-front-scale": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarFrontScale_FrontStripIsTheSizeReference"
+   ],
+   "play": "",
+   "hash": "1ff14c542edd",
+   "text": "Bảng LayerParams (params), dòng far_front_scale\nkey (string): far_front_scale\nname (string): Cỡ hình (đồi cây) của dải trước\nunit (string): lần\nidea (string): 1\nprototype (string): 1\nfull (string): như PROTOTYPE\nreason (string): Mốc so sánh",
+   "title": "LayerParams: Cỡ hình (đồi cây) của dải trước (far_front_scale)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-back-scale": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarBackScale_BackStripHillsAre0Point6OfTheFront"
+   ],
+   "play": "",
+   "hash": "e69c6a8efbb4",
+   "text": "Bảng LayerParams (params), dòng far_back_scale\nkey (string): far_back_scale\nname (string): Cỡ hình (núi đồi) của dải sau so với dải trước\nunit (string): lần\nidea (string): \nprototype (string): 0.6\nfull (string): như PROTOTYPE\nreason (string): Dự kiến; nhỏ hơn để đọc là xa hơn",
+   "title": "LayerParams: Cỡ hình (núi đồi) của dải sau so với dải trước (far_back_scale)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-front-color": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarFrontColor_FrontStripIsGreenOfThePalette"
+   ],
+   "play": "",
+   "hash": "ad4944ee7e7b",
+   "text": "Bảng LayerParams (params), dòng far_front_color\nkey (string): far_front_color\nname (string): Màu gốc dải trước\nunit (string): \nidea (string): Xanh lá (bảng màu chung)\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Đồi cây xanh như lá trang trí của ảnh tham chiếu",
+   "title": "LayerParams: Màu gốc dải trước (far_front_color)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-back-color": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarBackColor_BackStripIsBlueOfThePalette"
+   ],
+   "play": "",
+   "hash": "7f71cad0a125",
+   "text": "Bảng LayerParams (params), dòng far_back_color\nkey (string): far_back_color\nname (string): Màu gốc dải sau\nunit (string): \nidea (string): \nprototype (string): Xanh dương (bảng màu chung)\nfull (string): như PROTOTYPE\nreason (string): Núi xa ngả về màu trời",
+   "title": "LayerParams: Màu gốc dải sau (far_back_color)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-front-fade": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarFrontFade_FrontStripIsMixed20PercentTowardsTheSky"
+   ],
+   "play": "",
+   "hash": "589e060611ed",
+   "text": "Bảng LayerParams (params), dòng far_front_fade\nkey (string): far_front_fade\nname (string): Độ nhạt dải trước: pha màu gốc về màu trời\nunit (string): %\nidea (string): 0\nprototype (string): 20\nfull (string): như PROTOTYPE\nreason (string): Dự kiến; nhạt hơn unit để thành và unit nổi (art-unit-outline-contrast của gốc)",
+   "title": "LayerParams: Độ nhạt dải trước: pha màu gốc về màu trời (far_front_fade)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-back-fade": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarBackFade_BackStripIsMixed45PercentTowardsTheSky_PalerThanTheFront"
+   ],
+   "play": "",
+   "hash": "3b9e3e9101f0",
+   "text": "Bảng LayerParams (params), dòng far_back_fade\nkey (string): far_back_fade\nname (string): Độ nhạt dải sau: pha màu gốc về màu trời\nunit (string): %\nidea (string): \nprototype (string): 45\nfull (string): như PROTOTYPE\nreason (string): Dự kiến; nhạt hơn dải trước một bậc rõ để đọc chiều sâu",
+   "title": "LayerParams: Độ nhạt dải sau: pha màu gốc về màu trời (far_back_fade)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-far-art": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.FarArt_TwoStillStripsEachCoveringTheWholeWidth"
+   ],
+   "play": "",
+   "hash": "fb215cf3dce3",
+   "text": "Bảng LayerParams (params), dòng far_art\nkey (string): far_art\nname (string): Hình cảnh xa\nunit (string): \nidea (string): 1 dải sprite @ClaudeImage đứng yên\nprototype (string): 2 dải art @Codex đứng yên\nfull (string): như PROTOTYPE\nreason (string): Mỗi dải một sprite lặp ngang phủ ±21u",
+   "title": "LayerParams: Hình cảnh xa (far_art)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-ground-bottom": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.GroundBottom_GroundReachesYMinus4"
+   ],
+   "play": "",
+   "hash": "814da60aba00",
+   "text": "Bảng LayerParams (params), dòng ground_bottom\nkey (string): ground_bottom\nname (string): Đáy dải đất\nunit (string): u\nidea (string): -4\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Phủ tới mép dưới khung",
+   "title": "LayerParams: Đáy dải đất (ground_bottom)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-ground-art": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.GroundArt_GroundIsOneSpriteAcrossTheWidth"
+   ],
+   "play": "",
+   "hash": "d3c50a0dcaa0",
+   "text": "Bảng LayerParams (params), dòng ground_art\nkey (string): ground_art\nname (string): Hình dải đất\nunit (string): \nidea (string): 1 sprite lặp ngang\nprototype (string): art @Codex lặp ngang\nfull (string): như PROTOTYPE\nreason (string): Mặt cỏ xanh lá trên lớp đất; mép trên sáng như style",
+   "title": "LayerParams: Hình dải đất (ground_art)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:02"
+  },
+  "layerparams-decor-flat-count": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorFlatCount_TenFlatDecorPieces"
+   ],
+   "play": "",
+   "hash": "88ace2fb47f3",
+   "text": "Bảng LayerParams (params), dòng decor_flat_count\nkey (string): decor_flat_count\nname (string): Số decor phẳng\nunit (string): món\nidea (string): 10\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Mỗi bên 3 cỏ, 2 đá",
+   "title": "LayerParams: Số decor phẳng (decor_flat_count)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-grass-x": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorGrassX_GrassAt4_9_14EachSide"
+   ],
+   "play": "",
+   "hash": "1fdf0279bd61",
+   "text": "Bảng LayerParams (params), dòng decor_grass_x\nkey (string): decor_grass_x\nname (string): Tâm x các bụi cỏ mỗi bên\nunit (string): u\nidea (string): 4 9 14\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Rải đều 2.5u, cách thành; hai bên đối xứng (dấu ±)",
+   "title": "LayerParams: Tâm x các bụi cỏ mỗi bên (decor_grass_x)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-stone-x": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorStoneX_StonesAt6Point5_11Point5EachSide"
+   ],
+   "play": "",
+   "hash": "fb0cf5c86093",
+   "text": "Bảng LayerParams (params), dòng decor_stone_x\nkey (string): decor_stone_x\nname (string): Tâm x các hòn đá mỗi bên\nunit (string): u\nidea (string): 6.5 11.5\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Xen giữa các bụi cỏ",
+   "title": "LayerParams: Tâm x các hòn đá mỗi bên (decor_stone_x)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-grass-w": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorGrassW_GrassIs0Point8Wide"
+   ],
+   "play": "",
+   "hash": "5d3c92faf0aa",
+   "text": "Bảng LayerParams (params), dòng decor_grass_w\nkey (string): decor_grass_w\nname (string): Bề ngang bụi cỏ\nunit (string): u\nidea (string): 0.8\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Phẳng",
+   "title": "LayerParams: Bề ngang bụi cỏ (decor_grass_w)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-stone-w": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorStoneW_StoneIs0Point6Wide"
+   ],
+   "play": "",
+   "hash": "d87b6cad2810",
+   "text": "Bảng LayerParams (params), dòng decor_stone_w\nkey (string): decor_stone_w\nname (string): Bề ngang hòn đá\nunit (string): u\nidea (string): 0.6\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Phẳng",
+   "title": "LayerParams: Bề ngang hòn đá (decor_stone_w)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-flat-h": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorFlatH_FlatDecorIs0Point3High_OnTheGround"
+   ],
+   "play": "",
+   "hash": "87b91fc42ae7",
+   "text": "Bảng LayerParams (params), dòng decor_flat_h\nkey (string): decor_flat_h\nname (string): Chiều cao decor phẳng\nunit (string): u\nidea (string): 0.3\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Thấp hơn mọi unit (unit thấp nhất cao 0.8u)",
+   "title": "LayerParams: Chiều cao decor phẳng (decor_flat_h)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-clear-half": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorClearHalf_NoFlatOrStandingDecorWithin3UnitsOfTheCastle"
+   ],
+   "play": "",
+   "hash": "d60eaa687e2b",
+   "text": "Bảng LayerParams (params), dòng decor_clear_half\nkey (string): decor_clear_half\nname (string): Nửa khoảng không có decor quanh thành\nunit (string): u\nidea (string): 3\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Thân thành ±1.5u và chỗ hero ±2u, chừa thêm; áp cho cả decor đứng",
+   "title": "LayerParams: Nửa khoảng không có decor quanh thành (decor_clear_half)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-stand-count": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorStandCount_EightStandingDecor_TwoFlagsAndTwoFencesEachSide"
+   ],
+   "play": "",
+   "hash": "314afc3b1d29",
+   "text": "Bảng LayerParams (params), dòng decor_stand_count\nkey (string): decor_stand_count\nname (string): Số decor đứng (cờ và hàng rào)\nunit (string): món\nidea (string): 0\nprototype (string): 8\nfull (string): như PROTOTYPE\nreason (string): Mỗi bên 2 cờ, 2 hàng rào; đứng trong dải cảnh xa, không trên đường đi",
+   "title": "LayerParams: Số decor đứng (cờ và hàng rào) (decor_stand_count)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-flag-x": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorFlagX_FlagsAt7Point75_12Point75EachSide"
+   ],
+   "play": "",
+   "hash": "5e349a95f012",
+   "text": "Bảng LayerParams (params), dòng decor_flag_x\nkey (string): decor_flag_x\nname (string): Tâm x các cờ mỗi bên\nunit (string): u\nidea (string): \nprototype (string): 7.75 12.75\nfull (string): như PROTOTYPE\nreason (string): Dự kiến; nằm giữa các decor phẳng, không chồng cỏ, đá khi nhìn thẳng",
+   "title": "LayerParams: Tâm x các cờ mỗi bên (decor_flag_x)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-fence-x": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorFenceX_FencesAt5Point25_10Point25EachSide"
+   ],
+   "play": "",
+   "hash": "4af5486219ac",
+   "text": "Bảng LayerParams (params), dòng decor_fence_x\nkey (string): decor_fence_x\nname (string): Tâm x các hàng rào mỗi bên\nunit (string): u\nidea (string): \nprototype (string): 5.25 10.25\nfull (string): như PROTOTYPE\nreason (string): Dự kiến; như trên, ngoài khoảng ±3u quanh thành",
+   "title": "LayerParams: Tâm x các hàng rào mỗi bên (decor_fence_x)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-flag-w": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorFlagW_FlagIs0Point5Wide"
+   ],
+   "play": "",
+   "hash": "243bc00eef1b",
+   "text": "Bảng LayerParams (params), dòng decor_flag_w\nkey (string): decor_flag_w\nname (string): Bề ngang cờ\nunit (string): u\nidea (string): \nprototype (string): 0.5\nfull (string): như PROTOTYPE\nreason (string): Dự kiến",
+   "title": "LayerParams: Bề ngang cờ (decor_flag_w)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-flag-h": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorFlagH_FlagIs1Point2High_BelowTheBackFarStrip"
+   ],
+   "play": "",
+   "hash": "2590b63bb8e3",
+   "text": "Bảng LayerParams (params), dòng decor_flag_h\nkey (string): decor_flag_h\nname (string): Chiều cao cờ (cả cột)\nunit (string): u\nidea (string): \nprototype (string): 1.2\nfull (string): như PROTOTYPE\nreason (string): Dự kiến; thấp hơn đỉnh dải cảnh xa sau, không che thành",
+   "title": "LayerParams: Chiều cao cờ (cả cột) (decor_flag_h)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-fence-w": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorFenceW_FenceIs1Point4Wide"
+   ],
+   "play": "",
+   "hash": "bf884160506e",
+   "text": "Bảng LayerParams (params), dòng decor_fence_w\nkey (string): decor_fence_w\nname (string): Bề ngang một đoạn hàng rào\nunit (string): u\nidea (string): \nprototype (string): 1.4\nfull (string): như PROTOTYPE\nreason (string): Dự kiến",
+   "title": "LayerParams: Bề ngang một đoạn hàng rào (decor_fence_w)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-fence-h": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorFenceH_FenceIs0Point6High_LowerThanTheLowestUnit"
+   ],
+   "play": "",
+   "hash": "ac2b6c48206a",
+   "text": "Bảng LayerParams (params), dòng decor_fence_h\nkey (string): decor_fence_h\nname (string): Chiều cao hàng rào\nunit (string): u\nidea (string): \nprototype (string): 0.6\nfull (string): như PROTOTYPE\nreason (string): Dự kiến; thấp hơn unit thấp nhất",
+   "title": "LayerParams: Chiều cao hàng rào (decor_fence_h)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-stand-base": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorStandBase_StandingDecorStandsOnTheGroundLine"
+   ],
+   "play": "",
+   "hash": "7c38ecf0184e",
+   "text": "Bảng LayerParams (params), dòng decor_stand_base\nkey (string): decor_stand_base\nname (string): Chân decor đứng\nunit (string): u\nidea (string): \nprototype (string): 0\nfull (string): như PROTOTYPE\nreason (string): Đứng trên mặt đất, vẽ trước dải đất nên trông như ở phía xa, không chắn đường",
+   "title": "LayerParams: Chân decor đứng (decor_stand_base)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-stand-fade": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorStandFade_StandingDecorIsMixed20PercentTowardsTheSky_LikeTheFrontStrip"
+   ],
+   "play": "",
+   "hash": "97f3a05a5293",
+   "text": "Bảng LayerParams (params), dòng decor_stand_fade\nkey (string): decor_stand_fade\nname (string): Độ nhạt decor đứng: pha màu gốc về màu trời\nunit (string): %\nidea (string): \nprototype (string): 20\nfull (string): như PROTOTYPE\nreason (string): Cùng độ nhạt với dải cảnh xa trước để đọc là cảnh phía sau",
+   "title": "LayerParams: Độ nhạt decor đứng: pha màu gốc về màu trời (decor_stand_fade)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-stand-color": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorStandColor_FlagPinkWithYellowPole_FenceCreamWithYellowShade"
+   ],
+   "play": "",
+   "hash": "025832925211",
+   "text": "Bảng LayerParams (params), dòng decor_stand_color\nkey (string): decor_stand_color\nname (string): Màu decor đứng\nunit (string): \nidea (string): \nprototype (string): Cờ: lá cờ Hồng, cột Vàng; hàng rào: Kem, bóng Vàng (bảng màu chung)\nfull (string): như PROTOTYPE\nreason (string): Lấy màu trang trí của ảnh tham chiếu; không trùng màu phe hero hay quái",
+   "title": "LayerParams: Màu decor đứng (decor_stand_color)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-decor-sway": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DecorSway_GrassDoesNotSway"
+   ],
+   "play": "",
+   "hash": "a421d24ab5c5",
+   "text": "Bảng LayerParams (params), dòng decor_sway\nkey (string): decor_sway\nname (string): Cỏ lay\nunit (string): \nidea (string): Không\nprototype (string): Không\nfull (string): Cỏ lay nhẹ\nreason (string): Chỉ để nhìn",
+   "title": "LayerParams: Cỏ lay (decor_sway)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-draw-order": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.DrawOrder_SkyFarBackFarFrontStandingDecorGroundFlatDecor_AllBelowTheBattle"
+   ],
+   "play": "",
+   "hash": "b38930271ad1",
+   "text": "Bảng LayerParams (params), dòng draw_order\nkey (string): draw_order\nname (string): Thứ tự vẽ (sau ra trước)\nunit (string): \nidea (string): trời, cảnh xa, dải đất, decor phẳng, thành, quái và hero, hiệu ứng, HUD, popup\nprototype (string): trời, cảnh xa sau, cảnh xa trước, decor đứng, dải đất, decor phẳng, thành, quái và hero, hiệu ứng, HUD, popup\nfull (string): như PROTOTYPE\nreason (string): Theo node cha; decor đứng thuộc dải cảnh xa nên vẽ trước dải đất",
+   "title": "LayerParams: Thứ tự vẽ (sau ra trước) (draw_order)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-hud-top-line": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.HudTopLine_TopHudEdgeIsY11Point7_AboveEveryFarStripAndDecor"
+   ],
+   "play": "",
+   "hash": "09efe4169f12",
+   "text": "Bảng LayerParams (params), dòng hud_top_line\nkey (string): hud_top_line\nname (string): Mép dưới dải HUD trên\nunit (string): u\nidea (string): 11.7\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): feature-hud/hud-layout/layout-spec: dải trên cao 140 px (px 140)",
+   "title": "LayerParams: Mép dưới dải HUD trên (hud_top_line)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-hud-bottom-line": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.HudBottomLine_BottomBarEdgeIsYMinus1Point3_BelowTheGroundLine"
+   ],
+   "play": "",
+   "hash": "dd58c3b21f40",
+   "text": "Bảng LayerParams (params), dòng hud_bottom_line\nkey (string): hud_bottom_line\nname (string): Mép trên thanh dưới\nunit (string): u\nidea (string): -1.3\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Thanh nâng cấp, khay kĩ năng (đo lúc Play, theo @CodeLead); px 920",
+   "title": "LayerParams: Mép trên thanh dưới (hud_bottom_line)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
+  },
+  "layerparams-backdrop-by-wave": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "LayerParamsTests.BackdropByWave_TheBackdropDoesNotChangeByWave"
+   ],
+   "play": "",
+   "hash": "28ea8c2afd19",
+   "text": "Bảng LayerParams (params), dòng backdrop_by_wave\nkey (string): backdrop_by_wave\nname (string): Đổi nền theo mốc đợt\nunit (string): \nidea (string): Không\nprototype (string): Không\nfull (string): Xét lại\nreason (string): Trái \"một bản đồ\" ở vòng 1, cần người quyết",
+   "title": "LayerParams: Đổi nền theo mốc đợt (backdrop_by_wave)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:54:07"
   }
  },
  "log": [
@@ -449,6 +1009,622 @@
   {
    "at": "2026-11-25 12:10:47",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:44:57",
+   "id": "layerparams-unit-px",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.UnitPx_OneUnitIs60Pixels"
+  },
+  {
+   "at": "2026-11-26 00:45:03",
+   "id": "layerparams-ground-line-px",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.GroundLinePx_GroundLineIsAtPixel840FromTheTop"
+  },
+  {
+   "at": "2026-11-26 00:45:04",
+   "id": "layerparams-view-x-half",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.ViewXHalf_A16By9ScreenShows16UnitsEachSide"
+  },
+  {
+   "at": "2026-11-26 00:45:04",
+   "id": "layerparams-view-y-min",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.ViewYMin_BottomOfTheViewIsYMinus4"
+  },
+  {
+   "at": "2026-11-26 00:45:05",
+   "id": "layerparams-view-y-max",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.ViewYMax_TopOfTheViewIsY14"
+  },
+  {
+   "at": "2026-11-26 00:45:06",
+   "id": "layerparams-cover-x-half",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.CoverXHalf_SkyFarAndGroundReach21UnitsEachSide"
+  },
+  {
+   "at": "2026-11-26 00:45:07",
+   "id": "layerparams-sky-top",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.SkyTop_SkyReachesY14"
+  },
+  {
+   "at": "2026-11-26 00:45:08",
+   "id": "layerparams-sky-art",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.SkyArt_SkyIsOneStillSprite_InTheLightBlueOfThePalette"
+  },
+  {
+   "at": "2026-11-26 00:45:09",
+   "id": "layerparams-far-band-count",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarBandCount_TwoFarStrips"
+  },
+  {
+   "at": "2026-11-26 00:45:10",
+   "id": "layerparams-far-front-top",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarFrontTop_FrontStripTopIsY2"
+  },
+  {
+   "at": "2026-11-26 00:45:11",
+   "id": "layerparams-far-back-top",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarBackTop_BackStripTopIsY3Point2_AboveTheFrontStrip_BelowTheCastle"
+  },
+  {
+   "at": "2026-11-26 00:45:16",
+   "id": "layerparams-far-base",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarBase_EveryFarStripStandsOnTheGroundLine"
+  },
+  {
+   "at": "2026-11-26 00:45:17",
+   "id": "layerparams-far-front-scale",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarFrontScale_FrontStripIsTheSizeReference"
+  },
+  {
+   "at": "2026-11-26 00:45:18",
+   "id": "layerparams-far-back-scale",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarBackScale_BackStripHillsAre0Point6OfTheFront"
+  },
+  {
+   "at": "2026-11-26 00:45:19",
+   "id": "layerparams-far-front-color",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarFrontColor_FrontStripIsGreenOfThePalette"
+  },
+  {
+   "at": "2026-11-26 00:45:20",
+   "id": "layerparams-far-back-color",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarBackColor_BackStripIsBlueOfThePalette"
+  },
+  {
+   "at": "2026-11-26 00:45:21",
+   "id": "layerparams-far-front-fade",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarFrontFade_FrontStripIsMixed20PercentTowardsTheSky"
+  },
+  {
+   "at": "2026-11-26 00:45:22",
+   "id": "layerparams-far-back-fade",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarBackFade_BackStripIsMixed45PercentTowardsTheSky_PalerThanTheFront"
+  },
+  {
+   "at": "2026-11-26 00:45:23",
+   "id": "layerparams-far-art",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.FarArt_TwoStillStripsEachCoveringTheWholeWidth"
+  },
+  {
+   "at": "2026-11-26 00:45:24",
+   "id": "layerparams-ground-bottom",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.GroundBottom_GroundReachesYMinus4"
+  },
+  {
+   "at": "2026-11-26 00:45:25",
+   "id": "layerparams-ground-art",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.GroundArt_GroundIsOneSpriteAcrossTheWidth"
+  },
+  {
+   "at": "2026-11-26 00:45:26",
+   "id": "layerparams-decor-flat-count",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorFlatCount_TenFlatDecorPieces"
+  },
+  {
+   "at": "2026-11-26 00:45:30",
+   "id": "layerparams-decor-grass-x",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorGrassX_GrassAt4_9_14EachSide"
+  },
+  {
+   "at": "2026-11-26 00:45:31",
+   "id": "layerparams-decor-stone-x",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorStoneX_StonesAt6Point5_11Point5EachSide"
+  },
+  {
+   "at": "2026-11-26 00:45:32",
+   "id": "layerparams-decor-grass-w",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorGrassW_GrassIs0Point8Wide"
+  },
+  {
+   "at": "2026-11-26 00:45:33",
+   "id": "layerparams-decor-stone-w",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorStoneW_StoneIs0Point6Wide"
+  },
+  {
+   "at": "2026-11-26 00:45:34",
+   "id": "layerparams-decor-flat-h",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorFlatH_FlatDecorIs0Point3High_OnTheGround"
+  },
+  {
+   "at": "2026-11-26 00:45:35",
+   "id": "layerparams-decor-clear-half",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorClearHalf_NoFlatOrStandingDecorWithin3UnitsOfTheCastle"
+  },
+  {
+   "at": "2026-11-26 00:45:36",
+   "id": "layerparams-decor-stand-count",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorStandCount_EightStandingDecor_TwoFlagsAndTwoFencesEachSide"
+  },
+  {
+   "at": "2026-11-26 00:45:37",
+   "id": "layerparams-decor-flag-x",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorFlagX_FlagsAt7Point75_12Point75EachSide"
+  },
+  {
+   "at": "2026-11-26 00:45:38",
+   "id": "layerparams-decor-fence-x",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorFenceX_FencesAt5Point25_10Point25EachSide"
+  },
+  {
+   "at": "2026-11-26 00:45:39",
+   "id": "layerparams-decor-flag-w",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorFlagW_FlagIs0Point5Wide"
+  },
+  {
+   "at": "2026-11-26 00:45:40",
+   "id": "layerparams-decor-flag-h",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorFlagH_FlagIs1Point2High_BelowTheBackFarStrip"
+  },
+  {
+   "at": "2026-11-26 00:45:45",
+   "id": "layerparams-decor-fence-w",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorFenceW_FenceIs1Point4Wide"
+  },
+  {
+   "at": "2026-11-26 00:45:46",
+   "id": "layerparams-decor-fence-h",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorFenceH_FenceIs0Point6High_LowerThanTheLowestUnit"
+  },
+  {
+   "at": "2026-11-26 00:45:47",
+   "id": "layerparams-decor-stand-base",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorStandBase_StandingDecorStandsOnTheGroundLine"
+  },
+  {
+   "at": "2026-11-26 00:45:48",
+   "id": "layerparams-decor-stand-fade",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorStandFade_StandingDecorIsMixed20PercentTowardsTheSky_LikeTheFrontStrip"
+  },
+  {
+   "at": "2026-11-26 00:45:49",
+   "id": "layerparams-decor-stand-color",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorStandColor_FlagPinkWithYellowPole_FenceCreamWithYellowShade"
+  },
+  {
+   "at": "2026-11-26 00:45:50",
+   "id": "layerparams-decor-sway",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DecorSway_GrassDoesNotSway"
+  },
+  {
+   "at": "2026-11-26 00:45:51",
+   "id": "layerparams-draw-order",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.DrawOrder_SkyFarBackFarFrontStandingDecorGroundFlatDecor_AllBelowTheBattle"
+  },
+  {
+   "at": "2026-11-26 00:45:52",
+   "id": "layerparams-hud-top-line",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.HudTopLine_TopHudEdgeIsY11Point7_AboveEveryFarStripAndDecor"
+  },
+  {
+   "at": "2026-11-26 00:45:53",
+   "id": "layerparams-hud-bottom-line",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.HudBottomLine_BottomBarEdgeIsYMinus1Point3_BelowTheGroundLine"
+  },
+  {
+   "at": "2026-11-26 00:45:54",
+   "id": "layerparams-backdrop-by-wave",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.BackdropByWave_TheBackdropDoesNotChangeByWave"
+  },
+  {
+   "at": "2026-11-26 00:45:56",
+   "id": "params",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "LayerParamsTests.Params_RealConfigBreaksNoRuleOfTheTable, BackdropLayoutTests.RealConfig_BreaksNoDesignRule, BattlefieldParticipantTests.BattleSetUp_ShowsTheBackdropOnce_WithAllLayers, BattlefieldInstallerTests.RealInstaller_WithRunAndSession_JoinsTheBackdropToTheSession, BattlefieldInstallerTests.RealInstaller_WithoutTheRun_FailsAtOnceNamingIt"
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-unit-px",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-ground-line-px",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-view-x-half",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-view-y-min",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-view-y-max",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-cover-x-half",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-sky-top",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-sky-art",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-band-count",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-front-top",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-back-top",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-base",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-front-scale",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-back-scale",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-front-color",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-back-color",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-front-fade",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-back-fade",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-far-art",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-ground-bottom",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:02",
+   "id": "layerparams-ground-art",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-flat-count",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-grass-x",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-stone-x",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-grass-w",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-stone-w",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-flat-h",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-clear-half",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-stand-count",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-flag-x",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-fence-x",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-flag-w",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-flag-h",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-fence-w",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-fence-h",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-stand-base",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-stand-fade",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-stand-color",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-decor-sway",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-draw-order",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-hud-top-line",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-hud-bottom-line",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:54:07",
+   "id": "layerparams-backdrop-by-wave",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

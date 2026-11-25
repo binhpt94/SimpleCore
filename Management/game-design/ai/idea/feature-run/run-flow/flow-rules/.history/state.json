@@ -1,5 +1,5 @@
 {
- "hash": "c2c5ba06ffa8",
+ "hash": "f011f018b6c5",
  "items": {
   "boot-to-home": {
    "hash": "c2970d6d7da3",
@@ -20,6 +20,14 @@
   "revive-step": {
    "hash": "9c249309dfb0",
    "text": "Chọn hồi sinh và xem xong quảng cáo: đóng popup hồi sinh, thành có lại máu, trận chạy tiếp ngay từ chỗ dừng\nKhông đếm ngược; quái, hero, đợt, tiền, cấp, hồi chiêu giữ đúng như lúc dừng. Bỏ qua đề nghị, hoặc quảng cáo không xem hết hay không tải được: đóng popup hồi sinh, chốt điểm, hiện popup thua ngay (không chờ thêm 1 giây). Mỗi lượt chỉ một lần hồi sinh."
+  },
+  "offer-flag": {
+   "hash": "162097b6747e",
+   "text": "Lượt chơi giữ cờ \"đã đề nghị hồi sinh\", bật ngay lúc mở popup hồi sinh, chỉ tắt khi lượt mới bắt đầu\nThành bị phá khi cờ đã bật thì vào thẳng popup thua."
+  },
+  "held-clear": {
+   "hash": "41a954bd103f",
+   "text": "Tin dọn sạch đợt cùng khung hình thành bị phá được giữ; hồi sinh thì thả, chốt thua thì bỏ\nThả tin: đợt được cộng điểm, `feature-wave` thưởng tiền và bắt đầu lúc thở. Bỏ tin: không điểm, không thưởng."
   },
   "replay-path": {
    "hash": "e59094bf4cce",

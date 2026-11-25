@@ -1,0 +1,5 @@
+index,sheet,kind,key,rows,note
+int,string,enum:params|list|levels|formula|map,string,int,string
+Số thứ tự,Tên sheet,Loại bảng,Cột khoá của bảng,Số dòng dữ liệu (tool tự điền),Bảng chứa gì
+1,SeedParams,params,key,8,"Thông số seed: nguồn seed ở bản phát hành và bản dev, khoảng giá trị"
+2,Streams,list,id,1,Các dòng ngẫu nhiên theo tên feature

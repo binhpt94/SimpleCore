@@ -1,14 +1,20 @@
+using System;
 using System.Collections.Generic;
 using Game.Enemy;
 using NUnit.Framework;
 
 namespace Game.Wave.Tests
 {
+    /// <summary>
+    /// The director driven by a hand-stepped shared clock (0.025 s steps); a step is gameplay unless the run is paused.
+    /// </summary>
     public class WaveDirectorTests
     {
         private List<string> _log;
         private FakeRun _run;
         private FakeEnemies _enemies;
+        private FakeSimClock _clock;
+        private IDisposable _steps;
         private WaveDirector _director;
 
         [SetUp]
@@ -17,55 +23,85 @@ namespace Game.Wave.Tests
             _log = new List<string>();
             _run = new FakeRun(_log);
             _enemies = new FakeEnemies();
-            _director = new WaveDirector(new WaveRules(), _run, _enemies, new FakeIncome(_log), new FirstRandom());
-            _director.Attach();
+            _clock = new FakeSimClock { Paused = () => _run.IsPaused };
+            Make(new WaveRules());
             _director.WaveStarted += w => _log.Add("started " + w);
             _director.WaveCleared += w => _log.Add("cleared " + w);
             _director.CurrentWaveChanged += w => _log.Add("current " + w);
         }
 
         [TearDown]
-        public void TearDown() => _director.Detach();
+        public void TearDown()
+        {
+            _steps.Dispose();
+            _director.Detach();
+        }
 
-        /// <summary>Lets wave 1 send all 8 enemies (7 s) and defeats them, then settles the clear.</summary>
+        private void Make(WaveRules rules)
+        {
+            if (_director != null)
+            {
+                _steps.Dispose();
+                _director.Detach();
+            }
+            _director = new WaveDirector(rules, _run, _enemies, new FakeIncome(_log), new FirstRandom());
+            _director.Attach();
+            _steps = _clock.OnStep(WaveParticipant.Owner, _director.Step);
+        }
+
+        /// <summary>The battle starts and the first gameplay step runs: wave 1 begins in it.</summary>
+        private void Begin()
+        {
+            _run.StartBattle();
+            _clock.Steps(1);
+        }
+
+        private void Wait(double seconds) => _clock.Seconds(seconds);
+
+        private void Step() => _clock.Steps(1);
+
+        /// <summary>Lets wave 1 send all 8 enemies (7 s) and defeats them, then settles the clear on the next step.</summary>
         private void ClearWaveOne()
         {
-            _director.Tick(7.01f);
+            Wait(7.01);
             _enemies.DefeatAll();
-            _director.Tick(0.01f);
+            Step();
         }
 
         [Test]
         public void BattleStart_StartsWaveOne_WithTheFirstEnemyAtOnce()
         {
             _run.StartBattle();
+            Assert.That(_enemies.Spawned, Is.Empty, "nothing is sent outside a step of the shared clock");
+
+            Step();
 
             Assert.That(_log, Is.EqualTo(new[] { "current 1", "started 1" }));
             Assert.That(_director.CurrentWave, Is.EqualTo(1));
-            Assert.That(_enemies.Spawned.Count, Is.EqualTo(1));
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(1), "the first enemy comes on the first step of the battle");
         }
 
         [Test]
         public void Enemies_ComeOneByOne_OnePerSecondInWaveOne()
         {
-            _run.StartBattle();
+            Begin();
 
-            _director.Tick(0.99f);
+            Wait(0.99);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(1));
-            _director.Tick(0.02f);
-            Assert.That(_enemies.Spawned.Count, Is.EqualTo(2));
-            _director.Tick(6f);
+            Wait(0.02);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(2), "40 steps of 0.025 s after the first");
+            Wait(6);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(8));
-            _director.Tick(5f);
+            Wait(5);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(8), "wave 1 has 8 enemies");
         }
 
         [Test]
         public void SpawnedEnemies_CarryTheWaveStatScale()
         {
-            _run.StartBattle();
+            Begin();
             ClearWaveOne();
-            _director.Tick(3.01f);
+            Wait(3.01);
 
             Assert.That(_enemies.Spawned[_enemies.Spawned.Count - 1].StatScale, Is.EqualTo(1.1f).Within(1e-4));
         }
@@ -73,7 +109,7 @@ namespace Game.Wave.Tests
         [Test]
         public void ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave()
         {
-            _run.StartBattle();
+            Begin();
             _log.Clear();
 
             ClearWaveOne();
@@ -86,10 +122,10 @@ namespace Game.Wave.Tests
         [Test]
         public void LastEnemyDefeatedBeforeAllCame_DoesNotClearTheWave()
         {
-            _run.StartBattle();
-            _director.Tick(2.5f);
+            Begin();
+            Wait(2.5);
             _enemies.DefeatAll();
-            _director.Tick(0.01f);
+            Step();
 
             Assert.That(_log, Has.No.Member("cleared 1"));
         }
@@ -97,15 +133,15 @@ namespace Game.Wave.Tests
         [Test]
         public void AfterThreeSecondsOfBreak_TheNextWaveStartsWithAnEnemyAtOnce()
         {
-            _run.StartBattle();
+            Begin();
             ClearWaveOne();
             var before = _enemies.Spawned.Count;
 
-            _director.Tick(2.9f);
+            Wait(2.9);
             Assert.That(_log, Has.No.Member("started 2"));
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(before), "no enemy during the break");
 
-            _director.Tick(0.2f);
+            Wait(0.2);
             Assert.That(_log, Has.Member("started 2"));
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(before + 1));
         }
@@ -113,11 +149,11 @@ namespace Game.Wave.Tests
         [Test]
         public void CastleFallingInTheSameStepAsTheLastKill_LosesTheClear()
         {
-            _run.StartBattle();
-            _director.Tick(7.01f);
+            Begin();
+            Wait(7.01);
             _enemies.DefeatAll();
             _run.Lose();
-            _director.Tick(0.01f);
+            Step();
 
             Assert.That(_log, Has.No.Member("coins 25"));
             Assert.That(_log, Has.No.Member("score 1"));
@@ -127,12 +163,12 @@ namespace Game.Wave.Tests
         [Test]
         public void BattleStopped_StopsSendingEnemies()
         {
-            _run.StartBattle();
-            _director.Tick(2.5f);
+            Begin();
+            Wait(2.5);
             var sent = _enemies.Spawned.Count;
 
             _run.StopBattle();
-            _director.Tick(10f);
+            Wait(10);
 
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(sent));
         }
@@ -140,47 +176,44 @@ namespace Game.Wave.Tests
         [Test]
         public void Pause_FreezesSendingAndTheBreak()
         {
-            _run.StartBattle();
+            Begin();
             _run.IsPaused = true;
-            _director.Tick(10f);
+            Wait(10);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(1));
 
             _run.IsPaused = false;
             ClearWaveOne();
             _run.IsPaused = true;
-            _director.Tick(10f);
+            Wait(10);
             Assert.That(_log, Has.No.Member("started 2"));
 
             _run.IsPaused = false;
-            _director.Tick(3.01f);
+            Wait(3.01);
             Assert.That(_log, Has.Member("started 2"));
         }
 
         [Test]
         public void FortyEnemiesAlive_HoldsTheNextOne_UntilOneFalls()
         {
-            var rules = new WaveRules { AliveCap = 3 };
-            _director.Detach();
-            _director = new WaveDirector(rules, _run, _enemies, new FakeIncome(_log), new FirstRandom());
-            _director.Attach();
-            _run.StartBattle();
+            Make(new WaveRules { AliveCap = 3 });
+            Begin();
 
-            _director.Tick(10f);
+            Wait(10);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(3));
 
             _enemies.Defeat(1);
-            _director.Tick(0.01f);
-            Assert.That(_enemies.Spawned.Count, Is.EqualTo(4), "the held enemy comes at once");
+            Step();
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(4), "the held enemy comes on the next step");
 
-            _director.Tick(0.98f);
+            Wait(0.98);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(4), "the clock counts a full interval again");
         }
 
         [Test]
         public void CheatMidWave_StartsTheChosenWaveAtOnce_WithoutRewardOrScore()
         {
-            _run.StartBattle();
-            _director.Tick(2.5f);
+            Begin();
+            Wait(2.5);
             _log.Clear();
 
             _director.StartWave(7);
@@ -194,19 +227,19 @@ namespace Game.Wave.Tests
         [Test]
         public void CheatMidWave_EnemiesLeftOnTheField_MustFallBeforeTheNewWaveClears()
         {
-            _run.StartBattle();
-            _director.Tick(2.5f);
+            Begin();
+            Wait(2.5);
             var leftOver = _enemies.AliveCount;
             _director.StartWave(2);
-            _director.Tick(20f);
+            Wait(20);
             var sentInWaveTwo = _enemies.Spawned.Count - leftOver;
 
             _enemies.Defeat(sentInWaveTwo);
-            _director.Tick(0.01f);
+            Step();
             Assert.That(_log, Has.No.Member("cleared 2"), "the left-over enemies are still on the field");
 
             _enemies.Defeat(leftOver);
-            _director.Tick(0.01f);
+            Step();
             Assert.That(_log, Has.Member("cleared 2"));
             Assert.That(_log, Has.Member("coins 30"));
             Assert.That(_log, Has.No.Member("cleared 1"));
@@ -215,14 +248,14 @@ namespace Game.Wave.Tests
         [Test]
         public void CheatDuringTheBreak_StartsTheChosenWaveAtOnce_AndEndsTheBreak()
         {
-            _run.StartBattle();
+            Begin();
             ClearWaveOne();
-            _director.Tick(1f);
+            Wait(1);
             var before = _enemies.Spawned.Count;
             _log.Clear();
 
             _director.StartWave(5);
-            _director.Tick(3f);
+            Wait(3);
 
             Assert.That(_log, Is.EqualTo(new[] { "current 5", "started 5" }));
             Assert.That(_director.InBreak, Is.False);
@@ -236,7 +269,7 @@ namespace Game.Wave.Tests
             Assert.That(_enemies.Spawned, Is.Empty);
             Assert.That(_log, Is.Empty);
 
-            _run.StartBattle();
+            Begin();
             _run.StopBattle();
             var sent = _enemies.Spawned.Count;
             _log.Clear();
@@ -250,8 +283,8 @@ namespace Game.Wave.Tests
         [Test]
         public void WaveOne_SendsHalfOfItsEnemiesToEachSide()
         {
-            _run.StartBattle();
-            _director.Tick(7.01f);
+            Begin();
+            Wait(7.01);
 
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(8));
             Assert.That(_enemies.Spawned.FindAll(s => s.Side == EnemySide.Left).Count, Is.EqualTo(4));
@@ -261,63 +294,63 @@ namespace Game.Wave.Tests
         [Test]
         public void PauseMidInterval_ResumesTheRestOfTheInterval_WithoutCatchingUp()
         {
-            _run.StartBattle();
-            _director.Tick(0.4f);
+            Begin();
+            Wait(0.4);
             _run.IsPaused = true;
-            _director.Tick(10f);
+            Wait(10);
             _run.IsPaused = false;
 
-            _director.Tick(0.59f);
+            Wait(0.59);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(1), "0.6 s of the interval were still left");
-            _director.Tick(0.02f);
+            Wait(0.02);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(2), "one enemy, no make-up for the paused time");
         }
 
         [Test]
         public void PauseDuringTheBreak_KeepsTheRestOfTheThreeSeconds()
         {
-            _run.StartBattle();
+            Begin();
             ClearWaveOne();
-            _director.Tick(1.2f);
+            Wait(1.2);
             _run.IsPaused = true;
-            _director.Tick(10f);
+            Wait(10);
             _run.IsPaused = false;
 
-            _director.Tick(1.75f);
+            Wait(1.75);
             Assert.That(_log, Has.No.Member("started 2"), "1.8 s were left when paused at 1.2 s");
-            _director.Tick(0.1f);
+            Wait(0.1);
             Assert.That(_log, Has.Member("started 2"));
         }
 
         [Test]
         public void PauseRightAtTheClear_PaysAndScoresAtOnce_TheBreakCountsAfterResume()
         {
-            _run.StartBattle();
-            _director.Tick(7.01f);
+            Begin();
+            Wait(7.01);
             _enemies.DefeatAll();
             _run.IsPaused = true;
-            _director.Tick(0.01f);
+            Step();
 
             Assert.That(_log, Has.Member("coins 25"));
             Assert.That(_log, Has.Member("score 1"));
-            _director.Tick(10f);
+            Wait(10);
             Assert.That(_log, Has.No.Member("started 2"), "the break does not count while paused");
 
             _run.IsPaused = false;
-            _director.Tick(3.01f);
+            Wait(3.01);
             Assert.That(_log, Has.Member("started 2"));
         }
 
         [Test]
         public void CastleFallingDuringTheBreak_KeepsTheClearedWave_AndStartsNoNewWave()
         {
-            _run.StartBattle();
+            Begin();
             ClearWaveOne();
-            _director.Tick(1f);
+            Wait(1);
             var sent = _enemies.Spawned.Count;
 
             _run.Lose();
-            _director.Tick(10f);
+            Wait(10);
 
             Assert.That(_log, Has.Member("coins 25"));
             Assert.That(_log, Has.Member("score 1"));
@@ -328,18 +361,15 @@ namespace Game.Wave.Tests
         [Test]
         public void CastleFallingWhileHeldAtTheCap_DropsTheWaitingEnemies_AndNeverClears()
         {
-            var rules = new WaveRules { AliveCap = 3 };
-            _director.Detach();
-            _director = new WaveDirector(rules, _run, _enemies, new FakeIncome(_log), new FirstRandom());
-            _director.Attach();
+            Make(new WaveRules { AliveCap = 3 });
             _director.WaveCleared += w => _log.Add("cleared " + w);
-            _run.StartBattle();
-            _director.Tick(10f);
+            Begin();
+            Wait(10);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(3));
 
             _run.Lose();
             _enemies.DefeatAll();
-            _director.Tick(10f);
+            Wait(10);
 
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(3), "the 5 waiting enemies are dropped");
             Assert.That(_log, Has.No.Member("cleared 1"));
@@ -350,19 +380,16 @@ namespace Game.Wave.Tests
         {
             // Wave 10 has 25 enemies then the Boss; with the wave-1 enemy left on the field a cap of 26 is reached
             // just before the Boss.
-            var rules = new WaveRules { AliveCap = 26 };
-            _director.Detach();
-            _director = new WaveDirector(rules, _run, _enemies, new FakeIncome(_log), new FirstRandom());
-            _director.Attach();
-            _run.StartBattle();
+            Make(new WaveRules { AliveCap = 26 });
+            Begin();
             _director.StartWave(10);
 
-            _director.Tick(100f);
+            Wait(100);
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(26));
             Assert.That(_enemies.Spawned.Exists(s => s.Type == EnemyType.Boss), Is.False, "the Boss waits at the cap");
 
             _enemies.Defeat(1);
-            _director.Tick(0.01f);
+            Step();
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(27));
             Assert.That(_enemies.Spawned[26].Type, Is.EqualTo(EnemyType.Boss));
         }
@@ -370,18 +397,18 @@ namespace Game.Wave.Tests
         [Test]
         public void ClearingWaveOne_MakesTheWaveNumberTwoAtOnce_AndKeepsItThroughTheBreak()
         {
-            _run.StartBattle();
-            _director.Tick(7.01f);
+            Begin();
+            Wait(7.01);
             _enemies.DefeatAll();
             _log.Clear();
 
-            _director.Tick(0.01f);
+            Step();
             Assert.That(_director.CurrentWave, Is.EqualTo(2), "the number moves on in the step of the clear");
             Assert.That(_log, Has.Member("current 2"));
 
             _log.Clear();
-            _director.Tick(1.5f);
-            _director.Tick(1.4f);
+            Wait(1.5);
+            Wait(1.4);
             Assert.That(_director.InBreak, Is.True);
             Assert.That(_director.CurrentWave, Is.EqualTo(2), "during the break the number is the upcoming wave");
             Assert.That(_log, Is.Empty, "no number change while breathing");
@@ -390,11 +417,11 @@ namespace Game.Wave.Tests
         [Test]
         public void BreakEnd_StartsTheUpcomingWave_WithoutChangingTheWaveNumberAgain()
         {
-            _run.StartBattle();
+            Begin();
             ClearWaveOne();
             _log.Clear();
 
-            _director.Tick(3.01f);
+            Wait(3.01);
 
             Assert.That(_log, Is.EqualTo(new[] { "started 2" }), "only the start of wave 2, no second number change");
             Assert.That(_director.CurrentWave, Is.EqualTo(2));
@@ -406,10 +433,10 @@ namespace Game.Wave.Tests
         public void NextWave_StartsOnTime_WithoutWaitingForAnythingElse()
         {
             // Wave never waits for heroes coming back or upgrades: only the 3 s clock starts the next wave.
-            _run.StartBattle();
+            Begin();
             ClearWaveOne();
 
-            _director.Tick(3.01f);
+            Wait(3.01);
 
             Assert.That(_log, Has.Member("started 2"));
             Assert.That(_director.CurrentWave, Is.EqualTo(2));
@@ -418,15 +445,54 @@ namespace Game.Wave.Tests
         [Test]
         public void NewRun_StartsAgainFromWaveOne()
         {
-            _run.StartBattle();
+            Begin();
             ClearWaveOne();
             _run.StopBattle();
             _log.Clear();
 
-            _run.StartBattle();
+            Begin();
 
             Assert.That(_director.CurrentWave, Is.EqualTo(1));
             Assert.That(_log, Is.EqualTo(new[] { "current 1", "started 1" }));
+        }
+
+        [Test]
+        public void WaitsCountGameplaySteps_TheIntervalIsExactlyFortyStepsInWaveOne()
+        {
+            Begin();
+
+            _clock.Steps(39);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(1));
+            _clock.Steps(1);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(2), "1 s at 40 steps a second");
+        }
+
+        [Test]
+        public void StepsThatAreNotGameplay_DoNotStartTheFirstWave()
+        {
+            _run.IsPaused = true;
+            _run.StartBattle();
+            _clock.Steps(100);
+            Assert.That(_enemies.Spawned, Is.Empty, "the first wave waits for the first gameplay step");
+
+            _run.IsPaused = false;
+            Step();
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void DefeatsOfAStep_AreSeenByTheNextStep_TheHeldEnemyComesThen()
+        {
+            // spawn-after-results: Wave runs first in a step, so a kill made later in step k frees a place in step k+1.
+            Make(new WaveRules { AliveCap = 1 });
+            Begin();
+            Wait(2);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(1), "held at the cap");
+
+            _enemies.Defeat(1);
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(1), "nothing comes in the middle of the step");
+            Step();
+            Assert.That(_enemies.Spawned.Count, Is.EqualTo(2));
         }
     }
 }

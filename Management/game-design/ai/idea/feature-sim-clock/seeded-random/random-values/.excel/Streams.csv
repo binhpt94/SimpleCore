@@ -1,0 +1,4 @@
+index,id,name,stage,owner,uses
+int,string,string,enum:idea|prototype|full,string,string
+Số thứ tự,Mã,Tên hiển thị,Có từ giai đoạn nào,Feature xin dòng,Dùng để làm gì
+1,wave,Wave,idea,feature-wave,Xáo thứ tự loại quái và gán bên ra mỗi đợt

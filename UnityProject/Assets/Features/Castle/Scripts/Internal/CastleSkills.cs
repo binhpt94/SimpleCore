@@ -18,20 +18,23 @@ namespace Game.Castle
         private readonly IRunFlow _runFlow;
         private readonly IEnemyField _enemies;
         private readonly IHeroSquad _heroes;
+        private readonly ICastleEnemyHits _hits;
         private readonly CastleSkill[] _skills;
-        private readonly float[] _cooldownLeft;
+        // Double so an 800-step cooldown of 0.025 s steps ends on exactly the 800th step.
+        private readonly double[] _cooldownLeft;
         private readonly List<EnemyTarget> _alive = new List<EnemyTarget>();
         private int _level = 1;
 
-        public CastleSkills(CastleConfig config, ICastle castle, IRunFlow runFlow, IEnemyField enemies, IHeroSquad heroes)
+        public CastleSkills(CastleConfig config, ICastle castle, IRunFlow runFlow, IEnemyField enemies, IHeroSquad heroes, ICastleEnemyHits hits)
         {
+            _hits = hits ?? throw new ArgumentNullException(nameof(hits));
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _castle = castle ?? throw new ArgumentNullException(nameof(castle));
             _runFlow = runFlow ?? throw new ArgumentNullException(nameof(runFlow));
             _enemies = enemies ?? throw new ArgumentNullException(nameof(enemies));
             _heroes = heroes ?? throw new ArgumentNullException(nameof(heroes));
             _skills = (CastleSkill[])(config.Skills ?? Array.Empty<CastleSkill>()).Clone();
-            _cooldownLeft = new float[_skills.Length];
+            _cooldownLeft = new double[_skills.Length];
         }
 
         /// <summary>Thunder struck an enemy standing at this x (for the effect).</summary>
@@ -39,34 +42,48 @@ namespace Game.Castle
 
         public IReadOnlyList<CastleSkill> Skills => _skills;
 
+        /// <summary>True while any skill's cooldown is still running down.</summary>
+        public bool AnyCooling
+        {
+            get
+            {
+                foreach (var left in _cooldownLeft)
+                    if (left > 0d) return true;
+                return false;
+            }
+        }
+
         public CastleSkillState GetState(CastleSkill skill)
         {
             var index = IndexOf(skill);
             if (index < 0) return new CastleSkillState(skill, false, 0f, 0f);
             var left = _cooldownLeft[index];
-            return new CastleSkillState(skill, left <= 0f && CanAct(), left, CooldownOf(skill));
+            return new CastleSkillState(skill, left <= 0d && CanAct(), (float)left, CooldownOf(skill));
         }
 
         public bool TryUse(CastleSkill skill)
         {
             var index = IndexOf(skill);
-            if (index < 0 || _cooldownLeft[index] > 0f || !CanAct()) return false;
+            if (index < 0 || _cooldownLeft[index] > 0d || !CanAct()) return false;
 
             Apply(skill);
             // A skill with no cooldown is ready again at once: Ready stays the one source the buttons read.
             var cooldown = CooldownOf(skill);
-            _cooldownLeft[index] = cooldown <= CastleReach.TimeEpsilon ? 0f : cooldown;
+            _cooldownLeft[index] = cooldown <= CastleReach.TimeEpsilon ? 0d : cooldown;
             return true;
         }
 
-        /// <summary>Cooldowns run down while the battle is not paused.</summary>
+        /// <summary>
+        /// Cooldowns run down by one gameplay step of the shared clock (or any length of battle time in tests),
+        /// never while paused. A cooldown ends on the first step at which its full time has passed.
+        /// </summary>
         public void Tick(float deltaSeconds)
         {
             if (deltaSeconds <= 0f || _runFlow.IsPaused) return;
             for (var i = 0; i < _cooldownLeft.Length; i++)
             {
                 var left = _cooldownLeft[i] - deltaSeconds;
-                _cooldownLeft[i] = left <= CastleReach.TimeEpsilon ? 0f : left;
+                _cooldownLeft[i] = left <= CastleReach.TimeEpsilon ? 0d : left;
             }
         }
 
@@ -88,7 +105,7 @@ namespace Game.Castle
         {
             var index = IndexOf(skill);
             if (index < 0 || float.IsNaN(secondsLeft)) return;
-            _cooldownLeft[index] = Math.Max(0f, Math.Min(CooldownOf(skill), secondsLeft));
+            _cooldownLeft[index] = Math.Max(0d, Math.Min(CooldownOf(skill), secondsLeft));
         }
 #endif
 
@@ -106,7 +123,8 @@ namespace Game.Castle
                     foreach (var enemy in _alive)
                     {
                         if (CastleReach.GapToCastle(enemy.X, enemy.HalfWidth, _config.HalfWidth) > _config.ThunderRange) continue;
-                        _enemies.Damage(enemy.Handle, damage);
+                        // One hit per enemy in the zone, read when pressed (feature-combat: lightning_hits).
+                        _hits.Hit(enemy.Handle, damage);
                         ThunderStruck?.Invoke(enemy.X);
                     }
                     break;

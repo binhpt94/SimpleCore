@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+  <defs>
+    <linearGradient id="sGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/><stop offset="0.45" stop-color="#FFC61F"/><stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="sRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF8A80"/><stop offset="0.5" stop-color="#F0383C"/><stop offset="1" stop-color="#B81E28"/>
+    </linearGradient>
+    <linearGradient id="sBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7CD0FF"/><stop offset="0.45" stop-color="#22A0F0"/><stop offset="1" stop-color="#1270C8"/>
+    </linearGradient>
+    <linearGradient id="sSteel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="0.5" stop-color="#7CD0FF"/><stop offset="1" stop-color="#22A0F0"/>
+    </linearGradient>
+    <linearGradient id="sSkin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="0.4" stop-color="#FFF1E4"/><stop offset="1" stop-color="#F6D7C6"/>
+    </linearGradient>
+  </defs>
+  <g stroke-linejoin="round" stroke-linecap="round">
+    <!-- chân -->
+    <rect x="56" y="248" width="30" height="46" rx="10" fill="url(#sBlue)" stroke="#0B4C94" stroke-width="6"/>
+    <rect x="98" y="248" width="30" height="46" rx="10" fill="url(#sBlue)" stroke="#0B4C94" stroke-width="6"/>
+    <!-- thân áo vàng -->
+    <rect x="50" y="158" width="88" height="100" rx="24" fill="url(#sGold)" stroke="#C26A00" stroke-width="6"/>
+    <ellipse cx="78" cy="174" rx="18" ry="6" fill="#FFFFFF" opacity="0.6"/>
+    <rect x="52" y="210" width="84" height="14" fill="url(#sRed)" stroke="#7E1018" stroke-width="4"/>
+    <!-- kiếm dài chĩa lên phía trước -->
+    <path d="M126 204 L188 38 L198 46 L142 210 Z" fill="url(#sSteel)" stroke="#0B4C94" stroke-width="6"/>
+    <rect x="116" y="194" width="38" height="14" rx="6" fill="url(#sRed)" stroke="#7E1018" stroke-width="5" transform="rotate(-22 135 201)"/>
+    <circle cx="132" cy="216" r="15" fill="url(#sSkin)" stroke="#E0A27A" stroke-width="5"/>
+    <!-- đầu -->
+    <circle cx="92" cy="104" r="58" fill="url(#sSkin)" stroke="#E0A27A" stroke-width="6"/>
+    <!-- tóc và búi -->
+    <circle cx="66" cy="36" r="20" fill="#3B1E4F" stroke="#3B1E4F" stroke-width="4"/>
+    <path d="M34 108 A58 58 0 0 1 150 92 C120 80 82 86 62 112 Z" fill="#3B1E4F" stroke="#3B1E4F" stroke-width="4"/>
+    <!-- mũ giáp đỏ nửa đầu, đuôi bay ra sau -->
+    <path d="M36 82 C70 60 118 60 150 78 L148 94 C116 80 72 80 38 98 Z" fill="url(#sRed)" stroke="#7E1018" stroke-width="5"/>
+    <path d="M40 88 L10 72 L16 90 Z M40 94 L12 108 L28 112 Z" fill="url(#sRed)" stroke="#7E1018" stroke-width="5"/>
+    <ellipse cx="86" cy="70" rx="16" ry="4" fill="#FFFFFF" opacity="0.6"/>
+    <!-- mắt to -->
+    <ellipse cx="124" cy="114" rx="10" ry="12" fill="#FFFFFF" stroke="#3B1E4F" stroke-width="3"/>
+    <circle cx="127" cy="116" r="6" fill="#3B1E4F"/>
+    <circle cx="129" cy="113" r="2.5" fill="#FFFFFF"/>
+    <path d="M104 136 Q116 142 128 136" fill="none" stroke="#3B1E4F" stroke-width="4"/>
+  </g>
+</svg>

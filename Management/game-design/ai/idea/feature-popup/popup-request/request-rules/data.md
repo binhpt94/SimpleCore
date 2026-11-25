@@ -1,6 +1,6 @@
 ---
 based-on: ff4b78bc4b2c
-refs: feature-session-scene/session-steps/participant-order@10e1bf396998, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-popup-lose/lose-result@e06499689b32, feature-popup-pause/pause-popup@25d160950007
+refs: feature-session-scene/session-steps/participant-order@bdb6d08f1274, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-popup-lose/lose-result@e06499689b32, feature-popup-pause/pause-popup@25d160950007
 frame: none
 ---
 # Luật mở, đóng popup và danh sách id

@@ -101,15 +101,15 @@
    "at": "2026-11-25 12:03:22"
   },
   "edge-nguoi-choi-roi-game-ve-man-hinh-chinh": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play từ Loading.unity, lúc thanh đang chạy thì bỏ focus cửa sổ Game rồi quay lại: thanh tải tiếp từ chỗ cũ, không bắt đầu lại",
    "hash": "1293a84008be",
    "text": "**Người chơi rời game (về màn hình chính điện thoại) lúc đang Loading**: quay lại thì tải tiếp, không bắt đầu lại; thời gian rời game không tính vào giới hạn 10 giây.",
    "title": "Người chơi rời game (về màn hình chính điện thoại) lúc đang Loading",
-   "by": "SceneFlow",
-   "at": "2026-11-25 11:43:42"
+   "by": "@CodeLead",
+   "at": "2026-11-25 20:39:21"
   },
   "edge-cham-man-hinh-luc-loading": {
    "state": "verified",
@@ -320,6 +320,13 @@
   {
    "at": "2026-11-25 12:07:41",
    "id": "game-first-screen",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:39:21",
+   "id": "edge-nguoi-choi-roi-game-ve-man-hinh-chinh",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

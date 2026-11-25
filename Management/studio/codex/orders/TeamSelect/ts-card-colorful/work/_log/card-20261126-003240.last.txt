@@ -1,0 +1,3 @@
+Đã tạo một ảnh [out/card.png](/D:/AI/CoreSimple/Management/studio/codex/orders/TeamSelect/ts-card-colorful/work/out/card.png). PNG 300×400 px có nền ngoài trong suốt và ô lõm xanh 240×200 px tại (30, 20).
+
+Vùng kem phẳng đủ rộng để đặt hai dòng chữ. Viền vàng bo tròn chiếm phần sát đáy từ y=378.

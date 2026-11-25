@@ -30,14 +30,14 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Rời game khi lượt đã kết thúc (đang chờ hoặc đang có popup thua):** không tạm dừng; popup thua vẫn như cũ.
 - **Rời game khi đang ở màn bắt đầu hoặc chọn đội:** không có gì xảy ra.
 - **Bấm tạm dừng hai lần liền:** lần hai rơi vào nền che của popup, không có tác dụng.
-- **Tạm dừng khi kĩ năng vừa bấm trong cùng khung hình:** kĩ năng đã dùng trước thì giữ hiệu quả, hiệu ứng (ví dụ làm chậm của Băng giá) đứng yên cùng trận và chạy tiếp khi tiếp tục.
-- **Tạm dừng giữa lúc nghỉ 3 giây:** phần giây còn lại giữ nguyên; tiếp tục thì đếm tiếp phần còn lại.
+- **Tạm dừng và kĩ năng bấm trong cùng khung hình:** cả hai vào hàng chờ thao tác của `feature-sim-clock` và áp ở bước nhịp kế tiếp theo thứ tự bấm. Kĩ năng bấm trước thì dùng được và giữ hiệu quả, hiệu ứng (ví dụ làm chậm của Băng giá) đứng yên cùng trận và chạy tiếp khi tiếp tục. Tạm dừng bấm trước thì kĩ năng bị từ chối theo `pause-block-input`. (Câu chữ sửa 2026-11-25 theo hàng chờ thao tác; luật không đổi.)
 - **Bỏ lượt khi chưa dọn đợt nào:** điểm 0, kỉ lục không đổi.
 - **Rời game lúc popup hồi sinh đang mở hoặc quảng cáo đang chạy:** không tạm dừng, không mở popup tạm dừng; trận đã đứng yên từ lúc thành bị phá (`pause-not-during-revive` ở node cha).
 - **Hồi sinh xong:** trận về trạng thái đang đánh; nút tạm dừng có tác dụng lại.
 
 ## Đã tự quyết
 - **Không đếm ngược khi tiếp tục.** Trận đứng đúng chỗ, người chơi đã thấy tình hình trên nền che. Đã loại: đếm 3-2-1.
+- **Bỏ trường hợp biên "tạm dừng giữa lúc nghỉ 3 giây" (2026-11-26, người quyết qua @Manager: việc chéo feature tách về feature làm việc đó).** Đồng hồ lúc thở là của đợt quái; luật đã có ở `feature-wave/wave-gap/gap-timer` ("Tạm dừng trong lúc thở: đồng hồ đứng yên; tiếp tục thì đếm phần còn lại"). Lượt chơi chỉ giữ trạng thái tạm dừng.
 - **Nút quay lại của máy mở tạm dừng.** Khớp `feature-run/run-flow/flow-rules`.
 - **Thao tác lọt qua popup vẫn bị chặn ở feature chủ.** Không chỉ dựa vào nền che; tránh mua được trong khung hình popup đang mở.
 

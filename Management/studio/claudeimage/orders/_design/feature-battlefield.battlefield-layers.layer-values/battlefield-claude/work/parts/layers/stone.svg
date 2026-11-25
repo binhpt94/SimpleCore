@@ -1,5 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="120" height="60">
-  <!-- da phang nam sat dat; vien toi 4 px; mang sang tren trai, bong hai bac -->
-  <path d="M6 58 Q8 26 40 16 Q76 6 102 24 Q116 36 114 58 Z" fill="#9AA3AD" stroke="#2A2F36" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M20 40 Q24 26 44 22 Q62 18 70 24 Q50 28 36 42 Z" fill="#C6CDD4"/>
+  <!-- da det Colorful: khoi tron mau tim xanh nhat (khong xam duc), sang tren toi duoi, vet bong keo; vien dam 4 px; cham mep duoi -->
+  <defs>
+    <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C7CCF5"/>
+      <stop offset="1" stop-color="#8E95D8"/>
+    </linearGradient>
+  </defs>
+  <path d="M6 58 Q8 28 40 18 Q76 8 102 26 Q116 38 114 58 Z" fill="url(#s)" stroke="#4F569E" stroke-width="4" stroke-linejoin="round"/>
+  <ellipse cx="46" cy="28" rx="14" ry="5" fill="#EEF0FF"/>
 </svg>

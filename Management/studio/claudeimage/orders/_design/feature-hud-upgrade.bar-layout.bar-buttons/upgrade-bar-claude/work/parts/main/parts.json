@@ -19,7 +19,7 @@
     "frame": "main",
     "part": "band",
     "ref": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -41,7 +41,7 @@
     "frame": "main",
     "part": "upgrade",
     "ref": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -63,7 +63,7 @@
     "frame": "main",
     "part": "tray",
     "ref": "_design/feature-hud.hud-skill-button.skill-button-spec/skill-buttons-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },

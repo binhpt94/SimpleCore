@@ -3,12 +3,13 @@ using Game.Castle;
 using Game.Core;
 using Game.Hero;
 using Game.Run;
+using Game.SimClock;
 using Game.Wallet;
 using UnityEngine;
 
 namespace Game.Upgrade
 {
-    /// <summary>Wires the upgrade shop: publishes <see cref="IUpgradeShop"/> and joins the scene session.</summary>
+    /// <summary>Wires the upgrade shop: publishes <see cref="IUpgradeShop"/> and <see cref="IUpgradeOrders"/> and joins the scene session.</summary>
     [CreateAssetMenu(menuName = "Game/Upgrade/Installer", fileName = "UpgradeInstaller")]
     public sealed class UpgradeInstaller : InstallerAsset
     {
@@ -26,9 +27,11 @@ namespace Game.Upgrade
                 registry.Resolve<IWalletService>(),
                 registry.Resolve<IWalletBalance>(),
                 registry.Resolve<IHeroSquad>(),
-                registry.Resolve<ICastleUpgrades>());
+                registry.Resolve<ICastleUpgrades>(),
+                registry.Resolve<ISimClock>());
 
             registry.Register<IUpgradeShop>(shop);
+            registry.Register<IUpgradeOrders>(shop);
             session.Join(new UpgradeSession(shop));
         }
     }

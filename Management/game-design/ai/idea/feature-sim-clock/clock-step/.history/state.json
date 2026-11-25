@@ -1,0 +1,49 @@
+{
+ "hash": "63aec954598c",
+ "items": {
+  "one-update-per-step": {
+   "hash": "b695ec1ed8f6",
+   "text": "Mỗi bước nhịp, mỗi feature gameplay cập nhật đúng một lần với cùng một khoảng thời gian bước\nFeature không tự đo thời gian; khoảng thời gian do nhịp đưa."
+  },
+  "two-modes": {
+   "hash": "ae79a8f155d8",
+   "text": "Có hai cách chạy: bước cố định (TickUpdate) và theo khung hình (Update); config chung chọn một\nỞ cách bước cố định, bước nào cũng dài bằng nhau. Ở cách theo khung hình, mỗi khung là một bước dài bằng thời gian khung."
+  },
+  "catch-up-cap": {
+   "hash": "c5dedc4e0d1b",
+   "text": "Khung hình dài thì chạy nhiều bước trong một khung, có trần; vượt trần thì bỏ phần dư, trận chậm lại chứ không nhảy\nỞ cách theo khung hình, thời gian bước cũng bị kẹp theo trần đó."
+  },
+  "fixed-order": {
+   "hash": "b7769af56433",
+   "text": "Thứ tự các feature trong một bước nhịp cố định và ghi rõ\nCùng thứ tự thì cùng kết quả. Đợt quái thả quái trước, các bên ra đòn sau, giao chiến phân xử sau các bên ra đòn, lượt xét thua sau cùng."
+  },
+  "input-on-step": {
+   "hash": "0d1d28d73c42",
+   "text": "Thao tác của người chơi được áp vào đầu bước nhịp kế tiếp và ghi theo số bước\nBấm kĩ năng, mua nâng cấp, tạm dừng. Ghi theo số bước thì chơi lại đúng chuỗi thao tác cho cùng kết quả."
+  },
+  "input-queue": {
+   "hash": "540cf8978c5b",
+   "text": "Nhịp giữ hàng chờ thao tác chung, áp ở đầu bước kế tiếp đúng thứ tự đã đưa vào\nMột nơi duy nhất giữ bản ghi thao tác theo số bước. Bên dùng: mua nâng cấp, bấm kĩ năng thành, tạm dừng và tiếp tục, kết quả hồi sinh từ popup (danh sách ở `CLAUDE.md`)."
+  },
+  "input-while-paused": {
+   "hash": "88795c46e4a9",
+   "text": "Thao tác đưa vào lúc tạm dừng vẫn áp ở bước kế tiếp; feature nhận tự từ chối nếu luật của nó cấm khi đang tạm dừng\nVí dụ mua nâng cấp lúc tạm dừng bị `feature-upgrade` từ chối theo luật tạm dừng của `feature-run`."
+  },
+  "clock-time": {
+   "hash": "2e7d1fa028a3",
+   "text": "Mọi chờ giờ của gameplay tính bằng đồng hồ gameplay của nhịp, không theo giờ thật\nHồi chiêu, hồi sinh, lúc thở, lịch thả quái, chờ trước popup thua đều đếm theo các bước mà lượt cho trận chạy."
+  },
+  "view-reads-latest": {
+   "hash": "e5a1e64ae7ae",
+   "text": "Màn hình vẽ theo khung hình từ trạng thái mới nhất của gameplay; phần nhìn không chạy luật\nPhần nhìn chỉ đọc, không đổi trạng thái gameplay."
+  },
+  "pause-keeps-clock": {
+   "hash": "a64add067d63",
+   "text": "Lúc tạm dừng bước nhịp vẫn chạy để áp hàng chờ, còn đồng hồ gameplay đứng yên\nFeature tự đứng yên theo trạng thái tạm dừng. Luật tạm dừng giữ nguyên ở `feature-run`; nhịp không dùng cách làm chậm thời gian của engine."
+  },
+  "dev-fast-forward": {
+   "hash": "45aadfd6c560",
+   "text": "Bản dev cho tester tua nhanh: tăng số bước mỗi khung, chạy ngay nhiều bước, đóng băng, bước từng bước\nBản phát hành không có tua."
+  }
+ }
+}

@@ -15,6 +15,7 @@ MonoBehaviour:
   heroes:
   - code: knight
     displayName: "Hi\u1EC7p s\u0129"
+    stage: 0
     group: 0
     attack: 0
     maxHealth: 300
@@ -27,6 +28,7 @@ MonoBehaviour:
     placeholderColor: {r: 0.35, g: 0.55, b: 0.95, a: 1}
   - code: axeman
     displayName: "\u0110\u1EA5u s\u0129 r\xECu"
+    stage: 0
     group: 0
     attack: 1
     maxHealth: 240
@@ -39,6 +41,7 @@ MonoBehaviour:
     placeholderColor: {r: 0.9, g: 0.55, b: 0.2, a: 1}
   - code: swordsman
     displayName: "Ki\u1EBFm kh\xE1ch"
+    stage: 1
     group: 0
     attack: 0
     maxHealth: 180
@@ -51,6 +54,7 @@ MonoBehaviour:
     placeholderColor: {r: 0.9, g: 0.25, b: 0.25, a: 1}
   - code: archer
     displayName: "Cung th\u1EE7"
+    stage: 0
     group: 1
     attack: 0
     maxHealth: 120
@@ -63,6 +67,7 @@ MonoBehaviour:
     placeholderColor: {r: 0.3, g: 0.75, b: 0.3, a: 1}
   - code: mage
     displayName: "Ph\xE1p s\u01B0"
+    stage: 1
     group: 1
     attack: 2
     maxHealth: 100
@@ -90,3 +95,4 @@ MonoBehaviour:
   levelAttackSpeedCap: 0.6
   levelUpPopScale: 1.2
   levelUpPopSeconds: 0.3
+  levelUpLabelSeconds: 1

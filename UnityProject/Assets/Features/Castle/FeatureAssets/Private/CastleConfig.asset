@@ -15,12 +15,17 @@ MonoBehaviour:
   maxHealth: 1000
   halfWidth: 1.5
   healthPerLevel: 150
+  reviveFraction: 0.3
+  heroSlotX:
+  - -1.5
+  - 1.5
+  - -1.5
   shotDamage: 10
   secondsPerShot: 1
   shotRange: 6
   screenHalfWidth: 16
   attackBonusPerLevel: 0.2
-  skills: 00000000
+  skills: 000000000100000002000000
   thunderDamage: 80
   thunderRange: 6
   thunderCooldown: 20
@@ -33,5 +38,8 @@ MonoBehaviour:
   height: 4
   hitFlashSeconds: 0.1
   collapseSeconds: 0.5
+  reviveGrowSeconds: 0.5
   shotFlightSeconds: 0.15
   thunderEffectSeconds: 0.3
+  levelUpPopScale: 1.1
+  levelUpPopSeconds: 0.3

@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using Game.Core;
 using Game.Enemy;
 using Game.Run;
+using Game.SimClock;
 using Game.Wallet;
 
 namespace Game.Wave.Tests
@@ -13,7 +14,7 @@ namespace Game.Wave.Tests
         public readonly List<string> Log;
         public FakeRun(List<string> log) { Log = log; }
 
-        public RunStep Step => default;
+        public RunStep Step { get; set; } = RunStep.Playing;
         public RunTeam Team => default;
         public bool IsPaused { get; set; }
 
@@ -88,20 +89,113 @@ namespace Game.Wave.Tests
         public int Next(int maxExclusive) => 0;
     }
 
-    /// <summary>Frames stepped by hand: <see cref="Frame"/> calls every started tick that was not cancelled.</summary>
-    internal sealed class FakeClock : IWaveClock
+    /// <summary>Seeded test numbers (System.Random), standing in for a stream of the run in order-only tests.</summary>
+    internal sealed class SystemWaveRandom : IWaveRandom
     {
-        private readonly List<(Action<float> Tick, System.Threading.CancellationToken Stop)> _ticks =
-            new List<(Action<float>, System.Threading.CancellationToken)>();
+        private readonly Random _random;
+        public SystemWaveRandom(int seed) { _random = new Random(seed); }
+        public int Next(int maxExclusive) => _random.Next(maxExclusive);
+    }
 
-        public void Start(Action<float> tick, System.Threading.CancellationToken cancellation) => _ticks.Add((tick, cancellation));
+    /// <summary>Stand-in for SimClock's seeded streams: one stream per name, made from the seed and the name; counts draws.</summary>
+    internal sealed class FakeSimRandom : ISimRandom
+    {
+        public readonly List<string> Asked = new List<string>();
+        private readonly Dictionary<string, FakeStream> _streams = new Dictionary<string, FakeStream>();
+        private readonly int _seed;
 
-        public int Running => _ticks.FindAll(t => !t.Stop.IsCancellationRequested).Count;
+        public FakeSimRandom(int seed) { _seed = seed; }
 
-        public void Frame(float seconds = 0.016f)
+        public ISimRandomStream Stream(string name)
         {
-            foreach (var t in _ticks.ToArray())
-                if (!t.Stop.IsCancellationRequested) t.Tick(seconds);
+            Asked.Add(name);
+            if (!_streams.TryGetValue(name, out var stream))
+            {
+                var mixed = _seed;
+                foreach (var c in name) mixed = unchecked(mixed * 31 + c);
+                _streams[name] = stream = new FakeStream(mixed);
+            }
+            return stream;
+        }
+
+        public int Draws(string name) => _streams.TryGetValue(name, out var s) ? s.Draws : 0;
+
+        private sealed class FakeStream : ISimRandomStream
+        {
+            private readonly Random _random;
+            public int Draws;
+            public FakeStream(int seed) { _random = new Random(seed); }
+            public int Next(int maxExclusive)
+            {
+                Draws++;
+                return _random.Next(maxExclusive);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The shared clock stepped by hand, like the real one in fixed-tick mode: 0.025 s steps, left-over time kept
+    /// (counted in whole microseconds so it never drifts). A step is gameplay unless <see cref="Paused"/> says otherwise.
+    /// </summary>
+    internal sealed class FakeSimClock : ISimClock
+    {
+        private const long StepMicros = 25000;
+
+        public readonly List<string> Owners = new List<string>();
+        private readonly List<Action<SimStep>> _steps = new List<Action<SimStep>>();
+        private long _leftMicros;
+
+        public Func<bool> Paused = () => false;
+
+        public SimMode Mode => SimMode.FixedTick;
+        public float StepSeconds => 0.025f;
+        public long StepCount { get; private set; }
+        public long GameplayStepCount { get; private set; }
+        public double GameplaySeconds => GameplayStepCount * 0.025;
+        public int Subscribers => _steps.Count;
+
+        public IDisposable OnStep(string owner, Action<SimStep> onStep)
+        {
+            Owners.Add(owner);
+            _steps.Add(onStep);
+            return new Handle(() => _steps.Remove(onStep));
+        }
+
+        public void Enqueue(string owner, Action apply) => apply();
+
+        /// <summary>Runs every whole step that fits in <paramref name="seconds"/> plus the time left over before.</summary>
+        public void Seconds(double seconds)
+        {
+            _leftMicros += (long)Math.Round(seconds * 1e6);
+            while (_leftMicros >= StepMicros)
+            {
+                _leftMicros -= StepMicros;
+                Steps(1);
+            }
+        }
+
+        /// <summary>Runs exactly <paramref name="count"/> steps.</summary>
+        public void Steps(int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                var gameplay = !Paused();
+                StepCount++;
+                if (gameplay) GameplayStepCount++;
+                var step = new SimStep(StepCount, GameplayStepCount, StepSeconds, gameplay);
+                foreach (var onStep in _steps.ToArray()) onStep(step);
+            }
+        }
+
+        private sealed class Handle : IDisposable
+        {
+            private Action _dispose;
+            public Handle(Action dispose) { _dispose = dispose; }
+            public void Dispose()
+            {
+                _dispose?.Invoke();
+                _dispose = null;
+            }
         }
     }
 

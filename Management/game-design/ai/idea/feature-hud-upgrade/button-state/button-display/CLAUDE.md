@@ -38,7 +38,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 |---|---|---|---|
 | Hình hero | sprite hero gen bằng AI, thu nhỏ | chân dung riêng gen bằng AI | chân dung đủ art |
 | Biểu tượng máu / sức đánh / kĩ năng | hình đơn giản gen bằng AI | biểu tượng riêng | đủ art |
-| Phản hồi mua thành công | nảy 0,2 giây | nảy 0,2 giây và tiếng mua | thêm hiệu ứng đủ art |
+| Phản hồi mua thành công | nảy 0,2 giây | nảy 0,2 giây và số cấp mới nhấp sáng 0,2 giây; không có tiếng | thêm tiếng mua và hiệu ứng đủ art |
 | Phản hồi chạm nút mờ | không | rung nhẹ nút 0,2 giây | rung và tiếng báo không đủ tiền |
 | Dấu "hero đang gục" trên nút hero | không | có | có |
 | Rút gọn số | có | có | có |
@@ -57,6 +57,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Ngưỡng rút gọn 10.000.** Giá dưới 10.000 là phần lớn trận; trên đó chữ dài khó đọc trên nút. Đã loại: rút gọn từ 1.000 (mất độ chính xác khi giá còn thường gặp).
 - **Cắt bớt, không làm tròn lên.** Đơn giản, quen thuộc; sáng/mờ đã nói đúng mua được hay không. Đã loại: làm tròn lên.
 - **Không phản hồi khi chạm nút mờ.** Đủ cho chơi thử; phản hồi "không đủ tiền" để sau theo bảng giai đoạn.
+- **Không có tiếng ở PROTOTYPE (2026-11-26, người quyết qua @Manager: không dùng âm thanh, không bật module Audio ở PROTOTYPE).** Tiếng mua dời sang FULL; bù bằng hình: nút nảy và số cấp mới nhấp sáng 0,2 giây, để người chơi thấy rõ món vừa mua. Tiếng báo không đủ tiền vốn đã ở FULL.
 - **Dùng dấu phẩy thập phân kiểu Việt ("12,3K").** Khớp ngôn ngữ game. Đã loại: "12.3K".
 
 ## Chưa rõ

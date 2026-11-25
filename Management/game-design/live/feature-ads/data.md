@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: ads-result=gpt@r2-1#ads-verified-result, ads-game-waits=gpt@r2-1#ads-battle-freeze, ads-revive-consent=gpt@r2-1#ads-revive-consent, ads-result-recipient=gpt@r2-1#ads-result-recipient, ads-reward-owner=gpt@r2-1#ads-reward-owner, ads-return-timing=gpt@r2-1#ads-return-timing, ads-repeat-tap=gpt@r2-1#ads-repeat-tap, ads-pending-text=gpt@r2-1#ads-pending-text, ads-response-timeout=gpt@r2-1#ads-response-timeout, ads-failure-message=gpt@r2-1#ads-failure-message, ads-stale-result=gpt@r2-1#ads-stale-result
 ---
 # Quảng cáo

@@ -23,7 +23,6 @@ namespace Game.Home.Tests
         private static ServiceRegistry FullRegistry(FakeSessionScene session)
         {
             var registry = new ServiceRegistry();
-            registry.Register<IRunFlow>(new FakeRunFlow());
             registry.Register<IRunScore>(new FakeRunScore());
             registry.Register<ISessionScene>(session);
             return registry;
@@ -62,21 +61,30 @@ namespace Game.Home.Tests
         }
 
         [Test]
-        public void InstallWithoutRunFailsNamingIt()
+        public void InstallRegistersTheStartScreenForTheScreenFlow()
+        {
+            var registry = FullRegistry(new FakeSessionScene());
+
+            LoadInstaller().Install(registry);
+
+            Assert.IsTrue(registry.TryResolve<IHomeScreen>(out var screen));
+            Assert.IsNotNull(screen);
+        }
+
+        [Test]
+        public void InstallWithoutScoreFailsNamingIt()
         {
             var registry = new ServiceRegistry();
-            registry.Register<IRunScore>(new FakeRunScore());
             registry.Register<ISessionScene>(new FakeSessionScene());
 
             var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(registry));
-            StringAssert.Contains(nameof(IRunFlow), error.Message);
+            StringAssert.Contains(nameof(IRunScore), error.Message);
         }
 
         [Test]
         public void InstallWithoutSessionFailsNamingIt()
         {
             var registry = new ServiceRegistry();
-            registry.Register<IRunFlow>(new FakeRunFlow());
             registry.Register<IRunScore>(new FakeRunScore());
 
             var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(registry));
@@ -84,20 +92,51 @@ namespace Game.Home.Tests
         }
 
         [Test]
-        public void ScreenIsBuiltWhenSessionRunsAndRemovedWhenItEnds()
+        public void StartScreenViewIsHeldFromTheRunStepAndReleasedToZeroWhenSessionEnds()
         {
             var config = ScriptableObject.CreateInstance<HomeConfig>();
             try
             {
                 var factory = new FakeHomeFactory();
-                var participant = new HomeParticipant(new FakeRunFlow(), new FakeRunScore(), config, factory);
+                var participant = new HomeParticipant(new HomeScreenPresenter(new FakeRunScore(), config), config, factory);
+                var usage = (ISessionParticipantUsage)participant;
+
+                Assert.IsTrue(usage.OpensViewsOnRun, "The game opens on the start screen, so Home builds its view in the run step.");
+                Assert.AreEqual(0, usage.HeldViews);
+
+                participant.Run();
+                Assert.AreEqual(1, usage.HeldViews);
+
+                participant.DisposeAsync().GetAwaiter().GetResult();
+                Assert.AreEqual(0, usage.HeldViews);
+                Assert.IsTrue(factory.Display.Disposed);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(config);
+            }
+        }
+
+        [Test]
+        public void ScreenIsBuiltHiddenWhenSessionRunsAndRemovedWhenItEnds()
+        {
+            var config = ScriptableObject.CreateInstance<HomeConfig>();
+            try
+            {
+                var factory = new FakeHomeFactory();
+                var screen = new HomeScreenPresenter(new FakeRunScore(), config);
+                var participant = new HomeParticipant(screen, config, factory);
 
                 participant.Run();
                 Assert.IsNotNull(factory.Layout);
+                Assert.IsFalse(factory.Display.Visible, "The start screen waits for the screen flow to show it.");
+
+                screen.Show();
                 Assert.IsTrue(factory.Display.Visible);
 
                 participant.DisposeAsync().GetAwaiter().GetResult();
                 Assert.IsTrue(factory.Display.Disposed);
+                Assert.IsFalse(screen.IsShown);
             }
             finally
             {

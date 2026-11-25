@@ -23,6 +23,9 @@ namespace Game.Home
     {
         event Action PlayPressed;
 
+        /// <summary>The Unity object the view lives on, so the session can count it as held.</summary>
+        UnityEngine.Object Root { get; }
+
         void Show(HomeScreenContent content);
 
         void Hide();

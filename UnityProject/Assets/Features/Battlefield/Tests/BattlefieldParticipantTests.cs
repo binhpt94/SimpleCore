@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Game.Core;
 using Game.Run;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Game.Battlefield.Tests
 {
@@ -31,7 +33,8 @@ namespace Game.Battlefield.Tests
 
             Assert.That(_views.Created, Is.EqualTo(1));
             Assert.That(_views.Alive, Is.EqualTo(1));
-            Assert.That(_views.Last.Pieces.Count, Is.EqualTo(13));
+            // sky, 2 far strips, 8 standing decor, ground, 10 flat decor
+            Assert.That(_views.Last.Pieces.Count, Is.EqualTo(22));
         }
 
         [Test]
@@ -118,10 +121,72 @@ namespace Game.Battlefield.Tests
             Assert.That(_views.Created, Is.EqualTo(1));
         }
 
+        [Test]
+        public void ShownBackdrop_IsCountedAsAHeldView_AndNoJob()
+        {
+            _participant.Run();
+            _run.RaiseBattleStarted();
+
+            Assert.That(Usage.HeldViews, Is.EqualTo(1));
+            Assert.That(Usage.RunningJobs, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void LeavingTheBattle_ReleasesTheHeldView()
+        {
+            _participant.Run();
+            _run.RaiseBattleStarted();
+
+            _run.RaiseBattleCleared();
+
+            Assert.That(Usage.HeldViews, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ShownThenSessionEnd_LeavesNoViewAndNoJob()
+        {
+            _participant.Run();
+            _run.RaiseBattleStarted();
+            _run.RaiseBattleCleared();
+            _run.RaiseBattleStarted();
+
+            _participant.DisposeAsync().GetAwaiter().GetResult();
+
+            Assert.That(Usage.HeldViews, Is.EqualTo(0));
+            Assert.That(Usage.RunningJobs, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void SessionStartingOnTheHomeScreen_ReportsNoViewOnRun_AndHoldsNone()
+        {
+            _participant.Run();
+
+            Assert.That(Usage.OpensViewsOnRun, Is.False);
+            Assert.That(Usage.HeldViews, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void SessionRunningMidBattle_HoldsTheBackdropView()
+        {
+            _run.Step = RunStep.Playing;
+
+            _participant.Run();
+
+            Assert.That(Usage.HeldViews, Is.EqualTo(1));
+        }
+
+        [TearDown]
+        public void TearDown() => _views.DestroyAll();
+
+        private ISessionParticipantUsage Usage => _participant;
+
         private sealed class FakeView : IBackdropView
         {
+            public readonly GameObject Object = new GameObject("FakeBackdrop");
             public IReadOnlyList<BackdropPiece> Pieces = Array.Empty<BackdropPiece>();
             public int ShowCalls;
+
+            public UnityEngine.Object Root => Object;
 
             public void Show(IReadOnlyList<BackdropPiece> pieces)
             {
@@ -135,16 +200,25 @@ namespace Game.Battlefield.Tests
             public int Created;
             public int Alive;
             public FakeView Last;
+            private readonly List<FakeView> _all = new List<FakeView>();
 
             public IBackdropView Create()
             {
                 Created++;
                 Alive++;
                 Last = new FakeView();
+                _all.Add(Last);
                 return Last;
             }
 
+            // Only counts: the released handle, not a destroyed object, must bring the held views to 0.
             public void Destroy(IBackdropView view) => Alive--;
+
+            public void DestroyAll()
+            {
+                foreach (var view in _all) UnityEngine.Object.DestroyImmediate(view.Object);
+                _all.Clear();
+            }
         }
 
         private sealed class FakeRunFlow : IRunFlow

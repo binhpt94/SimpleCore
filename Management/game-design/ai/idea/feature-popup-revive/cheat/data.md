@@ -1,6 +1,6 @@
 ---
 based-on: 53c6e52aecb5
-refs: feature-castle/castle-core/castle-body-values@b648ec300023, feature-popup-revive/revive-order/order-values@80126913acc8, feature-popup-revive/revive-popup/revive-spec@d5baa8be95f9, feature-ads/ads-request/ads-values@d2cbf130c039, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+refs: feature-castle/castle-core/castle-body-values@b648ec300023, feature-popup-revive/revive-order/order-values@391239778635, feature-popup-revive/revive-popup/revive-spec@d5baa8be95f9, feature-ads/ads-request/ads-values@d2cbf130c039, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
 ---
 # Cheat: popup hồi sinh
 

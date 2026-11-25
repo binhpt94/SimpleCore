@@ -1,109 +1,157 @@
 using System;
 using System.Collections.Generic;
 using Game.Hero;
-using Game.Run;
 
 namespace Game.TeamSelect
 {
     /// <summary>
-    /// The team select screen (design: feature-team-select). Opens when the run reaches
-    /// <see cref="RunStep.TeamSelect"/>: fills the slots from the remembered team (or the default team), applies
-    /// the tap rules, and on Enter battle with a full team remembers the team and hands it to the run once.
-    /// After that the screen takes no more taps until it opens again.
+    /// The team select screen (design: feature-team-select/team-slots/slots-spec; routing:
+    /// feature-game-flow/flow-routes/routes-values).
+    /// The screen flow shows and hides it. On show the slots are filled from the remembered team (or the default
+    /// team); taps follow the slot rules. Enter battle with a full team reports the team once and locks the screen
+    /// until the flow unlocks it (a failed build) or hides it. The remembered team changes only when the flow says
+    /// a battle was built for a team (<see cref="RememberTeam"/>). Back (button or device key) is reported.
     /// </summary>
     internal sealed class TeamSelectPresenter : ITeamSelectInput, IDisposable
     {
-        private readonly IRunFlow _run;
         private readonly IHeroRoster _roster;
         private readonly TeamSelectRules _rules;
         private readonly TeamMemory _memory;
-        private readonly IHeroPortraits _portraits;
         private readonly TeamSlots _slots;
         private ITeamSelectView _view;
+        private IHeroPortraits _portraits;
+        private bool _locked;
+        private string _buildError;
 
-        public TeamSelectPresenter(IRunFlow run, IHeroRoster roster, TeamSelectRules rules, TeamMemory memory, IHeroPortraits portraits)
+        public TeamSelectPresenter(IHeroRoster roster, TeamSelectRules rules, TeamMemory memory)
         {
-            _run = run ?? throw new ArgumentNullException(nameof(run));
             _roster = roster ?? throw new ArgumentNullException(nameof(roster));
             _rules = rules ?? throw new ArgumentNullException(nameof(rules));
             _memory = memory ?? throw new ArgumentNullException(nameof(memory));
-            _portraits = portraits;
             _slots = new TeamSlots(rules.SlotCount);
             _slots.Changed += Refresh;
-            _run.StepChanged += OnStepChanged;
         }
+
+        /// <summary>Enter battle with a full team: hero codes in slot order.</summary>
+        public event Action<IReadOnlyList<string>> EnterBattlePressed;
+
+        /// <summary>The Back button or the device back key, while the screen is up and not waiting on a battle.</summary>
+        public event Action BackPressed;
 
         public TeamSlots Slots => _slots;
 
-        /// <summary>True while the screen is up and takes taps.</summary>
+        /// <summary>True while the screen is shown.</summary>
         public bool IsOpen { get; private set; }
 
-        public bool CanStart => IsOpen && _slots.IsFull;
+        /// <summary>True from Enter battle (or a lock from the flow) until the flow unlocks or hides the screen.</summary>
+        public bool IsLocked => _locked;
+
+        public bool TakesTaps => IsOpen && !_locked;
+
+        public bool CanStart => TakesTaps && _slots.IsFull;
+
+        /// <summary>The build error line now shown, or null.</summary>
+        public string BuildError => _buildError;
 
         public IReadOnlyList<HeroCard> Cards => HeroCards.Build(_roster, _slots, _rules, _portraits);
 
-        public void Attach(ITeamSelectView view)
+        /// <summary>Hooks the view (and the portraits it has); the view shows the current state at once.</summary>
+        public void Attach(ITeamSelectView view, IHeroPortraits portraits)
         {
             _view = view;
-            _view?.Bind(this);
-            if (_run.Step == RunStep.TeamSelect) Open();
-            else _view?.SetVisible(false);
+            _portraits = portraits;
+            if (_view == null) return;
+            _view.Bind(this);
+            _view.SetVisible(IsOpen);
+            _view.ShowBuildError(_buildError);
+            Refresh();
+        }
+
+        public void Detach()
+        {
+            _view = null;
+            _portraits = null;
         }
 
         public void Dispose()
         {
-            _run.StepChanged -= OnStepChanged;
             _slots.Changed -= Refresh;
-            _view = null;
+            EnterBattlePressed = null;
+            BackPressed = null;
+            Detach();
         }
 
-        private void OnStepChanged(RunStep step)
-        {
-            if (step == RunStep.TeamSelect) Open();
-            else Close();
-        }
-
-        /// <summary>Opens the screen with the remembered team (or the default team) in the slots.</summary>
-        public void Open()
+        /// <summary>Shows the screen with the remembered team (or the default team) in the slots.</summary>
+        public void Show()
         {
             IsOpen = true;
+            _locked = false;
+            _buildError = null;
             _slots.Fill(_memory.TeamToShow(_rules.DefaultTeam), code => _roster.TryGet(code, out _));
             _view?.SetVisible(true);
+            _view?.ShowBuildError(null);
             Refresh();
         }
 
-        private void Close()
+        /// <summary>Hides the screen; slots picked but not confirmed are dropped (the next show refills them).</summary>
+        public void Hide()
         {
             IsOpen = false;
+            _locked = false;
+            _buildError = null;
+            _view?.ShowBuildError(null);
             _view?.SetVisible(false);
         }
 
+        /// <summary>The flow locks the screen while a battle is built, and unlocks it when the build failed.</summary>
+        public void SetEnterBattleEnabled(bool enabled)
+        {
+            _locked = !enabled;
+            Refresh();
+        }
+
+        public void ShowBuildError(string text)
+        {
+            _buildError = string.IsNullOrEmpty(text) ? null : text;
+            _view?.ShowBuildError(_buildError);
+        }
+
+        public void HideBuildError() => ShowBuildError(null);
+
+        /// <summary>A battle was built for <paramref name="heroCodes"/>: it becomes the remembered team.</summary>
+        public void RememberTeam(IReadOnlyList<string> heroCodes) => _memory.Remember(heroCodes);
+
         public void TapCard(string heroCode)
         {
-            if (!IsOpen) return;
+            if (!TakesTaps) return;
             _slots.TapHero(heroCode);
         }
 
         public void TapSlot(int index)
         {
-            if (!IsOpen) return;
+            if (!TakesTaps) return;
             _slots.TapSlot(index);
         }
 
-        /// <summary>The device back key: the screen has no way back, so nothing happens.</summary>
+        /// <summary>The Back button and the device back key: reported while the screen takes taps.</summary>
         public void TapBack()
         {
+            if (!TakesTaps) return;
+            BackPressed?.Invoke();
         }
 
-        /// <summary>Enter battle: only with a full team, only once per opening.</summary>
+        /// <summary>
+        /// Enter battle (slots-spec#start-button-once): only with a full team; reports the team once and locks the
+        /// screen until the flow has the build result (unlocks on failure, hides on success).
+        /// </summary>
         public bool TapStart()
         {
             if (!CanStart) return false;
             var team = _slots.ToArray();
-            IsOpen = false;
-            _memory.Remember(team);
+            _locked = true;
+            HideBuildError(); // retrying after a failed build: the error line goes away on the tap
             Refresh();
-            _run.EnterBattle(new RunTeam(team));
+            EnterBattlePressed?.Invoke(team);
             return true;
         }
 

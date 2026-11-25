@@ -6,6 +6,9 @@ namespace Game.Hud
     /// <summary>The battle HUD on screen. Shows what it is given and reports taps; decides nothing.</summary>
     internal interface IHudView
     {
+        /// <summary>The Unity object that is this view on screen, counted by the session while it is held.</summary>
+        UnityEngine.Object Root { get; }
+
         void SetVisible(bool visible);
 
         void ShowHealth(string text, float fill);

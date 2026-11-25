@@ -136,15 +136,15 @@
    "at": "2026-11-25 12:23:19"
   },
   "edge-hai-con-ra-cung-cho": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Wave không chặn con ra cùng chỗ, chỉ đếm nhịp. Play đợt 1: hai con liền một bên vẫn ra, chồng lên nhau rồi Enemy tách khi đi",
    "hash": "489f811b1a3a",
    "text": "**Hai con ra cùng chỗ** (con trước còn đứng ở x = ±17u): vẫn ra, cho chồng lên nhau; `feature-enemy` lo việc tách khi đi.",
    "title": "Hai con ra cùng chỗ",
-   "by": "Wave",
-   "at": "2026-11-25 11:36:33"
+   "by": "@CodeLead",
+   "at": "2026-11-25 20:39:22"
   },
   "edge-khong-xep-duoc-ben-de-chuoi-3": {
    "state": "verified",
@@ -201,7 +201,7 @@
    "state": "verified",
    "note": "",
    "tests": [
-    "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers",
+    "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers",
     "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow",
     "SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave",
     "WaveDirectorTests.Boss_WaitsUnderTheAliveCapLikeEveryEnemy_AndStillComesLast"
@@ -211,7 +211,37 @@
    "text": "## Làm gì\n1. Đầu đợt nhận từ `feature-wave/difficulty-scaling/wave-formula`: số quái N, nhịp thả, hệ số chỉ số, số con từng loại.\n2. Lập danh sách N mục (loại, bên, lúc ra):\n   - Xáo thứ tự các loại không phải Trùm.\n   - Nếu đợt có Trùm: đặt Trùm ở vị trí cuối (thứ N).\n   - Gán bên: đúng N/2 trái, N/2 phải, ngẫu nhiên, không có chuỗi quá 3 mục liên tiếp cùng bên.\n   - Lúc ra dự kiến của mục thứ i (đếm từ 1) là (i − 1) × nhịp thả, tính từ đầu đợt, cộng thời gian bị hoãn.\n3. Thả lần lượt theo danh sách. Mỗi con mới ra mang chỉ số đã nhân hệ số của đợt đang đánh.\n4. Báo \"đã ra hết\" cho `feature-wave/wave-clear/clear-rules` khi mục cuối đã ra.\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Điểm ra bên trái / phải | x = −17 / +17, trên mặt đất của làn | u | Ngoài mép màn hình (±16u) 1u, quái đi vào khung hình |\n| Số quái mỗi bên | N/2 | con | Kẹp đều hai phía |\n| Vị trí Trùm | N (con cuối) | thứ tự | Cuối đợt; luật này do node này giữ |\n| Chuỗi cùng bên tối đa | 3 | con | Không bỏ trống một bên lâu |\n| Con đầu tiên ra | 0 | s từ đầu đợt | Đợt bắt đầu là thấy quái ngay |\n| Giới hạn quái sống | 40 | con | Màn hình điện thoại vẫn đọc được |\n| Thời gian thả cả đợt (không hoãn) | (N − 1) × nhịp | s | Đợt 1: 7 s, đợt 5: 12 s, đợt 10: 13.75 s, đợt 20: 13.5 s |\n\n\"Quái sống\" là quái đã ra và chưa bị hạ, ở bất kì vị trí nào (kể cả còn ngoài màn hình).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Điểm ra | x = ±17u | x = ±17u | x = ±17u |\n| Chia bên | N/2 mỗi bên | N/2 mỗi bên | N/2 mỗi bên |\n| Chuỗi cùng bên tối đa | 3 con | 3 con | chỉnh sau chơi thử |\n| Vị trí Trùm | không có Trùm | con cuối (N) | chỉnh sau chơi thử |\n| Giới hạn quái sống | 40 con | 40 con | chỉnh theo hiệu năng máy thật |\n| Xáo thứ tự, bên | có | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:01:19"
+   "at": "2026-11-26 00:30:14"
+  },
+  "seeded-shuffle": {
+   "state": "verified",
+   "note": "Chuyển Wave sang nhịp chung SimClock và xáo bằng dòng ngẫu nhiên Wave",
+   "tests": [
+    "SeededShuffleTests.SameRunSeed_GivesTheSameKindOrderAndSides_InEveryWave",
+    "SeededShuffleTests.DifferentRunSeeds_GiveDifferentWaves",
+    "SeededShuffleTests.EnemyHeldAtTheAliveCap_KeepsTheKindAndSideDrawnForIt_AndDrawsNothingWhileWaiting",
+    "WaveInstallerTests.RealInstaller_StepsWaveOnTheSharedClockAsWave_AndDrawsFromTheStreamNamedWave"
+   ],
+   "play": "",
+   "hash": "e3707d8a49c2",
+   "text": "Xáo thứ tự loại quái và gán bên ra đều lấy số từ dòng ngẫu nhiên của đợt quái, sinh từ seed của lượt\nCùng seed thì mọi đợt của lượt ra cùng thứ tự và cùng bên; luật dòng ngẫu nhiên ở `feature-sim-clock/seeded-random`. Nhịp thả và lúc hoãn đếm theo bước nhịp chung.",
+   "title": "Xáo thứ tự loại quái và gán bên ra đều lấy số từ dòng ngẫu nhiên của đợt quái, sinh từ seed của lượt",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:50:37"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "Test config thật PROTOTYPE: Trùm là con cuối đợt 10",
+   "tests": [
+    "PrototypeStageTests.SpawnOrderStagePrototype_RealConfigWaveTen_EndsWithTheBoss",
+    "SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave"
+   ],
+   "play": "",
+   "hash": "e224354aefcf",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Vị trí Trùm: con cuối (N)",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:14"
   }
  },
  "log": [
@@ -456,6 +486,69 @@
   {
    "at": "2026-11-25 12:23:19",
    "id": "edge-mua-nang-cap-dung-ki-nang-thanh-giua",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:39:22",
+   "id": "edge-hai-con-ra-cung-cho",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:14:09",
+   "id": "seeded-shuffle",
+   "state": "doing",
+   "by": "Wave",
+   "note": "Chuyển Wave sang nhịp chung SimClock và xáo bằng dòng ngẫu nhiên Wave"
+  },
+  {
+   "at": "2026-11-25 23:24:55",
+   "id": "seeded-shuffle",
+   "state": "done",
+   "by": "Wave",
+   "note": "SeededShuffleTests.SameRunSeed_GivesTheSameKindOrderAndSides_InEveryWave, SeededShuffleTests.DifferentRunSeeds_GiveDifferentWaves, SeededShuffleTests.EnemyHeldAtTheAliveCap_KeepsTheKindAndSideDrawnForIt_AndDrawsNothingWhileWaiting, WaveInstallerTests.RealInstaller_StepsWaveOnTheSharedClockAsWave_AndDrawsFromTheStreamNamedWave"
+  },
+  {
+   "at": "2026-11-25 23:50:37",
+   "id": "seeded-shuffle",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:13:06",
+   "id": "params",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers, SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow, SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave, WaveDirectorTests.Boss_WaitsUnderTheAliveCapLikeEveryEnemy_AndStillComesLast"
+  },
+  {
+   "at": "2026-11-26 00:30:14",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:02:58",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Wave",
+   "note": "Test config thật PROTOTYPE: Trùm là con cuối đợt 10"
+  },
+  {
+   "at": "2026-11-26 01:03:39",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Wave",
+   "note": "PrototypeStageTests.SpawnOrderStagePrototype_RealConfigWaveTen_EndsWithTheBoss, SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave"
+  },
+  {
+   "at": "2026-11-26 01:18:14",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

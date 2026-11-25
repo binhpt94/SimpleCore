@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Game.Core;
@@ -8,8 +9,9 @@ namespace Game.SceneFlow
     /// The Game scene's side: makes its scene the active one before any feature opens a view, opens
     /// the gate once every other feature of the scene is running, or marks it failed when the
     /// session fails. Install it last so its Run comes after all the others.
+    /// Also tells the scene's features, through <see cref="IGameSceneReady"/>, when that gate opens: once per load.
     /// </summary>
-    internal sealed class GameReadySignal : SessionParticipantBase
+    internal sealed class GameReadySignal : SessionParticipantBase, IGameSceneReady
     {
         private readonly ISessionScene session;
         private readonly SceneGate gate;
@@ -34,15 +36,23 @@ namespace Game.SceneFlow
             return UniTask.CompletedTask;
         }
 
+        public bool IsReady { get; private set; }
+
+        public event Action Ready;
+
         protected override void OnRun()
         {
             gate.Open();
+            if (IsReady) return;
+            IsReady = true;
+            Ready?.Invoke();
         }
 
         // Subscribed in the constructor, not in Run: the session can fail while still loading, before any Run.
         protected override UniTask OnDisposeAsync()
         {
             session.StateChanged -= OnStateChanged;
+            Ready = null;
             return UniTask.CompletedTask;
         }
 

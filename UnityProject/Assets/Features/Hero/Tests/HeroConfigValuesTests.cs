@@ -91,6 +91,12 @@ namespace Game.Hero.Tests
         }
 
         [Test]
+        public void At_prototype_the_new_level_number_shows_for_1_second_after_a_level_up()
+        {
+            Assert.That(HeroFakes.LoadConfig().LevelUpLabelSeconds, Is.EqualTo(1f).Within(Tolerance));
+        }
+
+        [Test]
         public void Heroes_target_enemies_within_16u_and_walk_within_15u_of_the_castle_centre()
         {
             var config = HeroFakes.LoadConfig();

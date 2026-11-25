@@ -3,6 +3,8 @@
   "rootNamespace": "Game.Hero.Tests",
   "references": [
     "Game.Core",
+    "Game.SimClock.Contracts",
+    "Game.Combat.Contracts",
     "Game.Hero.Contracts",
     "Game.Hero.Internal",
     "Game.Enemy.Contracts",

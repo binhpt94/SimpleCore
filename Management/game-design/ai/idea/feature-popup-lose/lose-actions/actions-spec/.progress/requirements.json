@@ -83,16 +83,18 @@
   },
   "two-buttons-text": {
    "state": "verified",
-   "note": "",
+   "note": "IDEA chỉ hiện Chơi lại, nút home ẩn tới PROTOTYPE",
    "tests": [
-    "PopupLoseInstallerTests.PopupPrefabHasReplayAsTheMainButtonAndHomeAsTheSecond"
+    "PopupLoseInstallerTests.PopupPrefabHasReplayAsTheMainButtonAndHomeAsTheSecond",
+    "LosePopupTests.AtIdeaTheHomeButtonIsHiddenAndOnlyReplayShows",
+    "LosePopupTests.FromPrototypeTheHomeButtonShows"
    ],
    "play": "",
    "hash": "b1d3627dd69f",
    "text": "Có 2 nút: \"Chơi lại\" là nút chính, \"Về màn bắt đầu\" là nút phụ\nNút chính đặt trước và nổi hơn nút phụ; cách làm nổi do chuyên gia giao diện quyết.",
    "title": "Có 2 nút: \"Chơi lại\" là nút chính, \"Về màn bắt đầu\" là nút phụ",
    "by": "@CodeLead",
-   "at": "2026-11-25 18:31:11"
+   "at": "2026-11-25 20:45:27"
   },
   "edge-roi-game-khi-popup-thua-dang-mo": {
    "state": "verified",
@@ -109,8 +111,12 @@
   },
   "params": {
    "state": "verified",
-   "note": "",
+   "note": "PROTOTYPE: bật nút Về màn bắt đầu trên PopupLoseInstaller.asset, test installer kiểm giá trị mới",
    "tests": [
+    "LosePopupTests.AtIdeaTheHomeButtonIsHiddenAndOnlyReplayShows",
+    "LosePopupTests.AtIdeaAHomeTouchIsNeverReportedAndReplayStillWorks",
+    "LosePopupTests.FromPrototypeTheHomeButtonShows",
+    "PopupLoseInstallerTests.RealInstallerJoinsTheSessionWithoutCheat",
     "PopupLoseInstallerTests.PopupPrefabHasReplayAsTheMainButtonAndHomeAsTheSecond",
     "LosePopupTests.HomeTouchAsksTheRunToGoHomeAndLocksButtons",
     "LosePopupTests.OnlyTheFirstReplayTouchIsReported",
@@ -122,18 +128,18 @@
    "text": "## Làm gì\n- Hiện 2 nút dưới phần kết quả (`feature-popup-lose/lose-result/result-spec`).\n- Chạm nút: báo lựa chọn cho `feature-run/run-flow/flow-rules` một lần, rồi khoá cả 2 nút.\n- Popup không tự đóng và không tự chuyển màn; `feature-run` đóng nó qua `feature-popup`.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số nút | 2 | nút | `actions-two` |\n| Nút chính | \"Chơi lại\" | | Vòng lặp thua rồi chơi lại ngay |\n| Nút phụ | \"Về màn bắt đầu\" | | |\n| Số lần báo mỗi lần popup mở | 1 | lần | `first-tap-only` |\n| Cách đóng khác | không có | | `actions-only-exit` |\n| Nút hồi sinh | không có | | Hồi sinh nằm ở popup hồi sinh, hiện trước popup thua |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Nút \"Chơi lại\" | Có; vào thẳng trận mới với đội mặc định | Có; sang màn chọn đội | Có; sang màn chọn đội |\n| Nút \"Về màn bắt đầu\" | Không có (chưa có màn bắt đầu) | Có | Có |\n| Hiệu ứng chạm nút | Không | Không | Nút lún nhẹ (thu 0.95 lần, 0.1 giây, dự kiến) |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 18:31:11"
+   "at": "2026-11-26 00:30:13"
   },
   "edge-tat-game-khi-popup-dang-mo": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play scene Game, thua với điểm vượt kỉ lục cũ. Khi popup thua đang mở thì dừng Play, rồi Play lại: kỉ lục mới vẫn còn. Kỉ lục do Run ghi xuống máy trước khi popup hiện, popup thua chỉ đọc, không ghi gì.",
    "hash": "917e62ec5448",
    "text": "**Tắt game khi popup đang mở:** kỉ lục đã lưu trước khi popup hiện (`feature-run/run-score/score-rules`).",
    "title": "Tắt game khi popup đang mở",
-   "by": "PopupLose",
-   "at": "2026-11-25 13:38:59"
+   "by": "@CodeLead",
+   "at": "2026-11-25 20:45:27"
   }
  },
  "log": [
@@ -370,6 +376,76 @@
   },
   {
    "at": "2026-11-25 18:31:11",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:42:27",
+   "id": "params",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "IDEA: ẩn và không nối nút Về màn bắt đầu theo bảng giai đoạn, cờ trên installer"
+  },
+  {
+   "at": "2026-11-25 20:42:29",
+   "id": "two-buttons-text",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "IDEA chỉ hiện Chơi lại, nút home ẩn tới PROTOTYPE"
+  },
+  {
+   "at": "2026-11-25 20:43:45",
+   "id": "params",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.AtIdeaTheHomeButtonIsHiddenAndOnlyReplayShows, LosePopupTests.AtIdeaAHomeTouchIsNeverReportedAndReplayStillWorks, LosePopupTests.FromPrototypeTheHomeButtonShows, PopupLoseInstallerTests.RealInstallerJoinsTheSessionWithoutCheat, PopupLoseInstallerTests.PopupPrefabHasReplayAsTheMainButtonAndHomeAsTheSecond, LosePopupTests.HomeTouchAsksTheRunToGoHomeAndLocksButtons, LosePopupTests.OnlyTheFirstReplayTouchIsReported, LosePopupTests.TouchOnTheOtherButtonAfterTheFirstIsNotReported, LosePopupTests.PopupDoesNotCloseByItself"
+  },
+  {
+   "at": "2026-11-25 20:43:46",
+   "id": "two-buttons-text",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "PopupLoseInstallerTests.PopupPrefabHasReplayAsTheMainButtonAndHomeAsTheSecond, LosePopupTests.AtIdeaTheHomeButtonIsHiddenAndOnlyReplayShows, LosePopupTests.FromPrototypeTheHomeButtonShows"
+  },
+  {
+   "at": "2026-11-25 20:45:27",
+   "id": "two-buttons-text",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:45:27",
+   "id": "edge-tat-game-khi-popup-dang-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:45:27",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:22:55",
+   "id": "params",
+   "state": "doing",
+   "by": "PopupLose",
+   "note": "PROTOTYPE: bật nút Về màn bắt đầu trên PopupLoseInstaller.asset, test installer kiểm giá trị mới"
+  },
+  {
+   "at": "2026-11-26 00:22:58",
+   "id": "params",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.AtIdeaTheHomeButtonIsHiddenAndOnlyReplayShows, LosePopupTests.AtIdeaAHomeTouchIsNeverReportedAndReplayStillWorks, LosePopupTests.FromPrototypeTheHomeButtonShows, PopupLoseInstallerTests.RealInstallerJoinsTheSessionWithoutCheat, PopupLoseInstallerTests.PopupPrefabHasReplayAsTheMainButtonAndHomeAsTheSecond, LosePopupTests.HomeTouchAsksTheRunToGoHomeAndLocksButtons, LosePopupTests.OnlyTheFirstReplayTouchIsReported, LosePopupTests.TouchOnTheOtherButtonAfterTheFirstIsNotReported, LosePopupTests.PopupDoesNotCloseByItself"
+  },
+  {
+   "at": "2026-11-26 00:30:13",
    "id": "params",
    "state": "verified",
    "by": "@CodeLead",

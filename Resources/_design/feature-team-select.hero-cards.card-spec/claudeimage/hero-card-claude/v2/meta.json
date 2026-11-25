@@ -1,0 +1,15 @@
+{
+ "node": "feature-team-select/hero-cards/card-spec",
+ "nodeHash": "786f5ada38ab",
+ "frames": {
+  "card": "dd85804d7b22"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99"
+ },
+ "order": "_design/feature-team-select.hero-cards.card-spec/hero-card-claude",
+ "version": 2,
+ "at": "2026-11-25 23:26:02",
+ "stamp": 1795623962.0618222,
+ "sources": []
+}

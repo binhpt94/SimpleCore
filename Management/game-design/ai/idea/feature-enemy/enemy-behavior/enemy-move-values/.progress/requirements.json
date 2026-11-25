@@ -178,14 +178,15 @@
    "tests": [
     "EnemyCombatTests.While_paused_enemies_stand_still",
     "EnemyCombatTests.Pause_keeps_the_time_left_on_Frost",
-    "EnemyCombatTests.Pause_keeps_the_time_left_before_the_next_hit"
+    "EnemyCombatTests.Pause_keeps_the_time_left_before_the_next_hit",
+    "EnemyCombatTests.A_step_that_is_not_gameplay_moves_no_enemy_and_freezes_the_stage"
    ],
    "play": "",
    "hash": "05ed87ae23d8",
    "text": "Tạm dừng: quái đứng yên, giữ trạng thái, thời gian chờ đòn và thời gian chậm.",
    "title": "Tạm dừng",
    "by": "@CodeLead",
-   "at": "2026-11-25 12:06:26"
+   "at": "2026-11-25 23:22:08"
   },
   "params": {
    "state": "verified",
@@ -202,6 +203,24 @@
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
    "at": "2026-11-25 12:06:26"
+  },
+  "stage-prototype": {
+   "state": "verified",
+   "note": "Cột PROTOTYPE: chậm do Băng giá và dấu chậm suốt thời gian chậm, thêm test dấu chậm",
+   "tests": [
+    "EnemyCombatTests.Frost_halves_walking_speed_while_it_lasts",
+    "EnemyCombatTests.Frost_doubles_the_wait_between_hits",
+    "EnemyInstallerTests.The_real_config_slows_enemies_by_half_under_Frost",
+    "EnemyCombatTests.A_slowed_enemy_shows_the_slow_mark_for_exactly_as_long_as_it_is_slowed",
+    "EnemyInstallerTests.The_real_stage_tints_slowed_enemies_with_a_visible_slow_mark",
+    "EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+   ],
+   "play": "",
+   "hash": "d693b423b6dc",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Chậm do Băng giá: ×0.5 đi, ×2 giây mỗi đòn\n- Dấu chậm: hiện suốt thời gian chậm",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:18:14"
   }
  },
  "log": [
@@ -481,6 +500,41 @@
   {
    "at": "2026-11-25 12:06:26",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:19:04",
+   "id": "edge-tam-dung",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyCombatTests.While_paused_enemies_stand_still, EnemyCombatTests.Pause_keeps_the_time_left_on_Frost, EnemyCombatTests.Pause_keeps_the_time_left_before_the_next_hit, EnemyCombatTests.A_step_that_is_not_gameplay_moves_no_enemy_and_freezes_the_stage"
+  },
+  {
+   "at": "2026-11-25 23:22:08",
+   "id": "edge-tam-dung",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:02:53",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "Enemy",
+   "note": "Cột PROTOTYPE: chậm do Băng giá và dấu chậm suốt thời gian chậm, thêm test dấu chậm"
+  },
+  {
+   "at": "2026-11-26 01:03:27",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyCombatTests.Frost_halves_walking_speed_while_it_lasts, EnemyCombatTests.Frost_doubles_the_wait_between_hits, EnemyInstallerTests.The_real_config_slows_enemies_by_half_under_Frost, EnemyCombatTests.A_slowed_enemy_shows_the_slow_mark_for_exactly_as_long_as_it_is_slowed, EnemyInstallerTests.The_real_stage_tints_slowed_enemies_with_a_visible_slow_mark, EnemyInstallerTests.The_real_stage_plays_the_unit_motions_with_the_design_numbers"
+  },
+  {
+   "at": "2026-11-26 01:18:14",
+   "id": "stage-prototype",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

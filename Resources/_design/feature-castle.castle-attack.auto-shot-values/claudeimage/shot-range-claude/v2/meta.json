@@ -1,0 +1,15 @@
+{
+ "node": "feature-castle/castle-attack/auto-shot-values",
+ "nodeHash": "73b7dbaf8425",
+ "frames": {
+  "shot-range": "b67f345cd915"
+ },
+ "styles": {
+  "world-cartoon": "81265f8159a9"
+ },
+ "order": "_design/feature-castle.castle-attack.auto-shot-values/shot-range-claude",
+ "version": 2,
+ "at": "2026-11-25 23:19:44",
+ "stamp": 1795623584.3257368,
+ "sources": []
+}

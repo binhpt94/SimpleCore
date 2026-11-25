@@ -1,0 +1,50 @@
+Muc 1, 2, 3, 6 cua dot PROTOTYPE 1 (execute_code, chi trong bo nho). Cot snap: step = RunFlow.Step; clockStep / gpStep = SimClock StepCount / GameplayStepCount;
+phase, nextIndex, untilNext, breakLeft = WaveDirector; skillCd = CastleSkills._cooldownLeft (Sam set, Bang gia, Co vu); E = quai (x, mau, slow con lai, hitWait);
+H = hero (x, mau, dang dung, hoi sinh con lai, cd don, grow); V = vi tri va scale cac hinh duoi EnemyStage, Heroes, CastleView.
+
+== Muc 1 + 2: bam Sam set, Bang gia, Co vu roi bam nut Tam dung (dot 5, gio tran khoang 103 s)
+A (ngay sau khi vao Paused):
+step=Paused clockStep=4170 gpStep=4151 frame=28731
+wave=5 phase=Sending nextIndex=16 untilNext=-11.850 breakLeft=0.000
+skillCd=20.000 35.000 25.000  castleHp=785.20
+autoShot: _alive#2 _sinceShot=0.875
+combat: _inBattle=True TicksRun=4151
+ E#57 Soldier x=2.975 hp=4.0 slow=5.000 hitWait=0.300
+ E#58 Giant x=5.580 hp=210.0 slow=5.000 hitWait=0.000
+ H0 x=-1.440 hp=188.0 stand=True resp=0.000 cd=0.000 grow=0.000
+ H1 x=1.500 hp=240.0 stand=True resp=0.000 cd=0.725 grow=0.000
+ H2 x=-5.025 hp=120.0 stand=True resp=0.000 cd=0.225 grow=0.000
+ V Enem/Enemy Soldier #57 p=2.975,0.000 sc=0.234
+ V Enem/Enemy Giant #58 p=5.580,0.014 sc=0.488
+ V Hero/Hero archer p=-5.025,0.000 [Effect 7.760,0.900 s0.250]   (mui ten cua Cung thu dang bay)
+ V Cast/Thunder p=2.975,1.000 sc=0.183 ; V Cast/Thunder p=5.580,1.000 sc=0.183   (hai hieu ung set dang hien)
+B (khoang 2000 khung, 8 giay that sau): chi khac dong dau: step=Paused clockStep=4488 gpStep=4151 frame=30706. Moi dong con lai giong het A.
+
+Muc 2 (van Paused): bam thang (ExecuteEvents, lot qua popup) 6 nut nang cap va 3 nut ki nang:
+before: coins=469 lv=1/1/1/1/1/1
+right after clicks: coins=469 lv=1/1/1/1/1/1
+sau them khoang 900 buoc nen: coins=469 lv=1/1/1/1/1/1; snapshot van giong het A (skillCd 20/35/25, gpStep 4151).
+Thanh nang cap mo khi tam dung (anh 01).
+
+Bam Tiep tuc (dong ho dev Freeze de dem tung buoc):
+after click: step=Paused clockStep=5517 gpStep=4151
+after 1 step: step=Playing gpStep=4152 untilNext=-11.875 skillCd=19.975 34.975 24.975 sinceShot=0.900 Giant slow=4.975 H1 cd=0.700 H2 cd=0.175 H0 x=-1.390
+after 2 steps: gpStep=4153 untilNext=-11.900 skillCd=19.950 34.950 24.950 sinceShot=0.925 Giant slow=4.950 H1 cd=0.675 H2 cd=0.150 H0 x=-1.340
+(Buoc dau sau tiep tuc: Linh #57 bi ha va Khong lo mat 80 mau: sat thuong Sam set ap o buoc nay qua Combat. Cac bam truoc tam dung giu hieu qua, theo pause-rules.)
+
+== Muc 3: tam dung giua 3 giay nghi (hook tu bam Tam dung khi breakLeft trong 1.6-1.9)
+3: pause clicked phase=Break breakLeft=1.900 wave=7
+paused: phase=Break breakLeft=1.9000 wave=7 gpStep=5590 clockStep=8759 real=249.95
+still paused: breakLeft=1.9000 wave=7 gpStep=5590 clockStep=9089 real=259.31
+3: resume clicked real=259.31
+3: WaveStarted 7 at gpStep=5666 real=262.03    -> 5666 - 5590 = 76 buoc = 1.900 s
+
+== Muc 6: ha quai roi tam dung ngay (hook tu bam Tam dung khi mot hinh quai bat dau thu nho)
+6: pause clicked f=54322 dying Enemy Wolf #85 scale=0.2238 max=0.2344
+Paused f=54353: Wolf #85 scale=0.2159
+Paused f=55706 (khoang 1350 khung sau): Wolf #85 scale=0.2159 pos=-12.621   (dung yen)
+Sau khi bam Tiep tuc (lenh execute_code): khung dau da 'gone'. EnemyStageView thu nho theo Time.deltaTime (0.3 s); khung ngay sau lenh execute_code
+thuong dai khoang 0.3 s vi bien dich code tren main thread, nen chua ket luan duoc. Dang lam lai bang hook tu bam Tiep tuc thi Unity nap lai code.
+
+== Bi ngat
+Khoang 00:36 Unity bien dich lai va nap lai domain giua luc Play (editor state: last_compile_started, external_changes_dirty), mat het bo do. Stop Play, BAO CHAN Manager.

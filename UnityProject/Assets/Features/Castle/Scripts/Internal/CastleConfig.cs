@@ -39,6 +39,10 @@ namespace Game.Castle
         [SerializeField] private GameObject viewPrefab;
         [SerializeField] private float height = 4f;
         [SerializeField] private float hitFlashSeconds = 0.1f;
+        [Tooltip("PROTOTYPE: a hit also shakes the castle lightly for this long (0 = no shake).")]
+        [SerializeField] private float hitShakeSeconds = 0.1f;
+        [Tooltip("PROTOTYPE: below this fraction of max health the castle shows its damaged picture.")]
+        [SerializeField] private float damagedHealthFraction = 0.5f;
         [SerializeField] private float collapseSeconds = 0.5f;
         [Tooltip("Revive: grows back from 0 to full size over this time (the fall reversed).")]
         [SerializeField] private float reviveGrowSeconds = 0.5f;
@@ -73,6 +77,8 @@ namespace Game.Castle
         public GameObject ViewPrefab => viewPrefab;
         public float Height => height;
         public float HitFlashSeconds => hitFlashSeconds;
+        public float HitShakeSeconds => hitShakeSeconds;
+        public float DamagedHealthFraction => damagedHealthFraction;
         public float CollapseSeconds => collapseSeconds;
         public float ReviveGrowSeconds => reviveGrowSeconds;
         public float ShotFlightSeconds => shotFlightSeconds;

@@ -19,7 +19,7 @@
     "frame": "main",
     "part": "panel",
     "ref": "_design/feature-popup.popup-layer.stack-rules/popup-panel-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -36,7 +36,7 @@
     "frame": "main",
     "part": "new-record-bg",
     "ref": "_design/feature-popup-lose.lose-result.result-spec/lose-result-claude",
-    "version": 2
+    "version": 3
    },
    "text": true
   },
@@ -58,7 +58,7 @@
     "frame": "main",
     "part": "btn-main",
     "ref": "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   },
@@ -80,7 +80,7 @@
     "frame": "main",
     "part": "btn-sub",
     "ref": "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
-    "version": 1
+    "version": 2
    },
    "text": true
   }

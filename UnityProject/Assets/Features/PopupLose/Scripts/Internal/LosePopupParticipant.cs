@@ -7,6 +7,7 @@ namespace Game.PopupLose
 {
     /// <summary>
     /// Opens the lose popup while the run is at <see cref="RunStep.Lost"/> and closes it when the run leaves that step.
+    /// "Về màn bắt đầu" is shown and wired only when <c>homeButton</c> is on (off at IDEA: no start screen yet, node actions-spec).
     /// Reads score, best, the new-best flag and the failed-revive flag once, when the popup opens. The first touch on either button
     /// ("Chơi lại" → Replay, "Về màn bắt đầu" → GoHome) is reported to the run, then both buttons are locked. The popup never closes itself: the run moves on and this class closes it.
     /// </summary>
@@ -18,14 +19,17 @@ namespace Game.PopupLose
         private readonly IPopupService _popups;
         private readonly IPopupViews _views;
         private readonly ILoseLog _log;
+        private readonly bool _homeButton;
 
         private PopupHandle _handle;
         private ILoseView _view;
+        private IDisposable _viewUsage;
         private bool _choiceSent;
 
         internal LosePopupParticipant(IRunFlow flow, IRunRevive revive, IRunScore score, IPopupService popups,
-            IPopupViews views, ILoseLog log)
+            IPopupViews views, ILoseLog log, bool homeButton)
         {
+            _homeButton = homeButton;
             _flow = flow ?? throw new ArgumentNullException(nameof(flow));
             _revive = revive ?? throw new ArgumentNullException(nameof(revive));
             _score = score ?? throw new ArgumentNullException(nameof(score));
@@ -60,10 +64,13 @@ namespace Game.PopupLose
 
             _handle = handle;
             _view = view;
+            // Held views are counted for the session's clean-up check (proposal 2026-11-25-session-usage-tracking).
+            if (view is UnityEngine.Object unityView) _viewUsage = TrackView(unityView);
             _choiceSent = false;
             _view.ShowResult(LoseResultText.From(_score.Score, _score.Best, _score.IsNewBest, _revive.LostAfterFailedRevive));
+            _view.ShowHomeButton(_homeButton);
             _view.ReplayPressed += OnReplayPressed;
-            _view.HomePressed += OnHomePressed;
+            if (_homeButton) _view.HomePressed += OnHomePressed;
         }
 
         private void OnStepChanged(RunStep step)
@@ -99,6 +106,8 @@ namespace Game.PopupLose
             _view.ReplayPressed -= OnReplayPressed;
             _view.HomePressed -= OnHomePressed;
             _view = null;
+            _viewUsage?.Dispose();
+            _viewUsage = null;
             _handle = default;
             _popups.Close(handle);
         }

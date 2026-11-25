@@ -1,5 +1,4 @@
 using System.Linq;
-using Game.Run;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -9,32 +8,34 @@ namespace Game.Home.Tests
     public sealed class HomeScreenTests
     {
         private HomeConfig _config;
-        private FakeRunFlow _flow;
         private FakeRunScore _score;
         private FakeHomeDisplay _display;
-        private HomeScreenPresenter _presenter;
+        private HomeScreenPresenter _screen;
+        private int _playPressed;
 
         [SetUp]
         public void SetUp()
         {
             _config = ScriptableObject.CreateInstance<HomeConfig>();
-            _flow = new FakeRunFlow();
             _score = new FakeRunScore();
             _display = new FakeHomeDisplay();
-            _presenter = new HomeScreenPresenter(_flow, _score, _config, _display);
+            _screen = new HomeScreenPresenter(_score, _config);
+            _screen.Attach(_display);
+            _playPressed = 0;
+            _screen.PlayPressed += () => _playPressed++;
         }
 
         [TearDown]
         public void TearDown()
         {
-            _presenter.Stop();
+            _screen.Detach();
             Object.DestroyImmediate(_config);
         }
 
         [Test]
         public void TitleLineShowsGameName()
         {
-            _presenter.Start();
+            _screen.Show();
 
             Assert.IsTrue(_display.Visible);
             Assert.AreEqual("Thủ thành anh hùng", _display.Content.Title);
@@ -53,7 +54,7 @@ namespace Game.Home.Tests
         public void RecordLineShowsCurrentBest()
         {
             _score.Best = 7;
-            _presenter.Start();
+            _screen.Show();
 
             Assert.AreEqual("Kỉ lục: 7 đợt", _display.Content.Record);
         }
@@ -62,7 +63,7 @@ namespace Game.Home.Tests
         public void RecordLineShowsZeroWhenNoBestYet()
         {
             _score.Best = 0;
-            _presenter.Start();
+            _screen.Show();
 
             Assert.AreEqual("Kỉ lục: 0 đợt", _display.Content.Record);
         }
@@ -71,7 +72,7 @@ namespace Game.Home.Tests
         public void VeryLargeRecordShowsEveryDigit()
         {
             _score.Best = 999;
-            _presenter.Start();
+            _screen.Show();
             Assert.AreEqual("Kỉ lục: 999 đợt", _display.Content.Record);
 
             _score.SetBest(123456);
@@ -81,55 +82,78 @@ namespace Game.Home.Tests
         [Test]
         public void PlayButtonSaysChoi()
         {
-            _presenter.Start();
+            _screen.Show();
 
             Assert.AreEqual("Chơi", _display.Content.PlayLabel);
         }
 
         [Test]
-        public void FirstTapOnPlayReportsPlayToTheRun()
+        public void FirstTapOnPlayReportsPlayPressed()
         {
-            _presenter.Start();
+            _screen.Show();
 
             _display.PressPlay();
 
-            Assert.AreEqual(1, _flow.PlayCalls);
+            Assert.AreEqual(1, _playPressed);
         }
 
         [Test]
         public void MoreTapsWhileLeavingAreIgnored()
         {
-            _presenter.Start();
+            _screen.Show();
 
             _display.PressPlay();
             _display.PressPlay();
             _display.PressPlay();
 
-            Assert.AreEqual(1, _flow.PlayCalls);
+            Assert.AreEqual(1, _playPressed);
         }
 
         [Test]
-        public void ScreenHidesWhenRunMovesToTeamSelect()
+        public void PlayDoesNotHideOrLeaveTheScreenByItself()
         {
-            _presenter.Start();
+            _screen.Show();
+
             _display.PressPlay();
 
-            _flow.GoTo(RunStep.TeamSelect);
-
-            Assert.IsFalse(_display.Visible);
-            _display.PressPlay();
-            Assert.AreEqual(1, _flow.PlayCalls);
+            Assert.IsTrue(_display.Visible, "Leaving the start screen is the screen flow's call.");
         }
 
         [Test]
-        public void ScreenDoesNotShowOutsideHomeStep()
+        public void ScreenHidesWhenTheFlowHidesIt()
         {
-            _flow.GoTo(RunStep.Playing);
-            _presenter.Start();
+            _screen.Show();
+            _display.PressPlay();
+
+            _screen.Hide();
 
             Assert.IsFalse(_display.Visible);
             _display.PressPlay();
-            Assert.AreEqual(0, _flow.PlayCalls);
+            Assert.AreEqual(1, _playPressed);
+        }
+
+        [Test]
+        public void ScreenStaysHiddenUntilTheFlowShowsIt()
+        {
+            Assert.IsFalse(_display.Visible);
+            Assert.IsFalse(_screen.IsShown);
+
+            _display.PressPlay();
+            Assert.AreEqual(0, _playPressed);
+        }
+
+        [Test]
+        public void ShowAskedBeforeTheViewIsBuiltAppearsWhenItIs()
+        {
+            var screen = new HomeScreenPresenter(new FakeRunScore { Best = 6 }, _config);
+            var display = new FakeHomeDisplay();
+            screen.Show();
+
+            screen.Attach(display);
+
+            Assert.IsTrue(display.Visible);
+            Assert.AreEqual("Kỉ lục: 6 đợt", display.Content.Record);
+            screen.Detach();
         }
 
         [Test]
@@ -147,14 +171,12 @@ namespace Game.Home.Tests
         public void BackFromAbandonWithNewBestShowsNewRecord()
         {
             _score.Best = 4;
-            _presenter.Start();
+            _screen.Show();
             _display.PressPlay();
-            _flow.GoTo(RunStep.TeamSelect);
-            _flow.GoTo(RunStep.Playing);
-            _flow.GoTo(RunStep.Paused);
+            _screen.Hide();
 
             _score.SetBest(9, raise: false);
-            _flow.GoTo(RunStep.Home);
+            _screen.Show();
 
             Assert.IsTrue(_display.Visible);
             Assert.AreEqual("Kỉ lục: 9 đợt", _display.Content.Record);
@@ -164,10 +186,8 @@ namespace Game.Home.Tests
         public void RecordSavedJustAfterReturningHomeStillShows()
         {
             _score.Best = 4;
-            _flow.GoTo(RunStep.Paused);
-            _presenter.Start();
 
-            _flow.GoTo(RunStep.Home);
+            _screen.Show();
             _score.SetBest(9);
 
             Assert.AreEqual("Kỉ lục: 9 đợt", _display.Content.Record);
@@ -178,7 +198,7 @@ namespace Game.Home.Tests
         {
             _score.Best = 9;
             _score.IsNewBest = true;
-            _presenter.Start();
+            _screen.Show();
 
             Assert.AreEqual("Kỉ lục: 9 đợt", _display.Content.Record);
             Assert.AreEqual("Thủ thành anh hùng", _display.Content.Title);
@@ -187,30 +207,42 @@ namespace Game.Home.Tests
         [Test]
         public void PlayTakesOneNewTapEachTimeScreenShowsAgain()
         {
-            _presenter.Start();
+            _screen.Show();
             _display.PressPlay();
-            _flow.GoTo(RunStep.TeamSelect);
+            _screen.Hide();
 
             for (var i = 0; i < 3; i++)
             {
-                _flow.GoTo(RunStep.Home);
+                _screen.Show();
                 _display.PressPlay();
                 _display.PressPlay();
-                _flow.GoTo(RunStep.TeamSelect);
+                _screen.Hide();
             }
 
-            Assert.AreEqual(4, _flow.PlayCalls);
+            Assert.AreEqual(4, _playPressed);
         }
 
         [Test]
-        public void StoppedScreenLetsGoOfRunEvents()
+        public void HiddenScreenLetsGoOfScoreEvents()
         {
-            _presenter.Start();
+            _screen.Show();
 
-            _presenter.Stop();
+            _screen.Hide();
 
-            Assert.IsFalse(_flow.HasListeners);
+            Assert.IsFalse(_score.HasListeners);
             Assert.IsFalse(_display.Visible);
+        }
+
+        [Test]
+        public void DetachedScreenIgnoresTapsOnTheOldView()
+        {
+            _screen.Show();
+
+            _screen.Detach();
+            _display.PressPlay();
+
+            Assert.AreEqual(0, _playPressed);
+            Assert.IsFalse(_score.HasListeners);
         }
     }
 }

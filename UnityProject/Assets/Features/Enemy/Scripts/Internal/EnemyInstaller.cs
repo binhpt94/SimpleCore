@@ -1,6 +1,8 @@
 using System;
+using Game.Combat;
 using Game.Core;
 using Game.Run;
+using Game.SimClock;
 using Game.Wallet;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -9,8 +11,9 @@ namespace Game.Enemy
 {
     /// <summary>
     /// Wires the enemy feature: publishes <see cref="IEnemyField"/> and joins the scene session.
-    /// Needs SessionScene, Run and Wallet installed earlier. Foes (heroes, castle) add themselves later
-    /// through <see cref="IEnemyField.AddFoes"/>.
+    /// Needs SessionScene, SimClock, Combat, Run and Wallet installed earlier. Publishes <see cref="IEnemyCombat"/> too:
+    /// the enemies join combat as a receiver and an actor here. Foes (heroes, castle) add themselves later through
+    /// <see cref="IEnemyCombat.AddCombatFoes"/> (or the older <see cref="IEnemyField.AddFoes"/>).
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Enemy/Enemy Installer", fileName = "EnemyInstaller")]
     public sealed class EnemyInstaller : InstallerAsset
@@ -40,12 +43,16 @@ namespace Game.Enemy
             var session = registry.Resolve<ISessionScene>();
             var runFlow = registry.Resolve<IRunFlow>();
             var income = registry.Resolve<IWalletIncome>();
+            var clock = registry.Resolve<ISimClock>();
+            var combat = registry.Resolve<ICombat>();
 
             var field = new EnemyField(_config, income);
+            field.JoinCombat(combat);
             registry.Register<IEnemyField>(field);
+            registry.Register<IEnemyCombat>(field);
 
             var prefab = _stagePrefab;
-            session.Join(new EnemyParticipant(field, runFlow,
+            session.Join(new EnemyParticipant(field, runFlow, clock, combat,
                 () => Object.Instantiate(prefab).GetComponent<IEnemyStage>()));
         }
     }

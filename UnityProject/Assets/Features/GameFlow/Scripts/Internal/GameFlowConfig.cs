@@ -4,7 +4,7 @@ namespace Game.GameFlow
 {
     /// <summary>
     /// Numbers of feature-game-flow/flow-routes/routes-values, as an asset in FeatureAssets/Private.
-    /// <see cref="RouteScreens"/> follows the stage table: off at IDEA, where the run still switches screens.
+    /// <see cref="RouteScreens"/> follows the stage table: off at IDEA (the run switched screens), on from PROTOTYPE.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/GameFlow/Config", fileName = "GameFlowConfig")]
     internal sealed class GameFlowConfig : ScriptableObject

@@ -1,0 +1,22 @@
+---
+based-on: d1732f41e794
+refs: glossary#seed@8db59a28bcae, glossary#run@721a2b6e316e
+---
+# Ngẫu nhiên theo seed
+
+Mỗi lượt có một seed. Mọi số ngẫu nhiên của gameplay trong lượt lấy từ các dòng sinh ra từ seed đó, mỗi feature một dòng. Seed được ghi lại để chơi lại đúng lượt.
+
+## Ý cốt lõi
+
+### run-seed | AI 7 | Mỗi lượt có một seed; mọi dòng ngẫu nhiên của lượt sinh ra từ seed đó
+
+### stream-by-name | AI 7 | Mỗi feature có một dòng ngẫu nhiên riêng, gọi theo tên feature
+Thêm một lần bốc ở feature này không làm lệch dãy số của feature khác.
+
+### reset-each-run | AI 7 | Đầu mỗi lượt mọi dòng được đặt lại từ seed của lượt
+Lượt sau không mang theo dãy số dở của lượt trước.
+
+### seed-recorded | AI 7 | Seed của lượt luôn được ghi lại để chơi lại đúng lượt đó khi báo lỗi
+
+### same-seed-same-run | AI 7 | Cùng seed và cùng chuỗi thao tác theo số bước thì ra cùng thứ tự quái, cùng tiền, cùng điểm
+Đây là tiêu chí kiểm của cả feature.

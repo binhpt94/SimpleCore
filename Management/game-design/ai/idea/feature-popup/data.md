@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: popup-close-owner=gpt@r2-1#popup-close-owner, popup-show=gpt@r2-1#popup-display-owner, lose-opens-after-result=gpt@r2-2#mo-popup-thua-sau-khi-chot, pause-opens-after-freeze=gpt@r2-2#mo-popup-khi-tran-da-dung, close-before-report=gpt@r2-2#dong-truoc-khi-bao-lua-chon, lose-before-pause=gpt@r2-3#chot-thua-truoc-tam-dung, freeze-after-lose=gpt@r2-3#dung-tran-sau-khi-thua, choice-only-when-paused=gpt@r2-3#lua-chon-khi-dang-dung, handoff-after-dispose=gpt@r2-3#chuyen-lua-chon-sau-khi-don, flow-routes-leave=gpt@r2-3#dinh-tuyen-khi-roi-tran, flow-switches-after-popup=gpt@r2-3#doi-man-sau-popup, back-key-pause=gpt@r2-3#quay-lai-khi-tam-dung, back-key-lose=gpt@r2-3#quay-lai-khi-thua
 gpt-dropped: r2-2#dich-den-sau-bao-thua=run-routes-after-lose
 ---

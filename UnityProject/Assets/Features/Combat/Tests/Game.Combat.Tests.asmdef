@@ -3,6 +3,7 @@
   "rootNamespace": "Game.Combat.Tests",
   "references": [
     "Game.Core",
+    "Game.SimClock.Contracts",
     "Game.Combat.Contracts",
     "Game.Combat.Internal",
     "Game.Run.Contracts",

@@ -8,7 +8,7 @@ namespace Game.Run
     /// Only this class decides the next step; requests that do not fit the current step, or that arrive while
     /// a step change is still running, are ignored.
     /// </summary>
-    internal sealed class RunFlow : IRunFlow, IRunRevive
+    internal sealed class RunFlow : IRunFlow, IRunRevive, IRunBattle
     {
         private readonly RunScore _score;
         private readonly IRunDelay _delay;
@@ -19,6 +19,10 @@ namespace Game.Run
         private readonly RunTeam _defaultTeam;
         private readonly bool _reviveOnce;
         private readonly bool _pauseEnabled;
+        private readonly IRunClock _clock;
+
+        // True between the clock's SetUpRun and ClearRun of the current battle.
+        private bool _clockRun;
 
         // Set when the revive is offered (the castle's first fall); cleared when a new run starts.
         private bool _reviveOffered;
@@ -40,11 +44,17 @@ namespace Game.Run
         /// The castle's first fall in a run offers a revive (feature-popup-revive/revive-order/order-values); the popup
         /// shows after <paramref name="loseDelaySeconds"/>. Off: every fall loses the run.
         /// </param>
+        /// <param name="clock">
+        /// The shared clock (feature-sim-clock): set up, started, gameplay on and off, cleared with the battle; pause and
+        /// continue go through its queue. Null: no clock, pause and continue apply at once (tests of the run alone).
+        /// </param>
         public RunFlow(RunScore score, IRunDelay delay, float loseDelaySeconds, int teamSize,
-            bool skipMenus = false, RunTeam defaultTeam = default, bool reviveOnce = false, bool pauseEnabled = true)
+            bool skipMenus = false, RunTeam defaultTeam = default, bool reviveOnce = false, bool pauseEnabled = true,
+            IRunClock clock = null)
         {
             _reviveOnce = reviveOnce;
             _pauseEnabled = pauseEnabled;
+            _clock = clock ?? new ImmediateRunClock();
             _score = score ?? throw new ArgumentNullException(nameof(score));
             _delay = delay ?? throw new ArgumentNullException(nameof(delay));
             if (loseDelaySeconds < 0f) throw new ArgumentOutOfRangeException(nameof(loseDelaySeconds));
@@ -89,6 +99,12 @@ namespace Game.Run
 
         internal bool PauseEnabled => _pauseEnabled;
 
+        /// <summary>
+        /// feature-popup-revive/revive-order/order-values#offer-flag: on from the castle's first fall of the run (the
+        /// revive is offered), off only when a new run starts. A fall while it is on loses the run.
+        /// </summary>
+        internal bool ReviveOffered => _reviveOffered;
+
         public RunTeam Team { get; private set; }
 
         public bool IsPaused =>
@@ -97,6 +113,10 @@ namespace Game.Run
         public bool LostAfterFailedRevive => Step == RunStep.Lost && _lostAfterFailedRevive;
 
         public event Action ReviveStarted;
+
+        public event Action BattleBuilt;
+        public event Action<string> BuildFailed;
+        public event Action<RunLeaveChoice> BattleLeft;
 
         public event Action<RunStep> StepChanged;
         public event Action<RunTeam> RunStarted;
@@ -117,14 +137,87 @@ namespace Game.Run
             Change(() => StartBattle(team));
         }
 
+        /// <summary>
+        /// The screen flow asks for a battle (from PROTOTYPE). Allowed only out of battle (start screen or team select,
+        /// as the run's step); answers with exactly one of BattleBuilt or BuildFailed before returning. A wrong team,
+        /// or a battle feature failing while it builds, is a BuildFailed and leaves nothing of the battle.
+        /// </summary>
+        public void BuildBattle(RunTeam team)
+        {
+            if (_changing || (Step != RunStep.Home && Step != RunStep.TeamSelect)) return;
+            try
+            {
+                CheckTeam(team);
+            }
+            catch (ArgumentException e)
+            {
+                BuildFailed?.Invoke(e.Message);
+                return;
+            }
+
+            string failure = null;
+            Change(() =>
+            {
+                try
+                {
+                    StartBattle(team);
+                }
+                catch (Exception e)
+                {
+                    failure = $"Building the battle failed: {e.Message}";
+                    ThrowAwayBattle();
+                }
+            });
+            if (failure != null) BuildFailed?.Invoke(failure);
+            else BattleBuilt?.Invoke();
+        }
+
+        /// <summary>
+        /// The screen flow gave up waiting for the build: whatever battle there is goes, with no answer and no
+        /// BattleLeft. The build answers before BuildBattle returns, so this only finds a battle built just before.
+        /// </summary>
+        public void CancelBuild()
+        {
+            if (_changing || Step != RunStep.Playing) return;
+            Change(ThrowAwayBattle);
+        }
+
+        /// <summary>The battle goes without settling a score: stopped, clock cleared, battle cleared, back on the start screen.</summary>
+        private void ThrowAwayBattle()
+        {
+            DropClearedWaves();
+            _pendingLose?.Dispose();
+            _pendingLose = null;
+            if (_clockRun)
+            {
+                BattleStopped?.Invoke();
+                ClearClockRun();
+                BattleCleared?.Invoke();
+            }
+            SetStep(RunStep.Home);
+        }
+
         public void Pause()
         {
             // pause-rules "Thông số theo giai đoạn": IDEA has no pause, every pause request is ignored.
+            if (!_pauseEnabled || Step != RunStep.Playing) return;
+            // A player action: applied at the start of the next step of the shared clock, checked again then.
+            _clock.Enqueue(ApplyPause);
+        }
+
+        public void Resume()
+        {
+            if (Step != RunStep.Paused) return;
+            _clock.Enqueue(ApplyResume);
+        }
+
+        private void ApplyPause()
+        {
             if (!_pauseEnabled || !CanChange(RunStep.Playing)) return;
             Change(() => SetStep(RunStep.Paused));
         }
 
-        public void Resume()
+        private void ApplyResume()
         {
             if (!CanChange(RunStep.Paused)) return;
             Change(() => SetStep(RunStep.Playing));
@@ -138,9 +231,12 @@ namespace Game.Run
                 CommitClearedWaves();
                 _score.Settle();
                 BattleStopped?.Invoke();
+                ClearClockRun();
                 BattleCleared?.Invoke();
                 SetStep(RunStep.Home);
             });
+            // The battle is gone: the screen flow shows the start screen.
+            BattleLeft?.Invoke(RunLeaveChoice.Abandon);
         }
 
         public void Lose()
@@ -165,10 +261,15 @@ namespace Game.Run
             if (!CanChange(RunStep.Lost)) return;
             Change(() =>
             {
+                ClearClockRun();
                 BattleCleared?.Invoke();
+                // PROTOTYPE: the run leaves the battle step and goes out of battle (Home is the run's only
+                // out-of-battle step); feature-game-flow shows team select from BattleLeft. IDEA: straight into a new battle.
                 if (_skipMenus) StartBattle(_defaultTeam);
-                else SetStep(RunStep.TeamSelect);
+                else SetStep(RunStep.Home);
             });
+            // Menus skipped (IDEA): the run already started the next battle itself, no screen flow to tell.
+            if (!_skipMenus) BattleLeft?.Invoke(RunLeaveChoice.PlayAgain);
         }
 
         public void GoHome()
@@ -176,9 +277,11 @@ namespace Game.Run
             if (_skipMenus || !CanChange(RunStep.Lost)) return;
             Change(() =>
             {
+                ClearClockRun();
                 BattleCleared?.Invoke();
                 SetStep(RunStep.Home);
             });
+            BattleLeft?.Invoke(RunLeaveChoice.BackToStart);
         }
 
         public void Revive()
@@ -223,6 +326,15 @@ namespace Game.Run
             _pendingLose?.Dispose();
             _pendingLose = null;
             DropClearedWaves();
+            ClearClockRun();
+        }
+
+        /// <summary>The clock clears the run's queue, left-over time and streams before the battle is reported cleared.</summary>
+        private void ClearClockRun()
+        {
+            if (!_clockRun) return;
+            _clockRun = false;
+            _clock.ClearRun();
         }
 
         private void OnNextFrameAfterClear()
@@ -284,11 +396,17 @@ namespace Game.Run
             DropClearedWaves();
             _reviveOffered = false;
             _lostAfterFailedRevive = false;
+            // The clock resets for the new run before anyone hears of it, and runs its first gameplay step only once
+            // the battle is built: building the battle spends no spawn or cooldown time.
+            ClearClockRun();
+            _clock.SetUpRun();
+            _clockRun = true;
             Team = team;
             _score.StartRun();
             SetStep(RunStep.Playing);
             RunStarted?.Invoke(team);
             BattleStarted?.Invoke();
+            _clock.StartRun();
         }
 
         private void ShowLost()
@@ -316,6 +434,8 @@ namespace Game.Run
         private void SetStep(RunStep step)
         {
             Step = step;
+            // The battle plays only while Playing: paused, waiting for or showing the revive, ending and lost stand still.
+            if (_clockRun) _clock.SetGameplay(step == RunStep.Playing);
             StepChanged?.Invoke(step);
         }
 

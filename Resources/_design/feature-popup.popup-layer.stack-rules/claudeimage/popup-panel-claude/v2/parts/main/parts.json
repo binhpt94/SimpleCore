@@ -1,0 +1,26 @@
+{
+ "frame": "main",
+ "parts": [
+  {
+   "id": "panel",
+   "w": 800,
+   "h": 700,
+   "slice": [
+    48,
+    48,
+    48,
+    56
+   ],
+   "shapes": [
+    "panel"
+   ],
+   "from": null,
+   "text": true
+  }
+ ],
+ "kept": [],
+ "skipped": [
+  "hud",
+  "backdrop"
+ ]
+}

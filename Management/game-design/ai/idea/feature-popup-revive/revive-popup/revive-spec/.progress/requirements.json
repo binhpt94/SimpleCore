@@ -140,6 +140,37 @@
    "title": "Nút chính \"Xem quảng cáo\" rộng 400 px; nút \"Kết thúc lượt\" rộng 260 px; cùng hàng y=540 trong khung",
    "by": "@CodeLead",
    "at": "2026-11-25 18:31:09"
+  },
+  "back-key-nothing": {
+   "state": "verified",
+   "note": "popup không khai xử lí nút quay lại, kiểm bằng Play",
+   "tests": [],
+   "play": "Mở popup hồi sinh, bấm Esc hay nút quay lại của máy lúc chờ chọn và lúc chờ quảng cáo · popup giữ nguyên, không báo Run, không mở popup tạm dừng",
+   "hash": "a9d058b47302",
+   "text": "Nút quay lại của máy không làm gì khi popup hồi sinh mở\nKhông có lối thoát thứ ba; tránh thua vì bấm nhầm.",
+   "title": "Nút quay lại của máy không làm gì khi popup hồi sinh mở",
+   "by": "@CodeLead",
+   "at": "2026-11-26 01:15:36"
+  },
+  "params": {
+   "state": "verified",
+   "note": "khung, chữ, nút và một lần chạm đã có test",
+   "tests": [
+    "PopupReviveAssetTests.PanelIs800By700",
+    "PopupReviveAssetTests.WatchButtonIs400WideAtX50Y540",
+    "PopupReviveAssetTests.EndButtonIs260WideAtX490Y540",
+    "PopupReviveAssetTests.TitleGainAndWaitLinesSitAtTheirRows",
+    "RevivePopupTests.TitleSaysCastleWasDestroyed",
+    "RevivePopupTests.GainLineSaysCastleGetsThirtyPercentAndPlayContinues",
+    "RevivePopupTests.ButtonsSayWatchAdAndEndRun",
+    "RevivePopupTests.ExactlyOneChoiceIsReportedPerPopup"
+   ],
+   "play": "",
+   "hash": "899458c8ec0b",
+   "text": "## Làm gì\n- Khi `feature-run` nhờ mở `PopupRevive/Main` qua dịch vụ popup: điền tiêu đề, dòng hồi sinh, hai nút; ẩn dòng chờ.\n- Chạm \"Xem quảng cáo\": gửi một yêu cầu tới `feature-ads` (kèm mã đề nghị), hiện dòng chờ, làm mờ và khoá hai nút.\n- Có kết quả: đóng popup, rồi báo `feature-run` \"hồi sinh\" hoặc \"quảng cáo không xem được\".\n- Chạm \"Kết thúc lượt\": đóng popup, rồi báo `feature-run` \"không hồi sinh\".\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Khung popup | 800 x 700 ở x=560, y=190 | px | Khung chuẩn của `feature-popup/popup-layer/stack-rules` |\n| Tiêu đề | \"Thành đã bị phá\", y=40, cao 90 | px | Giống popup thua |\n| Dòng hồi sinh | \"Xem quảng cáo để thành hồi 30% máu và chơi tiếp\", y=160, cao 70 | px | 30% từ `feature-castle/castle-core/castle-body-values` |\n| Dòng chờ | \"Đang chờ quảng cáo...\", y=340, cao 70 | px | Cùng chỗ dòng \"Kỉ lục mới!\" của popup thua |\n| Nút \"Xem quảng cáo\" | x=50, y=540, 400 x 120 | px | Nút chính, cùng chỗ \"Chơi lại\" |\n| Nút \"Kết thúc lượt\" | x=490, y=540, 260 x 120 | px | Cùng chỗ \"Về màn bắt đầu\" |\n| Cao nút | 120 | px | `tap` của `feature-hud/hud-layout/layout-spec` |\n| Số lần chạm có tác dụng mỗi lần mở | 1 | lần | Chặn bấm đúp |\n\nSố tính ra: 50 + 400 + 40 + 260 + 50 = 800 (bề rộng khung).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Popup hồi sinh | Không có | Có đủ chữ, hai nút, dòng chờ | Có, kèm hiệu ứng mở 0.2 giây (dự kiến) |\n| Nút mờ khi chờ | | Đổi độ mờ | Như PROTOTYPE, thêm vòng xoay nhỏ cạnh dòng chờ |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:30:14"
   }
  },
  "log": [
@@ -321,6 +352,48 @@
   {
    "at": "2026-11-25 18:31:09",
    "id": "edge-ket-qua-toi-khi-popup-da-dong-khong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:09:43",
+   "id": "back-key-nothing",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "popup không khai xử lí nút quay lại, kiểm bằng Play"
+  },
+  {
+   "at": "2026-11-26 00:09:44",
+   "id": "params",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "khung, chữ, nút và một lần chạm đã có test"
+  },
+  {
+   "at": "2026-11-26 00:10:28",
+   "id": "params",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "PopupReviveAssetTests.PanelIs800By700, PopupReviveAssetTests.WatchButtonIs400WideAtX50Y540, PopupReviveAssetTests.EndButtonIs260WideAtX490Y540, PopupReviveAssetTests.TitleGainAndWaitLinesSitAtTheirRows, RevivePopupTests.TitleSaysCastleWasDestroyed, RevivePopupTests.GainLineSaysCastleGetsThirtyPercentAndPlayContinues, RevivePopupTests.ButtonsSayWatchAdAndEndRun, RevivePopupTests.ExactlyOneChoiceIsReportedPerPopup"
+  },
+  {
+   "at": "2026-11-26 00:10:30",
+   "id": "back-key-nothing",
+   "state": "done",
+   "by": "PopupRevive",
+   "note": "Mở popup hồi sinh, bấm Esc hay nút quay lại của máy lúc chờ chọn và lúc chờ quảng cáo · popup giữ nguyên, không báo Run, không mở popup tạm dừng"
+  },
+  {
+   "at": "2026-11-26 00:30:14",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 01:15:36",
+   "id": "back-key-nothing",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

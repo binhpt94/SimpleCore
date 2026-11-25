@@ -1,5 +1,5 @@
 ---
-based-on: 53af9956f851
+based-on: 6181a7c21bf0
 by: castle-damage-between-waves=gpt@r2-1#castle-damage-between-waves, castle-auto-attack=gpt@r2-1#castle-defends-nearby
 ---
 # Thành

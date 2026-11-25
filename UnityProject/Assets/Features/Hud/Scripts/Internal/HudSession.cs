@@ -59,8 +59,10 @@ namespace Game.Hud
         {
             _view = _spawner.Spawn();
             var view = _view;
+            var heldView = TrackView(view.Root);
             WhenDisposed(() =>
             {
+                heldView.Dispose();
                 view.Destroy();
                 _view = null;
             });
@@ -73,7 +75,7 @@ namespace Game.Hud
             _skillButtons.Start();
             WhenDisposed(_skillButtons.Stop);
 
-            // Stages without a pause button (IDEA) show none and take no pause taps.
+            // Stages without a pause button (IDEA; optional at PROTOTYPE) show none and take no pause taps.
             view.ShowPauseButton(_hasPauseButton);
             if (_hasPauseButton)
             {
@@ -97,9 +99,11 @@ namespace Game.Hud
 
             _clock.Ticked += OnTick;
             _clock.Start();
+            var frameLoop = TrackJob();
             WhenDisposed(() =>
             {
                 _clock.Stop();
+                frameLoop.Dispose();
                 _clock.Ticked -= OnTick;
             });
         }

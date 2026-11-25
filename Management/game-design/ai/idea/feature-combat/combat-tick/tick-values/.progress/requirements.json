@@ -2,20 +2,20 @@
  "items": {
   "fixed-step": {
    "state": "verified",
-   "note": "FixedStepClock 0.02s, toi da 5 buoc moi khung, CombatLoop",
+   "note": "CombatLoop chay theo ISimClock.OnStep owner Combat, moi buoc mot nhip, khong dong ho rieng",
    "tests": [
-    "CombatLoopTests.BattleRunsFiftyTicksEachSecondOfTwoHundredthsEach",
-    "CombatLoopTests.FastFramesWaitUntilAWholeStepHasPassed",
-    "CombatLoopTests.SlowFrameRunsSeveralTicks",
-    "CombatLoopTests.VerySlowFrameRunsAtMostFiveTicksAndTheBattleSlowsDown",
-    "CombatLoopTests.SameFrameTimesGiveTheSameTicksOnFastAndSlowDevices"
+    "CombatLoopTests.EachSharedStepRunsExactlyOneCombatTick",
+    "CombatLoopTests.CombatStepsAtItsOwnPlaceInTheSharedStepOrder",
+    "CombatLoopTests.CombatKeepsNoTimeOfItsOwnAndFollowsTheSharedStepLength",
+    "CombatLoopTests.StepThatIsNotGameplayRunsNoTick",
+    "CombatLoopTests.DisposedLoopNoLongerTicks"
    ],
    "play": "",
-   "hash": "75320b992a48",
-   "text": "Trận cập nhật theo bước cố định 0.02 giây (50 bước mỗi giây); mỗi bước một nhịp giao chiến\nBước cố định cho kết quả giống nhau trên máy nhanh và máy chậm. Khung hình chậm thì chạy nhiều bước trong một khung, tối đa 5 bước.",
-   "title": "Trận cập nhật theo bước cố định 0.02 giây (50 bước mỗi giây); mỗi bước một nhịp giao chiến",
+   "hash": "f9b63fbdeb5b",
+   "text": "Mỗi bước nhịp chung của trận (0.025 giây, 40 bước mỗi giây) chạy đúng một nhịp giao chiến\nBước, trần số bước mỗi khung và cách chạy do `feature-sim-clock` giữ; giao chiến không có đồng hồ riêng. Người yêu cầu nhịp chung 40 lần mỗi giây (2026-11-25).",
+   "title": "Mỗi bước nhịp chung của trận (0.025 giây, 40 bước mỗi giây) chạy đúng một nhịp giao chiến",
    "by": "@CodeLead",
-   "at": "2026-11-25 13:46:40"
+   "at": "2026-11-25 23:56:00"
   },
   "tick-order": {
    "state": "verified",
@@ -80,16 +80,17 @@
   },
   "params": {
    "state": "verified",
-   "note": "CombatConfig asset 0.02s, 5 buoc",
+   "note": "bo CombatConfig buoc 0.02 va tran 5, buoc lay tu SimStep cua nhip chung",
    "tests": [
-    "CombatConfigTests.BattleStepsAreTwoHundredthsOfASecondAndAtMostFivePerFrame"
+    "CombatLoopTests.BattleRunsFortyTicksEachSecondOfTheSharedClock",
+    "CombatLoopTests.TickTakesTheStepLengthOfTheSharedClock"
    ],
    "play": "",
-   "hash": "09374f40362d",
-   "text": "## Làm gì\n- Mỗi bước cố định 0.02 giây của trận: chạy một nhịp theo thứ tự ở `tick-order`.\n- Nhận đòn trúng từ hero, quái, thành (đòn tự bắn, Sấm sét), lọc theo trạng thái đầu nhịp, cộng theo bên trúng.\n- Chuyển tổng cho feature sở hữu; chờ mọi bên trừ máu và báo xong; báo nhịp xong cho `feature-wave` và `feature-run`.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Bước cập nhật | 0.02 (50 bước/giây) | giây | Nhịp đòn nhanh nhất là 0.7 giây (Kiếm khách, `feature-hero/hero-list/hero-roster-values`); 0.02 giây đủ mịn |\n| Số bước tối đa trong một khung hình | 5 | bước | Khung hình chậm (0.1 giây) vẫn theo kịp; chậm hơn thì trận chạy chậm lại, không nhảy cóc |\n| Làm tròn sát thương | không | | Hệ số đợt cho số lẻ |\n| Đòn Sấm sét | một đòn mỗi quái trong vùng | đòn | `feature-castle/castle-skills/skill-values` |\n| Tiền khi hạ quái | một lần mỗi quái | lần | Dù nhiều bên cùng hạ |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Giao chiến | Không có: mỗi bên trừ máu ngay khi trúng | Có, bước 0.02 giây | Như PROTOTYPE |\n| Bước cập nhật cố định | Không bắt buộc | 0.02 giây | Như PROTOTYPE |",
+   "hash": "888144a03e10",
+   "text": "## Làm gì\n- Mỗi bước nhịp chung của trận (0.025 giây, theo `feature-sim-clock`): chạy một nhịp theo thứ tự ở `tick-order`.\n- Nhận đòn trúng từ hero, quái, thành (đòn tự bắn, Sấm sét), lọc theo trạng thái đầu nhịp, cộng theo bên trúng.\n- Chuyển tổng cho feature sở hữu; chờ mọi bên trừ máu và báo xong; báo nhịp xong cho `feature-wave` và `feature-run`.\n\n## Thông số\nBảng `TickParams` trong `.excel/` (loại `params`, chuyển từ bảng markdown cũ ngày 2026-11-25, giữ nguyên số trừ bước cập nhật): `combat_enabled`, `step_seconds`, `max_steps_per_frame`, `damage_rounding`, `lightning_hits`, `kill_reward_times`. Bước và trần lấy từ nhịp chung của `feature-sim-clock`; Sấm sét theo `feature-castle/castle-skills/skill-values`; nhịp đòn nhanh nhất theo `feature-hero/hero-list/hero-roster-values`.\n\n## Thông số theo giai đoạn\nBa cột `idea`, `prototype`, `full` của bảng `TickParams`. IDEA không có giao chiến (mỗi bên trừ máu ngay khi trúng); từ PROTOTYPE mỗi bước nhịp chung chạy một nhịp giao chiến.",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 13:46:40"
+   "at": "2026-11-25 23:56:00"
   },
   "skill-is-hit": {
    "state": "verified",
@@ -155,6 +156,84 @@
    "title": "Cổ vũ hồi máu cùng nhịp hero nhận đòn",
    "by": "@CodeLead",
    "at": "2026-11-25 13:46:40"
+  },
+  "tickparams-combat-enabled": {
+   "state": "verified",
+   "note": "test dong combat_enabled: moi buoc nhip chung mot nhip giao chiến",
+   "tests": [
+    "TickParamsTests.CombatEnabled_EverySharedStepRunsOneCombatTickThatSettlesItsHitsTogether"
+   ],
+   "play": "",
+   "hash": "bd8ce4d687a4",
+   "text": "Bảng TickParams (params), dòng combat_enabled\nkey (string): combat_enabled\nname (string): Có giao chiến\nunit (string): \nidea (string): không: mỗi bên trừ máu ngay khi trúng\nprototype (string): có: mỗi bước nhịp chung một nhịp\nfull (string): như PROTOTYPE\nreason (string): Ở IDEA đòn trùng đúng một bước hiếm",
+   "title": "TickParams: Có giao chiến (combat_enabled)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:29:50"
+  },
+  "tickparams-step-seconds": {
+   "state": "verified",
+   "note": "test dong step_seconds: buoc 0.025 lay tu SimClock",
+   "tests": [
+    "TickParamsTests.StepSeconds_TickIsAsLongAsTheSharedStepOfOneFortiethOfASecond"
+   ],
+   "play": "",
+   "hash": "3ff978bfec52",
+   "text": "Bảng TickParams (params), dòng step_seconds\nkey (string): step_seconds\nname (string): Bước cập nhật\nunit (string): giây\nidea (string): theo nhịp chung\nprototype (string): 0.025 (theo nhịp chung)\nfull (string): như PROTOTYPE\nreason (string): Người yêu cầu nhịp chung 40 lần mỗi giây; giữ ở feature-sim-clock/clock-step/clock-values; nhịp đòn nhanh nhất 0.7 giây (Kiếm khách ở feature-hero/hero-list/hero-roster-values) nên đủ mịn",
+   "title": "TickParams: Bước cập nhật (step_seconds)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:34"
+  },
+  "tickparams-max-steps-per-frame": {
+   "state": "verified",
+   "note": "test dong max_steps_per_frame: Combat khong co tran rieng",
+   "tests": [
+    "TickParamsTests.MaxStepsPerFrame_CombatHasNoCapOfItsOwn"
+   ],
+   "play": "",
+   "hash": "16d73ec5a311",
+   "text": "Bảng TickParams (params), dòng max_steps_per_frame\nkey (string): max_steps_per_frame\nname (string): Số bước tối đa trong một khung hình\nunit (string): bước\nidea (string): theo nhịp chung\nprototype (string): theo nhịp chung\nfull (string): như PROTOTYPE\nreason (string): Giữ ở feature-sim-clock; giao chiến không có trần riêng",
+   "title": "TickParams: Số bước tối đa trong một khung hình (max_steps_per_frame)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:34"
+  },
+  "tickparams-damage-rounding": {
+   "state": "verified",
+   "note": "test dong damage_rounding: khong lam tron",
+   "tests": [
+    "TickParamsTests.DamageRounding_None_TotalsAndHealthKeepFractions"
+   ],
+   "play": "",
+   "hash": "5c9e137ef94f",
+   "text": "Bảng TickParams (params), dòng damage_rounding\nkey (string): damage_rounding\nname (string): Làm tròn sát thương\nunit (string): \nidea (string): không\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Hệ số đợt cho số lẻ",
+   "title": "TickParams: Làm tròn sát thương (damage_rounding)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:34"
+  },
+  "tickparams-lightning-hits": {
+   "state": "verified",
+   "note": "test dong lightning_hits: mot don moi quai trong vung",
+   "tests": [
+    "TickParamsTests.LightningHits_OneHitPerEnemyInTheZone"
+   ],
+   "play": "",
+   "hash": "e00fb02816d9",
+   "text": "Bảng TickParams (params), dòng lightning_hits\nkey (string): lightning_hits\nname (string): Đòn Sấm sét\nunit (string): đòn\nidea (string): một đòn mỗi quái trong vùng\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Theo feature-castle/castle-skills/skill-values",
+   "title": "TickParams: Đòn Sấm sét (lightning_hits)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:34"
+  },
+  "tickparams-kill-reward-times": {
+   "state": "verified",
+   "note": "test dong kill_reward_times: mot lan moi quai",
+   "tests": [
+    "TickParamsTests.KillRewardTimes_EnemyFinishedBySeveralSidesFallsOnceSoItPaysOnce"
+   ],
+   "play": "",
+   "hash": "74ee90c6f3a7",
+   "text": "Bảng TickParams (params), dòng kill_reward_times\nkey (string): kill_reward_times\nname (string): Tiền khi hạ quái\nunit (string): lần\nidea (string): một lần mỗi quái\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Dù nhiều bên cùng hạ",
+   "title": "TickParams: Tiền khi hạ quái (kill_reward_times)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:34"
   }
  },
  "log": [
@@ -385,6 +464,174 @@
   {
    "at": "2026-11-25 13:46:40",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:49:43",
+   "id": "fixed-step",
+   "state": "doing",
+   "by": "Combat",
+   "note": "CombatLoop chay theo ISimClock.OnStep owner Combat, moi buoc mot nhip, khong dong ho rieng"
+  },
+  {
+   "at": "2026-11-25 23:49:47",
+   "id": "params",
+   "state": "doing",
+   "by": "Combat",
+   "note": "bo CombatConfig buoc 0.02 va tran 5, buoc lay tu SimStep cua nhip chung"
+  },
+  {
+   "at": "2026-11-25 23:50:05",
+   "id": "fixed-step",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatLoopTests.EachSharedStepRunsExactlyOneCombatTick, CombatLoopTests.CombatStepsAtItsOwnPlaceInTheSharedStepOrder, CombatLoopTests.CombatKeepsNoTimeOfItsOwnAndFollowsTheSharedStepLength, CombatLoopTests.StepThatIsNotGameplayRunsNoTick, CombatLoopTests.DisposedLoopNoLongerTicks"
+  },
+  {
+   "at": "2026-11-25 23:50:06",
+   "id": "params",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatLoopTests.BattleRunsFortyTicksEachSecondOfTheSharedClock, CombatLoopTests.TickTakesTheStepLengthOfTheSharedClock"
+  },
+  {
+   "at": "2026-11-25 23:56:00",
+   "id": "fixed-step",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:56:00",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:07:37",
+   "id": "tickparams-combat-enabled",
+   "state": "doing",
+   "by": "Combat",
+   "note": "test dong combat_enabled: moi buoc nhip chung mot nhip giao chiến"
+  },
+  {
+   "at": "2026-11-26 00:07:39",
+   "id": "tickparams-step-seconds",
+   "state": "doing",
+   "by": "Combat",
+   "note": "test dong step_seconds: buoc 0.025 lay tu SimClock"
+  },
+  {
+   "at": "2026-11-26 00:07:40",
+   "id": "tickparams-max-steps-per-frame",
+   "state": "doing",
+   "by": "Combat",
+   "note": "test dong max_steps_per_frame: Combat khong co tran rieng"
+  },
+  {
+   "at": "2026-11-26 00:07:41",
+   "id": "tickparams-damage-rounding",
+   "state": "doing",
+   "by": "Combat",
+   "note": "test dong damage_rounding: khong lam tron"
+  },
+  {
+   "at": "2026-11-26 00:07:42",
+   "id": "tickparams-lightning-hits",
+   "state": "doing",
+   "by": "Combat",
+   "note": "test dong lightning_hits: mot don moi quai trong vung"
+  },
+  {
+   "at": "2026-11-26 00:07:43",
+   "id": "tickparams-kill-reward-times",
+   "state": "doing",
+   "by": "Combat",
+   "note": "test dong kill_reward_times: mot lan moi quai"
+  },
+  {
+   "at": "2026-11-26 00:08:34",
+   "id": "tickparams-combat-enabled",
+   "state": "done",
+   "by": "Combat",
+   "note": "TickParamsTests.CombatEnabled_EverySharedStepRunsOneCombatTickThatSettlesItsHitsTogether"
+  },
+  {
+   "at": "2026-11-26 00:08:36",
+   "id": "tickparams-step-seconds",
+   "state": "done",
+   "by": "Combat",
+   "note": "TickParamsTests.StepSeconds_TickIsAsLongAsTheSharedStepOfOneFortiethOfASecond"
+  },
+  {
+   "at": "2026-11-26 00:08:37",
+   "id": "tickparams-max-steps-per-frame",
+   "state": "done",
+   "by": "Combat",
+   "note": "TickParamsTests.MaxStepsPerFrame_CombatHasNoCapOfItsOwn"
+  },
+  {
+   "at": "2026-11-26 00:08:37",
+   "id": "tickparams-damage-rounding",
+   "state": "done",
+   "by": "Combat",
+   "note": "TickParamsTests.DamageRounding_None_TotalsAndHealthKeepFractions"
+  },
+  {
+   "at": "2026-11-26 00:08:38",
+   "id": "tickparams-lightning-hits",
+   "state": "done",
+   "by": "Combat",
+   "note": "TickParamsTests.LightningHits_OneHitPerEnemyInTheZone"
+  },
+  {
+   "at": "2026-11-26 00:08:39",
+   "id": "tickparams-kill-reward-times",
+   "state": "done",
+   "by": "Combat",
+   "note": "TickParamsTests.KillRewardTimes_EnemyFinishedBySeveralSidesFallsOnceSoItPaysOnce"
+  },
+  {
+   "at": "2026-11-26 00:10:34",
+   "id": "tickparams-step-seconds",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:10:34",
+   "id": "tickparams-max-steps-per-frame",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:10:34",
+   "id": "tickparams-damage-rounding",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:10:34",
+   "id": "tickparams-lightning-hits",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:10:34",
+   "id": "tickparams-kill-reward-times",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:29:50",
+   "id": "tickparams-combat-enabled",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

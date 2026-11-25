@@ -1,14 +1,14 @@
 using System;
 using Game.Core;
 using Game.Hero;
-using Game.Run;
 using UnityEngine;
 
 namespace Game.TeamSelect
 {
     /// <summary>
-    /// Wires the team select screen into the Game scene: needs IRunFlow (Run), IHeroRoster (Hero) and
-    /// ISessionScene, installed earlier. Publishes no contract. Asset: FeatureAssets/Public/TeamSelectInstaller.asset.
+    /// Wires the team select screen into the Game scene: needs IHeroRoster (Hero) and ISessionScene, installed
+    /// earlier. Publishes <see cref="ITeamSelectScreen"/> for the screen flow (GameFlow).
+    /// Asset: FeatureAssets/Public/TeamSelectInstaller.asset.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/TeamSelect/Installer", fileName = "TeamSelectInstaller")]
     public sealed class TeamSelectInstaller : InstallerAsset
@@ -23,11 +23,11 @@ namespace Game.TeamSelect
             if (viewPrefab == null) throw new InvalidOperationException("TeamSelectInstaller: missing view prefab.");
 
             var session = new TeamSelectSession(
-                registry.Resolve<IRunFlow>(),
                 registry.Resolve<IHeroRoster>(),
                 config.ToRules(),
                 new PrefabViewFactory(viewPrefab));
             registry.Resolve<ISessionScene>().Join(session);
+            registry.Register<ITeamSelectScreen>(new TeamSelectScreen(session.Presenter));
         }
     }
 }

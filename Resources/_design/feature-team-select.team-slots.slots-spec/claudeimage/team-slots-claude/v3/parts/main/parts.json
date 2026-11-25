@@ -1,0 +1,76 @@
+{
+ "frame": "main",
+ "parts": [
+  {
+   "id": "card",
+   "w": 300,
+   "h": 400,
+   "slice": null,
+   "shapes": [
+    "cards"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "slot",
+   "w": 240,
+   "h": 240,
+   "slice": null,
+   "shapes": [
+    "slots"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "btn-main",
+   "w": 400,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "start"
+   ],
+   "from": {
+    "node": "feature-popup-lose/lose-actions/actions-spec",
+    "frame": "main",
+    "part": "btn-main",
+    "ref": "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+    "version": 2
+   },
+   "text": true
+  },
+  {
+   "id": "btn-sub",
+   "w": 260,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "back"
+   ],
+   "from": {
+    "node": "feature-popup-lose/lose-actions/actions-spec",
+    "frame": "main",
+    "part": "btn-sub",
+    "ref": "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+    "version": 2
+   },
+   "text": true
+  }
+ ],
+ "kept": [
+  "title",
+  "build-error"
+ ],
+ "skipped": []
+}

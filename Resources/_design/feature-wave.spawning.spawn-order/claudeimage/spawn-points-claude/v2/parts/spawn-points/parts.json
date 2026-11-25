@@ -1,0 +1,13 @@
+{
+ "frame": "spawn-points",
+ "parts": [],
+ "kept": [
+  "ground",
+  "castle",
+  "scr-l",
+  "scr-r",
+  "in-l",
+  "in-r"
+ ],
+ "skipped": []
+}

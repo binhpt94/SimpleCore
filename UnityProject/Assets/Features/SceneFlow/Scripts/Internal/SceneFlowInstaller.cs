@@ -75,7 +75,10 @@ namespace Game.SceneFlow
                 new PrefabSceneGateCarrierSource(gateCarrierPrefab).Create().Carry(gate);
             }
 
-            session.Join(new GameReadySignal(session, gate, new UnitySceneLoader(), gameScene));
+            var ready = new GameReadySignal(session, gate, new UnitySceneLoader(), gameScene);
+            // SceneFlow is installed last, so features installed before it must resolve this later (in Run), not in Install.
+            registry.Register<IGameSceneReady>(ready);
+            session.Join(ready);
         }
 
         private InvalidOperationException Missing(string field)

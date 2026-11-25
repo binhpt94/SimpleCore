@@ -91,15 +91,15 @@
    "at": "2026-11-25 13:03:33"
   },
   "hero-feedback": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [],
    "play": "Play scene Game: hero đi thì nhún 0.1u chu kì 0.4s, mỗi đòn nhích 0.2u về phía mục tiêu trong 0.15s, bị quái đánh thì nháy đỏ 0.1s, Đấu sĩ rìu có vệt chém 0.2s, Cung thủ có đạn bay 0.15s - HeroView, số trong Hero.prefab",
    "hash": "13086c97764e",
    "text": "Hero đi thì nhún 0.1u mỗi 0.4s, ra đòn thì nhích 0.2u về phía mục tiêu trong 0.15s, bị đánh thì nháy 0.1s\nNgười chơi phân biệt được hero đang đi, đang đánh, đang bị đánh mà không cần thanh trạng thái.",
    "title": "Hero đi thì nhún 0.1u mỗi 0.4s, ra đòn thì nhích 0.2u về phía mục tiêu trong 0.15s, bị đánh thì nháy 0.1s",
-   "by": "Hero",
-   "at": "2026-11-25 11:40:36"
+   "by": "@CodeLead",
+   "at": "2026-11-25 20:39:22"
   },
   "edge-dau-si-riu-chem": {
    "state": "verified",
@@ -162,14 +162,15 @@
     "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers",
     "HeroConfigValuesTests.No_two_heroes_run_at_the_same_speed_and_all_run_between_2_and_3_5u_per_second",
     "HeroConfigValuesTests.Every_hero_shares_a_box_1u_wide_and_1_5u_tall",
-    "HeroInstallerTests.The_roster_offers_the_five_heroes_in_order"
+    "HeroInstallerTests.The_roster_offers_the_five_heroes_in_order",
+    "HeroRosterTableTests.StageParams_hero_count_is_3_at_idea_and_5_at_prototype"
    ],
    "play": "",
-   "hash": "62fb1a51978f",
-   "text": "## Làm gì\n- Cung cấp danh sách hero (mã, tên tạm, nhóm, kiểu đòn, chỉ số lv1, hộp) cho `feature-team-select` và cho việc sinh hero trong trận.\n- Ra đòn theo kiểu đòn của hero, dùng luật đo khoảng cách, nhịp đánh và sát thương ở `feature-hero/hero-stats/hero-level-values`.\n- Hiện hero bằng sprite 2D gen bằng AI, chân trên mặt đất (y=0), quay mặt về phía mục tiêu hoặc hướng đang đi.\n\n## Thông số\n| Hero | Nhóm | Máu | Sát thương | s mỗi đòn | Tầm (u) | Chạy (u/s) | Hộp (u) | Kiểu đòn | Sát thương/s |\n|---|---|---|---|---|---|---|---|---|---|\n| Hiệp sĩ | Cận chiến | 300 | 12 | 1.0 | 1.2 | 2.0 | 1×1.5 | Một mục tiêu | 12.0 |\n| Đấu sĩ rìu | Cận chiến | 240 | 14 | 1.4 | 1.3 | 2.4 | 1×1.5 | Chém 1.5u phía trước | 10.0 mỗi quái |\n| Kiếm khách | Cận chiến | 180 | 16 | 0.7 | 1.2 | 3.5 | 1×1.5 | Một mục tiêu | 22.9 |\n| Cung thủ | Bắn xa | 120 | 14 | 0.8 | 7 | 3.0 | 1×1.5 | Một mục tiêu | 17.5 |\n| Pháp sư | Bắn xa | 100 | 18 | 1.6 | 6 | 2.6 | 1×1.5 | Nổ bán kính 1.5u | 11.25 mỗi quái |\n\nMọi giá trị là cấp 1, dự kiến, theo bộ số chung.\n\nTốc độ chạy theo vai (dự kiến):\n| Hero | Chạy (u/s) | Lí do |\n|---|---|---|\n| Hiệp sĩ | 2.0 | Giáp nặng; đứng chắn gần thành nên ít phải đi xa |\n| Đấu sĩ rìu | 2.4 | Rìu nặng; vẫn kịp ra gặp cụm quái |\n| Pháp sư | 2.6 | Áo choàng nhẹ, tầm 6u nên không cần chạy nhanh |\n| Cung thủ | 3.0 | Đồ nhẹ; chạy nhanh tới chỗ bắn, tầm 7u |\n| Kiếm khách | 3.5 | Nhanh nhất (vòng 3); lao tới hạ từng con |\n\nSo với quái: Lính 1.5, Sói 3.0 u/s (`feature-enemy`). Chỉ Kiếm khách chạy nhanh hơn Sói; Cung thủ bằng Sói. Lí do chung: cận chiến máu 180-300, bắn xa 100-120; hero đánh vùng có sát thương/s mỗi quái thấp hơn hero một mục tiêu (luật `hero-tradeoff` vòng 3).\n\nKiểu đòn:\n| Kiểu | Trúng ai |\n|---|---|\n| Một mục tiêu | Chỉ mục tiêu |\n| Chém phía trước | Mục tiêu và mọi quái có hộp chạm đoạn dài 1.5u bắt đầu từ mép trước của hero, về phía mục tiêu |\n| Nổ quanh mục tiêu | Mục tiêu và mọi quái có mép hộp cách tâm mục tiêu không quá 1.5u, cả hai phía của mục tiêu |\n\nHiệu ứng (mức tối thiểu):\n| Hiệu ứng | Xuất hiện | Biến mất |\n|---|---|---|\n| Nhún khi đi (0.1u, chu kì 0.4s) | bắt đầu đi | dừng đi |\n| Nhích khi ra đòn (0.2u về phía mục tiêu, 0.15s) | mỗi đòn | sau 0.15s |\n| Nháy khi bị đánh | mỗi đòn trúng | sau 0.1s, đòn mới đặt lại |\n| Vệt chém (Đấu sĩ rìu) | mỗi đòn, phủ đoạn 1.5u | sau 0.2s |\n| Vòng nổ (Pháp sư) | lúc trúng, bán kính 1.5u quanh mục tiêu | sau 0.3s |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số hero trong danh sách | 3 (Hiệp sĩ, Đấu sĩ rìu, Cung thủ) | 5 | 5 |\n| Số chỗ trong đội | 3 (cả 3 hero, không cần chọn; đúng đội mặc định của `feature-team-select/team-memory/memory-rules`) | 3 chọn từ 5 | 3 chọn từ 5 |\n| Kiểu đòn có | Một mục tiêu, Chém phía trước | cả ba | cả ba |\n| Chỉ số | như bảng | như bảng | theo số đã chỉnh sau chơi thử |\n| Tốc độ chạy riêng từng hero | có: Hiệp sĩ 2.0, Đấu sĩ rìu 2.4, Cung thủ 3.0 u/s | cả 5 hero như bảng | theo số đã chỉnh sau chơi thử |\n| Hình | 1 sprite mỗi hero, anim bằng move/scale/nháy | như IDEA, thêm sprite khi đánh | đủ anim đi, đánh, gục; âm thanh |",
+   "hash": "1ced06dba6b5",
+   "text": "## Làm gì\n- Cung cấp danh sách hero (mã, tên tạm, nhóm, kiểu đòn, chỉ số lv1, hộp) cho `feature-team-select` và cho việc sinh hero trong trận.\n- Ra đòn theo kiểu đòn của hero, dùng luật đo khoảng cách, nhịp đánh và sát thương ở `feature-hero/hero-stats/hero-level-values`.\n- Hiện hero bằng sprite 2D gen bằng AI, chân trên mặt đất (y=0), quay mặt về phía mục tiêu hoặc hướng đang đi.\n\n## Thông số\nSố liệu nằm ở các bảng trong `.excel/` (xem: `python Management/tools/gd_excel.py show ai/idea/feature-hero/hero-list/hero-roster-values`):\n- `Heroes` (loại `list`): năm hero, mỗi hero một dòng: nhóm, máu, sát thương, giây mỗi đòn, tầm, tốc độ chạy và lí do, hộp, kiểu đòn, cỡ vùng đòn, sát thương/s. Cột `stage` là giai đoạn hero bắt đầu có.\n- `AttackKinds` (loại `list`): ba kiểu đòn và đòn trúng ai; cột `attack_kind` của `Heroes` trỏ tới bảng này.\n- `Effects` (loại `list`): hiệu ứng tối thiểu, khi nào hiện, khi nào mất.\n\nMọi giá trị là cấp 1, dự kiến, theo bộ số chung.\n\nSo với quái: Lính 1.5, Sói 3.0 u/s (`feature-enemy`). Chỉ Kiếm khách chạy nhanh hơn Sói; Cung thủ bằng Sói. Lí do chung: cận chiến máu 180-300, bắn xa 100-120; hero đánh vùng có sát thương/s mỗi quái thấp hơn hero một mục tiêu (luật `hero-tradeoff` vòng 3).\n\n## Thông số theo giai đoạn\nBảng `StageParams` trong `.excel/` (loại `params`): danh sách hero có gì ở IDEA, PROTOTYPE, FULL. Hero và kiểu đòn nào có từ giai đoạn nào: cột `stage` của `Heroes` và `AttackKinds`.",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 13:03:33"
+   "at": "2026-11-25 23:23:31"
   },
   "speed-distinct": {
    "state": "verified",
@@ -199,6 +200,258 @@
    "title": "Đội chưa đủ 3 hero (lỗi từ màn chọn)",
    "by": "@CodeLead",
    "at": "2026-11-25 13:43:56"
+  },
+  "heroes-knight": {
+   "state": "verified",
+   "note": "test theo dòng bảng Heroes, thêm cột stage vào HeroConfig",
+   "tests": [
+    "HeroRosterTableTests.Heroes_knight_is_an_idea_melee_single_target_with_300_health_12_damage_every_1s_range_1_2_speed_2"
+   ],
+   "play": "",
+   "hash": "b1c3983907b6",
+   "text": "Bảng Heroes (list), dòng knight\nid (string): knight\nname (string): Hiệp sĩ\nstage (enum:idea|prototype|full): idea\ngroup (enum:melee|ranged): melee\nmax_health (int): 300\ndamage (int): 12\nattack_interval (float): 1\nattack_range (float): 1.2\nmove_speed (float): 2\nbox_width (float): 1\nbox_height (float): 1.5\nattack_kind (ref:AttackKinds.id): single_target\narea_size (float): \ndps (string): 12.0\nspeed_reason (string): Giáp nặng; đứng chắn gần thành nên ít phải đi xa",
+   "title": "Heroes: Hiệp sĩ (knight)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "heroes-axeman": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.Heroes_axeman_is_an_idea_melee_front_cleave_of_1_5u_with_240_health_14_damage_every_1_4s_range_1_3_speed_2_4"
+   ],
+   "play": "",
+   "hash": "f7bd24f895e7",
+   "text": "Bảng Heroes (list), dòng axeman\nid (string): axeman\nname (string): Đấu sĩ rìu\nstage (enum:idea|prototype|full): idea\ngroup (enum:melee|ranged): melee\nmax_health (int): 240\ndamage (int): 14\nattack_interval (float): 1.4\nattack_range (float): 1.3\nmove_speed (float): 2.4\nbox_width (float): 1\nbox_height (float): 1.5\nattack_kind (ref:AttackKinds.id): front_cleave\narea_size (float): 1.5\ndps (string): 10.0 mỗi quái\nspeed_reason (string): Rìu nặng; vẫn kịp ra gặp cụm quái",
+   "title": "Heroes: Đấu sĩ rìu (axeman)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "heroes-archer": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.Heroes_archer_is_an_idea_ranged_single_target_with_120_health_14_damage_every_0_8s_range_7_speed_3"
+   ],
+   "play": "",
+   "hash": "c8b86deb95c6",
+   "text": "Bảng Heroes (list), dòng archer\nid (string): archer\nname (string): Cung thủ\nstage (enum:idea|prototype|full): idea\ngroup (enum:melee|ranged): ranged\nmax_health (int): 120\ndamage (int): 14\nattack_interval (float): 0.8\nattack_range (float): 7\nmove_speed (float): 3\nbox_width (float): 1\nbox_height (float): 1.5\nattack_kind (ref:AttackKinds.id): single_target\narea_size (float): \ndps (string): 17.5\nspeed_reason (string): Đồ nhẹ; chạy nhanh tới chỗ bắn, tầm 7u",
+   "title": "Heroes: Cung thủ (archer)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "attackkinds-single-target": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.AttackKinds_single_target_hits_only_the_target"
+   ],
+   "play": "",
+   "hash": "26b7f4b7b82f",
+   "text": "Bảng AttackKinds (list), dòng single_target\nid (string): single_target\nname (string): Một mục tiêu\nstage (enum:idea|prototype|full): idea\nhits (string): Chỉ mục tiêu",
+   "title": "AttackKinds: Một mục tiêu (single_target)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "attackkinds-front-cleave": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.AttackKinds_front_cleave_hits_every_enemy_touching_the_1_5u_stretch_from_the_front_edge_towards_the_target"
+   ],
+   "play": "",
+   "hash": "994d00fb0910",
+   "text": "Bảng AttackKinds (list), dòng front_cleave\nid (string): front_cleave\nname (string): Chém phía trước\nstage (enum:idea|prototype|full): idea\nhits (string): Mục tiêu và mọi quái có hộp chạm đoạn dài 1.5u bắt đầu từ mép trước của hero, về phía mục tiêu",
+   "title": "AttackKinds: Chém phía trước (front_cleave)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "effects-walk-bob": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.Effects_walk_bob_lifts_the_hero_0_1u_every_0_4s_while_it_walks",
+    "HeroRosterTableTests.Effects_walk_bob_shows_while_walking_and_stops_when_the_hero_stops"
+   ],
+   "play": "",
+   "hash": "13060329d41b",
+   "text": "Bảng Effects (list), dòng walk_bob\nid (string): walk_bob\nname (string): Nhún khi đi (0.1u, chu kì 0.4s)\nstage (enum:idea|prototype|full): idea\nappears (string): bắt đầu đi\ndisappears (string): dừng đi",
+   "title": "Effects: Nhún khi đi (0.1u, chu kì 0.4s) (walk_bob)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "effects-attack-nudge": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.Effects_attack_nudge_moves_the_hero_0_2u_towards_its_target_for_0_15s_on_each_hit"
+   ],
+   "play": "",
+   "hash": "95a177f6631f",
+   "text": "Bảng Effects (list), dòng attack_nudge\nid (string): attack_nudge\nname (string): Nhích khi ra đòn (0.2u về phía mục tiêu, 0.15s)\nstage (enum:idea|prototype|full): idea\nappears (string): mỗi đòn\ndisappears (string): sau 0.15s",
+   "title": "Effects: Nhích khi ra đòn (0.2u về phía mục tiêu, 0.15s) (attack_nudge)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "effects-hit-flash": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.Effects_hit_flash_lasts_0_1s_and_each_new_hit_restarts_it"
+   ],
+   "play": "",
+   "hash": "54e0fc8277e6",
+   "text": "Bảng Effects (list), dòng hit_flash\nid (string): hit_flash\nname (string): Nháy khi bị đánh\nstage (enum:idea|prototype|full): idea\nappears (string): mỗi đòn trúng\ndisappears (string): sau 0.1s, đòn mới đặt lại",
+   "title": "Effects: Nháy khi bị đánh (hit_flash)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "effects-cleave-trail": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.Effects_cleave_trail_of_the_axeman_covers_its_1_5u_stretch_for_0_2s"
+   ],
+   "play": "",
+   "hash": "602b73c50a99",
+   "text": "Bảng Effects (list), dòng cleave_trail\nid (string): cleave_trail\nname (string): Vệt chém (Đấu sĩ rìu)\nstage (enum:idea|prototype|full): idea\nappears (string): mỗi đòn, phủ đoạn 1.5u\ndisappears (string): sau 0.2s",
+   "title": "Effects: Vệt chém (Đấu sĩ rìu) (cleave_trail)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "stageparams-hero-count": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.StageParams_hero_count_is_3_at_idea_and_5_at_prototype"
+   ],
+   "play": "",
+   "hash": "2f9945f9e254",
+   "text": "Bảng StageParams (params), dòng hero_count\nkey (string): hero_count\nname (string): Số hero trong danh sách\nunit (string): hero\nidea (string): 3 (Hiệp sĩ, Đấu sĩ rìu, Cung thủ)\nprototype (string): 5\nfull (string): 5\nreason (string): IDEA đúng bằng đội mặc định",
+   "title": "StageParams: Số hero trong danh sách (hero_count)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "stageparams-team-slots": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.StageParams_team_slots_are_3_and_hold_all_three_idea_heroes"
+   ],
+   "play": "",
+   "hash": "167237e8ce01",
+   "text": "Bảng StageParams (params), dòng team_slots\nkey (string): team_slots\nname (string): Số chỗ trong đội\nunit (string): hero\nidea (string): 3 (cả 3 hero, không cần chọn; đúng đội mặc định của feature-team-select/team-memory/memory-rules)\nprototype (string): 3 chọn từ 5\nfull (string): 3 chọn từ 5\nreason (string): IDEA không có màn chọn đội",
+   "title": "StageParams: Số chỗ trong đội (team_slots)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "stageparams-attack-kinds": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.StageParams_attack_kinds_at_idea_are_single_target_and_front_cleave"
+   ],
+   "play": "",
+   "hash": "4349c30255e9",
+   "text": "Bảng StageParams (params), dòng attack_kinds\nkey (string): attack_kinds\nname (string): Kiểu đòn có\nunit (string): \nidea (string): Một mục tiêu, Chém phía trước\nprototype (string): cả ba\nfull (string): cả ba\nreason (string): Theo hero có ở giai đoạn đó",
+   "title": "StageParams: Kiểu đòn có (attack_kinds)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "stageparams-stats": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.StageParams_stats_at_idea_are_the_heroes_table_numbers"
+   ],
+   "play": "",
+   "hash": "67d7ecafff39",
+   "text": "Bảng StageParams (params), dòng stats\nkey (string): stats\nname (string): Chỉ số\nunit (string): \nidea (string): như bảng Heroes\nprototype (string): như bảng Heroes\nfull (string): theo số đã chỉnh sau chơi thử\nreason (string): Bộ số chung, dự kiến",
+   "title": "StageParams: Chỉ số (stats)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "stageparams-move-speed": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.StageParams_move_speed_at_idea_is_2_for_knight_2_4_for_axeman_3_for_archer"
+   ],
+   "play": "",
+   "hash": "04bbf48f1166",
+   "text": "Bảng StageParams (params), dòng move_speed\nkey (string): move_speed\nname (string): Tốc độ chạy riêng từng hero\nunit (string): u/s\nidea (string): có: Hiệp sĩ 2.0, Đấu sĩ rìu 2.4, Cung thủ 3.0\nprototype (string): cả 5 hero như bảng Heroes\nfull (string): theo số đã chỉnh sau chơi thử\nreason (string): Người yêu cầu 2026-11-25: mỗi hero một tốc độ",
+   "title": "StageParams: Tốc độ chạy riêng từng hero (move_speed)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "stageparams-visuals": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.StageParams_visuals_at_idea_give_each_hero_one_sprite"
+   ],
+   "play": "",
+   "hash": "56ddae4ef393",
+   "text": "Bảng StageParams (params), dòng visuals\nkey (string): visuals\nname (string): Hình\nunit (string): \nidea (string): 1 sprite mỗi hero, anim bằng move/scale/nháy\nprototype (string): như IDEA, thêm sprite khi đánh\nfull (string): đủ anim đi, đánh, gục; âm thanh\nreason (string): Art tăng dần theo giai đoạn",
+   "title": "StageParams: Hình (visuals)",
+   "by": "@CodeLead",
+   "at": "2026-11-25 23:23:31"
+  },
+  "heroes-mage": {
+   "state": "verified",
+   "note": "test dòng mage, blast, blast_ring, swordsman trong HeroRosterTableTests",
+   "tests": [
+    "HeroRosterTableTests.Heroes_mage_is_a_prototype_ranged_blast_of_1_5u_with_100_health_18_damage_every_1_6s_range_6_speed_2_6",
+    "HeroRosterTableTests.Heroes_swordsman_and_mage_join_the_roster_at_prototype",
+    "HeroRosterTableTests.Heroes_swordsman_and_mage_fight_in_a_prototype_team"
+   ],
+   "play": "",
+   "hash": "4d255d6b6df3",
+   "text": "Bảng Heroes (list), dòng mage\nid (string): mage\nname (string): Pháp sư\nstage (enum:idea|prototype|full): prototype\ngroup (enum:melee|ranged): ranged\nmax_health (int): 100\ndamage (int): 18\nattack_interval (float): 1.6\nattack_range (float): 6\nmove_speed (float): 2.6\nbox_width (float): 1\nbox_height (float): 1.5\nattack_kind (ref:AttackKinds.id): blast\narea_size (float): 1.5\ndps (string): 11.25 mỗi quái\nspeed_reason (string): Áo choàng nhẹ, tầm 6u nên không cần chạy nhanh",
+   "title": "Heroes: Pháp sư (mage)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:33"
+  },
+  "heroes-swordsman": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.Heroes_swordsman_is_a_prototype_melee_single_target_with_180_health_16_damage_every_0_7s_range_1_2_speed_3_5",
+    "HeroRosterTableTests.Heroes_swordsman_and_mage_join_the_roster_at_prototype",
+    "HeroParticipantTests.A_swordsman_waits_exactly_28_steps_between_hits"
+   ],
+   "play": "",
+   "hash": "32dcc9811d66",
+   "text": "Bảng Heroes (list), dòng swordsman\nid (string): swordsman\nname (string): Kiếm khách\nstage (enum:idea|prototype|full): prototype\ngroup (enum:melee|ranged): melee\nmax_health (int): 180\ndamage (int): 16\nattack_interval (float): 0.7\nattack_range (float): 1.2\nmove_speed (float): 3.5\nbox_width (float): 1\nbox_height (float): 1.5\nattack_kind (ref:AttackKinds.id): single_target\narea_size (float): \ndps (string): 22.9\nspeed_reason (string): Nhanh nhất (vòng 3); lao tới hạ từng con",
+   "title": "Heroes: Kiếm khách (swordsman)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:33"
+  },
+  "attackkinds-blast": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.AttackKinds_blast_hits_the_target_and_every_enemy_whose_box_edge_is_within_1_5u_of_its_centre_on_both_sides"
+   ],
+   "play": "",
+   "hash": "b9c11de78437",
+   "text": "Bảng AttackKinds (list), dòng blast\nid (string): blast\nname (string): Nổ quanh mục tiêu\nstage (enum:idea|prototype|full): prototype\nhits (string): Mục tiêu và mọi quái có mép hộp cách tâm mục tiêu không quá 1.5u, cả hai phía của mục tiêu",
+   "title": "AttackKinds: Nổ quanh mục tiêu (blast)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:33"
+  },
+  "effects-blast-ring": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "HeroRosterTableTests.Effects_blast_ring_of_the_mage_shows_1_5u_around_the_target_when_it_hits_and_goes_after_0_3s"
+   ],
+   "play": "",
+   "hash": "76c631fdbc16",
+   "text": "Bảng Effects (list), dòng blast_ring\nid (string): blast_ring\nname (string): Vòng nổ (Pháp sư)\nstage (enum:idea|prototype|full): prototype\nappears (string): lúc trúng, bán kính 1.5u quanh mục tiêu\ndisappears (string): sau 0.3s",
+   "title": "Effects: Vòng nổ (Pháp sư) (blast_ring)",
+   "by": "@CodeLead",
+   "at": "2026-11-26 00:10:33"
   }
  },
  "log": [
@@ -485,6 +738,314 @@
   {
    "at": "2026-11-25 13:43:56",
    "id": "edge-doi-chua-du-3-hero-loi-tu-man",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 20:39:22",
+   "id": "hero-feedback",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:16:18",
+   "id": "heroes-knight",
+   "state": "doing",
+   "by": "Hero",
+   "note": "test theo dòng bảng Heroes, thêm cột stage vào HeroConfig"
+  },
+  {
+   "at": "2026-11-25 23:19:43",
+   "id": "heroes-knight",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Heroes_knight_is_an_idea_melee_single_target_with_300_health_12_damage_every_1s_range_1_2_speed_2"
+  },
+  {
+   "at": "2026-11-25 23:19:45",
+   "id": "heroes-axeman",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Heroes_axeman_is_an_idea_melee_front_cleave_of_1_5u_with_240_health_14_damage_every_1_4s_range_1_3_speed_2_4"
+  },
+  {
+   "at": "2026-11-25 23:19:46",
+   "id": "heroes-archer",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Heroes_archer_is_an_idea_ranged_single_target_with_120_health_14_damage_every_0_8s_range_7_speed_3"
+  },
+  {
+   "at": "2026-11-25 23:19:47",
+   "id": "attackkinds-single-target",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.AttackKinds_single_target_hits_only_the_target"
+  },
+  {
+   "at": "2026-11-25 23:19:48",
+   "id": "attackkinds-front-cleave",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.AttackKinds_front_cleave_hits_every_enemy_touching_the_1_5u_stretch_from_the_front_edge_towards_the_target"
+  },
+  {
+   "at": "2026-11-25 23:19:53",
+   "id": "effects-walk-bob",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Effects_walk_bob_lifts_the_hero_0_1u_every_0_4s_while_it_walks, HeroRosterTableTests.Effects_walk_bob_shows_while_walking_and_stops_when_the_hero_stops"
+  },
+  {
+   "at": "2026-11-25 23:19:54",
+   "id": "effects-attack-nudge",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Effects_attack_nudge_moves_the_hero_0_2u_towards_its_target_for_0_15s_on_each_hit"
+  },
+  {
+   "at": "2026-11-25 23:19:55",
+   "id": "effects-hit-flash",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Effects_hit_flash_lasts_0_1s_and_each_new_hit_restarts_it"
+  },
+  {
+   "at": "2026-11-25 23:19:56",
+   "id": "effects-cleave-trail",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Effects_cleave_trail_of_the_axeman_covers_its_1_5u_stretch_for_0_2s"
+  },
+  {
+   "at": "2026-11-25 23:19:57",
+   "id": "stageparams-hero-count",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.StageParams_hero_count_is_3_at_idea_and_5_at_prototype"
+  },
+  {
+   "at": "2026-11-25 23:19:58",
+   "id": "stageparams-team-slots",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.StageParams_team_slots_are_3_and_hold_all_three_idea_heroes"
+  },
+  {
+   "at": "2026-11-25 23:20:02",
+   "id": "stageparams-attack-kinds",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.StageParams_attack_kinds_at_idea_are_single_target_and_front_cleave"
+  },
+  {
+   "at": "2026-11-25 23:20:03",
+   "id": "stageparams-stats",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.StageParams_stats_at_idea_are_the_heroes_table_numbers"
+  },
+  {
+   "at": "2026-11-25 23:20:04",
+   "id": "stageparams-move-speed",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.StageParams_move_speed_at_idea_is_2_for_knight_2_4_for_axeman_3_for_archer"
+  },
+  {
+   "at": "2026-11-25 23:20:06",
+   "id": "stageparams-visuals",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.StageParams_visuals_at_idea_give_each_hero_one_sprite"
+  },
+  {
+   "at": "2026-11-25 23:20:08",
+   "id": "params",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroConfigValuesTests.Each_hero_starts_at_its_designed_level_1_numbers, HeroConfigValuesTests.No_two_heroes_run_at_the_same_speed_and_all_run_between_2_and_3_5u_per_second, HeroConfigValuesTests.Every_hero_shares_a_box_1u_wide_and_1_5u_tall, HeroInstallerTests.The_roster_offers_the_five_heroes_in_order, HeroRosterTableTests.StageParams_hero_count_is_3_at_idea_and_5_at_prototype"
+  },
+  {
+   "at": "2026-11-25 23:22:52",
+   "id": "stageparams-team-slots",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.StageParams_team_slots_are_3_and_hold_all_three_idea_heroes"
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "attackkinds-single-target",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "attackkinds-front-cleave",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "heroes-knight",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "heroes-axeman",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "heroes-archer",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "effects-walk-bob",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "effects-attack-nudge",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "effects-hit-flash",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "effects-cleave-trail",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "stageparams-hero-count",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "stageparams-team-slots",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "stageparams-attack-kinds",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "stageparams-stats",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "stageparams-move-speed",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-25 23:23:31",
+   "id": "stageparams-visuals",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:07:41",
+   "id": "heroes-mage",
+   "state": "doing",
+   "by": "Hero",
+   "note": "test dòng mage, blast, blast_ring, swordsman trong HeroRosterTableTests"
+  },
+  {
+   "at": "2026-11-26 00:09:10",
+   "id": "heroes-mage",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Heroes_mage_is_a_prototype_ranged_blast_of_1_5u_with_100_health_18_damage_every_1_6s_range_6_speed_2_6, HeroRosterTableTests.Heroes_swordsman_and_mage_join_the_roster_at_prototype, HeroRosterTableTests.Heroes_swordsman_and_mage_fight_in_a_prototype_team"
+  },
+  {
+   "at": "2026-11-26 00:09:11",
+   "id": "heroes-swordsman",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Heroes_swordsman_is_a_prototype_melee_single_target_with_180_health_16_damage_every_0_7s_range_1_2_speed_3_5, HeroRosterTableTests.Heroes_swordsman_and_mage_join_the_roster_at_prototype, HeroParticipantTests.A_swordsman_waits_exactly_28_steps_between_hits"
+  },
+  {
+   "at": "2026-11-26 00:09:12",
+   "id": "attackkinds-blast",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.AttackKinds_blast_hits_the_target_and_every_enemy_whose_box_edge_is_within_1_5u_of_its_centre_on_both_sides"
+  },
+  {
+   "at": "2026-11-26 00:09:12",
+   "id": "effects-blast-ring",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroRosterTableTests.Effects_blast_ring_of_the_mage_shows_1_5u_around_the_target_when_it_hits_and_goes_after_0_3s"
+  },
+  {
+   "at": "2026-11-26 00:10:33",
+   "id": "heroes-swordsman",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:10:33",
+   "id": "heroes-mage",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:10:33",
+   "id": "attackkinds-blast",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-26 00:10:33",
+   "id": "effects-blast-ring",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

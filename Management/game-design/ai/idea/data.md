@@ -1,6 +1,6 @@
 ---
 screen: landscape
-by: player-commander=gpt@root-r1#nguoi-chi-huy, castle-damage-carries=gpt@root-r1#ton-that-qua-dot, main-feel=gpt@root-r1#cam-giac-chu-dao
+by: player-commander=gpt@root-r1#nguoi-chi-huy, castle-damage-carries=gpt@root-r1#ton-that-qua-dot, main-feel=gpt@root-r1#cam-giac-chu-dao, art-shared-palette=gpt@style-colorful#bang-mau-chung, art-battle-reference=gpt@style-colorful#canh-tran-mau, art-light-from-top=gpt@style-colorful#anh-sang-tu-tren, art-outline-body-color=gpt@style-colorful#vien-theo-mau-than, art-popup-content-from-node=gpt@style-colorful#noi-dung-theo-node, art-ui-text-font=gpt@style-colorful#chu-dat-trong-ui, art-ad-button-pink=gpt@style-colorful#mau-nut-quang-cao, art-hud-text-contrast=gpt@style-colorful#do-tuong-phan-hud, art-faction-silhouette=gpt@style-colorful#duong-bao-hai-phe, art-unit-outline-contrast=gpt@style-colorful#nen-nhuong-vien-don-vi, art-castle-edge-solid=gpt@style-colorful#mep-thanh-de-doc, art-effect-overlay-limit=gpt@style-colorful#gioi-han-che-boi-hieu-ung, art-skill-color-match=gpt@style-colorful#mau-ky-nang-xuyen-suot
 ---
 # Thủ thành anh hùng (tên tạm)
 
@@ -56,3 +56,42 @@ Tiền và nâng cấp mất khi thua; lượt sau chọn lại đội hero. Đ�
 
 ### single-map | AI 6 | Game có một bản đồ duy nhất
 Đã loại: nhiều màn, nhiều bản đồ.
+
+### art-shared-palette | AI 7 | Hai style hình ảnh dùng chung một bảng màu ghi mã màu thân, vùng sáng, bóng và viền của từng màu chủ đạo
+Lấy màu gốc từ ảnh tham chiếu người chọn, thêm màu của trận trên cùng bảng. Chữ "tươi" để mỗi công cụ tự chọn màu sẽ làm lệch sắc qua mỗi lần vẽ.
+
+### art-battle-reference | AI 6 | Asset của cả hai công cụ vẽ được đối chiếu với cùng một khung trận ngang mẫu đã duyệt, có đủ UI và các lớp chiến trường
+Ảnh tham chiếu chỉ có popup. Khung trận mẫu có thành, hero, quái, nền, hiệu ứng, HUD và thanh nâng cấp ở kích thước hiển thị thật, theo bố cục đã chốt của nền chiến trường và HUD.
+
+### art-light-from-top | AI 7 | Mặt nổi trong cả hai style sáng nhất ở mép trên và tối dần về mép dưới
+Cùng một hướng sáng cho khung, nút, icon, giáp, thân thành, để hình AI và hình SVG lên khối giống nhau khi ghép vào trận.
+
+### art-outline-body-color | AI 8 | Viền ngoài của vật thể và nút là sắc đậm hơn của chính màu thân sát viền
+Nút xanh và khối hồng giữ được màu riêng ở rìa. Đã loại: viền đen chung.
+
+### art-popup-content-from-node | AI 8 | Popup lấy hình thức từ ảnh tham chiếu, lấy nội dung (chữ, số, nút) từ thiết kế của chính popup đó
+Ảnh có ô thưởng và nút hồi sinh trong popup thua; game này để nội dung popup thua và popup hồi sinh theo node của từng popup.
+
+### art-ui-text-font | AI 7 | Chữ và số do game hiển thị bằng một font tròn có đủ dấu tiếng Việt; ảnh và SVG để trống chỗ chữ
+Hai công cụ dùng chung khung, ruy băng mà chữ vẫn đồng nhất; số thay đổi trong trận và dấu tiếng Việt đọc rõ ở kích thước thật.
+
+### art-ad-button-pink | AI 7 | Nút xem quảng cáo luôn màu hồng, kể cả khi là nút chính của popup
+Chốt màu ưu tiên cho popup hồi sinh: nhận diện quảng cáo đứng trên quy tắc nút chính màu xanh lá.
+
+### art-hud-text-contrast | AI 7 | Chữ và số trên HUD đủ tương phản với nền ngay sau nó, kiểm trên khung trận ghép
+Trời, cảnh xa, mặt đất sáng khác nhau và hiệu ứng có thể chạy sau HUD; máu thành, tiền, giá nâng cấp, số giây hồi chiêu luôn phải đọc được.
+
+### art-faction-silhouette | AI 6 | Hero và quái phân biệt được chỉ bằng hình bóng tô đen ở kích thước trong trận
+Cung thủ có ở cả hai phe nên vũ khí không đủ phân biệt phe; hình tổng thể phải khác khi hai phe dồn sát thành.
+
+### art-unit-outline-contrast | AI 6 | Viền thành, hero và quái đủ tương phản với lớp nền ngay sau chúng ở cả hai cánh
+Cùng một sprite có thể nổi trên trời sáng rồi chìm trước cảnh xa; chỉnh màu nền hoặc viền để dải đi lại đọc được.
+
+### art-castle-edge-solid | AI 5 | Phần thân thành ngang tầm hero dùng mảng màu liền ở hai mép giáp dải đất
+Đó là chỗ hero xuất hiện và quái áp sát; mảng liền giữ hình bóng nhân vật rõ khi đứng sát thành.
+
+### art-effect-overlay-limit | AI 6 | Hiệu ứng vẽ đè lên thành, hero hay quái có giới hạn độ đục cộng gộp để vẫn thấy đơn vị bên dưới
+Điểm sáng mạnh để ở vùng trống quanh mục tiêu.
+
+### art-skill-color-match | AI 7 | Mỗi kĩ năng thành dùng cùng một màu chủ đạo trên nút HUD và trên hiệu ứng trong trận
+Người chơi nối được nút vừa bấm với hiệu ứng vừa hiện giữa nhiều đòn đánh.

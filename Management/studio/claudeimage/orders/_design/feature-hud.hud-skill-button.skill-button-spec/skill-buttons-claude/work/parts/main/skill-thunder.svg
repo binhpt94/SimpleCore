@@ -1,7 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" width="140" height="140">
-  <!-- nen nut chung: bong cung lech xuong 8 px, mau dac, vien den 6 px, bo 20 -->
-  <rect x="3" y="11" width="134" height="126" rx="20" fill="#000000"/>
-  <rect x="3" y="3" width="134" height="126" rx="20" fill="#F4A261" stroke="#000000" stroke-width="6"/>
-  <!-- bieu tuong set o nua tren, chu do tool in o giua -->
-  <polygon points="78,10 52,50 68,50 58,78 92,36 75,36 86,10" fill="#FFD60A" stroke="#000000" stroke-width="4" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="frame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/>
+      <stop offset="0.5" stop-color="#FFC61F"/>
+      <stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <linearGradient id="cream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.6" stop-color="#FFF1E4"/>
+      <stop offset="1" stop-color="#F6D7C6"/>
+    </linearGradient>
+    <linearGradient id="strip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/>
+      <stop offset="1" stop-color="#FFC61F"/>
+    </linearGradient>
+    <linearGradient id="icon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/>
+      <stop offset="0.55" stop-color="#FFC61F"/>
+      <stop offset="1" stop-color="#F29A0E"/>
+    </linearGradient>
+    <clipPath id="inner">
+      <rect x="11" y="11" width="118" height="110" rx="30"/>
+    </clipPath>
+  </defs>
+  <!-- khung chung: bong do lech xuong 6 px, khung vang vien #C26A00 6 px, bo 38 -->
+  <rect x="3" y="9" width="134" height="128" rx="38" fill="#4A1070"/>
+  <rect x="3" y="3" width="134" height="126" rx="38" fill="url(#frame)" stroke="#C26A00" stroke-width="6"/>
+  <!-- long kem, dai mau ki nang o day -->
+  <g clip-path="url(#inner)">
+    <rect x="11" y="11" width="118" height="110" fill="url(#cream)"/>
+    <rect x="11" y="98" width="118" height="23" fill="url(#strip)"/>
+  </g>
+  <rect x="11" y="11" width="118" height="110" rx="30" fill="none" stroke="#E0A27A" stroke-width="3"/>
+  <!-- vet bong keo mep tren -->
+  <rect x="34" y="15" width="72" height="6" rx="3" fill="#FFFFFF"/>
+  <!-- bieu tuong set vang o nua tren -->
+  <polygon points="78,12 52,38 66,38 58,58 90,28 75,28 84,12" fill="url(#icon)" stroke="#C26A00" stroke-width="4" stroke-linejoin="round"/>
 </svg>

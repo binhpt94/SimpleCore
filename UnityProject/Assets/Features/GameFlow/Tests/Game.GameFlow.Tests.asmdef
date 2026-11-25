@@ -5,6 +5,9 @@
     "Game.Core",
     "Game.GameFlow.Internal",
     "Game.Run.Contracts",
+    "Game.Home.Contracts",
+    "Game.TeamSelect.Contracts",
+    "Game.SceneFlow.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
