@@ -33,6 +33,8 @@
     ".ib-state.delivered { color: var(--ok, inherit); }",
     ".ib-state.error { color: var(--bad); }",
     ".ib-state.cancelled { color: var(--muted); }",
+    ".ib-who { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 13px; }",
+    ".ib-who .ib-btn { margin-left: auto; padding: 1px 8px; }",
     ".ib-wrap { overflow-x: auto; }"
   ].join("\n");
 
@@ -65,6 +67,7 @@
     var cfgBox = put(pane, el("div", "ib-box"));
     var sendBox = put(pane, el("div", "ib-box"));
     var listBox = put(pane, el("div", "ib-box"));
+    var armed = false;      // "Xoá cả hộp thư" phải bấm hai lần
     var data = null, sending = false, form = { target: "", text: "" }, reqs = { target: "", items: [], note: "" };
 
     var say = function (text, bad) {
@@ -112,6 +115,28 @@
         var line = put(card, el("div", ""));
         add(line, el("b", "", String(p.running)), el("span", "", " / " + p.limit + " đang chạy" + (on ? "" : " (trần khi bật thread mới)")));
         if (p.open_chats) add(card, el("div", "muted", p.open_chats + " là chat bạn đang mở"));
+        // Ai đang chiếm chỗ: tên thread, chạy ở đâu, đang làm gì, đã im bao lâu. Thread nền có nút Tắt (thread không mất;
+        // tin trong hộp thư sẽ bật nó lại).
+        (p.threads || []).slice().sort(function (a, b) { return a.idle - b.idle; }).forEach(function (t) {
+          var row = put(card, el("div", "ib-who"));
+          var bg = t.kind === "background";
+          var doing = t.hung ? "TREO: " + t.hung : t.state === "blocked" ? "chờ người" : t.status === "busy" ? "đang chạy một lượt" : "rảnh";
+          var quiet = t.idle >= 3600 ? Math.floor(t.idle / 3600) + " giờ" : t.idle >= 60 ? Math.floor(t.idle / 60) + " phút" : t.idle + " giây";
+          add(row, el("b", "", t.title), el("span", t.hung ? "bad-text" : "muted", " · " + (bg ? "nền" : "VS Code") + " · " + doing + (t.hung ? "" : " · im " + quiet) +
+            (t.inbox ? " · ✉ " + t.inbox : "")));
+          if (bg) {
+            var off = put(row, button("Tắt", function () {
+              off.disabled = true;
+              fetch("/api/sessions/stop", { method: "POST", cache: "no-store",
+                headers: { "Content-Type": "application/json", "X-Setup-Token": ctx.setup.token }, body: JSON.stringify({ id: t.id }) })
+                .then(function (r) { return r.json(); })
+                .then(function (res) { say(res.ok ? "Đã tắt phiên nền " + t.title + "." : "Không tắt được " + t.title + ": " + (res.error || ""), !res.ok); return refresh(); },
+                      function (e) { say("Không tắt được " + t.title + ": " + e.message, true); });
+            }));
+            off.title = "Tắt phiên nền này để nhường chỗ. Thread không mất; tin trong hộp thư sẽ bật nó lại.";
+          }
+        });
+        if (!(p.threads || []).length) add(card, el("div", "muted", "không thread nào đang chạy"));
       });
     };
 
@@ -138,9 +163,15 @@
       var fIn = num("Trần feature", data.config.limits.feature, 1, 32);
       var tIn = num("Trần tool", data.config.limits.tool, 1, 32);
       var iIn = num("Tắt sau (phút rảnh)", data.config.idle_minutes, 5, 240);
+      // Phiên treo: một lượt đang chạy mà transcript không có dòng mới. Báo @Manager sau N phút; tắt và giao lại sau M phút (0: không tự tắt).
+      var hnIn = num("Lượt im: báo sau (phút)", data.config.hung_note, 2, 120);
+      var hsIn = num("tắt và giao lại sau (phút, 0 = không)", data.config.hung_stop, 0, 240);
+      // Chat của feature/tool đang mở ở VS Code mà rảnh: đóng nó khi có tin chờ, sau N phút rảnh (0 = không bao giờ đóng).
+      var tkIn = num("Chat mở mà rảnh: đóng để giao sau (phút, 0 = không)", data.config.takeover_minutes, 0, 240);
       add(row2, button("Lưu", function () {
-        post("config", { limits: { feature: parseInt(fIn.value, 10), tool: parseInt(tIn.value, 10) }, idle_minutes: parseInt(iIn.value, 10) })
-          .then(function () { say("Đã lưu trần và thời gian rảnh."); }, function (e) { say(e.message, true); });
+        post("config", { limits: { feature: parseInt(fIn.value, 10), tool: parseInt(tIn.value, 10) }, idle_minutes: parseInt(iIn.value, 10),
+                         hung_note: parseInt(hnIn.value, 10), hung_stop: parseInt(hsIn.value, 10), takeover_minutes: parseInt(tkIn.value, 10) })
+          .then(function () { say("Đã lưu trần, thời gian rảnh và ngưỡng phiên treo."); }, function (e) { say(e.message, true); });
       }));
     };
 
@@ -208,6 +239,23 @@
       var s = data.summary;
       add(listBox, el("h2", "", "Tin (" + s.open + " chưa giao" + (s.error ? ", " + s.error + " lỗi" : "") + (s.old ? ", " + s.old + " chờ quá 30 phút" : "") + ")"));
       if (!data.messages.length) { add(listBox, el("p", "muted", "Chưa có tin nào.")); return; }
+      // Xoá hộp thư: tin đã xong (đã giao, đã huỷ, lỗi) hoặc mọi tin, kể cả tin chưa giao (sẽ không bao giờ được giao).
+      // Tin đang được giao đúng lúc đó thì giữ lại. Danh sách chỉ hiện các tin gần nhất; lệnh xoá áp dụng cho cả hộp thư.
+      var openCount = s.open;
+      var clearRow = put(listBox, el("div", "ib-row"));
+      add(clearRow, button("Xoá tin đã xong", function () {
+        post("clear", { scope: "done" }).then(function (res) { armed = false; say("Đã xoá " + res.removed + " tin đã xong."); }, function (e) { say(e.message, true); });
+      }));
+      var allBtn = put(clearRow, button(armed ? "Bấm lần nữa: xoá MỌI tin" + (openCount ? ", kể cả " + openCount + " tin chưa giao" : "") : "Xoá cả hộp thư", function () {
+        if (!armed) { armed = true; renderList(); return; }
+        post("clear", { scope: "all" }).then(function (res) { armed = false; say("Đã xoá " + res.removed + " tin; hộp thư trống."); renderList(); },
+                                             function (e) { armed = false; say(e.message, true); });
+      }));
+      if (armed) {
+        allBtn.className += " bad-text";
+        add(clearRow, button("Thôi", function () { armed = false; renderList(); }));
+        add(clearRow, el("span", "muted", "Tin chưa giao bị xoá sẽ không tới phiên nào; không lấy lại được."));
+      }
       var wrap = put(listBox, el("div", "ib-wrap"));
       var table = put(wrap, el("table", "ib-table"));
       var head = put(table, el("tr"));
@@ -217,6 +265,8 @@
         add(tr, el("td", "", when(m.created)), el("td", "", m.target), el("td", "", m.source));
         var stc = put(tr, el("td"));
         add(stc, el("span", "ib-state " + m.state, STATE_NAMES[m.state] || m.state));
+        var waitedMin = (m.state === "queued" || m.state === "waiting") ? Math.floor((Date.now() / 1000 - m.created) / 60) : 0;
+        if (waitedMin >= 1) add(stc, el("div", waitedMin >= 5 ? "bad-text" : "muted", "đã chờ " + waitedMin + " phút"));
         if (m.why) add(stc, el("div", "muted", m.why));
         if (m.error) add(stc, el("div", "bad-text", m.error));
         if (m.tries) add(stc, el("div", "muted", "lần thử: " + m.tries + (m.state === "delivered" ? " · " + when(m.delivered_at) : "")));
@@ -224,11 +274,24 @@
         var tc = put(tr, el("td", "ib-text", txt));
         tc.title = m.text;
         var act = put(tr, el("td"));
+        if (m.state === "queued" || m.state === "waiting") {
+          // Giao ngay: bỏ qua lí do chờ (chat đang mở mà rảnh thì server đóng chat rồi giao ở nền; hết chỗ thì giao vượt trần).
+          var now = put(act, button("Giao ngay", function () {
+            now.disabled = true;
+            say("Đang giao " + m.id + "…");
+            post("deliver", { id: m.id }).then(function () { say("Đã giao " + m.id + " cho " + m.target + "."); },
+                                               function (e) { say("Chưa giao được " + m.id + ": " + e.message, true); refresh(); });
+          }));
+          now.title = "Giao tin này ngay, bỏ qua lí do chờ. Chat của thread đang mở ở VS Code mà rảnh thì bị đóng (nội dung thread không mất) và thread chạy ở nền.";
+        }
         if (m.state === "queued" || m.state === "waiting" || m.state === "error") {
           add(act, button("Huỷ", function () { post("cancel", { id: m.id }).then(function () { say("Đã huỷ " + m.id); }, function (e) { say(e.message, true); }); }));
         }
         if (m.state === "error" || m.state === "cancelled") {
           add(act, button("Thử lại", function () { post("retry", { id: m.id }).then(function () { say("Đã đưa lại vào hàng: " + m.id); }, function (e) { say(e.message, true); }); }));
+        }
+        if (m.state !== "delivering" && m.state !== "queued" && m.state !== "waiting") {
+          add(act, button("Xoá", function () { post("remove", { id: m.id }).then(function () { say("Đã xoá " + m.id); }, function (e) { say(e.message, true); }); }));
         }
       });
     };

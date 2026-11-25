@@ -728,14 +728,18 @@
         });
         // Nút Live bật/tắt: màu theo trạng thái. Nền: bấm để tắt; không live: bấm để bật; VS Code/terminal: chỉ hiện.
         var liveState = t.live === "background" ? "on" : t.live ? "vscode" : "off";
-        var liveBtn = el("button", "copy live " + liveState, (liveState === "on" ? "● Live" + (t.live_status ? " · " + t.live_status : "")
-          : liveState === "vscode" ? "● VS Code" : "○ Live") + (t.inbox ? " · ✉ " + t.inbox : ""));
+        // Thread nền đang chờ người (hỏi quyền, hỏi lại) thì ghi rõ "chờ người": nó sẽ không tự chạy tiếp. Nút nền luôn
+        // kèm chữ "⏹ tắt" để thấy ngay bấm vào là tắt phiên nền (gỡ thread đang kẹt).
+        var blocked = t.live_state === "blocked";
+        var liveBtn = el("button", "copy live " + liveState, (liveState === "on" ? "● Live" + (t.hung ? " · TREO " + t.hung.split(" ở ")[0] : blocked ? " · chờ người" : t.live_status ? " · " + t.live_status : "")
+          : liveState === "vscode" ? "● VS Code" + (t.hung ? " · TREO " + t.hung.split(" ở ")[0] : "") : "○ Live") + (t.inbox ? " · ✉ " + t.inbox : "") + (liveState === "on" ? " · ⏹ tắt" : ""));
         liveBtn.type = "button";
         liveBtn.setAttribute("aria-pressed", liveState === "off" ? "false" : "true");
         var isHuman = t.binding === "@human" || t.feature === "@human";
         var liveOff = liveState === "vscode" ? "đang mở ở VS Code hoặc terminal (live): tắt ở đó"
           : liveState === "off" ? (why || (isHuman ? "thread của người không chạy nền (VS Code sẽ không mở được nó): mở nó trong VS Code là live" : "")) : "";
-        liveBtn.title = (liveOff || (liveState === "on" ? "đang chạy nền, phiên khác nhắn được; bấm để tắt live (xem, duyệt quyền: claude attach " + t.title + ")"
+        liveBtn.title = (liveOff || (liveState === "on" ? (blocked ? "phiên nền đang dừng chờ người (hỏi quyền hoặc hỏi lại) và sẽ không tự chạy tiếp. " : "") +
+            "Bấm để TẮT phiên nền này: thread không mất, tin trong hộp thư sẽ bật nó lại và được giao. Muốn xem hoặc trả lời nó: claude attach " + t.title
           : "phiên khác không thấy thread này; bấm để bật live (một lượt ngắn)"))
           + (t.inbox ? "\n" + t.inbox + " tin trong hộp thư chờ giao (tab Hộp thư)" : "")
           + (t.needs ? "\nđang chờ người: " + t.needs : "");

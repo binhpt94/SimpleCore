@@ -363,6 +363,265 @@ def delete_cases(check):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def cli_cases(check):
+    """The claude CLI is run directly, never through cmd.exe: there an argument is cut at its first newline, and the
+    inbox gave the threads messages without their text."""
+    real = (ss.shutil.which, ss.subprocess.run, ss.os.name)
+    calls = []
+
+    class Done:
+        returncode, stdout, stderr = 0, "ok", ""
+
+    def fake_run(command, **kw):
+        calls.append((command, kw.get("shell")))
+        return Done()
+    prompt = "Việc giao qua hộp thư.\n\n[tin m20261125-222813-ce0fb4 · từ @Manager]\nLàm 8 yêu cầu & 50% (a) \"x\""
+    try:
+        ss.subprocess.run = fake_run
+        ss.shutil.which = lambda name: r"C:\Users\x\.local\bin\claude.exe"
+        out = ss.run_claude(["--bg", "--resume", "sid", prompt])
+        check("cli: an .exe is run directly, with the prompt whole: every line, the message id, the special characters",
+              (out, calls[-1][0][0].endswith("claude.exe"), calls[-1][0][-1] == prompt, bool(calls[-1][1])), ("ok", True, True, False))
+        ss.shutil.which = lambda name: None
+        ss.run_claude(["-p", prompt])
+        check("cli: not found on PATH: still run by name, without the shell", (calls[-1][0][0], calls[-1][0][-1] == prompt, bool(calls[-1][1])),
+              ("claude", True, False))
+        if os.name == "nt":
+            ss.shutil.which = lambda name: r"C:\Users\x\AppData\Roaming\npm\claude.CMD"
+            ss.run_claude(["-p", prompt])
+            sent = calls[-1][0][-1]
+            check("cli: a .cmd shim must go through cmd.exe: the newlines are written as a mark, no text is lost",
+                  (bool(calls[-1][1]), "\n" in sent, "m20261125-222813-ce0fb4" in sent, "Làm 8 yêu cầu" in sent, sent.count(ss.NEWLINE_MARK)),
+                  (True, False, True, True, 3))
+    finally:
+        ss.shutil.which, ss.subprocess.run = real[0], real[1]
+    import subprocess as sp
+    echoed = sp.run([sys.executable, "-c", "import sys; sys.stdout.reconfigure(encoding='utf-8'); print(repr(sys.argv[1]))", prompt],
+                    capture_output=True, text=True, encoding="utf-8").stdout.strip()
+    check("cli: a real process run without the shell gets every line of the argument", echoed, repr(prompt))
+
+
+def watch_cases(check):
+    """The watch over silent turns: a turn that runs while its transcript gets no new line is told to @Manager, and a
+    background thread that runs on demand is stopped and given its work again, once."""
+    real = (ss.ROOT, ss.threads, ss.live_sessions, ss.stop_bg, ss.transcripts_dir)
+    root, tdir = Path(tempfile.mkdtemp(prefix="watch-")), Path(tempfile.mkdtemp(prefix="watch-t-"))
+    live, stopped = {}, []
+    listed = [thread("w0000000", "Wallet", binding="Wallet"), thread("h0000000", "Hud", binding="Hud"),
+              thread("l0000000", "CodeLead", binding="@CodeLead"), thread("u0000000", "UnityAutoPlay", binding="@UnityAutoPlay"),
+              thread("m0000000", "Me", binding="@human")]
+
+    def call(sid, name, inp, done=False):
+        rows = [{"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "t1", "name": name, "input": inp}]}}]
+        if done:
+            rows.append({"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "t1", "content": "ok"}]}})
+            rows.append({"type": "api-request-blob", "message": {"content": [rows[0]["message"]["content"][0]]}})      # the CLI's echo
+        (tdir / f"{sid}.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+
+    def age(sid, minutes):
+        os.utime(tdir / f"{sid}.jsonl", (time.time() - minutes * 60, time.time() - minutes * 60))
+
+    def busy(sid, kind="background"):
+        live[sid] = {"kind": kind, "status": "busy", "state": "working", "short": sid}
+
+    def notes():
+        d = root / "Management" / "reports"
+        return sorted(p.read_text(encoding="utf-8") for p in d.glob("*.md")) if d.is_dir() else []
+
+    def fake_stop(sid):
+        stopped.append(sid)
+        live.pop(sid, None)
+
+    delete = {"action": "delete", "path": "Assets/Features/Wallet/X.cs", "unity_instance": "UnityProject@1ec6164a"}
+    try:
+        ss.ROOT, ss.threads, ss.live_sessions = root, lambda: [dict(t) for t in listed], lambda fresh=False: dict(live)
+        ss.stop_bg, ss.transcripts_dir = fake_stop, lambda: tdir
+        ss.HUNG.clear()
+        for t in listed:
+            call(t["id"], "mcp__UnityMCP__manage_asset", delete)
+        busy("w0000000")
+        age("w0000000", 2)
+        check("watch: a turn silent for two minutes is not stuck yet", (ss.watch_tick(), ss.hang_of(listed[0], live["w0000000"], time.time())), ([], None))
+        age("w0000000", 4)
+        h = ss.hang_of(listed[0], live["w0000000"], time.time())
+        check("watch: silent for four minutes: the page says where it hangs, nobody is told yet",
+              (ss.hang_text(h), ss.watch_tick(), notes()),
+              ("im 4 phút ở lệnh mcp__UnityMCP__manage_asset (action=delete path=Assets/Features/Wallet/X.cs)", [], []))
+        check("watch: the tab of the inbox carries it", [x["hung"][:10] for x in ss.inbox_view()["pools"]["feature"]["threads"]], ["im 4 phút "])
+        age("w0000000", 6)
+        check("watch: silent past hung_note: one note for @Manager", (ss.watch_tick(), len(notes()), "phiên treo: lượt đang chạy im 6 phút" in notes()[0],
+                                                                      "FEATURE=Wallet" in notes()[0]), ([("hung-noted", "Wallet")], 1, True, True))
+        check("watch: the same silence is told once", (ss.watch_tick(), len(notes()), list(stopped)), ([], 1, []))
+        age("w0000000", 11)
+        did = ss.watch_tick()
+        ms = ss.dispatch.messages(root, "Wallet")
+        check("watch: silent past hung_stop: the background thread is stopped and its work is put in the inbox again",
+              (did, list(stopped), [(m["source"], m["state"], "bị treo: im 11 phút ở lệnh mcp__UnityMCP__manage_asset" in m["text"],
+                               "không làm lại từ đầu" in m["text"]) for m in ms], len(notes())),
+              ([("hung-restarted", "Wallet")], ["w0000000"], [("canh phiên", "queued", True, True)], 2))
+        ss.watch_tick()      # the stopped thread is gone: its silence is over
+        busy("w0000000")
+        age("w0000000", 11)
+        check("watch: stuck again within the hour: not stopped a second time, the human is told",
+              (ss.watch_tick(), list(stopped), len(ss.dispatch.messages(root, "Wallet")), "treo lần nữa" in notes()[-1] or any("treo lần nữa" in n for n in notes())),
+              ([("hung-left", "Wallet")], ["w0000000"], 1, True))
+        live.clear()
+        ss.HUNG.clear()
+        n = len(notes())
+        for sid, kind in (("l0000000", "background"), ("u0000000", "background"), ("h0000000", "interactive"), ("m0000000", "interactive")):
+            busy(sid, kind)
+            age(sid, 30)
+        did = ss.watch_tick()
+        check("watch: a Leader, a tester and a chat open in VS Code are told of, never stopped; the human's own chat is left alone",
+              (sorted(did), list(stopped), len(notes()) - n), ([("hung-noted", "@CodeLead"), ("hung-noted", "@UnityAutoPlay"), ("hung-noted", "Hud")], ["w0000000"], 3))
+        live.clear()
+        ss.HUNG.clear()
+        busy("h0000000")
+        call("h0000000", "Agent", {"prompt": "x"})
+        age("h0000000", 30)
+        check("watch: a turn that waits for a subagent is not stuck", ss.watch_tick(), [])
+        call("h0000000", "Bash", {"command": "python Management/tools/validate.py"})
+        age("h0000000", 11)
+        check("watch: a shell command may run for ten minutes", ss.watch_tick(), [])
+        age("h0000000", 13)
+        check("watch: past that it is stuck like any call", ss.watch_tick(), [("hung-restarted", "Hud")])
+        busy("h0000000")
+        call("h0000000", "mcp__UnityMCP__manage_asset", delete, done=True)
+        age("h0000000", 6)
+        ss.HUNG.clear()
+        check("watch: no call open (the model does not answer): told so", (ss.watch_tick(), "không ở lệnh nào" in "".join(notes())), ([("hung-noted", "Hud")], True))
+        live["h0000000"] = {"kind": "background", "status": "busy", "state": "blocked", "short": "h0000000"}
+        ss.HUNG.clear()
+        check("watch: a turn that waits for the human is not stuck; an idle thread neither", ss.watch_tick(), [])
+        ss.dispatch.set_config(root, hung_stop=0, hung_note=2)
+        live.clear()
+        ss.HUNG.clear()
+        busy("w0000000")
+        call("w0000000", "mcp__UnityMCP__manage_asset", delete)
+        age("w0000000", 300)
+        n_stop = len(stopped)
+        check("watch: hung_stop 0: only the note, however long", (ss.watch_tick(), len(stopped) - n_stop), ([("hung-noted", "Wallet")], 0))
+        check("watch: the settings are checked", (refused_cfg(root, hung_note=1), refused_cfg(root, hung_stop=500), ss.dispatch.config(root)["hung_note"]), (True, True, 2))
+    finally:
+        ss.ROOT, ss.threads, ss.live_sessions, ss.stop_bg, ss.transcripts_dir = real
+        ss.HUNG.clear()
+        shutil.rmtree(root, ignore_errors=True)
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
+def takeover_cases(check):
+    """A message for a thread whose chat is open in VS Code: an idle chat of a thread that runs on demand is closed
+    and the thread runs in the background; the Giao ngay button does it at once; a message that waits long is told."""
+    real = (ss.ROOT, ss.threads, ss.live_sessions, ss.turn, ss.stop_bg, ss.transcripts_dir, ss.close_chat, ss.kill_pid, ss.wait_live)
+    root, tdir = Path(tempfile.mkdtemp(prefix="take-")), Path(tempfile.mkdtemp(prefix="take-t-"))
+    live, given, closed, killed = {}, [], [], []
+    listed = [thread("w0000000", "Wallet", binding="Wallet"), thread("h0000000", "Hud", binding="Hud"),
+              thread("s0000000", "Shop", binding="Shop"), thread("u0000000", "UnityAutoPlay", binding="@UnityAutoPlay")]
+    for t in listed:
+        (tdir / f"{t['id']}.jsonl").write_text("{}\n", encoding="utf-8")
+
+    def chat(sid, status="idle", minutes=0):
+        live[sid] = {"kind": "interactive", "status": status, "state": "", "short": sid, "pid": 4242}
+        os.utime(tdir / f"{sid}.jsonl", (time.time() - minutes * 60, time.time() - minutes * 60))
+
+    def fake_turn(t, prompt, bg=None):
+        given.append((t["id"], prompt))
+        live[t["id"]] = {"kind": "background", "status": "busy", "state": "working", "short": t["id"][:8]}
+
+    def fake_close(sid):
+        closed.append(sid)
+        live.pop(sid, None)
+
+    def notes():
+        d = root / "Management" / "reports"
+        return sorted(p.read_text(encoding="utf-8") for p in d.glob("*.md")) if d.is_dir() else []
+
+    def msg(mid):
+        return ss.dispatch.get(root, mid)
+
+    try:
+        ss.ROOT, ss.threads, ss.live_sessions = root, lambda: [dict(t) for t in listed], lambda fresh=False: dict(live)
+        ss.turn, ss.stop_bg, ss.transcripts_dir, ss.close_chat = fake_turn, lambda sid: None, lambda: tdir, fake_close
+        chat("w0000000", minutes=2)
+        a = ss.dispatch.send(root, "Wallet", "Việc cho Wallet", "@Manager")
+        ss.courier_tick(time.time())
+        check("takeover: a chat idle for two minutes is left open; the message says when the server will close it",
+              (msg(a["id"])["state"], "rảnh 2 phút: server tự đóng chat và giao khi rảnh đủ 5 phút" in msg(a["id"])["why"], closed, given),
+              ("waiting", True, [], []))
+        chat("w0000000", status="busy", minutes=30)
+        ss.courier_tick(time.time())
+        check("takeover: a chat in the middle of a turn is never closed, however long", (closed, "đang chạy một lượt" in msg(a["id"])["why"]), ([], True))
+        check("deliver now: refused with the reason while the chat runs a turn",
+              (ss.inbox_call("deliver", {"id": a["id"]})["ok"], "đang chạy một lượt" in ss.inbox_call("deliver", {"id": a["id"]})["error"], closed), (False, True, []))
+        chat("w0000000", minutes=6)
+        did = ss.courier_tick(time.time())
+        check("takeover: idle past takeover_minutes with a message waiting: the chat is closed and the thread runs in the background with it",
+              (list(closed), [g[0] for g in given], a["id"] in given[-1][1], msg(a["id"])["state"], ("took-over", "Wallet") in did),
+              (["w0000000"], ["w0000000"], True, "delivering", True))
+        chat("h0000000", minutes=1)
+        b = ss.dispatch.send(root, "Hud", "Việc cho Hud", "@Manager")
+        ss.courier_tick(time.time())
+        n_closed = len(closed)
+        res = ss.inbox_call("deliver", {"id": b["id"]})
+        check("deliver now: the chat is closed at once, without the wait, and the message is given",
+              (res["ok"], res.get("state"), closed[n_closed:], given[-1][0], msg(b["id"]).get("force")), (True, "delivering", ["h0000000"], "h0000000", False))
+        ss.dispatch.set_config(root, takeover_minutes=0)
+        chat("s0000000", minutes=600)
+        c = ss.dispatch.send(root, "Shop", "Việc cho Shop", "@Manager")
+        n_closed = len(closed)
+        ss.courier_tick(time.time())
+        check("takeover: takeover_minutes 0: an open chat is never closed by itself; the message says how to send it",
+              (closed[n_closed:], "bấm Giao ngay" in msg(c["id"])["why"]), ([], True))
+        check("deliver now: still closes it, the human asked", (ss.inbox_call("deliver", {"id": c["id"]})["ok"], closed[n_closed:]), (True, ["s0000000"]))
+        ss.dispatch.set_config(root, takeover_minutes=5, limits={"feature": 1})
+        live.clear()
+        live["w0000000"] = {"kind": "background", "status": "busy", "state": "working", "short": "w0000000"}
+        for m in ss.dispatch.pending(root):
+            ss.dispatch.mark(root, m, "delivered")
+        d = ss.dispatch.send(root, "Hud", "Việc hai", "@Manager", now=time.time() - 400)
+        n = len(notes())
+        did = ss.courier_tick(time.time())
+        check("wait note: a message that has waited five minutes is told to @Manager, with why; once",
+              (msg(d["id"])["state"], "hết chỗ" in msg(d["id"])["why"], len(notes()) - n, "chưa giao được sau 6 phút" in notes()[-1] and "hết chỗ" in notes()[-1],
+               ss.courier_tick(time.time()) and len(notes()) - n), ("waiting", True, 1, True, 1))
+        n_given = len(given)
+        res = ss.inbox_call("deliver", {"id": d["id"]})
+        check("deliver now: a full pool is passed for this message; the thread is told the request may be old",
+              (res["ok"], len(given) - n_given, "LƯU Ý: tin này gửi lúc" in given[-1][1]), (True, 1, True))
+        check("deliver now: a message that is not waiting is refused", ss.inbox_call("deliver", {"id": d["id"]})["ok"], False)
+        e = ss.dispatch.send(root, "@UnityAutoPlay", "Chơi thử", "@Manager")
+        chat("u0000000", minutes=600)
+        n_closed = len(closed)
+        ss.courier_tick(time.time())
+        check("takeover: a tester's open chat is not closed by itself", (closed[n_closed:], msg(e["id"])["state"]), ([], "waiting"))
+        # close_chat itself
+        ss.close_chat, ss.kill_pid, ss.wait_live = real[6], lambda pid: killed.append(pid), lambda sid, present: True
+        chat("s0000000", status="busy")
+        try:
+            ss.close_chat("s0000000")
+            said = ""
+        except RuntimeError as ex:
+            said = str(ex)
+        chat("s0000000")
+        ss.close_chat("s0000000")
+        live["s0000000"]["kind"] = "background"
+        ss.close_chat("s0000000")
+        check("close_chat: ends the process of an idle chat only; never a chat in a turn, never a background session",
+              (said, killed), ("chat đang chạy một lượt", [4242]))
+    finally:
+        ss.ROOT, ss.threads, ss.live_sessions, ss.turn, ss.stop_bg, ss.transcripts_dir, ss.close_chat, ss.kill_pid, ss.wait_live = real
+        shutil.rmtree(root, ignore_errors=True)
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
+def refused_cfg(root, **kw):
+    try:
+        ss.dispatch.set_config(root, **kw)
+        return False
+    except ValueError:
+        return True
+
+
 def courier_cases(check):
     """The inbox courier: a message is given to its thread as a turn of its own, counted as delivered only when its id
     is in the transcript; on-demand mode stops idle threads and keeps each pool under its limit."""
@@ -411,12 +670,21 @@ def courier_cases(check):
         ss.courier_tick(now + 2)
         check("courier: a thread in the middle of a turn: the message waits",
               (ss.dispatch.get(root, b["id"])["state"], ss.dispatch.get(root, b["id"])["why"]), ("waiting", "thread đang chạy một lượt"))
+        live["w0000000"]["state"] = "blocked"
+        n_blocked = len(given)
+        ss.courier_tick(now + 2.5)
+        check("courier: a background thread stopped at a question to the human does nothing: the waiting message takes it over",
+              (len(given) - n_blocked, given[-1][0], b["id"] in given[-1][1], given[-1][2]), (1, "w0000000", True, "background"))
+        ss.courier_tick(now + 2.6)
+        live["w0000000"] = {"kind": "background", "status": "busy", "state": "working", "short": "w0000000"}
+        b = ss.dispatch.send(root, "Wallet", "Việc thứ ba", "@CodeLead")
+        ss.courier_tick(now + 2.7)
         live["w0000000"]["status"] = "idle"
         c = ss.dispatch.send(root, "Wallet", "Việc thứ ba", "người")
         ss.courier_tick(now + 3)
         check("courier: an idle background thread gets every waiting message in one turn, as a background turn",
               (b["id"] in given[-1][1] and c["id"] in given[-1][1], given[-1][2], len([g for g in given if g[0] == "w0000000"])),
-              (True, "background", 2))
+              (True, "background", 3))
         ss.courier_tick(now + 4)
 
         live["s0000000"] = {"kind": "interactive", "status": "busy", "state": "", "short": "s0000000"}
@@ -427,8 +695,46 @@ def courier_cases(check):
               ("waiting", True, True))
         e = ss.dispatch.send(root, "Hero", "Việc cho Hero", "@Manager")
         ss.courier_tick(now + 6)
-        check("courier: no thread bound to the target: waits, says to run Setup",
-              "chưa có thread" in ss.dispatch.get(root, e["id"])["why"])
+        check("courier: no thread and no such feature folder: the message waits, no thread is made",
+              ("không có feature hay vai này" in ss.dispatch.get(root, e["id"])["why"], ss.can_create("Hero"), ss.can_create("@Manager")),
+              (True, False, False))
+        # a target that exists but has no thread yet: the courier makes the thread, then gives it the message
+        for name in ("Hero", "Castle"):
+            (root / "UnityProject/Assets/Features" / name).mkdir(parents=True)
+        made = []
+        real_create = ss.create
+
+        def fake_create(name, feature, model, effort):
+            if feature == "Castle" and not made_ok["castle"]:
+                raise RuntimeError("CLI lỗi")
+            sid = feature.lower()[:1] + "9999999"
+            made.append((name, feature, model, effort))
+            (tdir / f"{sid}.jsonl").write_text("{}\n", encoding="utf-8")
+            return sid
+        made_ok = {"castle": False}
+        ss.create = fake_create
+        try:
+            c1 = ss.dispatch.send(root, "Castle", "Việc cho Castle", "@Manager")
+            n_given = len(given)
+            did = ss.courier_tick(now + 6.5)
+            check("courier: a target with a folder and no thread gets one made (the model of the pool's last thread), then its message",
+                  (list(made), [x[:2] for x in did if x[0] == "created"], given[-1][0], e["id"] in given[-1][1], given[-1][3],
+                   ss.dispatch.get(root, e["id"])["state"]),
+                  ([("Hero", "Hero", "claude-opus-x", "medium")], [("created", "Hero")], "h9999999", True, True, "delivering"))
+            check("courier: one thread is made in a pass; the next target waits its turn",
+                  (len(given) - n_given, "mỗi vòng tạo một" in ss.dispatch.get(root, c1["id"])["why"]), (1, True))
+            ss.courier_tick(now + 6.6)
+            m = ss.dispatch.get(root, c1["id"])
+            check("courier: a thread that cannot be made: the message goes back to the queue with the reason",
+                  (m["state"], "không tạo được thread: CLI lỗi" in m["error"], len(made)), ("queued", True, 1))
+            made_ok["castle"] = True
+            ss.courier_tick(now + 6.7)
+            check("courier: made at the next try", (made[-1][:2], given[-1][0]), (("Castle", "Castle"), "c9999999"))
+        finally:
+            ss.create = real_create
+        for sid in ("h9999999", "c9999999"):
+            live.pop(sid, None)
+        ss.dispatch.cancel(root, c1["id"]) if ss.dispatch.get(root, c1["id"])["state"] in ss.dispatch.OPEN else None
         ss.busy("h0000000", True)
         f = ss.dispatch.send(root, "Hud", "Việc cho Hud", "@Manager")
         ss.courier_tick(now + 7)
@@ -453,15 +759,14 @@ def courier_cases(check):
         seen["write"] = True
 
         ss.dispatch.cancel(root, d["id"])
-        ss.dispatch.cancel(root, e["id"])
         ss.dispatch.set_config(root, mode="on-demand", limits={"feature": 1}, idle_minutes=10)
         live.clear()
         live["w0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "w0000000"}
-        age("w0000000", 5)
+        age("w0000000", 1)
         h = ss.dispatch.send(root, "Hud", "Việc mới cho Hud", "@Manager")
         ss.courier_tick(time.time())
-        check("on-demand: the pool is full and its thread was busy 5 minutes ago: the message waits, nothing is stopped",
-              (ss.dispatch.get(root, h["id"])["state"], "hết chỗ" in ss.dispatch.get(root, h["id"])["why"], stopped), ("waiting", True, []))
+        check("on-demand: the pool is full and its thread was busy a minute ago: the message waits, nothing is stopped",
+              (ss.dispatch.get(root, h["id"])["state"], "hết chỗ" in ss.dispatch.get(root, h["id"])["why"], list(stopped)), ("waiting", True, []))
         age("w0000000", 30)
         ss.courier_tick(time.time())
         check("on-demand: idle past idle_minutes: it is stopped, and the waiting thread gets the slot",
@@ -500,6 +805,12 @@ def courier_cases(check):
               ("delivered", n_stop, False))
         live.pop("u0000000")
         v = ss.inbox_view()
+        live["w0000000"] = {"kind": "background", "status": "idle", "state": "blocked", "short": "w0000000"}
+        who = ss.inbox_view()["pools"]["feature"]["threads"]
+        check("inbox view: who takes the places of a pool: the thread, where it runs, what it does, how long it has been quiet",
+              [(x["title"], x["kind"], x["status"], x["state"], x["idle"] >= 0) for x in who if x["id"] == "w0000000"],
+              [("Wallet", "background", "idle", "blocked", True)])
+        live.pop("w0000000")
         check("inbox view: settings, each pool with its limit and running threads, targets without Leaders",
               (v["config"]["mode"], v["pools"]["feature"]["limit"], sorted(t["target"] for t in v["targets"])),
               ("always-live", 1, ["@Codex", "@UnityAutoPlay", "Hud", "Shop", "Wallet"]))
@@ -533,16 +844,36 @@ def courier_cases(check):
         capped = ss.dispatch.send(root, "Hud", "Việc khi nhóm đã đầy", "@Manager")
         n_stop, n_given = len(stopped), len(given)
         ss.courier_tick(time.time())
-        check("always-live: a thread is started only while its pool is under the limit; nothing is stopped to make room",
+        check("always-live: the pool is full and its thread is in the middle of a turn: the message waits, nothing is stopped",
               (ss.dispatch.get(root, capped["id"])["state"], "hết chỗ" in ss.dispatch.get(root, capped["id"])["why"],
                len(stopped) - n_stop, len(given) - n_given), ("waiting", True, 0, 0))
-        ss.dispatch.cancel(root, capped["id"])
+        live["w0000000"]["status"] = "idle"
+        age("w0000000", 1)
+        ss.courier_tick(time.time())
+        check("always-live: idle for a minute only: not stopped yet", (len(stopped) - n_stop, len(given) - n_given), (0, 0))
+        live["w0000000"]["kind"] = "interactive"
+        age("w0000000", 300)
+        ss.courier_tick(time.time())
+        check("always-live: a chat open in VS Code is never stopped to make room", (len(stopped) - n_stop, len(given) - n_given), (0, 0))
+        live["w0000000"]["kind"] = "background"
+        ss.courier_tick(time.time())
+        check("always-live: the pool is full and a thread has been idle long enough: it is stopped, and a waiting message gets the slot",
+              (stopped[n_stop:], len(given) - n_given, "w0000000" in live), (["w0000000"], 1, False))
+        for m in ss.dispatch.pending(root):      # nothing waits any more
+            ss.dispatch.mark(root, m, "cancelled", why="huỷ")
+        live.clear()
+        live["w0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "w0000000"}
+        age("w0000000", 300)
+        n_stop = len(stopped)
+        ss.courier_tick(time.time() + 1)
+        check("always-live: with no message waiting nothing is stopped for being idle", (len(stopped) - n_stop, "w0000000" in live), (0, True))
+        live.pop("w0000000", None)
         check("agents: a listed job with no pid (retired by the CLI's daemon, or waiting for the human) is not running",
               ss.parse_agents([{"sessionId": "a", "kind": "background", "state": "blocked", "id": "a"},
                                {"sessionId": "b", "pid": 7, "kind": "background", "status": "idle", "state": "done", "id": "b"},
                                {"sessionId": "c", "pid": 8, "kind": "interactive", "status": "busy", "id": "c"}, "junk"]),
-              {"b": {"kind": "background", "status": "idle", "state": "done", "short": "b"},
-               "c": {"kind": "interactive", "status": "busy", "state": "", "short": "c"}})
+              {"b": {"kind": "background", "status": "idle", "pid": 7, "state": "done", "short": "b"},
+               "c": {"kind": "interactive", "status": "busy", "pid": 8, "state": "", "short": "c"}})
     finally:
         ss.ROOT, ss.threads, ss.live_sessions, ss.turn, ss.stop_bg, ss.transcripts_dir = real
         shutil.rmtree(root, ignore_errors=True)
@@ -730,7 +1061,10 @@ def main():
     job_cases(check)
     live_cases(check)
     delete_cases(check)
+    cli_cases(check)
     courier_cases(check)
+    watch_cases(check)
+    takeover_cases(check)
     failed = [r for r in results if not r[0]]
     for _, label, expect, got in failed:
         print(f"FAIL  {label}: expected {expect!r}, got {got!r}")

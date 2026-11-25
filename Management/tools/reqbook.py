@@ -468,7 +468,10 @@ def mark(root, feature, refs, action, by, note=None, tests=None, play=None):
         node, req = find_req(v, ref.strip())
         state = req["state"]
         saved = req["saved"] or {}
-        if action in ("doing", "done") and req.get("deferred"):
+        # Only what nobody started waits. A requirement of a later phase that already has code (it was written in
+        # the book, and its design changed since, or it was sent back, or its test is gone) is listed as work, so
+        # the book must take its doing and done: otherwise the session that fixes it can never say so.
+        if action in ("doing", "done") and req.get("later"):
             raise ValueError(f"{req['ref']} thuộc giai đoạn {gd.stage_name(req['deferred']) or req['deferred']}, project đang làm "
                              f"{gd.stage_name(v['stage'])}: để sau, chưa làm. Người đổi giai đoạn đang làm ở tab Game design")
         if action == "doing":

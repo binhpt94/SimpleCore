@@ -1263,6 +1263,54 @@ def run_styles(root):
     check("style: gd_status prints the styles", "- Style ui-flat: UI phẳng (1 ảnh tham chiếu)" in gd_status.report(root))
 
 
+def run_held(root):
+    """Chốt while another program has a file of live open: Windows renames no folder above such a file."""
+    for path in ("", "feature-a", "feature-a/a1", "feature-a/a1/a1x"):
+        mk(root, path)
+    put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')
+    put(root, "idea/.art-style/ui-flat.md", "# UI phẳng\n\nPhẳng.\n")
+    put(root, "idea/.art-style/ui-flat-old.png", "png")
+    for path in ("feature-a", "feature-a/a1", "feature-a/a1/a1x"):
+        mk(root, path)      # based on the root with its style
+    put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')
+    gd.promote(root, "", True)
+    put(root, "idea/.art-style/ui-flat.md", "# UI phẳng\n\nPhẳng, viền dày.\n")
+    folder(root, "idea/.art-style/ui-flat-old.png").unlink()
+    put(root, "idea/.art-style/ui-flat-new.png", "png")
+    put(root, "live/.stray/x.txt")
+    held = open(folder(root, "live/feature-a/a1/a1x/data.md"), "rb")      # as Excel, a viewer or a reading session would
+    try:
+        check("held: the root is promoted although a file below it is open", gd.promote(root, "", False), ["(gốc)"])
+        check("held: its own files and folders are the new ones; what idea dropped is gone",
+              ("viền dày" in folder(root, "live/.art-style/ui-flat.md").read_text(encoding="utf-8"),
+               folder(root, "live/.art-style/ui-flat-new.png").is_file(), folder(root, "live/.art-style/ui-flat-old.png").exists(), folder(root, "live/.stray").exists()), (True, True, False, False))
+        check("held: the nodes below stay as they were", (folder(root, "live/feature-a/a1/a1x/data.md").is_file(),
+                                                          folder(root, "live/feature-a/code.json").is_file()), (True, True))
+        check("held: the root is the same as live", snap_node(root)["state"], "same")
+        mk(root, "feature-a")
+        put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')
+        mk(root, "feature-a/a1/a1x", doc="Chi tiết mới.")
+        check("held: a node above the open file is promoted too", gd.promote(root, "feature-a", False), ["feature-a"])
+        if os.name == "nt":
+            real = gd.SWAP_WAIT
+            gd.SWAP_WAIT = 0
+            try:
+                gd.promote(root, "feature-a", True)
+                said = ""
+            except OSError as ex:
+                said = str(ex)
+            finally:
+                gd.SWAP_WAIT = real
+            check("held: a whole branch cannot replace a folder with an open file: the reason is said, live is intact, nothing is left behind",
+                  ("đang mở file" in said, folder(root, "live/feature-a/a1/a1x/data.md").is_file(),
+                   folder(root, ".promote-new").exists(), folder(root, ".promote-old").exists()), (True, True, False, False))
+    finally:
+        held.close()
+    check("held: with the file closed the whole branch is promoted",
+          ("feature-a/a1/a1x" in gd.promote(root, "", True), "mới" in folder(root, "live/feature-a/a1/a1x/CLAUDE.md").read_text(encoding="utf-8")),
+          (True, True))
+
+
 def run_diff(root):
     """What the page shows against live: new, rewritten and removed ideas, title, summary, frames, when."""
     mk(root, "", items=(("loop", 8, "Vòng lặp."), ("win", 6, "Thắng sau 10 đợt."), ("map", 7, "Một bản đồ.")))
@@ -1361,7 +1409,7 @@ def run_deco(root):
 
 
 def main():
-    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_stage, run_progress, run_infra, run_code_names, run_flow, run_refs, run_follow, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco):
+    for case in (run_data, run_held, run_diff, run_scores, run_live_scores, run_priority, run_stage, run_progress, run_infra, run_code_names, run_flow, run_refs, run_follow, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

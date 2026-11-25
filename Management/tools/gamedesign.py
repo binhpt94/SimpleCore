@@ -2901,30 +2901,86 @@ def promote(root, path, deep, by="người"):
     tmp, old = work / ".promote-new", work / ".promote-old"
     for leftover in (tmp, old):
         shutil.rmtree(leftover, ignore_errors=True)
-    if deep:
-        shutil.copytree(src, tmp, ignore=shutil.ignore_patterns(*NOT_COPIED, "~$*"))
-    else:
-        tmp.mkdir(parents=True)
-        for name in NODE_FILES:
-            shutil.copy2(src / name, tmp / name)
-        for name in (CODE_FILE, UI_FILE):
-            if (src / name).is_file():
+    try:
+        if deep:
+            shutil.copytree(src, tmp, ignore=shutil.ignore_patterns(*NOT_COPIED, "~$*"))
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            if parts:
+                swap_dir(tmp, dst, old)
+            else:      # the root: live itself is never renamed, somebody always has a file of it open
+                put_inside(tmp, dst, old, keep_children=False)
+        else:
+            tmp.mkdir(parents=True)
+            for name in NODE_FILES:
                 shutil.copy2(src / name, tmp / name)
-        for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR, gd_excel.EXCEL_DIR):
-            if (src / extra).is_dir():
-                shutil.copytree(src / extra, tmp / extra, ignore=shutil.ignore_patterns("~$*"))
-        if dst.is_dir():      # keep what live already has below this node
-            for child in dst.iterdir():
-                if child.is_dir() and not child.name.startswith("."):
-                    shutil.copytree(child, tmp / child.name)
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    if dst.exists():
-        os.replace(dst, old)
-    os.replace(tmp, dst)
-    shutil.rmtree(old, ignore_errors=True)
+            for name in (CODE_FILE, UI_FILE):
+                if (src / name).is_file():
+                    shutil.copy2(src / name, tmp / name)
+            for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR, gd_excel.EXCEL_DIR):
+                if (src / extra).is_dir():
+                    shutil.copytree(src / extra, tmp / extra, ignore=shutil.ignore_patterns("~$*"))
+            put_inside(tmp, dst, old, keep_children=True)      # what live has below this node is not touched
+    except OSError as ex:
+        raise OSError(f"không ghi được '{path or '(gốc)'}' vào live: một chương trình khác đang mở file trong thư mục đó "
+                      f"(Excel, một cửa sổ thư mục, một phiên đang đọc). Đóng nó rồi bấm Chốt lại. Lỗi của máy: {ex}") from ex
+    finally:
+        for leftover in (tmp, old):
+            shutil.rmtree(leftover, ignore_errors=True)
     for n in walk(node):
         log(table_dir(root, "idea").joinpath(*(n["path"].split("/") if n["path"] else [])), "promote", by=by, hash=n["dataHash"])
     return [n["path"] or "(gốc)" for n in walk(node)]
+
+
+SWAP_TRIES = 5      # a file watcher or a virus scanner holds a folder for a moment only
+SWAP_WAIT = 0.2
+
+
+def patiently(fn, *args):
+    """fn(*args), tried again a few times when the file system refuses (somebody holds the file right now)."""
+    for i in range(SWAP_TRIES):
+        try:
+            return fn(*args)
+        except OSError:
+            if i == SWAP_TRIES - 1:
+                raise
+            time.sleep(SWAP_WAIT)
+
+
+def swap_dir(new, dst, old):
+    """The folder `new` takes the place of the folder `dst` (which may not exist); `old` is a free scratch path
+    beside them. When `new` cannot be put there, `dst` is put back."""
+    shutil.rmtree(old, ignore_errors=True)
+    had = dst.exists()
+    if had:
+        patiently(os.replace, dst, old)
+    try:
+        patiently(os.replace, new, dst)
+    except OSError:
+        if had:
+            os.replace(old, dst)
+        raise
+    shutil.rmtree(old, ignore_errors=True)
+
+
+def put_inside(new, dst, old, keep_children):
+    """Makes the folder `dst` hold what the folder `new` holds, entry by entry, without renaming `dst` itself:
+    Windows refuses to rename a folder while any program has a file below it open, and for a node near the root
+    that is nearly always. keep_children: the node folders below dst (not starting with ".") that `new` does not
+    have stay as they are; otherwise everything `new` does not have is removed."""
+    dst.mkdir(parents=True, exist_ok=True)
+    names = {p.name for p in new.iterdir()}
+    for p in list(dst.iterdir()):
+        if p.name in names or (keep_children and p.is_dir() and not p.name.startswith(".")):
+            continue
+        if p.is_dir():
+            patiently(shutil.rmtree, p)
+        else:
+            patiently(p.unlink)
+    for p in sorted(new.iterdir(), key=lambda p: p.name):
+        if p.is_dir():
+            swap_dir(p, dst / p.name, old)
+        else:
+            patiently(os.replace, p, dst / p.name)
 
 
 def promote_followers(root, by="người"):

@@ -212,6 +212,7 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/references/upload": 12 * 1024 * 1024, "/api/references/note": 64 * 1024,
               "/api/references/delete": MAX_BODY,
               "/api/inbox/send": 16 * 1024, "/api/inbox/cancel": MAX_BODY, "/api/inbox/retry": MAX_BODY,
+              "/api/inbox/remove": MAX_BODY, "/api/inbox/clear": MAX_BODY, "/api/inbox/deliver": MAX_BODY,
               "/api/inbox/config": MAX_BODY,
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
@@ -301,6 +302,8 @@ def threads():
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
                         "binding": guard.bound_feature(sid, guard.STORE_DIR) or "",
                         "live": (live.get(sid) or {}).get("kind", ""), "live_status": (live.get(sid) or {}).get("status", ""),
+                        "live_state": (live.get(sid) or {}).get("state", ""),
+                        "hung": hang_text(h) if (h := hang_of({"id": sid}, live.get(sid), time.time())) else "",
                         "needs": job_needs(sid), "inbox": waiting.get(guard.bound_feature(sid, guard.STORE_DIR) or "", 0),
                         "modified": time.strftime("%Y-%m-%d %H:%M", time.localtime(p.stat().st_mtime))})
     return sorted(out, key=lambda t: (t["title"].lower(), t["modified"]))
@@ -367,7 +370,7 @@ def parse_agents(rows):
     value = {}
     for s in rows if isinstance(rows, list) else []:
         if isinstance(s, dict) and isinstance(s.get("sessionId"), str) and s.get("pid") and s.get("status"):
-            value[s["sessionId"]] = {"kind": str(s.get("kind") or ""), "status": str(s.get("status") or ""),
+            value[s["sessionId"]] = {"kind": str(s.get("kind") or ""), "status": str(s.get("status") or ""), "pid": s.get("pid"),
                                      "state": str(s.get("state") or ""), "short": str(s.get("id") or s["sessionId"][:8])}
     return value
 
@@ -452,6 +455,30 @@ def stop_bg(session_id):
         forget_bg(s["short"])
 
 
+def kill_pid(pid):
+    """Ends one process and what it started (the chat's own MCP servers)."""
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/PID", str(int(pid)), "/T", "/F"], capture_output=True, timeout=20)
+    else:
+        os.kill(int(pid), 15)
+
+
+def close_chat(session_id):
+    """Ends the process of a chat open in VS Code or a terminal and waits until the session is gone, so the thread
+    can run in the background under its own id. Only an idle chat: one in the middle of a turn is left alone. The
+    transcript stays; the tab in VS Code says the session ended. Nothing when no such chat runs."""
+    s = live_sessions(fresh=True).get(session_id)
+    if not s or s["kind"] == "background":
+        return
+    if s["status"] != "idle":
+        raise RuntimeError("chat đang chạy một lượt")
+    if not s.get("pid"):
+        raise RuntimeError("không biết tiến trình của chat")
+    kill_pid(s["pid"])
+    if not wait_live(session_id, False):
+        raise RuntimeError(f"chat vẫn chạy sau {LIVE_SECONDS}s (pid {s['pid']})")
+
+
 def turn_args(t):
     """The model and effort a thread last used, as CLI flags."""
     args = []
@@ -467,11 +494,26 @@ def turn_args(t):
 CLAUDE_ENV = {"CLAUDE_CODE_ENTRYPOINT": VSCODE_ENTRY, "CLAUDE_BG_ISOLATION": "none"}
 
 
+NEWLINE_MARK = " ⏎ "
+
+
+def claude_command(args):
+    """(the command line, whether it must go through the shell) for the claude CLI. The CLI is run directly: through
+    cmd.exe (shell=True) an argument is cut at its first newline, so a prompt of several lines reached the thread as
+    its first line only (the inbox gave messages without their text). Only a CLI that is a .cmd or .bat shim (an npm
+    install) still needs cmd.exe; its newlines are then written as a mark so that nothing is lost."""
+    exe = shutil.which("claude") or "claude"
+    if os.name == "nt" and exe.lower().endswith((".cmd", ".bat")):
+        return [exe] + [a.replace("\r\n", "\n").replace("\n", NEWLINE_MARK) for a in args], True
+    return [exe] + list(args), False
+
+
 def run_claude(args):
     """Runs the claude CLI in the project (one headless turn) and returns what it printed; raises with its error."""
-    p = subprocess.run(["claude"] + args, cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace",
+    command, shell = claude_command(args)
+    p = subprocess.run(command, cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace",
                        env=dict(os.environ, **CLAUDE_ENV),
-                       timeout=CLAUDE_SECONDS, shell=(os.name == "nt"))
+                       timeout=CLAUDE_SECONDS, shell=shell)
     if p.returncode != 0:
         raise RuntimeError((p.stderr or p.stdout or f"exit {p.returncode}").strip()[:300])
     return (p.stdout or "").strip()
@@ -1016,6 +1058,146 @@ def idle_seconds(session_id, now):
         return 0
 
 
+# ---- the watch over silent turns: a turn that runs (status busy) while its transcript gets no new line is stuck in
+# one call (an MCP tool that never answers, a request that never ends). Nobody sees it: the page says "busy".
+HUNG_SHOW_SECONDS = 180      # from here the page says so
+HUNG_SLOW = ("Bash", "PowerShell")      # a shell command may rightly run for ten minutes
+HUNG_SLOW_SECONDS = 720
+HUNG_NEVER = ("Agent", "Task", "Workflow")      # a subagent writes its own transcript: silence here says nothing
+HUNG_RETRY_SECONDS = 3600      # a thread stopped for being stuck is not stopped again within this time
+HUNG_SOURCE = "canh phiên"
+HUNG_TAIL = 400_000      # bytes of the transcript read to find the call
+HUNG = {}      # session id -> {"noted", "stopped"} of the silence it is in now
+
+
+def pending_call(session_id):
+    """(tool, a short text of its input) of the last tool call of the thread that has no result yet, or ("", "")."""
+    try:
+        with open(transcript_path(session_id), "rb") as f:
+            f.seek(0, os.SEEK_END)
+            f.seek(max(0, f.tell() - HUNG_TAIL))
+            lines = f.read().decode("utf-8", errors="replace").splitlines()
+    except OSError:
+        return "", ""
+    calls = {}
+    for line in lines:
+        if '"tool_use' not in line and '"tool_result"' not in line:
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue      # the first line of the tail may be cut
+        # only the turns themselves: the CLI also writes rows that echo a request (api-request-blob), where a call
+        # comes again after its result
+        if not isinstance(row, dict) or row.get("type") not in ("assistant", "user"):
+            continue
+        content = (row.get("message") or {}).get("content")
+        for b in content if isinstance(content, list) else []:
+            if not isinstance(b, dict):
+                continue
+            if b.get("type") == "tool_use" and row["type"] == "assistant":
+                calls[b.get("id")] = (str(b.get("name") or ""), b.get("input"))
+            elif b.get("type") == "tool_result":
+                calls.pop(b.get("tool_use_id"), None)
+    if not calls:
+        return "", ""
+    name, inp = list(calls.values())[-1]
+    what = " ".join(f"{k}={v}" for k, v in inp.items() if isinstance(v, (str, int, float)) and k != "unity_instance") if isinstance(inp, dict) else ""
+    return name, re.sub(r"\s+", " ", what)[:160]
+
+
+def hang_of(t, s, now):
+    """None, or {"seconds", "tool", "what", "slow"} when the session `s` of thread `t` runs a turn that has been
+    silent for HUNG_SHOW_SECONDS. A turn that waits for the human (state blocked) or for a subagent is not stuck."""
+    if not s or s.get("status") != "busy" or s.get("state") == "blocked":
+        return None
+    quiet = idle_seconds(t["id"], now)
+    if quiet < HUNG_SHOW_SECONDS:
+        return None
+    tool, what = pending_call(t["id"])
+    if tool in HUNG_NEVER:
+        return None
+    return {"seconds": int(quiet), "tool": tool, "what": what, "slow": tool in HUNG_SLOW}
+
+
+def hang_text(h):
+    """'im 6 phút ở lệnh mcp__UnityMCP__manage_asset (action=delete path=…)' for the page, the note and the message."""
+    call = (f"ở lệnh {h['tool']}" + (f" ({h['what']})" if h["what"] else "")) if h["tool"] else "không ở lệnh nào (chờ mô hình trả lời)"
+    return f"im {h['seconds'] // 60} phút {call}"
+
+
+def hung_note(t, h, action):
+    """One note in Management/reports (where @Manager and @CodeLead are shown the new reports) about a stuck turn."""
+    folder = ROOT / "Management" / "reports"
+    folder.mkdir(parents=True, exist_ok=True)
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", t["binding"]).strip("-") or "unknown"
+    stamp, n = time.strftime("%Y%m%d-%H%M%S"), 1
+    path = folder / f"{stamp}-{slug}-treo.md"
+    while path.exists():
+        n += 1
+        path = folder / f"{stamp}-{slug}-treo-{n}.md"
+    body = (f"<!-- {time.strftime('%Y-%m-%d %H:%M:%S')} · FEATURE={t['binding']} · ghi bởi setup_server.py (canh phiên) -->\n"
+            f"## Báo cáo cho @Manager\n- Phiên: FEATURE={t['binding']}\n- Việc: (phiên treo: lượt đang chạy {hang_text(h)})\n"
+            f"- Trạng thái: bị chặn\n- Đã đổi: ?\n- Công khai đổi: ?\n- Cần bên khác: {action}\n- Kiểm tra: ?\n"
+            f"- Ghi chú: do server ghi, không phải phiên đó viết; thread {t['title']} ({t['id'][:8]})\n")
+    path.write_text(body, encoding="utf-8", newline="\n")
+    return path
+
+
+def watch_tick(now=None):
+    """One pass of the watch: every thread whose running turn is silent gets, once per silence, a note for @Manager
+    (after hung_note minutes) and, when it is a background thread that runs on demand (feature, service, @Core,
+    tool), is stopped and given its work again through the inbox (after hung_stop minutes; once in
+    HUNG_RETRY_SECONDS, after that only the note: the human decides). Never stopped: a chat open in VS Code or a
+    terminal, a Leader, a tester (it plays: long turns are its work). Returns what it did."""
+    now = time.time() if now is None else now
+    did = []
+    cfg = dispatch.config(ROOT)
+    live = live_sessions()
+    for t in threads():
+        if t["archived"] or t["unlisted"] or not t["binding"] or t["binding"] == "@human":
+            continue
+        s = live.get(t["id"])
+        h = hang_of(t, s, now)
+        if not h:
+            HUNG.pop(t["id"], None)
+            continue
+        mark = HUNG.setdefault(t["id"], {"noted": False, "stopped": False})
+        floor = HUNG_SLOW_SECONDS if h["slow"] else 0
+        target = t["binding"]
+        may_stop = bool(cfg["hung_stop"]) and s["kind"] == "background" and dispatch.pool_of(target) in dispatch.ON_DEMAND
+        if may_stop and not mark["stopped"] and h["seconds"] >= max(cfg["hung_stop"] * 60, floor):
+            mark["stopped"] = True
+            again = any(m.get("source") == HUNG_SOURCE and now - m.get("created", 0) < HUNG_RETRY_SECONDS
+                        for m in dispatch.messages(ROOT, target))
+            with BUSY_LOCK:
+                busy_now = t["id"] in BUSY
+            if again or busy_now:
+                hung_note(t, h, "người: phiên treo lần nữa sau khi server đã tắt và giao lại một lần; xem thread rồi tắt hoặc giao lại bằng tay")
+                did.append(("hung-left", target))
+                continue
+            try:
+                with COURIER_LOCK:
+                    stop_bg(t["id"])
+                    dispatch.send(ROOT, target, (
+                        f"Lượt trước của thread này bị treo: {hang_text(h)}, nên server đã tắt nó lúc {time.strftime('%H:%M', time.localtime(now))}. "
+                        "Kiểm lại kết quả của lệnh đó trước (nó có thể đã chạy xong hoặc chạy dở), rồi làm tiếp việc đang dở của lượt "
+                        "trước, không làm lại từ đầu. Lệnh đó treo lần nữa thì không gọi lại: ghi BÁO CHẶN trong báo cáo và dừng."),
+                        HUNG_SOURCE, now=now)
+                hung_note(t, h, "không: server đã tắt phiên và giao lại việc qua hộp thư (một lần)")
+                did.append(("hung-restarted", target))
+            except Exception as ex:
+                hung_note(t, h, f"người: server không tắt được phiên ({str(ex)[:120]})")
+                did.append(("hung-stop-failed", target, str(ex)[:120]))
+            mark["noted"] = True
+        elif not mark["noted"] and h["seconds"] >= max(cfg["hung_note"] * 60, floor):
+            mark["noted"] = True
+            hung_note(t, h, f"không: server tự tắt và giao lại sau {cfg['hung_stop']} phút im" if may_stop
+                      else "người hoặc @Manager: xem thread; server không tự tắt phiên này")
+            did.append(("hung-noted", target))
+    return did
+
+
 def thread_for(target, listed):
     """The thread bound to `target` that the courier gives messages to (the most recently used one), or None."""
     same = [t for t in listed if t["binding"] == target and not t["archived"] and not t["unlisted"]]
@@ -1032,6 +1214,29 @@ def can_stop(t, live, open_targets, cfg, now):
     return bool(s and s["kind"] == "background" and s["status"] == "idle" and not busy_now
                 and dispatch.pool_of(t["binding"]) in dispatch.ON_DEMAND and t["binding"] not in open_targets
                 and idle_seconds(t["id"], now) >= cfg["idle_minutes"] * 60)
+
+
+SLOT_IDLE_SECONDS = 120      # a thread idle this long may be stopped to make room for a waiting message
+
+
+def can_free(t, live, open_targets, now):
+    """A running background thread may be stopped to make room in a full pool (either mode): its turn is over, it
+    has been quiet for SLOT_IDLE_SECONDS, no message waits for it and the page is not running a turn in it. A chat
+    open in VS Code or a terminal is never stopped."""
+    s = live.get(t["id"])
+    with BUSY_LOCK:
+        busy_now = t["id"] in BUSY
+    return bool(s and s["kind"] == "background" and s["status"] == "idle" and not busy_now
+                and dispatch.pool_of(t["binding"]) in dispatch.ON_DEMAND and t["binding"] not in open_targets
+                and idle_seconds(t["id"], now) >= SLOT_IDLE_SECONDS)
+
+
+def can_create(target):
+    """True when the courier may make a thread for `target`: a role that runs on demand, or a feature or service
+    whose folder exists (the guard takes no other FEATURE value)."""
+    if dispatch.pool_of(target) is None:
+        return False
+    return target in ROLE_GROUPS or guard.valid_feature(target, str(ROOT))
 
 
 def still_valid(check):
@@ -1088,6 +1293,8 @@ def _courier_tick(now):
     open_ = dispatch.pending(ROOT)
     open_targets = {m["target"] for m in open_}
 
+    made = []      # the targets a thread was made for in this pass (one a pass: making one costs a whole turn)
+
     def running(pool):
         return sum(1 for sid, s in live.items() if sid in by_id and dispatch.pool_of(by_id[sid]["binding"]) == pool)
 
@@ -1117,10 +1324,17 @@ def _courier_tick(now):
             continue      # the last delivery is not confirmed yet
         t = thread_for(target, listed)
 
+        forced = any(m.get("force") for m in ms)      # the Giao ngay button
+
         def wait(why):
             for m in ms:
-                if m["state"] != "waiting" or m.get("why") != why:
-                    dispatch.mark(ROOT, m, "waiting", why=why)
+                extra = {}
+                if not m.get("noted") and now - m["created"] >= WAIT_NOTE_SECONDS:      # nobody would know otherwise
+                    extra["noted"] = True
+                    wait_note(m, why, now)
+                    did.append(("wait-noted", m["id"]))
+                if m["state"] != "waiting" or m.get("why") != why or extra or m.get("force"):
+                    dispatch.mark(ROOT, m, "waiting", why=why, force=False, **extra)
             did.append(("wait", target, why))
 
         stale = []
@@ -1133,35 +1347,84 @@ def _courier_tick(now):
         ms = [m for m in ms if m not in stale]
         if not ms:
             continue
-        if t is None:
-            wait("chưa có thread: chạy Setup cho tên này")
-            continue
-        with BUSY_LOCK:
-            busy_now = t["id"] in BUSY
-        if busy_now:
-            wait("trang đang chạy một lượt trong thread")
-            continue
-        s = live.get(t["id"])
-        if s and s["kind"] != "background":
-            wait("chat đang mở ở VS Code hoặc terminal: làm trong chat đó, hoặc đóng chat để hộp thư giao")
-            continue
-        if s and s["status"] != "idle":
-            wait("thread đang chạy một lượt")
-            continue
         pool = dispatch.pool_of(target)
-        # starting a thread: the limit holds in both modes (a tester has none: a Leader's message always opens it)
-        if not s and pool in cfg["limits"] and running(pool) >= cfg["limits"][pool]:
-            free = sorted((x for x in listed if dispatch.pool_of(x["binding"]) == pool and can_stop(x, live, open_targets, cfg, now)),
-                          key=lambda x: idle_seconds(x["id"], now), reverse=True) if cfg["mode"] == "on-demand" else []
-            if not (free and stop(free[0], "stopped-for-slot")):
-                wait(f"hết chỗ: {cfg['limits'][pool]} thread {pool} đang chạy")
+        s = None
+        if t is None:
+            if not can_create(target):
+                wait("không có feature hay vai này để tạo thread (thư mục feature chưa có?)")
                 continue
+            if made:
+                wait("chờ tới lượt tạo thread (mỗi vòng tạo một)")
+                continue
+        else:
+            with BUSY_LOCK:
+                busy_now = t["id"] in BUSY
+            if busy_now:
+                wait("trang đang chạy một lượt trong thread")
+                continue
+            s = live.get(t["id"])
+            if s and s["kind"] != "background":
+                # A chat left open would hold its messages for ever. One that is idle long enough (or at once, by the
+                # Giao ngay button) is closed, and the thread runs in the background with the messages.
+                quiet = idle_seconds(t["id"], now)
+                takeover = cfg["takeover_minutes"] * 60
+                if s["status"] != "idle":
+                    wait("chat đang mở ở VS Code hoặc terminal và đang chạy một lượt: tin đi khi lượt xong")
+                    continue
+                if not forced and (not takeover or pool not in dispatch.ON_DEMAND):
+                    wait("chat đang mở ở VS Code hoặc terminal: đóng chat, hoặc bấm Giao ngay để server đóng nó và giao")
+                    continue
+                if not forced and quiet < takeover:
+                    wait(f"chat đang mở ở VS Code hoặc terminal, rảnh {int(quiet // 60)} phút: server tự đóng chat và giao khi rảnh đủ "
+                         f"{cfg['takeover_minutes']} phút (hoặc bấm Giao ngay)")
+                    continue
+                try:
+                    close_chat(t["id"])
+                except Exception as ex:
+                    wait(f"không đóng được chat đang mở: {str(ex)[:120]}")
+                    continue
+                live.pop(t["id"], None)
+                s = None
+                did.append(("took-over", target))
+            # A background thread stopped at a question to the human (state blocked) is doing nothing and will not go
+            # on by itself: the waiting message takes it over (turn() stops it and starts it again with the message).
+            if s and s["status"] != "idle" and s.get("state") != "blocked":
+                wait("thread đang chạy một lượt")
+                continue
+        # starting a thread: the limit holds in both modes (a tester has none: a Leader's message always opens it).
+        # A full pool: the background thread of the pool that has been idle longest makes room, in both modes.
+        if not s and not forced and pool in cfg["limits"] and running(pool) >= cfg["limits"][pool]:
+            free = sorted((x for x in listed if dispatch.pool_of(x["binding"]) == pool and can_free(x, live, open_targets, now)),
+                          key=lambda x: idle_seconds(x["id"], now), reverse=True)
+            if not (free and stop(free[0], "stopped-for-slot")):
+                wait(f"hết chỗ: {cfg['limits'][pool]} thread {pool} đang chạy, chưa thread nào rảnh đủ {SLOT_IDLE_SECONDS // 60} phút")
+                continue
+        if t is None:      # no thread for this target yet: make one (one turn that reads the rules), then give it the message
+            made.append(target)
+            same = sorted((x for x in listed if dispatch.pool_of(x["binding"]) == pool and x.get("model")),
+                          key=lambda x: x["modified"], reverse=True)
+            model = same[0]["model"] if same else DEFAULT_MODEL
+            effort = same[0]["effort"] if same and same[0].get("effort") in EFFORTS else DEFAULT_EFFORT
+            wait("đang tạo thread")
+            try:
+                sid = create(thread_name(target), target, model, effort)
+            except Exception as ex:
+                for m in ms:
+                    dispatch.failed(ROOT, dispatch.get(ROOT, m["id"]), f"không tạo được thread: {ex}", now)
+                did.append(("create-failed", target, str(ex)[:120]))
+                continue
+            t = {"id": sid, "title": thread_name(target), "binding": target, "feature": target, "model": model, "effort": effort,
+                 "archived": False, "unlisted": False, "modified": now}
+            listed.append(t)
+            by_id[sid] = t
+            did.append(("created", target, sid[:8]))
+            ms = [dispatch.get(ROOT, m["id"]) for m in ms]
         t = dict(t, live=(s or {}).get("kind", ""))
         offset = transcript_size(t["id"])
         for m in ms:
-            dispatch.mark(ROOT, m, "delivering", why="", thread=t["id"], offset=offset, started=now, tries=m["tries"] + 1)
+            dispatch.mark(ROOT, m, "delivering", why="", thread=t["id"], offset=offset, started=now, tries=m["tries"] + 1, force=False)
         try:
-            turn(t, dispatch.prompt(ms), bg=True)
+            turn(t, dispatch.prompt(ms, now), bg=True)
             live[t["id"]] = {"kind": "background", "status": "busy", "state": "", "short": t["id"][:8]}
             did.append(("given", target, [m["id"] for m in ms]))
         except Exception as ex:
@@ -1169,6 +1432,36 @@ def _courier_tick(now):
                 dispatch.failed(ROOT, dispatch.get(ROOT, m["id"]), f"không bật được thread: {ex}", now)
             did.append(("give-failed", target, str(ex)[:120]))
     return did
+
+
+WAIT_NOTE_SECONDS = 300      # a message that waits this long is told to @Manager, once
+
+
+def wait_note(m, why, now):
+    """One note in Management/reports about a message nobody could be given for WAIT_NOTE_SECONDS."""
+    folder = ROOT / "Management" / "reports"
+    folder.mkdir(parents=True, exist_ok=True)
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", m["target"]).strip("-") or "unknown"
+    path = folder / f"{time.strftime('%Y%m%d-%H%M%S')}-{slug}-tin-cho-{m['id'][-6:]}.md"
+    text = m["text"].replace("\n", " ")
+    path.write_text(
+        f"<!-- {time.strftime('%Y-%m-%d %H:%M:%S')} · FEATURE={m['target']} · ghi bởi setup_server.py (hộp thư) -->\n"
+        f"## Báo cáo cho @Manager\n- Phiên: FEATURE={m['target']}\n"
+        f"- Việc: (tin {m['id']} từ {m['source']} chưa giao được sau {int((now - m['created']) // 60)} phút: {text[:160]})\n"
+        f"- Trạng thái: bị chặn\n- Đã đổi: không\n- Công khai đổi: không\n- Cần bên khác: người: {why}\n- Kiểm tra: ?\n"
+        "- Ghi chú: do server ghi; tab Hộp thư có nút Giao ngay trên tin đang chờ\n", encoding="utf-8", newline="\n")
+    return path
+
+
+def deliver_now(mid):
+    """The Giao ngay button of a waiting message: one pass of the courier that gives it whatever it waits for, or the
+    reason it still cannot go (its thread is in the middle of a turn). {ok, state, why}."""
+    dispatch.force(ROOT, mid)
+    courier_tick()
+    m = dispatch.get(ROOT, mid)
+    if m["state"] in ("delivering", "delivered"):
+        return {"ok": True, "state": m["state"], "why": ""}
+    return {"ok": False, "error": m.get("why") or m.get("error") or f"tin đang {m['state']}"}
 
 
 INBOX_DONE_SHOWN = 30      # delivered or cancelled messages the tab still shows
@@ -1183,7 +1476,12 @@ def inbox_view():
     done = [m for m in ms if m["state"] not in dispatch.OPEN + ("error",)][-INBOX_DONE_SHOWN:]
     live = live_sessions(fresh=True)
     listed = [t for t in threads() if not t["archived"] and not t["unlisted"]]
-    pools = {p: {"limit": n, "running": 0, "open_chats": 0} for p, n in cfg["limits"].items()}
+    pools = {p: {"limit": n, "running": 0, "open_chats": 0, "threads": []} for p, n in cfg["limits"].items()}
+    now = time.time()
+    waiting = {}
+    for m in keep:
+        if m["state"] in dispatch.OPEN:
+            waiting[m["target"]] = waiting.get(m["target"], 0) + 1
     targets = {}
     for t in listed:
         pool = dispatch.pool_of(t["binding"])
@@ -1194,13 +1492,19 @@ def inbox_view():
         if s and pool in pools:
             pools[pool]["running"] += 1
             pools[pool]["open_chats"] += s["kind"] != "background"
+            # who takes the place: the thread, where it runs, what it is doing, how long it has been quiet
+            pools[pool]["threads"].append({"id": t["id"], "title": t["title"], "target": t["binding"], "kind": s["kind"],
+                                           "status": s["status"], "state": s.get("state", ""),
+                                           "idle": int(idle_seconds(t["id"], now)), "inbox": waiting.get(t["binding"], 0),
+                                           "hung": hang_text(h) if (h := hang_of(t, s, now)) else ""})
     return {"config": cfg, "modes": list(dispatch.MODES), "messages": list(reversed(keep + done)),
             "summary": dispatch.summary(ROOT), "pools": pools,
             "targets": sorted(targets.values(), key=lambda x: (x["pool"], x["target"].lower()))}
 
 
 def inbox_call(action, data):
-    """POST /api/inbox/<action>: send (from the human), cancel, retry, config. {ok, data} or {ok: False, error}."""
+    """POST /api/inbox/<action>: send (from the human), cancel, retry, remove, clear, config. {ok, data} or
+    {ok: False, error}."""
     try:
         if action == "send":
             m = dispatch.send(ROOT, str(data.get("target") or ""), str(data.get("text") or ""), "người")
@@ -1209,9 +1513,20 @@ def inbox_call(action, data):
             dispatch.cancel(ROOT, str(data.get("id") or ""))
         elif action == "retry":
             dispatch.retry(ROOT, str(data.get("id") or ""))
+        elif action == "deliver":     # Giao ngay
+            res = deliver_now(str(data.get("id") or ""))
+            return dict(res, data=inbox_view())
+        elif action == "remove":      # one message, for good
+            dispatch.remove(ROOT, str(data.get("id") or ""))
+        elif action == "clear":       # the whole inbox, or only what is over
+            with COURIER_LOCK:        # not while a pass is giving messages
+                n = dispatch.clear(ROOT, str(data.get("scope") or "done"))
+            return {"ok": True, "removed": n, "data": inbox_view()}
         elif action == "config":
             limits = data.get("limits") if isinstance(data.get("limits"), dict) else None
-            dispatch.set_config(ROOT, mode=data.get("mode"), limits=limits, idle_minutes=data.get("idle_minutes"))
+            dispatch.set_config(ROOT, mode=data.get("mode"), limits=limits, idle_minutes=data.get("idle_minutes"),
+                                hung_note=data.get("hung_note"), hung_stop=data.get("hung_stop"),
+                                takeover_minutes=data.get("takeover_minutes"))
         else:
             return {"ok": False, "error": "không có thao tác này"}
         return {"ok": True, "data": inbox_view()}
@@ -1243,6 +1558,8 @@ def courier_loop():
         try:
             for step in courier_tick():
                 print("hộp thư:", *step, flush=True)
+            for step in watch_tick():
+                print("canh phiên:", *step, flush=True)
         except Exception as ex:      # the loop must survive anything a tick meets
             print(f"hộp thư: lỗi {ex}", file=sys.stderr, flush=True)
         time.sleep(COURIER_SECONDS)

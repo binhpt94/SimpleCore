@@ -19,9 +19,11 @@ A message counts as delivered only when its id is seen in the thread's transcrip
     python Management/tools/dispatch.py list [<target>]
     python Management/tools/dispatch.py cancel <id>
 
-mode "always-live" (the default): the courier stops no thread. "on-demand": it stops a thread that has been idle
-`idle_minutes`. In both modes a thread that is not running is started only while fewer than `limits` threads of its
-pool run (the human's open chats count), so many messages at once never start dozens of threads.
+mode "always-live" (the default): the courier stops no thread for being idle. "on-demand": it stops a thread that
+has been idle `idle_minutes`. In both modes a thread that is not running is started only while fewer than `limits`
+threads of its pool run (the human's open chats count), so many messages at once never start dozens of threads; when
+the pool is full, the background thread of that pool that has been idle longest is stopped to make room. A target
+that has no thread yet gets one made (the courier creates it, bound to the target, then gives it the message).
 """
 import json
 import os
@@ -37,14 +39,22 @@ HERE = Path(__file__).resolve().parent
 DIR = ("Management", "inbox")
 CONFIG = "config.json"
 MODES = ("always-live", "on-demand")
-DEFAULT_CONFIG = {"mode": "always-live", "limits": {"feature": 4, "tool": 4}, "idle_minutes": 20}
+# hung_note, hung_stop: minutes a running turn may be silent (no new line in its transcript) before the server tells
+# @Manager, and before it stops the thread and gives it its work again (0: never stops it). See setup_server.watch_tick.
+# takeover_minutes: a chat of a thread that runs on demand, open in VS Code or a terminal and idle this long, is closed
+# when a message waits for it, and the thread runs in the background with the message (0: an open chat is never closed).
+DEFAULT_CONFIG = {"mode": "always-live", "limits": {"feature": 8, "tool": 8}, "idle_minutes": 20, "hung_note": 5, "hung_stop": 10,
+                  "takeover_minutes": 5}
 LIMIT_MAX, IDLE_MIN, IDLE_MAX = 32, 5, 240
+HUNG_KEYS = {"hung_note": (2, 120), "hung_stop": (0, 240), "takeover_minutes": (0, 240)}
+HUNG_NAMES = {"hung_note": "phút im lặng (báo)", "hung_stop": "phút im lặng (tắt và giao lại)", "takeover_minutes": "phút chat rảnh trước khi đóng"}
+STALE_SECONDS = 300      # a message given this long after it was sent tells the thread it may be out of date
 TOOLS = ("@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor")
 TESTERS = ("@UnityAutoPlay",)
 ON_DEMAND = ("feature", "tool")     # the pools the courier limits and stops when idle; a tester stays live
 NOT_TARGETS = ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner")
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Z][A-Za-z0-9]*$")
-SOURCES = ("người", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "gd_req", "studio")
+SOURCES = ("người", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "gd_req", "studio", "canh phiên")
 ID_RX = re.compile(r"^m\d{8}-\d{6}-[0-9a-f]{6}$")
 TEXT_MAX = 8000
 STATES = ("queued", "waiting", "delivering", "delivered", "error", "cancelled")
@@ -130,6 +140,9 @@ def config(root):
     limits = raw.get("limits") if isinstance(raw.get("limits"), dict) else {}
     out = {"mode": raw.get("mode") if raw.get("mode") in MODES else DEFAULT_CONFIG["mode"], "limits": {},
            "idle_minutes": DEFAULT_CONFIG["idle_minutes"]}
+    for key, (low, high) in HUNG_KEYS.items():
+        n = raw.get(key)
+        out[key] = n if isinstance(n, int) and not isinstance(n, bool) and low <= n <= high else DEFAULT_CONFIG[key]
     for pool, default in DEFAULT_CONFIG["limits"].items():
         n = limits.get(pool)
         out["limits"][pool] = n if isinstance(n, int) and not isinstance(n, bool) and 1 <= n <= LIMIT_MAX else default
@@ -139,8 +152,14 @@ def config(root):
     return out
 
 
-def set_config(root, mode=None, limits=None, idle_minutes=None):
+def set_config(root, mode=None, limits=None, idle_minutes=None, hung_note=None, hung_stop=None, takeover_minutes=None):
     cfg = config(root)
+    for key, n in (("hung_note", hung_note), ("hung_stop", hung_stop), ("takeover_minutes", takeover_minutes)):
+        if n is not None:
+            low, high = HUNG_KEYS[key]
+            if not isinstance(n, int) or isinstance(n, bool) or not low <= n <= high:
+                raise ValueError(f"{HUNG_NAMES[key]}: {low}-{high}")
+            cfg[key] = n
     if mode is not None:
         if mode not in MODES:
             raise ValueError(f"chế độ phải là {' hoặc '.join(MODES)}")
@@ -255,6 +274,31 @@ def cancel(root, mid):
     return mark(root, m, "cancelled", why="huỷ")
 
 
+CLEAR_SCOPES = ("done", "all")
+
+
+def remove(root, mid):
+    """Deletes one message for good. One being given right now stays: the courier is waiting to see it arrive."""
+    m = get(root, mid)
+    if m["state"] == "delivering":
+        raise ValueError(f"tin '{mid}' đang được giao: chờ vài giây rồi xoá")
+    (folder(root) / f"{m['id']}.json").unlink(missing_ok=True)
+    return m
+
+
+def clear(root, scope="done"):
+    """Empties the inbox and returns how many messages were deleted. scope "done": the messages nobody waits for
+    any more (delivered, cancelled, failed). "all": also the ones not given yet; those are never given. A message
+    being given right now stays in both cases. The settings (config.json) are not touched."""
+    if scope not in CLEAR_SCOPES:
+        raise ValueError(f"phạm vi xoá phải là một trong {CLEAR_SCOPES}")
+    keep = ("delivering",) if scope == "all" else OPEN
+    gone = [m for m in messages(root) if m["state"] not in keep]
+    for m in gone:
+        (folder(root) / f"{m['id']}.json").unlink(missing_ok=True)
+    return len(gone)
+
+
 def retry(root, mid):
     m = get(root, mid)
     if m["state"] not in ("error", "cancelled"):
@@ -262,12 +306,33 @@ def retry(root, mid):
     return mark(root, m, "queued", tries=0, next_try=0, error="")
 
 
-def prompt(ms):
-    """The turn a thread gets for its messages: each one with its id, which is how delivery is checked."""
+def force(root, mid):
+    """The "Giao ngay" button: the waiting message `mid` is to be given at the courier's next pass whatever it waits
+    for (an open chat that is idle, a full pool, the wait before a new try)."""
+    m = get(root, mid)
+    if m["state"] not in ("queued", "waiting"):
+        raise ValueError(f"tin '{mid}' đang {m['state']}: chỉ giao ngay được tin đang chờ")
+    return mark(root, m, "queued", why="", next_try=0, force=True)
+
+
+def stale_line(m, now):
+    """The warning a message carries when it is given long after it was sent, or ''."""
+    waited = now - m["created"]
+    if waited < STALE_SECONDS:
+        return ""
+    return (f"LƯU Ý: tin này gửi lúc {time.strftime('%H:%M', time.localtime(m['created']))}, đã chờ {int(waited // 60)} phút mới tới thread. "
+            "Yêu cầu có thể đã cũ: trước khi làm, kiểm lại tình trạng hiện tại (sổ yêu cầu, báo cáo mới, code). Việc đã xong "
+            "hoặc không còn đúng thì nói vậy trong báo cáo và không làm lại.\n")
+
+
+def prompt(ms, now=None):
+    """The turn a thread gets for its messages: each one with its id, which is how delivery is checked. A message
+    that waited STALE_SECONDS or more says so first (stale_line)."""
+    now = time.time() if now is None else now
     head = ("Việc giao qua hộp thư của trang Setup (thread này chạy theo việc, không sống suốt). Đây là lượt việc "
             "thật, làm như người giao trong chat: làm theo luật của vai, kết thúc bằng báo cáo nếu có sửa file. Cần "
             "Leader thì nhắn Leader bằng SendMessage. Tin có mã đã làm rồi (giao lại sau sự cố) thì bỏ qua.")
-    body = "\n\n".join(f"[tin {m['id']} · từ {m['source']}]\n{m['text']}" for m in ms)
+    body = "\n\n".join(f"[tin {m['id']} · từ {m['source']}]\n{stale_line(m, now)}{m['text']}" for m in ms)
     return head + "\n\n" + body
 
 

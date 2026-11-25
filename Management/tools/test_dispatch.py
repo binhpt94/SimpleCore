@@ -6,6 +6,7 @@ import json
 import shutil
 import sys
 import tempfile
+import time
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
@@ -36,14 +37,14 @@ def main():
                                        "@CodeLead", "@human", "@UnityAutoPlay", "wallet", "../x", "", None)],
               ["feature", "feature", "feature", "tool", "tool", None, None, None, "tester", None, None, None, None])
         check("config: the defaults when there is no file (today's behaviour)", dp.config(root),
-              {"mode": "always-live", "limits": {"feature": 4, "tool": 4}, "idle_minutes": 20})
+              {"mode": "always-live", "limits": {"feature": 8, "tool": 8}, "idle_minutes": 20, "hung_note": 5, "hung_stop": 10, "takeover_minutes": 5})
         (dp.folder(root)).mkdir(parents=True)
         (dp.folder(root) / dp.CONFIG).write_text('{"mode": "wild", "limits": {"feature": 0, "tool": "9"}, "idle_minutes": 1}')
         check("config: every bad value reads as its default", dp.config(root), dp.DEFAULT_CONFIG)
         (dp.folder(root) / dp.CONFIG).write_text("{ broken")
         check("config: a broken file reads as the defaults", dp.config(root)["mode"], "always-live")
         dp.set_config(root, mode="on-demand", limits={"feature": 2}, idle_minutes=15)
-        check("config: saved", dp.config(root), {"mode": "on-demand", "limits": {"feature": 2, "tool": 4}, "idle_minutes": 15})
+        check("config: saved", dp.config(root), {"mode": "on-demand", "limits": {"feature": 2, "tool": 8}, "idle_minutes": 15, "hung_note": 5, "hung_stop": 10, "takeover_minutes": 5})
         for label, kw in (("bad mode", {"mode": "x"}), ("limit 0", {"limits": {"feature": 0}}), ("unknown pool", {"limits": {"x": 2}}),
                           ("limit not a number", {"limits": {"tool": "3"}}), ("idle too short", {"idle_minutes": 1})):
             check("config refused: " + label, refused(dp.set_config, root, **kw))
@@ -111,6 +112,39 @@ def main():
                                   % (here, str(root))], stdout=subprocess.PIPE, text=True)
             return p, p.stdout.readline().strip()
 
+        box = Path(tempfile.mkdtemp(prefix="inbox-stale-"))
+        try:
+            t0 = 1_800_000_000
+            old = dp.send(box, "Wallet", "Việc cũ", "@Manager", now=t0)
+            new = dp.send(box, "Wallet", "Việc mới", "@Manager", now=t0 + 400)
+            text = dp.prompt([old, new], t0 + 420)
+            first, second = text.split("[tin " + new["id"])
+            check("prompt: a message given seven minutes after it was sent says it may be out of date, with when and how long",
+                  ("LƯU Ý: tin này gửi lúc " + time.strftime("%H:%M", time.localtime(t0)) + ", đã chờ 7 phút" in first,
+                   "kiểm lại tình trạng hiện tại" in first, first.index("LƯU Ý") < first.index("Việc cũ")), (True, True, True))
+            check("prompt: one given at once carries no warning", ("LƯU Ý" in second, "Việc mới" in second), (False, True))
+            check("force: a waiting message is put first in line; one already given is refused",
+                  (dp.force(box, old["id"])["force"], refused(dp.force, box, dp.mark(box, new, "delivered")["id"])), (True, True))
+        finally:
+            shutil.rmtree(box, ignore_errors=True)
+        box = Path(tempfile.mkdtemp(prefix="inbox-clear-"))
+        try:
+            ms = [dp.send(box, "Wallet", f"Việc {i}", "@Manager") for i in range(5)]
+            dp.mark(box, ms[0], "delivered")
+            dp.mark(box, ms[1], "cancelled")
+            dp.mark(box, ms[2], "error")
+            dp.mark(box, ms[3], "delivering")
+            dp.set_config(box, mode="on-demand")
+            check("remove: one message is deleted for good; one being given right now is not",
+                  (dp.remove(box, ms[1]["id"])["id"], refused(dp.remove, box, ms[3]["id"]), refused(dp.remove, box, "m00000000-000000-aaaaaa"),
+                   len(dp.messages(box))), (ms[1]["id"], True, True, 4))
+            check("clear done: what is over goes, what still waits or is being given stays",
+                  (dp.clear(box), sorted(m["state"] for m in dp.messages(box))), (2, ["delivering", "queued"]))
+            check("clear: an unknown scope is refused", refused(dp.clear, box, "everything"))
+            check("clear all: the waiting ones go too; the one being given and the settings stay",
+                  (dp.clear(box, "all"), [m["state"] for m in dp.messages(box)], dp.config(box)["mode"]), (1, ["delivering"], "on-demand"))
+        finally:
+            shutil.rmtree(box, ignore_errors=True)
         check("courier_alive: no server holds the lock: False, and the lock is free again afterwards",
               (dp.courier_alive(root), dp.courier_alive(root)), (False, False))
         line = bind_session.inbox_line(str(root))

@@ -9,7 +9,8 @@
         "mcpforunityserver==10.3.0",
         "mcp-for-unity"
       ],
-      "env": {}
+      "env": {},
+      "timeout": 180000
     }
   }
 }

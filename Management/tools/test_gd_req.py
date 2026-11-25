@@ -283,6 +283,11 @@ def run_stage(root):
     check("a requirement that waits takes no doing and no done",
           (refused(lambda: rb.mark(root, W, f"income-amounts#{later}", "doing", W, note="x")),
            refused(lambda: rb.mark(root, W, f"income-amounts#{later}", "done", W, tests=["WalletLogicTests.Adds"]))), (True, True))
+    check("one of a later phase that already has code is work: the book takes its doing and done again",
+          (rb.mark(root, W, f"income-amounts#{first}", "doing", W, note="thiết kế đổi, sửa lại")[0][:7],
+           rb.mark(root, W, f"income-amounts#{first}", "done", W, tests=["WalletLogicTests.Adds"])[0][:7],
+           next(r["later"] for n in rb.view(root, W)["nodes"] if n["path"] == OTHER for r in n["reqs"] if r["id"] == first)),
+          ("Đã ghi ", "Đã ghi ", False))
     rb.mark(root, W, f"income-amounts#{first}", "verify", "@CodeLead")
     check("what was done before can still be verified", next(r["state"] for r in rb.view(root, W)["nodes"][1]["reqs"] if r["id"] == first)
           if rb.view(root, W)["nodes"][1]["path"] == OTHER else state(root, first, OTHER), "verified")
