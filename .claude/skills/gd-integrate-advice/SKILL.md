@@ -6,7 +6,7 @@ description: Chỉ phiên FEATURE=@GameDesigner (@DesignAdvisor đọc để hi�
 Một lần hỏi bên @DesignAdvisor: skill `advisor-ask-gpt`.
 
 ## Bên @GameDesigner: đưa góp ý vào node
-Cần GPT cùng nghĩ về một node thì nhắn `DesignAdvisor` (`SendMessage`, `to: "DesignAdvisor"`): node nào, hỏi gì, ràng buộc nào phải giữ. Nó nhắn lại đường dẫn `Management/game-design/advice/<node, '/' thay bằng '.'>/<id>.md` (node gốc: `_root`). Bạn chỉ đọc `advice/`.
+Cần GPT cùng nghĩ về một node thì nhờ @DesignAdvisor qua hộp thư (nó chạy theo việc, SendMessage tới nó bị chặn): `python Management/tools/dispatch.py send @DesignAdvisor --from GameDesigner "<node> · <hỏi gì> · <ràng buộc của người nếu có>"`. Nó nhắn lại bạn (SendMessage) đường dẫn `Management/game-design/advice/<node, '/' thay bằng '.'>/<id>.md` (node gốc: `_root`). Bạn chỉ đọc `advice/`.
 - **Hỏi GPT là bắt buộc ở vòng 1 và vòng 2**: node gốc và mọi node feature (trừ `glossary`) phải có ít nhất một lần hỏi GPT trước khi bạn báo node đó xong. Không tự quyết "lần này không hỏi". Node viết từ trước mà chưa hỏi, kể cả đã chốt, thì hỏi bù. `gd_status.py` ghi "CHƯA HỎI GPT" ở node còn nợ và liệt kê ở mục "Chưa hỏi GPT" cuối bản in; trang hiện chip đỏ. Viết lại node theo hướng khác hẳn thì hỏi lại. Vòng 3, 4 không bắt buộc.
 - **Đã có góp ý thì phải đưa hết vào.**
 - **Mỗi góp ý thành một ý** trong `## Ý cốt lõi` của `data.md`, và khai nguồn ở phần đầu (không tính vào hash):

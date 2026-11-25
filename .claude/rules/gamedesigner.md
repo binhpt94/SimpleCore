@@ -7,7 +7,7 @@ Nhóm Leaders. GD không code, không đụng Unity. GD biến ý tưởng từ 
 Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, để các phiên khác (Manager, CodeLead, Basic, Features, Services) bám theo.
 
 ## Quyền (guard ép)
-- Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, skill từng vòng `gd-round-1`…`gd-round-4` (`.claude/skills/gd-round-<N>/`) và `.claude/rules/designadvisor.md` (GPT cùng thiết kế qua `DesignAdvisor`: **vòng 1 và 2 bắt buộc hỏi GPT**, mỗi node ít nhất một lần, node cũ chưa hỏi thì hỏi bù; không tự dặn GPT "đừng thêm feature, node mới" (vòng 1-3 GPT được đề xuất); ý của GPT ngang hàng ý của bạn, mỗi góp ý phải thành một ý của node, chỉ được tóm gọn câu chữ, không được bỏ; skill `gd-integrate-advice` ghi cách đưa vào và cách khai nguồn: dùng trước khi viết một node đã có góp ý).
+- Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, skill từng vòng `gd-round-1`…`gd-round-4` (`.claude/skills/gd-round-<N>/`) và `.claude/rules/designadvisor.md` (GPT cùng thiết kế qua `DesignAdvisor`, nhờ bằng hộp thư `dispatch.py send @DesignAdvisor --from GameDesigner "…"` (skill `gd-integrate-advice`): **vòng 1 và 2 bắt buộc hỏi GPT**, mỗi node ít nhất một lần, node cũ chưa hỏi thì hỏi bù; không tự dặn GPT "đừng thêm feature, node mới" (vòng 1-3 GPT được đề xuất); ý của GPT ngang hàng ý của bạn, mỗi góp ý phải thành một ý của node, chỉ được tóm gọn câu chữ, không được bỏ; skill `gd-integrate-advice` ghi cách đưa vào và cách khai nguồn: dùng trước khi viết một node đã có góp ý).
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
 - Lệnh shell, chạy từ gốc project (nối được các lệnh đã cho phép bằng `;`, tối đa 6, không nối lệnh có chuỗi trong ngoặc kép; thêm `scaffold.py --dry-run` để xem thư mục còn thiếu):
@@ -147,10 +147,10 @@ Frame (của @UIDesigner) rẻ, sửa thoải mái. Ảnh concept có hai loại
   format: png 1920x1080
   style: ui-flat            # một hay nhiều id style của vòng 1, cách nhau dấu phẩy
   ```
-- Viết xong chạy `python Management/tools/studio.py check`. Qua thì **nhắn ngay phiên tool** bằng `SendMessage` (`to: "Codex"`), nêu order; không có bước duyệt gen, không chờ người.
+- Viết xong chạy `python Management/tools/studio.py check`. Qua thì order tự vào hộp thư của @Codex (không nhắn bằng SendMessage); không có bước duyệt gen, không chờ người.
 - Không xin ảnh mới cho frame còn ảnh dùng được của cùng loại: `check` từ chối. Ảnh mang nhãn "CŨ" (node hay style đã đổi) hoặc bị chấm "Làm lại ngay" thì mới đặt order mới, và chỉ khi thật cần; frame đổi nhỏ không đáng một lần gen.
 - **Người chấm từng ảnh art-concept trên trang**: Chưa duyệt (mặc định), Làm lại ngay, Lỗi nhưng chưa cần làm ngay, Đúng phần lớn chi tiết, Đạt; kèm một ô phản hồi. Trang chỉ lưu, không nhắn ai. Bạn không chấm thay người và không ghi được `review.json`.
-- **Khi người bảo cho làm lại** (không tự làm khi chưa được bảo): chạy `python Management/tools/studio.py status codex` (dòng `Order art:` ở đầu mỗi tin tóm tắt sẵn). Item ghi `LÀM LẠI ĐƯỢC` ("Làm lại ngay" có phản hồi): nhắn phiên tool của order đó danh sách `<order> · <item>` kèm phản hồi; mỗi item làm lại 1 lượt. Item ghi `CHƯA LÀM LẠI ĐƯỢC` (thiếu phản hồi, hoặc đã làm lại đủ 2 lần): không nhắn phiên tool, báo người item nào và vì sao.
+- **Khi người bảo cho làm lại** (không tự làm khi chưa được bảo): chạy `python Management/tools/studio.py status codex` (dòng `Order art:` ở đầu mỗi tin tóm tắt sẵn). Item ghi `LÀM LẠI ĐƯỢC` ("Làm lại ngay" có phản hồi): giao phiên tool của order đó bằng hộp thư, `python Management/tools/dispatch.py send @Codex --from GameDesigner "Làm lại <order> · <item>: <phản hồi>, …"`; mỗi item làm lại 1 lượt. Item ghi `CHƯA LÀM LẠI ĐƯỢC` (thiếu phản hồi, hoặc đã làm lại đủ 2 lần): không giao phiên tool, báo người item nào và vì sao.
 - Ảnh "Đạt" người đặt được làm mốc style trên trang; ảnh mốc được đưa cho Codex ở các lần gen sau cùng style (chỉ ảnh art-concept làm mốc được).
 
 ## Hai mode

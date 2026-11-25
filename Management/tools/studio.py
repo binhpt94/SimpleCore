@@ -1217,8 +1217,9 @@ def cmd_redo(root, ref, item, text):
         raise ValueError(f"frame '{item}' đang có một lượt làm lại chưa dùng")
     log(folder, "redo", item=item, round=b["round"] + 1, text=text, version=status["version"])
     save_status(folder, state="doing")
-    print(f"Đã mở 1 lượt vẽ lại cho frame '{item}' của {ref}. Nhắn @ClaudeImage bằng SendMessage (to: \"ClaudeImage\"): "
-          f"\"Order {ref}, frame {item}: được vẽ lại 1 lượt. Lí do: {text}\"")
+    print(f"Đã mở 1 lượt vẽ lại cho frame '{item}' của {ref}. "
+          + inbox(root, "@ClaudeImage", f"Order {ref}, frame {item}: được vẽ lại 1 lượt. Lí do: {text}. Làm theo skill "
+                  f"studio-claude-concept, rồi deliver.", f"claude-redo:{ref}/{item}/{b['round'] + 1}", f"item-redo {CLAUDE} {ref} {item}"))
     return 0
 
 
@@ -1582,10 +1583,11 @@ def cmd_deliver(root, tool, ref):
         return 0
     below = "; ".join(f"{i}: {q['note']}" for i, q in quality.items() if not q["ok"])
     below_text = f" Chưa chuẩn (hết lượt, có phiếu nợ): {below}." if below else ""
-    print(f"Đã giao bản v{version}: {rel} ({len(ids)} file).\nNhắn phiên {feature} bằng SendMessage: "
-          f"\"Order {feature}/{oid} đã giao bản v{version} ở {rel}. Chấm từng item: python Management/tools/studio.py "
-          f"review {feature}/{oid} <item> <0-3> \\\"<phản hồi>\\\" (0 làm lại ngay, 1 lỗi nhưng chưa cần làm ngay, 2 đúng "
-          f"phần lớn, 3 đạt); mức 1-3 được chép vào FeatureAssets." + below_text + "\"")
+    print(f"Đã giao bản v{version}: {rel} ({len(ids)} file).")
+    print(inbox(root, feature, f"Order {feature}/{oid} đã giao bản v{version} ở {rel}. Chấm từng item theo skill "
+                f"feature-order-asset: python Management/tools/studio.py review {feature}/{oid} <item> <0-3> \"<phản hồi>\" "
+                f"(0 làm lại ngay, 1 lỗi nhưng chưa cần làm ngay, 2 đúng phần lớn, 3 đạt); mức 1-3 được chép vào FeatureAssets."
+                + below_text, f"delivered:{tool}/{feature}/{oid}/v{version}", f"order-delivered {tool} {feature}/{oid} {version}"))
     return 0
 
 
@@ -1717,8 +1719,10 @@ def cmd_review(root, ref, item, level, text=""):
     if entry["level"] == REDO:
         b = budget(folder, item)
         if b["left"]:
-            print(f"Item được làm lại {RUNS_REDO} lượt. Nhắn @{tool.capitalize()} bằng SendMessage (to: \"{tool.capitalize()}\") "
-                  f"để làm lại {ref} · {item}; phản hồi tự vào prompt.")
+            print(f"Item được làm lại {RUNS_REDO} lượt; phản hồi tự vào prompt. "
+                  + inbox(root, INBOX_TOOLS[tool], f"Làm lại {ref} · {item} (bị chấm Làm lại ngay): {entry['text']}. Làm theo "
+                          f"skill studio-fulfill-order, rồi deliver.", f"redo:{tool}/{ref}/{item}/{b['round']}",
+                          f"item-redo {tool} {ref} {item}"))
         else:
             print(f"CHƯA làm lại được: {b['why']}.")
     left = [i for i, _ in data["items"] if (read_reviews(folder).get(i) or {}).get("level") is None]
@@ -2116,12 +2120,25 @@ def cmd_status(root, arg=""):
     return 0
 
 
+INBOX_TOOLS = {"codex": "@Codex", "blender": "@Blender", CLAUDE: "@ClaudeImage"}      # the inbox name of each tool chat
+
+
+def inbox(root, target, text, key, check, once=True):
+    """Puts a message for a chat that runs on demand into its inbox (dispatch.py); the line to print."""
+    import dispatch
+    return dispatch.notify(root, target, text, "studio", key, check=check, once=once)
+
+
 def cmd_check(root):
     bad = 0
-    for ref, tool, _, _, _, _, problems, _ in summary(root):
+    for ref, tool, state, _, count, title, problems, _ in summary(root):
         for p in problems:
             print(f"{tool} {ref}: {p}")
             bad += 1
+        if not problems and state == "new":      # a valid order nobody has started: its tool chat is told once
+            print(inbox(root, INBOX_TOOLS[tool], f"Order mới {tool} {ref} ({count} item: {title}). Làm theo skill "
+                        f"studio-fulfill-order; xem: python Management/tools/studio.py status {ref}",
+                        f"order:{tool}/{ref}", f"order-open {tool} {ref}"))
     print(f"{bad} lỗi order." if bad else "Mọi order đều hợp lệ.")
     return 1 if bad else 0
 

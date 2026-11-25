@@ -20,10 +20,11 @@ Chỉ làm khi bước 1 qua. Xong cả ba Leader rồi mới sang bước 3.
 - Leader chưa trả lời trong lượt đó: ghi "chưa trả lời" vào bản tổng hợp. Không coi là xong, không tự suy ra tiến độ thay Leader, và không giao việc cho tầng dưới thuộc phần của Leader đó (thiết kế: @GameDesigner; bố cục: @UIDesigner; code: @CodeLead) cho tới khi có trả lời.
 
 ## Bước 3. Các tầng nhỏ hơn, từ trên xuống
-Tools → Testers → Basic → Services → Features. Chỉ nhắn phiên có trong `ListAgents`; phiên tầng dưới không live thì ghi lại, không dừng.
+Tools → Testers → Basic → Services → Features. Feature, service, @Core và tool chạy theo việc: không có trong `ListAgents` khi rảnh là bình thường, giao việc bằng hộp thư (`dispatch.py send`), không SendMessage. Tester thì phải live mới nhắn được; không live thì ghi lại, không dừng.
+- **Hộp thư**: `python Management/tools/dispatch.py list` (server có đang giao tin không, tin chờ, tin lỗi). SERVER TẮT có tin chờ: đưa "bật setup_server.py" lên đầu bản tổng hợp; tin `error`: xem lỗi, thử lại trên tab Hộp thư hoặc báo người.
 - **Testers**: `python Management/tools/tester.py status` (các đợt chơi thử đang mở, mục đích và kết quả); đợt nào `không đạt` thì lỗi thuộc feature nào, đã có phiên sửa chưa.
 - **Tools**: `studio.py status` (order đang chờ, item bị chấm làm lại, phiếu nợ art); lần hỏi GPT còn nợ thì thấy ở `gd_status.py`.
-- **Basic, Services, Features**: `python Management/tools/gd_req.py status` (sổ yêu cầu: đã kiểm/tổng, chờ kiểm, bị trả, đổi thiết kế, mất test của từng feature; chờ kiểm thì nhắc `CodeLead`, bị trả, đổi thiết kế, mất test thì nhắn phiên feature đó kèm id yêu cầu), báo cáo mới của từng phiên (trạng thái dở, bị chặn, "Cần bên khác"), `validate.py` (vi phạm), feature ĐƯỢC CODE mà chưa có phiên làm (feature ĐANG KHOÁ thì không giao code, xem "Chuỗi của một feature" ở `manager.md`), thư mục còn thiếu (`scaffold.py --dry-run`).
+- **Basic, Services, Features**: `python Management/tools/gd_req.py status` (sổ yêu cầu: đã kiểm/tổng, chờ kiểm, bị trả, đổi thiết kế, mất test của từng feature; chờ kiểm thì nhắc `CodeLead`, bị trả, đổi thiết kế, mất test thì giao phiên feature đó qua hộp thư kèm id yêu cầu; `reject` đã tự gửi tin, không gửi lại), báo cáo mới của từng phiên (trạng thái dở, bị chặn, "Cần bên khác"), `validate.py` (vi phạm), feature ĐƯỢC CODE mà chưa có phiên làm (feature ĐANG KHOÁ thì không giao code, xem "Chuỗi của một feature" ở `manager.md`), thư mục còn thiếu (`scaffold.py --dry-run`).
 
 ## Bước 4. Bản tổng hợp cho người
 Một tin, theo thứ tự tầng: Leader (live, tiến độ, đang chờ gì) → Tools → Testers → Basic → Services → Features → việc bị chặn và ai gỡ được → đề xuất bước tiếp. Sau tin này mới làm việc người giao và điều phối tiếp, theo skill `manager-dispatch`.

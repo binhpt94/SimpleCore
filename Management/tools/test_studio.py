@@ -110,6 +110,12 @@ def log_of(folder):
 def run_check(root):
     order(root)
     check("a good order passes check", call(root, "check")[0], 0)
+    code, out = call(root, "check")
+    import dispatch
+    told = [m for m in dispatch.messages(root, "@Codex") if m["key"] == "order:codex/Wallet/coin-icons"]
+    check("check: a new valid order is put in its tool chat's inbox once, however often check runs",
+          (len(told), told[0]["source"] if told else "", told[0]["check"] if told else "", "đã có tin này" in out),
+          (1, "studio", "order-open codex Wallet/coin-icons", True))
     data = studio.parse_order((studio.order_dir(root, "codex", "Wallet", "coin-icons") / "order.md").read_text(encoding="utf-8"))
     check("items are read", data["items"], [("coin", "thứ coin"), ("gem", "thứ gem")])
     bad = order(root, oid="bad-count", count=3)
@@ -206,7 +212,11 @@ def run_deliver(root):
     v1 = Path(root) / "Resources/Wallet/codex/coin-icons/v1"
     check("deliver copies exactly the items into Resources/<F>/<tool>/<id>/v1",
           (code, sorted(p.name for p in v1.iterdir())), (0, ["coin.png", "gem.png", "quality.json"]))
-    check("deliver tells the tool chat what to send", "SendMessage" in out and "review Wallet/coin-icons" in out)
+    import dispatch
+    told = [m for m in dispatch.messages(root, "Wallet") if m["key"] == "delivered:codex/Wallet/coin-icons/v1"]
+    check("deliver puts a message in the feature's inbox, with how to judge, once",
+          (len(told), "review Wallet/coin-icons" in told[0]["text"] if told else False, "hộp thư của Wallet" in out), (1, True, True))
+    check("deliver with no server running still succeeds, and says SERVER TẮT", (code, "SERVER TẮT" in out), (0, True))
     check("a blender chat cannot deliver a codex order", call(root, "deliver", "blender", "Wallet/coin-icons")[0], 1)
 
     ref = "Wallet/coin-icons"
@@ -231,7 +241,9 @@ def run_deliver(root):
     code, out = call(root, "codex", ref, "coin")
     check("review: an item that was not sent back does not run again", (code, "không phải 'Làm lại ngay'" in out), (1, True))
     code, out = call(root, "review", ref, "gem", "0", "gem bị mờ ở 64px")
-    check("review: with feedback it may be made again, and says whom to tell", (code, "Nhắn @Codex" in out), (0, True))
+    redo_msgs = [m for m in dispatch.messages(root, "@Codex") if m["key"].startswith("redo:codex/" + ref + "/gem/")]
+    check("review: with feedback it may be made again, and the tool chat gets a message in its inbox",
+          (code, "hộp thư của @Codex" in out, len(redo_msgs), "gem bị mờ ở 64px" in redo_msgs[0]["text"] if redo_msgs else False), (0, True, 1, True))
     check("review: the tool chat sees what to make again", "làm lại: gem" in studio.pending_line(root, "codex"))
     Path(os.environ["FAKE_PROMPT"]).write_text("", encoding="utf-8")
     check("review: the item is made again", call(root, "codex", ref, "gem")[0], 0)
@@ -960,7 +972,7 @@ def run_claude(root):
           (call(root, "redo", sref, "main", " ")[0], call(root, "redo", oref, "main", "x")[0], call(root, "redo", cref, "main", "x")[0]), (1, 1, 1))
     code, out = call(root, "redo", sref, "main", "thêm nút extra")
     check("redo: a Leader opens one run and is told to tell @ClaudeImage",
-          (code, "to: \"ClaudeImage\"" in out, "phản hồi: thêm nút extra · LÀM LẠI ĐƯỢC (1 lượt)" in call(root, "status", sref)[1]), (0, True, True))
+          (code, "hộp thư của @ClaudeImage" in out, "phản hồi: thêm nút extra · LÀM LẠI ĐƯỢC (1 lượt)" in call(root, "status", sref)[1]), (0, True, True))
     code, out = call(root, "claude", sref, "main")
     check("redo: that one run draws the new part", (code, runs(sfolder), "3 phần (vẽ mới 3, lấy lại 0)" in out), (0, ["main", "main"], True))
     (sfolder / "work/main/extra.svg").write_text(GOOD_SVG.replace("#fc0", "#0cf"), encoding="utf-8")

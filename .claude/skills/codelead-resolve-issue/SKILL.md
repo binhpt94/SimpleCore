@@ -8,7 +8,7 @@ Tiêu chí mặc định (từ chối khi không thoả), khuôn BÁO CHẶN và
 ## Quy trình
 1. Nhận vấn đề hoặc báo cáo xong việc (thấy ở đầu mỗi tin).
 2. Xét phạm vi ảnh hưởng: đọc code các bên liên quan, ai dùng contract, asset id, asmdef nào.
-3. Nhắn các phiên liên quan; chấp nhận đề xuất hoặc đưa đề xuất khác. Các bên thống nhất một cách tốt nhất.
-4. Đổi khung: @CodeLead tự sửa, báo cáo, rồi nhắn mọi phiên dùng thứ vừa đổi. Phần còn lại: bên sở hữu tự sửa. @CodeLead biên dịch, chạy test, Play; có lỗi thì báo về đúng phiên kèm lỗi và file.
+3. Nhắn các phiên liên quan (Leader: `SendMessage`; feature, service, @Core: hộp thư `python Management/tools/dispatch.py send <F> --from CodeLead "<việc>"`, thread chạy theo việc nên không SendMessage được); chấp nhận đề xuất hoặc đưa đề xuất khác. Các bên thống nhất một cách tốt nhất.
+4. Đổi khung: @CodeLead tự sửa, báo cáo, rồi báo mọi phiên dùng thứ vừa đổi qua hộp thư. Phần còn lại: bên sở hữu tự sửa. @CodeLead biên dịch, chạy test, Play; có lỗi thì giao về đúng phiên qua hộp thư kèm lỗi và file; yêu cầu trong sổ thì `gd_req.py <F> reject <ref> "<lỗi>"`, lệnh tự gửi tin cho feature. `dispatch.py send` báo SERVER TẮT: tin đã lưu, nhắn Manager BÁO CHẶN.
 5. Lỗi kéo dài (sửa 2 lần chưa xong hoặc nhiều phiên đổ lỗi nhau): phân tích sâu, gửi từng bên yêu cầu chính xác (file, thay đổi, thứ tự).
 Xoá thư mục: @CodeLead tự xoá thư mục khung (`Scripts/Contracts`, `Scripts/Internal/Base`, `Scripts/View/Base` và bên dưới) và thư mục bên trong `Assets/_Composition`, qua `manage_asset delete`, không cần hỏi. Không thuộc @CodeLead: `rules.json`, xoá cả `Assets/_Composition` (hỏi người); đổi luật hay ranh giới (đề xuất cho người).

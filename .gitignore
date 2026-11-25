@@ -48,6 +48,8 @@ Thumbs.db
 
 # Báo cáo cho @Manager: Stop hook stop_report.py ghi, nhật ký điều phối trên máy này
 /Management/reports/
+# Hộp thư của các thread chạy theo việc (dispatch.py, setup_server.py): trạng thái lúc chạy, không commit
+/Management/inbox/
 
 # Trung gian của studio.py claude (ảnh ghép có font nhúng, khoảng 1,4 MB mỗi lần chạy)
 /Management/studio/**/work/_log/*.compose.svg

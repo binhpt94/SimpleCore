@@ -8,7 +8,8 @@ Quyền, chuỗi của một feature và danh sách "phải nối tiếp" vẫn 
 ## Giao việc theo đợt
 1. Lập bảng theo feature: `live` tới vòng mấy, ĐƯỢC CODE hay ĐANG KHOÁ, đang ở bước nào của chuỗi, phiên nào đang làm, đang chờ ai.
 2. Với mỗi feature, lấy đúng một việc kế tiếp theo chuỗi. Ở bước Code, giao theo sổ yêu cầu (`gd_req.py <Tên>`): nêu id yêu cầu cần làm, không giao "làm tiếp feature".
-3. Bỏ các việc vướng danh sách "phải nối tiếp". **Nhắn cùng lúc** mọi phiên còn lại: nhiều `SendMessage` trong một lượt. Không chờ phiên này trả lời rồi mới nhắn phiên kia.
+3. Bỏ các việc vướng danh sách "phải nối tiếp". **Giao cùng lúc** mọi phiên còn lại trong một lượt: Leader bằng `SendMessage`; feature, service, @Core và tool bằng hộp thư, `python Management/tools/dispatch.py send <tên> --from Manager "<việc>"` (mỗi phiên một lệnh; nêu id yêu cầu `<node>#<id>`, vì phiên có thể vừa renew). Không chờ phiên này trả lời rồi mới giao phiên kia.
+   - `dispatch.py send` báo **SERVER TẮT** (lỗi 3): tin đã lưu, chưa ai giao. Ngừng giao thêm cho feature, tool; đưa "bật setup_server.py" lên đầu danh sách chờ người. Bật lại thì tin tự đi, không gửi lại.
 4. Báo người bảng đó và các việc đang chờ người (chấm, chọn xung đột, chốt): đây thường là thứ đang chặn nhiều feature nhất.
 5. Có báo cáo mới thì lập lại bảng và giao đợt tiếp.
 
@@ -17,7 +18,7 @@ Quyền, chuỗi của một feature và danh sách "phải nối tiếp" vẫn 
 - @CodeLead và @GameDesigner được gọi nó trực tiếp chỉ để giả lập một thao tác người chơi xác nhận một tính năng (tin `XÁC NHẬN · …`); việc rộng hơn họ phải nhờ bạn.
 - Gom các thứ cần thử thành một đợt thay vì gọi nhiều lần. Không giao khi @CodeLead đang Play hay chạy test; hỏi `CodeLead` trước nếu chưa rõ.
 - Giao `UnityAutoPlay` chơi thử khi một feature ĐƯỢC CODE đã được @CodeLead kiểm và nối dây ở mức đang làm (IDEA, PROTOTYPE, FULL): nhắn feature nào, mức nào, muốn biết điều gì. Nó không sửa gì; kết quả nằm ở `Tester/UnityAutoPlay/<đợt>/README.md` và trong báo cáo cuối lượt của nó.
-- Đợt `không đạt`: chuyển danh sách lỗi cho @CodeLead (nó nhắn đúng phiên sở hữu). Sửa xong thì giao chơi lại đúng phần đó.
+- Đợt `không đạt`: chuyển danh sách lỗi cho @CodeLead (nó giao đúng phiên sở hữu qua hộp thư). Sửa xong thì giao chơi lại đúng phần đó.
 - Lưu trữ: đợt đã có đợt mới thay thế hoặc lỗi đã sửa và chơi lại đạt thì dời đi, `python Management/tools/tester.py archive UnityAutoPlay <đợt>` (hoặc `--keep <N>`). Sau khi dời, phiên ngoài nhóm Testers (kể cả bạn) không đọc được đợt đó nữa.
 
 ## Khi một Leader báo chặn
@@ -26,6 +27,6 @@ Quyền, chuỗi của một feature và danh sách "phải nối tiếp" vẫn 
 2. **Dừng giao các việc phụ thuộc** vào thứ đang bị chặn. Ví dụ @CodeLead kẹt ở khung của A: không giục phiên A và các feature dùng contract của A. @GameDesigner chờ người chốt node cha: không nhờ hỏi GPT hay đặt order cho node con của nó.
 3. **Giao ngay đợt mới cho các việc không phụ thuộc**: feature khác đã mở khoá, order ảnh, thiết kế của feature còn khoá. Một Leader đứng không phải là cả project đứng.
 4. **Chờ người**: gom mọi việc đang chờ người thành một danh sách ngắn trong câu trả lời cho người: việc gì, làm ở đâu (tab, node), đang chặn những feature nào; việc chặn nhiều feature nhất xếp trước. Không để từng Leader hỏi người lẻ tẻ.
-5. **Lỗi mà phiên khác gỡ được**: nhắn đúng phiên đó, kèm file và câu lỗi. Lỗi chỉ người gỡ được (guard, quyền, công cụ, hạn mức): báo người, nêu rõ lệnh và câu lỗi.
+5. **Lỗi mà phiên khác gỡ được**: giao đúng phiên đó (Leader: `SendMessage`; feature, tool: `dispatch.py send`), kèm file và câu lỗi. Lỗi chỉ người gỡ được (guard, quyền, công cụ, hạn mức): báo người, nêu rõ lệnh và câu lỗi.
 6. Nhận `HẾT CHẶN`: lập lại bảng và giao đợt tiếp theo "Giao việc theo đợt".
 Leader im lặng lâu mà bảng cho thấy nó đang giữ việc: hỏi thẳng nó trước khi coi là bị chặn.

@@ -18,7 +18,7 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic 
 ## Quyền (guard ép)
 - Sửa được khung (bảng trên). Khung của một feature chỉ sửa được khi feature đó đã mở khoá code (thiết kế tới vòng 4 trong `live`, cùng cổng với phiên feature); Core, _Composition không có cổng.
 - Sửa được mọi file trong `Assets/_Composition` (không còn vai trò @Composition). `InternalsVisibleTo` vẫn chỉ nằm trong `AssemblyInfo.cs`.
-- Ngoài khung và `_Composition` không sửa gì, kể cả `Management/proposals`: lỗi trong code của phiên khác thì nhắn phiên sở hữu.
+- Ngoài khung và `_Composition` không sửa gì, kể cả `Management/proposals`: lỗi trong code của phiên khác thì báo phiên sở hữu: feature, service, @Core chạy theo việc, giao bằng hộp thư `python Management/tools/dispatch.py send <F> --from CodeLead "<lỗi, file, việc cần sửa>"` (không SendMessage); yêu cầu bị trả thì `gd_req.py reject` tự gửi.
 - Lượt có sửa file kết thúc bằng khối báo cáo theo `.claude/rules/report.md`, như mọi phiên code.
 - Đọc được toàn bộ source các nhóm Basic, Features, Services (cả Internal, View, Tests, FeatureAssets/Private). Tìm được một lượt trên mọi feature (ví dụ ai đang dùng một contract): `grep -rn 'IWallet' UnityProject/Assets/Features --include='*.cs'` (hoặc `find`, `rg`, Grep/Glob đặt `path` ở `Assets/Features`, `Assets/Features/_Services`).
 - unity-mcp (bảng ở `.claude/rules/unity.md`): đọc, biên dịch, chạy test (`run_tests`), Play/Pause/Stop, mở scene/prefab để xem, sửa object trong scene khi thử, menu (`execute_menu_item`), tag/layer, package, camera, graphics, physics, ProBuilder, profiler; và xoá file khung (`manage_asset` action `delete`). Test, Play, menu, cài đặt và scene đều giữ khoá Editor tới hết lượt: phiên khác đang giữ thì chờ. Tạo, sửa, xoá asset và lưu scene hay prefab chỉ trong `Assets/_Composition`; ở vùng khác chỉ mở để xem. Không viết code qua unity-mcp. Chụp màn hình chỉ vào `output_folder: "Captures"` (ngoài `Assets`), không vào `_Composition/Screenshots`.
@@ -29,7 +29,7 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Basic 
   - `python Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done>`: ghi tiến độ của một node lá.
 
 ## Dựng khung cho một feature
-Dùng skill `codelead-scaffold-feature` (gd_pack, Contracts, asmdef, `AssemblyInfo.cs`, lớp base, validate, biên dịch, nhắn phiên feature).
+Dùng skill `codelead-scaffold-feature` (gd_pack, Contracts, asmdef, `AssemblyInfo.cs`, lớp base, validate, biên dịch, báo phiên feature bằng `dispatch.py send`).
 
 ## Nối dây (`Assets/_Composition`)
 - Vùng này chỉ nối dây: `Boot.cs`, các variant của `Boot.prefab` (danh sách installer theo thứ tự cài, catalog asset id → asset), scene. Không chứa luật game.
@@ -81,6 +81,6 @@ Nhận vấn đề hay báo cáo xong việc: dùng skill `codelead-resolve-issu
 Lý do: hợp đồng nằm trong Contracts của SessionScene nên dịch vụ Popup không tham gia được phiên, và lớp base bị chép 12 lần. Làm theo thứ tự:
 1. Core, namespace `Game.Core`, chữ ký giữ nguyên: `ISessionParticipant.cs`, `ISessionScene.cs` (kèm enum `SessionState`), `SessionParticipantBase.cs` (`public abstract`, nội dung như các `<Tên>ParticipantBase.cs` hiện có); thêm `UniTask` vào `Game.Core.asmdef` và `Game.Core.Tests.asmdef`.
 2. Xoá ba file cũ trong `_Services/SessionScene/Scripts/Contracts` (`ISessionParticipant.cs`, `ISessionScene.cs`, `SessionState.cs`; `ISessionLoadProgress.cs` ở lại) và 12 file `Scripts/Internal/Base/<Tên>ParticipantBase.cs`.
-3. Nhắn phiên sở hữu tự sửa `using` và lớp cha trong code của mình: `_Services/SessionScene`, `Wallet`, `Shop`, `SceneFlow`, `Upgrade` (cả Tests). Nhắn @Core viết test EditMode cho `SessionParticipantBase`. Nhắn `_Services/Popup`: giờ lấy được `ISessionScene` của Core để tham gia phiên. Phiên nào chưa mở thì ghi vào "Cần bên khác" của báo cáo.
+3. Giao (bằng `dispatch.py send`) phiên sở hữu tự sửa `using` và lớp cha trong code của mình: `_Services/SessionScene`, `Wallet`, `Shop`, `SceneFlow`, `Upgrade` (cả Tests). Giao @Core viết test EditMode cho `SessionParticipantBase`. Giao `_Services/Popup`: giờ lấy được `ISessionScene` của Core để tham gia phiên. Phiên nào chưa mở thì ghi vào "Cần bên khác" của báo cáo.
 4. `validate.py`, biên dịch, chạy test; code chưa biên dịch được tới khi các phiên ở bước 3 sửa xong, ghi rõ trong báo cáo.
 Xong thì báo người để xoá mục này.

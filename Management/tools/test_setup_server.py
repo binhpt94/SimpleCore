@@ -363,6 +363,167 @@ def delete_cases(check):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def courier_cases(check):
+    """The inbox courier: a message is given to its thread as a turn of its own, counted as delivered only when its id
+    is in the transcript; on-demand mode stops idle threads and keeps each pool under its limit."""
+    real = (ss.ROOT, ss.threads, ss.live_sessions, ss.turn, ss.stop_bg, ss.transcripts_dir)
+    root, tdir = Path(tempfile.mkdtemp(prefix="courier-")), Path(tempfile.mkdtemp(prefix="courier-t-"))
+    live, given, stopped = {}, [], []
+    listed = [thread("w0000000", "Wallet", binding="Wallet"), thread("s0000000", "Shop", binding="Shop"),
+              thread("h0000000", "Hud", binding="Hud"), thread("c0000000", "Codex", binding="@Codex"),
+              thread("l0000000", "CodeLead", binding="@CodeLead"), thread("o0000000", "Old", binding="Old", archived=True)]
+    for t in listed:
+        (tdir / f"{t['id']}.jsonl").write_text("{}\n", encoding="utf-8")
+    seen = {"write": True}
+
+    def fake_turn(t, prompt, bg=None):
+        given.append((t["id"], prompt, t.get("live"), bg))
+        live[t["id"]] = {"kind": "background", "status": "busy", "state": "working", "short": t["id"][:8]}
+        if seen["write"]:      # the thread writes the prompt into its transcript, as the CLI does
+            with open(tdir / f"{t['id']}.jsonl", "a", encoding="utf-8") as f:
+                f.write(json.dumps({"type": "user", "message": {"content": prompt}}, ensure_ascii=False) + "\n")
+        return ss.BG_ANSWER
+
+    def fake_stop(sid):
+        stopped.append(sid)
+        live.pop(sid, None)
+
+    def age(sid, minutes):
+        os.utime(tdir / f"{sid}.jsonl", (time.time() - minutes * 60, time.time() - minutes * 60))
+
+    try:
+        ss.ROOT, ss.threads, ss.live_sessions = root, lambda: [dict(t) for t in listed], lambda fresh=False: dict(live)
+        ss.turn, ss.stop_bg, ss.transcripts_dir = fake_turn, fake_stop, lambda: tdir
+        now = time.time()
+        check("courier: an empty inbox in always-live mode does nothing", ss.courier_tick(now), [])
+        a = ss.dispatch.send(root, "Wallet", "Làm yêu cầu x#y", "@Manager")
+        did = ss.courier_tick(now)
+        m = ss.dispatch.get(root, a["id"])
+        check("courier: a thread that is not running is started with the message as its prompt",
+              (did[0][:2], given[-1][0], a["id"] in given[-1][1], given[-1][3], m["state"], m["tries"]),
+              (("given", "Wallet"), "w0000000", True, True, "delivering", 1))
+        ss.courier_tick(now + 1)
+        check("courier: delivered once the id is in the transcript", ss.dispatch.get(root, a["id"])["state"], "delivered")
+
+        live["w0000000"]["status"] = "busy"
+        b = ss.dispatch.send(root, "Wallet", "Việc thứ hai", "@CodeLead")
+        ss.courier_tick(now + 2)
+        check("courier: a thread in the middle of a turn: the message waits",
+              (ss.dispatch.get(root, b["id"])["state"], ss.dispatch.get(root, b["id"])["why"]), ("waiting", "thread đang chạy một lượt"))
+        live["w0000000"]["status"] = "idle"
+        c = ss.dispatch.send(root, "Wallet", "Việc thứ ba", "người")
+        ss.courier_tick(now + 3)
+        check("courier: an idle background thread gets every waiting message in one turn, as a background turn",
+              (b["id"] in given[-1][1] and c["id"] in given[-1][1], given[-1][2], len([g for g in given if g[0] == "w0000000"])),
+              (True, "background", 2))
+        ss.courier_tick(now + 4)
+
+        live["s0000000"] = {"kind": "interactive", "status": "busy", "state": "", "short": "s0000000"}
+        d = ss.dispatch.send(root, "Shop", "Việc cho Shop", "@Manager")
+        ss.courier_tick(now + 5)
+        check("courier: a chat open in VS Code is never given a turn: the message waits",
+              (ss.dispatch.get(root, d["id"])["state"], "VS Code" in ss.dispatch.get(root, d["id"])["why"], given[-1][0] != "s0000000"),
+              ("waiting", True, True))
+        e = ss.dispatch.send(root, "Hero", "Việc cho Hero", "@Manager")
+        ss.courier_tick(now + 6)
+        check("courier: no thread bound to the target: waits, says to run Setup",
+              "chưa có thread" in ss.dispatch.get(root, e["id"])["why"])
+        ss.busy("h0000000", True)
+        f = ss.dispatch.send(root, "Hud", "Việc cho Hud", "@Manager")
+        ss.courier_tick(now + 7)
+        check("courier: a thread the page is running a turn in: waits", "trang đang chạy" in ss.dispatch.get(root, f["id"])["why"])
+        ss.busy("h0000000", False)
+
+        seen["write"] = False
+        ss.courier_tick(now + 8)
+        g = ss.dispatch.get(root, f["id"])
+        ss.courier_tick(now + 8 + ss.dispatch.VERIFY_SECONDS + 1)
+        g2 = ss.dispatch.get(root, f["id"])
+        check("courier: a delivery never seen in the transcript is tried again later, not counted as delivered",
+              (g["state"], g2["state"], g2["error"].startswith("không thấy tin"), g2["next_try"] > now + 8), ("delivering", "queued", True, True))
+        seen["write"] = True
+        for i in range(ss.dispatch.MAX_TRIES):
+            live.pop("h0000000", None)
+            g2 = ss.dispatch.mark(root, ss.dispatch.get(root, f["id"]), "queued", next_try=0)
+            seen["write"] = False
+            ss.courier_tick(now + 100 + i * 200)
+            ss.courier_tick(now + 100 + i * 200 + ss.dispatch.VERIFY_SECONDS + 1)
+        check("courier: after the last try the message is an error", ss.dispatch.get(root, f["id"])["state"], "error")
+        seen["write"] = True
+
+        ss.dispatch.cancel(root, d["id"])
+        ss.dispatch.cancel(root, e["id"])
+        ss.dispatch.set_config(root, mode="on-demand", limits={"feature": 1}, idle_minutes=10)
+        live.clear()
+        live["w0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "w0000000"}
+        age("w0000000", 5)
+        h = ss.dispatch.send(root, "Hud", "Việc mới cho Hud", "@Manager")
+        ss.courier_tick(time.time())
+        check("on-demand: the pool is full and its thread was busy 5 minutes ago: the message waits, nothing is stopped",
+              (ss.dispatch.get(root, h["id"])["state"], "hết chỗ" in ss.dispatch.get(root, h["id"])["why"], stopped), ("waiting", True, []))
+        age("w0000000", 30)
+        ss.courier_tick(time.time())
+        check("on-demand: idle past idle_minutes: it is stopped, and the waiting thread gets the slot",
+              (stopped, given[-1][0], "w0000000" in live), (["w0000000"], "h0000000", False))
+        live["c0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "c0000000"}
+        live["l0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "l0000000"}
+        live["s0000000"] = {"kind": "interactive", "status": "idle", "state": "", "short": "s0000000"}
+        for sid in ("c0000000", "l0000000", "s0000000"):
+            age(sid, 60)
+        ss.courier_tick(time.time())
+        check("on-demand: an idle tool thread is stopped; a Leader and a chat open in VS Code never are",
+              ("c0000000" in stopped, "l0000000" in stopped, "s0000000" in stopped), (True, False, False))
+        live["c0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "c0000000"}
+        age("c0000000", 60)
+        ss.dispatch.send(root, "@Codex", "Order mới", "studio")
+        n_stop = len(stopped)
+        ss.courier_tick(time.time())
+        check("on-demand: a thread with a message waiting is given it, not stopped", (len(stopped), given[-1][0]), (n_stop, "c0000000"))
+        ss.dispatch.set_config(root, mode="always-live")
+        live["w0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "w0000000"}
+        age("w0000000", 300)
+        n_stop = len(stopped)
+        ss.courier_tick(time.time())
+        check("always-live: nothing is ever stopped", len(stopped), n_stop)
+        v = ss.inbox_view()
+        check("inbox view: settings, each pool with its limit and running threads, targets without Leaders",
+              (v["config"]["mode"], v["pools"]["feature"]["limit"], sorted(t["target"] for t in v["targets"])),
+              ("always-live", 1, ["@Codex", "Hud", "Shop", "Wallet"]))
+        res = ss.inbox_call("send", {"target": "Shop", "text": "Việc của người"})
+        check("inbox send: from the page the source is the human", (res["ok"], ss.dispatch.get(root, res["id"])["source"]), (True, "người"))
+        check("inbox send refused: a Leader", ss.inbox_call("send", {"target": "@CodeLead", "text": "x"})["ok"], False)
+        check("inbox cancel and retry", (ss.inbox_call("cancel", {"id": res["id"]})["ok"], ss.inbox_call("retry", {"id": res["id"]})["ok"],
+                                         ss.dispatch.get(root, res["id"])["state"]), (True, True, "queued"))
+        check("inbox config: saved, a bad value refused", (ss.inbox_call("config", {"mode": "on-demand", "limits": {"tool": 2}})["ok"],
+                                                           ss.dispatch.config(root)["limits"]["tool"],
+                                                           ss.inbox_call("config", {"mode": "wild"})["ok"]), (True, 2, False))
+        check("inbox: an unknown action is refused", ss.inbox_call("delete", {})["ok"], False)
+        check("inbox reqs: a tool or @Core has no book", (ss.inbox_reqs("@Codex")["reqs"], ss.inbox_reqs("@Core")["reqs"]), ([], []))
+        real_valid = ss.still_valid
+        ss.still_valid = lambda check: (False, "đã sửa") if check == "gone" else (True, "")
+        live.pop("w0000000", None)
+        stale = ss.dispatch.send(root, "Wallet", "Yêu cầu bị trả", "gd_req", key="reject:x", check="gone")
+        fresh = ss.dispatch.send(root, "Wallet", "Việc còn đúng", "@Manager", check="ok")
+        n = len(given)
+        ss.dispatch.set_config(root, mode="always-live")
+        ss.courier_tick(time.time())
+        ss.still_valid = real_valid
+        check("courier: an automatic message whose event no longer holds is cancelled, not given; the others are",
+              (ss.dispatch.get(root, stale["id"])["state"], ss.dispatch.get(root, stale["id"])["why"], fresh["id"] in given[-1][1],
+               stale["id"] in given[-1][1], len(given) - n), ("cancelled", "hết hợp lệ: đã sửa", True, False, 1))
+        check("still_valid: a check it cannot read lets the message go", (ss.still_valid(None), ss.still_valid("weird x")), ((True, ""), (True, "")))
+        check("agents: a listed job with no pid (retired by the CLI's daemon, or waiting for the human) is not running",
+              ss.parse_agents([{"sessionId": "a", "kind": "background", "state": "blocked", "id": "a"},
+                               {"sessionId": "b", "pid": 7, "kind": "background", "status": "idle", "state": "done", "id": "b"},
+                               {"sessionId": "c", "pid": 8, "kind": "interactive", "status": "busy", "id": "c"}, "junk"]),
+              {"b": {"kind": "background", "status": "idle", "state": "done", "short": "b"},
+               "c": {"kind": "interactive", "status": "busy", "state": "", "short": "c"}})
+    finally:
+        ss.ROOT, ss.threads, ss.live_sessions, ss.turn, ss.stop_bg, ss.transcripts_dir = real
+        shutil.rmtree(root, ignore_errors=True)
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
 def main():
     store = tempfile.mkdtemp(prefix="setup-store-")
 
@@ -544,6 +705,7 @@ def main():
     job_cases(check)
     live_cases(check)
     delete_cases(check)
+    courier_cases(check)
     failed = [r for r in results if not r[0]]
     for _, label, expect, got in failed:
         print(f"FAIL  {label}: expected {expect!r}, got {got!r}")

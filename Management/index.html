@@ -133,6 +133,7 @@
 <script src="view/gamedesign.js"></script>
 <script src="view/studio.js"></script>
 <script src="view/references.js"></script>
+<script src="view/inbox.js"></script>
 <script>
 (function () {
   var idea = window.CORESIMPLE_IDEA || null;
@@ -395,6 +396,13 @@
     }, ["references"]);
   }
 
+  // ---------------------------------------------------------------- hộp thư: tin cho thread chạy theo việc (view/inbox.js)
+  if (views.inbox) {
+    tab("hop-thu", "Hộp thư", function (pane) {
+      views.inbox(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
+    });
+  }
+
   // ---------------------------------------------------------------- tài liệu: khái niệm chung, ảnh nằm ở docs/
   tab("tai-lieu", "Tài liệu", function (pane) {
     add(pane, el("h1", "", "Tài liệu"));
@@ -521,7 +529,9 @@
       "Xoá cần PIN và VS Code tắt hẳn: dời transcript của thread vào ~/.claude/projects/<project>/.deleted/ (khôi phục được), bỏ nó khỏi danh sách chat và bỏ gán. " +
       "Live: phiên khác chỉ thấy thread trong ListAgents (và nhắn được) khi có tiến trình chạy nó. Bật live chạy thread thành phiên nền (một lượt ngắn); " +
       "Setup tự bật live cho thread vừa tạo; Đọc lại, Compact, Renew giữ thread live. Phiên nền hỏi quyền thì vào duyệt bằng claude attach <tên> trong terminal. " +
-      "Muốn mở thread đó trong VS Code thì Tắt live trước, để hai tiến trình không cùng ghi một session."));
+      "Muốn mở thread đó trong VS Code thì Tắt live trước, để hai tiến trình không cùng ghi một session. " +
+      "Feature, service, @Core và tool nhận việc qua tab Hộp thư: thread tắt thì được bật lên với việc đó (✉ là số tin chờ giao); ở chế độ theo nhu cầu, Setup không bật live chúng và thread rảnh tự tắt. " +
+      "\"Chờ người\" là điều thread đang đợi bạn, theo bản tóm tắt của Claude Code."));
     var confirmRow = put(listBox, el("p", "gap", ""));      // dòng xác nhận của "Renew: tất cả" (không dùng hộp thoại trình duyệt)
     var rereadState = {};      // id -> { cls, text, running }: giữ qua các lần vẽ lại bảng
     var rereadable = [];       // id của thread đủ điều kiện, theo thứ tự trong bảng
@@ -718,15 +728,17 @@
         });
         // Nút Live bật/tắt: màu theo trạng thái. Nền: bấm để tắt; không live: bấm để bật; VS Code/terminal: chỉ hiện.
         var liveState = t.live === "background" ? "on" : t.live ? "vscode" : "off";
-        var liveBtn = el("button", "copy live " + liveState, liveState === "on" ? "● Live" + (t.live_status ? " · " + t.live_status : "")
-          : liveState === "vscode" ? "● VS Code" : "○ Live");
+        var liveBtn = el("button", "copy live " + liveState, (liveState === "on" ? "● Live" + (t.live_status ? " · " + t.live_status : "")
+          : liveState === "vscode" ? "● VS Code" : "○ Live") + (t.inbox ? " · ✉ " + t.inbox : ""));
         liveBtn.type = "button";
         liveBtn.setAttribute("aria-pressed", liveState === "off" ? "false" : "true");
         var isHuman = t.binding === "@human" || t.feature === "@human";
         var liveOff = liveState === "vscode" ? "đang mở ở VS Code hoặc terminal (live): tắt ở đó"
           : liveState === "off" ? (why || (isHuman ? "thread của người không chạy nền (VS Code sẽ không mở được nó): mở nó trong VS Code là live" : "")) : "";
-        liveBtn.title = liveOff || (liveState === "on" ? "đang chạy nền, phiên khác nhắn được; bấm để tắt live (xem, duyệt quyền: claude attach " + t.title + ")"
-          : "phiên khác không thấy thread này; bấm để bật live (một lượt ngắn)");
+        liveBtn.title = (liveOff || (liveState === "on" ? "đang chạy nền, phiên khác nhắn được; bấm để tắt live (xem, duyệt quyền: claude attach " + t.title + ")"
+          : "phiên khác không thấy thread này; bấm để bật live (một lượt ngắn)"))
+          + (t.inbox ? "\n" + t.inbox + " tin trong hộp thư chờ giao (tab Hộp thư)" : "")
+          + (t.needs ? "\nđang chờ người: " + t.needs : "");
         if (liveOff) { liveBtn.disabled = true; liveBtn.dataset.off = "1"; }
         else liveBtn.addEventListener("click", (function (kind, id) { return function () { runOne(kind, id); }; })(liveState === "on" ? "stop" : "live", t.id));
         if (!why || liveState === "on") rowBtns.push(liveBtn);
@@ -746,11 +758,13 @@
           rereadCells[t.id] = { btns: rowBtns, note: rereadNote };
           paintReread(t.id);
         }
+        var needsNote = t.needs ? el("div", "bad-text", "chờ người: " + t.needs) : null;
         var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")
           : t.unlisted ? el("span", "muted", "VS Code không hiện (tạo ngoài VS Code), bỏ qua")
           : (!wanted[key(t)] ? el("span", "muted", "ngoài bộ setup")
           : t.legacy ? el("span", "bad-text", "tên có @ nên không nhận được tin SendMessage: gõ /rename " + t.title.slice(1) + " trong chat này")
           : (t.binding === key(t) ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
+        if (needsNote) { var stateBox = el("span"); add(stateBox, state, needsNote); state = stateBox; }
         var inGroup = vs.groups[t.id] || "";
         var wantGroup = tier && vs.tierNames ? vs.tierNames[tier] : "";
         var vsCell = !wanted[key(t)] || t.archived || t.unlisted ? el("span", "muted", inGroup || "—")

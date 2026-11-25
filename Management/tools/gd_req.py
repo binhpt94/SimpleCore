@@ -21,9 +21,24 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
+import dispatch  # noqa: E402
 import reqbook as rb  # noqa: E402
 
 USAGE = __doc__.split("\n\n")[1]
+
+
+def reject_notices(root, feature, refs, note):
+    """A rejected requirement goes back to the feature's chat through its inbox (it may not be running): one message
+    per requirement, the lines to print."""
+    v = rb.view(root, feature)
+    out = []
+    for ref in [r.strip() for r in refs.split(",") if r.strip()]:
+        full = rb.find_req(v, ref)[1]["ref"]
+        text = (f"@CodeLead trả yêu cầu {full}: {note}\nSửa theo skill feature-implement-req, viết hoặc sửa test, rồi ghi lại "
+                f"python Management/tools/gd_req.py {feature} done {full} <Lớp.Hàm>[,...].")
+        out.append(dispatch.notify(root, feature, text, "gd_req", key=f"reject:{full}",
+                                   check=f"req-rejected {feature} {full}"))
+    return out
 
 
 def run(root, argv):
@@ -46,6 +61,7 @@ def run(root, argv):
         lines = rb.mark(root, feature, rest[0], "verify", "@CodeLead")
     elif action == "reject" and len(rest) == 2:
         lines = rb.mark(root, feature, rest[0], "reject", "@CodeLead", note=rest[1])
+        lines += reject_notices(root, feature, rest[0], rest[1])
     else:
         return 2, "Cách dùng:\n" + USAGE
     v = rb.view(root, feature)

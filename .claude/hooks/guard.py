@@ -247,6 +247,25 @@ CODELEAD_COMMANDS.append(GD_REQ + REQ_FEATURE + " verify " + REQ_REF + "(," + RE
 CODELEAD_COMMANDS.append(GD_REQ + REQ_FEATURE + " reject " + REQ_REF + r' "[^"\\]+"')
 FEATURE_REQ_RX = re.compile(r"^python3? Management/tools/gd_req\.py (" + REQ_FEATURE + ") (doing " + REQ_REF
                             + r' "[^"\\]+"|done ' + REQ_REF + " (" + REQ_TEST + "(," + REQ_TEST + r')*|play "[^"\\]+"))$')
+# The inbox of the chats that run on demand (Management/tools/dispatch.py): features, services, @Core and the tool
+# chats get work through it, not through SendMessage (a chat that is not running would never get the message).
+# list: every bound chat. send: a Leader, to the chats of its own part, with --from naming itself. cancel: @Manager.
+DISPATCH = PY + r"Management/tools/dispatch\.py "
+INBOX_TOOLS = ("Codex", "Blender", "ClaudeImage", "DesignAdvisor")
+INBOX_FEATURE = r"(_Services/)?[A-Z][A-Za-z0-9]*"
+ALLOWED_COMMANDS.append(DISPATCH + r"list( (@(Core|" + "|".join(INBOX_TOOLS) + r")|" + INBOX_FEATURE + r"))?")
+MANAGER_COMMANDS.append(DISPATCH + r"cancel m[0-9]{8}-[0-9]{6}-[0-9a-f]{6}")
+DISPATCH_SEND_RX = re.compile(r"^python3? Management/tools/dispatch\.py send (@[A-Za-z]+|" + INBOX_FEATURE
+                              + r') --from @?([A-Za-z]+) "[^"\\]+"$')
+INBOX_SENDERS = {      # role -> the targets it may send to ("feature": any feature or service)
+    "@Manager": ("feature", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor"),
+    "@CodeLead": ("feature", "@Core"),
+    "@GameDesigner": ("@DesignAdvisor", "@Codex"),
+    "@UIDesigner": ("@ClaudeImage",),
+}
+# Names SendMessage may still reach: the Leaders and the testers run all the time. Any other thread name (a feature,
+# a service, Core, a tool chat) runs on demand, so a message to it goes through the inbox.
+LIVE_NAMES = {"manager", "codelead", "gamedesigner", "uidesigner", "human"}
 ROLE_AREAS = {"@Core": "Core"}
 # The wiring (Boot, scenes, asset catalogs): @CodeLead edits all of it, not only its skeleton; no code gate.
 LEAD_AREA = "_Composition"
@@ -1508,6 +1527,15 @@ def decide(data, session_value, root, store=None):
 
     if tool == "SendMessage":
         to = text_of(ti.get("to")).strip().lstrip("@").lower()
+        tester_names = {n.lower() for n in TESTER_ROLES.values()}
+        on_demand = to not in LIVE_NAMES and to not in tester_names and (
+            to in {n.lower() for n in INBOX_TOOLS} | {"core"} or re.fullmatch(r"(_services/)?[a-z][a-z0-9]*", to))
+        if on_demand and mode not in ("human", "none"):
+            how = (f'python Management/tools/dispatch.py send <tên> --from {(role or "").lstrip("@")} "<việc>"'
+                   if role in INBOX_SENDERS else "nhờ Leader của phần đó (CodeLead, GameDesigner, UIDesigner, Manager)")
+            return "deny", ("this chat runs on demand and may not be running: a SendMessage to it would be lost. Give it "
+                            f"work through its inbox: {how}. gd_req.py reject and studio.py check, review 0, deliver, redo "
+                            "already put their message there.")
         if to in (n.lower() for n in TESTER_ROLES.values()) and mode not in TESTER_CALLERS:
             return "deny", ("only @Manager (and the human) gives a tester work: it holds the Unity Editor while it plays. "
                             "Message Manager instead: the feature and what you need confirmed.")
@@ -1532,6 +1560,17 @@ def decide(data, session_value, root, store=None):
             if ordered.startswith("_design/"):
                 return "deny", "art concepts are judged by the human on the management page (tab Game design)"
             return "deny", f"only the chat of {ordered} judges its own orders"
+        m = DISPATCH_SEND_RX.match(cmd)
+        # send to the inbox: a Leader, to its own part, naming itself; the text may hold "..", the rest may not.
+        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
+            target, sender = m.group(1), "@" + m.group(3)
+            allowed = INBOX_SENDERS.get(role or "", ())
+            if sender != role:
+                return "deny", f"--from must name this chat's own role ({role or 'none'})"
+            if target in allowed or ("feature" in allowed and not target.startswith("@")):
+                return "allow", f"{role} sends a message to the inbox of {target}"
+            return "deny", (f"{role or 'this chat'} may not send to the inbox of {target}"
+                            + (f" (only: {', '.join(allowed)})" if allowed else ""))
         m = FEATURE_REQ_RX.match(cmd)
         # doing / done in a requirement book: only the chat of that feature. The note may hold "..", the rest may not.
         if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:

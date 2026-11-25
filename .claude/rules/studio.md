@@ -45,7 +45,7 @@ design: feature-hero/hero-list/hero-roster-values                (không bắt b
 ```
 - Mỗi dòng Danh sách là đúng một kết quả. Muốn 3 ảnh thì 3 dòng. `kind: consult`: mỗi dòng là một câu hỏi cho GPT.
 - Không mơ hồ: viết điều kiện đo được trong Tiêu chí nhận. Phong cách thì đưa ảnh tham chiếu.
-- Viết xong: `python Management/tools/studio.py check`, rồi nhắn @Codex hoặc @Blender bằng SendMessage.
+- Viết xong: `python Management/tools/studio.py check`. Order hợp lệ tự vào hộp thư của tool (`dispatch.py`, mỗi order một lần): không nhắn tool bằng SendMessage (tool chạy theo việc, guard chặn).
 - Đặt order chỉ khi feature đã mở khoá code (cùng cổng thiết kế).
 - **Giai đoạn IDEA: ảnh đặt @ClaudeImage** (`tool: claudeimage`, `kind: image`) là đủ, không cần ảnh @Codex. Hình Claude vẽ là hình phẳng, rõ nghĩa, đúng kích thước; cần ảnh đẹp hơn (PROTOTYPE, FULL) thì đặt order mới cho @Codex.
 
@@ -60,7 +60,7 @@ Nhận, làm, tự kiểm, giao, làm lại: dùng skill `studio-fulfill-order` 
 | 2 | Đúng phần lớn chi tiết | dùng |
 | 3 | Đạt | dùng; đóng mọi phiếu nợ của item; ảnh concept được đặt làm mốc style |
 - Chấm lại bất cứ lúc nào bản giao còn là bản mới nhất; mức sau ghi đè mức trước. Đang làm lại thì chờ bản mới rồi chấm.
-- Chấm chỉ lưu giá trị, không nhắn ai: muốn tool làm lại thì bên đặt order phải nhắn.
+- Chấm của feature (`studio.py review … 0`) tự đưa tin làm lại vào hộp thư của tool. Chấm trên trang (ảnh art) chỉ lưu: muốn tool làm lại thì @GameDesigner giao bằng `dispatch.py send`.
 
 ## Phiếu nợ art (`Management/studio/debt.json`, chỉ studio.py và trang ghi)
 - Mở khi tool giao item chưa chuẩn (loại "chưa chuẩn"), hoặc khi item bị chấm mức 1 (loại "người chấm", lý do là phản hồi).
@@ -80,11 +80,11 @@ Nhận, làm, tự kiểm, giao, làm lại: dùng skill `studio-fulfill-order` 
 
 ## Ảnh art-concept của node thiết kế (`kind: art`)
 @GameDesigner đặt order chỉ cho node `cheat` của một feature (`<feature>/cheat`, đã ở `live`); `check` từ chối node khác. Đường dẫn: `orders/_design/<feature>.cheat/<id>/`. Mỗi item là id một state của node cheat (cũng là tên frame của state đó), mỗi feature tối đa 3 ảnh; `style:` là các style của vòng 1; `deliver: concept`.
-- **Không có bước duyệt gen:** @GameDesigner viết order, `check` qua thì nhắn @Codex; @Codex chạy được ngay.
+- **Không có bước duyệt gen:** @GameDesigner viết order, `check` qua thì order tự vào hộp thư của @Codex; @Codex chạy được ngay.
   - Phanh là trần lượt ở trên và trần chung: toàn project tối đa 20 lần chạy art mỗi ngày.
   - Hết lượt: dừng, báo người. Không tìm đường vòng (không gọi Codex bằng shell, không qua unity-mcp để né trần).
 - **Chấm:** người chấm từng ảnh trên tab Game design bằng thanh trượt (Chưa duyệt và 4 mức ở bảng trên) kèm ô phản hồi; trang lưu ngay vào `review.json` và không nhắn ai. Không phiên nào chấm thay người (`review` từ chối order `_design`).
-- **Làm lại:** khi người bảo, @GameDesigner đọc `studio.py status codex` rồi nhắn @Codex các ảnh mức 0 có phản hồi. Ảnh mức 0 thiếu phản hồi thì @GameDesigner báo lại người, @Codex không chạy.
+- **Làm lại:** khi người bảo, @GameDesigner đọc `studio.py status codex` rồi giao @Codex các ảnh mức 0 có phản hồi: `python Management/tools/dispatch.py send @Codex --from GameDesigner "Làm lại <ref> · <item>, …"` (ảnh art do người chấm trên trang nên không có tin tự động). Ảnh mức 0 thiếu phản hồi thì @GameDesigner báo lại người, @Codex không chạy.
 - **Khi chạy:** `studio.py codex` tự đưa vào prompt nội dung các style, và đưa cho Codex, theo thứ tự:
   1. frame vẽ ra PNG (bố cục và tỉ lệ phải giữ), có sẵn chữ hiển thị bằng Roboto, không có số đo hay chú thích;
   2. ảnh tham chiếu của style;

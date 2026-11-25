@@ -506,6 +506,7 @@ def run_cases():
     run_unity_cases()
     run_tool_cases()
     run_tester_cases()
+    run_inbox_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + "/x.txt"}, "cwd": real}), root=None)
@@ -858,7 +859,8 @@ def run_role_cases(payload):
     t(g, M, "allow", "Bash", sh(VALIDATE))
     t(g, M, "allow", "Bash", sh(VALIDATE + " --feature Shop"))
     t(g, M, "deny", guard.UNITY_ASSET_TOOL, delete("Assets/Core/Old.cs"))
-    t(g, M, "pass", "SendMessage", {"to": "Shop", "message": "x"})
+    t(g, M, "deny", "SendMessage", {"to": "Shop", "message": "x"})      # runs on demand: through the inbox
+    t(g, M, "pass", "SendMessage", {"to": "CodeLead", "message": "x"})
     t(g, M, "pass", "ListAgents", {})
 
     g = "own session folders outside the project"
@@ -1153,7 +1155,7 @@ def run_codelead_cases():
     t(g, L, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
     t(g, L, "allow", "Bash", {"command": VALIDATE})
     t(g, L, "deny", "Bash", {"command": "dotnet build"})
-    t(g, L, "pass", "SendMessage", {"to": W, "message": "Sửa giúp ..."})
+    t(g, L, "deny", "SendMessage", {"to": W, "message": "Sửa giúp ..."})      # the feature runs on demand: dispatch.py send
 
     g = "codelead: owns _Composition (the wiring)"
     for p in ("/Old.cs", "/Boot.cs", "/Tests/BootTests.cs", "/Tests/IFake.cs", "/Game.Popups.asset",
@@ -1555,6 +1557,44 @@ def run_designer_cases():
     check(g, D, True, "without a mode file the context says Full Auto", "Full Auto" in told and "User control" not in told)
 
 
+def run_inbox_cases():
+    """The inbox of the chats that run on demand (dispatch.py): who sends to whom, and SendMessage to such a chat."""
+    g = "inbox: dispatch.py"
+    D = 'python Management/tools/dispatch.py '
+
+    def sh(f, x, cmd): t(g, f, x, "Bash", {"command": cmd})
+    for who in ("Wallet", "@Core", "@Codex", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@UnityAutoPlay"):
+        sh(who, "allow", D + "list")
+        sh(who, "allow", D + "list Wallet")
+    sh("@Manager", "allow", D + 'send Wallet --from Manager "Làm yêu cầu feature-wallet/x#y"')
+    sh("@Manager", "allow", D + 'send _Services/Popup --from @Manager "Việc ... với dấu chấm"')
+    sh("@Manager", "allow", D + 'send @Codex --from Manager "Order ảnh"')
+    sh("@CodeLead", "allow", D + 'send Shop --from CodeLead "Sửa lỗi biên dịch ở Shop"')
+    sh("@CodeLead", "allow", D + 'send @Core --from CodeLead "x"')
+    sh("@CodeLead", "deny", D + 'send @Codex --from CodeLead "x"')           # not its part
+    sh("@GameDesigner", "allow", D + 'send @DesignAdvisor --from GameDesigner "Hỏi GPT về node feature-hero"')
+    sh("@GameDesigner", "deny", D + 'send Wallet --from GameDesigner "x"')
+    sh("@UIDesigner", "allow", D + 'send @ClaudeImage --from UIDesigner "x"')
+    sh("@UIDesigner", "deny", D + 'send @Codex --from UIDesigner "x"')
+    sh("@Manager", "deny", D + 'send Wallet --from CodeLead "x"')             # --from must be itself
+    sh("Wallet", "deny", D + 'send Shop --from Wallet "x"')                   # a feature sends to nobody
+    sh("@Codex", "deny", D + 'send Wallet --from Codex "x"')
+    sh("@Manager", "deny", D + 'send @CodeLead --from Manager "x"')           # a Leader is messaged with SendMessage
+    sh("@Manager", "deny", D + 'send Wallet --from Manager "x $(rm -rf .)"')
+    sh("@Manager", "deny", D + 'send ../Wallet --from Manager "x"')
+    sh("@Manager", "deny", D + 'send Wallet --from Manager "x"; rm -rf Assets')
+    sh("@Manager", "allow", D + "cancel m20261125-174601-ecb94c")
+    sh("@CodeLead", "deny", D + "cancel m20261125-174601-ecb94c")
+    g = "inbox: SendMessage to a chat that runs on demand"
+    for who in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "Wallet", "@Codex", "@DesignAdvisor"):
+        for to in ("Wallet", "_Services/Popup", "Core", "Codex", "DesignAdvisor", "ClaudeImage"):
+            t(g, who, "deny", "SendMessage", {"to": to, "message": "x"})
+        for to in ("Manager", "CodeLead", "GameDesigner", "UIDesigner"):
+            t(g + " (Leaders as before)", who, "pass", "SendMessage", {"to": to, "message": "x"})
+    t(g + " (the human, and the page's unbound relay helper)", "@human", "pass", "SendMessage", {"to": "Wallet", "message": "x"})
+    t(g + " (the human, and the page's unbound relay helper)", "", "pass", "SendMessage", {"to": "Wallet", "message": "x"})
+
+
 def run_tester_cases():
     """The testers (@UnityAutoPlay): read all the code, edit nothing in the project, write only Tester/<name> (a README,
     runs named by their time, data under images/), play through unity-mcp and change nothing there. Tester/ is read
@@ -1689,8 +1729,10 @@ def run_tester_cases():
             t(g + " (the others ask @Manager)", who, "deny", "SendMessage", {"to": to, "message": "x"})
         t(g, "@human", "pass", "SendMessage", {"to": to, "message": "x"})
     for who in (W, "@Core", "@Codex", T, M):
-        for to in ("Manager", "CodeLead", "Shop", "UnityAutoPlayer", ""):
+        for to in ("Manager", "CodeLead", ""):
             t(g + " (other chats as before)", who, "pass", "SendMessage", {"to": to, "message": "x"})
+        for to in ("Shop", "UnityAutoPlayer"):      # not a Leader or a tester: a chat that runs on demand
+            t(g + " (on-demand chats only through the inbox)", who, "deny", "SendMessage", {"to": to, "message": "x"})
 
     g = "tester: is told its job, and reports"
     Path(guard.binding_path("role-tester", STORE)).write_text(json.dumps({"feature": T}))

@@ -16,7 +16,7 @@ Nhóm Leaders. Không code, không đụng Unity, không viết thiết kế. @G
   - `python Management/tools/references.py`: ảnh tham chiếu, loại, tag và nhận định của người.
   - `python Management/tools/gd_delete.py ai/idea/<node>/.frame-concept/<tên>.frame`: xoá một frame của bạn.
   - `python Management/tools/studio.py check`, `status claudeimage`, `redo <ref> <frame> "<lí do>"`; `scaffold.py --dry-run`.
-- Nhắn: `GameDesigner` khi `ui.md` thiếu, thừa hay mâu thuẫn (không tự thêm phần tử); `ClaudeImage` khi có order; `UnityAutoPlay` chỉ để xác nhận một thao tác (khuôn `XÁC NHẬN · Feature: … · Thao tác: … · Mong đợi: … · Scene hoặc state cheat: …`), chơi thử rộng hơn thì nhờ `Manager`.
+- Nhắn: `GameDesigner` khi `ui.md` thiếu, thừa hay mâu thuẫn (không tự thêm phần tử); `ClaudeImage`: không nhắn, `studio.py check` và `redo` tự đưa order vào hộp thư của nó (việc khác: `dispatch.py send @ClaudeImage --from UIDesigner "…"`); `UnityAutoPlay` chỉ để xác nhận một thao tác (khuôn `XÁC NHẬN · Feature: … · Thao tác: … · Mong đợi: … · Scene hoặc state cheat: …`), chơi thử rộng hơn thì nhờ `Manager`.
 - **Báo cáo cuối lượt (Stop hook ép):** lượt có sửa file kết thúc bằng khối `## Báo cáo cho @Manager` 8 dòng (`.claude/rules/report.md`): "Đã đổi" là các frame (`<node>/<tên>.frame`); "Công khai đổi" là node đã có trong `live` mà frame vừa đổi, hoặc `không`; "Cần bên khác" là chờ người chấm frame, chờ @GameDesigner sửa `ui.md`, order claude-concept; "Kiểm tra" là dòng `CHỜ @UIDesigner` còn lại của `gd_status.py`. Bị chặn hay phải chờ người: nhắn `Manager` một tin `BÁO CHẶN · …`, hết thì `HẾT CHẶN · …`.
 
 ## `ui.md` (của @GameDesigner, bạn chỉ đọc)

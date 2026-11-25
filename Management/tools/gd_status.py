@@ -113,8 +113,8 @@ def lines_for(root, node, out):
         out.append("- Góp ý của GPT (ngang hàng ý của bạn: mỗi góp ý phải thành một ý, không được bỏ; xem "
                    "skill gd-integrate-advice): " + ", ".join(f"{where}/{a}.md" for a in asked))
     if node.get("gptOwed"):
-        out.append(f"- CHƯA HỎI GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}): nhắn DesignAdvisor "
-                   f"(SendMessage, to: DesignAdvisor) hỏi GPT về node này; câu trả lời sẽ nằm ở {where}/<id>.md")
+        out.append(f"- CHƯA HỎI GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}): nhờ DesignAdvisor "
+                   f"qua hộp thư (python Management/tools/dispatch.py send @DesignAdvisor --from GameDesigner \"<node> · <hỏi gì>\") hỏi GPT về node này; câu trả lời sẽ nằm ở {where}/<id>.md")
     gpt = node.get("gpt") or {}
     for m in gpt.get("missing", []):
         out.append(f"- GÓP Ý CHƯA VÀO NODE: {m['advice']}#{m['point']}: {m['title']} "
@@ -205,7 +205,7 @@ def report(root, arg=""):
         out += ["", "## Lỗi cấu trúc (phải sửa trước)"] + [f"- {p['path']}: {p['text']}" for p in problems]
     owed = [n for n in gd.walk(node) if n.get("gptOwed")]
     if owed:
-        out += ["", f"## Chưa hỏi GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}; nhắn DesignAdvisor, kể cả node đã chốt)"] + [
+        out += ["", f"## Chưa hỏi GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}; nhờ DesignAdvisor qua hộp thư dispatch.py send, kể cả node đã chốt)"] + [
             f"- {n['path'] or '(gốc)'}: {n['title']}" for n in owed]
     if not path and snap["missing"]:
         out += ["", "## Thiếu feature hạ tầng (vòng 2 luôn phải có)"] + [f"- {p['path']}: {p['text']}" for p in snap["missing"]]

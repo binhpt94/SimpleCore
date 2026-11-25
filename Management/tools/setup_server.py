@@ -40,6 +40,13 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   and the last turn of renew go into the background session of a thread that has one (stopped, then started again
   with that prompt), so it stays live. `claude attach <name>` opens a background thread in a terminal (to answer a
   permission question); stop it before opening the thread in VS Code. Delete stops it first.
+- Inbox courier (a thread of its own while the server runs; dispatch.py holds the messages and settings): every few
+  seconds it gives each waiting message of a feature, service, @Core or tool to that thread as a turn of its own
+  (start it with the message as its prompt, or stop and start an idle background one), never as a cross-session
+  message (a probe showed a session may refuse work that comes that way, and the relay helper may claim a message went
+  through when it did not). Delivered = the message id is in the thread's transcript; not seen in time = tried again,
+  an error after the last try. A chat open in VS Code or a terminal is never given a turn. In "on-demand" mode a thread
+  idle `idle_minutes` is stopped and each pool keeps under its limit; "always-live" (default) stops nothing.
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
   enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
@@ -75,8 +82,10 @@ ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / ".claude" / "hooks"))
 import bind_session  # noqa: E402
+import dispatch  # noqa: E402
 import gamedesign  # noqa: E402
 import guard  # noqa: E402
+import reqbook  # noqa: E402
 import studio  # noqa: E402
 import sync_page  # noqa: E402
 import validate  # noqa: E402
@@ -200,6 +209,8 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/gamedesign/requirement": 64 * 1024, "/api/vscode-groups": MAX_BODY,
               "/api/references/upload": 12 * 1024 * 1024, "/api/references/note": 64 * 1024,
               "/api/references/delete": MAX_BODY,
+              "/api/inbox/send": 16 * 1024, "/api/inbox/cancel": MAX_BODY, "/api/inbox/retry": MAX_BODY,
+              "/api/inbox/config": MAX_BODY,
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
               "/api/sessions/delete": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY}
@@ -255,6 +266,9 @@ def threads():
     model: of the last answer; effort: of the last request (both as the transcript recorded them)."""
     hidden = archived_ids()
     live = live_sessions()
+    waiting = {}
+    for m in dispatch.pending(ROOT):
+        waiting[m["target"]] = waiting.get(m["target"], 0) + 1
     out = []
     folder = transcripts_dir()
     for p in folder.glob("*.jsonl") if folder.is_dir() else []:
@@ -285,8 +299,20 @@ def threads():
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
                         "binding": guard.bound_feature(sid, guard.STORE_DIR) or "",
                         "live": (live.get(sid) or {}).get("kind", ""), "live_status": (live.get(sid) or {}).get("status", ""),
+                        "needs": job_needs(sid), "inbox": waiting.get(guard.bound_feature(sid, guard.STORE_DIR) or "", 0),
                         "modified": time.strftime("%Y-%m-%d %H:%M", time.localtime(p.stat().st_mtime))})
     return sorted(out, key=lambda t: (t["title"].lower(), t["modified"]))
+
+
+def job_needs(session_id):
+    """What the CLI's daemon says a background job waits for from the human (its state.json: state "blocked" and a
+    `needs` line, e.g. a proposal to approve), or ''. The job keeps it after its process was retired."""
+    base = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+    try:
+        st = json.loads((base / "jobs" / session_id[:8] / "state.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return ""
+    return str(st.get("needs") or "")[:200] if isinstance(st, dict) and st.get("state") == "blocked" else ""
 
 
 def sets():
@@ -321,19 +347,27 @@ def live_sessions(fresh=False):
     with LIVE_LOCK:
         if not fresh and time.time() - LIVE_CACHE["at"] < 2:
             return dict(LIVE_CACHE["value"])
-    value = {}
     try:
         p = subprocess.run(["claude", "agents", "--json"], cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8",
                            errors="replace", timeout=20, shell=(os.name == "nt"))
-        for s in json.loads(p.stdout or "[]") if p.returncode == 0 else []:
-            if isinstance(s, dict) and isinstance(s.get("sessionId"), str):
-                value[s["sessionId"]] = {"kind": str(s.get("kind") or ""), "status": str(s.get("status") or ""),
-                                         "short": str(s.get("id") or s["sessionId"][:8])}
+        value = parse_agents(json.loads(p.stdout or "[]") if p.returncode == 0 else [])
     except (OSError, ValueError, subprocess.SubprocessError):
         value = {}
     with LIVE_LOCK:
         LIVE_CACHE.update(at=time.time(), value=value)
     return dict(value)
+
+
+def parse_agents(rows):
+    """{session id: {kind, status, state, short}} of the sessions that RUN now. The CLI also lists a background job
+    whose process its daemon retired (idle about an hour) or that waits for the human, with no `pid` and no `status`:
+    that thread is not running, a message sent to it goes nowhere, so it is left out (probe, 2026-11-25)."""
+    value = {}
+    for s in rows if isinstance(rows, list) else []:
+        if isinstance(s, dict) and isinstance(s.get("sessionId"), str) and s.get("pid") and s.get("status"):
+            value[s["sessionId"]] = {"kind": str(s.get("kind") or ""), "status": str(s.get("status") or ""),
+                                     "state": str(s.get("state") or ""), "short": str(s.get("id") or s["sessionId"][:8])}
+    return value
 
 
 def wait_live(session_id, present):
@@ -681,6 +715,11 @@ def run_job(job, model, effort):
             else:
                 sid = create(thread_name(name), name, model, effort)
                 done = {"state": "created", "ids": [sid], "model": model, "effort": effort}
+                if dispatch.pool_of(name) and dispatch.config(ROOT)["mode"] == "on-demand":
+                    done.update(live=False, detail="chạy theo việc (hộp thư): không bật live")
+                    with JOB_LOCK:
+                        item.update(done, ended=time.time())
+                    continue
                 with JOB_LOCK:
                     item.update(done, detail="đã đọc quy trình, đang bật live…")
                 try:      # then run it on in the background, so the other sessions see it (one more short turn)
@@ -927,6 +966,273 @@ def art_review(ref, item, level, text):
     return {"ok": True, "data": sync_page.write_gamedesign(ROOT), "studio": sync_page.write_studio(ROOT)}
 
 
+# ---------------------------------------------------------------- courier: the inbox of the on-demand threads
+# Every few seconds: messages go to their threads as a turn of their own (start, or stop and start again), never as a
+# cross-session message; a delivery counts once its id is in the thread's transcript; in "on-demand" mode a thread
+# idle long enough is stopped and each pool has a limit. dispatch.py holds the messages and the settings.
+COURIER_SECONDS = 5
+COURIER_LOCK = threading.Lock()      # one tick at a time (the loop, and a test or the page asking for one)
+
+
+def transcript_path(session_id):
+    return transcripts_dir() / f"{session_id}.jsonl"
+
+
+def transcript_size(session_id):
+    try:
+        return transcript_path(session_id).stat().st_size
+    except OSError:
+        return 0
+
+
+def transcript_has(session_id, text, offset=0):
+    """True when the transcript holds `text` after byte `offset` (where it was when the message was given)."""
+    try:
+        with open(transcript_path(session_id), "rb") as f:
+            f.seek(max(0, offset))
+            return text.encode("utf-8") in f.read()
+    except OSError:
+        return False
+
+
+def idle_seconds(session_id, now):
+    try:
+        return now - transcript_path(session_id).stat().st_mtime
+    except OSError:
+        return 0
+
+
+def thread_for(target, listed):
+    """The thread bound to `target` that the courier gives messages to (the most recently used one), or None."""
+    same = [t for t in listed if t["binding"] == target and not t["archived"] and not t["unlisted"]]
+    return max(same, key=lambda t: t["modified"]) if same else None
+
+
+def can_stop(t, live, open_targets, cfg, now):
+    """A running background thread of a pool may be stopped: its turn is over (status idle), its transcript has
+    been quiet for idle_minutes, no message waits for it and the page is not running a turn in it. A chat open in VS
+    Code or a terminal is never stopped."""
+    s = live.get(t["id"])
+    with BUSY_LOCK:
+        busy_now = t["id"] in BUSY
+    return bool(s and s["kind"] == "background" and s["status"] == "idle" and not busy_now
+                and dispatch.pool_of(t["binding"]) and t["binding"] not in open_targets
+                and idle_seconds(t["id"], now) >= cfg["idle_minutes"] * 60)
+
+
+def still_valid(check):
+    """(True, '') when the event an automatic message tells of still holds, else (False, why). The checks gd_req.py
+    and studio.py attach: req-rejected <F> <ref> | order-open <tool> <ref> | item-redo <tool> <ref> <item> |
+    order-delivered <tool> <ref> <version>. Anything the courier cannot read is left to be delivered."""
+    parts = (check or "").split()
+    try:
+        if parts[:1] == ["req-rejected"] and len(parts) == 3:
+            v = reqbook.view(ROOT, parts[1])
+            node, req = reqbook.find_req(v, parts[2])
+            return (req["state"] == "rejected", f"yêu cầu {parts[2]} không còn bị trả ({reqbook.STATE_NAMES.get(req['state'], req['state'])})")
+        if parts[:1] in (["order-open"], ["item-redo"], ["order-delivered"]):
+            row = next((r for r in studio.summary(ROOT, parts[1]) if r[0] == parts[2]), None)
+            if row is None:
+                return False, f"không còn order {parts[1]} {parts[2]}"
+            if parts[0] == "order-open":
+                return row[2] in ("new", "doing"), f"order {parts[2]} đã giao"
+            if parts[0] == "item-redo" and len(parts) == 4:
+                item = next((i for i in row[7] if i["id"] == parts[3]), None)
+                return bool(item and item["redo"]), f"item {parts[3]} không còn chờ làm lại"
+            if parts[0] == "order-delivered" and len(parts) == 4:
+                return str(row[3]) == parts[3], f"order {parts[2]} đã có bản giao mới hơn v{parts[3]}"
+    except Exception:      # a book or an order that cannot be read: deliver, the thread will see
+        return True, ""
+    return True, ""
+
+
+def courier_tick(now=None):
+    """One pass over the inbox; returns what it did (for the tests and the log)."""
+    with COURIER_LOCK:
+        return _courier_tick(time.time() if now is None else now)
+
+
+def _courier_tick(now):
+    did = []
+    cfg = dispatch.config(ROOT)
+    open_ = dispatch.pending(ROOT)
+    if not open_ and cfg["mode"] != "on-demand":
+        return did
+    live = live_sessions(fresh=True)
+    listed = threads()
+    by_id = {t["id"]: t for t in listed}
+
+    # 1. deliveries that should be in the transcript by now
+    for m in [m for m in open_ if m["state"] == "delivering"]:
+        sid = m.get("thread") or ""
+        if transcript_has(sid, m["id"], m.get("offset", 0)):
+            dispatch.mark(ROOT, m, "delivered", delivered_at=now)
+            did.append(("delivered", m["id"]))
+        elif now - m.get("started", 0) > dispatch.VERIFY_SECONDS:
+            dispatch.failed(ROOT, m, "không thấy tin trong transcript của thread sau khi giao", now)
+            did.append(("not-seen", m["id"]))
+    open_ = dispatch.pending(ROOT)
+    open_targets = {m["target"] for m in open_}
+
+    def running(pool):
+        return sum(1 for sid, s in live.items() if sid in by_id and dispatch.pool_of(by_id[sid]["binding"]) == pool)
+
+    def stop(t, why):
+        try:
+            stop_bg(t["id"])
+            live.pop(t["id"], None)
+            did.append((why, t["binding"]))
+            return True
+        except Exception as ex:
+            did.append(("stop-failed", t["binding"], str(ex)[:120]))
+            return False
+
+    # 2. stop the threads idle long enough (on-demand only)
+    if cfg["mode"] == "on-demand":
+        for t in listed:
+            if can_stop(t, live, open_targets, cfg, now):
+                stop(t, "stopped-idle")
+
+    # 3. give each target its waiting messages, oldest target first
+    groups = {}
+    for m in open_:
+        if m["state"] in ("queued", "waiting") and m.get("next_try", 0) <= now:
+            groups.setdefault(m["target"], []).append(m)
+    for target, ms in sorted(groups.items(), key=lambda kv: min(m["created"] for m in kv[1])):
+        if any(m["state"] == "delivering" for m in open_ if m["target"] == target):
+            continue      # the last delivery is not confirmed yet
+        t = thread_for(target, listed)
+
+        def wait(why):
+            for m in ms:
+                if m["state"] != "waiting" or m.get("why") != why:
+                    dispatch.mark(ROOT, m, "waiting", why=why)
+            did.append(("wait", target, why))
+
+        stale = []
+        for m in ms:
+            ok, why = still_valid(m.get("check"))
+            if not ok:
+                dispatch.mark(ROOT, m, "cancelled", why="hết hợp lệ: " + why)
+                stale.append(m)
+                did.append(("stale", m["id"]))
+        ms = [m for m in ms if m not in stale]
+        if not ms:
+            continue
+        if t is None:
+            wait("chưa có thread: chạy Setup cho tên này")
+            continue
+        with BUSY_LOCK:
+            busy_now = t["id"] in BUSY
+        if busy_now:
+            wait("trang đang chạy một lượt trong thread")
+            continue
+        s = live.get(t["id"])
+        if s and s["kind"] != "background":
+            wait("chat đang mở ở VS Code hoặc terminal: làm trong chat đó, hoặc đóng chat để hộp thư giao")
+            continue
+        if s and s["status"] != "idle":
+            wait("thread đang chạy một lượt")
+            continue
+        pool = dispatch.pool_of(target)
+        if not s and cfg["mode"] == "on-demand" and running(pool) >= cfg["limits"][pool]:
+            free = sorted((x for x in listed if dispatch.pool_of(x["binding"]) == pool and can_stop(x, live, open_targets, cfg, now)),
+                          key=lambda x: idle_seconds(x["id"], now), reverse=True)
+            if not (free and stop(free[0], "stopped-for-slot")):
+                wait(f"hết chỗ: {cfg['limits'][pool]} thread {pool} đang chạy")
+                continue
+        t = dict(t, live=(s or {}).get("kind", ""))
+        offset = transcript_size(t["id"])
+        for m in ms:
+            dispatch.mark(ROOT, m, "delivering", why="", thread=t["id"], offset=offset, started=now, tries=m["tries"] + 1)
+        try:
+            turn(t, dispatch.prompt(ms), bg=True)
+            live[t["id"]] = {"kind": "background", "status": "busy", "state": "", "short": t["id"][:8]}
+            did.append(("given", target, [m["id"] for m in ms]))
+        except Exception as ex:
+            for m in ms:
+                dispatch.failed(ROOT, dispatch.get(ROOT, m["id"]), f"không bật được thread: {ex}", now)
+            did.append(("give-failed", target, str(ex)[:120]))
+    return did
+
+
+INBOX_DONE_SHOWN = 30      # delivered or cancelled messages the tab still shows
+
+
+def inbox_view():
+    """The Hộp thư tab: settings, messages (every open one and error, the last delivered or cancelled ones), each
+    pool's limit and how many of its threads run now (open chats count), and the targets the send box offers."""
+    cfg = dispatch.config(ROOT)
+    ms = dispatch.messages(ROOT)
+    keep = [m for m in ms if m["state"] in dispatch.OPEN + ("error",)]
+    done = [m for m in ms if m["state"] not in dispatch.OPEN + ("error",)][-INBOX_DONE_SHOWN:]
+    live = live_sessions(fresh=True)
+    listed = [t for t in threads() if not t["archived"] and not t["unlisted"]]
+    pools = {p: {"limit": n, "running": 0, "open_chats": 0} for p, n in cfg["limits"].items()}
+    targets = {}
+    for t in listed:
+        pool = dispatch.pool_of(t["binding"])
+        if not pool:
+            continue
+        targets[t["binding"]] = {"target": t["binding"], "pool": pool, "title": t["title"]}
+        s = live.get(t["id"])
+        if s:
+            pools[pool]["running"] += 1
+            pools[pool]["open_chats"] += s["kind"] != "background"
+    return {"config": cfg, "modes": list(dispatch.MODES), "messages": list(reversed(keep + done)),
+            "summary": dispatch.summary(ROOT), "pools": pools,
+            "targets": sorted(targets.values(), key=lambda x: (x["pool"], x["target"].lower()))}
+
+
+def inbox_call(action, data):
+    """POST /api/inbox/<action>: send (from the human), cancel, retry, config. {ok, data} or {ok: False, error}."""
+    try:
+        if action == "send":
+            m = dispatch.send(ROOT, str(data.get("target") or ""), str(data.get("text") or ""), "người")
+            return {"ok": True, "id": m["id"], "data": inbox_view()}
+        if action == "cancel":
+            dispatch.cancel(ROOT, str(data.get("id") or ""))
+        elif action == "retry":
+            dispatch.retry(ROOT, str(data.get("id") or ""))
+        elif action == "config":
+            limits = data.get("limits") if isinstance(data.get("limits"), dict) else None
+            dispatch.set_config(ROOT, mode=data.get("mode"), limits=limits, idle_minutes=data.get("idle_minutes"))
+        else:
+            return {"ok": False, "error": "không có thao tác này"}
+        return {"ok": True, "data": inbox_view()}
+    except ValueError as ex:
+        return {"ok": False, "error": str(ex)}
+
+
+def inbox_reqs(feature):
+    """The open requirements of a feature's book (for the send box): [{ref, title, state}]."""
+    if dispatch.pool_of(feature) != "feature" or feature == "@Core":
+        return {"ok": True, "reqs": []}
+    try:
+        v = reqbook.view(ROOT, feature)
+    except Exception as ex:
+        return {"ok": False, "error": str(ex)[:200]}
+    out = [{"ref": r["ref"], "title": r["title"], "state": r["state"], "name": reqbook.STATE_NAMES.get(r["state"], r["state"])}
+           for n in v["nodes"] for r in n["reqs"] if r["state"] not in reqbook.MET]
+    return {"ok": True, "reqs": out, "allowed": v["allowed"], "reason": v["reason"]}
+
+
+def courier_loop():
+    lock = None
+    while lock is None:      # one courier on this machine: another server already delivering keeps the lock
+        lock = dispatch.courier_lock(ROOT)
+        if lock is None:
+            print("hộp thư: một server khác đang giao tin; server này không giao, thử lại sau 30 giây", flush=True)
+            time.sleep(30)
+    while True:
+        try:
+            for step in courier_tick():
+                print("hộp thư:", *step, flush=True)
+        except Exception as ex:      # the loop must survive anything a tick meets
+            print(f"hộp thư: lỗi {ex}", file=sys.stderr, flush=True)
+        time.sleep(COURIER_SECONDS)
+
+
 class Handler(SimpleHTTPRequestHandler):
     token = ""
     port = 0
@@ -974,6 +1280,11 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, sync_page.write_studio(ROOT))
             if path == "/api/references":
                 return self.send_json(200, sync_page.write_references(ROOT))
+            if path == "/api/inbox":
+                return self.send_json(200, inbox_view())
+            if path == "/api/inbox/reqs":
+                query = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+                return self.send_json(200, inbox_reqs((query.get("feature") or [""])[0]))
             return self.send_error(404)
         if path in ("/", "/index.html"):
             page = (ROOT / "Management" / "index.html").read_text(encoding="utf-8")
@@ -1017,6 +1328,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, promote(data.get("path"), data.get("deep") is True))
             if self.path == "/api/gamedesign/review":
                 return self.send_json(200, review(data.get("path"), data.get("items"), data.get("table")))
+            if self.path.startswith("/api/inbox/"):
+                return self.send_json(200, inbox_call(self.path.rsplit("/", 1)[1], data))
             if self.path.startswith("/api/references/"):
                 return self.send_json(200, reference_call(self.path.rsplit("/", 1)[1], data))
             if self.path == "/api/gamedesign/progress":
@@ -1073,6 +1386,7 @@ def main():
         print(f"Cổng {args.port} đang bận (có thể server Setup cũ còn chạy): {ex}", file=sys.stderr)
         return 1
     print(f"Mở trang Setup: http://127.0.0.1:{args.port}/#setup  (Ctrl+C để tắt)", flush=True)
+    threading.Thread(target=courier_loop, name="courier", daemon=True).start()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

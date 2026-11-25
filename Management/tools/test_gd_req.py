@@ -126,6 +126,15 @@ def run_flow(root):
     rb.mark(root, W, "wallet-rules#cap-max", "done", W, play="cộng vượt trần, số dừng ở 999.999.999")
     rb.mark(root, W, "wallet-rules#cap-max", "reject", "@CodeLead", note="chưa có test trần")
     check("reject sends it back with the reason", state(root, "cap-max"), "rejected")
+    import dispatch
+    import gd_req
+    said = gd_req.reject_notices(root, W, "wallet-rules#cap-max", "chưa có test trần")
+    again = gd_req.reject_notices(root, W, "wallet-rules#cap-max", "chưa có test trần")
+    ms = dispatch.messages(root, W)
+    check("reject: a message in the feature's inbox, with the full ref, the reason and a check; run twice, one message",
+          (len(ms), ms[0]["source"], ms[0]["key"], "chưa có test trần" in ms[0]["text"], ms[0]["check"].startswith("req-rejected"),
+           "Đã đưa tin" in said[0], "đã có tin này" in again[0]),
+          (1, "gd_req", "reject:" + NODE + "#cap-max", True, True, True, True))
     v = rb.view(root, W)
     check("counts: 1 met of 29", (v["met"], v["total"]), (1, 29))
 

@@ -7,7 +7,7 @@ Thư mục, khung order, mức chấm, phiếu nợ art, luật riêng của @Cl
 
 ## Quy trình
 1. **Tool nhận**: `studio.py status <tool>` (in mức chấm và phản hồi của từng item). Đọc `order.md`, `refs/`, và **toàn bộ `lessons.md`** trước khi làm.
-   - **Báo đã nhận**: bên đặt order nhắn tới thì trả lời ngay một tin ngắn bằng SendMessage: đã nhận order nào, đang xếp sau order nào, sẽ nhắn lại khi giao. Đang gen dở thì trả lời ở đầu lượt kế tiếp, trước khi gen item tiếp theo. Làm theo thứ tự order tới; order làm lại (mức 0) chen lên trước.
+   - **Việc tới bằng hộp thư**: tool chạy theo việc; `studio.py check`, `review … 0` và `redo` tự đưa order, item làm lại vào hộp thư, setup_server.py bật phiên lên với việc đó ở đầu tin (`[tin <id> · từ studio]`). Không cần báo đã nhận. Tin có mã đã làm rồi thì bỏ qua. Làm theo thứ tự order tới; order làm lại (mức 0) chen lên trước.
 2. **Làm từng item**, mỗi lần một item:
    - @Codex, ảnh: viết `work/<item>.md` (prompt chi tiết của item), rồi `studio.py codex <F>/<id> <item>`.
    - @Codex, tham vấn: `studio.py consult <F>/<id> <item>`.
@@ -17,9 +17,9 @@ Thư mục, khung order, mức chấm, phiếu nợ art, luật riêng của @Cl
    - Thứ đo được thì đo, không ước bằng mắt: `studio.py measure <F>/<id> [<item>]` (mọi phiên chạy được, chỉ đọc) in kích thước px, nền có trong suốt không (4 góc, % điểm trong suốt), hình chiếm bao nhiêu % khung và lệch tâm bao nhiêu, và so với dòng `format` của order. Chép các số đó vào `check.md`. Chỉ đo PNG; nội dung hình (đúng đối tượng, phong cách, đọc được khi thu nhỏ) vẫn tự xem ảnh.
    - Chưa đạt và **còn lượt** thì sửa prompt hoặc script rồi chạy lại item đó.
    - **Hết lượt**: studio.py từ chối chạy. Không tìm đường vòng (shell, MCP, unity-mcp). Chọn bản gần order nhất bằng `studio.py pick <F>/<id> <item> <n>` (mọi lượt nằm ở `work/attempts/<item>-<n>.<đuôi>`; pick không tốn lượt), ghi `chưa đạt: <lý do>`, rồi giao.
-4. **Giao**: `studio.py deliver <tool> <F>/<id>`. Nó chỉ chấp nhận đúng một file cho mỗi item. Item ghi `chưa đạt` hoặc thiếu tự kiểm được giao với nhãn **chưa chuẩn** (`quality.json`) và mở một phiếu nợ art. Sau đó nhắn feature bằng câu mà lệnh in ra, nói rõ item nào chưa chuẩn.
+4. **Giao**: `studio.py deliver <tool> <F>/<id>`. Nó chỉ chấp nhận đúng một file cho mỗi item. Item ghi `chưa đạt` hoặc thiếu tự kiểm được giao với nhãn **chưa chuẩn** (`quality.json`) và mở một phiếu nợ art. Order của feature: `deliver` tự đưa tin "đã giao, chấm từng item" vào hộp thư của feature, không nhắn thêm. Order `_design`: nhắn Leader (@GameDesigner hay @UIDesigner) bằng SendMessage như lệnh in ra.
 5. **Bên đặt order chấm từng item** của bản giao (bảng "Mức chấm" ở `studio.md`): `studio.py review <F>/<id> <item> <0-3> "<phản hồi>"`. Item mức 1–3 được chép ngay vào `FeatureAssets/<deliver>/Generated/<id>/` (refresh Unity để có `.meta`); mức 1, 2 ghi vào `QUALITY.md` ở đó. Order tham vấn thì đọc câu trả lời ở `Resources/`, vẫn chấm nhưng không chép. Phản hồi viết trong ngoặc kép, không dùng `;` `&` `|` `<` `>` `$` `(` `)` `{` `}` hay dấu ngoặc kép bên trong.
-6. **Có item mức 0**: bên đặt order nhắn tool. Tool chạy lại đúng item đó **1 lượt**; studio.py tự chèn phản hồi vào prompt. Item mức 0 mà không có phản hồi thì studio.py từ chối chạy.
+6. **Có item mức 0**: `review … 0` của bên đặt order tự đưa tin làm lại vào hộp thư của tool. Tool chạy lại đúng item đó **1 lượt**; studio.py tự chèn phản hồi vào prompt. Item mức 0 mà không có phản hồi thì studio.py từ chối chạy.
 7. **Tool giao bản mới** (`deliver`, đủ mọi item như lần đầu): item vừa làm lại về "Chưa duyệt", item không làm lại giữ mức cũ.
 
 ## Trần lượt gen (studio.py ép, mọi order: ảnh, art, model, tham vấn)
