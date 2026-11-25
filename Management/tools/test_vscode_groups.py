@@ -143,12 +143,35 @@ def run_apply(folder):
     check("no database: refused", refused(vg.apply, ROOT, ASSIGN, db=Path(folder) / "none.vscdb", running=NOT_RUNNING))
 
 
+def run_forget(folder):
+    sub = Path(folder) / "forget"
+    sub.mkdir()
+    data = {"hiddenSessionIds": ["s-del", "s-x"], "sessionUnread:" + ROOT: ["s-del"], "nested": {"s-del": 1, "k": [1, "s-x"]},
+            vg.GROUPS_PREFIX + ROOT: [{"id": "g", "name": "7 · Features", "collapsed": True, "sessionIds": ["s-a", "s-del"]}]}
+    db = make_db(sub, data)
+    before = read(db)
+    check("forget: refused while VS Code runs, nothing written",
+          (refused(vg.forget_session, "s-del", db=db, running=RUNNING), read(db)), (True, before))
+    was = vg.forget_session("s-del", db=db, running=NOT_RUNNING)
+    after = json.loads(read(db))
+    check("forget: the groups it was in", was, ["7 · Features"])
+    check("forget: out of groups, hidden, unread and any other map, the rest kept", after,
+          {"hiddenSessionIds": ["s-x"], "sessionUnread:" + ROOT: [], "nested": {"k": [1, "s-x"]},
+           vg.GROUPS_PREFIX + ROOT: [{"id": "g", "name": "7 · Features", "collapsed": True, "sessionIds": ["s-a"]}]})
+    check("forget: a backup of the state before the write", read(vg.backup_path(db)), before)
+    check("forget: other rows untouched", read(db, "other.key"), "keep me")
+    check("forget: an id that is nowhere writes nothing", (vg.forget_session("s-none", db=db, running=NOT_RUNNING), read(db)),
+          ([], json.dumps(after, separators=(",", ":"), ensure_ascii=False)))
+    check("forget: no database: nothing to forget", vg.forget_session("s-del", db=sub / "none.vscdb", running=NOT_RUNNING), [])
+
+
 def main():
     run_plan()
     run_keys()
     folder = tempfile.mkdtemp(prefix="vsgroups-")
     try:
         run_apply(folder)
+        run_forget(folder)
     finally:
         shutil.rmtree(folder, ignore_errors=True)
     failed = [x for x in results if not x[0]]

@@ -23,6 +23,14 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
 - POST /api/sessions/renew {id, pin} (with the PIN, as it binds): empties the thread's context in the same chat (a
   /compact told to keep nothing; the CLI's /clear does not work on a resumed session in a headless turn), binds
   it again to the FEATURE it had, and tells it to read the rules. Three headless turns at most.
+- POST /api/setup {pin, mode, model, effort} checks the PIN, then runs the setup in the background and answers at
+  once with the job; GET /api/setup/job is that job as it goes (each name: waiting, running, bound, created or
+  error), so the page shows how far it is and which thread failed. One setup runs at a time.
+- POST /api/sessions/delete {id, pin} (with the PIN, and only while VS Code is closed: it keeps the chat list in
+  memory and writes it back): moves the thread's transcript and its folder into
+  ~/.claude/projects/<project>/.deleted/<time>-<id>/ (with its binding and an info.json), takes its id out of the
+  VS Code state (vscode_groups.forget_session) and removes its binding. Restore: move the files back to
+  ~/.claude/projects/<project>/ and run Setup to bind it again.
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
   enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
@@ -40,9 +48,11 @@ import json
 import os
 import re
 import secrets
+import shutil
 import sqlite3
 import subprocess
 import sys
+import threading
 import time
 import urllib.parse
 import uuid
@@ -117,7 +127,15 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/vscode-groups": MAX_BODY,
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
-              "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY}
+              "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
+              "/api/sessions/delete": MAX_BODY}
+TRASH = ".deleted"      # inside the transcripts folder: threads() reads only *.jsonl at its top
+# Threads that run a headless turn right now (renew, reread, compact, a thread setup is creating): not deleted.
+BUSY = set()
+BUSY_LOCK = threading.Lock()
+# The setup that runs or ran last: {id, mode, started, ended, done, items: [{name, group, state, ...}]}.
+JOB = None
+JOB_LOCK = threading.Lock()
 
 
 def transcripts_dir():
@@ -260,6 +278,11 @@ def eligible(session_id):
     return t, None
 
 
+def busy(session_id, on):
+    with BUSY_LOCK:
+        (BUSY.add if on else BUSY.discard)(session_id)
+
+
 def turn(t, prompt):
     """One headless turn in thread t, on the model and effort it last used; what it printed."""
     args = ["--resume", t["id"]]
@@ -267,7 +290,11 @@ def turn(t, prompt):
         args += ["--model", t["model"]]
     if t["effort"] in EFFORTS:
         args += ["--effort", t["effort"]]
-    return run_claude(args + ["-p", prompt])
+    busy(t["id"], True)
+    try:
+        return run_claude(args + ["-p", prompt])
+    finally:
+        busy(t["id"], False)
 
 
 def reread(session_id):
@@ -321,32 +348,136 @@ def renew(session_id, pin):
     return {"ok": True, "id": t["id"], "title": t["title"], "answer": "đã làm mới, gán lại " + t["binding"] + ". " + answer[:240]}
 
 
-def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
+def setup_check(pin, mode, model, effort):
+    """(names of the set, None) when the request may run; else (None, the refusal). The PIN is looked at last."""
     names = sets().get(mode) if mode in ("basic", "full") else None      # sets() also holds order, missing...
     if not names:
-        return {"ok": False, "error": f"unknown mode '{mode}'"}
+        return None, {"ok": False, "error": f"unknown mode '{mode}'"}
     if model not in MODELS or effort not in EFFORTS:      # checked before the PIN: a typo must not cost a try
-        return {"ok": False, "error": f"model must be one of {MODELS}, effort one of {EFFORTS}"}
+        return None, {"ok": False, "error": f"model must be one of {MODELS}, effort one of {EFFORTS}"}
     error = bind_session.check_pin(guard.STORE_DIR, pin)
     if error:
-        return {"ok": False, "error": error}
+        return None, {"ok": False, "error": error}
+    return names, None
+
+
+def new_job(mode, names):
+    return {"id": uuid.uuid4().hex[:8], "mode": mode, "started": time.time(), "ended": None, "done": False,
+            "items": [{"name": n, "group": group_of(n), "state": "waiting", "ids": [], "detail": "",
+                       "started": None, "ended": None} for n in names]}
+
+
+def run_job(job, model, effort):
+    """Binds or creates every name of the job in order; each item shows its state while it goes."""
     current = [t for t in threads() if not t["archived"] and not t["unlisted"]]
-    results = []
-    for name in names:
+    for item in job["items"]:
+        name = item["name"]
+        with JOB_LOCK:
+            item.update(state="running", started=time.time())
         same = [t for t in current if t["feature"] == name]
         try:
             if same:
                 for t in same:
                     bind(t["id"], name)
-                results.append({"name": name, "action": "bound", "ids": [t["id"] for t in same]})
+                done = {"state": "bound", "ids": [t["id"] for t in same]}
             else:
                 sid = create(thread_name(name), name, model, effort)
-                results.append({"name": name, "action": "created", "ids": [sid], "model": model, "effort": effort})
+                done = {"state": "created", "ids": [sid], "model": model, "effort": effort}
         except Exception as ex:
-            results.append({"name": name, "action": "error", "detail": str(ex)})
-    for r in results:      # the page groups the results by tier; names already come in tier order
-        r["group"] = group_of(r["name"])
+            done = {"state": "error", "detail": str(ex)[:300]}
+        with JOB_LOCK:
+            item.update(done, ended=time.time())
+    with JOB_LOCK:
+        job.update(done=True, ended=time.time())
+
+
+def job_view():
+    """A copy of the setup job that runs or ran last (None before the first), for the page."""
+    with JOB_LOCK:
+        return json.loads(json.dumps(JOB)) if JOB else None
+
+
+def setup_start(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT, background=True):
+    """The Setup buttons: checks the request and the PIN now, then runs the setup (in the background unless told
+    otherwise) and answers with the job; the page reads how far it is from GET /api/setup/job."""
+    global JOB
+    with JOB_LOCK:
+        if JOB and not JOB["done"]:
+            return {"ok": False, "error": "Setup đang chạy: chờ lần này xong", "running": True,
+                    "job": json.loads(json.dumps(JOB))}
+    names, no = setup_check(pin, mode, model, effort)
+    if no:
+        return no
+    job = new_job(mode, names)
+    with JOB_LOCK:
+        if JOB and not JOB["done"]:      # another one started while the PIN was checked
+            return {"ok": False, "error": "Setup đang chạy: chờ lần này xong", "running": True}
+        JOB = job
+    if background:
+        threading.Thread(target=run_job, args=(job, model, effort), daemon=True).start()
+    else:
+        run_job(job, model, effort)
+    return {"ok": True, "job": job_view()}
+
+
+def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
+    """The whole setup in one call (no background): {ok, results} with one result per name, in tier order."""
+    res = setup_start(pin, mode, model, effort, background=False)
+    if not res["ok"]:
+        return res
+    results = []
+    for item in res["job"]["items"]:
+        r = {"name": item["name"], "group": item["group"], "ids": item["ids"],
+             "action": {"bound": "bound", "created": "created"}.get(item["state"], "error")}
+        if item["state"] == "created":
+            r.update(model=item["model"], effort=item["effort"])
+        if item["state"] == "error":
+            r["detail"] = item["detail"]
+        results.append(r)
     return {"ok": True, "results": results}
+
+
+def delete_thread(session_id, pin):
+    """The Xoá button of one thread: moves its transcript (and its folder) into the trash of the transcripts folder,
+    takes it out of the VS Code state and removes its binding. With the PIN, and only while VS Code is closed (it
+    would write its chat list back). Archived and hidden threads may be deleted too."""
+    t = next((t for t in threads() if t["id"] == session_id), None) if isinstance(session_id, str) else None
+    if t is None:
+        return {"ok": False, "error": "không có thread này"}
+    head = {"ok": False, "id": t["id"], "title": t["title"]}
+    with BUSY_LOCK:
+        running_now = t["id"] in BUSY
+    with JOB_LOCK:
+        setup_runs = bool(JOB and not JOB["done"])
+    if setup_runs:
+        return dict(head, error="Setup đang chạy: chờ xong rồi xoá")
+    if running_now:
+        return dict(head, error="thread đang chạy một lượt từ trang này: chờ xong rồi xoá")
+    if vscode_groups.vscode_running():      # before the PIN: closing VS Code must not cost a try
+        return dict(head, error="VS Code đang chạy: tắt hẳn VS Code (mọi cửa sổ) rồi bấm lại", vscode=True)
+    error = bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
+    if error:
+        return dict(head, error=error, pin=True)
+    try:
+        was_in = vscode_groups.forget_session(t["id"], running=vscode_groups.vscode_running)
+    except (ValueError, OSError, sqlite3.Error) as ex:      # nothing moved yet
+        return dict(head, error="chưa xoá: " + str(ex)[:260])
+    folder = transcripts_dir()
+    trash = folder / TRASH / f"{time.strftime('%Y%m%d-%H%M%S')}-{t['id']}"
+    trash.mkdir(parents=True, exist_ok=True)
+    for src in (folder / f"{t['id']}.jsonl", folder / t["id"]):
+        if src.exists():
+            shutil.move(str(src), str(trash / src.name))
+    bpath = guard.binding_path(t["id"], guard.STORE_DIR)
+    if bpath and os.path.isfile(bpath):
+        shutil.copy2(bpath, trash / "binding.json")
+        os.remove(bpath)
+    guard.release_lock(guard.STORE_DIR, t["id"])
+    bind_session.write_json(str(trash / "info.json"), {
+        "id": t["id"], "title": t["title"], "feature": t["binding"], "deleted_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "vscode_groups": was_in,
+        "restore": f"chép {t['id']}.jsonl và thư mục {t['id']}/ (nếu có) về {folder}, rồi bấm Setup để gán lại"})
+    return {"ok": True, "id": t["id"], "title": t["title"], "trash": str(trash)}
 
 
 def promote(path, deep):
@@ -488,6 +619,8 @@ class Handler(SimpleHTTPRequestHandler):
                                             "defaults": {"model": DEFAULT_MODEL, "effort": DEFAULT_EFFORT},
                                             "vscode": vscode_view()})
             # Each tab of the page asks for its own data when it is first opened: nothing is built when the page is.
+            if path == "/api/setup/job":
+                return self.send_json(200, {"job": job_view()})
             if path == "/api/project":
                 return self.send_json(200, sync_page.write_project(ROOT))
             if path == "/api/gamedesign":
@@ -553,6 +686,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, compact(data.get("id")))
             if self.path == "/api/sessions/renew":
                 return self.send_json(200, renew(data.get("id"), data.get("pin")))
+            if self.path == "/api/sessions/delete":
+                return self.send_json(200, delete_thread(data.get("id"), data.get("pin")))
             if self.path == "/api/vscode-groups":
                 return self.send_json(200, group_in_vscode())
             if self.path == "/api/studio/review":
@@ -566,7 +701,7 @@ class Handler(SimpleHTTPRequestHandler):
             effort = str(data.get("effort") or DEFAULT_EFFORT)
         except Exception:
             return self.send_error(400)
-        self.send_json(200, setup(pin, mode, model, effort))
+        self.send_json(200, setup_start(pin, mode, model, effort))
 
 
 def main():

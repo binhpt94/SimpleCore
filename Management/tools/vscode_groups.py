@@ -196,6 +196,46 @@ def apply(root, assign, db=None, dry_run=False, running=vscode_running):
     return key, groups
 
 
+def _without(value, sid):
+    """value with every mention of sid taken out: list items equal to it, dict keys equal to it, at any depth."""
+    if isinstance(value, list):
+        return [_without(v, sid) for v in value if v != sid]
+    if isinstance(value, dict):
+        return {k: _without(v, sid) for k, v in value.items() if k != sid}
+    return value
+
+
+def forget_session(sid, db=None, running=vscode_running):
+    """Takes one session id out of the extension's state (its groups, hiddenSessionIds, unread lists...), for a
+    thread that is deleted. Returns the names of the groups it was in. Refused (ValueError) while VS Code runs; no
+    database or no extension key yet: nothing to forget. A backup is made before the write, as apply does."""
+    db = Path(db or vscode_state())
+    if running():
+        raise ValueError("VS Code đang chạy: nó sẽ ghi đè thay đổi. Tắt hẳn VS Code (mọi cửa sổ) rồi bấm lại.")
+    if not db.is_file():
+        return []
+    try:
+        raw, data = read_state(db)
+    except ValueError:
+        return []
+    check_format(data)
+    was_in = [g["name"] for key, groups in data.items() if key.startswith(GROUPS_PREFIX)
+              for g in groups if sid in g["sessionIds"]]
+    new = _without(data, sid)
+    if new == data:
+        return was_in
+    text = json.dumps(new, separators=(",", ":"), ensure_ascii=False)
+    copy_db(db, backup_path(db))
+    con = sqlite3.connect(db)
+    try:
+        with con:
+            con.execute("update ItemTable set value = ? where key = ?",
+                        (text if isinstance(raw, str) else text.encode("utf-8"), STATE_KEY))
+    finally:
+        con.close()
+    return was_in
+
+
 def restore(db=None, running=vscode_running):
     db = Path(db or vscode_state())
     bak = backup_path(db)

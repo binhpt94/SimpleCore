@@ -8,6 +8,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -66,6 +67,127 @@ def page_cases(check):
         ss.Handler.token, ss.Handler.port = old
         for n, f in zip(names, real):
             setattr(ss.sync_page, n, f)
+
+
+def job_cases(check):
+    """Setup runs in the background: each name shows waiting, running, then bound, created or error."""
+    import threading
+    real = (ss.run_claude, ss.threads, ss.sets, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB)
+    store = tempfile.mkdtemp(prefix="setup-job-")
+    gate = threading.Event()
+    try:
+        ss.guard.STORE_DIR = store
+        ss.JOB = None
+        ss.bind_session.check_pin = lambda store_, pin: "" if pin == "1234" else "PIN sai"
+        ss.sets = lambda: {"basic": ["@human", "@CodeLead", "Wallet"], "full": []}
+        ss.threads = lambda: [thread("aaaa1111", "human", binding="@human")]
+
+        def slow(args):
+            gate.wait(5)
+            if args[1] == "Wallet":
+                raise RuntimeError("claude: not logged in")
+            return "ok"
+
+        ss.run_claude = slow
+        res = ss.setup_start("0000", "basic")
+        check("job: a wrong PIN starts nothing", (res["ok"], res["error"], ss.JOB), (False, "PIN sai", None))
+        res = ss.setup_start("1234", "basic")
+        check("job: answers at once with every name waiting or running",
+              (res["ok"], [i["name"] for i in res["job"]["items"]], res["job"]["done"]), (True, ["@human", "@CodeLead", "Wallet"], False))
+        for _ in range(100):
+            states = [i["state"] for i in ss.job_view()["items"]]
+            if states[1] == "running":
+                break
+            time.sleep(0.02)
+        check("job: an existing thread is only bound, the next one runs, the rest waits", states, ["bound", "running", "waiting"])
+        again = ss.setup_start("1234", "basic")
+        check("job: a second setup is refused while one runs", (again["ok"], again.get("running")), (False, True))
+        gate.set()
+        for _ in range(250):
+            if ss.job_view()["done"]:
+                break
+            time.sleep(0.02)
+        view = ss.job_view()
+        check("job: ends with created and error, the error kept",
+              (view["done"], [i["state"] for i in view["items"]], view["items"][2]["detail"]),
+              (True, ["bound", "created", "error"], "claude: not logged in"))
+        check("job: the page reads it from GET /api/setup/job", "/api/setup" in ss.POST_PATHS)
+        ss.run_claude = lambda args: "ok"
+        res = ss.setup("1234", "basic")
+        check("setup(): the whole run in one call, results as before",
+              [(r["name"], r["action"]) for r in res["results"]], [("@human", "bound"), ("@CodeLead", "created"), ("Wallet", "created")])
+    finally:
+        gate.set()
+        (ss.run_claude, ss.threads, ss.sets, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB) = real
+        shutil.rmtree(store, ignore_errors=True)
+
+
+def delete_cases(check):
+    """Xoá: to the trash, with the PIN, only while VS Code is closed and the thread is not running a turn."""
+    import json
+    import sqlite3
+    real = (ss.threads, ss.transcripts_dir, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB,
+            ss.vscode_groups.vscode_running, ss.vscode_groups.vscode_state)
+    tmp = Path(tempfile.mkdtemp(prefix="setup-del-"))
+    tries = []
+    try:
+        folder, store = tmp / "projects", tmp / "store"
+        folder.mkdir()
+        (folder / "aaaa1111.jsonl").write_text("{}\n", encoding="utf-8")
+        (folder / "aaaa1111").mkdir()
+        (folder / "aaaa1111" / "sub.txt").write_text("x", encoding="utf-8")
+        (folder / "bbbb2222.jsonl").write_text("{}\n", encoding="utf-8")
+        db = tmp / "state.vscdb"
+        con = sqlite3.connect(db)
+        with con:
+            con.execute("create table ItemTable (key text, value blob)")
+            con.execute("insert into ItemTable values (?, ?)", (ss.vscode_groups.STATE_KEY, json.dumps({
+                "hiddenSessionIds": ["aaaa1111", "zz"],
+                "sessionGroups:/p": [{"id": "g", "name": "7 · Features", "collapsed": False, "sessionIds": ["aaaa1111", "bbbb2222"]}]})))
+        con.close()
+        ss.guard.STORE_DIR = str(store)
+        ss.JOB = None
+        ss.transcripts_dir = lambda: folder
+        ss.vscode_groups.vscode_state = lambda: db
+        ss.bind_session.check_pin = lambda store_, pin: tries.append(pin) or ("" if pin == "1234" else "PIN sai")
+        ss.threads = lambda: [thread("aaaa1111", "Wallet", binding="Wallet", archived=True), thread("bbbb2222", "Shop", binding="Shop")]
+        ss.bind("aaaa1111", "Wallet")
+        ss.vscode_groups.vscode_running = lambda: True
+        res = ss.delete_thread("aaaa1111", "1234")
+        check("delete: refused while VS Code runs, before the PIN is looked at",
+              (res["ok"], res.get("vscode"), tries, (folder / "aaaa1111.jsonl").exists()), (False, True, [], True))
+        ss.vscode_groups.vscode_running = lambda: False
+        res = ss.delete_thread("aaaa1111", "0000")
+        check("delete: a wrong PIN is refused, nothing moved", (res["ok"], res.get("pin"), (folder / "aaaa1111.jsonl").exists()), (False, True, True))
+        check("delete: an unknown thread is refused", ss.delete_thread("nope", "1234")["error"], "không có thread này")
+        ss.busy("aaaa1111", True)
+        res = ss.delete_thread("aaaa1111", "1234")
+        ss.busy("aaaa1111", False)
+        check("delete: refused while the thread runs a turn from the page", (res["ok"], "đang chạy" in res["error"]), (False, True))
+        ss.JOB = {"done": False, "items": []}
+        res = ss.delete_thread("aaaa1111", "1234")
+        check("delete: refused while a setup runs", (res["ok"], res["error"].startswith("Setup đang chạy")), (False, True))
+        ss.JOB = None
+        res = ss.delete_thread("aaaa1111", "1234")
+        trash = Path(res.get("trash", tmp / "none"))
+        check("delete: an archived thread is moved into the trash, with its folder",
+              (res["ok"], trash.parent == folder / ss.TRASH, (trash / "aaaa1111.jsonl").exists(), (trash / "aaaa1111" / "sub.txt").exists(),
+               (folder / "aaaa1111.jsonl").exists(), (folder / "aaaa1111").exists()), (True, True, True, True, False, False))
+        info = json.loads((trash / "info.json").read_text(encoding="utf-8"))
+        check("delete: the binding is kept in the trash and removed from the store",
+              ((trash / "binding.json").exists(), ss.guard.bound_feature("aaaa1111", str(store)), info["feature"], info["vscode_groups"]),
+              (True, None, "Wallet", ["7 · Features"]))
+        con = sqlite3.connect(db)
+        state = json.loads(con.execute("select value from ItemTable").fetchone()[0])
+        con.close()
+        check("delete: its id is out of the VS Code state, the others stay",
+              (state["hiddenSessionIds"], state["sessionGroups:/p"][0]["sessionIds"]), (["zz"], ["bbbb2222"]))
+        check("delete: the other thread is untouched", (folder / "bbbb2222.jsonl").exists())
+        check("the page may post to the delete path", "/api/sessions/delete" in ss.POST_PATHS)
+    finally:
+        (ss.threads, ss.transcripts_dir, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB,
+         ss.vscode_groups.vscode_running, ss.vscode_groups.vscode_state) = real
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def main():
@@ -200,6 +322,8 @@ def main():
         ss.run_claude, ss.threads, ss.guard.STORE_DIR = real
         shutil.rmtree(store, ignore_errors=True)
     page_cases(check)
+    job_cases(check)
+    delete_cases(check)
     failed = [r for r in results if not r[0]]
     for _, label, expect, got in failed:
         print(f"FAIL  {label}: expected {expect!r}, got {got!r}")

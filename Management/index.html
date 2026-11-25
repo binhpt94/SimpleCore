@@ -107,6 +107,9 @@
   }
   button.copy:hover { background: var(--accent); color: var(--panel); }
   button.copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button.copy.danger { border-color: var(--bad); color: var(--bad); }
+  button.copy.danger:hover:not(:disabled) { background: var(--bad); color: var(--panel); }
+  button.copy.danger:focus-visible { outline-color: var(--bad); }
   .gap { margin-top: 16px; }
   footer { margin-top: 24px; font-size: 13px; color: var(--muted); }
 
@@ -562,7 +565,8 @@
     });
     var rereadStatus = put(listBox, el("p", "gap muted",
       "Mỗi thao tác tốn lượt của thread. Nút \"tất cả\" chạy " + BATCH + " thread cùng lúc. Chat đang mở trong VS Code có thể chưa thấy lượt này: mở lại chat đó. " +
-      "Renew cần PIN (ô PIN ở trên), bỏ toàn bộ ngữ cảnh của thread rồi gán lại và nhắc đọc quy trình: việc dở dang chưa ghi ra file sẽ mất, chỉ bấm khi thread đang rảnh."));
+      "Renew cần PIN (ô PIN ở trên), bỏ toàn bộ ngữ cảnh của thread rồi gán lại và nhắc đọc quy trình: việc dở dang chưa ghi ra file sẽ mất, chỉ bấm khi thread đang rảnh. " +
+      "Xoá cần PIN và VS Code tắt hẳn: dời transcript của thread vào ~/.claude/projects/<project>/.deleted/ (khôi phục được), bỏ nó khỏi danh sách chat và bỏ gán."));
     var confirmRow = put(listBox, el("p", "gap", ""));      // dòng xác nhận của "Renew: tất cả" (không dùng hộp thoại trình duyệt)
     var rereadState = {};      // id -> { cls, text, running }: giữ qua các lần vẽ lại bảng
     var rereadable = [];       // id của thread đủ điều kiện, theo thứ tự trong bảng
@@ -646,6 +650,29 @@
       no.addEventListener("click", function () { confirmRow.textContent = ""; });
     });
     var listBody = put(listBox, el("div"));
+    // Xoá một thread: dời transcript vào thùng rác (~/.claude/projects/<project>/.deleted/), cần PIN, VS Code phải tắt.
+    var askDelete = function (t, note) {
+      note.textContent = "";
+      note.title = "";
+      if (!pin.value) { note.className = "bad-text"; note.textContent = " nhập PIN ở ô phía trên rồi bấm Xoá lại"; return; }
+      note.className = "bad-text";
+      add(note, el("span", "", " Dời " + t.title + " (" + t.id.slice(0, 8) + ") vào thùng rác? "));
+      var yes = put(note, el("button", "copy danger", "Xoá"));
+      var no = put(note, el("button", "copy", "Thôi"));
+      yes.type = "button"; no.type = "button"; no.style.marginLeft = "4px";
+      no.addEventListener("click", function () { note.textContent = ""; });
+      yes.addEventListener("click", function () {
+        yes.disabled = no.disabled = true;
+        api("POST", "/api/sessions/delete", { id: t.id, pin: pin.value }).then(function (res) {
+          if (res.ok) {
+            delete rereadState[t.id];
+            rereadStatus.className = "gap ok-text";
+            rereadStatus.textContent = "Đã dời " + res.title + " vào thùng rác: " + res.trash + ". Khôi phục: chép file về chỗ cũ rồi bấm Setup.";
+            refresh();
+          } else { note.textContent = " lỗi: " + res.error; }
+        }, function (e) { note.textContent = " lỗi gọi server: " + e.message; });
+      });
+    };
 
     var renderThreads = function (data) {
       fill(modelSel, data.models, data.defaults.model);
@@ -714,7 +741,15 @@
           else b.addEventListener("click", (function (kind, id) { return function () { runOne(kind, id); }; })(k, t.id));
           return b;
         });
+        var delBtn = put(rereadBox, el("button", "copy danger", "Xoá"));
+        delBtn.type = "button";
+        delBtn.style.marginRight = "4px";
         var rereadNote = put(rereadBox, el("span", "muted", ""));
+        var busyNow = rereadState[t.id] && rereadState[t.id].running;
+        if (vs.running || busyNow) {
+          delBtn.disabled = true;
+          delBtn.title = vs.running ? "VS Code đang chạy: tắt hẳn VS Code (mọi cửa sổ) rồi tải lại bảng" : "thread đang chạy một thao tác";
+        } else delBtn.addEventListener("click", (function (t, note) { return function () { askDelete(t, note); }; })(t, rereadNote));
         if (!why) {
           rereadable.push(t.id);
           rereadCells[t.id] = { btns: rowBtns, note: rereadNote };
@@ -743,37 +778,70 @@
       });
     };
 
+    // Setup chạy nền trên server; trang hỏi GET /api/setup/job tới khi xong và vẽ lại từng tên: chờ, đang chạy, xong, lỗi.
+    var MODE_LABEL = { basic: "Setup cơ bản", full: "Setup full" };
+    var pollTimer = null;
+    var renderJob = function (job) {
+      resultBox.textContent = "";
+      var now = Date.now() / 1000, done = 0, bad = 0, current = [];
+      var table = put(resultBox, el("table"));
+      add(table, headRow(["Tên", "Kết quả"]));
+      var body = put(table, el("tbody")), lastTier = null;
+      job.items.forEach(function (r) {      // server trả theo thứ tự tầng
+        if (r.group !== lastTier) {
+          lastTier = r.group;
+          var cell = add(el("th", "", r.group || "Ngoài các tầng"));
+          cell.colSpan = 2;
+          add(body, add(el("tr"), cell));
+        }
+        var secs = function (a, b) { return Math.max(0, Math.round((b || now) - a)) + "s"; };
+        var text;
+        if (r.state === "waiting") text = el("span", "muted", "chờ");
+        else if (r.state === "running") { current.push(r.name); text = el("span", "", "đang chạy… (" + secs(r.started) + ")"); }
+        else if (r.state === "created") { done++; text = el("span", "ok-text", "tạo mới (" + r.model + ", " + r.effort + ") và gán · " + secs(r.started, r.ended)); }
+        else if (r.state === "bound") { done++; text = el("span", "ok-text", "đã có, chỉ gán (" + r.ids.length + " thread)"); }
+        else { done++; bad++; text = el("span", "bad-text", "lỗi: " + r.detail); }
+        add(body, row([r.name, text]));
+      });
+      var total = job.items.length, label = MODE_LABEL[job.mode] || job.mode;
+      if (job.done) {
+        status.className = "gap " + (bad ? "bad-text" : "ok-text");
+        status.textContent = label + ": xong " + done + "/" + total + (bad ? ", lỗi " + bad : "") +
+          ". Mở thread trong danh sách chat của VS Code (có thể phải tải lại danh sách).";
+      } else {
+        status.className = "gap muted";
+        status.textContent = label + ": đang chạy… xong " + done + "/" + total + (bad ? ", lỗi " + bad : "") +
+          (current.length ? " · đang chạy: " + current.join(", ") : "") + ". Tạo thread mới mất vài giây tới vài chục giây mỗi cái.";
+      }
+    };
+    var follow = function () {      // bám job đang chạy tới khi xong
+      clearTimeout(pollTimer);
+      basicBtn.disabled = fullBtn.disabled = true;
+      api("GET", "/api/setup/job").then(function (res) {
+        if (!res.job) { basicBtn.disabled = fullBtn.disabled = false; return; }
+        renderJob(res.job);
+        if (res.job.done) { basicBtn.disabled = fullBtn.disabled = false; refresh(); }
+        else pollTimer = setTimeout(follow, 1500);
+      }, function (e) {
+        status.className = "gap bad-text";
+        status.textContent = "Lỗi hỏi tiến độ: " + e.message + " (thử lại sau 3 giây)";
+        pollTimer = setTimeout(follow, 3000);
+      });
+    };
     var run = function (mode) {
       if (!pin.value) { status.className = "gap bad-text"; status.textContent = "Nhập PIN trước."; pin.focus(); return; }
       basicBtn.disabled = fullBtn.disabled = true;
       status.className = "gap muted";
-      status.textContent = "Đang chạy… tạo thread mới mất vài giây mỗi cái.";
+      status.textContent = MODE_LABEL[mode] + ": đang kiểm PIN…";
       resultBox.textContent = "";
       api("POST", "/api/setup", { pin: pin.value, mode: mode, model: modelSel.value, effort: effortSel.value }).then(function (res) {
-        if (!res.ok) { status.className = "gap bad-text"; status.textContent = res.error; return; }
-        status.className = "gap ok-text";
-        status.textContent = "Xong. Mở thread trong danh sách chat của VS Code (có thể phải tải lại danh sách).";
-        var table = put(resultBox, el("table"));
-        add(table, headRow(["Tên", "Kết quả"]));
-        var body = put(table, el("tbody")), lastTier = null;
-        res.results.forEach(function (r) {      // server trả theo thứ tự tầng
-          if (r.group !== undefined && r.group !== lastTier) {
-            lastTier = r.group;
-            var cell = add(el("th", "", r.group || "Ngoài các tầng"));
-            cell.colSpan = 2;
-            add(body, add(el("tr"), cell));
-          }
-          var text = r.action === "created" ? el("span", "ok-text", "tạo mới (" + r.model + ", " + r.effort + ") và gán")
-            : r.action === "bound" ? el("span", "ok-text", "đã có, chỉ gán (" + r.ids.length + " thread)")
-            : el("span", "bad-text", "lỗi: " + r.detail);
-          add(body, row([r.name, text]));
-        });
+        if (!res.ok && !res.running) { status.className = "gap bad-text"; status.textContent = res.error; basicBtn.disabled = fullBtn.disabled = false; return; }
+        if (!res.ok) { status.className = "gap bad-text"; status.textContent = res.error; }
+        follow();
       }, function (e) {
         status.className = "gap bad-text";
         status.textContent = "Lỗi gọi server: " + e.message;
-      }).then(function () {
         basicBtn.disabled = fullBtn.disabled = false;
-        refresh();
       });
     };
     vsBtn.addEventListener("click", function () {
@@ -795,6 +863,11 @@
     basicBtn.addEventListener("click", function () { run("basic"); });
     fullBtn.addEventListener("click", function () { run("full"); });
     refresh();
+    // Mở tab (hay tải lại trang) giữa lúc Setup đang chạy: bám tiếp; đã xong thì hiện kết quả lần trước.
+    api("GET", "/api/setup/job").then(function (res) {
+      if (!res.job) return;
+      if (res.job.done) renderJob(res.job); else follow();
+    }, function () {});
   });
 
   // Cài đặt máy (Windows, Linux, macOS): nội dung ở data/sessions.js, mục config
