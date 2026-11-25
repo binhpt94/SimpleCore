@@ -437,10 +437,50 @@ def rel_segments(full, root):
 # too long for the chat (~/.claude/projects/<project>/<session id>/tool-results), the output of its background
 # commands and subagents (<temp>/claude/<x>/<session id>/tasks) and its scratch files (.../scratchpad). They hold only
 # what tools the guard already let this session run printed, so reading them grants nothing new. Another session's
-# folders, the transcripts and everything else outside the project stay closed.
+# folders, the transcripts and everything else outside the project stay closed, with one exception: @CodeLead and
+# @Manager read (never write) the folders of a session bound to a feature or service, to see what its agents and
+# background commands returned (PEER_READERS).
 OWN_ID_RX = re.compile(r"^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$")      # a real session id only
 OWN_WRITE_DIR = "scratchpad"
 OWN_HOME, OWN_TEMP = None, None      # tests point these at their own folders
+PEER_READERS = ("codelead", "manager")
+
+
+def session_bases():
+    """[(canonical folder, is temp)] where Claude Code keeps session folders, as the CLI computes them on Windows,
+    Linux and macOS: <CLAUDE_CONFIG_DIR or ~/.claude>/projects, and <CLAUDE_CODE_TMPDIR or the OS temp>/claude-<uid>
+    (uid 0 where the OS has none, i.e. Windows), plus the older <temp>/claude."""
+    config = OWN_HOME and os.path.join(OWN_HOME, ".claude") or os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(
+        os.path.expanduser("~"), ".claude")
+    temp_root = OWN_TEMP or os.environ.get("CLAUDE_CODE_TMPDIR") or tempfile.gettempdir()
+    uid = os.getuid() if hasattr(os, "getuid") else 0
+    bases = []
+    for folder, temp in [(os.path.join(config, "projects"), False)] + [
+            (os.path.join(temp_root, n), True) for n in (f"claude-{uid}", "claude")]:
+        # Windows %TEMP% is often a short 8.3 name (BINHPT~1); the path a chat reads may be the long one.
+        for form in (folder, os.path.realpath(folder)) if WINDOWS else (folder,):
+            if (canonical_root(form), temp) not in bases:
+                bases.append((canonical_root(form), temp))
+    return bases
+
+
+def session_folder(full):
+    """(session id, in temp, segments) when the canonical path `full` lies in a session folder outside the project:
+    <config>/projects/<project>/<id>/... or <temp>/claude-<uid>/<project>/<id>/... (session_bases); None otherwise, or when the way there
+    goes through a link or junction."""
+    for base, temp in session_bases():
+        if not inside(full, base):
+            continue
+        seg = rel_segments(full, base)
+        if len(seg) < 2 or not OWN_ID_RX.match(seg[1]) or any(s in ("", ".", "..") for s in seg):
+            return None
+        cur = base
+        for s in seg:      # no link or junction on the way: it could lead anywhere
+            cur = cur + "/" + s
+            if is_link(cur):
+                return None
+        return seg[1], temp, seg
+    return None
 
 
 def own_session_zone(full, session_id):
@@ -448,21 +488,21 @@ def own_session_zone(full, session_id):
     (see above): 'write' only inside its scratchpad, 'read' in the rest. None otherwise."""
     if not isinstance(session_id, str) or not OWN_ID_RX.match(session_id):
         return None
-    bases = ((canonical_root(os.path.join(OWN_HOME or os.path.expanduser("~"), ".claude", "projects")), False),
-             (canonical_root(os.path.join(OWN_TEMP or tempfile.gettempdir(), "claude")), True))
-    for base, temp in bases:
-        if not inside(full, base):
-            continue
-        seg = rel_segments(full, base)
-        if len(seg) < 2 or seg[1] != session_id or any(s in ("", ".", "..") for s in seg):
-            return None
-        cur = base
-        for s in seg:      # no link or junction on the way: it could lead anywhere
-            cur = cur + "/" + s
-            if is_link(cur):
-                return None
-        return "write" if temp and len(seg) > 3 and seg[2] == OWN_WRITE_DIR else "read"
-    return None
+    found = session_folder(full)
+    if not found or found[0] != session_id:
+        return None
+    _, temp, seg = found
+    return "write" if temp and len(seg) > 3 and seg[2] == OWN_WRITE_DIR else "read"
+
+
+def peer_feature(full, session_id, root, store):
+    """The feature or service a session folder outside the project belongs to, when `full` lies in the folder of
+    another session that the human bound to one; None otherwise."""
+    found = session_folder(full)
+    if not found or found[0] == session_id:
+        return None
+    raw = bound_feature(found[0], store) or ""
+    return raw if not role_of(raw) and valid_feature(raw, root) else None
 
 
 def is_link(path):
@@ -1259,12 +1299,16 @@ def search_paths(cmd):
     return paths
 
 
-def read_verdict(full, root, session_id, mode, feature, area, read_all):
+def read_verdict(full, root, session_id, mode, feature, area, read_all, store=None):
     """(decision, reason) of reading the canonical path `full`: Read, Grep, Glob and the read-only search commands."""
     if goes_through_link(full, root):
         return "deny", "path goes through a link or junction"
     if own_session_zone(full, session_id):
         return "allow", "this session's own tool output or scratch file"
+    if mode in PEER_READERS:
+        peer = peer_feature(full, session_id, root, store)
+        if peer:
+            return "allow", f"tool output, agent results or scratch file of the {peer} session (read only)"
     name, readable, _ = zone(full, root, feature, area, read_all)
     if mode == "gamedesigner":      # sees the design tree, its own rules and the studio, nothing else
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
@@ -1285,7 +1329,8 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all):
         return "allow", f"read inside {name}"
     return "deny", (f"may not read: {name}. Search and read only inside your own area or a readable zone"
                     + (" (outside the project only this session's own tool-results, tasks and scratchpad folders "
-                       "are readable; another session's are not)." if name == "outside the project" else "."))
+                       "are readable; another session's are not, except that @CodeLead and @Manager read those of "
+                       "a feature or service session)." if name == "outside the project" else "."))
 
 
 def decide(data, session_value, root, store=None):
@@ -1376,7 +1421,7 @@ def decide(data, session_value, root, store=None):
                     full = resolve_target(p, cwd)
                 except ValueError as ex:
                     return "deny", f"read-only search refused: {ex}"
-                verdict = read_verdict(full, root, data.get("session_id"), mode, feature, area, read_all)
+                verdict = read_verdict(full, root, data.get("session_id"), mode, feature, area, read_all, store)
                 if verdict[0] != "allow":
                     return "deny", f"read-only search refused at {p}: {verdict[1]}"
             return "allow", "read-only search inside readable zones"
@@ -1479,7 +1524,8 @@ def decide(data, session_value, root, store=None):
             glob = text_of(ti.get("pattern") if tool == "Glob" else ti.get("glob"))
             if ".." in glob or re.match(r"^([a-zA-Z]:|[\\/~])", glob):
                 return "deny", 'glob may not be absolute or contain ".."; set the search folder with path instead'
-        return read_verdict(resolve_target(target, cwd), root, data.get("session_id"), mode, feature, area, read_all)
+        return read_verdict(resolve_target(target, cwd), root, data.get("session_id"), mode, feature, area, read_all,
+                            store)
 
     if tool.startswith(BLENDER_PREFIX):      # soft gate: the guard cannot read the Python it runs (.claude/rules/studio.md)
         if mode == "tool" and TOOL_ROLES[role] == "blender":

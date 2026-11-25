@@ -781,9 +781,51 @@ def run_role_cases(payload):
         for who in ("Wallet", M, "@GameDesigner", "@Codex"):
             t(g + ": writes its scratchpad", who, "allow", "Write", {"file_path": mine[2], "content": "x"}, session=ME)
         t(g + ": unbound writes nothing", "", "deny", "Write", {"file_path": mine[2], "content": "x"}, session=ME)
+        if True:      # the CLI puts the temp folders in claude-<uid> (claude-0 on Windows)
+            uid_pad = os.path.join(temp, f"claude-{os.getuid() if hasattr(os, 'getuid') else 0}", "abc123", ME, "scratchpad")
+            os.makedirs(uid_pad)
+            t(g + ": claude-<uid> temp", "Wallet", "allow", "Read", {"file_path": os.path.join(uid_pad, "a.md")}, session=ME)
+            t(g + ": claude-<uid> temp", "Wallet", "allow", "Write", {"file_path": os.path.join(uid_pad, "a.md"), "content": "x"},
+              session=ME)
+            t(g + ": claude-<uid> temp", "Wallet", "deny", "Read", {"file_path": os.path.join(temp, "claude-x", "abc123", ME, "a.md")},
+              session=ME)
         for p in (mine[0], mine[1], os.path.join(temp_of(OTHER), "scratchpad", "note.py"), os.path.join(temp_of(ME), "scratchpad"),
                   os.path.join(temp_of(ME), "other", "x.txt")):
             t(g + ": writes only inside its scratchpad", "Wallet", "deny", "Write", {"file_path": p, "content": "x"}, session=ME)
+
+        # @CodeLead and @Manager read (only) the folders of a session bound to a feature or service.
+        FEAT, SERV, LEAD, CORE = ("aaaaaaaa-2222-3333-4444-555555555555", "bbbbbbbb-2222-3333-4444-555555555555",
+                                  "cccccccc-2222-3333-4444-555555555555", "dddddddd-2222-3333-4444-555555555555")
+        os.makedirs(os.path.join(STORE, "sessions"), exist_ok=True)
+        bound = []
+        for sid, value in ((FEAT, "Wallet"), (SERV, "_Services/Popup"), (LEAD, "@CodeLead"), (CORE, "@Core")):
+            bound.append(os.path.join(STORE, "sessions", sid + ".json"))
+            with open(bound[-1], "w", encoding="utf-8") as f:
+                json.dump({"feature": value}, f)
+        for sid in (FEAT, SERV, LEAD, CORE):
+            for d in (os.path.join(store_of(sid), "subagents"), os.path.join(temp_of(sid), "tasks"),
+                      os.path.join(temp_of(sid), "scratchpad")):
+                os.makedirs(d)
+        peer = lambda sid: [os.path.join(store_of(sid), "subagents", "agent-1.jsonl"),      # noqa: E731
+                            os.path.join(temp_of(sid), "tasks", "a1.output"), os.path.join(temp_of(sid), "scratchpad", "n.md")]
+        try:
+            for who in ("@CodeLead", M):
+                for sid in (FEAT, SERV):
+                    for p in peer(sid):
+                        t(g + ": leads read a feature session's", who, "allow", "Read", {"file_path": p}, session=ME)
+                    t(g + ": leads search a feature session's", who, "allow", "Bash",
+                      sh("grep -rn 'error' " + os.path.join(temp_of(sid), "tasks")), session=ME)
+                    t(g + ": leads list a feature session's", who, "allow", "Bash", sh("ls " + temp_of(sid)), session=ME)
+                    t(g + ": but never write there", who, "deny", "Write", {"file_path": peer(sid)[2], "content": "x"}, session=ME)
+                for sid in (LEAD, CORE, OTHER):      # not a feature: a role, or no binding
+                    t(g + ": only feature sessions'", who, "deny", "Read", {"file_path": peer(sid)[1]}, session=ME)
+                t(g + ": not the transcript", who, "deny", "Read",
+                  {"file_path": os.path.join(home, ".claude", "projects", "d--proj", FEAT + ".jsonl")}, session=ME)
+            for who in ("Shop", "@GameDesigner", "@Core", "@UnityAutoPlay", "@Codex", ""):
+                t(g + ": nobody else reads a feature session's", who, "deny", "Read", {"file_path": peer(FEAT)[1]}, session=ME)
+        finally:
+            for b in bound:
+                os.remove(b)
     finally:
         guard.OWN_HOME, guard.OWN_TEMP = None, None
         shutil.rmtree(home, ignore_errors=True)

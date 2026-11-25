@@ -36,7 +36,7 @@ Feature nằm ở `UnityProject/Assets/Features/<Tên>/`, dịch vụ ở `Featu
 | `Tester` (kết quả chơi thử; mỗi tester một thư mục, mỗi đợt test một thư mục `<yyyymmdd-hhmmss>`; `python Management/tools/tester.py status` in tóm tắt) | Leaders, @Core, Services, Features, Testers; nhóm Tools và @DesignAdvisor: cấm | chỉ phiên tester, trong thư mục của mình |
 | `Tester/<Tên>/Archive` (đợt test cũ đã dời đi) | chỉ nhóm Testers: phiên khác không đọc, để không loãng ngữ cảnh | chỉ lệnh `tester.py archive` (tester đó, @Manager) |
 | `Library`, `Temp`, `Logs`, `obj`, `UserSettings` | cấm | cấm |
-| Thư mục tạm của chính phiên, ngoài project (kết quả tool dài `tool-results`, kết quả lệnh nền `tasks`, `scratchpad`; đường dẫn do hệ thống đưa) | được; của phiên khác: cấm | chỉ trong `scratchpad` của mình |
+| Thư mục tạm của chính phiên, ngoài project (kết quả tool dài `tool-results`, kết quả lệnh nền `tasks`, `scratchpad`; đường dẫn do hệ thống đưa) | được; của phiên khác: cấm, trừ @CodeLead và @Manager đọc được của phiên Features, Services (kết quả agent, lệnh nền) | chỉ trong `scratchpad` của mình |
 
 Vùng không có trong bảng: cấm đọc và sửa. Tìm kiếm (`ls`, `find`, `grep`, `rg` trong shell, mỗi lần một lệnh; hoặc Grep/Glob nếu có) phải nêu thư mục nằm trong một vùng được đọc, ví dụ `grep -rn 'IWallet' UnityProject/Assets/Features/Wallet --include='*.cs'`: mẫu đặt trong ngoặc đơn, không pipe, không chuyển hướng, không `-exec`.
 Cần đổi khung (`Contracts`, lớp base, `*.asmdef`, `InternalsVisibleTo`): gửi @CodeLead ngữ cảnh, file, đề xuất; @CodeLead sửa, phiên mình chờ. Xung đột code do @CodeLead giải quyết; lỗi @CodeLead báo về thì phiên sở hữu tự sửa. `rules.json`: hỏi người. Cấm `*.asmref`.
