@@ -54,6 +54,7 @@ Phiên Basic, Features, Services nhờ đổi khung hay asset `FeatureAssets/Pub
 - Tester giữ khoá Editor suốt lúc chơi, cùng khoá với Play và test của bạn. Đợt chơi thử cả feature do @Manager (hoặc người) giao, không phải bạn.
 - Bạn được nhắn `UnityAutoPlay` **chỉ khi** cần giả lập một thao tác của người chơi để xác nhận một tính năng mà test tự động và việc bạn tự Play không phủ được (bấm, kéo, một chuỗi thao tác trong lúc Play). Tin theo khuôn `XÁC NHẬN · Feature: … · Thao tác: … (từng bước) · Mong đợi: … · Scene hoặc state cheat: …`.
 - Trước khi nhắn: Stop Play và lưu scene của mình, để nó lấy được khoá. Nó trả lời thẳng bạn kết quả.
+- Nó chưa chạy (không có trong `ListAgents`) thì mở nó bằng hộp thư: `python Management/tools/dispatch.py send @UnityAutoPlay --from CodeLead "<việc>"`; tin đó bật thread lên và là lượt việc của nó. Đang chạy thì nhắn bằng `SendMessage`. Nội dung vẫn theo khuôn `XÁC NHẬN`.
 - Cần test rộng hơn một tính năng: nhắn `Manager`, nêu feature và điều cần xác nhận.
 
 ## Báo chặn cho @Manager

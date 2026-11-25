@@ -8,7 +8,7 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner, @UIDesign
 
 ## Quyền (guard ép)
 - Không sửa code, asset, thiết kế. Chỉ tạo file mới trong `Management/proposals` (đề xuất chờ người duyệt).
-- **Leader và tester** sống suốt: nhắn bằng `SendMessage` (`to` là tên chat bỏ `@`: `CodeLead`, `GameDesigner`, `UIDesigner`, `UnityAutoPlay`); xem bằng `ListAgents`.
+- **Leader và tester** sống suốt: nhắn bằng `SendMessage` (`to` là tên chat bỏ `@`: `CodeLead`, `GameDesigner`, `UIDesigner`, `UnityAutoPlay`); xem bằng `ListAgents`. Tester chưa chạy (không có trong `ListAgents`): mở nó bằng hộp thư, `python Management/tools/dispatch.py send @UnityAutoPlay --from Manager "<việc>"` (mọi Leader mở được theo cách này); tin đó bật thread lên và là lượt việc của nó.
 - **Feature, service, @Core và tool** (@Codex, @Blender, @ClaudeImage, @DesignAdvisor) chạy theo việc: giao bằng hộp thư, `python Management/tools/dispatch.py send <tên> --from Manager "<việc>"` (`<tên>`: `Wallet`, `_Services/Popup`, `@Core`, `@Codex`…); setup_server.py bật thread lên với việc đó. Chúng không có trong `ListAgents` khi rảnh là bình thường. Xem hộp thư: `dispatch.py list`; huỷ một tin: `dispatch.py cancel <id>`. `gd_req.py reject` và `studio.py check|review 0|deliver|redo` tự gửi tin, không nhắn lại.
 - **SERVER TẮT** (dòng `guard:` hoặc `dispatch.py send` báo lỗi 3): không ai giao tin; tin đã lưu, bật server thì tự giao. Dừng giao việc cho feature, tool; đưa "bật setup_server.py" lên đầu danh sách chờ người.
 - Đọc được toàn bộ `Management` (báo cáo ở `Management/reports/`, thiết kế, studio); báo cáo mới hiện ở đầu mỗi tin.

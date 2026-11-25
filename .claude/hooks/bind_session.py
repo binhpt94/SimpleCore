@@ -318,7 +318,7 @@ def context(data, root, store):
         return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders). Gặp lỗi không tự gỡ được hoặc phải dừng chờ người: "
                 "trước khi kết thúc lượt nhắn Manager (SendMessage) một tin BÁO CHẶN theo khuôn ở .claude/rules/codelead.md, "
                 "hết chặn thì nhắn HẾT CHẶN. Tester UnityAutoPlay giữ khoá Editor: chỉ nhắn nó khi cần giả lập một thao tác "
-                "người chơi để xác nhận một tính năng (khuôn XÁC NHẬN ở codelead.md); test rộng hơn thì nhờ Manager. "
+                "người chơi để xác nhận một tính năng (khuôn XÁC NHẬN ở codelead.md); test rộng hơn thì nhờ Manager. Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from CodeLead \"<việc>\", tin đó bật thread lên. "
                 "Việc của vai trò: kiểm code và giải quyết xung đột của nhóm "
                 "Basic, Features, Services, và quản cấu trúc khung. Chỉ sửa khung: Scripts/Contracts, Scripts/Internal/"
                 "Base, Scripts/View/Base, *.asmdef, AssemblyInfo.cs của feature đã mở khoá code; *.asmdef, "
@@ -389,7 +389,7 @@ def context(data, root, store):
                 "trả lời, chọn ý trái nhau, chốt), kể cả lượt không sửa file: trước khi kết thúc lượt nhắn Manager "
                 "(SendMessage) một tin BÁO CHẶN theo khuôn ở gamedesigner.md, hết chặn thì nhắn HẾT CHẶN. Tester UnityAutoPlay "
                 "giữ khoá Unity Editor: chỉ nhắn nó khi cần giả lập một thao tác người chơi để xác nhận một tính năng (khuôn "
-                "XÁC NHẬN), chơi thử rộng hơn thì nhờ Manager. Chỉ đọc "
+                "XÁC NHẬN), chơi thử rộng hơn thì nhờ Manager. Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from GameDesigner \"<việc>\", tin đó bật thread lên. Chỉ đọc "
                 "Management/game-design, .claude/rules/gamedesigner.md, designadvisor.md và skill gd-*; chỉ ghi trong Management/game-design/ai "
                 "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
                 "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
@@ -444,7 +444,7 @@ def context(data, root, store):
                 "check (order tự vào hộp thư của @ClaudeImage, không nhắn); vẽ lại sau khi giao: python Management/tools/studio.py redo <ref> <frame> \"<lí do>\" (cũng tự gửi); "
                 "việc khác cho @ClaudeImage: python Management/tools/dispatch.py send @ClaudeImage --from UIDesigner \"<việc>\". "
                 "Lượt có sửa file kết thúc bằng khối '## Báo cáo cho @Manager' (8 dòng; Stop hook ép). Chờ người hay bị chặn: "
-                "nhắn Manager BÁO CHẶN, hết thì HẾT CHẶN. Tester UnityAutoPlay chỉ nhắn để xác nhận một thao tác (khuôn XÁC NHẬN)."
+                "nhắn Manager BÁO CHẶN, hết thì HẾT CHẶN. Tester UnityAutoPlay chỉ nhắn để xác nhận một thao tác (khuôn XÁC NHẬN). Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from UIDesigner \"<việc>\", tin đó bật thread lên."
                 + studio_pending(root, None) + " Làm theo .claude/rules/uidesigner.md." + inbox_line(root, full=False))
     if role == "@DesignAdvisor":
         return ("guard: chat này gán FEATURE=@DesignAdvisor (nhóm Tools): đưa GPT (Codex CLI) vào thiết kế game, theo yêu cầu của "
@@ -476,7 +476,7 @@ def context(data, root, store):
                 "phiên CÙNG LÚC trong một lượt, không tuần tự từng phiên (skill manager-dispatch). Nhận tin BÁO CHẶN của một Leader: điều phối lại ngay "
                 "(dừng việc phụ thuộc, giao việc không phụ thuộc, gom việc chờ người thành một danh sách cho người). Chỉ bạn và "
                 "người giao đợt chơi thử cho tester UnityAutoPlay (nó giữ khoá Unity Editor): gom thành một đợt, không giao "
-                "khi CodeLead đang Play hay test." + inbox_line(root) + unread_reports(root, store, role))
+                "khi CodeLead đang Play hay test. Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from Manager \"<việc>\", tin đó bật thread lên." + inbox_line(root) + unread_reports(root, store, role))
     if raw and guard.valid_feature(raw, root):
         group = "Services" if raw.startswith("_Services/") else "Features"
         return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "

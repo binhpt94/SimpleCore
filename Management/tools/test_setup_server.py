@@ -371,7 +371,8 @@ def courier_cases(check):
     live, given, stopped = {}, [], []
     listed = [thread("w0000000", "Wallet", binding="Wallet"), thread("s0000000", "Shop", binding="Shop"),
               thread("h0000000", "Hud", binding="Hud"), thread("c0000000", "Codex", binding="@Codex"),
-              thread("l0000000", "CodeLead", binding="@CodeLead"), thread("o0000000", "Old", binding="Old", archived=True)]
+              thread("l0000000", "CodeLead", binding="@CodeLead"), thread("o0000000", "Old", binding="Old", archived=True),
+              thread("u0000000", "UnityAutoPlay", binding="@UnityAutoPlay")]
     for t in listed:
         (tdir / f"{t['id']}.jsonl").write_text("{}\n", encoding="utf-8")
     seen = {"write": True}
@@ -485,10 +486,23 @@ def courier_cases(check):
         n_stop = len(stopped)
         ss.courier_tick(time.time())
         check("always-live: nothing is ever stopped", len(stopped), n_stop)
+        u = ss.dispatch.send(root, "@UnityAutoPlay", "Chơi tiếp R1, B1", "@Manager")
+        did = ss.courier_tick(time.time())
+        check("tester: a Leader's message opens its thread although the other pools are full",
+              (("given", "@UnityAutoPlay", [u["id"]]) in did, given[-1][0], "u0000000" in live), (True, "u0000000", True))
+        ss.courier_tick(time.time() + 1)
+        live["u0000000"]["status"] = "idle"
+        age("u0000000", 300)
+        n_stop = len(stopped)
+        ss.courier_tick(time.time() + 2)
+        check("tester: delivered, and never stopped for being idle (it stays live, on-demand mode too)",
+              (ss.dispatch.get(root, u["id"])["state"], len(stopped), ss.can_stop(listed[-1], live, set(), dict(ss.dispatch.config(root), mode="on-demand"), time.time())),
+              ("delivered", n_stop, False))
+        live.pop("u0000000")
         v = ss.inbox_view()
         check("inbox view: settings, each pool with its limit and running threads, targets without Leaders",
               (v["config"]["mode"], v["pools"]["feature"]["limit"], sorted(t["target"] for t in v["targets"])),
-              ("always-live", 1, ["@Codex", "Hud", "Shop", "Wallet"]))
+              ("always-live", 1, ["@Codex", "@UnityAutoPlay", "Hud", "Shop", "Wallet"]))
         res = ss.inbox_call("send", {"target": "Shop", "text": "Việc của người"})
         check("inbox send: from the page the source is the human", (res["ok"], ss.dispatch.get(root, res["id"])["source"]), (True, "người"))
         check("inbox send refused: a Leader", ss.inbox_call("send", {"target": "@CodeLead", "text": "x"})["ok"], False)

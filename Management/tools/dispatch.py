@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """The inbox of the threads that run on demand: the features, services and @Core (pool "feature") and the tool
-chats @Codex, @Blender, @ClaudeImage, @DesignAdvisor (pool "tool"). The Leaders and the testers stay live and are
-messaged with SendMessage as before.
+chats @Codex, @Blender, @ClaudeImage, @DesignAdvisor (pool "tool"). The Leaders stay live and are messaged with
+SendMessage as before. A tester (pool "tester") stays live too once it runs, and is messaged with SendMessage then;
+its inbox is how a Leader or the human opens it when it is not running: the message starts its thread. That pool has
+no limit and the courier never stops its thread.
 
 A message waits here until setup_server.py (its courier) gives it to the thread as a turn of its own: a thread that
 is not running is started with the message as its prompt (claude --bg --resume), one running in the background and
@@ -38,7 +40,9 @@ MODES = ("always-live", "on-demand")
 DEFAULT_CONFIG = {"mode": "always-live", "limits": {"feature": 4, "tool": 4}, "idle_minutes": 20}
 LIMIT_MAX, IDLE_MIN, IDLE_MAX = 32, 5, 240
 TOOLS = ("@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor")
-NOT_TARGETS = ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@UnityAutoPlay")
+TESTERS = ("@UnityAutoPlay",)
+ON_DEMAND = ("feature", "tool")     # the pools the courier limits and stops when idle; a tester stays live
+NOT_TARGETS = ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner")
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Z][A-Za-z0-9]*$")
 SOURCES = ("người", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "gd_req", "studio")
 ID_RX = re.compile(r"^m\d{8}-\d{6}-[0-9a-f]{6}$")
@@ -55,9 +59,11 @@ def folder(root):
 
 
 def pool_of(target):
-    """'tool' or 'feature' for a valid target; None for anything else (a Leader, the human, a bad name)."""
+    """'tool', 'feature' or 'tester' for a valid target; None for anything else (a Leader, the human, a bad name)."""
     if target in TOOLS:
         return "tool"
+    if target in TESTERS:
+        return "tester"
     if target in NOT_TARGETS:
         return None
     if target == "@Core" or FEATURE_RX.match(target or ""):
@@ -193,8 +199,8 @@ def send(root, target, text, source, key=None, check=None, now=None, once=False)
     target = (target or "").strip()
     pool = pool_of(target)
     if pool is None:
-        raise ValueError(f"'{target}' không nhận tin qua hộp thư: chỉ feature, service, @Core và tool "
-                         f"({', '.join(TOOLS)}); Leader và tester nhắn bằng SendMessage")
+        raise ValueError(f"'{target}' không nhận tin qua hộp thư: chỉ feature, service, @Core, tool "
+                         f"({', '.join(TOOLS)}) và tester ({', '.join(TESTERS)}); Leader nhắn bằng SendMessage")
     if source not in SOURCES:
         raise ValueError(f"nguồn phải là một trong: {', '.join(SOURCES)}")
     text = (text or "").strip()

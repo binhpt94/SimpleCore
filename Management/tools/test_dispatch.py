@@ -31,10 +31,10 @@ def refused(fn, *args, **kw):
 def main():
     root = Path(tempfile.mkdtemp(prefix="inbox-"))
     try:
-        check("pools: features, services and @Core; the tools; never a Leader, the human or a bad name",
+        check("pools: features, services and @Core; the tools; the tester; never a Leader, the human or a bad name",
               [dp.pool_of(x) for x in ("Wallet", "_Services/Popup", "@Core", "@Codex", "@DesignAdvisor", "@Manager",
                                        "@CodeLead", "@human", "@UnityAutoPlay", "wallet", "../x", "", None)],
-              ["feature", "feature", "feature", "tool", "tool", None, None, None, None, None, None, None, None])
+              ["feature", "feature", "feature", "tool", "tool", None, None, None, "tester", None, None, None, None])
         check("config: the defaults when there is no file (today's behaviour)", dp.config(root),
               {"mode": "always-live", "limits": {"feature": 4, "tool": 4}, "idle_minutes": 20})
         (dp.folder(root)).mkdir(parents=True)
@@ -53,10 +53,17 @@ def main():
               (a["state"], a["pool"], a["text"], a["tries"], bool(dp.ID_RX.match(a["id"]))),
               ("queued", "feature", "Làm yêu cầu feature-wallet/x#y", 0, True))
         for label, args in (("a Leader", ("@CodeLead", "x", "@Manager")), ("the human", ("@human", "x", "@Manager")),
-                            ("a tester", ("@UnityAutoPlay", "x", "@Manager")), ("a bad name", ("../Wallet", "x", "@Manager")),
+                            ("a bad name", ("../Wallet", "x", "@Manager")),
                             ("no text", ("Wallet", "   ", "@Manager")), ("too long", ("Wallet", "x" * (dp.TEXT_MAX + 1), "@Manager")),
                             ("unknown source", ("Wallet", "x", "@Hacker"))):
             check("send refused: " + label, refused(dp.send, root, *args))
+        tester_root = Path(tempfile.mkdtemp(prefix="inbox-tester-"))
+        try:
+            check("send: a tester takes a message from a Leader, in a pool of its own that has no limit",
+                  (dp.send(tester_root, "@UnityAutoPlay", "Chơi tiếp R1", "@CodeLead")["pool"], "tester" in dp.config(tester_root)["limits"],
+                   "tester" in dp.ON_DEMAND), ("tester", False, False))
+        finally:
+            shutil.rmtree(tester_root, ignore_errors=True)
         k1 = dp.send(root, "Wallet", "Yêu cầu bị trả", "gd_req", key="reject:a#b", now=1001)
         k2 = dp.send(root, "Wallet", "Yêu cầu bị trả (lần 2)", "gd_req", key="reject:a#b", now=1002)
         check("send: same key while not delivered gives the same message", (k1["id"] == k2["id"], len(dp.messages(root))), (True, 2))

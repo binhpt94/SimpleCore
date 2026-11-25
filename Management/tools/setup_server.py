@@ -716,7 +716,7 @@ def run_job(job, model, effort):
             else:
                 sid = create(thread_name(name), name, model, effort)
                 done = {"state": "created", "ids": [sid], "model": model, "effort": effort}
-                if dispatch.pool_of(name) and dispatch.config(ROOT)["mode"] == "on-demand":
+                if dispatch.pool_of(name) in dispatch.ON_DEMAND and dispatch.config(ROOT)["mode"] == "on-demand":
                     done.update(live=False, detail="chạy theo việc (hộp thư): không bật live")
                     with JOB_LOCK:
                         item.update(done, ended=time.time())
@@ -1017,7 +1017,7 @@ def can_stop(t, live, open_targets, cfg, now):
     with BUSY_LOCK:
         busy_now = t["id"] in BUSY
     return bool(s and s["kind"] == "background" and s["status"] == "idle" and not busy_now
-                and dispatch.pool_of(t["binding"]) and t["binding"] not in open_targets
+                and dispatch.pool_of(t["binding"]) in dispatch.ON_DEMAND and t["binding"] not in open_targets
                 and idle_seconds(t["id"], now) >= cfg["idle_minutes"] * 60)
 
 
@@ -1136,7 +1136,8 @@ def _courier_tick(now):
             wait("thread đang chạy một lượt")
             continue
         pool = dispatch.pool_of(target)
-        if not s and running(pool) >= cfg["limits"][pool]:      # starting a thread: the limit holds in both modes
+        # starting a thread: the limit holds in both modes (a tester has none: a Leader's message always opens it)
+        if not s and pool in cfg["limits"] and running(pool) >= cfg["limits"][pool]:
             free = sorted((x for x in listed if dispatch.pool_of(x["binding"]) == pool and can_stop(x, live, open_targets, cfg, now)),
                           key=lambda x: idle_seconds(x["id"], now), reverse=True) if cfg["mode"] == "on-demand" else []
             if not (free and stop(free[0], "stopped-for-slot")):
@@ -1177,7 +1178,7 @@ def inbox_view():
             continue
         targets[t["binding"]] = {"target": t["binding"], "pool": pool, "title": t["title"]}
         s = live.get(t["id"])
-        if s:
+        if s and pool in pools:
             pools[pool]["running"] += 1
             pools[pool]["open_chats"] += s["kind"] != "background"
     return {"config": cfg, "modes": list(dispatch.MODES), "messages": list(reversed(keep + done)),

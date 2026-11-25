@@ -1650,6 +1650,11 @@ def run_inbox_cases():
     sh("Wallet", "deny", D + 'send Shop --from Wallet "x"')                   # a feature sends to nobody
     sh("@Codex", "deny", D + 'send Wallet --from Codex "x"')
     sh("@Manager", "deny", D + 'send @CodeLead --from Manager "x"')           # a Leader is messaged with SendMessage
+    for lead in ("Manager", "CodeLead", "GameDesigner", "UIDesigner"):        # every Leader opens the tester through its inbox
+        sh("@" + lead, "allow", D + 'send @UnityAutoPlay --from ' + lead + ' "Chơi tiếp R1, B1"')
+        sh("@" + lead, "allow", D + "list @UnityAutoPlay")
+    for who in ("Wallet", "_Services/Popup", "@Core", "@Codex", "@DesignAdvisor", "@UnityAutoPlay"):
+        sh(who, "deny", D + 'send @UnityAutoPlay --from ' + who.lstrip("@") + ' "x"')
     sh("@Manager", "deny", D + 'send Wallet --from Manager "x $(rm -rf .)"')
     sh("@Manager", "deny", D + 'send ../Wallet --from Manager "x"')
     sh("@Manager", "deny", D + 'send Wallet --from Manager "x"; rm -rf Assets')

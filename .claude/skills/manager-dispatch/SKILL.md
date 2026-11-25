@@ -16,6 +16,7 @@ Quyền, chuỗi của một feature và danh sách "phải nối tiếp" vẫn 
 ## Chơi thử (nhóm Testers)
 - **Bạn (cùng người) là bên duy nhất giao đợt chơi thử và xếp lịch cho tester.** Nó giữ khoá Unity Editor suốt lúc chơi, nên mỗi lần gọi là chặn Play, test và scene của mọi phiên. Guard chặn `SendMessage` tới `UnityAutoPlay` của phiên feature, @Core, Services và nhóm Tools; các phiên đó nhắn bạn khi cần chơi thử.
 - @CodeLead và @GameDesigner được gọi nó trực tiếp chỉ để giả lập một thao tác người chơi xác nhận một tính năng (tin `XÁC NHẬN · …`); việc rộng hơn họ phải nhờ bạn.
+- `UnityAutoPlay` không có trong `ListAgents` (chưa chạy): mở nó bằng hộp thư, `python Management/tools/dispatch.py send @UnityAutoPlay --from Manager "<việc>"`, nội dung là đợt chơi thử; tin đó bật thread lên (mọi Leader mở được theo cách này). Đang chạy thì `SendMessage`. SERVER TẮT thì chờ người bật server.
 - Gom các thứ cần thử thành một đợt thay vì gọi nhiều lần. Không giao khi @CodeLead đang Play hay chạy test; hỏi `CodeLead` trước nếu chưa rõ.
 - Giao `UnityAutoPlay` chơi thử khi một feature ĐƯỢC CODE đã được @CodeLead kiểm và nối dây ở mức đang làm (IDEA, PROTOTYPE, FULL): nhắn feature nào, mức nào, muốn biết điều gì. Nó không sửa gì; kết quả nằm ở `Tester/UnityAutoPlay/<đợt>/README.md` và trong báo cáo cuối lượt của nó.
 - Đợt `không đạt`: chuyển danh sách lỗi cho @CodeLead (nó giao đúng phiên sở hữu qua hộp thư). Sửa xong thì giao chơi lại đúng phần đó.

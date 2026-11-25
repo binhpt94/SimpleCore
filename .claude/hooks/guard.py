@@ -251,18 +251,20 @@ FEATURE_REQ_RX = re.compile(r"^python3? Management/tools/gd_req\.py (" + REQ_FEA
 # The inbox of the chats that run on demand (Management/tools/dispatch.py): features, services, @Core and the tool
 # chats get work through it, not through SendMessage (a chat that is not running would never get the message).
 # list: every bound chat. send: a Leader, to the chats of its own part, with --from naming itself. cancel: @Manager.
+# A tester stays live once it runs (SendMessage); every Leader may send to its inbox, which opens it when it is not
+# running (what the message may ask for is the written rule of .claude/rules/tester.md).
 DISPATCH = PY + r"Management/tools/dispatch\.py "
 INBOX_TOOLS = ("Codex", "Blender", "ClaudeImage", "DesignAdvisor")
 INBOX_FEATURE = r"(_Services/)?[A-Z][A-Za-z0-9]*"
-ALLOWED_COMMANDS.append(DISPATCH + r"list( (@(Core|" + "|".join(INBOX_TOOLS) + r")|" + INBOX_FEATURE + r"))?")
+ALLOWED_COMMANDS.append(DISPATCH + r"list( (@(Core|" + "|".join(INBOX_TOOLS + tuple(TESTER_ROLES.values())) + r")|" + INBOX_FEATURE + r"))?")
 MANAGER_COMMANDS.append(DISPATCH + r"cancel m[0-9]{8}-[0-9]{6}-[0-9a-f]{6}")
 DISPATCH_SEND_RX = re.compile(r"^python3? Management/tools/dispatch\.py send (@[A-Za-z]+|" + INBOX_FEATURE
                               + r') --from @?([A-Za-z]+) "[^"\\]+"$')
 INBOX_SENDERS = {      # role -> the targets it may send to ("feature": any feature or service)
-    "@Manager": ("feature", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor"),
-    "@CodeLead": ("feature", "@Core"),
-    "@GameDesigner": ("@DesignAdvisor", "@Codex"),
-    "@UIDesigner": ("@ClaudeImage",),
+    "@Manager": ("feature", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor") + tuple(TESTER_ROLES),
+    "@CodeLead": ("feature", "@Core") + tuple(TESTER_ROLES),
+    "@GameDesigner": ("@DesignAdvisor", "@Codex") + tuple(TESTER_ROLES),
+    "@UIDesigner": ("@ClaudeImage",) + tuple(TESTER_ROLES),
 }
 # Names SendMessage may still reach: the Leaders and the testers run all the time. Any other thread name (a feature,
 # a service, Core, a tool chat) runs on demand, so a message to it goes through the inbox.
@@ -1092,9 +1094,13 @@ def unity_statuses():
 def project_unity(root, statuses):
     """(hashes, id) of this project's Editor: the sha1 of its Assets path, plus any status file naming that path."""
     assets = root.rstrip("/") + "/" + UNITY_PROJECT_DIR + "/Assets"
-    hashes = {hashlib.sha1(assets.encode("utf-8")).hexdigest()[:8]}
-    hashes |= {st["hash"] for st in statuses if st["path"] and same(st["path"], assets)}
-    return hashes, f"{UNITY_PROJECT_DIR}@{sorted(hashes)[0]}"
+    # Unity names the path with a capital drive letter (D:/...); the session's root may come as d:/..., which gives
+    # another sha1, an id no Editor has. The id shown is the one of a status file (what the Editor really uses),
+    # else the capital-drive one.
+    upper = assets[:1].upper() + assets[1:] if assets[1:2] == ":" else assets
+    seen = sorted(st["hash"] for st in statuses if st["path"] and same(st["path"], assets))
+    hashes = {hashlib.sha1(a.encode("utf-8")).hexdigest()[:8] for a in (assets, upper)} | set(seen)
+    return hashes, f"{UNITY_PROJECT_DIR}@{seen[0] if seen else hashlib.sha1(upper.encode('utf-8')).hexdigest()[:8]}"
 
 
 def names_this_project(value, hashes):

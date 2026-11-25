@@ -165,7 +165,7 @@
       var sel = put(row, el("select"));
       var opt0 = put(sel, el("option", "", "— chọn thread nhận —"));
       opt0.value = "";
-      [["feature", "Feature, service, @Core"], ["tool", "Tool"]].forEach(function (g) {
+      [["feature", "Feature, service, @Core"], ["tool", "Tool"], ["tester", "Tester (tin này mở thread)"]].forEach(function (g) {
         var og = put(sel, el("optgroup"));
         og.label = g[1];
         data.targets.filter(function (t) { return t.pool === g[0]; }).forEach(function (t) {

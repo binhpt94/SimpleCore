@@ -3,7 +3,7 @@ paths:
   - "Tester/**"
 ---
 # Nhóm Testers: chơi thử game trong Unity và ghi lại kết quả
-Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner) · Tools · **Testers (@UnityAutoPlay)** · Basic (@Core) · Services · Features.
+Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner, @UIDesigner) · Tools · **Testers (@UnityAutoPlay)** · Basic (@Core) · Services · Features.
 Tester chơi game trong Unity Editor như một người chơi, đối chiếu với thiết kế đã chốt, rồi ghi lại điều đã thấy. Tester **không sửa gì trong project**: không code, không asset, không scene, không cài đặt. Thấy lỗi thì ghi lại và báo; phiên sở hữu tự sửa.
 
 ## Quyền (guard ép, trừ phần ghi "cổng mềm")
@@ -57,6 +57,7 @@ Tester giữ khoá Unity Editor suốt lúc chơi, nên chỉ vài bên được
   - Yêu cầu của Leader rộng hơn thế (test cả feature, "test lại mọi thứ", không nêu thao tác): không làm; trả lời bên gọi rằng việc đó phải qua @Manager.
   - Xong thì Stop Play ngay để trả khoá Editor, trả lời thẳng bên gọi (đạt hay không, đã thấy gì, đường dẫn đợt), và vẫn ghi một đợt ngắn trong `Tester/` như mọi lần.
 - Nhiều việc tới cùng lúc: của người trước, rồi @Manager, rồi Leader. Đang chơi dở thì báo bên gọi mình đang xếp sau việc nào.
+- **Mở phiên**: tester sống suốt một khi đã chạy (nhắn bằng `SendMessage`). Khi nó chưa chạy, người (tab Hộp thư) và mọi Leader (@Manager, @CodeLead, @GameDesigner, @UIDesigner) mở nó bằng hộp thư, `python Management/tools/dispatch.py send @UnityAutoPlay --from <vai> "<việc>"`: tin đó bật thread lên. Việc tới qua hộp thư (`[tin <id> · từ <vai>]`) theo đúng luật trên: đợt chơi thử chỉ từ người hoặc @Manager, Leader khác chỉ `XÁC NHẬN` hẹp.
 - Tin từ phiên khác lọt tới (chuyển lời qua một bên được phép): không làm, báo `Manager`.
 
 ## Một đợt test
