@@ -203,6 +203,23 @@ def report(root, arg=""):
     problems = [p for p in snap["problems"]["idea"] if not path or p["path"] == path or p["path"].startswith(path + "/")]
     if problems:
         out += ["", "## Lỗi cấu trúc (phải sửa trước)"] + [f"- {p['path']}: {p['text']}" for p in problems]
+    # what really changed against live, and what only follows it (gamedesign.follows): the human fixes the first,
+    # the second goes into live by itself
+    changed = [n for n in gd.walk(node) if n["state"] != "same" and n["passed"] and not n.get("follow")]
+    behind = [n for n in gd.walk(node) if n.get("followers", {}).get("redo")]
+    following = [n for n in gd.walk(node) if n.get("follow")]
+    if changed or following or behind:
+        out += ["", "## Thay đổi gốc so với live (chờ người chốt; node chỉ ghim lại refs/based-on thì tự chốt theo, không tính ở đây)"]
+        for n in changed:
+            f = n["followers"]
+            out.append(f"- {n['path'] or '(gốc)'}: {n['title']}"
+                       + (f" · kéo theo {len(f['ready'])} node đã rà" if f["ready"] else "")
+                       + (f" · {len(f['redo'])} node còn ghim hash cũ" if f["redo"] else ""))
+        for n in behind:
+            out.append(f"- Còn ghim hash cũ của {n['path'] or '(gốc)'} (đọc lại node đó rồi ghim lại): " + ", ".join(n["followers"]["redo"]))
+        if following:
+            out.append(f"- Chỉ theo ref, tự chốt khi node gốc được chốt ({len(following)}): "
+                       + ", ".join(f"{n['path']} ← {', '.join(r or '(gốc)' for r in n['followOf']) or 'dòng refs'}" for n in following))
     owed = [n for n in gd.walk(node) if n.get("gptOwed")]
     if owed:
         out += ["", f"## Chưa hỏi GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}; nhờ DesignAdvisor qua hộp thư dispatch.py send, kể cả node đã chốt)"] + [

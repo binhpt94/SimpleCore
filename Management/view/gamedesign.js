@@ -11,7 +11,7 @@
   // ---------------------------------------------------------------- cấu hình
   var OVERVIEW_LAST_ROUND = 2;   // bản đồ chung ("Tất cả feature") hiện tới vòng này
   var FOCUS_ROUND = 2;           // bấm node ở vòng này thì chỉ còn nhánh của nó, hiện tới vòng cuối
-  var CARD_W = 312, CARD_H = 140, GAP_X = 64, GAP_Y = 14, HEAD_H = 40;
+  var CARD_W = 312, CARD_H = 156, GAP_X = 64, GAP_Y = 14, HEAD_H = 40;
   // `dir`: thư mục của bảng, tính từ Management/ (để nạp ảnh và ghi đường dẫn).
   var TABLES = [
     { key: "live", label: "Đã chốt (live)", dir: "game-design/live/", empty: "Chưa có gì được chốt. Chốt node từ bảng Đề xuất (idea)." },
@@ -70,6 +70,14 @@
     ".gd-card strong { display: block; font-size: 14px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 30px; }",
     ".gd-card span.sum { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 12.5px; line-height: 1.35; color: var(--muted); margin-top: 3px; }",
     ".gd-card span.low { position: absolute; right: 8px; top: 7px; }",
+    // Id của node (đường dẫn trong cây): để gọi tên node khi trao đổi; bấm là chép.
+    ".gd-card span.id { display: block; margin-top: 2px; font: 11px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--muted); white-space: nowrap; overflow: hidden; cursor: copy; }",
+    ".gd-card span.id:hover { color: var(--accent); }",
+    ".gd-card.follow { border-left-color: var(--muted); }",
+    ".gd-chip.follow { border-style: dashed; color: var(--muted); text-decoration: none; }",
+    ".gd-chip.branch.follow { border-color: var(--muted); color: var(--muted); font-weight: 400; }",
+    ".gd-tag.pull { border-color: var(--warn-text); color: var(--warn-text); }",
+    ".gd-idline code { user-select: all; }",
     ".gd-chips { position: absolute; display: flex; gap: 4px; overflow: hidden; align-items: center; }",
     ".gd-chips.info .gd-tag { font-size: 11px; padding: 3px 7px; }",
     ".gd-tag.branch { font-weight: 600; }",
@@ -615,10 +623,18 @@
     // Của node: "ok" (đạt và giống live), "redo" (việc của @GameDesigner), "todo" (chờ bạn chấm, trả lời hoặc chốt).
     // "ui": chưa đạt chỉ vì frame (việc của @UIDesigner: thiếu, cũ so với ui.md, bị chấm thấp).
     var uiOwed = function (n) { return !!(n.uiWait && n.uiWait.length); };
-    var own = function (n) { return !n.passed ? (n.redo ? "redo" : uiOwed(n) ? "ui" : "todo") : n.state === "same" ? "ok" : "todo"; };
+    // "follow": đạt, khác live chỉ ở dòng refs/based-on vì một node nó tham chiếu đã đổi (gamedesign.follows). Không phải
+    // việc của bạn: nó tự chốt khi node gốc được chốt.
+    var own = function (n) { return !n.passed ? (n.redo ? "redo" : uiOwed(n) ? "ui" : "todo") : n.state === "same" ? "ok" : n.follow ? "follow" : "todo"; };
+    var shortPath = function (path, max) { return !path ? "(gốc)" : path.length > max ? "…" + path.slice(path.length - max + 1) : path; };
+    var copyText = function (text, what) {
+      var done = function () { state.message = { bad: false, text: "Đã chép " + what + ": " + text }; renderNotice(); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { say("Không chép được; id: " + text); });
+      else say("Trình duyệt không cho chép; id: " + text);
+    };
     // Của nhánh: đếm mọi node bên dưới (kể cả node đang ẩn trên bản đồ) theo trạng thái của chúng.
     var branch = function (n) {
-      var out = { total: 0, todo: 0, redo: 0, ui: 0 };
+      var out = { total: 0, todo: 0, redo: 0, ui: 0, follow: 0 };
       var visit = function (c) {
         out.total++;
         var st = own(c);
@@ -703,7 +719,11 @@
         if (clash) push("clash", n, clash + " nhóm ý trái nhau");
         else if (n.pending) push("ask", n, n.pending + " câu hỏi");
         else if (own(n) === "todo" && !n.passed) push("score", n, (n.reasons || [])[0] || "chờ bạn chấm");
-        else if (lockable[n.path]) push("lock", n, "đạt, chờ chốt · " + diffShort(n));
+        else if (lockable[n.path] && !(n.follow && (n.followWait || []).length)) {
+          // Node chỉ theo ref không phải việc của bạn khi node gốc còn chờ chốt: nó đi theo node gốc.
+          var pulled = n.followers ? n.followers.ready.length : 0;
+          push("lock", n, "đạt, chờ chốt · " + (n.follow ? "chỉ đổi dòng refs, node gốc đã chốt" : diffShort(n)) + (pulled ? " · kéo theo " + pulled + " node" : ""));
+        }
       });
       if (data.live) {
         each(data.live, function (n) {
@@ -952,7 +972,11 @@
     var promote = function (node, deep) {
       state.message = null;
       send("/api/gamedesign/promote", { path: node.path, deep: deep },
-        function (res) { return "Đã chốt sang live: " + res.written.join(", "); });
+        function (res) {
+          var f = res.followed || [];
+          return "Đã chốt sang live: " + res.written.join(", ") + (f.length ? ". Tự chốt theo (chỉ đổi dòng refs): " + f.length + " node: " +
+            f.map(function (x) { return x.path; }).join(", ") : "");
+        });
     };
 
     var reload = function () {
@@ -1067,6 +1091,28 @@
       renderNeeds();
       // Mọi node khác live mà chưa đạt: AI đã đổi, đang chờ bạn chấm hoặc chờ @GameDesigner làm lại. Gập sẵn: việc
       // của bạn trong đó đã có ở ô "Cần tôi".
+      // Thay đổi gốc: node đạt, khác live vì chính nó đổi (không phải vì ghim lại ref). Đây là thứ bạn cần xem; node chỉ
+      // theo ref không nằm ở đây và tự chốt khi node gốc của nó được chốt.
+      if (state.table === "idea" && data && data.idea) {
+        var rootsChanged = [], followCount = 0;
+        each(data.idea, function (n) {
+          if (n.state !== "same" && n.passed) { if (n.follow) followCount++; else rootsChanged.push(n); }
+        });
+        if (rootsChanged.length || followCount) {
+          var rootFold = put(noticeBox, el("details", "gd-fold"));
+          rootFold.open = true;
+          add(rootFold, el("summary", "", "Thay đổi gốc chờ bạn chốt (" + rootsChanged.length + ")" + (followCount ? " · " + followCount + " node chỉ theo ref, tự chốt theo" : "")));
+          var rootBox = put(rootFold, el("div", "gd-wait-list"));
+          rootsChanged.forEach(function (n) {
+            var f = n.followers || { ready: [], redo: [] };
+            var link = put(rootBox, button((n.path || "(gốc)") + " · " + diffShort(n) + (f.ready.length ? " · kéo theo " + f.ready.length : "") +
+              (f.redo.length ? " · " + f.redo.length + " chờ rà" : ""), function () { goTo(n); }, null, "gd-chip diff"));
+            link.title = trail(n) + "\nSo với live: " + diffParts(n).join(", ") + "." +
+              (f.ready.length ? "\nTự chốt theo node này: " + f.ready.join(", ") : "") + (f.redo.length ? "\nCòn ghim hash cũ: " + f.redo.join(", ") : "");
+          });
+          if (!rootsChanged.length) add(rootBox, el("p", "gd-note", "Mọi node gốc đã chốt: bấm ✓ ở một node \"Theo ref\" để chốt cả nhóm."));
+        }
+      }
       if (state.table === "idea" && data && data.idea) {
         var drift = [];
         each(data.idea, function (n) { if (n.state !== "same" && !n.passed) drift.push(n); });
@@ -1160,7 +1206,7 @@
         grid.textContent = "";
         visible().forEach(function (n) {
           var below = idea ? branch(n) : null;
-          var kind = !idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || own(n) === "ui" || below.todo || below.ui ? " wait" : " done";
+          var kind = !idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || own(n) === "ui" || below.todo || below.ui ? " wait" : own(n) === "follow" || below.follow ? " follow" : " done";
           var card = put(grid, button("", function () { select(n); }, null, "gd-mini" + kind + (n.path === state.selected ? " sel" : "") + (needed(n) ? "" : " dim")));
           card.title = n.title + (n.summary ? "\n" + n.summary : "");
           add(card, el("strong", "", n.title || n.key));
@@ -1316,6 +1362,20 @@
         var done = el("span", "gd-tag ok", "✓ Đã duyệt");
         done.title = "Node này đạt và giống bản đã chốt (live)";
         out.push(done);
+      } else if (n.follow) {
+        var roots = n.followOf || [], waits = n.followWait || [];
+        var first = roots.length ? find(data.idea, roots[0]) : null;
+        var label = !roots.length ? "Chỉ đổi dòng refs" : roots.length === 1 ? "Theo ref: " + (first ? first.title || shortPath(roots[0], 28) : shortPath(roots[0], 28)) : "Theo ref: " + roots.length + " node";
+        var tag = button(label, function () { if (first) goTo(first); else open(); }, null, "gd-chip follow");
+        tag.title = "Nội dung node không đổi: chỉ dòng refs/based-on được ghim lại theo node đã đổi:\n" + roots.map(function (r) { return "- " + (r || "(gốc)"); }).join("\n") +
+          (waits.length ? "\nTự chốt sang live khi bạn chốt: " + waits.join(", ") + ". Bấm để tới node gốc." : "\nNode gốc đã chốt: bấm ✓ để chốt node này (các node theo ref khác đi cùng).");
+        out.push(tag);
+        if (!waits.length && ctx.setup) {
+          var goFollow = button("✓", function () { promote(n, false); }, null, "gd-chip go tick");
+          goFollow.title = "Node gốc đã ở live: chốt node này và mọi node theo ref đang chờ";
+          goFollow.setAttribute("aria-label", "Chốt node theo ref " + (n.title || where(n)) + " sang live");
+          out.push(goFollow);
+        }
       } else {
         out.push(todo("Node đạt nhưng chưa chốt sang live" + (ctx.setup ? ": bấm ✓ để duyệt nhanh, hoặc bấm đây để mở node." : ". " + SERVER_HINT)));
         if (ctx.setup) {
@@ -1325,7 +1385,15 @@
           out.push(go);
         }
       }
-      if (n.state !== "same") {
+      var pulls = n.followers || { ready: [], redo: [] };
+      if (n.state !== "same" && !n.follow && (pulls.ready.length || pulls.redo.length)) {
+        var pull = el("span", "gd-tag pull", "Kéo theo " + (pulls.ready.length + pulls.redo.length));
+        pull.title = "Node khác tham chiếu tới node này:\n" +
+          (pulls.ready.length ? pulls.ready.length + " node đã rà, tự chốt khi bạn chốt node này:\n" + pulls.ready.map(function (p) { return "- " + p; }).join("\n") + "\n" : "") +
+          (pulls.redo.length ? pulls.redo.length + " node còn ghim hash cũ, chờ @GameDesigner rà:\n" + pulls.redo.map(function (p) { return "- " + p; }).join("\n") : "");
+        out.push(pull);
+      }
+      if (n.state !== "same" && !n.follow) {
         var look = toLook(n);
         var diffChip = button(diffShort(n), open, null, "gd-chip diff");
         diffChip.title = "So với live: " + diffParts(n).join(", ") + (look ? ". " + look + " ý mới hoặc sửa bạn chưa chấm." : ".") + " Bấm để xem.";
@@ -1333,14 +1401,15 @@
       }
       // Nhánh: mọi node bên dưới. Chỉ là hiển thị; node cha "đã duyệt" mà nhánh còn việc thì thấy ngay ở đây.
       var b = branch(n);
-      if (b.total && !b.todo && !b.redo && !b.ui) {
+      if (b.total && !b.todo && !b.redo && !b.ui && !b.follow) {
         var all = el("span", "gd-tag ok branch", "Nhánh ✓");
         all.title = "Cả " + b.total + " node bên dưới đã duyệt";
         out.push(all);
       } else if (b.total) {
-        var text = "Nhánh: " + [b.redo ? b.redo + " cần làm lại" : "", b.ui ? b.ui + " chờ UI" : "", b.todo ? b.todo + " chưa duyệt" : ""].filter(Boolean).join(", ");
-        var more = button(text, function () { goTo(n); }, null, "gd-chip branch" + (b.redo ? " redo" : ""));
-        more.title = "Trong " + b.total + " node bên dưới: " + b.todo + " chưa duyệt, " + b.redo + " cần làm lại. Bấm để mở nhánh.";
+        var text = "Nhánh: " + [b.redo ? b.redo + " cần làm lại" : "", b.ui ? b.ui + " chờ UI" : "", b.todo ? b.todo + " chưa duyệt" : "", b.follow ? b.follow + " theo ref" : ""].filter(Boolean).join(", ");
+        var more = button(text, function () { goTo(n); }, null, "gd-chip branch" + (b.redo ? " redo" : !b.todo && !b.ui ? " follow" : ""));
+        more.title = "Trong " + b.total + " node bên dưới: " + b.todo + " chưa duyệt, " + b.redo + " cần làm lại, " + b.follow +
+          " chỉ đổi dòng refs theo node khác (tự chốt khi node gốc được chốt). Bấm để mở nhánh.";
         out.push(more);
       }
       return out;
@@ -1401,7 +1470,7 @@
         }
         var nodeFixed = !idea || n.state === "same";      // bảng live: mọi node đã chốt
         var below = idea ? branch(n) : null;
-        var kind = (!idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || own(n) === "ui" || below.todo || below.ui ? " wait" : " done") + (needed(n) ? "" : " dim") +
+        var kind = (!idea ? "" : own(n) === "redo" || below.redo ? " redo" : own(n) === "todo" || own(n) === "ui" || below.todo || below.ui ? " wait" : own(n) === "follow" || below.follow ? " follow" : " done") + (needed(n) ? "" : " dim") +
           (nodeFixed ? " fixed" : " loose") + (n.nodeBy && !nodeFixed ? " by-gpt" : "");
         var card = el("button", "gd-card" + (n.path === state.selected ? " sel" : "") + kind);
         card.type = "button";
@@ -1410,7 +1479,10 @@
         card.style.width = CARD_W + "px";
         card.style.height = CARD_H + "px";
         card.title = n.title + (n.summary ? "\n" + n.summary : "");
-        add(card, el("strong", "", n.title || "(chưa đặt tên)"), el("span", "sum", n.summary || "Chưa có tóm tắt."));
+        var idLine = el("span", "id", shortPath(n.path, 46));
+        idLine.title = "Id của node: " + (n.path || "(gốc)") + " (bấm để chép)";
+        idLine.addEventListener("click", function (ev) { ev.stopPropagation(); copyText(n.path || "(gốc)", "id node"); });
+        add(card, el("strong", "", n.title || "(chưa đặt tên)"), idLine, el("span", "sum", n.summary || "Chưa có tóm tắt."));
         if (lowest(n) !== null) {
           var low = num(lowest(n), "Điểm thấp nhất của node");
           low.className += " low";
@@ -2035,7 +2107,34 @@
       add(body, el("h2", "", node.title || "(chưa đặt tên)"));
       add(body, el("p", "gd-path", "Vòng " + node.round + " · " + ((data.rounds || [])[node.round - 1] || "") + " · " +
         table().dir.replace("game-design/", "") + (node.path ? node.path + "/" : "")));
+      var idP = put(body, el("p", "gd-path gd-idline", "Id: "));
+      add(idP, el("code", "", node.path || "(gốc)"));
+      idP.appendChild(document.createTextNode(" "));
+      put(idP, button("Chép id", function () { copyText(node.path || "(gốc)", "id node"); }, null, "gd-link"));
       if (node.summary) add(body, el("p", "", node.summary));
+      if (state.table === "idea") {
+        var linkList = function (box, paths) {
+          var ul = put(box, el("ul", "gd-refs"));
+          paths.forEach(function (p) {
+            var li = put(ul, el("li"));
+            var target = find(data.idea, p);
+            if (target) { put(li, button(p || "(gốc)", function () { goTo(target); }, null, "gd-link")); add(li, el("span", "muted", " " + (target.title || ""))); }
+            else add(li, el("code", "", p || "(gốc)"));
+          });
+        };
+        if (node.follow) {
+          var fw = node.followWait || [];
+          add(body, el("p", "gd-gate ok", "Node này chỉ theo ref: nội dung không đổi, chỉ dòng refs/based-on được ghim lại theo node đã đổi dưới đây. " +
+            (fw.length ? "Nó tự chốt sang live khi bạn chốt các node đó; không cần duyệt riêng." : "Các node đó đã ở live: bấm ✓ trên thẻ để chốt.")));
+          linkList(body, node.followOf || []);
+        }
+        var fl = node.followers || { ready: [], redo: [] };
+        if (node.state !== "same" && !node.follow && (fl.ready.length || fl.redo.length)) {
+          var flBox = fold(body, "Node theo thay đổi này (" + (fl.ready.length + fl.redo.length) + ")");
+          if (fl.ready.length) { add(flBox, el("p", "gd-note", "Đã rà, chỉ đổi dòng refs: tự chốt khi bạn chốt node này (" + fl.ready.length + ")")); linkList(flBox, fl.ready); }
+          if (fl.redo.length) { add(flBox, el("p", "gd-note", "Còn ghim hash cũ: chờ @GameDesigner đọc lại (" + fl.redo.length + ")")); linkList(flBox, fl.redo); }
+        }
+      }
       // Ý của node do AI nào đề xuất, ý GPT bị loại, và góp ý của GPT chưa được đưa vào node.
       var clashes = state.table === "idea" ? openClashes(node) : 0;
       if (clashes) add(body, el("p", "gd-clash-text", "Xung đột chưa giải quyết: " + clashes + " nhóm ý trái nhau. Trong mỗi khung \"Chọn 1\" bên dưới, " +
@@ -2342,6 +2441,25 @@
       add(guide, el("p", "gd-note", MODES.filter(function (m) { return m.key === mode(); })[0].hint.replace("mức đạt", passMin()) +
         " Điểm của bạn là tuyệt đối và dùng chung cho bảng đề xuất và bảng đã chốt."));
       renderText(ctx, fold(body, "Diễn giải (CLAUDE.md)"), node.body.replace(/^# .*\n?/, "") || "Chưa có diễn giải.");
+      // Bảng dữ liệu config của node (<node>/.excel, Management/tools/gd_excel.py): dòng 1 tên cột, dòng 2 kiểu, dòng 3 mô tả.
+      if ((node.excel || []).length) {
+        var xbox = fold(body, "Dữ liệu (Excel): " + node.excel.length + " bảng");
+        add(xbox, el("p", "gd-note", "File mở bằng Excel: .excel/" + (node.key || node.path.split("/").pop() || "idea") +
+          ".xlsx trong thư mục của node. Sửa xong chạy gd_excel.py sync để bản chữ (csv) theo kịp."));
+        node.excel.forEach(function (t) {
+          add(xbox, el("h4", "", t.sheet + " · " + t.kind + (t.key ? " · khoá " + t.key : "")));
+          if (t.note) add(xbox, el("p", "gd-note", t.note));
+          var tbl = put(put(xbox, el("div", "gd-table")), el("table"));
+          t.rows.forEach(function (r, i) {
+            if (i === 1) return;      // kiểu: ghi nhỏ ngay dưới tên cột
+            var tr = put(tbl, el("tr"));
+            r.forEach(function (c, x) {
+              var cell = put(tr, el(i === 0 ? "th" : "td", i === 2 ? "gd-note" : "", c));
+              if (i === 0 && t.rows[1] && t.rows[1][x]) { add(cell, el("br")); add(cell, el("small", "", t.rows[1][x])); }
+            });
+          });
+        });
+      }
       // Lịch sử nằm ở node đề xuất; node live dùng lịch sử của node đề xuất cùng đường dẫn.
       var source = state.table === "idea" ? node : find(data.idea, node.path);
       var history = source ? source.history : [];

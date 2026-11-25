@@ -115,6 +115,11 @@ def full_lines(node, out, doc=True, book=None):
             out.append(f"- {frame}: {a['file']} ({a['label']}; {use}" + (f"; CHƯA CHUẨN: {a['below']}" if a.get("below") else "") + ")")
             for line in part_lines(a):
                 out.append(f"    {line}")
+    if doc and node.get("excel"):      # the config tables of the node (<node>/.excel), as text
+        out.append("")
+        out.append(f"### Bảng dữ liệu ({LIVE}/{node['path']}/{gd.gd_excel.EXCEL_DIR}/: số liệu config của node; dòng đầu là tên cột, "
+                   "dòng hai là kiểu và mô tả)")
+        out += gd.gd_excel.markdown(node["excel"], "####")
     body = node["body"].split("\n", 1)[1].strip() if "\n" in node["body"] else ""
     if doc and body:
         out.append("")

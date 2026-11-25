@@ -71,6 +71,28 @@ import shutil
 import time
 from pathlib import Path
 
+import importlib.util
+import sys
+
+
+def _beside(name):
+    """The module `name` that lies beside this file. Loaded by its path, not through sys.path: this file is also
+    loaded by path (the guard, the tests), and adding its folder to sys.path would let a later `import gamedesign`
+    find this copy where the guard must find none."""
+    if name not in sys.modules:
+        spec = importlib.util.spec_from_file_location(name, Path(__file__).resolve().parent / f"{name}.py")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        try:
+            spec.loader.exec_module(module)
+        except BaseException:
+            del sys.modules[name]
+            raise
+    return sys.modules[name]
+
+
+gd_excel = _beside("gd_excel")      # the config tables of a node (<node>/.excel): the csv side only here, no openpyxl
+
 ROUNDS = ["Ý tưởng sơ khai", "Feature (tóm tắt)", "Quan hệ và định nghĩa", "Quyết định chi tiết"]
 BASE = ("Management", "game-design")
 WORK_DIR = "ai"
@@ -1976,10 +1998,10 @@ def node_files(folder):
         d = folder / extra
         if d.is_dir():
             items += sorted(p for p in d.iterdir() if p.is_file())
-    return items
+    return items + gd_excel.data_files(folder)      # none without .excel: such a node keeps its own hash
 
 
-TEXT_SUFFIXES = (".md", ".json", ".frame", ".txt", ".svg")
+TEXT_SUFFIXES = (".md", ".json", ".frame", ".txt", ".svg", ".csv")
 TEXT_SHOWN_MAX = 200_000      # bytes of one file the page may carry to compare
 
 
@@ -2176,6 +2198,8 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
         problems.append({"path": where, "text": f"{DOC_FILE} phải trỏ tới {DATA_FILE}"})
     if depth > len(ROUNDS):
         problems.append({"path": where, "text": f"sâu hơn vòng {len(ROUNDS)}"})
+    for text in gd_excel.problems(folder, "ai/idea" + ("/" + path if path else "")):      # a broken table stops promote
+        problems.append({"path": where, "text": text})
     images, images_note = read_images(folder, where, problems)
     questions = read_questions(folder, where, problems)
     pending = sum(1 for q in questions if not q["answered"])
@@ -2294,7 +2318,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "frames": frames, "frameNotes": frame_notes, "frameItems": ui_items, "uiWait": ui_owed,
             "ui": {k: ui[k] for k in ("elements", "interactions", "flow", "hash")} if ui else None, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
             "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "gptOwed": gpt_owed, "clashOpen": open_clashes(items), "nodeBy": data.get("nodeBy"),
-            "refText": raw + "\n" + doc, "_files": file_versions(folder), "children": []}
+            "refText": raw + "\n" + doc, "_files": file_versions(folder), "excel": gd_excel.view(folder), "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name
         if not KEY_RX.match(child.name):
@@ -2525,9 +2549,43 @@ def walk(node):
             yield from walk(child)
 
 
+PIN_LINE_RX = re.compile(r"^(refs|based-on)\s*:.*\n?", re.M)
+
+
+def without_pins(text):
+    """A data.md without the `refs:` and `based-on:` lines of its front matter: the two lines that only pin the
+    hash of another node. Two texts equal after this differ in nothing the node itself says."""
+    if not text.startswith("---"):
+        return text
+    end = text.find("\n---", 3)
+    return text if end < 0 else PIN_LINE_RX.sub("", text[:end + 1]) + text[end + 1:]
+
+
+def follows(node, other):
+    """(True, [paths of the nodes it follows]) when a passing node differs from its live copy `other` only in the
+    pins of data.md: a node it refers to (or its parent) changed, and the pin was moved to the new hash after the
+    node was read again. Nothing the node says changed, so it needs no look of its own. (False, []) otherwise."""
+    if not other or not node["passed"] or other["hash"] == node["hash"]:
+        return False, []
+    a, b = other.get("_files", {}), node.get("_files", {})
+    if any(a.get(k) != b.get(k) for k in set(a) | set(b) if k != DATA_FILE):
+        return False, []
+    old, new = (a.get(DATA_FILE) or {}).get("text"), (b.get(DATA_FILE) or {}).get("text")
+    if old is None or new is None or without_pins(old) != without_pins(new):
+        return False, []
+    was = {r["label"]: r["hash"] for r in other.get("refs", [])}
+    roots = [r["path"] for r in node.get("refs", []) if was.get(r["label"]) != r["hash"]]
+    if other.get("basedOn") != node.get("basedOn") and node["path"]:
+        roots.append(node["path"].rpartition("/")[0])
+    return True, sorted(set(roots))
+
+
 def mark_states(idea, live, mode=DEFAULT_MODE):
     """Sets on every idea node `state` (new | changed | same, its own content against live), `dirty` (the node or
-    something below it differs from live) and `approved` (it passes and, in mode user, is the same as live)."""
+    something below it differs from live) and `approved` (it passes and, in mode user, is the same as live); also
+    `follow` and `followOf` (it differs from live only because a node it pins changed: follows()), and on the node
+    that changed `followers`: {"ready": the nodes that follow it and wait only for it, "redo": the nodes that
+    still pin its old hash and must be read again}."""
     in_live = {n["path"]: n for n in walk(live)}
 
     def visit(node):
@@ -2553,6 +2611,8 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
             "files": file_changes(other.get("_files", {}), node.get("_files", {})) if other else [],
         }
         node["approved"] = node["passed"] and not node.get("clashOpen") and (mode != "user" or node["state"] == "same")
+        node["follow"], node["followOf"] = follows(node, other)
+        node["followers"] = {"ready": [], "redo": []}
         below = [visit(c) for c in node["children"]]
         live_keys = {c["key"] for c in other["children"]} if other else set()
         gone = bool(live_keys - {c["key"] for c in node["children"]})      # live has a child that idea dropped
@@ -2561,6 +2621,19 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
 
     if idea:
         visit(idea)
+    by_path = {n["path"]: n for n in walk(idea)}
+    for n in walk(idea):
+        for root in n["followOf"]:
+            if root in by_path:
+                by_path[root]["followers"]["ready"].append(n["path"])
+        behind = [r["path"] for r in n.get("refs", []) if r["ok"] is False]
+        if n.get("stale") and n["path"]:
+            behind.append(n["path"].rpartition("/")[0])
+        for root in sorted(set(behind)):
+            if root in by_path:
+                by_path[root]["followers"]["redo"].append(n["path"])
+    for n in walk(idea):      # a follower waits when a node it follows still differs from live
+        n["followWait"] = [r for r in n["followOf"] if r in by_path and by_path[r]["state"] != "same"]
     for n in list(walk(idea)) + list(walk(live)):      # the page carries only the files that differ
         n.pop("_files", None)
 
@@ -2748,7 +2821,7 @@ def promote(root, path, deep, by="người"):
     for leftover in (tmp, old):
         shutil.rmtree(leftover, ignore_errors=True)
     if deep:
-        shutil.copytree(src, tmp, ignore=shutil.ignore_patterns(*NOT_COPIED))
+        shutil.copytree(src, tmp, ignore=shutil.ignore_patterns(*NOT_COPIED, "~$*"))
     else:
         tmp.mkdir(parents=True)
         for name in NODE_FILES:
@@ -2756,9 +2829,9 @@ def promote(root, path, deep, by="người"):
         for name in (CODE_FILE, UI_FILE):
             if (src / name).is_file():
                 shutil.copy2(src / name, tmp / name)
-        for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR):
+        for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR, gd_excel.EXCEL_DIR):
             if (src / extra).is_dir():
-                shutil.copytree(src / extra, tmp / extra)
+                shutil.copytree(src / extra, tmp / extra, ignore=shutil.ignore_patterns("~$*"))
         if dst.is_dir():      # keep what live already has below this node
             for child in dst.iterdir():
                 if child.is_dir() and not child.name.startswith("."):
@@ -2771,6 +2844,33 @@ def promote(root, path, deep, by="người"):
     for n in walk(node):
         log(table_dir(root, "idea").joinpath(*(n["path"].split("/") if n["path"] else [])), "promote", by=by, hash=n["dataHash"])
     return [n["path"] or "(gốc)" for n in walk(node)]
+
+
+def promote_followers(root, by="người"):
+    """Copies into live every idea node that differs from live only in its pins (follows()) once every node it
+    follows is the same as live: the human looked at the change itself, and these say nothing new. Nothing in the
+    idea table is written. Returns [{"path", "of": the nodes it followed}] of the nodes copied."""
+    mode = read_mode(root)
+    live, _ = read_tree(root, "live", mode)
+    idea, _ = read_tree(root, "idea", mode)
+    mark_states(idea, live, mode)
+    done = []
+    for n in list(walk(idea)) if idea else []:
+        if not n["follow"] or n["followWait"] or n.get("clashOpen"):
+            continue
+        of = ", ".join(r or "(gốc)" for r in n["followOf"])
+        try:
+            promote(root, n["path"], False, by=f"tự chốt theo {of}" if of else "tự chốt (chỉ đổi dòng refs)")
+        except (ValueError, OSError):
+            continue      # its parent is not in live yet, or a structure problem: it stays for the human to see
+        done.append({"path": n["path"], "of": n["followOf"]})
+    return done
+
+
+def promote_and_follow(root, path, deep, by="người"):
+    """promote(), then promote_followers(): (the node paths written, the followers copied after them)."""
+    written = promote(root, path, deep, by)
+    return written, promote_followers(root)
 
 
 def sync_live(root):

@@ -1,0 +1,9 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,hero_count,Số hero trong danh sách,hero,"3 (Hiệp sĩ, Đấu sĩ rìu, Cung thủ)",5,5,IDEA đúng bằng đội mặc định
+2,team_slots,Số chỗ trong đội,hero,"3 (cả 3 hero, không cần chọn; đúng đội mặc định của feature-team-select/team-memory/memory-rules)",3 chọn từ 5,3 chọn từ 5,IDEA không có màn chọn đội
+3,attack_kinds,Kiểu đòn có,,"Một mục tiêu, Chém phía trước",cả ba,cả ba,Theo hero có ở giai đoạn đó
+4,stats,Chỉ số,,như bảng Heroes,như bảng Heroes,theo số đã chỉnh sau chơi thử,"Bộ số chung, dự kiến"
+5,move_speed,Tốc độ chạy riêng từng hero,u/s,"có: Hiệp sĩ 2.0, Đấu sĩ rìu 2.4, Cung thủ 3.0",cả 5 hero như bảng Heroes,theo số đã chỉnh sau chơi thử,Người yêu cầu 2026-11-25: mỗi hero một tốc độ
+6,visuals,Hình,,"1 sprite mỗi hero, anim bằng move/scale/nháy","như IDEA, thêm sprite khi đánh","đủ anim đi, đánh, gục; âm thanh",Art tăng dần theo giai đoạn

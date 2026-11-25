@@ -1,0 +1,7 @@
+index,sheet,kind,key,rows,note
+int,string,enum:params|list|levels|formula|map,string,int,string
+Số thứ tự,Tên sheet,Loại bảng,Cột khoá của bảng,Số dòng dữ liệu (tool tự điền),Bảng chứa gì
+1,AttackKinds,list,id,3,Kiểu đòn của hero và đòn trúng ai
+2,Heroes,list,id,5,"Năm hero: chỉ số cấp 1 (dự kiến, theo bộ số chung), hộp, kiểu đòn"
+3,Effects,list,id,5,"Hiệu ứng tối thiểu của hero: khi nào hiện, khi nào mất"
+4,StageParams,params,key,6,Danh sách hero có gì ở từng giai đoạn

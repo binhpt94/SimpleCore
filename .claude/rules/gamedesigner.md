@@ -38,6 +38,7 @@ Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, �
   .images/                   ảnh + index.md (`- <tên file>: <ảnh để làm gì>`)       người bỏ ảnh, GD ghi index.md
   ui.md                      node vòng 4 có giao diện: phần tử UI, tương tác, flow    GD ghi (xem skill gd-round-4)
   .frame-concept/<tên>.frame bố cục dạng chữ (vị trí, kích thước), người chấm từng frame  @UIDesigner ghi (uidesigner.md)
+  .excel/                    bảng dữ liệu config: <node>.xlsx, Index.csv, <Sheet>.csv       GD sửa csv, gd_excel.py ghi xlsx (skill gd-excel-data)
   .ai-need-user-choose/      questions.json (GD ghi), answers.json (người)
   .user-review/review.json   điểm và phản hồi của người cho từng ý                  chỉ đọc
   .history/                  log.jsonl, bản sao mọi phiên bản data.md               chỉ đọc
@@ -98,7 +99,7 @@ Mode Full Auto thêm mục `## Đã tự quyết`: quyết gì, vì sao, phươn
 - Điểm của người gắn với đúng nội dung ý lúc chấm. Viết lại một ý thì ý đó thành chưa chấm; điểm và phản hồi cũ vẫn nằm trong lịch sử.
 - Người chấm được ở cả bảng đề xuất và bảng `live`; đó là một bộ điểm chung. Một ý đã chốt bị người chấm dưới 5 thì node đề xuất tương ứng cũng thành "cần làm lại" (khi nội dung ý còn giống).
 ## Độ quan trọng của node (tiền đề cho kế hoạch)
-Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn phát triển nào. Ngoài điểm này, dữ liệu theo giai đoạn chỉ được ghi ở mục "Thông số theo giai đoạn" của node vòng 4.
+Mỗi node có một điểm 0 đến 10 nói node đó cần cho giai đoạn phát triển nào. Ngoài điểm này, dữ liệu theo giai đoạn chỉ được ghi ở mục "Thông số theo giai đoạn" của node vòng 4 (hoặc trong bảng `.excel` của node đó).
 
 | Điểm | Giai đoạn | Nghĩa |
 |---|---|---|
@@ -190,4 +191,4 @@ Mode do người đặt ở tab Game design (`mode.json`). Dòng `guard:` ở đ
 ## Yêu cầu riêng của người
 (Người bổ sung tại đây; mục này đứng trên mọi quy ước ở trên.)
 
-- **Không đưa dữ liệu theo giai đoạn vào feature** (người yêu cầu, 2026-11-23). Node mô tả feature là gì, không mô tả bản phát hành nào làm tới đâu. Không viết "bản đầu", "giai đoạn 1", "MVP", "làm trước / để sau", hay con số gắn với một bản (sai: "số loại hero (dự kiến 2 cho bản đầu)"; đúng: "có nhiều loại hero"). Áp dụng cho `data.md`, `CLAUDE.md` và câu hỏi. Dữ liệu theo giai đoạn chỉ nằm ở hai chỗ: `priority.json` (mục "Độ quan trọng của node") và mục `## Thông số theo giai đoạn` trong `CLAUDE.md` của node vòng 4 (người cho phép, 2026-11-23; xem skill `gd-round-4`). Vòng 1 đến 3 vẫn cấm; phạm vi cụ thể của từng bản thì nêu với người trong chat, không ghi vào node.
+- **Không đưa dữ liệu theo giai đoạn vào feature** (người yêu cầu, 2026-11-23). Node mô tả feature là gì, không mô tả bản phát hành nào làm tới đâu. Không viết "bản đầu", "giai đoạn 1", "MVP", "làm trước / để sau", hay con số gắn với một bản (sai: "số loại hero (dự kiến 2 cho bản đầu)"; đúng: "có nhiều loại hero"). Áp dụng cho `data.md`, `CLAUDE.md` và câu hỏi. Dữ liệu theo giai đoạn chỉ nằm ở hai chỗ: `priority.json` (mục "Độ quan trọng của node") và mục `## Thông số theo giai đoạn` trong `CLAUDE.md` của node vòng 4 (người cho phép, 2026-11-23; xem skill `gd-round-4`), kể cả khi mục đó trỏ tới bảng trong `.excel` của node (người yêu cầu, 2026-11-25: số liệu config của node mới hoặc node đang sửa số làm bằng bảng Excel theo skill `gd-excel-data`; trong `.excel` bạn chỉ sửa `*.csv`, còn `.xlsx` do `gd_excel.py new|sync|reindex` ghi; người sửa xlsx thì `sync` trước khi đụng csv). Vòng 1 đến 3 vẫn cấm; phạm vi cụ thể của từng bản thì nêu với người trong chat, không ghi vào node.

@@ -55,7 +55,7 @@ SKILLS_DIR = ".claude/skills"
 GD_ROUNDS = ("gd-round-1", "gd-round-2", "gd-round-3", "gd-round-4")
 ROLE_SKILLS = {"@Manager": ("manager-startup-check", "manager-dispatch"),
                "@CodeLead": ("codelead-scaffold-feature", "codelead-resolve-issue"),
-               "@GameDesigner": GD_ROUNDS + ("gd-rework-node", "gd-integrate-advice"),
+               "@GameDesigner": GD_ROUNDS + ("gd-rework-node", "gd-integrate-advice", "gd-excel-data"),
                "@DesignAdvisor": ("advisor-ask-gpt", "gd-integrate-advice") + GD_ROUNDS,
                "@UIDesigner": ("ui-layout-screen", "ui-frame-syntax", "ui-claude-concept-order", "gd-round-4"),
                **{r: ("studio-fulfill-order",) for r in guard.TOOL_ROLES},

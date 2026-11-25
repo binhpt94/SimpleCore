@@ -61,6 +61,7 @@ Mỗi ý phải làm theo được và kiểm được. Sai: "Unit sói hay vẫ
 ## Thông số theo giai đoạn
 Vòng 4 là vòng duy nhất được ghi dữ liệu theo giai đoạn, và chỉ ở một chỗ:
 - `CLAUDE.md` của node có mục `## Thông số theo giai đoạn`: bảng mỗi hàng một thông số, ba cột IDEA, PROTOTYPE, FULL.
+- Node mới viết, hoặc node cũ khi sửa số: số liệu nằm trong bảng Excel của node (`<node>/.excel/`, skill `gd-excel-data`: bảng `params` có cột `idea`, `prototype`, `full`; bảng `list` có cột `stage`), và hai mục `## Thông số`, `## Thông số theo giai đoạn` chỉ còn tên bảng và phần lí giải. Node cũ còn bảng markdown vẫn hợp lệ.
 - Ý cốt lõi trong `data.md` nêu giá trị của mức IDEA và không nhắc tới giai đoạn nào.
 
 ## Mức IDEA là gì

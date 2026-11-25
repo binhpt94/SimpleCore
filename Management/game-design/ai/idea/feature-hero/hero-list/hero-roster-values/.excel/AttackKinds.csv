@@ -1,0 +1,6 @@
+index,id,name,stage,hits
+int,string,string,enum:idea|prototype|full,string
+Số thứ tự,Mã,Tên hiển thị,Có từ giai đoạn nào,Trúng ai
+1,single_target,Một mục tiêu,idea,Chỉ mục tiêu
+2,front_cleave,Chém phía trước,idea,"Mục tiêu và mọi quái có hộp chạm đoạn dài 1.5u bắt đầu từ mép trước của hero, về phía mục tiêu"
+3,blast,Nổ quanh mục tiêu,prototype,"Mục tiêu và mọi quái có mép hộp cách tâm mục tiêu không quá 1.5u, cả hai phía của mục tiêu"

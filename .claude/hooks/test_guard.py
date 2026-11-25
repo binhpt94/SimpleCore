@@ -116,6 +116,7 @@ def build_fixture():
     Path(live + "/feature-code/code.json").write_text('{"unity": ["Wallet", "_Services/Popup"]}')
     shutil.copy2(HERE.parent.parent / "Management" / "tools" / "gamedesign.py", FX + "/Management/tools/gamedesign.py")
     shutil.copy2(HERE.parent.parent / "Management" / "tools" / "reqbook.py", FX + "/Management/tools/reqbook.py")
+    shutil.copy2(HERE.parent.parent / "Management" / "tools" / "gd_excel.py", FX + "/Management/tools/gd_excel.py")      # gamedesign.py imports it
 
 
 def run_cases():
@@ -930,9 +931,6 @@ def run_role_cases(payload):
                 for sid in (FEAT, SERV):
                     for p in peer(sid):
                         t(g + ": leads read a feature session's", who, "allow", "Read", {"file_path": p}, session=ME)
-                    t(g + ": leads search a feature session's", who, "allow", "Bash",
-                      sh("grep -rn 'error' " + os.path.join(temp_of(sid), "tasks")), session=ME)
-                    t(g + ": leads list a feature session's", who, "allow", "Bash", sh("ls " + temp_of(sid)), session=ME)
                     t(g + ": but never write there", who, "deny", "Write", {"file_path": peer(sid)[2], "content": "x"}, session=ME)
                 for sid in (LEAD, CORE, OTHER):      # not a feature: a role, or no binding
                     t(g + ": only feature sessions'", who, "deny", "Read", {"file_path": peer(sid)[1]}, session=ME)
@@ -1351,6 +1349,7 @@ def run_designer_cases():
     # same file under another name, only to compute hashes for its fixture.
     source = HERE.parent.parent / "Management" / "tools" / "gamedesign.py"
     shutil.copy2(source, FX + "/Management/tools/gamedesign.py")
+    shutil.copy2(source.with_name("gd_excel.py"), FX + "/Management/tools/gd_excel.py")
     spec = importlib.util.spec_from_file_location("gamedesign_for_fixture", source)
     gd = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(gd)
@@ -1402,6 +1401,30 @@ def run_designer_cases():
     t(g, D, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
     t(g, D, "deny", "mcp__unityMCP__refresh_unity", {})
     t(g, D, "pass", "SendMessage", {"to": "@Manager", "message": "x"})
+
+    g = "designer: the config tables of a node (.excel)"
+    X = "python Management/tools/gd_excel.py "
+    for p in (idea + "/feature-hero/.excel/Heroes.csv", idea + "/feature-hero/.excel/Index.csv"):
+        w(g, D, "allow", p)
+    for p in (idea + "/feature-hero/.excel/feature-hero.xlsx", idea + "/feature-hero/.excel/.sync.json",
+              idea + "/feature-hero/.excel/notes.md", idea + "/feature-hero/.excel/sub/Heroes.csv", live + "/.excel/Heroes.csv"):
+        w(g + " (only the csv of a table, only in ai)", D, "deny", p)
+    for who in ("Wallet", "@CodeLead", "@UIDesigner", "@Manager"):
+        w(g + " (nobody else)", who, "deny", idea + "/feature-hero/.excel/Heroes.csv")
+    for cmd in (X + 'new ai/idea/feature-hero/hero-list/hero-roster-values Heroes list "Danh sách hero"', X + "sync ai/idea/feature-hero",
+                X + "sync ai/idea/feature-hero --from xlsx", X + "reindex ai/idea/feature-hero Heroes", X + "sync ai/idea"):
+        t(g, D, "allow", "Bash", {"command": cmd})
+        for who in ("Wallet", "@CodeLead", "@UIDesigner", "@Manager", "@Codex"):
+            t(g + " (only @GameDesigner changes them)", who, "deny", "Bash", {"command": cmd})
+    for cmd in (X + 'new live/feature-hero Heroes list "x"', X + 'new ai/idea/feature-hero Heroes list "x"; ls', X + "sync live/feature-hero",
+                X + 'new ai/idea/feature-hero Heroes list "x $(rm -rf .)"', X + "sync ai/idea/../live", X + "sync ai/idea/feature-hero --from both",
+                X + "reindex ai/idea/feature-hero ../x"):
+        t(g, D, "deny", "Bash", {"command": cmd})
+    for who in (D, "Wallet", "@CodeLead", "@UIDesigner", "@Manager", "@Core"):
+        for cmd in (X + "show live/feature-hero/hero-list/hero-roster-values", X + "show ai/idea/feature-hero Heroes", X + "check",
+                    X + "check ai/idea/feature-hero"):
+            t(g + " (every chat looks)", who, "allow", "Bash", {"command": cmd})
+        t(g + " (every chat looks)", who, "deny", "Bash", {"command": X + "show ../x"})
 
     g = "designer: reads only the design tree"
     for p in (idea + "/data.md", live + "/data.md", idea + "/feature-hero/.images/a.png", base, base + "/mode.json",

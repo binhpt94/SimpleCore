@@ -839,10 +839,10 @@ def promote(path, deep):
     the page token shows the request comes from the page this server served, and the guard lets no feature or
     role session run or call this server. gamedesign.promote refuses a node that does not pass."""
     try:
-        written = gamedesign.promote(ROOT, path, deep)
+        written, followed = gamedesign.promote_and_follow(ROOT, path, deep)
     except (ValueError, OSError) as ex:
         return {"ok": False, "error": str(ex)}
-    return {"ok": True, "written": written, "data": sync_page.write_gamedesign(ROOT)}
+    return {"ok": True, "written": written, "followed": followed, "data": sync_page.write_gamedesign(ROOT)}
 
 
 def priority(path, score):

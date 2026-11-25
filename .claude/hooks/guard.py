@@ -95,12 +95,20 @@ ALLOWED_COMMANDS = [
     # the frames of one design node, resolved (reads only; --html writes a file, so it is left to the human)
     PY + r"Management/tools/gd_frame\.py (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)+( --png)?",
     PY + r"Management/tools/references\.py",      # the reference pictures and the human's notes on them
+    # the config tables of one design node (<node>/.excel), read only: print them, check their shape
+    PY + r"Management/tools/gd_excel\.py show (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)*( [A-Za-z][A-Za-z0-9_]{0,30})?",
+    PY + r"Management/tools/gd_excel\.py check( (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
 ]
 
 # One more command, for @GameDesigner only: delete a file or a node inside Management/game-design/ai.
 DESIGNER_COMMANDS = [
     PY + r"Management/tools/gd_delete\.py ai(/[A-Za-z0-9._-]+)+",
     PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+    # the config tables of a node (<node>/.excel): add a table of a standard kind, carry the side that changed (the
+    # csv it edits, the xlsx the human edits) to the other, number the index column again
+    PY + r'Management/tools/gd_excel\.py new ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* [A-Za-z][A-Za-z0-9_]{0,30} [a-z]+ "[^"\\]+"',
+    PY + r"Management/tools/gd_excel\.py sync ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*( --from (xlsx|csv))?",
+    PY + r"Management/tools/gd_excel\.py reindex ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* [A-Za-z][A-Za-z0-9_]{0,30}",
 ]
 # For @UIDesigner only: delete one of its frames, and look at the design's status.
 FRAME_FILE = r"[a-z][a-z0-9-]*\.frame"
@@ -147,6 +155,7 @@ READ_ALL_ZONES = {"Management/studio", "Resources", REFERENCES_ZONE}      # the 
 # only the page and the history code write (the human's scores, the node's history).
 DESIGN_TREE, DESIGN_CHOOSE, DESIGN_ANSWERS = "idea", ".ai-need-user-choose", "answers.json"
 DESIGN_KEPT = {".user-review", ".history", ".progress"}
+EXCEL_DIR_NAME = ".excel"      # the config tables of a design node (Management/tools/gd_excel.py)
 DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per round
 HUMAN_ASK_ZONES = set()      # zone names where the human chat is still asked before an edit; the human emptied it
 # FEATURE values that are not feature folders.
@@ -928,6 +937,9 @@ def decide_designer_edit(full, root, name):
         return "deny", (".user-review (the human's scores and feedback), .history (the node's history) and "
                         ".progress (what is built) are written only by the management page and its tools. "
                         "Read them; do not write them.")
+    if EXCEL_DIR_NAME in low and not (low[-2:-1] == [EXCEL_DIR_NAME] and low[-1].endswith(".csv")):
+        return "deny", ("in .excel you edit only the csv of a table (<sheet>.csv, Index.csv); the .xlsx and .sync.json are "
+                        "written by python Management/tools/gd_excel.py (new, sync, reindex): skill gd-excel-data")
     if FRAME_DIR_NAME in low or low == [UI_LESSONS]:
         return "deny", ("frames (.frame-concept) and ui-lessons.md are @UIDesigner's: you list the UI the node needs in ui.md (elements, "
                         "interactions, flow), then message UIDesigner to lay it out")

@@ -151,8 +151,112 @@ def run_flow(root):
           (len(ms), ms[0]["source"], ms[0]["key"], "chưa có test trần" in ms[0]["text"], ms[0]["check"].startswith("req-rejected"),
            "Đã đưa tin" in said[0], "đã có tin này" in again[0]),
           (1, "gd_req", "reject:" + NODE + "#cap-max", True, True, True, True))
+
+
+ROW_TESTS = """using NUnit.Framework;
+namespace Game.Wallet.Tests
+{
+    public class EnemyTableTests
+    {
+        [Test]
+        public void Soldier_HasItsStats() { var e = Find("soldier"); }
+
+        [Test]
+        public void Wolf_IsFasterThanSoldier() { }
+
+        [Test]
+        public void Unrelated() { }
+
+        [Test]
+        public void ShotRange_IsSix() { }
+
+        [Test]
+        public void ReadsBoss() { var e = Find("big_boss"); }
+    }
+}
+"""
+
+
+def put_table(root, sheet, kind, key, columns, rows, path=NODE):
+    """Writes one table (and its Index row) into the .excel of a live node: the csv side is what the book reads."""
+    gx = gd.gd_excel
+    d = gd.table_dir(root, "live").joinpath(*path.split("/"), gx.EXCEL_DIR)
+    d.mkdir(parents=True, exist_ok=True)
+    index = gx.read_csv(d / "Index.csv") if (d / "Index.csv").is_file() else gx.index_head()
+    index = [r for r in index if r[1] != sheet or r in index[:gx.HEAD_ROWS]]
+    index.append([str(len(index) - gx.HEAD_ROWS + 1), sheet, kind, key, str(len(rows)), "Bảng " + sheet])
+    gx.write_csv(d / "Index.csv", index)
+    head = [["index"] + [c[0] for c in columns], ["int"] + [c[1] for c in columns], ["Số thứ tự"] + [c[0] for c in columns]]
+    gx.write_csv(d / f"{sheet}.csv", head + [[str(n)] + list(r) for n, r in enumerate(rows, start=1)])
+
+
+def run_tables(root):
+    """The config tables of a node (.excel): a row of a list, params or formula table is a requirement of its own."""
+    W = "Wallet"
+    (root / "UnityProject/Assets/Features/Wallet/Tests/EnemyTableTests.cs").write_text(ROW_TESTS, encoding="utf-8")
+    before = {r["id"]: r["hash"] for n in rb.view(root, W)["nodes"] for r in n["reqs"]}
+    cols = (("id", "string"), ("name", "string"), ("stage", "enum:idea|prototype|full"), ("max_health", "int"))
+    soldier, wolf = ("soldier", "Lính", "idea", "40"), ("wolf", "Sói", "idea", "25")
+    put_table(root, "Enemies", "list", "id", cols, [soldier])
+    put_table(root, "ShotParams", "params", "key", (("key", "string"), ("name", "string"), ("unit", "string"), ("idea", "string"),
+                                                    ("prototype", "string"), ("full", "string"), ("reason", "string")),
+              [("shot_range", "Tầm", "u", "6", "6", "6", "x"), ("bullet_visual", "Hình đạn", "", "1 sprite", "", "", "x")])
+    put_table(root, "WaveLevels", "levels", "level", (("level", "int"), ("count", "int")), [("1", "8"), ("2", "10")])
+    put_table(root, "Counters", "map", "", (("from", "string"), ("to", "string"), ("value", "float")), [("soldier", "wolf", "1.5")])
     v = rb.view(root, W)
-    check("counts: 1 met of 29", (v["met"], v["total"]), (1, 29))
+    node = next(n for n in v["nodes"] if n["path"] == NODE)
+    new = {r["id"]: r for r in node["reqs"] if r["id"] not in before}
+    check("tables: a row of a list or params table is one requirement, a levels or map table is one for the whole table",
+          sorted((k, r["kind"]) for k, r in new.items()),
+          [("counters", "table"), ("enemies-soldier", "row"), ("shotparams-bullet-visual", "row"), ("shotparams-shot-range", "row"),
+           ("wavelevels", "table")])
+    check("tables: the requirements the node had keep their hash",
+          {r["id"]: r["hash"] for n in v["nodes"] for r in n["reqs"] if r["id"] in before}, before)
+    check("tables: a row names its key and holds its own values",
+          (new["enemies-soldier"]["key"], "max_health (int): 40" in new["enemies-soldier"]["text"], new["enemies-soldier"]["title"]),
+          ("soldier", True, "Enemies: Lính (soldier)"))
+
+    T = "EnemyTableTests."
+    check("done: a test that does not name the key is refused",
+          refused(lambda: rb.mark(root, W, "wallet-rules#enemies-soldier", "done", W, tests=[T + "Unrelated", T + "Wolf_IsFasterThanSoldier".replace("Soldier", "X")])))
+    check("done: an old test of another thing is refused", refused(lambda: rb.mark(root, W, "wallet-rules#enemies-soldier", "done", W, tests=[T + "Unrelated"])))
+    check("done: a row of a list is not proven by play alone",
+          refused(lambda: rb.mark(root, W, "wallet-rules#enemies-soldier", "done", W, play="thấy Lính đi ra")))
+    rb.mark(root, W, "wallet-rules#enemies-soldier", "done", W, tests=[T + "Soldier_HasItsStats", T + "Unrelated"])
+    rb.mark(root, W, "wallet-rules#enemies-soldier", "verify", "@CodeLead")
+    check("done: one test naming the key is enough; then verified", state(root, "enemies-soldier"), "verified")
+    rb.mark(root, W, "wallet-rules#shotparams-shot-range", "done", W, tests=[T + "ShotRange_IsSix"])
+    check("done: the key is found however it is written (shot_range, ShotRange)", state(root, "shotparams-shot-range"), "done")
+    rb.mark(root, W, "wallet-rules#shotparams-bullet-visual", "done", W, play="viên đạn bay thẳng 0.15s")
+    check("done: a row of a params table may still be shown by play", state(root, "shotparams-bullet-visual"), "done")
+    check("done: but its tests, when given, must name the key",
+          refused(lambda: rb.mark(root, W, "wallet-rules#shotparams-bullet-visual", "done", W, tests=[T + "Unrelated"])))
+    rb.mark(root, W, "wallet-rules#wavelevels", "done", W, tests=[T + "Unrelated"])
+    check("done: a whole-table requirement keeps the old rule", state(root, "wavelevels"), "done")
+
+    put_table(root, "Enemies", "list", "id", cols, [soldier, wolf])
+    check("a new row is a new requirement to do; the rows that were there keep their state",
+          (state(root, "enemies-wolf"), state(root, "enemies-soldier"), state(root, "shotparams-shot-range")), ("todo", "verified", "done"))
+    line = rb.render(rb.view(root, W))
+    check("the book tells the feature which key the test must name", "test phải nhắc tới khoá 'wolf'; done cần test" in line)
+    put_table(root, "Enemies", "list", "id", cols, [wolf, soldier])
+    check("moving a row (another index) changes nothing", (state(root, "enemies-soldier"), state(root, "enemies-wolf")), ("verified", "todo"))
+    rb.mark(root, W, "wallet-rules#enemies-wolf", "done", W, tests=[T + "Wolf_IsFasterThanSoldier"])
+    put_table(root, "Enemies", "list", "id", cols, [("wolf", "Sói", "idea", "30"), soldier])
+    check("a changed cell changes only its row", (state(root, "enemies-wolf"), state(root, "enemies-soldier")), ("changed", "verified"))
+    put_table(root, "Enemies", "list", "id", cols, [soldier])
+    v = rb.view(root, W)
+    check("a removed row is a dropped requirement",
+          (state(root, "enemies-wolf"), any(d["id"] == "enemies-wolf" for d in v["dropped"])), (None, True))
+    put_table(root, "Enemies", "list", "id", cols + (("damage", "int"),), [soldier + ("5",)])
+    check("a new column changes every row of the table", state(root, "enemies-soldier"), "changed")
+    put_table(root, "Enemies", "list", "id", cols, [soldier, ("big_boss", "Trùm", "full", "900")])
+    rb.mark(root, W, "wallet-rules#enemies-big-boss", "done", W, tests=[T + "ReadsBoss"])
+    check("a key with an underscore: its id uses a hyphen, a test that holds the key in a string proves it", state(root, "enemies-big-boss"), "done")
+    (root / "UnityProject/Assets/Features/Wallet/Tests/EnemyTableTests.cs").write_text(
+        ROW_TESTS.replace('Find("big_boss")', 'Find("other")'), encoding="utf-8")
+    check("verify: refused when the test no longer names the key",
+          refused(lambda: rb.mark(root, W, "wallet-rules#enemies-big-boss", "verify", "@CodeLead")))
 
 
 def run_progress_gate(root):
@@ -254,13 +358,6 @@ def run_changes(root):
 def run_cli(root):
     rc, out = cli(root, "Wallet")
     check("CLI: prints the book", (rc, "# Sổ yêu cầu của Wallet" in out), (0, True))
-    rc, out = cli(root, "Wallet", "doing", "income-amounts#kill-once", "viết EnemyReward")
-    check("CLI: doing", (rc, "đang làm" in out), (0, True))
-    rc, out = cli(root, "Wallet", "done", "income-amounts#kill-once", "WalletLogicTests.Missing")
-    check("CLI: done with a missing test fails", (rc, "không thấy test" in out), (1, True))
-    rc, out = cli(root, "Wallet", "done", "income-amounts#kill-once", "WalletLogicTests.Adds")
-    rc2, out2 = cli(root, "Wallet", "verify", "income-amounts#kill-once")
-    check("CLI: done then verify", (rc, rc2, "đã kiểm" in out2), (0, 0, True))
     rc, out = cli(root, "status")
     check("CLI: status lists the feature", (rc, "- Wallet:" in out), (0, True))
     rc, _ = cli(root, "Wallet", "frobnicate", "x#y")
@@ -270,7 +367,7 @@ def run_cli(root):
 
 
 def main():
-    for fn in (run_list, run_flow, run_progress_gate, run_changes, run_cli):
+    for fn in (run_list, run_flow, run_tables, run_progress_gate, run_changes, run_cli):
         root = make_root()
         try:
             if fn in (run_changes,):

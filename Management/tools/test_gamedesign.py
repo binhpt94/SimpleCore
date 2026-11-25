@@ -749,6 +749,73 @@ def term_hash(root, tid, table="idea"):
     return next(it["hash"] for it in gd.read_data(folder(root, f"{table}/glossary"))["items"] if it["id"] == tid)
 
 
+def pin(root, path, *targets):
+    """Writes the refs line of an idea node again, each target pinned to the hash it has now."""
+    line = ", ".join(f"{t}@{gd.read_data(folder(root, 'idea/' + t))['hash']}" for t in targets)
+    f = folder(root, f"idea/{path}/data.md")
+    text = "\n".join(x for x in f.read_text(encoding="utf-8").split("\n") if not x.startswith("refs:"))
+    f.write_text(text.replace("\n---\n", f"\nrefs: {line}\n---\n", 1), encoding="utf-8")
+
+
+def run_follow(root):
+    """A node that differs from live only because a node it pins changed: it follows that node, is shown apart from
+    the real changes, and goes into live by itself once the human has fixed the node it follows."""
+    mk(root, "")
+    for path in ("feature-a", "feature-a/a1", "feature-a/a2", "feature-b", "feature-b/b1", "feature-b/b2", "feature-b/b3", "feature-b/b4"):
+        mk(root, path)
+    for path in ("feature-b/b1", "feature-b/b2", "feature-b/b4"):
+        pin(root, path, "feature-a/a1")
+    pin(root, "feature-b/b3", "feature-a/a1", "feature-a/a2")
+    gd.sync_live(root)
+    check("everything is in live to start with", [n["path"] for n in gd.walk(gd.snapshot(root)["idea"]) if n["state"] != "same"], [])
+    check("the pins are not what a node says",
+          gd.without_pins("---\nbased-on: a\nrefs: x/y@1\nscreen: wide\n---\n# T\nrefs: kept\n"), "---\nscreen: wide\n---\n# T\nrefs: kept\n")
+
+    mk(root, "feature-a/a1", items=[("core", 8, "Ý đã đổi.")])
+    n = snap_node(root, "feature-a/a1")
+    check("the node that changed lists the nodes that still pin its old hash",
+          (n["follow"], n["followers"]["ready"], n["followers"]["redo"]),
+          (False, [], ["feature-b/b1", "feature-b/b2", "feature-b/b3", "feature-b/b4"]))
+    pin(root, "feature-b/b1", "feature-a/a1")
+    mk(root, "feature-b/b2", items=[("core", 8, "Ý của b2 cũng đổi.")])
+    pin(root, "feature-b/b2", "feature-a/a1")
+    n = snap_node(root, "feature-b/b1")
+    check("read again and pinned to the new hash, nothing else changed: it follows that node and waits for it",
+          (n["passed"], n["state"], n["follow"], n["followOf"], n["followWait"]), (True, "changed", True, ["feature-a/a1"], ["feature-a/a1"]))
+    check("a node whose own content changed too is a change of its own", snap_node(root, "feature-b/b2")["follow"], False)
+    n = snap_node(root, "feature-a/a1")
+    check("the changed node shows who follows it and who is still behind",
+          (n["followers"]["ready"], n["followers"]["redo"]), (["feature-b/b1"], ["feature-b/b3", "feature-b/b4"]))
+    check("a follower is not copied while the node it follows is not in live", gd.promote_followers(root), [])
+
+    mk(root, "feature-a/a2", items=[("core", 8, "a2 cũng đổi.")])
+    pin(root, "feature-b/b3", "feature-a/a1", "feature-a/a2")
+    check("a node may follow two nodes", snap_node(root, "feature-b/b3")["followOf"], ["feature-a/a1", "feature-a/a2"])
+    written, followed = gd.promote_and_follow(root, "feature-a/a1", False)
+    check("fixing the node that changed copies its followers into live by itself, and only those",
+          (written, followed), (["feature-a/a1"], [{"path": "feature-b/b1", "of": ["feature-a/a1"]}]))
+    check("the follower is the same as live now; the one with its own change, the one behind and the one waiting for a second node stay",
+          [(snap_node(root, x)["state"], snap_node(root, x)["passed"]) for x in ("feature-b/b1", "feature-b/b2", "feature-b/b3", "feature-b/b4")],
+          [("same", True), ("changed", True), ("changed", True), ("same", False)])
+    check("the history of the follower says why it was fixed",
+          [e.get("by") for e in gd.read_history(folder(root, "idea/feature-b/b1")) if e["event"] == "promote"][-1], "tự chốt theo feature-a/a1")
+    check("the idea table was not written: the node behind still pins the old hash", snap_node(root, "feature-b/b4")["refStale"], ["feature-a/a1"])
+    check("it waits for the second node only", snap_node(root, "feature-b/b3")["followWait"], ["feature-a/a2"])
+    written, followed = gd.promote_and_follow(root, "feature-a/a2", False)
+    check("the second node fixed: the node that followed both goes too", [f["path"] for f in followed], ["feature-b/b3"])
+
+    mk(root, "feature-a", items=[("core", 8, "Feature a đổi.")])
+    check("a child behind its parent is listed under the parent", snap_node(root, "feature-a")["followers"]["redo"], ["feature-a/a1", "feature-a/a2"])
+    for child, text in (("feature-a/a1", "Ý đã đổi."), ("feature-a/a2", "a2 cũng đổi.")):
+        mk(root, child, items=[("core", 8, text)])      # the same ideas, based-on moved to the parent's new hash
+    n = snap_node(root, "feature-a/a1")
+    check("a child whose based-on alone moved follows its parent", (n["follow"], n["followOf"]), (True, ["feature-a"]))
+    written, followed = gd.promote_and_follow(root, "feature-a", False)
+    check("fixing the parent copies those children", sorted(f["path"] for f in followed), ["feature-a/a1", "feature-a/a2"])
+    check("nothing but the node with its own change and the node behind is left",
+          sorted(n["path"] for n in gd.walk(gd.snapshot(root)["idea"]) if n["state"] != "same" or not n["passed"]), ["feature-b/b2", "feature-b/b4"])
+
+
 def run_refs(root):
     """refs: nodes of other branches a node builds on, each with the hash it was checked against."""
     text = data_text("T", [("a", 8, "B.")], "abc")
@@ -1247,7 +1314,7 @@ def run_deco(root):
 
 
 def main():
-    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco):
+    for case in (run_data, run_diff, run_scores, run_live_scores, run_priority, run_progress, run_infra, run_code_names, run_flow, run_refs, run_follow, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

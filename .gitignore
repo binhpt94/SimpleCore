@@ -55,3 +55,6 @@ Thumbs.db
 /Management/studio/**/work/_log/*.compose.svg
 /Management/studio/**/work/_log/*.font.svg
 /Management/studio/**/work/_made/
+
+# Excel lock files (a workbook open in Excel)
+~$*

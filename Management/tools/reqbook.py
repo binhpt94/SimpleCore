@@ -41,6 +41,11 @@ LOG_MAX = 300
 EDGE_TITLE = "Trường hợp biên"
 PARAM_TITLES = ("Làm gì", "Thông số", "Thông số theo giai đoạn")
 PARAMS_ID = "params"
+# The config tables of a node (<node>/.excel, gd_excel.py). A table of these kinds gives one requirement per row,
+# named by the row's key: a new enemy in the list is a new requirement, with a test of its own. The other kinds
+# (levels, map) give one requirement for the whole table.
+ROW_KINDS = ("list", "params", "formula")
+TEST_ONLY_KINDS = ("list",)      # a row of these is an entity of the game: done needs a test, play alone is not enough
 SLUG_WORDS = 8
 
 # saved states (what a session wrote) ...
@@ -99,8 +104,43 @@ def edge_items(text):
     return out
 
 
-def node_requirements(data, doc):
-    """[{id, kind, title, text, hash}] of one leaf, from its parsed data.md and its CLAUDE.md text."""
+def table_requirements(tables):
+    """[{id, kind, title, text, hash, ...}] of the config tables of a node (gd_excel.view): a row of a list, params
+    or formula table is one requirement ('row', with its key and the table's kind); a levels or map table is one
+    ('table'). The index column counts for nothing: moving a row or numbering again changes no requirement."""
+    out = []
+    for t in tables or []:
+        rows = t["rows"]
+        if len(rows) < gd.gd_excel.HEAD_ROWS:
+            continue
+        names, types = rows[0][1:], rows[1][1:]
+        data = [r[1:] for r in rows[gd.gd_excel.HEAD_ROWS:]]
+        head = f"{t['sheet']} ({t['kind']})"
+
+        def lines(r):
+            return "\n".join(f"{c} ({k}): {v}" for c, k, v in zip(names, types, r))
+        key_at = names.index(t["key"]) if t["key"] in names else None
+        if t["kind"] in ROW_KINDS and key_at is not None:
+            name_at = names.index("name") if "name" in names else None
+            for r in data:
+                key = r[key_at]
+                if not key:
+                    continue
+                label = r[name_at] if name_at is not None and r[name_at] else key
+                out.append({"id": slug(t["sheet"]) + "-" + slug(key), "kind": "row", "table": t["kind"], "sheet": t["sheet"],
+                            "key": key, "title": f"{t['sheet']}: {label}" + (f" ({key})" if label != key else ""),
+                            "text": f"Bảng {head}, dòng {key}\n" + lines(r), "hash": gd.short_hash(*names, *types, *r)})
+        else:
+            out.append({"id": slug(t["sheet"]), "kind": "table", "table": t["kind"], "sheet": t["sheet"],
+                        "title": f"Bảng {head}: {t['note']}",
+                        "text": f"Bảng {head}\n" + " | ".join(names) + "\n" + "\n".join(" | ".join(r) for r in data),
+                        "hash": gd.short_hash(*names, *types, *[c for r in data for c in r])})
+    return out
+
+
+def node_requirements(data, doc, tables=None):
+    """[{id, kind, title, text, hash}] of one leaf, from its parsed data.md, its CLAUDE.md text and its config
+    tables (gd_excel.view; none for a node without .excel, whose requirements stay what they were)."""
     out, seen = [], set()
     for it in data["items"]:
         text = it["title"] + ("\n" + it["detail"] if it.get("detail") else "")
@@ -121,6 +161,14 @@ def node_requirements(data, doc):
         out.append({"id": rid, "kind": "params", "title": "Số và việc của node (" + ", ".join(t for t, _ in found) + ")",
                     "text": "\n\n".join(f"## {t}\n{x}" for t, x in found),
                     "hash": gd.short_hash(*[p for t, x in found for p in (t, x)])})
+        seen.add(rid)
+    for r in table_requirements(tables):
+        base, n = r["id"], 1
+        while r["id"] in seen:
+            n += 1
+            r["id"] = f"{base}-{n}"
+        seen.add(r["id"])
+        out.append(r)
     return out
 
 
@@ -184,7 +232,27 @@ def strip_comments(text):
 
 def test_names(folders):
     """{"Class.Method"} of every NUnit test under <folder>/Tests of the given code folders."""
-    out = set()
+    return set(test_sources(folders))
+
+
+WORD_RX = re.compile(r"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|\d+")
+
+
+def plain(text):
+    """The words of a text, lower case, each between spaces: shot_range, ShotRange, shotRange and "shot-range" are
+    all ' shot range '. Whole words, so the key mage is not found in damage."""
+    return " " + " ".join(w.lower() for w in WORD_RX.findall(text or "")) + " "
+
+
+def names_key(source, key):
+    """True when a test (its attributes, name and body) names the key of a table row, however it is written."""
+    return bool(plain(key).strip()) and plain(key) in plain(source)
+
+
+def test_sources(folders):
+    """{"Class.Method": the test's text, from its attributes to the next test} of every NUnit test under
+    <folder>/Tests of the given code folders (comments left out)."""
+    out = {}
     for folder in folders:
         tests = folder / "Tests"
         for f in sorted(tests.rglob("*.cs")) if tests.is_dir() else []:
@@ -193,13 +261,29 @@ def test_names(folders):
             except OSError:
                 continue
             classes = [(m.start(), m.group(1)) for m in CLASS_RX.finditer(text)]
-            for m in METHOD_RX.finditer(text):
-                if not TEST_ATTR_RX.search(m.group(1)):
-                    continue
+            found = [m for m in METHOD_RX.finditer(text) if TEST_ATTR_RX.search(m.group(1))]
+            for i, m in enumerate(found):
                 owner = [name for at, name in classes if at < m.start()]
                 if owner:
-                    out.add(f"{owner[-1]}.{m.group(2)}")
+                    end = found[i + 1].start() if i + 1 < len(found) else len(text)
+                    out[f"{owner[-1]}.{m.group(2)}"] = text[m.start():end]
     return out
+
+
+def row_test_problem(req, names, sources):
+    """Why the tests named for a row requirement do not prove it, or ''. A row of a table is one thing of the game
+    (the enemy `wolf`): at least one of its tests must name that key, so an old test of another row cannot stand in."""
+    if req.get("kind") != "row":
+        return ""
+    if not names:
+        if req.get("table") in TEST_ONLY_KINDS:
+            return (f"{req['ref']} là một dòng của bảng {req['sheet']} (khoá '{req['key']}'): done cần test, play một mình "
+                    "không đủ. Viết test gọi đúng khoá đó rồi ghi done kèm tên test")
+        return ""
+    if any(names_key(sources.get(t, ""), req["key"]) for t in names):
+        return ""
+    return (f"{req['ref']} là dòng '{req['key']}' của bảng {req['sheet']}: không test nào trong {', '.join(names)} nhắc tới "
+            f"khoá '{req['key']}' (tên hàm hoặc thân hàm; viết hoa hay gạch dưới đều được). Viết test riêng cho dòng này")
 
 
 # ---------------------------------------------------------------- the saved book
@@ -238,7 +322,7 @@ def node_view(root, path, folder, tests):
     doc = gd.read_text(folder / gd.DOC_FILE) if (folder / gd.DOC_FILE).is_file() else ""
     book = read_book(root, path)
     reqs = []
-    for r in node_requirements(data, doc):
+    for r in node_requirements(data, doc, gd.gd_excel.view(folder)):
         saved = book["items"].get(r["id"])
         state, why = check_one(r, saved, tests)
         row = dict(r, ref=f"{path}#{r['id']}", state=state, why=why,
@@ -381,17 +465,28 @@ def mark(root, feature, refs, action, by, note=None, tests=None, play=None):
             bad = [t for t in names if not TEST_RX.match(t)]
             if bad:
                 raise ValueError("tên test phải có dạng Lớp.Hàm: " + ", ".join(bad))
-            have = set().union(*(test_names(test_folders(root, k, feature)) for k in v["keys"]))
+            have = {}
+            for k in v["keys"]:
+                have.update(test_sources(test_folders(root, k, feature)))
             gone = [t for t in names if t not in have]
             if gone:
                 raise ValueError(f"không thấy test [Test] nào tên {', '.join(gone)} trong UnityProject/Assets/Features/"
                                  f"{feature}/Tests hay UnityProject/Assets/{COMPOSITION}/Tests; viết test trước rồi mới ghi done")
+            why = row_test_problem(req, names, have)
+            if why:
+                raise ValueError(why)
             write(root, node, req, {"state": "done", "note": saved.get("note") or "", "tests": names, "play": play_text},
                   by, play_text or ", ".join(names))
         elif action == "verify":
             if state != "done":
                 raise ValueError(f"{req['ref']} đang '{STATE_NAMES[state]}': chỉ xác nhận được yêu cầu 'chờ kiểm' "
                                  "(feature đã ghi done, thiết kế chưa đổi, test còn đủ)")
+            have = {}
+            for k in v["keys"]:
+                have.update(test_sources(test_folders(root, k, feature)))
+            why = row_test_problem(req, saved.get("tests") or [], have)
+            if why:
+                raise ValueError(why + " (trả lại bằng reject nếu test đã bị sửa mất)")
             write(root, node, req, dict(saved, state="verified"), by, note)
         elif action == "reject":
             if state not in ("done", "verified", "no-test"):
@@ -451,6 +546,9 @@ def req_line(r):
     s = r["saved"] or {}
     line = f"- [{STATE_NAMES[r['state']]}] {r['ref']}: {r['title']}"
     extra = []
+    if r.get("kind") == "row" and r["state"] not in MET:
+        extra.append(f"dòng của bảng {r['sheet']}: test phải nhắc tới khoá '{r['key']}'"
+                     + ("; done cần test, không nhận play một mình" if r.get("table") in TEST_ONLY_KINDS else ""))
     if r["why"]:
         extra.append(r["why"])
     if s.get("note") and r["state"] in ("doing", "rejected", "changed", "waived"):
