@@ -272,6 +272,7 @@ namespace Game.HudUpgrade.Tests
 
         [TestCase(1440f)] // 4:3, canvas matched on height
         [TestCase(1620f)] // 3:2
+        [TestCase(1800f)] // 5:3, the 640x384 Game view where the overlap was seen
         public void On_a_narrower_screen_the_bar_shrinks_to_stay_left_of_the_skill_cluster(float canvasWidth)
         {
             var layout = BarLayout.Compute(Groups, canvasWidth, Frame);

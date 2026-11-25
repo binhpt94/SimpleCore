@@ -46,6 +46,7 @@
    "state": "done",
    "note": "",
    "tests": [
+    "BarLayoutTests.Gap_between_the_groups_is_wider_than_between_buttons_of_one_group",
     "UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups",
     "HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
    ],
@@ -54,7 +55,7 @@
    "text": "Giữa 2 nhóm có một khoảng trống rộng hơn khoảng cách giữa hai nút trong cùng nhóm\nLiếc là thấy hai nhóm; kiểm bằng ảnh chụp màn hình. Độ rộng cụ thể do người làm giao diện quyết.",
    "title": "Giữa 2 nhóm có một khoảng trống rộng hơn khoảng cách giữa hai nút trong cùng nhóm",
    "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:12"
+   "at": "2026-11-25 11:46:26"
   },
   "show-when": {
    "state": "done",
@@ -168,11 +169,15 @@
   },
   "params": {
    "state": "done",
-   "note": "",
+   "note": "sửa thanh đè cụm kĩ năng theo CodeLead, BarLayout giữ mép phải nút cuối trước x 1420, màn hẹp thì thu thanh",
    "tests": [
     "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills",
     "UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups",
     "UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus",
+    "BarLayoutTests.On_a_16_9_screen_the_six_buttons_sit_where_the_frame_puts_them",
+    "BarLayoutTests.Last_button_ends_left_of_the_skill_cluster_at_1420_on_a_16_9_screen",
+    "BarLayoutTests.On_a_narrower_screen_the_bar_shrinks_to_stay_left_of_the_skill_cluster",
+    "BarLayoutTests.On_a_20_9_screen_the_bar_keeps_its_size",
     "HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
    ],
    "play": "",
@@ -180,7 +185,7 @@
    "text": "## Làm gì\n- Khi trận bắt đầu, nhận danh sách 6 mục theo thứ tự từ `feature-upgrade/upgrade-list/item-set` và tạo đúng 6 nút theo thứ tự đó.\n- Xếp hai nhóm dọc theo mép dưới màn hình (`feature-hud-upgrade/bar-layout`):\n  - Nhóm hero: `hero-1`, `hero-2`, `hero-3`.\n  - Nhóm thành: `castle-health`, `castle-attack`, `castle-skill`.\n- Giữa hai nhóm có khoảng trống. Chỗ cụ thể của từng nhóm trên mép dưới, cỡ nút: do người làm giao diện quyết.\n- Thanh hiện suốt trận; ẩn khi popup kết thúc lượt hiện.\n- Nội dung từng nút (hình, cấp, giá, sáng/mờ): `feature-hud-upgrade/button-state/button-display`.\n\nMỗi nút đại diện cho:\n| Nút | Đại diện cho | Mua xong thì |\n|---|---|---|\n| Hero 1, 2, 3 | Hero ở chỗ đó trong đội | Hero đó lên một cấp: máu, sát thương, tốc độ đánh tăng |\n| Máu | Máu thành | Máu tối đa và máu hiện tại của thành +150 |\n| Sức đánh | Đòn tự bắn của thành | Sát thương mỗi phát tự bắn tăng |\n| Kĩ năng | Cả ba kĩ năng thành (Sấm sét, Băng giá, Cổ vũ) | Cả ba kĩ năng mạnh hơn, hồi chiêu không đổi |\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số nút | 6 | nút | 3 hero + 3 thành (bộ số chung) |\n| Số nhóm | 2 | nhóm | Vòng 3 |\n| Khoảng trống giữa hai nhóm | rộng hơn khoảng cách giữa hai nút cùng nhóm | | Đủ thấy hai nhóm; độ rộng cụ thể là việc giao diện |\n| Số lần thanh ẩn trong trận | 0 | lần | Luôn hiện (vòng 3) |\n| Tỉ lệ màn hình phải kiểm | 16:9 và 20:9 | | Hai tỉ lệ điện thoại cầm ngang phổ biến |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số nút | 6 | 6 | 6 |\n| Tỉ lệ màn hình được kiểm | 16:9 | 16:9 và 20:9 | 16:9, 20:9 và 4:3 |\n| Khoảng trống giữa hai nhóm | có | có | có, đủ art |\n| Nhãn tên nhóm (\"Hero\", \"Thành\") | không | không | tuỳ người làm giao diện |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "HudUpgrade",
-   "at": "2026-11-25 11:38:29"
+   "at": "2026-11-25 11:46:24"
   }
  },
  "log": [
@@ -281,6 +286,27 @@
    "state": "done",
    "by": "HudUpgrade",
    "note": "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills, UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups, UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
+  },
+  {
+   "at": "2026-11-25 11:45:39",
+   "id": "params",
+   "state": "doing",
+   "by": "HudUpgrade",
+   "note": "sửa thanh đè cụm kĩ năng theo CodeLead, BarLayout giữ mép phải nút cuối trước x 1420, màn hẹp thì thu thanh"
+  },
+  {
+   "at": "2026-11-25 11:46:24",
+   "id": "params",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "UpgradeBarTests.Bar_has_six_buttons_heroes_in_team_order_then_health_attack_skills, UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups, UpgradeBarTests.Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus, BarLayoutTests.On_a_16_9_screen_the_six_buttons_sit_where_the_frame_puts_them, BarLayoutTests.Last_button_ends_left_of_the_skill_cluster_at_1420_on_a_16_9_screen, BarLayoutTests.On_a_narrower_screen_the_bar_shrinks_to_stay_left_of_the_skill_cluster, BarLayoutTests.On_a_20_9_screen_the_bar_keeps_its_size, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
+  },
+  {
+   "at": "2026-11-25 11:46:26",
+   "id": "group-gap",
+   "state": "done",
+   "by": "HudUpgrade",
+   "note": "BarLayoutTests.Gap_between_the_groups_is_wider_than_between_buttons_of_one_group, UpgradeBarTests.Hero_buttons_and_castle_buttons_are_two_separate_groups, HudUpgradeSessionTests.Bar_prefab_has_hero_portraits_castle_icons_coin_wider_group_gap_and_short_bounce"
   }
  ]
 }

@@ -37,11 +37,11 @@
     "SceneFlowTests.ASwitchDoneWithinFiveSeconds_LogsNoWarning"
    ],
    "play": "",
-   "hash": "476f649d47c6",
-   "text": "Từ lúc mở game tới lúc thấy màn bắt đầu không quá 5 giây trên điện thoại tầm trung (dự kiến)\nQuá 5 giây là lỗi hiệu năng cần báo, không chặn người chơi.",
-   "title": "Từ lúc mở game tới lúc thấy màn bắt đầu không quá 5 giây trên điện thoại tầm trung (dự kiến)",
+   "hash": "89d42c519191",
+   "text": "Từ lúc mở game tới lúc thấy màn đầu tiên của scene Game không quá 5 giây trên điện thoại tầm trung (dự kiến)\nQuá 5 giây là lỗi hiệu năng cần báo, không chặn người chơi.",
+   "title": "Từ lúc mở game tới lúc thấy màn đầu tiên của scene Game không quá 5 giây trên điện thoại tầm trung (dự kiến)",
    "by": "SceneFlow",
-   "at": "2026-11-25 11:43:33"
+   "at": "2026-11-25 11:45:59"
   },
   "loading-fail": {
    "state": "done",
@@ -133,25 +133,26 @@
     "SceneFlowTests.TheLoadingScreenStaysForItsMinimumTime_EvenWhenTheGameSceneIsReadySooner",
     "SceneFlowTests.ASwitchStillGoingAfterFiveSeconds_LogsAPerformanceWarning_AndKeepsGoing",
     "SceneFlowTests.TheBar_StartsEmpty_AndFillsAsTheNewScenesFeaturesFinishLoading",
-    "SceneFlowTests.LoadingScreenPrefab_ShowsOnlyTheGameNameAndTheBar_WithNoButton"
+    "SceneFlowTests.LoadingScreenPrefab_ShowsOnlyTheGameNameAndTheBar_WithNoButton",
+    "SceneFlowTests.ASwitch_ShowsTheCover_EndsTheOldScene_LoadsTheNewOne_ThenRemovesTheCoverOnceItRuns"
    ],
    "play": "",
-   "hash": "528100ebcda0",
-   "text": "## Làm gì\n1. Mở game: engine mở scene Loading. Scene Loading tải và chạy như mọi scene (`feature-session-scene/session-steps`); view màn Loading là của feature này.\n2. Màn Loading hiện tên game (chữ) và thanh tiến độ ở 0%. Ngay sau khi màn Loading hiện, feature này xin chuyển sang scene Game (`feature-scene-flow/scene-request`).\n3. Lớp che hiện lên với đúng nội dung màn Loading (tên game, thanh tiến độ), rồi scene Loading bị huỷ. Người chơi không thấy khác gì: vẫn là màn Loading.\n4. Trong lúc scene Game tải, thanh tiến độ trên lớp che tăng theo số feature tham gia của scene Game đã tải xong.\n5. Tải xong và màn Loading (tính từ lúc nó hiện ở bước 2) đã hiện đủ thời gian ít nhất: scene Game chạy, màn bắt đầu (`feature-home`) được tạo, rồi lớp che biến mất.\n6. Sau đó không quay lại Loading trong lần chạy game này.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Thời gian hiện ít nhất của màn Loading | 1 | giây | Tránh màn nháy; ngắn đủ để không thấy chờ |\n| Thời gian tối đa từ mở game tới màn bắt đầu | 5 (dự kiến) | giây | Lượt chơi ngắn, người chơi phổ thông dễ bỏ nếu chờ lâu |\n| Thời gian chờ tối đa một feature tải | 10 (dự kiến) | giây | Quá mức này coi là tải lỗi (`loading-fail`) |\n| Bước tiến độ | 1 feature | feature | Tiến độ thật, không giả |\n| Số nút trên màn Loading | 0 | nút | Theo `boot-path` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Nội dung màn Loading | Tên game dạng chữ + thanh tiến độ | Như IDEA | Có hình nền và logo game |\n| Thời gian hiện ít nhất | 1 giây | 1 giây | 1 giây |\n| Thời gian tối đa tới màn đầu tiên của scene Game | 5 giây (dự kiến); ở IDEA màn đầu là trận, chưa có màn bắt đầu (`feature-run/run-flow/flow-rules`) | 5 giây (màn bắt đầu) | 3 giây (dự kiến, sau khi tối ưu) |\n| Thanh tiến độ | Nhảy theo từng feature | Chạy mượt giữa các mốc | Như PROTOTYPE |\n| Màn lỗi tải | Dòng chữ nêu tên feature lỗi | Như IDEA | Chữ thân thiện cho người chơi, tên feature chỉ ghi vào log |",
+   "hash": "1de130db1256",
+   "text": "## Làm gì\n1. Mở game: engine mở scene Loading. Scene Loading tải và chạy như mọi scene (`feature-session-scene/session-steps`); view màn Loading là của feature này.\n2. Màn Loading hiện tên game (chữ) và thanh tiến độ ở 0%. Ngay sau khi màn Loading hiện, feature này xin chuyển sang scene Game (`feature-scene-flow/scene-request`).\n3. Lớp che hiện lên với đúng nội dung màn Loading (tên game, thanh tiến độ), rồi scene Loading bị huỷ. Người chơi không thấy khác gì: vẫn là màn Loading.\n4. Trong lúc scene Game tải, thanh tiến độ trên lớp che tăng theo số feature tham gia của scene Game đã tải xong.\n5. Tải xong và màn Loading (tính từ lúc nó hiện ở bước 2) đã hiện đủ thời gian ít nhất: scene Game chạy, màn đầu tiên được tạo (trận, theo `game-first-screen`), rồi lớp che biến mất.\n6. Sau đó không quay lại Loading trong lần chạy game này.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Thời gian hiện ít nhất của màn Loading | 1 | giây | Tránh màn nháy; ngắn đủ để không thấy chờ |\n| Thời gian tối đa từ mở game tới màn đầu tiên của scene Game | 5 (dự kiến) | giây | Lượt chơi ngắn, người chơi phổ thông dễ bỏ nếu chờ lâu |\n| Thời gian chờ tối đa một feature tải | 10 (dự kiến) | giây | Quá mức này coi là tải lỗi (`loading-fail`) |\n| Bước tiến độ | 1 feature | feature | Tiến độ thật, không giả |\n| Số nút trên màn Loading | 0 | nút | Theo `boot-path` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Nội dung màn Loading | Tên game dạng chữ + thanh tiến độ | Như IDEA | Có hình nền và logo game |\n| Thời gian hiện ít nhất | 1 giây | 1 giây | 1 giây |\n| Thời gian tối đa tới màn đầu tiên của scene Game | 5 giây (dự kiến); ở IDEA màn đầu là trận, chưa có màn bắt đầu (`feature-run/run-flow/flow-rules`) | 5 giây (màn bắt đầu) | 3 giây (dự kiến, sau khi tối ưu) |\n| Màn đầu tiên của scene Game | Trận, đội mặc định | Màn bắt đầu (`feature-home`) | Màn bắt đầu |\n| Thanh tiến độ | Nhảy theo từng feature | Chạy mượt giữa các mốc | Như PROTOTYPE |\n| Màn lỗi tải | Dòng chữ nêu tên feature lỗi | Như IDEA | Chữ thân thiện cho người chơi, tên feature chỉ ghi vào log |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "SceneFlow",
-   "at": "2026-11-25 11:43:46"
+   "at": "2026-11-25 11:46:03"
   },
   "game-first-screen": {
    "state": "done",
    "note": "",
    "tests": [],
-   "play": "Play từ Loading.unity: sau màn Loading thấy ngay màn đầu của scene Game, ở IDEA là trận, view đã có khi màn Loading biến mất, không thấy màn trống",
-   "hash": "1d822a6c8c7c",
-   "text": "Sang scene Game thì màn đầu tiên người chơi thấy là màn bắt đầu\nKhông vào thẳng trận hay màn chọn đội.",
-   "title": "Sang scene Game thì màn đầu tiên người chơi thấy là màn bắt đầu",
+   "play": "Play từ Loading.unity: sau màn Loading thấy ngay trận với đội mặc định, view trận đã có khi màn Loading biến mất, không thấy màn trống",
+   "hash": "daa0f3659e7f",
+   "text": "Sang scene Game thì màn đầu tiên người chơi thấy là trận, với đội mặc định\nChưa có màn bắt đầu và màn chọn đội; trận do `feature-run` dựng (`feature-run/run-flow/flow-rules`).",
+   "title": "Sang scene Game thì màn đầu tiên người chơi thấy là trận, với đội mặc định",
    "by": "SceneFlow",
-   "at": "2026-11-25 11:43:56"
+   "at": "2026-11-25 11:46:00"
   }
  },
  "log": [
@@ -231,6 +232,27 @@
    "state": "done",
    "by": "SceneFlow",
    "note": "Play từ Loading.unity: sau màn Loading thấy ngay màn đầu của scene Game, ở IDEA là trận, view đã có khi màn Loading biến mất, không thấy màn trống"
+  },
+  {
+   "at": "2026-11-25 11:45:59",
+   "id": "loading-max-time",
+   "state": "done",
+   "by": "SceneFlow",
+   "note": "SceneFlowTests.ASwitchStillGoingAfterFiveSeconds_LogsAPerformanceWarning_AndKeepsGoing, SceneFlowTests.ASwitchDoneWithinFiveSeconds_LogsNoWarning"
+  },
+  {
+   "at": "2026-11-25 11:46:00",
+   "id": "game-first-screen",
+   "state": "done",
+   "by": "SceneFlow",
+   "note": "Play từ Loading.unity: sau màn Loading thấy ngay trận với đội mặc định, view trận đã có khi màn Loading biến mất, không thấy màn trống"
+  },
+  {
+   "at": "2026-11-25 11:46:03",
+   "id": "params",
+   "state": "done",
+   "by": "SceneFlow",
+   "note": "SceneFlowTests.ConfigAsset_HoldsTheDesignTimings_AndBothScenes, SceneFlowTests.TheLoadingScreenStaysForItsMinimumTime_EvenWhenTheGameSceneIsReadySooner, SceneFlowTests.ASwitchStillGoingAfterFiveSeconds_LogsAPerformanceWarning_AndKeepsGoing, SceneFlowTests.TheBar_StartsEmpty_AndFillsAsTheNewScenesFeaturesFinishLoading, SceneFlowTests.LoadingScreenPrefab_ShowsOnlyTheGameNameAndTheBar_WithNoButton, SceneFlowTests.ASwitch_ShowsTheCover_EndsTheOldScene_LoadsTheNewOne_ThenRemovesTheCoverOnceItRuns"
   }
  ]
 }

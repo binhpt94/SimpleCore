@@ -201,14 +201,16 @@
    "note": "",
    "tests": [
     "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers",
-    "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow"
+    "SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow",
+    "SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave",
+    "WaveDirectorTests.Boss_WaitsUnderTheAliveCapLikeEveryEnemy_AndStillComesLast"
    ],
    "play": "",
-   "hash": "12627d974efe",
-   "text": "## Làm gì\n1. Đầu đợt nhận từ `feature-wave/difficulty-scaling/wave-formula`: số quái N, nhịp thả, hệ số chỉ số, số con từng loại.\n2. Lập danh sách N mục (loại, bên, lúc ra):\n   - Xáo thứ tự các loại không phải Trùm.\n   - Nếu đợt có Trùm: đặt Trùm ở vị trí cuối (thứ N).\n   - Gán bên: đúng N/2 trái, N/2 phải, ngẫu nhiên, không có chuỗi quá 3 mục liên tiếp cùng bên.\n   - Lúc ra dự kiến của mục thứ i (đếm từ 1) là (i − 1) × nhịp thả, tính từ đầu đợt, cộng thời gian bị hoãn.\n3. Thả lần lượt theo danh sách. Mỗi con mới ra mang chỉ số đã nhân hệ số của đợt đang đánh.\n4. Báo \"đã ra hết\" cho `feature-wave/wave-clear/clear-rules` khi mục cuối đã ra.\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Điểm ra bên trái / phải | x = −17 / +17, trên mặt đất của làn | u | Ngoài mép màn hình (±16u) 1u, quái đi vào khung hình |\n| Số quái mỗi bên | N/2 | con | Kẹp đều hai phía |\n| Vị trí Trùm | N (con cuối) | thứ tự | Cuối đợt, khớp `feature-enemy/enemy-list/enemy-type-values` |\n| Chuỗi cùng bên tối đa | 3 | con | Không bỏ trống một bên lâu |\n| Con đầu tiên ra | 0 | s từ đầu đợt | Đợt bắt đầu là thấy quái ngay |\n| Giới hạn quái sống | 40 | con | Màn hình điện thoại vẫn đọc được |\n| Thời gian thả cả đợt (không hoãn) | (N − 1) × nhịp | s | Đợt 1: 7 s, đợt 5: 12 s, đợt 10: 13.75 s, đợt 20: 13.5 s |\n\n\"Quái sống\" là quái đã ra và chưa bị hạ, ở bất kì vị trí nào (kể cả còn ngoài màn hình).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Điểm ra | x = ±17u | x = ±17u | x = ±17u |\n| Chia bên | N/2 mỗi bên | N/2 mỗi bên | N/2 mỗi bên |\n| Chuỗi cùng bên tối đa | 3 con | 3 con | chỉnh sau chơi thử |\n| Vị trí Trùm | không có Trùm | con cuối (N) | chỉnh sau chơi thử |\n| Giới hạn quái sống | 40 con | 40 con | chỉnh theo hiệu năng máy thật |\n| Xáo thứ tự, bên | có | có | có |",
+   "hash": "3fb86722ac85",
+   "text": "## Làm gì\n1. Đầu đợt nhận từ `feature-wave/difficulty-scaling/wave-formula`: số quái N, nhịp thả, hệ số chỉ số, số con từng loại.\n2. Lập danh sách N mục (loại, bên, lúc ra):\n   - Xáo thứ tự các loại không phải Trùm.\n   - Nếu đợt có Trùm: đặt Trùm ở vị trí cuối (thứ N).\n   - Gán bên: đúng N/2 trái, N/2 phải, ngẫu nhiên, không có chuỗi quá 3 mục liên tiếp cùng bên.\n   - Lúc ra dự kiến của mục thứ i (đếm từ 1) là (i − 1) × nhịp thả, tính từ đầu đợt, cộng thời gian bị hoãn.\n3. Thả lần lượt theo danh sách. Mỗi con mới ra mang chỉ số đã nhân hệ số của đợt đang đánh.\n4. Báo \"đã ra hết\" cho `feature-wave/wave-clear/clear-rules` khi mục cuối đã ra.\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Điểm ra bên trái / phải | x = −17 / +17, trên mặt đất của làn | u | Ngoài mép màn hình (±16u) 1u, quái đi vào khung hình |\n| Số quái mỗi bên | N/2 | con | Kẹp đều hai phía |\n| Vị trí Trùm | N (con cuối) | thứ tự | Cuối đợt; luật này do node này giữ |\n| Chuỗi cùng bên tối đa | 3 | con | Không bỏ trống một bên lâu |\n| Con đầu tiên ra | 0 | s từ đầu đợt | Đợt bắt đầu là thấy quái ngay |\n| Giới hạn quái sống | 40 | con | Màn hình điện thoại vẫn đọc được |\n| Thời gian thả cả đợt (không hoãn) | (N − 1) × nhịp | s | Đợt 1: 7 s, đợt 5: 12 s, đợt 10: 13.75 s, đợt 20: 13.5 s |\n\n\"Quái sống\" là quái đã ra và chưa bị hạ, ở bất kì vị trí nào (kể cả còn ngoài màn hình).\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Điểm ra | x = ±17u | x = ±17u | x = ±17u |\n| Chia bên | N/2 mỗi bên | N/2 mỗi bên | N/2 mỗi bên |\n| Chuỗi cùng bên tối đa | 3 con | 3 con | chỉnh sau chơi thử |\n| Vị trí Trùm | không có Trùm | con cuối (N) | chỉnh sau chơi thử |\n| Giới hạn quái sống | 40 con | 40 con | chỉnh theo hiệu năng máy thật |\n| Xáo thứ tự, bên | có | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "Wave",
-   "at": "2026-11-25 11:36:39"
+   "at": "2026-11-25 11:45:55"
   }
  },
  "log": [
@@ -330,6 +332,13 @@
    "state": "done",
    "by": "Wave",
    "note": "WaveDirectorTests.Boss_WaitsUnderTheAliveCapLikeEveryEnemy_AndStillComesLast, SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave"
+  },
+  {
+   "at": "2026-11-25 11:45:55",
+   "id": "params",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveConfigTests.RealConfig_HoldsTheDesignedIdeaNumbers, SpawnOrderTests.EverySide_GetsExactlyHalf_AndNeverMoreThanThreeInARow, SpawnOrderTests.Boss_IsAlwaysTheLastEnemyOfTheWave, WaveDirectorTests.Boss_WaitsUnderTheAliveCapLikeEveryEnemy_AndStillComesLast"
   }
  ]
 }

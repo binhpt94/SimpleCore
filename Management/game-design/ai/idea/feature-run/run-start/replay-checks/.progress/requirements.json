@@ -1,0 +1,132 @@
+{
+ "items": {
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "IDEA: Play 3 luot lien trong scene Game, dau luot 3 so object trong Hierarchy bang dau luot 1, khong con quai, hero, popup cua luot truoc",
+   "hash": "0d58cd07c2a9",
+   "text": "## Làm gì\n- Mỗi lần lượt chơi báo lượt mới bắt đầu trong scene Game: các feature trận tự về trạng thái ban đầu theo `feature-run/run-start/start-values`; không feature nào tải lại thứ đã tải, không chuyển scene.\n- Đầu mỗi lượt mới phải đúng: không còn quái, hero, hiệu ứng đang chạy của lượt trước, không còn popup mở.\n- Kiểm rò rỉ: đọc số view và số việc đang chạy của các feature trận (bộ đếm của `feature-session-scene`) ở đầu lượt 1 và đầu lượt 10; hai số phải bằng nhau.\n- Thứ còn lại qua các lượt trong scene Game: kỉ lục, đội đã nhớ. Thứ còn lại sau khi tắt game: chỉ kỉ lục.\n- Feature trận được kiểm: `feature-castle`, `feature-wallet`, `feature-upgrade`, `feature-wave`, `feature-hero`, `feature-enemy`.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số lượt liền để kiểm rò rỉ | 10 | lượt | Đủ để thấy thứ dồn lên mỗi lượt |\n| Chênh số view, số việc đầu lượt 10 so với đầu lượt 1 | 0 | view, việc | Lượt mới bắt đầu sạch |\n| Popup mở ở đầu lượt mới | 0 | popup | Popup thua đã đóng trước khi lượt mới bắt đầu |\n| Thời gian từ bấm chơi lại tới màn chọn đội | dưới 0,5 (dự kiến) | giây | Không tải lại scene nên gần như tức thì |\n| Thứ được lưu khi tắt game | 1 (kỉ lục) | thứ | `only-record-saved` |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số lượt liền để kiểm rò rỉ | 3 (kiểm bằng tay khi Play) | 10 | 10, có kiểm bộ nhớ không tăng |\n| Thời gian từ bấm chơi lại tới màn chọn đội | dưới 0,5 giây (dự kiến) | dưới 0,5 giây | dưới 0,5 giây |",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "Run",
+   "at": "2026-11-25 11:47:28"
+  },
+  "replay-no-growth": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "IDEA: Play 3 luot lien, so view va so viec cua cac feature tran o dau luot 3 bang dau luot 1",
+   "hash": "f1e89923db75",
+   "text": "Chơi 10 lượt liền trong scene Game, số view và số việc đang chạy ở đầu lượt thứ 10 bằng ở đầu lượt thứ 1\nKiểm cho việc đặt lại lượt (`feature-run/run-start/start-values`) không để lại quái, hero, hiệu ứng hay popup của lượt trước. Số đếm lấy từ bộ đếm theo feature của `feature-session-scene`.",
+   "title": "Chơi 10 lượt liền trong scene Game, số view và số việc đang chạy ở đầu lượt thứ 10 bằng ở đầu lượt thứ 1",
+   "by": "Run",
+   "at": "2026-11-25 11:47:29"
+  },
+  "popup-cleared-on-reset": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Play: thua, bam Choi lai: popup thua dong truoc khi tran moi hien, dau luot moi khong con popup nao mo",
+   "hash": "694859bc541f",
+   "text": "Đầu lượt mới không còn popup nào đang mở\nPopup thua đã đóng khi bấm nút; nếu vì lỗi còn popup mở thì lượt chơi ghi lỗi nêu id popup (`feature-popup/popup-request/request-rules`), không tự đóng âm thầm.",
+   "title": "Đầu lượt mới không còn popup nào đang mở",
+   "by": "Run",
+   "at": "2026-11-25 11:47:30"
+  },
+  "only-record-saved": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Play: pha ki luc, dung Play roi Play lai: ki luc con, moi thu khac ve dau luot. Run chi ghi khoa PlayerPrefs Run/Best",
+   "hash": "f10ab1f79ffa",
+   "text": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game\nKỉ lục do `feature-run/run-score/score-rules` lưu. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống lúc game đang mở.",
+   "title": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game",
+   "by": "Run",
+   "at": "2026-11-25 11:47:31"
+  },
+  "edge-luot-ket-thuc-luc-dang-co-hieu-ung": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Play: thua luc ki nang thanh dang chay hoac quai chet do, choi lai: hieu ung cu khong chay sang luot moi",
+   "hash": "07c756681b68",
+   "text": "**Lượt kết thúc lúc đang có hiệu ứng (kĩ năng thành, quái chết dở)**: hiệu ứng của lượt cũ bị dừng và bỏ khi lượt mới bắt đầu, không chạy tiếp sang lượt mới.",
+   "title": "Lượt kết thúc lúc đang có hiệu ứng (kĩ năng thành, quái chết dở)",
+   "by": "Run",
+   "at": "2026-11-25 11:47:33"
+  },
+  "edge-tien-nang-cap-dot-mau-thanh-cua-luot": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Play: sau 1 luot co tien, nang cap, dot 3, choi lai: tien 50, cap 1, dot 1, thanh 1000/1000",
+   "hash": "0c5f67d3f021",
+   "text": "**Tiền, nâng cấp, đợt, máu thành của lượt trước**: về giá trị ban đầu của từng feature (`feature-run/run-start/start-values`), không còn sót.",
+   "title": "Tiền, nâng cấp, đợt, máu thành của lượt trước",
+   "by": "Run",
+   "at": "2026-11-25 11:47:34"
+  },
+  "edge-tat-game-giua-tran": {
+   "state": "done",
+   "note": "",
+   "tests": [],
+   "play": "Play: dung Play giua tran roi Play lai: chi ki luc da luu truoc do con, luot do khong luu",
+   "hash": "447a9ad70ef9",
+   "text": "**Tắt game giữa trận**: chỉ kỉ lục đã lưu trước đó còn lại; lượt dở không được lưu.",
+   "title": "Tắt game giữa trận",
+   "by": "Run",
+   "at": "2026-11-25 11:47:35"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-25 11:47:28",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "IDEA: Play 3 luot lien trong scene Game, dau luot 3 so object trong Hierarchy bang dau luot 1, khong con quai, hero, popup cua luot truoc"
+  },
+  {
+   "at": "2026-11-25 11:47:29",
+   "id": "replay-no-growth",
+   "state": "done",
+   "by": "Run",
+   "note": "IDEA: Play 3 luot lien, so view va so viec cua cac feature tran o dau luot 3 bang dau luot 1"
+  },
+  {
+   "at": "2026-11-25 11:47:30",
+   "id": "popup-cleared-on-reset",
+   "state": "done",
+   "by": "Run",
+   "note": "Play: thua, bam Choi lai: popup thua dong truoc khi tran moi hien, dau luot moi khong con popup nao mo"
+  },
+  {
+   "at": "2026-11-25 11:47:31",
+   "id": "only-record-saved",
+   "state": "done",
+   "by": "Run",
+   "note": "Play: pha ki luc, dung Play roi Play lai: ki luc con, moi thu khac ve dau luot. Run chi ghi khoa PlayerPrefs Run/Best"
+  },
+  {
+   "at": "2026-11-25 11:47:33",
+   "id": "edge-luot-ket-thuc-luc-dang-co-hieu-ung",
+   "state": "done",
+   "by": "Run",
+   "note": "Play: thua luc ki nang thanh dang chay hoac quai chet do, choi lai: hieu ung cu khong chay sang luot moi"
+  },
+  {
+   "at": "2026-11-25 11:47:34",
+   "id": "edge-tien-nang-cap-dot-mau-thanh-cua-luot",
+   "state": "done",
+   "by": "Run",
+   "note": "Play: sau 1 luot co tien, nang cap, dot 3, choi lai: tien 50, cap 1, dot 1, thanh 1000/1000"
+  },
+  {
+   "at": "2026-11-25 11:47:35",
+   "id": "edge-tat-game-giua-tran",
+   "state": "done",
+   "by": "Run",
+   "note": "Play: dung Play giua tran roi Play lai: chi ki luc da luu truoc do con, luot do khong luu"
+  }
+ ]
+}

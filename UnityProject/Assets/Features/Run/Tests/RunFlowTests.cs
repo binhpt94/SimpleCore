@@ -317,6 +317,60 @@ namespace Game.Run.Tests
         }
 
         [Test]
+        public void NoSavedBestCountsAsZero()
+        {
+            _store.Value = 0;
+            _score.LoadBest();
+            Assert.AreEqual(0, _score.Best);
+        }
+
+        [Test]
+        public void ScoreBestAndNewBestCanBeReadAtAnyTime()
+        {
+            Assert.AreEqual(0, _score.Score);
+            Assert.AreEqual(0, _score.Best);
+            Assert.IsFalse(_score.IsNewBest);
+
+            _store.Value = 3;
+            _score.LoadBest();
+            Assert.AreEqual(3, _score.Best);
+
+            EnterBattle();
+            _flow.CountClearedWave(1);
+            Assert.AreEqual(1, _score.Score);
+        }
+
+        [Test]
+        public void GivingUpRightAfterEnteringBattleScoresZeroAndKeepsTheBest()
+        {
+            _store.Value = 2;
+            _score.LoadBest();
+            EnterBattle();
+            _flow.Pause();
+            _flow.Abandon();
+
+            Assert.AreEqual(0, _score.Score);
+            Assert.AreEqual(2, _score.Best);
+            Assert.IsFalse(_score.IsNewBest);
+            Assert.IsNull(_store.Saved);
+        }
+
+        [Test]
+        public void PressingPlayAgainAndBackToStartTogetherOnlyTheFirstCounts()
+        {
+            EnterBattle();
+            _flow.Lose();
+            _delay.Fire();
+            _log.Clear();
+
+            _flow.Replay();
+            _flow.GoHome();
+
+            CollectionAssert.AreEqual(new[] { "BattleCleared", "step:TeamSelect" }, _log);
+            Assert.AreEqual(RunStep.TeamSelect, _flow.Step);
+        }
+
+        [Test]
         public void SessionEndDropsThePendingLosePopup()
         {
             EnterBattle();
