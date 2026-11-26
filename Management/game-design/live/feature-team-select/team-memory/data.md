@@ -1,6 +1,6 @@
 ---
 based-on: 6da99ea96860
-refs: feature-run/run-score@5869f69301eb, feature-team-select/team-slots@c34032308bdd, feature-run/run-start@d386ccae4d88, feature-run/run-flow@8db5f61d9f6e, glossary#remembered-team@a5f218ba8ce3
+refs: feature-run/run-score@3d29bb683b7c, feature-team-select/team-slots@c34032308bdd, feature-run/run-start@d386ccae4d88, feature-run/run-flow@8db5f61d9f6e, glossary#remembered-team@a5f218ba8ce3
 ---
 # Nhớ đội lượt trước
 

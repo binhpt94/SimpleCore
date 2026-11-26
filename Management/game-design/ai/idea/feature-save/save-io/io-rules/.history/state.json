@@ -1,0 +1,37 @@
+{
+ "hash": "d41cd6182692",
+ "items": {
+  "rules-version-one": {
+   "hash": "c868f41d17fb",
+   "text": "Phiên bản dữ liệu hiện tại là 1; mỗi lần ghi đều ghi kèm số 1\nChưa có phiên bản nào cũ hơn, nên chưa có dạng cũ nào phải chuyển."
+  },
+  "rules-record-int": {
+   "hash": "e46882e9c575",
+   "text": "Kỉ lục được cất là số nguyên 32 bit, trả lại đúng số đã cất, kể cả số âm\nLưu dữ liệu không xét số âm; `feature-run` coi kỉ lục âm là 0."
+  },
+  "rules-read-cases": {
+   "hash": "21342174c5a8",
+   "text": "Đọc: phiên bản 1 và kỉ lục là số nguyên thì trả kỉ lục; mọi trường hợp khác trả chưa có\nKhác gồm: không có bản ghi, thiếu phiên bản hay kỉ lục, phiên bản không phải số nguyên dương, kỉ lục không phải số nguyên, phiên bản lớn hơn 1."
+  },
+  "rules-instant": {
+   "hash": "0319d1bbcb83",
+   "text": "Đọc và ghi trả kết quả ngay trong lần gọi, bên gọi không phải chờ khung hình sau\nChỉ có một số nguyên nên ghi rất nhẹ (dự kiến dưới 10 ms). Nhờ vậy kỉ lục đã ghi xong trước khi popup thua hiện."
+  },
+  "rules-write-whole": {
+   "hash": "772a2f2fe009",
+   "text": "Tắt game ngay giữa lúc ghi thì lần mở sau đọc được bản cũ hoặc bản mới, không bao giờ ra chưa có vì ghi dở"
+  },
+  "rules-newer-reject": {
+   "hash": "b1c8720d617b",
+   "text": "Trên máy là bản ghi có phiên bản lớn hơn 1 thì mọi lần ghi báo thất bại và bản ghi giữ nguyên"
+  },
+  "rules-broken-kept": {
+   "hash": "75793ebf6e33",
+   "text": "Bản ghi hỏng không bị xoá khi đọc; chỉ bị thay khi có lần ghi thành công"
+  },
+  "rules-fail-silent": {
+   "hash": "f7a798f564bc",
+   "text": "Ghi thất bại không hiện gì cho người chơi; bản dev ghi một dòng cảnh báo vào log kèm lí do"
+  }
+ }
+}

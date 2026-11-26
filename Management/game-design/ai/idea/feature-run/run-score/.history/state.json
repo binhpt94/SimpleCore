@@ -1,5 +1,5 @@
 {
- "hash": "5869f69301eb",
+ "hash": "3d29bb683b7c",
  "items": {
   "score-def": {
    "hash": "fc3ad70594ba",
@@ -18,8 +18,8 @@
    "text": "Kỉ lục là điểm cao nhất trong mọi lượt đã chơi\nChốt điểm xong, điểm lớn hơn kỉ lục cũ thì điểm đó thành kỉ lục mới; bằng hoặc thấp hơn thì kỉ lục giữ nguyên."
   },
   "record-save": {
-   "hash": "14003271b383",
-   "text": "Kỉ lục được lưu lại, tắt game mở lại vẫn còn\nĐây là thứ duy nhất lưu khi tắt game. Đã loại: chỉ nhớ trong lúc game đang mở."
+   "hash": "c5a89f4a6c27",
+   "text": "Kỉ lục được lưu lại, tắt game mở lại vẫn còn\nLượt chơi giữ luật kỉ lục và nhờ `feature-save` đọc, ghi xuống máy; lượt chơi không tự ghi. Đây là thứ duy nhất lưu khi tắt game. Đã loại: chỉ nhớ trong lúc game đang mở."
   },
   "record-new-flag": {
    "hash": "443c587fcb4a",

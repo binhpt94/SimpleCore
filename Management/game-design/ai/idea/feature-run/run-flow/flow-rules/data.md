@@ -1,6 +1,6 @@
 ---
 based-on: 8db5f61d9f6e
-refs: feature-run/run-start@d386ccae4d88, feature-run/run-score@5869f69301eb, feature-scene-flow/scene-list@78ed2dcc0859, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-run/run-pause@331cbd30e30e, feature-popup-pause/pause-popup/pause-popup-spec@4db8a9f181fd, feature-game-flow/flow-routes/routes-values@66f0417d12da
+refs: feature-run/run-start@d386ccae4d88, feature-run/run-score@3d29bb683b7c, feature-scene-flow/scene-list@78ed2dcc0859, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-run/run-pause@331cbd30e30e, feature-popup-pause/pause-popup/pause-popup-spec@4db8a9f181fd, feature-game-flow/flow-routes/routes-values@66f0417d12da
 frame: none
 ---
 # Luật chuyển màn của lượt

@@ -25,3 +25,4 @@
 {"at": "2026-11-25 22:57:40", "event": "data", "hash": "94ac7c56dd22", "previous": "53af9956f851", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-25 23:03:42", "event": "data", "hash": "6181a7c21bf0", "previous": "94ac7c56dd22", "added": ["art-shared-palette", "art-battle-reference", "art-light-from-top", "art-outline-body-color", "art-popup-content-from-node", "art-ui-text-font", "art-ad-button-pink", "art-hud-text-contrast", "art-faction-silhouette", "art-unit-outline-contrast", "art-castle-edge-solid", "art-effect-overlay-limit", "art-skill-color-match"], "removed": [], "rewritten": []}
 {"at": "2026-11-25 23:12:40", "event": "promote", "by": "người", "hash": "6181a7c21bf0"}
+{"at": "2026-11-26 18:22:02", "event": "promote", "by": "người (Sync)", "hash": "6181a7c21bf0"}

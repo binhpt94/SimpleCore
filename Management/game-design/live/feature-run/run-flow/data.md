@@ -1,6 +1,6 @@
 ---
 based-on: 7150875035ad
-refs: feature-run/run-score@5869f69301eb, feature-scene-flow/scene-list@78ed2dcc0859, feature-run/run-start@d386ccae4d88, glossary#run@721a2b6e316e
+refs: feature-run/run-score@3d29bb683b7c, feature-scene-flow/scene-list@78ed2dcc0859, feature-run/run-start@d386ccae4d88, glossary#run@721a2b6e316e
 ---
 # Luồng màn hình của lượt
 

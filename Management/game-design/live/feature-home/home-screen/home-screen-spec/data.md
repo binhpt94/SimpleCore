@@ -1,6 +1,6 @@
 ---
 based-on: e8c7b20b31fd
-refs: feature-run/run-flow/flow-rules@f011f018b6c5, feature-run/run-score/score-rules@54a8417a7ccd, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+refs: feature-run/run-flow/flow-rules@f011f018b6c5, feature-run/run-score/score-rules@1090f4b26dd9, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
 ---
 # Thành phần màn bắt đầu
 

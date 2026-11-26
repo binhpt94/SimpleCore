@@ -6,7 +6,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Một lượt có một điểm. Cả game có một kỉ lục.
 - `feature-wave` báo mỗi lần dọn sạch một đợt; feature này đếm thành điểm.
 - `feature-run/run-flow` báo lượt kết thúc; feature này chốt điểm và cập nhật kỉ lục.
-- Bên đọc: `feature-home` (kỉ lục), `feature-popup-lose` (điểm, kỉ lục, cờ phá kỉ lục).
+- Bên đọc: `feature-home` (kỉ lục), `feature-popup-lose` (điểm, kỉ lục, cờ phá kỉ lục). Hai bên này đọc từ feature này, không đọc thẳng từ `feature-save`.
+- `feature-save` cất kỉ lục xuống máy và trả lại khi mở game; feature này quyết giá trị và lúc ghi (sửa 2026-11-26, người quyết tách Save).
 - Số đợt HUD hiện (`feature-hud`) là đợt đang đánh, lấy từ `feature-wave`; khác với điểm.
 
 ## Định nghĩa
@@ -23,7 +24,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Điểm chỉ tăng, không giảm trong lượt.
 - Điểm chốt khi lượt kết thúc, cả khi thua lẫn khi bỏ lượt.
 - Kỉ lục chỉ đổi khi điểm chốt lớn hơn nó.
-- Kỉ lục được lưu ngay khi đổi.
+- Kỉ lục được giao `feature-save` ghi ngay khi đổi.
 
 ## Đã tự quyết
 - **Bằng kỉ lục không tính là phá kỉ lục.** Báo "phá kỉ lục" chỉ khi vượt thật.

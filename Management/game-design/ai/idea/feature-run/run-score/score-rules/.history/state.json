@@ -1,5 +1,5 @@
 {
- "hash": "54a8417a7ccd",
+ "hash": "1090f4b26dd9",
  "items": {
   "score-start-zero": {
    "hash": "18bd686f6336",
@@ -14,12 +14,20 @@
    "text": "Chốt điểm xong: điểm lớn hơn kỉ lục thì kỉ lục bằng điểm và cờ \"kỉ lục mới\" bật\nBằng hoặc nhỏ hơn thì kỉ lục giữ nguyên, cờ tắt. Điểm 0 không bao giờ bật cờ."
   },
   "record-default-zero": {
-   "hash": "8862664f3c2d",
-   "text": "Chưa có kỉ lục lưu trên máy thì kỉ lục là 0\nLần mở game đầu tiên, hoặc dữ liệu lưu đọc không được, đều coi là 0."
+   "hash": "f0cccc1e1ea1",
+   "text": "`feature-save` báo chưa có kỉ lục thì kỉ lục là 0\nLần mở game đầu tiên, hoặc dữ liệu lưu đọc không được, `feature-save` đều báo chưa có; lượt chơi coi là 0."
   },
   "record-save-now": {
-   "hash": "403c316e6e09",
-   "text": "Kỉ lục mới được ghi xuống máy ngay khi đổi, trước khi popup thua hiện\nTắt game ngay trên popup thua vẫn giữ kỉ lục mới."
+   "hash": "03dfb27bc6b1",
+   "text": "Kỉ lục mới được giao `feature-save` ghi xuống máy ngay khi đổi, trước khi popup thua hiện\nTắt game ngay trên popup thua vẫn giữ kỉ lục mới."
+  },
+  "record-keep-on-fail": {
+   "hash": "fde6ed33e844",
+   "text": "`feature-save` báo ghi thất bại thì kỉ lục mới vẫn giữ trong bộ nhớ tới khi tắt game\nMàn bắt đầu và popup thua vẫn thấy kỉ lục mới; không báo lỗi cho người chơi."
+  },
+  "record-retry": {
+   "hash": "cc371d34e8e3",
+   "text": "Kỉ lục chưa ghi được thì thử ghi lại khi game trở lại màn hình, và ở lần chốt lượt kế tiếp\nMỗi dịp thử một lần; ghi được thì thôi. Lượt sau không phá kỉ lục vẫn thử."
   },
   "record-read-anytime": {
    "hash": "cde7c9dfa319",

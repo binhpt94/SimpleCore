@@ -5,3 +5,5 @@
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "6f1909d90f98"}
 {"at": "2026-11-24 23:45:25", "event": "data", "hash": "5869f69301eb", "previous": "6f1909d90f98", "added": ["score-across-revive"], "removed": [], "rewritten": []}
 {"at": "2026-11-25 00:11:10", "event": "promote", "by": "người (Sync)", "hash": "5869f69301eb"}
+{"at": "2026-11-26 18:14:11", "event": "data", "hash": "3d29bb683b7c", "previous": "5869f69301eb", "added": [], "removed": [], "rewritten": [{"id": "record-save", "old": "Kỉ lục được lưu lại, tắt game mở lại vẫn còn\nĐây là thứ duy nhất lưu khi tắt game. Đã loại: chỉ nhớ trong lúc game đang mở.", "new": "Kỉ lục được lưu lại, tắt game mở lại vẫn còn\nLượt chơi giữ luật kỉ lục và nhờ `feature-save` đọc, ghi xuống máy; lượt chơi không tự ghi. Đây là thứ duy nhất lưu khi tắt game. Đã loại: chỉ nhớ trong lúc game đang mở."}]}
+{"at": "2026-11-26 18:22:02", "event": "promote", "by": "người (Sync)", "hash": "3d29bb683b7c"}

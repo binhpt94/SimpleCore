@@ -1,6 +1,6 @@
 ---
 based-on: e06499689b32
-refs: feature-run/run-score@5869f69301eb, feature-run/run-score/score-rules@54a8417a7ccd, feature-popup-lose/lose-actions/actions-spec@a6b5a02909a8, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+refs: feature-run/run-score@3d29bb683b7c, feature-run/run-score/score-rules@1090f4b26dd9, feature-popup-lose/lose-actions/actions-spec@a6b5a02909a8, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
 ---
 # Chữ kết quả trên popup thua
 

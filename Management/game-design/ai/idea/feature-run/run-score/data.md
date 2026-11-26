@@ -21,7 +21,7 @@ Kỉ lục chỉ xét lúc lượt đã chốt thua hoặc bỏ lượt, không 
 Chốt điểm xong, điểm lớn hơn kỉ lục cũ thì điểm đó thành kỉ lục mới; bằng hoặc thấp hơn thì kỉ lục giữ nguyên.
 
 ### record-save | AI 7 | Kỉ lục được lưu lại, tắt game mở lại vẫn còn
-Đây là thứ duy nhất lưu khi tắt game. Đã loại: chỉ nhớ trong lúc game đang mở.
+Lượt chơi giữ luật kỉ lục và nhờ `feature-save` đọc, ghi xuống máy; lượt chơi không tự ghi. Đây là thứ duy nhất lưu khi tắt game. Đã loại: chỉ nhớ trong lúc game đang mở.
 
 ### record-new-flag | AI 7 | Lượt vừa kết thúc biết mình có phá kỉ lục hay không
 Cờ "phá kỉ lục" để `feature-popup-lose` báo cho người chơi.

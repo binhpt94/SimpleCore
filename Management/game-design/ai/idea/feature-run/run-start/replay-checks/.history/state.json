@@ -1,5 +1,5 @@
 {
- "hash": "cc2084b931e2",
+ "hash": "b4c7f6741229",
  "items": {
   "replay-no-growth": {
    "hash": "f1e89923db75",
@@ -10,8 +10,8 @@
    "text": "Đầu lượt mới không còn popup nào đang mở\nPopup thua đã đóng khi bấm nút; nếu vì lỗi còn popup mở thì lượt chơi ghi lỗi nêu id popup (`feature-popup/popup-request/request-rules`), không tự đóng âm thầm."
   },
   "only-record-saved": {
-   "hash": "f10ab1f79ffa",
-   "text": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game\nKỉ lục do `feature-run/run-score/score-rules` lưu. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống lúc game đang mở."
+   "hash": "a328613df48b",
+   "text": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game\nKỉ lục do `feature-run/run-score/score-rules` quyết và giao `feature-save` ghi xuống máy. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống lúc game đang mở."
   }
  }
 }

@@ -1,0 +1,2 @@
+{"at": "2026-11-26 18:20:22", "event": "data", "hash": "2830f8d52b13", "previous": "", "added": ["io-one-record", "io-read-two-results", "io-read-before-home", "io-write-replaces", "io-write-reports", "io-write-whole", "io-write-last-wins", "io-older-version", "io-newer-version", "io-broken-not-erased"], "removed": [], "rewritten": []}
+{"at": "2026-11-26 18:22:02", "event": "promote", "by": "người (Sync)", "hash": "2830f8d52b13"}

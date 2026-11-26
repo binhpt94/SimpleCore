@@ -102,3 +102,6 @@ Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc đi�
 - choi-lai-tu-dau (advice/_root/root-gaps.md): dùng; sửa câu vòng lặp thành giữ đội hoặc đổi đội.
 - mot-ban-do (advice/_root/root-gaps.md): dùng; thêm lí do ở "Một bản đồ duy nhất".
 - pho-thong-de-doc (advice/_root/root-gaps.md): sửa theo điều kiện của GPT ở `root-gaps-r2.md`: "hero nào sắp gục" thay cho "cánh nào cần cứu"; thêm dòng ở "Người chơi".
+- advice/_general/r2-all-4 (2026-11-26, sau khi tách `feature-save`): 8 góp ý đã thành ý của `feature-save` (danh sách ở `CLAUDE.md` của node đó). Hai góp ý không thành ý mới:
+  - bo-luot-khong-xet-ki-luc: không dùng. Đi ngược `feature-run/run-score#score-final` đã chốt (bỏ lượt vẫn chốt điểm, phương án "bỏ lượt thì mất điểm" đã bị loại). Muốn đổi thì người quyết.
+  - don-scene-khong-xoa-luu: đã có, đúng ý `feature-session-scene/session-clean#saved-data-only`; không thêm ý trùng.
