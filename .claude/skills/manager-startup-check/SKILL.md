@@ -19,7 +19,7 @@ Chạy ở **lượt làm việc đầu tiên sau khi phiên được tạo mớ
 - Bạn không tự đặt, không tự suy ra giai đoạn từ tiến độ.
 
 ## Bước 2. Tiến độ của ba Leader
-Chỉ làm khi bước 1 qua. Một lần gọi shell được nối tối đa 6 lệnh: `python Management/tools/gd_status.py; python Management/tools/gd_req.py status; python Management/tools/toolwork.py list`.
+Chỉ làm khi bước 1 qua. Một lần gọi shell được nối tối đa 6 lệnh: `python Management/tools/gd_status.py --brief; python Management/tools/gd_req.py status; python Management/tools/toolwork.py list`.
 - **@GameDesigner**: từ `gd_status.py` (cả cây), ghi lại:
   - mode và vòng đang làm;
   - node chưa đạt, node chưa hỏi GPT, node có xung đột chưa giải quyết (khoá vòng sau);

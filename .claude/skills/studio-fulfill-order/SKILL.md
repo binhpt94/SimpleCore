@@ -53,12 +53,12 @@ Mỗi mục một dòng, ghi lỗi dưới dạng luật làm được, kèm ngu
 **@Codex, ảnh**
 1. `studio.py codex`: Codex CLI ghi trực tiếp (`-s workspace-write`, chỉ trong `work/` của order).
 2. Cũng lệnh đó, tự chuyển sang chỉ đọc (`-s read-only`), rồi lấy đúng ảnh mới Codex lưu trong `~/.codex/generated_images/`.
-3. Cả hai không được (lệnh in hướng dẫn): đi gián tiếp qua unity-mcp. Tìm cấu hình tool của Codex trong unity-mcp, rồi gọi `execute_custom_tool` hoặc `execute_menu_item`. Guard giữ khoá Editor cho chat đó tới hết lượt.
+3. Lệnh in `CODEX LỖI:` (Codex không chạy: mất kết nối, đăng nhập, config) hay cả hai cách không ra ảnh: DỪNG. Không chạy lại, không đi đường khác (không qua unity-mcp); báo bên giao việc MỘT tin rồi kết thúc lượt (người quyết 2026-11-26). Guard chặn lần chạy lại trong cùng lượt.
 
 **@Blender, model**
 1. `studio.py blender`: Blender headless (`blender -b --factory-startup -P work/<item>.py`).
 2. Không được: blender MCP (`mcp__blender__*`, chỉ @Blender). Chạy cùng nội dung script và lưu vào `work/out/<item>.<đuôi>`.
-3. MCP không kết nối được: qua unity-mcp như Codex.
+3. MCP không kết nối được: DỪNG, báo bên giao việc MỘT tin; không đi đường khác.
 
 Đường 2 của Blender và đường 3 của cả hai là cổng mềm: guard không đọc được code bên trong. Vì vậy:
 - kết quả chỉ được để ở `work/out/` của đúng order;

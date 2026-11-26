@@ -104,6 +104,15 @@ def fail(text):
     return 1
 
 
+CODEX_STOP = "DỪNG: không chạy lại, không đi đường khác; báo bên giao việc MỘT tin rồi kết thúc lượt."
+
+
+def codex_fail(text):
+    """Codex itself failed (người quyết 2026-11-26: dừng ngay, không cố): the mark the hook tool_fail.py looks for."""
+    print(f"CODEX LỖI: {text}. {CODEX_STOP}")
+    return 1
+
+
 def node_folders(root, node):
     """[(table name, folder)] of the node in ai/idea and in live, the ones that exist; [] for _general."""
     if node == gd.ADVICE_GENERAL:
@@ -311,7 +320,7 @@ def main(argv, root=ROOT):
     try:
         exe = studio.tool_exe("codex")
     except ValueError as ex:
-        return fail(str(ex))
+        return codex_fail(str(ex))
     prompt = build_prompt(root, node, found, question, also, aid)
     with tempfile.TemporaryDirectory(prefix="gd-advise-") as tmp:
         out = Path(tmp) / "answer.md"
@@ -319,7 +328,7 @@ def main(argv, root=ROOT):
                                       "-o", str(out), "-"], prompt)
         answer = gd.read_text(out).strip() if out.is_file() else ""
     if not answer:
-        return fail(f"Codex không trả lời (mã {code}): {err.strip()[-600:]}")
+        return codex_fail(f"Codex không trả lời (mã {code}): {' '.join(err.split())[-400:]}")
     node_data = gd.read_data(found[0][1]) if found else None
     points, errors = answer_problems(answer, {it["id"] for it in node_data["items"]} if node_data else set())
     if errors:

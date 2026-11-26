@@ -7,8 +7,9 @@ and what is measurably wrong. Reads only, unless --html is given.
     python Management/tools/gd_frame.py <node path> --html <file> also writes one self-contained HTML page
                                                                   (the drawing, data-* numbers on every shape)
     python Management/tools/gd_frame.py <node path> --png         also draws every frame into PNGs to look at:
-        Management/game-design/.pack/frames/<node, '/' as '.'>/<frame>.png          as a concept shows it (no numbers)
-                                                              .../<frame>.measure.png  with the numbers and notes
+        Management/game-design/.pack/frames/<node, '/' as '.'>/<frame>.png          as a concept shows it (no numbers), 960 px
+                                                              .../<frame>.measure.png  with the numbers and notes, 1280 px
+    python Management/tools/gd_frame.py <node path> --png-full    the same at 1920 px (a fine detail; costs more to Read)
 The frame syntax is at the top of the frames part of gamedesign.py and in the skill .claude/skills/ui-frame-syntax/SKILL.md.
 """
 import html
@@ -70,9 +71,12 @@ def html_page(table, node):
 
 
 PNG_DIR = ("Management", "game-design", ".pack", "frames")
+# A PNG a session Reads costs about (width x height) / 750 tokens: 960 px is about a third of 1920 (người quyết
+# 2026-11-26: ảnh nhỏ hơn). The numbers of .measure still read at 1280.
+PNG_WIDTH, MEASURE_WIDTH, FULL_WIDTH = 960, 1280, 1920
 
 
-def write_pngs(root, table, node):
+def write_pngs(root, table, node, full=False):
     """Draws every frame of the node twice (as a concept, and with the numbers); returns the printed lines."""
     import studio      # the SVG to PNG ways of the studio
     dest = Path(root).joinpath(*PNG_DIR, (table + "." + node["path"].replace("/", ".")) if node["path"] else table)
@@ -80,7 +84,8 @@ def write_pngs(root, table, node):
     for fr in node["frames"]:
         stem = Path(fr["file"]).stem
         for name, concept in ((stem, True), (stem + ".measure", False)):
-            png = studio.frame_png_file(fr, dest, name, concept=concept)
+            width = FULL_WIDTH if full else PNG_WIDTH if concept else MEASURE_WIDTH
+            png = studio.frame_png_file(fr, dest, name, concept=concept, width=width)
             if png is None:
                 failed = True
                 continue
@@ -95,8 +100,9 @@ def main(argv):
     if len(argv) >= 3 and argv[-2] == "--root":      # test-only override
         root, argv = Path(argv[-1]), argv[:-2]
     args = argv[1:]
-    out_file, png = None, "--png" in args
-    args = [a for a in args if a != "--png"]
+    full = "--png-full" in args
+    out_file, png = None, "--png" in args or full
+    args = [a for a in args if a not in ("--png", "--png-full")]
     if "--html" in args:
         i = args.index("--html")
         if i + 1 >= len(args):
@@ -113,7 +119,7 @@ def main(argv):
         return 2
     print(text_report(table, node))
     if png:
-        print("\n".join(write_pngs(root, table, node)))
+        print("\n".join(write_pngs(root, table, node, full)))
     if out_file:
         Path(out_file).write_text(html_page(table, node), encoding="utf-8")
         print(f"\nĐã ghi {out_file}")

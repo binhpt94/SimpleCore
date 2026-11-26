@@ -13,7 +13,7 @@ Nhóm Tools. Không code, không đụng Unity, **không viết thiết kế**. 
   - `<id>`: chữ thường, số, gạch nối; không trùng trong thư mục đó.
 - Lệnh shell, chạy từ gốc project:
   - `python Management/tools/gd_advise.py <node> <id>`: gửi `<id>.q.md` cho GPT, ghi câu trả lời vào `<id>.md`. Không có trần lượt.
-  - `python Management/tools/gd_status.py [ai/idea/<node>]`: tình trạng cây hoặc một nhánh; ở mỗi node có dòng "Góp ý của GPT" và các góp ý chưa vào node.
+  - `python Management/tools/gd_status.py [ai/idea/<node>] [--brief]` (`--brief`: chỉ in node chưa đạt hoặc còn người phải làm, cùng các mục cuối; node đạt chỉ được đếm): tình trạng cây hoặc một nhánh; ở mỗi node có dòng "Góp ý của GPT" và các góp ý chưa vào node.
   - `gd_pack.py`, `gd_frame.py`, `studio.py check|status|measure` như mọi phiên.
 - Không chạy `codex` bằng shell trực tiếp, không dùng `studio.py consult`, không dùng unity-mcp. Bị guard chặn thì dừng và báo người.
 - Không có báo cáo cuối lượt.

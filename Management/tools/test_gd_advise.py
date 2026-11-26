@@ -131,7 +131,9 @@ def advise_cases(root, tmp):
                answer.read_text(encoding="utf-8") == before), (1, True, True))
     os.environ["FAKE_ANSWER"] = ""
     code, text = run(root, "feature-hero", "q1")
-    check("Codex says nothing: refused, the answer stays", (code, "không trả lời" in text, answer.read_text(encoding="utf-8") == before), (1, True, True))
+    check("Codex says nothing: CODEX LỖI, stop (no retry, no other way), the answer stays",
+          (code, "không trả lời" in text, text.lstrip().startswith("CODEX LỖI:"), "DỪNG" in text,
+           answer.read_text(encoding="utf-8") == before), (1, True, True, True, True))
 
     os.environ["FAKE_ANSWER"] = "### more-loot | thêm | Quái rơi đồ\nCó thứ để nhặt.\n"
     for name in (gd.ADVICE_ROOT, gd.ADVICE_GENERAL):

@@ -513,6 +513,7 @@ def run_cases():
     run_tester_cases()
     run_inbox_cases()
     run_unity_instance_cases()
+    run_fail_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
         json.dumps({"tool_name": "Write", "tool_input": {"file_path": real + "/x.txt"}, "cwd": real}), root=None)
@@ -548,6 +549,9 @@ def run_uidesigner_cases():
         w(g, who, "deny", FX + "/.claude/skills/studio-claude-concept/SKILL.md")
     g = "uidesigner: commands"
     for cmd in ("python Management/tools/gd_status.py", "python Management/tools/gd_status.py ai/idea/feature-hero",
+                "python Management/tools/gd_status.py --brief", "python Management/tools/gd_status.py ai/idea/feature-hero --brief",
+                "python Management/tools/gd_frame.py ai/idea/feature-hero/hero-list/x --png",
+                "python Management/tools/gd_frame.py ai/idea/feature-hero/hero-list/x --png-full",
                 "python Management/tools/gd_frame.py ai/idea/feature-hero/hero-list/x",
                 "python Management/tools/gd_delete.py ai/idea/feature-hero/hero-list/.frame-concept/main.frame",
                 "python Management/tools/gd_status.py; python Management/tools/gd_frame.py live/feature-hero",
@@ -1672,6 +1676,9 @@ def run_unity_instance_cases():
           {"commands": [{"tool": "read_console", "params": {"action": "get", "unity_instance": mine}}]})
         status(mine, "UnityProject", FX + "/UnityProject/Assets", 3600)
         t(g + " (this Editor gone, another runs: nothing reaches it)", L, "deny", read, {"action": "get", "unity_instance": mine})
+        check(g + " (... and the turn stops: the session is flagged, no retry)", L, True, "flag set",
+              guard.read_fail("test-session", STORE, "unity") is not None)
+        guard.clear_fails("test-session", STORE)
         t(g + " (... resources may still be read)", L, "allow", "ReadMcpResourceTool", {"server": "UnityMCP", "uri": "mcpforunity://instances"})
         status(other, "Rebuilt", "/elsewhere/Rebuilt/Assets", 3600)
         t(g + " (every Editor quiet: the server says what it sees)", L, "allow", read, {"action": "get", "unity_instance": mine})
@@ -1692,6 +1699,67 @@ def run_unity_instance_cases():
         t(g + " (the default port file names another project: the call must name this one)", L, "allow", read, {"action": "get", "unity_instance": mine})
     finally:
         clear()
+
+
+def run_fail_cases():
+    """Người quyết 2026-11-26: unity-mcp lỗi kết nối, hay Codex lỗi: dừng, không thử lại trong lượt, báo một lần.
+    tool_fail.py flags the session from the failed result; guard refuses the retries; a new turn clears the flags."""
+    import subprocess
+    g = "fail: stop, no retry"
+    hook = str(HERE / "tool_fail.py")
+
+    def post(event, tool, ti, result, session):
+        data = {"hook_event_name": event, "tool_name": tool, "tool_input": ti, "session_id": session}
+        data["error" if event == "PostToolUseFailure" else "tool_response"] = result
+        p = subprocess.run([sys.executable, "-I", hook, "--store", STORE], input=json.dumps(data).encode("utf-8"),
+                           capture_output=True)
+        return p.stdout.decode("utf-8")
+
+    def bind(session, value):
+        os.makedirs(os.path.join(STORE, "sessions"), exist_ok=True)
+        with open(guard.binding_path(session, STORE), "w", encoding="utf-8") as f:
+            json.dump({"feature": value}, f)
+    read = "mcp__UnityMCP__read_console"
+    for s, v in (("fail-w", "Wallet"), ("fail-lead", "@CodeLead"), ("fail-adv", "@DesignAdvisor"), ("fail-codex", "@Codex"),
+                 ("fail-human", "@human")):
+        bind(s, v)
+        guard.clear_fails(s, STORE)
+    out = post("PostToolUseFailure", read, {"action": "get"}, "Invalid value for 'count': must be a number", "fail-w")
+    check(g, "Wallet", (False, ""), "a unity-mcp error that is not a connection error: nothing",
+          (guard.read_fail("fail-w", STORE, "unity") is not None, out))
+    t(g, "Wallet", "allow", read, {"action": "get"}, session="fail-w")
+    out = post("PostToolUseFailure", read, {"action": "get"},
+               "Instance 'UnityProject@638c2683' not found. Available: Hitsort@a573ff35.", "fail-w")
+    check(g, "Wallet", (True, True, True), "unity-mcp connection error: flagged, told to stop and tell its Leader once",
+          (guard.read_fail("fail-w", STORE, "unity") is not None, "UNITY MCP LỖI KẾT NỐI" in out, "MỘT tin" in out))
+    t(g + " (the retry is refused)", "Wallet", "deny", read, {"action": "get"}, session="fail-w")
+    t(g + " (... other work goes on)", "Wallet", "allow", "Read", {"file_path": FX + "/CLAUDE.md"}, session="fail-w")
+    out = post("PostToolUse", read, {"action": "get"}, {"success": False, "error": "Connection refused"}, "fail-lead")
+    check(g, "@CodeLead", True, "a result with success false and a connection error flags too",
+          guard.read_fail("fail-lead", STORE, "unity") is not None)
+    t(g + " (CodeLead's retry refused)", "@CodeLead", "deny", "mcp__UnityMCP__refresh_unity", {}, session="fail-lead")
+    post("PostToolUseFailure", read, {"action": "get"}, "Connection refused", "fail-human")
+    check(g, "@human", None, "the human's chat is never flagged", guard.read_fail("fail-human", STORE, "unity"))
+
+    advise = "python Management/tools/gd_advise.py feature-hero q1"
+    out = post("PostToolUse", "Bash", {"command": advise},
+               {"stdout": "CODEX LỖI: Codex không trả lời (mã 1): stream error. DỪNG: không chạy lại"}, "fail-adv")
+    check(g, "@DesignAdvisor", (True, True), "a command that printed CODEX LỖI: flagged, told to stop",
+          (guard.read_fail("fail-adv", STORE, "codex") is not None, "CODEX LỖI" in out))
+    t(g + " (gd_advise.py again refused)", "@DesignAdvisor", "deny", "Bash", {"command": advise}, session="fail-adv")
+    post("PostToolUseFailure", "Bash", {"command": "python Management/tools/studio.py consult Wallet/ask palette"},
+         "Exit code 1\nCODEX LỖI: codex exec lỗi (mã 1): Error loading configuration", "fail-codex")
+    for cmd in ("python Management/tools/studio.py consult Wallet/ask palette",
+                "python Management/tools/studio.py codex Wallet/coin-icons coin"):
+        t(g + " (Codex run again refused)", "@Codex", "deny", "Bash", {"command": cmd}, session="fail-codex")
+    out = post("PostToolUse", "Bash", {"command": "python Management/tools/studio.py check"}, {"stdout": "ok"}, "fail-w")
+    check(g, "Wallet", "", "an ordinary command output: nothing", out)
+
+    for s in ("fail-w", "fail-adv"):
+        p = subprocess.run([sys.executable, "-I", str(HERE / "bind_session.py"), "--root", FX, "--store", STORE],
+                           input=json.dumps({"session_id": s, "prompt": "Unity đã mở lại"}).encode("utf-8"), capture_output=True)
+    check(g, "Wallet", (None, None), "a new turn clears the flags: it may try once again",
+          (guard.read_fail("fail-w", STORE, "unity"), guard.read_fail("fail-adv", STORE, "codex")))
 
 
 def run_inbox_cases():

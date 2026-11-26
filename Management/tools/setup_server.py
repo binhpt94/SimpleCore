@@ -21,10 +21,11 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   them (none changed: no turn). The page's "Đọc lại quy trình" buttons (one thread, or all of them a few at a time)
   call it. It binds nothing.
 - POST /api/sessions/compact {id} (page token, no PIN): one headless turn that runs /compact in that thread.
-- POST /api/sessions/renew {id, pin} (with the PIN, as it binds; a thread that runs on demand, neither the human's nor a
-  Leader's, is only marked and the courier does it right before its next job): empties the thread's context in the same chat (a
-  /compact told to keep nothing; the CLI's /clear does not work on a resumed session in a headless turn), binds
-  it again to the FEATURE it had, and tells it to read the rules. Three headless turns at most.
+- POST /api/sessions/renew {id, pin} (with the PIN, as it binds): a clear done by the server, no model turn: the
+  transcript is moved to the .renewed folder and a new one keeps only its name and a neutral finished first turn (same
+  session id, same chat in VS Code), the thread is bound again to the FEATURE it had and its next turn is told by the
+  guard line to Read its role rules. A thread in the middle of a turn is only marked; the courier clears it right
+  before its next job. A background session is stopped and not started again.
 - POST /api/setup {pin, mode, model, effort} checks the PIN, then runs the setup in the background and answers at
   once with the job; GET /api/setup/job is that job as it goes (each name: waiting, running, bound, created or
   error), so the page shows how far it is and which thread failed. One setup runs at a time.
@@ -37,8 +38,8 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   a headless -p turn exits when done. GET /api/threads gives each thread `live` ("interactive": open in VS Code or a
   terminal; "background"; "") from `claude agents --json`. POST /api/sessions/live {id} (no PIN) runs a bound,
   not yet live thread on as a background session, `claude --bg --resume <id> <LIVE_PROMPT>` (one short turn);
-  /api/sessions/stop {id} ends it (`claude stop`). Setup does that after a new thread's first turn. Reread, compact
-  and the last turn of renew go into the background session of a thread that has one (stopped, then started again
+  /api/sessions/stop {id} ends it (`claude stop`). Setup does that after a new thread's first turn. Reread and compact
+  go into the background session of a thread that has one (stopped, then started again
   with that prompt), so it stays live. `claude attach <name>` opens a background thread in a terminal (to answer a
   permission question); stop it before opening the thread in VS Code. Delete stops it first.
 - Inbox courier (a thread of its own while the server runs; dispatch.py holds the messages and settings): every few
@@ -170,17 +171,35 @@ def rules_state(binding):
     return out
 
 
-# Renew of a thread that runs on demand (Tools, Testers, Basic, Services, Features; người quyết 2026-11-26) only marks
-# it: the context is emptied right before the next inbox message is given to it, so a thread that gets no work costs
-# nothing (an idle @Blender had cost ~1M tokens in rereads and renews). The human's chat and the Leaders are renewed
-# at once, as before: their work does not come through the inbox, so nothing would ever run the mark.
+# Renew is a clear the server does itself (người quyết 2026-11-26: no /compact, no turn; the next turn binds and reads
+# the rules). `claude --resume <id> -p /clear` does not empty the session (it opens another one), and a transcript
+# with no message cannot be resumed ("No conversation found"), so the first user message stays with a neutral text.
+# The VS Code extension cannot go on with a transcript whose only message is a user one with no answer: clicking the
+# thread opened a new, unbound session (2026-11-26). So the user message is followed by a finished assistant answer,
+# written by the server ("<synthetic>" model, as the CLI marks the messages it makes itself).
+# A thread in the middle of a turn is only marked (renew-pending); the courier clears it right before its next job.
 RENEW_PENDING_DIR = "renew-pending"
-RENEW_NOW_GROUPS = ("Master", "Leaders")
+RENEWED = ".renewed"      # inside the transcripts folder: the transcripts a renew took away
+RENEW_NOTE = "Thread này vừa được làm mới (renew) từ trang Setup: ngữ cảnh cũ đã bỏ."
+RENEW_REPLY = "Sẵn sàng."
+SYNTHETIC_MODEL = "<synthetic>"
+HEAD_TYPES = ("custom-title", "agent-name", "session-owner")      # transcript lines that are not the conversation
+# fields of the user line the answer shares (where and how the session ran), never its content
+TURN_FIELDS = ("isSidechain", "userType", "entrypoint", "cwd", "sessionId", "version", "gitBranch")
 
 
-def renew_deferred(binding):
-    """True when Renew of a thread bound to `binding` is a mark that the courier runs before the next job."""
-    return ROLE_GROUPS.get(binding) not in RENEW_NOW_GROUPS
+def renew_turn(first):
+    """The conversation a renewed transcript keeps: the first user line of the old one with RENEW_NOTE as its only
+    content, and a finished assistant answer RENEW_REPLY right after it (same uuid chain, same session fields)."""
+    user = dict(first, message={"role": "user", "content": RENEW_NOTE}, parentUuid=None)
+    user.pop("toolUseResult", None)
+    answer = {k: first[k] for k in TURN_FIELDS if k in first}
+    answer.update(type="assistant", parentUuid=user.get("uuid"), uuid=str(uuid.uuid4()), timestamp=first.get("timestamp"),
+                  message={"id": "msg_renew_" + uuid.uuid4().hex[:24], "type": "message", "role": "assistant",
+                           "model": SYNTHETIC_MODEL, "content": [{"type": "text", "text": RENEW_REPLY}],
+                           "stop_reason": "end_turn", "stop_sequence": None,
+                           "usage": {"input_tokens": 0, "output_tokens": 0}})
+    return [user, answer]
 
 
 def renew_mark_path(session_id):
@@ -223,9 +242,6 @@ def mark_rules_seen(session_id, state):
 
 
 COMPACT_PROMPT = "/compact"
-# Renew: the CLI's /clear does not empty a resumed session in a headless turn, a /compact told to keep nothing does.
-WIPE_PROMPT = ("/compact Session này được làm mới: KHÔNG giữ lại bất kì nội dung, con số, file, việc dở dang hay quyết định nào "
-               "của cuộc trò chuyện. Bản tóm tắt chỉ gồm đúng một câu: 'Session đã được làm mới, không còn ngữ cảnh cũ.'")
 CLAUDE_SECONDS = 300      # one headless turn that reads the rules
 # Live: a thread other sessions see in ListAgents has a running process (the CLI's session list, `claude agents --json`).
 # A headless turn (-p) exits when it is done, so the page keeps a thread live with `claude --bg --resume <id> <prompt>`:
@@ -512,14 +528,113 @@ def close_chat(session_id):
         raise RuntimeError(f"chat vẫn chạy sau {LIVE_SECONDS}s (pid {s['pid']})")
 
 
-def turn_args(t):
-    """The model and effort a thread last used, as CLI flags."""
-    args = []
-    if t["model"]:
-        args += ["--model", t["model"]]
-    if t["effort"] in EFFORTS:
-        args += ["--effort", t["effort"]]
+# ---- the profile of a role (người quyết 2026-11-26: cắt phần khởi đầu cố định theo vai, model theo vai). Every
+# turn the server runs carries what its role needs and no more: the MCP servers it uses (--strict-mcp-config, which
+# also keeps the claude.ai connectors out), only its own skills (skillOverrides "off" for the others: the project's
+# skills of other roles, the user's skills, the claude.ai skills), no bundled skills, no easel, no Artifact /
+# Workflow / ScheduleWakeup / ReportFindings tools. Measured on the first call of a turn: 51.7k tokens without it,
+# about 20-26k with it. A chat opened by hand in VS Code does not go through the server and gets none of this;
+# the human's own thread never does.
+ROLE_SKILLS = {"@Manager": "manager-", "@CodeLead": "codelead-", "@GameDesigner": "gd-", "@UIDesigner": "ui-",
+               "@Codex": "studio-", "@Blender": "studio-", "@ClaudeImage": "studio-", "@DesignAdvisor": "advisor-",
+               "@UnityAutoPlay": "tester-", "@Core": "feature-"}
+GROUP_SKILLS = {"Services": "feature-", "Features": "feature-"}
+UNITY_ROLES = {"@CodeLead", "@Core", "@UnityAutoPlay"}      # and every Services and Features thread
+UNITY_SKILL = "unity-mcp-skill"
+KEEP_ALL_MCP = {"@Blender"}      # its Blender server is the user's, set outside the project
+OFF_TOOLS = "Artifact,Workflow,ScheduleWakeup,ReportFindings"
+OFF_PLUGINS = ("cc-plugin-easel@builtin", "plugin-authoring@builtin")
+CLAUDEAI_SKILL = "anthropic-skills:"
+# (model, effort) by role; a role not named keeps what the page chose.
+LOW, MID = ("opus", "low"), ("opus", "medium")
+ROLE_MODELS = {"@Manager": LOW, "@UnityAutoPlay": LOW, "@Core": LOW, "@GameDesigner": MID, "@CodeLead": MID}
+GROUP_MODELS = {"Services": LOW, "Features": LOW}
+PROFILE_DIR = ".profiles"      # in the transcripts folder: the generated settings and MCP files of each role
+PROFILES = True      # tests of the plain CLI lines turn it off
+
+
+def config_dir():
+    return Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+
+
+def profiled(feature):
+    """Whether a thread bound to `feature` runs with a role profile: a role of the setup or a feature/service; not the
+    human's thread, not a name outside the setup."""
+    return PROFILES and bool(feature) and feature != "@human" and group_of(feature) not in ("", "Master")
+
+
+def role_model(feature, model, effort):
+    """The (model, effort) a thread of that role runs on: the role's own when it has one, else the ones given."""
+    pick = ROLE_MODELS.get(feature) or GROUP_MODELS.get(group_of(feature)) if profiled(feature) else None
+    return pick or (model, effort)
+
+
+def skill_names():
+    """Every skill a session of this project could list: the project's, the user's, the claude.ai ones (synced)."""
+    names = set()
+    for folder in (ROOT / ".claude" / "skills", config_dir() / "skills"):
+        if folder.is_dir():
+            names |= {p.name for p in folder.iterdir() if p.is_dir() and p.name != "synced"}
+    synced = config_dir() / "skills" / "synced"
+    if synced.is_dir():
+        names |= {CLAUDEAI_SKILL + p.name for p in synced.glob("*/*") if p.is_dir()}
+    return names
+
+
+def role_settings(feature):
+    """The settings a thread of that role runs with: only its own skills listed, no bundled ones, no claude.ai
+    connectors, no easel."""
+    keep = ROLE_SKILLS.get(feature) or GROUP_SKILLS.get(group_of(feature)) or "\0"
+    unity = uses_unity(feature)
+    off = {n: "off" for n in sorted(skill_names()) if not n.startswith(keep) and not (unity and n == UNITY_SKILL)}
+    return {"skillOverrides": off, "disableBundledSkills": True, "disableClaudeAiConnectors": True,
+            "enabledPlugins": {p: False for p in OFF_PLUGINS}}
+
+
+def uses_unity(feature):
+    return feature in UNITY_ROLES or group_of(feature) in ("Services", "Features")
+
+
+def role_mcp(feature):
+    """The MCP servers of that role: UnityMCP (as .mcp.json defines it) for the roles that drive Unity, none else."""
+    servers = {}
+    if uses_unity(feature):
+        try:
+            servers = {k: v for k, v in json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))["mcpServers"].items()
+                       if k == "UnityMCP"}
+        except (OSError, ValueError, KeyError):
+            servers = {}
+    return {"mcpServers": servers}
+
+
+def profile_args(feature):
+    """The CLI flags of the role profile ([] for the human's thread or a name outside the setup). The settings and
+    the MCP list go into files (a JSON argument would not survive cmd.exe on Windows)."""
+    if not profiled(feature):
+        return []
+    folder = transcripts_dir() / PROFILE_DIR
+    folder.mkdir(parents=True, exist_ok=True)
+    stem = re.sub(r"[^A-Za-z0-9]+", "-", feature).strip("-") or "role"
+    settings = folder / f"{stem}.settings.json"
+    settings.write_text(json.dumps(role_settings(feature), ensure_ascii=False, indent=1), encoding="utf-8")
+    args = ["--settings", str(settings), "--disallowedTools", OFF_TOOLS]
+    if feature not in KEEP_ALL_MCP:
+        mcp = folder / f"{stem}.mcp.json"
+        mcp.write_text(json.dumps(role_mcp(feature), ensure_ascii=False, indent=1), encoding="utf-8")
+        args += ["--strict-mcp-config", "--mcp-config", str(mcp)]
     return args
+
+
+def turn_args(t):
+    """The model and effort of the thread's role (else the ones it last used), and its role profile, as CLI flags."""
+    feature = t.get("binding") or t.get("feature") or ""
+    model, effort = role_model(feature, t.get("model") or "", t.get("effort") or "")
+    args = []
+    if model:
+        args += ["--model", model]
+    if effort in EFFORTS:
+        args += ["--effort", effort]
+    return args + profile_args(feature)
 
 
 # A background thread (claude --bg) edits the shared checkout: the one Unity has open. Without this the CLI blocks its
@@ -566,9 +681,10 @@ def create(name, feature, model, effort):
     knows its role and reads the right rules; returns its session id. Costs one turn."""
     sid = str(uuid.uuid4())
     bind(sid, feature)
+    model, effort = role_model(feature, model, effort)
     try:
-        run_claude(["-n", name, "--session-id", sid, "--model", model, "--effort", effort,
-                    "-p", f"Thread {name} được tạo bởi trang Setup. {REREAD_PROMPT}"])
+        run_claude(["-n", name, "--session-id", sid, "--model", model, "--effort", effort] + profile_args(feature)
+                   + ["-p", f"Thread {name} được tạo bởi trang Setup. {REREAD_PROMPT}"])
         mark_rules_seen(sid, rules_state(feature))
     except Exception:
         try:
@@ -733,41 +849,73 @@ def compact(session_id):
     return {"ok": True, "id": t["id"], "title": t["title"], "answer": "đã compact"}
 
 
+def wipe_transcript(t):
+    """The clear of a renew, without a model turn: a background session of thread t is stopped (it would write the
+    transcript back), its transcript and folder go to <transcripts>/.renewed/<time>-<id>/, and a new transcript keeps
+    only the lines that are not the conversation (name, owner) and one neutral finished turn (renew_turn: a transcript
+    without a message cannot be resumed, and VS Code opens a new session for one with no answer). Then the thread is bound again to the FEATURE it had and its next
+    turn gets the guard line that says to Read its role rules (bind_session.rules_reminder)."""
+    sid = t["id"]
+    if t.get("live") == "background":
+        stop_bg(sid)
+        t["live"] = ""
+    folder = transcripts_dir()
+    src = folder / f"{sid}.jsonl"
+    head, first = {}, None
+    if src.is_file():
+        with open(src, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                try:
+                    o = json.loads(line)
+                except ValueError:
+                    continue
+                if not isinstance(o, dict):
+                    continue
+                if o.get("type") in HEAD_TYPES:
+                    head[o["type"]] = o      # the last one: a thread may have been renamed
+                elif o.get("type") == "user" and first is None and isinstance(o.get("message"), dict):
+                    first = o
+    if first is not None:      # a transcript with no message has no context to drop
+        trash = folder / RENEWED / f"{time.strftime('%Y%m%d-%H%M%S')}-{sid}"
+        trash.mkdir(parents=True, exist_ok=True)
+        for old in (src, folder / sid):
+            if old.exists():
+                shutil.move(str(old), str(trash / old.name))
+        lines = [head[k] for k in HEAD_TYPES if k in head] + renew_turn(first)
+        src.write_text("".join(json.dumps(o, ensure_ascii=False) + "\n" for o in lines), encoding="utf-8", newline="\n")
+    bind(sid, t["binding"])
+    bind_session.forget_rules_read(sid, guard.STORE_DIR)
+    # its next turn Reads every role rule file anyway: the page's "Đọc lại quy trình" must not add a turn for them
+    mark_rules_seen(sid, rules_state(t["binding"]))
+
+
 def renew(session_id, pin):
-    """Makes one existing, bound thread new again, in the same chat: its context is emptied, it is bound again to
-    the FEATURE it had, and it is told to read the rules. With the PIN, as every binding.
-    The claude CLI cannot run /clear on a session in a headless turn (it opens another, empty session and leaves
-    this one as it was), so the context is emptied by a /compact that is told to keep nothing: same session id,
-    same chat in VS Code. The old messages stay in the transcript above the compact line; the model no longer has
-    them."""
+    """Makes one existing, bound thread new again, in the same chat (wipe_transcript): no model turn; its next turn
+    is told to read the rules. With the PIN, as every binding. A thread in the middle of a turn is only marked: the
+    courier clears it right before its next job. A background session is stopped and not started again (người quyết
+    2026-11-26)."""
     t, no = eligible(session_id)
     if no:
         return no
-    no = open_elsewhere(t, "đóng chat đó trong VS Code rồi bấm Renew lại (hoặc gõ /clear trong chat, rồi nhắn nó đọc lại quy trình)")
+    no = open_elsewhere(t, "gõ /clear trong chat đó (rồi gán lại FEATURE nếu guard báo chưa gán), hoặc đóng chat rồi bấm Renew lại")
     if no:      # before the PIN: closing the chat must not cost a try
         return no
     error = bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
     if error:
         return {"ok": False, "id": t["id"], "title": t["title"], "error": error, "pin": True}
-    if renew_deferred(t["binding"]):      # runs on demand: only marked, emptied before its next job (courier)
+    with BUSY_LOCK:
+        busy_now = t["id"] in BUSY
+    if busy_now or t.get("live_status") == "busy":
         bind_session.write_json(renew_mark_path(t["id"]), {"binding": t["binding"], "at": time.strftime("%Y-%m-%d %H:%M:%S")})
         return {"ok": True, "id": t["id"], "title": t["title"], "pending": True,
-                "answer": "đã đánh dấu cần renew: server làm mới thread ngay trước việc kế tiếp hộp thư giao cho nó"}
-    # a renewed thread is live; a chat open in VS Code stays there, and the human's own chat is never put in the background
-    live_after = t.get("live") != "interactive" and not human_thread(t)
+                "answer": "thread đang chạy một lượt: đã đánh dấu, server làm mới ngay trước việc kế tiếp hộp thư giao cho nó"}
     try:
-        turn(t, WIPE_PROMPT, bg=False)
-    except Exception as ex:      # nothing was changed
-        return {"ok": False, "id": t["id"], "title": t["title"], "error": "chưa làm mới được: " + str(ex)[:260]}
-    bind(t["id"], t["binding"])
-    try:
-        answer = turn(t, f"Thread {t['title']} vừa được làm mới (renew) từ trang Setup: ngữ cảnh cũ đã bỏ. {REREAD_PROMPT}",
-                      bg=live_after)
+        wipe_transcript(t)
     except Exception as ex:
-        return {"ok": False, "id": t["id"], "title": t["title"], "renewed": True,
-                "error": "đã làm mới và gán lại, CHƯA đọc quy trình (bấm Đọc lại quy trình): " + str(ex)[:200]}
-    mark_rules_seen(t["id"], rules_state(t["binding"]))
-    return {"ok": True, "id": t["id"], "title": t["title"], "answer": "đã làm mới, gán lại " + t["binding"] + ". " + answer[:240]}
+        return {"ok": False, "id": t["id"], "title": t["title"], "error": "chưa làm mới được: " + str(ex)[:260]}
+    clear_renew_mark(t["id"])
+    return {"ok": True, "id": t["id"], "title": t["title"],
+            "answer": "đã làm mới, gán lại " + t["binding"] + "; lượt sau sẽ đọc lại quy trình (không chạy lượt nào)"}
 
 
 def setup_check(pin, mode, model, effort):
@@ -804,7 +952,8 @@ def run_job(job, model, effort):
                 done = {"state": "bound", "ids": [t["id"] for t in same]}
             else:
                 sid = create(thread_name(name), name, model, effort)
-                done = {"state": "created", "ids": [sid], "model": model, "effort": effort}
+                m, e = role_model(name, model, effort)
+                done = {"state": "created", "ids": [sid], "model": m, "effort": e}
                 if dispatch.pool_of(name) in dispatch.ON_DEMAND and dispatch.config(ROOT)["mode"] == "on-demand":
                     done.update(live=False, detail="chạy theo việc (hộp thư): không bật live")
                     with JOB_LOCK:
@@ -814,7 +963,8 @@ def run_job(job, model, effort):
                     item.update(done, detail="đã đọc quy trình, đang bật live…")
                 try:      # then run it on in the background, so the other sessions see it (one more short turn)
                     busy(sid, True)
-                    start_bg(sid, ["-n", thread_name(name), "--model", model, "--effort", effort], LIVE_PROMPT)
+                    start_bg(sid, ["-n", thread_name(name)] + turn_args({"binding": name, "model": model, "effort": effort}),
+                             LIVE_PROMPT)
                     done.update(live=True, detail="")
                 except Exception as ex:
                     done.update(live=False, detail="chưa bật live (bấm Bật live): " + str(ex)[:240])
@@ -1510,17 +1660,15 @@ def _courier_tick(now):
             did.append(("created", target, sid[:8]))
             ms = [dispatch.get(ROOT, m["id"]) for m in ms]
         t = dict(t, live=(s or {}).get("kind", ""))
-        # Renew marked on the page (renew_deferred): the context is emptied now, before the job, and the thread bound
-        # again; the job turn itself is told to read the role rules (the compaction made the guard line say so).
+        # Renew marked on the page (the thread was in a turn): cleared now, before the job (wipe_transcript, no model
+        # turn); the job turn itself is told by the guard line to read the role rules.
         # Not when it stopped at a question to the human: the message may be the answer. A failed wipe keeps the mark.
         if renew_pending(t["id"]) and (s or {}).get("state") != "blocked":
             try:
-                turn(t, WIPE_PROMPT, bg=False)
+                wipe_transcript(t)
                 t["live"] = ""
                 live.pop(t["id"], None)
-                bind(t["id"], t["binding"])
                 clear_renew_mark(t["id"])
-                mark_rules_seen(t["id"], rules_state(t["binding"]))
                 did.append(("renewed", target))
             except Exception as ex:      # the job still goes, with the old context
                 did.append(("renew-failed", target, str(ex)[:120]))

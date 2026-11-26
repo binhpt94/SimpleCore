@@ -52,6 +52,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 - `SendMessage` chỉ dùng giữa các Leader và tới tester đang chạy.
 - Tầng 2–6 chỉ nhắn Leader của phần mình (tầng dưới: @CodeLead). Không nhắn @Manager.
 - Lệnh hay dòng `guard:` báo SERVER TẮT: dừng việc phụ thuộc, BÁO CHẶN, chờ người bật server.
+- unity-mcp lỗi kết nối, hay lệnh in `CODEX LỖI`: dừng việc đó, không thử lại, không đi đường khác; báo Leader (Unity) hay bên giao việc (Codex) MỘT tin BÁO CHẶN rồi kết thúc lượt. Guard chặn lần thử lại trong cùng lượt.
 
 ## Giai đoạn
 - Project làm theo giai đoạn IDEA, PROTOTYPE, FULL. Người đặt "giai đoạn đang làm" ở tab Game design. Dòng `guard:`, `gd_status.py` và `gd_req.py status` nêu nó.

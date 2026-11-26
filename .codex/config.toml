@@ -1,2 +1,3 @@
-[mcp_servers.unityMCP]
-url = "http://localhost:8080/mcp"
+# unityMCP: dùng bản stdio ở ~/.codex/config.toml (người quyết 2026-11-26).
+# Khối [mcp_servers.unityMCP] với url = "http://localhost:8080/mcp" từng ở đây xung đột với bản đó:
+# codex báo "url is not supported for stdio" và không chạy được trong project.

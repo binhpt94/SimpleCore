@@ -15,12 +15,12 @@ Thứ gì đã đọc thì nằm trong ngữ cảnh tới lần renew sau, và m
 - `CLAUDE.md` trong cây thiết kế không tự nạp vào ngữ cảnh (`claudeMdExcludes` trong `.claude/settings.json`); muốn biết nội dung thì phải đọc.
 
 ## Quy trình một lượt
-1. Xem mode ở dòng `guard:`, rồi chạy `gd_status.py`.
+1. Xem mode ở dòng `guard:`, rồi chạy `gd_status.py --brief`.
 2. Đọc `live` trước (thứ đã chốt là nền, không cãi lại), rồi đọc `ai/idea` của nhánh đang làm.
    **Bắt buộc** trước khi viết hay sửa một node: chạy `gd_status.py ai/idea/<node>` **một lần cho node cao nhất của nhánh đang làm** (bản in gồm cả các node con), đọc mục "Bám theo"; với mỗi node trong refs, Grep đúng mục cần dùng trong `CLAUDE.md` của nó (theo tiêu đề `## `), không Read cả file.
 3. Có node "cần làm lại" phía trên việc được giao thì làm lại nó trước, từ trên xuống.
 4. Viết hoặc sửa node (skill `gd-node-format` và `gd-round-<N>`; chấm điểm theo `gd-scoring`). User control: điểm cần quyết thành câu hỏi, rồi dừng chờ. Full Auto: tự quyết và ghi lại.
-5. Viết xong cả nhánh thì chạy lại `gd_status.py` **một lần** cho node cao nhất của nhánh, để chắc các node vừa sửa không còn lỗi cấu trúc, `based-on` và `refs` đã khớp. Không chạy riêng cho từng node.
+5. Viết xong cả nhánh thì chạy lại `gd_status.py ai/idea/<node> --brief` **một lần** cho node cao nhất của nhánh, để chắc các node vừa sửa không còn lỗi cấu trúc, `based-on` và `refs` đã khớp. Không chạy riêng cho từng node.
 6. Kết thúc: liệt kê node đã đổi, node chờ người chấm hoặc trả lời, node còn phải làm lại.
 
 ## Làm việc gì thì gọi skill nào (tool Skill, trước khi làm)
@@ -40,7 +40,7 @@ Thứ gì đã đọc thì nằm trong ngữ cảnh tới lần renew sau, và m
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
 - Lệnh shell, chạy từ gốc project (nối được các lệnh đã cho phép bằng `;`, tối đa 6, không nối lệnh có chuỗi trong ngoặc kép; thêm `scaffold.py --dry-run` để xem thư mục còn thiếu):
-  - `python Management/tools/gd_status.py` hoặc `... gd_status.py ai/idea/<node>`: tình trạng cây hoặc một nhánh. **Chạy đầu mỗi lượt**, và đọc theo mục "Đọc tiết kiệm" ở cuối file. Bản in dài (cả cây) được ghi ra `Management/game-design/.pack/`; lệnh in đường dẫn và mục lục có số dòng kèm Kết luận từng node: đọc phần cần bằng Read (offset, limit) hoặc Grep. Chạy cho một node thì đầu bản in có mục "Bám theo": các node phía trên, các node và từ mà refs trỏ tới.
+  - `python Management/tools/gd_status.py` hoặc `... gd_status.py ai/idea/<node>`: tình trạng cây hoặc một nhánh. **Chạy đầu mỗi lượt với `--brief`** (`--brief`: chỉ in node chưa đạt hoặc còn người phải làm, cùng các mục cuối; node đạt chỉ được đếm); bản đủ (có mục "Bám theo") chỉ chạy trước khi viết hay sửa một node. Đọc theo mục "Đọc tiết kiệm" ở cuối file. Bản in dài (cả cây) được ghi ra `Management/game-design/.pack/`; lệnh in đường dẫn và mục lục có số dòng kèm Kết luận từng node: đọc phần cần bằng Read (offset, limit) hoặc Grep. Chạy cho một node thì đầu bản in có mục "Bám theo": các node phía trên, các node và từ mà refs trỏ tới.
   - `python Management/tools/gd_delete.py ai/<đường dẫn>`: xoá một file hoặc cả một node trong `ai`. Lịch sử của node bị xoá được giữ lại ở node cha. Xem frame của @UIDesigner đã giải ra số: `python Management/tools/gd_frame.py ai/idea/<node>`.
 - **Báo cáo cuối lượt (Stop hook ép):** lượt có sửa file kết thúc bằng khối `## Báo cáo cho @Manager` 8 dòng theo `.claude/rules/report.md` (phần điền của @GameDesigner); "Kiểm tra" là kết quả `gd_status.py`.
 - **Báo chặn:** khi gặp lỗi không tự gỡ được (guard chặn, lệnh hay công cụ lỗi, order hết lượt, @DesignAdvisor hay tool không trả lời) hoặc phải dừng chờ người (chấm, trả lời câu hỏi, chọn ý trái nhau, chốt vào `live`), kể cả lượt không sửa file: trước khi kết thúc lượt nhắn `Manager` bằng SendMessage một tin `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … (file, node, lệnh, câu lỗi) · Ai gỡ được: … · Việc của mình vẫn chạy tiếp được: … · Việc của phiên khác bị kéo theo: …`; vẫn báo người như cũ; hết chặn thì nhắn `HẾT CHẶN · <việc>`; một tin cho mỗi lần bị chặn.

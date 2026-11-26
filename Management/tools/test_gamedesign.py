@@ -717,6 +717,18 @@ def run_flow(root):
                         ("rejected idea", "10 đợt quá ngắn"), ("scores", "Ý loop: AI 8, người chưa chấm"), ("previous score", "bản trước của ý này người chấm 2")):
         check("status shows: " + label, part in text)
     check("status of one branch leaves the others out", "feature-shop" in gd_status.report(root, "ai/idea/feature-hero"), False)
+    brief = gd_status.report(root, brief=True)
+    walked = list(gd.walk(gd.snapshot(root)["idea"]))
+    open_nodes = [n["path"] for n in walked if not gd_status.quiet(n) and n["path"]]
+    quiet_nodes = [n["path"] for n in walked if gd_status.quiet(n) and n["path"]]
+    check("brief status: shorter, nodes that pass and wait for nobody left out and counted",
+          (len(brief) < len(text), all(f"## {p}  ·" not in brief for p in quiet_nodes),
+           f"({len([n for n in walked if gd_status.quiet(n)])} node đạt" in brief), (True, True, True))
+    check("brief status: a node someone still works on is printed in full", all(f"## {p}  ·" in brief for p in open_nodes))
+    check("brief status: the closing sections stay", ("## Giai đoạn đang làm" in brief) == ("## Giai đoạn đang làm" in text))
+    check("brief status of a branch has no 'Bám theo'",
+          ("## Bám theo" in gd_status.report(root, "ai/idea/feature-hero"),
+           "## Bám theo" in gd_status.report(root, "ai/idea/feature-hero", brief=True)), (True, False))
     for arg in ("live", "ai/idea/../live", "ai/idea/feature-none", "idea/feature-hero", "ai/idea/Bad"):
         check(f"status refused: {arg}", refused(gd_status.report, root, arg))
 
@@ -1169,6 +1181,19 @@ def run_frames(root):
     check("frame: gd_frame --html writes one page", (gd_frame.main(["gd_frame.py", "ai/idea/feature-a/a1/a1x", "--html", str(out),
                                                                    "--root", root]), "<svg" in out.read_text(encoding="utf-8")), (0, True))
     check("frame: gd_frame refuses a path outside the tables", gd_frame.main(["gd_frame.py", "ai/other/x", "--root", root]), 2)
+    import studio
+    widths, real_png = [], studio.frame_png_file
+    try:
+        studio.frame_png_file = lambda fr, dest, stem, concept=True, width=None: (widths.append((concept, width)), None)[1]
+        gd_frame.write_pngs(root, table, node)
+        small = sorted(set(widths))
+        widths.clear()
+        gd_frame.write_pngs(root, table, node, full=True)
+        full = sorted(set(widths))
+    finally:
+        studio.frame_png_file = real_png
+    check("frame: --png draws small (concept 960, measure 1280); --png-full draws 1920",
+          (small, full), ([(False, 1280), (True, 960)], [(False, 1920), (True, 1920)]))
     d = folder(root, "idea/feature-a/a1/a1x/data.md")
     d.write_text(d.read_text(encoding="utf-8").replace(after, gd.read_data(folder(root, "idea/feature-b/b1/b1x"))["hash"]), encoding="utf-8")
     put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')

@@ -49,4 +49,4 @@ Tool tự tính (in ở `gd_frame.py`, `gd_pack.py`; ảnh `.measure.png` vẽ n
 - Khoảng cách giữa các nút (thang 8/16/24/40/64) vẫn đo giữa các rect cảm nhận.
 
 ## Xem lại
-`python Management/tools/gd_frame.py ai/idea/<node> [--png]`: frame đã giải ra số tuyệt đối kèm cảnh báo; `--png` vẽ mỗi frame ra `<tên>.png` và `<tên>.measure.png` để Read.
+`python Management/tools/gd_frame.py ai/idea/<node> [--png]`: frame đã giải ra số tuyệt đối kèm cảnh báo; `--png` vẽ mỗi frame ra `<tên>.png` (960 px) và `<tên>.measure.png` (1280 px) để Read; `--png-full` vẽ 1920 px khi cần xem chi tiết nhỏ (tốn token hơn khi Read).

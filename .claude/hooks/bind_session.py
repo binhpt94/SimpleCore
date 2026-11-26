@@ -428,8 +428,8 @@ def context(data, root, store):
     if role in guard.TOOL_ROLES:
         tool = guard.TOOL_ROLES[role]
         how = ("ảnh (kind image) và tham vấn GPT (kind consult). Gen ảnh: python Management/tools/studio.py codex "
-               "<F>/<id> <item> (tự thử Codex ghi trực tiếp, rồi chỉ đọc ảnh Codex sinh ra); không được thì đi gián tiếp "
-               "qua unity-mcp (execute_custom_tool, execute_menu_item). Tham vấn: studio.py consult <F>/<id> <item>."
+               "<F>/<id> <item> (tự thử Codex ghi trực tiếp, rồi chỉ đọc ảnh Codex sinh ra); lệnh in CODEX LỖI hay không ra ảnh "
+               "thì dừng, không chạy lại, không đi đường khác, báo bên giao một tin. Tham vấn: studio.py consult <F>/<id> <item>."
                if tool == "codex" else
                "ảnh do chính mình vẽ (kind image cho feature, đủ dùng ở giai đoạn IDEA; kind art là claude-concept của một "
                "node thiết kế). Order của feature, mỗi item: viết hình thành SVG vào work/<item>.svg bằng Write (một file tự đủ: có viewBox cùng tỉ lệ "
@@ -467,7 +467,7 @@ def context(data, root, store):
                 "XÁC NHẬN), chơi thử rộng hơn thì nhờ CodeLead. Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from GameDesigner \"<việc>\", tin đó bật thread lên. Chỉ đọc "
                 "Management/game-design, .claude/rules/gamedesigner.md, designadvisor.md và skill gd-*; chỉ ghi trong Management/game-design/ai "
                 "(cây đề xuất ở ai/idea); live là bảng đã chốt, chỉ người chốt. Xoá trong ai: python "
-                "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py "
+                "Management/tools/gd_delete.py ai/<đường dẫn>. Đầu lượt chạy python Management/tools/gd_status.py --brief "
                 "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on (cả cây thì lệnh "
                 "in đường dẫn file trong Management/game-design/.pack và mục lục có số dòng kèm Kết luận từng node: "
                 "đọc phần cần bằng Read offset/limit hoặc Grep). Độ quan trọng "
@@ -507,7 +507,7 @@ def context(data, root, store):
                 "không ghi được. Mỗi frame ghi ở phần đầu: 'ui: <hash ui.md>' (gd_status.py in hash), 'ai: <0-10>' (điểm của "
                 "bạn) và vài dòng 'why: <lý do bố cục>'; id hình trùng id phần tử trong ui.md, đủ mọi phần tử chính, nút "
                 "nào cũng có trong ui.md. Người chấm từng frame như chấm một ý; dưới 5 là bạn làm lại. ui.md thiếu hay mâu "
-                "thuẫn thì nhắn GameDesigner, không tự thêm phần tử. Đầu lượt chạy python Management/tools/gd_status.py "
+                "thuẫn thì nhắn GameDesigner, không tự thêm phần tử. Đầu lượt chạy python Management/tools/gd_status.py --brief "
                 "(dòng 'CHỜ @UIDesigner'), đọc Management/game-design/ai/ui-lessons.md (bài học từ phản hồi của người, bạn tự ghi "
                 "thêm) và python Management/tools/references.py (ảnh tham chiếu bố cục, Read ảnh cùng tag với màn). Màn mới: 2 "
                 "phương án (an toàn và táo bạo, bản sau ghi 'alt: <frame kia>'), người chọn. Viết hay sửa frame: dùng skill "
@@ -688,6 +688,7 @@ def main(argv):
         if session_start:
             forget_rules_read(data.get("session_id"), store)
             return 0
+        guard.clear_fails(data.get("session_id"), store)      # a new turn may try a failed service once again
         message = handle(data, root, store)
         if message:
             block(message)

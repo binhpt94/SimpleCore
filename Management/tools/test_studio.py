@@ -29,6 +29,9 @@ open(os.environ["FAKE_PROMPT"], "a", encoding="utf-8").write("=== " + mode + "\n
 how = os.environ.get("FAKE_MODE", "write1")
 m = re.search(r"Mục cần làm \(chỉ mục này\): ([a-z0-9-]+):", prompt)
 item = m.group(1) if m else "x"
+if how == "down":
+    sys.stderr.write("Error loading configuration: url is not supported for stdio\n")
+    sys.exit(1)
 def png(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     open(path, "wb").write(b"\x89PNG fake")
@@ -178,7 +181,15 @@ def run_codex(root):
     check("read-only with two new images takes none", call(root, "codex", "Wallet/coin-icons", "gem")[0], 1)
     os.environ["FAKE_MODE"] = "none"
     code, out = call(root, "codex", "Wallet/coin-icons", "gem")
-    check("nothing either way: points to unity-mcp", (code, "unity-mcp" in out), (1, True))
+    check("nothing either way: stop and tell the giver, no other way (no unity-mcp)",
+          (code, "unity-mcp" in out, "Báo bên giao" in out), (1, False, True))
+    n_runs = len(log_of(folder))
+    os.environ["FAKE_MODE"] = "down"
+    code, out = call(root, "codex", "Wallet/coin-icons", "gem")
+    check("Codex down (config error): CODEX LỖI, stop, no second read-only run",
+          (code, "CODEX LỖI:" in out, "DỪNG" in out, [e.get("mode") for e in log_of(folder)[n_runs:] if e.get("mode")]),
+          (1, True, True, ["workspace-write"]))
+    os.environ["FAKE_MODE"] = "write1"
     check("an item the order does not have", "không có item" in call(root, "codex", "Wallet/coin-icons", "ruby")[1])
     lock = studio.studio_dir(root, "codex") / ".run.lock"
     lock.write_text("1")
@@ -192,6 +203,11 @@ def run_codex(root):
     head = text.rfind("=== ", 0, text.rfind("Trả lời đúng"))
     check("consult runs read-only", text[head:head + 13], "=== read-only")
     check("an image order is not a consult", "không chạy bằng lệnh này" in call(root, "consult", "Wallet/coin-icons", "coin")[1])
+    os.environ["FAKE_MODE"] = "down"
+    code, out = call(root, "consult", "Wallet/ask", "palette")
+    check("a consult Codex cannot answer: CODEX LỖI, stop", (code, "CODEX LỖI:" in out, "DỪNG" in out), (1, True, True))
+    os.environ["FAKE_MODE"] = "write1"
+    call(root, "consult", "Wallet/ask", "palette")      # the answer back, for the cases after
 
 
 def run_deliver(root):
@@ -324,7 +340,8 @@ def run_blender(root):
     check("a file of no item is set aside", (code, (folder / "work/out/preview.png").exists()), (0, False))
     os.environ["FAKE_MODE"] = "fail"
     code, out = call(root, "blender", "Wallet/coin-model", "coin")
-    check("blender fails: points to blender MCP, then unity-mcp", (code, "blender MCP" in out and "unity-mcp" in out), (1, True))
+    check("blender fails: points to blender MCP, then stop (no unity-mcp)",
+          (code, "blender MCP" in out, "unity-mcp" in out, "dừng" in out), (1, True, False, True))
     check("blender order runs only through blender", call(root, "codex", "Wallet/coin-model", "coin")[0], 1)
     check("summary for the blender chat", "Wallet/coin-model" in studio.pending_line(root, "blender"))
 

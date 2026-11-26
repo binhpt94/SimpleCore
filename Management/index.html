@@ -521,7 +521,7 @@
     var listBox = put(pane, section("Thread hiện có"));
     listBox.style.marginTop = "16px";
     // Ba thao tác trên một thread, server chạy lượt ngầm (claude --resume) trong chính thread đó:
-    // Đọc lại quy trình; Compact (/compact); Renew (bỏ ngữ cảnh cũ, gán lại FEATURE, đọc quy trình; cần PIN).
+    // Đọc lại quy trình; Compact (/compact); Renew (server tự clear transcript, không chạy lượt nào; gán lại FEATURE, lượt sau đọc quy trình; cần PIN).
     var ACTIONS = {
       reread: { label: "Đọc lại quy trình", path: "/api/sessions/reread", done: "đã đọc" },
       compact: { label: "Compact", path: "/api/sessions/compact", done: "đã compact" },
@@ -541,10 +541,10 @@
     });
     var rereadStatus = put(listBox, el("p", "gap muted",
       "Mỗi thao tác tốn lượt của thread. Nút \"tất cả\" chạy " + BATCH + " thread cùng lúc. Chat đang mở trong VS Code có thể chưa thấy lượt này: mở lại chat đó. " +
-      "Renew cần PIN (ô PIN ở trên), bỏ toàn bộ ngữ cảnh của thread rồi gán lại và nhắc đọc quy trình: việc dở dang chưa ghi ra file sẽ mất, chỉ bấm khi thread đang rảnh. Thread của người và Leader làm mới ngay; thread chạy theo việc (Tools, Testers, Basic, Services, Features) chỉ được đánh dấu \"chờ renew\": server làm mới ngay trước việc kế tiếp hộp thư giao cho nó, không có việc thì không tốn lượt nào. " +
+      "Renew cần PIN (ô PIN ở trên): server tự clear thread (transcript cũ dời vào ~/.claude/projects/<project>/.renewed/, cùng chat, không chạy lượt nào), gán lại FEATURE; lượt kế tiếp của thread được dòng guard nhắc đọc lại quy trình. Việc dở dang chưa ghi ra file sẽ mất. Thread đang chạy nền thì bị tắt live; thread đang giữa một lượt chỉ được đánh dấu \"chờ renew\": server làm mới ngay trước việc kế tiếp hộp thư giao cho nó. " +
       "Xoá cần PIN và VS Code tắt hẳn: dời transcript của thread vào ~/.claude/projects/<project>/.deleted/ (khôi phục được), bỏ nó khỏi danh sách chat và bỏ gán. " +
       "Live: phiên khác chỉ thấy thread trong ListAgents (và nhắn được) khi có tiến trình chạy nó. Bật live chạy thread thành phiên nền (một lượt ngắn); " +
-      "Setup tự bật live cho thread vừa tạo; Đọc lại, Compact, Renew giữ thread live. Phiên nền hỏi quyền thì vào duyệt bằng claude attach <tên> trong terminal. " +
+      "Setup tự bật live cho thread vừa tạo; Đọc lại, Compact giữ thread live; Renew tắt live. Phiên nền hỏi quyền thì vào duyệt bằng claude attach <tên> trong terminal. " +
       "Muốn mở thread đó trong VS Code thì Tắt live trước, để hai tiến trình không cùng ghi một session. " +
       "Feature, service, @Core và tool nhận việc qua tab Hộp thư: thread tắt thì được bật lên với việc đó (✉ là số tin chờ giao); ở chế độ theo nhu cầu, Setup không bật live chúng và thread rảnh tự tắt. " +
       "\"Chờ người\" là điều thread đang đợi bạn, theo bản tóm tắt của Claude Code."));
@@ -579,7 +579,7 @@
       paintReread(id);
       return api("POST", act.path, body).then(function (res) {
         out.ok = !!res.ok; out.pin = !!res.pin;
-        rereadState[id] = res.ok ? { cls: "ok-text", text: res.pending ? "đã đánh dấu, renew khi có việc" : act.done, full: res.answer || "" }
+        rereadState[id] = res.ok ? { cls: "ok-text", text: res.pending ? "đang chạy lượt: đã đánh dấu, renew khi có việc" : act.done, full: res.answer || "" }
           : { cls: "bad-text", text: "lỗi: " + res.error };
       }, function (e) {
         rereadState[id] = { cls: "bad-text", text: "lỗi gọi server: " + e.message };
@@ -731,7 +731,7 @@
           : !t.binding ? "thread chưa gán FEATURE: chạy Setup trước" : "";
         // Chat đang mở trong VS Code (hoặc terminal): tiến trình đó không thấy lượt trang chạy vào, nên không chạy.
         // Đọc lại vẫn chạy: server nhắn vào chat đó (SendMessage). Compact, Renew thì không: lệnh / qua tin nhắn chỉ là chữ.
-        var openWhy = t.live === "interactive" ? "đang mở trong VS Code (hoặc terminal): Compact thì gõ /compact trong chat đó; Renew thì đóng chat rồi bấm" : "";
+        var openWhy = t.live === "interactive" ? "đang mở trong VS Code (hoặc terminal): Compact thì gõ /compact, Renew thì gõ /clear trong chat đó (hoặc đóng chat rồi bấm)" : "";
         var rereadBox = el("span"), rowBtns = ROW_KEYS.map(function (k) {
           var b = put(rereadBox, el("button", "copy", ACTIONS[k].label));
           b.type = "button";
@@ -779,7 +779,7 @@
           paintReread(t.id);
         }
         var needsNote = t.needs ? el("div", "bad-text", "chờ người: " + t.needs) : null;
-        // Renew của thread chạy theo việc (không phải người, không phải Leader) chỉ đánh dấu: server làm mới ngay trước việc kế tiếp.
+        // Renew bấm lúc thread đang giữa một lượt chỉ đánh dấu: server làm mới ngay trước việc kế tiếp.
         if (t.renew_pending) {
           var pendNote = el("div", "muted", "⟳ chờ renew: làm mới khi hộp thư giao việc kế tiếp");
           needsNote = needsNote ? add(el("div"), needsNote, pendNote) : pendNote;

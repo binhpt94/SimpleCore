@@ -3,6 +3,9 @@
 
     python Management/tools/gd_status.py                     the whole tree
     python Management/tools/gd_status.py ai/idea/<path>      one branch
+    python Management/tools/gd_status.py [ai/idea/<path>] --brief
+                                                             only what needs work: a node that passes and waits for
+                                                             nobody is left out, and so is "Bám theo"
 
 For every node: its round, whether it passes and why not, its data hash and the hash to write into the
 children's based-on, its refs (matching, changed, mentioned but not declared, and the refs line to write), every
@@ -27,7 +30,20 @@ STATUS_NOTE = ("Đọc trước: các node mà mục lục ghi Kết luận CHƯ
                "Thuật ngữ). Trước khi viết hay sửa một node vẫn chạy lệnh này cho riêng node đó.")
 
 
-def lines_for(root, node, out):
+def quiet(node):
+    """A node --brief leaves out: it passes, and nobody has work on it (no frame to draw, no ref to pin again, no
+    advice to write in, no clash, no GPT question owed)."""
+    gpt = node.get("gpt") or {}
+    return bool(node["passed"] and not node.get("uiWait") and not node["refMissing"] and not node.get("refStale")
+                and not node["stale"] and not gpt.get("missing") and not node.get("clashOpen") and not node.get("gptOwed"))
+
+
+def lines_for(root, node, out, brief=False, hidden=None):
+    if brief and quiet(node):
+        hidden.append(node["path"] or "(gốc)")
+        for child in node["children"]:
+            lines_for(root, child, out, brief, hidden)
+        return
     name = node["path"] or "(gốc)"
     folder = gd.table_dir(root, "idea").joinpath(*(node["path"].split("/") if node["path"] else []))
     out.append("")
@@ -149,7 +165,7 @@ def lines_for(root, node, out):
             out.append(f"    [{e.get('at', '')}] {e.get('item', '')} (điểm {e.get('score')}): {text[:160]}"
                        + (f" | phản hồi: {e.get('feedback')}" if e.get("feedback") else ""))
     for child in node["children"]:
-        lines_for(root, child, out)
+        lines_for(root, child, out, brief, hidden)
 
 
 def brief_lines(b, out, indent=""):
@@ -178,7 +194,7 @@ def context_lines(snap, node):
     return out
 
 
-def report(root, arg=""):
+def report(root, arg="", brief=False):
     """The text to print; raises ValueError for a path that is not a node of the idea table."""
     path = ""
     if arg:
@@ -195,11 +211,14 @@ def report(root, arg=""):
     out = [f"# Game design: {mode % gd.PASS_MIN}",
            "Thang điểm: " + " · ".join(f"{b['min']}-{b['max']} {b['label']}" for b in gd.BANDS),
            "Độ quan trọng (chỉ chấm ở node lá): " + " · ".join(f"{x['min']}-{x['max']} {x['name']}: {x['label']}" for x in gd.PHASES)]
-    if path:
+    if path and not brief:
         out += context_lines(snap, node)
-    else:
+    elif not path:
         out += ["", f"## Cổng code theo feature (chỉ code khi thiết kế tới vòng {len(gd.ROUNDS)} trong live)"] + gate_lines(snap, root) + [""]
-    lines_for(root, node, out)
+    hidden = []
+    lines_for(root, node, out, brief, hidden)
+    if hidden:
+        out += ["", f"({len(hidden)} node đạt, không ai còn việc, ẩn bởi --brief; chạy không --brief để xem đủ)"]
     problems = [p for p in snap["problems"]["idea"] if not path or p["path"] == path or p["path"].startswith(path + "/")]
     if problems:
         out += ["", "## Lỗi cấu trúc (phải sửa trước)"] + [f"- {p['path']}: {p['text']}" for p in problems]
@@ -287,13 +306,15 @@ def main(argv):
     root = HERE.parent.parent
     if len(argv) >= 3 and argv[-2] == "--root":      # test-only override
         root, argv = Path(argv[-1]), argv[:-2]
+    brief = "--brief" in argv[1:]
+    argv = [a for a in argv if a != "--brief"]
     if len(argv) > 2:
-        print(f"Cách dùng: python Management/tools/gd_status.py [{PREFIX}/<node>]", file=sys.stderr)
+        print(f"Cách dùng: python Management/tools/gd_status.py [{PREFIX}/<node>] [--brief]", file=sys.stderr)
         return 2
     try:
         arg = argv[1] if len(argv) == 2 else ""
         name = arg.replace("\\", "/").rstrip("/")[len(PREFIX) + 1:]
-        print(gd.emit(root, "status", name or "all", report(root, arg), STATUS_NOTE))
+        print(gd.emit(root, "status-brief" if brief else "status", name or "all", report(root, arg, brief), STATUS_NOTE))
         return 0
     except (ValueError, OSError) as ex:
         print(f"Không đọc được: {ex}", file=sys.stderr)

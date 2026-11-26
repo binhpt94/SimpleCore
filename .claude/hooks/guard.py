@@ -94,7 +94,7 @@ ALLOWED_COMMANDS = [
     # Management/game-design/.pack/, which every session that reads the design may read, and the command prints its path)
     PY + r"Management/tools/gd_pack\.py (_Services/)?[A-Za-z][A-Za-z0-9]*",
     # the frames of one design node, resolved (reads only; --html writes a file, so it is left to the human)
-    PY + r"Management/tools/gd_frame\.py (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)+( --png)?",
+    PY + r"Management/tools/gd_frame\.py (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)+( --png| --png-full)?",
     PY + r"Management/tools/references\.py",      # the reference pictures and the human's notes on them
     # the config tables of one design node (<node>/.excel), read only: print them, check their shape
     PY + r"Management/tools/gd_excel\.py show (ai/idea|live)(/[a-z0-9]+(-[a-z0-9]+)*)*( [A-Za-z][A-Za-z0-9_]{0,30})?",
@@ -104,7 +104,7 @@ ALLOWED_COMMANDS = [
 # One more command, for @GameDesigner only: delete a file or a node inside Management/game-design/ai.
 DESIGNER_COMMANDS = [
     PY + r"Management/tools/gd_delete\.py ai(/[A-Za-z0-9._-]+)+",
-    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?( --brief)?",
     # the config tables of a node (<node>/.excel): add a table of a standard kind, carry the side that changed (the
     # csv it edits, the xlsx the human edits) to the other, number the index column again
     PY + r'Management/tools/gd_excel\.py new ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* [A-Za-z][A-Za-z0-9_]{0,30} [a-z]+ "[^"\\]+"',
@@ -115,7 +115,7 @@ DESIGNER_COMMANDS = [
 FRAME_FILE = r"[a-z][a-z0-9-]*\.frame"
 UIDESIGNER_COMMANDS = [
     PY + r"Management/tools/gd_delete\.py ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)+/\.frame-concept/" + FRAME_FILE,
-    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?( --brief)?",
 ]
 # For @DesignAdvisor only: ask GPT one question about a design node (the question is the file
 # Management/game-design/advice/<node>/<id>.q.md it wrote; the answer lands beside it), and look at the design's status.
@@ -123,19 +123,19 @@ ADVICE_ID = r"[a-z0-9]+(-[a-z0-9]+)*"
 ADVICE_NODE = r"(_general|_root|" + ADVICE_ID + r"(\." + ADVICE_ID + r")*)"
 ADVISOR_COMMANDS = [
     PY + r"Management/tools/gd_advise\.py " + ADVICE_NODE + " " + ADVICE_ID,
-    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?( --brief)?",
 ]
 # For @CodeLead only: mark the progress of a design leaf after checking the code, and look at the design's status.
 CODELEAD_COMMANDS = [
     PY + r"Management/tools/gd_progress\.py ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* (idea|prototype|full) (todo|doing|done)",
-    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?( --brief)?",
 ]
 # For @Manager only: create the feature, service, Core and _Composition folders the live design asks for and that
 # are missing (folders and .gitkeep only, never code; see scaffold.py), and look at the design's status (how far
 # @GameDesigner is: the first thing it checks after it is created or renewed, .claude/rules/manager.md).
 MANAGER_COMMANDS = [
     PY + r"Management/tools/scaffold\.py( --dry-run)?",
-    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?",
+    PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?( --brief)?",
 ]
 
 # The list of tool work (Management/tools/toolwork.py): what the human decided and only the human's session can do
@@ -628,6 +628,77 @@ def goes_through_link(full, root):
         if link:
             return True
     return False
+
+
+# ---------------------------------------------------------------- a service that failed in this turn
+# Người quyết 2026-11-26: unity-mcp lỗi kết nối, hay Codex lỗi, thì phiên dừng việc đó ngay, không thử lại, không đi
+# đường khác, báo Leader hay bên giao MỘT tin. tool_fail.py (PostToolUse / PostToolUseFailure) and this guard (a call
+# it refuses because the Editor is not running) set a flag for the session; the guard then refuses every retry in the
+# turn; bind_session.py clears the flags when a new turn starts (the next turn may try once again).
+FAIL_KINDS = ("unity", "codex")
+UNITY_FAIL_RX = re.compile(r"not found\. Available|is not running|not connected|no unity (editor|instance)|no instances?|"
+                           r"connection (refused|reset|closed|error)|failed to connect|could not connect|disconnected|"
+                           r"timed? ?out|econnrefused|unity (editor )?is not (open|running)", re.I)
+CODEX_FAIL_MARK = "CODEX LỖI:"
+CODEX_COMMAND_RX = re.compile(r"Management/tools/(gd_advise\.py|studio\.py\s+(codex|consult))\b")
+FAIL_STOP = {
+    "unity": ("UNITY MCP LỖI KẾT NỐI{why}: DỪNG mọi việc cần Unity trong lượt này. Không gọi lại unity-mcp, không tìm đường "
+              "khác. Nhắn Leader của bạn MỘT tin BÁO CHẶN kèm câu lỗi (tầng dưới: CodeLead; CodeLead: Manager), rồi kết thúc "
+              "lượt; có sửa file thì báo cáo như thường."),
+    "codex": ("CODEX LỖI{why}: DỪNG việc cần Codex trong lượt này. Không chạy lại, không đi đường khác. Báo bên giao việc MỘT "
+              "tin (không nhắn ai khác), rồi kết thúc lượt."),
+}
+
+
+def fail_path(session_id, store, kind):
+    if not store or not isinstance(session_id, str) or not SESSION_RX.match(session_id) or kind not in FAIL_KINDS:
+        return None
+    return os.path.join(store, "fails", f"{session_id}.{kind}.json")
+
+
+def set_fail(session_id, store, kind, why):
+    path = fail_path(session_id, store, kind)
+    if path:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"why": " ".join(text_of(why).split())[:300], "at": time.time()}, f, ensure_ascii=False)
+
+
+def read_fail(session_id, store, kind):
+    """The error that stopped this kind of work in the session's turn, or None."""
+    path = fail_path(session_id, store, kind)
+    try:
+        with open(path, encoding="utf-8") as f:
+            return text_of(json.load(f).get("why")) or "lỗi"
+    except (OSError, ValueError, TypeError, AttributeError):
+        return None
+
+
+def clear_fails(session_id, store):
+    for kind in FAIL_KINDS:
+        path = fail_path(session_id, store, kind)
+        if path and os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+
+
+def fail_stop(kind, why=""):
+    return FAIL_STOP[kind].format(why=f" ({why})" if why else "")
+
+
+def failed_retry(tool, ti, session_id, store):
+    """The refusal of a retry of work that failed in this turn, or ''."""
+    if tool.startswith(UNITY_PREFIX):
+        why = read_fail(session_id, store, "unity")
+        if why is not None:
+            return "unity-mcp đã lỗi trong lượt này, không thử lại. " + fail_stop("unity", why)
+    if tool == "Bash" and CODEX_COMMAND_RX.search(text_of(ti.get("command")).replace("\\", "/")):
+        why = read_fail(session_id, store, "codex")
+        if why is not None:
+            return "Codex đã lỗi trong lượt này, không chạy lại. " + fail_stop("codex", why)
+    return ""
 
 
 # ---------------------------------------------------------------- sessions
@@ -1423,6 +1494,9 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
         return "deny", f"batch_execute takes 1 to {BATCH_MAX} commands"
     wrong = unity_instance_problem(tool, ti, cmds, root)
     if wrong:
+        if "is not running" in wrong:      # the Editor is down: stop, do not retry (FAIL_STOP)
+            set_fail(session, store, "unity", wrong)
+            return "deny", wrong + " " + fail_stop("unity")
         return "deny", wrong
     session = session if isinstance(session, str) else ""
     held = read_lock(store)
@@ -1711,6 +1785,11 @@ def decide(data, session_value, root, store=None):
     read_all = mode in ("codelead", "tester")      # they read the private parts of every feature
 
     edit_path = text_of(ti.get("file_path")) or text_of(ti.get("notebook_path"))
+
+    if mode != "human":      # a service failed earlier in this turn: no retry
+        retry = failed_retry(tool, ti, data.get("session_id"), store)
+        if retry:
+            return "deny", retry
 
     # --- human session: only the three sensitive zones ask
     if mode == "human":

@@ -264,7 +264,7 @@ def live_cases(check):
             res = ss.renew("ffff6666", "1234")
         finally:
             ss.bind_session.check_pin = real_pin
-        check("live: renewing the human's chat keeps its last turn headless", (calls[-1][0], calls[-1][-2], "ffff6666" in live), ("--resume", "-p", False))
+        check("live: renewing the human's chat runs no turn and leaves it not live", (res["ok"], len(calls), "ffff6666" in live), (True, before, False))
         # compact and renew on a thread that runs in the background: stop, remove the ended job, resume under the same id
         live["aaaa1111"] = {"kind": "background", "status": "idle", "short": "aaaa1111"}
         before = len(calls)
@@ -278,10 +278,8 @@ def live_cases(check):
             res = ss.renew("aaaa1111", "1234")
         finally:
             ss.bind_session.check_pin = real_pin
-        check("renew on a background thread: stop, rm, the wipe headless, then rm and back live under its id",
-              (res["ok"], [c[0] if c[0] != "--resume" else c[-2] for c in calls[before:]], calls[-1][:3], "aaaa1111" in live),
-              (True, ["stop", "rm", "-p", "rm", "--bg"], ["--bg", "--resume", "aaaa1111"], True))
-        check("renew: no copy was made on the way", any(c[0] == "--bg" and not c[2].startswith("aaaa1111") for c in calls[before:]), False)
+        check("renew on a background thread: stopped and its job removed, no turn, not started again (người quyết 2026-11-26)",
+              (res["ok"], [c[0] for c in calls[before:]], "aaaa1111" in live), (True, ["stop", "rm"], False))
         check("the page may post to the live and stop paths",
               ("/api/sessions/live" in ss.POST_PATHS, "/api/sessions/stop" in ss.POST_PATHS), (True, True))
     finally:
@@ -834,15 +832,21 @@ def courier_cases(check):
         real_store, ss.guard.STORE_DIR = ss.guard.STORE_DIR, tempfile.mkdtemp(prefix="courier-store-")
         try:
             ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "Shop"})
+            with open(tdir / "s0000000.jsonl", "a", encoding="utf-8") as f:      # a conversation to drop
+                f.write(json.dumps({"type": "user", "message": {"content": "việc cũ"}}, ensure_ascii=False) + "\n")
             live.pop("s0000000", None)
             m = ss.dispatch.send(root, "Shop", "Làm yêu cầu shop-list#a", "@CodeLead")
             n = len(given)
             ss.dispatch.mark(root, m, "queued", force=True)      # the Giao ngay button: the pool limit does not hold
             did = ss.courier_tick(time.time() + 3)
-            check("renew mark: emptied first (headless), then the job in the background; bound again, mark gone",
-                  ([(g[0], g[1] == ss.WIPE_PROMPT, g[3]) for g in given[n:]], ("renewed", "Shop") in did,
-                   ss.renew_pending("s0000000"), ss.guard.bound_feature("s0000000", ss.guard.STORE_DIR)),
-                  ([("s0000000", True, False), ("s0000000", False, True)], True, False, "Shop"))
+            kept = [json.loads(x) for x in (tdir / "s0000000.jsonl").read_text(encoding="utf-8").splitlines()]
+            check("renew mark: cleared first with no turn (old transcript in .renewed), then the job; bound again, mark gone",
+                  ([(g[0], g[3]) for g in given[n:]], ("renewed", "Shop") in did, ss.renew_pending("s0000000"),
+                   ss.guard.bound_feature("s0000000", ss.guard.STORE_DIR), len(list((tdir / ss.RENEWED).glob("*-s0000000/s0000000.jsonl"))),
+                   kept[0]["message"]["content"]),
+                  ([("s0000000", True)], True, False, "Shop", 1, ss.RENEW_NOTE))
+            check("renew mark: the job prompt is the only thing after the renew turn",
+                  (len(kept), kept[1]["type"], "shop-list#a" in kept[-1]["message"]["content"]), (3, "assistant", True))
             ss.courier_tick(time.time() + 4)
             ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "Shop"})
             live["s0000000"] = {"kind": "background", "status": "idle", "state": "blocked", "short": "s0000000"}
@@ -851,7 +855,7 @@ def courier_cases(check):
             n = len(given)
             ss.courier_tick(time.time() + 5)
             check("renew mark: a thread stopped at a question to the human keeps its context and its mark",
-                  ([g[1] == ss.WIPE_PROMPT for g in given[n:]], ss.renew_pending("s0000000")), ([False], True))
+                  (len(given[n:]), ss.renew_pending("s0000000"), len(list((tdir / ss.RENEWED).glob("*-s0000000")))), (1, True, 1))
             ss.courier_tick(time.time() + 6)
         finally:
             shutil.rmtree(ss.guard.STORE_DIR, ignore_errors=True)
@@ -951,8 +955,64 @@ def courier_cases(check):
         shutil.rmtree(tdir, ignore_errors=True)
 
 
+def profile_cases(check):
+    """The role profile: each role gets its model, only its own skills, only the MCP servers it uses, and the human's
+    thread gets nothing."""
+    tdir = Path(tempfile.mkdtemp(prefix="profiles-"))
+    real = (ss.transcripts_dir, ss.skill_names, ss.PROFILES)
+    try:
+        ss.PROFILES = True
+        ss.transcripts_dir = lambda: tdir
+        ss.skill_names = lambda: {"manager-startup-check", "codelead-dispatch", "gd-round-1", "feature-implement-req",
+                                  "tester-playtest-session", "studio-fulfill-order", "unity-mcp-skill", "skill-creator",
+                                  "anthropic-skills:docx"}
+
+        def flags(feature):
+            args = ss.profile_args(feature)
+            settings = json.loads(Path(args[args.index("--settings") + 1]).read_text(encoding="utf-8")) if args else {}
+            mcp = (json.loads(Path(args[args.index("--mcp-config") + 1]).read_text(encoding="utf-8"))["mcpServers"]
+                   if "--mcp-config" in args else None)
+            on = sorted(n for n in ss.skill_names() if n not in settings.get("skillOverrides", {}))
+            return args, settings, mcp, on
+
+        check("profile: the human's thread runs with no profile", ss.profile_args("@human"), [])
+        check("profile: a name outside the setup runs with no profile", ss.profile_args("NoSuchFeature"), [])
+        args, settings, mcp, on = flags("@Manager")
+        check("profile: Manager lists only its own skills", on, ["manager-startup-check"])
+        check("profile: Manager has no MCP server, strictly", (mcp, "--strict-mcp-config" in args), ({}, True))
+        check("profile: no bundled skills, no claude.ai connectors, no easel, no Artifact",
+              (settings["disableBundledSkills"], settings["disableClaudeAiConnectors"],
+               settings["enabledPlugins"].get("cc-plugin-easel@builtin"), ss.OFF_TOOLS in args), (True, True, False, True))
+        args, settings, mcp, on = flags("@CodeLead")
+        check("profile: CodeLead keeps UnityMCP (its runner subagent uses it) and the Unity skill",
+              (sorted(mcp), on), (["UnityMCP"], ["codelead-dispatch", "unity-mcp-skill"]))
+        feature = next((n for n, _, _ in ss.gamedesign.live_feature_names(ss.ROOT)), None) or "Wallet"
+        args, settings, mcp, on = flags(feature)
+        check("profile: a feature thread has UnityMCP and the feature- skills",
+              (sorted(mcp or {}), on), (["UnityMCP"], ["feature-implement-req", "unity-mcp-skill"]))
+        args, settings, mcp, on = flags("@GameDesigner")
+        check("profile: GameDesigner has no MCP and only gd- skills", (mcp, on), ({}, ["gd-round-1"]))
+        args, settings, mcp, on = flags("@Blender")
+        check("profile: Blender keeps every MCP server (no strict list)", ("--strict-mcp-config" in args, on),
+              (False, ["studio-fulfill-order"]))
+        check("profile: models by role (người quyết 2026-11-26)",
+              [ss.role_model(f, "sonnet", "high") for f in ("@Manager", "@UnityAutoPlay", feature, "@GameDesigner",
+                                                           "@CodeLead", "@UIDesigner", "@human")],
+              [("opus", "low"), ("opus", "low"), ("opus", "low"), ("opus", "medium"), ("opus", "medium"),
+               ("sonnet", "high"), ("sonnet", "high")])
+        t = thread("aaaa1111", "Manager", binding="@Manager", model="claude-opus-x", effort="high")
+        args = ss.turn_args(t)
+        check("profile: a turn of an existing thread runs on its role's model and effort, with the profile",
+              (args[:4], "--settings" in args), (["--model", "opus", "--effort", "low"], True))
+    finally:
+        ss.transcripts_dir, ss.skill_names, ss.PROFILES = real
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
 def main():
     store = tempfile.mkdtemp(prefix="setup-store-")
+    profile_cases(check)
+    ss.PROFILES = False      # the cases below check the plain CLI lines
 
     def forget():      # no thread has read the rules yet: a reread names all of its role's files
         shutil.rmtree(os.path.join(store, ss.RULES_SEEN_DIR), ignore_errors=True)
@@ -1082,64 +1142,76 @@ def main():
         res = ss.compact("aaaa1111")
         check("compact: a failed run is reported", (res["ok"], res["error"]), (False, "claude: not logged in"))
         check("compact binds nothing", ss.guard.bound_feature("aaaa1111", store) or "", "")
-        # renew: with the PIN; the context is emptied in the same chat, the thread is bound again, then reads the rules
-        real_pin = ss.bind_session.check_pin
+        # renew: with the PIN; a clear the server does itself (no turn), bound again, the next turn reads the rules
+        real_pin, real_tdir = ss.bind_session.check_pin, ss.transcripts_dir
         ss.bind_session.check_pin = lambda store_, pin: "" if pin == "1234" else "PIN sai"
+        tdir = Path(tempfile.mkdtemp(prefix="renew-t-"))
+        ss.transcripts_dir = lambda: tdir
+        lines = [{"type": "custom-title", "customTitle": "CodeLead", "sessionId": "aaaa1111"},
+                 {"type": "agent-name", "agentName": "CodeLead", "sessionId": "aaaa1111"},
+                 {"type": "session-owner", "accountUuid": "x", "sessionId": "aaaa1111"},
+                 {"type": "queue-operation", "operation": "enqueue"},
+                 {"type": "user", "uuid": "u1", "parentUuid": None, "sessionId": "aaaa1111", "entrypoint": "claude-vscode",
+                  "message": {"role": "user", "content": "Thread CodeLead được tạo bởi trang Setup. Bí mật cũ"}},
+                 {"type": "assistant", "uuid": "a1", "parentUuid": "u1", "message": {"content": [{"type": "text", "text": "đã đọc"}]}},
+                 {"type": "custom-title", "customTitle": "CodeLead", "sessionId": "aaaa1111"}]
+        (tdir / "aaaa1111.jsonl").write_text("".join(json.dumps(x, ensure_ascii=False) + "\n" for x in lines), encoding="utf-8")
+        (tdir / "aaaa1111").mkdir()
+        (tdir / "aaaa1111" / "tool-results.txt").write_text("x", encoding="utf-8")
         try:
             ss.run_claude = fake
             before = len(calls)
             for pin in ("", "0000", None, 1234):
                 res = ss.renew("aaaa1111", pin)
                 check(f"renew: a wrong PIN is refused ({pin!r})", (res["ok"], res["error"], res.get("pin")), (False, "PIN sai", True))
-            check("renew: a wrong PIN runs nothing and binds nothing",
-                  (len(calls), ss.guard.bound_feature("aaaa1111", store) or ""), (before, ""))
+            check("renew: a wrong PIN runs nothing, binds nothing, moves nothing",
+                  (len(calls), ss.guard.bound_feature("aaaa1111", store) or "", (tdir / ss.RENEWED).exists()), (before, "", False))
             res = ss.renew("cccc3333", "1234")
             check("renew: a thread that is not bound is refused before the PIN is looked at",
                   (res["ok"], res["error"], len(calls)), (False, "thread chưa gán FEATURE: chạy Setup trước", before))
+            ss.bind_session.write_json(ss.bind_session.rules_read_path("aaaa1111", store), {"role": "@CodeLead"})
             res = ss.renew("aaaa1111", "1234")
-            first, second = calls[-2], calls[-1]
-            check("renew: first the context is emptied in the same thread (a /compact told to keep nothing, not /clear)",
-                  (first[:2], first[-2], first[-1] == ss.WIPE_PROMPT, first[-1].startswith("/compact "), "KHÔNG giữ lại" in first[-1]),
-                  (["--resume", "aaaa1111"], "-p", True, True, True))
-            check("renew: then it is told it was renewed and to read the rules, as a background session (live)",
-                  (second[:3], second[-1].startswith("Thread CodeLead vừa được làm mới"), ss.REREAD_PROMPT in second[-1], len(calls) - before),
-                  (["--bg", "--resume", "aaaa1111"], True, True, 2))
-            check("renew: it is bound again to the FEATURE it had", (res["ok"], ss.guard.bound_feature("aaaa1111", store)), (True, "@CodeLead"))
-            os.remove(ss.guard.binding_path("aaaa1111", store))
-            ss.run_claude = failing
+            kept = [json.loads(x) for x in (tdir / "aaaa1111.jsonl").read_text(encoding="utf-8").splitlines()]
+            moved = list((tdir / ss.RENEWED).glob("*-aaaa1111"))
+            check("renew: no model turn at all (no /compact, no reread)", (res["ok"], len(calls) - before), (True, 0))
+            check("renew: the old transcript and its folder are moved to .renewed",
+                  (len(moved), (moved[0] / "aaaa1111.jsonl").is_file() if moved else False,
+                   (moved[0] / "aaaa1111" / "tool-results.txt").is_file() if moved else False, (tdir / "aaaa1111").exists()),
+                  (1, True, True, False))
+            check("renew: the new transcript keeps only the name lines and the first user message, as the renew note",
+                  ([x["type"] for x in kept], kept[3]["message"]["content"], kept[3]["uuid"], kept[3]["sessionId"],
+                   "Bí mật cũ" in (tdir / "aaaa1111.jsonl").read_text(encoding="utf-8"),
+                   "đã đọc" in (tdir / "aaaa1111.jsonl").read_text(encoding="utf-8")),
+                  (["custom-title", "agent-name", "session-owner", "user", "assistant"], ss.RENEW_NOTE, "u1", "aaaa1111", False, False))
+            answer = kept[4]
+            check("renew: the user message is answered (VS Code opens a new session for a transcript with no answer)",
+                  (answer["parentUuid"], answer["sessionId"], answer["entrypoint"], answer["message"]["model"],
+                   answer["message"]["stop_reason"], answer["message"]["content"], answer["uuid"] != "a1"),
+                  ("u1", "aaaa1111", "claude-vscode", ss.SYNTHETIC_MODEL, "end_turn", [{"type": "text", "text": ss.RENEW_REPLY}], True))
+            check("renew: bound again to the FEATURE it had; the guard line will tell it to read the rules on its next turn",
+                  (ss.guard.bound_feature("aaaa1111", store), os.path.exists(ss.bind_session.rules_read_path("aaaa1111", store)),
+                   "lượt sau" in res["answer"]), ("@CodeLead", False, True))
+            forget()
             res = ss.renew("aaaa1111", "1234")
-            check("renew: when emptying fails nothing is bound", (res["ok"], res["error"].startswith("chưa làm mới được"),
-                                                                  ss.guard.bound_feature("aaaa1111", store) or ""), (False, True, ""))
-            turns = []
-
-            def second_fails(args):
-                turns.append(args)
-                if len(turns) == 2:
-                    raise RuntimeError("claude: timeout")
-                return ""
-
-            ss.run_claude = second_fails
-            res = ss.renew("aaaa1111", "1234")
-            check("renew: emptied and bound but the rules not read: said so, the binding stays",
-                  (res["ok"], res.get("renewed"), "CHƯA đọc quy trình" in res["error"], ss.guard.bound_feature("aaaa1111", store)),
-                  (False, True, True, "@CodeLead"))
-            # a thread that runs on demand is only marked: emptied by the courier before its next job
-            check("renew: the human's chat and the Leaders are renewed at once; every other group only marked",
-                  [ss.renew_deferred(b) for b in ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner",
-                                                  "@Codex", "@DesignAdvisor", "@UnityAutoPlay", "@Core", "Wallet", "_Services/Popup")],
-                  [False, False, False, False, False, True, True, True, True, True, True])
-            ss.run_claude = fake
-            before = len(calls)
+            check("renew: pressing it again keeps the same short transcript and costs nothing",
+                  (res["ok"], len(calls) - before, [json.loads(x)["type"] for x in (tdir / "aaaa1111.jsonl").read_text(encoding="utf-8").splitlines()]),
+                  (True, 0, ["custom-title", "agent-name", "session-owner", "user", "assistant"]))
+            check("renew: the page's reread after a renew runs no turn (the next turn reads every rule file anyway)",
+                  (ss.reread("aaaa1111").get("skipped"), len(calls) - before), (True, 0))
+            # a thread in the middle of a turn is only marked: cleared by the courier before its next job
+            listed[1] = dict(listed[1], live_status="busy")
             res = ss.renew("bbbb2222", "0000")
             check("renew (marked): a wrong PIN marks nothing", (res["ok"], ss.renew_pending("bbbb2222")), (False, False))
             res = ss.renew("bbbb2222", "1234")
-            check("renew (marked): a feature thread runs no turn, it is marked and told so",
+            check("renew (marked): a thread in a turn runs no turn, it is marked and told so",
                   (res["ok"], res.get("pending"), len(calls) - before, ss.renew_pending("bbbb2222"), "việc kế tiếp" in res["answer"]),
                   (True, True, 0, True, True))
             ss.clear_renew_mark("bbbb2222")
             check("renew (marked): the mark can be cleared", ss.renew_pending("bbbb2222"), False)
+            listed[1] = dict(listed[1], live_status="")
         finally:
-            ss.bind_session.check_pin = real_pin
+            ss.bind_session.check_pin, ss.transcripts_dir = real_pin, real_tdir
+            shutil.rmtree(tdir, ignore_errors=True)
         check("the page may post to the compact and renew paths",
               ("/api/sessions/compact" in ss.POST_PATHS, "/api/sessions/renew" in ss.POST_PATHS), (True, True))
     finally:

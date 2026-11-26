@@ -599,16 +599,21 @@ def frame_png(root, path, frame, dest):
     return frame_png_file(fr, dest, f"{frame}.frame", concept=True)
 
 
-def frame_png_file(fr, dest, stem, concept=True):
+def frame_png_file(fr, dest, stem, concept=True, width=None):
     """One resolved frame drawn into dest/<stem>.png (and the .svg beside it), colours fixed and the font inside.
     concept: only what the player reads (how a concept shows it); otherwise with the numbers and the notes.
+    width: px (the height keeps the shape of the frame); without it 1920, what an art order is drawn from.
     Returns the PNG path, or None when this machine cannot draw an SVG into a PNG."""
     svg = gd.frame_svg(fr, concept=concept).replace("</defs>", f"</defs><style>{frame_css()}</style>", 1)
     dest = Path(dest)
     dest.mkdir(parents=True, exist_ok=True)
     svg_path, png_path = dest / f"{stem}.svg", dest / f"{stem}.png"
     svg_path.write_text(svg, encoding="utf-8")
-    return png_path if svg_to_png(svg_path, png_path) else None
+    size = None
+    if width:
+        box = svg_box(svg) or (16, 9)
+        size = (width, max(1, round(width * box[1] / box[0])))
+    return png_path if svg_to_png(svg_path, png_path, size) else None
 
 
 def art_inputs(root, feature, data, item, work):
@@ -727,7 +732,7 @@ def tool_exe(name):
     """The command that starts a tool, as a list. STUDIO_<NAME> overrides it (a .py file runs with this Python)."""
     exe = os.environ.get(f"STUDIO_{name.upper()}") or shutil.which(name)
     if not exe:
-        raise ValueError(f"không tìm thấy lệnh {name}: cài {name} hoặc đi đường dự phòng (mục Ba đường chạy của skill studio-fulfill-order)")
+        raise ValueError(f"không tìm thấy lệnh {name}: báo bên giao việc một tin rồi dừng (người cài {name})")
     return [sys.executable, exe] if exe.endswith(".py") else [exe]
 
 
@@ -915,10 +920,40 @@ def take_result(work, item, new, exts):
     return True, f"đã có work/out/{dest.name}", [dest.name]
 
 
+CODEX_STOP = "DỪNG: không chạy lại, không đi đường khác; báo bên giao việc MỘT tin rồi kết thúc lượt."
+
+
+def codex_fail(text):
+    """Codex itself failed (người quyết 2026-11-26: dừng ngay, không cố): the mark the hook tool_fail.py looks for."""
+    print(f"CODEX LỖI: {' '.join(str(text).split())[-400:]}. {CODEX_STOP}", file=sys.stderr)
+    return 1
+
+
+# Codex itself is down (not the sandbox, not the picture): the second, read-only run would fail the same way.
+CODEX_DOWN_RX = re.compile(r"error loading configuration|not logged in|login|unauthori[sz]ed|\b401\b|\b403\b|\b429\b|"
+                           r"rate limit|quota|stream (error|disconnected)|connection|network|timed? ?out|dns|"
+                           r"could not resolve|service unavailable|\b5\d\d\b", re.I)
+
+
+def codex_down(code, err):
+    return code < 0 or bool(CODEX_DOWN_RX.search(err or ""))
+
+
+def codex_exe():
+    """tool_exe("codex"), or None after printing CODEX LỖI."""
+    try:
+        return tool_exe("codex")
+    except ValueError as ex:
+        codex_fail(str(ex))
+        return None
+
+
 def cmd_codex(root, ref, item):
     with RunLock(root, "codex"):
         feature, oid, folder, data, text, work, refs = prepare(root, "codex", ref, item, ("image", "art"))
-        exe = tool_exe("codex")
+        exe = codex_exe()
+        if exe is None:
+            return 1
         extra = ONE_IMAGE.format(item=item)
         if data["fields"]["kind"] == "art":
             style_text, art_images, notes = art_inputs(root, feature, data, item, work)
@@ -949,6 +984,8 @@ def cmd_codex(root, ref, item):
         if made:      # it made too many: running again in another mode would only hide it
             print(f"Codex (ghi trực tiếp): {msg}. Chạy lại item này.", file=sys.stderr)
             return 1
+        if code != 0 and codex_down(code, err):      # Codex itself failed: the read-only run would fail too
+            return codex_fail(f"codex exec lỗi (mã {code}): {err}")
         # 2. Read only: Codex keeps the images it makes in its own folder; take the new ones from there.
         gen = codex_images_dir()
         seen = files_in(gen, IMAGE_EXT, skip=())
@@ -963,8 +1000,9 @@ def cmd_codex(root, ref, item):
             keep_attempt(work, item, attempt)
             print(f"Codex (chỉ đọc, lấy ảnh ở {gen}, lượt {attempt}): {msg}")
             return 0
-        print(f"Codex không tạo được ảnh ({msg}). Đi gián tiếp qua unity-mcp theo mục Ba đường chạy của skill studio-fulfill-order, rồi để "
-              f"kết quả ở work/out/{item}.png và chạy deliver.", file=sys.stderr)
+        if code2 != 0:
+            return codex_fail(f"codex exec lỗi (mã {code2}): {err2}")
+        print(f"Codex không tạo được ảnh ({msg}). Báo bên giao việc một tin rồi dừng; không đi đường khác.", file=sys.stderr)
         return 1
 
 
@@ -1471,7 +1509,9 @@ def cmd_claude(root, ref, item):
 def cmd_consult(root, ref, item):
     with RunLock(root, "codex"):
         feature, oid, folder, data, text, work, refs = prepare(root, "codex", ref, item, ("consult",))
-        exe = tool_exe("codex")
+        exe = codex_exe()
+        if exe is None:
+            return 1
         prompt = prompt_for(root, "codex", data, item, text, work,
                             "Trả lời đúng câu hỏi trên, bằng tiếng Việt, ngắn gọn và cụ thể. Không tạo ảnh hay file nào.")
         out = work / "out" / f"{item}.md"
@@ -1485,8 +1525,10 @@ def cmd_consult(root, ref, item):
             keep_attempt(work, item, attempt)
         log(folder, "run", tool="codex", item=item, mode="consult", exit=code, result="có câu trả lời" if ok else
             "không có câu trả lời", files=[out.name] if ok else [], error=err if not ok else "")
-        print(f"Câu trả lời: work/out/{out.name}" if ok else "Codex không trả lời được; xem log.jsonl", file=sys.stdout if ok else sys.stderr)
-        return 0 if ok else 1
+        if not ok:
+            return codex_fail(f"Codex không trả lời (mã {code}): {err}; xem log.jsonl")
+        print(f"Câu trả lời: work/out/{out.name}")
+        return 0
 
 
 def cmd_blender(root, ref, item):
@@ -1518,8 +1560,8 @@ def cmd_blender(root, ref, item):
             msg += f"; {len(others)} file không thuộc item nào bị dời vào work/_rejected"
         log(folder, "run", tool="blender", item=item, mode="headless", exit=code, result=msg,
             files=[p.name for p in made] if ok else [], error=err if not ok else "")
-        print(f"Blender (headless): {msg}" if ok else f"Blender (headless): {msg}. Thử blender MCP, rồi unity-mcp "
-              f"(mục Ba đường chạy của skill studio-fulfill-order); kết quả để ở work/out/{item}.<đuôi> rồi chạy deliver.",
+        print(f"Blender (headless): {msg}" if ok else f"Blender (headless): {msg}. Thử blender MCP (mục Ba đường chạy của skill "
+              f"studio-fulfill-order), kết quả để ở work/out/{item}.<đuôi> rồi chạy deliver; MCP không kết nối thì dừng, báo bên giao một tin.",
               file=sys.stdout if ok else sys.stderr)
         return 0 if ok else 1
 
