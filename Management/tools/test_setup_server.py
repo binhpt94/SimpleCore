@@ -288,6 +288,50 @@ def live_cases(check):
         shutil.rmtree(tdir, ignore_errors=True)
 
 
+def usage_cases(check):
+    """thread_usage: tokens a thread spent since its last renew, from its transcript and its subagents'."""
+    real = ss.transcripts_dir
+    tmp = Path(tempfile.mkdtemp(prefix="setup-usage-"))
+
+    def answer(mid, model="claude-opus-x", **u):
+        return json.dumps({"type": "assistant", "message": {"id": mid, "role": "assistant", "model": model, "usage": u}})
+
+    try:
+        ss.transcripts_dir = lambda: tmp
+        user = json.dumps({"type": "user", "timestamp": "2026-11-20T03:00:00.000Z",
+                           "message": {"role": "user", "content": ss.RENEW_NOTE}}, ensure_ascii=False)      # spaces, as a renew writes it
+        lines = [user, answer("msg_renew_x", ss.SYNTHETIC_MODEL, input_tokens=0, output_tokens=0),
+                 answer("m1", input_tokens=10, output_tokens=100, cache_read_input_tokens=1000, cache_creation_input_tokens=400,
+                        cache_creation={"ephemeral_1h_input_tokens": 300, "ephemeral_5m_input_tokens": 100}),
+                 answer("m1", input_tokens=10, output_tokens=100, cache_read_input_tokens=1000, cache_creation_input_tokens=400,
+                        cache_creation={"ephemeral_1h_input_tokens": 300, "ephemeral_5m_input_tokens": 100})]
+        main = tmp / "sid1.jsonl"
+        main.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        (tmp / ss.RENEWED / "20261126-175006-sid1").mkdir(parents=True)
+        u = ss.thread_usage("sid1")
+        check("usage: an answer of several lines counts once, the renew answer not at all",
+              (u["calls"], u["input"], u["output"], u["cache_read"], u["cache_write"]), (1, 10, 100, 1000, 400))
+        check("usage: cost in input-price tokens (cache write 1h x2, 5m x1.25, read x0.1, output x5)",
+              u["cost"], round(10 + 300 * 2 + 100 * 1.25 + 1000 * 0.1 + 100 * 5))
+        check("usage: counted from the renew, at the time in the name of its folder", (u["renewed"], u["since"]), (True, "11-26 17:50"))
+        sub = tmp / "sid1" / "subagents"
+        sub.mkdir(parents=True)
+        (sub / "agent-a.jsonl").write_text(answer("s1", input_tokens=5, output_tokens=2, cache_creation_input_tokens=8) + "\n", encoding="utf-8")
+        u = ss.thread_usage("sid1")
+        check("usage: subagents add to the thread and count apart (a write with no split is a 5m write)",
+              (u["calls"], u["subagent_calls"], u["input"], u["cost"]), (2, 1, 15, 1335 + 5 + 10 + 10))
+        with open(main, "a", encoding="utf-8") as f:
+            f.write(answer("m2", input_tokens=1, output_tokens=1) + "\n")
+        check("usage: a transcript that changed is read again", ss.thread_usage("sid1")["calls"], 3)
+        (tmp / "sid2.jsonl").write_text(json.dumps({"type": "user", "timestamp": "2026-11-20T03:00:00.000Z",
+                                                    "message": {"role": "user", "content": "hi"}}) + "\n", encoding="utf-8")
+        u = ss.thread_usage("sid2")
+        check("usage: a thread never renewed counts from its start, nothing spent yet", (u["renewed"], u["calls"], bool(u["since"])), (False, 0, True))
+    finally:
+        ss.transcripts_dir = real
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def unnamed_cases(check):
     """threads(include_unnamed=True) lists the chats with no name under the title VS Code shows them by, the PIN hidden."""
     real = (ss.transcripts_dir, ss.archived_ids, ss.live_sessions, ss.dispatch.pending, ss.guard.STORE_DIR)
@@ -1269,6 +1313,7 @@ def main():
     live_cases(check)
     delete_cases(check)
     unnamed_cases(check)
+    usage_cases(check)
     ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)

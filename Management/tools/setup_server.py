@@ -36,7 +36,8 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   ~/.claude/projects/<project>/ and run Setup to bind it again.
 - Live (other sessions see the thread in ListAgents and can message it): a thread is live while a process runs it;
   a headless -p turn exits when done. GET /api/threads gives each thread `live` ("interactive": open in VS Code or a
-  terminal; "background"; "") from `claude agents --json`. POST /api/sessions/live {id} (no PIN) runs a bound,
+  terminal; "background"; "") from `claude agents --json`, and `tokens`: what the thread spent since its last
+  renew (thread_usage: its transcript and its subagents', read from the files, no model turn). POST /api/sessions/live {id} (no PIN) runs a bound,
   not yet live thread on as a background session, `claude --bg --resume <id> <LIVE_PROMPT>` (one short turn);
   /api/sessions/stop {id} ends it (`claude stop`). Setup does that after a new thread's first turn. Reread and compact
   go into the background session of a thread that has one (stopped, then started again
@@ -62,6 +63,7 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   only, read only) so the page can show them.
 """
 import argparse
+import calendar
 import hashlib
 import html
 import json
@@ -401,9 +403,98 @@ def threads(include_unnamed=False):
                         "live": (live.get(sid) or {}).get("kind", ""), "live_status": (live.get(sid) or {}).get("status", ""),
                         "live_state": (live.get(sid) or {}).get("state", ""),
                         "hung": hang_text(h) if (h := hang_of({"id": sid}, live.get(sid), time.time())) else "",
+                        "tokens": thread_usage(sid),
                         "needs": job_needs(sid), "renew_pending": renew_pending(sid), "inbox": waiting.get(guard.bound_feature(sid, guard.STORE_DIR) or "", 0),
                         "modified": time.strftime("%Y-%m-%d %H:%M", time.localtime(p.stat().st_mtime))})
     return sorted(out, key=lambda t: (t["title"].lower(), t["modified"]))
+
+
+# Tokens a thread spent, from the `usage` the CLI writes on each answer. cost: input-price tokens, the price ratios being
+# the same for every model (cache write 1h ×2, 5m ×1.25, cache read ×0.1, output ×5), so threads compare by one number.
+USAGE_KEYS = ("calls", "input", "cache_write", "cache_read", "output", "cost")
+USAGE_CACHE = {}      # transcript path -> ((mtime, size), its usage): the page asks for the list every few seconds
+USAGE_LOCK = threading.Lock()
+
+
+def usage_of(path):
+    """{calls, input, cache_write, cache_read, output, cost, first, renewed} of one transcript. An answer written as
+    several lines (thinking, text, tool use) carries the same usage on each: counted once by its message id. The
+    synthetic answer of a renew costs nothing. first: time of the first user line; renewed: that line is RENEW_NOTE."""
+    try:
+        st = os.stat(path)
+    except OSError:
+        return dict.fromkeys(USAGE_KEYS, 0)
+    stamp = (st.st_mtime_ns, st.st_size)
+    with USAGE_LOCK:
+        hit = USAGE_CACHE.get(str(path))
+    if hit and hit[0] == stamp:
+        return dict(hit[1])
+    out = dict.fromkeys(USAGE_KEYS, 0)
+    out.update(first="", renewed=False)
+    seen = set()
+    with open(path, encoding="utf-8", errors="replace") as f:
+        for line in f:
+            if not out["first"] and '"user"' in line:      # a renew writes its line with spaces: "type": "user"
+                try:
+                    o = json.loads(line)
+                except ValueError:
+                    continue
+                if o.get("type") == "user" and not o.get("isMeta") and isinstance(o.get("message"), dict):
+                    out["first"] = str(o.get("timestamp") or "")
+                    out["renewed"] = (o["message"].get("content") == RENEW_NOTE)
+                continue
+            if '"assistant"' not in line or '"usage"' not in line:
+                continue
+            try:
+                m = json.loads(line).get("message") or {}
+            except ValueError:
+                continue
+            u = m.get("usage")
+            if not isinstance(u, dict) or m.get("role") != "assistant" or m.get("model") == SYNTHETIC_MODEL or m.get("id") in seen:
+                continue
+            seen.add(m.get("id"))
+            write = int(u.get("cache_creation_input_tokens") or 0)
+            split = u.get("cache_creation") if isinstance(u.get("cache_creation"), dict) else {}
+            hour = int(split.get("ephemeral_1h_input_tokens") or 0)
+            inp, read, outp = (int(u.get(k) or 0) for k in ("input_tokens", "cache_read_input_tokens", "output_tokens"))
+            out["calls"] += 1
+            out["input"] += inp
+            out["cache_write"] += write
+            out["cache_read"] += read
+            out["output"] += outp
+            out["cost"] += inp + hour * 2 + max(write - hour, 0) * 1.25 + read * 0.1 + outp * 5
+    out["cost"] = int(round(out["cost"]))
+    with USAGE_LOCK:
+        USAGE_CACHE[str(path)] = (stamp, dict(out))
+    return out
+
+
+def thread_usage(session_id):
+    """What thread session_id spent since its last renew (a renew moves the transcript and its folder away): its
+    transcript plus its subagents' (<id>/subagents/*.jsonl), with subagent_calls apart. since: time of its first
+    line, or of the last renew (local, "MM-DD HH:MM"); renewed: counted from a renew, else from the thread's start."""
+    folder = transcripts_dir()
+    main = usage_of(folder / f"{session_id}.jsonl")
+    total = {k: main.get(k, 0) for k in USAGE_KEYS}
+    total["subagent_calls"] = 0
+    sub = folder / session_id / "subagents"
+    for p in sorted(sub.glob("*.jsonl")) if sub.is_dir() else []:
+        u = usage_of(p)
+        for k in USAGE_KEYS:
+            total[k] += u.get(k, 0)
+        total["subagent_calls"] += u.get("calls", 0)
+    since = ""
+    try:
+        moved = sorted(x.name for x in (folder / RENEWED).glob(f"*-{session_id}")) if main.get("renewed") else []
+        if moved:      # the renew line keeps the old first line's time: the time of the renew is in its folder's name
+            since = time.strftime("%m-%d %H:%M", time.strptime(moved[-1][:15], "%Y%m%d-%H%M%S"))
+        elif main.get("first"):
+            since = time.strftime("%m-%d %H:%M", time.localtime(
+                calendar.timegm(time.strptime(main["first"][:19], "%Y-%m-%dT%H:%M:%S"))))      # the CLI writes UTC
+    except (ValueError, OverflowError):
+        since = ""
+    total.update(since=since, renewed=bool(main.get("renewed")))
+    return total
 
 
 def job_needs(session_id):

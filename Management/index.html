@@ -715,7 +715,7 @@
         vsStatus.textContent = vs.running ? "VS Code đang chạy: tắt hẳn VS Code rồi chạy lệnh trên trong terminal ngoài." : "VS Code đang tắt: bấm nút để gom nhóm.";
       }
       var table = put(listBody, el("table"));
-      add(table, headRow(["Tên", "Đang gán", "Nhóm VS Code", "Model", "Effort", "Sửa lần cuối", "Trạng thái", "Live", "Id", "Session"]));
+      add(table, headRow(["Tên", "Đang gán", "Nhóm VS Code", "Model", "Effort", "Sửa lần cuối", "Token", "Trạng thái", "Live", "Id", "Session"]));
       var body = put(table, el("tbody")), lastTier = null;
       rereadable = [];
       rereadCells = {};
@@ -726,7 +726,7 @@
         if (tier !== lastTier) {
           lastTier = tier;
           var head = el("tr"), cell = add(el("th", "", tier || "Ngoài các tầng"));
-          cell.colSpan = 10;
+          cell.colSpan = 11;
           add(body, add(head, cell));
         }
         var unnamed = t.named === false;
@@ -804,12 +804,23 @@
         var vsCell = unnamed || !wanted[key(t)] || t.archived || t.unlisted ? el("span", "muted", inGroup || "—")
           : (inGroup === wantGroup ? el("span", "ok-text", inGroup) : el("span", "bad-text", (inGroup || "chưa nhóm") + " → " + wantGroup));
         add(body, row([t.title, t.binding || "—", vsCell, (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
-          t.modified, state, liveBtn, el("code", "", t.id.slice(0, 8)), rereadBox]));
+          t.modified, tokenCell(t.tokens), state, liveBtn, el("code", "", t.id.slice(0, 8)), rereadBox]));
       });
       var made = {};
       data.threads.forEach(function (t) { if (t.named !== false && !t.archived && !t.unlisted) made[key(t)] = true; });
       var todo = data.sets.full.filter(function (n) { return !made[n]; });
       if (todo.length) add(listBody, el("p", "muted", "Chưa có thread (Setup full sẽ tạo): " + todo.join(", ") + "."));
+    };
+    // Token thread đã tiêu từ lần renew (server cộng usage trong transcript và subagent, không chạy lượt nào).
+    // Số chính: token quy đổi theo giá input (ghi cache 1h ×2, 5m ×1,25, đọc cache ×0,1, output ×5).
+    var tokenCell = function (u) {
+      if (!u || !u.calls) return el("span", "muted", "—");
+      var n = function (v) { return v >= 1e6 ? (v / 1e6).toFixed(2).replace(".", ",") + "M" : v >= 1e3 ? Math.round(v / 1e3) + "k" : String(v); };
+      var cell = el("span", "", "≈" + n(u.cost));
+      cell.title = (u.renewed ? "từ renew " : "từ đầu thread ") + (u.since || "?") + " · " + u.calls + " lần gọi"
+        + (u.subagent_calls ? " (" + u.subagent_calls + " của subagent)" : "")
+        + " · input " + n(u.input) + " · ghi cache " + n(u.cache_write) + " · đọc cache " + n(u.cache_read) + " · output " + n(u.output);
+      return cell;
     };
     var refresh = function () {
       return api("GET", "/api/threads").then(renderThreads, function (e) {
