@@ -398,9 +398,18 @@ def run_cases():
     t(g, "", "allow", "PowerShell", {"command": VALIDATE})      # read-only script, harmless without FEATURE
 
     g = "tools"
-    t(g, W, "deny", "mcp__unity__manage_script", {"path": "x"})
-    t(g, W, "deny", "Monitor", {"command": "ls"})
-    t(g, W, "deny", "Artifact", {"file_path": F + "/Shop/Scripts/Internal/S.cs"})
+    t(g, W, "deny", "mcp__unity__manage_script", {"path": "x"})      # not this project's unity-mcp
+    t(g, W, "deny", "Monitor", {"command": "ls"})      # a shell command: the Bash allow-list
+    t(g, W, "allow", "Monitor", {"command": VALIDATE})
+    t(g, W, "deny", "Artifact", {"file_path": F + "/Shop/Scripts/Internal/S.cs"})      # reads another feature's private
+    t(g, W, "deny", "Artifact", {"file_path": F + "/Wallet/a.html", "files": {"s.cs": F + "/Shop/Scripts/Internal/S.cs"}})
+    t(g, W, "deny", "Artifact", {"files": {"s.cs": {"from": "Scripts/Internal/S.cs"}}, "root": F + "/Shop"})
+    t(g, W, "pass", "Artifact", {"file_path": F + "/Wallet/a.html"})
+    t(g, W, "pass", "Artifact", {"action": "list"})
+    # unknown tools pass (human decided 2026-11-26): a subagent hands back its result, a lead reads its tasks
+    for who in (W, "@CodeLead", "@Manager", "@Core", "@UnityAutoPlay", "@Codex", "@GameDesigner", ""):
+        for tool in ("SubagentHandback", "TaskOutput", "TaskStop", "ScheduleWakeup", "SomeNewTool"):
+            t(g + " (unknown tools pass)", who, "pass", tool, {"result": "x"})
     t(g, W, "pass", "TodoWrite", {"todos": []})
     t(g, W, "pass", "AskUserQuestion", {"questions": []})
 
@@ -937,6 +946,22 @@ def run_role_cases(payload):
         for who in ("Wallet", M, "@GameDesigner", "@Codex"):
             t(g + ": writes its scratchpad", who, "allow", "Write", {"file_path": mine[2], "content": "x"}, session=ME)
         t(g + ": unbound writes nothing", "", "deny", "Write", {"file_path": mine[2], "content": "x"}, session=ME)
+        if not WIN:      # a link in its own folders: followed only when it stays in this session's folders, read only
+            sub = os.path.join(store_of(ME), "subagents")
+            os.makedirs(sub)
+            with open(os.path.join(sub, "agent-1.jsonl"), "w") as f:
+                f.write("x")
+            inner = os.path.join(temp_of(ME), "tasks", "a1.output")
+            os.symlink(os.path.join(sub, "agent-1.jsonl"), inner)
+            out = os.path.join(temp_of(ME), "tasks", "a2.output")
+            os.symlink(os.path.join(store_of(OTHER), "tool-results"), out)
+            pad = os.path.join(temp_of(ME), "scratchpad", "l.output")
+            os.symlink(os.path.join(sub, "agent-1.jsonl"), pad)
+            t(g + ": link to its subagent", "@CodeLead", "allow", "Read", {"file_path": inner}, session=ME)
+            t(g + ": link to its subagent", "Wallet", "allow", "Read", {"file_path": inner}, session=ME)
+            t(g + ": link out of the session", "@CodeLead", "deny", "Read", {"file_path": out}, session=ME)
+            t(g + ": link in scratchpad read only", "Wallet", "allow", "Read", {"file_path": pad}, session=ME)
+            t(g + ": link in scratchpad read only", "Wallet", "deny", "Write", {"file_path": pad, "content": "x"}, session=ME)
         if True:      # the CLI puts the temp folders in claude-<uid> (claude-0 on Windows)
             uid_pad = os.path.join(temp, f"claude-{os.getuid() if hasattr(os, 'getuid') else 0}", "abc123", ME, "scratchpad")
             os.makedirs(uid_pad)

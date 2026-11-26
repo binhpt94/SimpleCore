@@ -69,7 +69,8 @@ Paths (Windows and Linux/macOS):
     Zone names that only restrict (deny) match in any letter case; zones that grant (allow/create/design/ask)
     match the exact spelling on a case-sensitive system, so 'assets/core' on Linux is not Assets/Core.
 
-Default is deny: unknown tools, unknown zones and any error in this script are blocked.
+Unknown tools pass (human decided 2026-11-26: SubagentHandback, TaskOutput, Monitor... must work, or subagents
+cannot hand back their result); unknown zones and any error in this script are blocked.
 Reads the hook JSON on stdin, writes the decision JSON on stdout. Standard library only.
 Tests: python .claude/hooks/test_guard.py
 """
@@ -155,7 +156,7 @@ PROPOSALS_MSG = ("Management/proposals is closed (2026-11-26): it is kept to be 
 
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
 READ_TOOLS = {"Read", "Grep", "Glob"}
-SHELL_TOOLS = {"Bash", "PowerShell"}
+SHELL_TOOLS = {"Bash", "PowerShell", "Monitor"}      # Monitor runs a shell command too: same allow-list
 # Tools that do not touch project files.
 PASS_TOOLS = {"AskUserQuestion", "TodoWrite", "TaskCreate", "TaskUpdate", "TaskList", "TaskGet", "Task", "Agent",
               "Skill", "ToolSearch", "WebSearch", "WebFetch", "EnterPlanMode", "ExitPlanMode", "ListAgents",
@@ -563,9 +564,9 @@ def session_bases():
 
 
 def session_folder(full):
-    """(session id, in temp, segments) when the canonical path `full` lies in a session folder outside the project:
+    """(session id, in temp, segments, through a link) when the canonical path `full` lies in a session folder outside the project:
     <config>/projects/<project>/<id>/... or <temp>/claude-<uid>/<project>/<id>/... (session_bases); None otherwise, or when the way there
-    goes through a link or junction."""
+    goes through a link or junction that leads out of this same session's folders."""
     for base, temp in session_bases():
         if not inside(full, base):
             continue
@@ -573,11 +574,15 @@ def session_folder(full):
         if len(seg) < 2 or not OWN_ID_RX.match(seg[1]) or any(s in ("", ".", "..") for s in seg):
             return None
         cur = base
-        for s in seg:      # no link or junction on the way: it could lead anywhere
-            cur = cur + "/" + s
+        for s in seg:      # a link or junction on the way could lead anywhere: only one that stays in the same session
+            cur = cur + "/" + s      # folder is followed (a task's output file links to its subagent's transcript)
             if is_link(cur):
-                return None
-        return seg[1], temp, seg
+                real = canonical_root(os.path.realpath(full))
+                found = None if real == full else session_folder(real)
+                if not found or found[0] != seg[1]:
+                    return None
+                return seg[1], temp, seg, True
+        return seg[1], temp, seg, False
     return None
 
 
@@ -589,8 +594,8 @@ def own_session_zone(full, session_id):
     found = session_folder(full)
     if not found or found[0] != session_id:
         return None
-    _, temp, seg = found
-    return "write" if temp and len(seg) > 3 and seg[2] == OWN_WRITE_DIR else "read"
+    _, temp, seg, linked = found      # through a link: read only, never write
+    return "write" if temp and len(seg) > 3 and seg[2] == OWN_WRITE_DIR and not linked else "read"
 
 
 def peer_feature(full, session_id, root, store):
@@ -2005,7 +2010,32 @@ def decide(data, session_value, root, store=None):
     if tool.startswith(UNITY_PREFIX) or tool in UNITY_RESOURCE_TOOLS:
         return decide_unity(tool, ti, mode, feature, area, who, root, data.get("session_id"), store)
 
-    return "deny", f"tool '{tool}' is not on the guard's list of known tools"
+    # Another registration of a Unity server would skip the rules above: refused.
+    if re.match(r"mcp__[^_]*unity", tool, re.I):
+        return "deny", f"'{tool}' is not this project's unity-mcp ({UNITY_PREFIX}*); ask the human"
+
+    # Any other tool (SubagentHandback, TaskOutput, TaskStop, Artifact...) passes (human decided 2026-11-26: a
+    # subagent must be able to hand back its result). A file it is given is still read: the read zones apply to it.
+    base = resolve_target(text_of(ti.get("root")), cwd) if text_of(ti.get("root")) else cwd
+    for p in tool_paths(ti):
+        verdict = read_verdict(resolve_target(p, base), root, data.get("session_id"), mode, feature, area, read_all, store)
+        if verdict[0] != "allow":
+            return "deny", f"{tool} reads {p}: {verdict[1]}"
+    return None
+
+
+def tool_paths(ti):
+    """The file paths in the input of a tool the guard does not know: file_path, notebook_path, path, file_paths, and
+    the sources of a files map or list (Artifact)."""
+    out = [text_of(ti.get(k)) for k in ("file_path", "notebook_path", "path") if text_of(ti.get(k))]
+    out += [text_of(x) for x in ti.get("file_paths") or [] if text_of(x)]
+    files = ti.get("files")
+    items = files.values() if isinstance(files, dict) else files if isinstance(files, list) else []
+    for v in items:
+        src = v.get("from") or (v.get("path") if not v.get("artifact") else None) if isinstance(v, dict) else v
+        if text_of(src):
+            out.append(text_of(src))
+    return out
 
 
 def main(argv):

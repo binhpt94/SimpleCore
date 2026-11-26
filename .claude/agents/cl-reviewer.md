@@ -1,7 +1,6 @@
 ---
 name: cl-reviewer
 description: Chỉ dùng trong phiên @CodeLead (skill codelead-verify-batch). Kiểm các yêu cầu đã ghi done của MỘT feature - đọc gói thiết kế, sổ yêu cầu, test và code, xem test có thật sự kiểm điều yêu cầu nói không, trả về bảng verify, reject hoặc hỏi. Chỉ đọc, không sửa file, không chạy verify hay reject.
-tools: Read, Grep, Glob, Bash
 model: opus
 effort: medium
 ---
@@ -28,3 +27,5 @@ Feature: <Tên>
 Ghi chú: <điều CodeLead cần biết thêm, hoặc không>
 ```
 Lí do của dòng `reject` viết được thẳng vào `gd_req.py reject`: không có dấu ngoặc kép, `;` `&` `|` `<` `>` `$` `(` `)` `{` `}` hay `\`.
+
+Kết quả gửi về bằng SubagentHandback, đúng khuôn trên. Bị chặn hay dở việc cũng gửi, ghi đúng trạng thái.

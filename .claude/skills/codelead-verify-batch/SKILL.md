@@ -5,6 +5,7 @@ description: Chỉ phiên FEATURE=@CodeLead. Kiểm một lô yêu cầu feature
 # @CodeLead: kiểm một lô yêu cầu bằng subagent
 Việc kiểm là phần tốn nhất của bạn: khoảng một nửa chi phí, gồm đọc code và test, biên dịch, chạy test. Giao cho subagent để ngữ cảnh của bạn chỉ nhận bảng phán quyết.
 - Subagent chạy trong chính phiên này: cùng `FEATURE=@CodeLead`, guard ép như với bạn, chung khoá Editor.
+- Subagent có đủ tool của phiên và gửi kết quả bằng SubagentHandback. Nó kết thúc mà không trả gì thì đọc output của task bằng TaskOutput (hoặc Read file `tasks/<id>.output` của phiên mình), không gọi lại ngay.
 - Bạn vẫn là người quyết `verify`/`reject`. Tiêu chí kiểm ở mục "Tiêu chí kiểm" cuối skill này.
 
 ## Các bước
