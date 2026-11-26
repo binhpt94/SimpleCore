@@ -3,11 +3,14 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 
 ## Luật chung
 - Việc chưa được duyệt thì không làm.
-- Cần người quyết thì hỏi ngay trong chat (vấn đề, các phương án, phương án đề nghị, ai đang bị chặn), rồi làm tiếp việc không phụ thuộc.
+- Leader (tầng 1) cần người quyết thì hỏi ngay trong chat (vấn đề, các phương án, phương án đề nghị, ai đang bị chặn), rồi làm tiếp việc không phụ thuộc.
+- Tầng 2–6 chạy theo việc (headless), không ai trả lời câu hỏi: không hỏi người. Guard chặn AskUserQuestion và mọi lần cần người duyệt của các phiên này (người quyết 2026-11-26).
+  - Cần người quyết hay bị chặn: dừng, nhắn Leader của phần mình (cột "Báo cáo, báo chặn tới") `BÁO CHẶN · chờ người · Việc: … · Vướng ở: … · Cần quyết: …`, rồi kết thúc lượt.
+  - Leader hỏi người trong chat của nó, rồi gửi `TRẢ LỜI · <việc> · <người quyết gì>` vào hộp thư của phiên đó (`dispatch.py send`). Tin đó mở lượt mới; phiên làm tiếp từ chỗ dừng.
 - Việc người đã quyết mà phải sửa công cụ, guard hay luật: Leader ghi bằng `python Management/tools/toolwork.py add "<việc>" --from <vai> --decided "<người quyết gì, ngày nào>"`. Mọi phiên xem bằng `toolwork.py list`. Phiên `@human` làm rồi ghi `done` hoặc `drop`.
 - Quyền do `.claude/hooks/guard.py` ép theo `FEATURE` của phiên.
 - Người gán trong chat bằng `FEATURE=<giá trị> <PIN>`. Chưa gán thì cấm mọi thao tác sửa. AI không tự gán.
-- Bị guard chặn thì dừng và báo người, không tìm đường vòng.
+- Bị guard chặn thì dừng, không tìm đường vòng: Leader báo người trong chat; tầng 2–6 nhắn Leader `BÁO CHẶN`.
 - Lượt có sửa file kết thúc bằng báo cáo theo `.claude/rules/report.md`.
 - Không dùng Claude in Chrome.
 
@@ -16,7 +19,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 |---|---|---|---|---|---|---|
 | 0 | Master | `@human` | | | | |
 | 1 | Leaders | `@Manager`, `@CodeLead`, `@GameDesigner`, `@UIDesigner` | người; @Manager điều phối ba Leader còn lại | @Manager | `.claude/rules/<vai>.md` | `manager-`, `codelead-`, `gd-`, `ui-` |
-| 2 | Tools | `@Codex`, `@Blender`, `@ClaudeImage`, `@DesignAdvisor` | order của feature, @GameDesigner, @UIDesigner | bên giao việc | `studio.md`; `designadvisor.md` | `studio-`, `advisor-` |
+| 2 | Tools | `@Codex`, `@Blender`, `@ClaudeImage`, `@DesignAdvisor` | order của feature, @GameDesigner, @UIDesigner | Leader đã giao order (order của feature: @CodeLead) | `studio.md`; `designadvisor.md` | `studio-`, `advisor-` |
 | 3 | Testers | `@UnityAutoPlay` | @CodeLead, người | @CodeLead | `tester.md` | `tester-` |
 | 4 | Basic | `@Core` | @CodeLead | @CodeLead | `feature.md` | `feature-` |
 | 5 | Services | `_Services/<Tên>` | @CodeLead | @CodeLead | `feature.md` | `feature-` |

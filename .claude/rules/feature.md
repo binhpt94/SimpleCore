@@ -12,7 +12,7 @@ paths:
 - Không tạo `Shared/`.
 - Phiên Features/Services chỉ sửa được code của mình khi thiết kế của nó đã tới vòng 4 trong `Management/game-design/live` (guard kiểm).
 - Dòng `guard:` đầu tin báo code đang mở hay khoá.
-- Bị khoá thì dừng và báo người.
+- Bị khoá thì dừng, không hỏi người, nhắn Leader của phần mình `BÁO CHẶN` rồi kết thúc lượt (`CLAUDE.md` gốc, mục Luật chung).
 
 ## Thiết kế để bám theo
 - `python Management/tools/gd_pack.py <Tên>`: gói thiết kế đã chốt của feature (node feature, node con, node nhánh khác mà refs trỏ tới, thuật ngữ, frame bố cục).

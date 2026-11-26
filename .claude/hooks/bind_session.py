@@ -359,8 +359,22 @@ def advice_mode(root):
 
 
 def context(data, root, store):
-    """One line for the model on every prompt that gets through: what this chat is bound to.
-    Read from the binding each time, so it stays right after a rebind or a compaction. Never has the PIN."""
+    """One line for the model on every prompt that gets through: what this chat is bound to, and for a headless chat
+    (tiers 2-6) that it never asks the human (2026-11-26)."""
+    text = bound_context(data, root, store)
+    raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
+    leader = guard.headless_leader(raw, guard.canonical_root(root))
+    if leader:
+        text += (f" KHÔNG HỎI NGƯỜI: phiên này chạy theo việc (headless), không ai trả lời câu hỏi; AskUserQuestion và mọi "
+                 f"lần guard cần người duyệt đều bị chặn. Cần người quyết hay bị chặn: dừng, nhắn {leader} (SendMessage) "
+                 "một tin 'BÁO CHẶN · chờ người · Việc: … · Vướng ở: … · Cần quyết: …' rồi kết thúc lượt; Leader hỏi người "
+                 "và gửi câu trả lời vào hộp thư của bạn (TRẢ LỜI · …), tin đó mở lượt mới.")
+    return text
+
+
+def bound_context(data, root, store):
+    """What this chat is bound to. Read from the binding each time, so it stays right after a rebind or a compaction.
+    Never has the PIN."""
     raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
     role = guard.role_of(raw)
     if role == "@human":

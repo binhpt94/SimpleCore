@@ -47,7 +47,7 @@ Mỗi mục một dòng, ghi lỗi dưới dạng luật làm được, kèm ngu
 ```
 - Thêm mục khi: phản hồi của một item nói lên một luật chung, tự kiểm thấy lỗi, hoặc log có lỗi lặp lại. Phản hồi riêng của một item đã tự vào prompt của item đó, không cần chép; bài học không còn là điều kiện để chạy lại.
 - Viết thành luật chung, áp được cho order sau, không viết riêng cho một item.
-- Gộp các mục trùng nhau; không xoá mục cũ khi chưa hỏi người.
+- Gộp các mục trùng nhau; không xoá mục cũ khi người chưa đồng ý (hỏi qua `BÁO CHẶN` tới Leader đã giao order, không hỏi người trực tiếp).
 
 ## Ba đường chạy (theo thứ tự, chỉ chuyển khi đường trước không được)
 **@Codex, ảnh**

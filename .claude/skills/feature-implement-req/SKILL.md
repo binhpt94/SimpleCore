@@ -3,14 +3,14 @@ name: feature-implement-req
 description: Chỉ phiên Features và Services (FEATURE=<Tên> hoặc _Services/<Tên>). Làm một yêu cầu trong sổ yêu cầu của feature, từ lúc nhận tới lúc báo xong - đọc sổ gd_req.py, ghi doing, đọc gói gd_pack.py (node vòng 4 và CHEAT), code trên lớp con, test EditMode, biên dịch và đọc console, ghi done kèm tên test hoặc play, validate, báo cáo. Dùng mỗi khi bắt đầu hay làm tiếp một yêu cầu, hoặc sửa yêu cầu bị @CodeLead trả.
 ---
 # Làm một yêu cầu của feature
-Quyền và ranh giới ở bảng của `CLAUDE.md` gốc; luật code ở `.claude/rules/unity.md`; báo cáo ở `.claude/rules/report.md`. Dòng `guard:` đầu tin nói feature đang ĐƯỢC CODE hay ĐANG KHOÁ: khoá thì dừng và báo người, không code.
+Quyền và ranh giới ở bảng của `CLAUDE.md` gốc; luật code ở `.claude/rules/unity.md`; báo cáo ở `.claude/rules/report.md`. Dòng `guard:` đầu tin nói feature đang ĐƯỢC CODE hay ĐANG KHOÁ: khoá thì không code: dừng, nhắn @CodeLead `BÁO CHẶN`, kết thúc lượt.
 
 ## Các bước
-1. **Việc tới bằng hộp thư:** phiên chạy theo việc; việc ở đầu tin, dạng `[tin <id> · từ <ai>]`. Tin có mã đã làm rồi (giao lại sau sự cố) thì bỏ qua. Cần hỏi, bị chặn hay xong một đợt thì nhắn @CodeLead bằng `SendMessage` (`to: "CodeLead"`, Leader, luôn sống); không nhắn @Manager (guard chặn: từ 2026-11-26 tầng dưới là phần của CodeLead).
+1. **Việc tới bằng hộp thư:** phiên chạy theo việc; việc ở đầu tin, dạng `[tin <id> · từ <ai>]`. Tin có mã đã làm rồi (giao lại sau sự cố) thì bỏ qua. Cần người quyết, cần hỏi, bị chặn hay xong một đợt thì nhắn @CodeLead (không hỏi người: phiên chạy headless, không ai trả lời) bằng `SendMessage` (`to: "CodeLead"`, Leader, luôn sống); không nhắn @Manager (guard chặn: từ 2026-11-26 tầng dưới là phần của CodeLead).
 2. **Đọc sổ:** `python Management/tools/gd_req.py <Tên>`. Mỗi ý, trường hợp biên và phần thông số của node vòng 4 (và node cheat) trong `live` là một yêu cầu `<node>#<id>`, tự sinh, không viết tay. Làm trước: yêu cầu bị trả (`reject`, kèm lỗi của @CodeLead), yêu cầu đổi thiết kế hoặc mất test, rồi tới yêu cầu @CodeLead giao, rồi yêu cầu chưa làm. Phiên vừa renew đọc sổ để biết đã làm, đang làm gì (dòng `Sổ yêu cầu` ở đầu mỗi tin).
    - Yêu cầu `<node>#stage-<giai đoạn>` là một cột của bảng `## Thông số theo giai đoạn` của node: nội dung yêu cầu liệt kê các dòng giai đoạn đó đòi mới hoặc khác giai đoạn trước. Làm đủ từng dòng, test nêu đúng giá trị của giai đoạn đó; dòng chỉ kiểm được bằng chơi thử thì ghi `done ... play`. `#params` vẫn là cả phần thông số của node.
 3. **Ghi đang làm:** `python Management/tools/gd_req.py <Tên> doing <node>#<id> "<đang làm gì>"`.
-4. **Đọc thiết kế:** `python Management/tools/gd_pack.py <Tên>` ghi gói ra `Management/game-design/.pack/` và in mục lục có số dòng. Đọc đủ node vòng 4 của yêu cầu và mục CHEAT của phần đó bằng Read (offset, limit) hoặc Grep, không chỉ đọc mục lục. Bám đúng con số, tên, trường hợp biên của gói; thiết kế thiếu hay mâu thuẫn thì hỏi, không tự bịa.
+4. **Đọc thiết kế:** `python Management/tools/gd_pack.py <Tên>` ghi gói ra `Management/game-design/.pack/` và in mục lục có số dòng. Đọc đủ node vòng 4 của yêu cầu và mục CHEAT của phần đó bằng Read (offset, limit) hoặc Grep, không chỉ đọc mục lục. Bám đúng con số, tên, trường hợp biên của gói; thiết kế thiếu hay mâu thuẫn thì không tự bịa, không hỏi người: nhắn @CodeLead `BÁO CHẶN · chờ người · … · Cần quyết: …`, làm phần không phụ thuộc rồi kết thúc lượt; câu trả lời tới qua hộp thư (`TRẢ LỜI · …`).
 5. **Code:** trong vùng của mình, trên lớp con của lớp base (khung chỉ đọc). Luật game ở lớp C# thuần trong `Internal`; View chỉ hiển thị. Cần đổi khung: skill `feature-request-framework-change`, rồi chờ. Cần ảnh hay model: skill `feature-order-asset`.
 6. **Test:** mỗi hành vi người chơi thấy được có ít nhất một test EditMode, tên nói hành vi; feature khác thay bằng đồ giả trong file test. Sửa lỗi thì thêm test tái hiện lỗi trước.
 7. **Biên dịch:** `refresh_unity` rồi `read_console`, sửa hết lỗi của mình. Chạy test và Play là việc của @CodeLead.
@@ -25,4 +25,4 @@ Việc kỹ thuật do khung đòi (ví dụ gọi `TrackView`, `TrackJob` của
 ## Lưu ý
 - Thiết kế đổi, test mất hay ý bị xoá thì sổ tự báo, yêu cầu không còn tính xong: làm lại từ bước 2.
 - Lỗi @CodeLead báo về thì tự sửa trong vùng mình, ghi `done` lại với test mới.
-- Bị guard chặn thì dừng và báo người, không tìm đường vòng.
+- Bị guard chặn thì dừng, không tìm đường vòng, không hỏi người: nhắn @CodeLead `BÁO CHẶN` (câu lỗi của guard), kết thúc lượt.

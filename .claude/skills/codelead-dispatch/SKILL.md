@@ -39,10 +39,12 @@ Từ 2026-11-26 tầng dưới là phần của bạn: feature, service, @Core v
 - **Ai khác gọi được:** @GameDesigner và @UIDesigner chỉ gọi nó cho yêu cầu `XÁC NHẬN` hẹp; việc rộng hơn họ nhờ bạn. @Manager không gọi tester.
 
 ## Khi tầng dưới báo chặn
-Feature, service, @Core, tester nhắn bạn `BÁO CHẶN · …` (không nhắn Manager nữa).
+Feature, service, @Core, tester, và tool làm order của feature nhắn bạn `BÁO CHẶN · …` (không nhắn Manager nữa).
 1. Lỗi trong vùng của bạn (khung, `_Composition`, khoá Editor bạn giữ): gỡ ngay, rồi báo phiên đó qua hộp thư.
 2. Lỗi của phiên khác: giao đúng phiên đó qua hộp thư, kèm file và câu lỗi.
 3. Câu hỏi thiết kế: gom các câu của nhiều feature, hỏi `GameDesigner` một tin. Có câu trả lời thì chuyển xuống từng feature.
-4. Cần sửa `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json`: hỏi người trong chat, từng lần (vấn đề, đề xuất sửa, ai cần); người đồng ý thì báo lại phiên đó.
-5. Chỉ người gỡ được (guard, quyền, công cụ, server tắt): nhắn `Manager` một tin BÁO CHẶN gom các chỗ đó. Trong lúc chờ, giao việc không phụ thuộc cho feature khác.
-6. Không trả lời tin "đã nhận", "cảm ơn"; không chuyển lời qua Manager.
+4. Cần sửa `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json`: hỏi người trong chat, từng lần (vấn đề, đề xuất sửa, ai cần); người trả lời thì gửi lại phiên đó (bước 7).
+5. Chỉ người gỡ được (guard, quyền, công cụ, server tắt): nhắn `Manager` một tin BÁO CHẶN gom các chỗ đó; gỡ xong thì báo lại phiên bị chặn (bước 7). Trong lúc chờ, giao việc không phụ thuộc cho feature khác.
+6. `BÁO CHẶN · chờ người` (tầng dưới không được hỏi người: chạy headless, không ai trả lời): tự quyết được theo thiết kế, luật thì trả lời luôn; không thì hỏi người trong chat (vấn đề, các phương án, phương án đề nghị, ai bị chặn). Tool (@Codex, @Blender, @ClaudeImage) bị chặn ở order của feature cũng báo bạn.
+7. Có câu trả lời: `python Management/tools/dispatch.py send <tên> --from CodeLead "TRẢ LỜI · <việc> · <người quyết gì>"`. Tin mở lượt mới của phiên đó.
+8. Không trả lời tin "đã nhận", "cảm ơn"; không chuyển lời qua Manager.

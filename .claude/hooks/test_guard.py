@@ -179,7 +179,7 @@ def run_cases():
     r(g, W, "allow", FX + "/Management/tools/validate.py")
     w(g, W, "deny", FX + "/Management/tools/validate.py")
     r(g, W, "allow", FX + "/Management/tools/rules.json")
-    e(g, W, "ask", FX + "/Management/tools/rules.json")
+    e(g, W, "deny", FX + "/Management/tools/rules.json")
     e(g, "", "deny", FX + "/Management/tools/rules.json")
     e(g, W, "deny", FX + "/Management/tools/sub/rules.json")
 
@@ -411,7 +411,7 @@ def run_cases():
         for tool in ("SubagentHandback", "TaskOutput", "TaskStop", "ScheduleWakeup", "SomeNewTool"):
             t(g + " (unknown tools pass)", who, "pass", tool, {"result": "x"})
     t(g, W, "pass", "TodoWrite", {"todos": []})
-    t(g, W, "pass", "AskUserQuestion", {"questions": []})
+    t(g, W, "deny", "AskUserQuestion", {"questions": []})
 
     # ---- unity-mcp: only deleting a file of the session's own feature
     g, U = "unity-mcp delete", "mcp__unityMCP__manage_asset"
@@ -429,27 +429,27 @@ def run_cases():
     d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/*.cs")
     d(W, "deny", "Assets/Core/Base.cs")
     d(W, "deny", "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")      # the skeleton
-    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal")
-    d(W, "ask", "Assets/Features/Wallet")
-    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Missing.cs")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Internal")
+    d(W, "deny", "Assets/Features/Wallet")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/Missing.cs")
     # an empty folder of its own (files deleted one by one first) goes without asking; the layout folders stay
     cheat = F + "/Wallet/Scripts/Internal/Cheat"
     os.makedirs(cheat + "/Sub", exist_ok=True)
     Path(cheat + "/Sub.meta").write_text("x")
     Path(cheat + "/Gone.cs.meta").write_text("x")      # a .meta left without its file is not empty
-    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Cheat")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/Cheat")
     os.remove(cheat + "/Gone.cs.meta")
     d(W, "allow", "Assets/Features/Wallet/Scripts/Internal/Cheat")
     d(W, "allow", "Assets/Features/Wallet/Scripts/Internal/Cheat/Sub")
     Path(cheat + "/Sub/C.cs").write_text("x")
-    d(W, "ask", "Assets/Features/Wallet/Scripts/Internal/Cheat")
+    d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/Cheat")
     os.makedirs(F + "/Wallet/Tests/Empty", exist_ok=True)
     d(W, "allow", "Assets/Features/Wallet/Tests/Empty")
     os.makedirs(F + "/Wallet/FeatureAssets/Private", exist_ok=True)
     os.makedirs(F + "/Wallet/Empty", exist_ok=True)
     for layout in ("Assets/Features/Wallet/FeatureAssets/Private", "Assets/Features/Wallet/FeatureAssets",
                    "Assets/Features/Wallet/Empty", "Assets/Features/Wallet/Tests/Empty/../../Tests"):
-        d(W, "ask", layout)
+        d(W, "deny", layout)
     os.makedirs(F + "/Shop/Scripts/Internal/Empty", exist_ok=True)
     d(W, "deny", "Assets/Features/Shop/Scripts/Internal/Empty")      # not its own
     d(W, "deny", "Assets/Features/Wallet/Scripts/Internal/AssemblyInfo.cs")
@@ -673,7 +673,9 @@ def run_advisor_cases():
           all(s in told for s in ("FEATURE=@DesignAdvisor", "game-design/advice", "gd_advise.py", "người hoặc @GameDesigner",
                                   ".claude/rules/designadvisor.md", "Full Auto", "điểm NGƯỜI chấm", "không được bỏ")))
     check(g, V, False, "the context never has the PIN", PIN in told)
+    check(g, V, True, "a headless chat is told not to ask, and whom to tell", "KHÔNG HỎI NGƯỜI" in told and "GameDesigner" in told)
     told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
+    check(g, D, False, "a Leader asks the human itself", "KHÔNG HỎI NGƯỜI" in told)
     check(g, D, True, "@GameDesigner is told about the advisor and the labels",
           all(s in told for s in ("DesignAdvisor", "game-design/advice", "by: <id ý>=gpt@<id lần hỏi>#<id góp ý>", "gpt-dropped:",
                                   "node-by:", "KHÔNG ĐƯỢC BỎ", "NGANG HÀNG")))
@@ -872,7 +874,7 @@ def run_role_cases(payload):
         r(g, role, "allow", F + "/Wallet/CLAUDE.md")
         r(g, role, "allow", A + other + "/Old.cs")
         w(g, role, "deny", FX + "/Management/proposals/new.md")
-        e(g, role, "ask", FX + "/Management/tools/rules.json")
+        e(g, role, "deny", FX + "/Management/tools/rules.json")
         e(g, role, "deny", FX + "/.claude/settings.json")
         t(g, role, "allow", "Bash", sh(VALIDATE + " --feature " + owner))
         t(g, role, "deny", "Bash", sh("dotnet build"))
@@ -1383,7 +1385,7 @@ def run_codelead_cases():
     e(g + " (human)", "@human", "pass", A + "/Core/IServiceRegistry.cs")
     for p in (A + "/Core/Old.cs", A + "/_Composition/Old.cs"):
         e(g + ": a feature never edits Core/_Composition", W, "deny", p)
-    e(g, W, "ask", FX + "/Management/tools/rules.json")
+    e(g, W, "deny", FX + "/Management/tools/rules.json")
     e(g, W, "deny", FX + "/Management/approvals/a.json")          # the old approval folder means nothing now
 
     g = "codelead: bind and reports"
@@ -1816,7 +1818,7 @@ def run_inbox_cases():
     sh("@CodeLead", "allow", D + 'send _Services/Popup --from @CodeLead "Việc ... với dấu chấm"')
     sh("@CodeLead", "allow", D + 'send Shop --from CodeLead "Sửa lỗi biên dịch ở Shop"')
     sh("@CodeLead", "allow", D + 'send @Core --from CodeLead "x"')
-    sh("@CodeLead", "deny", D + 'send @Codex --from CodeLead "x"')           # not its part
+    sh("@CodeLead", "allow", D + 'send @Codex --from CodeLead "TRẢ LỜI · order Shop/coin · người chọn A"')      # answers a tool
     sh("@GameDesigner", "allow", D + 'send @DesignAdvisor --from GameDesigner "Hỏi GPT về node feature-hero"')
     sh("@GameDesigner", "deny", D + 'send Wallet --from GameDesigner "x"')
     sh("@UIDesigner", "allow", D + 'send @ClaudeImage --from UIDesigner "x"')
@@ -2543,10 +2545,35 @@ def run_unity_cases():
         check(g, "", want, f"{name} {ti}", guard.unity_changes("mcp__unityMCP__" + name, ti))
 
 
+def run_headless_cases():
+    """Tiers 2-6 run headless: they never ask the human (2026-11-26)."""
+    g = "headless: no asking"
+    low = ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor")
+    for who in low:
+        t(g, who, "deny", "AskUserQuestion", {"questions": []})
+    for who in ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner"):
+        t(g + " (Leaders and the human ask)", who, "pass", "AskUserQuestion", {"questions": []})
+    data = {"tool_name": "AskUserQuestion", "tool_input": {}, "cwd": FX, "session_id": "test-session"}
+    for who, leader in (("Wallet", "CodeLead"), ("@Core", "CodeLead"), ("@UnityAutoPlay", "CodeLead"),
+                        ("@DesignAdvisor", "GameDesigner"), ("@Codex", "gave the order")):
+        reason = guard.decide(data, who, FX, STORE)[1]
+        check(g + " (names the Leader)", who, True, "reason names " + leader, leader in reason and "BÁO CHẶN" in reason)
+    edit = {"tool_name": "Edit", "tool_input": {"file_path": FX + "/Management/tools/rules.json"}, "cwd": FX,
+            "session_id": "test-session"}
+    got = guard.decide(edit, "Wallet", FX, STORE)
+    check(g + " (an ask becomes a deny to the Leader)", "Wallet", True, "rules.json", got[0] == "deny" and "CodeLead" in got[1])
+    deny = {"tool_name": "Bash", "tool_input": {"command": "dotnet build"}, "cwd": FX, "session_id": "test-session"}
+    got = guard.decide(deny, "Wallet", FX, STORE)
+    check(g + " (tell the human: through the Leader)", "Wallet", True, "dotnet build", got[0] == "deny" and "BÁO CHẶN" in got[1])
+    got = guard.decide(deny, "@CodeLead", FX, STORE)
+    check(g + " (Leaders: as before)", "@CodeLead", True, "dotnet build", got[0] == "deny" and "BÁO CHẶN" not in got[1])
+
+
 def main():
     try:
         build_fixture()
         run_cases()
+        run_headless_cases()
     finally:
         link = F + "/Wallet/link"
         if os.path.lexists(link):

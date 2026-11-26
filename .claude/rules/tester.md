@@ -23,7 +23,7 @@ Tester chơi game trong Unity Editor như một người chơi, đối chiếu v
   - **không** ghi, sửa, xoá file hay asset (`File.*`, `AssetDatabase.Create/Delete/Move/SaveAssets`, `EditorSceneManager.SaveScene`, `PrefabUtility.Save*`, `PlayerSettings`...), không đổi cài đặt project, không cài package;
   - không ghi file nào, kể cả ảnh: ảnh chụp bằng `manage_camera` rồi `tester.py shot` (bước 5 của skill `tester-playtest-session`); dữ liệu đo dạng chữ ghi bằng Write vào `images/`;
   - không dùng nó để làm việc mà guard đã chặn ở lệnh khác.
-- Bị guard chặn thì dừng và báo người, không tìm đường vòng.
+- Bị guard chặn thì dừng, không tìm đường vòng, không hỏi người: nhắn `CodeLead` `BÁO CHẶN` (mục cuối), kết thúc lượt.
 
 ## Thư mục
 ```

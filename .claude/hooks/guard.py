@@ -296,7 +296,8 @@ CODELEAD_COMMANDS.append(DISPATCH + r"cancel m[0-9]{8}-[0-9]{6}-[0-9a-f]{6}")
 DISPATCH_SEND_RX = re.compile(r"^python3? Management/tools/dispatch\.py send (@[A-Za-z]+|" + INBOX_FEATURE
                               + r') --from @?([A-Za-z]+) "[^"\\]+"$')
 INBOX_SENDERS = {      # role -> the targets it may send to ("feature": any feature or service)
-    "@CodeLead": ("feature", "@Core") + tuple(TESTER_ROLES),
+    # the tools too: CodeLead answers a tool that is blocked on an order of a feature (TRẢ LỜI, 2026-11-26)
+    "@CodeLead": ("feature", "@Core", "@Codex", "@Blender", "@ClaudeImage") + tuple(TESTER_ROLES),
     "@GameDesigner": ("@DesignAdvisor", "@Codex") + tuple(TESTER_ROLES),
     "@UIDesigner": ("@ClaudeImage",) + tuple(TESTER_ROLES),
 }
@@ -1751,8 +1752,45 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all, store=No
                        "a feature or service session)." if name == "outside the project" else "."))
 
 
+# Tiers 2-6 (tools, testers, @Core, services, features) run headless (claude -p, opened by the inbox): nobody answers a
+# question there, nor an "ask" of the guard. Human decided 2026-11-26: they never ask the human; they stop, send their
+# Leader BÁO CHẶN and end the turn; the Leader asks the human in its chat and sends the answer back through the inbox.
+HEADLESS_ASK = ("this chat runs headless (on demand): nobody can answer a question here. Do not ask the human. Stop, "
+                "message {leader} (SendMessage) one line 'BÁO CHẶN · chờ người · Việc: … · Vướng ở: … · Cần quyết: …' and "
+                "end the turn; the Leader asks the human and sends the answer through your inbox (TRẢ LỜI · …).")
+
+
+def headless_leader(session_value, root):
+    """The Leader a headless chat (tiers 2-6) reports to, as words for a message; None for the human, the Leaders and
+    an unbound chat."""
+    raw = (session_value or "").strip().replace("\\", "/")
+    role = role_of(raw)
+    if role == "@DesignAdvisor":
+        return "GameDesigner"
+    if role in TOOL_ROLES:
+        return ("the Leader that gave the order (an order of a feature: CodeLead; _design: GameDesigner for Codex, "
+                "UIDesigner for ClaudeImage)")
+    if role in ROLE_AREAS or role in TESTER_ROLES or (not role and raw and valid_feature(raw, root)):
+        return "CodeLead"
+    return None
+
+
 def decide(data, session_value, root, store=None):
-    """Returns (decision, reason), or None to leave the call to the normal permission flow."""
+    """Returns (decision, reason), or None to leave the call to the normal permission flow. A headless chat (tiers 2-6)
+    is never asked: AskUserQuestion and every "ask" become a deny that sends it to its Leader."""
+    leader = headless_leader(session_value, canonical_root(root))
+    if leader and unity_name(data.get("tool_name")) == "AskUserQuestion":
+        return "deny", HEADLESS_ASK.format(leader=leader)
+    result = decide_raw(data, session_value, root, store)
+    if leader and result and result[0] == "ask":
+        return "deny", result[1] + ". " + HEADLESS_ASK.format(leader=leader)
+    if leader and result and result[0] == "deny" and "human" in result[1]:
+        return "deny", result[1] + " (" + HEADLESS_ASK.format(leader=leader) + ")"
+    return result
+
+
+def decide_raw(data, session_value, root, store=None):
+    """decide() before the headless rule: (decision, reason), or None."""
     tool = unity_name(data.get("tool_name"))
     if not tool:
         raise ValueError("no tool_name in hook input")
