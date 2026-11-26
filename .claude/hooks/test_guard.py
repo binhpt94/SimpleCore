@@ -1385,8 +1385,15 @@ def run_codelead_cases():
     dl = lambda expect, path: t(g, L, expect, guard.UNITY_ASSET_TOOL, {"action": "delete", "path": path})  # noqa: E731
     dl("allow", "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")
     dl("allow", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
-    dl("deny", "Assets/Features/Wallet/Scripts/Internal/Old.cs")
-    dl("deny", "Assets/Features/Shop/Scripts/Internal/S.cs")
+    # any file or folder of any feature or service, the whole feature too, no code gate (decided 2026-11-27)
+    os.makedirs(F + "/Shop/Scripts/Internal", exist_ok=True)
+    os.makedirs(F + "/_Services/Popup", exist_ok=True)
+    Path(F + "/Wallet/Scripts/Internal/Old.cs").write_text("x")
+    Path(F + "/Shop/Scripts/Internal/S.cs").write_text("x")
+    dl("allow", "Assets/Features/Wallet/Scripts/Internal/Old.cs")
+    dl("allow", "Assets/Features/Shop/Scripts/Internal/S.cs")         # Shop's code gate is closed: deleting still goes
+    dl("allow", "Assets/Features/_Services/Popup")
+    dl("deny", "Assets/Features/Wallet/Scripts/Internal/x.asmref")
     dl("allow", "Assets/Features/Wallet/Scripts/Contracts")            # a skeleton folder is @CodeLead's own: no question
     os.makedirs(F + "/Wallet/Scripts/Internal/Base", exist_ok=True)
     os.makedirs(A + "/_Composition/Scenes", exist_ok=True)
@@ -1394,9 +1401,11 @@ def run_codelead_cases():
     dl("allow", "Assets/_Composition/Scenes")
     dl("ask", "Assets/_Composition")                                   # the whole wiring area: the human decides
     dl("ask", "Assets/Features/Wallet/Scripts/Contracts/Missing")      # nothing there: not a folder it can be sure of
-    dl("deny", "Assets/Features/Wallet/Scripts/Internal")              # not skeleton: the owner's
-    dl("deny", "Assets/Features/Wallet")
-    dl("deny", "Assets/Features/Shop/Scripts/Internal/Base")           # Shop's code gate is closed
+    dl("allow", "Assets/Features/Wallet/Scripts/Internal")
+    dl("allow", "Assets/Features/Wallet")
+    dl("ask", "Assets/Features/Shop/Scripts/Internal/Base")            # nothing there: not a folder it can be sure of
+    for top in ("Assets/Features", "Assets/Features/_Services"):
+        dl("deny", top)
     dl("deny", "Assets/Core")
     t(g, L, "deny", guard.UNITY_ASSET_TOOL, {"action": "modify", "path": "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs"})
 
@@ -1640,12 +1649,18 @@ def run_designer_cases():
     w(g + " (auto)", D, "deny", hero)                           # the root has no data.md
     w(g + " (auto)", D, "allow", idea + "/data.md")
     node(idea, ai=9, idea_text="Viết lại ý.")
+    def chot(node_dir, path):      # the human's Chốt (người quyết 2026-11-26): approved.json holds the content hash
+        gdm = importlib.util.module_from_spec(importlib.util.spec_from_file_location("gd_for_test", FX + "/Management/tools/gamedesign.py"))
+        gdm.__spec__.loader.exec_module(gdm)
+        held = gdm.read_approvals(FX)
+        held[path] = {"hash": gdm.own_hash(Path(node_dir)), "at": "", "by": "test"}
+        gdm.write_approvals(FX, held)
     # ---- mode user: the human scored every idea, no open question, and the node is the same in live
     Path(base + "/mode.json").write_text('{"mode": "user"}')
     w(g + " (user)", D, "deny", hero)                           # the human has not scored the root
     score(idea, 8)
     w(g + " (user)", D, "deny", hero)                           # scored, but live differs
-    shutil.copy2(idea + "/data.md", live + "/data.md")
+    chot(idea, "")
     w(g + " (user)", D, "allow", hero)
     os.makedirs(idea + choose)
     Path(questions).write_text('{"questions": [{"id": "q1", "text": "?", "options": [{"id": "a", "label": "A"}]}]}')
@@ -1655,8 +1670,7 @@ def run_designer_cases():
     w(g + " (user)", D, "allow", hero)
     w(g + " (user)", D, "deny", skills)                         # feature-hero: unscored and not in live
     score(hero_dir, 6)
-    for name in ("data.md", "CLAUDE.md"):
-        shutil.copy2(hero_dir + "/" + name, live + "/feature-hero/" + name)
+    chot(hero_dir, "feature-hero")
     w(g + " (user)", D, "allow", skills)
     score(hero_dir, 4)
     w(g + " (user)", D, "deny", skills)                         # a human 4 does not pass
@@ -1667,7 +1681,7 @@ def run_designer_cases():
     w(g + " (user)", D, "allow", idea + "/data.md")
     w(g + " (user)", D, "allow", ai + "/notes.md")             # outside the tree: not a node
     w(g + " (the human is not gated)", "@human", "pass", skills)
-    shutil.copy2(idea + "/CLAUDE.md", live + "/CLAUDE.md")
+    chot(idea, "")
     w(g + " (user)", D, "allow", skills)
     os.rename(FX + "/Management/tools/gamedesign.py", FX + "/Management/tools/gamedesign.off")
     sys.modules.pop("gamedesign", None)

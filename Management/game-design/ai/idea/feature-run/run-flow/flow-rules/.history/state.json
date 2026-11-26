@@ -1,5 +1,5 @@
 {
- "hash": "f011f018b6c5",
+ "hash": "593e3d21d6c1",
  "items": {
   "boot-to-home": {
    "hash": "c2970d6d7da3",
@@ -10,32 +10,20 @@
    "text": "Mỗi lần bấm vào trận, trận được dựng mới hoàn toàn; không giữ gì của trận trước\nThành, hero, quái, HUD, thanh nâng cấp của trận trước bị huỷ hết khi rời trận. Vào trận là dựng lại từ đầu rồi báo \"lượt mới\" (`feature-run/run-start`)."
   },
   "lose-stop-same-moment": {
-   "hash": "16fb9e578d28",
-   "text": "Thành báo bị phá thì trong cùng khung hình trận dừng hẳn\nQuái thôi ra, mọi unit thôi đi và thôi đánh, nút kĩ năng và thanh nâng cấp thôi nhận bấm, nút tạm dừng thôi tác dụng. Báo dọn sạch đợt tới sau lúc này bị bỏ qua. Điểm chốt khi lượt thật sự kết thúc (thua không hồi sinh, hoặc bỏ lượt), không chốt ở lần bị phá đầu."
+   "hash": "393cafc3dc3b",
+   "text": "Thành báo bị phá thì trong cùng khung hình trận dừng hẳn\nQuái thôi ra, mọi unit thôi đi và thôi đánh, nút kĩ năng và thanh nâng cấp thôi nhận bấm. Báo dọn sạch đợt tới sau lúc này bị bỏ qua. Điểm chốt ngay lúc này."
   },
   "lose-popup-delay": {
-   "hash": "678a0fc1e59f",
-   "text": "Popup sau khi thành bị phá hiện sau 1 giây kể từ lúc trận dừng\n1 giây (dự kiến) để người chơi thấy thành vừa bị phá. Lần bị phá đầu trong lượt: hiện popup hồi sinh; lần sau: hiện popup thua. Trong 1 giây này không có gì bấm được."
-  },
-  "revive-step": {
-   "hash": "9c249309dfb0",
-   "text": "Chọn hồi sinh và xem xong quảng cáo: đóng popup hồi sinh, thành có lại máu, trận chạy tiếp ngay từ chỗ dừng\nKhông đếm ngược; quái, hero, đợt, tiền, cấp, hồi chiêu giữ đúng như lúc dừng. Bỏ qua đề nghị, hoặc quảng cáo không xem hết hay không tải được: đóng popup hồi sinh, chốt điểm, hiện popup thua ngay (không chờ thêm 1 giây). Mỗi lượt chỉ một lần hồi sinh."
-  },
-  "offer-flag": {
-   "hash": "162097b6747e",
-   "text": "Lượt chơi giữ cờ \"đã đề nghị hồi sinh\", bật ngay lúc mở popup hồi sinh, chỉ tắt khi lượt mới bắt đầu\nThành bị phá khi cờ đã bật thì vào thẳng popup thua."
+   "hash": "5afa5e01b733",
+   "text": "Popup thua hiện sau 1 giây kể từ lúc trận dừng\n1 giây (dự kiến) để người chơi thấy thành vừa bị phá. Trong 1 giây này không có gì bấm được."
   },
   "held-clear": {
-   "hash": "41a954bd103f",
-   "text": "Tin dọn sạch đợt cùng khung hình thành bị phá được giữ; hồi sinh thì thả, chốt thua thì bỏ\nThả tin: đợt được cộng điểm, `feature-wave` thưởng tiền và bắt đầu lúc thở. Bỏ tin: không điểm, không thưởng."
+   "hash": "551968241c53",
+   "text": "Tin dọn sạch đợt tới cùng khung hình thành bị phá thì bị bỏ\nĐợt đó không được cộng điểm, `feature-wave` không thưởng tiền, không bắt đầu lúc thở."
   },
   "replay-path": {
    "hash": "e59094bf4cce",
    "text": "Chơi lại ở popup thua: huỷ trận, sang màn chọn đội; về màn bắt đầu: huỷ trận, sang màn bắt đầu\nChơi lại không đi qua màn bắt đầu."
-  },
-  "quit-path": {
-   "hash": "89aec6b4ce50",
-   "text": "Đồng ý bỏ lượt: chốt điểm như thua, huỷ trận, về thẳng màn bắt đầu, không hiện popup thua\nKỉ lục cập nhật như thua; màn bắt đầu hiện kỉ lục đã cập nhật."
   },
   "transition-lock": {
    "hash": "9d26d1c5984d",

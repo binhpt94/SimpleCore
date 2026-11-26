@@ -36,13 +36,13 @@ Thời gian dự kiến: Hiệp sĩ (2.0u/s) từ x=1.5u đi tới quái mới v
 - Mục tiêu ở ngoài ±15u và ngoài tầm khi hero đứng ở mốc: hero đứng yên ở mốc, vẫn chọn lại mỗi khung hình; có quái khác gần hơn thì đổi.
 - Quái mới vào màn khi hero đang về điểm đứng chờ: chọn quái đó ngay, không cần về tới nơi.
 - Giữa hai đợt còn quái sót: vẫn nhắm và đánh như thường.
-- Tạm dừng: hero đứng yên, giữ trạng thái và mục tiêu.
 
 ## Đã tự quyết
 - **Tốc độ chạy khác nhau giữa các hero (2026-11-25, theo yêu cầu của người).** Mỗi hero chạy theo tốc độ riêng ở node danh sách hero; luật nhắm và đi không đổi. Đã rà ví dụ thời gian đi theo số mới.
 - **Không nhắm quái ngoài màn (tâm quá ±16u).** Tránh hero cận chiến đánh quái người chơi không thấy ở x=±17u. Đã loại: nhắm mọi quái đã sinh.
 - **Bằng khoảng cách thì ưu tiên quái gần thành.** Đó là con nguy cho thành hơn.
 - **Đứng chờ ở điểm xuất phát, không ở tâm thành.** Hai bên đều có hero chờ sẵn. Đã loại: đứng ở x=0 (cả đội chồng một chỗ).
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - Không có điểm chặn.

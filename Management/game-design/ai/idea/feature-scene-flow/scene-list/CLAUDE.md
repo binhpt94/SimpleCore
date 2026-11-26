@@ -14,7 +14,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Danh sách
 - Scene Loading.
-- Scene Game: màn bắt đầu (`feature-home`), màn chọn đội (`feature-team-select`), trận, popup thua (`feature-popup-lose`), popup tạm dừng (`feature-popup-pause`).
+- Scene Game: màn bắt đầu (`feature-home`), màn chọn đội (`feature-team-select`), trận, popup thua (`feature-popup-lose`).
 
 ## Luật cơ bản
 - Mở game: vào Loading, tải xong tự sang Game.
@@ -26,6 +26,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Mọi màn chơi chung scene Game** (theo đề xuất mặc định). Lí do: lượt chơi ngắn, chơi lại phải nhanh; scene Game có ít màn. Đã loại: mỗi màn một scene; trận ở scene riêng.
 - **Loading không có nút bấm.** Màn bắt đầu đã có nút chơi. Đã loại: "chạm để chơi" ở Loading.
 - **Không quay lại Loading.** Không có lí do tải lại từ đầu trong một lần chạy game.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ popup tạm dừng khỏi scene Game.
 
 ## Chưa rõ
 - Loading hiện gì cho người chơi (tên game, thanh tiến độ): vòng 4.

@@ -1,0 +1,8 @@
+index,id,name,stage,appears,disappears
+int,string,string,enum:idea|prototype|full,string,string
+Số thứ tự,Mã,Tên hiển thị,Có từ giai đoạn nào,Xuất hiện,Biến mất
+1,walk_bob,"Nhún khi đi (0.1u, chu kì 0.4s)",idea,bắt đầu đi,dừng đi
+2,attack_nudge,"Nhích khi ra đòn (0.2u về phía mục tiêu, 0.15s)",idea,mỗi đòn,sau 0.15s
+3,hit_flash,Nháy khi bị đánh,idea,mỗi đòn trúng,"sau 0.1s, đòn mới đặt lại"
+4,cleave_trail,Vệt chém (Đấu sĩ rìu),idea,"mỗi đòn, phủ đoạn 1.5u",sau 0.2s
+5,blast_ring,Vòng nổ (Pháp sư),prototype,"lúc trúng, bán kính 1.5u quanh mục tiêu",sau 0.3s

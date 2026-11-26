@@ -19,12 +19,12 @@ Ba cột `idea`, `prototype`, `full` của bảng `ClockParams`. Chỉ `view_int
 
 ## Trường hợp biên
 - **Khung đầu tiên sau khi tải scene dài bất thường** (vài giây): bị kẹp ở 0.125 giây, chạy tối đa 5 bước; trận không nhảy.
-- **Game rời khỏi màn hình rồi quay lại:** lượt tự tạm dừng theo `feature-run`; nhịp vẫn chạy nhưng gameplay đứng yên; thời gian ngoài game bị kẹp như trên.
+- **Game rời khỏi màn hình rồi quay lại:** thời gian ngoài game bị kẹp như trên.
 - **Khung không đủ 0.025 giây:** không chạy bước nào; phần thời gian giữ lại cho khung sau.
 - **Thao tác bấm đúng lúc lượt vừa kết thúc trong bước trước:** thao tác bị bỏ theo luật của feature nhận nó (ví dụ nút kĩ năng đã khoá).
 - **Đổi cách chạy trong lúc đang chơi:** không hỗ trợ; config đọc một lần khi vào trận.
 - **Tua 16 lần trên máy chậm:** vẫn kẹp ở 0.125 giây thời gian khung; chạy tối đa 80 bước. Kết quả gameplay không đổi vì mỗi bước vẫn dài 0.025 giây.
-- **Chạy N bước khi đang tạm dừng:** bước vẫn chạy, gameplay vẫn đứng yên theo luật tạm dừng.
+- **Chạy N bước khi trận dừng:** bước vẫn chạy, gameplay vẫn đứng yên.
 - **Ở cách theo khung hình:** kết quả không lặp lại giữa các máy; dùng khi cần thử cảm giác theo khung hình, không dùng để kiểm cân bằng.
 
 ## Đã tự quyết
@@ -33,6 +33,7 @@ Ba cột `idea`, `prototype`, `full` của bảng `ClockParams`. Chỉ `view_int
 - **Chờ giờ hết ở bước đầu tiên đạt hoặc vượt.** Một luật cho mọi feature, đổi giây sang số bước không cần làm tròn riêng.
 - **Tốc độ tua dự kiến 1 tới 16 lần.** Đã loại: tua không giới hạn (máy dev treo khung hình lâu, khó theo dõi).
 - **Cách chạy mặc định là bước cố định.** Người quyết (2026-11-25), không phải tự quyết.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ tự tạm dừng khi game xuống nền; "chạy N bước khi tạm dừng" thành "khi trận dừng".
 
 ## Chưa rõ
 - Không có điểm chặn.

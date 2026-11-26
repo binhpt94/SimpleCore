@@ -1,5 +1,5 @@
 ---
-based-on: 6181a7c21bf0
+based-on: ca84fa282d14
 by: castle-damage-between-waves=gpt@r2-1#castle-damage-between-waves, castle-auto-attack=gpt@r2-1#castle-defends-nearby
 ---
 # Thành
@@ -10,9 +10,6 @@ Tòa thành đứng giữa màn hình: thứ người chơi phải giữ, đồn
 
 ### castle-health | AI 8 | Thành là thứ phải giữ: quái tới được thì đánh thành, thành bị phá là thua
 Báo cho `feature-run` khi thành bị phá.
-
-### castle-revive | AI 7 | Được hồi sinh thì thành đứng lại với một phần máu tối đa, cấp nâng cấp giữ nguyên
-Hồi sinh là việc lượt chơi quyết sau khi người chơi xem xong quảng cáo; thành chỉ lấy lại máu.
 
 ### castle-damage-between-waves | AI 7 | Thành giữ nguyên mức hư hại khi sang đợt quái kế tiếp
 Giữ thành ít hư hại trong đợt này thì đợt sau chống đỡ tốt hơn.

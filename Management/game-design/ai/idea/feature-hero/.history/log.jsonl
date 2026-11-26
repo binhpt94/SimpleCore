@@ -26,3 +26,6 @@
 {"at": "2026-11-26 23:15:33", "event": "data", "hash": "72f3a14abd32", "previous": "342d7eeb41df", "added": ["user-3"], "removed": [], "rewritten": []}
 {"at": "2026-11-26 23:15:41", "event": "promote", "by": "người", "hash": "72f3a14abd32"}
 {"at": "2026-11-26 23:15:44", "event": "promote", "by": "người", "hash": "72f3a14abd32"}
+{"at": "2026-11-26 23:53:13", "event": "human-delete", "item": "owner-applies-hp", "text": "Máu hiện tại của hero, quái và thành chỉ do feature sở hữu bên đó cập nhật", "by": "gpt"}
+{"at": "2026-11-26 23:53:13", "event": "data", "hash": "46623bac3830", "previous": "72f3a14abd32", "added": [], "removed": [{"id": "owner-applies-hp", "text": "Máu hiện tại của hero, quái và thành chỉ do feature sở hữu bên đó cập nhật"}], "rewritten": []}
+{"at": "2026-11-26 23:53:14", "event": "approve", "hash": "8686d08e17f294c5d4f28df4c68d3b630aa25822", "by": "tự duyệt (Full Auto)"}

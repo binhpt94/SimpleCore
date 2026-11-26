@@ -6,7 +6,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Một kĩ năng thành, một nút.
 - `feature-castle` báo danh sách kĩ năng, trạng thái từng kĩ năng và thời gian hồi chiêu còn lại; nút chỉ hiện.
 - Bấm nút: báo cho `feature-castle`; `feature-castle` dùng kĩ năng và bắt đầu hồi chiêu.
-- Lúc tạm dừng, hồi chiêu đứng và nút không nhận bấm (`feature-run/run-pause`).
 - Vị trí nút ở `feature-hud/hud-layout`.
 
 ## Định nghĩa
@@ -28,6 +27,7 @@ Trên mỗi nút:
 - **Hiện cả số thời gian còn lại lẫn lớp phủ.** Quyết định chung yêu cầu hiện thời gian còn lại; lớp phủ cho liếc nhanh.
 - **HUD không tự đếm hồi chiêu.** Thời gian do `feature-castle` giữ để chỉ có một nơi đúng.
 - **Có tín hiệu lúc hồi xong.** Canh lúc bấm kĩ năng là cảm giác chính ở vòng 1; người chơi không nên phải nhìn chằm chằm vào nút.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ luật nút không nhận bấm lúc tạm dừng (`feature-run/run-pause`).
 
 ## Chưa rõ
 - Số kĩ năng và biểu tượng từng kĩ năng chờ vòng 3 của `feature-castle`.

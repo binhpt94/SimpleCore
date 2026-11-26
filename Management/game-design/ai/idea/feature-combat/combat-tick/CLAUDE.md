@@ -24,11 +24,11 @@ Các bước của một nhịp:
 - Hai bên kết liễu nhau cùng nhịp thì cả hai đều hết máu.
 - Sát thương đã chốt lúc ra đòn; nâng cấp giữa lúc ra đòn và lúc trúng không đổi đòn đó.
 - Giao chiến không giữ máu hay chỉ số.
-- Tạm dừng: không có nhịp nào chạy.
 
 ## Đã tự quyết
 - **Ở IDEA không có giao chiến (độ quan trọng 6).** Mỗi bên tự trừ máu ngay khi trúng theo luật của nhánh chỉ số hero; kết quả khác nhau chỉ ở đòn trùng đúng một bước, hiếm ở nhịp game này.
 - **Băng giá, Cổ vũ không đi qua giao chiến.** Chúng không trừ máu.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ luật "tạm dừng: không có nhịp nào chạy".
 
 ## Chưa rõ
 - Giao chiến là một dịch vụ riêng hay một bước trong vòng lặp trận: vòng 4, cùng @CodeLead.

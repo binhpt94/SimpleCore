@@ -1,0 +1,29 @@
+kind: ui
+title: Thanh nâng cấp: 6 nút, hai nhóm
+use bottom-h = feature-hud/hud-layout/layout-spec#bottom-h
+use up-w = feature-hud/hud-layout/layout-spec#up-w
+use up-h = feature-hud/hud-layout/layout-spec#up-h
+let bottom-y = 900
+let bar-x = 40
+let bar-y = 15
+let bar-w = 1340
+let bar-h = 150
+let grp-y = 5
+let grp-w = 620
+let grp-h = 140
+let heroes-x = 10
+let castle-x = 700
+let b1-x = 0
+let b2-x = 210
+let b3-x = 420
+- bottom   rect   x=0   y=bottom-y w=1920 h=bottom-h label="Mép dưới"
+- bar      rect   x=bar-x y=bar-y w=bar-w h=bar-h parent=bottom label="Thanh nâng cấp"
+- heroes   rect   x=heroes-x y=grp-y w=grp-w h=grp-h parent=bar label="Nhóm hero"
+- castle   rect   x=castle-x y=grp-y w=grp-w h=grp-h parent=bar label="Nhóm thành"
+- hero-1   button x=b1-x y=0 w=up-w h=up-h parent=heroes label="Hero chỗ 1"
+- hero-2   button x=b2-x y=0 w=up-w h=up-h parent=heroes label="Hero chỗ 2"
+- hero-3   button x=b3-x y=0 w=up-w h=up-h parent=heroes label="Hero chỗ 3"
+- c-hp     button x=b1-x y=0 w=up-w h=up-h parent=castle label="Máu"
+- c-atk    button x=b2-x y=0 w=up-w h=up-h parent=castle label="Sức đánh"
+- c-skill  button x=b3-x y=0 w=up-w h=up-h parent=castle label="Kĩ năng"
+- skills   rect   x=1420 y=20 w=460  h=140 parent=bottom label="Cụm kĩ năng (feature-hud, không thuộc thanh)"

@@ -24,4 +24,4 @@ Bên ra đòn ghi là thành.
 ### kill-credit | AI 6 | Quái hết máu do tổng của nhiều bên thì vẫn cho tiền đúng một lần, không chia theo bên
 Tiền vào ví như mọi lần hạ quái.
 
-### pause-no-tick | AI 7 | Lúc tạm dừng, lúc chờ hồi sinh và sau khi lượt kết thúc không có nhịp nào chạy
+### pause-no-tick | AI 7 | Sau khi lượt kết thúc không có nhịp nào chạy

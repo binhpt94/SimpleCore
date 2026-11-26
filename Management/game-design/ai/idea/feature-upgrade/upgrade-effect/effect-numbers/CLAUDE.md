@@ -31,13 +31,14 @@ Mức tăng mỗi cấp (tham khảo, không phải của node này):
 ## Trường hợp biên
 - **Mua cấp cho hero đang gục**: vẫn báo ngay; `feature-hero` chỉ đổi cấp và dùng cấp mới khi hồi sinh (`hero-level-values`).
 - **Mua nhiều cấp liên tiếp trong một khung hình**: báo từng cấp một (2, rồi 3...), không gộp thành một lời báo "lên cấp 3".
-- **Lần mua bị từ chối** (không đủ tiền, đang tạm dừng, lượt đã kết thúc): không báo gì.
+- **Lần mua bị từ chối** (không đủ tiền, lượt đã kết thúc): không báo gì.
 - **Lượt mới bắt đầu**: cấp về 1 do lệnh đặt lại của `feature-run`; nâng cấp không gửi lời báo "lên cấp 1".
 
 ## Đã tự quyết
 - **Viết lại node chỉ còn luật báo lên cấp (2026-11-25, người chọn hướng A).** Bản trước chép công thức cấp hero, mức tăng máu, sức đánh, kĩ năng thành và các trường hợp biên của chúng, trong khi node cha ghi "feature này chỉ báo mục X lên cấp Y" và "không giữ chỉ số". Sổ yêu cầu vì vậy giao các con số cho Upgrade dù Upgrade không có code cho chúng. Các ý `hero-plus-15`, `hero-speed-3`, `hero-hp-gain`, `hero-fallen`, `castle-hp-150`, `castle-attack-20`, `castle-skill-20` bỏ khỏi node này; luật đó vẫn có ở `hero-level-values` (`level-formula`, `level-hp-gain`) và `upgrade-effect-values` (`hp-per-level`, `attack-per-level`, `skill-per-level`). Đã loại: giữ bản chép (hai nơi cùng một luật, sẽ lệch).
 - **Báo từng cấp, không gộp.** Bên nhận chỉ cần một luật "lên 1 cấp"; khớp trường hợp biên "mua nhiều cấp liên tiếp" của `hero-level-values`. Đã loại: báo cấp cuối cùng một lần.
 - **Không báo khi đặt lại lượt.** Việc đặt lại thuộc `feature-run`; mỗi feature tự về trạng thái ban đầu.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ "đang tạm dừng" khỏi lí do mua bị từ chối.
 
 ## Chưa rõ
 - Hai đề xuất cho người ở bản trước (Băng giá không có trần thời gian chậm, Cổ vũ hồi đầy từ cấp 13) thuộc nhánh thành; chúng vẫn đúng với số ở `upgrade-effect-values` nhưng không còn ghi ở node này.

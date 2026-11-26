@@ -1,0 +1,27 @@
+kind: ui
+title: Một thẻ hero (thẻ đầu tiên, Hiệp sĩ)
+use cards-x = feature-team-select/team-slots/slots-spec#cards-x
+use cards-y = feature-team-select/team-slots/slots-spec#cards-y
+use card-w = feature-team-select/team-slots/slots-spec#card-w
+use card-h = feature-team-select/team-slots/slots-spec#card-h
+let portrait-x = 30
+let portrait-y = 20
+let portrait-w = 240
+let portrait-h = 200
+let text-x = 20
+let text-w = 260
+let name-y = 235
+let name-h = 50
+let style-y = 290
+let style-h = 40
+let role-y = 340
+let role = 48
+let picked-x = 232
+let picked-y = 12
+let picked = 56
+- card     round-rect x=cards-x y=cards-y w=card-w h=card-h label="Thẻ hero"
+- portrait rect       x=portrait-x y=portrait-y w=portrait-w h=portrait-h parent=card label="Hình hero"
+- name     label      x=text-x y=name-y w=text-w h=name-h parent=card label="Hiệp sĩ"
+- style    label      x=text-x y=style-y w=text-w h=style-h parent=card label="Cận chiến · Chắn"
+- role     icon       x=text-x y=role-y w=role h=role parent=card label="Dấu vai trò"
+- picked   icon       x=picked-x y=picked-y w=picked h=picked parent=card overlap label="Đã chọn"

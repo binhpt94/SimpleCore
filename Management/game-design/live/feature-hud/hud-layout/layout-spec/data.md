@@ -1,15 +1,15 @@
 ---
-based-on: e541be0cca19
-refs: feature-hud-upgrade/bar-layout@4a9d06c74198, feature-popup/popup-layer@91d4f017d2fb, feature-hud/hud-status/status-spec@339ea3c8f938, feature-hud/hud-skill-button/skill-button-spec@62838fe48a2d
+based-on: 7bbb09d6efb6
+refs: feature-hud-upgrade/bar-layout@4a9d06c74198, feature-popup/popup-layer@91d4f017d2fb, feature-hud/hud-status/status-spec@d8a728628845, feature-hud/hud-skill-button/skill-button-spec@7b0191869555
 ---
 # Chỗ của từng phần HUD
 
-Chốt mép và góc cho từng phần HUD trận: thông tin và nút tạm dừng ở mép trên, 3 nút kĩ năng ở góc dưới bên phải, phần còn lại của mép dưới cho thanh nâng cấp.
+Chốt mép và góc cho từng phần HUD trận: thông tin ở mép trên, 3 nút kĩ năng ở góc dưới bên phải, phần còn lại của mép dưới cho thanh nâng cấp.
 
 ## Ý cốt lõi
 
-### top-row-order | AI 7 | Mép trên từ trái sang phải: nút tạm dừng, tiền, máu thành, đợt
-Máu thành ở giữa, thẳng phía trên thành. Nút tạm dừng ở góc trên bên trái, xa góc dưới bên phải nơi có nút kĩ năng.
+### top-row-order | AI 7 | Mép trên từ trái sang phải: tiền, máu thành, đợt
+Máu thành ở giữa, thẳng phía trên thành.
 
 ### skills-bottom-right | AI 7 | 3 nút kĩ năng gom thành một cụm ở góc dưới bên phải, xếp ngang theo thứ tự Sấm sét, Băng giá, Cổ vũ
 Ngón cái phải chạm tới. Cụm này không đổi chỗ trong trận.

@@ -1,6 +1,6 @@
 ---
-based-on: d46873561735
-refs: feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-popup/popup-request/request-rules@a51eb270271a, feature-popup-lose/cheat@683571cd6600, feature-popup/popup-request@ff4b78bc4b2c, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+based-on: d0ede8765995
+refs: feature-popup/popup-layer/stack-rules@5f909869fc3d, feature-popup/popup-request/request-rules@2a7ea725bb37, feature-popup-lose/cheat@683571cd6600, feature-popup/popup-request@ff4b78bc4b2c, feature-hud/hud-layout/layout-spec@aa79f655e44b
 ---
 # Cheat: dịch vụ popup
 

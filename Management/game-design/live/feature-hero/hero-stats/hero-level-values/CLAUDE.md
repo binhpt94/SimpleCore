@@ -42,13 +42,13 @@ Cân bằng dự kiến: Lính đợt n có 40×(1+0.1×(n-1)) máu, tăng 10%/�
 - Lên cấp khi hero đang gục: chỉ tăng cấp; lúc hồi sinh lấy máu tối đa của cấp mới (`feature-hero/hero-respawn/respawn-values`).
 - Mua nhiều cấp liên tiếp trong một khung hình: áp từng cấp một, kết quả như mua lần lượt.
 - Sát thương làm máu xuống dưới 0: máu coi là 0; phần thừa không chuyển sang mục tiêu khác.
-- Tạm dừng: bộ đếm đòn dừng, không mua được cấp.
 - Không có cấp tối đa; tốc độ đánh dừng tăng ở cấp 21, máu và sát thương vẫn tăng.
 
 ## Đã tự quyết
 - **Đo bằng khoảng trống giữa mép hộp.** Một cách đo cho mọi tầm, khớp "tầm tính từ mép thành". Đã loại: đo từ tâm.
 - **Sát thương tức thì cho mọi đòn.** Bớt trường hợp biên đạn bay; nhìn vẫn có đạn. Đã loại: đạn bay thật.
 - **Số thực bên trong, làm tròn khi hiện.** Công thức +15% ra số lẻ (12×1.15=13.8); làm tròn từng cấp sẽ làm cấp thấp tăng không đều.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - Không có điểm chặn.

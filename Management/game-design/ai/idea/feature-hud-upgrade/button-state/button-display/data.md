@@ -1,6 +1,6 @@
 ---
-based-on: f1aa8b544f79
-refs: feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+based-on: c2f8ded28909
+refs: feature-upgrade/upgrade-purchase/purchase-rules@ba02d7fd60f1, feature-hud/hud-layout/layout-spec@aa79f655e44b
 ---
 # Hiển thị và chạm nút nâng cấp
 
@@ -14,7 +14,7 @@ Ví dụ nút hero 1 vừa vào trận: chân dung hero đó, "Cấp 1", giá 30
 ### icons | AI 8 | Có 4 loại hình: chân dung từng hero, biểu tượng máu thành, biểu tượng đòn tự bắn, biểu tượng kĩ năng thành
 Chân dung hero là hình của đúng hero ở chỗ đó. Biểu tượng kĩ năng đại diện cho cả ba kĩ năng, không phải một kĩ năng riêng.
 
-### bright-dim | AI 8 | Nút sáng khi mua được và mờ khi không mua được, đổi trong cùng 1 khung hình với lúc số dư, cấp hoặc tạm dừng đổi
+### bright-dim | AI 8 | Nút sáng khi mua được và mờ khi không mua được, đổi trong cùng 1 khung hình với lúc số dư hoặc cấp đổi
 "Mua được" lấy từ `feature-upgrade`; nút không tự so tiền với giá.
 
 ### tap-once | AI 8 | 1 chạm vào nút sáng gửi đúng 1 yêu cầu mua; chạm nút mờ gửi 0 yêu cầu

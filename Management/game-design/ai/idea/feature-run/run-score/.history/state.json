@@ -1,17 +1,13 @@
 {
- "hash": "3d29bb683b7c",
+ "hash": "691534d6dde7",
  "items": {
   "score-def": {
    "hash": "fc3ad70594ba",
    "text": "Điểm của lượt bằng số đợt đã dọn sạch; đợt đang đánh dở không tính\nMỗi lần `feature-wave` báo dọn sạch một đợt thì điểm tăng một bậc. Đã loại: điểm theo số quái hạ, điểm theo thời gian trụ."
   },
   "score-final": {
-   "hash": "d15dc17af8be",
-   "text": "Điểm được chốt lúc lượt kết thúc, dù thua hay bỏ lượt\nHai cách kết thúc tính điểm giống nhau. Đã loại: bỏ lượt thì mất điểm."
-  },
-  "score-across-revive": {
-   "hash": "65aec4b4a7e4",
-   "text": "Hồi sinh thành không đặt lại điểm; điểm của lượt gồm cả các đợt dọn trước và sau khi hồi sinh\nKỉ lục chỉ xét lúc lượt đã chốt thua hoặc bỏ lượt, không xét lúc thành bị phá lần đầu."
+   "hash": "223662d6ca27",
+   "text": "Điểm được chốt lúc lượt kết thúc"
   },
   "record-def": {
    "hash": "57fcbd5d552e",

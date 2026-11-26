@@ -1,5 +1,5 @@
 {
- "hash": "d46873561735",
+ "hash": "d0ede8765995",
  "items": {
   "popup-show": {
    "hash": "38123247a07c",
@@ -17,29 +17,17 @@
    "hash": "f1aefde2505b",
    "text": "`feature-popup-lose` nhờ dịch vụ mở popup khi `feature-run` báo đã chốt kết quả thua\nTín hiệu chốt bảo đảm điểm và kỉ lục đã sẵn để hiện."
   },
-  "pause-opens-after-freeze": {
-   "hash": "23f31eba8494",
-   "text": "`feature-popup-pause` nhờ dịch vụ mở popup khi `feature-run` xác nhận trận đã tạm dừng\nNgười chơi chỉ thấy nút Tiếp tục khi trận đã đứng yên."
-  },
-  "lose-before-pause": {
-   "hash": "ba168e9854ae",
-   "text": "Thành bị phá trong bước đang xử lí lúc có yêu cầu tạm dừng thì `feature-run` chốt thua trước\nKhi đó chỉ popup thua được mở."
-  },
   "freeze-after-lose": {
    "hash": "abaf7bfeb096",
    "text": "`feature-run` giữ trận đứng yên từ lúc chốt thua tới khi dọn xong trận\nNgười chơi đọc kết quả khi quái, đợt và hồi chiêu đều đã dừng; popup thua vẫn nhận bấm."
   },
   "flow-routes-leave": {
-   "hash": "54f2a30546d1",
-   "text": "`feature-game-flow` quyết màn đích cho mọi lựa chọn rời trận từ popup thua và popup tạm dừng\nChơi lại về màn chọn đội; về màn bắt đầu và bỏ lượt đều về màn bắt đầu."
-  },
-  "choice-only-when-paused": {
-   "hash": "d0e8108daa1a",
-   "text": "`feature-run` chỉ nhận Tiếp tục hoặc Bỏ lượt khi lượt đang tạm dừng\nLựa chọn tới muộn không làm chạy lại hay kết thúc lượt đã chốt."
+   "hash": "54ecd988524d",
+   "text": "`feature-game-flow` quyết màn đích cho mọi lựa chọn rời trận từ popup thua\nChơi lại về màn chọn đội; về màn bắt đầu thì về màn bắt đầu."
   },
   "close-before-report": {
-   "hash": "f4174e3a0f8e",
-   "text": "Popup thua và popup tạm dừng báo lựa chọn cho `feature-run` sau khi dịch vụ đã đóng popup\nLượt tiếp tục trận hay chuyển màn khi nền che đã gỡ."
+   "hash": "e7d5f250077b",
+   "text": "Popup thua báo lựa chọn cho `feature-run` sau khi dịch vụ đã đóng popup\nLượt chuyển màn khi nền che đã gỡ."
   },
   "handoff-after-dispose": {
    "hash": "61b9b50e18b4",
@@ -48,10 +36,6 @@
   "flow-switches-after-popup": {
    "hash": "874ff969c44b",
    "text": "`feature-game-flow` đổi màn trong scene Game sau lựa chọn rời trận từ popup"
-  },
-  "back-key-pause": {
-   "hash": "36a4a40f9d8e",
-   "text": "`feature-popup-pause` xử lí nút Quay lại của điện thoại như nút Tiếp tục"
   },
   "back-key-lose": {
    "hash": "0c038ab5987a",

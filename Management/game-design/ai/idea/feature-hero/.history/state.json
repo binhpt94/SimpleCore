@@ -1,5 +1,5 @@
 {
- "hash": "72f3a14abd32",
+ "hash": "46623bac3830",
  "items": {
   "hero-auto-combat": {
    "hash": "a06ca8a02eac",
@@ -60,10 +60,6 @@
   "same-tick-sum": {
    "hash": "fb41215dbc8e",
    "text": "Sát thương của các đòn hợp lệ cùng nhịp cộng thành một khoản cho mỗi bên trúng\nHero và thành cùng đánh một con quái thì quái nhận tổng một lần."
-  },
-  "owner-applies-hp": {
-   "hash": "c2429e2040e0",
-   "text": "Máu hiện tại của hero, quái và thành chỉ do feature sở hữu bên đó cập nhật"
   },
   "report-after-hp": {
    "hash": "c3cfc4a6da01",

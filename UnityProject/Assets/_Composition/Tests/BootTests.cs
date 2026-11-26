@@ -15,7 +15,7 @@ namespace Game.Composition.Tests
         private static readonly object[] Scenes =
         {
             new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 2 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 22 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 19 },
         };
 
         [Test]
@@ -108,8 +108,7 @@ namespace Game.Composition.Tests
 
             Assert.That(names, Is.EquivalentTo(new[]
             {
-                "PopupPauseInstaller", "AdsInstaller", "PopupReviveInstaller", "HomeInstaller", "TeamSelectInstaller",
-                "GameFlowInstaller", "CombatInstaller",
+                "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "CombatInstaller",
             }));
         }
 
@@ -129,8 +128,7 @@ namespace Game.Composition.Tests
                 SessionScene, SimClock,
                 "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "CombatInstaller",
                 "EnemyInstaller", "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
-                "HudUpgradeInstaller", "PopupLoseInstaller", "PopupPauseInstaller", "AdsInstaller", "PopupReviveInstaller",
-                "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "SceneFlowGameInstaller",
+                "HudUpgradeInstaller", "PopupLoseInstaller", "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "SceneFlowGameInstaller",
             }));
         }
 
@@ -165,7 +163,7 @@ namespace Game.Composition.Tests
         }
 
         // feature-popup/popup-request/request-rules#params: the Game scene's popup ids by stage.
-        // IDEA has 1 (PopupLose/Main); PROTOTYPE adds the pause and revive popups.
+        // The pause and revive popups were removed from the design (2026-11-27): every stage has only PopupLose/Main.
         [Test]
         public void GameScene_AtIdea_PopupCatalogHasOnlyTheLosePopup()
         {
@@ -175,12 +173,11 @@ namespace Game.Composition.Tests
         }
 
         [Test]
-        public void GameScene_AtPrototype_PopupCatalogHasTheThreePopups()
+        public void GameScene_AtPrototype_PopupCatalogHasOnlyTheLosePopup()
         {
             var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").CatalogsAt(GameStage.Prototype));
 
-            Assert.That(catalogs.Get("Popup").Ids,
-                Is.EquivalentTo(new[] { "PopupLose/Main", "PopupPause/Main", "PopupRevive/Main" }));
+            Assert.That(catalogs.Get("Popup").Ids, Is.EquivalentTo(new[] { "PopupLose/Main" }));
         }
 
         [TestCaseSource(nameof(Scenes))]
@@ -190,24 +187,6 @@ namespace Game.Composition.Tests
 
             Assert.That(boot.PrototypeCatalogs, Has.None.Null);
             Assert.DoesNotThrow(() => new AssetCatalogs(boot.CatalogsAt(GameStage.Prototype)));
-        }
-
-        [Test]
-        public void GameScene_PopupCatalogHasThePausePopup()
-        {
-            var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").CatalogsAt(GameStage.Prototype));
-
-            Assert.That(catalogs.Get("Popup").TryGet("PopupPause/Main", out var prefab), Is.True);
-            Assert.That(prefab, Is.InstanceOf<GameObject>());
-        }
-
-        [Test]
-        public void GameScene_PopupCatalogHasTheRevivePopup()
-        {
-            var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").CatalogsAt(GameStage.Prototype));
-
-            Assert.That(catalogs.Get("Popup").TryGet("PopupRevive/Main", out var prefab), Is.True);
-            Assert.That(prefab, Is.InstanceOf<GameObject>());
         }
 
         private static Boot Load(string path)

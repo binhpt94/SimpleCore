@@ -1,13 +1,13 @@
 {
- "hash": "1090f4b26dd9",
+ "hash": "2ff455851b82",
  "items": {
   "score-start-zero": {
    "hash": "18bd686f6336",
    "text": "Đầu lượt điểm bằng 0; mỗi lần `feature-wave` báo dọn sạch một đợt thì điểm cộng 1\nDọn sạch đợt 1 thì điểm 1; thua giữa đợt 4 thì điểm 3."
   },
   "score-lock-once": {
-   "hash": "e82b9756e080",
-   "text": "Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thua hoặc đồng ý bỏ lượt)\nSau khi chốt, báo dọn sạch tới muộn không làm đổi điểm."
+   "hash": "56740aeef3a6",
+   "text": "Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thành bị phá)\nSau khi chốt, báo dọn sạch tới muộn không làm đổi điểm."
   },
   "record-update": {
    "hash": "ee245bca5cf7",

@@ -6,7 +6,8 @@ gd_delete.py, gd_status.py and (for the write gate) .claude/hooks/guard.py.
       mode.json   {"mode": "auto" | "user"}; written only by the page (setup_server.py, with the PIN)
       ai/         where @GameDesigner works (it reads and writes here)
         idea/     the table it proposes
-      live/       the fixed table; changes only through promote() (the Chốt button) and sync_live() (Sync)
+      approved.json  {node path: {hash, at, by}}: what the human (or Full Auto) approved; written by this code only
+      live/       the fixed table; rebuilt as a whole by build_live() from approved.json, never written by hand
 
 Both tables have the same shape. A folder is a node; its depth is its round (ROUNDS). One node:
     data.md                    the core data: title, short summary, and the core ideas, each with the AI's score
@@ -19,7 +20,8 @@ Both tables have the same shape. A folder is a node; its depth is its round (ROU
     .user-review/review.json   the human's score and feedback per idea (by the page)
     .history/                  log.jsonl and a copy of every version of data.md (by this code only)
     .frame-concept/<name>.frame round-4 nodes: the layout as text (see parse_frame), in the data hash
-Folders starting with "." are not nodes. live holds only data.md, CLAUDE.md, code.json, .images and .frame-concept.
+Folders starting with "." are not nodes. live holds only what a node carries (live_entries): data.md, CLAUDE.md,
+code.json, ui.md, .images, .frame-concept, .art-style and .excel.
 The root's data.md also says `screen: landscape | portrait` (the screen frames are drawn on); a round-4 node with no
 layout says `frame: none`. Neither is in the data hash.
 
@@ -53,7 +55,11 @@ A node PASSES when it has ideas, is not stale, and
     mode user: the human scored every idea, every score passes, and no question is unanswered.
 A node may be written only when every node above it is approved: it passes, the human has settled its ideas that
 stand against each other (open_clashes), and, in mode user, it is the same in live.
-Nothing reaches live by itself: the human presses Chốt on a node, or Sync for every passing node (sync_live).
+Approval (người quyết 2026-11-26): approving a node writes its own_hash (pins left out) into approved.json and keeps
+a copy of its content in .history/approved/<hash>/. Mode user: the human presses Chốt (approve) or Sync
+(approve_passing). Mode auto: every passing node is approved on each page refresh (auto_approve). live is then
+rebuilt by build_live: a node is there when it is approved and its parent is there; moving a pin (gd_pin) needs
+no new approval.
 The human may score an idea in either table; the score belongs to the idea's text, so one low score on a
 fixed idea makes the proposed node fail wherever the text is still the same.
 Progress: a leaf is done when the cell of the phase its own score means is "done". A done leaf keeps its score
@@ -73,6 +79,15 @@ from pathlib import Path
 
 import importlib.util
 import sys
+
+# The tree is Vietnamese: a script that imports this module (a tool, a test, python -c) prints it on a Windows
+# console or pipe whose code page cannot, unless the streams are UTF-8.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure") and (getattr(_stream, "encoding", "") or "").lower().replace("-", "") != "utf8":
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except (ValueError, OSError):
+            pass
 
 
 def _beside(name):
@@ -2138,7 +2153,7 @@ def ancestors(tree, path):
 # ---------------------------------------------------------------- one node
 def node_files(folder):
     """The files that belong to the node itself (data.md, CLAUDE.md, code.json, .images, .frame-concept,
-    .art-style): what promote copies into live and own_hash hashes. Some of the first three may not exist."""
+    .art-style): what live carries (live_entries) and own_hash hashes. Some of the first three may not exist."""
     items = [folder / name for name in NODE_FILES + (CODE_FILE,)]
     if (folder / UI_FILE).is_file():      # only when there: a node without ui.md keeps its own hash
         items.append(folder / UI_FILE)
@@ -2172,13 +2187,15 @@ def file_versions(folder):
 
 
 def own_hash(folder):
-    """Hash of what belongs to the node itself (data.md, CLAUDE.md, .images, .frame-concept): what promote copies
-    into live."""
+    """Hash of what belongs to the node itself (node_files): what an approval holds and live carries. The two pin
+    lines of data.md (based-on, refs) are left out: moving a pin says nothing new, so it needs no new approval."""
     h = hashlib.sha1()
     for p in node_files(folder):
         h.update(p.name.encode("utf-8") + b"\0")
         if p.is_file():
             data = p.read_bytes()
+            if p.name == DATA_FILE:
+                data = without_pins(data.decode("utf-8", "replace").replace("\r", "")).encode("utf-8")
             h.update(data.replace(b"\r", b"") if p.suffix.lower() == ".md" else data)
         h.update(b"\0")
     return h.hexdigest()
@@ -2346,7 +2363,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
         problems.append({"path": where, "text": f"{DOC_FILE} phải trỏ tới {DATA_FILE}"})
     if depth > len(ROUNDS):
         problems.append({"path": where, "text": f"sâu hơn vòng {len(ROUNDS)}"})
-    for text in gd_excel.problems(folder, "ai/idea" + ("/" + path if path else "")):      # a broken table stops promote
+    for text in gd_excel.problems(folder, "ai/idea" + ("/" + path if path else "")):      # a broken table stops an approval
         problems.append({"path": where, "text": text})
     images, images_note = read_images(folder, where, problems)
     questions = read_questions(folder, where, problems)
@@ -2367,7 +2384,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
                                                 f"({ADVICE_DIR}/{above.name}/{named}.md, {ADVICE_DIR}/{advice.name}/{named}.md "
                                                 f"hoặc {ADVICE_DIR}/{ADVICE_GENERAL}/{named}.md)"})
     by_count = {who: sum(1 for it in items if it["by"] == who) for who in BY_NAMES}
-    # Asking GPT is a must in ADVICE_ROUNDS (the glossary is no feature). Not a structure problem: those stop promote.
+    # Asking GPT is a must in ADVICE_ROUNDS (the glossary is no feature). Not a structure problem: those stop an approval.
     group = feature_group(path, data) if depth == CODE_ROUND and path != GLOSSARY_KEY else ""
     if data.get("group") and (depth != CODE_ROUND or path == GLOSSARY_KEY):
         problems.append({"path": where, "text": f"{DATA_FILE}: group: chỉ đặt ở node feature (vòng 2)"})
@@ -2937,32 +2954,13 @@ def without_pins(text):
     return text if end < 0 else PIN_LINE_RX.sub("", text[:end + 1]) + text[end + 1:]
 
 
-def follows(node, other):
-    """(True, [paths of the nodes it follows]) when a passing node differs from its live copy `other` only in the
-    pins of data.md: a node it refers to (or its parent) changed, and the pin was moved to the new hash after the
-    node was read again. Nothing the node says changed, so it needs no look of its own. (False, []) otherwise."""
-    if not other or not node["passed"] or other["hash"] == node["hash"]:
-        return False, []
-    a, b = other.get("_files", {}), node.get("_files", {})
-    if any(a.get(k) != b.get(k) for k in set(a) | set(b) if k != DATA_FILE):
-        return False, []
-    old, new = (a.get(DATA_FILE) or {}).get("text"), (b.get(DATA_FILE) or {}).get("text")
-    if old is None or new is None or without_pins(old) != without_pins(new):
-        return False, []
-    was = {r["label"]: r["hash"] for r in other.get("refs", [])}
-    roots = [r["path"] for r in node.get("refs", []) if was.get(r["label"]) != r["hash"]]
-    if other.get("basedOn") != node.get("basedOn") and node["path"]:
-        roots.append(node["path"].rpartition("/")[0])
-    return True, sorted(set(roots))
-
-
-def mark_states(idea, live, mode=DEFAULT_MODE):
+def mark_states(idea, live, mode=DEFAULT_MODE, approvals=None):
     """Sets on every idea node `state` (new | changed | same, its own content against live), `dirty` (the node or
-    something below it differs from live) and `approved` (it passes and, in mode user, is the same as live); also
-    `follow` and `followOf` (it differs from live only because a node it pins changed: follows()), and on the node
-    that changed `followers`: {"ready": the nodes that follow it and wait only for it, "redo": the nodes that
-    still pin its old hash and must be read again}."""
+    something below it differs from live), `accepted` (approved.json holds this very content), `toApprove` (it
+    passes, has no open clash and waits for an approval) and `approved` (its children may be written: it passes,
+    has no open clash and, in mode user, is accepted). Ideas get fixed, change, live and liveAi against live."""
     in_live = {n["path"]: n for n in walk(live)}
+    approvals = approvals or {}
 
     def visit(node):
         other = in_live.get(node["path"])
@@ -2986,9 +2984,10 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
             "frames": bool(other) and other.get("frameHash") != node.get("frameHash"),
             "files": file_changes(other.get("_files", {}), node.get("_files", {})) if other else [],
         }
-        node["approved"] = node["passed"] and not node.get("clashOpen") and (mode != "user" or node["state"] == "same")
-        node["follow"], node["followOf"] = follows(node, other)
-        node["followers"] = {"ready": [], "redo": []}
+        ok = node["passed"] and not node.get("clashOpen")
+        node["accepted"] = (approvals.get(node["path"]) or {}).get("hash") == node["hash"]
+        node["toApprove"] = ok and not node["accepted"]
+        node["approved"] = ok and (mode != "user" or node["accepted"])
         below = [visit(c) for c in node["children"]]
         live_keys = {c["key"] for c in other["children"]} if other else set()
         gone = bool(live_keys - {c["key"] for c in node["children"]})      # live has a child that idea dropped
@@ -2997,19 +2996,6 @@ def mark_states(idea, live, mode=DEFAULT_MODE):
 
     if idea:
         visit(idea)
-    by_path = {n["path"]: n for n in walk(idea)}
-    for n in walk(idea):
-        for root in n["followOf"]:
-            if root in by_path:
-                by_path[root]["followers"]["ready"].append(n["path"])
-        behind = [r["path"] for r in n.get("refs", []) if r["ok"] is False]
-        if n.get("stale") and n["path"]:
-            behind.append(n["path"].rpartition("/")[0])
-        for root in sorted(set(behind)):
-            if root in by_path:
-                by_path[root]["followers"]["redo"].append(n["path"])
-    for n in walk(idea):      # a follower waits when a node it follows still differs from live
-        n["followWait"] = [r for r in n["followOf"] if r in by_path and by_path[r]["state"] != "same"]
     for n in list(walk(idea)) + list(walk(live)):      # the page carries only the files that differ
         n.pop("_files", None)
 
@@ -3060,11 +3046,11 @@ def node_approved(root, parts, mode, parent_hash):
         return False, (f"node cha '{name}' còn {clashes} nhóm ý trái nhau người chưa chọn (xung đột): chờ người chấm để mỗi nhóm "
                        f"chỉ còn một ý đạt, rồi bỏ ý bị loại"), data["hash"]
     if mode == "user":
-        dst = table_dir(root, "live").joinpath(*parts)
-        if not (dst / DATA_FILE).is_file():
-            return False, f"node cha '{name}' chưa được người chốt sang live", data["hash"]
-        if own_hash(src) != own_hash(dst):
-            return False, f"node cha '{name}' đang khác bản đã chốt trong live; chờ người chốt lại", data["hash"]
+        held = read_approvals(root).get("/".join(parts))
+        if not held:
+            return False, f"node cha '{name}' chưa được người chốt", data["hash"]
+        if held.get("hash") != own_hash(src):
+            return False, f"node cha '{name}' đang khác bản đã chốt; chờ người chốt lại", data["hash"]
     return True, "", data["hash"]
 
 
@@ -3168,67 +3154,270 @@ def save_review(root, path, items, table="idea"):
 
 
 # ---------------------------------------------------------------- idea -> live
-def promote(root, path, deep, by="người"):
-    """Copies the idea node at `path` into live. deep: the whole branch replaces live's branch; otherwise only the
-    node's own data.md, CLAUDE.md and .images, live's children stay. Returns the list of node paths written.
-    The parent must already be in live; every node copied must have no structure problem and must pass.
-    Questions, reviews and history stay in the idea table."""
-    parts = check_path(path)
-    src = table_dir(root, "idea").joinpath(*parts)
-    dst = table_dir(root, "live").joinpath(*parts)
-    if not src.is_dir():
-        raise ValueError(f"idea không có node '{path or '(gốc)'}'")
-    if parts and not (dst.parent / DATA_FILE).is_file():
-        raise ValueError("node cha chưa được chốt trong live; chốt node cha trước")
-    parent = read_data(src.parent) if parts else None
-    problems = []
-    node = read_node(src, path, len(parts) + 1, problems, read_mode(root), parent["hash"] if parent else None)
-    if not deep:
-        node["children"] = []
-        problems = [p for p in problems if p["path"] == (path or "(gốc)")]
-    if problems:
-        raise ValueError("còn lỗi cấu trúc: " + "; ".join(f"{p['path']}: {p['text']}" for p in problems[:5]))
-    failing = [n for n in walk(node) if not n["passed"]]
-    if failing:
-        raise ValueError("chưa đạt: " + "; ".join(f"{n['path'] or '(gốc)'}: {n['reasons'][0]}" for n in failing[:5]))
+# ---------------------------------------------------------------- approvals -> live (người quyết 2026-11-26)
+# Approving a node writes its content hash into approved.json and keeps a copy of what it carries into live in
+# <idea node>/.history/approved/<hash>/. live is then rebuilt as a whole by build_live: a node is there when it
+# holds an approval whose content is still at hand and its parent is there. Nothing is copied by hand.
+APPROVALS_FILE = "approved.json"
+APPROVED_DIR = "approved"
+BUILD_LOCK = ".build.lock"
+BUILD_LOCK_STALE = 120      # seconds: a lock older than this was left by a run that died
+LIVE_DIRS = (IMAGES_DIR, FRAME_DIR, STYLE_DIR, gd_excel.EXCEL_DIR)
 
-    work = Path(root).joinpath(*BASE)
-    tmp, old = work / ".promote-new", work / ".promote-old"
-    for leftover in (tmp, old):
-        shutil.rmtree(leftover, ignore_errors=True)
+
+def approvals_path(root):
+    return Path(root).joinpath(*BASE, APPROVALS_FILE)
+
+
+def read_approvals(root):
+    """{node path: {hash, at, by}} of approved.json; {} when there is none."""
+    return {k: v for k, v in read_dict(approvals_path(root), "nodes").items() if isinstance(v, dict)}
+
+
+def write_approvals(root, nodes):
+    write_json(approvals_path(root), {"nodes": dict(sorted(nodes.items()))})
+
+
+def live_entries(folder):
+    """[(name relative to the node, path)] of every file a node carries into live."""
+    out = []
+    for name in NODE_FILES + (CODE_FILE, UI_FILE):
+        if (folder / name).is_file():
+            out.append((name, folder / name))
+    for d in LIVE_DIRS:
+        base = folder / d
+        if base.is_dir():
+            out += [(p.relative_to(folder).as_posix(), p) for p in sorted(base.rglob("*"))
+                    if p.is_file() and not p.name.startswith("~$") and not p.name.endswith(".tmp")]
+    return out
+
+
+def approved_copy(folder, h):
+    return Path(folder) / HISTORY_DIR / APPROVED_DIR / h
+
+
+def keep_approved(folder, h, source=None):
+    """The copy of what node `source` (default: the idea node `folder`) carries into live, kept as
+    <folder>/.history/approved/<h>/ unless it is there already."""
+    target = approved_copy(folder, h)
+    if (target / DATA_FILE).is_file():
+        return target
+    tmp = target.with_name(h + ".tmp")
+    shutil.rmtree(tmp, ignore_errors=True)
+    for name, p in live_entries(Path(source or folder)):
+        q = tmp / name
+        q.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(p, q)
+    shutil.rmtree(target, ignore_errors=True)
+    os.replace(tmp, target)
+    return target
+
+
+def approve(root, path, deep=False, by="người"):
+    """The Chốt button: approves the idea node at `path` (deep: also every passing node below it whose parent is
+    approved), then rebuilds live. The node must pass, have no structure problem and no open clash, and its parent
+    must be approved. Returns {"approved": [paths], "build": build_live's result}."""
+    parts = check_path(path)
+    mode = read_mode(root)
+    idea, problems = read_tree(root, "idea", mode)
+    node = next((n for n in walk(idea) if n["path"] == "/".join(parts)), None) if idea else None
+    if node is None:
+        raise ValueError(f"idea không có node '{path or '(gốc)'}'")
+    approvals = read_approvals(root)
+    by_path = {n["path"]: n for n in walk(idea)}
+    if parts:
+        up = by_path.get("/".join(parts[:-1]))
+        if not up or (approvals.get(up["path"]) or {}).get("hash") != up["hash"]:
+            raise ValueError("node cha chưa được chốt (hoặc đã đổi từ lần chốt); chốt node cha trước")
+    broken = {p["path"] for p in problems}
+
+    def why_not(n):
+        if (n["path"] or "(gốc)") in broken:
+            return "còn lỗi cấu trúc: " + "; ".join(p["text"] for p in problems if p["path"] == (n["path"] or "(gốc)"))[:300]
+        if not n["passed"]:
+            return "chưa đạt: " + (n["reasons"][0] if n["reasons"] else "")
+        if n.get("clashOpen"):
+            return "còn ý trái nhau chưa chọn"
+        return ""
+    reason = why_not(node)
+    if reason:
+        raise ValueError(f"{path or '(gốc)'} {reason}")
+    done = _approve_down(root, node, approvals, by, why_not, deep)
+    write_approvals(root, approvals)
+    return {"approved": done, "build": build_live(root)}
+
+
+def _approve_down(root, node, approvals, by, why_not, deep):
+    """Approves `node` (and, deep, what passes below it) in `approvals`; returns the paths newly approved."""
+    done = []
+    if why_not(node):
+        return done
+    folder = table_dir(root, "idea").joinpath(*(node["path"].split("/") if node["path"] else []))
+    if (approvals.get(node["path"]) or {}).get("hash") != node["hash"]:
+        keep_approved(folder, node["hash"])
+        approvals[node["path"]] = {"hash": node["hash"], "at": now(), "by": by}
+        log(folder, "approve", hash=node["hash"], by=by)
+        done.append(node["path"] or "(gốc)")
+    if deep:
+        for child in node["children"]:
+            done += _approve_down(root, child, approvals, by, why_not, True)
+    return done
+
+
+def approve_passing(root, by="người (Sync)"):
+    """The Sync button, and Full Auto on every page refresh: approves every passing node from the root down
+    (stopping below a node that does not pass), then rebuilds live. Returns approve()'s shape."""
+    mode = read_mode(root)
+    idea, problems = read_tree(root, "idea", mode)
+    approvals = read_approvals(root)
+    broken = {p["path"] for p in problems}
+
+    def why_not(n):
+        if (n["path"] or "(gốc)") in broken or not n["passed"] or n.get("clashOpen"):
+            return "no"
+        return ""
+    done = _approve_down(root, idea, approvals, by, why_not, True) if idea else []
+    if done:
+        write_approvals(root, approvals)
+    return {"approved": done, "build": build_live(root)}
+
+
+def auto_approve(root):
+    """Full Auto (người quyết 2026-11-26): a passing node is approved and reaches live by itself."""
+    if read_mode(root) != "auto":
+        return {"approved": [], "build": build_live(root)}
+    return approve_passing(root, by="tự duyệt (Full Auto)")
+
+
+def migrate_approvals(root):
+    """Once, when approved.json does not exist yet: every node that is both in live and in the proposal is approved
+    as live holds it (its content kept from live). Returns True when it ran."""
+    if approvals_path(root).is_file():
+        return False
+    idea_root, live_root = table_dir(root, "idea"), table_dir(root, "live")
+    approvals = {}
+
+    def visit(live_folder, path):
+        idea_folder = idea_root.joinpath(*(path.split("/") if path else []))
+        if not (live_folder / DATA_FILE).is_file() or not (idea_folder / DATA_FILE).is_file():
+            return
+        h = own_hash(live_folder)
+        keep_approved(idea_folder, h, source=live_folder)
+        approvals[path] = {"hash": h, "at": now(), "by": "chuyển từ live cũ"}
+        for child in node_children(live_folder):
+            visit(child, f"{path}/{child.name}" if path else child.name)
+    if (live_root / DATA_FILE).is_file():
+        visit(live_root, "")
+    write_approvals(root, approvals)
+    return True
+
+
+def _build_lock(root):
+    lock = Path(root).joinpath(*BASE, BUILD_LOCK)
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    for _ in range(100):
+        try:
+            fd = os.open(str(lock), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.close(fd)
+            return lock
+        except FileExistsError:
+            try:
+                if time.time() - lock.stat().st_mtime > BUILD_LOCK_STALE:
+                    lock.unlink()
+                    continue
+            except OSError:
+                pass
+            time.sleep(0.1)
+    raise OSError("một lần dựng live khác đang chạy; thử lại sau")
+
+
+def _same_bytes(a, b):
     try:
-        if deep:
-            shutil.copytree(src, tmp, ignore=shutil.ignore_patterns(*NOT_COPIED, "~$*"))
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            if parts:
-                swap_dir(tmp, dst, old)
-            else:      # the root: live itself is never renamed, somebody always has a file of it open
-                put_inside(tmp, dst, old, keep_children=False)
-        else:
-            tmp.mkdir(parents=True)
-            for name in NODE_FILES:
-                shutil.copy2(src / name, tmp / name)
-            for name in (CODE_FILE, UI_FILE):
-                if (src / name).is_file():
-                    shutil.copy2(src / name, tmp / name)
-            for extra in (IMAGES_DIR, FRAME_DIR, STYLE_DIR, gd_excel.EXCEL_DIR):
-                if (src / extra).is_dir():
-                    shutil.copytree(src / extra, tmp / extra, ignore=shutil.ignore_patterns("~$*"))
-            put_inside(tmp, dst, old, keep_children=True)      # what live has below this node is not touched
-    except OSError as ex:
-        raise OSError(f"không ghi được '{path or '(gốc)'}' vào live: một chương trình khác đang mở file trong thư mục đó "
-                      f"(Excel, một cửa sổ thư mục, một phiên đang đọc). Đóng nó rồi bấm Chốt lại. Lỗi của máy: {ex}") from ex
+        return b.is_file() and a.stat().st_size == b.stat().st_size and a.read_bytes() == b.read_bytes()
+    except OSError:
+        return False
+
+
+def build_live(root):
+    """Rebuilds live/ from approved.json: a node is in live when it holds an approval whose content is at hand
+    (the proposal itself when it still has that content, else the copy kept when it was approved) and its parent
+    is in live. Writes file by file (only what differs, through a .tmp file), removes what is not wanted, never
+    renames a folder. A file a program holds open is skipped and named in "held". Approvals of nodes the proposal
+    no longer has are dropped. Returns {"written": n, "removed": [node paths], "held": [files]}."""
+    lock = _build_lock(root)
+    try:
+        approvals = read_approvals(root)
+        idea_root, live_root = table_dir(root, "idea"), table_dir(root, "live")
+        want = {}
+
+        def visit(folder, path):
+            held = approvals.get(path)
+            if not held:
+                return
+            src = folder if own_hash(folder) == held.get("hash") else approved_copy(folder, held.get("hash", ""))
+            if not (src / DATA_FILE).is_file():
+                return
+            want[path] = src
+            for child in node_children(folder):
+                visit(child, f"{path}/{child.name}" if path else child.name)
+        if (idea_root / DATA_FILE).is_file():
+            visit(idea_root, "")
+        gone = [k for k in approvals if not (idea_root.joinpath(*(k.split("/") if k else [])) / DATA_FILE).is_file()]
+        if gone:
+            write_approvals(root, {k: v for k, v in approvals.items() if k not in gone})
+        written, removed, held_files = 0, [], []
+        for path, src in sorted(want.items(), key=lambda kv: kv[0].count("/") if kv[0] else -1):
+            dst = live_root.joinpath(*(path.split("/") if path else []))
+            files = dict(live_entries(src))
+            for name, p in files.items():
+                q = dst / name
+                if _same_bytes(p, q):
+                    continue
+                try:
+                    q.parent.mkdir(parents=True, exist_ok=True)
+                    tmp = q.with_name(q.name + ".tmp")
+                    shutil.copy2(p, tmp)
+                    patiently(os.replace, tmp, q)
+                    written += 1
+                except OSError:
+                    held_files.append(f"{path or '(gốc)'}/{name}")
+            for q in sorted(dst.iterdir()) if dst.is_dir() else []:
+                if q.is_dir() and not q.name.startswith("."):
+                    continue      # a child node: kept or removed below, as a whole
+                inner = [q] if q.is_file() else sorted(q.rglob("*"), key=lambda x: -len(x.parts)) + [q]
+                for x in inner:
+                    rel = x.relative_to(dst).as_posix()
+                    try:
+                        if x.is_file() and rel not in files:
+                            patiently(x.unlink)
+                        elif x.is_dir() and not any(x.iterdir()):
+                            x.rmdir()
+                    except OSError:
+                        if x.is_file():
+                            held_files.append(f"{path or '(gốc)'}/{rel}")
+        if live_root.is_dir():
+            for q in sorted((x for x in live_root.rglob("*") if x.is_dir()), key=lambda x: len(x.parts)):
+                rel = q.relative_to(live_root).as_posix()
+                if any(part.startswith(".") for part in rel.split("/")) or not q.exists():
+                    continue
+                if rel not in want:
+                    try:
+                        patiently(shutil.rmtree, q)
+                        removed.append(rel)
+                    except OSError:
+                        held_files.append(rel + "/")
+            if "" not in want:
+                for name in [n for n, _ in live_entries(live_root)]:
+                    try:
+                        patiently((live_root / name).unlink)
+                    except OSError:
+                        held_files.append(f"(gốc)/{name}")
+        return {"written": written, "removed": removed, "held": held_files}
     finally:
-        for leftover in (tmp, old):
-            shutil.rmtree(leftover, ignore_errors=True)
-    if not deep:      # a child the proposal deleted goes from live too (người quyết 2026-11-26)
-        for child in node_children(dst):
-            if not (src / child.name / DATA_FILE).is_file():
-                patiently(shutil.rmtree, child)
-                log(src, "live-removed", key=child.name, by=by)
-    for n in walk(node):
-        log(table_dir(root, "idea").joinpath(*(n["path"].split("/") if n["path"] else [])), "promote", by=by, hash=n["dataHash"])
-    return [n["path"] or "(gốc)" for n in walk(node)]
+        try:
+            lock.unlink()
+        except OSError:
+            pass
 
 
 SWAP_TRIES = 5      # a file watcher or a virus scanner holds a folder for a moment only
@@ -3244,96 +3433,6 @@ def patiently(fn, *args):
             if i == SWAP_TRIES - 1:
                 raise
             time.sleep(SWAP_WAIT)
-
-
-def swap_dir(new, dst, old):
-    """The folder `new` takes the place of the folder `dst` (which may not exist); `old` is a free scratch path
-    beside them. When `new` cannot be put there, `dst` is put back."""
-    shutil.rmtree(old, ignore_errors=True)
-    had = dst.exists()
-    if had:
-        patiently(os.replace, dst, old)
-    try:
-        patiently(os.replace, new, dst)
-    except OSError:
-        if had:
-            os.replace(old, dst)
-        raise
-    shutil.rmtree(old, ignore_errors=True)
-
-
-def put_inside(new, dst, old, keep_children):
-    """Makes the folder `dst` hold what the folder `new` holds, entry by entry, without renaming `dst` itself:
-    Windows refuses to rename a folder while any program has a file below it open, and for a node near the root
-    that is nearly always. keep_children: the node folders below dst (not starting with ".") that `new` does not
-    have stay as they are; otherwise everything `new` does not have is removed."""
-    dst.mkdir(parents=True, exist_ok=True)
-    names = {p.name for p in new.iterdir()}
-    for p in list(dst.iterdir()):
-        if p.name in names or (keep_children and p.is_dir() and not p.name.startswith(".")):
-            continue
-        if p.is_dir():
-            patiently(shutil.rmtree, p)
-        else:
-            patiently(p.unlink)
-    for p in sorted(new.iterdir(), key=lambda p: p.name):
-        if p.is_dir():
-            swap_dir(p, dst / p.name, old)
-        else:
-            patiently(os.replace, p, dst / p.name)
-
-
-def promote_followers(root, by="người"):
-    """Copies into live every idea node that differs from live only in its pins (follows()) once every node it
-    follows is the same as live: the human looked at the change itself, and these say nothing new. Nothing in the
-    idea table is written. Returns [{"path", "of": the nodes it followed}] of the nodes copied."""
-    mode = read_mode(root)
-    live, _ = read_tree(root, "live", mode)
-    idea, _ = read_tree(root, "idea", mode)
-    mark_states(idea, live, mode)
-    done = []
-    for n in list(walk(idea)) if idea else []:
-        if not n["follow"] or n["followWait"] or n.get("clashOpen"):
-            continue
-        of = ", ".join(r or "(gốc)" for r in n["followOf"])
-        try:
-            promote(root, n["path"], False, by=f"tự chốt theo {of}" if of else "tự chốt (chỉ đổi dòng refs)")
-        except (ValueError, OSError):
-            continue      # its parent is not in live yet, or a structure problem: it stays for the human to see
-        done.append({"path": n["path"], "of": n["followOf"]})
-    return done
-
-
-def promote_and_follow(root, path, deep, by="người"):
-    """promote(), then promote_followers(): (the node paths written, the followers copied after them)."""
-    written = promote(root, path, deep, by)
-    return written, promote_followers(root)
-
-
-def sync_live(root):
-    """The Sync button, either mode: copies into live every passing idea node that differs from live, from the
-    root down, and does not go below a node that does not pass. Returns the node paths written."""
-    mode = read_mode(root)
-    written = []
-
-    def visit(node):
-        if not node["passed"]:
-            return
-        if node["state"] != "same":
-            try:
-                promote(root, node["path"], False, by="người (Sync)")
-            except (ValueError, OSError):
-                return      # a structure problem: leave it and everything below for the human to see
-            written.append(node["path"] or "(gốc)")
-        for child in node["children"]:
-            visit(child)
-
-    live, _ = read_tree(root, "live", mode)
-    idea, _ = read_tree(root, "idea", mode)
-    mark_states(idea, live, mode)
-    if idea:
-        visit(idea)
-    return written
 
 
 def missing_infra(idea):
@@ -3548,7 +3647,7 @@ def snapshot(root):
     mode = read_mode(root)
     live, live_problems = read_tree(root, "live", mode)
     idea, idea_problems = read_tree(root, "idea", mode)
-    mark_states(idea, live, mode)
+    mark_states(idea, live, mode, read_approvals(root))
     mark_priority(idea)
     mark_priority(live)
     ranked = {n["path"]: n for n in walk(idea)}

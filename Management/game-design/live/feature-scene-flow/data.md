@@ -1,5 +1,5 @@
 ---
-based-on: 6181a7c21bf0
+based-on: ca84fa282d14
 by: scene-boot=gpt@r2-1#boot-vao-man-bat-dau, scene-switch=gpt@r2-1#ranh-gioi-chuyen-scene
 ---
 # Chuyển scene

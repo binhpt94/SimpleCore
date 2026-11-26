@@ -1,0 +1,17 @@
+kind: ui
+title: Cheat màn Loading: tải lỗi
+use title-x = feature-scene-flow/scene-list/boot-loading#title-x
+use title-y = feature-scene-flow/scene-list/boot-loading#title-y
+use title-w = feature-scene-flow/scene-list/boot-loading#title-w
+use title-h = feature-scene-flow/scene-list/boot-loading#title-h
+use bar-x = feature-scene-flow/scene-list/boot-loading#bar-x
+use bar-y = feature-scene-flow/scene-list/boot-loading#bar-y
+use bar-w = feature-scene-flow/scene-list/boot-loading#bar-w
+use bar-h = feature-scene-flow/scene-list/boot-loading#bar-h
+use error-x = feature-scene-flow/scene-list/boot-loading#error-x
+use error-y = feature-scene-flow/scene-list/boot-loading#error-y
+use error-w = feature-scene-flow/scene-list/boot-loading#error-w
+use error-h = feature-scene-flow/scene-list/boot-loading#error-h
+- title  label x=title-x y=title-y w=title-w h=title-h label="Thủ thành anh hùng"
+- bar    bar   x=bar-x y=bar-y w=bar-w h=bar-h fill=0.4 label="Tiến độ đứng ở 40%"
+- error  label x=error-x y=error-y w=error-w h=error-h label="Lỗi tải: Wallet"

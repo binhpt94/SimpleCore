@@ -34,7 +34,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Máu vượt máu tối đa (không nên xảy ra):** thanh đầy, số hiện đúng giá trị nhận được.
 - **Tiền rất lớn (ví dụ 12345):** hiện đủ số, không rút gọn.
 - **Đợt mới bắt đầu khi thông báo đợt trước còn hiện:** thay ngay bằng thông báo mới, đếm lại 1.5 giây.
-- **Tạm dừng khi thông báo đợt đang hiện:** thời gian hiện đứng yên cùng trận, tiếp tục thì chạy tiếp phần còn lại.
 - **Lượt kết thúc:** 3 ô giữ giá trị cuối (máu 0) cho tới khi trận bị huỷ; thông báo đợt đang hiện thì tắt.
 
 ## Đã tự quyết
@@ -42,6 +41,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Thông báo "Đợt N" thuộc HUD.** `feature-wave/wave-gap` để việc báo đợt mới cho `feature-hud`. Không chặn bấm vì trận không dừng.
 - **Làm tròn xuống.** Người chơi thấy "0" là biết rất nguy. Đã loại: làm tròn lên (thấy "1" mà thành đã bị phá ở khung sau).
 - **`ui.md` (2026-11-25, quy trình mới):** 6 phần tử, trùng id hình trong `main.frame`. Máu (thanh và số) và số tiền là chính, vì là thứ người chơi liếc để quyết bấm kĩ năng hay mua; biểu tượng xu, ô đợt, thông báo đợt là phụ. Không phần tử nào nhận chạm.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên tạm dừng khi thông báo đợt đang hiện.
 
 ## Chưa rõ
 - `feature-wave` cần báo hai việc riêng: "đợt hiện tại/sắp tới là N" (đổi ngay khi dọn sạch) và "đợt N bắt đầu ra quái" (để hiện thông báo).

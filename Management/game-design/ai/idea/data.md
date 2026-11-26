@@ -1,6 +1,7 @@
 ---
 screen: landscape
-by: player-commander=gpt@root-r1#nguoi-chi-huy, castle-damage-carries=gpt@root-r1#ton-that-qua-dot, main-feel=gpt@root-r1#cam-giac-chu-dao, art-shared-palette=gpt@style-colorful#bang-mau-chung, art-battle-reference=gpt@style-colorful#canh-tran-mau, art-light-from-top=gpt@style-colorful#anh-sang-tu-tren, art-outline-body-color=gpt@style-colorful#vien-theo-mau-than, art-popup-content-from-node=gpt@style-colorful#noi-dung-theo-node, art-ui-text-font=gpt@style-colorful#chu-dat-trong-ui, art-ad-button-pink=gpt@style-colorful#mau-nut-quang-cao, art-hud-text-contrast=gpt@style-colorful#do-tuong-phan-hud, art-faction-silhouette=gpt@style-colorful#duong-bao-hai-phe, art-unit-outline-contrast=gpt@style-colorful#nen-nhuong-vien-don-vi, art-castle-edge-solid=gpt@style-colorful#mep-thanh-de-doc, art-effect-overlay-limit=gpt@style-colorful#gioi-han-che-boi-hieu-ung, art-skill-color-match=gpt@style-colorful#mau-ky-nang-xuyen-suot
+by: player-commander=gpt@root-r1#nguoi-chi-huy, castle-damage-carries=gpt@root-r1#ton-that-qua-dot, main-feel=gpt@root-r1#cam-giac-chu-dao, art-shared-palette=gpt@style-colorful#bang-mau-chung, art-battle-reference=gpt@style-colorful#canh-tran-mau, art-light-from-top=gpt@style-colorful#anh-sang-tu-tren, art-outline-body-color=gpt@style-colorful#vien-theo-mau-than, art-popup-content-from-node=gpt@style-colorful#noi-dung-theo-node, art-ui-text-font=gpt@style-colorful#chu-dat-trong-ui, art-hud-text-contrast=gpt@style-colorful#do-tuong-phan-hud, art-faction-silhouette=gpt@style-colorful#duong-bao-hai-phe, art-unit-outline-contrast=gpt@style-colorful#nen-nhuong-vien-don-vi, art-castle-edge-solid=gpt@style-colorful#mep-thanh-de-doc, art-effect-overlay-limit=gpt@style-colorful#gioi-han-che-boi-hieu-ung, art-skill-color-match=gpt@style-colorful#mau-ky-nang-xuyen-suot
+gpt-dropped: style-colorful#mau-nut-quang-cao=art-ad-button-pink
 ---
 # Thủ thành anh hùng (tên tạm)
 
@@ -42,9 +43,6 @@ Mua lúc nào cũng được, kể cả đang đánh; mạnh lên liền. Đã l
 
 ### lose-condition | AI 9 | Thua khi thành bị phá
 
-### ad-revive | AI 7 | Thành bị phá lần đầu trong lượt thì người chơi được chọn xem quảng cáo để hồi sinh thành và chơi tiếp
-Mỗi lượt một lần; thành hồi sinh với một phần máu, quái và đợt giữ nguyên. Không xem thì thua như thường. Người yêu cầu (2026-11-24).
-
 ### castle-damage-carries | AI 7 | Sang đợt kế tiếp, thành giữ nguyên mức hư hại
 Trụ qua một đợt mà ít tổn thất thì trụ được lâu hơn; giữ thành trong đợt này còn có giá trị sau khi đợt kết thúc.
 
@@ -70,13 +68,10 @@ Cùng một hướng sáng cho khung, nút, icon, giáp, thân thành, để hì
 Nút xanh và khối hồng giữ được màu riêng ở rìa. Đã loại: viền đen chung.
 
 ### art-popup-content-from-node | AI 8 | Popup lấy hình thức từ ảnh tham chiếu, lấy nội dung (chữ, số, nút) từ thiết kế của chính popup đó
-Ảnh có ô thưởng và nút hồi sinh trong popup thua; game này để nội dung popup thua và popup hồi sinh theo node của từng popup.
+Ảnh có ô thưởng và nút hồi sinh trong popup thua; game này để nội dung popup thua theo node của popup đó.
 
 ### art-ui-text-font | AI 7 | Chữ và số do game hiển thị bằng một font tròn có đủ dấu tiếng Việt; ảnh và SVG để trống chỗ chữ
 Hai công cụ dùng chung khung, ruy băng mà chữ vẫn đồng nhất; số thay đổi trong trận và dấu tiếng Việt đọc rõ ở kích thước thật.
-
-### art-ad-button-pink | AI 7 | Nút xem quảng cáo luôn màu hồng, kể cả khi là nút chính của popup
-Chốt màu ưu tiên cho popup hồi sinh: nhận diện quảng cáo đứng trên quy tắc nút chính màu xanh lá.
 
 ### art-hud-text-contrast | AI 7 | Chữ và số trên HUD đủ tương phản với nền ngay sau nó, kiểm trên khung trận ghép
 Trời, cảnh xa, mặt đất sáng khác nhau và hiệu ứng có thể chạy sau HUD; máu thành, tiền, giá nâng cấp, số giây hồi chiêu luôn phải đọc được.

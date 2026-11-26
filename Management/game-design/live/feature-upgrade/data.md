@@ -1,5 +1,5 @@
 ---
-based-on: 6181a7c21bf0
+based-on: ca84fa282d14
 by: upgrade-items=gpt@r2-1#chon-muc-tieu-nang-cap, upgrade-cost=gpt@r2-2#gia-lan-mua-ke, hero-applies-level=gpt@r2-2#ap-chi-so-hero, castle-applies-level=gpt@r2-2#ap-chi-so-thanh, wallet-checks-money=gpt@r2-2#vi-xet-du-tien, upgrade-buyable=gpt@r2-2#trang-thai-mua-tung-muc, bar-reads-upgrade=gpt@r2-2#nguon-du-lieu-nut, bar-sends-item=gpt@r2-2#noi-nhan-yeu-cau-mua, buy-transaction=gpt@r2-3#giao-dich-mua, buy-needs-running-run=gpt@r2-3#trang-thai-luc-xu-ly, shared-team-slots=gpt@r2-3#chung-vi-tri-doi, wallet-notifies-balance=gpt@r2-3#bao-doi-so-du, bar-one-snapshot=gpt@r2-3#cap-nhat-sau-nut
 ---
 # Nâng cấp
@@ -12,7 +12,7 @@ Cách người chơi biến tiền thành sức mạnh: nâng từng hero trong 
 Kể cả lúc đang đánh. Đã loại (người loại ở vòng 1): chỉ nâng cấp giữa hai đợt.
 
 ### buy-needs-running-run | AI 7 | Nâng cấp chỉ nhận lần mua khi `feature-run` xác nhận lượt của yêu cầu đang chạy lúc xét
-Yêu cầu còn chờ bị từ chối nếu lượt đã tạm dừng, đã kết thúc hay đã thay bằng lượt mới; lúc thở vẫn mua được.
+Yêu cầu còn chờ bị từ chối nếu lượt đã kết thúc hay đã thay bằng lượt mới; lúc thở vẫn mua được.
 
 ### upgrade-instant | AI 8 | Mua xong là mạnh lên ngay
 Kể cả với hero đang gục chờ hồi sinh.

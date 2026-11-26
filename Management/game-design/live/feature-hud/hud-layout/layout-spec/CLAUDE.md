@@ -10,10 +10,9 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Thông số
 | Phần | Mép / góc | Thứ tự | Lí do |
 |---|---|---|---|
-| Nút tạm dừng | Góc trên bên trái | 1 (trái nhất) | Xa cụm kĩ năng (góc dưới phải) và đầu thanh nâng cấp |
-| Tiền | Mép trên, bên trái máu | 2 | Gần thanh nâng cấp hơn để liếc tiền rồi mua |
-| Máu thành | Giữa mép trên | 3 | Thẳng phía trên thành |
-| Đợt | Mép trên, bên phải | 4 (phải nhất) | |
+| Tiền | Mép trên, bên trái máu | 1 (trái nhất) | Gần thanh nâng cấp hơn để liếc tiền rồi mua |
+| Máu thành | Giữa mép trên | 2 | Thẳng phía trên thành |
+| Đợt | Mép trên, bên phải | 3 (phải nhất) | |
 | Thông báo "Đợt N" | Mép trên, ngay dưới máu thành | | Thoáng qua 1.5 giây, không che dải chiến trường |
 | 3 nút kĩ năng | Góc dưới bên phải, xếp ngang | Sấm sét, Băng giá, Cổ vũ | Ngón cái phải |
 | Thanh nâng cấp | Mép dưới, từ cạnh trái tới sát cụm kĩ năng | | `feature-hud-upgrade/bar-layout` |
@@ -27,7 +26,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
-| Phần có mặt | Máu, tiền, đợt, cụm kĩ năng giữ đủ 3 chỗ nhưng chỉ có nút Sấm sét (`feature-hud/hud-skill-button/skill-button-spec`) | Thêm thông báo đợt (nút tạm dừng không bắt buộc) | Đủ, có nút tạm dừng |
+| Phần có mặt | Máu, tiền, đợt, cụm kĩ năng giữ đủ 3 chỗ nhưng chỉ có nút Sấm sét (`feature-hud/hud-skill-button/skill-button-spec`) | Thêm thông báo đợt | Đủ |
 | Tỉ lệ màn hình phải kiểm | 16:9 | 16:9 và 20:9 | 16:9 tới 21:9 |
 | Vùng an toàn | Không bắt buộc | Có | Có |
 
@@ -39,10 +38,10 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Đã tự quyết
 - **Kĩ năng góc dưới bên phải, thanh nâng cấp phía trái.** Trả lời "Chưa rõ" của node cha. Phần đông người chơi thuận tay phải; kĩ năng là thao tác cần canh đúng lúc nên giao cho ngón cái phải. Đã loại: kĩ năng bên trái.
-- **Nút tạm dừng góc trên bên trái.** Chéo hẳn với cụm kĩ năng, khác mép với thanh nâng cấp.
 - **Kích thước chỉ ước lượng, nằm trong frame `main.frame` (2026-11-23, luật frame mới).** Trên 1920x1080: dải trên cao 140 px, dải dưới cao 180 px, dải chiến trường ở giữa (y 140–900) không HUD nào chạm. Cạnh nút chạm tối thiểu 120 px (trên ngưỡng 96 px), lề trái phải 40 px, nút kĩ năng 140 px, nút nâng cấp 200x140 px. Các số này đặt bằng `let` ở đây để các node HUD và popup khác `use`, không chép lại. Kích thước cuối cùng vẫn do chuyên gia giao diện chỉnh. Đã loại: mỗi node tự đặt cỡ nút (dễ lệch).
 - **Thông báo "Đợt N" nằm trong dải trên, dưới thanh máu** (y 78–134, cách thanh máu 8 px theo thang của @UIDesigner, 2026-11-25), vì dải trên 140 px đủ chỗ cho cả hai mà không lấn chiến trường.
-- **`ui.md` (2026-11-25, quy trình mới):** liệt kê mọi phần HUD trận, trùng id hình trong `main.frame`. Mức chính: máu, tiền, cụm kĩ năng, chỗ thanh nâng cấp (phải thấy và dùng ngay); phụ: đợt, thông báo đợt, nút tạm dừng (nút này chỉ có ở FULL). Tương tác của từng phần thuộc node sở hữu nó; node này chỉ chia chỗ.
+- **`ui.md` (2026-11-25, quy trình mới):** liệt kê mọi phần HUD trận, trùng id hình trong `main.frame`. Mức chính: máu, tiền, cụm kĩ năng, chỗ thanh nâng cấp (phải thấy và dùng ngay); phụ: đợt, thông báo đợt. Tương tác của từng phần thuộc node sở hữu nó; node này chỉ chia chỗ.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ nút tạm dừng góc trên bên trái; tiền thành phần trái nhất của mép trên.
 
 ## Chưa rõ
 - `feature-hud-upgrade` cần đồng ý dùng phần mép dưới bên trái, chừa góc dưới phải cho cụm kĩ năng.

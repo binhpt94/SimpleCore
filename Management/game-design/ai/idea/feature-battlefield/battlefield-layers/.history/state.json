@@ -1,5 +1,5 @@
 {
- "hash": "5c2132462329",
+ "hash": "9c6afd246afa",
  "items": {
   "layers-four": {
    "hash": "6caa9fdeb3de",
@@ -30,8 +30,8 @@
    "text": "Cả trận vẽ từ sau ra trước: trời, cảnh xa, dải đất, decor, thành, quái và hero, hiệu ứng, HUD, popup\nNền luôn dưới thành; thành dưới quái và hero để thấy được unit đứng ở mép thành; HUD và popup trên cùng."
   },
   "layers-static": {
-   "hash": "3e2c0e4f966a",
-   "text": "Các lớp nền đứng yên trong trận, không đổi theo đợt, máu thành hay tạm dừng\nNền không báo tin gì cho người chơi; thông tin trận nằm ở `feature-hud`."
+   "hash": "e4d999b304f8",
+   "text": "Các lớp nền đứng yên trong trận, không đổi theo đợt hay máu thành\nNền không báo tin gì cho người chơi; thông tin trận nằm ở `feature-hud`."
   }
  }
 }

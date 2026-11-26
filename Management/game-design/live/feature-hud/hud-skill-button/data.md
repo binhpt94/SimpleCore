@@ -1,6 +1,6 @@
 ---
-based-on: 628a4bda5a29
-refs: feature-castle/castle-skills@8bc45d0edc8d, feature-run/run-pause@331cbd30e30e, feature-hud/hud-layout@e541be0cca19, glossary#castle-skill@1c6e2774b71d
+based-on: 51fc27d3f6cb
+refs: feature-castle/castle-skills@d5a006594b09, feature-hud/hud-layout@7bbb09d6efb6, glossary#castle-skill@1c6e2774b71d
 ---
 # Nút kĩ năng thành
 

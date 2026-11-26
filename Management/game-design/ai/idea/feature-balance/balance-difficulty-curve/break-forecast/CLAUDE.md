@@ -42,7 +42,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 Mỗi đợt mất T × (1 + P) (thời gian thả cộng thời gian dọn quái tồn, khoảng T × P) cộng 3 s lúc thở: đợt 1 khoảng 14 s, đợt 5 khoảng 26 s, đợt 10 khoảng 41 s, đợt 15–19 khoảng 40–47 s (P các đợt giữa hai mẫu lấy nội suy tuyến tính). Cộng dồn: hết đợt 9 khoảng 3.7 phút, hết đợt 14 khoảng 7.0 phút, hết đợt 18 khoảng 9.8 phút, hết đợt 19 khoảng 10.6 phút. Gãy ở đợt 15–19 (thua giữa đợt đó): lượt dài khoảng 7–10.5 phút. Khớp ước tính của `feature-wave/wave-gap/gap-timer` (gãy ở đợt 15: khoảng 7–8 phút).
 
 ### Ba cách chơi để chơi thử (tester mô phỏng đúng như sau)
-Chung cho cả ba: đội Hiệp sĩ + Cung thủ + Pháp sư; từ chối hồi sinh; mua và bấm chỉ khi trận đang chạy.
+Chung cho cả ba: đội Hiệp sĩ + Cung thủ + Pháp sư; mua và bấm chỉ khi trận đang chạy.
 
 | | Vụng | Thường | Khéo |
 |---|---|---|---|
@@ -90,6 +90,7 @@ Trước đợt Trùm (đợt 9, 19, …) để dành đủ giá Băng giá cấ
   - **Đợt gãy của cách chơi thường đo được 14, sát dưới khoảng 15–19:** chấp nhận, chưa đổi số.
   - **Chưa đổi số của feature nào.** Chạy lại với ba cách chơi mới trước. Nếu khéo vẫn hơn vụng dưới 4 đợt thì chỉnh theo thứ tự, mỗi lần một bước rồi chạy lại: (1) Sấm sét sát thương gốc 80 → 110, hồi chiêu giữ 20 giây (bấm đúng lúc dồn đông được thưởng nhiều hơn bấm bừa); (2) Băng giá làm chậm 50% → 65% (giữ cho Trùm đáng hơn); (3) giá kĩ năng thành hệ số 1.5 → 1.4. Ba số đó thuộc `feature-castle` (kĩ năng) và `feature-upgrade` (giá).
   - Đã loại: hạ độ khó chung (giảm hệ số +0.10 mỗi đợt): kéo cả vụng lẫn khéo lên, không nới khoảng cách.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ "từ chối hồi sinh" khỏi luật chung của ba cách chơi thử.
 
 ## Chưa rõ
 - **Đợt Trùm vọt quá mạnh: đã áp dụng (2026-11-23).** Máu Trùm gốc giảm 800 → 400, giữ sát thương 40 (`feature-enemy/enemy-stats/enemy-stat-values`); P đợt 9 → 10 → 11 còn 1.1 → 1.8 → 1.5, đợt 20 còn 2.9. Đợt Trùm là ngoại lệ có chủ đích của `curve-smooth`. Đã loại: Trùm chiếm 5 chỗ trong số quái.

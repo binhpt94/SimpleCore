@@ -6,3 +6,6 @@
 {"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "345954ac135f"}
 {"at": "2026-11-25 00:37:02", "event": "promote", "by": "người", "hash": "345954ac135f"}
 {"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "345954ac135f"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "98a7977ed8e0", "previous": "345954ac135f", "added": [], "removed": [{"id": "bo-luot-ve-man-bat-dau", "text": "Chọn Bỏ lượt trên popup tạm dừng thì về màn bắt đầu\nLượt chơi xác nhận và kết thúc lượt, dọn trận; điều hướng màn sở hữu đích đến."}], "rewritten": [{"id": "flow-owns-screens", "old": "Điều hướng màn là nơi duy nhất đổi màn chính đang hiện giữa màn bắt đầu, màn chọn đội và màn trận\nHai popup vẫn do feature sở hữu nhờ dịch vụ popup hiện và đóng.", "new": "Điều hướng màn là nơi duy nhất đổi màn chính đang hiện giữa màn bắt đầu, màn chọn đội và màn trận\nPopup thua vẫn do feature sở hữu nhờ dịch vụ popup hiện và đóng."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "08022b2a71144afef63c06c09094352782ca953b", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:13:07", "event": "approve", "hash": "cd680a67db41f9edfaf57d9aedda14b0f44999e8", "by": "tự duyệt (Full Auto)"}

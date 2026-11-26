@@ -21,8 +21,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Đã tự quyết
 - **Mờ chứ không ẩn.** Thanh giữ nguyên chỗ, người chơi biết mục đó vẫn ở đó và thấy giá để dành tiền. Đã loại: ẩn nút.
 - **Không xác nhận khi mua.** Trận không dừng, mua phải nhanh; mỗi chạm chỉ một cấp nên lỡ tay cũng không mất nhiều. Đã loại: hỏi lại.
-- **Mờ cả lúc tạm dừng.** Khớp luật không mua khi tạm dừng (`feature-upgrade/upgrade-purchase`).
 - **Nút không có logic.** Theo luật project: hiển thị không quyết định kết quả.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ luật nút mờ lúc tạm dừng.
 
 ## Chưa rõ
 - Không có điểm chặn.

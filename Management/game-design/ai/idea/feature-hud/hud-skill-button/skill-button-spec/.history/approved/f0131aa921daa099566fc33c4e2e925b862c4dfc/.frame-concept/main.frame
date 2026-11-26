@@ -1,0 +1,30 @@
+kind: ui
+title: Ba nút kĩ năng thành ở góc dưới bên phải
+ui: b0b33c28c2fa
+ai: 6
+why: góc dưới phải dưới ngón cái phải; xếp ngang theo thứ tự Sấm sét, Băng giá, Cổ vũ như danh sách kĩ năng của feature-castle
+why: 3 nút chính cùng cỡ 140 là cố ý: 3 kĩ năng ngang hàng, không cái nào quan trọng hơn; HUD không còn nút nào khác ngoài thanh nâng cấp nên cụm này là chỗ bấm nổi nhất
+why: khe giữa các nút 20 (lệch thang): cụm rộng 460 cố định bởi feature-hud/hud-layout/layout-spec và feature-hud-upgrade/bar-buttons; lên 24 phải dời cả thanh nâng cấp
+why: nút chỉ khoá khi lượt đã kết thúc, lúc đó cả ba cùng khoá nên frame vẽ lúc đang đánh: hai sẵn sàng, một đang hồi
+why: số giây đặt giữa nút đang hồi, chồng lên lớp phủ, để liếc là thấy nút nào còn bao lâu
+why: không có tham chiếu phù hợp (chưa có ảnh tham chiếu nào)
+use skill = feature-hud/hud-layout/layout-spec#skill
+use bottom-h = feature-hud/hud-layout/layout-spec#bottom-h
+let bottom-y = 900
+let cluster-x = 1420
+let cluster-y = 20
+let cluster-w = 460
+let thunder-x = 0
+let frost-x = 160
+let rally-x = 320
+let sec-x = 30
+let sec-y = 40
+let sec-w = 80
+let sec-h = 60
+- bottom   rect   x=0    y=bottom-y w=1920 h=bottom-h label="Mép dưới"
+- cluster  rect   x=cluster-x y=cluster-y w=cluster-w h=skill parent=bottom label="Cụm kĩ năng"
+- thunder  button x=thunder-x y=0 w=skill h=skill parent=cluster label="Sấm sét (sẵn sàng)"
+- frost    button x=frost-x   y=0 w=skill h=skill parent=cluster label="Băng giá (đang hồi)"
+- rally    button x=rally-x   y=0 w=skill h=skill parent=cluster label="Cổ vũ (sẵn sàng)"
+- cover    bar    x=0    y=0   w=skill h=skill fill=0.6 parent=frost label="Lớp phủ: phần hồi chiêu còn lại"
+- seconds  label  x=sec-x y=sec-y w=sec-w h=sec-h parent=frost overlap label="21"

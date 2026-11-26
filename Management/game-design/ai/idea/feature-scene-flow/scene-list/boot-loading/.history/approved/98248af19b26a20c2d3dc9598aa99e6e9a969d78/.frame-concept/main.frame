@@ -1,0 +1,17 @@
+kind: ui
+title: Màn Loading
+let title-x = 360
+let title-y = 320
+let title-w = 1200
+let title-h = 160
+let bar-x = 460
+let bar-y = 600
+let bar-w = 1000
+let bar-h = 48
+let error-x = 360
+let error-y = 700
+let error-w = 1200
+let error-h = 60
+- title  label x=title-x y=title-y w=title-w h=title-h label="Thủ thành anh hùng"
+- bar    bar   x=bar-x y=bar-y w=bar-w h=bar-h fill=0.4 label="Tiến độ 0-100%"
+- error  label x=error-x y=error-y w=error-w h=error-h label="Lỗi tải: <tên feature> (chỉ khi lỗi)"

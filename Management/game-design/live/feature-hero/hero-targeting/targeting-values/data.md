@@ -1,6 +1,6 @@
 ---
 based-on: 49b5ce7a72b8
-refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-hero/hero-list/hero-roster-values@b91d8c9d12d4, feature-castle/castle-core/castle-body-values@b648ec300023, feature-wave/spawning/spawn-order@dbef5244fdeb
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-hero/hero-list/hero-roster-values@b91d8c9d12d4, feature-castle/castle-core/castle-body-values@3e635d304ab3, feature-wave/spawning/spawn-order@dbef5244fdeb
 ---
 # Thông số nhắm và di chuyển của hero
 

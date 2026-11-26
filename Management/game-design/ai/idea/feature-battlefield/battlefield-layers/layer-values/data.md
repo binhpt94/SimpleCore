@@ -1,6 +1,6 @@
 ---
-based-on: 5c2132462329
-refs: feature-castle/castle-core/castle-body-values@b648ec300023, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+based-on: 9c6afd246afa
+refs: feature-castle/castle-core/castle-body-values@3e635d304ab3, feature-hud/hud-layout/layout-spec@aa79f655e44b
 ---
 # Thông số các lớp nền
 

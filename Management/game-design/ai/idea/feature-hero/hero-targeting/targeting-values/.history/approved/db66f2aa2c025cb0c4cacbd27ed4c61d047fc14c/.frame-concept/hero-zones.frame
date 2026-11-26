@@ -1,0 +1,20 @@
+kind: field
+title: Vùng hero nhắm quái (tâm quái trong ±16u) và vùng hero đi được (tâm hero trong ±15u)
+view: x=-18u..18u y=-1u..6u
+let walk-left = -15u
+let walk-right = 15u
+let walk-w = 30u
+use screen-left = feature-castle/castle-core/castle-body-values#screen-left
+use screen-right = feature-castle/castle-core/castle-body-values#screen-right
+use castle-left = feature-castle/castle-core/castle-body-values#castle-left
+use castle-w = feature-castle/castle-core/castle-body-values#castle-w
+use castle-h = feature-castle/castle-core/castle-body-values#castle-h
+use spawn-left = feature-wave/spawning/spawn-order#spawn-left
+use spawn-right = feature-wave/spawning/spawn-order#spawn-right
+- ground   line from=-18u,0 to=18u,0 label="mặt đất"
+- castle   rect x=castle-left y=0 w=castle-w h=castle-h label="Thành"
+- walk     rect x=walk-left y=5u w=walk-w h=0.3u label="tâm hero đi được: -15u → +15u"
+- tgt-l    line from=screen-left,0 to=screen-left,6u label="giới hạn nhắm ±16u (mép màn)" overlap
+- tgt-r    line from=screen-right,0 to=screen-right,6u label="giới hạn nhắm" overlap
+- spn-l    line from=spawn-left,0 to=spawn-left,2u label="quái ra -17u: chưa bị nhắm" overlap
+- spn-r    line from=spawn-right,0 to=spawn-right,2u label="quái ra +17u" overlap

@@ -7,3 +7,6 @@
 {"at": "2026-11-23 17:30:54", "event": "data", "hash": "b972ab828a57", "previous": "838604d80215", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "b972ab828a57"}
 {"at": "2026-11-25 18:21:39", "event": "promote", "by": "người (Sync)", "hash": "b972ab828a57"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "0eac7d319efe", "previous": "b972ab828a57", "added": [], "removed": [], "rewritten": [{"id": "show-when", "old": "Thanh hiện từ khung hình đầu của trận tới khi popup kết thúc lượt hiện, kể cả lúc nghỉ giữa đợt và lúc tạm dừng, 0 lần ẩn giữa chừng\nLúc tạm dừng thanh vẫn hiện, các nút ở trạng thái không mua được.", "new": "Thanh hiện từ khung hình đầu của trận tới khi popup kết thúc lượt hiện, kể cả lúc nghỉ giữa đợt, 0 lần ẩn giữa chừng"}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "4bdabc6c1373e5bc081e9b9cbe64e115f35628bf", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:26:06", "event": "approve", "hash": "df60099c8134683c4c3b2b4426c34ed843834576", "by": "tự duyệt (Full Auto)"}

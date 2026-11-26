@@ -1,5 +1,5 @@
 ---
-based-on: 6181a7c21bf0
+based-on: ca84fa282d14
 ---
 # Bảng thuật ngữ
 
@@ -9,9 +9,6 @@ Nơi duy nhất định nghĩa các từ dùng chung trong thiết kế; node kh
 
 ### run | AI 8 | Lượt: một lần chơi, từ lúc vào trận tới lúc trận kết thúc
 Khác trận: trận là phần chơi trên dải chiến trường bên trong lượt. Màn bắt đầu và màn chọn đội nằm ngoài lượt.
-
-### paused | AI 8 | Tạm dừng: trận đứng yên hoàn toàn
-Khác lúc thở: lúc thở trận vẫn chạy.
 
 ### leave-game | AI 7 | Rời khỏi game: game không còn ở trên màn hình
 Ví dụ chuyển ứng dụng, khoá máy, có cuộc gọi.
@@ -54,7 +51,7 @@ Khác lúc thở: trong lúc thở không có đợt đang đánh.
 ### wave-clear | AI 9 | Dọn sạch đợt: quái của đợt đã ra hết và không còn con nào còn sống
 
 ### wave-gap | AI 8 | Lúc thở: khoảng từ lúc dọn sạch một đợt tới lúc đợt sau bắt đầu ra quái
-Khác tạm dừng: lúc thở trận vẫn chạy.
+Lúc thở trận vẫn chạy.
 
 ### score | AI 9 | Điểm: số đợt đã dọn sạch trong lượt
 Khác số đợt đang đánh mà HUD hiện.

@@ -16,11 +16,12 @@ Dữ liệu cốt lõi: [data.md](data.md)
   4. Hình dáng popup thật vẫn của feature gọi; popup mẫu chỉ là khung trống cỡ khung chuẩn của `stack-rules`, là bên gọi của chính dịch vụ.
   Đã loại: xoá node (trái luật cheat); giữ `PopupPause/Main` (vướng cả bốn điểm).
 - **Id mẫu mang tên thư mục của dịch vụ: `_Services/Popup/DevSample` (2026-11-24, theo @CodeLead qua @Manager).** Validator SRC-05 bắt phần chủ của id trùng thư mục code của chủ; thư mục của dịch vụ là `_Services/Popup` (`code.json`). Đã loại: `Popup/DevSample` (bản trước, validator báo lỗi).
-- **Cảnh popup đè lên trận thuộc cheat của feature sở hữu popup.** `feature-popup-lose/cheat` (state `new-record`) đã có nền che trên trận đứng yên phía sau và đủ thành phần popup thua; về sau `feature-popup-pause` có cheat riêng. Không cần thêm state nào cho popup thua.
+- **Cảnh popup đè lên trận thuộc cheat của feature sở hữu popup.** `feature-popup-lose/cheat` (state `new-record`) đã có nền che trên trận đứng yên phía sau và đủ thành phần popup thua. Không cần thêm state nào cho popup thua.
 - **Một state.** Game chỉ mở một popup mỗi lúc; state chồng nhiều popup không có thật. Đã loại: state ba popup chồng nhau.
 - **Frame `use` khung từ `stack-rules`, cao nút từ `feature-hud/hud-layout/layout-spec`.** Tự ghi: nền che và lớp dưới phủ toàn màn 1920x1080 (màn của vòng 1); nút "Đóng" rộng 260 px đặt giữa khung (x = (800 − 260) / 2 = 270), y = 540 cùng hàng nút với popup thua.
 - **Nút "Đóng" giữ hình cơ bản trong claude-concept (2026-11-25).** Không node vòng 4 nào của dịch vụ có phần nút: dịch vụ không vẽ nút, nút là của feature gọi. Popup mẫu chỉ có ở bản dev, nên hình cơ bản là đủ. Đã loại: `use` số nút "Về màn bắt đầu" của popup thua để mượn phần đã vẽ (dịch vụ sẽ dựa vào feature gọi, trái luật "dịch vụ không biết nội dung popup"); đặt order vẽ nút riêng (tốn lượt cho thứ không ra bản phát hành).
 - **Ảnh art-concept của dịch vụ popup (khung, nền che) chỉ đặt ở node này**, style `ui-flat`; chưa đặt order, cảnh popup đã có ảnh ở `feature-popup-lose/cheat`.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ câu "về sau `feature-popup-pause` có cheat riêng".
 
 ## Chưa rõ
 - Không có điểm chặn.

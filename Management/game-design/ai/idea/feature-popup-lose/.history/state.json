@@ -1,13 +1,13 @@
 {
- "hash": "aa89ff39c089",
+ "hash": "747e72f87525",
  "items": {
   "lose-score-consistency": {
    "hash": "5d3a514872a8",
    "text": "Popup thua hiện điểm lượt và kỉ lục do `feature-run` cấp, và báo khi phá kỉ lục\nĐiểm và kỉ lục cùng một thước đo, đúng thứ `feature-run` dùng để xét kỉ lục."
   },
   "lose-actions": {
-   "hash": "98947350ea2b",
-   "text": "Popup thua cho chơi lại (về màn chọn đội) hoặc về màn bắt đầu\nHồi sinh thành bằng quảng cáo đã được đề nghị trước đó ở `feature-popup-revive`; popup thua chỉ hiện khi lượt đã thật sự thua."
+   "hash": "1bd0b5f82631",
+   "text": "Popup thua cho chơi lại (về màn chọn đội) hoặc về màn bắt đầu"
   }
  }
 }

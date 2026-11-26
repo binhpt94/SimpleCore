@@ -1,6 +1,6 @@
 ---
 based-on: e41a7b75e5a6
-refs: feature-castle/castle-core@54dc235e583a, feature-enemy/enemy-stats@504e5ffe01a8, feature-castle/castle-skills@8bc45d0edc8d, feature-hero/hero-targeting@49b5ce7a72b8, glossary#reach-castle@7db7d78f37e0
+refs: feature-castle/castle-core@81d0b06388c9, feature-enemy/enemy-stats@504e5ffe01a8, feature-castle/castle-skills@d5a006594b09, feature-hero/hero-targeting@49b5ce7a72b8, glossary#reach-castle@7db7d78f37e0
 ---
 # Quái đi và đánh
 

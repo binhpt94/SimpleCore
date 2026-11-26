@@ -48,14 +48,14 @@ Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc đi�
 
 - **Đổi style sang Colorful (2026-11-25, người yêu cầu qua @Manager, ảnh `Management/references/20261125-225339-lose.png`: "Tôi dùng phong cách này · Colorfull").** Viết lại cả hai style theo ảnh: màu bão hoà và tươi, viền vàng dày, ruy băng tím, chữ to tròn có viền và bóng, nút viên thuốc bóng như kẹo, icon emoji, trang trí sao, nơ, lá. Thay cho bản cũ "phẳng, màu đặc, không gradient, không glow". `world-cartoon` theo cùng tông (chibi, màu tươi, bóng mềm) để trận và UI là một game. Tự quyết:
   - **Giữ id `ui-flat`** dù tên không còn đúng nghĩa: hơn 50 order ở studio (feature, @UIDesigner, @Codex) khai `style: ui-flat`; đổi id làm hỏng các order đó. Tiêu đề file đã đổi thành "Giao diện Colorful kiểu casual mobile". Đã loại: id mới `ui-colorful` (phải sửa order của phiên khác).
-  - **Gán màu theo vai trò nút** (xanh lá chính, xanh dương về, hồng quảng cáo) theo đúng ảnh, để mọi màn đọc giống nhau.
+  - **Gán màu theo vai trò nút** (xanh lá chính, xanh dương về) theo đúng ảnh, để mọi màn đọc giống nhau.
   - Ảnh tham chiếu nằm ở tab Tham chiếu; chưa chép vào `.art-style/` (người bỏ ảnh `ui-flat-<tên>` vào đó nếu muốn làm ảnh chính thức).
   - Hệ quả: hash gốc đổi; các node vòng 2 cập nhật `based-on`, không đổi ý nào. Ảnh concept cũ thành "CŨ" theo style mới.
 
 - **Đưa góp ý GPT lần hỏi `style-colorful` (2026-11-25, `advice/_root/style-colorful.md`, 13 góp ý "thêm").** Mỗi góp ý thành một ý `art-*` ở node gốc (không con số, theo luật vòng 1); quy tắc cụ thể và con số (mã màu, tương phản 4,5:1 cho chữ HUD và 3:1 cho viền đơn vị, độ đục hiệu ứng tối đa 50%) ghi trong hai file `.art-style/`. Tự quyết:
   - **Bảng màu chung** đặt trong `ui-flat.md`, `world-cartoon.md` trỏ tới đó. Mã màu dự kiến, đo bằng mắt từ ảnh tham chiếu; người sửa được thẳng trong bảng.
   - **Nguồn sáng thống nhất "từ trên"** cho cả hai style (`art-light-from-top`); bỏ "trên bên trái" của `world-cartoon`. Đã loại: giữ lệch trái cho thế giới (hai công cụ lên khối khác nhau khi ghép).
-  - **Ngôn ngữ chữ trong game là tiếng Việt** (`art-ui-text-font`): mọi node vòng 4 có giao diện đã chốt chữ tiếng Việt ("Chơi lại", "Tạm dừng"); ảnh tham chiếu dùng tiếng Anh chỉ là ví dụ phong cách.
+  - **Ngôn ngữ chữ trong game là tiếng Việt** (`art-ui-text-font`): mọi node vòng 4 có giao diện đã chốt chữ tiếng Việt ("Chơi lại"); ảnh tham chiếu dùng tiếng Anh chỉ là ví dụ phong cách.
   - **Khung trận mẫu** (`art-battle-reference`, AI 6): chưa có. Dựng từ concept nền chiến trường và HUD sau khi người duyệt style mới; trước đó đối chiếu với frame đã chốt.
   - Điểm thấp hơn: `art-castle-edge-solid` (AI 5, chi tiết mức vẽ thành, gần vòng 4), `art-faction-silhouette`, `art-unit-outline-contrast`, `art-effect-overlay-limit` (AI 6, đúng nhưng là quy tắc kiểm asset hơn là quyết định định hình game).
   - Hash gốc đổi lần nữa; 24 node vòng 2 ghim lại `based-on`, không đổi ý.
@@ -79,11 +79,7 @@ Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc đi�
   - **Không dùng `tinh-so-tien-thuong` (ví tính số tiền thưởng).** Mức tiền hạ quái và thưởng dọn đợt đã chốt ở nhánh của `feature-enemy` và `feature-wave`; cụm `feature-wave/r2-3` của GPT giao việc tính cho quái và đợt, ví chỉ ghi (`enemy-computes-reward`, `wave-computes-reward`, và `wallet-records-rewards` ở `feature-wallet`).
   - **Không dùng `moc-chot-diem-luot` (tính điểm đợt dọn sạch cùng lúc thành bị phá).** Trái luật đã chốt "thua trước" ở nhánh luồng màn của `feature-run` và nhánh dọn đợt của `feature-wave`; giữ góp ý cùng chỗ `thu-tu-chot-thua` (`lose-before-clear` ở `feature-wave`).
 
-- **Thêm quảng cáo hồi sinh thành (2026-11-24, người yêu cầu: "xem quảng cáo nhận hồi sinh thành với 30% hp").** Ý `ad-revive`. Thay cho quyết định cũ "không có hồi sinh khi thua" ở `feature-run` và `feature-popup-lose` (lí do cũ: không có quảng cáo; nay có). Tự quyết trong Full Auto:
-  - **Mỗi lượt một lần.** Hồi sinh nhiều lần thì thua mất nghĩa và điểm kỉ lục không còn so được. Đã loại: không giới hạn.
-  - **Quái, đợt, tiền, nâng cấp giữ nguyên khi hồi sinh;** chỉ thành có lại máu. Chơi tiếp đúng thế trận.
-  - Mức 30% máu là thông số, ghi ở vòng 4 của nhánh thành.
-  - Hai feature mới ở vòng 2: dịch vụ quảng cáo (`feature-ads`) và popup đề nghị hồi sinh (`feature-popup-revive`), theo luật mỗi popup một feature.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ ý `ad-revive` và hai feature `feature-ads`, `feature-popup-revive`; thành bị phá là thua; bỏ chữ "Tạm dừng" và màu nút quảng cáo khỏi các ý art.
 
 ## Chưa rõ
 - Tên chính thức: chưa có, không chặn việc thiết kế.
@@ -103,5 +99,5 @@ Khác game thủ thành thường gặp (xây tháp dọc đường, hoặc đi�
 - mot-ban-do (advice/_root/root-gaps.md): dùng; thêm lí do ở "Một bản đồ duy nhất".
 - pho-thong-de-doc (advice/_root/root-gaps.md): sửa theo điều kiện của GPT ở `root-gaps-r2.md`: "hero nào sắp gục" thay cho "cánh nào cần cứu"; thêm dòng ở "Người chơi".
 - advice/_general/r2-all-4 (2026-11-26, sau khi tách `feature-save`): 8 góp ý đã thành ý của `feature-save` (danh sách ở `CLAUDE.md` của node đó). Hai góp ý không thành ý mới:
-  - bo-luot-khong-xet-ki-luc: không dùng. Đi ngược `feature-run/run-score#score-final` đã chốt (bỏ lượt vẫn chốt điểm, phương án "bỏ lượt thì mất điểm" đã bị loại). Muốn đổi thì người quyết.
+  - bo-luot-khong-xet-ki-luc: không dùng. Game không còn bỏ lượt (bỏ tạm dừng, 2026-11-26).
   - don-scene-khong-xoa-luu: đã có, đúng ý `feature-session-scene/session-clean#saved-data-only`; không thêm ý trùng.

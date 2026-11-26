@@ -6,3 +6,7 @@
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "e8c7b20b31fd"}
 {"at": "2026-11-25 00:11:10", "event": "promote", "by": "người (Sync)", "hash": "e8c7b20b31fd"}
 {"at": "2026-11-26 18:22:02", "event": "promote", "by": "người (Sync)", "hash": "e8c7b20b31fd"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "ae3341f9364a", "previous": "e8c7b20b31fd", "added": [], "removed": [], "rewritten": [{"id": "home-entry", "old": "Người chơi tới màn bắt đầu theo ba đường: mở game, bỏ lượt, hoặc chọn về màn bắt đầu ở popup thua", "new": "Người chơi tới màn bắt đầu theo hai đường: mở game, hoặc chọn về màn bắt đầu ở popup thua"}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "1ec83b21f0f74b366ba67f843c449d1630ba13d6", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:13:07", "event": "approve", "hash": "4c4fae2f45a3632864f9f61eaa9f2f36e368eecd", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:13:32", "event": "approve", "hash": "c16241126b771292c2e0650928219639874155e3", "by": "người"}

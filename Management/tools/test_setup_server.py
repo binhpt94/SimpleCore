@@ -110,6 +110,18 @@ def page_cases(check):
                           ({"ok": True, "ideas": 1, "nodes": 1, "data": {"kind": "write_gamedesign"}}, [([{"path": "", "id": "x"}], ["feature-a"])]))
                 finally:
                     ss.gamedesign.human_delete = real_delete
+                calls2, real_approve, real_passing = [], ss.gamedesign.approve, ss.gamedesign.approve_passing
+                ss.gamedesign.approve = lambda *a: calls2.append(("approve",) + a[1:]) or {"approved": ["feature-a"], "build": {"held": []}}
+                ss.gamedesign.approve_passing = lambda *a: calls2.append(("sync",)) or {"approved": [], "build": {"held": ["x/data.md"]}}
+                try:
+                    check("promote: Chốt approves (no PIN) and answers with fresh data",
+                          post("/api/gamedesign/promote", {"path": "feature-a", "deep": True})[1],
+                          {"ok": True, "approved": ["feature-a"], "held": [], "data": {"kind": "write_gamedesign"}})
+                    check("sync: no PIN any more; held files are said",
+                          post("/api/gamedesign/sync", {})[1], {"ok": True, "approved": [], "held": ["x/data.md"], "data": {"kind": "write_gamedesign"}})
+                    check("promote and sync reach gamedesign", calls2, [("approve", "feature-a", True), ("sync",)])
+                finally:
+                    ss.gamedesign.approve, ss.gamedesign.approve_passing = real_approve, real_passing
             finally:
                 ss.gamedesign.user_idea = real_user_idea
             check("references: the paths need the token", post("/api/references/delete", {"id": rid}, token="no")[0], 403)

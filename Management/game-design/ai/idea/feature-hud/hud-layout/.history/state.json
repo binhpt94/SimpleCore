@@ -1,13 +1,9 @@
 {
- "hash": "e541be0cca19",
+ "hash": "7bbb09d6efb6",
  "items": {
   "layout-top-info": {
    "hash": "8cabdf75eaef",
    "text": "Máu thành, tiền và số đợt nằm ở mép trên màn hình\nMáu thành ở giữa mép trên, thẳng phía trên thành, để nhìn thành là thấy máu. Tiền và số đợt ở hai bên. Đã loại: thanh máu đặt ngay trên đầu thành trong chiến trường (che quái đứng gần thành)."
-  },
-  "layout-pause-corner": {
-   "hash": "2e2e7d7bbc12",
-   "text": "Nút tạm dừng ở một góc trên, xa các nút bấm nhiều"
   },
   "layout-skill-corner": {
    "hash": "912c3189658c",

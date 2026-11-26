@@ -8,7 +8,7 @@ Quyền, phạm vi (chỉ ba Leader, người quyết 2026-11-26), chuỗi của
 ## Giao việc theo đợt
 0. Người đã trả lời **phạm vi việc** trong phiên này (`manager.md`, mục "Phạm vi việc"; chưa trả lời thì hỏi, chưa giao gì) và đã xác nhận giai đoạn đang làm (skill `manager-startup-check`), bạn đã báo `CodeLead`. Chỉ nhắc việc của node **tới hạn**; feature để sau còn dừng ở vòng 2, 3 thì không giục @GameDesigner đào sâu.
 1. Lập bảng theo Leader, chỉ cho các feature trong phạm vi (`full`: mọi feature):
-   - **@GameDesigner:** node đang viết, node chờ người chấm hay chốt, feature ĐANG KHOÁ vì thiếu vòng 4 (`gd_status.py`, mục "Cổng code theo feature").
+   - **@GameDesigner:** node đang viết, node chờ người chấm hay chốt (chỉ User control; Full Auto tự chốt node đạt), feature ĐANG KHOÁ vì thiếu vòng 4 (`gd_status.py`, mục "Cổng code theo feature").
    - **@UIDesigner:** các dòng `CHỜ @UIDesigner` trong `gd_status.py`.
    - **@CodeLead:** `gd_req.py status` (chờ kiểm, bị trả, đổi thiết kế; feature ĐƯỢC CODE mà chưa có yêu cầu đã làm) và báo cáo mới của nó.
 2. Mỗi Leader lấy đúng một việc kế tiếp, ưu tiên việc đang chặn Leader khác. Ví dụ: feature vừa mở khoá thì nhắn `CodeLead` dựng khung và giao việc; `ui.md` mới thì nhắn `UIDesigner`; CodeLead hỏi thiết kế thì chuyển `GameDesigner` nếu CodeLead chưa nhắn thẳng.
@@ -25,7 +25,7 @@ Quyền, phạm vi (chỉ ba Leader, người quyết 2026-11-26), chuỗi của
 ## Khi một Leader báo chặn
 @CodeLead, @GameDesigner, @UIDesigner nhắn `BÁO CHẶN · <lỗi | chờ người> · …` khi gặp lỗi không tự gỡ được hoặc phải dừng chờ người, và `HẾT CHẶN · <việc>` khi đi tiếp được. Nhận tin thì điều phối lại ngay, không đợi báo cáo cuối lượt:
 1. Ghi vào bảng theo Leader: bị chặn ở đâu, chờ ai, kéo theo những gì.
-2. **Dừng nhắn các việc phụ thuộc** vào thứ đang bị chặn. Ví dụ: @GameDesigner chờ người chốt node cha thì không giục @UIDesigner xếp frame cho node con.
+2. **Dừng nhắn các việc phụ thuộc** vào thứ đang bị chặn. Ví dụ: @GameDesigner chờ người chốt node cha (User control) thì không giục @UIDesigner xếp frame cho node con.
 3. **Nhắn ngay đợt mới cho các Leader không phụ thuộc.** Một Leader đứng không phải là cả project đứng.
 4. **Chờ người**: gom mọi việc đang chờ người thành một danh sách ngắn trong câu trả lời: việc gì, làm ở đâu (tab, node), đang chặn những gì; việc chặn nhiều nhất xếp trước. Không để từng Leader hỏi người lẻ tẻ.
 5. **Lỗi mà Leader khác gỡ được**: nhắn đúng Leader đó, kèm file và câu lỗi. Lỗi chỉ người gỡ được (guard, quyền, công cụ, hạn mức, server tắt): báo người, nêu rõ lệnh và câu lỗi.

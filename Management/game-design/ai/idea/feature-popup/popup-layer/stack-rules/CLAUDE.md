@@ -13,7 +13,6 @@ Các tình huống trong game hiện tại:
 | Tình huống | Chồng popup (dưới → trên) | Nhận bấm |
 |---|---|---|
 | Đang đánh | (trống) | HUD, màn chơi |
-| Tạm dừng (cả bước hỏi xác nhận bỏ lượt) | popup tạm dừng | popup tạm dừng |
 | Thua | popup thua | popup thua |
 
 ## Thông số
@@ -24,7 +23,7 @@ Các tình huống trong game hiện tại:
 | Độ tối của một nền che | 60 (dự kiến) | % | Đủ thấy đang có popup mà vẫn nhận ra trận phía sau |
 | Thời gian hiện, đóng popup | 0 | giây | Tức thì, nhận bấm ngay |
 | Tác dụng khi bấm nền che | không | — | Tránh bấm nhầm mất popup thua |
-| Tác dụng nút quay lại của điện thoại khi có popup | chuyển cho feature của popup trên cùng; dịch vụ không tự làm gì | — | Mỗi popup tự quyết (popup tạm dừng: như "Tiếp tục"/"Không"; popup thua: không tác dụng) |
+| Tác dụng nút quay lại của điện thoại khi có popup | chuyển cho feature của popup trên cùng; dịch vụ không tự làm gì | — | Mỗi popup tự quyết (popup thua: không tác dụng) |
 
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
@@ -41,17 +40,17 @@ Các tình huống trong game hiện tại:
 - **Mở id đang mở**: từ chối, ghi cảnh báo; không đưa popup đó lên trên cùng.
 - **Bấm hai nút của popup trên cùng trong cùng khung hình (hai ngón)**: chỉ lần bấm đầu được chuyển cho feature gọi; feature gọi chịu trách nhiệm bỏ qua bấm sau khi đã xử lí (xem `feature-popup/popup-request/request-rules`).
 - **Đóng popup không ở trên cùng**: chỉ popup đó và nền của nó mất; popup phía trên vẫn ở trên cùng và vẫn nhận bấm.
-- **Trận đứng yên (tạm dừng, thua)**: popup và hiệu ứng của popup không đứng theo; popup không dựa vào đồng hồ của trận.
+- **Trận đứng yên (thua)**: popup và hiệu ứng của popup không đứng theo; popup không dựa vào đồng hồ của trận.
 - **Người chơi rời game lúc có popup**: quay lại thì chồng popup y như cũ.
 - **Không có popup**: lớp popup không chặn bấm, không làm tối gì.
 
 ## Đã tự quyết
 - **Giới hạn 3.** Dư chỗ cho popup sau này, bắt được lỗi mở lặp. Đã loại: không giới hạn; giới hạn 1 (không chồng được popup mới).
-- **Không còn hộp xác nhận chồng lên popup tạm dừng (2026-11-23, sửa lệch).** Theo `feature-popup-pause/pause-popup`: xác nhận bỏ lượt là bước trong cùng popup. Sửa chi tiết ý `stack-max` và `backdrop-dim`, bảng tình huống.
 - **Một bản mỗi id.** Đơn giản nhất để chặn bấm đúp. Đã loại: cho mở trùng.
 - **Nền chồng thì tối thêm.** Mỗi popup một nền theo vòng 3; tối thêm giúp thấy popup nào đang hoạt động. Đã loại: chỉ nền trên cùng làm tối.
 - **Nút quay lại chuyển cho feature của popup trên cùng (2026-11-23, sửa lệch với `feature-popup-pause/pause-popup/pause-popup-spec` ý `back-key`).** Dịch vụ vẫn không tự đóng popup, giữ luật "popup chỉ đóng khi feature gọi yêu cầu"; mỗi popup tự quyết nút quay lại làm gì. Đã loại: nút quay lại đóng popup trên cùng (dịch vụ quyết thay feature); nút quay lại không tác dụng với mọi popup (trái thói quen trên điện thoại ở popup tạm dừng).
 - **Hiện tức thì.** Hiệu ứng không cần để thấy gameplay.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ popup tạm dừng khỏi bảng tình huống, nút quay lại và trận đứng yên; bỏ mục đã tự quyết về hộp xác nhận bỏ lượt.
 
 ## Chưa rõ
-- Nút quay lại của điện thoại khi không có popup (ví dụ giữa trận có mở popup tạm dừng không): việc của `feature-run/run-pause`, không thuộc dịch vụ này.
+- Nút quay lại của điện thoại khi không có popup: việc của `feature-run/run-flow`, không thuộc dịch vụ này.

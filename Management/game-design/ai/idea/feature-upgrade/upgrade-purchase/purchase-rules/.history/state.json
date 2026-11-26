@@ -1,5 +1,5 @@
 {
- "hash": "ba593a5e3e09",
+ "hash": "ba02d7fd60f1",
  "items": {
   "hero-price": {
    "hash": "007accb1aa44",
@@ -14,8 +14,8 @@
    "text": "Giá kĩ năng thành = 60 × 1,5^(cấp hiện tại − 1) tiền, làm tròn lên\nCấp 1→2 giá 60, 2→3 giá 90, 3→4 giá 135, 5→6 giá 304."
   },
   "buy-when": {
-   "hash": "a2c44682ba76",
-   "text": "Mua được khi trận đang chạy, kể cả lúc nghỉ giữa đợt; không mua được khi tạm dừng hoặc lượt đã kết thúc\nLượt kết thúc là từ khung hình thành về 0 máu."
+   "hash": "7df9ae25c0d4",
+   "text": "Mua được khi trận đang chạy, kể cả lúc nghỉ giữa đợt; không mua được khi lượt đã kết thúc\nLượt kết thúc là từ khung hình thành về 0 máu."
   },
   "buy-sequence": {
    "hash": "9d83f361d7f9",

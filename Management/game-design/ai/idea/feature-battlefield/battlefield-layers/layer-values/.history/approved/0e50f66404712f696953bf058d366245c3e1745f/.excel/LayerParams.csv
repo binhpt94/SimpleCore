@@ -1,0 +1,46 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,unit_px,Quy đổi đơn vị chiến trường,px mỗi u,60,như IDEA,như IDEA,"Camera đang có của scene Game (orthographic size 9, cao 18u), theo @CodeLead"
+2,ground_line_px,Mặt đất y=0 tính từ mép trên màn 1920x1080,px,840,như IDEA,như IDEA,"Như trên; chân thành, hero, quái đều ở đây"
+3,view_x_half,Nửa bề ngang khung thấy ở 16:9,u,16,như IDEA,như IDEA,Mép màn khớp feature-castle/castle-core/castle-body-values
+4,view_y_min,Mép dưới khung thấy,u,-4,như IDEA,như IDEA,Camera cao 18u
+5,view_y_max,Mép trên khung thấy,u,14,như IDEA,như IDEA,Camera cao 18u
+6,cover_x_half,"Nửa bề ngang phủ của trời, cảnh xa, dải đất",u,21,như IDEA,như IDEA,Màn 21:9 thấy khoảng ±21u
+7,sky_top,Đỉnh lớp trời,u,14,như IDEA,như IDEA,Phủ tới mép trên khung
+8,sky_art,Hình lớp trời,,1 sprite @ClaudeImage đứng yên,1 sprite art @Codex đứng yên,Thêm mây trôi chậm,Trời Colorful: xanh dương sáng (vùng sáng của Xanh dương trong bảng màu chung)
+9,far_band_count,Số dải cảnh xa,dải,1,2,như PROTOTYPE,"PROTOTYPE tạo độ sâu bằng hai dải khác cỡ, khác độ nhạt (camera đứng yên nên không có parallax chuyển động)"
+10,far_front_top,Đỉnh dải cảnh xa trước,u,2.5,2,như PROTOTYPE,"Dự kiến; hạ dải trước xuống để dải sau ló lên phía sau, vẫn thấp hơn thành 4u"
+11,far_back_top,Đỉnh dải cảnh xa sau,u,,3.2,như PROTOTYPE,"Dự kiến; cao hơn dải trước để thấy được, thấp hơn thành 4u để thành vẫn nổi"
+12,far_base,Chân của mọi dải cảnh xa,u,0,như IDEA,như IDEA,Đứng trên mặt đất; phần dưới y=0 bị dải đất che
+13,far_front_scale,Cỡ hình (đồi cây) của dải trước,lần,1,1,như PROTOTYPE,Mốc so sánh
+14,far_back_scale,Cỡ hình (núi đồi) của dải sau so với dải trước,lần,,0.6,như PROTOTYPE,Dự kiến; nhỏ hơn để đọc là xa hơn
+15,far_front_color,Màu gốc dải trước,,Xanh lá (bảng màu chung),như IDEA,như IDEA,Đồi cây xanh như lá trang trí của ảnh tham chiếu
+16,far_back_color,Màu gốc dải sau,,,Xanh dương (bảng màu chung),như PROTOTYPE,Núi xa ngả về màu trời
+17,far_front_fade,Độ nhạt dải trước: pha màu gốc về màu trời,%,0,20,như PROTOTYPE,Dự kiến; nhạt hơn unit để thành và unit nổi (art-unit-outline-contrast của gốc)
+18,far_back_fade,Độ nhạt dải sau: pha màu gốc về màu trời,%,,45,như PROTOTYPE,Dự kiến; nhạt hơn dải trước một bậc rõ để đọc chiều sâu
+19,far_art,Hình cảnh xa,,1 dải sprite @ClaudeImage đứng yên,2 dải art @Codex đứng yên,như PROTOTYPE,Mỗi dải một sprite lặp ngang phủ ±21u
+20,ground_bottom,Đáy dải đất,u,-4,như IDEA,như IDEA,Phủ tới mép dưới khung
+21,ground_art,Hình dải đất,,1 sprite lặp ngang,art @Codex lặp ngang,như PROTOTYPE,Mặt cỏ xanh lá trên lớp đất; mép trên sáng như style
+22,decor_flat_count,Số decor phẳng,món,10,như IDEA,như IDEA,"Mỗi bên 3 cỏ, 2 đá"
+23,decor_grass_x,Tâm x các bụi cỏ mỗi bên,u,4 9 14,như IDEA,như IDEA,"Rải đều 2.5u, cách thành; hai bên đối xứng (dấu ±)"
+24,decor_stone_x,Tâm x các hòn đá mỗi bên,u,6.5 11.5,như IDEA,như IDEA,Xen giữa các bụi cỏ
+25,decor_grass_w,Bề ngang bụi cỏ,u,0.8,như IDEA,như IDEA,Phẳng
+26,decor_stone_w,Bề ngang hòn đá,u,0.6,như IDEA,như IDEA,Phẳng
+27,decor_flat_h,Chiều cao decor phẳng,u,0.3,như IDEA,như IDEA,Thấp hơn mọi unit (unit thấp nhất cao 0.8u)
+28,decor_clear_half,Nửa khoảng không có decor quanh thành,u,3,như IDEA,như IDEA,"Thân thành ±1.5u và chỗ hero ±2u, chừa thêm; áp cho cả decor đứng"
+29,decor_stand_count,Số decor đứng (cờ và hàng rào),món,0,8,như PROTOTYPE,"Mỗi bên 2 cờ, 2 hàng rào; đứng trong dải cảnh xa, không trên đường đi"
+30,decor_flag_x,Tâm x các cờ mỗi bên,u,,7.75 12.75,như PROTOTYPE,"Dự kiến; nằm giữa các decor phẳng, không chồng cỏ, đá khi nhìn thẳng"
+31,decor_fence_x,Tâm x các hàng rào mỗi bên,u,,5.25 10.25,như PROTOTYPE,"Dự kiến; như trên, ngoài khoảng ±3u quanh thành"
+32,decor_flag_w,Bề ngang cờ,u,,0.5,như PROTOTYPE,Dự kiến
+33,decor_flag_h,Chiều cao cờ (cả cột),u,,1.2,như PROTOTYPE,"Dự kiến; thấp hơn đỉnh dải cảnh xa sau, không che thành"
+34,decor_fence_w,Bề ngang một đoạn hàng rào,u,,1.4,như PROTOTYPE,Dự kiến
+35,decor_fence_h,Chiều cao hàng rào,u,,0.6,như PROTOTYPE,Dự kiến; thấp hơn unit thấp nhất
+36,decor_stand_base,Chân decor đứng,u,,0,như PROTOTYPE,"Đứng trên mặt đất, vẽ trước dải đất nên trông như ở phía xa, không chắn đường"
+37,decor_stand_fade,Độ nhạt decor đứng: pha màu gốc về màu trời,%,,20,như PROTOTYPE,Cùng độ nhạt với dải cảnh xa trước để đọc là cảnh phía sau
+38,decor_stand_color,Màu decor đứng,,,"Cờ: lá cờ Hồng, cột Vàng; hàng rào: Kem, bóng Vàng (bảng màu chung)",như PROTOTYPE,Lấy màu trang trí của ảnh tham chiếu; không trùng màu phe hero hay quái
+39,decor_sway,Cỏ lay,,Không,Không,Cỏ lay nhẹ,Chỉ để nhìn
+40,draw_order,Thứ tự vẽ (sau ra trước),,"trời, cảnh xa, dải đất, decor phẳng, thành, quái và hero, hiệu ứng, HUD, popup","trời, cảnh xa sau, cảnh xa trước, decor đứng, dải đất, decor phẳng, thành, quái và hero, hiệu ứng, HUD, popup",như PROTOTYPE,Theo node cha; decor đứng thuộc dải cảnh xa nên vẽ trước dải đất
+41,hud_top_line,Mép dưới dải HUD trên,u,11.7,như IDEA,như IDEA,feature-hud/hud-layout/layout-spec: dải trên cao 140 px (px 140)
+42,hud_bottom_line,Mép trên thanh dưới,u,-1.3,như IDEA,như IDEA,"Thanh nâng cấp, khay kĩ năng (đo lúc Play, theo @CodeLead); px 920"
+43,backdrop_by_wave,Đổi nền theo mốc đợt,,Không,Không,Xét lại,"Trái ""một bản đồ"" ở vòng 1, cần người quyết"

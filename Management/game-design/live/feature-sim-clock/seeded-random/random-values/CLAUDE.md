@@ -19,7 +19,6 @@ Ba cột `idea`, `prototype`, `full` của bảng `SeedParams` (mọi thông s�
 
 ## Trường hợp biên
 - **Chơi lại sau khi thua (cùng lần mở game):** lượt mới. Bản phát hành bốc seed mới; bản dev dùng lại đúng seed config nên ra đúng lượt vừa chơi nếu thao tác như cũ.
-- **Hồi sinh thành bằng quảng cáo:** vẫn là cùng lượt; seed giữ nguyên, các dòng chạy tiếp từ vị trí bốc hiện tại, không đặt lại.
 - **Dựng trận hỏng trước khi lượt bắt đầu:** không ghi seed; lần dựng sau chọn seed lại theo luật.
 - **Tester muốn chơi lại một lượt bất kì:** đặt seed của config bằng seed đã in (hoặc đã ghi trong log), vào trận.
 - **Feature xin dòng có tên không có trong `Streams`:** bản dev báo lỗi rõ để thêm vào bảng; không tự tạo dòng ngầm.
@@ -32,6 +31,7 @@ Ba cột `idea`, `prototype`, `full` của bảng `SeedParams` (mọi thông s�
 - **Ghi seed lúc lượt bắt đầu, không lúc dựng trận** (góp ý `chu-so-huu-ban-ghi-seed`).
 - **Seed mặc định dev 12345 (dự kiến).**
 - **Dòng sinh từ tên, không từ thứ tự xin.** Đã loại: chia dòng theo thứ tự cài feature (đổi thứ tự cài là lệch số).
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên hồi sinh thành bằng quảng cáo.
 
 ## Chưa rõ
 - Không có điểm chặn.

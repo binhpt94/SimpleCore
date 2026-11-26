@@ -7,3 +7,6 @@
 {"at": "2026-11-25 12:03:40", "event": "promote", "by": "người", "hash": "4d5cfe278549"}
 {"at": "2026-11-25 18:21:39", "event": "promote", "by": "người (Sync)", "hash": "4d5cfe278549"}
 {"at": "2026-11-25 21:52:52", "event": "promote", "by": "tự chốt theo feature-wave/spawning/spawn-order", "hash": "4d5cfe278549"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "fa0d994768de", "previous": "4d5cfe278549", "added": [], "removed": [{"id": "gap-pause-freeze", "text": "Tạm dừng trong lúc thở thì đồng hồ 3 giây đứng yên, bỏ tạm dừng thì đếm tiếp phần còn lại\nVí dụ dừng ở giây 1.2 thì sau khi tiếp tục còn 1.8 giây."}], "rewritten": []}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "539ee9691caf6bfd2d3712b72ee05b4b4cd8a796", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:21:41", "event": "approve", "hash": "2c43dafcb4d91c4328d468e06f5df959befc5bc3", "by": "tự duyệt (Full Auto)"}

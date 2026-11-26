@@ -25,7 +25,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Thời gian từ bấm chơi lại tới màn chọn đội | dưới 0,5 giây (dự kiến) | dưới 0,5 giây | dưới 0,5 giây |
 
 ## Trường hợp biên
-- **Bỏ lượt từ popup tạm dừng**: popup xác nhận và popup tạm dừng đều đóng trước khi về màn bắt đầu; trận đứng yên lúc tạm dừng vẫn phải được dọn khi lượt mới bắt đầu.
 - **Lượt kết thúc lúc đang có hiệu ứng (kĩ năng thành, quái chết dở)**: hiệu ứng của lượt cũ bị dừng và bỏ khi lượt mới bắt đầu, không chạy tiếp sang lượt mới.
 - **Lượt mới bắt đầu mà còn popup mở (lỗi)**: ghi lỗi nêu id popup; không tự đóng âm thầm.
 - **Tiền, nâng cấp, đợt, máu thành của lượt trước**: về giá trị ban đầu của từng feature (`feature-run/run-start/start-values`), không còn sót.
@@ -35,6 +34,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Tách từ node kiểm tra dọn sạch của `feature-session-scene` (2026-11-25, người chọn hướng A).** Ba ý `replay-no-growth`, `popup-cleared-on-reset`, `only-record-saved` và các trường hợp biên về đặt lại lượt chuyển sang đây, giữ nguyên id và nội dung. Đặt lại giữa hai lượt là việc của lượt chơi (`run-reset-in-scene` ở nhánh dọn sạch của `feature-session-scene`), không qua vòng đời scene. Đã loại: giữ ở dịch vụ vòng đời scene (nó không có code cho các luật này).
 - **Lượt chơi ghi lỗi popup sót, không tự đóng.** Theo luật "không âm thầm bỏ qua"; popup sót là lỗi của feature gọi.
 - **Đội đã nhớ không lưu khi tắt game.** Theo `feature-team-select/team-memory`.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên bỏ lượt từ popup tạm dừng.
 
 ## Chưa rõ
 - Không có điểm chặn.

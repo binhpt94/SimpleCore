@@ -18,8 +18,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Vào trận: thành có đầy máu.
 - Quái đánh thành thì máu thành giảm theo sức đánh của quái.
 - Máu thành không tự tăng. Chỉ nâng cấp máu (`feature-castle/castle-upgrade-effects`) làm máu tăng.
-- Máu về 0: thành bị phá, báo `feature-run`; `feature-run` đề nghị hồi sinh (lần đầu trong lượt) hoặc báo thua.
-- Hồi sinh: thành đứng lại với một phần máu tối đa (mức cụ thể ở vòng 4); máu tối đa, cấp giữ nguyên.
+- Máu về 0: thành bị phá, báo `feature-run`; `feature-run` báo thua.
 - Hero và đòn của chính thành không trừ máu thành.
 - Hero xuất phát từ thành khi vào trận và hồi sinh tại thành (`feature-hero/hero-respawn`).
 - Phạt: để quái lọt tới thành là mất máu vĩnh viễn trong lượt.
@@ -29,6 +28,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Thêm máu chỉ qua nâng cấp.** Biến nâng cấp máu thành lựa chọn có ý nghĩa: tiền vào máu thành hay vào hero. Đã loại: kĩ năng thành hồi máu thành (làm mất áp lực của `castle-no-regen`).
 - **Thành chỉ là vị trí của hero.** Luật gục, chờ, hồi sinh để ở `feature-hero/hero-respawn`, tránh hai node cùng giữ một luật.
 - **Gộp ý `castle-health` và `castle-hero-base` của vòng 2 vào node này.** Cả hai nói về chính công trình thành; tách riêng thì node hero-base quá mỏng.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ đề nghị hồi sinh và luật hồi sinh thành; thành bị phá là thua.
 
 ## Chưa rõ
 - Không có điểm chặn.

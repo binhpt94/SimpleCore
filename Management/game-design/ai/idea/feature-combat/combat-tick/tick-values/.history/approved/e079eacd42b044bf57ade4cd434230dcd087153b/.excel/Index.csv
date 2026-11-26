@@ -1,0 +1,4 @@
+index,sheet,kind,key,rows,note
+int,string,enum:params|list|levels|formula|map,string,int,string
+Số thứ tự,Tên sheet,Loại bảng,Cột khoá của bảng,Số dòng dữ liệu (tool tự điền),Bảng chứa gì
+1,TickParams,params,key,6,"Thông số nhịp giao chiến: bước, làm tròn, đòn Sấm sét, tiền hạ quái"

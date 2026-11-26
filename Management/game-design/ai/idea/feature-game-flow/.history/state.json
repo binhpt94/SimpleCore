@@ -1,9 +1,9 @@
 {
- "hash": "345954ac135f",
+ "hash": "98a7977ed8e0",
  "items": {
   "flow-owns-screens": {
-   "hash": "9cec7c542968",
-   "text": "Điều hướng màn là nơi duy nhất đổi màn chính đang hiện giữa màn bắt đầu, màn chọn đội và màn trận\nHai popup vẫn do feature sở hữu nhờ dịch vụ popup hiện và đóng."
+   "hash": "a44c35ca6ba3",
+   "text": "Điều hướng màn là nơi duy nhất đổi màn chính đang hiện giữa màn bắt đầu, màn chọn đội và màn trận\nPopup thua vẫn do feature sở hữu nhờ dịch vụ popup hiện và đóng."
   },
   "flow-only-picks-target": {
    "hash": "7eb6c7daa5d5",
@@ -36,10 +36,6 @@
   "lose-to-home": {
    "hash": "5fad2e6c13c3",
    "text": "Chọn Về màn bắt đầu trên popup thua thì về màn bắt đầu"
-  },
-  "bo-luot-ve-man-bat-dau": {
-   "hash": "72c0cd337430",
-   "text": "Chọn Bỏ lượt trên popup tạm dừng thì về màn bắt đầu\nLượt chơi xác nhận và kết thúc lượt, dọn trận; điều hướng màn sở hữu đích đến."
   },
   "back-from-team": {
    "hash": "52d2f51ad0c9",

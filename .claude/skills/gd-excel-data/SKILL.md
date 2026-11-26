@@ -46,7 +46,7 @@ Bạn không đọc được `.xlsx` (nhị phân) và guard không cho ghi nó:
 - Số lấy từ node khác: không chép sang bảng mình; khai `refs` trong `data.md` và ghi tên node ở `reason` hay `note`.
 
 ## Mỗi dòng là một yêu cầu phải code và test
-Khi node được chốt sang `live`, sổ yêu cầu của feature (`gd_req.py`) sinh yêu cầu từ bảng:
+Khi node được chốt (Full Auto: tự chốt khi đạt; `live` được dựng lại từ bản đã chốt), sổ yêu cầu của feature (`gd_req.py`) sinh yêu cầu từ bảng:
 - Bảng `list`, `params`, `formula`: **mỗi dòng một yêu cầu**, tên `<node>#<sheet>-<khoá>` (`Enemies` + `wolf` → `#enemies-wolf`). Bảng `levels`, `map`: cả bảng một yêu cầu `<node>#<sheet>`.
 - **Thêm một dòng là thêm một việc**: phiên feature phải code và viết test nhắc đúng khoá của dòng đó; dòng của bảng `list` không được `done` bằng `play`. Chỉ thêm dòng khi thứ đó thật sự cần có trong game ở giai đoạn ghi trong cột `stage`.
 - Sửa một ô chỉ làm yêu cầu của dòng đó báo "đổi thiết kế". Thêm hay bỏ một cột làm mọi dòng của bảng báo đổi. Đổi chỗ dòng, đánh lại `index` không làm đổi gì.

@@ -1,6 +1,6 @@
 ---
-based-on: 628a4bda5a29
-refs: feature-run/run-score@3d29bb683b7c, feature-hud/hud-layout@e541be0cca19, glossary#active-wave@cc772cb923dd, glossary#wave-gap@8ee5484a4f32
+based-on: 51fc27d3f6cb
+refs: feature-run/run-score@691534d6dde7, feature-hud/hud-layout@7bbb09d6efb6, glossary#active-wave@cc772cb923dd, glossary#wave-gap@32d7f7b372c9
 ---
 # Thông tin trận
 

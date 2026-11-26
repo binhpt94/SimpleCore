@@ -1,6 +1,6 @@
 ---
-based-on: aa89ff39c089
-refs: feature-run/run-score@3d29bb683b7c, feature-run/run-flow@8db5f61d9f6e, feature-popup-lose/lose-actions@bddc499985f8, glossary#score@6f4bf7c75284
+based-on: 747e72f87525
+refs: feature-run/run-score@691534d6dde7, feature-run/run-flow@45cc90c1501f, feature-popup-lose/lose-actions@133ab527ee01, glossary#score@6f4bf7c75284
 ---
 # Kết quả lượt
 
@@ -19,6 +19,3 @@ Dựa vào cờ phá kỉ lục của `feature-run/run-score`. Không phá kỉ 
 
 ### result-title | AI 7 | Popup có tiêu đề cho biết thành đã bị phá
 Người chơi hiểu ngay vì sao lượt kết thúc.
-
-### result-ad-failed | AI 6 | Thua sau khi xem quảng cáo hồi sinh không thành thì popup có thêm một dòng báo quảng cáo chưa hoàn tất
-Người chơi biết vì sao không được hồi sinh. Bỏ qua đề nghị hồi sinh thì không có dòng này.

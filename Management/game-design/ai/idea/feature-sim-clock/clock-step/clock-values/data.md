@@ -1,6 +1,6 @@
 ---
-based-on: 63aec954598c
-refs: feature-combat/combat-tick/tick-values@0b863ec78d17
+based-on: 2269a58744ae
+refs: feature-combat/combat-tick/tick-values@aa74e1a2c37b
 frame: none
 ---
 # Thông số nhịp chung
@@ -22,7 +22,7 @@ Khung hình 0.1 giây vẫn theo kịp đủ 4 bước. Máy chậm hơn mức �
 Cùng trần với cách bước cố định để hai cách cho cảm giác gần nhau trên máy chậm.
 
 ### steps-counted | AI 7 | Nhịp đếm số bước chung và số bước gameplay bằng số nguyên; giờ của trận bằng số bước gameplay nhân 0.025 giây
-Số bước chung tăng ở mọi bước; số bước gameplay chỉ tăng ở bước lượt cho trận chạy. Thao tác ghi theo số bước chung; mọi chờ giờ đếm theo số bước gameplay nên đứng yên lúc tạm dừng. Không cộng dồn số lẻ, chạy lâu không lệch.
+Số bước chung tăng ở mọi bước; số bước gameplay chỉ tăng ở bước lượt cho trận chạy. Thao tác ghi theo số bước chung; mọi chờ giờ đếm theo số bước gameplay nên đứng yên lúc trận dừng. Không cộng dồn số lẻ, chạy lâu không lệch.
 
 ### timer-in-steps | AI 7 | Một chờ giờ t giây của gameplay hết ở bước đầu tiên mà giờ đã đếm từ lúc bắt đầu chờ đạt hoặc vượt t
 Ví dụ hồi chiêu 20 giây hết sau đúng 800 bước; chờ 0.7 giây hết sau 28 bước.

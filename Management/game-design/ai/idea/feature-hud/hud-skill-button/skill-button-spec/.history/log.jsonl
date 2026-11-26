@@ -11,3 +11,8 @@
 {"at": "2026-11-25 16:17:21", "event": "data", "hash": "c6a6787dd381", "previous": "693755b379ea", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-25 16:19:59", "event": "data", "hash": "62838fe48a2d", "previous": "c6a6787dd381", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-25 18:21:39", "event": "promote", "by": "người (Sync)", "hash": "62838fe48a2d"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "cadd49063fec", "previous": "62838fe48a2d", "added": [], "removed": [], "rewritten": [{"id": "buttons-locked-off-battle", "old": "Lúc tạm dừng hoặc lượt đã kết thúc, cả 3 nút không nhận chạm và số giây đứng yên", "new": "Lúc lượt đã kết thúc, cả 3 nút không nhận chạm và số giây đứng yên"}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "1167f39d5fd9f1e05f59046367b3d22546e8f954", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:14:14", "event": "data", "hash": "3147ec42e2aa", "previous": "cadd49063fec", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-27 00:27:09", "event": "data", "hash": "7b0191869555", "previous": "3147ec42e2aa", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-27 00:28:53", "event": "approve", "hash": "f0131aa921daa099566fc33c4e2e925b862c4dfc", "by": "tự duyệt (Full Auto)"}

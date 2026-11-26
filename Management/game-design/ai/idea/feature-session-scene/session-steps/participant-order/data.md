@@ -1,6 +1,6 @@
 ---
 based-on: 70f3b17acc2e
-refs: feature-scene-flow/scene-list/boot-loading@cf7c99a185e0, feature-run/run-start@d386ccae4d88, feature-balance/balance-config@6934878b1b70, feature-home/home-screen/home-screen-spec@eecc5b73afde, feature-team-select/team-slots/slots-spec@70b7a99657b4, feature-popup-pause/pause-popup/pause-popup-spec@4db8a9f181fd, feature-game-flow/flow-routes/routes-values@66f0417d12da
+refs: feature-scene-flow/scene-list/boot-loading@cf7c99a185e0, feature-run/run-start@31cb7598b529, feature-balance/balance-config@6934878b1b70, feature-home/home-screen/home-screen-spec@eecc5b73afde, feature-team-select/team-slots/slots-spec@70b7a99657b4, feature-game-flow/flow-routes/routes-values@32933d60f1d0
 frame: none
 ---
 # Danh sách tham gia và xử lí lỗi từng bước

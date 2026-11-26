@@ -59,6 +59,16 @@ def mk(root, path, items=GOOD, title=None, table="idea", based=None, summary="T�
     put(root, rel + "/CLAUDE.md", f"# {title}\n\nDữ liệu cốt lõi: data.md\n\n{doc}\n")
 
 
+def promote(root, path, deep=False):
+    """Chốt (người quyết 2026-11-26: an approval, then live is rebuilt): the paths newly approved."""
+    return gd.approve(root, path, deep)["approved"]
+
+
+def sync(root):
+    """Sync: every passing node approved, live rebuilt; the paths newly approved."""
+    return gd.approve_passing(root)["approved"]
+
+
 def refused(fn, *args):
     try:
         fn(*args)
@@ -157,7 +167,11 @@ def run_data(root):
                             ("bad key", "Bad_Name: tên thư mục"), ("too deep", "a/b/c/d: sâu hơn vòng 4"),
                             ("images without index", "a: .images có ảnh nhưng thiếu index.md")):
             check("problem: " + label, part in texts)
-        check("promote refuses a branch with problems", refused(gd.promote, bad, "", True))
+        try:
+            got = promote(bad, "", True)
+        except ValueError:
+            got = []
+        check("Chốt cả nhánh skips the nodes with problems", [p for p in got if p in ("no-data", "doc-without-ref", "Bad_Name", "a")], [])
     finally:
         shutil.rmtree(bad, ignore_errors=True)
 
@@ -171,7 +185,7 @@ def run_scores(root):
     check("auto: an AI score of 3 fails the node", (n["passed"], "AI chấm 3" in n["reasons"][0]), (False, True))
     check("a child of a failing node is locked", gd.can_write_node(root, hero)[0], False)
     check("the failing node itself is writable", gd.can_write_node(root, []), (True, ""))
-    check("promote refuses a failing node", refused(gd.promote, root, "", False))
+    check("promote refuses a failing node", refused(promote, root, "", False))
     for label, items in (("unknown idea", {"nope": {"score": 7}}), ("score 11", {"win": {"score": 11}}),
                          ("score -1", {"win": {"score": -1}}), ("score as text", {"win": {"score": "7"}}),
                          ("score true", {"win": {"score": True}}), ("nothing", {"win": {"score": None, "feedback": " "}}),
@@ -221,12 +235,12 @@ def run_scores(root):
     check("user: every idea scored 5 or more passes", snap_node(root)["passed"])
     put(root, "idea/.ai-need-user-choose/questions.json", questions(q("spawn")))
     check("user: an unanswered question fails", (snap_node(root)["passed"], snap_node(root)["pending"]), (False, 1))
-    check("user: promote refused", refused(gd.promote, root, "", False))
+    check("user: promote refused", refused(promote, root, "", False))
     gd.save_answers(root, "", {"spawn": {"chosen": ["a"]}})
     check("user: passing is not yet approved (not in live)", (snap_node(root)["passed"], snap_node(root)["approved"]), (True, False))
     check("user: the child waits for the promote", "chưa được người chốt" in gd.can_write_node(root, hero)[1])
     check("user: reading the tree for the page promotes nothing", (gd.snapshot(root)["live"], gd.record_versions(root) and None), (None, None))
-    gd.promote(root, "", False)
+    promote(root, "", False)
     check("user: approved once promoted; the child opens", (snap_node(root)["approved"], gd.can_write_node(root, hero)), (True, (True, "")))
     check("grandchild locked: its parent is unscored", gd.can_write_node(root, skills)[0], False)
     put(root, "idea/CLAUDE.md", "# Game\n\ndata.md\n\nSửa nữa.\n")
@@ -258,7 +272,7 @@ def run_live_scores(root):
     mk(root, "", items=(("loop", 8, "Vòng lặp."), ("win", 8, "Thắng sau 10 đợt.")))
     mk(root, "feature-hero")
     check("nothing reaches live by reading", (gd.record_versions(root) != [], gd.snapshot(root)["live"]), (True, None))
-    check("sync in mode auto", gd.sync_live(root), ["(gốc)", "feature-hero"])
+    check("sync in mode auto", sync(root), ["(gốc)", "feature-hero"])
     live = lambda: gd.read_tree(root, "live")[0]      # noqa: E731
     check("live ideas start unscored", [i["user"] for i in live()["items"]], [None, None])
     check("a live node that is not in live is refused", refused(gd.save_review, root, "feature-none", {"x": {"score": 5}}, "live"))
@@ -278,7 +292,7 @@ def run_live_scores(root):
     check("live still shows the 3 on the old text", live()["items"][1]["user"], 3)
     gd.save_review(root, "", {"win": {"score": 9}}, "idea")
     check("both scores are kept, each for its own text", (snap_node(root)["items"][1]["user"], live()["items"][1]["user"]), (9, 3))
-    gd.sync_live(root)
+    sync(root)
     check("after the sync live has the new text and its score", (live()["items"][1]["text"], live()["items"][1]["user"]), ("Chơi vô tận.", 9))
     old = folder(root, "idea/.user-review/review.json")
     item = gd.read_data(folder(root, "idea"))["items"][0]
@@ -288,7 +302,7 @@ def run_live_scores(root):
     check("and is kept when another idea is saved", [i["user"] for i in snap_node(root)["items"]], [6, 7])
     gd.write_mode(root, "user")
     put(root, "idea/CLAUDE.md", "# Game\n\ndata.md\n\nSửa.\n")
-    check("sync in mode user promotes what the human scored", gd.sync_live(root), ["(gốc)"])
+    check("sync in mode user promotes what the human scored", sync(root), ["(gốc)"])
     check("and stops at the node the human has not scored", snap_node(root, "feature-hero")["passed"], False)
 
 
@@ -393,7 +407,7 @@ def run_priority(root):
 
     # ---- outside every hash, every gate and the history
     before = snap_node(root, "feature-wallet")
-    gd.record_versions(root), gd.sync_live(root)
+    gd.record_versions(root), sync(root)
     n_events = len(gd.read_history(folder(root, "idea/feature-wallet")))
     ai("feature-wallet", 2), gd.save_priority(root, "feature-wallet", 7)
     after = snap_node(root, "feature-wallet")
@@ -471,7 +485,7 @@ def run_progress(root):
     check("a feature node names its code folders", (n["code"], gd.snapshot(root)["problems"]["idea"]), (["Hero", "_Services/Popup"], []))
     check("named only in the proposal: still locked", gate("Hero")[0], False)
     before_hash = n["dataHash"]
-    gd.sync_live(root)
+    sync(root)
     check("code.json goes to live with the node", folder(root, "live/feature-hero/code.json").is_file())
     check("neither progress nor importance goes to live",
           [x.name for x in gd.table_dir(root, "live").rglob("*") if x.name in (".progress", "priority.json")], [])
@@ -479,7 +493,7 @@ def run_progress(root):
           (gate("Hero"), gate("_Services/Popup"), gate("hero")), ((True, ""), (True, ""), (True, "")))
     check("a feature whose design stops at round 2 is locked, and the reason says so", (gate("Wallet")[0], "tới vòng 2" in gate("Wallet")[1]), (False, True))
     check("a folder no node names is locked", gate("Shop")[0], False)
-    mk(root, "feature-wallet/coins"), gd.sync_live(root)
+    mk(root, "feature-wallet/coins"), sync(root)
     check("round 3 is not enough", (gate("Wallet")[0], "tới vòng 3" in gate("Wallet")[1]), (False, True))
     table = [x for x in gd_status.report(root).split("\n") if x.startswith("- ") and ("ĐƯỢC CODE" in x or "ĐANG KHOÁ" in x)
              and "(feature-" in x]
@@ -489,7 +503,7 @@ def run_progress(root):
           (["- Hero (feature-hero): ĐƯỢC CODE", "- Wallet (feature-wallet): ĐANG KHOÁ"], True, False))
     mk(root, "feature-wallet/coins/cap")
     check("round 4 only in the proposal is not enough", gate("Wallet")[0], False)
-    gd.sync_live(root)
+    sync(root)
     check("round 4 in live opens it", gate("Wallet"), (True, ""))
     check("the snapshot says so per folder", snap_node(root, "feature-wallet")["codeGate"], [{"unity": "Wallet", "ok": True, "reason": ""}])
     code("feature-wallet", ["Wallet", "Shop"])
@@ -598,7 +612,7 @@ def run_ui(root):
     folder(root, "idea/feature-a/a1/ui.md").unlink()
     rows = {r["unity"]: r for r in gd.snapshot(root)["features"]}
     check("the feature row is the same shape with ui.md around", sorted(rows), [""])
-    gd.sync_live(root)
+    sync(root)
     check("ui.md goes to live with the node", folder(root, "live/feature-a/a1/a1x/ui.md").is_file())
 
     # ---- options: another frame for the same screen (alt:), the human picks one, @UIDesigner deletes the others
@@ -664,7 +678,7 @@ def run_infra(root):
     put(root, "idea/feature-scene-flow/code.json", '{"unity": ["SceneFlow"]}')
     put(root, "idea/feature-session-scene/code.json", '{"unity": ["_Services/SessionScene"]}')
     check("all three there with their folders: nothing owed", (owed(), "Thiếu feature hạ tầng" in gd_status.report(root)), ([], False))
-    check("the reminder is no structure problem and blocks no promote", (gd.snapshot(root)["problems"]["idea"], gd.promote(root, "", False)), ([], ["(gốc)"]))
+    check("the reminder is no structure problem and blocks no promote", (gd.snapshot(root)["problems"]["idea"], promote(root, "", False)), ([], ["(gốc)"]))
     check("an infrastructure feature is locked like any other until round 4 is in live", gd.code_allowed(root, "SceneFlow")[0], False)
 
 
@@ -678,35 +692,35 @@ def run_flow(root):
     check("first versions are recorded", gd.record_versions(root),
           ["(gốc)", "feature-hero", "feature-hero/skills", "feature-hero/skills/cooldown", "feature-shop"])
     check("nothing new: nothing recorded", gd.record_versions(root), [])
-    check("sync goes down to the first failing node", gd.sync_live(root), ["(gốc)", "feature-hero", "feature-shop"])
+    check("sync goes down to the first failing node", sync(root), ["(gốc)", "feature-hero", "feature-shop"])
     check("live has the passing nodes only", paths(gd.read_tree(root, "live")[0]), ["", "feature-hero", "feature-shop"])
-    check("again: nothing to do", gd.sync_live(root), [])
+    check("again: nothing to do", sync(root), [])
     check("live holds no review, questions or history",
           [p.name for p in gd.table_dir(root, "live").rglob(".*") if p.is_dir()], [])
     gd.save_review(root, "", {"win": {"score": 2, "feedback": "10 đợt quá ngắn"}})
     mk(root, "feature-shop", items=(("buy", 9, "Mua bằng xu."),))
-    check("a failing root stops everything below", gd.sync_live(root), [])
+    check("a failing root stops everything below", sync(root), [])
     mk(root, "", items=(("loop", 8, "Vòng lặp."), ("win", 7, "Chơi vô tận, tính điểm theo đợt.")))
     check("the rewrite is recorded with the old text", gd.record_versions(root), ["(gốc)", "feature-shop"])
     events = gd.read_history(folder(root, "idea"))
-    check("history: data, promote, review, data", [e["event"] for e in events], ["data", "promote", "review", "data"])
+    check("history: data, approve, review, data", [e["event"] for e in events], ["data", "approve", "review", "data"])
     check("history keeps what was rewritten", events[-1]["rewritten"], [{"id": "win", "old": "Thắng sau 10 đợt.", "new": "Chơi vô tận, tính điểm theo đợt."}])
     check("history: the rejected idea with its feedback",
           [(e["item"], e["score"], e["feedback"]) for e in gd.rejected(folder(root, "idea"))], [("win", 2, "10 đợt quá ngắn")])
     check("history: who promoted", events[1]["by"], "người (Sync)")
     check("history keeps a copy of every version", len(list(folder(root, "idea/.history").glob("data-*.md"))), 2)
     check("the snapshot carries the history, newest first", snap_node(root)["history"][0]["event"], "data")
-    check("children are stale after the root's rewrite; only the root is promoted", gd.sync_live(root), ["(gốc)"])
+    check("children are stale after the root's rewrite; only the root is promoted", sync(root), ["(gốc)"])
     mk(root, "feature-hero"), mk(root, "feature-shop", items=(("buy", 9, "Mua bằng xu."),))
-    check("redone children are promoted again", gd.sync_live(root), ["feature-hero", "feature-shop"])
-    check("deep promote refused when a node below fails", refused(gd.promote, root, "feature-hero", True))
-    check("child before its parent is refused", refused(gd.promote, root, "feature-hero/skills/cooldown", False))
+    check("redone children: only the one whose content changed needs a new approval (a moved pin does not)", sync(root), ["feature-shop"])
+    check("Chốt cả nhánh leaves a failing node below unapproved", "feature-hero/skills" in promote(root, "feature-hero", True), False)
+    check("child before its parent is refused", refused(promote, root, "feature-hero/skills/cooldown", False))
     for p in ("..", "feature-hero/..", "/feature-hero", "Feature", "a/b/c/d", "feature-hero\\skills", None):
-        check(f"bad path refused: {p}", refused(gd.promote, root, p, True))
+        check(f"bad path refused: {p}", refused(promote, root, p, True))
     mk(root, "feature-hero/skills", items=(("three", 7, "Ba kĩ năng."),))
     mk(root, "feature-hero/skills/cooldown")
-    check("deep promote of a passing branch", gd.promote(root, "feature-hero", True),
-          ["feature-hero", "feature-hero/skills", "feature-hero/skills/cooldown"])
+    check("Chốt cả nhánh of a passing branch", promote(root, "feature-hero", True),
+          ["feature-hero/skills", "feature-hero/skills/cooldown"])
     states = {n["path"]: (n["state"], n["dirty"]) for n in gd.walk(gd.snapshot(root)["idea"])}
     check("everything is the same as live now", set(states.values()), {("same", False)})
 
@@ -751,9 +765,10 @@ def run_flow(root):
     check("its history and its children's move to the parent", kept, ["skills", "skills-cooldown"])
     removed = [e for e in gd.read_history(folder(root, "idea/feature-hero")) if e["event"] == "removed"][0]
     check("the parent's log notes what was removed", (removed["key"], removed["items"][0]["id"]), ("skills", "three"))
-    check("deep promote removes from live what idea dropped", (gd.promote(root, "feature-hero", True), paths(gd.read_tree(root, "live")[0])),
-          (["feature-hero"], ["", "feature-hero", "feature-shop"]))
-    check("no work folders left", sorted(p.name for p in Path(root).joinpath(*gd.BASE).iterdir()), ["ai", "live", "outside.md"])
+    promote(root, "feature-hero", True)
+    check("live loses what the proposal dropped", paths(gd.read_tree(root, "live")[0]), ["", "feature-hero", "feature-shop"])
+    check("no work folders left", sorted(p.name for p in Path(root).joinpath(*gd.BASE).iterdir()),
+          ["ai", "approved.json", "live", "outside.md"])
 
 
 def run_code_names(root):
@@ -776,7 +791,7 @@ def run_code_names(root):
     check("written code.json is no longer suggested", [p for p, _ in owed()], ["feature-wallet"])
     check("the reminder blocks nothing", gd.snapshot(root)["problems"]["idea"], [])
     check("live names nothing before the human promotes", gd.live_code_names(root), [])
-    gd.promote(root, "", True)
+    promote(root, "", True)
     check("live names each code folder with its node, sorted", gd.live_code_names(root),
           [("_Services/Popup", "feature-popup"), ("Hero", "feature-hero")])
     put(root, "live/feature-hero/skills/code.json", '{"unity": ["Skills"]}')
@@ -814,65 +829,6 @@ def pin(root, path, *targets):
     f = folder(root, f"idea/{path}/data.md")
     text = "\n".join(x for x in f.read_text(encoding="utf-8").split("\n") if not x.startswith("refs:"))
     f.write_text(text.replace("\n---\n", f"\nrefs: {line}\n---\n", 1), encoding="utf-8")
-
-
-def run_follow(root):
-    """A node that differs from live only because a node it pins changed: it follows that node, is shown apart from
-    the real changes, and goes into live by itself once the human has fixed the node it follows."""
-    mk(root, "")
-    for path in ("feature-a", "feature-a/a1", "feature-a/a2", "feature-b", "feature-b/b1", "feature-b/b2", "feature-b/b3", "feature-b/b4"):
-        mk(root, path)
-    for path in ("feature-b/b1", "feature-b/b2", "feature-b/b4"):
-        pin(root, path, "feature-a/a1")
-    pin(root, "feature-b/b3", "feature-a/a1", "feature-a/a2")
-    gd.sync_live(root)
-    check("everything is in live to start with", [n["path"] for n in gd.walk(gd.snapshot(root)["idea"]) if n["state"] != "same"], [])
-    check("the pins are not what a node says",
-          gd.without_pins("---\nbased-on: a\nrefs: x/y@1\nscreen: wide\n---\n# T\nrefs: kept\n"), "---\nscreen: wide\n---\n# T\nrefs: kept\n")
-
-    mk(root, "feature-a/a1", items=[("core", 8, "Ý đã đổi.")])
-    n = snap_node(root, "feature-a/a1")
-    check("the node that changed lists the nodes that still pin its old hash",
-          (n["follow"], n["followers"]["ready"], n["followers"]["redo"]),
-          (False, [], ["feature-b/b1", "feature-b/b2", "feature-b/b3", "feature-b/b4"]))
-    pin(root, "feature-b/b1", "feature-a/a1")
-    mk(root, "feature-b/b2", items=[("core", 8, "Ý của b2 cũng đổi.")])
-    pin(root, "feature-b/b2", "feature-a/a1")
-    n = snap_node(root, "feature-b/b1")
-    check("read again and pinned to the new hash, nothing else changed: it follows that node and waits for it",
-          (n["passed"], n["state"], n["follow"], n["followOf"], n["followWait"]), (True, "changed", True, ["feature-a/a1"], ["feature-a/a1"]))
-    check("a node whose own content changed too is a change of its own", snap_node(root, "feature-b/b2")["follow"], False)
-    n = snap_node(root, "feature-a/a1")
-    check("the changed node shows who follows it and who is still behind",
-          (n["followers"]["ready"], n["followers"]["redo"]), (["feature-b/b1"], ["feature-b/b3", "feature-b/b4"]))
-    check("a follower is not copied while the node it follows is not in live", gd.promote_followers(root), [])
-
-    mk(root, "feature-a/a2", items=[("core", 8, "a2 cũng đổi.")])
-    pin(root, "feature-b/b3", "feature-a/a1", "feature-a/a2")
-    check("a node may follow two nodes", snap_node(root, "feature-b/b3")["followOf"], ["feature-a/a1", "feature-a/a2"])
-    written, followed = gd.promote_and_follow(root, "feature-a/a1", False)
-    check("fixing the node that changed copies its followers into live by itself, and only those",
-          (written, followed), (["feature-a/a1"], [{"path": "feature-b/b1", "of": ["feature-a/a1"]}]))
-    check("the follower is the same as live now; the one with its own change, the one behind and the one waiting for a second node stay",
-          [(snap_node(root, x)["state"], snap_node(root, x)["passed"]) for x in ("feature-b/b1", "feature-b/b2", "feature-b/b3", "feature-b/b4")],
-          [("same", True), ("changed", True), ("changed", True), ("same", False)])
-    check("the history of the follower says why it was fixed",
-          [e.get("by") for e in gd.read_history(folder(root, "idea/feature-b/b1")) if e["event"] == "promote"][-1], "tự chốt theo feature-a/a1")
-    check("the idea table was not written: the node behind still pins the old hash", snap_node(root, "feature-b/b4")["refStale"], ["feature-a/a1"])
-    check("it waits for the second node only", snap_node(root, "feature-b/b3")["followWait"], ["feature-a/a2"])
-    written, followed = gd.promote_and_follow(root, "feature-a/a2", False)
-    check("the second node fixed: the node that followed both goes too", [f["path"] for f in followed], ["feature-b/b3"])
-
-    mk(root, "feature-a", items=[("core", 8, "Feature a đổi.")])
-    check("a child behind its parent is listed under the parent", snap_node(root, "feature-a")["followers"]["redo"], ["feature-a/a1", "feature-a/a2"])
-    for child, text in (("feature-a/a1", "Ý đã đổi."), ("feature-a/a2", "a2 cũng đổi.")):
-        mk(root, child, items=[("core", 8, text)])      # the same ideas, based-on moved to the parent's new hash
-    n = snap_node(root, "feature-a/a1")
-    check("a child whose based-on alone moved follows its parent", (n["follow"], n["followOf"]), (True, ["feature-a"]))
-    written, followed = gd.promote_and_follow(root, "feature-a", False)
-    check("fixing the parent copies those children", sorted(f["path"] for f in followed), ["feature-a/a1", "feature-a/a2"])
-    check("nothing but the node with its own change and the node behind is left",
-          sorted(n["path"] for n in gd.walk(gd.snapshot(root)["idea"]) if n["state"] != "same" or not n["passed"]), ["feature-b/b2", "feature-b/b4"])
 
 
 def run_refs(root):
@@ -982,7 +938,7 @@ def run_glossary(root):
     shutil.rmtree(folder(root, "idea/glossary/child"))
     folder(root, "idea/glossary/code.json").unlink()
     for path in ("", "glossary", "feature-a"):
-        gd.promote(root, path, False)
+        promote(root, path, False)
     check("live features leave the glossary out", [k for _, k, _ in gd.live_feature_names(root)], ["feature-a"])
     check("the glossary never opens a code folder", gd.code_allowed(root, "Glossary")[0], False)
 
@@ -997,7 +953,7 @@ def run_pack(root):
     mk(root, "feature-a/a1", doc="## Thông số\nDựa trên `feature-b/b1` và `glossary#wave`.")
     add_refs(root, "feature-a/a1", f"feature-b/b1@{gd.read_data(folder(root, 'idea/feature-b/b1'))['hash']}, glossary#wave@{term_hash(root, 'wave')}")
     mk(root, "feature-a/a1/a1x")
-    gd.promote(root, "", True)
+    promote(root, "", True)
     text = gd_pack.pack(root, "alpha")
     check("pack: the code gate", "Code: ĐƯỢC CODE" in text)
     check("pack: the root as context", "## Bối cảnh: node gốc" in text)
@@ -1197,21 +1153,18 @@ def run_frames(root):
     d = folder(root, "idea/feature-a/a1/a1x/data.md")
     d.write_text(d.read_text(encoding="utf-8").replace(after, gd.read_data(folder(root, "idea/feature-b/b1/b1x"))["hash"]), encoding="utf-8")
     put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')
-    try:
-        gd.promote(root, "", True)
-        refused = ""
-    except ValueError as ex:
-        refused = str(ex)
-    check("cheat: a ui frame without the feature's cheat node blocks Chốt", "chưa có node cheat" in refused)
+    got = promote(root, "", True)
+    check("cheat: a ui frame without the feature's cheat node blocks Chốt of that node",
+          ("feature-a/a1/a1x" in got, any("chưa có node cheat" in p["text"] for p in gd.read_tree(root, "idea")[1])), (False, True))
     check("cheat: a field-only node does not ask for it",
           any("chưa có node cheat" in p["text"] for p in gd.read_tree(root, "idea")[1] if p["path"] == "feature-b/b1/b1x"), False)
     mk(root, "feature-a/cheat")
     put(root, "idea/feature-a/cheat/.frame-concept/core.frame", "kind: ui\n- panel rect x=560 y=190 w=800 h=700\n")
-    gd.promote(root, "", True)
+    promote(root, "", True)
     check("frame: a deep Chốt copies frames", folder(root, "live/feature-a/a1/a1x/.frame-concept/main.frame").is_file())
     put(root, "idea/feature-a/a1/a1x/.frame-concept/main.frame", UI_FRAME.replace("w=320 h=80", "w=320 h=100"))
     check("frame: a changed frame makes the node differ from live", snap_node(root, "feature-a/a1/a1x")["state"], "changed")
-    gd.promote(root, "feature-a/a1/a1x", False)
+    promote(root, "feature-a/a1/a1x", False)
     check("frame: a single Chốt copies frames", "h=100" in folder(root, "live/feature-a/a1/a1x/.frame-concept/main.frame").read_text(encoding="utf-8"))
     pack = gd_pack.pack(root, "Alpha")
     check("frame: gd_pack prints the frames of the branch", "### Frame (bố cục ước lượng" in pack and "home button x=980 y=750 w=320 h=100" in pack)
@@ -1282,7 +1235,7 @@ def run_styles(root):
     check("style: only at the root", any(".art-style chỉ đặt ở node gốc" in p["text"] for p in gd.read_tree(root, "idea")[1]))
     shutil.rmtree(folder(root, "idea/feature-a/.art-style"))
     mk(root, "feature-a")      # based-on the new root hash
-    gd.promote(root, "", False)
+    promote(root, "", False)
     check("style: Chốt copies the styles", folder(root, "live/.art-style/ui-flat-ref.png").is_file())
     check("style: the root is the same as live after Chốt", snap_node(root)["state"], "same")
     check("style: gd_status prints the styles", "- Style ui-flat: UI phẳng (1 ảnh tham chiếu)" in gd_status.report(root))
@@ -1298,49 +1251,38 @@ def run_held(root):
     for path in ("feature-a", "feature-a/a1", "feature-a/a1/a1x"):
         mk(root, path)      # based on the root with its style
     put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')
-    gd.promote(root, "", True)
+    promote(root, "", True)
     put(root, "idea/.art-style/ui-flat.md", "# UI phẳng\n\nPhẳng, viền dày.\n")
     folder(root, "idea/.art-style/ui-flat-old.png").unlink()
     put(root, "idea/.art-style/ui-flat-new.png", "png")
     put(root, "live/.stray/x.txt")
     held = open(folder(root, "live/feature-a/a1/a1x/data.md"), "rb")      # as Excel, a viewer or a reading session would
     try:
-        check("held: the root is promoted although a file below it is open", gd.promote(root, "", False), ["(gốc)"])
+        check("held: the root is promoted although a file below it is open", promote(root, "", False), ["(gốc)"])
         check("held: its own files and folders are the new ones; what idea dropped is gone",
               ("viền dày" in folder(root, "live/.art-style/ui-flat.md").read_text(encoding="utf-8"),
                folder(root, "live/.art-style/ui-flat-new.png").is_file(), folder(root, "live/.art-style/ui-flat-old.png").exists(), folder(root, "live/.stray").exists()), (True, True, False, False))
         check("held: the nodes below stay as they were", (folder(root, "live/feature-a/a1/a1x/data.md").is_file(),
                                                           folder(root, "live/feature-a/code.json").is_file()), (True, True))
         check("held: the root is the same as live", snap_node(root)["state"], "same")
-        mk(root, "feature-a")
-        put(root, "idea/feature-a/code.json", '{"unity": ["Alpha"]}')
-        mk(root, "feature-a/a1/a1x", doc="Chi tiết mới.")
-        check("held: a node above the open file is promoted too", gd.promote(root, "feature-a", False), ["feature-a"])
-        if os.name == "nt":
-            real = gd.SWAP_WAIT
-            gd.SWAP_WAIT = 0
-            try:
-                gd.promote(root, "feature-a", True)
-                said = ""
-            except OSError as ex:
-                said = str(ex)
-            finally:
-                gd.SWAP_WAIT = real
-            check("held: a whole branch cannot replace a folder with an open file: the reason is said, live is intact, nothing is left behind",
-                  ("đang mở file" in said, folder(root, "live/feature-a/a1/a1x/data.md").is_file(),
-                   folder(root, ".promote-new").exists(), folder(root, ".promote-old").exists()), (True, True, False, False))
+        mk(root, "feature-a/a1/a1x", doc="Chi tiết mới.", summary="Tóm tắt mới.")
+        got = gd.approve(root, "feature-a/a1/a1x")
+        check("held: the node is approved; the open file is skipped and named, the rest is written",
+              (got["approved"], ("feature-a/a1/a1x/data.md" in got["build"]["held"]) if os.name == "nt" else True,
+               "mới" in folder(root, "live/feature-a/a1/a1x/CLAUDE.md").read_text(encoding="utf-8")),
+              (["feature-a/a1/a1x"], True, True))
     finally:
         held.close()
-    check("held: with the file closed the whole branch is promoted",
-          ("feature-a/a1/a1x" in gd.promote(root, "", True), "mới" in folder(root, "live/feature-a/a1/a1x/CLAUDE.md").read_text(encoding="utf-8")),
-          (True, True))
+    check("held: with the file closed the next build writes it",
+          (gd.build_live(root)["held"], "Tóm tắt mới" in folder(root, "live/feature-a/a1/a1x/data.md").read_text(encoding="utf-8")),
+          ([], True))
 
 
 def run_diff(root):
     """What the page shows against live: new, rewritten and removed ideas, title, summary, frames, when."""
     mk(root, "", items=(("loop", 8, "Vòng lặp."), ("win", 6, "Thắng sau 10 đợt."), ("map", 7, "Một bản đồ.")))
     mk(root, "feature-shop", items=(("buy", 9, "Mua bằng xu."),))
-    gd.record_versions(root), gd.sync_live(root)
+    gd.record_versions(root), sync(root)
     node = snap_node(root)
     check("diff: a node the same as live has no change", (node["diff"]["added"], node["diff"]["rewritten"], node["diff"]["removed"],
                                                          node["diff"]["title"], node["diff"]["summary"], node["diff"]["frames"]), (0, 0, [], None, None, False))
@@ -1472,7 +1414,7 @@ def run_user_ideas(root):
     f.write_text(good.replace("\nuser: user-1", ""), encoding="utf-8")
     check("someone else drops the label: Ý CỦA NGƯỜI BỊ XOÁ", any("BỊ XOÁ" in p["text"] for p in gd.read_tree(root, "idea")[1]))
     f.write_text(good, encoding="utf-8")
-    gd.sync_live(root)
+    sync(root)
     check("live keeps the label", [x["by"] for x in gd.read_tree(root, "live")[0]["items"] if x["id"] == iid], [gd.BY_USER])
     gd.user_idea(root, "", "delete", iid)
     data = gd.read_data(folder(root, "idea"))
@@ -1492,7 +1434,7 @@ def run_human_delete(root):
     mk(root, "feature-hero/skills/skill-b")
     mk(root, "feature-hero/moves")
     mk(root, "feature-hero/moves/move-a")
-    gd.sync_live(root)
+    sync(root)
     check("set up: live has the whole branch", sorted(paths(gd.read_tree(root, "live")[0]))[-1], "feature-hero/skills/skill-b")
     before = folder(root, "idea/data.md").read_text(encoding="utf-8")
     check("a wrong part refuses everything", refused(gd.human_delete, root, [{"path": "", "id": "loop"}, {"path": "", "id": "nope"}], []))
@@ -1518,7 +1460,7 @@ def run_human_delete(root):
     mk(root, "feature-hero/moves/move-b")
     check("a new round-4 node clears it", ([p for p in gd.read_tree(root, "idea")[1] if p["path"] == "feature-hero/moves"],
                                            gd.code_allowed(root, "Hero")[0]), ([], True))
-    gd.promote(root, "feature-hero/skills", False)
+    promote(root, "feature-hero/skills", False)
     check("promote: live loses the child the proposal deleted",
           (folder(root, "live/feature-hero/skills/skill-a").exists(), folder(root, "live/feature-hero/skills/skill-b").exists()), (False, True))
     got = gd.human_delete(root, [{"path": "feature-hero/skills/skill-b", "id": "core"}], ["feature-hero/skills", "feature-hero/skills/skill-b"])
@@ -1544,8 +1486,70 @@ def run_human_delete(root):
            [p for p in gd.read_tree(root, "idea")[1] if p["path"] == "feature-hero" and "NGƯỜI" in p["text"]]), ([], True, []))
 
 
+def run_approvals(root):
+    """live is rebuilt from approved.json (người quyết 2026-11-26): an approval holds a content hash (pins left out)
+    and a copy of the content; a node is in live when approved and its parent is."""
+    gd.write_mode(root, "user")
+    mk(root, "", items=(("loop", 8, "Vòng lặp."),))
+    gd.save_review(root, "", {"loop": {"score": 8}})
+    mk(root, "feature-hero")
+    gd.save_review(root, "feature-hero", {"core": {"score": 8}})
+    mk(root, "feature-shop")
+    gd.save_review(root, "feature-shop", {"core": {"score": 8}})
+    live = lambda: paths(gd.read_tree(root, "live")[0])      # noqa: E731
+    check("user: nothing is in live before an approval", gd.build_live(root)["written"], 0)
+    check("a child cannot be approved before its parent", refused(promote, root, "feature-hero"))
+    check("Sync approves what passes, top down", (sync(root), live()), (["(gốc)", "feature-hero", "feature-shop"], ["", "feature-hero", "feature-shop"]))
+    check("approved.json holds content hashes", sorted(gd.read_approvals(root)), ["", "feature-hero", "feature-shop"])
+    check("a second build writes nothing", gd.build_live(root), {"written": 0, "removed": [], "held": []})
+    # a moved pin is no new content
+    d = folder(root, "idea/feature-hero/data.md")
+    text = d.read_text(encoding="utf-8")
+    d.write_text(text.replace("---\n", "---\nrefs: feature-shop@" + gd.read_data(folder(root, "idea/feature-shop"))["hash"] + "\n", 1), encoding="utf-8")
+    n = snap_node(root, "feature-hero")
+    check("a moved pin needs no new approval", (n["accepted"], n["toApprove"], n["state"]), (True, False, "same"))
+    gd.build_live(root)
+    check("... and live gets the new pin line on the next build", "refs: feature-shop@" in folder(root, "live/feature-hero/data.md").read_text(encoding="utf-8"))
+    # an edit not approved yet: live keeps the approved content (from the copy kept at approval)
+    mk(root, "feature-shop", items=(("core", 8, "Ý chính đã sửa."),))
+    gd.build_live(root)
+    check("an unapproved edit: live keeps the approved text", "Ý chính đã sửa" in folder(root, "live/feature-shop/data.md").read_text(encoding="utf-8"), False)
+    n = snap_node(root, "feature-shop")
+    check("... the node is changed, not accepted", (n["state"], n["accepted"]), ("changed", False))
+    gd.save_review(root, "feature-shop", {"core": {"score": 8}})
+    check("... it waits for the human", snap_node(root, "feature-shop")["toApprove"], True)
+    promote(root, "feature-shop")
+    check("... approved: live has the new text", "Ý chính đã sửa" in folder(root, "live/feature-shop/data.md").read_text(encoding="utf-8"))
+    # a node deleted from the proposal leaves live; an unapproved parent keeps its children out
+    gd.human_delete(root, [], ["feature-shop"])
+    gd.build_live(root)
+    check("a deleted node leaves live and approved.json", (live(), "feature-shop" in gd.read_approvals(root)), (["", "feature-hero"], False))
+    mk(root, "feature-hero/skills")
+    gd.save_review(root, "feature-hero/skills", {"core": {"score": 8}})
+    promote(root, "feature-hero/skills")
+    mk(root, "feature-hero", items=(("core", 8, "Ý chính."), ("more", 8, "Thêm.")))
+    gd.save_review(root, "feature-hero", {"core": {"score": 8}, "more": {"score": 8}})
+    check("the parent's edit locks its child for GD in mode user", "khác bản đã chốt" in gd.can_write_node(root, ["feature-hero", "skills"])[1])
+    check("live keeps the old parent and its approved child", live(), ["", "feature-hero", "feature-hero/skills"])
+    # Full Auto: a passing node is approved by itself
+    gd.write_mode(root, "auto")
+    mk(root, "feature-wallet")
+    got = gd.auto_approve(root)
+    check("auto: passing nodes are approved and reach live by themselves",
+          ("feature-wallet" in got["approved"], "feature-wallet" in live()), (True, True))
+    # the first run: approved.json from the old live
+    gd.approvals_path(root).unlink()
+    before = {p.relative_to(gd.table_dir(root, "live")).as_posix(): p.read_bytes()
+              for p in gd.table_dir(root, "live").rglob("*") if p.is_file()}
+    check("migration runs once", (gd.migrate_approvals(root), gd.migrate_approvals(root)), (True, False))
+    gd.build_live(root)
+    after = {p.relative_to(gd.table_dir(root, "live")).as_posix(): p.read_bytes()
+             for p in gd.table_dir(root, "live").rglob("*") if p.is_file()}
+    check("migration rebuilds exactly the old live", after == before)
+
+
 def main():
-    for case in (run_data, run_held, run_diff, run_scores, run_live_scores, run_priority, run_stage, run_progress, run_infra, run_code_names, run_flow, run_refs, run_follow, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco, run_user_ideas, run_human_delete):
+    for case in (run_data, run_held, run_diff, run_scores, run_live_scores, run_priority, run_stage, run_progress, run_infra, run_code_names, run_flow, run_refs, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco, run_user_ideas, run_human_delete, run_approvals):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

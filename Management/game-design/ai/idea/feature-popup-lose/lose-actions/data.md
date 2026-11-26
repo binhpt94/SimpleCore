@@ -1,6 +1,6 @@
 ---
-based-on: aa89ff39c089
-refs: feature-run/run-flow@8db5f61d9f6e, feature-team-select/team-memory@4a24db16dcc6
+based-on: 747e72f87525
+refs: feature-run/run-flow@45cc90c1501f, feature-team-select/team-memory@4a24db16dcc6
 ---
 # Nút của popup thua
 
@@ -9,7 +9,7 @@ Popup thua có hai nút: chơi lại (về màn chọn đội) và về màn b�
 ## Ý cốt lõi
 
 ### actions-two | AI 8 | Popup thua có đúng hai nút: chơi lại và về màn bắt đầu
-Hồi sinh thành bằng quảng cáo nằm ở `feature-popup-revive`, trước popup thua; popup thua không có nút hồi sinh.
+Thua là hết lượt; popup không có nút chơi tiếp.
 
 ### actions-replay-main | AI 7 | Nút chơi lại là nút chính, to và nổi hơn nút về màn bắt đầu
 Vòng lặp vòng 1 là thua rồi chơi lại ngay với đội khác.

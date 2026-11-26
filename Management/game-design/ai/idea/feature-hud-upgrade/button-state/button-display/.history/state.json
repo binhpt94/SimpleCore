@@ -1,5 +1,5 @@
 {
- "hash": "79f973592f0d",
+ "hash": "a56d1f8d5995",
  "items": {
   "three-things": {
    "hash": "df24c00d4a09",
@@ -10,8 +10,8 @@
    "text": "Có 4 loại hình: chân dung từng hero, biểu tượng máu thành, biểu tượng đòn tự bắn, biểu tượng kĩ năng thành\nChân dung hero là hình của đúng hero ở chỗ đó. Biểu tượng kĩ năng đại diện cho cả ba kĩ năng, không phải một kĩ năng riêng."
   },
   "bright-dim": {
-   "hash": "e483cbceb241",
-   "text": "Nút sáng khi mua được và mờ khi không mua được, đổi trong cùng 1 khung hình với lúc số dư, cấp hoặc tạm dừng đổi\n\"Mua được\" lấy từ `feature-upgrade`; nút không tự so tiền với giá."
+   "hash": "70fb5978e7dc",
+   "text": "Nút sáng khi mua được và mờ khi không mua được, đổi trong cùng 1 khung hình với lúc số dư hoặc cấp đổi\n\"Mua được\" lấy từ `feature-upgrade`; nút không tự so tiền với giá."
   },
   "tap-once": {
    "hash": "f2445b86f3bb",

@@ -1,6 +1,6 @@
 ---
 based-on: 4a9d06c74198
-refs: feature-upgrade/upgrade-list/item-set@fd6c29c2b1b5, feature-hud-upgrade/button-state/button-display@79f973592f0d, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+refs: feature-upgrade/upgrade-list/item-set@fd6c29c2b1b5, feature-hud-upgrade/button-state/button-display@a56d1f8d5995, feature-hud/hud-layout/layout-spec@aa79f655e44b
 ---
 # Nút trên thanh nâng cấp
 
@@ -20,8 +20,8 @@ Máu: máu thành. Sức đánh: đòn tự bắn của thành. Kĩ năng: cả 
 ### group-gap | AI 7 | Giữa 2 nhóm có một khoảng trống rộng hơn khoảng cách giữa hai nút trong cùng nhóm
 Liếc là thấy hai nhóm; kiểm bằng ảnh chụp màn hình. Độ rộng cụ thể do người làm giao diện quyết.
 
-### show-when | AI 8 | Thanh hiện từ khung hình đầu của trận tới khi popup kết thúc lượt hiện, kể cả lúc nghỉ giữa đợt và lúc tạm dừng, 0 lần ẩn giữa chừng
-Lúc tạm dừng thanh vẫn hiện, các nút ở trạng thái không mua được.
+### show-when | AI 8 | Thanh hiện từ khung hình đầu của trận tới khi popup kết thúc lượt hiện, kể cả lúc nghỉ giữa đợt, 0 lần ẩn giữa chừng
+
 
 ### no-cover | AI 7 | Thanh không che dải đất chiến trường: 0 phần của dải đất nằm dưới thanh
 Kiểm bằng ảnh chụp màn hình ở tỉ lệ 16:9 và 20:9.

@@ -1,5 +1,5 @@
 {
- "hash": "66f0417d12da",
+ "hash": "32933d60f1d0",
  "items": {
   "switch-instant": {
    "hash": "26720a874124",
@@ -22,8 +22,8 @@
    "text": "Mỗi lần scene Game sẵn sàng, màn bắt đầu hiện đúng một lần; báo sẵn sàng lặp lại bị bỏ"
   },
   "back-key-map": {
-   "hash": "4fc6dba6549c",
-   "text": "Nút quay lại của máy: ở màn chọn đội như \"Quay lại\"; ở màn bắt đầu không làm gì\nTrong màn trận giữ luật của `feature-run` (như bấm tạm dừng)."
+   "hash": "f2ab45e12cad",
+   "text": "Nút quay lại của máy: ở màn chọn đội như \"Quay lại\"; ở màn bắt đầu không làm gì\nTrong màn trận giữ luật của `feature-run`."
   }
  }
 }

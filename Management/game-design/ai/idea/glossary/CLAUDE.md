@@ -11,7 +11,7 @@ Không phải feature: không `code.json`, không node con, không `priority.jso
   - nhiều node dùng và từng định nghĩa khác nhau;
   - khái niệm riêng của game, người lạ không đoán được.
 - **Từ giữ và lí do:**
-  - Chốt một nghĩa giữa hai từ dễ lẫn: `run` (lượt khác trận), `paused` và `wave-gap` (trận đứng yên khác trận vẫn chạy), `active-wave` (lúc thở không có đợt đang đánh), `wave-clear` (ra hết và không còn con nào), `down` và `defeated` (gục của hero khác bị hạ của quái), `reach-castle` (trong tầm, không phải chạm), `score` (số đợt đã dọn, khác số đợt HUD hiện), `scene` và `screen`, `castle-skill` (khác đòn tự bắn), `level`, `range`, `leave-game`.
+  - Chốt một nghĩa giữa hai từ dễ lẫn: `run` (lượt khác trận), `wave-gap` (lúc thở trận vẫn chạy), `active-wave` (lúc thở không có đợt đang đánh), `wave-clear` (ra hết và không còn con nào), `down` và `defeated` (gục của hero khác bị hạ của quái), `reach-castle` (trong tầm, không phải chạm), `score` (số đợt đã dọn, khác số đợt HUD hiện), `scene` và `screen`, `castle-skill` (khác đòn tự bắn), `level`, `range`, `leave-game`.
   - Từng định nghĩa khác nhau ở nhiều node: `fighting-style`, `target`.
   - Khái niệm riêng của game: `battlefield`, `castle-zone`, `remembered-team`, `base-stats`, `break-wave`, `counter`, `mono-team`, `wave`, `owner-feature`, `participant`, `caller`, `popup-id`, `backdrop`.
 - **Từ bỏ, theo nhóm:**
@@ -31,6 +31,7 @@ Không phải feature: không `code.json`, không node con, không `priority.jso
 - **Nghĩa chỉ nói từ đó là gì, không nói nó vận hành ra sao.** Chi tiết chỉ để ví dụ hoặc phân biệt với từ gần nghĩa.
 - **Chi tiết của ý không nhắc đường dẫn node.** Glossary không khai refs; mọi nghĩa tự đứng được.
 - **Node không còn từ nào thì mục "Định nghĩa" ghi "Không dùng thuật ngữ riêng."**
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ từ `paused` khỏi danh sách từ giữ.
 
 ## Chưa rõ
 - Các node vòng 4 có định nghĩa riêng dạng `- **Từ**: nghĩa` chưa được rà theo tiêu chí này; rà khi sửa các node đó.

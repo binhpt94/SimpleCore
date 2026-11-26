@@ -21,7 +21,7 @@ Ba cột `idea`, `prototype`, `full` của bảng `LayerParams`. Ở PROTOTYPE:
 ## Trường hợp biên
 - **Màn rộng hơn 21:9:** hở hai mép ngoài ±21u; không hỗ trợ tỉ lệ đó. Màn 4:3 hẹp hơn: thấy ít hơn ±16u, nền vẫn phủ.
 - **Unit đứng trên decor:** decor vẽ sau, unit che decor; không có va chạm.
-- **Tạm dừng, thành bị phá, hồi sinh:** nền không đổi gì.
+- **Thành bị phá:** nền không đổi gì.
 - **Rời màn trận rồi vào lại:** nền dựng lại như cũ (một bản đồ).
 
 ## Đã tự quyết
@@ -34,6 +34,7 @@ Ba cột `idea`, `prototype`, `full` của bảng `LayerParams`. Ở PROTOTYPE:
   - Decor đứng thuộc lớp cảnh xa: vẽ sau dải cảnh xa trước, trước dải đất. Đã loại: đặt cờ, hàng rào trên dải đất (dễ đọc là vật cản trên đường đi, trái `field-decor-flat`).
   - Mọi số PROTOTYPE mới là dự kiến; chỉnh khi xem art @Codex trên khung trận.
 - **Hai đường HUD trên frame chỉ là nét đo.** Số px của HUD vẫn là của `feature-hud`; frame ghi lại để kiểm nền không bị che sai chỗ.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ tạm dừng và hồi sinh thành khỏi trường hợp biên của nền.
 
 ## Chưa rõ
 - Không có điểm chặn.

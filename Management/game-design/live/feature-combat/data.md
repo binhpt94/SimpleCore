@@ -1,5 +1,5 @@
 ---
-based-on: 6181a7c21bf0
+based-on: ca84fa282d14
 node-by: gpt@r2-all-2
 by: combat-own-code=gpt@r2-1#combat-co-code-rieng, combat-every-hit=gpt@r2-1#moi-don-qua-giao-chien, combat-same-moment=gpt@r2-1#cung-buoc-mo-phong, attacker-picks=gpt@r2-1#ben-ra-don-chon, attacker-locks-damage=gpt@r2-1#chot-sat-thuong-luc-ra-don, state-before-hp=gpt@r2-1#trang-thai-truoc-khi-tru-mau, sum-per-target=gpt@r2-1#cong-sat-thuong-theo-ben-trung, combat-sides-own-hp=gpt@r2-1#chu-so-huu-tru-mau, owner-reports-once=gpt@r2-1#chu-so-huu-bao-het-mau, combat-report-after=gpt@r2-1#bao-sau-khi-tru-mau-xong, combat-tick-done=gpt@r2-1#moc-da-bao-du-ket-qua
 ---

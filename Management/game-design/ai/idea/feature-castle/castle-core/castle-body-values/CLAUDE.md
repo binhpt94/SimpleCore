@@ -19,9 +19,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Điểm xuất phát chỗ 1, 2, 3 | -1.5 / +1.5 / -1.5 | x (u) | Chia hai bên, không chồng toàn bộ |
 | Nháy khi bị đánh | 0.1 | s | Đủ thấy, không nhấp nháy liên tục khó chịu |
 | Thu nhỏ khi bị phá | 0.5 | s | Cho người chơi thấy khoảnh khắc thua trước khi `feature-run` báo |
-| Máu khi hồi sinh | 30% máu tối đa lúc đó, làm tròn lên | máu | Người chọn (2026-11-24); 1000 máu tối đa → 300 |
-| Số lần hồi sinh mỗi lượt | 1 | lần | Giữ nghĩa của thua và kỉ lục |
-| Hiện lại khi hồi sinh | phóng từ 0 lên đủ cỡ trong 0.5 | s | Ngược với lúc bị phá, cùng thời gian |
 
 Cân bằng dự kiến: đợt 10 có 26 quái, Lính 40×1.9=76 máu, 5×1.9=9.5 sát thương/1.0s. 10 Lính đứng đánh thành cùng lúc trừ 95 máu/s, thành 1000 máu trụ khoảng 10.5s: đủ để người chơi kịp bấm Sấm sét và mua máu.
 
@@ -32,17 +29,12 @@ Cân bằng dự kiến: đợt 10 có 26 quái, Lính 40×1.9=76 máu, 5×1.9=9
 | Hình thành | 1 sprite gen bằng AI | 1 sprite, có hình khi máu dưới 50% | đủ hình theo mức máu (100%, 50%, 25%) |
 | Phản hồi bị đánh | nháy 0.1s | nháy 0.1s + rung nhẹ 0.1s | đủ hiệu ứng và âm thanh |
 | Phản hồi bị phá | thu nhỏ còn 0 trong 0.5s | như IDEA | hiệu ứng sụp đổ riêng |
-| Hồi sinh 30% máu | không có (chưa có quảng cáo); bị phá là thua | có, mỗi lượt 1 lần | có, mỗi lượt 1 lần |
 
 ## Trường hợp biên
 - Nhiều quái đánh trúng cùng một khung hình: trừ lần lượt; lần đưa máu về ≤0 là lần báo bị phá; các lần sau bị bỏ qua.
 - Nâng máu đúng lúc máu về 0 cùng khung hình: bị phá xử lý trước; đã bị phá thì không mua được nữa (`feature-run` dừng trận).
 - Máu hiện tại có số lẻ (sát thương quái nhân hệ số đợt): giữ số thực; còn 0.4 máu thì thành chưa bị phá. Cách hiện số là việc của `feature-hud` (làm tròn xuống, nên hiện "0/1000" và thanh còn một vệt).
-- Tạm dừng: thành không nhận sát thương vì mọi quái đứng yên; hiệu ứng nháy đang chạy cũng dừng.
 - Hero và đòn của chính thành, kĩ năng thành không bao giờ trừ máu thành.
-- Hồi sinh mà quái vẫn đứng sát thành: không có lúc bất tử; quái đánh lại ngay khi trận chạy tiếp. 300 máu chịu được khoảng 3s trước 10 Lính đợt 10, đủ để bấm Sấm sét. Đã loại: bất tử vài giây (thêm luật, che mất áp lực).
-- Hồi sinh rồi bị phá lần hai: báo `feature-run` thêm 1 lần; lần này là thua.
-- **Hồi sinh: thành phóng từ 0 lên đủ cỡ trong 0.5 giây; máu đặt 30% máu tối đa ngay đầu 0.5 giây đó.** Ngược với lúc bị phá (thu nhỏ còn 0 trong 0.5 giây). `feature-run` chờ thành hiện xong rồi mới cho trận chạy tiếp. (Chuyển từ ý revive-anim của nhánh thứ tự hồi sinh ở popup hồi sinh, 2026-11-26: việc này do thành làm.)
 
 ## Đã tự quyết
 - **Mọi tầm tính từ mép thành.** Khớp bộ số chung ("tầm 6u tính từ mép thành"). Đã loại: tính từ tâm.
@@ -51,6 +43,7 @@ Cân bằng dự kiến: đợt 10 có 26 quái, Lính 40×1.9=76 máu, 5×1.9=9
 - **Bị phá chỉ báo 1 lần.** Tránh `feature-run` nhận hai lần thua.
 
 - **Frame `castle.frame` (2026-11-23).** Node này giữ các hằng chung của chiến trường: `castle-left`, `castle-right`, `castle-w`, `castle-h`, `screen-left`, `screen-right`; node khác `use` lại. Số tính ra trong frame: hộp hero ở chỗ 1/3 có x=-2u = tâm -1.5u − nửa rộng 0.5u; chỗ 2 có x=1u = +1.5u − 0.5u. Hộp hero chồng lên thành (cờ `overlap`) là đúng ý: điểm xuất phát nằm ở mép thành.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ hồi sinh thành (máu 30%, 1 lần mỗi lượt, hiện lại 0.5s) và trường hợp biên tạm dừng; thành bị phá là thua.
 
 ## Chưa rõ
 - 1000 máu có thể dư ở đợt đầu (Lính đợt 1 cần 200s một mình): giữ theo bộ số chung, đề xuất chỉnh sau chơi thử xuống 600-800 nếu đợt 1-5 không thấy áp lực.

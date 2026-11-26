@@ -1,6 +1,6 @@
 ---
-based-on: d1732f41e794
-refs: glossary#sim-step@ea2316690640, glossary#paused@89f75d658689, feature-combat/combat-tick/tick-values@0b863ec78d17
+based-on: 83ee7a4052d1
+refs: glossary#sim-step@ea2316690640, feature-combat/combat-tick/tick-values@aa74e1a2c37b
 ---
 # Bước nhịp và cách chạy
 
@@ -21,13 +21,13 @@ Feature không tự đo thời gian; khoảng thời gian do nhịp đưa.
 Cùng thứ tự thì cùng kết quả. Đợt quái thả quái trước, các bên ra đòn sau, giao chiến phân xử sau các bên ra đòn, lượt xét thua sau cùng.
 
 ### input-on-step | AI 7 | Thao tác của người chơi được áp vào đầu bước nhịp kế tiếp và ghi theo số bước
-Bấm kĩ năng, mua nâng cấp, tạm dừng. Ghi theo số bước thì chơi lại đúng chuỗi thao tác cho cùng kết quả.
+Bấm kĩ năng, mua nâng cấp. Ghi theo số bước thì chơi lại đúng chuỗi thao tác cho cùng kết quả.
 
 ### input-queue | AI 7 | Nhịp giữ hàng chờ thao tác chung, áp ở đầu bước kế tiếp đúng thứ tự đã đưa vào
-Một nơi duy nhất giữ bản ghi thao tác theo số bước. Bên dùng: mua nâng cấp, bấm kĩ năng thành, tạm dừng và tiếp tục, kết quả hồi sinh từ popup (danh sách ở `CLAUDE.md`).
+Một nơi duy nhất giữ bản ghi thao tác theo số bước. Bên dùng: mua nâng cấp, bấm kĩ năng thành (danh sách ở `CLAUDE.md`).
 
-### input-while-paused | AI 7 | Thao tác đưa vào lúc tạm dừng vẫn áp ở bước kế tiếp; feature nhận tự từ chối nếu luật của nó cấm khi đang tạm dừng
-Ví dụ mua nâng cấp lúc tạm dừng bị `feature-upgrade` từ chối theo luật tạm dừng của `feature-run`.
+### input-while-paused | AI 7 | Thao tác đưa vào lúc trận dừng vẫn áp ở bước kế tiếp; feature nhận tự từ chối nếu luật của nó cấm khi trận dừng
+Ví dụ mua nâng cấp sau khi thành bị phá bị `feature-upgrade` từ chối.
 
 ### clock-time | AI 7 | Mọi chờ giờ của gameplay tính bằng đồng hồ gameplay của nhịp, không theo giờ thật
 Hồi chiêu, hồi sinh, lúc thở, lịch thả quái, chờ trước popup thua đều đếm theo các bước mà lượt cho trận chạy.
@@ -35,8 +35,8 @@ Hồi chiêu, hồi sinh, lúc thở, lịch thả quái, chờ trước popup t
 ### view-reads-latest | AI 7 | Màn hình vẽ theo khung hình từ trạng thái mới nhất của gameplay; phần nhìn không chạy luật
 Phần nhìn chỉ đọc, không đổi trạng thái gameplay.
 
-### pause-keeps-clock | AI 7 | Lúc tạm dừng bước nhịp vẫn chạy để áp hàng chờ, còn đồng hồ gameplay đứng yên
-Feature tự đứng yên theo trạng thái tạm dừng. Luật tạm dừng giữ nguyên ở `feature-run`; nhịp không dùng cách làm chậm thời gian của engine.
+### pause-keeps-clock | AI 7 | Lúc trận dừng bước nhịp vẫn chạy để áp hàng chờ, còn đồng hồ gameplay đứng yên
+Feature tự đứng yên theo trạng thái trận của `feature-run`; nhịp không dùng cách làm chậm thời gian của engine.
 
 ### dev-fast-forward | AI 7 | Bản dev cho tester tua nhanh: tăng số bước mỗi khung, chạy ngay nhiều bước, đóng băng, bước từng bước
 Bản phát hành không có tua.

@@ -1,0 +1,16 @@
+kind: field
+title: Điểm ra quái x=±17u, ngoài mép màn 1u
+view: x=-18u..18u y=-1u..6u
+let spawn-left = -17u
+let spawn-right = 17u
+use screen-left = feature-castle/castle-core/castle-body-values#screen-left
+use screen-right = feature-castle/castle-core/castle-body-values#screen-right
+use castle-left = feature-castle/castle-core/castle-body-values#castle-left
+use castle-w = feature-castle/castle-core/castle-body-values#castle-w
+use castle-h = feature-castle/castle-core/castle-body-values#castle-h
+- ground   line  from=-18u,0 to=18u,0 label="mặt đất"
+- castle   rect  x=castle-left y=0 w=castle-w h=castle-h label="Thành"
+- scr-l    line  from=screen-left,0 to=screen-left,6u label="mép màn trái" overlap
+- scr-r    line  from=screen-right,0 to=screen-right,6u label="mép màn phải" overlap
+- in-l     arrow from=spawn-left,1u to=-2u,1u label="quái ra trái, đi vào thành"
+- in-r     arrow from=spawn-right,1u to=2u,1u label="quái ra phải, đi vào thành"

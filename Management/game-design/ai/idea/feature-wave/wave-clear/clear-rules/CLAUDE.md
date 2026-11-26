@@ -23,15 +23,15 @@ Ví dụ: đợt 1: 25 xu; đợt 5: 45 xu; đợt 10: 70 xu; đợt 15: 95 xu; 
 | Báo dọn sạch cho `feature-hud` | không bắt buộc | có | có |
 
 ## Trường hợp biên
-- **Thành bị phá cùng lúc con cuối bị hạ** (ví dụ con cuối đánh thành rồi chết vì Sấm sét trong cùng một bước cập nhật): đợt chưa được tính; tin dọn sạch do `feature-run` giữ. Lượt chốt thua (không hồi sinh): không thưởng, không điểm. Hồi sinh thành công: `feature-run` thả tin, feature này cộng thưởng dọn đợt và bắt đầu lúc thở 3 giây như mọi lần dọn sạch. (Sửa 2026-11-26 khi chuyển ý held-clear từ nhánh thứ tự hồi sinh ở popup hồi sinh về lượt chơi; ý đó nay ở `feature-run/run-flow/flow-rules`.)
+- **Thành bị phá cùng lúc con cuối bị hạ** (ví dụ con cuối đánh thành rồi chết vì Sấm sét trong cùng một bước cập nhật): đợt chưa được tính; tin dọn sạch bị `feature-run` bỏ (ý held-clear ở `feature-run/run-flow/flow-rules`). Không thưởng, không điểm.
 - **Con cuối bị hạ trước khi ra hết** (đang hoãn vì đủ 40 hoặc còn mục chưa tới nhịp): chưa dọn sạch, chờ mục cuối ra và bị hạ.
 - **Đạn của quái bắn xa còn bay sau khi đợt đã dọn sạch:** vẫn gây sát thương. Nếu nó phá thành trong lúc thở thì lượt thua, nhưng đợt vừa dọn vẫn được tính (điểm và thưởng đã cộng).
-- **Tạm dừng đúng lúc dọn sạch:** việc cộng thưởng, báo điểm đã xảy ra trước khi dừng; đồng hồ lúc thở bắt đầu đếm khi bỏ tạm dừng.
 - **Quái bị hạ khi còn ngoài màn hình** (ví dụ ở x = ±16.5u bởi Cung thủ): vẫn tính, vẫn cho tiền.
 
 ## Đã tự quyết
 - **Thua xét trước dọn sạch.** Theo luật node cha: thành bị phá thì đợt đang đánh không được tính. Đã loại: dọn sạch xét trước (người chơi được điểm dù đã thua).
 - **Thưởng dọn đợt tăng tuyến tính 5 xu mỗi đợt.** Theo bộ số chuẩn; tăng chậm hơn giá nâng cấp (tăng theo hệ số mũ).
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Tin dọn sạch cùng khung hình thành bị phá bị bỏ, không còn giữ chờ để thả khi hồi sinh; bỏ trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - Không có điểm chặn.

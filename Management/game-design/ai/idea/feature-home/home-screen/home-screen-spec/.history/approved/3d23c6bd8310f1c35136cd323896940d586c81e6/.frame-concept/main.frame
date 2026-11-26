@@ -1,0 +1,17 @@
+kind: ui
+title: Màn bắt đầu
+use tap = feature-hud/hud-layout/layout-spec#tap
+let title-x = 360
+let title-y = 200
+let title-w = 1200
+let title-h = 160
+let record-x = 660
+let record-y = 420
+let record-w = 600
+let record-h = 80
+let play-x = 760
+let play-y = 620
+let play-w = 400
+- title  label  x=title-x y=title-y w=title-w h=title-h label="Thủ thành anh hùng"
+- record label  x=record-x y=record-y w=record-w h=record-h label="Kỉ lục: N đợt"
+- play   button x=play-x y=play-y w=play-w h=tap label="Chơi"

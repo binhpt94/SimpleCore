@@ -1,0 +1,19 @@
+kind: field
+title: Thân thành và điểm xuất phát của hero
+view: x=-17u..17u y=-1u..6u
+let castle-left = -1.5u
+let castle-right = 1.5u
+let castle-w = 3u
+let castle-h = 4u
+let screen-left = -16u
+let screen-right = 16u
+use hero-w = feature-hero/hero-list/hero-roster-values#hero-w
+use hero-h = feature-hero/hero-list/hero-roster-values#hero-h
+- ground   line   from=-17u,0 to=17u,0 label="mặt đất y=0"
+- castle   rect   x=castle-left y=0 w=castle-w h=castle-h label="Thành (tâm x=0)"
+- edge-l   line   from=castle-left,0 to=castle-left,5u label="mép trái x=-1.5u" overlap
+- edge-r   line   from=castle-right,0 to=castle-right,5u label="mép phải x=+1.5u" overlap
+- slot-13  rect   x=-2u y=0 w=hero-w h=hero-h label="chỗ 1 và 3 (tâm x=-1.5u)" overlap
+- slot-2   rect   x=1u y=0 w=hero-w h=hero-h label="chỗ 2 (tâm x=+1.5u)" overlap
+- scr-l    line   from=screen-left,0 to=screen-left,6u label="mép màn trái" overlap
+- scr-r    line   from=screen-right,0 to=screen-right,6u label="mép màn phải" overlap

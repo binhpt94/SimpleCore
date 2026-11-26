@@ -21,9 +21,10 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Không có popup nào mở thì lớp popup không chặn gì.
 
 ## Đã tự quyết
-- **Xếp chồng thay vì một popup một lúc.** Quy tắc chung đơn giản, không cần hàng chờ; popup thua và tạm dừng không cần biết nhau. Đã loại: một popup một lúc có hàng chờ; popup mới thay popup cũ.
+- **Xếp chồng thay vì một popup một lúc.** Quy tắc chung đơn giản, không cần hàng chờ. Đã loại: một popup một lúc có hàng chờ; popup mới thay popup cũ.
 - **Nền che làm tối.** Người chơi phổ thông thấy rõ đang có popup. Đã loại: nền trong suốt.
 - **Popup trên cả HUD.** Popup là thứ cần người chơi chọn ngay; HUD không được đè.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ popup tạm dừng khỏi lí do xếp chồng.
 
 ## Chưa rõ
 - Độ tối của nền che: vòng 4.

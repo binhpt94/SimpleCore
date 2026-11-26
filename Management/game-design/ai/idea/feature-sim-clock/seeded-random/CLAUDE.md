@@ -18,7 +18,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Luật cơ bản
 - Không feature gameplay nào gọi bộ ngẫu nhiên của engine hay tự tạo bộ ngẫu nhiên.
 - Đầu lượt: đặt lại mọi dòng từ seed của lượt.
-- Hồi sinh thành trong cùng lượt: các dòng chạy tiếp từ vị trí bốc hiện tại, không đặt lại.
 - Huỷ trận: các dòng của lượt bị dọn.
 - Chạy lại ra cùng kết quả còn cần cùng đội, config và độ dài từng bước (ý `tester-fast-run` của node feature).
 - Phần chỉ để nhìn (hiệu ứng) dùng ngẫu nhiên riêng, không lấy từ các dòng này, để không làm lệch gameplay.
@@ -27,6 +26,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Dòng theo tên feature** (@CodeLead đề nghị). Đã loại: một dòng chung (thêm một lần bốc ở đâu cũng làm lệch cả trận).
 - **Đặt lại mỗi lượt** (@CodeLead đề nghị). Chơi lại một lượt từ seed của nó không phụ thuộc các lượt trước.
 - **Hiệu ứng không dùng dòng của gameplay.** Hiệu ứng chạy theo khung hình; nếu lấy chung thì số khung khác nhau giữa các máy sẽ làm lệch thứ tự quái.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ luật hồi sinh thành trong cùng lượt.
 
 ## Chưa rõ
 - Không có điểm chặn. Seed lấy từ đâu ở bản dev và bản phát hành: vòng 4.

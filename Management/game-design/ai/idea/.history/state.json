@@ -1,5 +1,5 @@
 {
- "hash": "6181a7c21bf0",
+ "hash": "ca84fa282d14",
  "items": {
   "target-player": {
    "hash": "27c4f0c553f0",
@@ -49,10 +49,6 @@
    "hash": "6564b55b86f1",
    "text": "Thua khi thành bị phá"
   },
-  "ad-revive": {
-   "hash": "4cb8fecd1ccb",
-   "text": "Thành bị phá lần đầu trong lượt thì người chơi được chọn xem quảng cáo để hồi sinh thành và chơi tiếp\nMỗi lượt một lần; thành hồi sinh với một phần máu, quái và đợt giữ nguyên. Không xem thì thua như thường. Người yêu cầu (2026-11-24)."
-  },
   "castle-damage-carries": {
    "hash": "0ba827481b84",
    "text": "Sang đợt kế tiếp, thành giữ nguyên mức hư hại\nTrụ qua một đợt mà ít tổn thất thì trụ được lâu hơn; giữ thành trong đợt này còn có giá trị sau khi đợt kết thúc."
@@ -86,16 +82,12 @@
    "text": "Viền ngoài của vật thể và nút là sắc đậm hơn của chính màu thân sát viền\nNút xanh và khối hồng giữ được màu riêng ở rìa. Đã loại: viền đen chung."
   },
   "art-popup-content-from-node": {
-   "hash": "f3749e205d16",
-   "text": "Popup lấy hình thức từ ảnh tham chiếu, lấy nội dung (chữ, số, nút) từ thiết kế của chính popup đó\nẢnh có ô thưởng và nút hồi sinh trong popup thua; game này để nội dung popup thua và popup hồi sinh theo node của từng popup."
+   "hash": "ae4b5110360f",
+   "text": "Popup lấy hình thức từ ảnh tham chiếu, lấy nội dung (chữ, số, nút) từ thiết kế của chính popup đó\nẢnh có ô thưởng và nút hồi sinh trong popup thua; game này để nội dung popup thua theo node của popup đó."
   },
   "art-ui-text-font": {
    "hash": "eadc2d8c7a07",
    "text": "Chữ và số do game hiển thị bằng một font tròn có đủ dấu tiếng Việt; ảnh và SVG để trống chỗ chữ\nHai công cụ dùng chung khung, ruy băng mà chữ vẫn đồng nhất; số thay đổi trong trận và dấu tiếng Việt đọc rõ ở kích thước thật."
-  },
-  "art-ad-button-pink": {
-   "hash": "5f995c5e9eb2",
-   "text": "Nút xem quảng cáo luôn màu hồng, kể cả khi là nút chính của popup\nChốt màu ưu tiên cho popup hồi sinh: nhận diện quảng cáo đứng trên quy tắc nút chính màu xanh lá."
   },
   "art-hud-text-contrast": {
    "hash": "d3f599d6962b",

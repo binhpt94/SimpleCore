@@ -1,5 +1,5 @@
 {
- "hash": "8bc45d0edc8d",
+ "hash": "d5a006594b09",
  "items": {
   "skill-list": {
    "hash": "ed8dfe706164",
@@ -22,8 +22,8 @@
    "text": "Mỗi kĩ năng có hồi chiêu riêng; kĩ năng mạnh hơn thì hồi lâu hơn\nVào trận mọi kĩ năng đều sẵn sàng. Kĩ năng không tốn tiền. Đã loại: dùng kĩ năng tốn tiền (tranh tiền với nâng cấp làm người chơi ngại bấm)."
   },
   "skill-press-instant": {
-   "hash": "fab0beb9efbc",
-   "text": "Bấm là dùng ngay, không chọn vị trí, không chọn mục tiêu\nHợp thao tác một chạm trên điện thoại. Lúc tạm dừng không bấm được. Đã loại: kéo thả để nhắm vùng."
+   "hash": "a9d82f94265a",
+   "text": "Bấm là dùng ngay, không chọn vị trí, không chọn mục tiêu\nHợp thao tác một chạm trên điện thoại. Đã loại: kéo thả để nhắm vùng."
   }
  }
 }

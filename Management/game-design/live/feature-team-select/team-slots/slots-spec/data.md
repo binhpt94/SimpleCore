@@ -1,6 +1,6 @@
 ---
 based-on: c34032308bdd
-refs: feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-team-select/hero-cards/card-spec@786f5ada38ab, feature-run/run-start@d386ccae4d88, feature-hero/hero-list@1bf8998ab5a4, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c, feature-game-flow/flow-routes/routes-values@66f0417d12da
+refs: feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-team-select/hero-cards/card-spec@786f5ada38ab, feature-run/run-start@31cb7598b529, feature-hero/hero-list@1bf8998ab5a4, feature-hud/hud-layout/layout-spec@aa79f655e44b, feature-game-flow/flow-routes/routes-values@32933d60f1d0
 ---
 # Ba chỗ trong đội và nút vào trận
 

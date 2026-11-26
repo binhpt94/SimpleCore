@@ -1,13 +1,9 @@
 {
- "hash": "7100f997d2a8",
+ "hash": "411319037ef3",
  "items": {
   "castle-health": {
    "hash": "eaa0aaec6ac8",
    "text": "Thành là thứ phải giữ: quái tới được thì đánh thành, thành bị phá là thua\nBáo cho `feature-run` khi thành bị phá."
-  },
-  "castle-revive": {
-   "hash": "38c378ab57ab",
-   "text": "Được hồi sinh thì thành đứng lại với một phần máu tối đa, cấp nâng cấp giữ nguyên\nHồi sinh là việc lượt chơi quyết sau khi người chơi xem xong quảng cáo; thành chỉ lấy lại máu."
   },
   "castle-damage-between-waves": {
    "hash": "1d7ac450b250",

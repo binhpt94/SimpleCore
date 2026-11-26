@@ -26,13 +26,13 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Trường hợp biên
 - **Kỉ lục rất lớn (ví dụ 999):** hiện đủ số, không rút gọn.
-- **Về màn bắt đầu bằng bỏ lượt và vừa phá kỉ lục:** dòng kỉ lục hiện số mới; màn này không báo "kỉ lục mới" (chỉ popup thua báo).
 - **Nút quay lại của máy:** không làm gì (`feature-run/run-flow/flow-rules`).
 - **Màn hiện lại nhiều lần trong một lần mở game:** nút "Chơi" lại nhận một lần chạm mới mỗi lần màn hiện.
 
 ## Đã tự quyết
 - **Chữ "Kỉ lục: N đợt" kể cả khi N = 0.** Người chơi mới thấy luôn mục tiêu là số đợt. Đã loại: ẩn dòng kỉ lục khi chưa chơi.
 - **Không báo kỉ lục mới ở màn này.** Tránh trùng với `feature-popup-lose`.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên về màn bắt đầu bằng bỏ lượt.
 
 ## Chưa rõ
 - Tên game chính thức chưa có; dùng tên tạm.

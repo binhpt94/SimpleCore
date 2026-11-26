@@ -1,7 +1,7 @@
 ---
-based-on: 6181a7c21bf0
-by: doi-hinh-xuyen-luot=gpt@r2-1#doi-hinh-xuyen-luot, hero-roles=gpt@r2-1#khac-biet-khi-tu-danh, combat-arbiter=gpt@r2-3#tach-phan-xu-giao-chien, enemy-picks-target=gpt@r2-3#quai-tu-chon-muc-tieu, enemy-prefers-blocker=gpt@r2-3#quai-uu-tien-hero-chan, castle-picks-target=gpt@r2-3#thanh-tu-chon-muc-tieu, attacker-picks-hits=gpt@r2-3#nguon-xac-dinh-ben-trung, attacker-sets-damage=gpt@r2-3#nguon-xac-dinh-sat-thuong, same-tick-snapshot=gpt@r2-3#cung-nhip-cung-co-hieu-luc, same-tick-sum=gpt@r2-3#cong-sat-thuong-cung-nhip, owner-applies-hp=gpt@r2-3#ben-trung-tu-tru-mau, report-after-hp=gpt@r2-3#bao-ket-qua-sau-khi-tru-mau, shared-target-word=gpt@r2-3#muc-tieu-dung-chung
-gpt-dropped: r2-3#tinh-dot-cuoi-khi-thanh-vo=last-wave-counts, r2-3#chu-so-huu-xac-nhan-het-mau=owner-reports-zero
+based-on: ca84fa282d14
+by: doi-hinh-xuyen-luot=gpt@r2-1#doi-hinh-xuyen-luot, hero-roles=gpt@r2-1#khac-biet-khi-tu-danh, combat-arbiter=gpt@r2-3#tach-phan-xu-giao-chien, enemy-picks-target=gpt@r2-3#quai-tu-chon-muc-tieu, enemy-prefers-blocker=gpt@r2-3#quai-uu-tien-hero-chan, castle-picks-target=gpt@r2-3#thanh-tu-chon-muc-tieu, attacker-picks-hits=gpt@r2-3#nguon-xac-dinh-ben-trung, attacker-sets-damage=gpt@r2-3#nguon-xac-dinh-sat-thuong, same-tick-snapshot=gpt@r2-3#cung-nhip-cung-co-hieu-luc, same-tick-sum=gpt@r2-3#cong-sat-thuong-cung-nhip, report-after-hp=gpt@r2-3#bao-ket-qua-sau-khi-tru-mau, shared-target-word=gpt@r2-3#muc-tieu-dung-chung
+gpt-dropped: r2-3#tinh-dot-cuoi-khi-thanh-vo=last-wave-counts, r2-3#chu-so-huu-xac-nhan-het-mau=owner-reports-zero, r2-3#ben-trung-tu-tru-mau=owner-applies-hp
 user: user-1, user-2, user-3
 ---
 # Hero
@@ -53,8 +53,6 @@ Hai bên cùng đủ điều kiện ra đòn thì vẫn hạ được nhau; hero
 
 ### same-tick-sum | AI 5 | Sát thương của các đòn hợp lệ cùng nhịp cộng thành một khoản cho mỗi bên trúng
 Hero và thành cùng đánh một con quái thì quái nhận tổng một lần.
-
-### owner-applies-hp | AI 7 | Máu hiện tại của hero, quái và thành chỉ do feature sở hữu bên đó cập nhật
 
 ### report-after-hp | AI 5 | Kết quả của một nhịp chỉ được báo sau khi mọi bên trúng đã trừ máu xong
 Chốt lượt hay đợt dựa trên trạng thái đã cập nhật đủ.

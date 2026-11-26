@@ -1,5 +1,5 @@
 ---
-based-on: 6181a7c21bf0
+based-on: ca84fa282d14
 by: wave-content=gpt@r2-1#ap-luc-hai-phia, wave-scaling=gpt@r2-2#chu-tinh-do-kho-dot, wave-rhythm-owner=gpt@r2-2#chu-nhip-dot, wave-clear-owner=gpt@r2-2#chu-chot-don-dot, wave-follows-run=gpt@r2-2#trang-thai-luot-chi-phoi-nhip, balance-sets-growth=gpt@r2-2#chu-can-muc-tang, enemy-stats-by-wave=gpt@r2-2#chi-so-quai-theo-dot, defeat-per-spawn=gpt@r2-3#bao-ha-theo-muc-tha, alive-cap-owner=gpt@r2-3#chu-kiem-tran-quai, castle-damage-to-enemy=gpt@r2-3#sat-thuong-thanh-len-quai, balance-sets-kill-reward=gpt@r2-3#dinh-muc-thuong-ha-quai, enemy-computes-reward=gpt@r2-3#tinh-thuong-ha-quai, balance-sets-clear-reward=gpt@r2-3#dinh-muc-thuong-don-dot, balance-scope=gpt@r2-3#pham-vi-can-bang, enemy-creates-spawn=gpt@r2-3#chu-tao-quai, lose-before-clear=gpt@r2-3#thu-tu-chot-thua, wave-computes-reward=gpt@r2-3#tinh-thuong-don-dot
 ---
 # Đợt quái

@@ -1,5 +1,5 @@
 {
- "hash": "e8c7b20b31fd",
+ "hash": "ae3341f9364a",
  "items": {
   "home-items": {
    "hash": "968eb683eee3",
@@ -14,8 +14,8 @@
    "text": "Kỉ lục hiện ở màn bắt đầu lấy từ `feature-run/run-score`, chỉ đọc\nKỉ lục mới vừa đạt ở lượt trước hiện ngay khi quay về màn này. Feature này không tính hay lưu kỉ lục."
   },
   "home-entry": {
-   "hash": "1acac5ba098f",
-   "text": "Người chơi tới màn bắt đầu theo ba đường: mở game, bỏ lượt, hoặc chọn về màn bắt đầu ở popup thua"
+   "hash": "c9ac5e95497f",
+   "text": "Người chơi tới màn bắt đầu theo hai đường: mở game, hoặc chọn về màn bắt đầu ở popup thua"
   }
  }
 }

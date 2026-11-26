@@ -22,7 +22,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Mua xong là có hiệu lực ngay, kể cả đang đánh hay kĩ năng đang hồi chiêu.
 - Cấp càng cao thì thành càng mạnh ở mục đó.
 - Cấp và hiệu ứng giữ tới hết lượt; lượt mới đặt lại do `feature-run`.
-- Lúc tạm dừng không mua được (quyết định chung của game).
 - Thưởng-phạt: tiền vào thành là tiền không vào hero; nâng máu giữ thành lâu hơn nhưng không giúp hạ quái.
 
 ## Đã tự quyết
@@ -30,6 +29,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Một mục kĩ năng chung cho cả ba kĩ năng.** Ít nút, hợp người chơi phổ thông. Đã loại: một mục cho mỗi kĩ năng.
 - **Nâng kĩ năng không giảm hồi chiêu.** Mạnh hơn dễ thấy hơn hồi nhanh hơn; hồi chiêu giữ nhịp bấm ổn định. Đã loại: giảm hồi chiêu.
 - **Mỗi mục chỉ tăng một thứ.** Người chơi đọc tên mục là biết mua gì.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ luật "lúc tạm dừng không mua được".
 
 ## Chưa rõ
 - Không có điểm chặn.

@@ -1,5 +1,5 @@
 {
- "hash": "63aec954598c",
+ "hash": "2269a58744ae",
  "items": {
   "one-update-per-step": {
    "hash": "b695ec1ed8f6",
@@ -18,16 +18,16 @@
    "text": "Thứ tự các feature trong một bước nhịp cố định và ghi rõ\nCùng thứ tự thì cùng kết quả. Đợt quái thả quái trước, các bên ra đòn sau, giao chiến phân xử sau các bên ra đòn, lượt xét thua sau cùng."
   },
   "input-on-step": {
-   "hash": "0d1d28d73c42",
-   "text": "Thao tác của người chơi được áp vào đầu bước nhịp kế tiếp và ghi theo số bước\nBấm kĩ năng, mua nâng cấp, tạm dừng. Ghi theo số bước thì chơi lại đúng chuỗi thao tác cho cùng kết quả."
+   "hash": "5bac294e7a1a",
+   "text": "Thao tác của người chơi được áp vào đầu bước nhịp kế tiếp và ghi theo số bước\nBấm kĩ năng, mua nâng cấp. Ghi theo số bước thì chơi lại đúng chuỗi thao tác cho cùng kết quả."
   },
   "input-queue": {
-   "hash": "540cf8978c5b",
-   "text": "Nhịp giữ hàng chờ thao tác chung, áp ở đầu bước kế tiếp đúng thứ tự đã đưa vào\nMột nơi duy nhất giữ bản ghi thao tác theo số bước. Bên dùng: mua nâng cấp, bấm kĩ năng thành, tạm dừng và tiếp tục, kết quả hồi sinh từ popup (danh sách ở `CLAUDE.md`)."
+   "hash": "def2f1bde587",
+   "text": "Nhịp giữ hàng chờ thao tác chung, áp ở đầu bước kế tiếp đúng thứ tự đã đưa vào\nMột nơi duy nhất giữ bản ghi thao tác theo số bước. Bên dùng: mua nâng cấp, bấm kĩ năng thành (danh sách ở `CLAUDE.md`)."
   },
   "input-while-paused": {
-   "hash": "88795c46e4a9",
-   "text": "Thao tác đưa vào lúc tạm dừng vẫn áp ở bước kế tiếp; feature nhận tự từ chối nếu luật của nó cấm khi đang tạm dừng\nVí dụ mua nâng cấp lúc tạm dừng bị `feature-upgrade` từ chối theo luật tạm dừng của `feature-run`."
+   "hash": "b0cdba4b875f",
+   "text": "Thao tác đưa vào lúc trận dừng vẫn áp ở bước kế tiếp; feature nhận tự từ chối nếu luật của nó cấm khi trận dừng\nVí dụ mua nâng cấp sau khi thành bị phá bị `feature-upgrade` từ chối."
   },
   "clock-time": {
    "hash": "2e7d1fa028a3",
@@ -38,8 +38,8 @@
    "text": "Màn hình vẽ theo khung hình từ trạng thái mới nhất của gameplay; phần nhìn không chạy luật\nPhần nhìn chỉ đọc, không đổi trạng thái gameplay."
   },
   "pause-keeps-clock": {
-   "hash": "a64add067d63",
-   "text": "Lúc tạm dừng bước nhịp vẫn chạy để áp hàng chờ, còn đồng hồ gameplay đứng yên\nFeature tự đứng yên theo trạng thái tạm dừng. Luật tạm dừng giữ nguyên ở `feature-run`; nhịp không dùng cách làm chậm thời gian của engine."
+   "hash": "96ce7f80c1b7",
+   "text": "Lúc trận dừng bước nhịp vẫn chạy để áp hàng chờ, còn đồng hồ gameplay đứng yên\nFeature tự đứng yên theo trạng thái trận của `feature-run`; nhịp không dùng cách làm chậm thời gian của engine."
   },
   "dev-fast-forward": {
    "hash": "45aadfd6c560",

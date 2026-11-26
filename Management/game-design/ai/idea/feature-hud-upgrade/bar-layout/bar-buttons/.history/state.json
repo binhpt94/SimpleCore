@@ -1,5 +1,5 @@
 {
- "hash": "b972ab828a57",
+ "hash": "0eac7d319efe",
  "items": {
   "six-buttons": {
    "hash": "f4b1826f2643",
@@ -18,8 +18,8 @@
    "text": "Giữa 2 nhóm có một khoảng trống rộng hơn khoảng cách giữa hai nút trong cùng nhóm\nLiếc là thấy hai nhóm; kiểm bằng ảnh chụp màn hình. Độ rộng cụ thể do người làm giao diện quyết."
   },
   "show-when": {
-   "hash": "40933e6343d2",
-   "text": "Thanh hiện từ khung hình đầu của trận tới khi popup kết thúc lượt hiện, kể cả lúc nghỉ giữa đợt và lúc tạm dừng, 0 lần ẩn giữa chừng\nLúc tạm dừng thanh vẫn hiện, các nút ở trạng thái không mua được."
+   "hash": "cd46be5bd187",
+   "text": "Thanh hiện từ khung hình đầu của trận tới khi popup kết thúc lượt hiện, kể cả lúc nghỉ giữa đợt, 0 lần ẩn giữa chừng"
   },
   "no-cover": {
    "hash": "726026270a8a",

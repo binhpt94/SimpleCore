@@ -8,3 +8,6 @@
 {"at": "2026-11-25 21:15:45", "event": "data", "hash": "82bb29fa21ee", "previous": "1d3ef58a6e65", "added": ["sim-step", "seed"], "removed": [], "rewritten": []}
 {"at": "2026-11-25 21:54:05", "event": "promote", "by": "người", "hash": "82bb29fa21ee"}
 {"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "82bb29fa21ee"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "61131b22bc1e", "previous": "82bb29fa21ee", "added": [], "removed": [{"id": "paused", "text": "Tạm dừng: trận đứng yên hoàn toàn\nKhác lúc thở: lúc thở trận vẫn chạy."}], "rewritten": [{"id": "wave-gap", "old": "Lúc thở: khoảng từ lúc dọn sạch một đợt tới lúc đợt sau bắt đầu ra quái\nKhác tạm dừng: lúc thở trận vẫn chạy.", "new": "Lúc thở: khoảng từ lúc dọn sạch một đợt tới lúc đợt sau bắt đầu ra quái\nLúc thở trận vẫn chạy."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "8e55090cf432fea1999a1376a2616071157ec858", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:21:41", "event": "approve", "hash": "3e9fa4abea28cd86aefbb915360da33c806c3ae3", "by": "tự duyệt (Full Auto)"}

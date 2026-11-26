@@ -8,7 +8,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Liên quan
 - `feature-run`: lượt chơi trong trận; báo đã dọn trận xong để điều hướng màn đổi màn.
 - `feature-home`, `feature-team-select`: hai màn trước lượt; gửi lựa chọn của người chơi.
-- `feature-popup-lose`, `feature-popup-pause`: lựa chọn rời trận.
+- `feature-popup-lose`: lựa chọn rời trận.
 - `feature-scene-flow`: bàn giao khi scene Game sẵn sàng.
 
 ## Đã tự quyết
@@ -21,6 +21,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Người chấm `flow-buttons-send-choice` 2 (2026-11-24).** Xoá ý đó; giữ `leave-choice-after-dispose`: lựa chọn rời trận đi qua lượt chơi để dọn trận trước. Nút Chơi và Vào trận vẫn gửi thẳng cho điều hướng màn (`play-opens-team`, `start-hands-team`).
 
 - **Độ quan trọng 6, không phải 8 (2026-11-25, theo câu hỏi của @Manager).** IDEA chỉ có màn trận: mở game vào thẳng trận, "Chơi lại" vào trận mới; hai việc này nằm ở nhánh luồng màn của `feature-run` (bảng giai đoạn của nó ghi rõ). Điều hướng màn chỉ cần khi có màn bắt đầu và màn chọn đội, tức từ PROTOTYPE; vòng 3-4 viết trước khi vào PROTOTYPE. Đã loại: viết vòng 3-4 sớm cho IDEA (chuyển luồng màn đã chốt và đang code của `feature-run` mà IDEA không cần).
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ `feature-popup-pause` khỏi các bên gửi lựa chọn rời trận.
 
 ## Chưa rõ
 - Chuyển nhánh luồng màn đã chốt của `feature-run` sang đây thế nào: vòng 3.

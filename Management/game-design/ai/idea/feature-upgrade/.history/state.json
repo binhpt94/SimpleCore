@@ -1,13 +1,13 @@
 {
- "hash": "112626ed0626",
+ "hash": "ddaad7454112",
  "items": {
   "upgrade-anytime": {
    "hash": "7a8a0670e3ab",
    "text": "Mua nâng cấp lúc nào cũng được, trận không dừng\nKể cả lúc đang đánh. Đã loại (người loại ở vòng 1): chỉ nâng cấp giữa hai đợt."
   },
   "buy-needs-running-run": {
-   "hash": "1e2c80432d53",
-   "text": "Nâng cấp chỉ nhận lần mua khi `feature-run` xác nhận lượt của yêu cầu đang chạy lúc xét\nYêu cầu còn chờ bị từ chối nếu lượt đã tạm dừng, đã kết thúc hay đã thay bằng lượt mới; lúc thở vẫn mua được."
+   "hash": "d576b1a154fe",
+   "text": "Nâng cấp chỉ nhận lần mua khi `feature-run` xác nhận lượt của yêu cầu đang chạy lúc xét\nYêu cầu còn chờ bị từ chối nếu lượt đã kết thúc hay đã thay bằng lượt mới; lúc thở vẫn mua được."
   },
   "upgrade-instant": {
    "hash": "84faad5d065d",

@@ -8,3 +8,6 @@
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "79f973592f0d"}
 {"at": "2026-11-25 18:21:39", "event": "promote", "by": "người (Sync)", "hash": "79f973592f0d"}
 {"at": "2026-11-26 00:53:50", "event": "promote", "by": "người", "hash": "79f973592f0d"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "a56d1f8d5995", "previous": "79f973592f0d", "added": [], "removed": [], "rewritten": [{"id": "bright-dim", "old": "Nút sáng khi mua được và mờ khi không mua được, đổi trong cùng 1 khung hình với lúc số dư, cấp hoặc tạm dừng đổi\n\"Mua được\" lấy từ `feature-upgrade`; nút không tự so tiền với giá.", "new": "Nút sáng khi mua được và mờ khi không mua được, đổi trong cùng 1 khung hình với lúc số dư hoặc cấp đổi\n\"Mua được\" lấy từ `feature-upgrade`; nút không tự so tiền với giá."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "82e873e42a94aba8062b4f4e37081053e91b3bc0", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:26:06", "event": "approve", "hash": "d8bd729a4881bb653787c224b239c84a293ded74", "by": "tự duyệt (Full Auto)"}

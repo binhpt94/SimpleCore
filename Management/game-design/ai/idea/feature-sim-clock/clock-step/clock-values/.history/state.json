@@ -1,5 +1,5 @@
 {
- "hash": "10c0a9cf07ca",
+ "hash": "161f0b899e94",
  "items": {
   "tick-40": {
    "hash": "4e84a876ed44",
@@ -18,8 +18,8 @@
    "text": "Ở cách theo khung hình, mỗi khung là một bước dài bằng thời gian khung, tối đa 0.125 giây\nCùng trần với cách bước cố định để hai cách cho cảm giác gần nhau trên máy chậm."
   },
   "steps-counted": {
-   "hash": "d3ca9faee00c",
-   "text": "Nhịp đếm số bước chung và số bước gameplay bằng số nguyên; giờ của trận bằng số bước gameplay nhân 0.025 giây\nSố bước chung tăng ở mọi bước; số bước gameplay chỉ tăng ở bước lượt cho trận chạy. Thao tác ghi theo số bước chung; mọi chờ giờ đếm theo số bước gameplay nên đứng yên lúc tạm dừng. Không cộng dồn số lẻ, chạy lâu không lệch."
+   "hash": "5e97d6a365b5",
+   "text": "Nhịp đếm số bước chung và số bước gameplay bằng số nguyên; giờ của trận bằng số bước gameplay nhân 0.025 giây\nSố bước chung tăng ở mọi bước; số bước gameplay chỉ tăng ở bước lượt cho trận chạy. Thao tác ghi theo số bước chung; mọi chờ giờ đếm theo số bước gameplay nên đứng yên lúc trận dừng. Không cộng dồn số lẻ, chạy lâu không lệch."
   },
   "timer-in-steps": {
    "hash": "b720987bbf37",

@@ -1,6 +1,6 @@
 ---
 based-on: 34c92f9b0c18
-refs: feature-wave/wave-clear@b7789c127bb4, feature-wave/spawning@8c9e1c247bf1, glossary#wave-gap@8ee5484a4f32
+refs: feature-wave/wave-clear@b7789c127bb4, feature-wave/spawning@8c9e1c247bf1, glossary#wave-gap@32d7f7b372c9
 ---
 # Lúc thở giữa hai đợt
 

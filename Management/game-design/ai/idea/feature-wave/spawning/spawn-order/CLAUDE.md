@@ -38,7 +38,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Trường hợp biên
 - **Đủ 40 quái sống đúng lúc tới nhịp:** con đó chưa ra; đồng hồ nhịp dừng. Một con bị hạ (còn 39) thì con đó ra ngay, đồng hồ đếm lại một nhịp đầy đủ cho con kế tiếp.
 - **Thành bị phá giữa lúc thả hoặc lúc đang hoãn:** ngừng thả ngay; các mục chưa ra bị bỏ; quái đang sống đứng theo luật kết thúc của `feature-run`.
-- **Tạm dừng giữa lúc thả:** đồng hồ nhịp đứng yên; bỏ tạm dừng thì đếm tiếp phần còn lại của nhịp, không thả bù.
 - **Hai con ra cùng chỗ** (con trước còn đứng ở x = ±17u): vẫn ra, cho chồng lên nhau; `feature-enemy` lo việc tách khi đi.
 - **Không xếp được bên để chuỗi ≤ 3:** với N/2 trái, N/2 phải luôn xếp được; nếu bước ngẫu nhiên ra chuỗi 4 thì đổi bên mục thứ 4 với mục gần nhất phía sau thuộc bên kia.
 - **Trùm và giới hạn 40:** Trùm cũng phải chờ dưới 40 như mọi con; vẫn là con cuối của đợt.
@@ -53,6 +52,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Hoãn khi đủ 40 rồi thả ngay khi bớt.** Không mất quái nào của đợt, đợt vẫn đủ số. Đã loại: bỏ con thừa (đợt nhẹ đi khi đội yếu, thưởng người chơi kém).
 - **Xáo theo seed của lượt (2026-11-25, người yêu cầu ngẫu nhiên tất định theo seed).** Ý `seeded-shuffle`: hai bước "xáo thứ tự" và "gán bên" ở mục "Làm gì" lấy số từ dòng ngẫu nhiên của đợt quái (`feature-sim-clock/seeded-random`), không dùng bộ ngẫu nhiên của engine. Không đổi luật xáo nào. Đã loại: ghi vào node thả quái vòng 3 (luật chung ở đó không đổi, chỉ nguồn số đổi).
 - **Không có đếm ngược trước đợt 1.** Node `feature-wave/wave-gap` chỉ có lúc thở sau dọn sạch; quãng đi của quái đã đủ làm lúc chuẩn bị.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên tạm dừng giữa lúc thả.
 
 ## Chưa rõ
 - Giới hạn 40 có đủ nhẹ cho máy yếu không: cần đo trên máy thật.

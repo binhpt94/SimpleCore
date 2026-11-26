@@ -1,0 +1,27 @@
+kind: ui
+title: Bố cục HUD trận (16:9)
+ui: c439436ddefc
+ai: 7
+why: mép trên trái sang phải: tiền, máu thành, đợt; máu giữa và rộng nhất (thẳng trên thành) nên mắt rơi vào trước
+why: thông tin ở mép trên, nút bấm nhiều ở mép dưới; cụm kĩ năng góc dưới phải cho ngón cái phải, thanh nâng cấp lấy phần còn lại bên trái
+why: tiền ở góc trên trái (40–340), đối xứng với đợt ở góc trên phải (1580–1880); tiền thẳng trên thanh nâng cấp để liếc tiền rồi mua
+why: mép trên chỉ còn thông tin, không nút nào: mọi chỗ bấm dồn xuống mép dưới
+why: banner "Đợt N" ngay dưới máu, cách 8, vẫn trong dải trên 140; dải chiến trường y 140–900 không phần nào chạm
+why: khe giữa 3 nút kĩ năng giữ 20 (lệch thang): cụm rộng 460 đã chia với thanh nâng cấp ở feature-hud-upgrade/bar-buttons; lên 24 thì phải dời cả thanh
+why: không có tham chiếu phù hợp (chưa có ảnh tham chiếu nào)
+let tap = 120                # cạnh ngắn tối thiểu của nút chạm trong HUD và popup
+let safe = 40                # lề an toàn hai cạnh trái, phải
+let top-h = 140              # chiều cao dải trên
+let bottom-h = 180           # chiều cao dải dưới
+let skill = 140              # cạnh nút kĩ năng thành
+let up-w = 200               # rộng nút nâng cấp
+let up-h = 140               # cao nút nâng cấp
+- top      rect   x=0    y=0   w=1920 h=top-h label="Mép trên"
+- strip    rect   x=0    y=140 w=1920 h=760 label="Dải chiến trường (không HUD nào chồng lên)"
+- bottom   rect   x=0    y=900 w=1920 h=bottom-h label="Mép dưới"
+- money    label  x=safe y=10  w=300  h=60  parent=top label="Tiền"
+- hp       bar    x=660  y=10  w=600  h=60  fill=1 parent=top label="Máu thành"
+- wave     label  x=1580 y=10  w=300  h=60  parent=top label="Đợt"
+- banner   label  x=760  y=78  w=400  h=56  parent=top label="Thông báo Đợt N"
+- upgrade  rect   x=safe y=15  w=1340 h=150 parent=bottom label="Thanh nâng cấp (feature-hud-upgrade)"
+- skills   grid   x=1420 y=20  cols=3 rows=1 cell=skill gap=20 parent=bottom label="3 nút kĩ năng"

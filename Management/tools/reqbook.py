@@ -13,8 +13,8 @@ node) gives
                               like any requirement of a later phase); #params still holds the whole section
 Ids are names, never positions: moving an idea or a node's children around changes nothing.
 
-What the sessions did is kept beside the leaf's progress, in the PROPOSED table (live is a copy and is replaced on
-every sync):  Management/game-design/ai/idea/<node>/.progress/requirements.json
+What the sessions did is kept beside the leaf's progress, in the PROPOSED table (live is rebuilt from the
+approved versions on every build, gamedesign.build_live):  Management/game-design/ai/idea/<node>/.progress/requirements.json
     {"items": {"<id>": {state, hash, text, note, tests, play, by, at}}, "log": [{at, id, state, by, note}]}
 Only this module writes it (gd_req.py for the sessions, the page for the human).
 

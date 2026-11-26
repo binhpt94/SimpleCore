@@ -1,0 +1,669 @@
+{
+ "nodes": {
+  "": {
+   "hash": "27b1609ae18214075818cf00eb2fc75afe74ee2c",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-balance": {
+   "hash": "d5f4d60e59915548fa2ed2eb5c5525c3259139e8",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-balance/balance-config": {
+   "hash": "88b951615a641dde5a452f7e3b49620c1a666971",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-balance/balance-config/number-table": {
+   "hash": "3c4ee2c4318eabd74abc71c6bf2827623bb76fdf",
+   "at": "2026-11-27 00:11:41",
+   "by": "người (Sync)"
+  },
+  "feature-balance/balance-difficulty-curve": {
+   "hash": "f179bb861646cf275046b0a720e5f06e7fb45d55",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-balance/balance-difficulty-curve/break-forecast": {
+   "hash": "613bf43004ca9d020ee0b204b250723c61f25158",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-balance/balance-economy": {
+   "hash": "c89dd07e083f6e3acaff03445fe790c090b7fb1b",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-balance/balance-economy/income-and-prices": {
+   "hash": "d106d74f17b02f107c8b0331ffe26e048a23bb59",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-balance/balance-team": {
+   "hash": "edf85eebf9edf2274cc705e8bcd558930b00c722",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-balance/balance-team/hero-compare": {
+   "hash": "0398ef98c04ffd935d3c584d0a840cb76688ce2e",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-battlefield": {
+   "hash": "d9123235551bc01cb1c996c904c336a33c355320",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-battlefield/battlefield-layers": {
+   "hash": "6044fea67df37bf4f3ec1e33186b08af3b21a31f",
+   "at": "2026-11-27 00:10:55",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-battlefield/battlefield-layers/layer-values": {
+   "hash": "0e50f66404712f696953bf058d366245c3e1745f",
+   "at": "2026-11-27 00:11:41",
+   "by": "người (Sync)"
+  },
+  "feature-castle": {
+   "hash": "a382ba7eb4e372b41855c3e0baa71eaf66ae268b",
+   "at": "2026-11-27 00:10:55",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-castle/castle-attack": {
+   "hash": "56d0010b29144b02a4725353b929c3eae9a94a04",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-castle/castle-attack/auto-shot-values": {
+   "hash": "23e40541286e8d517d390c798430aa65c379c9ea",
+   "at": "2026-11-27 00:11:45",
+   "by": "người (Sync)"
+  },
+  "feature-castle/castle-core": {
+   "hash": "e6235d394249f63ad8222331c4bbe69ca230d84f",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-castle/castle-core/castle-body-values": {
+   "hash": "85804c5595586006b0446c2eaba9790ba10e717d",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-castle/castle-skills": {
+   "hash": "b8c062dbff2086521542b91be186b32c916fda05",
+   "at": "2026-11-27 00:12:06",
+   "by": "người (Sync)"
+  },
+  "feature-castle/castle-skills/skill-values": {
+   "hash": "194ceaf0cf13bb7a9cc650ff350583e1c22c386c",
+   "at": "2026-11-27 00:12:13",
+   "by": "người (Sync)"
+  },
+  "feature-castle/castle-upgrade-effects": {
+   "hash": "a86019cba67394d8f7faefd2e402333ede3ceedc",
+   "at": "2026-11-27 00:12:20",
+   "by": "người (Sync)"
+  },
+  "feature-castle/castle-upgrade-effects/upgrade-effect-values": {
+   "hash": "fa0fff4900866cf733a57bb7cc805dd750dce8d8",
+   "at": "2026-11-27 00:12:20",
+   "by": "người (Sync)"
+  },
+  "feature-combat": {
+   "hash": "6743f03ce078dfcd89288b34fc20b73829ada0a4",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-combat/combat-tick": {
+   "hash": "3aa338449b97954cfd8c44a70a261f5d74f46cf1",
+   "at": "2026-11-27 00:12:35",
+   "by": "người (Sync)"
+  },
+  "feature-combat/combat-tick/tick-values": {
+   "hash": "e079eacd42b044bf57ade4cd434230dcd087153b",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-enemy": {
+   "hash": "68ec200a7e61161c7e0189a2c4774c3da852da90",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-enemy/enemy-behavior": {
+   "hash": "85d7e278585db864f6296b43f24f50cf6f3088e3",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-enemy/enemy-behavior/enemy-move-values": {
+   "hash": "cec118545dce2bc45f53b5dd69de12f0167407fa",
+   "at": "2026-11-27 00:12:35",
+   "by": "người (Sync)"
+  },
+  "feature-enemy/enemy-list": {
+   "hash": "b43be80118371720493ed01702fc081ea3bd8a83",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-enemy/enemy-list/enemy-type-values": {
+   "hash": "11d7dc76fa51cca90020a8ff4457e059082b65e2",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-enemy/enemy-reward": {
+   "hash": "d27d56c4e73dcf724e20330cc3c2ce3e6919d694",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-enemy/enemy-reward/reward-values": {
+   "hash": "56594253f1a79430fad2a2f4f1f2479dde715d27",
+   "at": "2026-11-27 00:12:35",
+   "by": "người (Sync)"
+  },
+  "feature-enemy/enemy-stats": {
+   "hash": "91a9fd286a2d7febac161c7f9f691293613843df",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-enemy/enemy-stats/enemy-stat-values": {
+   "hash": "2e44d1fc5ca06ded152ebf497ae495ff7673a836",
+   "at": "2026-11-27 00:12:49",
+   "by": "người (Sync)"
+  },
+  "feature-game-flow": {
+   "hash": "cd680a67db41f9edfaf57d9aedda14b0f44999e8",
+   "at": "2026-11-27 00:13:07",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-game-flow/flow-routes": {
+   "hash": "f5bed925ffad6a277f9dba2548e4d61f3e38dbcd",
+   "at": "2026-11-27 00:13:07",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-game-flow/flow-routes/routes-values": {
+   "hash": "2ae26657d1b3dc406961fad4dce1f5ee41557c82",
+   "at": "2026-11-27 00:10:55",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hero": {
+   "hash": "8686d08e17f294c5d4f28df4c68d3b630aa25822",
+   "at": "2026-11-26 23:53:14",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hero/hero-list": {
+   "hash": "6a1b66dab30b839e6da33bf7cde82e7112a87f65",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-hero/hero-list/hero-roster-values": {
+   "hash": "2411f8136d74d9321e63448a7cec0bb33b3222cd",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-hero/hero-respawn": {
+   "hash": "b73103fa716253fe56e89e168c74e66cf4ab0dc9",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-hero/hero-respawn/respawn-values": {
+   "hash": "817616cf813714dccbbef2b1d1aa0611d9f4b89f",
+   "at": "2026-11-27 00:12:49",
+   "by": "người (Sync)"
+  },
+  "feature-hero/hero-stats": {
+   "hash": "a040c42d58df3d06532792e88bea50ffa5037cfc",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-hero/hero-stats/hero-level-values": {
+   "hash": "42777f2c479389b7b51477a9f587bf31fbd2d218",
+   "at": "2026-11-27 00:12:49",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hero/hero-targeting": {
+   "hash": "7cd54c49ac4ca8acfda58208e209134851a65932",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-hero/hero-targeting/targeting-values": {
+   "hash": "31960f9c2d3357595d0cd158dd76f61440872bc8",
+   "at": "2026-11-27 00:13:07",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-home": {
+   "hash": "0a92ce30a769d9a5204265c0c6c39a5f1d330ce7",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-home/cheat": {
+   "hash": "3429f4c74d9733555d62339a235d25813b0c8eb5",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-home/home-screen": {
+   "hash": "c16241126b771292c2e0650928219639874155e3",
+   "at": "2026-11-27 00:13:32",
+   "by": "người"
+  },
+  "feature-home/home-screen/home-screen-spec": {
+   "hash": "1e1d8e98315864108d85f3a5385b5bc46783c7ae",
+   "at": "2026-11-27 00:13:32",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud": {
+   "hash": "2e7bce489a268a4483de98591fa8d7da9f1ae957",
+   "at": "2026-11-27 00:14:18",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud-upgrade": {
+   "hash": "9d5fe4ab34042a00b2b28391cc8011624b4201db",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-hud-upgrade/bar-layout": {
+   "hash": "b81742b86284c15bec84980bc070f491aa0f5658",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-hud-upgrade/bar-layout/bar-buttons": {
+   "hash": "df60099c8134683c4c3b2b4426c34ed843834576",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud-upgrade/button-state": {
+   "hash": "97db1253c895a2569c6f9c4275bf0aa1d822b6a7",
+   "at": "2026-11-27 00:14:52",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud-upgrade/button-state/button-display": {
+   "hash": "d8bd729a4881bb653787c224b239c84a293ded74",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud-upgrade/cheat": {
+   "hash": "01a24c454a4dc676dab15cf00879ef26d90359d4",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud/cheat": {
+   "hash": "aa5765916bfc52517209b79c59d1c6746a0574e0",
+   "at": "2026-11-27 00:28:53",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud/hud-layout": {
+   "hash": "3746b994600be81d187d8b08a6465a52fb33afa7",
+   "at": "2026-11-27 00:14:18",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud/hud-layout/layout-spec": {
+   "hash": "070a6c429a6fc5878c0325a50c164902012b56dc",
+   "at": "2026-11-27 00:28:53",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud/hud-skill-button": {
+   "hash": "b012c61a9112f35d97ddd7f52668251b5fdce527",
+   "at": "2026-11-27 00:14:27",
+   "by": "người"
+  },
+  "feature-hud/hud-skill-button/skill-button-spec": {
+   "hash": "f0131aa921daa099566fc33c4e2e925b862c4dfc",
+   "at": "2026-11-27 00:28:53",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-hud/hud-status": {
+   "hash": "506fe44a253714bfae082276c25dca840748a0b7",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-hud/hud-status/status-spec": {
+   "hash": "0d2352e4ace4e46ffbee56ab8a0a113ca35c1a2c",
+   "at": "2026-11-27 00:28:53",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup": {
+   "hash": "d4b66265a0c14eb18d15d5578bd94ed1527c702e",
+   "at": "2026-11-27 00:15:26",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-lose": {
+   "hash": "02a165b011ccc32086dd9fd52c41bca735015e6b",
+   "at": "2026-11-27 00:10:55",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-lose/cheat": {
+   "hash": "98c8cabd8ac9ee00dfffbef340bd966b72002c1d",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-popup-lose/lose-actions": {
+   "hash": "fa20a05079913a648ffa2e4bc07154055b6029cc",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-lose/lose-actions/actions-spec": {
+   "hash": "1c70b9eacebaa0a17462cf6b4328cb69880e0725",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-lose/lose-result": {
+   "hash": "63fb99fc07c77d15ccbc37ff045430282cf799dc",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-lose/lose-result/result-spec": {
+   "hash": "b6791b2d34e8423d261aabf7117b7a0171293df2",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup/cheat": {
+   "hash": "3de84f75114eea4386cf9c9a89783b6b27694912",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup/popup-layer": {
+   "hash": "910b442f99caff235f8537ac53f0f98efb0df045",
+   "at": "2026-11-27 00:15:26",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup/popup-layer/stack-rules": {
+   "hash": "684dcbc0750707c541f8501ef361d07f3f3c5ba9",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup/popup-request": {
+   "hash": "25631c55fe4d0fcfecc137cafbdb7b844a48eac4",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup/popup-request/request-rules": {
+   "hash": "a53275a422da251b1c0190c831674d3259d15d74",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-run": {
+   "hash": "81e350537317e5ec74b910b06d216b796d5b05d3",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-run/run-flow": {
+   "hash": "8ff1e3e4d2477da2d934b610765a125912ba571b",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-run/run-flow/flow-rules": {
+   "hash": "799e27a8bfbcec1fe9c788729ab2e479a602145c",
+   "at": "2026-11-27 00:26:06",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-run/run-score": {
+   "hash": "8b6f6fb947631a7e893adb4d181bdcf23c2d0ed2",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-run/run-score/score-rules": {
+   "hash": "c460332ff18acb9c12647e8f21553b8750374b28",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-run/run-start": {
+   "hash": "0245f936323376e1f036621cd21c88802cc5aef0",
+   "at": "2026-11-27 00:10:55",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-run/run-start/replay-checks": {
+   "hash": "b1c3571daa125f9b68cc6a94fa4f6662a8a3fcf7",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-run/run-start/start-values": {
+   "hash": "5148238534c9c3cf9f0c187293dd5fb2367c5b96",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-save": {
+   "hash": "4988c041e48898c335be5e1cba2013fbabe6cbf8",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-save/save-io": {
+   "hash": "71308c06cf79940319beba59aeaa05f77cbf0eb3",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-save/save-io/io-rules": {
+   "hash": "17588580e1ba838d72c07509e41cfb8bcd2206a1",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-scene-flow": {
+   "hash": "404af6767e8724bd24de5653f9230a2c82c3ea39",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-scene-flow/cheat": {
+   "hash": "ab9ac3adeb9ec1486a9a9724ad5de2f3ce7e5688",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-scene-flow/scene-list": {
+   "hash": "b478522d62b86b3a2c5fe3310d2c0f653a90ac05",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-scene-flow/scene-list/boot-loading": {
+   "hash": "98248af19b26a20c2d3dc9598aa99e6e9a969d78",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-scene-flow/scene-request": {
+   "hash": "5067c147cd86487ade1a4c79f200736fd65b535e",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-scene-flow/scene-request/switch-rules": {
+   "hash": "1405b05dc06648ff2944fd7977cd4c0856673134",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-session-scene": {
+   "hash": "258b2021b0480c8848b61eb996147f4d6ddc426c",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-session-scene/session-clean": {
+   "hash": "948930de068aca3f7b3b92a92cd5a1f449772ed1",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-session-scene/session-clean/clean-checks": {
+   "hash": "415549a76163c09d91cd081494b158afad0976dc",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-session-scene/session-steps": {
+   "hash": "0be0ca8a59ec6d5fd47ef2f42953cfebc1ef5958",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-session-scene/session-steps/participant-order": {
+   "hash": "be9cb34ddf898506798ddca708ffa479cfd539d0",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-sim-clock": {
+   "hash": "89a5a3c47e14a6e4991d56308fa7e0e00b6332f8",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-sim-clock/clock-step": {
+   "hash": "1e93d617d4d94f6c5b869818c626bf6026e40659",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-sim-clock/clock-step/clock-values": {
+   "hash": "2c930b41a831ce87196da667ee18d1e526bc6afa",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-sim-clock/seeded-random": {
+   "hash": "391965c2eb62ef2375522889ade994265fc19817",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-sim-clock/seeded-random/random-values": {
+   "hash": "d59f179cb3cfad97143780c58348a9caf01eb9c1",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-team-select": {
+   "hash": "3eb96eb0825470638403feddbbc31b7c0644b860",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-team-select/cheat": {
+   "hash": "03fa01666b66a5b47a78a3a1563a55b575324c42",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-team-select/hero-cards": {
+   "hash": "b3c5c92540ab164606b8f98664020ff64b83e630",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-team-select/hero-cards/card-spec": {
+   "hash": "5f97fe5c395aa1c383beba1773eb2e41517163dc",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-team-select/team-memory": {
+   "hash": "d6904059ce6efe74f5142559a05a669a3217e5dd",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-team-select/team-memory/memory-rules": {
+   "hash": "c977e88bbc297be3dcf9e56ad8e2678b6b81492f",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-team-select/team-slots": {
+   "hash": "d8d8d1aaaab0ac099119e9df0ba86ad893bd0cb2",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-team-select/team-slots/slots-spec": {
+   "hash": "1a45f6710b14cf1fad58dbd1004e1444f5b67776",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-upgrade": {
+   "hash": "75c3a721e686905cc9ceb480b3d06994d30abe3e",
+   "at": "2026-11-27 00:10:55",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-upgrade/upgrade-effect": {
+   "hash": "60c431b7d62e84a867ae8ca4c798c0566b0e1704",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-upgrade/upgrade-effect/effect-numbers": {
+   "hash": "fb709e0202f769a9be4f1cb16943053e49110526",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-upgrade/upgrade-list": {
+   "hash": "b0a4358a3cbf4e4715e3fa8f86d5da311115ce4c",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-upgrade/upgrade-list/item-set": {
+   "hash": "152b238b6ac8c1b389752a9a932374f0fe466104",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-upgrade/upgrade-purchase": {
+   "hash": "5c2e3da661870df8f1a8d8eb09b6210636b8d293",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-upgrade/upgrade-purchase/purchase-rules": {
+   "hash": "1cbdd77096f1a33720b9923e0950f05fde0e75ab",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-wallet": {
+   "hash": "b7e77cf39da0d081929adf832972b684f152764a",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wallet/balance-spend": {
+   "hash": "96ec065a4038f55373ad11027e2c1a874452dce5",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wallet/balance-spend/wallet-rules": {
+   "hash": "be4bb33886b32ee24b1c627a6c181656e6a1a52c",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wallet/income": {
+   "hash": "66d8e816260341adfa89a8ee7fa8eec471da21cb",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wallet/income/income-amounts": {
+   "hash": "289bd94ab5dd0b7a4cce41a4822cf7940ebece54",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wave": {
+   "hash": "5d63ee0fbf5d32b5fdfe7c295540bfef206c1b09",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wave/difficulty-scaling": {
+   "hash": "7f42f5fcbd369cd086843ee7cef107dae9c6180d",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wave/difficulty-scaling/wave-formula": {
+   "hash": "487f800622ef85cfb73d390daed366bf3b521eb4",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wave/spawning": {
+   "hash": "a4536e51d25f12741978b7928020395f3471c219",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wave/spawning/spawn-order": {
+   "hash": "b5100290bde701e69c4927fcdebec510c1044c0f",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-wave/wave-clear": {
+   "hash": "227fe39ccc6285a1ec83541f84f0a9cbf5f5dbf4",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wave/wave-clear/clear-rules": {
+   "hash": "a329a54f08ab80a45a32da8559fe5f17ba818bd1",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-wave/wave-gap": {
+   "hash": "4834c1f537a0bd51c1722729e1d65b68b40d3b73",
+   "at": "2026-11-26 23:46:56",
+   "by": "chuyển từ live cũ"
+  },
+  "feature-wave/wave-gap/gap-timer": {
+   "hash": "2c43dafcb4d91c4328d468e06f5df959befc5bc3",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "glossary": {
+   "hash": "3e9fa4abea28cd86aefbb915360da33c806c3ae3",
+   "at": "2026-11-27 00:21:41",
+   "by": "tự duyệt (Full Auto)"
+  }
+ }
+}

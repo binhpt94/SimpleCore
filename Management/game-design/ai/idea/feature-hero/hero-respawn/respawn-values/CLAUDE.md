@@ -35,8 +35,6 @@ Cân bằng dự kiến: đợt 1 có 8 Lính thả mỗi 1.0s, đi 14.5u ở 1.
 - Hero gục cùng khung hình với thành bị phá: không cần xử lý hồi sinh; `feature-run` dừng trận.
 - Hero gục đúng lúc đòn của nó đang ra: đòn đó không ra (gục xử lý trước khi ra đòn trong khung hình).
 - Hồi sinh khi đang nghỉ giữa hai đợt: hồi sinh bình thường, đứng chờ ở điểm xuất phát.
-- Tạm dừng: đồng hồ 8s và anim 0.3s đứng yên.
-- Hero đang chờ hồi sinh khi thành bị phá lần đầu (luồng hồi sinh thành): đồng hồ 8s đứng yên suốt luồng (trận dừng, popup hồi sinh, thành hiện lại), chạy tiếp khi trận chạy tiếp. (Chuyển từ nhánh thứ tự hồi sinh ở popup hồi sinh, 2026-11-26.)
 - Hết lượt (`feature-run`): mọi hero bị gỡ, không hồi sinh; lượt mới sinh lại ở cấp 1.
 
 ## Đã tự quyết
@@ -44,6 +42,7 @@ Cân bằng dự kiến: đợt 1 có 8 Lính thả mỗi 1.0s, đi 14.5u ở 1.
 - **0.3s không đánh, không bị đánh khi hồi sinh.** Thêm vì quái đánh thành đứng ngay mép thành, trùng điểm hồi sinh. Đã loại: không có thời gian an toàn.
 
 - **Frame `spawn-slots.frame` (2026-11-23).** Thành và hộp hero `use` từ `feature-castle/castle-core/castle-body-values` và `feature-hero/hero-list/hero-roster-values`. Số tính ra: hộp chỗ 1/3 ở x=-2u, chỗ 2 ở x=1u (tâm ∓ nửa rộng 0.5u). Chỗ 3 cùng điểm với chỗ 1, vẽ lệch hàng (y=4.2u) chỉ để thấy cả hai.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên tạm dừng và trường hợp hero chờ hồi sinh trong luồng hồi sinh thành; hồi sinh hero giữ nguyên.
 
 ## Chưa rõ
 - Không có điểm chặn.

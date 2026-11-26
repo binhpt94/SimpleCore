@@ -6,3 +6,6 @@
 {"at": "2026-11-24 23:45:16", "event": "data", "hash": "e06499689b32", "previous": "4b9f46cc241a", "added": ["result-ad-failed"], "removed": [], "rewritten": []}
 {"at": "2026-11-25 00:11:10", "event": "promote", "by": "người (Sync)", "hash": "e06499689b32"}
 {"at": "2026-11-26 18:22:02", "event": "promote", "by": "người (Sync)", "hash": "e06499689b32"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "4b9f46cc241a", "previous": "e06499689b32", "added": [], "removed": [{"id": "result-ad-failed", "text": "Thua sau khi xem quảng cáo hồi sinh không thành thì popup có thêm một dòng báo quảng cáo chưa hoàn tất\nNgười chơi biết vì sao không được hồi sinh. Bỏ qua đề nghị hồi sinh thì không có dòng này."}], "rewritten": []}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "d3d51fad9dbaca259f12787ae3a033ebd77951a5", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:21:41", "event": "approve", "hash": "63fb99fc07c77d15ccbc37ff045430282cf799dc", "by": "tự duyệt (Full Auto)"}

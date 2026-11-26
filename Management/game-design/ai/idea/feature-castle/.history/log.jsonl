@@ -12,3 +12,5 @@
 {"at": "2026-11-24 23:22:35", "event": "data", "hash": "7100f997d2a8", "previous": "411319037ef3", "added": ["castle-revive"], "removed": [], "rewritten": []}
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "7100f997d2a8"}
 {"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "7100f997d2a8"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "411319037ef3", "previous": "7100f997d2a8", "added": [], "removed": [{"id": "castle-revive", "text": "Được hồi sinh thì thành đứng lại với một phần máu tối đa, cấp nâng cấp giữ nguyên\nHồi sinh là việc lượt chơi quyết sau khi người chơi xem xong quảng cáo; thành chỉ lấy lại máu."}], "rewritten": []}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "a382ba7eb4e372b41855c3e0baa71eaf66ae268b", "by": "tự duyệt (Full Auto)"}

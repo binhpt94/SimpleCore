@@ -1,2 +1,4 @@
 {"at": "2026-11-25 01:06:46", "event": "data", "hash": "5c2132462329", "previous": "", "added": ["layers-four", "sky-above-ground", "far-on-horizon", "ground-below-line", "layers-full-width", "decor-two-sides", "draw-order", "layers-static"], "removed": [], "rewritten": []}
 {"at": "2026-11-25 01:10:39", "event": "promote", "by": "người", "hash": "5c2132462329"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "9c6afd246afa", "previous": "5c2132462329", "added": [], "removed": [], "rewritten": [{"id": "layers-static", "old": "Các lớp nền đứng yên trong trận, không đổi theo đợt, máu thành hay tạm dừng\nNền không báo tin gì cho người chơi; thông tin trận nằm ở `feature-hud`.", "new": "Các lớp nền đứng yên trong trận, không đổi theo đợt hay máu thành\nNền không báo tin gì cho người chơi; thông tin trận nằm ở `feature-hud`."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "6044fea67df37bf4f3ec1e33186b08af3b21a31f", "by": "tự duyệt (Full Auto)"}

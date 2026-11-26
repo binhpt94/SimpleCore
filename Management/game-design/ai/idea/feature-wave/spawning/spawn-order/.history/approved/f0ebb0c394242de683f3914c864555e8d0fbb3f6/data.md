@@ -1,0 +1,33 @@
+---
+based-on: 8c9e1c247bf1
+refs: feature-wave/difficulty-scaling/wave-formula@4ec2cc7f93ed, feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-wave/wave-gap@d9d4c35f6907, feature-enemy/enemy-list/enemy-type-values@96f77fbbafff, feature-enemy/enemy-behavior/enemy-move-values@820f944e332f, feature-castle/castle-core/castle-body-values@b648ec300023, feature-sim-clock/seeded-random@493ba40160e7
+---
+# Thứ tự và cách thả quái
+
+Đầu đợt lập danh sách thả từ số con từng loại, xáo thứ tự, chia đúng một nửa cho mỗi bên rồi thả từng con theo nhịp của đợt ở x = −17u hoặc x = +17u. Khi đã có 40 quái sống thì hoãn thả tới khi bớt.
+
+## Ý cốt lõi
+
+### spawn-point | AI 8 | Quái ra trên mặt đất ở x = −17u (bên trái) hoặc x = +17u (bên phải), ngoài mép màn hình 1u
+Ra xong tự đi vào thành theo `feature-enemy`. Lính cần khoảng 9.3 s để tới mép thành (x = ±1.5u), nên người chơi thấy quái đi vào chứ không hiện sát thành.
+
+### half-split | AI 8 | Mỗi bên đúng một nửa số quái của đợt (đợt 1: 4 trái, 4 phải)
+Số quái luôn chẵn. Trùm, nếu có, ra ở bên được bốc ngẫu nhiên và tính vào nửa của bên đó.
+
+### shuffle-order | AI 7 | Thứ tự loại quái xáo ngẫu nhiên, trừ Trùm luôn là con cuối cùng của đợt
+Đợt 10 có 26 con: Trùm là con thứ 26. Người chơi dọn bớt quái thường rồi mới gặp Trùm, đỉnh căng thẳng ở cuối đợt (khớp `feature-enemy/enemy-list/enemy-type-values`).
+
+### side-run | AI 7 | Không có quá 3 con liên tiếp ra cùng một bên
+Giữ cảm giác bị kẹp liên tục; không có lúc một bên bỏ trống lâu. Bên ra vẫn ngẫu nhiên trong giới hạn này.
+
+### spawn-timing | AI 8 | Con đầu tiên ra lúc 0 s của đợt, mỗi con sau cách con trước đúng một nhịp thả của đợt
+Đợt 1: 8 con ra trong 7 s; đợt 20: 46 con ra trong 13.5 s (nếu không bị hoãn).
+
+### alive-cap | AI 7 | Đã có 40 quái sống thì hoãn thả; còn dưới 40 thì con kế tiếp ra ngay, rồi lại đếm nhịp từ đó
+Giữ màn hình đọc được và máy không quá tải. Đồng hồ nhịp đứng yên trong lúc hoãn.
+
+### stop-on-end | AI 8 | Thành bị phá thì ngừng thả ngay, các con chưa ra bị bỏ
+Đợt đó không được tính là dọn sạch.
+
+### seeded-shuffle | AI 7 | Xáo thứ tự loại quái và gán bên ra đều lấy số từ dòng ngẫu nhiên của đợt quái, sinh từ seed của lượt
+Cùng seed thì mọi đợt của lượt ra cùng thứ tự và cùng bên; luật dòng ngẫu nhiên ở `feature-sim-clock/seeded-random`. Nhịp thả và lúc hoãn đếm theo bước nhịp chung.

@@ -1,5 +1,5 @@
 {
- "hash": "0b863ec78d17",
+ "hash": "aa74e1a2c37b",
  "items": {
   "fixed-step": {
    "hash": "f9b63fbdeb5b",
@@ -22,8 +22,8 @@
    "text": "Quái hết máu do tổng của nhiều bên thì vẫn cho tiền đúng một lần, không chia theo bên\nTiền vào ví như mọi lần hạ quái."
   },
   "pause-no-tick": {
-   "hash": "13c3b605b658",
-   "text": "Lúc tạm dừng, lúc chờ hồi sinh và sau khi lượt kết thúc không có nhịp nào chạy"
+   "hash": "2cd50472aabc",
+   "text": "Sau khi lượt kết thúc không có nhịp nào chạy"
   }
  }
 }

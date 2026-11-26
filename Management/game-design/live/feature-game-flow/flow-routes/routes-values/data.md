@@ -1,6 +1,6 @@
 ---
-based-on: d4ab4cd4389f
-refs: feature-run/run-flow/flow-rules@f011f018b6c5, feature-team-select/team-memory/memory-rules@e36a9ec522a1
+based-on: f824a988839a
+refs: feature-run/run-flow/flow-rules@593e3d21d6c1, feature-team-select/team-memory/memory-rules@e36a9ec522a1
 frame: none
 ---
 # Thông số đổi màn
@@ -24,4 +24,4 @@ Yêu cầu tới trong lúc khoá bị bỏ, ghi cảnh báo.
 ### home-first-once | AI 7 | Mỗi lần scene Game sẵn sàng, màn bắt đầu hiện đúng một lần; báo sẵn sàng lặp lại bị bỏ
 
 ### back-key-map | AI 7 | Nút quay lại của máy: ở màn chọn đội như "Quay lại"; ở màn bắt đầu không làm gì
-Trong màn trận giữ luật của `feature-run` (như bấm tạm dừng).
+Trong màn trận giữ luật của `feature-run`.

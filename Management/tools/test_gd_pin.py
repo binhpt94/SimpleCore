@@ -52,6 +52,11 @@ def run(root, *args):
     return code, out.getvalue() + err.getvalue()
 
 
+def listed(text):
+    """The node paths the diff lists (its "node:" lines)."""
+    return {p.strip() for line in text.splitlines() if line.startswith("  node: ") for p in line[8:].split(",")}
+
+
 def node_of(root, path):
     return next(n for n in gd.walk(gd.snapshot(root)["idea"]) if n["path"] == path)
 
@@ -83,7 +88,7 @@ def pin_cases(root):
           ("viết lại [hero-a] Hero đánh gần -> Hero đánh xa" in text, "thêm [hero-c] Hero có giáp" in text,
            "bỏ [hero-b] Hero có máu" in text), (True, True, True))
     check("a ref's diff: the detail rewritten", "viết lại chi tiết [wave-a]" in text and "Đợt sau đông hơn." in text)
-    check("only the nodes that are off", ("## feature-hero/hero-list\n" in text, "## feature-hero\n" in text), (True, False))
+    check("only the nodes that are off", ("feature-hero/hero-list" in listed(text), "feature-hero" in listed(text)), (True, False))
     check("the last line is the command with its code", "--chain --write " in text.strip().splitlines()[-1])
     good = text.strip().split("--write ")[-1].strip()
 
@@ -112,13 +117,69 @@ def pin_cases(root):
     check("no path: usage", code, 2)
 
 
+def all_cases(root):
+    """--all, grouped diffs, --hide, dead refs and --drop-dead, on a tree of its own."""
+    build(root)
+    node(root, "feature-home", idea("home-a", "Màn chính"),
+         head(h(root, ""), f"feature-hero/hero-list/list-spec@{h(root, 'feature-hero/hero-list/list-spec')}"))
+    node(root, "feature-shop", idea("shop-a", "Cửa hàng"), head(h(root, ""), f"feature-home@{h(root, 'feature-home')}"))
+    node(root, "feature-other", idea("other-a", "Khác"), head(h(root, "")))
+    gd.record_versions(root)
+    code, text = run(root, "--all")
+    check("--all: nothing off in the whole tree", (code, "không có gì để ghim" in text), (0, True))
+
+    spec = gd.table_dir(root, "idea") / "feature-hero" / "hero-list" / "list-spec" / "data.md"
+    spec.write_text(spec.read_text(encoding="utf-8").replace("Mỗi hero một ô", "Mỗi hero hai ô"), encoding="utf-8")
+    home = gd.table_dir(root, "idea") / "feature-home" / "data.md"
+    home.write_text(home.read_text(encoding="utf-8").replace("Màn chính", "Màn chính mới"), encoding="utf-8")
+    other = gd.table_dir(root, "idea") / "feature-other" / "data.md"
+    other.write_text(other.read_text(encoding="utf-8").replace("based-on: ", "based-on: 0"), encoding="utf-8")
+    gd.record_versions(root)
+
+    code, text = run(root, "ai/idea/feature-hero/hero-list", "--all")
+    check("<node> --all pulls in a node of another branch that refers below it, and the node referring to that one",
+          ({"feature-home", "feature-shop"} <= listed(text), "feature-other" in listed(text)), (True, False))
+    check("--chain does not see the other branches",
+          "feature-home" in listed(run(root, "ai/idea/feature-hero/hero-list", "--chain")[1]), False)
+
+    code, text = run(root, "--all")
+    check("--all with no node: the whole tree", {"feature-home", "feature-shop", "feature-other"} <= listed(text))
+    blocks = [line for line in text.splitlines() if line.startswith("### [")]
+    check("one block per source change", len(blocks), len(set(blocks)))
+    check("the diff of a change is printed once", text.count("Mỗi hero hai ô"), 1)
+    good = text.strip().split("--write ")[-1].strip()
+    gid = next(line for line in blocks if "list-spec" in line).split("]")[0][5:]
+    code, hidden = run(root, "--all", "--hide", gid)
+    check("--hide prints the block as one line and keeps the code",
+          (f"đã rà: [{gid}]" in hidden, "Mỗi hero hai ô" in hidden, hidden.strip().split("--write ")[-1].strip()),
+          (True, False, good))
+    code, text = run(root, "--all", "--write", good)
+    check("one code pins every node", (code, "Đã ghim" in text, run(root, "--all")[1].count("### [")), (0, True, 0))
+
+    shutil.rmtree(gd.table_dir(root, "idea") / "feature-home")
+    code, text = run(root, "--all")
+    check("a ref to a deleted node is listed as dead", ("ref chết feature-home" in text, "--drop-dead" in text), (True, True))
+    check("dead only: no write command without --drop-dead", "--write " in text, False)
+    code, text = run(root, "--all", "--drop-dead")
+    good = text.strip().split("--write ")[-1].strip()
+    check("the code of a --drop-dead run", ("--drop-dead --write" in text, len(good)), (True, 8))
+    code, text = run(root, "--all", "--write", good)
+    check("a --drop-dead code does not work without the flag", code, 1)
+    code, text = run(root, "--all", "--drop-dead", "--write", good)
+    shop = (gd.table_dir(root, "idea") / "feature-shop" / "data.md").read_text(encoding="utf-8")
+    check("--drop-dead takes the dead ref off, and the empty refs line with it",
+          (code, "feature-home" in shop, "refs:" in shop, node_of(root, "feature-shop")["refs"]), (0, False, False, []))
+    check("then nothing is off", "không có gì để ghim" in run(root, "--all")[1])
+    check("--all and --chain together: usage", run(root, "ai/idea/feature-hero", "--all", "--chain")[0], 2)
+
+
 def hashes_cases(root):
     text = gd_status.hash_lines(root, "ai/idea/feature-hero")
     check("--hashes: one line per node", len([x for x in text.splitlines() if x.startswith("feature-hero")]), 3)
     check("--hashes: an off based-on, with both hashes",
           any(x.startswith("feature-hero/hero-list ") and "based-on LỆCH" in x for x in text.splitlines()))
     check("--hashes: a matching ref", any("ref feature-wave khớp" in x for x in text.splitlines()))
-    check("--hashes: the pin command when something is off", "gd_pin.py ai/idea/feature-hero --chain" in text)
+    check("--hashes: the pin command when something is off", "gd_pin.py ai/idea/feature-hero --all" in text)
 
 
 def main():
@@ -128,6 +189,9 @@ def main():
     try:
         pin_cases(root)
         hashes_cases(root)
+        other = Path(tmp) / "project-all"
+        other.mkdir()
+        all_cases(other)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     failed = [r for r in results if not r[0]]
@@ -138,7 +202,4 @@ def main():
 
 
 if __name__ == "__main__":
-    for stream in (sys.stdout, sys.stderr):
-        if hasattr(stream, "reconfigure"):
-            stream.reconfigure(encoding="utf-8", errors="replace")
     sys.exit(main())

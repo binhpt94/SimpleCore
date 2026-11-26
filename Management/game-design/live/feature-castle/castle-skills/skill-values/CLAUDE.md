@@ -4,7 +4,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Làm gì
 - Giữ trạng thái sẵn sàng và thời gian hồi còn lại của từng kĩ năng; báo cho `feature-hud` để hiện nút.
-- Nhận lệnh bấm từ `feature-hud`. Nếu kĩ năng sẵn sàng, thành còn đứng, không tạm dừng: áp hiệu lực ngay, bắt đầu hồi chiêu.
+- Nhận lệnh bấm từ `feature-hud`. Nếu kĩ năng sẵn sàng, thành còn đứng: áp hiệu lực ngay, bắt đầu hồi chiêu.
 - Sấm sét: lấy mọi quái còn sống có khoảng cách tới mép thành gần nhất ≤ 6u (hai bên), trừ máu mỗi con bằng sát thương Sấm sét hiện tại.
 - Băng giá: gắn trạng thái "chậm" lên mọi quái đang sống trong thời gian chậm hiện tại; quái bị chậm có tốc độ đi ×0.5 và giây mỗi đòn ×2 (`feature-enemy/enemy-behavior/enemy-move-values`).
 - Cổ vũ: mọi hero đang đứng trên chiến trường (không gục) cộng máu = tỉ lệ hồi hiện tại × máu tối đa hiện tại của nó, chặn ở máu tối đa.
@@ -42,9 +42,7 @@ Cân bằng dự kiến: Sấm sét dùng được 3 lần mỗi phút, mỗi l�
 - Quái bị chậm rồi bị hạ: trạng thái chậm và dấu chậm biến mất cùng quái.
 - Băng giá trúng quái đang chậm: thời gian chậm đặt lại về đủ (5s ở lv1), mức chậm vẫn 50%.
 - Cổ vũ trên hero đầy máu: không đổi gì, hiệu ứng vẫn hiện.
-- Tạm dừng: không bấm được; hồi chiêu và thời gian chậm còn lại đứng yên.
 - Thành bị phá: không bấm được nữa; quái đang chậm giữ nguyên tới khi `feature-run` dừng trận.
-- Băng giá đang làm chậm quái khi thành bị phá lần đầu (luồng hồi sinh thành): thời gian chậm còn lại và hồi chiêu đứng yên suốt luồng, chạy tiếp khi trận chạy tiếp. (Chuyển từ nhánh thứ tự hồi sinh ở popup hồi sinh, 2026-11-26.)
 - Hồi chiêu đang chạy khi chuyển sang đợt mới: không đặt lại; hồi chiêu chạy suốt trận, kể cả lúc nghỉ 3s giữa hai đợt.
 
 ## Đã tự quyết
@@ -54,6 +52,7 @@ Cân bằng dự kiến: Sấm sét dùng được 3 lần mỗi phút, mỗi l�
 - **Làm mới, không cộng dồn Băng giá.** Một mức chậm, dễ đọc.
 
 - **Frame `thunder-zone.frame` (2026-11-23).** Vùng Sấm sét `use` tầm tự bắn (`feature-castle/castle-attack/auto-shot-values#shot-range`), đúng quyết định "vùng Sấm sét bằng tầm tự bắn". Số tính ra: vùng trái bắt đầu ở x=-7.5u = -1.5u − 6u. Vùng chồng lên thành (`overlap`) chỉ ở cạnh chung, cố ý.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ điều kiện "không tạm dừng" khi bấm, trường hợp biên tạm dừng và trường hợp Băng giá trong luồng hồi sinh thành.
 
 ## Chưa rõ
 - Sấm sét 80 sát thương có thể quá mạnh đợt 1-10 (hạ ngay mọi Lính, Sói): giữ theo bộ số chung; đề xuất xem lại sau chơi thử, có thể 50.

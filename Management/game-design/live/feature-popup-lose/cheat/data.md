@@ -1,6 +1,6 @@
 ---
-based-on: aa89ff39c089
-refs: feature-popup-lose/lose-result/result-spec@a7d56f47797b, feature-popup-lose/lose-actions/actions-spec@a6b5a02909a8, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c, feature-run/run-score/score-rules@1090f4b26dd9
+based-on: 747e72f87525
+refs: feature-popup-lose/lose-result/result-spec@a7d56f47797b, feature-popup-lose/lose-actions/actions-spec@a6b5a02909a8, feature-popup/popup-layer/stack-rules@5f909869fc3d, feature-hud/hud-layout/layout-spec@aa79f655e44b, feature-run/run-score/score-rules@2ff455851b82
 ---
 # Cheat: popup thua
 

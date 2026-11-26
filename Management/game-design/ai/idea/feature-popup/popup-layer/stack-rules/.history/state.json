@@ -1,13 +1,13 @@
 {
- "hash": "fa85847e35ee",
+ "hash": "5f909869fc3d",
  "items": {
   "stack-max": {
-   "hash": "660a745e6c30",
-   "text": "Tối đa 3 popup chồng cùng lúc; mở cái thứ 4 thì bị từ chối và ghi lỗi nêu id\nGame hiện chỉ mở một popup mỗi lúc (popup tạm dừng hoặc popup thua; xác nhận bỏ lượt nằm trong popup tạm dừng); dư chỗ cho popup sau này. Đã loại: không giới hạn (lỗi mở lặp không bị phát hiện)."
+   "hash": "83b12c85463b",
+   "text": "Tối đa 3 popup chồng cùng lúc; mở cái thứ 4 thì bị từ chối và ghi lỗi nêu id\nGame hiện chỉ mở một popup mỗi lúc (popup thua); dư chỗ cho popup sau này. Đã loại: không giới hạn (lỗi mở lặp không bị phát hiện)."
   },
   "same-id-once": {
-   "hash": "87d95b853a64",
-   "text": "Một id popup chỉ mở một bản mỗi lúc; xin mở id đang mở thì bị từ chối, popup đang mở giữ nguyên\nBấm nút tạm dừng hai lần nhanh không ra hai popup."
+   "hash": "d9259dc21566",
+   "text": "Một id popup chỉ mở một bản mỗi lúc; xin mở id đang mở thì bị từ chối, popup đang mở giữ nguyên\nHai lần xin mở liền nhau không ra hai popup."
   },
   "backdrop-dim": {
    "hash": "336d33fe10ee",
@@ -18,16 +18,16 @@
    "text": "Bấm vào nền che không làm gì: không đóng popup, không xuống phần bên dưới"
   },
   "back-key-nothing": {
-   "hash": "70553b2fa589",
-   "text": "Khi có popup mở, nút quay lại của điện thoại chỉ chuyển cho feature của popup trên cùng; dịch vụ không tự đóng popup và không chuyển xuống phần bên dưới\nFeature của popup tự quyết nút quay lại làm gì (ví dụ `feature-popup-pause/pause-popup/pause-popup-spec`); không khai thì nút không có tác dụng. Popup vẫn chỉ đóng khi feature gọi yêu cầu (`feature-popup/popup-request`)."
+   "hash": "862c468a8e9f",
+   "text": "Khi có popup mở, nút quay lại của điện thoại chỉ chuyển cho feature của popup trên cùng; dịch vụ không tự đóng popup và không chuyển xuống phần bên dưới\nFeature của popup tự quyết nút quay lại làm gì (ví dụ popup thua bỏ qua nút này); không khai thì nút không có tác dụng. Popup vẫn chỉ đóng khi feature gọi yêu cầu (`feature-popup/popup-request`)."
   },
   "input-instant": {
    "hash": "c32a7410b1d3",
    "text": "Popup hiện và đóng tức thì; popup trên cùng nhận bấm ngay khung hình nó hiện"
   },
   "runs-while-frozen": {
-   "hash": "1acef0975a2d",
-   "text": "Popup hiện, nhận bấm và đóng được cả khi trận đang đứng yên\nPopup tạm dừng và popup thua đều mở lúc trận đã dừng."
+   "hash": "4bb1afb84a92",
+   "text": "Popup hiện, nhận bấm và đóng được cả khi trận đang đứng yên\nPopup thua mở lúc trận đã dừng."
   }
  }
 }

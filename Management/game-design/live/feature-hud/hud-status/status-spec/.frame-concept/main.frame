@@ -5,14 +5,14 @@ ai: 7
 why: thanh máu giữa mép trên, rộng nhất nên mắt rơi vào trước; chữ "1000/1000" căn giữa trên thanh, đọc số và tỉ lệ một lần liếc
 why: xu và số tiền là một nhóm (cách 8), đứng bên trái máu; ô đợt ở mép phải, cùng hàng và cùng cao 60 để mép trên đọc thành một dòng
 why: banner "Đợt N" dưới thanh máu, cách 8, vẫn trong dải trên 140 nên không che chiến trường; chạm đi xuyên
-why: chỗ từng ô theo feature-hud/hud-layout/layout-spec (tiền từ 224 đến 524, máu 660–1260, đợt 1580–1880)
+why: chỗ từng ô theo feature-hud/hud-layout/layout-spec (tiền 40–340, máu 660–1260, đợt 1580–1880); tiền và đợt đối xứng hai góc
 why: không có tham chiếu phù hợp (chưa có ảnh tham chiếu nào)
 use top-h = feature-hud/hud-layout/layout-spec#top-h
 let info-y = 10
 let info-h = 60
-let coin-x = 224
+let coin-x = 40
 let coin-w = 60
-let money-x = 292
+let money-x = 108
 let money-w = 232
 let hp-x = 660
 let hp-w = 600

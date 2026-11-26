@@ -1,0 +1,48 @@
+kind: ui
+title: Cheat HUD: giữa trận, thành nguy, một kĩ năng đang hồi
+use top-h = feature-hud/hud-layout/layout-spec#top-h
+use bottom-h = feature-hud/hud-layout/layout-spec#bottom-h
+use skill = feature-hud/hud-layout/layout-spec#skill
+use info-y = feature-hud/hud-status/status-spec#info-y
+use info-h = feature-hud/hud-status/status-spec#info-h
+use coin-x = feature-hud/hud-status/status-spec#coin-x
+use coin-w = feature-hud/hud-status/status-spec#coin-w
+use money-x = feature-hud/hud-status/status-spec#money-x
+use money-w = feature-hud/hud-status/status-spec#money-w
+use hp-x = feature-hud/hud-status/status-spec#hp-x
+use hp-w = feature-hud/hud-status/status-spec#hp-w
+use hp-num-x = feature-hud/hud-status/status-spec#hp-num-x
+use hp-num-y = feature-hud/hud-status/status-spec#hp-num-y
+use hp-num-w = feature-hud/hud-status/status-spec#hp-num-w
+use hp-num-h = feature-hud/hud-status/status-spec#hp-num-h
+use wave-x = feature-hud/hud-status/status-spec#wave-x
+use wave-w = feature-hud/hud-status/status-spec#wave-w
+use banner-x = feature-hud/hud-status/status-spec#banner-x
+use banner-y = feature-hud/hud-status/status-spec#banner-y
+use banner-w = feature-hud/hud-status/status-spec#banner-w
+use banner-h = feature-hud/hud-status/status-spec#banner-h
+use bottom-y = feature-hud/hud-skill-button/skill-button-spec#bottom-y
+use cluster-x = feature-hud/hud-skill-button/skill-button-spec#cluster-x
+use cluster-y = feature-hud/hud-skill-button/skill-button-spec#cluster-y
+use cluster-w = feature-hud/hud-skill-button/skill-button-spec#cluster-w
+use thunder-x = feature-hud/hud-skill-button/skill-button-spec#thunder-x
+use frost-x = feature-hud/hud-skill-button/skill-button-spec#frost-x
+use rally-x = feature-hud/hud-skill-button/skill-button-spec#rally-x
+use sec-x = feature-hud/hud-skill-button/skill-button-spec#sec-x
+use sec-y = feature-hud/hud-skill-button/skill-button-spec#sec-y
+use sec-w = feature-hud/hud-skill-button/skill-button-spec#sec-w
+use sec-h = feature-hud/hud-skill-button/skill-button-spec#sec-h
+- top        rect   x=0 y=0 w=1920 h=top-h label="Mép trên"
+- bottom     rect   x=0 y=bottom-y w=1920 h=bottom-h label="Mép dưới (bên trái là thanh nâng cấp, feature-hud-upgrade)"
+- coin       icon   x=coin-x y=info-y w=coin-w h=info-h parent=top label="xu"
+- money      label  x=money-x y=info-y w=money-w h=info-h parent=top label="245"
+- hp         bar    x=hp-x y=info-y w=hp-w h=info-h fill=0.3 parent=top label="Máu thành"
+- hp-number  label  x=hp-num-x y=hp-num-y w=hp-num-w h=hp-num-h parent=hp overlap label="300/1000"
+- wave       label  x=wave-x y=info-y w=wave-w h=info-h parent=top label="Đợt 7"
+- banner     label  x=banner-x y=banner-y w=banner-w h=banner-h parent=top label="Đợt 7"
+- cluster    rect   x=cluster-x y=cluster-y w=cluster-w h=skill parent=bottom label="Cụm kĩ năng"
+- thunder    button x=thunder-x y=0 w=skill h=skill parent=cluster label="Sấm sét (sẵn sàng)"
+- frost      button x=frost-x y=0 w=skill h=skill parent=cluster label="Băng giá (đang hồi)"
+- rally      button x=rally-x y=0 w=skill h=skill parent=cluster label="Cổ vũ (sẵn sàng)"
+- cover      bar    x=0 y=0 w=skill h=skill fill=0.34 parent=frost label="Lớp phủ: còn 12/35 giây"
+- seconds    label  x=sec-x y=sec-y w=sec-w h=sec-h parent=frost overlap label="12"

@@ -217,9 +217,15 @@ def write_js(out, name, data):
 
 def write_gamedesign(root=None):
     """Writes Management/data/gamedesign.js from Management/game-design (live and idea) and returns the data.
-    Also keeps the nodes' history (gamedesign.record_versions). It never changes live."""
+    Also keeps the nodes' history (gamedesign.record_versions), approves passing nodes in Full Auto and rebuilds live
+    from approved.json (gamedesign.auto_approve, build_live)."""
     root = Path(root) if root else HERE.parent.parent
     gamedesign.record_versions(root)      # history: what changed in data.md since the last run
+    try:
+        gamedesign.migrate_approvals(root)      # once: approved.json from the old live
+        gamedesign.auto_approve(root)           # Full Auto approves passing nodes; live is rebuilt either way
+    except OSError as ex:      # another build runs, or live is held: the page still shows the data
+        print(f"live chưa dựng lại: {ex}", file=sys.stderr)
     data = gamedesign.snapshot(root)
     data["generatedAt"] = time.strftime("%Y-%m-%dT%H:%M:%S")
     write_js(root / "Management" / "data" / "gamedesign.js", "CORESIMPLE_GAMEDESIGN", data)

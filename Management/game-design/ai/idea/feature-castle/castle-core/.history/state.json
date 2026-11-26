@@ -1,5 +1,5 @@
 {
- "hash": "54dc235e583a",
+ "hash": "81d0b06388c9",
  "items": {
   "castle-one": {
    "hash": "3c6e72fadca2",
@@ -10,16 +10,12 @@
    "text": "Thành có máu; quái tới thành thì đánh trừ máu thành\nMáu là thước đo duy nhất cho biết thành đang an toàn hay sắp nguy. Chỉ quái làm mất máu thành."
   },
   "castle-no-regen": {
-   "hash": "81e1e60b894a",
-   "text": "Máu thành không tự hồi trong trận\nMáu mất ở đợt trước kéo áp lực sang đợt sau; không có lúc nghỉ nào đầy máu lại. Chỉ hai cách có thêm máu: nâng cấp máu (`feature-castle/castle-upgrade-effects`) và hồi sinh thành. Đã loại: tự hồi chậm theo thời gian, hồi đầy khi dọn sạch đợt."
+   "hash": "dbb5855c96eb",
+   "text": "Máu thành không tự hồi trong trận\nMáu mất ở đợt trước kéo áp lực sang đợt sau; không có lúc nghỉ nào đầy máu lại. Chỉ một cách có thêm máu: nâng cấp máu (`feature-castle/castle-upgrade-effects`). Đã loại: tự hồi chậm theo thời gian, hồi đầy khi dọn sạch đợt."
   },
   "castle-destroyed": {
-   "hash": "8d238d14f1fb",
-   "text": "Máu thành về 0 thì thành bị phá và báo `feature-run` đúng một lần\nMọi việc sau đó (dừng trận, đề nghị hồi sinh hay báo thua) là của `feature-run`."
-  },
-  "castle-revive-restore": {
-   "hash": "6ca00f183a42",
-   "text": "Được hồi sinh thì thành đứng lại với một phần máu tối đa; cấp nâng cấp và máu tối đa giữ nguyên\nHồi sinh do `feature-run` ra lệnh sau khi người chơi xem xong quảng cáo; thành chỉ đổi máu hiện tại. Bị phá lần nữa thì báo lại như lần đầu."
+   "hash": "75d5bad0984f",
+   "text": "Máu thành về 0 thì thành bị phá và báo `feature-run` đúng một lần\nMọi việc sau đó (dừng trận, báo thua) là của `feature-run`."
   },
   "castle-hero-base": {
    "hash": "2369819f4b42",

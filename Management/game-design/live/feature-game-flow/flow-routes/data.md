@@ -1,5 +1,5 @@
 ---
-based-on: 345954ac135f
+based-on: 98a7977ed8e0
 refs: glossary#screen@939e5a4868a2
 ---
 # Các màn chính và đường đi giữa chúng
@@ -9,15 +9,15 @@ Scene Game có ba màn chính: màn bắt đầu, màn chọn đội, màn trậ
 ## Ý cốt lõi
 
 ### three-screens | AI 7 | Scene Game có đúng ba màn chính: bắt đầu, chọn đội, trận; mỗi lúc hiện đúng một
-Popup (thua, tạm dừng, hồi sinh) không phải màn chính; chúng mở trên màn trận.
+Popup thua không phải màn chính; nó mở trên màn trận.
 
 ### first-is-home | AI 7 | Scene Game sẵn sàng thì màn đầu tiên là màn bắt đầu, mở một lần cho mỗi lần tải Game
 
 ### direct-senders | AI 7 | Màn bắt đầu và màn chọn đội gửi yêu cầu thẳng cho điều hướng màn
 "Chơi", "Vào trận" và "Quay lại" là ba yêu cầu này.
 
-### leave-via-run | AI 7 | Lựa chọn rời trận (chơi lại, về màn bắt đầu, bỏ lượt) tới điều hướng màn qua lượt chơi, sau khi lượt chơi đã dọn trận
-Popup thua và popup tạm dừng báo lượt chơi; lượt chơi kết thúc lượt, dọn trận rồi chuyển lựa chọn.
+### leave-via-run | AI 7 | Lựa chọn rời trận (chơi lại, về màn bắt đầu) tới điều hướng màn qua lượt chơi, sau khi lượt chơi đã dọn trận
+Popup thua báo lượt chơi; lượt chơi kết thúc lượt, dọn trận rồi chuyển lựa chọn.
 
 ### battle-handover | AI 7 | "Vào trận" giao đội đã xác nhận cho lượt chơi; màn trận chỉ hiện khi lượt chơi báo trận đã dựng xong
 Dựng lỗi thì ở lại màn chọn đội với đội vừa xác nhận, cho bấm lại.

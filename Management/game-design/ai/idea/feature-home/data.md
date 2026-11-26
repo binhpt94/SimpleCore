@@ -1,5 +1,5 @@
 ---
-based-on: 6181a7c21bf0
+based-on: ca84fa282d14
 by: home-return-from-loss=gpt@r2-1#home-return-from-loss, home-record=gpt@r2-1#home-score-record
 ---
 # Màn bắt đầu

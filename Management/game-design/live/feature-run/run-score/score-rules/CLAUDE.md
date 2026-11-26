@@ -35,15 +35,14 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Dữ liệu lưu là số âm:** lượt chơi coi kỉ lục là 0 (luật giá trị là của lượt chơi, `feature-save` không xét).
 - **`feature-save` ghi thất bại:** kỉ lục trong lúc game mở vẫn đúng; không báo lỗi cho người chơi.
 - **Báo dọn sạch tới hai lần cho cùng một đợt:** chỉ cộng một lần (đợt sau phải có số lớn hơn đợt đã tính).
-- **Bỏ lượt ngay khi vào trận:** điểm 0, như thua ở đợt 1.
-- **Thành bị phá lần đầu rồi hồi sinh:** điểm không chốt, không đặt lại; cộng tiếp từ số đang có. Kỉ lục chỉ so khi lượt kết thúc thật.
-- **Đợt dọn sạch cùng khung hình thành bị phá lần đầu:** giữ chờ: hồi sinh thành công thì cộng; chốt thua thì không cộng, theo luật "thua trước" (ý `same-tick-clear` của `feature-popup-revive`; sửa 2026-11-25).
+- **Đợt dọn sạch cùng khung hình thành bị phá:** tin dọn sạch bị bỏ, không cộng, theo luật "thua trước".
 
 ## Đã tự quyết
 - **Kỉ lục hỏng coi là 0.** Không chặn người chơi vì lỗi lưu. Đã loại: hiện thông báo lỗi.
 - **Ghi trước khi popup thua hiện.** Tránh mất kỉ lục khi tắt game giữa popup.
 - **Chống cộng trùng theo số đợt.** Phòng khi `feature-wave` báo lặp.
 - **Thêm `record-keep-on-fail`, `record-retry` (2026-11-26).** Từ góp ý GPT khi tách `feature-save` (ý `run-keep-on-fail`, `run-retry-on-resume`, `run-retry-next-loss` của node đó). Thử lại chấm 5 vì lỗi ghi hiếm.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp bỏ lượt và hồi sinh thành; tin dọn sạch cùng khung hình thành bị phá bị bỏ, không còn giữ chờ.
 
 ## Chưa rõ
 - Không có điểm chặn.

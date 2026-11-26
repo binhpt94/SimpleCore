@@ -73,7 +73,7 @@ Xem lại khi đổi: hệ số đợt, đòn tự bắn và Sấm sét của th
 | Cấp tối đa | không có | |
 | Tiền đầu lượt | 50 xu | đợt 1–2 dễ |
 
-Khác: điểm = số đợt đã dọn sạch; tạm dừng thì mọi thứ đứng yên.
+Khác: điểm = số đợt đã dọn sạch.
 
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
@@ -95,6 +95,7 @@ Khác: điểm = số đợt đã dọn sạch; tạm dừng thì mọi thứ đ
 - **Trùm máu gốc 800 → 400, sát thương 40 giữ nguyên (2026-11-23, quyết định đã chốt).** Theo `feature-balance/balance-difficulty-curve/break-forecast`; đợt Trùm là ngoại lệ có chủ đích về độ khó.
 - **Nghĩa "hiệu lực" kĩ năng đã chốt (2026-11-23).** Mỗi cấp +20% hiệu lực lv1: Sấm sét +16 sát thương, Băng giá +1 s thời gian chậm (mức chậm giữ 50%), Cổ vũ +6% máu tối đa hồi; hồi chiêu không đổi. Đã đối chiếu `feature-castle/castle-skills/skill-values`, `feature-castle/castle-upgrade-effects/upgrade-effect-values`, `feature-upgrade/upgrade-effect/effect-numbers`: cả ba dùng cùng nghĩa.
 - **Rà lại sau khi node báo lên cấp của nâng cấp được viết lại (2026-11-25).** `feature-upgrade/upgrade-effect/effect-numbers` giờ chỉ giữ luật báo "mục X lên cấp L", không còn chép mức tăng; mức tăng mỗi cấp vẫn ở node cách tính cấp của nhánh hero và `feature-castle/castle-upgrade-effects/upgrade-effect-values`, khớp bảng này. Không đổi số nào.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ câu "tạm dừng thì mọi thứ đứng yên".
 
 ## Chưa rõ
 - Không có điểm chặn.

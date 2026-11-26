@@ -5,3 +5,5 @@
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "2d489af38e03"}
 {"at": "2026-11-24 12:46:14", "event": "promote", "by": "người (Sync)", "hash": "2d489af38e03"}
 {"at": "2026-11-25 12:56:09", "event": "promote", "by": "người (Sync)", "hash": "2d489af38e03"}
+{"at": "2026-11-27 00:12:49", "event": "approve", "hash": "618ab987456eb9082ab36f3435a79796dbe74c7a", "by": "người (Sync)"}
+{"at": "2026-11-27 00:12:49", "event": "approve", "hash": "42777f2c479389b7b51477a9f587bf31fbd2d218", "by": "tự duyệt (Full Auto)"}

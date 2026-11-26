@@ -13,11 +13,6 @@ namespace Game.Run
     {
         [SerializeField] private RunConfig config;
 
-        [Tooltip("Dev only: build cheat state feature-popup-revive/cheat#waiting-ad (battle at wave 8, castle just fell, revive popup waiting for the ad). Off on the real asset.")]
-        [SerializeField] private bool cheatWaitingAd;
-
-        internal bool CheatWaitingAd => cheatWaitingAd;
-
         public override void Install(IServiceRegistry registry)
         {
             if (registry == null) throw new ArgumentNullException(nameof(registry));
@@ -49,16 +44,6 @@ namespace Game.Run
                 config.PauseOnLeavingApp, config.BackKeyPauses, clockWaits));
             session.Join(new LeftoverPopupCheck(flow, () => popups.OpenIds.Select(id => id.ToString()).ToList(),
                 frames, new UnityRunLog()));
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (cheatWaitingAd)
-            {
-                // Wave, Castle and Ads install after the run: their cheats are resolved when the session runs.
-                session.Join(new ReviveWaitingAdCheat(flow, simClock, frames, config.DefaultTeam,
-                    () => registry.Resolve<Game.Wave.IWaveCheat>(),
-                    () => registry.Resolve<Game.Ads.IAdsCheat>(),
-                    () => registry.Resolve<Game.Castle.ICastleFallCheat>()));
-            }
-#endif
         }
     }
 }

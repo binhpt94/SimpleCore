@@ -1,6 +1,6 @@
 ---
-based-on: d386ccae4d88
-refs: feature-run/run-score@3d29bb683b7c, feature-castle/castle-skills@8bc45d0edc8d, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-wallet/income/income-amounts@f36980378e51
+based-on: 31cb7598b529
+refs: feature-run/run-score@691534d6dde7, feature-castle/castle-skills@d5a006594b09, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-wallet/income/income-amounts@f36980378e51
 frame: none
 ---
 # Giá trị đầu lượt
@@ -22,7 +22,5 @@ Máu tối đa về 1000 dù lượt trước đã nâng.
 
 ### start-team-3 | AI 8 | Đầu lượt cả 3 hero của đội đã chọn sinh ra ở thành cùng lúc, đủ máu
 Đội 3 hero không trùng; trong trận không đổi đội.
-
-### start-revive-1 | AI 7 | Đầu lượt còn đúng 1 lần hồi sinh thành, kể cả khi lượt trước đã dùng
 
 ### start-before-wave | AI 7 | Mọi giá trị trên đã đặt xong và HUD đã hiện đúng trước khi quái đầu tiên của đợt 1 ra

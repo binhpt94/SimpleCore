@@ -39,7 +39,6 @@ Mỗi nút đại diện cho:
 ## Trường hợp biên
 - **Đội không đủ 3 hero** (lỗi dữ liệu): `item-set` đã báo lỗi; thanh không tự tạo ít nút hơn.
 - **Hero gục**: nút hero vẫn ở nguyên chỗ, vẫn bấm được nếu đủ tiền.
-- **Tạm dừng**: thanh vẫn hiện, mọi nút ở trạng thái mờ.
 - **Lượt kết thúc**: thanh ẩn khi popup kết thúc lượt hiện; chạm trong khoảng giữa thành về 0 máu và lúc popup hiện không mua được (`purchase-rules`).
 - **Lượt mới**: thanh tạo lại 6 nút theo đội mới.
 - **Nghỉ giữa đợt**: thanh hiện, nút sáng/mờ như thường.
@@ -48,6 +47,7 @@ Mỗi nút đại diện cho:
 - **6 nút, không thêm nút phụ.** Đủ cho mọi mục, một chạm là mua. Đã loại: nút thu gọn thanh.
 - **Hero trước, thành sau.** Khớp thứ tự `item-set`. Đã loại: thành trước.
 - **Vị trí và cỡ nút chỉ ước lượng, trong frame `main.frame` (2026-11-23, luật frame mới).** Thanh x 40–1380 px ở dải dưới, cách cụm kĩ năng (x 1420) 40 px; nút 200x140 px (`use` từ `feature-hud/hud-layout/layout-spec`); nút cùng nhóm cách 10 px, hai nhóm cách 70 px nên `group-gap` thoả. Cỡ cuối cùng do người làm giao diện chỉnh.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - `feature-hud` cần biết mép dưới đã do thanh nâng cấp giữ.

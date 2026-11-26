@@ -1,0 +1,11 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,release_seed,Seed của bản phát hành,,ngẫu nhiên mỗi lượt,như IDEA,như IDEA,Người quyết: mỗi lượt một thứ tự quái mới
+2,release_seed_log,Ghi seed ở bản phát hành,,ghi vào log lúc vào trận,như IDEA,như IDEA,Người quyết: lặp lại đúng lượt khi báo lỗi
+3,dev_seed,Seed của bản dev,,lấy từ config,như IDEA,như IDEA,Người quyết: seed cố định để test lặp lại được
+4,dev_seed_default,Seed mặc định trong config dev,,12345,như IDEA,như IDEA,Dự kiến; số nào cũng được miễn cố định
+5,dev_seed_print,In seed ở bản dev,,in ra console lúc vào trận,như IDEA,như IDEA,Người quyết
+6,dev_seed_step,Seed của mỗi lượt ở bản dev,,đúng seed config,như IDEA,như IDEA,Theo góp ý GPT seed-dev-dung-config: chơi lại trong cùng lần mở game ra đúng lượt vừa chơi
+7,seed_min,Seed nhỏ nhất,,0,như IDEA,như IDEA,Số nguyên không âm
+8,seed_max,Seed lớn nhất,,2147483647,như IDEA,như IDEA,Vừa số nguyên 32 bit

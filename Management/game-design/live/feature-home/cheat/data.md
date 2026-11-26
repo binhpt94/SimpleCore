@@ -1,6 +1,6 @@
 ---
 based-on: 39e910418294
-refs: feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c, feature-home/home-screen/home-screen-spec@eecc5b73afde, feature-run/run-score/score-rules@1090f4b26dd9
+refs: feature-hud/hud-layout/layout-spec@aa79f655e44b, feature-home/home-screen/home-screen-spec@eecc5b73afde, feature-run/run-score/score-rules@2ff455851b82
 ---
 # Cheat: màn bắt đầu
 

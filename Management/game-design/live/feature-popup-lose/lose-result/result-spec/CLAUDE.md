@@ -10,7 +10,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Thông số
 | Thông số | Giá trị | Đơn vị | Lí do |
 |---|---|---|---|
-| Số popup thua mỗi lượt | tối đa 1 | popup | Chỉ khi thua, không khi bỏ lượt |
+| Số popup thua mỗi lượt | tối đa 1 | popup | Chỉ khi thua |
 | Dòng luôn hiện | 3 (tiêu đề, điểm, kỉ lục) | dòng | `lose-result` |
 | Dòng có điều kiện | 1 ("Kỉ lục mới!") | dòng | Chỉ khi cờ bật |
 | Chữ tiêu đề | "Thành đã bị phá" | | Nói vì sao thua |
@@ -29,7 +29,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Điểm 0, kỉ lục 0:** "Trụ được 0 đợt", "Kỉ lục: 0 đợt", không có dòng kỉ lục mới.
 - **Phá kỉ lục:** N = M, có dòng kỉ lục mới.
 - **Bằng kỉ lục cũ:** N = M nhưng không có dòng kỉ lục mới.
-- **Quảng cáo hồi sinh không xem hết hoặc không tải được:** dòng "Quảng cáo chưa hoàn tất" ở chỗ dòng "Kỉ lục mới!"; phá kỉ lục thì chỉ hiện "Kỉ lục mới!". Không thêm frame: chung chỗ, chung cỡ với dòng kỉ lục mới.
 - **Ghi kỉ lục xuống máy thất bại:** popup vẫn hiện đúng kỉ lục trong lúc game mở, không báo lỗi.
 
 ## Đã tự quyết
@@ -39,6 +38,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Dòng "Kỉ lục mới!" có dải nền riêng (2026-11-24).** Vòng 3 đòi lượt phá kỉ lục "trông vui hơn hẳn"; chữ trơn không làm được điều đó và ảnh claude-concept cũng không thể hiện (chữ do tool in). Thêm hình `new-record-bg` (round-rect 400x70, cùng chỗ với dòng chữ) để @ClaudeImage vẽ thành một phần riêng; dải nảy cùng dòng chữ. Đã loại: chỉ đổi màu chữ (không vẽ được phần, nhìn không khác bao nhiêu); pháo giấy (để FULL).
 - **Frame vẽ cả popup (2026-11-23).** Frame có nền che toàn màn (cờ `overlap` cho khung popup vì cố ý nằm trên nền che) và hai nút lấy số từ `feature-popup-lose/lose-actions/actions-spec` (`btn-y`, `replay-x`, `replay-w`, `home-x`, `home-w`). Node này sở hữu vị trí các dòng chữ (`text-x`, `text-w`, `title-y`, `title-h`, `row-h`, `score-y`, `record-y`, `newrec-*`); actions-spec `use` lại. Số mẫu chỉ để nhìn bố cục và gen ảnh concept, không phải thông số. Đã loại: mỗi node chỉ vẽ nửa của mình kèm hộp giữ chỗ (không thấy được popup thật, không dùng để gen ảnh được).
 - **Dòng "Kỉ lục mới!" nằm ở khoảng trống giữa kỉ lục và hai nút** (y 340–410 trong khung, nút bắt đầu ở 540). Không có dòng này thì khoảng trống để trống; bố cục hai trạng thái giữ nguyên, nút không nhảy chỗ.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ dòng "Quảng cáo chưa hoàn tất" và vế "không khi bỏ lượt".
 
 ## Chưa rõ
 - Không có điểm chặn.

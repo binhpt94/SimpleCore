@@ -5,3 +5,6 @@
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "ba593a5e3e09"}
 {"at": "2026-11-23 17:34:15", "event": "promote", "by": "người (Sync)", "hash": "ba593a5e3e09"}
 {"at": "2026-11-25 11:26:00", "event": "promote", "by": "người (Sync)", "hash": "ba593a5e3e09"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "ba02d7fd60f1", "previous": "ba593a5e3e09", "added": [], "removed": [], "rewritten": [{"id": "buy-when", "old": "Mua được khi trận đang chạy, kể cả lúc nghỉ giữa đợt; không mua được khi tạm dừng hoặc lượt đã kết thúc\nLượt kết thúc là từ khung hình thành về 0 máu.", "new": "Mua được khi trận đang chạy, kể cả lúc nghỉ giữa đợt; không mua được khi lượt đã kết thúc\nLượt kết thúc là từ khung hình thành về 0 máu."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "1fc133bc0cf164c100b706427115a3a0c2172bcd", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:21:41", "event": "approve", "hash": "1cbdd77096f1a33720b9923e0950f05fde0e75ab", "by": "tự duyệt (Full Auto)"}

@@ -2,3 +2,5 @@
 {"at": "2026-11-25 01:23:28", "event": "promote", "by": "người (Sync)", "hash": "66f0417d12da"}
 {"at": "2026-11-25 11:45:01", "event": "promote", "by": "người (Sync)", "hash": "66f0417d12da"}
 {"at": "2026-11-26 01:17:49", "event": "promote", "by": "người (Sync)", "hash": "66f0417d12da"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "32933d60f1d0", "previous": "66f0417d12da", "added": [], "removed": [], "rewritten": [{"id": "back-key-map", "old": "Nút quay lại của máy: ở màn chọn đội như \"Quay lại\"; ở màn bắt đầu không làm gì\nTrong màn trận giữ luật của `feature-run` (như bấm tạm dừng).", "new": "Nút quay lại của máy: ở màn chọn đội như \"Quay lại\"; ở màn bắt đầu không làm gì\nTrong màn trận giữ luật của `feature-run`."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "2ae26657d1b3dc406961fad4dce1f5ee41557c82", "by": "tự duyệt (Full Auto)"}

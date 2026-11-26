@@ -1,5 +1,5 @@
 ---
-based-on: d1732f41e794
+based-on: 83ee7a4052d1
 refs: glossary#seed@8db59a28bcae, glossary#run@721a2b6e316e
 ---
 # Ngẫu nhiên theo seed

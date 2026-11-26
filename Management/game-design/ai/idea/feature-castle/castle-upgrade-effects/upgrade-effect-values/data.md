@@ -1,6 +1,6 @@
 ---
 based-on: 2c1e443d0ced
-refs: feature-castle/castle-core/castle-body-values@b648ec300023, feature-castle/castle-attack/auto-shot-values@73b7dbaf8425, feature-castle/castle-skills/skill-values@ad45ef4fdcc9
+refs: feature-castle/castle-core/castle-body-values@3e635d304ab3, feature-castle/castle-attack/auto-shot-values@73b7dbaf8425, feature-castle/castle-skills/skill-values@ad45ef4fdcc9
 frame: none
 ---
 # Mức tăng mỗi cấp nâng thành

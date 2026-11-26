@@ -1,6 +1,6 @@
 ---
 based-on: 5e6dc1e8532e
-refs: feature-wave/wave-gap@d9d4c35f6907, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+refs: feature-wave/wave-gap@d9d4c35f6907, feature-hud/hud-layout/layout-spec@aa79f655e44b
 ---
 # Ba ô thông tin trận và thông báo đợt
 

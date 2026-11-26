@@ -3,3 +3,4 @@
 {"at": "2026-11-25 11:45:01", "event": "promote", "by": "người (Sync)", "hash": "cc2084b931e2"}
 {"at": "2026-11-26 18:15:28", "event": "data", "hash": "b4c7f6741229", "previous": "cc2084b931e2", "added": [], "removed": [], "rewritten": [{"id": "only-record-saved", "old": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game\nKỉ lục do `feature-run/run-score/score-rules` lưu. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống lúc game đang mở.", "new": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game\nKỉ lục do `feature-run/run-score/score-rules` quyết và giao `feature-save` ghi xuống máy. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống lúc game đang mở."}]}
 {"at": "2026-11-26 18:22:02", "event": "promote", "by": "người (Sync)", "hash": "b4c7f6741229"}
+{"at": "2026-11-27 00:21:41", "event": "approve", "hash": "b1c3571daa125f9b68cc6a94fa4f6662a8a3fcf7", "by": "tự duyệt (Full Auto)"}

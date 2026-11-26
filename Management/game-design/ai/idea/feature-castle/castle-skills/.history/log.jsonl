@@ -4,3 +4,6 @@
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "8bc45d0edc8d"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "8bc45d0edc8d"}
 {"at": "2026-11-25 00:11:10", "event": "promote", "by": "người (Sync)", "hash": "8bc45d0edc8d"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "d5a006594b09", "previous": "8bc45d0edc8d", "added": [], "removed": [], "rewritten": [{"id": "skill-press-instant", "old": "Bấm là dùng ngay, không chọn vị trí, không chọn mục tiêu\nHợp thao tác một chạm trên điện thoại. Lúc tạm dừng không bấm được. Đã loại: kéo thả để nhắm vùng.", "new": "Bấm là dùng ngay, không chọn vị trí, không chọn mục tiêu\nHợp thao tác một chạm trên điện thoại. Đã loại: kéo thả để nhắm vùng."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "15eda1f1a8c66fc8532a97b24024704143447c8d", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:12:06", "event": "approve", "hash": "b8c062dbff2086521542b91be186b32c916fda05", "by": "người (Sync)"}

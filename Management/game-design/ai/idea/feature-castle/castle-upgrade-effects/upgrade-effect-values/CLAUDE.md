@@ -39,13 +39,14 @@ Cân bằng dự kiến: Băng giá cấp 31 thì chậm 35s bằng hồi chiêu
 - Mua nâng sức đánh khi hình đạn đang bay: phát đó đã tính sát thương lúc bắn; phát sau mới dùng số mới.
 - Mua nâng máu khi thành còn 1 máu: thành thành 151 máu, máu tối đa +150.
 - Cổ vũ vượt 100% máu tối đa (cấp ≥ 13): hero hồi tới đầy, không vượt.
-- Tạm dừng hoặc thành đã bị phá: không nhận lệnh mua (`feature-upgrade` chặn).
+- Thành đã bị phá: không nhận lệnh mua (`feature-upgrade` chặn).
 - Không có hoàn tiền, không có hạ cấp.
 
 ## Đã tự quyết
 - **Cộng tuyến tính theo giá trị lv1.** Người chơi tính được trong đầu; giá tăng theo hàm mũ đã đủ hãm. Đã loại: nhân theo phần trăm của cấp trước (tăng quá nhanh).
 - **Nâng kĩ năng không đổi hiệu lực đang chạy.** Tránh kéo dài hiệu ứng giữa chừng khó đọc.
 - **IDEA có đủ ba mục nâng thành, phản hồi phóng to 1.1 lần trong 0.3s (2026-11-24, sửa lệch).** Bản trước ghi IDEA chưa có nâng thành và phản hồi 0.2s chỉ từ PROTOTYPE, lệch với bảng mức tăng mỗi cấp của nhánh nâng cấp (ba mục thành có từ IDEA, phản hồi 0.3s) và với danh sách mục (3 mục thành ở IDEA). Phiên Castle đã code theo 1.1 lần, 0.3s. Thống nhất một số cho cả game: thời lượng 0.3s như phản hồi lên cấp của hero; thành phóng 1.1 lần (nhỏ hơn hero 1.2 lần vì thành to, phóng nhiều sẽ che chiến trường). Đã loại: giữ 0.2s và chỉ từ PROTOTYPE (lệch với các node khác và code đã có).
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ tạm dừng khỏi trường hợp không nhận lệnh mua.
 
 ## Chưa rõ
 - Không có điểm chặn.

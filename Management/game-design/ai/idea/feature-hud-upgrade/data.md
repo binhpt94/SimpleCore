@@ -1,5 +1,5 @@
 ---
-based-on: 6181a7c21bf0
+based-on: ca84fa282d14
 by: hien-doi-tuong-nang-cap=gpt@r2-1#hien-doi-tuong-nang-cap, hien-gia-nang-cap=gpt@r2-1#hien-gia-nang-cap, upgrade-bar-state=gpt@r2-1#ro-tien-do-nang-cap
 ---
 # Thanh nâng cấp

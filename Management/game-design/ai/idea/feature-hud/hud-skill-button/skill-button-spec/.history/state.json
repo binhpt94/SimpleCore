@@ -1,5 +1,5 @@
 {
- "hash": "62838fe48a2d",
+ "hash": "7b0191869555",
  "items": {
   "three-buttons-order": {
    "hash": "a60a9722b34a",
@@ -26,8 +26,8 @@
    "text": "Lúc vừa hồi xong, nút phóng to lên 1.2 lần rồi về cỡ cũ trong 0.3 giây, một lần\nNgười chơi đang nhìn chiến trường vẫn nhận ra kĩ năng dùng lại được."
   },
   "buttons-locked-off-battle": {
-   "hash": "2a05691cf777",
-   "text": "Lúc tạm dừng hoặc lượt đã kết thúc, cả 3 nút không nhận chạm và số giây đứng yên"
+   "hash": "073672a50750",
+   "text": "Lúc lượt đã kết thúc, cả 3 nút không nhận chạm và số giây đứng yên"
   }
  }
 }

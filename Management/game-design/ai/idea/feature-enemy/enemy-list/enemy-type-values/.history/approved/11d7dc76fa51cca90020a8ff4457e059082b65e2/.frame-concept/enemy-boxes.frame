@@ -1,0 +1,27 @@
+kind: field
+title: Hộp năm loại quái so với hero (đứng cạnh nhau trên mặt đất, chỉ để so cỡ)
+view: x=-1u..16u y=-1u..5u
+let soldier-w = 1u
+let soldier-h = 1.2u
+let wolf-w = 1.2u
+let wolf-h = 0.8u
+let giant-w = 2u
+let giant-h = 2.5u
+let archer-w = 1u
+let archer-h = 1.2u
+let boss-w = 3u
+let boss-h = 3.5u
+let soldier-range = 1u
+let wolf-range = 1u
+let giant-range = 1.2u
+let archer-range = 5u
+let boss-range = 1.5u
+use hero-w = feature-hero/hero-list/hero-roster-values#hero-w
+use hero-h = feature-hero/hero-list/hero-roster-values#hero-h
+- ground   line from=-1u,0 to=16u,0 label="mặt đất"
+- hero     rect x=0 y=0 w=hero-w h=hero-h label="hero (so cỡ)"
+- soldier  rect x=2u y=0 w=soldier-w h=soldier-h label="Lính"
+- wolf     rect x=4u y=0 w=wolf-w h=wolf-h label="Sói"
+- giant    rect x=6u y=0 w=giant-w h=giant-h label="Khổng lồ"
+- archer   rect x=9u y=0 w=archer-w h=archer-h label="Cung thủ quái"
+- boss     rect x=11u y=0 w=boss-w h=boss-h label="Trùm"

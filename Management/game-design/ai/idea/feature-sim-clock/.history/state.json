@@ -1,9 +1,9 @@
 {
- "hash": "d1732f41e794",
+ "hash": "83ee7a4052d1",
  "items": {
   "clock-drives-gameplay": {
-   "hash": "ef5e8be579fd",
-   "text": "Logic gameplay lấy thời gian từ đồng hồ gameplay của nhịp chung; đồng hồ này chỉ cộng các bước mà lượt cho trận chạy\nHero, quái, thành, đợt quái, kĩ năng, hồi sinh, giao chiến không tự đọc thời gian khung hình. Số bước chung vẫn tiến lúc tạm dừng để xếp thao tác; lịch thả quái, lúc thở, hồi chiêu đứng yên suốt lúc dừng. Phần chỉ để nhìn không bắt buộc."
+   "hash": "83132fafc29b",
+   "text": "Logic gameplay lấy thời gian từ đồng hồ gameplay của nhịp chung; đồng hồ này chỉ cộng các bước mà lượt cho trận chạy\nHero, quái, thành, đợt quái, kĩ năng, hồi sinh, giao chiến không tự đọc thời gian khung hình. Số bước chung vẫn tiến lúc trận dừng để xếp thao tác; lịch thả quái, lúc thở, hồi chiêu đứng yên suốt lúc dừng. Phần chỉ để nhìn không bắt buộc."
   },
   "update-or-tick": {
    "hash": "ded75ac0af0c",
@@ -22,8 +22,8 @@
    "text": "Cùng đội, config, seed, chuỗi thao tác và độ dài từng bước thì chạy lại ra cùng kết quả, kể cả khi tua nhanh\nThao tác giữ số bước và thứ tự trong bước. Ở cách theo khung hình, bản dev phát lại độ dài từng bước đã ghi, vì hai lần chạy có thể chia cùng một khoảng thời gian thành các bước khác nhau. Tua nhanh chỉ có ở bản dev. Người yêu cầu."
   },
   "clock-no-rules": {
-   "hash": "fcf80b3edb13",
-   "text": "Feature này chỉ cấp nhịp và số ngẫu nhiên, không giữ luật gameplay nào\nAi làm gì trong một nhịp vẫn do feature sở hữu quyết; tạm dừng vẫn là việc của `feature-run`, thứ tự trong nhịp giao chiến vẫn ở `feature-combat`."
+   "hash": "f358cf43c29a",
+   "text": "Feature này chỉ cấp nhịp và số ngẫu nhiên, không giữ luật gameplay nào\nAi làm gì trong một nhịp vẫn do feature sở hữu quyết; dừng trận vẫn là việc của `feature-run`, thứ tự trong nhịp giao chiến vẫn ở `feature-combat`."
   },
   "step-after-combat": {
    "hash": "084fef7ed6d3",
@@ -49,17 +49,9 @@
    "hash": "03205550fca4",
    "text": "Nhịp ghi seed của lượt đúng một lần, lúc lượt chơi xác nhận lượt đã bắt đầu\nLần dựng trận hỏng không để lại bản ghi của một lượt chưa chơi."
   },
-  "continue-after-revive": {
-   "hash": "822969af9398",
-   "text": "Thành hồi sinh thì nhịp tiếp tục số bước và vị trí bốc của các dòng ngẫu nhiên trong cùng lượt\nĐợt quái chạy tiếp đúng lịch đã lập và dùng đúng số ngẫu nhiên kế tiếp."
-  },
   "clear-on-dispose": {
    "hash": "a38e1e8e08fd",
    "text": "Khi lượt chơi huỷ trận, nhịp dọn hàng chờ thao tác, thời gian dư và các dòng ngẫu nhiên của lượt\nDọn xong trước khi báo huỷ xong; lượt sau trong cùng scene bắt đầu với trạng thái riêng."
-  },
-  "revive-result-queued": {
-   "hash": "1f4de2aacaa6",
-   "text": "Kết quả hồi sinh từ popup đi qua hàng chờ của nhịp để được ghi và phát lại theo số bước\nPopup vẫn đóng trước khi báo kết quả. Bấm Xem chưa biết quảng cáo có thành công không, nên bản chạy lại đưa kết quả đã ghi tới lượt chơi ở đúng bước."
   }
  }
 }

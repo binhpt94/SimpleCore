@@ -1,6 +1,6 @@
 ---
 based-on: d2e78e0c80dc
-refs: feature-wallet/balance-spend/wallet-rules@1367fdb78322, feature-enemy/enemy-reward/reward-values@30a4a6c88e50, feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-run/run-start/start-values@04f1a45bba47
+refs: feature-wallet/balance-spend/wallet-rules@1367fdb78322, feature-enemy/enemy-reward/reward-values@30a4a6c88e50, feature-wave/wave-clear/clear-rules@b10f4f27eaf5, feature-run/run-start/start-values@ecc0af822edd
 frame: none
 ---
 # Mức tiền thu

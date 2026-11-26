@@ -1,9 +1,9 @@
 {
- "hash": "d4ab4cd4389f",
+ "hash": "f824a988839a",
  "items": {
   "three-screens": {
-   "hash": "448e63911965",
-   "text": "Scene Game có đúng ba màn chính: bắt đầu, chọn đội, trận; mỗi lúc hiện đúng một\nPopup (thua, tạm dừng, hồi sinh) không phải màn chính; chúng mở trên màn trận."
+   "hash": "e12beccfcd0e",
+   "text": "Scene Game có đúng ba màn chính: bắt đầu, chọn đội, trận; mỗi lúc hiện đúng một\nPopup thua không phải màn chính; nó mở trên màn trận."
   },
   "first-is-home": {
    "hash": "a015b09c38ed",
@@ -14,8 +14,8 @@
    "text": "Màn bắt đầu và màn chọn đội gửi yêu cầu thẳng cho điều hướng màn\n\"Chơi\", \"Vào trận\" và \"Quay lại\" là ba yêu cầu này."
   },
   "leave-via-run": {
-   "hash": "5a6b679baaae",
-   "text": "Lựa chọn rời trận (chơi lại, về màn bắt đầu, bỏ lượt) tới điều hướng màn qua lượt chơi, sau khi lượt chơi đã dọn trận\nPopup thua và popup tạm dừng báo lượt chơi; lượt chơi kết thúc lượt, dọn trận rồi chuyển lựa chọn."
+   "hash": "d0dda17448ca",
+   "text": "Lựa chọn rời trận (chơi lại, về màn bắt đầu) tới điều hướng màn qua lượt chơi, sau khi lượt chơi đã dọn trận\nPopup thua báo lượt chơi; lượt chơi kết thúc lượt, dọn trận rồi chuyển lựa chọn."
   },
   "battle-handover": {
    "hash": "1bcd22e8809c",

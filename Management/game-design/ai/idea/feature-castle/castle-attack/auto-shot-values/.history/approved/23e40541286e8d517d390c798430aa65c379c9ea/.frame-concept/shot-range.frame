@@ -1,0 +1,16 @@
+kind: field
+title: Tầm tự bắn 6u tính từ mép thành, cả hai bên
+view: x=-17u..17u y=-1u..6u
+let shot-range = 6u
+use castle-left = feature-castle/castle-core/castle-body-values#castle-left
+use castle-right = feature-castle/castle-core/castle-body-values#castle-right
+use castle-w = feature-castle/castle-core/castle-body-values#castle-w
+use castle-h = feature-castle/castle-core/castle-body-values#castle-h
+use screen-left = feature-castle/castle-core/castle-body-values#screen-left
+use screen-right = feature-castle/castle-core/castle-body-values#screen-right
+- ground   line from=-17u,0 to=17u,0 label="mặt đất"
+- castle   rect x=castle-left y=0 w=castle-w h=castle-h label="Thành"
+- range-r  rect x=castle-right y=4.5u w=shot-range h=0.3u label="tầm phải: x 1.5u → 7.5u"
+- range-l  rect x=-7.5u y=4.5u w=shot-range h=0.3u label="tầm trái: x -7.5u → -1.5u"
+- scr-l    line from=screen-left,0 to=screen-left,6u label="mép màn (chỉ bắn quái có tâm trong ±16u)" overlap
+- scr-r    line from=screen-right,0 to=screen-right,6u label="mép màn" overlap

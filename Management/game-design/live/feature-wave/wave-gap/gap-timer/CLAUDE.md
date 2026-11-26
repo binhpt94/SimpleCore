@@ -20,10 +20,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 |---|---|---|---|
 | Độ dài lúc thở | 3 s | 3 s, chỉnh sau chơi thử | chốt sau chơi thử |
 | Báo đợt mới cho `feature-hud` | không bắt buộc | có | có |
-| Tạm dừng đóng băng đồng hồ | có | có | có |
-
 ## Trường hợp biên
-- **Tạm dừng trong lúc thở:** đồng hồ đứng yên; tiếp tục thì đếm phần còn lại.
 - **Thành bị phá trong lúc thở** (chỉ có thể do đạn quái còn bay): lượt kết thúc, đồng hồ dừng, không bắt đầu đợt mới.
 - **Mua nâng cấp đúng lúc hết 3 giây:** nâng cấp có hiệu lực ngay; đợt mới vẫn bắt đầu đúng giờ, không chờ.
 - **Hero đang hồi sinh khi đợt mới bắt đầu:** hồi sinh tiếp tục theo đồng hồ 8 s riêng của hero; đợt mới không chờ.
@@ -33,6 +30,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **3 giây cố định.** Theo bộ số chuẩn. Đã loại: lúc thở dài dần theo đợt (làm lượt dài thêm mà không thêm quyết định).
 - **Số đợt tăng ngay lúc dọn sạch, thả quái sau 3 giây (2026-11-25, làm rõ, theo câu hỏi của @CodeLead).** Bản trước ghi "hết 3 giây thì số đợt tăng 1", đọc được thành số người chơi thấy chỉ đổi sau 3 giây, trái với `feature-hud/hud-status/status-spec` (`wave-label`: trong lúc thở hiện đợt sắp tới) và node cha ở nhánh HUD ("lúc thở hiện đợt sắp tới"). Tách thành hai ý: `gap-next-number` (số đợt đổi ngay) và `gap-start-next` (thả quái sau 3 giây). Không đổi hành vi code hiện có (Wave đặt đợt hiện tại bằng w + 1 lúc dọn sạch). Đã loại: số đợt đổi sau 3 giây (ô đợt hiện đợt đã dọn suốt lúc thở).
 - **Đợt mới không chờ hero hồi sinh xong.** Hero gục là hậu quả của đợt trước; chờ thì làm nhẹ áp lực. Đã loại: chờ cả đội đứng dậy.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ dòng "Tạm dừng đóng băng đồng hồ" và trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - Không có điểm chặn.

@@ -1,6 +1,6 @@
 ---
 based-on: ff4b78bc4b2c
-refs: feature-session-scene/session-steps/participant-order@bdb6d08f1274, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-popup-lose/lose-result@e06499689b32, feature-popup-pause/pause-popup@25d160950007
+refs: feature-session-scene/session-steps/participant-order@bdb6d08f1274, feature-popup/popup-layer/stack-rules@5f909869fc3d, feature-popup-lose/lose-result@4b9f46cc241a
 frame: none
 ---
 # Luật mở, đóng popup và danh sách id
@@ -10,7 +10,7 @@ Chốt danh sách id popup của scene Game, việc popup được chuẩn bị 
 ## Ý cốt lõi
 
 ### id-list | AI 8 | Scene Game có 1 id popup: `PopupLose/Main` (popup thua)
-Chưa có popup tạm dừng và popup hồi sinh. Tên `Name` do feature sở hữu đặt; đây là tên dự kiến.
+Tên `Name` do feature sở hữu đặt; đây là tên dự kiến.
 
 ### preload | AI 8 | Mọi popup có id trong danh sách của scene được chuẩn bị ở bước tải, nên xin mở là popup hiện ngay trong khung hình đó
 

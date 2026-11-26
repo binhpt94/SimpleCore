@@ -47,7 +47,6 @@ Mọi điểm dừng nằm trong tầm tự bắn và vùng Sấm sét (mép tro
 - Nhiều quái chồng hình nhau: cho phép, không đẩy nhau ra.
 - Băng giá trúng quái đang đứng đánh: nó vẫn đứng đánh, chỉ chậm nhịp đánh.
 - Thành bị phá: quái đứng yên tới khi `feature-run` dừng trận.
-- Tạm dừng: quái đứng yên, giữ trạng thái, thời gian chờ đòn và thời gian chậm.
 
 ## Đã tự quyết
 - **Quái giữ hero đang đánh nếu còn trong tầm.** Tránh đổi mục tiêu liên tục khi nhiều hero đứng gần nhau. Đã loại: mỗi khung hình chọn lại hero gần nhất.
@@ -55,6 +54,7 @@ Mọi điểm dừng nằm trong tầm tự bắn và vùng Sấm sét (mép tro
 - **Trúng chậm giữa nhịp đánh thì giãn phần còn lại.** Tác dụng chậm thấy ngay, không đợi tới đòn sau.
 
 - **Frame `stop-points.frame` (2026-11-23).** Hộp, tầm của từng loại `use` từ `feature-enemy/enemy-list/enemy-type-values`; điểm ra `use` từ `feature-wave/spawning/spawn-order`; thành và tầm tự bắn `use` từ `feature-castle`. Số tính ra: mép trong của quái dừng = mép thành 1.5u + tầm (Lính, Sói 2.5u; Khổng lồ 2.7u; Cung thủ quái 6.5u; Trùm 3.0u); tâm = mép trong + nửa rộng, khớp bảng "Điểm dừng trước thành". Mỗi loại vẽ một hàng chỉ để dễ đọc.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - Không có điểm chặn.

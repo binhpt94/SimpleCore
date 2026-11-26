@@ -15,13 +15,14 @@ Ba cột `idea`, `prototype`, `full` của bảng `TickParams`. IDEA không có 
 
 ## Trường hợp biên
 - **Hero và quái kết liễu nhau cùng nhịp:** cả hai hết máu; hero gục, quái bị hạ, quái vẫn cho tiền.
-- **Thành và con quái cuối cùng hết máu cùng nhịp:** thành bị phá xét trước; luồng hồi sinh giữ tin dọn sạch.
+- **Thành và con quái cuối cùng hết máu cùng nhịp:** thành bị phá xét trước; tin dọn sạch bị bỏ.
 - **Đòn vào quái đã ra ngoài màn (±16u):** vẫn trúng nếu bên ra đòn đã chọn nó; luật chọn là của bên ra đòn.
 - **Cổ vũ hồi máu cùng nhịp hero nhận đòn:** Cổ vũ không qua giao chiến; hồi máu áp ở bước "đi và nhắm" trước khi trừ máu.
 
 ## Đã tự quyết
 - **Bước theo nhịp chung 0.025 giây (sửa 2026-11-25, người yêu cầu nhịp chung 40 lần mỗi giây).** Thay cho bước riêng 0.02 giây (50 bước mỗi giây) và trần 5 bước mỗi khung của giao chiến; nay bước, trần và cách chạy do `feature-sim-clock` giữ cho mọi logic gameplay. Giữ `id` `fixed-step`. Code của Combat bỏ đồng hồ bước riêng sau khi node chốt (@CodeLead).
 - **Cổ vũ áp trước khi trừ máu.** Người chơi bấm cứu đúng lúc thì hero được cứu.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Tin dọn sạch cùng nhịp thành bị phá bị bỏ, không còn giữ cho luồng hồi sinh thành.
 
 ## Chưa rõ
 - Giao chiến là dịch vụ riêng hay một bước trong vòng lặp trận: phiên code cùng @CodeLead.

@@ -22,7 +22,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Luật cơ bản
 - Lượt mới bắt đầu thì điểm về không.
 - Điểm chỉ tăng, không giảm trong lượt.
-- Điểm chốt khi lượt kết thúc, cả khi thua lẫn khi bỏ lượt.
+- Điểm chốt khi lượt kết thúc.
 - Kỉ lục chỉ đổi khi điểm chốt lớn hơn nó.
 - Kỉ lục được giao `feature-save` ghi ngay khi đổi.
 
@@ -30,6 +30,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Bằng kỉ lục không tính là phá kỉ lục.** Báo "phá kỉ lục" chỉ khi vượt thật.
 - **Lưu kỉ lục ngay khi đổi.** Người chơi điện thoại hay tắt ngang; lưu lúc tắt game dễ mất.
 - **Một kỉ lục cho cả game, không theo đội.** Vòng 1 chỉ nói lưu kỉ lục. Đã loại: kỉ lục riêng cho từng đội.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ vế "cả khi bỏ lượt" ở luật chốt điểm.
 
 ## Chưa rõ
 - Không có điểm chặn.

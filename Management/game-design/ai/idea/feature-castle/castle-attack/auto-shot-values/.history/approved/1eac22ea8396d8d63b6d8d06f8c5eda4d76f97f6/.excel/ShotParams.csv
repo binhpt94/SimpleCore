@@ -1,0 +1,10 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,shot_damage_lv1,Sát thương lv1,máu/phát,10,10 (chỉnh sau chơi thử),theo số đã chỉnh,Bộ số chung; Lính đợt 1 cần 4 phát
+2,shot_interval,Giây mỗi phát,s,1.0,1.0,theo số đã chỉnh,Bộ số chung; đủ chậm để không thay hero
+3,shot_range,Tầm,"u, tính từ mép thành",6,6,theo số đã chỉnh,Phủ x 1.5→7.5u mỗi bên; ngắn hơn khoảng đất 14.5u mỗi bên
+4,targets_per_shot,Số mục tiêu mỗi phát,quái,1,như IDEA,như IDEA,Luật vòng 3
+5,bullet_fly_time,Thời gian hình đạn bay,s,0.15,như IDEA,như IDEA,Dự kiến; chỉ để nhìn
+6,target_scope,Phạm vi chọn,u,tâm quái |x| ≤ 16,như IDEA,như IDEA,Không bắn quái chưa vào màn
+7,bullet_visual,Hình đạn,,1 sprite di chuyển thẳng 0.15s,"như IDEA, thêm nháy ở mục tiêu khi trúng","hiệu ứng bắn và trúng riêng, âm thanh",Chỉ để nhìn

@@ -8,3 +8,6 @@
 {"at": "2026-11-25 00:50:59", "event": "promote", "by": "người", "hash": "04f1a45bba47"}
 {"at": "2026-11-26 01:17:50", "event": "promote", "by": "người (Sync)", "hash": "04f1a45bba47"}
 {"at": "2026-11-26 18:22:02", "event": "promote", "by": "người (Sync)", "hash": "04f1a45bba47"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "ecc0af822edd", "previous": "04f1a45bba47", "added": [], "removed": [{"id": "start-revive-1", "text": "Đầu lượt còn đúng 1 lần hồi sinh thành, kể cả khi lượt trước đã dùng"}], "rewritten": []}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "7b7c040b5b343e9bdf33a2fc510ad50ddb9d7176", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:21:41", "event": "approve", "hash": "5148238534c9c3cf9f0c187293dd5fb2367c5b96", "by": "tự duyệt (Full Auto)"}

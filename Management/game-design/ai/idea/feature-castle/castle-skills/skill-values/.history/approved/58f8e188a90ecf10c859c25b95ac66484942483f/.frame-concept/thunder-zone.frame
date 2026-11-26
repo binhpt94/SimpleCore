@@ -1,0 +1,12 @@
+kind: field
+title: Vùng Sấm sét: quái cách mép thành không quá 6u, cả hai bên (trùng tầm tự bắn)
+view: x=-17u..17u y=-1u..6u
+use thunder-range = feature-castle/castle-attack/auto-shot-values#shot-range
+use castle-left = feature-castle/castle-core/castle-body-values#castle-left
+use castle-right = feature-castle/castle-core/castle-body-values#castle-right
+use castle-w = feature-castle/castle-core/castle-body-values#castle-w
+use castle-h = feature-castle/castle-core/castle-body-values#castle-h
+- ground    line from=-17u,0 to=17u,0 label="mặt đất"
+- castle    rect x=castle-left y=0 w=castle-w h=castle-h label="Thành"
+- zone-r    rect x=castle-right y=0 w=thunder-range h=3u label="Sấm sét phải" overlap
+- zone-l    rect x=-7.5u y=0 w=thunder-range h=3u label="Sấm sét trái" overlap

@@ -341,10 +341,10 @@ def designer_mode(root):
         return ("Mode hiện tại: User control. Không tự quyết thay người: mọi điểm cần quyết ghi thành câu hỏi trong "
                 ".ai-need-user-choose/questions.json của node đó; câu trả lời của người nằm ở answers.json cùng thư "
                 "mục (chỉ đọc). Node chỉ đạt khi người chấm mọi ý từ 5 trở lên và hết câu hỏi; node con bị guard khoá "
-                "cho tới khi node cha đạt và đã được người chốt sang live.")
+                "cho tới khi node cha đạt và bản hiện tại của nó đã được người chốt; live được dựng lại từ các bản đã chốt.")
     return ("Mode hiện tại: Full Auto. Tự phân tích và tự quyết, không cần hỏi người; điểm đã tự quyết ghi rõ trong "
             "CLAUDE.md của node. Node đạt khi mọi ý có điểm hiệu lực từ 5 trở lên (điểm của người nếu đã chấm, chưa thì "
-            "điểm AI); người bấm Sync để chép node đạt sang live; node con bị guard khoá khi node cha chưa đạt. "
+            "điểm AI); node đạt tự được duyệt và lên live ở lần dựng cuối lượt; node con bị guard khoá khi node cha chưa đạt. "
             "Người chấm được cả ý đã chốt trong live: điểm dưới 5 ở đó cũng bắt làm lại.")
 
 
@@ -536,7 +536,9 @@ def bound_context(data, root, store):
                 "để biết node nào cần làm lại, điểm và phản hồi của người, hash cần ghi vào based-on (cả cây thì lệnh "
                 "in đường dẫn file trong Management/game-design/.pack và mục lục có số dòng kèm Kết luận từng node: "
                 "đọc phần cần bằng Read offset/limit hoặc Grep). Chỉ cần hash: gd_status.py ai/idea/<node> --hashes. Ghim lại based-on, refs: "
-                "python Management/tools/gd_pin.py ai/idea/<node> [--chain] (in diff để rà, rồi lệnh --write <mã>), không sửa tay. Độ quan trọng "
+                "python Management/tools/gd_pin.py ai/idea/<node> [--chain | --all] hoặc gd_pin.py --all cả cây (diff gộp theo thay đổi nguồn, "
+                "--hide <id> ẩn phần đã rà, --drop-dead gỡ ref chết, rồi một lệnh --write <mã>), không sửa tay. Trước và sau khi "
+                "xoá node: gd_impact.py <node> (mọi chỗ còn nhắc tới nó). Bỏ, sửa ý: gd_idea.py rm|replace ai/idea/<node>#<id>. Độ quan trọng "
                 "(0-10, theo giai đoạn IDEA/PROTOTYPE/FULL) chỉ chấm ở node lá, ghi vào priority.json của node đó. "
                 + designer_mode(root) + stage_line(root) +
                 " GPT cùng thiết kế qua @DesignAdvisor, nhờ bằng hộp thư: python Management/tools/dispatch.py send @DesignAdvisor "

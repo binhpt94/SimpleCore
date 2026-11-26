@@ -5,13 +5,13 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Làm gì
 - Mỗi mục (`feature-upgrade/upgrade-list/item-set`) có giá cấp sau tính từ cấp hiện tại L theo công thức của loại mục.
 - Nhận một yêu cầu mua (một chạm từ `feature-hud-upgrade`) cho một mục:
-  1. Trận không chạy (đang tạm dừng, hoặc lượt đã kết thúc): từ chối, không đổi gì.
+  1. Trận không chạy (lượt đã kết thúc): từ chối, không đổi gì.
   2. Xin ví trừ giá cấp sau (`feature-wallet/balance-spend/wallet-rules`).
   3. Ví trả "không đủ": từ chối, không đổi gì.
   4. Ví trả "được": mục lên L + 1, báo bên giữ chỉ số (`feature-upgrade/upgrade-effect/effect-numbers`), tính giá cấp sau mới.
 - Xử lí yêu cầu lần lượt theo thứ tự tới; yêu cầu sau luôn thấy số dư và giá đã đổi của yêu cầu trước.
-- Đưa cho thanh nâng cấp, với mỗi mục: cấp hiện tại, giá cấp sau, mua được hay không. Gửi lại cho mọi mục mỗi khi số dư đổi, một cấp đổi, hoặc trạng thái tạm dừng/kết thúc đổi.
-- **Mua được** = trận đang chạy (không tạm dừng, chưa kết thúc) và số dư >= giá cấp sau.
+- Đưa cho thanh nâng cấp, với mỗi mục: cấp hiện tại, giá cấp sau, mua được hay không. Gửi lại cho mọi mục mỗi khi số dư đổi, một cấp đổi, hoặc lượt kết thúc.
+- **Mua được** = trận đang chạy (chưa kết thúc) và số dư >= giá cấp sau.
 
 ## Thông số
 Công thức (giá trị dự kiến; nằm trong asset cấu hình của `feature-balance`, không viết cứng):
@@ -53,7 +53,6 @@ Cách tính: tính số thực, làm tròn tới 6 chữ số thập phân để
 - **Số dư đúng bằng giá**: mua được, số dư về 0.
 - **Hero đang gục**: mua được như thường; chỉ cấp đổi (`effect-numbers`).
 - **Thua đúng lúc đang mua**: từ khung hình thành về 0 máu, lượt đã kết thúc, mọi yêu cầu mua sau đó bị từ chối. Yêu cầu tới trước khung hình đó đã xử lí xong; mua máu thành không cứu được thành đã về 0 máu.
-- **Đang tạm dừng**: từ chối, kể cả khi đủ tiền; thanh nâng cấp hiện mọi nút ở trạng thái không mua được.
 - **Lúc nghỉ giữa hai đợt**: mua được.
 - **Tiền vào cùng khung hình với yêu cầu mua**: theo thứ tự ví nhận; không bao giờ trừ khi chưa đủ.
 - **Giá rất lớn** (ví dụ hero cấp 30 lên 31 giá khoảng 181.000 tiền): giá vẫn là số nguyên; cách rút gọn khi hiển thị thuộc `feature-hud-upgrade/button-state/button-display`.
@@ -62,6 +61,7 @@ Cách tính: tính số thực, làm tròn tới 6 chữ số thập phân để
 - **Dùng đúng bộ số chung.** Giá 30/40/60, hệ số 1,35/1,4/1,5. Đã loại: một công thức chung cho mọi mục (mất khác biệt hero rẻ, kĩ năng đắt).
 - **Làm tròn sau khi bỏ sai số.** Để giá trong test khớp bảng trên. Đã loại: làm tròn lên thẳng (ra 57 thay vì 56).
 - **Từ chối ngay, không xếp hàng chờ tiền.** Chạm khi không đủ tiền không được nhớ lại. Đã loại: đặt mua trước, tự mua khi đủ tiền.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ tạm dừng khỏi điều kiện "trận không chạy" và trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - Đề xuất cho người: thưởng dọn đợt tăng tuyến tính (đợt 20 được 120) còn giá tăng theo cấp số nhân; sau khoảng đợt 15 mỗi đợt chỉ còn mua được 1 cấp. Nếu chơi thử thấy về sau quá bí, cân nhắc hạ hệ số hero còn 1,3. Hiện vẫn dùng 1,35.

@@ -1,11 +1,8 @@
 kind: ui
 title: Cheat HUD: giữa trận, thành nguy, một kĩ năng đang hồi
-use tap = feature-hud/hud-layout/layout-spec#tap
-use safe = feature-hud/hud-layout/layout-spec#safe
 use top-h = feature-hud/hud-layout/layout-spec#top-h
 use bottom-h = feature-hud/hud-layout/layout-spec#bottom-h
 use skill = feature-hud/hud-layout/layout-spec#skill
-use pause-y = feature-hud/hud-pause-button/pause-button-spec#pause-y
 use info-y = feature-hud/hud-status/status-spec#info-y
 use info-h = feature-hud/hud-status/status-spec#info-h
 use coin-x = feature-hud/hud-status/status-spec#coin-x
@@ -37,7 +34,6 @@ use sec-w = feature-hud/hud-skill-button/skill-button-spec#sec-w
 use sec-h = feature-hud/hud-skill-button/skill-button-spec#sec-h
 - top        rect   x=0 y=0 w=1920 h=top-h label="Mép trên"
 - bottom     rect   x=0 y=bottom-y w=1920 h=bottom-h label="Mép dưới (bên trái là thanh nâng cấp, feature-hud-upgrade)"
-- pause      button x=safe y=pause-y w=tap h=tap parent=top label="II (Tạm dừng)"
 - coin       icon   x=coin-x y=info-y w=coin-w h=info-h parent=top label="xu"
 - money      label  x=money-x y=info-y w=money-w h=info-h parent=top label="245"
 - hp         bar    x=hp-x y=info-y w=hp-w h=info-h fill=0.3 parent=top label="Máu thành"

@@ -13,9 +13,8 @@ Danh sách id của scene Game (đủ mọi giai đoạn; id nào có ở giai �
 | Id | Feature sở hữu | Số nút | Nút | Chặn gì |
 |---|---|---|---|---|
 | `PopupLose/Main` | `feature-popup-lose` | 2 | Chơi lại; Về màn bắt đầu | Mọi thứ bên dưới (trận đã dừng) |
-| `PopupPause/Main` | `feature-popup-pause` | 2 mỗi bước | Bước chính: Tiếp tục; Bỏ lượt. Bước hỏi: Bỏ lượt; Không | Mọi thứ bên dưới (trận đứng yên) |
 
-Nội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup-lose/lose-result`, `feature-popup-pause/pause-popup`); dịch vụ không biết.
+Nội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup-lose/lose-result`); dịch vụ không biết.
 
 ## Thông số
 | Thông số | Giá trị | Đơn vị | Lí do |
@@ -28,7 +27,7 @@ Nội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
-| Số id popup scene Game | 1: `PopupLose/Main` | 3: thêm `PopupRevive/Main` (`feature-popup-revive`, 2 nút: Xem quảng cáo; Kết thúc lượt) và `PopupPause/Main` | Theo danh sách popup lúc đó |
+| Số id popup scene Game | 1: `PopupLose/Main` | 1: `PopupLose/Main` | Theo danh sách popup lúc đó |
 | Thời gian từ xin mở tới hiện | 1 khung hình | 1 khung hình (hiệu ứng mở chạy sau đó) | Như PROTOTYPE |
 
 ## Trường hợp biên
@@ -38,16 +37,15 @@ Nội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup
 - **Xin mở id đang mở**: từ chối (`same-id-once` ở `feature-popup/popup-layer/stack-rules`).
 - **Xin đóng popup đã đóng hoặc chưa từng mở**: bỏ qua, không lỗi.
 - **Bấm nút ngay rồi bấm tiếp nút khác trước khi popup đóng**: feature gọi chỉ xử lí lần đầu.
-- **Đang mở popup tạm dừng mà lượt kết thúc (không xảy ra vì trận đứng yên)**: nếu vẫn xảy ra, feature gọi đóng popup tạm dừng rồi mới mở popup thua.
 - **Rời scene khi có popup mở**: popup bị huỷ, không báo bấm nút; feature gọi không nhận gì thêm từ popup đó.
 - **Feature gọi xin mở trước khi scene vào bước chạy**: từ chối, ghi lỗi; popup chỉ mở được khi scene đang chạy.
 
 ## Đã tự quyết
 - **Ở IDEA chỉ có `PopupLose/Main` (2026-11-25, sửa lệch, theo @Manager).** Ý `id-list` bản trước có cả `PopupPause/Main`, trong khi IDEA không có popup tạm dừng (`feature-popup-pause/pause-popup`, bảng giai đoạn của node con) và popup tạm dừng không tham gia scene Game ở IDEA (`feature-session-scene/session-steps/participant-order`). Ý cốt lõi nêu giá trị IDEA; hai id còn lại vào từ PROTOTYPE. Hộp xác nhận bỏ lượt vẫn là một bước bên trong popup tạm dừng, không có id riêng. Đã loại: giữ 2 id (dịch vụ báo lỗi tải vì thiếu asset của popup IDEA không có).
 - **Chuẩn bị sẵn ở bước tải.** Popup thua phải hiện ngay khi thành bị phá; chờ tải giữa trận dễ thấy giật. Đã loại: tải lúc xin mở.
-- **Hộp xác nhận bỏ lượt là bước trong popup tạm dừng, không có id riêng (2026-11-23, sửa lệch).** Bản cũ khai `PopupPause/QuitConfirm`, trái với `feature-popup-pause/pause-popup` (ý `popup-quit-confirm`: xác nhận ngay trong popup) và node con `pause-popup-spec` của nó. Feature sở hữu quyết nội dung popup của mình. Đã loại: popup riêng chồng lên.
 - **Chặn bấm đúp ở feature gọi.** Dịch vụ không biết nút nào là nút; giữ dịch vụ không biết nội dung popup. Đã loại: dịch vụ tự khoá popup sau lần bấm đầu.
 - **Rời scene không báo bấm nút.** Tránh feature gọi làm việc (chơi lại, chuyển màn) khi scene đang huỷ.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ id `PopupPause/Main` và `PopupRevive/Main`; mọi giai đoạn chỉ có `PopupLose/Main`; bỏ mục đã tự quyết về hộp xác nhận bỏ lượt.
 
 ## Chưa rõ
-- Tên `Name` của từng popup do `feature-popup-lose` và `feature-popup-pause` chốt; đổi tên thì sửa bảng này.
+- Tên `Name` của từng popup do `feature-popup-lose` chốt; đổi tên thì sửa bảng này.

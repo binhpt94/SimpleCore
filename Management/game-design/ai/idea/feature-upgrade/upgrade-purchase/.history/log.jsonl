@@ -4,3 +4,6 @@
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "c53d76edf8b3"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "c53d76edf8b3"}
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "c53d76edf8b3"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "dfecac7ac2de", "previous": "c53d76edf8b3", "added": [], "removed": [], "rewritten": [{"id": "buy-anytime", "old": "Mua được mọi lúc trong trận, kể cả giữa đợt, trừ lúc đang tạm dừng\nĐã loại (người loại ở vòng 1): chỉ mua giữa hai đợt. Đã loại: mua cả lúc tạm dừng (mất áp lực chọn giữa trận).", "new": "Mua được mọi lúc trong trận, kể cả giữa đợt\nĐã loại (người loại ở vòng 1): chỉ mua giữa hai đợt."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "aa0b99401046688233020ea518782f3d52d2aa2b", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:21:41", "event": "approve", "hash": "5c2e3da661870df8f1a8d8eb09b6210636b8d293", "by": "tự duyệt (Full Auto)"}

@@ -1,13 +1,9 @@
 {
- "hash": "82bb29fa21ee",
+ "hash": "61131b22bc1e",
  "items": {
   "run": {
    "hash": "721a2b6e316e",
    "text": "Lượt: một lần chơi, từ lúc vào trận tới lúc trận kết thúc\nKhác trận: trận là phần chơi trên dải chiến trường bên trong lượt. Màn bắt đầu và màn chọn đội nằm ngoài lượt."
-  },
-  "paused": {
-   "hash": "89f75d658689",
-   "text": "Tạm dừng: trận đứng yên hoàn toàn\nKhác lúc thở: lúc thở trận vẫn chạy."
   },
   "leave-game": {
    "hash": "fe2884e1a36a",
@@ -70,8 +66,8 @@
    "text": "Dọn sạch đợt: quái của đợt đã ra hết và không còn con nào còn sống"
   },
   "wave-gap": {
-   "hash": "8ee5484a4f32",
-   "text": "Lúc thở: khoảng từ lúc dọn sạch một đợt tới lúc đợt sau bắt đầu ra quái\nKhác tạm dừng: lúc thở trận vẫn chạy."
+   "hash": "32d7f7b372c9",
+   "text": "Lúc thở: khoảng từ lúc dọn sạch một đợt tới lúc đợt sau bắt đầu ra quái\nLúc thở trận vẫn chạy."
   },
   "score": {
    "hash": "6f4bf7c75284",

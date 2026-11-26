@@ -1,6 +1,6 @@
 ---
 based-on: dda5759077eb
-refs: feature-castle/castle-skills@8bc45d0edc8d, feature-run/run-start/start-values@04f1a45bba47, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+refs: feature-castle/castle-skills@d5a006594b09, feature-run/run-start/start-values@ecc0af822edd, feature-hud/hud-layout/layout-spec@aa79f655e44b
 ---
 # Ba nút kĩ năng thành
 
@@ -25,4 +25,4 @@ Vừa bấm thì phủ kín; còn một nửa thời gian thì phủ một nửa
 ### ready-bounce | AI 6 | Lúc vừa hồi xong, nút phóng to lên 1.2 lần rồi về cỡ cũ trong 0.3 giây, một lần
 Người chơi đang nhìn chiến trường vẫn nhận ra kĩ năng dùng lại được.
 
-### buttons-locked-off-battle | AI 7 | Lúc tạm dừng hoặc lượt đã kết thúc, cả 3 nút không nhận chạm và số giây đứng yên
+### buttons-locked-off-battle | AI 7 | Lúc lượt đã kết thúc, cả 3 nút không nhận chạm và số giây đứng yên

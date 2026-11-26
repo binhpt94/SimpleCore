@@ -1,6 +1,6 @@
 ---
 based-on: e41a7b75e5a6
-refs: feature-hero/hero-stats@2748621645f8, feature-enemy/enemy-list@10b291cde6dc, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-skills@8bc45d0edc8d, glossary#range@f6d3cd6778ab, glossary#defeated@7f764615289d, glossary#base-stats@5b93f172d5e9
+refs: feature-hero/hero-stats@2748621645f8, feature-enemy/enemy-list@10b291cde6dc, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-skills@d5a006594b09, glossary#range@f6d3cd6778ab, glossary#defeated@7f764615289d, glossary#base-stats@5b93f172d5e9
 ---
 # Chỉ số quái
 

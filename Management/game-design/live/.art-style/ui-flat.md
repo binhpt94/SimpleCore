@@ -12,11 +12,9 @@ Nhìn thẳng, không phối cảnh. Khối có độ phồng (bóng sáng, bón
 - Mỗi vai trò một màu, giữ ở mọi màn:
   - nút chính (chơi, chơi lại, mua): xanh lá;
   - nút về màn trước hoặc nút trung tính: xanh dương;
-  - nút có quảng cáo hoặc hồi sinh: hồng;
   - ruy băng tiêu đề: tím; viền khung, sao, tiền: vàng.
 - Thân popup là nền sáng ấm (kem, hồng nhạt) để chữ tối đọc rõ; ô thông tin bên trong là một mảng màu nhạt hơn, bo tròn.
 - Nền phía sau popup bị tối đi để popup nổi lên.
-- Nút xem quảng cáo luôn màu hồng, kể cả khi là nút chính của popup (popup hồi sinh).
 - Trạng thái "không bấm được" là bản mờ của chính nút đó (giảm bão hoà và độ sáng), không đổi sang màu khác.
 
 ## Bảng màu chung (sRGB, dùng chung với `world-cartoon`; mã dự kiến, lấy theo ảnh tham chiếu)

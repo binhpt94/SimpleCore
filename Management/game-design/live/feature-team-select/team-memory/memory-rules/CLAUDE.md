@@ -22,7 +22,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | Đội mặc định | Hiệp sĩ, Đấu sĩ rìu, Cung thủ | Như IDEA | Như IDEA (chỉnh theo `feature-balance` nếu cần) |
 
 ## Trường hợp biên
-- **Bỏ lượt rồi bấm "Chơi" lại:** đội nhớ là đội của lượt vừa bỏ (đã vào trận).
 - **Đổi đội ở màn chọn đội:** màn này chỉ rời được bằng "Vào trận", nên đội đã đổi thành đội nhớ ngay khi vào trận. Tắt game giữa lúc đổi thì đội nhớ cũ cũng mất.
 - **Đội nhớ có hero không còn trong danh sách (hero bị bỏ khỏi `feature-hero`):** chỗ đó để trống, người chơi chọn thêm cho đủ 3.
 - **Đội mặc định có hero không còn trong danh sách:** chỗ đó để trống như trên.
@@ -30,6 +29,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Đã tự quyết
 - **Có đội mặc định thay vì để trống.** Trả lời câu "Chưa rõ" của node cha. Người mới vào trận bằng hai chạm (Chơi, Vào trận). Đội mặc định trùng đội IDEA ở `feature-run/run-start/start-values`. Đã loại: để trống; đội ngẫu nhiên (khó kiểm, khó cân bằng lần đầu).
 - **Giữ thứ tự chỗ.** Thứ tự không ảnh hưởng trận nhưng giữ để thanh nâng cấp hero (`feature-hud-upgrade`, xếp theo thứ tự đội) không đổi chỗ giữa các lượt.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên bỏ lượt rồi bấm "Chơi" lại.
 
 ## Chưa rõ
 - Không có điểm chặn.

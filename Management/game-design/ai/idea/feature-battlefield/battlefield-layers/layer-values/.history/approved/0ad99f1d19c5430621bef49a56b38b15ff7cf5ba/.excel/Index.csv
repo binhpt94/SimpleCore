@@ -1,0 +1,4 @@
+index,sheet,kind,key,rows,note
+int,string,enum:params|list|levels|formula|map,string,int,string
+Số thứ tự,Tên sheet,Loại bảng,Cột khoá của bảng,Số dòng dữ liệu (tool tự điền),Bảng chứa gì
+1,LayerParams,params,key,43,"Thông số bốn lớp nền theo giai đoạn: quy đổi, phủ, trời, hai dải cảnh xa, dải đất, decor phẳng và decor đứng"

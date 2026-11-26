@@ -1,6 +1,6 @@
 ---
 based-on: ac9f64988525
-refs: feature-castle/castle-core@54dc235e583a, glossary#battlefield@565b01770cea
+refs: feature-castle/castle-core@81d0b06388c9, glossary#battlefield@565b01770cea
 ---
 # Các lớp nền và thứ tự vẽ
 
@@ -29,5 +29,5 @@ Hai bên trông như nhau để không bên nào trông "nguy" hơn chỉ vì de
 ### draw-order | AI 8 | Cả trận vẽ từ sau ra trước: trời, cảnh xa, dải đất, decor, thành, quái và hero, hiệu ứng, HUD, popup
 Nền luôn dưới thành; thành dưới quái và hero để thấy được unit đứng ở mép thành; HUD và popup trên cùng.
 
-### layers-static | AI 7 | Các lớp nền đứng yên trong trận, không đổi theo đợt, máu thành hay tạm dừng
+### layers-static | AI 7 | Các lớp nền đứng yên trong trận, không đổi theo đợt hay máu thành
 Nền không báo tin gì cho người chơi; thông tin trận nằm ở `feature-hud`.

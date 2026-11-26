@@ -1,5 +1,5 @@
 ---
-based-on: 8cd1bf682940
+based-on: 46623bac3830
 refs: feature-hero/hero-list@1bf8998ab5a4, feature-hero/hero-stats@2748621645f8, feature-hero/hero-respawn@2ae1008b33cd, feature-enemy/enemy-reward@1fbbced31e0f, feature-enemy/enemy-behavior@cf9290ce16e6, glossary#target@f51ab44b30ff
 ---
 # Hero tự nhắm và tự đánh

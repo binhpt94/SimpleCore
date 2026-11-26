@@ -9,3 +9,8 @@
 {"at": "2026-11-25 16:17:21", "event": "data", "hash": "fdde77ed752a", "previous": "ebefd7f8b116", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-25 16:19:59", "event": "data", "hash": "1a7ddf5f3b6c", "previous": "fdde77ed752a", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-25 16:24:09", "event": "promote", "by": "người", "hash": "1a7ddf5f3b6c"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "25ea0af16348", "previous": "1a7ddf5f3b6c", "added": [], "removed": [], "rewritten": [{"id": "top-row-order", "old": "Mép trên từ trái sang phải: nút tạm dừng, tiền, máu thành, đợt\nMáu thành ở giữa, thẳng phía trên thành. Nút tạm dừng ở góc trên bên trái, xa góc dưới bên phải nơi có nút kĩ năng.", "new": "Mép trên từ trái sang phải: tiền, máu thành, đợt\nMáu thành ở giữa, thẳng phía trên thành."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "72f9bd2328b4586806c62c1c9aa0143580706558", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:14:14", "event": "data", "hash": "3fb86a404186", "previous": "25ea0af16348", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-27 00:27:09", "event": "data", "hash": "aa79f655e44b", "previous": "3fb86a404186", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-27 00:28:53", "event": "approve", "hash": "070a6c429a6fc5878c0325a50c164902012b56dc", "by": "tự duyệt (Full Auto)"}

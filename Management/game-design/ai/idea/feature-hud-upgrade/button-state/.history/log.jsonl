@@ -4,3 +4,6 @@
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "f1aa8b544f79"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "f1aa8b544f79"}
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "f1aa8b544f79"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "c2f8ded28909", "previous": "f1aa8b544f79", "added": [], "removed": [], "rewritten": [{"id": "button-dim", "old": "Nút mờ khi không mua được, sáng lại ngay khi mua được\nKhông mua được là không đủ tiền hoặc đang tạm dừng. Cập nhật mỗi khi số dư hoặc cấp đổi. Đã loại: ẩn nút không đủ tiền (thanh nhảy chỗ).", "new": "Nút mờ khi không mua được, sáng lại ngay khi mua được\nKhông mua được là không đủ tiền. Cập nhật mỗi khi số dư hoặc cấp đổi. Đã loại: ẩn nút không đủ tiền (thanh nhảy chỗ)."}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "0ee21e0307a7df4ad4a23e41ce7a1d24b106be79", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:14:52", "event": "approve", "hash": "97db1253c895a2569c6f9c4275bf0aa1d822b6a7", "by": "tự duyệt (Full Auto)"}

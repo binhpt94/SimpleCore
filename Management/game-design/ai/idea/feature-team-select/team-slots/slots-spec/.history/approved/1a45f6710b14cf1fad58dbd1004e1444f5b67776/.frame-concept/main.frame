@@ -1,0 +1,37 @@
+kind: ui
+title: Màn chọn đội
+ui: 146c1ddd9648
+ai: 7
+why: thứ tự đọc từ trên xuống: tên màn, 5 thẻ để chọn, rồi hàng dưới gồm 3 chỗ trong đội và nút Vào trận, đúng trình tự chọn rồi vào trận
+why: Vào trận là nút chính duy nhất, to nhất (440x136, gấp hơn 2 lần diện tích nút Quay lại), đặt ở nửa phải hàng dưới, gần ngón cái phải
+why: Quay lại ở góc trên trái theo routes-values (cạnh 120, dùng safe 40 và tap 120 của bố cục HUD), xa nút Vào trận để không bấm nhầm
+why: dòng lỗi dựng trận đặt ngay trên nút Vào trận, cách 24, vì nó nói về lần bấm nút đó; ẩn thì chỗ đó trống
+why: hàng dưới (3 chỗ, cách 64, rồi cột lỗi và nút) cân giữa màn; nút Vào trận thẳng đáy với 3 chỗ, dòng lỗi thẳng đỉnh với 3 chỗ
+why: nhóm theo việc: trong nhóm cách 24 (chỗ, lỗi và nút) và 40 (thẻ); giữa các nhóm cách 64
+why: không có tham chiếu phù hợp (ảnh tham chiếu duy nhất là popup thua)
+use tap = feature-hud/hud-layout/layout-spec#tap
+use safe = feature-hud/hud-layout/layout-spec#safe
+let back-w = 240
+let title-x = 560
+let title-w = 800
+let cards-x = 130
+let cards-y = 224
+let card-w = 300
+let card-h = 400
+let card-gap = 40
+let row-y = 688
+let slots-x = 324
+let slot = 240
+let slot-gap = 24
+let start-x = 1156
+let start-y = 792
+let start-w = 440
+let start-h = 136
+let error-w = 440
+let error-h = 80
+- back        button x=safe y=safe w=back-w h=tap label="Quay lại"
+- title       label  x=title-x y=safe w=title-w h=tap label="Chọn đội"
+- cards       grid   x=cards-x y=cards-y cols=5 rows=1 cw=card-w ch=card-h gap=card-gap label="5 thẻ hero"
+- slots       grid   x=slots-x y=row-y cols=3 rows=1 cell=slot gap=slot-gap label="3 chỗ trong đội"
+- build-error label  x=start-x y=row-y w=error-w h=error-h label="Không vào được trận, thử lại (chỉ hiện khi dựng trận lỗi)"
+- start       button x=start-x y=start-y w=start-w h=start-h label="Vào trận"

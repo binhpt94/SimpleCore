@@ -4,3 +4,6 @@
 {"at": "2026-11-23 15:32:26", "event": "promote", "by": "người", "hash": "e541be0cca19"}
 {"at": "2026-11-23 16:25:57", "event": "promote", "by": "người", "hash": "e541be0cca19"}
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "e541be0cca19"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "7bbb09d6efb6", "previous": "e541be0cca19", "added": [], "removed": [{"id": "layout-pause-corner", "text": "Nút tạm dừng ở một góc trên, xa các nút bấm nhiều"}], "rewritten": []}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "09360229531afe889ac2e482e1d832248db1a539", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 00:14:18", "event": "approve", "hash": "3746b994600be81d187d8b08a6465a52fb33afa7", "by": "tự duyệt (Full Auto)"}

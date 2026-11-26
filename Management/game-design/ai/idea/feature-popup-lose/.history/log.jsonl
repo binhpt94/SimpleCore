@@ -10,3 +10,5 @@
 {"at": "2026-11-24 23:43:16", "event": "data", "hash": "aa89ff39c089", "previous": "bbba810d005e", "added": [], "removed": [{"id": "lose-result", "text": "Popup thua báo số đợt trụ được, kỉ lục, và cho biết khi vừa phá kỉ lục"}], "rewritten": []}
 {"at": "2026-11-24 23:44:03", "event": "promote", "by": "người (Sync)", "hash": "aa89ff39c089"}
 {"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "aa89ff39c089"}
+{"at": "2026-11-27 00:10:54", "event": "data", "hash": "747e72f87525", "previous": "aa89ff39c089", "added": [], "removed": [], "rewritten": [{"id": "lose-actions", "old": "Popup thua cho chơi lại (về màn chọn đội) hoặc về màn bắt đầu\nHồi sinh thành bằng quảng cáo đã được đề nghị trước đó ở `feature-popup-revive`; popup thua chỉ hiện khi lượt đã thật sự thua.", "new": "Popup thua cho chơi lại (về màn chọn đội) hoặc về màn bắt đầu"}]}
+{"at": "2026-11-27 00:10:55", "event": "approve", "hash": "02a165b011ccc32086dd9fd52c41bca735015e6b", "by": "tự duyệt (Full Auto)"}

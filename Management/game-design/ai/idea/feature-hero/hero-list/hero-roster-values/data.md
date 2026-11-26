@@ -1,6 +1,6 @@
 ---
 based-on: 1bf8998ab5a4
-refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-core/castle-body-values@b648ec300023, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-run/run-start/start-values@04f1a45bba47
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-enemy/enemy-reward@1fbbced31e0f, feature-castle/castle-core/castle-body-values@3e635d304ab3, feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-run/run-start/start-values@ecc0af822edd
 ---
 # Năm hero: chỉ số, kích thước, kiểu đòn
 

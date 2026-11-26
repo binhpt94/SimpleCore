@@ -902,12 +902,19 @@ def run_designer_cases():
     w(g + " (auto)", D, "deny", hero)                           # the root has no data.md
     w(g + " (auto)", D, "allow", idea + r"\data.md")
     node(idea, ai=9, idea_text="Viết lại ý.")
-    # ---- mode user: the human scored every idea, no open question, and the node is the same in live
+    def chot(node_dir, path):      # the human's Chốt (người quyết 2026-11-26): approved.json holds the content hash
+        spec = importlib.util.spec_from_file_location("gd_for_test", FX + r"\Management\tools\gamedesign.py")
+        gdm = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(gdm)
+        held = gdm.read_approvals(FX)
+        held[path] = {"hash": gdm.own_hash(Path(node_dir)), "at": "", "by": "test"}
+        gdm.write_approvals(FX, held)
+    # ---- mode user: the human scored every idea, no open question, and the node is approved
     Path(base + r"\mode.json").write_text('{"mode": "user"}')
     w(g + " (user)", D, "deny", hero)                           # the human has not scored the root
     score(idea, 8)
     w(g + " (user)", D, "deny", hero)                           # scored, but live differs
-    shutil.copy2(idea + r"\data.md", live + r"\data.md")
+    chot(idea, "")
     w(g + " (user)", D, "allow", hero)
     os.makedirs(idea + choose)
     Path(questions).write_text('{"questions": [{"id": "q1", "text": "?", "options": [{"id": "a", "label": "A"}]}]}')
@@ -917,8 +924,7 @@ def run_designer_cases():
     w(g + " (user)", D, "allow", hero)
     w(g + " (user)", D, "deny", skills)                         # feature-hero: unscored and not in live
     score(hero_dir, 6)
-    for name in ("data.md", "CLAUDE.md"):
-        shutil.copy2(hero_dir + "\\" + name, live + r"\feature-hero" + "\\" + name)
+    chot(hero_dir, "feature-hero")
     w(g + " (user)", D, "allow", skills)
     score(hero_dir, 4)
     w(g + " (user)", D, "deny", skills)                         # a human 4 does not pass
@@ -929,7 +935,7 @@ def run_designer_cases():
     w(g + " (user)", D, "allow", idea + r"\data.md")
     w(g + " (user)", D, "allow", ai + r"\notes.md")             # outside the tree: not a node
     w(g + " (the human is not gated)", "@human", "pass", skills)
-    shutil.copy2(idea + r"\CLAUDE.md", live + r"\CLAUDE.md")
+    chot(idea, "")
     w(g + " (user)", D, "allow", skills)
     os.rename(FX + r"\Management\tools\gamedesign.py", FX + r"\Management\tools\gamedesign.off")
     sys.modules.pop("gamedesign", None)

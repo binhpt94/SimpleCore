@@ -46,7 +46,8 @@ Basic, Features, Services and Tools read the public parts of features, Core, _Co
 the root CLAUDE.md. Every bound chat (@GameDesigner too) reads Management/studio and Resources; a feature creates
 the order.md of its own orders there, once, and judges what was delivered (studio.py review; art concepts are
 judged by the human on the management page). rules.json and deleting folders ask the human
-(@CodeLead deletes its own folders itself: skeleton folders, and folders inside _Composition).
+(@CodeLead deletes its own folders itself: skeleton folders, folders inside _Composition, and any file or folder of
+any feature or service, the whole feature too).
 unity-mcp (UNITY_RULES): code sessions read through it, change assets of their own area (write), compile
 (shared) and change the open scene or a prefab stage (state); play, tests and project settings are @CodeLead's.
 state/play/lead take the Editor lock (LOCK_FILE in STORE_DIR): one chat at a time, renewed on every call, freed
@@ -330,7 +331,7 @@ ROLE_AREAS = {"@Core": "Core"}
 LEAD_AREA = "_Composition"
 # unity-mcp: every tool and action, by what it touches (kind). A tool or action missing here is denied.
 #   read    looks only; any path it names must be readable by the session           every code session, @CodeLead
-#   write   changes asset files; every path it names must be the session's own       the owner (@CodeLead: _Composition; delete: also skeleton files)
+#   write   changes asset files; every path it names must be the session's own       the owner (@CodeLead: _Composition; delete: skeleton, features)
 #   shared  compiles; touches the one Editor but holds nothing                       every code session, @CodeLead; not while
 #                                                                                    another session holds the Editor lock
 #   state   changes the open scene, a prefab stage or the console                    every code session, @CodeLead; takes the lock
@@ -912,7 +913,8 @@ def is_asmref(full):
 
 def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
     """Deleting through unity-mcp: one existing file inside the session's own feature or area, outside the skeleton;
-    for @CodeLead, one existing skeleton file (of an unlocked feature, or of Core) or a file of _Composition."""
+    for @CodeLead, one existing skeleton file (of an unlocked feature, or of Core) or a file of _Composition, and any
+    file or folder of any feature or service, the feature's own folder too (no code gate)."""
     if text_of(ti.get("action")) != "delete":
         return "deny", "unity-mcp manage_asset: a feature session may use only action 'delete'"
     if mode == "none":
@@ -927,7 +929,12 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         return "deny", "unity-mcp delete: the path leaves UnityProject/Assets"
     if goes_through_link(full, root):
         return "deny", "path goes through a link or junction"
-    if mode == "codelead":
+    lead_feature = feature_of(full, root) if mode == "codelead" else None
+    if lead_feature:
+        # @CodeLead deletes anything of any feature or service, the whole folder too (a feature dropped from the
+        # design); no code gate: a dropped feature's gate stays closed (decided by the human 2026-11-27).
+        name = f"feature '{lead_feature}'"
+    elif mode == "codelead":
         name, _, edit = zone(full, root, None, LEAD_AREA, True)
         if edit not in ("skeleton", "allow"):
             return "deny", (f"@CodeLead deletes only skeleton files and files of {LEAD_AREA}, not in: {name}. "
@@ -948,6 +955,8 @@ def decide_unity_delete(ti, mode, feature, root, area=None, who=""):
         if locked:
             return "deny", locked
     if not os.path.isfile(full):
+        if lead_feature and os.path.isdir(full):
+            return "allow", f"@CodeLead deletes a folder of {name}"
         # @CodeLead owns the skeleton folders and everything below _Composition: it deletes a folder there itself.
         if mode == "codelead" and os.path.isdir(full) and not same(full, under(root, "UnityProject", "Assets", LEAD_AREA)):
             return "allow", f"@CodeLead deletes a folder of its own inside {name}"

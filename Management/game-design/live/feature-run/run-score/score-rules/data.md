@@ -1,5 +1,5 @@
 ---
-based-on: 3d29bb683b7c
+based-on: 691534d6dde7
 frame: none
 ---
 # Cách đếm điểm và lưu kỉ lục
@@ -11,7 +11,7 @@ frame: none
 ### score-start-zero | AI 8 | Đầu lượt điểm bằng 0; mỗi lần `feature-wave` báo dọn sạch một đợt thì điểm cộng 1
 Dọn sạch đợt 1 thì điểm 1; thua giữa đợt 4 thì điểm 3.
 
-### score-lock-once | AI 8 | Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thua hoặc đồng ý bỏ lượt)
+### score-lock-once | AI 8 | Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thành bị phá)
 Sau khi chốt, báo dọn sạch tới muộn không làm đổi điểm.
 
 ### record-update | AI 8 | Chốt điểm xong: điểm lớn hơn kỉ lục thì kỉ lục bằng điểm và cờ "kỉ lục mới" bật

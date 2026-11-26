@@ -1,0 +1,24 @@
+---
+based-on: aa89ff39c089
+refs: feature-run/run-score@3d29bb683b7c, feature-run/run-flow@8db5f61d9f6e, feature-popup-lose/lose-actions@bddc499985f8, glossary#score@6f4bf7c75284
+---
+# Kết quả lượt
+
+Phần trên của popup thua: điểm của lượt vừa xong, kỉ lục, và lời báo khi vừa phá kỉ lục.
+
+## Ý cốt lõi
+
+### result-score | AI 8 | Popup thua hiện điểm của lượt: số đợt đã dọn sạch
+Điểm lấy từ `feature-run/run-score`, đã chốt lúc lượt kết thúc. Popup không tính điểm.
+
+### result-record | AI 7 | Popup thua hiện kỉ lục ngay dưới điểm
+Kỉ lục là giá trị sau khi đã cập nhật với lượt vừa xong. Để người chơi so điểm mình với mục tiêu.
+
+### result-new-record | AI 7 | Lượt vừa phá kỉ lục thì popup báo rõ "kỉ lục mới" và trông vui hơn hẳn
+Dựa vào cờ phá kỉ lục của `feature-run/run-score`. Không phá kỉ lục thì không có lời báo. Đã loại: luôn hiện câu động viên (làm nhạt lúc phá kỉ lục thật).
+
+### result-title | AI 7 | Popup có tiêu đề cho biết thành đã bị phá
+Người chơi hiểu ngay vì sao lượt kết thúc.
+
+### result-ad-failed | AI 6 | Thua sau khi xem quảng cáo hồi sinh không thành thì popup có thêm một dòng báo quảng cáo chưa hoàn tất
+Người chơi biết vì sao không được hồi sinh. Bỏ qua đề nghị hồi sinh thì không có dòng này.

@@ -46,13 +46,13 @@ Cân bằng dự kiến: Trùm đợt 10 có 760 máu; đội Hiệp sĩ, Cung t
 - Quái bị hạ khi đang chậm: trạng thái chậm biến mất cùng quái.
 - Sát thương có số lẻ (9.5): giữ số thực; hiện ra theo cách làm tròn ở `feature-hero/hero-stats/hero-level-values`.
 - Thành bị phá: quái còn lại không bị hạ thêm, không cho tiền; `feature-run` gỡ quái khi dừng trận.
-- Tạm dừng: anim 0.3s đứng yên.
 
 ## Đã tự quyết
 - **Wave giữ và tính hệ số, Enemy chỉ nhân (2026-11-24, sửa lệch theo @Manager).** Bản trước ghi Enemy nhận số đợt rồi tự tính, trái với `feature-wave/difficulty-scaling/wave-formula` và node cha (`feature-enemy/enemy-stats`: mức tăng theo đợt do `feature-wave` quyết). Một nơi giữ công thức, quái không cần biết đang đợt mấy. Đã loại: Enemy giữ công thức hệ số.
 - **Hệ số đợt áp lúc sinh, không áp lại.** Quái sống qua đợt sau vẫn giữ chỉ số đợt của nó. Đã loại: tính lại theo đợt hiện tại.
 - **Chỉ nhân máu và sát thương.** Giữ hình dạng trận (tốc độ, tầm) như nhau mọi đợt; khó lên nhờ số đông và độ trâu.
 - **Máu Trùm gốc 800 xuống 400, sát thương 40 giữ nguyên (2026-11-23).** Theo đề xuất ở `feature-balance/balance-difficulty-curve/break-forecast`: 800 làm đợt 10 vọt quá mạnh. Đợt Trùm vẫn khó vọt hơn đợt trước, là ngoại lệ có chủ đích. Đã loại: Trùm chiếm 5 chỗ trong số quái.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - Sói 20 máu, 3 sát thương rất yếu: một phát tự bắn cấp 1 (10) cần 2 phát, một Sấm sét hạ cả đàn tới đợt 30. Giữ theo bộ số chung; đề xuất xem lại sau chơi thử (ví dụ 30 máu).

@@ -1,0 +1,21 @@
+---
+based-on: 6181a7c21bf0
+by: enemy-wave-clear=gpt@r2-1#enemy-wave-clear, enemy-type-threats=gpt@r2-1#enemy-type-threats
+---
+# Quái
+
+Kẻ địch đi từ mép trái và mép phải màn hình vào phía thành. Quái đánh hero chắn đường và đánh thành nếu tới được; bị hạ thì cho người chơi tiền.
+
+## Ý cốt lõi
+
+### enemy-path | AI 8 | Quái đi từ hai mép màn hình vào thành, đánh hero chắn đường và đánh thành khi tới nơi
+Cho hero cận chiến có vai trò chắn. Đã loại: quái bỏ qua hero, chỉ nhắm thành.
+
+### enemy-type-threats | AI 7 | Các loại quái tạo ra những mối đe doạ cần cách ứng phó khác nhau
+Giá trị của nhiều loại quái là làm đổi quyết định giữ thành, ví dụ lúc bấm kĩ năng. Cách đi và sức chịu từng loại để vòng 3.
+
+### enemy-reward | AI 8 | Hạ quái thì được tiền, dù hạ bằng hero hay bằng thành
+Tiền vào thẳng `feature-wallet`, không cần nhặt.
+
+### enemy-wave-clear | AI 7 | Quái báo khi bị hạ để `feature-wave` biết lúc đợt được dọn sạch
+`feature-wave` quyết quái nào ra và lúc nào; nó còn cần kết quả giao chiến để kết thúc đợt và trao thưởng.

@@ -17,7 +17,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
   | Máu | Máu thành |
   | Sức đánh | Đòn tự bắn của thành |
   | Kĩ năng | Cả ba kĩ năng thành gộp chung |
-- Trạng thái: sáng (mua được) hoặc mờ (không mua được: không đủ tiền, đang tạm dừng, hoặc lượt đã kết thúc).
+- Trạng thái: sáng (mua được) hoặc mờ (không mua được: không đủ tiền hoặc lượt đã kết thúc).
 - Chạm nút sáng: gửi một yêu cầu mua cho mục đó tới `purchase-rules`. Chạm nút mờ: không gửi gì, không có phản hồi.
 - Mua thành công: nút nảy một lần (phóng to rồi về cỡ cũ) trong 0,2 giây; cấp và giá đổi theo thông tin mới.
 - Nút không tự tính giá, không tự so tiền với giá, không tự quyết mua.
@@ -47,7 +47,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Bấm hai lần rất nhanh khi chỉ đủ tiền một lần**: nút gửi hai yêu cầu (nếu chạm lần hai tới trước khi nút kịp mờ) hoặc một yêu cầu; `purchase-rules` xử lí lần lượt nên chỉ một lần mua thành công, nút nảy một lần, rồi mờ.
 - **Số dư vừa đúng bằng giá**: nút sáng; mua xong số dư về 0, nút mờ ngay (giá mới cao hơn).
 - **Hero đang gục**: nút hero vẫn sáng nếu đủ tiền, mua được.
-- **Tạm dừng**: mọi nút mờ; hết tạm dừng thì nút đủ tiền sáng lại ngay.
 - **Thua đúng lúc đang chạm**: từ khung hình thành về 0 máu mọi nút mờ; chạm không gửi yêu cầu hoặc yêu cầu bị từ chối.
 - **Giá rất lớn**: rút gọn ("181,0K"); sáng/mờ theo giá thật, nên có thể thấy giá "12,3K" mờ khi đang có 12.350 tiền (giá thật 12.399).
 - **Cấp rất lớn**: hiện đủ số, không rút gọn (cấp không lớn tới mức cần).
@@ -59,6 +58,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Không phản hồi khi chạm nút mờ.** Đủ cho chơi thử; phản hồi "không đủ tiền" để sau theo bảng giai đoạn.
 - **Không có tiếng ở PROTOTYPE (2026-11-26, người quyết qua @Manager: không dùng âm thanh, không bật module Audio ở PROTOTYPE).** Tiếng mua dời sang FULL; bù bằng hình: nút nảy và số cấp mới nhấp sáng 0,2 giây, để người chơi thấy rõ món vừa mua. Tiếng báo không đủ tiền vốn đã ở FULL.
 - **Dùng dấu phẩy thập phân kiểu Việt ("12,3K").** Khớp ngôn ngữ game. Đã loại: "12.3K".
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ tạm dừng khỏi lí do nút mờ và trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - Đề xuất cho người: `feature-hud` hiện số tiền nên dùng cùng luật rút gọn để người chơi so được số tiền và giá.

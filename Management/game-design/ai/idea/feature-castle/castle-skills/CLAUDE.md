@@ -25,7 +25,6 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Kĩ năng đang hồi: không bấm được.
 - Ba kĩ năng hồi độc lập; dùng cái này không ảnh hưởng cái kia.
 - Kĩ năng không tốn tiền.
-- Lúc tạm dừng: không bấm được, hồi chiêu không chạy.
 - Quái bị Sấm sét hạ vẫn cho tiền (`feature-enemy/enemy-reward`).
 - Nâng cấp kĩ năng làm kĩ năng mạnh hơn, không làm hồi chiêu ngắn lại (`feature-castle/castle-upgrade-effects`).
 - Thưởng-phạt: dùng đúng lúc quái dồn đông thì dọn được nhiều; dùng phí thì lúc nguy phải chờ hồi.
@@ -36,6 +35,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Sấm sét đánh vùng quanh thành ở cả hai bên.** Không chọn vị trí mà vẫn có ý nghĩa: dùng khi quái dồn sát thành. Đã loại: đánh toàn màn hình (quá mạnh, không cần canh lúc).
 - **Kĩ năng miễn phí, chỉ giới hạn bằng hồi chiêu.** Giữ tiền cho nâng cấp; không bắt người chơi so hai thứ cùng lúc. Đã loại: tốn tiền.
 - **Nút kĩ năng hiển thị ở `feature-hud`.** Node này chỉ lo kĩ năng làm gì.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ luật "lúc tạm dừng không bấm được".
 
 ## Chưa rõ
 - Không có điểm chặn.

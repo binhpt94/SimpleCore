@@ -1,6 +1,6 @@
 ---
 based-on: 6da99ea96860
-refs: feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-team-select/team-slots/slots-spec@70b7a99657b4, feature-team-select/hero-cards/card-spec@786f5ada38ab, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+refs: feature-team-select/team-memory/memory-rules@e36a9ec522a1, feature-team-select/team-slots/slots-spec@70b7a99657b4, feature-team-select/hero-cards/card-spec@786f5ada38ab, feature-hud/hud-layout/layout-spec@aa79f655e44b
 ---
 # Cheat: màn chọn đội
 

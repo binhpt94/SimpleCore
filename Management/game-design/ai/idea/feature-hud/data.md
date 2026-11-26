@@ -1,6 +1,7 @@
 ---
-based-on: 6181a7c21bf0
-by: hud-status=gpt@r2-1#hud-castle-damage, hud-clear-view=gpt@r2-2#phan-vung-mep-man, hud-reads-castle-hp=gpt@r2-2#nguon-mau-thanh, hud-reads-money=gpt@r2-2#nguon-so-du, hud-reads-wave=gpt@r2-2#nguon-so-dot, hud-reads-cooldown=gpt@r2-2#nguon-hoi-chieu, castle-checks-skill=gpt@r2-2#kiem-tra-khi-nhan-yeu-cau, castle-runs-skill=gpt@r2-2#thuc-hien-ki-nang, keep-upgrade-bar-apart=gpt@r2-3#giu-rieng-thanh-nang-cap, hud-resizes-bar-area=gpt@r2-3#cap-lai-vung-nang-cap, hud-pause=gpt@r2-3#gui-yeu-cau-tam-dung, hud-locks-by-run=gpt@r2-3#khoa-nut-theo-luot, hud-wave-banner-event=gpt@r2-3#bao-dot-tu-su-kien, hud-sends-skill-id=gpt@r2-3#gui-dung-ky-nang
+based-on: ca84fa282d14
+by: hud-status=gpt@r2-1#hud-castle-damage, hud-clear-view=gpt@r2-2#phan-vung-mep-man, hud-reads-castle-hp=gpt@r2-2#nguon-mau-thanh, hud-reads-money=gpt@r2-2#nguon-so-du, hud-reads-wave=gpt@r2-2#nguon-so-dot, hud-reads-cooldown=gpt@r2-2#nguon-hoi-chieu, castle-checks-skill=gpt@r2-2#kiem-tra-khi-nhan-yeu-cau, castle-runs-skill=gpt@r2-2#thuc-hien-ki-nang, keep-upgrade-bar-apart=gpt@r2-3#giu-rieng-thanh-nang-cap, hud-resizes-bar-area=gpt@r2-3#cap-lai-vung-nang-cap, hud-locks-by-run=gpt@r2-3#khoa-nut-theo-luot, hud-wave-banner-event=gpt@r2-3#bao-dot-tu-su-kien, hud-sends-skill-id=gpt@r2-3#gui-dung-ky-nang
+gpt-dropped: r2-3#gui-yeu-cau-tam-dung=hud-pause
 ---
 # HUD trận
 
@@ -35,10 +36,7 @@ Nút có thể còn hiện sẵn sàng khi lần bấm trước vừa bắt đ�
 ### castle-runs-skill | AI 7 | `feature-castle` thực hiện ngay kĩ năng khi chấp nhận yêu cầu từ HUD
 Bên chấp nhận yêu cầu cũng là bên tạo hiệu ứng trong trận.
 
-### hud-pause | AI 7 | Nút tạm dừng trên HUD gửi yêu cầu tạm dừng cho `feature-run`
-Popup tạm dừng mở sau khi `feature-run` xác nhận trận đã dừng.
-
-### hud-locks-by-run | AI 7 | HUD dùng trạng thái từ `feature-run` để khoá nút kĩ năng và nút tạm dừng khi trận dừng hay lượt đã kết thúc
+### hud-locks-by-run | AI 7 | HUD dùng trạng thái từ `feature-run` để khoá nút kĩ năng khi trận dừng hay lượt đã kết thúc
 Nút ngừng nhận chạm ngay khi trạng thái lượt đổi, kể cả trước lúc popup hiện.
 
 ### hud-clear-view | AI 7 | HUD chia mép màn cho chính nó và `feature-hud-upgrade`, ngoài dải chiến trường

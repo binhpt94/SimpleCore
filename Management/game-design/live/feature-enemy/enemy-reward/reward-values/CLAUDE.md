@@ -38,13 +38,13 @@ Giá cấp hero thứ 5 là 30×1.35^4 ≈ 100: tới đợt 10 người chơi m
 - Đòn vùng hạ nhiều quái: mỗi quái cho tiền riêng, cùng khung hình.
 - Quái bị hạ cùng khung hình thành bị phá: thành bị phá xử lý trước, không cộng tiền (`feature-run` đã dừng lượt).
 - Quái bị hạ lúc nghỉ giữa hai đợt: vẫn cho tiền.
-- Tạm dừng: không có quái bị hạ nên không có tiền; chữ đang bay đứng yên.
 - Ví có giới hạn hay không: việc của `feature-wallet`; node này luôn gửi đủ số tiền.
 
 ## Đã tự quyết
 - **Thành bị phá trước, tiền sau trong cùng khung hình.** Lượt đã thua thì tiền vô nghĩa và tránh `feature-wallet` nhận tiền sau khi lượt kết thúc.
 - **Cột máu Trùm theo máu gốc mới 400 (2026-11-23).** Tiền Trùm giữ 100; chỉ cập nhật cột tham khảo theo `feature-enemy/enemy-stats/enemy-stat-values`.
 - **Chữ tiền là của node này, không của HUD.** Gắn với chỗ quái bị hạ trên chiến trường, không phải thanh trên màn hình.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ trường hợp biên tạm dừng.
 
 ## Chưa rõ
 - Không có điểm chặn.

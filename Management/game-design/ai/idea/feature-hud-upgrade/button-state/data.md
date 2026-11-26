@@ -1,6 +1,6 @@
 ---
 based-on: 72f1cb81f16b
-refs: feature-upgrade/upgrade-purchase@c53d76edf8b3, feature-upgrade/upgrade-list@7294a54c79df, feature-hud-upgrade/bar-layout@4a9d06c74198
+refs: feature-upgrade/upgrade-purchase@dfecac7ac2de, feature-upgrade/upgrade-list@7294a54c79df, feature-hud-upgrade/bar-layout@4a9d06c74198
 ---
 # Trạng thái nút nâng cấp
 
@@ -12,7 +12,7 @@ Mỗi nút cho thấy nó nâng cái gì, đang ở cấp mấy, cấp sau giá 
 Hình là chân dung hero hoặc biểu tượng máu, sức đánh, kĩ năng của thành. Đã loại: chỉ hiện giá (không biết đã nâng tới đâu).
 
 ### button-dim | AI 8 | Nút mờ khi không mua được, sáng lại ngay khi mua được
-Không mua được là không đủ tiền hoặc đang tạm dừng. Cập nhật mỗi khi số dư hoặc cấp đổi. Đã loại: ẩn nút không đủ tiền (thanh nhảy chỗ).
+Không mua được là không đủ tiền. Cập nhật mỗi khi số dư hoặc cấp đổi. Đã loại: ẩn nút không đủ tiền (thanh nhảy chỗ).
 
 ### button-one-tap | AI 8 | Chạm một lần vào nút sáng là mua một cấp
 Không có bước xác nhận. Chạm nút mờ thì không mua. Đã loại: giữ để mua, hỏi lại trước khi mua.

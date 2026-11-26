@@ -1,5 +1,5 @@
 ---
-based-on: 112626ed0626
+based-on: ddaad7454112
 refs: feature-wallet/balance-spend@df494e209c1e, feature-upgrade/upgrade-effect@b9bcec737959
 ---
 # Mua nâng cấp
@@ -8,8 +8,8 @@ Luật một lần mua: mua được lúc nào, giá bao nhiêu, tiền trừ ra
 
 ## Ý cốt lõi
 
-### buy-anytime | AI 8 | Mua được mọi lúc trong trận, kể cả giữa đợt, trừ lúc đang tạm dừng
-Đã loại (người loại ở vòng 1): chỉ mua giữa hai đợt. Đã loại: mua cả lúc tạm dừng (mất áp lực chọn giữa trận).
+### buy-anytime | AI 8 | Mua được mọi lúc trong trận, kể cả giữa đợt
+Đã loại (người loại ở vòng 1): chỉ mua giữa hai đợt.
 
 ### buy-one-level | AI 8 | Mỗi lần mua tăng đúng một cấp của một mục
 Đã loại: mua nhiều cấp một lúc.

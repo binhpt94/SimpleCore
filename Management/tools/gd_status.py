@@ -55,6 +55,7 @@ def lines_for(root, node, out, brief=False, hidden=None):
         out.append(f"- based-on đang ghi: {node['basedOn'] or '(chưa có)'}; hash data của cha: {node['parentHash']}"
                    + (" -> LỆCH, rà lại node rồi ghi hash mới" if node["stale"] else " -> khớp"))
     out.append(f"- So với live: {dict(new='chưa có trong live', changed='khác live', same='giống live')[node['state']]}"
+               + ("; đã được duyệt" if node.get("accepted") else "; chờ duyệt" if node.get("toApprove") else "")
                + ("; các node con đang mở cho bạn ghi" if node["approved"] else "; các node con đang bị khoá"))
     if node.get("clashOpen"):
         out.append(f"- XUNG ĐỘT CHƯA GIẢI QUYẾT: {node['clashOpen']} nhóm ý trái nhau người chưa chọn. Các node con bị khoá tới khi "
@@ -238,7 +239,8 @@ def hash_lines(root, arg=""):
     width = max(len(k) for k, _ in rows)
     out = [f"{k.ljust(width)}  {v}".rstrip() for k, v in rows]
     if off:
-        out += ["", f"Ghim: python Management/tools/gd_pin.py {arg or PREFIX} --chain (in diff để rà, rồi lệnh ghim)"]
+        out += ["", f"Ghim: python Management/tools/gd_pin.py {arg or PREFIX} --all (nhánh này và mọi node ref tới nó; "
+                    "cả cây: gd_pin.py --all; in diff để rà, rồi lệnh ghim)"]
     return "\n".join(out)
 
 
@@ -255,7 +257,7 @@ def report(root, arg="", brief=False):
     node = next((n for n in gd.walk(snap["idea"]) if n["path"] == path), None)
     if node is None:
         raise ValueError(f"idea không có node '{path or '(gốc)'}'")
-    mode = "User control (người chấm hết, mọi điểm từ %d)" if snap["mode"] == "user" else "Full Auto (điểm hiệu lực từ %d; người bấm Sync để chép node đạt sang live)"
+    mode = "User control (người chấm hết, mọi điểm từ %d)" if snap["mode"] == "user" else "Full Auto (điểm hiệu lực từ %d; node đạt tự được duyệt và lên live)"
     out = [f"# Game design: {mode % gd.PASS_MIN}",
            "Thang điểm: " + " · ".join(f"{b['min']}-{b['max']} {b['label']}" for b in gd.BANDS),
            "Độ quan trọng (chỉ chấm ở node lá): " + " · ".join(f"{x['min']}-{x['max']} {x['name']}: {x['label']}" for x in gd.PHASES)]
@@ -270,23 +272,17 @@ def report(root, arg="", brief=False):
     problems = [p for p in snap["problems"]["idea"] if not path or p["path"] == path or p["path"].startswith(path + "/")]
     if problems:
         out += ["", "## Lỗi cấu trúc (phải sửa trước)"] + [f"- {p['path']}: {p['text']}" for p in problems]
-    # what really changed against live, and what only follows it (gamedesign.follows): the human fixes the first,
-    # the second goes into live by itself
-    changed = [n for n in gd.walk(node) if n["state"] != "same" and n["passed"] and not n.get("follow")]
-    behind = [n for n in gd.walk(node) if n.get("followers", {}).get("redo")]
-    following = [n for n in gd.walk(node) if n.get("follow")]
-    if changed or following or behind:
-        out += ["", "## Thay đổi gốc so với live (chờ người chốt; node chỉ ghim lại refs/based-on thì tự chốt theo, không tính ở đây)"]
-        for n in changed:
-            f = n["followers"]
-            out.append(f"- {n['path'] or '(gốc)'}: {n['title']}"
-                       + (f" · kéo theo {len(f['ready'])} node đã rà" if f["ready"] else "")
-                       + (f" · {len(f['redo'])} node còn ghim hash cũ" if f["redo"] else ""))
-        for n in behind:
-            out.append(f"- Còn ghim hash cũ của {n['path'] or '(gốc)'} (đọc lại node đó rồi ghim lại): " + ", ".join(n["followers"]["redo"]))
-        if following:
-            out.append(f"- Chỉ theo ref, tự chốt khi node gốc được chốt ({len(following)}): "
-                       + ", ".join(f"{n['path']} ← {', '.join(r or '(gốc)' for r in n['followOf']) or 'dòng refs'}" for n in following))
+    # what waits for the human's approval (mode user) and what still pins an old hash (GD's work)
+    pending = [n for n in gd.walk(node) if n.get("toApprove")]
+    stale = [n for n in gd.walk(node) if n.get("stale") or any(r["ok"] is False for r in n.get("refs", []))]
+    if pending or stale:
+        out += ["", "## Chờ duyệt và còn ghim hash cũ"]
+        if pending:
+            out.append(("- Đạt, chờ người chốt: " if snap["mode"] == "user" else "- Đạt, tự lên live ở lần dựng kế tiếp: ")
+                       + ", ".join(n["path"] or "(gốc)" for n in pending))
+        if stale:
+            out.append("- Còn ghim hash cũ (đọc lại node cha hay node được ref rồi gd_pin.py; nhiều nhánh: gd_pin.py --all): "
+                       + ", ".join(n["path"] or "(gốc)" for n in stale))
     # the stage the project is in: which nodes still have to be written down to the last round, which only wait
     stage = snap["stage"]["stage"]
     names = {ph["key"]: ph["name"] for ph in gd.PHASES}
@@ -374,7 +370,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    for stream in (sys.stdout, sys.stderr):
-        if hasattr(stream, "reconfigure"):
-            stream.reconfigure(encoding="utf-8", errors="replace")
     sys.exit(main(sys.argv))

@@ -42,7 +42,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 |---|---|---|---|
 | Cách tải các feature | Lần lượt | Lần lượt | Lần lượt (xét tải song song nếu quá 3 giây) |
 | Thời gian tải tối đa một feature | 10 giây (dự kiến) | 10 giây | 10 giây |
-| Số feature scene Game | 14: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, scene-flow | 21: sim-clock vẫn đầu; thêm `feature-combat` (trước hero, enemy, castle là bên ra đòn; chờ installer), và sau popup-lose theo thứ tự popup-pause, ads, popup-revive (cần ads, run, popup), home, team-select (cần run, hero), game-flow; scene-flow vẫn cuối | Theo danh sách feature lúc đó |
+| Số feature scene Game | 14: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, scene-flow | 18: sim-clock vẫn đầu; thêm `feature-combat` (trước hero, enemy, castle là bên ra đòn; chờ installer), và sau popup-lose theo thứ tự home, team-select (cần run, hero), game-flow; scene-flow vẫn cuối | Theo danh sách feature lúc đó |
 
 ## Trường hợp biên
 - **Feature thứ k tải lỗi**: không tải feature k+1 trở đi; huỷ feature k (phần đã tải được) rồi k-1 về 1; báo lỗi nêu tên feature k.
@@ -58,12 +58,13 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Enemy, Hero, Castle theo thứ tự phụ thuộc (2026-11-25, theo @CodeLead qua @Manager).** Hero và Castle lấy dịch vụ chiến trường của Enemy ngay khi cài; Castle lấy thêm đội hero. Bản trước xếp Castle trước vì "hero sinh ra từ thành", nhưng đó là vị trí trong trận, không đòi thành tải trước. Đã loại: giữ thứ tự cũ và đổi code ba feature (việc lớn, không được gì).
 - **Danh sách scene Game ở IDEA có 12 feature, không có màn bắt đầu, màn chọn đội, popup tạm dừng (2026-11-25, theo @CodeLead qua @Manager).** Bản trước ghi 15, lệch với các node đã chốt: bảng giai đoạn của `feature-home/home-screen/home-screen-spec` ("Không, mở game vào thẳng trận"), `feature-team-select/team-slots/slots-spec` ("Không có; đội cố định"), `feature-popup-pause/pause-popup/pause-popup-spec` ("Không") và `feature-game-flow/flow-routes/routes-values` (chỉ có màn trận). Ba feature đó vào lại danh sách ở PROTOTYPE. Đã loại: giữ 15 (bắt phiên SessionScene và CodeLead nối ba feature IDEA không dùng).
 - **Thêm `feature-scene-flow` vào cuối danh sách scene Game (2026-11-25, theo @CodeLead qua @Manager).** Bản trước loại scene-flow vì nó không có view, không tải. Code thật cần nó là bên tham gia: đặt scene chính lúc tải, mở cổng cho scene Loading bỏ lớp che lúc chạy, báo feature lỗi khi phiên hỏng. Nó phải cuối để cổng chỉ mở khi mọi feature khác đã chạy. `feature-session-scene` vẫn không tính: nó là dịch vụ chạy phiên. Đã loại: giữ 12 và coi cổng là việc ngoài phiên (cổng mở sai lúc, lỗi phiên không về được màn Loading).
-- **Thứ tự PROTOTYPE theo Boot.Game (2026-11-25).** Các feature của PROTOTYPE nối sau popup-lose theo đúng thứ tự @CodeLead đã cài; thoả mọi phụ thuộc (popup-revive sau ads, team-select sau hero). Bản trước chen ads sau popup, game-flow sau run, home và team-select trước hud: không phụ thuộc nào đòi vậy. Combat đặt trước ba bên ra đòn. Ở IDEA các feature đó không tham gia.
+- **Thứ tự PROTOTYPE theo Boot.Game (2026-11-25).** Các feature của PROTOTYPE nối sau popup-lose theo đúng thứ tự @CodeLead đã cài; thoả mọi phụ thuộc (team-select sau hero). Bản trước chen ads sau popup, game-flow sau run, home và team-select trước hud: không phụ thuộc nào đòi vậy. Combat đặt trước ba bên ra đòn. Ở IDEA các feature đó không tham gia.
 - **Thêm `feature-sim-clock` đứng đầu danh sách scene Game (2026-11-25, theo @CodeLead).** Nhịp chung là một bên tham gia không view, chạy nhịp mỗi khung; đứng trước popup để mọi feature gameplay lấy được nhịp ngay lúc cài, và huỷ sau cùng. Code đã nối SimClock ngay sau SessionScene, test Boot của scene Game đã có nó ở đầu. Đã loại: để nhịp ngoài phiên (không được dọn khi rời scene, trái `feature-session-scene`).
 - **Popup đứng ngay sau nhịp chung (trước đây đứng đầu).** Feature nào cũng có thể cần mở popup khi chạy; popup huỷ sau cùng nên không popup nào còn chủ mà mất dịch vụ.
 - **Run đứng trước các feature trận.** Các feature trận nghe "lượt mới bắt đầu" từ `feature-run/run-start`.
 - **Balance không tham gia.** Số liệu nằm trong cấu hình của từng feature (`feature-balance/balance-config`), không có view hay việc tải riêng.
 - **Lỗi tải, chạy thì dừng; lỗi huỷ thì đi tiếp.** Tải thiếu là chơi sai; huỷ dở là rò rỉ.
+- **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ popup-pause, ads, popup-revive khỏi danh sách scene Game ở PROTOTYPE; số feature PROTOTYPE từ 21 còn 18.
 
 ## Chưa rõ
 - Không còn điểm chặn về thứ tự enemy, hero, castle (đã chốt theo phụ thuộc trong code, 2026-11-25).

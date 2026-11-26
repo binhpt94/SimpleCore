@@ -1,5 +1,5 @@
 {
- "hash": "4d5cfe278549",
+ "hash": "fa0d994768de",
  "items": {
   "gap-length": {
    "hash": "bf58dfbdb31d",
@@ -12,10 +12,6 @@
   "gap-next-number": {
    "hash": "14ddc73c0a8a",
    "text": "Dọn sạch đợt w thì số đợt thành w + 1 ngay khung hình đó; suốt 3 giây thở, số đợt là đợt sắp tới\nĐây là số `feature-hud` hiện ở ô đợt. Điểm của lượt vẫn tính theo đợt vừa dọn (`feature-wave/wave-clear/clear-rules`)."
-  },
-  "gap-pause-freeze": {
-   "hash": "5a499610fe53",
-   "text": "Tạm dừng trong lúc thở thì đồng hồ 3 giây đứng yên, bỏ tạm dừng thì đếm tiếp phần còn lại\nVí dụ dừng ở giây 1.2 thì sau khi tiếp tục còn 1.8 giây."
   },
   "gap-same-rules": {
    "hash": "7d952949eb62",

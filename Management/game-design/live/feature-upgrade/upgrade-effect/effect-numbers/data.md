@@ -1,6 +1,6 @@
 ---
 based-on: b9bcec737959
-refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-castle/castle-upgrade-effects/upgrade-effect-values@b16439440823, feature-upgrade/upgrade-purchase/purchase-rules@ba593a5e3e09
+refs: feature-hero/hero-stats/hero-level-values@2d489af38e03, feature-castle/castle-upgrade-effects/upgrade-effect-values@b16439440823, feature-upgrade/upgrade-purchase/purchase-rules@ba02d7fd60f1
 frame: none
 ---
 # Báo lên cấp cho bên giữ chỉ số

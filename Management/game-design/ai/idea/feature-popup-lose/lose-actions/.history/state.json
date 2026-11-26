@@ -1,9 +1,9 @@
 {
- "hash": "bddc499985f8",
+ "hash": "133ab527ee01",
  "items": {
   "actions-two": {
-   "hash": "7d4c8721aef8",
-   "text": "Popup thua có đúng hai nút: chơi lại và về màn bắt đầu\nHồi sinh thành bằng quảng cáo nằm ở `feature-popup-revive`, trước popup thua; popup thua không có nút hồi sinh."
+   "hash": "1dd5935c1bce",
+   "text": "Popup thua có đúng hai nút: chơi lại và về màn bắt đầu\nThua là hết lượt; popup không có nút chơi tiếp."
   },
   "actions-replay-main": {
    "hash": "0b4da219cd1f",

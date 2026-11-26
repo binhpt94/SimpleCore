@@ -56,12 +56,13 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   idle `idle_minutes` is stopped; in both modes a thread that is not running is started only while its pool is under
   its limit (many messages at once must not start dozens of threads); "always-live" (default) stops nothing.
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
-  enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /user-idea adds, edits or
+  enough): POST /api/gamedesign/promote approves one idea node (or a branch) and rebuilds live (gamedesign.approve), /sync
+  approves every passing node and rebuilds live (gamedesign.approve_passing), /user-idea adds, edits or
   removes one of the human's own ideas of a proposed node (gamedesign.user_idea), /delete deletes the ideas and
   nodes the human marked (gamedesign.human_delete), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
-  human's importance score of a node, /progress the progress of a leaf. With the PIN: /sync copies every passing node into live at once
-  (gamedesign.sync_live), /mode switches Full Auto / User control. Nothing reaches live without promote or sync.
+  human's importance score of a node, /progress the progress of a leaf. With the PIN: /mode switches Full Auto / User control,
+  /stage the phase. live is only ever rebuilt from approved.json (gamedesign.build_live).
 - Art concepts (studio.py), all without the PIN: POST /api/studio/review stores the human's judgement of one
   delivered picture (level 0-3 or null, and a feedback text; studio.save_review) and tells nobody,
   /anchor marks a picture judged "Đạt" as a style anchor, /debt-close accepts an art debt as it is (GET /api/studio
@@ -1292,14 +1293,14 @@ def delete_thread(session_id, pin):
 
 
 def promote(path, deep):
-    """The Chốt button of the Game design tab: copies one idea node (deep: its whole branch) into live. No PIN:
-    the page token shows the request comes from the page this server served, and the guard lets no feature or
-    role session run or call this server. gamedesign.promote refuses a node that does not pass."""
+    """The Chốt button of the Game design tab: approves one idea node (deep: also what passes below it) and
+    rebuilds live (gamedesign.approve). No PIN: the page token shows the request comes from the page this server
+    served, and the guard lets no feature or role session run or call this server."""
     try:
-        written, followed = gamedesign.promote_and_follow(ROOT, path, deep)
+        done = gamedesign.approve(ROOT, path, deep)
     except (ValueError, OSError) as ex:
         return {"ok": False, "error": str(ex)}
-    return {"ok": True, "written": written, "followed": followed, "data": sync_page.write_gamedesign(ROOT)}
+    return {"ok": True, "approved": done["approved"], "held": done["build"]["held"], "data": sync_page.write_gamedesign(ROOT)}
 
 
 def priority(path, score):
@@ -1332,17 +1333,14 @@ def requirement(ref, action, note):
     return {"ok": True, "data": sync_page.write_gamedesign(ROOT)}
 
 
-def sync_live(pin):
-    """The Sync button: every passing idea node that differs from live is copied into live. Needs the PIN: it
-    rewrites many fixed nodes at once."""
-    error = bind_session.check_pin(guard.STORE_DIR, pin)
-    if error:
-        return {"ok": False, "error": error}
+def sync_live():
+    """The Sync button: approves every passing idea node and rebuilds live (gamedesign.approve_passing). No PIN
+    (người quyết 2026-11-26), like Chốt."""
     try:
-        written = gamedesign.sync_live(ROOT)
+        done = gamedesign.approve_passing(ROOT)
     except (ValueError, OSError) as ex:
         return {"ok": False, "error": str(ex)}
-    return {"ok": True, "written": written, "data": sync_page.write_gamedesign(ROOT)}
+    return {"ok": True, "approved": done["approved"], "held": done["build"]["held"], "data": sync_page.write_gamedesign(ROOT)}
 
 
 def set_mode(pin, mode):
@@ -2166,7 +2164,7 @@ class Handler(SimpleHTTPRequestHandler):
             if self.path == "/api/gamedesign/priority":
                 return self.send_json(200, priority(data.get("path"), data.get("score")))
             if self.path == "/api/gamedesign/sync":
-                return self.send_json(200, sync_live(str(data.get("pin") or "")))
+                return self.send_json(200, sync_live())
             if self.path == "/api/gamedesign/mode":
                 return self.send_json(200, set_mode(str(data.get("pin") or ""), data.get("mode")))
             if self.path == "/api/gamedesign/stage":

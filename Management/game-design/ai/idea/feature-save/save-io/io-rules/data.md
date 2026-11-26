@@ -1,6 +1,6 @@
 ---
 based-on: 2830f8d52b13
-refs: feature-home/cheat@1881bd47e941, feature-popup-lose/cheat@683571cd6600, feature-run/run-score/score-rules@1090f4b26dd9
+refs: feature-home/cheat@1881bd47e941, feature-popup-lose/cheat@683571cd6600, feature-run/run-score/score-rules@2ff455851b82
 frame: none
 ---
 # Luật đọc ghi bản ghi lưu
