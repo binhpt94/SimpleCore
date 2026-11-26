@@ -138,14 +138,4 @@ namespace Game.PopupRating
             }
         }
     }
-
-    /// <summary>
-    /// What this feature remembers while the app is open: how many invites were shown. Never saved to disk;
-    /// a new app launch starts at 0 (node rating-timing, người quyết 2026-11-27). The installer asset holds the
-    /// one instance of a launch, so it outlives each Game scene session.
-    /// </summary>
-    internal sealed class RatingLaunchMemory
-    {
-        internal int InvitesShown { get; set; }
-    }
 }

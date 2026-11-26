@@ -192,31 +192,42 @@
    "state": "verified",
    "note": "",
    "tests": [
-    "BootTests.GameScene_PopupCatalogHasTheLosePopup"
+    "BootTests.GameScene_PopupCatalogHasTheRatingPopup",
+    "BootTests.GameScene_AtIdea_PopupCatalogHasTheLoseAndRatingPopups"
    ],
    "play": "",
-   "hash": "e9c342e855de",
-   "text": "Scene Game có 1 id popup: `PopupLose/Main` (popup thua)\nChưa có popup tạm dừng và popup hồi sinh. Tên `Name` do feature sở hữu đặt; đây là tên dự kiến.",
-   "title": "Scene Game có 1 id popup: `PopupLose/Main` (popup thua)",
+   "hash": "2f2e9fa92266",
+   "text": "Scene Game có 2 id popup: `PopupLose/Main` (popup thua) và `PopupRating/Main` (popup mời đánh giá)\nTên `Name` do feature sở hữu đặt; đây là tên dự kiến.",
+   "title": "Scene Game có 2 id popup: `PopupLose/Main` (popup thua) và `PopupRating/Main` (popup mời đánh giá)",
    "by": "@CodeLead",
-   "at": "2026-11-25 20:45:27"
+   "at": "2026-11-27 03:19:02"
   },
   "params": {
    "state": "verified",
    "note": "",
    "tests": [
-    "BootTests.GameScene_AtIdea_PopupCatalogHasOnlyTheLosePopup",
-    "BootTests.GameScene_AtPrototype_PopupCatalogHasTheThreePopups",
-    "PopupServiceTests.Show_OpensThePopupOnTopAtOnce",
-    "PopupCheatTests.SamplePopup_CloseButton_ClosesItLikeAnyCaller_AndASecondClickIsIgnored",
-    "BootTests.LoadingScene_HasOnlySceneFlowAsParticipant"
+    "BootTests.GameScene_AtIdea_PopupCatalogHasTheLoseAndRatingPopups",
+    "BootTests.GameScene_AtPrototype_PopupCatalogHasTheLoseAndRatingPopups"
    ],
    "play": "",
-   "hash": "bf17d53480dc",
-   "text": "## Làm gì\n- Bước tải của scene Game: dịch vụ chuẩn bị mọi popup có id trong danh sách của scene (asset nằm ở `FeatureAssets/Public` của feature sở hữu). Thiếu asset của một id thì bước tải lỗi, nêu id (`feature-session-scene/session-steps/participant-order`).\n- Feature gọi xin mở bằng id: dịch vụ đặt popup lên trên cùng (`feature-popup/popup-layer/stack-rules`) và trả popup cho feature gọi điền nội dung, nghe nút.\n- Feature gọi xin đóng: popup và nền che của nó biến mất.\n- Bước huỷ của scene: mọi popup đang mở và mọi popup đã chuẩn bị bị bỏ.\n\nDanh sách id của scene Game (đủ mọi giai đoạn; id nào có ở giai đoạn nào xem bảng \"Thông số theo giai đoạn\"):\n\n| Id | Feature sở hữu | Số nút | Nút | Chặn gì |\n|---|---|---|---|---|\n| `PopupLose/Main` | `feature-popup-lose` | 2 | Chơi lại; Về màn bắt đầu | Mọi thứ bên dưới (trận đã dừng) |\n| `PopupPause/Main` | `feature-popup-pause` | 2 mỗi bước | Bước chính: Tiếp tục; Bỏ lượt. Bước hỏi: Bỏ lượt; Không | Mọi thứ bên dưới (trận đứng yên) |\n\nNội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup-lose/lose-result`, `feature-popup-pause/pause-popup`); dịch vụ không biết.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số id popup scene Game | 1 | id | Theo các feature popup có trong scene Game |\n| Thời gian từ lúc xin mở tới lúc popup hiện | 1 | khung hình | Đã chuẩn bị ở bước tải |\n| Số lần bấm nút được xử lí mỗi lần mở | 1 | lần | Chặn bấm đúp |\n| Popup trong scene Loading | 0 | popup | Loading không có popup |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số id popup scene Game | 1: `PopupLose/Main` | 3: thêm `PopupRevive/Main` (`feature-popup-revive`, 2 nút: Xem quảng cáo; Kết thúc lượt) và `PopupPause/Main` | Theo danh sách popup lúc đó |\n| Thời gian từ xin mở tới hiện | 1 khung hình | 1 khung hình (hiệu ứng mở chạy sau đó) | Như PROTOTYPE |",
+   "hash": "996db0e63d5c",
+   "text": "## Làm gì\n- Bước tải của scene Game: dịch vụ chuẩn bị mọi popup có id trong danh sách của scene (asset nằm ở `FeatureAssets/Public` của feature sở hữu). Thiếu asset của một id thì bước tải lỗi, nêu id (`feature-session-scene/session-steps/participant-order`).\n- Feature gọi xin mở bằng id: dịch vụ đặt popup lên trên cùng (`feature-popup/popup-layer/stack-rules`) và trả popup cho feature gọi điền nội dung, nghe nút.\n- Feature gọi xin đóng: popup và nền che của nó biến mất.\n- Bước huỷ của scene: mọi popup đang mở và mọi popup đã chuẩn bị bị bỏ.\n\nDanh sách id của scene Game (đủ mọi giai đoạn; id nào có ở giai đoạn nào xem bảng \"Thông số theo giai đoạn\"):\n\n| Id | Feature sở hữu | Số nút | Nút | Chặn gì |\n|---|---|---|---|---|\n| `PopupLose/Main` | `feature-popup-lose` | 2 | Chơi lại; Về màn bắt đầu | Mọi thứ bên dưới (trận đã dừng) |\n| `PopupRating/Main` | `feature-popup-rating` | 2 | Đánh giá; Để sau | Mọi thứ bên dưới, kể cả popup thua |\n\nNội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup-lose/lose-result`); dịch vụ không biết.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số id popup scene Game | 2 | id | Theo các feature popup có trong scene Game |\n| Thời gian từ lúc xin mở tới lúc popup hiện | 1 | khung hình | Đã chuẩn bị ở bước tải |\n| Số lần bấm nút được xử lí mỗi lần mở | 1 | lần | Chặn bấm đúp |\n| Popup trong scene Loading | 0 | popup | Loading không có popup |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số id popup scene Game | 2: `PopupLose/Main`, `PopupRating/Main` | 2: `PopupLose/Main`, `PopupRating/Main` | Theo danh sách popup lúc đó |\n| Thời gian từ xin mở tới hiện | 1 khung hình | 1 khung hình (hiệu ứng mở chạy sau đó) | Như PROTOTYPE |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 20:45:28"
+   "at": "2026-11-27 03:19:02"
+  },
+  "stage-idea": {
+   "state": "verified",
+   "note": "",
+   "tests": [
+    "BootTests.GameScene_AtIdea_PopupCatalogHasTheLoseAndRatingPopups"
+   ],
+   "play": "",
+   "hash": "14295f4fa720",
+   "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Số id popup scene Game: 2: `PopupLose/Main`, `PopupRating/Main`\n- Thời gian từ xin mở tới hiện: 1 khung hình",
+   "title": "Thông số của giai đoạn IDEA",
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:19:02"
   }
  },
  "log": [
@@ -454,6 +465,48 @@
   {
    "at": "2026-11-25 20:45:28",
    "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:10:47",
+   "id": "id-list",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "BootTests.GameScene_PopupCatalogHasTheRatingPopup, BootTests.GameScene_AtIdea_PopupCatalogHasTheLoseAndRatingPopups"
+  },
+  {
+   "at": "2026-11-27 03:10:47",
+   "id": "params",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "BootTests.GameScene_AtIdea_PopupCatalogHasTheLoseAndRatingPopups, BootTests.GameScene_AtPrototype_PopupCatalogHasTheLoseAndRatingPopups"
+  },
+  {
+   "at": "2026-11-27 03:10:47",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "_Services/Popup",
+   "note": "BootTests.GameScene_AtIdea_PopupCatalogHasTheLoseAndRatingPopups"
+  },
+  {
+   "at": "2026-11-27 03:19:02",
+   "id": "id-list",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:19:02",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:19:02",
+   "id": "stage-idea",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""

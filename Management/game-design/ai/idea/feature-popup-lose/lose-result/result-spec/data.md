@@ -18,7 +18,4 @@ Thua ở đợt 1 thì "Trụ được 0 đợt".
 ### result-new-record-line | AI 7 | Cờ kỉ lục mới bật thì có thêm dòng "Kỉ lục mới!" và dòng này phóng to 1.0 → 1.15 → 1.0 lặp lại mỗi 1 giây
 Dòng này nằm trên một dải nền nổi bật cùng cỡ (400x70 px), để lượt phá kỉ lục trông vui hơn hẳn. Cờ tắt thì không có cả dòng lẫn dải nền, không có câu nào thay vào.
 
-### result-ad-failed-text | AI 6 | Quảng cáo hồi sinh không xem hết hoặc không tải được thì có dòng "Quảng cáo chưa hoàn tất" ở chỗ dòng "Kỉ lục mới!"
-Chữ trơn, không dải nền. Phá kỉ lục thì chỉ hiện "Kỉ lục mới!".
-
 ### result-read-only | AI 8 | Popup chỉ đọc điểm, kỉ lục, cờ một lần lúc mở; không đổi số nào

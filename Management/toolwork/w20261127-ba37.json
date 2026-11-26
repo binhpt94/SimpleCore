@@ -1,0 +1,10 @@
+{
+ "id": "w20261127-ba37",
+ "text": "validate.py và hook Stop gọi nó vỡ UnicodeEncodeError khi in chữ tiếng Việt trên console Windows cp1252 · cần ép stdout utf-8 trong validate.py, ví dụ sys.stdout.reconfigure encoding utf-8, hoặc đặt PYTHONIOENCODING cho hook · hiện phải chạy kèm PYTHONIOENCODING=utf-8",
+ "source": "@CodeLead",
+ "decided": "người bảo ghi toolwork cho lỗi này trong chat CodeLead, 2026-11-27",
+ "state": "done",
+ "note": "validate.py ép stdout, stderr sang utf-8 khi chạy · stop_validate.py gọi validate.py kèm PYTHONIOENCODING=utf-8 · thử trên console cp1252 không còn vỡ",
+ "created": 1795723355.7119267,
+ "closed": 1795723846.7794797
+}

@@ -1,0 +1,10 @@
+{
+ "id": "w20261127-f31f",
+ "text": "stop_report.py lưu lặp báo cáo của CodeLead · cùng một khối Báo cáo cho @Manager được lưu lại thành file mới ở các lượt sau, kể cả lượt không sửa file, ví dụ 5 bản 20261127-021625, 021938, 022053, 022110, 022155 · cần chỉ lưu khối của chính lượt vừa kết thúc, không lấy khối cũ trong transcript",
+ "source": "@CodeLead",
+ "decided": "người bảo ghi toolwork cho lỗi này trong chat CodeLead, 2026-11-27",
+ "state": "done",
+ "note": "stop_report.py: tin từ phiên khác (SendMessage, isMeta, origin peer) giờ mở lượt mới, nên lượt trả lời Leader không lấy lại khối báo cáo của lượt trước · thêm test",
+ "created": 1795723355.8631768,
+ "closed": 1795723659.4369118
+}

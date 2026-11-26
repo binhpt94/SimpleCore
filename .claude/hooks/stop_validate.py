@@ -8,6 +8,7 @@ The agent is sent back once; if it stops again with violations left, it is let g
 violations stay visible to validate.py / the management page.
 """
 import json
+import os
 import re
 import subprocess
 import sys
@@ -40,7 +41,8 @@ def main(argv):
 
         p = subprocess.run([sys.executable, str(root / "Management" / "tools" / "validate.py"),
                             "--root", str(root), "--feature", feature],
-                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=50)
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=50,
+                           env={**os.environ, "PYTHONIOENCODING": "utf-8"})      # the child prints utf-8 we read
         if p.returncode == 0:
             return 0
 

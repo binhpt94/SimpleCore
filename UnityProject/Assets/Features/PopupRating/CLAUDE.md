@@ -8,7 +8,7 @@ Không có. Feature không mở kiểu công khai nào.
 ## Nối dây
 - `PopupRatingInstaller` (FeatureAssets/Public): cài sau Popup và Run. Cần `ISessionScene`, `IRunFlow`, `IRunScore`, `IPopupService`, `IPopupViews`, và config `FeatureAssets/Private/PopupRatingConfig` (bảng InviteParams, TimingParams).
 - Popup id `PopupRating/Main` → prefab `FeatureAssets/Public/PopupRatingMain.prefab` (gốc có `RatingView`), nằm trong catalog popup của scene Game ở `_Composition`.
-- Asset installer giữ số lần đã mời của lần mở game (chỉ trong bộ nhớ, không lưu xuống máy).
+- Số lần đã mời là field của `RatingParticipant`, sống cùng scene Game, tức suốt một lần mở game (chơi lại không tải lại scene). Chỉ trong bộ nhớ, không lưu xuống máy.
 
 ## Hành vi
 - Đếm `invite_delay` (1.5 giây thật, không tính lúc ở ngoài game) từ `IRunFlow.BattleStopped`; `BattleCleared` huỷ.

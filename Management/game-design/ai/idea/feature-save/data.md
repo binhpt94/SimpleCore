@@ -37,7 +37,7 @@ Màn bắt đầu không hiện nhầm số mặc định rồi mới đổi san
 Giá trị mặc định là của bên sở hữu kỉ lục, theo `save-no-rules`.
 
 ### run-compares-record | AI 7 | `feature-run` so điểm với kỉ lục khi lượt chốt và chỉ đổi kỉ lục khi điểm lớn hơn
-Bằng kỉ lục thì không phải kỉ lục mới. Lượt có hồi sinh thì chỉ so khi đã chốt thua.
+Bằng kỉ lục thì không phải kỉ lục mới.
 
 ### run-asks-write | AI 8 | Kỉ lục đổi thì `feature-run` giao Lưu dữ liệu ghi ngay, không chờ rời popup thua
 

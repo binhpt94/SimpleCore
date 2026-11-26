@@ -1,3 +1,4 @@
+using Game.Run;
 using Game.Core;
 using NUnit.Framework;
 using static Game.PopupRating.Tests.RatingFakes;
@@ -34,6 +35,64 @@ namespace Game.PopupRating.Tests
         }
 
         [Test]
+        public void InviteDelay_ALongFrameRightAfterTheStopNeverOpensTheInviteBeforeTheLosePopup()
+        {
+            _rig.Config.MaxFrameSeconds = 0.125f;   // the shipped cap
+            _rig.Participant.Run();
+            _rig.Score.IsNewBest = true;
+            _rig.Flow.Step = RunStep.Ending;
+            _rig.Flow.Stop();
+            _rig.Clock.Tick(0.6f);            // one long frame, like the castle falling
+            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(0), "the long frame counts only the per-frame cap");
+            for (var i = 0; i < 20 && _rig.Clock.Running; i++) _rig.Clock.Tick(0.6f);
+            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(0), "invite_delay reached, but the run is not at Lost yet");
+
+            _rig.Popups.ShowLoseBelow();      // the run reaches Lost: the lose popup opens first
+            _rig.Flow.GoTo(RunStep.Lost);
+            Assert.That(_rig.Popups.Shown, Is.EqualTo(new[] { RatingPopupIds.Main }));
+            Assert.That(_rig.Popups.TopIsInvite, Is.True, "the invite sits on top of the lose popup");
+        }
+
+        [Test]
+        public void InviteDelay_EachFrameCountsAtMostTheBattleClockCap()
+        {
+            var shipped = UnityEngine.ScriptableObject.CreateInstance<RatingConfig>();
+            Assert.That(shipped.MaxFrameSeconds, Is.EqualTo(0.125f), "SimClock cap: 5 steps of 1/40 s");
+            UnityEngine.Object.DestroyImmediate(shipped);
+            _rig.Config.MaxFrameSeconds = 0.125f;
+            _rig.NewBest();
+            for (var i = 0; i < 11; i++) _rig.Clock.Tick(1f);   // 11 x 0.125 = 1.375 s < invite_delay
+            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(0));
+            _rig.Clock.Tick(1f);                                // 1.5 s
+            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void LeavingTheBattleWhileTheInviteIsOpenClosesItSilently()
+        {
+            _rig.NewBest();
+            _rig.Clock.Tick(1.5f);
+            Assert.That(_rig.Participant.IsOpen, Is.True);
+            _rig.Flow.Clear();                // Play again touched while the invite was open
+            Assert.That(_rig.Participant.IsOpen, Is.False);
+            Assert.That(_rig.Popups.OpenCount, Is.EqualTo(0), "no invite over the next screen");
+            Assert.That(_rig.Store.AppTries + _rig.Store.BrowserTries, Is.EqualTo(0), "not a touch on a button");
+            Assert.That(_rig.Participant.InvitesShown, Is.EqualTo(1), "it was shown, so it counts");
+        }
+
+        [Test]
+        public void LeavingTheBattleWhileWaitingForLostCancelsTheInvite()
+        {
+            _rig.Participant.Run();
+            _rig.Flow.Step = RunStep.Ending;
+            _rig.Flow.Stop();
+            for (var i = 0; i < 12; i++) _rig.Clock.Tick(0.125f);
+            _rig.Flow.Clear();
+            _rig.Flow.GoTo(RunStep.Lost);
+            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(0));
+        }
+
+        [Test]
         public void NoInviteWhenTheRunDidNotSetANewBest()
         {
             _rig.Participant.Run();
@@ -41,7 +100,7 @@ namespace Game.PopupRating.Tests
             _rig.Flow.Stop();
             _rig.Clock.Tick(2f);
             Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(0));
-            Assert.That(_rig.Memory.InvitesShown, Is.EqualTo(0));
+            Assert.That(_rig.Participant.InvitesShown, Is.EqualTo(0));
         }
 
         [Test]
@@ -73,31 +132,52 @@ namespace Game.PopupRating.Tests
         }
 
         [Test]
-        public void InvitedFlagTurnsOnWhenShownAndBlocksASecondInviteThisLaunch()
+        public void InvitedFlagTurnsOnWhenShownAndBlocksASecondInviteAfterPlayAgain()
         {
-            Assert.That(_rig.Config.MaxInvitesPerLaunch, Is.EqualTo(1), "max_invites_per_launch at IDEA");
             _rig.NewBest();
+            Assert.That(_rig.Participant.InvitesShown, Is.EqualTo(0), "not yet shown while counting");
             _rig.Clock.Tick(1.5f);
-            Assert.That(_rig.Memory.InvitesShown, Is.EqualTo(1));
+            Assert.That(_rig.Participant.InvitesShown, Is.EqualTo(1), "on once the invite is shown");
             _rig.Popups.View.PressLater();
 
-            // Next session of the same launch (Play again): same memory.
-            var next = _rig.NewSessionSameLaunch();
-            next.Run();
+            // Play again in the same Game scene, beat the best again: same participant, flag still on.
+            _rig.Flow.Clear();
+            _rig.Score.IsNewBest = true;
             _rig.Flow.Stop();
             _rig.Clock.Tick(2f);
-            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(1), "max_invites_per_launch = 1");
+            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(1));
+            Assert.That(_rig.Participant.InvitesShown, Is.EqualTo(1));
         }
 
         [Test]
-        public void MaxInvitesPerLaunch_ANewLaunchStartsWithNoInviteShown()
+        public void MaxInvitesPerLaunch_IsOneSoTheSecondNewBestOfTheLaunchIsNotInvited()
         {
-            var installer = UnityEngine.ScriptableObject.CreateInstance<PopupRatingInstaller>();
-            try
+            Assert.That(_rig.Config.MaxInvitesPerLaunch, Is.EqualTo(1), "max_invites_per_launch at IDEA");
+            Assert.That(_rig.Participant.InvitesShown, Is.EqualTo(0), "nothing saved on disk: a launch starts at 0");
+            _rig.Participant.Run();
+            for (var run = 1; run <= 3; run++)
             {
-                Assert.That(installer.Launch.InvitesShown, Is.EqualTo(0), "nothing saved on disk: a launch starts at 0");
+                _rig.Score.IsNewBest = true;
+                _rig.Flow.Stop();
+                _rig.Clock.Tick(1.5f);
+                if (_rig.Participant.IsOpen) _rig.Popups.View.PressLater();
+                _rig.Flow.Clear();
             }
-            finally { UnityEngine.Object.DestroyImmediate(installer); }
+            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(_rig.Config.MaxInvitesPerLaunch),
+                "max_invites_per_launch caps the invites of one launch");
+        }
+
+        [Test]
+        public void MaxInvitesPerLaunch_RaisedToTwoAllowsASecondInvite()
+        {
+            _rig.Config.MaxInvitesPerLaunch = 2;   // the cap is read from max_invites_per_launch, not hard-coded
+            _rig.NewBest();
+            _rig.Clock.Tick(1.5f);
+            _rig.Popups.View.PressLater();
+            _rig.Flow.Clear();
+            _rig.Flow.Stop();
+            _rig.Clock.Tick(1.5f);
+            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(2));
         }
 
         [Test]
@@ -109,7 +189,7 @@ namespace Game.PopupRating.Tests
             Assert.That(_rig.Clock.Running, Is.False);
             _rig.Clock.Tick(1f);
             Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(0));
-            Assert.That(_rig.Memory.InvitesShown, Is.EqualTo(0));
+            Assert.That(_rig.Participant.InvitesShown, Is.EqualTo(0));
 
             _rig.Flow.Stop();                // a later run beats the best again: still invited
             _rig.Clock.Tick(1.5f);
@@ -123,7 +203,7 @@ namespace Game.PopupRating.Tests
             _rig.NewBest();
             _rig.Clock.Tick(1.5f);
             Assert.That(_rig.Participant.IsOpen, Is.False);
-            Assert.That(_rig.Memory.InvitesShown, Is.EqualTo(0));
+            Assert.That(_rig.Participant.InvitesShown, Is.EqualTo(0));
             Assert.That(_rig.Log.Warnings.Count, Is.EqualTo(1));
         }
 
@@ -165,11 +245,10 @@ namespace Game.PopupRating.Tests
             Assert.That(_rig.Popups.OpenCount, Is.EqualTo(0));
             Assert.That(_rig.Store.AppTries + _rig.Store.BrowserTries, Is.EqualTo(0), "no touch reported");
 
-            var next = _rig.NewSessionSameLaunch();
-            next.Run();
+            Assert.That(_rig.Participant.InvitesShown, Is.EqualTo(1), "the invite counted: it was shown");
             _rig.Flow.Stop();
             _rig.Clock.Tick(2f);
-            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(1));
+            Assert.That(_rig.Popups.Shown.Count, Is.EqualTo(1), "an ended session invites no more");
         }
 
         [Test]

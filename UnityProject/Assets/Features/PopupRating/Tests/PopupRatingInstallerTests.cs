@@ -124,6 +124,34 @@ namespace Game.PopupRating.Tests
             Assert.That(rateRect.sizeDelta.x, Is.GreaterThan(laterRect.sizeDelta.x), "main button stands out");
         }
 
+        [Test]
+        public void BackdropTouchDoesNotCloseTheInvite_ThePrefabHasOnlyRateAndLaterAsTouchTargets()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+            Assert.That(prefab, Is.Not.Null, $"popup prefab missing at {PrefabPath}");
+            var view = prefab.GetComponent<IRatingView>() as Component;
+            var so = new SerializedObject(view);
+            var rate = so.FindProperty("_rate").objectReferenceValue;
+            var later = so.FindProperty("_later").objectReferenceValue;
+
+            // No UnityEngine.UI reference in this test assembly: find touch targets by type name.
+            var all = prefab.GetComponentsInChildren<Component>(true);
+            var selectables = System.Array.FindAll(all, c => IsKindOf(c, "Selectable"));
+            Assert.That(selectables, Has.Length.EqualTo(2), "only the two buttons take touches");
+            Assert.That(selectables, Is.EquivalentTo(new UnityEngine.Object[] { rate, later }));
+            var clickables = System.Array.FindAll(all, c => c is UnityEngine.EventSystems.IPointerClickHandler);
+            Assert.That(clickables, Has.Length.EqualTo(2), "no other tap area on the panel or around it");
+            Assert.That(System.Array.Exists(prefab.GetComponents<Component>(), c => IsKindOf(c, "Selectable")),
+                Is.False, "the panel itself is not a button");
+        }
+
+        private static bool IsKindOf(Component c, string typeName)
+        {
+            for (var t = c.GetType(); t != null; t = t.BaseType)
+                if (t.Name == typeName) return true;
+            return false;
+        }
+
         internal sealed class FakeSession : ISessionScene
         {
             public readonly List<ISessionParticipant> Joined = new List<ISessionParticipant>();

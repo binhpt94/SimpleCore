@@ -25,6 +25,11 @@ namespace Game.PopupRating
         [Tooltip("max_invites_per_launch: invites shown per app launch.")]
         [SerializeField] private int _maxInvitesPerLaunch = 1;
 
+        [Header("Pace")]
+        [Tooltip("Most real seconds one frame adds to the count: the battle clock's cap (SimClock max_steps_per_frame / tick_rate = 5 / 40), so a long frame never lets the invite overtake the run's 1 s lose delay.")]
+        [SerializeField, Min(0.001f)] private float _maxFrameSeconds = 0.125f;
+
+        internal float MaxFrameSeconds { get => _maxFrameSeconds; set => _maxFrameSeconds = value; }
         internal string InviteText { get => _inviteText; set => _inviteText = value; }
         internal string RateLabel { get => _rateLabel; set => _rateLabel = value; }
         internal string LaterLabel { get => _laterLabel; set => _laterLabel = value; }

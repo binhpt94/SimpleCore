@@ -618,7 +618,17 @@ def validate(root, cfg, feature=None):
     }
 
 
+def utf8_output():
+    """Print Vietnamese names and messages on any console (Windows cp1252 would raise UnicodeEncodeError)."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
+
 def main(argv=None):
+    utf8_output()
     here = Path(__file__).resolve().parent
     ap = argparse.ArgumentParser(description="Check feature boundaries.")
     ap.add_argument("--root", default=str(here.parent.parent), help="project root (default: two levels above this file)")

@@ -351,8 +351,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup-lose/lose-result/result-spec": {
-   "hash": "b6791b2d34e8423d261aabf7117b7a0171293df2",
-   "at": "2026-11-27 00:26:06",
+   "hash": "328876c293efcd837b40a6f5e95dea89af5f6b37",
+   "at": "2026-11-27 03:20:53",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup-rating": {
@@ -396,8 +396,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup/popup-layer/stack-rules": {
-   "hash": "684dcbc0750707c541f8501ef361d07f3f3c5ba9",
-   "at": "2026-11-27 00:26:06",
+   "hash": "f58c5d427af3f35c4642df81959506ae28f15715",
+   "at": "2026-11-27 03:20:53",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup/popup-request": {
@@ -406,8 +406,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup/popup-request/request-rules": {
-   "hash": "9189da31513affc0ae523c91e6e9c756522ef158",
-   "at": "2026-11-27 02:33:54",
+   "hash": "e2ccb81feb134b58ba5d320ebe23099e1b455a3b",
+   "at": "2026-11-27 03:20:53",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-run": {
@@ -421,8 +421,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-run/run-flow/flow-rules": {
-   "hash": "799e27a8bfbcec1fe9c788729ab2e479a602145c",
-   "at": "2026-11-27 00:26:06",
+   "hash": "b4dc4fd1266551a6eb060eba499c784f080323c4",
+   "at": "2026-11-27 03:20:53",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-run/run-score": {
@@ -451,9 +451,9 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-save": {
-   "hash": "4988c041e48898c335be5e1cba2013fbabe6cbf8",
-   "at": "2026-11-26 23:46:56",
-   "by": "chuyển từ live cũ"
+   "hash": "79d49505280bc0c5a9e73de2df8d50d4c8a82c2d",
+   "at": "2026-11-27 03:20:53",
+   "by": "tự duyệt (Full Auto)"
   },
   "feature-save/save-io": {
    "hash": "71308c06cf79940319beba59aeaa05f77cbf0eb3",
@@ -516,8 +516,8 @@
    "by": "chuyển từ live cũ"
   },
   "feature-session-scene/session-steps/participant-order": {
-   "hash": "be9cb34ddf898506798ddca708ffa479cfd539d0",
-   "at": "2026-11-27 00:21:41",
+   "hash": "db75a88afa78c2311f644b40d79e055850954bda",
+   "at": "2026-11-27 03:20:53",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-sim-clock": {

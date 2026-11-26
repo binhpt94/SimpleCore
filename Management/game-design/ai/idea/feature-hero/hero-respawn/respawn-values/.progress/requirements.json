@@ -186,8 +186,8 @@
    "at": "2026-11-25 12:02:00"
   },
   "stage-prototype": {
-   "state": "done",
-   "note": "squad đếm thời gian chờ hồi sinh còn lại theo slot, chờ CodeLead thêm vào contract IHeroDownState cho HUD đọc",
+   "state": "verified",
+   "note": "Test The_respawn_wait_left_counts_down_for_the_hud hỏng ở HeroParticipantTests.cs dòng 311: down again right before the clear, Expected greater than 0, But was 0. Hero chỗ 0 đánh gục lại ngay trước ClearBattle nhưng RespawnSecondsLeft vẫn là 0. Xem hero đã thật sự gục chưa, máu, bước đồng hồ cần chạy để tin gục tới, rồi sửa test hay code cho đúng. Biên dịch xong thì đọc console, CodeLead chạy lại test.",
    "tests": [
     "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud",
     "HeroInstallerTests.Installing_publishes_the_respawn_wait_left_from_the_squad",
@@ -197,8 +197,8 @@
    "hash": "521dc64be449",
    "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Thời gian chờ hồi sinh: 8s (chỉnh sau chơi thử)\n- Hiện thời gian chờ còn lại: có (qua `feature-hud`)",
    "title": "Thông số của giai đoạn PROTOTYPE",
-   "by": "Hero",
-   "at": "2026-11-27 02:32:31"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:10:37"
   },
   "edge-hero-dang-cho-hoi-sinh-khi-thanh-bi": {
    "state": "verified",
@@ -460,6 +460,41 @@
    "state": "done",
    "by": "Hero",
    "note": "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud, HeroInstallerTests.Installing_publishes_the_respawn_wait_left_from_the_squad, HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+  },
+  {
+   "at": "2026-11-27 03:06:05",
+   "id": "stage-prototype",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:07:07",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud, HeroInstallerTests.Installing_publishes_the_respawn_wait_left_from_the_squad, HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+  },
+  {
+   "at": "2026-11-27 03:09:11",
+   "id": "stage-prototype",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test The_respawn_wait_left_counts_down_for_the_hud hỏng ở HeroParticipantTests.cs dòng 311: down again right before the clear, Expected greater than 0, But was 0. Hero chỗ 0 đánh gục lại ngay trước ClearBattle nhưng RespawnSecondsLeft vẫn là 0. Xem hero đã thật sự gục chưa, máu, bước đồng hồ cần chạy để tin gục tới, rồi sửa test hay code cho đúng. Biên dịch xong thì đọc console, CodeLead chạy lại test."
+  },
+  {
+   "at": "2026-11-27 03:09:45",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud, HeroInstallerTests.Installing_publishes_the_respawn_wait_left_from_the_squad, HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
+  },
+  {
+   "at": "2026-11-27 03:10:37",
+   "id": "stage-prototype",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

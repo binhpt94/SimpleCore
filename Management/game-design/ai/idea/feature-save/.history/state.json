@@ -1,5 +1,5 @@
 {
- "hash": "df214e928524",
+ "hash": "028d6c6cb4ed",
  "items": {
   "save-role": {
    "hash": "d9c3f6988961",
@@ -38,8 +38,8 @@
    "text": "`feature-run` dùng kỉ lục 0 khi Lưu dữ liệu báo chưa có\nGiá trị mặc định là của bên sở hữu kỉ lục, theo `save-no-rules`."
   },
   "run-compares-record": {
-   "hash": "e629662fa480",
-   "text": "`feature-run` so điểm với kỉ lục khi lượt chốt và chỉ đổi kỉ lục khi điểm lớn hơn\nBằng kỉ lục thì không phải kỉ lục mới. Lượt có hồi sinh thì chỉ so khi đã chốt thua."
+   "hash": "bb1c75c4a080",
+   "text": "`feature-run` so điểm với kỉ lục khi lượt chốt và chỉ đổi kỉ lục khi điểm lớn hơn\nBằng kỉ lục thì không phải kỉ lục mới."
   },
   "run-asks-write": {
    "hash": "0ad47ed52a2a",

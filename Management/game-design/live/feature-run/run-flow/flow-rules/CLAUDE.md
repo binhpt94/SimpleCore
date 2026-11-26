@@ -47,7 +47,7 @@ Các tin cần có giữa các feature ở PROTOTYPE (tên và hình thức cont
 - **Rời game đúng lúc thành vừa bị phá (trong 1 giây chờ):** thời gian ở ngoài không tính vào 1 giây; quay lại thì popup thua hiện.
 - **Bấm "Chơi lại" và "Về màn bắt đầu" gần như cùng lúc:** chỉ lần bấm đầu tính (`transition-lock`).
 - **Đang ở màn bắt đầu hoặc màn chọn đội mà rời game:** không có gì dừng; quay lại vẫn ở màn đó.
-- **Nút quay lại của máy (Android):** ở màn bắt đầu, màn chọn đội, trong trận đang đánh, popup thua và trong 1 giây chờ: không làm gì (trong trận: tự quyết 2026-11-26, vì không còn tạm dừng; đã loại: thoát game, hỏi rời trận).
+- **Nút quay lại của máy (Android):** ở màn bắt đầu, màn chọn đội, trong trận đang đánh, popup thua và trong 1 giây chờ: không làm gì (trong trận: tự quyết 2026-11-26; đã loại: thoát game, hỏi rời trận).
 
 ## Đã tự quyết
 - **Mọi màn trong scene Game, không tách scene trận.** Theo `feature-scene-flow/scene-list` và ý `flow-scenes` của node cha (đã sửa cho khớp, 2026-11-23). Lượt mới luôn sạch vì trận được dựng mới và huỷ hết mỗi lần (`fresh-battle`). Đã loại: tải lại scene Game mỗi lượt (chậm, trái `no-return-loading`).

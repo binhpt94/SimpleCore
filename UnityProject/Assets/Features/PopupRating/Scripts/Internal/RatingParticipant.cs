@@ -11,7 +11,8 @@ namespace Game.PopupRating
     /// <see cref="IRunFlow.BattleStopped"/> (the run settled the loss), not counting time out of the app. Then
     /// invites only when the run set a new best and this app launch has shown fewer than max_invites_per_launch
     /// invites. <see cref="IRunFlow.BattleCleared"/> (the player chose on the lose popup) cancels the count.
-    /// The invite counts once the popup is shown; a refusal of the popup service does not count.</para>
+    /// The invite counts once the popup is shown; a refusal of the popup service does not count.
+    /// The count lives in this participant only, for the life of the Game scene (one app launch).</para>
     /// <para>Invite (node rating-invite/invite-spec): first touch only. "Đánh giá" closes the popup, then opens the
     /// game's Google Play page (app, else browser, else only a log error). "Để sau" and the back key while the
     /// popup is on top close it. The popup never closes on the backdrop: the popup service ignores it.</para>
@@ -26,13 +27,13 @@ namespace Game.PopupRating
         private readonly IRatingClock _clock;
         private readonly IRatingLog _log;
         private readonly RatingConfig _config;
-        private readonly RatingLaunchMemory _memory;
 
         private IDisposable _clockRun;
         private IDisposable _jobUsage;
         private float _elapsed;
         private bool _appActive = true;
         private bool _skipNextTick;
+        private bool _waitingForLost;
 
         private PopupHandle _handle;
         private IRatingView _view;
@@ -40,7 +41,7 @@ namespace Game.PopupRating
         private bool _choiceTaken;
 
         internal RatingParticipant(IRunFlow flow, IRunScore score, IPopupService popups, IPopupViews views,
-            IStorePage store, IRatingClock clock, IRatingLog log, RatingConfig config, RatingLaunchMemory memory)
+            IStorePage store, IRatingClock clock, IRatingLog log, RatingConfig config)
         {
             _flow = flow ?? throw new ArgumentNullException(nameof(flow));
             _score = score ?? throw new ArgumentNullException(nameof(score));
@@ -50,11 +51,16 @@ namespace Game.PopupRating
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _memory = memory ?? throw new ArgumentNullException(nameof(memory));
         }
 
         internal bool IsCounting => _clockRun != null;
         internal bool IsOpen => _handle.IsValid;
+
+        /// <summary>
+        /// Invites shown in this app launch. The Game scene lives for the whole launch (Play again does not
+        /// reload it), so the participant's own field is the launch memory: never saved, 0 at each launch.
+        /// </summary>
+        internal int InvitesShown { get; private set; }
 
         protected override void OnRun()
         {
@@ -63,12 +69,14 @@ namespace Game.PopupRating
             WhenDisposed(() => _flow.BattleStopped -= OnBattleStopped);
             WhenDisposed(() => _flow.BattleCleared -= OnBattleCleared);
             WhenDisposed(StopCounting);
+            WhenDisposed(StopWaitingForLost);
             WhenDisposed(Close);   // scene ends: the popup goes silently, no choice is reported
         }
 
         private void OnBattleStopped()
         {
             StopCounting();
+            StopWaitingForLost();
             _elapsed = 0f;
             _appActive = true;
             _skipNextTick = false;
@@ -76,7 +84,13 @@ namespace Game.PopupRating
             _clockRun = _clock.Start(OnTick, OnAppActive);
         }
 
-        private void OnBattleCleared() => StopCounting();
+        // The player left the battle (Play again, Back to start): no invite over the next screen.
+        private void OnBattleCleared()
+        {
+            StopCounting();
+            StopWaitingForLost();
+            Close();   // silent: not a touch on either button
+        }
 
         private void OnAppActive(bool active)
         {
@@ -93,11 +107,40 @@ namespace Game.PopupRating
                 _skipNextTick = false;
                 return;
             }
-            _elapsed += seconds;
+            // Same pace as the run's lose delay: one long frame counts at most the battle clock's cap.
+            _elapsed += Math.Min(seconds, _config.MaxFrameSeconds);
             if (_elapsed < _config.InviteDelay) return;
             StopCounting();
+            if (_flow.Step == RunStep.Lost) TryInvite();
+            else WaitForLost();
+        }
+
+        // The invite must sit above the lose popup: never ask before the run shows it.
+        private void WaitForLost()
+        {
+            if (_waitingForLost) return;
+            _waitingForLost = true;
+            _flow.StepChanged += OnStepWhileWaiting;
+        }
+
+        private void OnStepWhileWaiting(RunStep step)
+        {
+            if (step != RunStep.Lost) return;
+            StopWaitingForLost();
+            TryInvite();
+        }
+
+        private void StopWaitingForLost()
+        {
+            if (!_waitingForLost) return;
+            _waitingForLost = false;
+            _flow.StepChanged -= OnStepWhileWaiting;
+        }
+
+        private void TryInvite()
+        {
             if (!_score.IsNewBest) return;
-            if (_memory.InvitesShown >= _config.MaxInvitesPerLaunch) return;
+            if (InvitesShown >= _config.MaxInvitesPerLaunch) return;
             Open();
         }
 
@@ -133,7 +176,7 @@ namespace Game.PopupRating
             _view = view;
             if (view is UnityEngine.Object unityView) _viewUsage = TrackView(unityView);
             _choiceTaken = false;
-            _memory.InvitesShown++;
+            InvitesShown++;
             _view.ShowText(_config.InviteText, _config.RateLabel, _config.LaterLabel);
             _view.RatePressed += OnRatePressed;
             _view.LaterPressed += OnLaterPressed;

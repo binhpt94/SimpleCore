@@ -17,13 +17,18 @@ namespace Game.PopupRating.Tests
             public readonly FakeClock Clock = new FakeClock();
             public readonly FakeLog Log = new FakeLog();
             public readonly RatingConfig Config = UnityEngine.ScriptableObject.CreateInstance<RatingConfig>();
-            public readonly RatingLaunchMemory Memory = new RatingLaunchMemory();
             public RatingParticipant Participant;
 
-            public Rig() => Participant = Make();
+            public Rig()
+            {
+                // Most tests tick whole seconds; the per-frame cap has its own tests, which set it back.
+                Config.MaxFrameSeconds = 1000f;
+                Participant = Make();
+            }
+
 
             private RatingParticipant Make() =>
-                new RatingParticipant(Flow, Score, Popups, Popups, Store, Clock, Log, Config, Memory);
+                new RatingParticipant(Flow, Score, Popups, Popups, Store, Clock, Log, Config);
 
             /// <summary>Runs the participant, the run set a new best, and the battle stopped.</summary>
             public void NewBest()
@@ -33,20 +38,18 @@ namespace Game.PopupRating.Tests
                 Flow.Stop();
             }
 
-            public RatingParticipant NewSessionSameLaunch()
-            {
-                Participant.DisposeAsync().GetAwaiter().GetResult();
-                Participant = Make();
-                return Participant;
-            }
-
             public void Dispose() => UnityEngine.Object.DestroyImmediate(Config);
         }
 
         internal sealed class FakeFlow : IRunFlow
         {
-            public RunStep Step => RunStep.Lost;
-            public event Action<RunStep> StepChanged { add { } remove { } }
+            public RunStep Step { get; set; } = RunStep.Lost;
+            public event Action<RunStep> StepChanged;
+            public void GoTo(RunStep step)
+            {
+                Step = step;
+                StepChanged?.Invoke(step);
+            }
             public RunTeam Team => default;
             public event Action<RunTeam> RunStarted { add { } remove { } }
             public event Action BattleStarted { add { } remove { } }

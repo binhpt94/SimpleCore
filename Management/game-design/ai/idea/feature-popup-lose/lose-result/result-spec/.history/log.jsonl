@@ -16,3 +16,6 @@
 {"at": "2026-11-25 18:21:39", "event": "promote", "by": "người (Sync)", "hash": "a7d56f47797b"}
 {"at": "2026-11-26 18:22:02", "event": "promote", "by": "người (Sync)", "hash": "a7d56f47797b"}
 {"at": "2026-11-27 00:26:06", "event": "approve", "hash": "b6791b2d34e8423d261aabf7117b7a0171293df2", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 03:19:55", "event": "ai-remove", "item": "result-ad-failed-text", "text": "Quảng cáo hồi sinh không xem hết hoặc không tải được thì có dòng \"Quảng cáo chưa hoàn tất\" ở chỗ dòng \"Kỉ lục mới!\"\nChữ trơn, không dải nền. Phá kỉ lục thì chỉ hiện \"Kỉ lục mới!\".", "by": "claude"}
+{"at": "2026-11-27 03:20:52", "event": "data", "hash": "92e28a5acae5", "previous": "a7d56f47797b", "added": [], "removed": [{"id": "result-ad-failed-text", "text": "Quảng cáo hồi sinh không xem hết hoặc không tải được thì có dòng \"Quảng cáo chưa hoàn tất\" ở chỗ dòng \"Kỉ lục mới!\"\nChữ trơn, không dải nền. Phá kỉ lục thì chỉ hiện \"Kỉ lục mới!\"."}], "rewritten": []}
+{"at": "2026-11-27 03:20:53", "event": "approve", "hash": "328876c293efcd837b40a6f5e95dea89af5f6b37", "by": "tự duyệt (Full Auto)"}

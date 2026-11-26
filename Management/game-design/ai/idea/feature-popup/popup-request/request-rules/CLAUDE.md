@@ -42,7 +42,6 @@ Nội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup
 - **Feature gọi xin mở trước khi scene vào bước chạy**: từ chối, ghi lỗi; popup chỉ mở được khi scene đang chạy.
 
 ## Đã tự quyết
-- **Ở IDEA chỉ có `PopupLose/Main` (2026-11-25, sửa lệch, theo @Manager).** Ý `id-list` bản trước có cả `PopupPause/Main`, trong khi IDEA không có popup tạm dừng (`feature-popup-pause/pause-popup`, bảng giai đoạn của node con) và popup tạm dừng không tham gia scene Game ở IDEA (`feature-session-scene/session-steps/participant-order`). Ý cốt lõi nêu giá trị IDEA; hai id còn lại vào từ PROTOTYPE. Hộp xác nhận bỏ lượt vẫn là một bước bên trong popup tạm dừng, không có id riêng. Đã loại: giữ 2 id (dịch vụ báo lỗi tải vì thiếu asset của popup IDEA không có).
 - **Chuẩn bị sẵn ở bước tải.** Popup thua phải hiện ngay khi thành bị phá; chờ tải giữa trận dễ thấy giật. Đã loại: tải lúc xin mở.
 - **Chặn bấm đúp ở feature gọi.** Dịch vụ không biết nút nào là nút; giữ dịch vụ không biết nội dung popup. Đã loại: dịch vụ tự khoá popup sau lần bấm đầu.
 - **Rời scene không báo bấm nút.** Tránh feature gọi làm việc (chơi lại, chuyển màn) khi scene đang huỷ.

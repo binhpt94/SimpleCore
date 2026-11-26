@@ -1,7 +1,7 @@
 {
  "items": {
   "invite-open": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingInviteTests.CheatInviteOpen_OpensTheFullInviteWithoutANewBestAndNoTouch",
@@ -11,8 +11,8 @@
    "hash": "14bc44169ab5",
    "text": "Popup mời đánh giá đang mở, chưa chạm nút nào\nÉp: mở `PopupRating/Main` trên scene Game, bỏ qua điều kiện lúc mời. Có đủ mọi thành phần: dòng mời \"Đánh giá game trên Google Play\", nút \"Đánh giá\", nút \"Để sau\".",
    "title": "Popup mời đánh giá đang mở, chưa chạm nút nào",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:59"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   }
  },
  "log": [
@@ -29,6 +29,13 @@
    "state": "done",
    "by": "PopupRating",
    "note": "RatingInviteTests.CheatInviteOpen_OpensTheFullInviteWithoutANewBestAndNoTouch, PopupRatingInstallerTests.CheatInviteOpenAlsoJoinsTheCheat"
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "invite-open",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

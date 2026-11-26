@@ -15,7 +15,7 @@ namespace Game.Composition.Tests
         private static readonly object[] Scenes =
         {
             new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 2 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 19 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 20 },
         };
 
         [Test]
@@ -59,12 +59,12 @@ namespace Game.Composition.Tests
             Assert.That(names, Is.EqualTo(new[] { SessionScene, "SceneFlowLoadingInstaller" }));
         }
 
-        // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 14 participants
+        // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 15 participants
         // in this order: SimClock first (no view, drives the shared clock each frame, so every gameplay feature can
-        // resolve it), then 12 features, then scene-flow last (a participant with no view). SessionScene installs
+        // resolve it), then 13 features (PopupRating after PopupLose, it opens over it), then scene-flow last (a participant with no view). SessionScene installs
         // first and runs the session; it is not a participant.
         [Test]
-        public void GameScene_AtIdea_HasFourteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast()
+        public void GameScene_AtIdea_HasFifteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast()
         {
             var names = Load("Assets/_Composition/Boot.Game.prefab").InstallersAt(GameStage.Idea).Select(i => i.name).ToList();
 
@@ -73,13 +73,14 @@ namespace Game.Composition.Tests
                 SessionScene, SimClock,
                 "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
                 "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
-                "HudUpgradeInstaller", "PopupLoseInstaller",
+                "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller",
                 "SceneFlowGameInstaller",
             }));
-            Assert.That(names.Skip(1).Count(), Is.EqualTo(14), "participants after SessionScene");
+            Assert.That(names.Skip(1).Count(), Is.EqualTo(15), "participants after SessionScene");
         }
 
-        // The project stage (set by the human on the design page) is PROTOTYPE since 2026-11-26.
+        // The build stays at PROTOTYPE (human, 2026-11-27): at IDEA Enemy needs Combat, which the design puts at
+        // PROTOTYPE, so the Game scene could not boot. Kept until the stages of Combat and the PROTOTYPE features are reviewed.
         [Test]
         public void EveryScene_IsAtPrototype_SetOnceOnTheBasePrefab()
         {
@@ -128,7 +129,7 @@ namespace Game.Composition.Tests
                 SessionScene, SimClock,
                 "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "CombatInstaller",
                 "EnemyInstaller", "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
-                "HudUpgradeInstaller", "PopupLoseInstaller", "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "SceneFlowGameInstaller",
+                "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller", "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "SceneFlowGameInstaller",
             }));
         }
 
@@ -162,22 +163,31 @@ namespace Game.Composition.Tests
             Assert.That(prefab, Is.InstanceOf<GameObject>());
         }
 
-        // feature-popup/popup-request/request-rules#params: the Game scene's popup ids by stage.
-        // The pause and revive popups were removed from the design (2026-11-27): every stage has only PopupLose/Main.
         [Test]
-        public void GameScene_AtIdea_PopupCatalogHasOnlyTheLosePopup()
+        public void GameScene_PopupCatalogHasTheRatingPopup()
+        {
+            var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").Catalogs);
+
+            Assert.That(catalogs.Get("Popup").TryGet("PopupRating/Main", out var prefab), Is.True);
+            Assert.That(prefab, Is.InstanceOf<GameObject>());
+        }
+
+        // feature-popup/popup-request/request-rules#params, #id-list: the Game scene's popup ids by stage.
+        // Every stage has the lose popup and the rating invite, which opens over it (2026-11-27).
+        [Test]
+        public void GameScene_AtIdea_PopupCatalogHasTheLoseAndRatingPopups()
         {
             var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").CatalogsAt(GameStage.Idea));
 
-            Assert.That(catalogs.Get("Popup").Ids, Is.EquivalentTo(new[] { "PopupLose/Main" }));
+            Assert.That(catalogs.Get("Popup").Ids, Is.EquivalentTo(new[] { "PopupLose/Main", "PopupRating/Main" }));
         }
 
         [Test]
-        public void GameScene_AtPrototype_PopupCatalogHasOnlyTheLosePopup()
+        public void GameScene_AtPrototype_PopupCatalogHasTheLoseAndRatingPopups()
         {
             var catalogs = new AssetCatalogs(Load("Assets/_Composition/Boot.Game.prefab").CatalogsAt(GameStage.Prototype));
 
-            Assert.That(catalogs.Get("Popup").Ids, Is.EquivalentTo(new[] { "PopupLose/Main" }));
+            Assert.That(catalogs.Get("Popup").Ids, Is.EquivalentTo(new[] { "PopupLose/Main", "PopupRating/Main" }));
         }
 
         [TestCaseSource(nameof(Scenes))]

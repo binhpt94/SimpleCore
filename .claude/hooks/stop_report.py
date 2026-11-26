@@ -15,6 +15,9 @@ about it on its next prompt (bind_session.py) and the management page lists it.
 Missing report: the agent is sent back once (a "pending" mark in the store keeps the check on even if the
 hook's own message starts a new turn in the transcript); if it stops again without one, a "no report" note
 is saved so the Manager still sees that the session changed files. A broken transcript lets the agent stop.
+A turn starts at a human prompt or at a message from another session (SendMessage, a meta entry of origin "peer"),
+so a reply to a Leader's message does not take the report of the turn before it. A block identical to the newest
+saved report of the same role is not saved again.
 Requirement book (Management/tools/gd_req.py): the saved report gets a line "- Sổ yêu cầu:" with every doing / done /
 verify / reject the turn ran. A Features/Services chat that edited its Scripts/ or Tests/ without writing any of them
 is sent back once to write doing or done for what it worked on (REQ_REMINDER); stopping again lets it go.
@@ -54,8 +57,21 @@ REQ_REMINDER = ("This turn changed the code of {f} but wrote nothing in its requ
                 "where it left off. Then end with the report again.")
 
 
-def turn_tools(path):
-    """[(tool name, input)] of the agent's tool calls in this turn, from the transcript."""
+def is_prompt(e):
+    """Does this transcript entry start a turn? A human prompt (or a task notification), or a message from another
+    Claude session (SendMessage: isMeta, origin kind "peer"). Not tool results, nor the meta entries inside a turn
+    (skill text, hook feedback, context): those belong to the turn they appear in."""
+    if not isinstance(e, dict) or e.get("type") != "user":
+        return False
+    content = (e.get("message") or {}).get("content")
+    if isinstance(content, list) and any(isinstance(x, dict) and x.get("type") == "tool_result" for x in content):
+        return False
+    origin = e.get("origin")
+    return not e.get("isMeta") or (isinstance(origin, dict) and origin.get("kind") == "peer")
+
+
+def turn_entries(path):
+    """The transcript entries of this turn: after the last entry that started a turn (is_prompt)."""
     entries = []
     with open(path, encoding="utf-8") as f:
         for line in f:
@@ -65,14 +81,16 @@ def turn_tools(path):
                 continue
     start = 0
     for i, e in enumerate(entries):
-        if not isinstance(e, dict) or e.get("type") != "user" or e.get("isMeta"):
-            continue
-        content = (e.get("message") or {}).get("content")
-        if isinstance(content, list) and any(isinstance(x, dict) and x.get("type") == "tool_result" for x in content):
-            continue
-        start = i + 1
+        if is_prompt(e):
+            start = i + 1
+    return entries[start:]
+
+
+def turn_tools(path):
+    """[(tool name, input)] of the agent's tool calls in this turn, from the transcript."""
+    entries = turn_entries(path)
     out = []
-    for e in entries[start:]:
+    for e in entries:
         content = (e.get("message") or {}).get("content") if isinstance(e, dict) and e.get("type") == "assistant" else None
         for x in content if isinstance(content, list) else []:
             if isinstance(x, dict) and x.get("type") == "tool_use":
@@ -107,23 +125,9 @@ def edited_code(tools, feature, root):
 
 def read_turn(path):
     """(changed files in this turn?, text of the agent's messages in this turn) from the transcript."""
-    entries = []
-    with open(path, encoding="utf-8") as f:
-        for line in f:
-            try:
-                entries.append(json.loads(line))
-            except ValueError:
-                continue
-    start = 0
-    for i, e in enumerate(entries):
-        if not isinstance(e, dict) or e.get("type") != "user" or e.get("isMeta"):
-            continue
-        content = (e.get("message") or {}).get("content")
-        if isinstance(content, list) and any(isinstance(x, dict) and x.get("type") == "tool_result" for x in content):
-            continue
-        start = i + 1
+    entries = turn_entries(path)
     changed, texts = False, []
-    for e in entries[start:]:
+    for e in entries:
         if not isinstance(e, dict) or e.get("type") != "assistant":
             continue
         content = (e.get("message") or {}).get("content")
@@ -156,9 +160,34 @@ def find_report(text):
     return block, None
 
 
+def report_slug(role):
+    return re.sub(r"[^A-Za-z0-9]+", "-", role).strip("-") or "unknown"
+
+
+def same_as_last(root, role, body):
+    """Is body the same block as the newest saved report of this role? (a repeat is not saved again)"""
+    folder, slug = os.path.join(root, "Management", "reports"), report_slug(role)
+    rx = re.compile(r"^(\d{8}-\d{6})-" + re.escape(slug) + r"(?:-(\d+))?\.md$")
+    try:
+        found = [(m.group(1), int(m.group(2) or 1), n) for n in os.listdir(folder) for m in [rx.match(n)] if m]
+    except OSError:
+        return False
+    if not found:
+        return False
+    names = [n for _, _, n in sorted(found)]      # same second: <stamp>-<role>.md, then -2, -3...
+    try:
+        with open(os.path.join(folder, names[-1]), encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return False
+    if text.startswith("<!--"):
+        text = text.split("\n", 1)[1] if "\n" in text else ""
+    return text.strip() == body.strip()
+
+
 def save(root, role, body):
     folder = os.path.join(root, "Management", "reports")
-    slug = re.sub(r"[^A-Za-z0-9]+", "-", role).strip("-") or "unknown"
+    slug = report_slug(role)
     stamp = time.strftime("%Y%m%d-%H%M%S")
     path = os.path.join(folder, f"{stamp}-{slug}.md")
     n = 1
@@ -215,7 +244,9 @@ def main(argv):
             except (OSError, ValueError):
                 tools = []
             reqs = req_changes(tools)
-            save(root, who, block + ("\n- Sổ yêu cầu: " + "; ".join(reqs) if reqs else ""))
+            body = block + ("\n- Sổ yêu cầu: " + "; ".join(reqs) if reqs else "")
+            if not same_as_last(root, who, body):      # the same block again (a later turn quoting it) is not saved twice
+                save(root, who, body)
             done()
             # saved first: the reminder's own message may start a new turn, after which this turn's report is not seen
             if (not role and not reqs and not data.get("stop_hook_active") and not was_pending

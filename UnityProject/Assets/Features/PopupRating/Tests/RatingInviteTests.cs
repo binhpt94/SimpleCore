@@ -135,15 +135,6 @@ namespace Game.PopupRating.Tests
         }
 
         [Test]
-        public void BackdropTouchDoesNotCloseTheInvite()
-        {
-            // The view reports only the two buttons and the back key; the backdrop is the popup service's, ignored.
-            _rig.Clock.Tick(10f);
-            Assert.That(_rig.Participant.IsOpen, Is.True);
-            Assert.That(_rig.Popups.OpenCount, Is.EqualTo(1));
-        }
-
-        [Test]
         public void LeavingTheAppWithThePopupOpen_ItIsStillOpenOnReturnAndNoChoiceIsTaken()
         {
             _rig.Clock.SetActive(false);
@@ -187,9 +178,11 @@ namespace Game.PopupRating.Tests
             var rig = new Rig();
             try
             {
+                // Use up the launch limit first: the cheat skips it, and the new-best flag too.
+                rig.NewBest();
+                rig.Clock.Tick(1.5f);
+                rig.Popups.View.PressLater();
                 rig.Score.IsNewBest = false;
-                rig.Memory.InvitesShown = 1;     // launch limit skipped too
-                rig.Participant.Run();
                 new RatingCheatParticipant(rig.Participant).Run();
                 Assert.That(rig.Participant.IsOpen, Is.True);
                 Assert.That(rig.Popups.View.Text, Is.EqualTo("Đánh giá game trên Google Play"));

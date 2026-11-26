@@ -9,7 +9,6 @@ namespace Game.PopupRating
     /// <summary>
     /// Wires the rating invite into the Game scene session. Install after Popup and Run.
     /// The popup prefab is listed under id PopupRating/Main in the scene's popup catalog (_Composition).
-    /// This asset also holds the "invites shown" count of the app launch: in memory only, never saved.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/PopupRating/Installer", fileName = "PopupRatingInstaller")]
     public sealed class PopupRatingInstaller : InstallerAsset
@@ -20,14 +19,8 @@ namespace Game.PopupRating
         [Tooltip("Dev builds only: build this cheat state as soon as the session runs (node feature-popup-rating/cheat).")]
         [SerializeField] private RatingCheatState _cheat = RatingCheatState.None;
 
-        [NonSerialized] private RatingLaunchMemory _launch = new RatingLaunchMemory();
-
         internal RatingConfig Config { get => _config; set => _config = value; }
         internal RatingCheatState Cheat { get => _cheat; set => _cheat = value; }
-        internal RatingLaunchMemory Launch => _launch;
-
-        // A new launch (or entering Play in the Editor) starts with no invite shown.
-        private void OnEnable() => _launch = new RatingLaunchMemory();
 
         public override void Install(IServiceRegistry registry)
         {
@@ -41,7 +34,7 @@ namespace Game.PopupRating
             var views = Need<IPopupViews>(registry, "Popup");
 
             var invite = new RatingParticipant(flow, score, popups, views, new UnityStorePage(),
-                new UnityRatingClock(), new UnityRatingLog(), _config, _launch);
+                new UnityRatingClock(), new UnityRatingLog(), _config);
             session.Join(invite);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (_cheat == RatingCheatState.InviteOpen) session.Join(new RatingCheatParticipant(invite));

@@ -1152,13 +1152,16 @@ def run_report_cases():
                            ("rep-lead", "@CodeLead"), ("rep-gd", "@GameDesigner")):
         Path(guard.binding_path(session, STORE)).write_text(json.dumps({"feature": value}))
 
-    def rep(expect, label, session, entries, active=False, transcript=True, keep_pending=False):
+    def rep(expect, label, session, entries, active=False, transcript=True, keep_pending=False, same=False):
         pending = stop_report.pending_path(session, STORE)
         if not keep_pending and os.path.exists(pending):
             os.remove(pending)
         path = FX + f"/transcript-{len(results)}.jsonl"
         if transcript:
-            Path(path).write_text("\n".join(json.dumps(x, ensure_ascii=False) for x in entries) + "\n", encoding="utf-8")
+            lines = "\n".join(json.dumps(x, ensure_ascii=False) for x in entries) + "\n"
+            if not same:      # each case its own report: an identical block is not saved twice
+                lines = lines.replace("- Ghi chú: không", f"- Ghi chú: ca {len(results)}")
+            Path(path).write_text(lines, encoding="utf-8")
         before = count()
         stdin = json.dumps({"session_id": session, "transcript_path": path, "stop_hook_active": active})
         p = subprocess.run([sys.executable, "-I", str(HERE / "stop_report.py"), "--root", FX, "--store", STORE],
@@ -1211,6 +1214,17 @@ def run_report_cases():
     rep("pass, +1 report", "and when it still writes none, the note is saved", "rep-wallet",
         [human, edit, result, say_text("Xong."), human, say_text("Đã xong rồi mà.")], keep_pending=True)
     rep("pass, +0 report", "the mark is gone after that", "rep-wallet", [human, say_text("hỏi đáp")], keep_pending=True)
+    # A message from another session (SendMessage) starts a new turn: the report of the turn before is not taken again.
+    peer = {"type": "user", "isMeta": True, "origin": {"kind": "peer"},
+            "message": {"role": "user", "content": "Another Claude session sent a message: <cross-session-message>x"}}
+    rep("pass, +1 report", "@CodeLead report before a Leader's message", "rep-lead", [human, edit, result, say_text(REPORT_OK)])
+    rep("pass, +0 report", "turn opened by a peer message, no edits: the old report is not saved again", "rep-lead",
+        [human, edit, result, say_text(REPORT_OK), peer, say_text("Đã nhận, chưa sửa gì.")])
+    rep("pass, +1 report", "turn opened by a peer message, with edits and its own report", "rep-lead",
+        [human, edit, result, say_text(REPORT_OK), peer, edit, result, say_text(REPORT_OK.replace("Thêm số xu", "Sửa số xu"))])
+    rep("pass, +1 report", "a report", "rep-lead", [human, edit, result, say_text(REPORT_OK)], same=True)
+    rep("pass, +0 report", "the identical block again is not saved twice", "rep-lead",
+        [human, edit, result, say_text(REPORT_OK)], same=True)
 
     # The requirement book: a feature chat that edited its code must have written doing / done (asked once).
     code_edit = use("Edit", file_path=F + "/Wallet/Scripts/Internal/Old.cs")

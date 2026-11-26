@@ -16,3 +16,5 @@ MonoBehaviour:
   entries:
   - id: PopupLose/Main
     asset: {fileID: 1000000000000000001, guid: d5f03cb0cea3eb74cafe8bb9995fa12c, type: 3}
+  - id: PopupRating/Main
+    asset: {fileID: 8740528351727644530, guid: 88e99b01456a10449a5404beb3e59928, type: 3}

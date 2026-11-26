@@ -19,3 +19,4 @@
 {"at": "2026-11-27 02:33:40", "event": "data", "hash": "f36090b274ea", "previous": "2a7ea725bb37", "added": [], "removed": [], "rewritten": [{"id": "id-list", "old": "Scene Game có 1 id popup: `PopupLose/Main` (popup thua)\nTên `Name` do feature sở hữu đặt; đây là tên dự kiến.", "new": "Scene Game có 2 id popup: `PopupLose/Main` (popup thua) và `PopupRating/Main` (popup mời đánh giá)\nTên `Name` do feature sở hữu đặt; đây là tên dự kiến."}]}
 {"at": "2026-11-27 02:33:41", "event": "approve", "hash": "23dfe336a5adf6e1891f5778cdfd199eb2391be6", "by": "tự duyệt (Full Auto)"}
 {"at": "2026-11-27 02:33:54", "event": "approve", "hash": "9189da31513affc0ae523c91e6e9c756522ef158", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 03:20:53", "event": "approve", "hash": "e2ccb81feb134b58ba5d320ebe23099e1b455a3b", "by": "tự duyệt (Full Auto)"}

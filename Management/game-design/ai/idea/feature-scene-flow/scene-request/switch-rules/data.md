@@ -1,6 +1,6 @@
 ---
 based-on: 646c23aa767e
-refs: feature-scene-flow/scene-list@78ed2dcc0859, feature-session-scene/session-clean@d8d13ced1680, feature-session-scene/session-steps/participant-order@bdb6d08f1274
+refs: feature-scene-flow/scene-list@78ed2dcc0859, feature-session-scene/session-clean@d8d13ced1680, feature-session-scene/session-steps/participant-order@3cfb8fc5bd71
 frame: none
 ---
 # Các bước và luật của một lần chuyển

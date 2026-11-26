@@ -170,35 +170,45 @@
    "at": "2026-11-25 20:45:28"
   },
   "game-list": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "BootTests.GameScene_AtIdea_HasFourteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast"
+    "BootTests.GameScene_AtIdea_HasFifteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast"
    ],
    "play": "",
-   "hash": "85fb00fda291",
-   "text": "Scene Game có 14 feature tham gia, `feature-sim-clock` đứng đầu, `feature-scene-flow` luôn đứng cuối\nThứ tự: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, scene-flow. Scene-flow không view, không tải; nó mở cổng cho scene Loading bỏ lớp che khi mọi feature đã chạy. Không có màn bắt đầu, màn chọn đội, popup tạm dừng. `feature-balance` không tham gia.",
-   "title": "Scene Game có 14 feature tham gia, `feature-sim-clock` đứng đầu, `feature-scene-flow` luôn đứng cuối",
-   "by": "@CodeLead",
-   "at": "2026-11-25 23:56:00"
+   "hash": "814a14f22f3b",
+   "text": "Scene Game có 15 feature tham gia, `feature-sim-clock` đứng đầu, `feature-scene-flow` luôn đứng cuối\nThứ tự: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, popup-rating, scene-flow. Scene-flow không view, không tải; nó mở cổng cho scene Loading bỏ lớp che khi mọi feature đã chạy. Không có màn bắt đầu, màn chọn đội, popup tạm dừng. `feature-balance` không tham gia.",
+   "title": "Scene Game có 15 feature tham gia, `feature-sim-clock` đứng đầu, `feature-scene-flow` luôn đứng cuối",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-27 03:12:59"
   },
   "params": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "BootTests.LoadingScene_HasOnlySceneFlowAsParticipant",
-    "BootTests.GameScene_AtIdea_HasFourteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast",
-    "SessionSceneLogicTests.InstallerAsset_GivesEachParticipantTenSecondsToLoad",
-    "SessionSceneLogicTests.ParticipantsLoadOneAtATime_TheNextStartsOnlyAfterThePreviousFinished",
-    "SessionSceneLogicTests.RunStep_EveryoneRunsInTheSameCallThatFinishedTheLastLoad_WithoutAnyNewLoadTimer",
-    "SessionSceneLogicTests.EndingARunningSession_CleansUpInReverseJoinOrder_AndSessionIsDisposed"
+    "BootTests.GameScene_AtIdea_HasFifteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast",
+    "BootTests.GameScene_AtPrototype_JoinsItsFeaturesInTheDesignedOrder"
    ],
    "play": "",
-   "hash": "b2d157a2cf7a",
-   "text": "## Làm gì\n- Scene Loading: danh sách gồm `feature-scene-flow` (view màn Loading, `feature-scene-flow/scene-list/boot-loading`).\n- Scene Game: danh sách theo thứ tự dưới đây. Tải và chạy từ đầu tới cuối danh sách; huỷ từ cuối về đầu.\n\n| # | Feature | Vì sao đứng ở đây |\n|---|---|---|\n| 1 | `feature-sim-clock` | Nhịp chung và ngẫu nhiên theo seed; không view, không tải. Đứng đầu để mọi feature gameplay lấy được nhịp ngay lúc cài; huỷ sau cùng nên không feature nào còn chạy nhịp khi nhịp đã mất |\n| 2 | `feature-popup` | Dịch vụ; mọi feature sau có thể mở popup |\n| 3 | `feature-run` | Giữ luồng lượt chơi, kỉ lục; các feature trận nghe \"lượt mới bắt đầu\" từ nó |\n| 4 | `feature-wallet` | Tiền; castle, enemy, upgrade dùng |\n| 5 | `feature-battlefield` | Nền chiến trường; không cần feature nào, mọi thứ của trận vẽ lên trên nó |\n| 6 | `feature-enemy` | Quái; giữ dịch vụ chiến trường mà hero và thành lấy khi cài |\n| 7 | `feature-hero` | Hero; cần dịch vụ chiến trường của enemy |\n| 8 | `feature-castle` | Thành; cần dịch vụ chiến trường của enemy và đội hero |\n| 9 | `feature-wave` | Đợt quái; cần enemy |\n| 10 | `feature-upgrade` | Nâng cấp; cần wallet, hero, castle |\n| 11 | `feature-hud` | HUD trận |\n| 12 | `feature-hud-upgrade` | Thanh nâng cấp; cần upgrade, wallet |\n| 13 | `feature-popup-lose` | Popup thua; cần popup, run |\n| 14 | `feature-scene-flow` | Luôn cuối: đặt Game làm scene chính lúc tải; lúc chạy mở cổng báo scene Loading bỏ lớp che (mọi feature trước đã chạy xong); phiên lỗi thì báo tên feature lỗi cho màn Loading. Không view, không tải |\n\n- Bước tải: lần lượt từng feature, feature sau bắt đầu tải khi feature trước xong. Báo tiến độ sau mỗi feature (thanh tiến độ của màn Loading).\n- Bước chạy: lần lượt từng feature tạo view; cả bước xong trong một khung hình.\n- Bước huỷ: lần lượt ngược lại; mỗi feature huỷ view và bỏ thứ đã tải.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số feature tham gia scene Loading | 1 | feature | Chỉ có màn Loading |\n| Số feature tham gia scene Game | 14 | feature | Mọi feature có view hoặc cần tải ở mức đang chơi được, cộng `feature-sim-clock` (nhịp chung) và `feature-scene-flow` (cổng báo scene Loading); trừ `feature-session-scene` (chính dịch vụ phiên), `feature-balance` |\n| Thời gian tải tối đa một feature | 10 (dự kiến) | giây | Đủ rộng cho máy yếu; quá mức này gần như chắc là lỗi |\n| Thời gian bước chạy cả scene | 1 | khung hình | Không tải gì thêm ở bước chạy |\n| Thời gian bước huỷ cả scene | không giới hạn, không chờ tải | — | Huỷ chỉ dọn, không chờ mạng hay file |\n| Cách tải | Lần lượt | — | Dễ biết feature nào lỗi, tiến độ rõ |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Cách tải các feature | Lần lượt | Lần lượt | Lần lượt (xét tải song song nếu quá 3 giây) |\n| Thời gian tải tối đa một feature | 10 giây (dự kiến) | 10 giây | 10 giây |\n| Số feature scene Game | 14: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, scene-flow | 21: sim-clock vẫn đầu; thêm `feature-combat` (trước hero, enemy, castle là bên ra đòn; chờ installer), và sau popup-lose theo thứ tự popup-pause, ads, popup-revive (cần ads, run, popup), home, team-select (cần run, hero), game-flow; scene-flow vẫn cuối | Theo danh sách feature lúc đó |",
+   "hash": "fc23d2156529",
+   "text": "## Làm gì\n- Scene Loading: danh sách gồm `feature-scene-flow` (view màn Loading, `feature-scene-flow/scene-list/boot-loading`).\n- Scene Game: danh sách theo thứ tự dưới đây. Tải và chạy từ đầu tới cuối danh sách; huỷ từ cuối về đầu.\n\n| # | Feature | Vì sao đứng ở đây |\n|---|---|---|\n| 1 | `feature-sim-clock` | Nhịp chung và ngẫu nhiên theo seed; không view, không tải. Đứng đầu để mọi feature gameplay lấy được nhịp ngay lúc cài; huỷ sau cùng nên không feature nào còn chạy nhịp khi nhịp đã mất |\n| 2 | `feature-popup` | Dịch vụ; mọi feature sau có thể mở popup |\n| 3 | `feature-run` | Giữ luồng lượt chơi, kỉ lục; các feature trận nghe \"lượt mới bắt đầu\" từ nó |\n| 4 | `feature-wallet` | Tiền; castle, enemy, upgrade dùng |\n| 5 | `feature-battlefield` | Nền chiến trường; không cần feature nào, mọi thứ của trận vẽ lên trên nó |\n| 6 | `feature-enemy` | Quái; giữ dịch vụ chiến trường mà hero và thành lấy khi cài |\n| 7 | `feature-hero` | Hero; cần dịch vụ chiến trường của enemy |\n| 8 | `feature-castle` | Thành; cần dịch vụ chiến trường của enemy và đội hero |\n| 9 | `feature-wave` | Đợt quái; cần enemy |\n| 10 | `feature-upgrade` | Nâng cấp; cần wallet, hero, castle |\n| 11 | `feature-hud` | HUD trận |\n| 12 | `feature-hud-upgrade` | Thanh nâng cấp; cần upgrade, wallet |\n| 13 | `feature-popup-lose` | Popup thua; cần popup, run |\n| 14 | `feature-popup-rating` | Popup mời đánh giá; cần popup, run; đứng sau popup thua vì lời mời mở chồng lên popup thua |\n| 15 | `feature-scene-flow` | Luôn cuối: đặt Game làm scene chính lúc tải; lúc chạy mở cổng báo scene Loading bỏ lớp che (mọi feature trước đã chạy xong); phiên lỗi thì báo tên feature lỗi cho màn Loading. Không view, không tải |\n\n- Bước tải: lần lượt từng feature, feature sau bắt đầu tải khi feature trước xong. Báo tiến độ sau mỗi feature (thanh tiến độ của màn Loading).\n- Bước chạy: lần lượt từng feature tạo view; cả bước xong trong một khung hình.\n- Bước huỷ: lần lượt ngược lại; mỗi feature huỷ view và bỏ thứ đã tải.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Số feature tham gia scene Loading | 1 | feature | Chỉ có màn Loading |\n| Số feature tham gia scene Game | 15 | feature | Mọi feature có view hoặc cần tải ở mức đang chơi được, cộng `feature-sim-clock` (nhịp chung) và `feature-scene-flow` (cổng báo scene Loading); trừ `feature-session-scene` (chính dịch vụ phiên), `feature-balance` |\n| Thời gian tải tối đa một feature | 10 (dự kiến) | giây | Đủ rộng cho máy yếu; quá mức này gần như chắc là lỗi |\n| Thời gian bước chạy cả scene | 1 | khung hình | Không tải gì thêm ở bước chạy |\n| Thời gian bước huỷ cả scene | không giới hạn, không chờ tải | — | Huỷ chỉ dọn, không chờ mạng hay file |\n| Cách tải | Lần lượt | — | Dễ biết feature nào lỗi, tiến độ rõ |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Cách tải các feature | Lần lượt | Lần lượt | Lần lượt (xét tải song song nếu quá 3 giây) |\n| Thời gian tải tối đa một feature | 10 giây (dự kiến) | 10 giây | 10 giây |\n| Số feature scene Game | 15: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, popup-rating, scene-flow | 19: sim-clock vẫn đầu; thêm `feature-combat` (trước hero, enemy, castle là bên ra đòn; chờ installer), và sau popup-rating theo thứ tự home, team-select (cần run, hero), game-flow; scene-flow vẫn cuối | Theo danh sách feature lúc đó |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "@CodeLead",
-   "at": "2026-11-25 23:56:00"
+   "by": "_Services/SessionScene",
+   "at": "2026-11-27 03:13:00"
+  },
+  "stage-idea": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "BootTests.GameScene_AtIdea_HasFifteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast",
+    "BootTests.GameScene_AtPrototype_JoinsItsFeaturesInTheDesignedOrder"
+   ],
+   "play": "",
+   "hash": "303e86b8796a",
+   "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Cách tải các feature: Lần lượt\n- Thời gian tải tối đa một feature: 10 giây (dự kiến)\n- Số feature scene Game: 15: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, popup-rating, scene-flow",
+   "title": "Thông số của giai đoạn IDEA",
+   "by": "_Services/SessionScene",
+   "at": "2026-11-27 03:13:00"
   }
  },
  "log": [
@@ -495,6 +505,27 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 03:12:59",
+   "id": "game-list",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "BootTests.GameScene_AtIdea_HasFifteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast"
+  },
+  {
+   "at": "2026-11-27 03:13:00",
+   "id": "params",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "BootTests.GameScene_AtIdea_HasFifteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast, BootTests.GameScene_AtPrototype_JoinsItsFeaturesInTheDesignedOrder"
+  },
+  {
+   "at": "2026-11-27 03:13:00",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "_Services/SessionScene",
+   "note": "BootTests.GameScene_AtIdea_HasFifteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast, BootTests.GameScene_AtPrototype_JoinsItsFeaturesInTheDesignedOrder"
   }
  ]
 }

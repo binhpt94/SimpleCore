@@ -307,8 +307,12 @@ namespace Game.Hero.Tests
             _combat.RunSteps(220);
             Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(0f), "back on its feet");
 
+            _combat.RunSteps(13);                   // 0.3 s growing back (12 steps, +1): no hit lands until it is over
+            _squad.Hit(0, 1000f);
+            Assert.That(_squad.RespawnSecondsLeft(0), Is.GreaterThan(0f), "down again right before the clear");
+
             _run.ClearBattle();
-            Assert.That(_squad.RespawnSecondsLeft(1), Is.EqualTo(0f), "no run going");
+            Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(0f), "no run going");
         }
 
         [Test]

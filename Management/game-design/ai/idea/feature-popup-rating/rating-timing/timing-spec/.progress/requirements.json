@@ -1,7 +1,7 @@
 {
  "items": {
   "start-signal": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.CountStartsWhenTheRunSettlesTheLoss"
@@ -10,65 +10,69 @@
    "hash": "cf2889fdd759",
    "text": "Bắt đầu đếm khi `feature-run` báo đã chốt kết quả thua, cùng tín hiệu popup thua dùng để mở\nLúc đó điểm, kỉ lục và cờ \"kỉ lục mới\" đã chốt (`feature-run/run-score/score-rules`).",
    "title": "Bắt đầu đếm khi `feature-run` báo đã chốt kết quả thua, cùng tín hiệu popup thua dùng để mở",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:37"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "invite-delay": {
-   "state": "done",
-   "note": "code và test",
+   "state": "verified",
+   "note": "giới hạn mỗi khung hình, chờ Lost",
    "tests": [
+    "RatingTimingTests.InviteDelay_ALongFrameRightAfterTheStopNeverOpensTheInviteBeforeTheLosePopup",
+    "RatingTimingTests.InviteDelay_EachFrameCountsAtMostTheBattleClockCap",
     "RatingTimingTests.InviteDelay_AsksForTheInvite1Point5SecondsAfterTheBattleStops"
    ],
    "play": "",
    "hash": "6c1efb201a0e",
    "text": "Xin mở lời mời 1.5 giây sau lúc trận dừng, tức 0.5 giây sau khi popup thua hiện\nPopup thua hiện sau 1 giây (`feature-run/run-flow/flow-rules#lose-popup-delay`); thêm 0.5 giây (dự kiến) để người chơi kịp thấy dòng \"Kỉ lục mới!\" rồi mới bị che.",
    "title": "Xin mở lời mời 1.5 giây sau lúc trận dừng, tức 0.5 giây sau khi popup thua hiện",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:38"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:27:34"
   },
   "check-flag": {
-   "state": "done",
-   "note": "code và test",
+   "state": "verified",
+   "note": "test đổi tên",
    "tests": [
     "RatingTimingTests.NoInviteWhenTheRunDidNotSetANewBest",
-    "RatingTimingTests.InvitedFlagTurnsOnWhenShownAndBlocksASecondInviteThisLaunch"
+    "RatingTimingTests.InvitedFlagTurnsOnWhenShownAndBlocksASecondInviteAfterPlayAgain"
    ],
    "play": "",
    "hash": "4c3a66e11f94",
    "text": "Đến lúc xin mở, cờ \"kỉ lục mới\" tắt hoặc cờ \"đã mời\" bật thì không mời",
    "title": "Đến lúc xin mở, cờ \"kỉ lục mới\" tắt hoặc cờ \"đã mời\" bật thì không mời",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:39"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:09:11"
   },
   "invited-flag": {
-   "state": "done",
-   "note": "code và test",
+   "state": "verified",
+   "note": "bộ đếm chuyển vào RatingParticipant",
    "tests": [
-    "RatingTimingTests.InvitedFlagTurnsOnWhenShownAndBlocksASecondInviteThisLaunch",
-    "RatingTimingTests.MaxInvitesPerLaunch_ANewLaunchStartsWithNoInviteShown"
+    "RatingTimingTests.InvitedFlagTurnsOnWhenShownAndBlocksASecondInviteAfterPlayAgain",
+    "RatingTimingTests.SceneEndsWhileTheInviteIsOpen_ClosedSilentlyAndNotInvitedAgainThisLaunch"
    ],
    "play": "",
    "hash": "e228aa92c6b9",
    "text": "Cờ \"đã mời\" bật khi popup mời đã hiện, và giữ tới khi tắt game\nChỉ nằm trong bộ nhớ, không lưu xuống máy. Mở game thì cờ tắt.",
    "title": "Cờ \"đã mời\" bật khi popup mời đã hiện, và giữ tới khi tắt game",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:39"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:09:11"
   },
   "cancel-on-leave": {
-   "state": "done",
-   "note": "code và test",
+   "state": "verified",
+   "note": "BattleCleared đóng lời mời",
    "tests": [
+    "RatingTimingTests.LeavingTheBattleWhileTheInviteIsOpenClosesItSilently",
+    "RatingTimingTests.LeavingTheBattleWhileWaitingForLostCancelsTheInvite",
     "RatingTimingTests.TouchOnTheLosePopupBeforeTheInviteCancelsItAndTheFlagStaysOff"
    ],
    "play": "",
    "hash": "211c3d94db65",
    "text": "Người chơi đã chạm nút trên popup thua trước lúc xin mở thì huỷ lần mời này, cờ \"đã mời\" giữ nguyên tắt\nHuỷ khi `feature-run` bắt đầu huỷ trận theo lựa chọn rời trận; lời mời không hiện đè lên trận mới.",
    "title": "Người chơi đã chạm nút trên popup thua trước lúc xin mở thì huỷ lần mời này, cờ \"đã mời\" giữ nguyên tắt",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:40"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:27:34"
   },
   "refused-no-count": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.PopupServiceRefusesThenNoInviteTheFlagStaysOffAndAWarningIsLogged"
@@ -77,11 +81,11 @@
    "hash": "2278a45a43e9",
    "text": "Dịch vụ từ chối mở (đã đủ popup chồng, id đang mở) thì không mời, cờ \"đã mời\" giữ nguyên tắt\nTheo `feature-popup/popup-layer/stack-rules`; ghi cảnh báo trong log.",
    "title": "Dịch vụ từ chối mở (đã đủ popup chồng, id đang mở) thì không mời, cờ \"đã mời\" giữ nguyên tắt",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:40"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "background-pause": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.TimeOutsideTheAppDoesNotCount_TheRestIsCountedOnReturn"
@@ -90,11 +94,11 @@
    "hash": "7ceca156d4a3",
    "text": "Thời gian ở ngoài game không tính vào 1.5 giây chờ\nQuay lại game thì đếm tiếp phần còn lại.",
    "title": "Thời gian ở ngoài game không tính vào 1.5 giây chờ",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:41"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "lose-under-input": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.WhileTheInviteIsOpenOnlyItTakesTheBackKey_TheLosePopupBelowGetsNothing"
@@ -103,11 +107,11 @@
    "hash": "716466f2e4c6",
    "text": "Trong lúc lời mời mở, popup thua không nhận chạm; nút quay lại của máy tới lời mời\nTheo luật chỉ popup trên cùng nhận bấm của dịch vụ popup.",
    "title": "Trong lúc lời mời mở, popup thua không nhận chạm; nút quay lại của máy tới lời mời",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:41"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "edge-diem-0": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.ScoreZero_NeverSetsANewBestSoNoInvite"
@@ -116,11 +120,11 @@
    "hash": "cc2bdfa2ebc2",
    "text": "**Điểm 0:** cờ \"kỉ lục mới\" không bao giờ bật (`score-rules#record-update`), nên không mời.",
    "title": "Điểm 0",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:42"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "edge-luot-dau-tien-sau-khi-cai-game-diem": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.FirstRunAfterInstallWithScoreAboveZeroIsInvited"
@@ -129,11 +133,11 @@
    "hash": "b617c7453c3b",
    "text": "**Lượt đầu tiên sau khi cài game, điểm lớn hơn 0:** kỉ lục cũ là 0, cờ bật, nên được mời. Đây là cách chính để người chơi mới thấy lời mời.",
    "title": "Lượt đầu tiên sau khi cài game, điểm lớn hơn 0",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:42"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "edge-nguoi-choi-cham-nut-popup-thua-trong-0": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.TouchOnTheLosePopupBeforeTheInviteCancelsItAndTheFlagStaysOff"
@@ -142,11 +146,11 @@
    "hash": "9a4388f5e69f",
    "text": "**Người chơi chạm nút popup thua trong 0.5 giây trước khi lời mời hiện:** huỷ lần mời; lượt sau phá kỉ lục vẫn được mời.",
    "title": "Người chơi chạm nút popup thua trong 0.5 giây trước khi lời mời hiện",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:43"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "edge-roi-game-trong-luc-dem": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.TimeOutsideTheAppDoesNotCount_TheRestIsCountedOnReturn"
@@ -155,11 +159,11 @@
    "hash": "86f8144e720e",
    "text": "**Rời game trong lúc đếm:** dừng đếm, quay lại thì đếm tiếp; popup thua vẫn hiện như luật của `feature-run`.",
    "title": "Rời game trong lúc đếm",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:43"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "edge-ghi-ki-luc-xuong-may-that-bai": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.SavingTheBestFailedButTheFlagIsStillOnInMemory_StillInvites"
@@ -168,11 +172,11 @@
    "hash": "5e0c64c31f51",
    "text": "**Ghi kỉ lục xuống máy thất bại:** cờ \"kỉ lục mới\" vẫn bật trong bộ nhớ (`score-rules#record-keep-on-fail`), nên vẫn mời.",
    "title": "Ghi kỉ lục xuống máy thất bại",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:44"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "edge-dich-vu-tu-choi-mo": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.PopupServiceRefusesThenNoInviteTheFlagStaysOffAndAWarningIsLogged"
@@ -181,11 +185,11 @@
    "hash": "9757968b0052",
    "text": "**Dịch vụ từ chối mở:** không mời, cờ \"đã mời\" giữ tắt, ghi cảnh báo.",
    "title": "Dịch vụ từ chối mở",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:44"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "edge-scene-game-bi-huy-khi-loi-moi-dang": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.SceneEndsWhileTheInviteIsOpen_ClosedSilentlyAndNotInvitedAgainThisLaunch"
@@ -194,11 +198,11 @@
    "hash": "841b0f1ab71b",
    "text": "**Scene Game bị huỷ khi lời mời đang mở:** dịch vụ huỷ popup (`dispose-silent`); cờ \"đã mời\" đã bật nên không mời lại trong lần mở game đó.",
    "title": "Scene Game bị huỷ khi lời mời đang mở",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:45"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "edge-hai-popup-chong": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.WhileTheInviteIsOpenOnlyItTakesTheBackKey_TheLosePopupBelowGetsNothing"
@@ -207,11 +211,11 @@
    "hash": "45cd6d7e8b97",
    "text": "**Hai popup chồng:** popup thua và popup mời là 2, dưới mức tối đa 3 của dịch vụ.",
    "title": "Hai popup chồng",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:45"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "PopupRatingInstallerTests.RealConfigHoldsTheIdeaValuesOfInviteParamsAndTimingParams",
@@ -221,11 +225,11 @@
    "hash": "72130a2d254d",
    "text": "## Làm gì\n- Nghe tín hiệu \"đã chốt kết quả thua\" của `feature-run` (tín hiệu popup thua dùng để mở, ý `lose-opens-after-result` của `feature-popup`).\n- Đếm 1.5 giây theo thời gian thật, không tính lúc game ở ngoài màn hình.\n- Hết giờ: đọc cờ \"kỉ lục mới\" (`feature-run/run-score/score-rules#record-read-anytime`) và cờ \"đã mời\". Cờ kỉ lục bật và chưa mời thì xin dịch vụ mở `PopupRating/Main` (node `rating-invite/invite-spec`).\n- Popup mời đã hiện thì bật cờ \"đã mời\".\n- Trong lúc đếm, `feature-run` bắt đầu huỷ trận (người chơi đã chọn trên popup thua) thì dừng đếm, không mời.\n\n## Thông số\n- Bảng `TimingParams` (`params`) trong `.excel/`: `invite_delay` thời gian từ lúc trận dừng tới lúc xin mở, `max_invites_per_launch` số lần mời tối đa mỗi lần mở game.\n- Độ trễ 1 giây trước popup thua là số của `feature-run/run-flow/flow-rules`, không chép vào bảng; `invite_delay` phải lớn hơn số đó.\n\n## Thông số theo giai đoạn\n- Cột `idea`, `prototype`, `full` của bảng `TimingParams`; mọi dòng giữ như IDEA.",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:46"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "timingparams-invite-delay": {
-   "state": "done",
+   "state": "verified",
    "note": "code và test",
    "tests": [
     "RatingTimingTests.InviteDelay_AsksForTheInvite1Point5SecondsAfterTheBattleStops"
@@ -234,21 +238,22 @@
    "hash": "bd8f8d0d67dd",
    "text": "Bảng TimingParams (params), dòng invite_delay\nkey (string): invite_delay\nname (string): Thời gian từ lúc trận dừng tới lúc xin mở lời mời\nunit (string): giây\nidea (string): 1.5\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Popup thua hiện sau 1 giây (feature-run/run-flow/flow-rules), thêm 0.5 giây để thấy dòng Kỉ lục mới (dự kiến)",
    "title": "TimingParams: Thời gian từ lúc trận dừng tới lúc xin mở lời mời (invite_delay)",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:47"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:06:33"
   },
   "timingparams-max-invites-per-launch": {
-   "state": "done",
-   "note": "code và test",
+   "state": "verified",
+   "note": "test theo số của bảng",
    "tests": [
-    "RatingTimingTests.MaxInvitesPerLaunch_ANewLaunchStartsWithNoInviteShown"
+    "RatingTimingTests.MaxInvitesPerLaunch_IsOneSoTheSecondNewBestOfTheLaunchIsNotInvited",
+    "RatingTimingTests.MaxInvitesPerLaunch_RaisedToTwoAllowsASecondInvite"
    ],
    "play": "",
    "hash": "f573bbd1abd7",
    "text": "Bảng TimingParams (params), dòng max_invites_per_launch\nkey (string): max_invites_per_launch\nname (string): Số lần mời tối đa mỗi lần mở game\nunit (string): lần\nidea (string): 1\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Không mời lại liên tục; không lưu xuống máy (người quyết 2026-11-27)",
    "title": "TimingParams: Số lần mời tối đa mỗi lần mở game (max_invites_per_launch)",
-   "by": "PopupRating",
-   "at": "2026-11-27 02:51:47"
+   "by": "@CodeLead",
+   "at": "2026-11-27 03:09:11"
   }
  },
  "log": [
@@ -566,6 +571,258 @@
    "state": "done",
    "by": "PopupRating",
    "note": "RatingTimingTests.MaxInvitesPerLaunch_ANewLaunchStartsWithNoInviteShown"
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "background-pause",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "cancel-on-leave",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "check-flag",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "edge-dich-vu-tu-choi-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "edge-diem-0",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "edge-ghi-ki-luc-xuong-may-that-bai",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "edge-hai-popup-chong",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "edge-luot-dau-tien-sau-khi-cai-game-diem",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "edge-nguoi-choi-cham-nut-popup-thua-trong-0",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "edge-roi-game-trong-luc-dem",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "edge-scene-game-bi-huy-khi-loi-moi-dang",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "invite-delay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "lose-under-input",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "refused-no-count",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "start-signal",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:33",
+   "id": "timingparams-invite-delay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:06:45",
+   "id": "invited-flag",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Số lần đã mời nằm trong field NonSerialized RatingLaunchMemory của asset PopupRatingInstaller, PopupRatingInstaller.cs dòng 23, 30, 44. Đó là trạng thái toàn cục trên asset dùng chung, trái unity.md: không static, không singleton, installer chỉ nối dây. Bản build có thể dỡ rồi nạp lại asset, khi đó OnEnable đặt về 0. Scene Game sống suốt một lần mở game, chơi lại không tải lại scene, nên chuyển bộ đếm thành field của RatingParticipant và bỏ RatingLaunchMemory. Test: bỏ NewSessionSameLaunch, chặn lần mời thứ hai trong cùng participant sau khi chơi lại và phá kỉ lục lần nữa."
+  },
+  {
+   "at": "2026-11-27 03:06:45",
+   "id": "timingparams-max-invites-per-launch",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Test MaxInvitesPerLaunch_ANewLaunchStartsWithNoInviteShown không nhắc khoá max_invites_per_launch, không dùng số 1 của bảng, chỉ kiểm installer mới có InvitesShown bằng 0. Cần assert config MaxInvitesPerLaunch bằng 1 kèm tên khoá, và test lần mời thứ hai trong cùng participant bị chặn theo số đó, sau khi chuyển bộ đếm khỏi installer."
+  },
+  {
+   "at": "2026-11-27 03:08:24",
+   "id": "invited-flag",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "bộ đếm chuyển vào RatingParticipant"
+  },
+  {
+   "at": "2026-11-27 03:08:24",
+   "id": "invited-flag",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingTimingTests.InvitedFlagTurnsOnWhenShownAndBlocksASecondInviteAfterPlayAgain, RatingTimingTests.SceneEndsWhileTheInviteIsOpen_ClosedSilentlyAndNotInvitedAgainThisLaunch"
+  },
+  {
+   "at": "2026-11-27 03:08:24",
+   "id": "timingparams-max-invites-per-launch",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "test theo số của bảng"
+  },
+  {
+   "at": "2026-11-27 03:08:24",
+   "id": "timingparams-max-invites-per-launch",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingTimingTests.MaxInvitesPerLaunch_IsOneSoTheSecondNewBestOfTheLaunchIsNotInvited, RatingTimingTests.MaxInvitesPerLaunch_RaisedToTwoAllowsASecondInvite"
+  },
+  {
+   "at": "2026-11-27 03:08:25",
+   "id": "check-flag",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "test đổi tên"
+  },
+  {
+   "at": "2026-11-27 03:08:25",
+   "id": "check-flag",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingTimingTests.NoInviteWhenTheRunDidNotSetANewBest, RatingTimingTests.InvitedFlagTurnsOnWhenShownAndBlocksASecondInviteAfterPlayAgain"
+  },
+  {
+   "at": "2026-11-27 03:09:11",
+   "id": "check-flag",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:09:11",
+   "id": "invited-flag",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:09:11",
+   "id": "timingparams-max-invites-per-launch",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:25:11",
+   "id": "invite-delay",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Chơi thử Tester/UnityAutoPlay/20261127-031927 không đạt: có một khung hình dài lúc thành bị phá thì lời mời mở ở +0.61s, popup thua mở ở +0.87s, nên lời mời nằm dưới popup thua và hai nút không có tác dụng. Tái hiện 2 lần. Nguyên nhân nghi: UnityRatingClock cộng unscaledDeltaTime không giới hạn, còn độ trễ 1 giây của Run đếm theo đồng hồ chung có giới hạn bước. Sửa sao cho lời mời luôn mở sau popup thua: đếm cùng nhịp với độ trễ của Run, cùng giới hạn mỗi khung hình. Đến lúc xin mở mà IRunFlow.Step chưa là Lost thì chờ tới khi sang Lost rồi mới mở. Thêm test tái hiện: một khung hình dài 0.6 giây ngay sau BattleStopped, lời mời không được mở trước bước Lost và phải nằm trên cùng."
+  },
+  {
+   "at": "2026-11-27 03:25:12",
+   "id": "cancel-on-leave",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Chơi thử 20261127-031927: lời mời đã mở mà người chơi rời trận, ví dụ chạm Chơi lại khi lời mời nằm dưới popup thua, thì BattleCleared chỉ dừng đếm, không đóng lời mời, nên lời mời nổi trên màn chọn đội. Thiết kế ghi lời mời không hiện đè lên trận mới. Khi BattleCleared mà lời mời đang mở thì nhờ dịch vụ đóng nó lặng lẽ, không tính là chạm nút. Thêm test cho trường hợp này."
+  },
+  {
+   "at": "2026-11-27 03:26:35",
+   "id": "invite-delay",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "giới hạn mỗi khung hình, chờ Lost"
+  },
+  {
+   "at": "2026-11-27 03:26:36",
+   "id": "invite-delay",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingTimingTests.InviteDelay_ALongFrameRightAfterTheStopNeverOpensTheInviteBeforeTheLosePopup, RatingTimingTests.InviteDelay_EachFrameCountsAtMostTheBattleClockCap, RatingTimingTests.InviteDelay_AsksForTheInvite1Point5SecondsAfterTheBattleStops"
+  },
+  {
+   "at": "2026-11-27 03:26:36",
+   "id": "cancel-on-leave",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "BattleCleared đóng lời mời"
+  },
+  {
+   "at": "2026-11-27 03:26:36",
+   "id": "cancel-on-leave",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingTimingTests.LeavingTheBattleWhileTheInviteIsOpenClosesItSilently, RatingTimingTests.LeavingTheBattleWhileWaitingForLostCancelsTheInvite, RatingTimingTests.TouchOnTheLosePopupBeforeTheInviteCancelsItAndTheFlagStaysOff"
+  },
+  {
+   "at": "2026-11-27 03:27:34",
+   "id": "invite-delay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 03:27:34",
+   "id": "cancel-on-leave",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

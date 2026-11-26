@@ -14,11 +14,12 @@ Các tình huống trong game hiện tại:
 |---|---|---|
 | Đang đánh | (trống) | HUD, màn chơi |
 | Thua | popup thua | popup thua |
+| Thua, lượt vừa phá kỉ lục | popup thua, popup mời đánh giá | popup mời đánh giá; đóng nó thì popup thua |
 
 ## Thông số
 | Thông số | Giá trị | Đơn vị | Lí do |
 |---|---|---|---|
-| Số popup chồng tối đa | 3 | popup | Game hiện cần 1; dư cho popup sau này, quá 3 là dấu hiệu lỗi |
+| Số popup chồng tối đa | 3 | popup | Game hiện cần 2 (popup thua và popup mời đánh giá); dư cho popup sau này, quá 3 là dấu hiệu lỗi |
 | Số bản mỗi id cùng lúc | 1 | bản | Chặn mở trùng do bấm nhanh |
 | Độ tối của một nền che | 60 (dự kiến) | % | Đủ thấy đang có popup mà vẫn nhận ra trận phía sau |
 | Thời gian hiện, đóng popup | 0 | giây | Tức thì, nhận bấm ngay |
@@ -48,7 +49,6 @@ Các tình huống trong game hiện tại:
 - **Giới hạn 3.** Dư chỗ cho popup sau này, bắt được lỗi mở lặp. Đã loại: không giới hạn; giới hạn 1 (không chồng được popup mới).
 - **Một bản mỗi id.** Đơn giản nhất để chặn bấm đúp. Đã loại: cho mở trùng.
 - **Nền chồng thì tối thêm.** Mỗi popup một nền theo vòng 3; tối thêm giúp thấy popup nào đang hoạt động. Đã loại: chỉ nền trên cùng làm tối.
-- **Nút quay lại chuyển cho feature của popup trên cùng (2026-11-23, sửa lệch với `feature-popup-pause/pause-popup/pause-popup-spec` ý `back-key`).** Dịch vụ vẫn không tự đóng popup, giữ luật "popup chỉ đóng khi feature gọi yêu cầu"; mỗi popup tự quyết nút quay lại làm gì. Đã loại: nút quay lại đóng popup trên cùng (dịch vụ quyết thay feature); nút quay lại không tác dụng với mọi popup (trái thói quen trên điện thoại ở popup tạm dừng).
 - **Hiện tức thì.** Hiệu ứng không cần để thấy gameplay.
 - **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ popup tạm dừng khỏi bảng tình huống, nút quay lại và trận đứng yên; bỏ mục đã tự quyết về hộp xác nhận bỏ lượt.
 

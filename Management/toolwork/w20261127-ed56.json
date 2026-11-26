@@ -3,8 +3,8 @@
  "text": "Sửa Stop hook lưu báo cáo, .claude/hooks/stop_report.py hoặc chỗ lưu Management/reports: mỗi lượt của CodeLead lại lưu thêm một file báo cáo cùng nội dung với lượt trước, ví dụ 20261127-021625, 021938, 022053, 022110, 022155, 022547 đều là cùng một báo cáo gỡ Ads và xoá 6 thư mục. Xong thì: một lượt không có khối báo cáo mới, hoặc khối giống hệt bản đã lưu, không tạo file mới trong Management/reports",
  "source": "@Manager",
  "decided": "Người quyết 2026-11-27: ghi việc công cụ sửa hook lưu lặp báo cáo",
- "state": "open",
- "note": "",
+ "state": "done",
+ "note": "stop_report.py: không lưu file mới khi khối giống hệt báo cáo mới nhất của cùng vai · gốc lỗi lặp là tin SendMessage không được tính là mở lượt, đã sửa ở w20261127-f31f · thêm test",
  "created": 1795721409.5746117,
- "closed": 0
+ "closed": 1795723659.6014633
 }

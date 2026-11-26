@@ -1,6 +1,6 @@
 ---
 based-on: d8d13ced1680
-refs: feature-session-scene/session-steps/participant-order@bdb6d08f1274
+refs: feature-session-scene/session-steps/participant-order@3cfb8fc5bd71
 frame: none
 ---
 # Kiểm tra dọn sạch sau bước huỷ

@@ -1,5 +1,5 @@
 ---
-based-on: df214e928524
+based-on: 028d6c6cb4ed
 node-by: gpt@r2-1
 ---
 # Đọc, ghi và khôi phục dữ liệu lưu
