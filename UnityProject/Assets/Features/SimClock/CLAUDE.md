@@ -1,4 +1,5 @@
 # SimClock
+Tầng: 6 · Features
 
 Nhịp chung và ngẫu nhiên theo seed của trận. Thiết kế: `live/feature-sim-clock` (vòng 4: `clock-step/clock-values`, `seeded-random/random-values`).
 

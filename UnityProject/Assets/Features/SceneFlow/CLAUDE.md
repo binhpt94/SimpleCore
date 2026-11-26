@@ -1,4 +1,5 @@
 # SceneFlow
+Tầng: 6 · Features
 
 Đưa người chơi từ scene Loading sang scene Game. Không feature nào khác được nạp hay gỡ scene.
 Thiết kế: `live/feature-scene-flow/scene-list/boot-loading` (màn Loading), cheat ở `feature-scene-flow/cheat`.

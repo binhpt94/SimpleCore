@@ -807,7 +807,22 @@ def run_binding_cases(payload):
     bind_session.write_json(guard.binding_path(sid, STORE), {"feature": "@CodeLead"})
     check(g, "", ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/codelead.md", ".claude/rules/unity.md"],
           "rule files of @CodeLead (what a reread names)", bind_session.rule_files("@CodeLead", FX))
-    check(g, "", [], "a feature chat reads no role file itself (unity.md loads with the Unity files)", bind_session.must_read("Wallet"))
+    check(g, "", [".claude/rules/feature.md"], "a feature chat reads feature.md itself (unity.md loads with the Unity files)", bind_session.must_read("Wallet"))
+    check(g, "", ([".claude/rules/feature.md"], [".claude/rules/feature.md"], [".claude/rules/manager.md"]),
+          "@Core and a service read feature.md too; a Leader reads only its own rules", (bind_session.must_read("@Core"), bind_session.must_read("_Services/Popup"), bind_session.must_read("@Manager")))
+    check(g, "", ("tầng 0 · Master", "tầng 6 · Features"), "tiers are numbered top to bottom", (bind_session.tier_label("Master"), bind_session.tier_label("Features")))
+    check(g, "", [".claude/rules/gamedesigner.md", ".claude/rules/designadvisor.md"],
+          "@GameDesigner reads its rules itself: they no longer load with the design files", bind_session.must_read("@GameDesigner"))
+    check(g, "", [".claude/rules/designadvisor.md", ".claude/rules/gamedesigner.md"],
+          "@DesignAdvisor reads its rules itself", bind_session.must_read("@DesignAdvisor"))
+    excludes = json.loads((HERE.parent / "settings.json").read_text(encoding="utf-8")).get("claudeMdExcludes", [])
+    for name in ("manager.md", "codelead.md", "gamedesigner.md", "designadvisor.md", "uidesigner.md", "tester.md", "studio.md", "feature.md"):
+        check(g, "", True, f"{name} never loads by itself into another role's chat (claudeMdExcludes)",
+              f"**/.claude/rules/{name}" in excludes)
+    check(g, "", True, "the node files of the design tree (CLAUDE.md) do not load near a Read",
+          "**/Management/game-design/**/CLAUDE.md" in excludes)
+    check(g, "", False, "report.md and unity.md still load (shared rules)",
+          any(e.endswith(("report.md", "unity.md")) for e in excludes))
     for name in ("manager.md", "codelead.md", "tester.md", "studio.md", "unity.md"):
         head = (HERE.parent / "rules" / name).read_text(encoding="utf-8").split("\n", 2)[:2]
         check(g, "", ["---", "paths:"], f"{name} is path-scoped, not loaded into every chat", head)
@@ -1884,7 +1899,7 @@ def run_tester_cases():
     Path(guard.binding_path("role-tester", STORE)).write_text(json.dumps({"feature": T}))
     told = bind_session.context({"session_id": "role-tester"}, FX, STORE)
     check(g, T, [], "the guard line names the folder, the commands, the soft gate and the report",
-          [x for x in ("nhóm Testers", "Tester/UnityAutoPlay/", "tester.py new UnityAutoPlay", "execute_code", "cổng mềm", "XÁC NHẬN",
+          [x for x in ("tầng 3 · Testers", "Tester/UnityAutoPlay/", "tester.py new UnityAutoPlay", "execute_code", "cổng mềm", "XÁC NHẬN",
                        "Báo cáo cho @Manager", ".claude/rules/tester.md") if x not in told])
 
 

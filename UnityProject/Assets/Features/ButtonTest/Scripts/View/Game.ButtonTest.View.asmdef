@@ -1,0 +1,18 @@
+{
+  "name": "Game.ButtonTest.View",
+  "rootNamespace": "Game.ButtonTest",
+  "references": [
+    "Game.Core",
+    "Game.ButtonTest.Internal",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

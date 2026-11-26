@@ -3,7 +3,7 @@ name: gd-rework-node
 description: Chỉ phiên FEATURE=@GameDesigner. Làm lại một node mà gd_status.py ghi cần làm lại - ý bị chấm dưới 5, lệch hash với cha, chưa có ý, ref đổi hoặc thiếu; đọc lịch sử ý đã bị người loại trước khi viết lại; làm từ trên xuống. Dùng khi gd_status.py báo một node cần làm lại.
 ---
 # @GameDesigner: làm lại một node
-Luật chung của node, chấm điểm và lúc node đạt vẫn ở `.claude/rules/gamedesigner.md`.
+Lúc node đạt ở `.claude/rules/gamedesigner.md`; khuôn node ở skill `gd-node-format`; chấm điểm ở skill `gd-scoring`.
 
 ## Làm lại một node
 `gd_status.py` ghi rõ node nào "bạn cần làm lại" và vì sao. Có ba lí do:

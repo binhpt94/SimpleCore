@@ -63,7 +63,12 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 - Sửa object trong scene chỉ sau khi đã mở (`load`) hoặc tạo (`create`) scene của vùng mình trong lượt đó; guard chỉ cho lưu đúng scene đó. Trước khi kết thúc lượt: lưu scene hoặc prefab stage đã mở, không để scene dở dang.
 - Prefab của feature thì sửa headless (`manage_prefabs modify_contents`), không cần scene và không cần khoá.
 - Biên dịch xong thì đọc console (`read_console`), sửa hết lỗi của mình rồi mới báo xong. Lỗi của feature khác thì báo @CodeLead, không sửa hộ.
+- Ai đang giữ khoá Editor, tới mấy giờ, scene nào: mọi phiên Read được `~/.coresimple-guard/editor-lock.json` (chỉ file đó). Không có file là không ai giữ.
+- Chụp màn hình (`manage_camera screenshot`) phải ghi `output_folder: "Captures"` (ngoài `Assets`, không commit). Thêm `include_image: true` để thấy ảnh. Guard chặn khi thiếu hoặc trỏ chỗ khác.
+- Xoá file: chỉ file trong vùng của mình, qua unity-mcp (`manage_asset`, action `delete`, path bắt đầu bằng `Assets/`).
+- Xoá thư mục: xoá hết file trong đó trước. Thư mục rỗng thì xoá được, trừ thư mục khung (`Scripts`, `Tests`, `FeatureAssets` và tầng ngay dưới).
+- Biên dịch: mọi phiên code. Test, Play: @human, @CodeLead hoặc nhóm Testers.
 
 ## Không lách
 - Không viết code để né regex của validator (tách chuỗi, gọi gián tiếp API cấm).
-- Validator báo sai thì dừng và báo người; sửa `rules.json` chỉ sau khi hỏi và được người đồng ý, từng lần.
+- Validator báo sai thì dừng và báo @CodeLead; sửa `rules.json`: @CodeLead hỏi người, từng lần.

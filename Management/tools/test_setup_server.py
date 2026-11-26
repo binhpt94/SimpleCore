@@ -393,6 +393,14 @@ def cli_cases(check):
             check("cli: a .cmd shim must go through cmd.exe: the newlines are written as a mark, no text is lost",
                   (bool(calls[-1][1]), "\n" in sent, "m20261125-222813-ce0fb4" in sent, "Làm 8 yêu cầu" in sent, sent.count(ss.NEWLINE_MARK)),
                   (True, False, True, True, 3))
+        ss.shutil.which = lambda name: None
+        for args in (["--bg", "--resume", "sid", "x"], ["--resume", "sid", "-p", "x"], ["-n", "T", "--session-id", "s", "-p", "x"],
+                     ["-p", "--model", "m", "x"]):
+            ss.run_claude(args)
+            check(f"cli: a turn ({args[0]}) runs without Claude in Chrome", calls[-1][0][1:], ["--no-chrome"] + args)
+        for args in (["agents", "--json"], ["stop", "abc"], ["rm", "abc"]):
+            ss.run_claude(args)
+            check(f"cli: {args[0]} runs no turn and takes no Chrome flag", calls[-1][0][1:], args)
     finally:
         ss.shutil.which, ss.subprocess.run = real[0], real[1]
     import subprocess as sp
@@ -822,6 +830,32 @@ def courier_cases(check):
         n_stop = len(stopped)
         ss.courier_tick(time.time())
         check("on-demand: a thread with a message waiting is given it, not stopped", (len(stopped), given[-1][0]), (n_stop, "c0000000"))
+        # a Renew marked on the page runs right before the next job: wipe (headless), bind again, then the job
+        real_store, ss.guard.STORE_DIR = ss.guard.STORE_DIR, tempfile.mkdtemp(prefix="courier-store-")
+        try:
+            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "Shop"})
+            live.pop("s0000000", None)
+            m = ss.dispatch.send(root, "Shop", "Làm yêu cầu shop-list#a", "@CodeLead")
+            n = len(given)
+            ss.dispatch.mark(root, m, "queued", force=True)      # the Giao ngay button: the pool limit does not hold
+            did = ss.courier_tick(time.time() + 3)
+            check("renew mark: emptied first (headless), then the job in the background; bound again, mark gone",
+                  ([(g[0], g[1] == ss.WIPE_PROMPT, g[3]) for g in given[n:]], ("renewed", "Shop") in did,
+                   ss.renew_pending("s0000000"), ss.guard.bound_feature("s0000000", ss.guard.STORE_DIR)),
+                  ([("s0000000", True, False), ("s0000000", False, True)], True, False, "Shop"))
+            ss.courier_tick(time.time() + 4)
+            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "Shop"})
+            live["s0000000"] = {"kind": "background", "status": "idle", "state": "blocked", "short": "s0000000"}
+            m = ss.dispatch.send(root, "Shop", "Trả lời câu hỏi", "@CodeLead")
+            ss.dispatch.mark(root, m, "queued", force=True)
+            n = len(given)
+            ss.courier_tick(time.time() + 5)
+            check("renew mark: a thread stopped at a question to the human keeps its context and its mark",
+                  ([g[1] == ss.WIPE_PROMPT for g in given[n:]], ss.renew_pending("s0000000")), ([False], True))
+            ss.courier_tick(time.time() + 6)
+        finally:
+            shutil.rmtree(ss.guard.STORE_DIR, ignore_errors=True)
+            ss.guard.STORE_DIR = real_store
         ss.dispatch.set_config(root, mode="always-live")
         live["w0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "w0000000"}
         age("w0000000", 300)
@@ -982,12 +1016,23 @@ def main():
               ss.bind_session.rule_files("@CodeLead", str(ss.ROOT)),
               ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/codelead.md", ".claude/rules/unity.md",
                ".claude/skills/codelead-dispatch/SKILL.md", ".claude/skills/codelead-verify-batch/SKILL.md",
-               ".claude/skills/codelead-scaffold-feature/SKILL.md", ".claude/skills/codelead-resolve-issue/SKILL.md"])
+               ".claude/skills/codelead-scaffold-feature/SKILL.md", ".claude/skills/codelead-resolve-issue/SKILL.md",
+               ".claude/skills/codelead-wiring/SKILL.md"])
         check("reread: a role with skills is told about them too (each SKILL.md is followed for changes)",
               ss.bind_session.rule_files("@UIDesigner", str(ss.ROOT)),
               ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/uidesigner.md",
                ".claude/skills/ui-layout-screen/SKILL.md", ".claude/skills/ui-frame-syntax/SKILL.md",
-               ".claude/skills/ui-claude-concept-order/SKILL.md", ".claude/skills/gd-round-4/SKILL.md"])
+               ".claude/skills/ui-claude-concept-order/SKILL.md", ".claude/skills/gd-round-4/SKILL.md",
+               ".claude/skills/gd-node-format/SKILL.md"])
+        check("reread: @GameDesigner follows the skills split out of gamedesigner.md",
+              [r for r in ss.bind_session.rule_files("@GameDesigner", str(ss.ROOT))
+               if any(n in r for n in ("gd-node-format", "gd-scoring", "gd-glossary", "gd-art-concept", "gd-user-control"))],
+              [f".claude/skills/{n}/SKILL.md" for n in ("gd-node-format", "gd-scoring", "gd-glossary", "gd-art-concept", "gd-user-control")])
+        heads = []
+        for n in ("gd-node-format", "gd-scoring", "gd-glossary", "gd-art-concept", "gd-user-control", "codelead-wiring"):
+            text = (ss.ROOT / ".claude" / "skills" / n / "SKILL.md").read_text(encoding="utf-8")
+            heads.append((text.startswith("---\nname: " + n + "\ndescription: "), "Dùng khi" in text.split("---")[1] or "Dùng trước" in text.split("---")[1]))
+        check("skills split out of the rules: each has a name and says when it is used", heads, [(True, True)] * 6)
         check("reread: a feature follows the feature skills", [r for r in ss.bind_session.rule_files("Wallet", str(ss.ROOT)) if "skills" in r],
               [".claude/skills/feature-implement-req/SKILL.md", ".claude/skills/feature-order-asset/SKILL.md",
                ".claude/skills/feature-request-framework-change/SKILL.md"])
@@ -1078,6 +1123,21 @@ def main():
             check("renew: emptied and bound but the rules not read: said so, the binding stays",
                   (res["ok"], res.get("renewed"), "CHƯA đọc quy trình" in res["error"], ss.guard.bound_feature("aaaa1111", store)),
                   (False, True, True, "@CodeLead"))
+            # a thread that runs on demand is only marked: emptied by the courier before its next job
+            check("renew: the human's chat and the Leaders are renewed at once; every other group only marked",
+                  [ss.renew_deferred(b) for b in ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner",
+                                                  "@Codex", "@DesignAdvisor", "@UnityAutoPlay", "@Core", "Wallet", "_Services/Popup")],
+                  [False, False, False, False, False, True, True, True, True, True, True])
+            ss.run_claude = fake
+            before = len(calls)
+            res = ss.renew("bbbb2222", "0000")
+            check("renew (marked): a wrong PIN marks nothing", (res["ok"], ss.renew_pending("bbbb2222")), (False, False))
+            res = ss.renew("bbbb2222", "1234")
+            check("renew (marked): a feature thread runs no turn, it is marked and told so",
+                  (res["ok"], res.get("pending"), len(calls) - before, ss.renew_pending("bbbb2222"), "việc kế tiếp" in res["answer"]),
+                  (True, True, 0, True, True))
+            ss.clear_renew_mark("bbbb2222")
+            check("renew (marked): the mark can be cleared", ss.renew_pending("bbbb2222"), False)
         finally:
             ss.bind_session.check_pin = real_pin
         check("the page may post to the compact and renew paths",

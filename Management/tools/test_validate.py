@@ -132,7 +132,7 @@ def build_clean(r):
     put(r, f"{A}/Core/AssemblyInfo.cs", IVT % '"Game.Core.Tests"')
     # Wallet
     w = f"{F}/Wallet"
-    put(r, f"{w}/CLAUDE.md", "# Wallet\n")
+    put(r, f"{w}/CLAUDE.md", "# Wallet\nTầng: 6 · Features\n## Contracts\n### IWalletReader\n### SpendResult\n")
     put_asmdef(r, f"{w}/Scripts/Contracts", "Game.Wallet.Contracts", ["Game.Core"], noEngineReferences=True)
     put(r, f"{w}/Scripts/Contracts/IWalletReader.cs", "namespace Game.Wallet { public interface IWalletReader { int Coins { get; } } public readonly struct SpendResult { } }")
     put_asmdef(r, f"{w}/Scripts/Internal", "Game.Wallet.Internal", ["Game.Core", "Game.Wallet.Contracts", "Game.Services.Popup.Contracts", "Game.Shop.Contracts"])
@@ -151,6 +151,7 @@ def build_clean(r):
     put_meta(r, f"{w}/FeatureAssets/Private/Config.asset", G["walletCfg"])
     # Shop
     s = f"{F}/Shop"
+    put(r, f"{s}/CLAUDE.md", "# Shop\nTầng: 6 · Features\n## Contracts\n### IShop\n")
     put_asmdef(r, f"{s}/Scripts/Contracts", "Game.Shop.Contracts", ["Game.Core"], noEngineReferences=True)
     put(r, f"{s}/Scripts/Contracts/IShop.cs", "namespace Game.Shop { public interface IShop { } }")
     put_asmdef(r, f"{s}/Scripts/Internal", "Game.Shop.Internal", ["Game.Core", "Game.Shop.Contracts", "Game.Wallet.Contracts"])
@@ -163,6 +164,7 @@ def build_clean(r):
     put_meta(r, f"{s}/FeatureAssets/Public/Shop.prefab", G["shopPrefab"])
     # Popup service
     p = f"{F}/_Services/Popup"
+    put(r, f"{p}/CLAUDE.md", "# Popup\nTầng: 5 · Services\n## Contracts\n### IPopupService\n### PopupClosed\n### PopupId\n### PopupIds\n")
     put_asmdef(r, f"{p}/Scripts/Contracts", "Game.Services.Popup.Contracts", ["Game.Core"], noEngineReferences=True)
     put(r, f"{p}/Scripts/Contracts/IPopupService.cs", "namespace Game.Services.Popup { public interface IPopupService { } public delegate void PopupClosed(int id); }")
     put(r, f"{p}/Scripts/Contracts/PopupId.cs", "namespace Game.Services.Popup {\n"
@@ -212,6 +214,14 @@ CASES = [
     ("DOC-01", "feature CLAUDE.md over 200 lines", lambda d: put(d, f"{F}/Wallet/CLAUDE.md", "line\n" * 201)),
     ("DOC-01", "root CLAUDE.md over 200 lines", lambda d: put(d, "CLAUDE.md", "line\n" * 201)),
     ("DOC-01", ".claude/rules md over 200 lines", lambda d: put(d, ".claude/rules/unity.md", "line\n" * 201), "*unity.md*"),
+    ("DOC-02", "feature with Contracts and no CLAUDE.md", lambda d: (d / f"{F}/Shop/CLAUDE.md").unlink(), "*no CLAUDE.md*IShop*"),
+    ("DOC-02", "CLAUDE.md without the tier line", lambda d: put(d, f"{F}/Shop/CLAUDE.md", "# Shop\n### IShop\n"), "*no tier line*"),
+    ("DOC-02", "service CLAUDE.md with the feature tier", lambda d: put(d, f"{F}/_Services/Popup/CLAUDE.md",
+        "# Popup\nTầng: 6 · Features\n### IPopupService PopupClosed PopupId PopupIds\n"), "*this folder is 'Tầng: 5 · Services'*"),
+    ("DOC-02", "a public Contracts type (struct) not described", lambda d: put(d, f"{F}/Wallet/CLAUDE.md",
+        "# Wallet\nTầng: 6 · Features\n### IWalletReader\n"), "*types: SpendResult"),
+    ("DOC-02", "a public delegate not described", lambda d: put(d, f"{F}/_Services/Popup/CLAUDE.md",
+        "# Popup\nTầng: 5 · Services\n### IPopupService PopupId PopupIds\n"), "*types: PopupClosed"),
 
     ("ASM-00", "asmdef is not JSON", lambda d: put(d, WI_ASM, "{ broken")),
     ("ASM-01", "wrong assembly name", lambda d: set_json(d, WI_ASM, name="Game.Shop.Internal")),

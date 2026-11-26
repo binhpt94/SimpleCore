@@ -1,4 +1,5 @@
 # Upgrade
+Tầng: 6 · Features
 
 Cửa hàng nâng cấp trong trận: 6 mục (hero chỗ 1, 2, 3, rồi máu thành, sức đánh thành, kĩ năng thành), mọi mục vào trận ở cấp 1. Thiết kế: `feature-upgrade` trong `Management/game-design/live`.
 

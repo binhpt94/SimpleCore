@@ -1,4 +1,5 @@
 # Popup (dịch vụ)
+Tầng: 5 · Services
 
 Xếp chồng popup của scene (`live/feature-popup`): tối đa 3, mỗi id một bản, popup mới nằm trên và là popup duy nhất nhận bấm.
 Không sở hữu popup nào. Feature gọi xin mở bằng id; prefab, nội dung và nút là của feature gọi.

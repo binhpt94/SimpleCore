@@ -1,4 +1,5 @@
 # SessionScene (dịch vụ)
+Tầng: 5 · Services
 
 Giữ vòng đời một phiên của scene: Init → Loading → Running → Disposing → Disposed, hoặc Failed.
 Không biết feature nào; feature tự xin tham gia bằng `ISessionScene.Join` trong `Install`.

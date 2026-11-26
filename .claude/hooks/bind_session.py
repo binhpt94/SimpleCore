@@ -42,11 +42,22 @@ CONTEXT_BLOCK_RX = re.compile(r"<([A-Za-z][\w-]*)\b[^>]*>.*?</\1>", re.S)
 USAGE = ("Cách gõ: FEATURE=<tên feature, @Core, @Manager, @CodeLead, @GameDesigner, @UIDesigner, @UnityAutoPlay hoặc @human> <PIN>. "
          "Xem chat đang gán gì: FEATURE?")
 MAX_LISTED_REPORTS = 20
-# Role rules that are not loaded into every chat (their frontmatter `paths:` keeps them out; loading the rules of
-# every role into all ~30 chats cost each call ~20k tokens). The chat of that role is told to Read its file once:
-# after it is bound, and again after a compaction or /clear empties its context (SessionStart hook, --session-start).
+# Role rules that are never loaded by themselves: .claude/settings.json lists them in `claudeMdExcludes` (người quyết
+# 2026-11-26). Their `paths:` alone did not keep them out: gamedesigner.md (paths Management/game-design/**) loaded
+# into every chat that read a design file or a gd_pack output, CodeLead and the features included. The chat of that
+# role is told to Read its file once: after it is bound, and again after a compaction or /clear empties its context
+# (SessionStart hook, --session-start). The node files of the design tree (Management/game-design/**/CLAUDE.md) are
+# excluded too: a Read near them no longer pulls the node and every parent node (the root twice, ai/idea and live).
 RULES_DIR = ".claude/rules"
+# The tiers of CLAUDE.md, top to bottom (tầng 0-6); the guard line names a chat's tier, the Setup page groups by it.
+TIERS = ("Master", "Leaders", "Tools", "Testers", "Basic", "Services", "Features")
+FEATURE_RULES = "feature.md"      # Basic (@Core), Services, Features: read it themselves (claudeMdExcludes)
+
+
+def tier_label(group):
+    return f"tầng {TIERS.index(group)} · {group}"
 ROLE_RULES = {"@Manager": ("manager.md",), "@CodeLead": ("codelead.md",), "@UIDesigner": ("uidesigner.md",),
+              "@GameDesigner": ("gamedesigner.md", "designadvisor.md"), "@DesignAdvisor": ("designadvisor.md", "gamedesigner.md"),
               **{r: ("tester.md",) for r in guard.TESTER_ROLES}, **{r: ("studio.md",) for r in guard.TOOL_ROLES}}
 # The skills of each role (.claude/skills/<name>/SKILL.md): a task's procedure, loaded with the Skill tool only when the
 # chat does that task, so it does not sit in the context of every turn. The guard line names them; the rule files point
@@ -55,10 +66,11 @@ SKILLS_DIR = ".claude/skills"
 GD_ROUNDS = ("gd-round-1", "gd-round-2", "gd-round-3", "gd-round-4")
 ROLE_SKILLS = {"@Manager": ("manager-startup-check", "manager-dispatch"),
                "@CodeLead": ("codelead-dispatch", "codelead-verify-batch", "codelead-scaffold-feature",
-                             "codelead-resolve-issue"),
-               "@GameDesigner": GD_ROUNDS + ("gd-rework-node", "gd-integrate-advice", "gd-excel-data"),
-               "@DesignAdvisor": ("advisor-ask-gpt", "gd-integrate-advice") + GD_ROUNDS,
-               "@UIDesigner": ("ui-layout-screen", "ui-frame-syntax", "ui-claude-concept-order", "gd-round-4"),
+                             "codelead-resolve-issue", "codelead-wiring"),
+               "@GameDesigner": GD_ROUNDS + ("gd-node-format", "gd-scoring", "gd-rework-node", "gd-integrate-advice", "gd-excel-data",
+                                             "gd-glossary", "gd-art-concept", "gd-user-control"),
+               "@DesignAdvisor": ("advisor-ask-gpt", "gd-integrate-advice", "gd-node-format") + GD_ROUNDS,
+               "@UIDesigner": ("ui-layout-screen", "ui-frame-syntax", "ui-claude-concept-order", "gd-round-4", "gd-node-format"),
                **{r: ("studio-fulfill-order",) for r in guard.TOOL_ROLES},
                "@ClaudeImage": ("studio-fulfill-order", "studio-claude-concept"),
                **{r: ("tester-playtest-session",) for r in guard.TESTER_ROLES},
@@ -368,10 +380,10 @@ def context(data, root, store):
               + editor_status(store))
     if role in guard.ROLE_AREAS:
         area = guard.ROLE_AREAS[role]
-        return (f"guard: chat này gán FEATURE={role} (nhóm Basic). Chỉ sửa UnityProject/Assets/{area}/; đọc phần "
+        return (f"guard: chat này gán FEATURE={role} (tầng 4 · Basic). Chỉ sửa UnityProject/Assets/{area}/; đọc phần "
                 "công khai của feature." + worker)
     if role == "@CodeLead":
-        return ("guard: chat này gán FEATURE=@CodeLead (nhóm Leaders). Bạn nắm cả tầng dưới (từ 2026-11-26): feature, service, "
+        return ("guard: chat này gán FEATURE=@CodeLead (tầng 1 · Leaders). Bạn nắm cả tầng dưới (từ 2026-11-26): feature, service, "
                 "@Core và tester báo cáo, báo chặn và hỏi bạn, không qua Manager. Giao việc dev theo đợt (skill codelead-dispatch: "
                 "gd_req.py status một lần, mỗi feature rảnh một yêu cầu kế tiếp, mọi dispatch.py send trong một lượt); kiểm yêu cầu "
                 "đã done theo skill codelead-verify-batch: giao subagent cl-unity-runner (biên dịch, test) và cl-reviewer (mỗi feature "
@@ -399,7 +411,7 @@ def context(data, root, store):
                 + editor_status(store) + stage_line(root) + inbox_line(root) + unread_reports(root, store, role))
     if role in guard.TESTER_ROLES:
         name = guard.TESTER_ROLES[role]
-        return (f"guard: chat này gán FEATURE={role} (nhóm Testers): chơi thử game trong Unity và ghi lại kết quả; KHÔNG "
+        return (f"guard: chat này gán FEATURE={role} (tầng 3 · Testers): chơi thử game trong Unity và ghi lại kết quả; KHÔNG "
                 "sửa gì trong project (không code, asset, scene, cài đặt). Đọc được toàn bộ UnityProject/Assets (cả phần "
                 f"riêng của mọi feature), Management và Tester (cả Archive). Chỉ ghi trong Tester/{name}/: README.md, và "
                 "trong một đợt <yyyymmdd-hhmmss>/ thì README.md, ghi chú .md, images/**. Tạo đợt: python "
@@ -433,7 +445,7 @@ def context(data, root, store):
                "model 3D (kind model). Viết script vào work/<item>.py rồi chạy headless: python Management/tools/studio.py "
                "blender <F>/<id> <item>; không được thì dùng blender MCP, rồi unity-mcp (execute_custom_tool, "
                "execute_menu_item). Kết quả luôn để ở work/out/<item>.<đuôi>.")
-        return (f"guard: chat này gán FEATURE={role} (nhóm Tools): nhận order của các feature và làm {how} Không code, "
+        return (f"guard: chat này gán FEATURE={role} (tầng 2 · Tools): nhận order của các feature và làm {how} Không code, "
                 f"không sửa Assets. Chỉ ghi Management/studio/{tool}/lessons.md và work/ của các order. Đầu lượt: python "
                 f"Management/tools/studio.py status {tool}; đọc order.md và lessons.md trước khi gen. Phiên chạy theo việc: "
                 f"order mới, item làm lại tới ở đầu tin (hộp thư, [tin <id> · từ ...]), không cần báo đã nhận; tin có mã đã "
@@ -446,7 +458,7 @@ def context(data, root, store):
                 f"Phản hồi là một luật chung thì thêm một mục vào lessons.md. "
                 f"Luật ở .claude/rules/studio.md; mỗi order làm theo skill studio-fulfill-order." + studio_pending(root, tool) + editor_status(store))
     if role == "@GameDesigner":
-        return ("guard: chat này gán FEATURE=@GameDesigner (nhóm Leaders): thiết kế game, không code. Lượt có sửa file "
+        return ("guard: chat này gán FEATURE=@GameDesigner (tầng 1 · Leaders): thiết kế game, không code. Lượt có sửa file "
                 "phải kết thúc bằng khối '## Báo cáo cho @Manager' (8 dòng, xem gamedesigner.md; Stop hook ép): @Manager "
                 "dựa vào đó để biết việc đã xong và đang chờ ai. Gặp lỗi không tự gỡ được hoặc phải dừng chờ người (chấm, "
                 "trả lời, chọn ý trái nhau, chốt), kể cả lượt không sửa file: trước khi kết thúc lượt nhắn Manager "
@@ -487,7 +499,7 @@ def context(data, root, store):
                 " Làm theo .claude/rules/gamedesigner.md; trước khi viết hay sửa node vòng N dùng skill gd-round-<N> (tool Skill)."
                 + inbox_line(root, full=False))
     if role == "@UIDesigner":
-        return ("guard: chat này gán FEATURE=@UIDesigner (nhóm Leaders): bố cục UI của thiết kế, không code. @GameDesigner "
+        return ("guard: chat này gán FEATURE=@UIDesigner (tầng 1 · Leaders): bố cục UI của thiết kế, không code. @GameDesigner "
                 "liệt kê UI ở ui.md của node vòng 4 (phần tử, tương tác, flow); bạn quyết định vị trí, kích thước, nhóm, "
                 "khoảng cách, vùng an toàn bằng frame. Ghi: CHỈ Management/game-design/ai/idea/<node>/.frame-concept/<tên>.frame "
                 "(cùng cổng khoá node như @GameDesigner) và order.md mới của claude-concept trong "
@@ -510,7 +522,7 @@ def context(data, root, store):
                 "nhắn Manager BÁO CHẶN, hết thì HẾT CHẶN. Tester UnityAutoPlay chỉ nhắn để xác nhận một thao tác (khuôn XÁC NHẬN), chơi thử rộng hơn thì nhờ CodeLead. Tester chưa chạy (không có trong ListAgents): mở nó bằng python Management/tools/dispatch.py send @UnityAutoPlay --from UIDesigner \"<việc>\", tin đó bật thread lên."
                 + studio_pending(root, None) + " Làm theo .claude/rules/uidesigner.md." + inbox_line(root, full=False))
     if role == "@DesignAdvisor":
-        return ("guard: chat này gán FEATURE=@DesignAdvisor (nhóm Tools): đưa GPT (Codex CLI) vào thiết kế game, theo yêu cầu của "
+        return ("guard: chat này gán FEATURE=@DesignAdvisor (tầng 2 · Tools): đưa GPT (Codex CLI) vào thiết kế game, theo yêu cầu của "
                 "người và @GameDesigner. Không code, không viết thiết kế. CHỈ nhận việc khi người hoặc @GameDesigner nhắn; "
                 "không tự rà, phiên khác nhờ thì từ chối và bảo họ nhờ @GameDesigner. Đọc: Management/game-design (ai/idea là "
                 "bảng đề xuất, live là bảng đã chốt), CLAUDE.md gốc, .claude/rules/designadvisor.md và gamedesigner*.md. Ghi: "
@@ -526,7 +538,7 @@ def context(data, root, store):
                 "dẫn file. Ý của GPT ngang hàng ý của Claude: @GameDesigner phải đưa mọi góp ý vào node, không được bỏ; người "
                 "chốt lên live. " + advice_mode(root) + " Làm theo .claude/rules/designadvisor.md; mỗi lần hỏi theo skill advisor-ask-gpt.")
     if role == "@Manager":
-        return ("guard: chat này gán FEATURE=@Manager (nhóm Leaders): điều phối BA LEADER (CodeLead, GameDesigner, UIDesigner), "
+        return ("guard: chat này gán FEATURE=@Manager (tầng 1 · Leaders): điều phối BA LEADER (CodeLead, GameDesigner, UIDesigner), "
                 "không sửa code, asset hay file nào. Từ 2026-11-26 bạn không nắm feature, service, @Core, tool hay tester: "
                 "CodeLead giao việc dev, kiểm code, giao đợt chơi thử; GameDesigner, UIDesigner lo order thiết kế; tầng dưới "
                 "không nhắn bạn, và bạn không gửi hộp thư (dispatch.py send bị chặn) hay nhắn tester. Tiến độ code xem bằng "
@@ -545,8 +557,8 @@ def context(data, root, store):
                 + toolwork_line(root, False) + inbox_line(root, full=False) + unread_reports(root, store, role))
     if raw and guard.valid_feature(raw, root):
         group = "Services" if raw.startswith("_Services/") else "Features"
-        return (f"guard: chat này gán FEATURE={raw} (nhóm {group}). Sửa được trong UnityProject/Assets/Features/{raw}/ "
-                "theo bảng quyền ở CLAUDE.md gốc; không cần dò lại quyền. Phiên chạy theo việc: việc tới ở đầu tin (hộp thư, "
+        return (f"guard: chat này gán FEATURE={raw} ({tier_label(group)}). Sửa được trong UnityProject/Assets/Features/{raw}/ "
+                "theo .claude/rules/feature.md và bảng vùng ở CLAUDE.md gốc; không cần dò lại quyền. Phiên chạy theo việc: việc tới ở đầu tin (hộp thư, "
                 "[tin <id> · từ ...]); tin có mã đã làm thì bỏ qua; cần Leader thì SendMessage. " + code_gate(root, raw) + stage_line(root) + worker)
     if raw:
         return f"guard: chat này gán FEATURE={raw}, giá trị không hợp lệ: mọi thao tác sửa bị chặn."
@@ -554,9 +566,18 @@ def context(data, root, store):
             "bằng FEATURE=<tên> <PIN>; AI không gán và không hỏi PIN.")
 
 
+def code_tier(raw):
+    """True for a chat of the code tiers under @CodeLead that read feature.md: @Core, a service, a feature."""
+    raw = (raw or "").strip()
+    return raw == "@Core" or bool(raw) and not raw.startswith("@")
+
+
 def must_read(raw):
     """The role rule files (paths from the project root) a chat bound to `raw` reads itself, since they are not loaded."""
-    return [f"{RULES_DIR}/{n}" for n in ROLE_RULES.get(guard.role_of(raw) or "", ())]
+    names = list(ROLE_RULES.get(guard.role_of(raw) or "", ()))
+    if code_tier(raw):
+        names.append(FEATURE_RULES)
+    return [f"{RULES_DIR}/{n}" for n in names]
 
 
 def rule_files(raw, root):
@@ -565,7 +586,7 @@ def rule_files(raw, root):
     role = guard.role_of(raw)
     if not raw:
         return []
-    names = ["report.md"] + list(ROLE_RULES.get(role or "", ()))
+    names = ["report.md"] + list(ROLE_RULES.get(role or "", ())) + ([FEATURE_RULES] if code_tier(raw) else [])
     if role in ("@Core", "@CodeLead") or role in guard.TESTER_ROLES or not role and guard.valid_feature(raw, root):
         names.append("unity.md")
     if role in ("@GameDesigner", "@DesignAdvisor"):

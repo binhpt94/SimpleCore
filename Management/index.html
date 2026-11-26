@@ -541,7 +541,7 @@
     });
     var rereadStatus = put(listBox, el("p", "gap muted",
       "Mỗi thao tác tốn lượt của thread. Nút \"tất cả\" chạy " + BATCH + " thread cùng lúc. Chat đang mở trong VS Code có thể chưa thấy lượt này: mở lại chat đó. " +
-      "Renew cần PIN (ô PIN ở trên), bỏ toàn bộ ngữ cảnh của thread rồi gán lại và nhắc đọc quy trình: việc dở dang chưa ghi ra file sẽ mất, chỉ bấm khi thread đang rảnh. " +
+      "Renew cần PIN (ô PIN ở trên), bỏ toàn bộ ngữ cảnh của thread rồi gán lại và nhắc đọc quy trình: việc dở dang chưa ghi ra file sẽ mất, chỉ bấm khi thread đang rảnh. Thread của người và Leader làm mới ngay; thread chạy theo việc (Tools, Testers, Basic, Services, Features) chỉ được đánh dấu \"chờ renew\": server làm mới ngay trước việc kế tiếp hộp thư giao cho nó, không có việc thì không tốn lượt nào. " +
       "Xoá cần PIN và VS Code tắt hẳn: dời transcript của thread vào ~/.claude/projects/<project>/.deleted/ (khôi phục được), bỏ nó khỏi danh sách chat và bỏ gán. " +
       "Live: phiên khác chỉ thấy thread trong ListAgents (và nhắn được) khi có tiến trình chạy nó. Bật live chạy thread thành phiên nền (một lượt ngắn); " +
       "Setup tự bật live cho thread vừa tạo; Đọc lại, Compact, Renew giữ thread live. Phiên nền hỏi quyền thì vào duyệt bằng claude attach <tên> trong terminal. " +
@@ -579,7 +579,7 @@
       paintReread(id);
       return api("POST", act.path, body).then(function (res) {
         out.ok = !!res.ok; out.pin = !!res.pin;
-        rereadState[id] = res.ok ? { cls: "ok-text", text: act.done, full: res.answer || "" }
+        rereadState[id] = res.ok ? { cls: "ok-text", text: res.pending ? "đã đánh dấu, renew khi có việc" : act.done, full: res.answer || "" }
           : { cls: "bad-text", text: "lỗi: " + res.error };
       }, function (e) {
         rereadState[id] = { cls: "bad-text", text: "lỗi gọi server: " + e.message };
@@ -779,6 +779,11 @@
           paintReread(t.id);
         }
         var needsNote = t.needs ? el("div", "bad-text", "chờ người: " + t.needs) : null;
+        // Renew của thread chạy theo việc (không phải người, không phải Leader) chỉ đánh dấu: server làm mới ngay trước việc kế tiếp.
+        if (t.renew_pending) {
+          var pendNote = el("div", "muted", "⟳ chờ renew: làm mới khi hộp thư giao việc kế tiếp");
+          needsNote = needsNote ? add(el("div"), needsNote, pendNote) : pendNote;
+        }
         var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")
           : t.unlisted ? el("span", "muted", "VS Code không hiện (tạo ngoài VS Code), bỏ qua")
           : (!wanted[key(t)] ? el("span", "muted", "ngoài bộ setup")

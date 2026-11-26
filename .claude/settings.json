@@ -2,6 +2,17 @@
   "enabledMcpjsonServers": [
     "UnityMCP"
   ],
+  "claudeMdExcludes": [
+    "**/Management/game-design/**/CLAUDE.md",
+    "**/.claude/rules/manager.md",
+    "**/.claude/rules/codelead.md",
+    "**/.claude/rules/gamedesigner.md",
+    "**/.claude/rules/designadvisor.md",
+    "**/.claude/rules/uidesigner.md",
+    "**/.claude/rules/tester.md",
+    "**/.claude/rules/studio.md",
+    "**/.claude/rules/feature.md"
+  ],
   "env": {
     "CLAUDE_BG_ISOLATION": "none"
   },

@@ -35,10 +35,14 @@ Từ 2026-11-26 tầng dưới là phần của bạn: feature, service, @Core v
   - Sửa xong thì giao chơi lại đúng phần đó.
 - Lưu trữ: đợt đã có đợt mới thay thế, hoặc lỗi đã sửa và chơi lại đạt, thì dời bằng `python Management/tools/tester.py archive UnityAutoPlay <đợt>` (hoặc `--keep <N>`).
 
+- **Yêu cầu hẹp** khi test tự động và việc bạn tự Play không phủ được một thao tác (bấm, kéo, một chuỗi thao tác lúc Play): tin theo khuôn `XÁC NHẬN · Feature: … · Thao tác: … (từng bước) · Mong đợi: … · Scene hoặc state cheat: …`.
+- **Ai khác gọi được:** @GameDesigner và @UIDesigner chỉ gọi nó cho yêu cầu `XÁC NHẬN` hẹp; việc rộng hơn họ nhờ bạn. @Manager không gọi tester.
+
 ## Khi tầng dưới báo chặn
 Feature, service, @Core, tester nhắn bạn `BÁO CHẶN · …` (không nhắn Manager nữa).
 1. Lỗi trong vùng của bạn (khung, `_Composition`, khoá Editor bạn giữ): gỡ ngay, rồi báo phiên đó qua hộp thư.
 2. Lỗi của phiên khác: giao đúng phiên đó qua hộp thư, kèm file và câu lỗi.
 3. Câu hỏi thiết kế: gom các câu của nhiều feature, hỏi `GameDesigner` một tin. Có câu trả lời thì chuyển xuống từng feature.
-4. Chỉ người gỡ được (guard, quyền, công cụ, `rules.json`, `Packages`, server tắt): nhắn `Manager` một tin BÁO CHẶN gom các chỗ đó. Trong lúc chờ, giao việc không phụ thuộc cho feature khác.
-5. Không trả lời tin "đã nhận", "cảm ơn"; không chuyển lời qua Manager.
+4. Cần sửa `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json`: hỏi người trong chat, từng lần (vấn đề, đề xuất sửa, ai cần); người đồng ý thì báo lại phiên đó.
+5. Chỉ người gỡ được (guard, quyền, công cụ, server tắt): nhắn `Manager` một tin BÁO CHẶN gom các chỗ đó. Trong lúc chờ, giao việc không phụ thuộc cho feature khác.
+6. Không trả lời tin "đã nhận", "cảm ơn"; không chuyển lời qua Manager.

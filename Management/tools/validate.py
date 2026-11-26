@@ -16,7 +16,11 @@ Rule groups
   SRC  C# source      01 public type in Internal   02 MonoBehaviour in Internal
                       03 InternalsVisibleTo   04 banned API   05 asset id
   AST  assets        01 reference to another feature's private asset   02 not text-serialized
-  DOC  01 md file too long      CFG  01 invalid exception in rules.json
+  DOC  01 md file too long      02 feature with Contracts lacks its CLAUDE.md (tier line, every public type)
+  CFG  01 invalid exception in rules.json
+
+DOC-02: a feature or service with a .cs file in Scripts/Contracts has <feature>/CLAUDE.md with a line
+`Tầng: 6 · Features` (`Tầng: 5 · Services` for _Services/*) and names every public type its Contracts declare.
 
 SRC-05: an asset id (`new XxxId("...")` or `XxxId x = new("...")`, type name ending in Id) is a plain
 string literal "<Owner>/<Name>", created only in Scripts/Contracts or Scripts/Internal of the feature
@@ -36,6 +40,7 @@ from pathlib import Path
 NAME_RX = re.compile(r"^[A-Z][A-Za-z0-9]*$")
 RESERVED = ("Services", "Core", "Composition")
 OWN_ROOTS = ("Features", "Core", "_Composition")
+TIER_RX = re.compile(r"^Tầng:\s*(\d)\s*·\s*(Features|Services)\s*$", re.M)
 ROOT_MD_MAX, FEATURE_MD_MAX, RULES_MD_MAX = 200, 200, 200      # lines; one limit for every md DOC-01 checks
 
 # ---------------------------------------------------------------- C# text helpers
@@ -57,6 +62,10 @@ def strip_cs(text, keep_strings):
 
 
 MODS = r"(?:\b(?:public|internal|private|protected|static|sealed|abstract|partial|readonly|ref|unsafe|new|file)\s+)*"
+# A public type a Contracts file declares (DOC-02): class, interface, struct, enum, record, or a delegate's name.
+PUBLIC_TYPE_RX = re.compile(
+    r"\bpublic\s+(?:(?:static|sealed|abstract|partial|readonly|ref|unsafe|new)\s+)*"
+    r"(?:(?:class|interface|struct|enum|record(?:\s+struct)?)\s+([A-Za-z_]\w*)|delegate\s+[^;(]*?\b([A-Za-z_]\w*)\s*[<(])")
 TOKEN_RX = re.compile(
     r"(?P<ns>\bnamespace\s+[\w.]+\s*\{)"
     r"|(?P<del>(?P<dmods>" + MODS + r")\bdelegate\s+[^;(){}]*?\b(?P<dname>\w+)\s*(?:<[^>(]*>)?\s*\()"
@@ -262,6 +271,7 @@ class Scan:
         self.check_roots_and_names()
         self.check_layout()
         self.check_md_size()
+        self.check_contract_docs()
         self.check_assemblies()
         self.check_sources()
         self.check_assets()
@@ -347,6 +357,34 @@ class Scan:
                 n = len(read_text(path).splitlines())
                 if n > limit:
                     self.add("DOC-01", path, n, f"{path.name} has {n} lines; the limit is {limit}")
+
+    def check_contract_docs(self):
+        for f in self.features:
+            contracts = f["dir"] / "Scripts" / "Contracts"
+            sources = sorted(contracts.rglob("*.cs")) if contracts.is_dir() else []
+            if not sources:
+                continue
+            names = []
+            for src in sources:
+                for m in PUBLIC_TYPE_RX.finditer(strip_cs(read_text(src), keep_strings=False)):
+                    name = m.group(1) or m.group(2)
+                    if name not in names:
+                        names.append(name)
+            doc = f["dir"] / "CLAUDE.md"
+            tier = "5 · Services" if f["is_service"] else "6 · Features"
+            if not doc.is_file():
+                self.add("DOC-02", doc, 0, f"{f['id']} has Contracts but no CLAUDE.md: write one with the line "
+                         f"'Tầng: {tier}' and a section for each public type ({', '.join(names) or 'none found'})")
+                continue
+            text = read_text(doc)
+            m = TIER_RX.search(text)
+            if not m:
+                self.add("DOC-02", doc, 0, f"CLAUDE.md has no tier line: add 'Tầng: {tier}'")
+            elif f"{m.group(1)} · {m.group(2)}" != tier:
+                self.add("DOC-02", doc, 0, f"CLAUDE.md says 'Tầng: {m.group(1)} · {m.group(2)}'; this folder is 'Tầng: {tier}'")
+            missing = [n for n in names if not re.search(r"\b" + re.escape(n) + r"\b", text)]
+            if missing:
+                self.add("DOC-02", doc, 0, f"CLAUDE.md does not describe these public Contracts types: {', '.join(missing)}")
 
     def check_assemblies(self):
         cs_files = [f for f in self.files if f.suffix.lower() == ".cs"]

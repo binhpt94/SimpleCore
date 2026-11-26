@@ -51,6 +51,8 @@ Mọi thư mục có `README.md` nói thư mục chứa gì. README của một 
 | `archive <Tester> --keep <N>` | giữ N đợt mới nhất, dời phần còn lại | tester đó, @CodeLead |
 Tên đợt viết trong ngoặc kép, không có dấu ngoặc kép hay `\` bên trong.
 
+- `python Management/tools/tester.py status`: tóm tắt kết quả chơi thử của mọi tester (mọi phiên đọc `Tester` chạy được).
+
 ## Ai giao việc
 Tester giữ khoá Unity Editor suốt lúc chơi, nên chỉ vài bên được gọi nó (guard chặn `SendMessage` của mọi phiên khác):
 - **Đợt chơi thử** (cả một feature, một luồng nhiều feature, test lại sau khi sửa): chỉ nhận từ **người** hoặc **@CodeLead** (từ 2026-11-26 tester là phần của CodeLead; @Manager chỉ nắm ba Leader và không gọi tester).

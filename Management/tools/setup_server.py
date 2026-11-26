@@ -21,7 +21,8 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   them (none changed: no turn). The page's "Đọc lại quy trình" buttons (one thread, or all of them a few at a time)
   call it. It binds nothing.
 - POST /api/sessions/compact {id} (page token, no PIN): one headless turn that runs /compact in that thread.
-- POST /api/sessions/renew {id, pin} (with the PIN, as it binds): empties the thread's context in the same chat (a
+- POST /api/sessions/renew {id, pin} (with the PIN, as it binds; a thread that runs on demand, neither the human's nor a
+  Leader's, is only marked and the courier does it right before its next job): empties the thread's context in the same chat (a
   /compact told to keep nothing; the CLI's /clear does not work on a resumed session in a headless turn), binds
   it again to the FEATURE it had, and tells it to read the rules. Three headless turns at most.
 - POST /api/setup {pin, mode, model, effort} checks the PIN, then runs the setup in the background and answers at
@@ -98,7 +99,7 @@ BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@Co
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
                "@UIDesigner": "Leaders", "@Codex": "Tools", "@Blender": "Tools", "@ClaudeImage": "Tools", "@DesignAdvisor": "Tools",
                "@UnityAutoPlay": "Testers", "@Core": "Basic"}
-GROUP_ORDER = ["Master", "Leaders", "Tools", "Testers", "Basic", "Services", "Features"]      # the tiers of CLAUDE.md, top to bottom
+GROUP_ORDER = list(bind_session.TIERS)      # the tiers of CLAUDE.md, top to bottom
 STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp", ".ttf")
 
 
@@ -167,6 +168,38 @@ def rules_state(binding):
         except OSError:
             pass
     return out
+
+
+# Renew of a thread that runs on demand (Tools, Testers, Basic, Services, Features; người quyết 2026-11-26) only marks
+# it: the context is emptied right before the next inbox message is given to it, so a thread that gets no work costs
+# nothing (an idle @Blender had cost ~1M tokens in rereads and renews). The human's chat and the Leaders are renewed
+# at once, as before: their work does not come through the inbox, so nothing would ever run the mark.
+RENEW_PENDING_DIR = "renew-pending"
+RENEW_NOW_GROUPS = ("Master", "Leaders")
+
+
+def renew_deferred(binding):
+    """True when Renew of a thread bound to `binding` is a mark that the courier runs before the next job."""
+    return ROLE_GROUPS.get(binding) not in RENEW_NOW_GROUPS
+
+
+def renew_mark_path(session_id):
+    path = guard.binding_path(session_id, guard.STORE_DIR)
+    return path and os.path.join(guard.STORE_DIR, RENEW_PENDING_DIR, os.path.basename(path))
+
+
+def renew_pending(session_id):
+    path = renew_mark_path(session_id)
+    return bool(path and os.path.isfile(path))
+
+
+def clear_renew_mark(session_id):
+    path = renew_mark_path(session_id)
+    if path:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
 
 
 def rules_seen_path(session_id):
@@ -304,7 +337,7 @@ def threads():
                         "live": (live.get(sid) or {}).get("kind", ""), "live_status": (live.get(sid) or {}).get("status", ""),
                         "live_state": (live.get(sid) or {}).get("state", ""),
                         "hung": hang_text(h) if (h := hang_of({"id": sid}, live.get(sid), time.time())) else "",
-                        "needs": job_needs(sid), "inbox": waiting.get(guard.bound_feature(sid, guard.STORE_DIR) or "", 0),
+                        "needs": job_needs(sid), "renew_pending": renew_pending(sid), "inbox": waiting.get(guard.bound_feature(sid, guard.STORE_DIR) or "", 0),
                         "modified": time.strftime("%Y-%m-%d %H:%M", time.localtime(p.stat().st_mtime))})
     return sorted(out, key=lambda t: (t["title"].lower(), t["modified"]))
 
@@ -508,8 +541,17 @@ def claude_command(args):
     return [exe] + list(args), False
 
 
+# Claude in Chrome is off in every thread the server runs (người quyết 2026-11-26: không dùng Chrome trong project):
+# while it is on, each time the extension connects or drops, the tool list at the head of the context changes and
+# every live session writes its whole cache again. Commands that run no turn take no such flag.
+NO_TURN_COMMANDS = ("agents", "stop", "rm")
+SESSION_FLAGS = ["--no-chrome"]
+
+
 def run_claude(args):
     """Runs the claude CLI in the project (one headless turn) and returns what it printed; raises with its error."""
+    if args and args[0] not in NO_TURN_COMMANDS:
+        args = SESSION_FLAGS + list(args)
     command, shell = claude_command(args)
     p = subprocess.run(command, cwd=str(ROOT), capture_output=True, text=True, encoding="utf-8", errors="replace",
                        env=dict(os.environ, **CLAUDE_ENV),
@@ -707,6 +749,10 @@ def renew(session_id, pin):
     error = bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
     if error:
         return {"ok": False, "id": t["id"], "title": t["title"], "error": error, "pin": True}
+    if renew_deferred(t["binding"]):      # runs on demand: only marked, emptied before its next job (courier)
+        bind_session.write_json(renew_mark_path(t["id"]), {"binding": t["binding"], "at": time.strftime("%Y-%m-%d %H:%M:%S")})
+        return {"ok": True, "id": t["id"], "title": t["title"], "pending": True,
+                "answer": "đã đánh dấu cần renew: server làm mới thread ngay trước việc kế tiếp hộp thư giao cho nó"}
     # a renewed thread is live; a chat open in VS Code stays there, and the human's own chat is never put in the background
     live_after = t.get("live") != "interactive" and not human_thread(t)
     try:
@@ -1464,6 +1510,20 @@ def _courier_tick(now):
             did.append(("created", target, sid[:8]))
             ms = [dispatch.get(ROOT, m["id"]) for m in ms]
         t = dict(t, live=(s or {}).get("kind", ""))
+        # Renew marked on the page (renew_deferred): the context is emptied now, before the job, and the thread bound
+        # again; the job turn itself is told to read the role rules (the compaction made the guard line say so).
+        # Not when it stopped at a question to the human: the message may be the answer. A failed wipe keeps the mark.
+        if renew_pending(t["id"]) and (s or {}).get("state") != "blocked":
+            try:
+                turn(t, WIPE_PROMPT, bg=False)
+                t["live"] = ""
+                live.pop(t["id"], None)
+                bind(t["id"], t["binding"])
+                clear_renew_mark(t["id"])
+                mark_rules_seen(t["id"], rules_state(t["binding"]))
+                did.append(("renewed", target))
+            except Exception as ex:      # the job still goes, with the old context
+                did.append(("renew-failed", target, str(ex)[:120]))
         offset = transcript_size(t["id"])
         for m in ms:
             dispatch.mark(ROOT, m, "delivering", why="", thread=t["id"], offset=offset, started=now, tries=m["tries"] + 1, force=False)

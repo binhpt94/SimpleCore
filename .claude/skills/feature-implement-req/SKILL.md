@@ -16,7 +16,7 @@ Quyền và ranh giới ở bảng của `CLAUDE.md` gốc; luật code ở `.cl
 7. **Biên dịch:** `refresh_unity` rồi `read_console`, sửa hết lỗi của mình. Chạy test và Play là việc của @CodeLead.
 8. **Ghi xong:** `python Management/tools/gd_req.py <Tên> done <node>#<id> <Lớp.Hàm>[,...]`. Test nằm ở `Tests` của mình; yêu cầu là danh sách nối dây (Boot variant, catalog ở `_Composition`) thì trích test của @CodeLead trong `UnityProject/Assets/_Composition/Tests` (ví dụ `BootTests.<Hàm>`). Không kiểm được bằng EditMode thì `done <node>#<id> play "<cách thấy khi Play>"`. @CodeLead chạy đúng các test đó rồi `verify` hoặc `reject`; chỉ khi đó yêu cầu mới tính xong.
    - Yêu cầu dạng `<node>#<sheet>-<khoá>` là **một dòng của bảng dữ liệu** của node (`.excel`, ví dụ `#enemies-wolf` là con quái `wolf` của bảng `Enemies`; sổ ghi "test phải nhắc tới khoá"): viết test riêng cho đúng dòng đó, tên hàm hoặc thân hàm test phải nhắc tới khoá (`Wolf_…`, `Find("wolf")`; viết hoa hay gạch dưới đều được), không thì `done` bị từ chối. Dòng của bảng `list` (thực thể: quái, hero, vật phẩm) không `done` được bằng `play`. Một test của dòng khác không dùng thay được.
-9. **Kiểm ranh giới:** `python Management/tools/validate.py --feature <Tên>`; còn vi phạm thì chưa xong.
+9. **Kiểm ranh giới:** `python Management/tools/validate.py --feature <Tên>`; còn vi phạm thì chưa xong. Code hiện thực hay đổi hành vi một contract thì cập nhật mục của nó trong `CLAUDE.md` của feature (khuôn ở `.claude/rules/feature.md`, DOC-02).
 10. **Báo cáo:** kết thúc lượt bằng khối `## Báo cáo cho @Manager` (`report.md`). Dòng "Việc" nêu các id `<node>#<id>` đã làm và đã ghi `doing`/`done`. "Công khai đổi" ghi rõ Contracts, `FeatureAssets/Public`, id asset nào đã đổi.
 
 ## Việc không có id (người đã quyết)

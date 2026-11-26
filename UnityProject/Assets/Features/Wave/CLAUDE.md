@@ -1,4 +1,5 @@
 # Wave
+Tầng: 6 · Features
 
 Điều phối các đợt quái của một trận: lập đợt từ số đợt, thả quái hai bên, nhận ra lúc dọn sạch, trả thưởng, lúc thở 3 giây rồi sang đợt sau.
 

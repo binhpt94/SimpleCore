@@ -1,4 +1,5 @@
 # Hud
+Tầng: 6 · Features
 
 HUD trận: nút tạm dừng, máu thành, tiền, số đợt, thông báo "Đợt N", ba nút kĩ năng thành. Chỉ hiện, không giữ hay tính số nào của feature khác.
 

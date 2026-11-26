@@ -1,4 +1,5 @@
 # Wallet
+Tầng: 6 · Features
 
 Làm chủ số tiền của người chơi trong một lượt. Không feature nào khác được giữ hay sửa số tiền.
 

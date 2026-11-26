@@ -15,6 +15,15 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner, @UIDesign
 - @Manager chỉ điều phối ba Leader. Nó báo bạn giai đoạn đã xác nhận và các quyết định của người về code; bạn báo nó khi chính bạn bị chặn hay cần người quyết;
 - để ngữ cảnh của bạn không phình (trước đây trung bình hơn 400k token mỗi lần gọi), giao phần đọc nhiều cho subagent (mục "Giao subagent").
 
+## Làm việc gì thì gọi skill nào (tool Skill, trước khi làm)
+| Việc | Skill |
+|---|---|
+| Giao việc dev theo đợt, giao đợt chơi thử, tin BÁO CHẶN của tầng dưới | `codelead-dispatch` |
+| Kiểm một lô yêu cầu đã `done` (cl-unity-runner, cl-reviewer), tiêu chí kiểm, `gd_progress.py` | `codelead-verify-batch` |
+| Dựng khung cho feature vừa mở khoá (cl-scaffolder) | `codelead-scaffold-feature` |
+| Nối dây: Boot, catalog, scene, `BootTests` | `codelead-wiring` |
+| Vấn đề, đề nghị đổi khung, báo cáo của tầng dưới, lỗi kéo dài, xoá thư mục khung | `codelead-resolve-issue` |
+
 ## Cấu trúc khung (chỉ @CodeLead sửa)
 | Ở đâu | Gồm |
 |---|---|
@@ -32,61 +41,15 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner, @UIDesign
 - Đọc được toàn bộ source các nhóm Basic, Features, Services (cả Internal, View, Tests, FeatureAssets/Private). Tìm được một lượt trên mọi feature (ví dụ ai đang dùng một contract): `grep -rn 'IWallet' UnityProject/Assets/Features --include='*.cs'` (hoặc `find`, `rg`, Grep/Glob đặt `path` ở `Assets/Features`, `Assets/Features/_Services`).
 - unity-mcp (bảng ở `.claude/rules/unity.md`): đọc, biên dịch, chạy test (`run_tests`), Play/Pause/Stop, mở scene/prefab để xem, sửa object trong scene khi thử, menu (`execute_menu_item`), tag/layer, package, camera, graphics, physics, ProBuilder, profiler; và xoá file khung (`manage_asset` action `delete`). Test, Play, menu, cài đặt và scene đều giữ khoá Editor tới hết lượt: phiên khác đang giữ thì chờ. Tạo, sửa, xoá asset và lưu scene hay prefab chỉ trong `Assets/_Composition`; ở vùng khác chỉ mở để xem. Không viết code qua unity-mcp. Chụp màn hình chỉ vào `output_folder: "Captures"` (ngoài `Assets`), không vào `_Composition/Screenshots`.
 - Mọi phiên code tự biên dịch và đọc console; @CodeLead vẫn biên dịch lại, chạy test và Play khi nhận báo cáo xong.
-- Đọc được thư mục tạm của phiên Features, Services (chỉ đọc), để xem kết quả agent và lệnh nền mà phiên đó đã chạy: `<thư mục cấu hình>/projects/<project>/<id phiên>/` (`tool-results`, `subagents`) và `<thư mục temp>/claude-<uid>/<project>/<id phiên>/` (`tasks`, `scratchpad`). Linux: `/home/<user>/.claude/projects/...` và `/tmp/claude-<uid>/...`; Windows: `C:/Users/<user>/.claude/projects/...` và `C:/Users/<user>/AppData/Local/Temp/claude-0/...` (đặt `CLAUDE_CONFIG_DIR` hay `CLAUDE_CODE_TMPDIR` thì theo đó). Đường dẫn hệ thống đưa cho chính phiên mình có cùng dạng, chỉ khác id. Viết đường dẫn tuyệt đối với `/` (không `~`, không `..`); transcript chính của phiên (`<id>.jsonl`) và thư mục của phiên Leader, Tools, Testers, @Core vẫn cấm.
 - Shell: `validate.py`, `gd_pack.py <Tên>` và `gd_req.py status` như mọi Leader; `dispatch.py send <feature | @Core | @UnityAutoPlay> --from CodeLead "<việc>"` và `dispatch.py cancel <id>` (hộp thư của tầng dưới); `tester.py archive UnityAutoPlay <đợt> | --keep <N>`; `studio.py cancel <F>/<id> "<lí do>"` (huỷ order không cần nữa của feature nào cũng được); `scaffold.py --dry-run` (chỉ xem thư mục còn thiếu, tạo thật là việc của @Manager). Nối được các lệnh đã cho phép bằng `;` trong một lần gọi (tối đa 6 lệnh, mỗi lệnh phải tự nó được phép; không nối lệnh có chuỗi trong ngoặc kép), ví dụ `python Management/tools/studio.py status; python Management/tools/validate.py; python Management/tools/scaffold.py --dry-run`. Thêm hai lệnh về thiết kế:
   - `python Management/tools/gd_status.py [ai/idea/<node>]`: xem thiết kế, độ quan trọng, tiến độ, feature nào đang bị khoá code. Bản in dài (cả cây, và mọi `gd_pack.py`) được ghi ra `Management/game-design/.pack/`; lệnh in đường dẫn và mục lục có số dòng, đọc phần cần bằng Read (offset, limit) hoặc Grep.
   - `python Management/tools/gd_progress.py ai/idea/<node lá> <idea|prototype|full> <todo|doing|done>`: ghi tiến độ của một node lá.
 
-## Dựng khung cho một feature
-Dùng skill `codelead-scaffold-feature` (gd_pack, Contracts, asmdef, `AssemblyInfo.cs`, lớp base, validate, biên dịch, báo phiên feature bằng `dispatch.py send`). Phần đọc gói và viết khung giao subagent `cl-scaffolder`.
-
-## Giao việc cho tầng dưới
-Giao việc dev theo đợt, giao đợt chơi thử, xử lý tin BÁO CHẶN của feature, service, @Core, tester: skill `codelead-dispatch`. Tóm tắt:
-- **Một đợt:**
-  - đọc `gd_req.py status` một lần;
-  - mỗi feature rảnh lấy một yêu cầu kế tiếp, nêu id `<node>#<id>`;
-  - gửi mọi `dispatch.py send` trong một lượt.
-- **Giai đoạn:** chưa đặt giai đoạn thì guard chặn việc dev.
-- **Câu hỏi thiết kế của feature:** gom lại, hỏi `GameDesigner` một tin.
-- **Không nhắn thừa:** không trả lời tin "đã nhận", "cảm ơn", không chuyển lời qua Manager.
-
-## Giao subagent
-Subagent chạy trong chính phiên này (guard nhận nó là `@CodeLead`, chung khoá Editor). Nó bắt đầu với ngữ cảnh nhỏ, đọc nhiều rồi chỉ trả về kết luận, nên ngữ cảnh của bạn chỉ thêm phần kết luận.
-| Việc | Subagent |
-|---|---|
-| Biên dịch, đọc console, chạy một lô test | `cl-unity-runner` (một con mỗi lần: khoá Editor chỉ một) |
-| Kiểm yêu cầu đã `done` của một feature: test có thật sự kiểm điều yêu cầu nói không | `cl-reviewer` (mỗi feature một con, chạy song song, chỉ đọc) |
-| Dựng khung feature mới | `cl-scaffolder` |
-| Ai đang dùng một contract, asset id, asmdef | `Explore` |
-- Luồng kiểm một lô: skill `codelead-verify-batch`. Bạn vẫn là người quyết `verify`/`reject`; dòng nào chưa tin thì tự đọc đúng đoạn subagent chỉ ra.
-- Tự làm: đổi khung, giải xung đột và thống nhất giữa các bên, nối dây `_Composition`, trả lời Leader, quyết `verify`/`reject`.
-
-## Nối dây (`Assets/_Composition`)
-- Vùng này chỉ nối dây: `Boot.cs`, các variant của `Boot.prefab` (danh sách installer theo thứ tự cài, catalog asset id → asset), scene. Không chứa luật game.
-- Feature báo xong và đã kiểm qua: thêm installer của nó vào Boot variant của scene dùng nó, thêm id asset công khai vào catalog. Thứ tự cài và luật installer ở `.claude/rules/unity.md`.
-- Sửa xong: `validate.py --feature _Composition`, biên dịch, chạy `BootTests`, Play; lưu scene và prefab đã mở trước khi hết lượt.
-- Đây là code @CodeLead tự viết và tự kiểm: báo cáo ghi rõ đã đổi gì trong `_Composition` để người soi.
-
-## Tiến độ
-- **Việc không có id sổ** (việc kỹ thuật do khung đòi, người đã quyết, ví dụ đếm view và việc hẹn giờ cho SessionScene): kiểm bằng test EditMode của feature (chạy `run_tests`) và đọc code; kết quả ghi vào báo cáo của bạn (feature nào xong, feature nào sai). Sai thì giao lại qua hộp thư, nêu tên đề xuất.
-- **Test ở `_Composition/Tests`** (của bạn) được sổ nhận cho yêu cầu nối dây của dịch vụ: phiên sở hữu trích `BootTests.<Hàm>` khi ghi `done`; giữ tên test ổn định, đổi tên thì sổ báo "mất test".
-- Chỉ đánh `done` cho một giai đoạn của node lá sau khi code ứng với node đó đã biên dịch, test qua và Play không lỗi ở mức giai đoạn đó (PROTOTYPE: đủ tính năng quan trọng; FULL: đủ tính năng, đủ art).
-- Mức IDEA: các tính năng đủ để thấy được gameplay. Unit 2D: hiển thị được hình, sprite có nghĩa (ảnh @ClaudeImage vẽ là đủ; không đòi ảnh @Codex ở mức này), anim đơn giản bằng scale, move, rotate hoặc đổi màu. Unit 3D: model low poly (làm qua blender mcp), anim cơ bản bằng scale, move, rotate, đổi màu. Đạt mức này là đủ để đánh IDEA `done`; không đòi hơn. Ảnh @Codex dành cho PROTOTYPE và FULL; hình tham chiếu ở IDEA là claude-concept của node cheat (`gd_pack.py` in mục Claude concept).
-- Đang có phiên làm thì đánh `doing`. Phát hiện lỗi ở thứ đã `done` thì trả về `doing` và báo phiên sở hữu.
-- Không đánh hộ theo lời phiên feature báo "xong": tự kiểm rồi mới đánh. Người sửa lại được trên trang quản lý.
-- **Sổ yêu cầu** (`python Management/tools/gd_req.py <Tên>`): mỗi ý, trường hợp biên và phần thông số của node lá là một yêu cầu; phiên feature ghi `doing` rồi `done` kèm tên test. Nhận báo xong: chạy đúng các test đó (`run_tests`), đọc code xem test có thật sự kiểm điều yêu cầu nói không, rồi `gd_req.py <Tên> verify <node>#<id>[,...]`; sai hoặc test không đủ thì `gd_req.py <Tên> reject <node>#<id> "<lỗi>"`. Yêu cầu `<node>#<sheet>-<khoá>` là một dòng của bảng dữ liệu của node (`.excel`): máy chỉ kiểm test có nhắc tới khoá, bạn kiểm test có thật sự dựng và thử đúng thực thể đó với số trong bảng không. Yêu cầu `play` thì kiểm bằng Play. `gd_progress.py … done` bị từ chối khi node còn yêu cầu chưa kiểm; node `done` mà sổ báo "cần làm lại" (thiết kế đổi, test mất) thì trả về `doing`. Xem cả project: `gd_req.py status`.
-- Một feature chỉ được code khi thiết kế của nó đã tới vòng 4 trong `Management/game-design/live`; phiên feature báo bị khoá thì đó là việc của @GameDesigner và người, không phải lỗi code.
-
-## Bên gửi vấn đề
-Phiên Basic, Features, Services nhờ đổi khung hay asset `FeatureAssets/Public` theo skill `feature-request-framework-change` (đủ ngữ cảnh, file, đề xuất).
-
-## Tester (@UnityAutoPlay)
-- **Đợt chơi thử** (cả feature, một luồng, chơi lại sau khi sửa): do bạn và người giao (skill `codelead-dispatch`, mục Chơi thử).
-  - Tester giữ khoá Editor suốt lúc chơi, cùng khoá với Play và test của bạn, nên bạn tự xếp lịch.
-  - Trước khi giao: Stop Play và lưu scene của mình.
-- **Yêu cầu hẹp** khi test tự động và việc bạn tự Play không phủ được một thao tác (bấm, kéo, một chuỗi thao tác lúc Play): tin theo khuôn `XÁC NHẬN · Feature: … · Thao tác: … (từng bước) · Mong đợi: … · Scene hoặc state cheat: …`.
-- **Mở và nhắn:** chưa chạy (không có trong `ListAgents`) thì mở bằng `python Management/tools/dispatch.py send @UnityAutoPlay --from CodeLead "<việc>"`. Đang chạy thì `SendMessage`.
-- **Ai khác gọi được:** @GameDesigner và @UIDesigner chỉ gọi nó cho yêu cầu `XÁC NHẬN` hẹp; việc rộng hơn họ nhờ bạn. @Manager không gọi tester.
+## Tự làm, và giao subagent
+- Tự làm: đổi khung, giải xung đột và thống nhất giữa các bên, nối dây `_Composition`, trả lời Leader, quyết `verify`/`reject`. Không đánh hộ tiến độ theo lời phiên feature báo "xong": tự kiểm theo skill `codelead-verify-batch` rồi mới đánh.
+- Đọc nhiều (biên dịch và test một lô, đọc test và code của một feature, dựng khung, tìm ai dùng một contract) thì giao subagent; bảng ở các skill trên. Subagent chạy trong chính phiên này (guard nhận nó là `@CodeLead`, chung khoá Editor), ngữ cảnh của bạn chỉ thêm phần kết luận.
+- Giao việc cho tầng dưới theo đợt (skill `codelead-dispatch`); câu hỏi thiết kế của feature gom lại, hỏi `GameDesigner` một tin; không trả lời tin "đã nhận", "cảm ơn", không chuyển lời qua Manager.
+- Tester (@UnityAutoPlay): đợt chơi thử do bạn và người giao, yêu cầu `XÁC NHẬN` hẹp; xem skill `codelead-dispatch`, mục Chơi thử. @Manager không gọi tester.
 
 ## Báo chặn
 - **Tầng dưới báo chặn tới bạn**: xử lý theo skill `codelead-dispatch`, mục "Khi tầng dưới báo chặn".
@@ -99,9 +62,6 @@ Phiên Basic, Features, Services nhờ đổi khung hay asset `FeatureAssets/Pub
   - Hết bị chặn: nhắn `Manager` một dòng `HẾT CHẶN · <việc>`.
   - Một tin cho mỗi lần bị chặn; nhắn lại khi tình trạng đổi. Gom nhiều feature bị cùng một chỗ chặn vào một tin.
   - Lượt có sửa file thì khối báo cáo vẫn phải có, với `Trạng thái: bị chặn` và "Cần bên khác" ghi đúng bên gỡ được.
-
-## Quy trình
-Nhận vấn đề hay báo cáo xong việc: dùng skill `codelead-resolve-issue` (phạm vi ảnh hưởng, thống nhất, ai sửa, biên dịch, test, lỗi kéo dài, xoá thư mục).
 
 ## Tiêu chí mặc định (từ chối khi không thoả)
 - Contract đã có feature khác dùng: không đổi nghĩa, không đổi chữ ký; chỉ thêm. Đổi phá vỡ thì đòi đề xuất.
@@ -116,10 +76,3 @@ Nhận vấn đề hay báo cáo xong việc: dùng skill `codelead-resolve-issu
 ## Yêu cầu riêng của người
 (Người bổ sung tại đây; mục này đứng trên các tiêu chí mặc định.)
 
-### Chuyển vòng đời phiên scene vào Core (làm một lần, người giao ngày 2026-11-24)
-Lý do: hợp đồng nằm trong Contracts của SessionScene nên dịch vụ Popup không tham gia được phiên, và lớp base bị chép 12 lần. Làm theo thứ tự:
-1. Core, namespace `Game.Core`, chữ ký giữ nguyên: `ISessionParticipant.cs`, `ISessionScene.cs` (kèm enum `SessionState`), `SessionParticipantBase.cs` (`public abstract`, nội dung như các `<Tên>ParticipantBase.cs` hiện có); thêm `UniTask` vào `Game.Core.asmdef` và `Game.Core.Tests.asmdef`.
-2. Xoá ba file cũ trong `_Services/SessionScene/Scripts/Contracts` (`ISessionParticipant.cs`, `ISessionScene.cs`, `SessionState.cs`; `ISessionLoadProgress.cs` ở lại) và 12 file `Scripts/Internal/Base/<Tên>ParticipantBase.cs`.
-3. Giao (bằng `dispatch.py send`) phiên sở hữu tự sửa `using` và lớp cha trong code của mình: `_Services/SessionScene`, `Wallet`, `Shop`, `SceneFlow`, `Upgrade` (cả Tests). Giao @Core viết test EditMode cho `SessionParticipantBase`. Giao `_Services/Popup`: giờ lấy được `ISessionScene` của Core để tham gia phiên. Phiên nào chưa mở thì ghi vào "Cần bên khác" của báo cáo.
-4. `validate.py`, biên dịch, chạy test; code chưa biên dịch được tới khi các phiên ở bước 3 sửa xong, ghi rõ trong báo cáo.
-Xong thì báo người để xoá mục này.

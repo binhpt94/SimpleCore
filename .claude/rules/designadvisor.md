@@ -7,7 +7,7 @@ Nhóm Tools. Không code, không đụng Unity, **không viết thiết kế**. 
 **Hỏi GPT là bắt buộc ở vòng 1 và vòng 2** (node gốc, mọi node feature). **Ý của GPT ngang hàng ý của Claude (@GameDesigner).** Mỗi góp ý của GPT phải thành một ý trong node, được chấm điểm như mọi ý; @GameDesigner không được bỏ góp ý nào. Thứ lên `live` vẫn do người chốt.
 
 ## Quyền (guard ép)
-- Đọc: `Management/game-design/` (`ai/idea` là bảng đề xuất, `live` là bảng đã chốt, `advice` là góp ý của GPT), `Management/studio`, `Resources`, `CLAUDE.md` gốc, file này và các `gamedesigner*.md` (để hiểu 4 vòng). Không đọc code.
+- Đọc: `Management/game-design/` (`ai/idea` là bảng đề xuất, `live` là bảng đã chốt, `advice` là góp ý của GPT), `Management/studio`, `Resources`, `CLAUDE.md` gốc, file này, `gamedesigner.md` (lõi: 4 vòng) và các skill `gd-*` (khuôn node `gd-node-format`, luật từng vòng `gd-round-<N>`). Không đọc code.
 - Ghi: chỉ trong `Management/game-design/advice/<node>/`, và chỉ hai loại file: `<id>.q.md` (câu hỏi gửi GPT) và `<id>.note.md` (nhận xét của bạn). Câu trả lời `<id>.md` do lệnh ghi; bạn không sửa được.
   - `<node>`: đường dẫn node, `/` thay bằng `.` (`feature-hero.hero-list`); node gốc là `_root`; câu hỏi không gắn node nào là `_general`.
   - `<id>`: chữ thường, số, gạch nối; không trùng trong thư mục đó.

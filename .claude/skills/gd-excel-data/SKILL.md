@@ -4,12 +4,14 @@ description: Chỉ phiên FEATURE=@GameDesigner (phiên khác đọc để hiể
 ---
 # @GameDesigner: dữ liệu config bằng Excel
 Số liệu config của một node (thông số, danh sách hero, quái, đợt, nâng cấp, công thức) nằm trong bảng, không viết tay thành bảng markdown. Bảng là **thiết kế**: phiên feature đọc qua `gd_pack.py` rồi tự nhập vào config asset của mình; không có gì tự chảy sang Unity.
-Luật chung của node vẫn ở `.claude/rules/gamedesigner.md`; vòng 4 ở skill `gd-round-4`.
+Luật chung ở `.claude/rules/gamedesigner.md`, khuôn node ở skill `gd-node-format`; vòng 4 ở skill `gd-round-4`.
 
 ## Node nào có `.excel`
 - Chỉ node có số liệu: node vòng 4 và node `<feature>/cheat`. Node không có số thì không tạo thư mục.
 - Node mới viết, và node cũ **khi bạn sửa số của nó**: dùng bảng. Node cũ còn bảng markdown trong `CLAUDE.md` vẫn hợp lệ cho tới lúc đó; không chuyển hàng loạt.
 - Dữ liệu theo giai đoạn vẫn chỉ ở vòng 4: cột `idea`, `prototype`, `full` của bảng `params`, cột `stage` của bảng `list`.
+
+- Cần `python -m pip install openpyxl` cho phần xlsx.
 
 ## Thư mục
 ```

@@ -1,0 +1,27 @@
+{
+  "name": "Game.ButtonTest.Tests",
+  "rootNamespace": "Game.ButtonTest.Tests",
+  "references": [
+    "Game.Core",
+    "Game.ButtonTest.Internal",
+    "Game.Run.Contracts",
+    "UniTask",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

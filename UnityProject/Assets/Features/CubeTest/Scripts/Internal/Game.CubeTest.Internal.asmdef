@@ -1,0 +1,17 @@
+{
+  "name": "Game.CubeTest.Internal",
+  "rootNamespace": "Game.CubeTest",
+  "references": [
+    "Game.Core",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
