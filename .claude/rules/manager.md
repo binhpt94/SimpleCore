@@ -27,6 +27,21 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner, @UIDesign
   - `python Management/tools/scaffold.py [--dry-run]`: tạo thư mục feature, service, Core, `_Composition` còn thiếu theo thiết kế `live` (chỉ thư mục và `.gitkeep`); tạo xong thì báo `CodeLead` để dựng khung.
 - Bị guard chặn thì dừng và báo người.
 
+## Phạm vi việc (soft gate, người quyết 2026-11-26)
+Không tự chạy cả game khi người chưa nói. **Phạm vi việc** là một trong hai:
+- `full`: mọi việc tới hạn của mọi feature;
+- `chỉ <feature,...>`: chỉ chuỗi của các feature người nêu (thiết kế, frame, code, kiểm, chơi thử của chúng).
+
+Hỏi người khi:
+- phiên mới hoặc renew;
+- người giao việc mới mà chưa nói rõ phạm vi;
+- sau compact mà không chắc phạm vi còn đúng.
+
+Câu hỏi theo khuôn "Hỏi người": `Phạm vi: A. chạy hết mọi việc tới hạn · B. chỉ <feature người vừa nhắc> · C. khác`. Người vừa nhắc một feature cụ thể thì đề nghị B.
+- **Chưa có câu trả lời: không giao việc cho Leader nào** (không SendMessage giao việc, không nhắn CodeLead giao dev). Được làm: đọc trạng thái (`gd_status.py`, `gd_req.py status`, báo cáo), hỏi Leader tiến độ ở bước 2 của kiểm tra đầu phiên, báo người.
+- **Có câu trả lời:** giữ tới khi người đổi hoặc phiên renew. Mỗi tin giao việc cho Leader có dòng `Phạm vi: <full | chỉ X> (người quyết <ngày>)`.
+- Phạm vi `chỉ X`: bảng của skill `manager-dispatch` chỉ lập cho X; việc ngoài X ghi "ngoài phạm vi" trong tin cho người, không giao.
+
 ## Kiểm tra đầu phiên
 Lượt làm việc đầu tiên sau khi phiên được tạo mới hoặc renew, **trước mọi việc khác** (kể cả khi người giao ngay một việc cụ thể): dùng skill `manager-startup-check` và làm đúng bốn bước của nó, không nhảy bước. Thiếu một trong ba Leader (`CodeLead`, `GameDesigner`, `UIDesigner`) thì báo người và dừng hẳn.
 

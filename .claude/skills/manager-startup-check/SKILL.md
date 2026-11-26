@@ -41,7 +41,7 @@ Một tin, theo thứ tự:
 2. Tiến độ code tóm từ `gd_req.py status` và câu trả lời của CodeLead.
 3. Việc bị chặn và ai gỡ được.
 4. Việc công cụ đang chờ phiên `@human` (`toolwork.py list`).
-5. Các câu đang chờ người quyết (khuôn ở `manager.md`, mục "Hỏi người"), cùng câu hỏi xác nhận giai đoạn.
+5. Các câu đang chờ người quyết (khuôn ở `manager.md`, mục "Hỏi người"), cùng câu hỏi xác nhận giai đoạn và **câu hỏi phạm vi việc** (`manager.md`, mục "Phạm vi việc": chạy hết mọi việc hay chỉ feature được nhắc).
 6. Bước tiếp bạn đề nghị.
 
-Sau tin này mới làm việc người giao và điều phối tiếp, theo skill `manager-dispatch`.
+Người trả lời phạm vi (và giai đoạn) rồi mới làm việc người giao và điều phối tiếp, theo skill `manager-dispatch`. Chưa trả lời thì không giao việc cho Leader nào.

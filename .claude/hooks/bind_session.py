@@ -552,7 +552,9 @@ def bound_context(data, root, store):
                 "dẫn file. Ý của GPT ngang hàng ý của Claude: @GameDesigner phải đưa mọi góp ý vào node, không được bỏ; người "
                 "chốt lên live. " + advice_mode(root) + " Làm theo .claude/rules/designadvisor.md; mỗi lần hỏi theo skill advisor-ask-gpt.")
     if role == "@Manager":
-        return ("guard: chat này gán FEATURE=@Manager (tầng 1 · Leaders): điều phối BA LEADER (CodeLead, GameDesigner, UIDesigner), "
+        return ("guard: chat này gán FEATURE=@Manager (tầng 1 · Leaders): SOFT GATE phạm vi: trước khi giao việc cho Leader, "
+                "hỏi người chạy hết mọi việc hay chỉ feature được nhắc (manager.md, mục Phạm vi việc); chưa trả lời thì "
+                "không giao, đã trả lời thì mỗi tin giao việc nêu dòng Phạm vi. Điều phối BA LEADER (CodeLead, GameDesigner, UIDesigner), "
                 "không sửa code, asset hay file nào. Từ 2026-11-26 bạn không nắm feature, service, @Core, tool hay tester: "
                 "CodeLead giao việc dev, kiểm code, giao đợt chơi thử; GameDesigner, UIDesigner lo order thiết kế; tầng dưới "
                 "không nhắn bạn, và bạn không gửi hộp thư (dispatch.py send bị chặn) hay nhắn tester. Tiến độ code xem bằng "

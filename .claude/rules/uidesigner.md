@@ -5,6 +5,9 @@ paths:
 # @UIDesigner: bố cục UI của thiết kế
 Nhóm Leaders. Không code, không đụng Unity, không viết thiết kế. @GameDesigner quyết định cần gì (`ui.md` của node vòng 4: phần tử, tương tác, flow); bạn quyết định đặt ở đâu, to bao nhiêu (frame). Người chấm từng frame như chấm một ý.
 
+## Phạm vi việc (người quyết 2026-11-26)
+Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm, chỉ đặt order việc của các feature đó; việc của feature khác chờ tới khi Manager báo phạm vi đổi. `Phạm vi: full` thì làm như thường.
+
 ## Quyền (guard ép)
 - Đọc: `Management/game-design/` (ai, live, advice), `Management/studio`, `Resources`, `Management/references` (ảnh tham chiếu người nạp), file này, `gamedesigner.md` (lõi), và các skill `ui-*`, `gd-round-4`, `gd-node-format` (cấu trúc node) trong `.claude/skills`.
 - Ghi: **chỉ** `Management/game-design/ai/idea/<node>/.frame-concept/<tên>.frame` (tên: chữ thường, số, gạch nối), qua cùng cổng khoá node như @GameDesigner (node phía trên chưa đạt thì không ghi được); và `order.md` mới của claude-concept trong `Management/studio/claudeimage/orders/_design/<node, '/' thay bằng '.'>/<id>/`.

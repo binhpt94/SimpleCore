@@ -15,6 +15,9 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner, @UIDesign
 - @Manager chỉ điều phối ba Leader. Nó báo bạn giai đoạn đã xác nhận và các quyết định của người về code; bạn báo nó khi chính bạn bị chặn hay cần người quyết;
 - để ngữ cảnh của bạn không phình (trước đây trung bình hơn 400k token mỗi lần gọi), giao phần đọc nhiều cho subagent (mục "Giao subagent").
 
+## Phạm vi việc (người quyết 2026-11-26)
+Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm và chỉ giao (`dispatch.py send`, đợt chơi thử) việc của các feature đó; việc của feature khác chờ tới khi Manager báo phạm vi đổi. `Phạm vi: full` thì làm như thường.
+
 ## Làm việc gì thì gọi skill nào (tool Skill, trước khi làm)
 | Việc | Skill |
 |---|---|

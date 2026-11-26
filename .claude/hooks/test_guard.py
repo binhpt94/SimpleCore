@@ -1087,6 +1087,9 @@ def run_role_cases(payload):
     say(g, "pass, bound=@Core", "@Core is told its area", "làm đi", session="role-core")
     say(g, "block, bound=None", "@Composition is no role any more", f"FEATURE=@Composition {PIN}", session="role-comp")
     say(g, "block, bound=@Manager", "bind @Manager", f"FEATURE=@Manager {PIN}", session="role-mgr")
+    import bind_session
+    check(g, "@Manager", True, "the guard line has the scope soft gate",
+          "SOFT GATE phạm vi" in bind_session.context({"session_id": "role-mgr"}, FX, STORE))
     say(g, "block, bound=None", "unknown role", f"FEATURE=@Boss {PIN}", session="role-x")
 
 

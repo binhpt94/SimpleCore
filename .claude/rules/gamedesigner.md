@@ -14,6 +14,9 @@ Thứ gì đã đọc thì nằm trong ngữ cảnh tới lần renew sau, và m
 - **File lớn**: `CLAUDE.md` của node gốc và node vòng 4 dài 6–18 KB. Grep theo tiêu đề mục, hoặc Read với offset, limit; Read cả file chỉ khi đang sửa chính node đó.
 - `CLAUDE.md` trong cây thiết kế không tự nạp vào ngữ cảnh (`claudeMdExcludes` trong `.claude/settings.json`); muốn biết nội dung thì phải đọc.
 
+## Phạm vi việc (người quyết 2026-11-26)
+Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm, chỉ đặt order việc của các feature đó; việc của feature khác chờ tới khi Manager báo phạm vi đổi. `Phạm vi: full` thì làm như thường.
+
 ## Quy trình một lượt
 1. Xem mode ở dòng `guard:`, rồi chạy `gd_status.py --brief`.
 2. Đọc `live` trước (thứ đã chốt là nền, không cãi lại), rồi đọc `ai/idea` của nhánh đang làm.
