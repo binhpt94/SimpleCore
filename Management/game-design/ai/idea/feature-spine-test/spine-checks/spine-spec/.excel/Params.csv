@@ -10,5 +10,6 @@ Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,
 7,anim_run,Tên animation chạy (lặp),,run,như IDEA,như IDEA,Tên trong spineboy
 8,anim_action,Tên animation một lần,,jump,như IDEA,như IDEA,"Tên trong spineboy; rời đất rồi về, thấy rõ chạy một lần"
 9,mix_time,Thời gian chuyển mượt mọi cặp animation,s,0.2,như IDEA,như IDEA,"Đủ ngắn để không trễ, đủ dài để thấy trộn (dự kiến)"
-10,time_scale,Tốc độ animation,lần,1,như IDEA,như IDEA,Đúng tốc độ bộ mẫu
+10,time_scale,Tốc độ animation khi trận chạy,lần,1,như IDEA,như IDEA,Đúng tốc độ bộ mẫu; trận dừng thì 0
 11,sort_offset,Thứ tự vẽ so với hero và quái cùng lớp,bậc,1,như IDEA,như IDEA,"Ngay trên hero, quái; dưới hiệu ứng"
+12,perf_sample,Độ dài đoạn đo hiệu năng,s,60,như IDEA,như IDEA,Đủ dài để p95 ổn định ở đoạn trận đông (dự kiến)

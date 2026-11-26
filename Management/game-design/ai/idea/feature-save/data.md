@@ -1,5 +1,6 @@
 ---
 based-on: 6181a7c21bf0
+group: infra
 refs: feature-run/run-score@3d29bb683b7c
 by: run-compares-record=gpt@r2-1#run-so-ky-luc, run-asks-write=gpt@r2-1#run-ghi-ky-luc, run-reads-at-boot=gpt@r2-1#run-doc-khoi-dong, run-default-zero=gpt@r2-1#mac-dinh-ky-luc, save-keep-unreadable=gpt@r2-1#loi-doc-khong-ghi-de, save-atomic-write=gpt@r2-1#ghi-khong-tron-ven, save-write-result=gpt@r2-1#ket-qua-ghi, run-retry-on-resume=gpt@r2-1#thu-lai-ghi, save-write-order=gpt@r2-1#thu-tu-ghi, save-data-version=gpt@r2-1#phien-ban-du-lieu, save-migrate-old=gpt@r2-1#chuyen-doi-du-lieu, save-keep-newer=gpt@r2-1#giu-ban-khong-ho-tro, save-io-node=gpt@r2-1#node-xu-ly-luu
 gpt-dropped: r2-1#phan-biet-loi-doc=save-read-reasons

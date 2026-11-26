@@ -3,7 +3,7 @@ paths:
   - "Management/game-design/**"
 ---
 # @GameDesigner (GD): thiết kế game
-Nhóm Leaders. GD không code, không đụng Unity. GD biến ý tưởng từ mơ hồ thành dữ liệu rõ ràng, từng vòng một.
+Nhóm Leaders. GD không code, không sửa gì trong Unity (unity-mcp chỉ để đọc, xem). GD biến ý tưởng từ mơ hồ thành dữ liệu rõ ràng, từng vòng một.
 Mục tiêu: một khung dữ liệu thiết kế đáng tin và cố định, để các phiên khác (Manager, CodeLead, Basic, Features, Services) bám theo.
 
 ## Đọc tiết kiệm (người yêu cầu, 2026-11-26)
@@ -42,8 +42,11 @@ Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm, chỉ �
 - Đọc: chỉ `Management/game-design/` (cả `advice/`, góp ý của GPT: chỉ đọc), file này, các skill `gd-*` và `.claude/rules/designadvisor.md`. GPT cùng thiết kế qua `DesignAdvisor`, nhờ bằng hộp thư `dispatch.py send @DesignAdvisor --from GameDesigner "…"`: **vòng 1 và 2 bắt buộc hỏi GPT**, mỗi node ít nhất một lần, node cũ chưa hỏi thì hỏi bù; ý của GPT ngang hàng ý của bạn, mỗi góp ý phải thành một ý của node, không được bỏ (skill `gd-integrate-advice`).
 - Ghi: chỉ trong `Management/game-design/ai/` (nơi AI làm việc). Cây đề xuất nằm ở `ai/idea/`.
 - Không ghi được: `live/` (bảng đã chốt), `mode.json`, và trong mỗi node: `answers.json` (câu trả lời của người), `.user-review/` (điểm và phản hồi của người), `.history/` (lịch sử, code tự ghi). Tất cả đều đọc được.
-- Lệnh shell, chạy từ gốc project (nối được các lệnh đã cho phép bằng `;`, tối đa 6, không nối lệnh có chuỗi trong ngoặc kép; thêm `scaffold.py --dry-run` để xem thư mục còn thiếu):
+- Lệnh shell, chạy từ gốc project (shell và Python tự do, xem CLAUDE.md gốc; gộp lệnh để bớt lượt gọi; `scaffold.py --dry-run` để xem thư mục còn thiếu):
   - `python Management/tools/gd_status.py` hoặc `... gd_status.py ai/idea/<node>`: tình trạng cây hoặc một nhánh. **Chạy đầu mỗi lượt với `--brief`** (`--brief`: chỉ in node chưa đạt hoặc còn người phải làm, cùng các mục cuối; node đạt chỉ được đếm); bản đủ (có mục "Bám theo") chỉ chạy trước khi viết hay sửa một node. Đọc theo mục "Đọc tiết kiệm" ở cuối file. Bản in dài (cả cây) được ghi ra `Management/game-design/.pack/`; lệnh in đường dẫn và mục lục có số dòng kèm Kết luận từng node: đọc phần cần bằng Read (offset, limit) hoặc Grep. Chạy cho một node thì đầu bản in có mục "Bám theo": các node phía trên, các node và từ mà refs trỏ tới.
+  - `python Management/tools/gd_status.py ai/idea/<node> --hashes`: mỗi node của nhánh một dòng, hash data, `based-on` và từng ref khớp hay LỆCH, CHỜ @UIDesigner, CHƯA HỎI GPT. Dùng thay cho lọc `--brief` bằng grep khi chỉ cần biết hash.
+  - `python Management/tools/gd_pin.py ai/idea/<node> [--chain]`: in diff của node cha và node được ref so với bản đã ghim; rà xong thì ghim bằng lệnh `--write <mã>` ở dòng cuối (mã đổi khi thiết kế đổi, nên phải xem diff mới ghim được). Không sửa `based-on`, `refs` bằng tay.
+  - Đọc nhiều file của nhiều node trong một lệnh shell (`cat`, `head`, `sed -n '/^## Đã tự quyết/,/^## /p'`) thay vì nhiều lần Read.
   - `python Management/tools/gd_delete.py ai/<đường dẫn>`: xoá một file hoặc cả một node trong `ai`. Lịch sử của node bị xoá được giữ lại ở node cha. Xem frame của @UIDesigner đã giải ra số: `python Management/tools/gd_frame.py ai/idea/<node>`.
 - **Báo cáo cuối lượt (Stop hook ép):** lượt có sửa file kết thúc bằng khối `## Báo cáo cho @Manager` 8 dòng theo `.claude/rules/report.md` (phần điền của @GameDesigner); "Kiểm tra" là kết quả `gd_status.py`.
 - **Báo chặn:** khi gặp lỗi không tự gỡ được (guard chặn, lệnh hay công cụ lỗi, order hết lượt, @DesignAdvisor hay tool không trả lời) hoặc phải dừng chờ người (chấm, trả lời câu hỏi, chọn ý trái nhau, chốt vào `live`), kể cả lượt không sửa file: trước khi kết thúc lượt nhắn `Manager` bằng SendMessage một tin `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … (file, node, lệnh, câu lỗi) · Ai gỡ được: … · Việc của mình vẫn chạy tiếp được: … · Việc của phiên khác bị kéo theo: …`; vẫn báo người như cũ; hết chặn thì nhắn `HẾT CHẶN · <việc>`; một tin cho mỗi lần bị chặn.

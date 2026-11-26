@@ -28,9 +28,6 @@ A = FX + "/UnityProject/Assets"
 F = A + "/Features"
 VALIDATE = "python Management/tools/validate.py"
 STORE = FX + "/guard-store"      # stands in for guard.STORE_DIR; the real one is never touched
-UNITY_STATUS = FX + "/unity-mcp-status"      # stands in for ~/.unity-mcp: the Editors of this machine are never read
-os.makedirs(UNITY_STATUS, exist_ok=True)
-os.environ[guard.UNITY_STATUS_ENV] = UNITY_STATUS
 PIN = "tr0ng-test"
 
 results = []
@@ -521,7 +518,7 @@ def run_cases():
     run_tool_cases()
     run_tester_cases()
     run_inbox_cases()
-    run_unity_instance_cases()
+    run_unity_leader_cases()
     run_fail_cases()
     real = str(HERE.parent.parent)
     cli("real root", "", "deny", "Write <real root>\\x.txt, no --root",
@@ -588,8 +585,8 @@ def run_uidesigner_cases():
         t(g + " (everyone reads the references)", who, "allow", "Grep", {"pattern": "x", "path": refs})
     for who in (U, "@GameDesigner", "@Manager", "@CodeLead", "Wallet"):
         w(g + " (only the page writes them)", who, "deny", refs + "/index.json")
-    g = "uidesigner: no unity-mcp, no code, may message the tester"
-    t(g, U, "deny", "mcp__unityMCP__read_console", {"action": "get"})
+    g = "uidesigner: unity-mcp reads, no code, may message the tester"
+    t(g, U, "allow", "mcp__unityMCP__read_console", {"action": "get"})
     t(g, U, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
     t(g, U, "pass", "SendMessage", {"to": "UnityAutoPlay", "message": "XÁC NHẬN · Feature: Hud · Thao tác: bấm II"})
     t(g, U, "pass", "SendMessage", {"to": "GameDesigner", "message": "ui.md thiếu nút đóng"})
@@ -623,8 +620,8 @@ def run_advisor_cases():
               FX + "/.claude/rules/designadvisor.md", F + "/Wallet/Scripts/Internal/W.cs", A + "/Core/Base.cs"):
         w(g + " (never the design or anything else)", V, "deny", p)
     t(g, V, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
-    t(g, V, "deny", "mcp__unityMCP__refresh_unity", {})
-    t(g, V, "deny", "mcp__unityMCP__read_console", {"action": "get"})
+    t(g, V, "allow", "mcp__unityMCP__refresh_unity", {})
+    t(g, V, "allow", "mcp__unityMCP__read_console", {"action": "get"})
     t(g, V, "pass", "SendMessage", {"to": "GameDesigner", "message": "x"})
 
     g = "advisor: the others do not write in advice"
@@ -676,6 +673,21 @@ def run_advisor_cases():
     check(g, V, True, "a headless chat is told not to ask, and whom to tell", "KHÔNG HỎI NGƯỜI" in told and "GameDesigner" in told)
     told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
     check(g, D, False, "a Leader asks the human itself", "KHÔNG HỎI NGƯỜI" in told)
+
+    g = "guard line: the fixed text once"
+    gd = {"session_id": "role-gd"}
+    bind_session.forget_shown("role-gd", STORE)
+    first = bind_session.prompt_context(gd, FX, STORE)
+    again = bind_session.prompt_context(gd, FX, STORE)
+    check(g, D, True, "the first prompt has the whole text, with the skills", "NGANG HÀNG" in first and "Skill của vai" in first)
+    check(g, D, True, "the next one: the first line and what changes only",
+          again.startswith("guard: chat này gán FEATURE=@GameDesigner (tầng 1 · Leaders)") and "NGANG HÀNG" not in again
+          and "Skill của vai" not in again and len(again) < len(first) // 3)
+    check(g, D, True, "the mode is part of the fixed text: a change sends the whole line again",
+          "Mode hiện tại" not in again and "Mode hiện tại" in first)
+    bind_session.forget_shown("role-gd", STORE)      # a compaction or /clear
+    check(g, D, True, "after a compaction the whole text again", "NGANG HÀNG" in bind_session.prompt_context(gd, FX, STORE))
+    check(g, D, True, "no marks left in either", all(c not in x for x in (first, again) for c in (chr(1), chr(2))))
     check(g, D, True, "@GameDesigner is told about the advisor and the labels",
           all(s in told for s in ("DesignAdvisor", "game-design/advice", "by: <id ý>=gpt@<id lần hỏi>#<id góp ý>", "gpt-dropped:",
                                   "node-by:", "KHÔNG ĐƯỢC BỎ", "NGANG HÀNG")))
@@ -1021,8 +1033,7 @@ def run_role_cases(payload):
     for cmd in (SCAFFOLD + " --root /tmp/x", SCAFFOLD + " Hero", SCAFFOLD + "; rm -rf UnityProject",
                 SCAFFOLD + " --dry-run && ls", "python Management/tools/../tools/scaffold.py", SCAFFOLD + " --dry-run --dry-run"):
         t(g, M, "deny", "Bash", sh(cmd))
-    for who in ("Wallet", "@CodeLead", "@GameDesigner", "@Core", ""):
-        t(g + " (others)", who, "deny", "Bash", sh(SCAFFOLD))
+    t(g + " (@CodeLead creates the folders too, người quyết 2026-11-26)", "@CodeLead", "allow", "Bash", sh(SCAFFOLD))
     for who in ("@CodeLead", "@GameDesigner"):      # looking is every Leader's, creating is @Manager's
         t(g + " (dry run: every Leader)", who, "allow", "Bash", sh(SCAFFOLD + " --dry-run"))
     for who in ("Wallet", "@Core", "@DesignAdvisor", "@Codex", ""):
@@ -1040,7 +1051,7 @@ def run_role_cases(payload):
                 "; ".join(["python Management/tools/validate.py"] * 7),
                 "python Management/tools/validate.py; python Management/tools/../tools/validate.py"):
         t(g + " (refused)", M, "deny", "Bash", sh(bad))
-    t(g + " (refused)", "@CodeLead", "deny", "Bash", sh("python Management/tools/validate.py; python Management/tools/scaffold.py"))
+    t(g, "@CodeLead", "allow", "Bash", sh("python Management/tools/validate.py; python Management/tools/scaffold.py"))
     # every bound chat chains since 2026-11-26; an unbound one does not
     for who in ("Wallet", "@Core", "@DesignAdvisor", "@Codex", "@UnityAutoPlay"):
         t(g + " (every role)", who, "allow", "Bash", sh("python Management/tools/validate.py; python Management/tools/studio.py status"))
@@ -1343,8 +1354,9 @@ def run_codelead_cases():
     u("manage_asset", expect="deny", action="create", path="Assets/Features/Wallet/FeatureAssets/Private/n.asset")
     t(g + " (others)", W, "allow", "mcp__unityMCP__refresh_unity", {})
     t(g + " (others)", W, "allow", "ReadMcpResourceTool", {"server": "unityMCP", "uri": "x"})
-    for who in ("@Manager", "@GameDesigner", ""):
-        t(g + " (others)", who, "deny", "mcp__unityMCP__read_console", {"action": "get"})
+    for who in ("@Manager", "@GameDesigner"):      # every role uses unity-mcp (người quyết 2026-11-26)
+        t(g + " (others)", who, "allow", "mcp__unityMCP__read_console", {"action": "get"})
+    t(g + " (others)", "", "deny", "mcp__unityMCP__read_console", {"action": "get"})
     guard.release_lock(STORE)
 
     g = "codelead: skeleton"
@@ -1494,7 +1506,7 @@ def run_designer_cases():
         e(g + " (never the human's files or the history)", D, "deny", p)
     t(g, D, "deny", "MultiEdit", {"file_path": live + "/node.md", "edits": []})
     t(g, D, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
-    t(g, D, "deny", "mcp__unityMCP__refresh_unity", {})
+    t(g, D, "allow", "mcp__unityMCP__refresh_unity", {})
     t(g, D, "pass", "SendMessage", {"to": "@Manager", "message": "x"})
 
     g = "designer: the config tables of a node (.excel)"
@@ -1680,72 +1692,17 @@ def run_designer_cases():
     check(g, D, True, "without a mode file the context says Full Auto", "Full Auto" in told and "User control" not in told)
 
 
-def run_unity_instance_cases():
-    """unity-mcp reaches only this project's Editor: unity_instance, set_active_instance, and no call while this
-    Editor is gone and another project's runs."""
-    import hashlib
-    g = "unity: only this project's Editor"
-    mine = hashlib.sha1((FX + "/UnityProject/Assets").encode("utf-8")).hexdigest()[:8]
-    other = "5e230bc6"
-
-    def status(h, name, path, age):
-        f = os.path.join(UNITY_STATUS, f"unity-mcp-status-{h}.json")
-        with open(f, "w", encoding="utf-8") as out:
-            json.dump({"project_name": name, "project_path": path}, out)
-        os.utime(f, (time.time() - age, time.time() - age))
-
-    def clear():
-        for n in os.listdir(UNITY_STATUS):
-            os.remove(os.path.join(UNITY_STATUS, n))
-    L = "@CodeLead"
-    read = "mcp__UnityMCP__read_console"
-    try:
-        clear()
-        t(g + " (no status files: as before)", L, "allow", read, {"action": "get"})
-        status(mine, "UnityProject", FX + "/UnityProject/Assets", 5)
-        status(other, "Rebuilt", "/elsewhere/Rebuilt/Assets", 5)
-        for value in ("UnityProject@" + mine, mine, mine[:4], mine.upper()):
-            t(g, L, "allow", read, {"action": "get", "unity_instance": value})
-        for value in ("Rebuilt@" + other, other, other[:4], "6400", "UnityProject@" + other, "abc"):
-            t(g + " (another Editor, a port, a name that is not one)", L, "deny", read, {"action": "get", "unity_instance": value})
-        t(g + " (inside a batch)", L, "deny", "mcp__UnityMCP__batch_execute",
-          {"commands": [{"tool": "read_console", "params": {"action": "get", "unity_instance": other}}]})
-        t(g + " (the batch itself)", L, "deny", "mcp__UnityMCP__batch_execute",
-          {"unity_instance": other, "commands": [{"tool": "read_console", "params": {"action": "get"}}]})
-        t(g + " (set_active_instance)", L, "allow", "mcp__UnityMCP__set_active_instance", {"instance": "UnityProject@" + mine})
-        t(g + " (set_active_instance)", L, "deny", "mcp__UnityMCP__set_active_instance", {"instance": "Rebuilt@" + other})
-        t(g + " (set_active_instance)", L, "deny", "mcp__UnityMCP__set_active_instance", {"instance": "6400"})
-        t(g + " (another project known, no instance named: may land there, so refused)", L, "deny", read, {"action": "get"})
-        t(g + " (another project known, no instance named: may land there, so refused)", L, "deny", "mcp__UnityMCP__batch_execute",
-          {"commands": [{"tool": "read_console", "params": {"action": "get", "unity_instance": mine}},
-                        {"tool": "refresh_unity", "params": {}}]})
-        t(g + " (every command of a batch names it)", L, "allow", "mcp__UnityMCP__batch_execute",
-          {"commands": [{"tool": "read_console", "params": {"action": "get", "unity_instance": mine}}]})
-        status(mine, "UnityProject", FX + "/UnityProject/Assets", 3600)
-        t(g + " (this Editor gone, another runs: nothing reaches it)", L, "deny", read, {"action": "get", "unity_instance": mine})
-        check(g + " (... and the turn stops: the session is flagged, no retry)", L, True, "flag set",
-              guard.read_fail("test-session", STORE, "unity") is not None)
-        guard.clear_fails("test-session", STORE)
-        t(g + " (... resources may still be read)", L, "allow", "ReadMcpResourceTool", {"server": "UnityMCP", "uri": "mcpforunity://instances"})
-        status(other, "Rebuilt", "/elsewhere/Rebuilt/Assets", 3600)
-        t(g + " (every Editor quiet: the server says what it sees)", L, "allow", read, {"action": "get", "unity_instance": mine})
-        clear()
-        status("abcd1234", "UnityProject", FX + "/UnityProject/Assets", 5)      # the path written another way: its hash counts
-        status(other, "Rebuilt", "/elsewhere/Rebuilt/Assets", 5)
-        t(g + " (a status file naming this project's path)", L, "allow", read, {"action": "get", "unity_instance": "UnityProject@abcd1234"})
-        clear()
-        status(mine, "UnityProject", FX + "/UnityProject/Assets", 5)
-
-        def port(name, path):
-            with open(os.path.join(UNITY_STATUS, name), "w", encoding="utf-8") as out:
-                json.dump({"unity_port": 6400, "project_path": path}, out)
-        port("unity-mcp-port.json", FX + "/UnityProject/Assets")
-        t(g + " (only this project known: no instance needed, as before)", L, "allow", read, {"action": "get"})
-        port("unity-mcp-port.json", "/elsewhere/UnityGame/Assets")
-        t(g + " (the default port file names another project: the call must name this one)", L, "deny", read, {"action": "get"})
-        t(g + " (the default port file names another project: the call must name this one)", L, "allow", read, {"action": "get", "unity_instance": mine})
-    finally:
-        clear()
+def run_unity_leader_cases():
+    """Every bound role uses unity-mcp (người quyết 2026-11-26), with no check of the Editor instance a call names;
+    the zones and the Editor lock still hold. A chat with no FEATURE does not."""
+    g = "unity: every role"
+    for who in ("@Manager", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@CodeLead"):
+        t(g + " (reads, no instance named)", who, "allow", "mcp__UnityMCP__read_console", {"action": "get"})
+        t(g + " (any instance named)", who, "allow", "mcp__UnityMCP__read_console", {"action": "get", "unity_instance": "Other@1234abcd"})
+    for who in ("@Manager", "@GameDesigner", "@UIDesigner", "@DesignAdvisor"):
+        t(g + " (no area in Assets: no write)", who, "deny", "mcp__UnityMCP__manage_asset",
+          {"action": "create", "path": "Assets/Features/Wallet/FeatureAssets/Public/x.mat", "asset_type": "Material"})
+    t(g + " (no FEATURE)", "", "deny", "mcp__UnityMCP__read_console", {"action": "get"})
 
 
 def run_fail_cases():
@@ -2385,7 +2342,7 @@ def run_unity_cases():
     t(g, W, "allow", "mcp__UnityMCP__batch_execute", {"commands": [{"tool": "mcp__UnityMCP__read_console", "params": {"action": "get"}}]})
     t(g, W, "allow", "ReadMcpResourceTool", {"server": "UnityMCP", "uri": "mcpforunity://editor/state"})
     t(g, W, "deny", "ReadMcpResourceTool", {"server": "blender", "uri": "x"})
-    t(g, "@Manager", "deny", "mcp__UnityMCP__read_console", {"action": "get"})
+    t(g, "@Manager", "allow", "mcp__UnityMCP__read_console", {"action": "get"})
     u(g, W, "allow", "read_console")
     u(g, W, "allow", "find_gameobjects", search_term="Coin")
     u(g, W, "allow", "manage_scene", action="get_hierarchy")
@@ -2460,9 +2417,12 @@ def run_unity_cases():
                      ("manage_packages", {"action": "add"}), ("manage_camera", {"action": "screenshot"})):
         u(g, W, "deny", name, **ti)
         u(g, "@Core", "deny", name, **ti)
-    for who in ("@Manager", "@GameDesigner", ""):
-        u(g + " (leaders without code, unset)", who, "deny", "read_console", action="get")
-        u(g + " (leaders without code, unset)", who, "deny", "refresh_unity")
+    for who in ("@Manager", "@GameDesigner"):      # they read and compile, play and lead stay @CodeLead's
+        u(g + " (leaders without code)", who, "allow", "read_console", action="get")
+        u(g + " (leaders without code)", who, "allow", "refresh_unity")
+        u(g + " (leaders without code)", who, "deny", "run_tests")
+    u(g + " (unset)", "", "deny", "read_console", action="get")
+    u(g + " (unset)", "", "deny", "refresh_unity")
 
     g = "unity: the Editor lock"
     guard.release_lock(STORE)
@@ -2589,11 +2549,72 @@ def run_headless_cases():
     check(g + " (Leaders: as before)", "@CodeLead", True, "dotnet build", got[0] == "deny" and "BÁO CHẶN" not in got[1])
 
 
+def run_free_shell_cases():
+    """Free shell (người quyết 2026-11-26): every bound chat, and its subagents, runs any shell command and any
+    Python; the gates of dispatch send, gd_req doing / done, studio review still hold; a chat with no FEATURE does not."""
+    g = "free shell"
+    guard.FREE_SHELL = True
+    try:
+        for who in ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay", "@Codex", "@Blender", "@ClaudeImage",
+                    "@DesignAdvisor", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner"):
+            for cmd in ('python -c "print(1)"', "python Management/tools/test_validate.py", "ls", "git status",
+                        "python Management/tools/validate.py; git diff | head -5"):
+                t(g, who, "allow", "Bash", {"command": cmd})
+            t(g, who, "allow", "PowerShell", {"command": "Get-ChildItem"})
+            t(g, who, "allow", "Monitor", {"command": "ls"})
+        t(g + " (no FEATURE: allow-list)", "", "deny", "Bash", {"command": 'python -c "print(1)"'})
+        t(g + " (gates hold)", "Wallet", "deny", "Bash",
+          {"command": 'python Management/tools/dispatch.py send Shop --from CodeLead "x"'})
+        t(g + " (gates hold)", "Wallet", "deny", "Bash",
+          {"command": 'ls; python Management/tools/gd_req.py Shop doing a/b#1 "x"'})
+        t(g + " (edit zones hold)", "Wallet", "deny", "Edit",
+          {"file_path": FX + "/UnityProject/Assets/Features/Shop/Scripts/Internal/S.cs"})
+        g2 = "PowerShell: a bare @Name is splatting"
+        send = 'python Management/tools/dispatch.py send {} --from GameDesigner "hỏi"'
+        for cmd in (send.format("@DesignAdvisor"), "python Management/tools/dispatch.py list @Codex",
+                    "ls; python x.py @Core"):
+            t(g2, "@GameDesigner", "deny", "PowerShell", {"command": cmd})
+        for cmd in (send.format("'@DesignAdvisor'"), send.format("DesignAdvisor"), "$a = @(1, 2)", "$h = @{a = 1}",
+                    'Write-Host "mail @x"', "git log --format=%H@x"):
+            t(g2 + " (quoted, no @, arrays)", "@GameDesigner", "allow", "PowerShell", {"command": cmd})
+        t(g2 + " (Bash keeps @)", "@GameDesigner", "allow", "Bash", {"command": send.format("@DesignAdvisor")})
+        for cmd in (send.format("'@Codex'"), send.format("Codex")):
+            t(g2 + " (the gate still reads the quoted or bare name)", "@UIDesigner", "deny", "PowerShell", {"command": cmd})
+    finally:
+        guard.FREE_SHELL = False
+
+
+def run_free_read_cases():
+    """Free read (người quyết 2026-11-26): every bound chat reads anywhere in the project with Read / Grep / Glob,
+    but for Unity's generated folders, the testers' Archive and outside the project."""
+    g = "free read"
+    guard.FREE_READ = True
+    try:
+        for who in ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay", "@Codex", "@DesignAdvisor", "@Manager",
+                    "@CodeLead", "@GameDesigner", "@UIDesigner"):
+            for path in ("/Management/tools/dispatch.py", "/UnityProject/Assets/Features/Shop/Scripts/Internal/S.cs",
+                         "/.claude/rules/feature.md", "/CLAUDE.md"):
+                t(g, who, "allow", "Read", {"file_path": FX + path})
+            t(g, who, "allow", "Grep", {"pattern": "x", "path": FX + "/Management"})
+            t(g, who, "allow", "Glob", {"pattern": "**/*.cs", "path": FX + "/UnityProject/Assets/Features"})
+            t(g + " (generated folders)", who, "deny", "Read", {"file_path": FX + "/UnityProject/Library/x.txt"})
+            t(g + " (outside the project)", who, "deny", "Read", {"file_path": os.path.dirname(FX) + "/other.txt"})
+        t(g + " (no FEATURE: read zones)", "", "deny", "Read",
+          {"file_path": FX + "/UnityProject/Assets/Features/Shop/Scripts/Internal/S.cs"})
+        t(g + " (edit zones hold)", "@GameDesigner", "deny", "Edit", {"file_path": FX + "/Management/tools/dispatch.py"})
+    finally:
+        guard.FREE_READ = False
+
+
 def main():
+    guard.FREE_SHELL = False      # the cases below check the allow-lists (a chat with no FEATURE, or FREE_SHELL off)
+    guard.FREE_READ = False       # and the read zones of each role
     try:
         build_fixture()
         run_cases()
         run_headless_cases()
+        run_free_shell_cases()
+        run_free_read_cases()
     finally:
         link = F + "/Wallet/link"
         if os.path.lexists(link):

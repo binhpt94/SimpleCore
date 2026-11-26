@@ -14,6 +14,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 - Bị guard chặn thì dừng, không tìm đường vòng: Leader báo người trong chat; tầng 2–6 nhắn Leader `BÁO CHẶN`.
 - Lượt có sửa file kết thúc bằng báo cáo theo `.claude/rules/report.md`.
 - Không dùng Claude in Chrome.
+- Tool deferred (unity-mcp, SendMessage...): nạp mọi tool lượt này sẽ cần trong MỘT `ToolSearch` `select:a,b,c` ở đầu lượt, không nạp từng cái (mỗi lần nạp là một lần gọi, đọc lại cả ngữ cảnh). Bộ thường dùng (tên đủ `mcp__UnityMCP__<tool>`): feature, service, @Core `refresh_unity,read_console,manage_asset,manage_scriptable_object` và `SendMessage`; @CodeLead thêm `run_tests,get_test_job,manage_scene,manage_editor`; tester `manage_scene,manage_editor,read_console,execute_menu_item,execute_code,manage_camera`; Leader khác `SendMessage`.
 
 ## Tầng
 | Tầng | Nhóm | `FEATURE` | Nhận việc từ | Báo cáo, báo chặn tới | Đọc lúc bắt đầu | Skill |
@@ -43,15 +44,16 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 | Bảng dữ liệu `.excel`, `gd_excel.py` | skill `gd-excel-data` |
 | Frame bố cục `gd_frame.py`, ảnh tham chiếu `references.py` | `.claude/rules/uidesigner.md` |
 | Chơi thử, `tester.py` | `.claude/rules/tester.md` |
-| Tạo thư mục feature `scaffold.py` | `.claude/rules/manager.md` |
+| Tạo thư mục feature `scaffold.py` (@Manager, @CodeLead) | `.claude/rules/codelead.md`, `.claude/rules/manager.md` |
 | Thử lại guard | `python .claude/hooks/test_guard.py` |
 
 - Lệnh shell chạy từ gốc project.
-- Mọi phiên đã gán nối được các lệnh đã cho phép bằng `;` trong một lần gọi (tối đa 6, mỗi lệnh phải tự nó được phép, kể cả lệnh có chuỗi trong ngoặc kép; tìm kiếm vẫn mỗi lần một lệnh). Gộp lệnh để bớt lượt gọi. Bốn Leader chạy được `scaffold.py --dry-run`.
+- Mọi phiên đã gán, kể cả subagent của nó, chạy được mọi lệnh shell và Python (người quyết 2026-11-26): pipe, nối lệnh, `python -c`, script riêng. Guard chỉ còn giữ cổng của `dispatch.py send`, `gd_req.py doing|done`, `studio.py review|cancel` và giai đoạn, cả trong chuỗi lệnh. Sửa file vẫn bằng Edit/Write theo bảng Vùng; không dùng shell để sửa vùng mình bị cấm. Phiên chưa gán chỉ chạy được các lệnh trong danh sách của guard. Gộp lệnh để bớt lượt gọi.
 
 ## Nhắn ai
 - Tầng 2, 4, 5, 6 chạy theo việc. Giao việc cho chúng bằng hộp thư: `python Management/tools/dispatch.py send <tên> --from <vai> "<việc>"` (Leader, theo phần mình) hoặc tab Hộp thư (người).
 - Nội dung tin trong ngoặc kép, không chứa `;` `&` `|` `<` `>` `$` `(` `)` `{` `}`, dấu ngoặc kép hay `\`. Ngăn ý bằng `·` hoặc dấu phẩy.
+- Trong PowerShell, `@Tên` không có ngoặc là splatting nên tên biến mất: viết `'@Codex'` trong ngoặc đơn, bỏ `@` (`Codex`), hoặc chạy bằng Bash. Guard chặn lệnh PowerShell có `@Tên` trần.
 - `gd_req.py reject` và `studio.py check|review 0|deliver|redo` tự gửi tin.
 - `SendMessage` chỉ dùng giữa các Leader và tới tester đang chạy.
 - Tầng 2–6 chỉ nhắn Leader của phần mình (tầng dưới: @CodeLead). Không nhắn @Manager.
@@ -89,6 +91,6 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 | Thư mục tạm của chính phiên (`tool-results`, `tasks`, `scratchpad`) | được | chỉ `scratchpad` |
 | Thư mục tạm của phiên khác | cấm; @CodeLead đọc được của tầng 5, 6 | cấm |
 
-- Vùng không có trong bảng: cấm đọc và sửa.
-- Tìm kiếm (`ls`, `find`, `grep`, `rg`, mỗi lần một lệnh; hoặc Grep/Glob) phải nêu thư mục nằm trong một vùng được đọc. Mẫu đặt trong ngoặc đơn; không pipe, không chuyển hướng, không `-exec`.
+- Vùng không có trong bảng: cấm sửa; phiên chưa gán cấm cả đọc.
+- Cột "Đọc" chỉ còn giữ phiên chưa gán (người quyết 2026-11-26): mọi phiên đã gán, kể cả subagent, đọc và tìm (Read, Grep, Glob, shell) được mọi nơi trong project, trừ `Library`, `Temp`, `Logs`, `obj`, `UserSettings`, `Tester/<Tên>/Archive` (chỉ tầng 3) và thư mục tạm của phiên khác. Cột "Sửa" giữ nguyên.
 - `Management/index.html` chỉ là vỏ hiển thị; nội dung đã duyệt nằm trong `Management/data/`.

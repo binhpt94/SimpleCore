@@ -5,7 +5,7 @@ feature session has got with each (see reqbook.py for where the list comes from 
     python Management/tools/gd_req.py <F>                                     the book (any chat that reads the design)
     python Management/tools/gd_req.py status                                  one line per feature (Leaders)
     python Management/tools/gd_req.py <F> doing <node>#<id> "<ghi chú>"       the feature's chat: started, what it is at
-    python Management/tools/gd_req.py <F> done <node>#<id> <Lớp.Hàm>[,...]    the feature's chat: the tests that show it
+    python Management/tools/gd_req.py <F> done <node>#<id> <Lớp.Hàm>[,...]    the feature's chat: the tests that show it (a namespace is dropped)
     python Management/tools/gd_req.py <F> done <node>#<id> play "<cách thấy>" the feature's chat: seen only when playing
     python Management/tools/gd_req.py <F> verify <node>#<id>[,...]            @CodeLead, after running the tests
     python Management/tools/gd_req.py <F> reject <node>#<id> "<lỗi>"          @CodeLead: back to the feature

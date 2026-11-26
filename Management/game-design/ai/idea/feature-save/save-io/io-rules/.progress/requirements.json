@@ -1,0 +1,228 @@
+{
+ "items": {
+  "rules-version-one": {
+   "state": "done",
+   "note": "đợt 1, SavedRecord và FileRecordStore",
+   "tests": [
+    "SavedRecordTests.EveryWrite_StoresDataVersionOne"
+   ],
+   "play": "",
+   "hash": "c868f41d17fb",
+   "text": "Phiên bản dữ liệu hiện tại là 1; mỗi lần ghi đều ghi kèm số 1\nChưa có phiên bản nào cũ hơn, nên chưa có dạng cũ nào phải chuyển.",
+   "title": "Phiên bản dữ liệu hiện tại là 1; mỗi lần ghi đều ghi kèm số 1",
+   "by": "Save",
+   "at": "2026-11-26 21:42:48"
+  },
+  "rules-record-int": {
+   "state": "done",
+   "note": "đợt 1, SavedRecord và FileRecordStore",
+   "tests": [
+    "SavedRecordTests.WrittenRecord_IsReadBackExactly_EvenNegative"
+   ],
+   "play": "",
+   "hash": "e46882e9c575",
+   "text": "Kỉ lục được cất là số nguyên 32 bit, trả lại đúng số đã cất, kể cả số âm\nLưu dữ liệu không xét số âm; `feature-run` coi kỉ lục âm là 0.",
+   "title": "Kỉ lục được cất là số nguyên 32 bit, trả lại đúng số đã cất, kể cả số âm",
+   "by": "Save",
+   "at": "2026-11-26 21:42:48"
+  },
+  "rules-read-cases": {
+   "state": "done",
+   "note": "đợt 1, SavedRecord và FileRecordStore",
+   "tests": [
+    "SavedRecordTests.NothingSaved_ReadsNoneYet",
+    "SavedRecordTests.AnythingButVersionOneWithIntegerRecord_ReadsNoneYet",
+    "SavedRecordTests.VersionOneWithIntegerRecord_ReadsTheRecord"
+   ],
+   "play": "",
+   "hash": "21342174c5a8",
+   "text": "Đọc: phiên bản 1 và kỉ lục là số nguyên thì trả kỉ lục; mọi trường hợp khác trả chưa có\nKhác gồm: không có bản ghi, thiếu phiên bản hay kỉ lục, phiên bản không phải số nguyên dương, kỉ lục không phải số nguyên, phiên bản lớn hơn 1.",
+   "title": "Đọc: phiên bản 1 và kỉ lục là số nguyên thì trả kỉ lục; mọi trường hợp khác trả chưa có",
+   "by": "Save",
+   "at": "2026-11-26 21:42:48"
+  },
+  "rules-instant": {
+   "state": "done",
+   "note": "đợt 1, SavedRecord và FileRecordStore",
+   "tests": [
+    "SavedRecordTests.ReadAndWrite_FinishWithinTheCall_OnTheRealFile"
+   ],
+   "play": "",
+   "hash": "0319d1bbcb83",
+   "text": "Đọc và ghi trả kết quả ngay trong lần gọi, bên gọi không phải chờ khung hình sau\nChỉ có một số nguyên nên ghi rất nhẹ (dự kiến dưới 10 ms). Nhờ vậy kỉ lục đã ghi xong trước khi popup thua hiện.",
+   "title": "Đọc và ghi trả kết quả ngay trong lần gọi, bên gọi không phải chờ khung hình sau",
+   "by": "Save",
+   "at": "2026-11-26 21:42:49"
+  },
+  "rules-write-whole": {
+   "state": "done",
+   "note": "đợt 1, SavedRecord và FileRecordStore",
+   "tests": [
+    "FileRecordStoreTests.GameKilledMidWrite_NextLaunchReadsTheOldRecord_NotNoneYet",
+    "FileRecordStoreTests.WriteAfterInterruptedWrite_ReplacesWholeRecord"
+   ],
+   "play": "",
+   "hash": "772a2f2fe009",
+   "text": "Tắt game ngay giữa lúc ghi thì lần mở sau đọc được bản cũ hoặc bản mới, không bao giờ ra chưa có vì ghi dở",
+   "title": "Tắt game ngay giữa lúc ghi thì lần mở sau đọc được bản cũ hoặc bản mới, không bao giờ ra chưa có vì ghi dở",
+   "by": "Save",
+   "at": "2026-11-26 21:42:49"
+  },
+  "rules-newer-reject": {
+   "state": "done",
+   "note": "đợt 1, SavedRecord và FileRecordStore",
+   "tests": [
+    "SavedRecordTests.NewerVersionOnDevice_EveryWriteFails_AndRecordStaysUntouched"
+   ],
+   "play": "",
+   "hash": "b1c8720d617b",
+   "text": "Trên máy là bản ghi có phiên bản lớn hơn 1 thì mọi lần ghi báo thất bại và bản ghi giữ nguyên",
+   "title": "Trên máy là bản ghi có phiên bản lớn hơn 1 thì mọi lần ghi báo thất bại và bản ghi giữ nguyên",
+   "by": "Save",
+   "at": "2026-11-26 21:42:49"
+  },
+  "rules-broken-kept": {
+   "state": "done",
+   "note": "đợt 1, SavedRecord và FileRecordStore",
+   "tests": [
+    "SavedRecordTests.BrokenRecord_IsNotDeletedByReading_AndIsReplacedBySuccessfulWrite",
+    "SavedRecordTests.BrokenVersionZero_DoesNotBlockWrites"
+   ],
+   "play": "",
+   "hash": "75793ebf6e33",
+   "text": "Bản ghi hỏng không bị xoá khi đọc; chỉ bị thay khi có lần ghi thành công",
+   "title": "Bản ghi hỏng không bị xoá khi đọc; chỉ bị thay khi có lần ghi thành công",
+   "by": "Save",
+   "at": "2026-11-26 21:42:49"
+  },
+  "rules-fail-silent": {
+   "state": "done",
+   "note": "đợt 1, SavedRecord và FileRecordStore",
+   "tests": [
+    "SavedRecordTests.DeviceRefusesWrite_ReturnsFailure_WithoutThrowing_AndLogsOneWarningWithReason",
+    "SavedRecordTests.RefusedNewerVersionWrite_LogsWarningWithReason",
+    "FileRecordStoreTests.FileThatCannotBeWritten_FailsWithReason_AndOldFileStays"
+   ],
+   "play": "",
+   "hash": "f7a798f564bc",
+   "text": "Ghi thất bại không hiện gì cho người chơi; bản dev ghi một dòng cảnh báo vào log kèm lí do",
+   "title": "Ghi thất bại không hiện gì cho người chơi; bản dev ghi một dòng cảnh báo vào log kèm lí do",
+   "by": "Save",
+   "at": "2026-11-26 21:42:50"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-26 21:40:07",
+   "id": "rules-version-one",
+   "state": "doing",
+   "by": "Save",
+   "note": "đợt 1, SavedRecord và FileRecordStore"
+  },
+  {
+   "at": "2026-11-26 21:40:07",
+   "id": "rules-record-int",
+   "state": "doing",
+   "by": "Save",
+   "note": "đợt 1, SavedRecord và FileRecordStore"
+  },
+  {
+   "at": "2026-11-26 21:40:08",
+   "id": "rules-read-cases",
+   "state": "doing",
+   "by": "Save",
+   "note": "đợt 1, SavedRecord và FileRecordStore"
+  },
+  {
+   "at": "2026-11-26 21:40:08",
+   "id": "rules-instant",
+   "state": "doing",
+   "by": "Save",
+   "note": "đợt 1, SavedRecord và FileRecordStore"
+  },
+  {
+   "at": "2026-11-26 21:40:08",
+   "id": "rules-write-whole",
+   "state": "doing",
+   "by": "Save",
+   "note": "đợt 1, SavedRecord và FileRecordStore"
+  },
+  {
+   "at": "2026-11-26 21:40:09",
+   "id": "rules-newer-reject",
+   "state": "doing",
+   "by": "Save",
+   "note": "đợt 1, SavedRecord và FileRecordStore"
+  },
+  {
+   "at": "2026-11-26 21:40:09",
+   "id": "rules-broken-kept",
+   "state": "doing",
+   "by": "Save",
+   "note": "đợt 1, SavedRecord và FileRecordStore"
+  },
+  {
+   "at": "2026-11-26 21:40:09",
+   "id": "rules-fail-silent",
+   "state": "doing",
+   "by": "Save",
+   "note": "đợt 1, SavedRecord và FileRecordStore"
+  },
+  {
+   "at": "2026-11-26 21:42:48",
+   "id": "rules-version-one",
+   "state": "done",
+   "by": "Save",
+   "note": "SavedRecordTests.EveryWrite_StoresDataVersionOne"
+  },
+  {
+   "at": "2026-11-26 21:42:48",
+   "id": "rules-record-int",
+   "state": "done",
+   "by": "Save",
+   "note": "SavedRecordTests.WrittenRecord_IsReadBackExactly_EvenNegative"
+  },
+  {
+   "at": "2026-11-26 21:42:48",
+   "id": "rules-read-cases",
+   "state": "done",
+   "by": "Save",
+   "note": "SavedRecordTests.NothingSaved_ReadsNoneYet, SavedRecordTests.AnythingButVersionOneWithIntegerRecord_ReadsNoneYet, SavedRecordTests.VersionOneWithIntegerRecord_ReadsTheRecord"
+  },
+  {
+   "at": "2026-11-26 21:42:49",
+   "id": "rules-instant",
+   "state": "done",
+   "by": "Save",
+   "note": "SavedRecordTests.ReadAndWrite_FinishWithinTheCall_OnTheRealFile"
+  },
+  {
+   "at": "2026-11-26 21:42:49",
+   "id": "rules-write-whole",
+   "state": "done",
+   "by": "Save",
+   "note": "FileRecordStoreTests.GameKilledMidWrite_NextLaunchReadsTheOldRecord_NotNoneYet, FileRecordStoreTests.WriteAfterInterruptedWrite_ReplacesWholeRecord"
+  },
+  {
+   "at": "2026-11-26 21:42:49",
+   "id": "rules-newer-reject",
+   "state": "done",
+   "by": "Save",
+   "note": "SavedRecordTests.NewerVersionOnDevice_EveryWriteFails_AndRecordStaysUntouched"
+  },
+  {
+   "at": "2026-11-26 21:42:49",
+   "id": "rules-broken-kept",
+   "state": "done",
+   "by": "Save",
+   "note": "SavedRecordTests.BrokenRecord_IsNotDeletedByReading_AndIsReplacedBySuccessfulWrite, SavedRecordTests.BrokenVersionZero_DoesNotBlockWrites"
+  },
+  {
+   "at": "2026-11-26 21:42:50",
+   "id": "rules-fail-silent",
+   "state": "done",
+   "by": "Save",
+   "note": "SavedRecordTests.DeviceRefusesWrite_ReturnsFailure_WithoutThrowing_AndLogsOneWarningWithReason, SavedRecordTests.RefusedNewerVersionWrite_LogsWarningWithReason, FileRecordStoreTests.FileThatCannotBeWritten_FailsWithReason_AndOldFileStays"
+  }
+ ]
+}

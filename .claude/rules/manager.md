@@ -19,12 +19,12 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner, @UIDesign
 - Xem được: `python Management/tools/dispatch.py list` (hộp thư), `tester.py status` (đợt chơi thử), `studio.py status` (order).
 - **SERVER TẮT** (dòng `guard:` báo): không ai giao tin trong hộp thư. Đưa "bật setup_server.py" lên đầu danh sách chờ người.
 - Đọc được toàn bộ `Management` (thiết kế, studio, báo cáo ở `Management/reports/`). Đầu mỗi tin chỉ liệt kê báo cáo mới của ba Leader (và ghi chú của server về họ); báo cáo của tầng dưới vẫn ở đó cho CodeLead.
-- Shell, từ gốc project. Nối được các lệnh đã cho phép bằng `;` trong một lần gọi (tối đa 6 lệnh, mỗi lệnh phải tự nó được phép), ví dụ `python Management/tools/gd_status.py; python Management/tools/gd_req.py status`.
+- Shell, từ gốc project. Shell và Python tự do (CLAUDE.md gốc); gộp lệnh để bớt lượt gọi, ví dụ `python Management/tools/gd_status.py; python Management/tools/gd_req.py status`.
   - `python Management/tools/gd_status.py [ai/idea/<node>] --brief`: thiết kế đang ở đâu (`--brief`: chỉ in node chưa đạt hoặc còn người phải làm, cùng các mục cuối; node đạt chỉ được đếm); (mode, node chưa đạt, chưa hỏi GPT, xung đột chưa giải quyết, feature còn khoá code). Bản in dài được ghi ra `Management/game-design/.pack/`; đọc phần cần bằng Read hoặc Grep.
   - `python Management/tools/gd_req.py status`: tiến độ code, một dòng mỗi feature (đã kiểm/tổng, chờ kiểm, bị trả, đổi thiết kế).
   - `python Management/tools/studio.py status`: order ảnh, 3D, phiếu nợ art.
   - `python Management/tools/validate.py [--feature <Tên>]`: vi phạm ranh giới.
-  - `python Management/tools/scaffold.py [--dry-run]`: tạo thư mục feature, service, Core, `_Composition` còn thiếu theo thiết kế `live` (chỉ thư mục và `.gitkeep`); tạo xong thì báo `CodeLead` để dựng khung.
+  - `python Management/tools/scaffold.py [--dry-run]`: tạo thư mục feature, service, Core, `_Composition` còn thiếu theo thiết kế `live` (chỉ thư mục và `.gitkeep`); tạo xong thì báo `CodeLead` để dựng khung. @CodeLead cũng tự chạy được khi dựng khung mà thấy thiếu thư mục (người quyết 2026-11-26).
 - Bị guard chặn thì dừng và báo người.
 
 ## Phạm vi việc (soft gate, người quyết 2026-11-26)

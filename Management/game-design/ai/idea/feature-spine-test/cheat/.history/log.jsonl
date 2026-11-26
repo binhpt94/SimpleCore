@@ -2,3 +2,8 @@
 {"at": "2026-11-26 15:07:13", "event": "data", "hash": "c291493afe1b", "previous": "e24a5b840cb0", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-26 15:08:17", "event": "data", "hash": "1fd904b5d5d3", "previous": "c291493afe1b", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-26 17:08:40", "event": "promote", "by": "người (Sync)", "hash": "1fd904b5d5d3"}
+{"at": "2026-11-26 20:50:14", "event": "data", "hash": "43779ebd3c36", "previous": "1fd904b5d5d3", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-26 20:54:23", "event": "promote", "by": "người (Sync)", "hash": "43779ebd3c36"}
+{"at": "2026-11-26 20:58:01", "event": "data", "hash": "22fa0bcb2134", "previous": "43779ebd3c36", "added": ["overlap"], "removed": [], "rewritten": []}
+{"at": "2026-11-26 20:58:34", "event": "data", "hash": "1717b5ee62cd", "previous": "22fa0bcb2134", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-26 21:27:11", "event": "promote", "by": "người (Sync)", "hash": "1717b5ee62cd"}

@@ -338,6 +338,7 @@ def label_cases(root):
           {it["id"]: it["fixed"] for it in n["items"]}, {"hero-count": True, "hero-speed": False, "hero-bench": False, "hero-four": False})
     check("the live table has no advice owed", [x["gpt"]["missing"] for x in gd.walk(snap["live"])], [[], []])
     owed_cases(root)
+    group_cases(root)
     check("gd_pack labels GPT's ideas", "GPT (góp ý q1#add-bench)" in "\n".join(gd_pack_lines(n)))
     long = PLAIN + f"\n### hero-long | AI 6 | {'d' * (gd.IDEA_TITLE_MAX + 1)}\nx\n"
     hero_node(root, ("", long))
@@ -377,6 +378,35 @@ def owed_cases(root):
           ("- CHƯA HỎI GPT" in text, text.split("## Chưa hỏi GPT")[1].split("\n##")[0].count("\n- ")), (True, 2))
     (advice / "feature-shop" / "s1.md").write_text("## Góp ý của GPT\n", encoding="utf-8")
     check("an answer settles it", next(x for x in gd.walk(gd.snapshot(root)["idea"]) if x["path"] == "feature-shop")["gptOwed"], False)
+
+
+def group_cases(root):
+    """Infra and test features owe GPT no question (người quyết 2026-11-26): group: in data.md, the default infra
+    features and a key ending in -test; group: takes infra or test, on a feature node only."""
+    idea = gd.table_dir(root, "idea")
+    top = f"---\nbased-on: {gd.read_data(idea)['hash']}\n---\n"
+    node(root, "idea", "feature-save", PLAIN.replace("hero-", "save-"), top.replace("\n---\n", "\ngroup: infra\n---\n", 1))
+    node(root, "idea", "feature-dot-test", PLAIN.replace("hero-", "dot-"), top)
+    node(root, "idea", "feature-popup", PLAIN.replace("hero-", "pop-"), top)
+    node(root, "idea", "feature-coin", PLAIN.replace("hero-", "coin-"), top)
+    node(root, "idea", "feature-odd", PLAIN.replace("hero-", "odd-"), top.replace("\n---\n", "\ngroup: lung-tung\n---\n", 1))
+    under = f"---\nbased-on: {gd.read_data(idea / 'feature-coin')['hash']}\ngroup: test\n---\n"
+    node(root, "idea", "feature-coin/coin-deep", PLAIN.replace("hero-", "deep-"), under)
+    snap = gd.snapshot(root)
+    nodes = {x["path"]: x for x in gd.walk(snap["idea"])}
+    check("infra and test owe GPT no question; a plain feature still does",
+          {k: (nodes[k]["group"], nodes[k]["gptOwed"]) for k in ("feature-save", "feature-dot-test", "feature-popup", "feature-coin", "feature-odd")},
+          {"feature-save": ("infra", False), "feature-dot-test": ("test", False), "feature-popup": ("infra", False),
+           "feature-coin": ("", True), "feature-odd": ("", True)})
+    texts = [p["path"] + ": " + p["text"] for p in snap["problems"]["idea"] if "group:" in p["text"]]
+    check("a wrong group, or one below round 2, is a structure problem",
+          (any(t.startswith("feature-odd:") and "lung-tung" in t for t in texts),
+           any(t.startswith("feature-coin/coin-deep:") and "vòng 2" in t for t in texts), len(texts)), (True, True, 2))
+    saved = (idea / "feature-save" / "data.md").read_text(encoding="utf-8")
+    check("the group header leaves the data hash alone",
+          gd.read_data(idea / "feature-save")["hash"] == gd.parse_data(saved.replace("group: infra\n", ""))["hash"], True)
+    text = gd_status.report(root, "ai/idea/feature-save")
+    check("gd_status names the group", "- Nhóm: hạ tầng" in text and "CHƯA HỎI GPT" not in text, True)
 
 
 def gd_pack_lines(n):

@@ -1,4 +1,4 @@
 index,sheet,kind,key,rows,note
 int,string,enum:params|list|levels|formula|map,string,int,string
 Số thứ tự,Tên sheet,Loại bảng,Cột khoá của bảng,Số dòng dữ liệu (tool tự điền),Bảng chứa gì
-1,Params,params,key,0,Thông số của bản ghi lưu và lần đọc ghi
+1,Params,params,key,8,Thông số của bản ghi lưu và lần đọc ghi

@@ -1,6 +1,6 @@
 ---
-based-on: 5033d18c216a
-refs: feature-spine-test/spine-checks/spine-spec@396ed200581f, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
+based-on: 95aa661c0148
+refs: feature-spine-test/spine-checks/spine-spec@41d348a9ece6, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
 ---
 # Cheat: nhân vật thử Spine
 
@@ -10,3 +10,6 @@ State dựng nhanh nhân vật Spine và các nút thử ở bản dev để tes
 
 ### run-flipped | AI 7 | Màn trận có nhân vật Spine đang chạy, quay mặt phải, nhãn "run · lặp · mặt phải"
 Ép: animation run, mặt phải, nút "Chạy" ở trạng thái đang chọn. Nhân vật, bốn nút và nhãn đúng chỗ của `feature-spine-test/spine-checks/spine-spec`. Không cần trận chạy phía sau. Bấm nút trong state này vẫn đổi animation và lật mặt như thường.
+
+### overlap | AI 7 | Màn trận có HUD, nhân vật Spine đang idle, một hero và một quái đứng chồng hình lên nhân vật
+Ép: một hero của `feature-hero` và một quái của `feature-enemy` đứng tại chỗ của nhân vật (x=+9u, chân trên mặt đất), không di chuyển, không đánh nhau; nhân vật idle, mặt trái, nhãn "idle · lặp · mặt trái"; HUD hiện đủ. Để chụp và lặp lại lỗi thứ tự vẽ mà không phải chờ hero, quái đi tới đúng chỗ. Theo góp ý GPT `r2-core#ca-cheat-giao-hinh`.

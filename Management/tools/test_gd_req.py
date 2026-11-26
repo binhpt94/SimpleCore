@@ -118,8 +118,13 @@ def run_flow(root):
     check("the line for the chat names what it is doing", "wallet-rules#start-50 (viết Reset)" in rb.brief(root, W))
     check("verify refuses a requirement that is not done",
           refused(lambda: rb.mark(root, W, "wallet-rules#start-50", "verify", "@CodeLead")))
-    rb.mark(root, W, "wallet-rules#start-50", "done", W, tests=["WalletLogicTests.StartsWithConfiguredCoins"])
+    for bad in ("Game..WalletLogicTests.StartsWithConfiguredCoins", "Game.1x.WalletLogicTests.StartsWithConfiguredCoins"):
+        check("done refuses a malformed name: " + bad, refused(lambda: rb.mark(root, W, "wallet-rules#start-50", "done", W, tests=[bad])))
+    rb.mark(root, W, "wallet-rules#start-50", "done", W, tests=["Game.Wallet.Tests.WalletLogicTests.StartsWithConfiguredCoins"])
     check("done with a real test: waiting for @CodeLead", state(root, "start-50"), "done")
+    check("done drops the namespace: the book keeps Lớp.Hàm",
+          [(r["saved"] or {}).get("tests") for n in rb.view(root, W)["nodes"] for r in n["reqs"] if r["ref"].endswith("#start-50")],
+          [["WalletLogicTests.StartsWithConfiguredCoins"]])
     rb.mark(root, W, "feature-wallet/balance-spend/wallet-rules#start-50", "verify", "@CodeLead")
     check("verify (full path) makes it met", state(root, "start-50"), "verified")
     check("unknown requirement is refused", refused(lambda: rb.mark(root, W, "wallet-rules#nope", "doing", W, note="x")))

@@ -15,12 +15,13 @@ Nhóm Tools. Không code, không đụng Unity, **không viết thiết kế**. 
   - `python Management/tools/gd_advise.py <node> <id>`: gửi `<id>.q.md` cho GPT, ghi câu trả lời vào `<id>.md`. Không có trần lượt.
   - `python Management/tools/gd_status.py [ai/idea/<node>] [--brief]` (`--brief`: chỉ in node chưa đạt hoặc còn người phải làm, cùng các mục cuối; node đạt chỉ được đếm): tình trạng cây hoặc một nhánh; ở mỗi node có dòng "Góp ý của GPT" và các góp ý chưa vào node.
   - `gd_pack.py`, `gd_frame.py`, `studio.py check|status|measure` như mọi phiên.
-- Không chạy `codex` bằng shell trực tiếp, không dùng `studio.py consult`, không dùng unity-mcp. Bị guard chặn hay cần người quyết thì dừng, không hỏi người: nhắn `GameDesigner` `BÁO CHẶN`, kết thúc lượt; câu trả lời tới qua hộp thư.
+- Không chạy `codex` bằng shell trực tiếp, không dùng `studio.py consult`. Bị guard chặn hay cần người quyết thì dừng, không hỏi người: nhắn `GameDesigner` `BÁO CHẶN`, kết thúc lượt; câu trả lời tới qua hộp thư.
 - Không có báo cáo cuối lượt.
 
 ## Ai được nhờ
 - Chỉ **người** và **@GameDesigner**. Việc tới ở đầu tin (hộp thư, `[tin <id> · từ @GameDesigner]`) hoặc trong chat của người. Phiên khác nhờ thì trả lời một câu: việc này đi qua @GameDesigner. Trả lời @GameDesigner bằng `SendMessage` (Leader, luôn sống).
 - Không tự rà cây, không tự hỏi GPT khi chưa ai nhờ, không tự nhắn góp ý cho phiên code.
+- Không hỏi GPT về feature test (`group: test` hay key đuôi `-test`) và node cheat (`<feature>/cheat`), người quyết 2026-11-26: được nhờ thì nhắn lại GameDesigner một câu theo luật này, không chạy `gd_advise.py`. Feature hạ tầng (`group: infra`) không bắt buộc hỏi, nhưng được nhờ thì vẫn hỏi.
 
 ## Một lần hỏi
 Mỗi lần được nhờ: dùng skill `advisor-ask-gpt` (năm bước: đọc, viết `<id>.q.md`, `gd_advise.py`, `<id>.note.md`, nhắn lại).

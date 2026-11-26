@@ -128,8 +128,12 @@ def lines_for(root, node, out, brief=False, hidden=None):
     if asked:
         out.append("- Góp ý của GPT (ngang hàng ý của bạn: mỗi góp ý phải thành một ý, không được bỏ; xem "
                    "skill gd-integrate-advice): " + ", ".join(f"{where}/{a}.md" for a in asked))
+    if node.get("group") == "infra":
+        out.append("- Nhóm: hạ tầng (không cần hỏi GPT; hỏi khi bạn thấy cần)")
+    elif node.get("group") == "test":
+        out.append("- Nhóm: test (không hỏi GPT, kể cả node con và node cheat)")
     if node.get("gptOwed"):
-        out.append(f"- CHƯA HỎI GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}): nhờ DesignAdvisor "
+        out.append(f"- CHƯA HỎI GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}, trừ feature hạ tầng, test): nhờ DesignAdvisor "
                    f"qua hộp thư (python Management/tools/dispatch.py send @DesignAdvisor --from GameDesigner \"<node> · <hỏi gì>\") hỏi GPT về node này; câu trả lời sẽ nằm ở {where}/<id>.md")
     gpt = node.get("gpt") or {}
     for m in gpt.get("missing", []):
@@ -192,6 +196,45 @@ def context_lines(snap, node):
         elif r["path"] in nodes:
             brief_lines(gd.brief(nodes[r["path"]]), out)
     return out
+
+
+def hash_lines(root, arg=""):
+    """--hashes: one line per node of the branch (the whole tree without a path): its data hash, whether based-on and
+    each ref still match, what it waits for. Short, so printed as it is."""
+    path = ""
+    if arg:
+        arg = arg.replace("\\", "/").rstrip("/")
+        if arg != PREFIX and not arg.startswith(PREFIX + "/"):
+            raise ValueError(f"đường dẫn phải có dạng {PREFIX}/<node>")
+        path = arg[len(PREFIX) + 1:]
+    gd.check_path(path)
+    top = next((n for n in gd.walk(gd.snapshot(root)["idea"]) if n["path"] == path), None)
+    if top is None:
+        raise ValueError(f"idea không có node '{path or '(gốc)'}'")
+    rows, off = [], False
+    for n in gd.walk(top):
+        parts = []
+        if n["path"]:
+            parts.append(f"based-on LỆCH (ghi {n['basedOn'] or 'chưa có'}, cha {n['parentHash']})" if n["stale"] else "based-on khớp")
+            off = off or n["stale"]
+        for r in n["refs"]:
+            name = r["label"].rpartition("/")[2]
+            parts.append(f"ref {name} " + ("không có node này" if r["ok"] is None else "khớp" if r["ok"]
+                                           else f"LỆCH (ghi {r['hash']}, giờ {r['current']})"))
+            off = off or r["ok"] is False
+        for r in n["refMissing"]:
+            parts.append(f"thiếu ref {r['label']}")
+            off = True
+        if n.get("uiWait"):
+            parts.append("CHỜ @UIDesigner")
+        if n.get("gptOwed"):
+            parts.append("CHƯA HỎI GPT")
+        rows.append((n["path"] or "(gốc)", f"hash {n['dataHash']}  " + " · ".join(parts)))
+    width = max(len(k) for k, _ in rows)
+    out = [f"{k.ljust(width)}  {v}".rstrip() for k, v in rows]
+    if off:
+        out += ["", f"Ghim: python Management/tools/gd_pin.py {arg or PREFIX} --chain (in diff để rà, rồi lệnh ghim)"]
+    return "\n".join(out)
 
 
 def report(root, arg="", brief=False):
@@ -257,7 +300,7 @@ def report(root, arg="", brief=False):
                 for n in later] or ["- không có"]
     owed = [n for n in gd.walk(node) if n.get("gptOwed")]
     if owed:
-        out += ["", f"## Chưa hỏi GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}; nhờ DesignAdvisor qua hộp thư dispatch.py send, kể cả node đã chốt)"] + [
+        out += ["", f"## Chưa hỏi GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}, trừ feature hạ tầng, test; nhờ DesignAdvisor qua hộp thư dispatch.py send, kể cả node đã chốt)"] + [
             f"- {n['path'] or '(gốc)'}: {n['title']}" for n in owed]
     if not path and snap["missing"]:
         out += ["", "## Thiếu feature hạ tầng (vòng 2 luôn phải có)"] + [f"- {p['path']}: {p['text']}" for p in snap["missing"]]
@@ -307,12 +350,16 @@ def main(argv):
     if len(argv) >= 3 and argv[-2] == "--root":      # test-only override
         root, argv = Path(argv[-1]), argv[:-2]
     brief = "--brief" in argv[1:]
-    argv = [a for a in argv if a != "--brief"]
+    hashes = "--hashes" in argv[1:]
+    argv = [a for a in argv if a not in ("--brief", "--hashes")]
     if len(argv) > 2:
-        print(f"Cách dùng: python Management/tools/gd_status.py [{PREFIX}/<node>] [--brief]", file=sys.stderr)
+        print(f"Cách dùng: python Management/tools/gd_status.py [{PREFIX}/<node>] [--brief | --hashes]", file=sys.stderr)
         return 2
     try:
         arg = argv[1] if len(argv) == 2 else ""
+        if hashes:
+            print(hash_lines(root, arg))
+            return 0
         name = arg.replace("\\", "/").rstrip("/")[len(PREFIX) + 1:]
         print(gd.emit(root, "status-brief" if brief else "status", name or "all", report(root, arg, brief), STATUS_NOTE))
         return 0

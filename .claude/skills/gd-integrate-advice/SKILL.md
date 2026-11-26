@@ -7,7 +7,11 @@ Một lần hỏi bên @DesignAdvisor: skill `advisor-ask-gpt`.
 
 ## Bên @GameDesigner: đưa góp ý vào node
 Cần GPT cùng nghĩ về một node thì nhờ @DesignAdvisor qua hộp thư (nó chạy theo việc, SendMessage tới nó bị chặn): `python Management/tools/dispatch.py send @DesignAdvisor --from GameDesigner "<node> · <hỏi gì> · <ràng buộc của người nếu có>"`. Nó nhắn lại bạn (SendMessage) đường dẫn `Management/game-design/advice/<node, '/' thay bằng '.'>/<id>.md` (node gốc: `_root`). Bạn chỉ đọc `advice/`.
-- **Hỏi GPT là bắt buộc ở vòng 1 và vòng 2**: node gốc và mọi node feature (trừ `glossary`) phải có ít nhất một lần hỏi GPT trước khi bạn báo node đó xong. Không tự quyết "lần này không hỏi". Node viết từ trước mà chưa hỏi, kể cả đã chốt, thì hỏi bù. `gd_status.py` ghi "CHƯA HỎI GPT" ở node còn nợ và liệt kê ở mục "Chưa hỏi GPT" cuối bản in; trang hiện chip đỏ. Viết lại node theo hướng khác hẳn thì hỏi lại. Vòng 3, 4 không bắt buộc.
+- **Hỏi GPT là bắt buộc ở vòng 1 và vòng 2**: node gốc và mọi node feature (trừ `glossary`, feature hạ tầng và feature test) phải có ít nhất một lần hỏi GPT trước khi bạn báo node đó xong. Không tự quyết "lần này không hỏi". Node viết từ trước mà chưa hỏi, kể cả đã chốt, thì hỏi bù. `gd_status.py` ghi "CHƯA HỎI GPT" ở node còn nợ và liệt kê ở mục "Chưa hỏi GPT" cuối bản in; trang hiện chip đỏ. Viết lại node theo hướng khác hẳn thì hỏi lại. Vòng 3, 4 không bắt buộc.
+- **Hai nhóm feature không hỏi GPT** (người quyết 2026-11-26), khai bằng dòng `group:` ở phần đầu `data.md` của node vòng 2 (skill `gd-round-2`):
+  - `group: infra`, hạ tầng: không dính gameplay, không phải thứ người chơi nghe, nhìn, cảm nhận (lưu dữ liệu, mã hoá, chuyển scene, nhịp trận). Không cần hỏi; vẫn nhờ hỏi được khi bạn thấy cần.
+  - `group: test`, feature dùng để thử (key đuôi `-test` tự là test): không hỏi GPT, kể cả node con của nó.
+  - Node cheat (`<feature>/cheat`) của mọi feature: không hỏi GPT.
 - **Đã có góp ý thì phải đưa hết vào.**
 - **Mỗi góp ý thành một ý** trong `## Ý cốt lõi` của `data.md`, và khai nguồn ở phần đầu (không tính vào hash):
   `by: hero-bench=gpt@q1#add-bench, hero-four=gpt@q1#four-heroes` (ý `hero-bench` là góp ý `add-bench` của lần hỏi `q1`).

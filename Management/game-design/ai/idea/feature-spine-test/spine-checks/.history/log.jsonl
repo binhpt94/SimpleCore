@@ -1,2 +1,4 @@
 {"at": "2026-11-26 15:02:13", "event": "data", "hash": "85ddd2d933a5", "previous": "", "added": ["one-character", "unit-layer", "same-camera", "three-anims", "loop-plays-on", "once-then-idle", "smooth-switch", "run-in-place", "anim-buttons", "flip-button", "state-label", "wide-screen", "under-hud-popup", "shown-with-battle"], "removed": [], "rewritten": []}
 {"at": "2026-11-26 17:08:40", "event": "promote", "by": "người (Sync)", "hash": "85ddd2d933a5"}
+{"at": "2026-11-26 20:58:01", "event": "data", "hash": "91a5bf33f442", "previous": "85ddd2d933a5", "added": ["dev-build-only", "all-required", "pause-freeze", "touch-lock", "overlap-order", "flip-anchor", "mid-mix-switch", "size-vs-hero", "narrow-camera", "material-check", "style-fit", "perf-cost"], "removed": [], "rewritten": []}
+{"at": "2026-11-26 20:58:34", "event": "promote", "by": "người (Sync)", "hash": "91a5bf33f442"}

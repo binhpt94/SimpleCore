@@ -1,9 +1,13 @@
 {
- "hash": "1fd904b5d5d3",
+ "hash": "1717b5ee62cd",
  "items": {
   "run-flipped": {
    "hash": "d0c1de8d23b3",
    "text": "Màn trận có nhân vật Spine đang chạy, quay mặt phải, nhãn \"run · lặp · mặt phải\"\nÉp: animation run, mặt phải, nút \"Chạy\" ở trạng thái đang chọn. Nhân vật, bốn nút và nhãn đúng chỗ của `feature-spine-test/spine-checks/spine-spec`. Không cần trận chạy phía sau. Bấm nút trong state này vẫn đổi animation và lật mặt như thường."
+  },
+  "overlap": {
+   "hash": "c182094ecf9b",
+   "text": "Màn trận có HUD, nhân vật Spine đang idle, một hero và một quái đứng chồng hình lên nhân vật\nÉp: một hero của `feature-hero` và một quái của `feature-enemy` đứng tại chỗ của nhân vật (x=+9u, chân trên mặt đất), không di chuyển, không đánh nhau; nhân vật idle, mặt trái, nhãn \"idle · lặp · mặt trái\"; HUD hiện đủ. Để chụp và lặp lại lỗi thứ tự vẽ mà không phải chờ hero, quái đi tới đúng chỗ. Theo góp ý GPT `r2-core#ca-cheat-giao-hinh`."
   }
  }
 }

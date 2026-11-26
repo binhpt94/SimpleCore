@@ -1,5 +1,5 @@
 {
- "hash": "85ddd2d933a5",
+ "hash": "91a5bf33f442",
  "items": {
   "one-character": {
    "hash": "79e67abcefe0",
@@ -56,6 +56,54 @@
   "shown-with-battle": {
    "hash": "14c8227df9fe",
    "text": "Nhân vật và các nút thử hiện suốt màn trận và ẩn theo màn trận"
+  },
+  "dev-build-only": {
+   "hash": "2ec41a2cb0dc",
+   "text": "Nhân vật, nút và nhãn thử chỉ có ở bản dev; bản cho người chơi không có chúng\nHiện thực `dev-only` của feature."
+  },
+  "all-required": {
+   "hash": "3e6f20c7cf9d",
+   "text": "Mọi điều kiểm của node này là bắt buộc để lần thử đạt, trừ độ hợp style ghi riêng\nHiện thực `pass-rule`: độ hợp style (`style-fit`) không làm lần thử trượt, chỉ là đầu vào cho quyết định làm art Spine riêng."
+  },
+  "pause-freeze": {
+   "hash": "71df06c575b4",
+   "text": "Trận dừng thì nhân vật đứng nguyên tư thế; trận chạy lại thì animation chạy tiếp từ đúng chỗ\nKể cả lúc đang nhảy và lúc đang chuyển mượt. Tín hiệu dừng của `feature-run` tới qua nơi lắp màn."
+  },
+  "touch-lock": {
+   "hash": "d242430a8130",
+   "text": "Nút thử chỉ nhận chạm khi trận đang chạy và không có popup chặn bấm\nChạm lúc bị chặn bị bỏ, không thành lệnh khi trận chạy lại."
+  },
+  "overlap-order": {
+   "hash": "dfcca2e6bb65",
+   "text": "Hero hay quái đi ngang qua thì mọi phần của nhân vật giữ cùng thứ tự vẽ so với sprite đó, suốt clip\nThân, tay, phụ kiện không phần nào lọt ra sau sprite hay đổi lớp giữa chừng."
+  },
+  "flip-anchor": {
+   "hash": "6db7e9745f1e",
+   "text": "Lật mặt giữ nguyên chỗ chân trên mặt đất, không trượt ngang, không nhấc lên"
+  },
+  "mid-mix-switch": {
+   "hash": "a3b41cdb8272",
+   "text": "Đổi animation giữa lúc đang chuyển mượt thì chuyển tiếp từ tư thế đang hiện sang animation mới\nLần nhảy bị ngắt không tự kéo nhân vật về đứng yên khi đã sang animation khác."
+  },
+  "size-vs-hero": {
+   "hash": "be6a1051d872",
+   "text": "Nhân vật ở tư thế đứng cao bằng hộp hero; ghi thêm chênh với chiều cao nhìn thấy của sprite hero"
+  },
+  "narrow-camera": {
+   "hash": "a60f8739a3af",
+   "text": "Ở tỉ lệ màn hẹp nhất được hỗ trợ, camera giữ trọn hình nhân vật qua mọi animation và cả hai mặt\nĐo tới đỉnh cú nhảy và phụ kiện xa nhất. Bổ sung cho `wide-screen`."
+  },
+  "material-check": {
+   "hash": "7dfd8dd8ec6d",
+   "text": "Màu và mép trong suốt của nhân vật đúng trên cả vùng sáng và vùng tối của nền trận, ở cả hai mặt\nKhông mảng hồng, ô đục, quầng viền, không mất chi tiết khi lật."
+  },
+  "style-fit": {
+   "hash": "00fa36b6c8d2",
+   "text": "Hình bóng, viền và bảng màu của nhân vật được so với sprite hero ở cỡ trong trận\nHiện thực `art-fit`; ghi riêng, không làm lần thử trượt."
+  },
+  "perf-cost": {
+   "hash": "67f995661363",
+   "text": "Đo thời gian xử lý khung hình của một đoạn trận đông khi bật và khi tắt nhân vật thử, cùng máy và cùng cảnh\nGhi phần tăng khi bật. Ngưỡng đạt theo ngân sách FPS khi thiết kế có ngân sách đó."
   }
  }
 }

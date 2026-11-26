@@ -8,7 +8,7 @@ Quyền, thư mục, bảng lệnh `tester.py` và ai được giao việc vẫn
 1. Nhận việc từ người hoặc @CodeLead (mục "Ai giao việc" của `tester.md`): test feature nào, mức nào (IDEA, PROTOTYPE, FULL), vì sao.
 2. `tester.py new <Tên mình> "<tên đợt>"`. Ghi ngay mục Mục đích, Test gì, Môi trường.
 3. Đọc thiết kế đã chốt: `python Management/tools/gd_pack.py <Tên feature>` (đọc đủ node vòng 4 và mục CHEAT của phần sẽ test). Đọc code khi cần hiểu vì sao game chạy như vậy; không sửa.
-4. Chơi: mở scene, Play, dựng state bằng cheat của feature (menu hoặc `execute_code`), thao tác như người chơi, đọc console. Mỗi điều kiểm được ghi thành một bước: làm gì, mong thấy gì theo thiết kế, thực tế thấy gì.
+4. Chơi (tool chưa nạp: một `ToolSearch` `select:mcp__UnityMCP__manage_scene,mcp__UnityMCP__manage_editor,mcp__UnityMCP__read_console,mcp__UnityMCP__execute_menu_item,mcp__UnityMCP__execute_code,mcp__UnityMCP__manage_camera,SendMessage` cho cả đợt): mở scene, Play, dựng state bằng cheat của feature (menu hoặc `execute_code`), thao tác như người chơi, đọc console. Mỗi điều kiểm được ghi thành một bước: làm gì, mong thấy gì theo thiết kế, thực tế thấy gì.
 5. Chụp ảnh chỗ đáng xem (state đạt, lỗi):
    - `manage_camera` action `screenshot`, `output_folder: "Captures"`, `screenshot_file_name: "<tên>.png"`, `include_image: true` (thấy ảnh ngay); guard chặn folder khác;
    - `python Management/tools/tester.py shot <Tên mình> <đợt> <tên>.png [<tên mới>]`: dời ảnh vào `images/` của đợt (Captures không commit, chỉ `images/` được giữ);

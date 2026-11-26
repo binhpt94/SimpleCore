@@ -1,5 +1,5 @@
 ---
-based-on: 85ddd2d933a5
+based-on: 91a5bf33f442
 refs: feature-battlefield/battlefield-layers/layer-values@9b7d55c81fc4, feature-hero/hero-list/hero-roster-values@b91d8c9d12d4, feature-popup/popup-layer/stack-rules@fa85847e35ee, feature-hud/hud-layout/layout-spec@1a7ddf5f3b6c
 ---
 # Nhân vật Spine thử: bộ mẫu, chỗ đứng, animation và nút
@@ -28,8 +28,8 @@ Giống hướng hero đứng chờ quái ở cánh phải. Nút Lật đổi sa
 ### mix-time | AI 8 | Mọi lần đổi animation chuyển mượt trong 0.2 giây
 Đủ ngắn để không trễ, đủ dài để thấy trộn. Áp cho cả lúc jump chạy xong tự về idle.
 
-### real-time | AI 7 | Animation chạy theo thời gian thực, tốc độ 1, không đọc nhịp trận
-Giữ đúng ý không đọc gì của feature khác. Popup mở thì nhân vật vẫn chạy dưới nền che.
+### match-time | AI 8 | Animation chạy tốc độ 1 khi trận chạy; trận dừng thì đứng nguyên tư thế, trận chạy lại thì chạy tiếp từ đúng chỗ
+Tín hiệu dừng của `feature-run` tới qua nơi lắp màn, nhân vật không gọi thẳng feature khác. Đang nhảy hay đang chuyển mượt lúc dừng cũng đứng nguyên, chạy lại thì làm tiếp phần còn lại.
 
 ### same-unit-layer | AI 7 | Nhân vật vẽ ở lớp unit, ngay trên hero và quái cùng lớp, dưới hiệu ứng
 Quái đi qua thì nhân vật che lên quái; hiệu ứng đòn vẫn vẽ đè lên nhân vật.
@@ -48,3 +48,20 @@ Ví dụ: "run · lặp · mặt trái". Đổi ngay khi bấm nút hay khi jump
 
 ### popup-dims | AI 8 | Popup mở thì nền che tối phủ nhân vật, nút thử không bấm được tới khi popup đóng
 Theo `feature-popup/popup-layer/stack-rules`.
+
+### touch-lock | AI 7 | Nút thử chỉ nhận chạm khi trận đang chạy và không có popup chặn bấm; chạm lúc bị chặn bị bỏ
+Kể cả lúc trận đã dừng mà popup chưa hiện, và lúc popup đã đóng mà trận chưa chạy lại.
+
+### dev-build | AI 8 | Nhân vật, nút và nhãn chỉ có trong Unity Editor và bản Development build
+Bản phát hành không có, như mọi thứ chỉ để thử.
+
+### flip-anchor | AI 8 | Lật mặt lấy gốc ở chân nhân vật: chân vẫn ở x=+9u, y=0 trước và sau khi lật
+
+### mid-mix-switch | AI 7 | Đổi animation giữa lúc đang chuyển mượt thì chuyển mượt 0.2 giây từ tư thế đang hiện sang animation mới
+Nhảy bị ngắt bởi Chạy hay Đứng thì không còn tự về idle.
+
+### narrow-fits | AI 7 | Ở 16:9, tỉ lệ hẹp nhất, đỉnh cú nhảy và phụ kiện xa nhất của nhân vật nằm trọn trong khung nhìn ở cả hai mặt
+16:9 thấy y tới +14u theo `feature-battlefield/battlefield-layers/layer-values`; spineboy cao 1.5u nhảy không tới đó. Mép phải x=+16u cách nhân vật 7u.
+
+### perf-measure | AI 6 | Đo p95 thời gian khung hình của 60 giây trận đông, một lượt bật và một lượt tắt nhân vật thử
+Cùng máy, đội, seed và thao tác; ghi p95 hai lượt và phần tăng khi bật. Chưa có ngưỡng đạt vì thiết kế chưa có ngân sách FPS; người xem số rồi quyết.

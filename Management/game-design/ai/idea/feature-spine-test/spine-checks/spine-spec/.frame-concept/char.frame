@@ -1,7 +1,7 @@
 kind: field
 title: Chỗ đứng của nhân vật Spine (cánh phải, x=+9u, chân trên mặt đất)
 view: x=-16u..16u y=-4u..14u
-ui: faa9d59fca56
+ui: 11f59bd03c00
 ai: 7
 why: hộp nhân vật 1u x 1.5u bằng hộp hero (use hero-roster-values), tâm ngang ở +9u, đáy chạm mặt đất y=0
 why: mũi tên chỉ hướng mặt lúc màn trận mở: quay về phía thành (sang trái)

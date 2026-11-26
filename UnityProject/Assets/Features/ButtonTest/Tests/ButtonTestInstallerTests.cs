@@ -7,6 +7,7 @@ using Game.Run;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using SessionState = Game.Core.SessionState;
 
 namespace Game.ButtonTest.Tests
 {

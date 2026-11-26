@@ -25,13 +25,18 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Animation một lần chạy xong: tự về đứng yên.
 - Bấm nút quay mặt: nhân vật lật sang phía kia, animation không đổi.
 - Rời màn trận: nhân vật và nút ẩn; lần sau mở lại từ đầu.
+- Trận dừng: nhân vật đứng nguyên tư thế, nút không nhận chạm; trận chạy lại: animation chạy tiếp từ đúng chỗ.
+- Lần thử đạt khi mọi điều kiểm đạt, trừ `style-fit` ghi riêng. Kết quả, ảnh, clip, số đo ghi ở đợt chơi thử của tester (`Tester/`), đó là phiếu `result-sheet` của feature.
 
 ## Đã tự quyết
 - **Ba animation**: đủ cả hai kiểu lặp và một lần, và đủ một cặp lặp-lặp để thử chuyển mượt. Đã loại: chỉ một animation (không thử được đổi), bày hết mọi animation của bộ mẫu (nhiều nút, không thêm điều kiểm mới).
 - **Vẽ ở lớp unit**: đây là chỗ Spine sẽ đứng nếu được dùng cho hero, quái. Ba chỗ khác trong thứ tự vẽ đã có `feature-cube-test` thử. Đã loại: ba nhân vật ở ba lớp.
 - **Chạy tại chỗ**: thử animation, không thử đường đi; tránh đè lên khối thử, decor.
 - **Nút trên màn**, không phải phím: chơi thử trên điện thoại và tester bấm được.
+- **Dừng theo trận** (`pause-freeze`, theo góp ý GPT `r2-core` ở node feature): Spine dùng cho unit thì phải đứng khi trận dừng. Đã loại: chạy theo thời gian thực bất kể trận dừng.
+- **Các điều kiểm mới theo `r2-core`** (`overlap-order`, `flip-anchor`, `mid-mix-switch`, `size-vs-hero`, `narrow-camera`, `material-check`, `style-fit`, `perf-cost`, `touch-lock`, `dev-build-only`, `all-required`): hiện thực các ý cùng tên của node feature thành điều chấm được.
+- **Phiếu kết quả là đợt chơi thử của tester**, không làm file riêng: tester đã ghi ảnh, kết quả từng điều, lỗi theo đợt.
 
 ## Chưa rõ
-- Animation có dừng khi tạm dừng trận không: chốt ở vòng 4.
+- Ngân sách FPS và máy yếu nhất được hỗ trợ (`perf-cost`): chưa có trong thiết kế.
 - Bộ xương mẫu cụ thể: chốt ở vòng 4, theo bản runtime @CodeLead cài.

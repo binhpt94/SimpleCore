@@ -32,6 +32,15 @@ def refused(fn, *args, **kw):
 def main():
     root = Path(tempfile.mkdtemp(prefix="inbox-"))
     try:
+        check("a role named without its @ is that role (PowerShell drops a bare @Name); a feature stays as it is",
+              [dp.role_name(x) for x in ("Codex", "designadvisor", "Core", "UnityAutoPlay", "Manager", "Wallet", "@Codex")],
+              ["@Codex", "@DesignAdvisor", "@Core", "@UnityAutoPlay", "@Manager", "Wallet", "@Codex"])
+        other = Path(tempfile.mkdtemp(prefix="inbox-"))
+        try:
+            check("send: DesignAdvisor without @ goes to @DesignAdvisor",
+                  dp.send(other, "DesignAdvisor", "hỏi", "@GameDesigner")["target"], "@DesignAdvisor")
+        finally:
+            shutil.rmtree(other, ignore_errors=True)
         check("pools: features, services and @Core; the tools; the tester; never a Leader, the human or a bad name",
               [dp.pool_of(x) for x in ("Wallet", "_Services/Popup", "@Core", "@Codex", "@DesignAdvisor", "@Manager",
                                        "@CodeLead", "@human", "@UnityAutoPlay", "wallet", "../x", "", None)],

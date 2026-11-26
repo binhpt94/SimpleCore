@@ -17,5 +17,6 @@
 - Màn trận mở → nhân vật idle, quay mặt trái; bốn nút và nhãn hiện, nhãn "idle · lặp · mặt trái", spine-idle đang chọn.
 - Chạm Chạy → "run · lặp · mặt trái". Chạm Lật → "run · lặp · mặt phải".
 - Chạm Nhảy → "jump · một lần · …"; nhảy xong → "idle · lặp · …", spine-idle đang chọn.
-- Popup bất kì mở → popup che lên, không chạm tới nút; nhân vật vẫn chạy dưới nền che; đóng popup → bấm được lại, trạng thái giữ nguyên.
+- Popup bất kì mở → popup che lên, không chạm tới nút; nhân vật chạy tiếp dưới nền che nếu trận còn chạy, đứng nguyên nếu trận dừng; đóng popup và trận chạy lại → bấm được lại, trạng thái giữ nguyên.
+- Trận dừng mà không có popup → nút không nhận chạm, nhân vật đứng nguyên; trận chạy lại → animation chạy tiếp từ đúng chỗ.
 - Rời màn trận → nhân vật, nút và nhãn ẩn; lần sau mở lại từ idle, mặt trái.

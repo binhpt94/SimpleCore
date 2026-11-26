@@ -521,16 +521,16 @@
     var listBox = put(pane, section("Thread hiện có"));
     listBox.style.marginTop = "16px";
     // Ba thao tác trên một thread, server chạy lượt ngầm (claude --resume) trong chính thread đó:
-    // Đọc lại quy trình; Compact (/compact); Renew (server tự clear transcript, không chạy lượt nào; gán lại FEATURE, lượt sau đọc quy trình; cần PIN).
+    // Compact (/compact); Renew (server tự clear transcript, không chạy lượt nào; gán lại FEATURE, lượt sau đọc quy trình; cần PIN).
     var ACTIONS = {
-      reread: { label: "Đọc lại quy trình", path: "/api/sessions/reread", done: "đã đọc" },
+      model: { label: "Đổi model", path: "/api/sessions/model", done: "đã đổi model" },
       compact: { label: "Compact", path: "/api/sessions/compact", done: "đã compact" },
       renew: { label: "Renew", path: "/api/sessions/renew", done: "đã làm mới", pin: true },
       live: { label: "Bật live", path: "/api/sessions/live", done: "đã live" },
       stop: { label: "Tắt live", path: "/api/sessions/stop", done: "đã tắt" }
     };
-    var ACTION_KEYS = ["reread", "compact", "renew", "live", "stop"];      // nút "tất cả"
-    var ROW_KEYS = ["reread", "compact", "renew"];      // nút của từng dòng; Live là nút bật/tắt ở cột Live
+    var ACTION_KEYS = ["compact", "renew", "live", "stop"];      // nút "tất cả"
+    var ROW_KEYS = ["compact", "renew"];      // nút của từng dòng; Live là nút bật/tắt ở cột Live
     var BATCH = 10;     // số thread chạy cùng lúc của các nút "tất cả"
     var rereadRow = put(listBox, el("div", "gap"));
     var allBtns = {};
@@ -544,7 +544,7 @@
       "Renew cần PIN (ô PIN ở trên): server tự clear thread (transcript cũ dời vào ~/.claude/projects/<project>/.renewed/, cùng chat, không chạy lượt nào), gán lại FEATURE; lượt kế tiếp của thread được dòng guard nhắc đọc lại quy trình. Việc dở dang chưa ghi ra file sẽ mất. Thread đang chạy nền thì bị tắt live; thread đang giữa một lượt chỉ được đánh dấu \"chờ renew\": server làm mới ngay trước việc kế tiếp hộp thư giao cho nó. " +
       "Xoá cần PIN và VS Code tắt hẳn: dời transcript của thread vào ~/.claude/projects/<project>/.deleted/ (khôi phục được), bỏ nó khỏi danh sách chat và bỏ gán. " +
       "Live: phiên khác chỉ thấy thread trong ListAgents (và nhắn được) khi có tiến trình chạy nó. Bật live chạy thread thành phiên nền (một lượt ngắn); " +
-      "Setup tự bật live cho thread vừa tạo; Đọc lại, Compact giữ thread live; Renew tắt live. Phiên nền hỏi quyền thì vào duyệt bằng claude attach <tên> trong terminal. " +
+      "Setup tự bật live cho thread vừa tạo; Compact giữ thread live; Renew tắt live. Phiên nền hỏi quyền thì vào duyệt bằng claude attach <tên> trong terminal. " +
       "Muốn mở thread đó trong VS Code thì Tắt live trước, để hai tiến trình không cùng ghi một session. " +
       "Feature, service, @Core và tool nhận việc qua tab Hộp thư: thread tắt thì được bật lên với việc đó (✉ là số tin chờ giao); ở chế độ theo nhu cầu, Setup không bật live chúng và thread rảnh tự tắt. " +
       "\"Chờ người\" là điều thread đang đợi bạn, theo bản tóm tắt của Claude Code."));
@@ -554,7 +554,7 @@
     var rereadCells = {};      // id -> { btns, note } của lần vẽ hiện tại
     var refreshTimer = null;
     var humanIds = {};
-    var openIds = {};      // đang mở trong VS Code/terminal: Compact, Renew "tất cả" bỏ qua (Đọc lại thì nhắn vào chat)      // thread của người: "Bật live: tất cả" bỏ qua
+    var openIds = {};      // đang mở trong VS Code/terminal: Compact, Renew "tất cả" bỏ qua      // thread của người: "Bật live: tất cả" bỏ qua
     var paintReread = function (id) {
       var cell = rereadCells[id], st = rereadState[id];
       if (!cell) return;
@@ -564,8 +564,9 @@
       cell.note.title = st && st.full ? st.full : "";
     };
     // Chạy một thao tác trên một thread; trả { ok, pin } (pin: server từ chối vì PIN, không nên thử tiếp thread khác).
-    var runOne = function (kind, id) {
+    var runOne = function (kind, id, extra) {
       var act = ACTIONS[kind], body = { id: id };
+      if (extra) Object.keys(extra).forEach(function (k) { body[k] = extra[k]; });
       if (act.pin) {
         body.pin = pin.value;
         if (!body.pin) {
@@ -579,7 +580,7 @@
       paintReread(id);
       return api("POST", act.path, body).then(function (res) {
         out.ok = !!res.ok; out.pin = !!res.pin;
-        rereadState[id] = res.ok ? { cls: "ok-text", text: res.pending ? "đang chạy lượt: đã đánh dấu, renew khi có việc" : act.done, full: res.answer || "" }
+        rereadState[id] = res.ok ? { cls: "ok-text", text: res.pending ? "đang chạy lượt: đã đánh dấu, renew khi có việc" : kind === "model" ? res.answer : act.done, full: res.answer || "" }
           : { cls: "bad-text", text: "lỗi: " + res.error };
       }, function (e) {
         rereadState[id] = { cls: "bad-text", text: "lỗi gọi server: " + e.message };
@@ -628,7 +629,6 @@
         ACTION_KEYS.forEach(function (k) { allBtns[k].disabled = false; });
       });
     };
-    allBtns.reread.addEventListener("click", function () { runAll("reread"); });
     allBtns.compact.addEventListener("click", function () { runAll("compact"); });
     allBtns.stop.classList.add("danger");      // tắt mọi phiên nền: màu đỏ như Xoá
     allBtns.live.addEventListener("click", function () { runAll("live"); });
@@ -682,8 +682,8 @@
       };
       setsNote.textContent = "Cơ bản: " + byGroup(data.sets.basic) + ". Full: thêm " +
         (byGroup(data.sets.full.slice(data.sets.basic.length)) || "không có gì") +
-        ". Model và effort chỉ áp cho thread tạo mới (mặc định " + data.defaults.model + ", " + data.defaults.effort +
-        "); thread đã có giữ nguyên.";
+        ". Model và effort ở đây chỉ áp cho thread tạo mới (mặc định " + data.defaults.model + ", " + data.defaults.effort +
+        "; vai có model riêng thì theo vai). Thread đã có: đổi ở cột Model, Effort của từng dòng rồi bấm Xác nhận.";
       listBody.textContent = "";
       var missing = data.sets.missing || [], suggested = data.sets.suggested || [];
       if (missing.length) {
@@ -733,14 +733,13 @@
         var why = unnamed ? "chat chưa đặt tên: mở nó trong VS Code rồi gõ /rename <tên>" : t.archived ? "thread đã archive" : t.unlisted ? "VS Code không hiện thread này"
           : !t.binding ? "thread chưa gán FEATURE: chạy Setup trước" : "";
         // Chat đang mở trong VS Code (hoặc terminal): tiến trình đó không thấy lượt trang chạy vào, nên không chạy.
-        // Đọc lại vẫn chạy: server nhắn vào chat đó (SendMessage). Compact, Renew thì không: lệnh / qua tin nhắn chỉ là chữ.
+        // Compact, Renew không chạy được: lệnh / nhắn qua SendMessage chỉ là chữ.
         var openWhy = t.live === "interactive" ? "đang mở trong VS Code (hoặc terminal): Compact thì gõ /compact, Renew thì gõ /clear trong chat đó (hoặc đóng chat rồi bấm)" : "";
         var rereadBox = el("span"), rowBtns = ROW_KEYS.map(function (k) {
           var b = put(rereadBox, el("button", "copy", ACTIONS[k].label));
           b.type = "button";
           b.style.marginRight = "4px";
-          var off = why || (k !== "reread" ? openWhy : "");
-          if (k === "reread" && openWhy && !why) b.title = "đang mở trong VS Code: trang nhắn tin vào chat đó (SendMessage), chat tự đọc lại";
+          var off = why || openWhy;
           if (off) { b.disabled = true; b.title = off; b.dataset.off = "1"; }
           else b.addEventListener("click", (function (kind, id) { return function () { runOne(kind, id); }; })(k, t.id));
           return b;
@@ -781,6 +780,53 @@
           rereadCells[t.id] = { btns: rowBtns, note: rereadNote };
           paintReread(t.id);
         }
+        // Model và effort của từng thread: chọn rồi bấm Xác nhận. Lưu cho mọi lượt server chạy trong thread này
+        // (đè model theo vai); phiên nền đang rảnh được bật lại ngay trên model mới.
+        var run = t.run || {};
+        var used = (t.model || "—").replace(/^claude-/, "") + ", " + (t.effort || "—");
+        var rowPick = function (values, chosen, label) {
+          var s = el("select");
+          s.setAttribute("aria-label", label + " của " + t.title);
+          s.style.cssText = "padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--text);font:inherit";
+          values.forEach(function (v) {
+            var o = add(el("option", "", v));
+            o.value = v;
+            o.selected = v === chosen;
+            add(s, o);
+          });
+          if (values.indexOf(chosen) < 0) {      // chưa biết (CLI tự chọn) hay model lạ: vẫn hiện, không chọn được
+            var o2 = add(el("option", "", chosen || "mặc định CLI"));
+            o2.value = ""; o2.selected = true; o2.disabled = true;
+            add(s, o2);
+          }
+          return s;
+        };
+        var mSel = rowPick(data.models, run.model, "Model"), eSel = rowPick(data.efforts, run.effort, "Effort");
+        var okBtn = el("button", "copy", "Xác nhận");
+        okBtn.type = "button";
+        okBtn.style.marginLeft = "4px";
+        var pickTip = "lượt kế tiếp server chạy: " + (run.model || "—") + ", " + (run.effort || "—") +
+          (t.choice ? " (bạn đã chọn)" : " (theo vai)") + " · lượt gần nhất trong transcript: " + used;
+        mSel.title = eSel.title = pickTip;
+        var samePick = function () { return mSel.value === (run.model || "") && eSel.value === (run.effort || ""); };
+        var pickOff = why || "";
+        var paintPick = function () {
+          okBtn.disabled = !!pickOff || samePick() || !mSel.value || !eSel.value;
+          okBtn.title = pickOff || (samePick() ? "chọn model hoặc effort khác rồi bấm" :
+            "đổi sang " + mSel.value + ", " + eSel.value + (liveState === "on" ? "; phiên nền rảnh thì được bật lại (một lượt ngắn)" : ": áp từ lượt kế tiếp"));
+        };
+        if (pickOff) { mSel.disabled = eSel.disabled = true; }
+        mSel.addEventListener("change", paintPick);
+        eSel.addEventListener("change", paintPick);
+        paintPick();
+        okBtn.addEventListener("click", function () {
+          okBtn.disabled = true;
+          runOne("model", t.id, { model: mSel.value, effort: eSel.value });
+        });
+        var modelCell = el("span"), effortCell = el("span");
+        add(modelCell, mSel);
+        add(effortCell, eSel, okBtn);
+        if (t.choice) add(modelCell, el("div", "muted", "bạn chọn"));
         var needsNote = t.needs ? el("div", "bad-text", "chờ người: " + t.needs) : null;
         // Renew bấm lúc thread đang giữa một lượt chỉ đánh dấu: server làm mới ngay trước việc kế tiếp.
         if (t.renew_pending) {
@@ -803,7 +849,7 @@
         var wantGroup = tier && vs.tierNames ? vs.tierNames[tier] : "";
         var vsCell = unnamed || !wanted[key(t)] || t.archived || t.unlisted ? el("span", "muted", inGroup || "—")
           : (inGroup === wantGroup ? el("span", "ok-text", inGroup) : el("span", "bad-text", (inGroup || "chưa nhóm") + " → " + wantGroup));
-        add(body, row([t.title, t.binding || "—", vsCell, (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
+        add(body, row([t.title, t.binding || "—", vsCell, modelCell, effortCell,
           t.modified, tokenCell(t.tokens), state, liveBtn, el("code", "", t.id.slice(0, 8)), rereadBox]));
       });
       var made = {};

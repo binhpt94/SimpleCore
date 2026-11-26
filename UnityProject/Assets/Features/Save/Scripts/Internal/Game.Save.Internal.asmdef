@@ -1,0 +1,17 @@
+{
+  "name": "Game.Save.Internal",
+  "rootNamespace": "Game.Save",
+  "references": [
+    "Game.Core",
+    "Game.Save.Contracts"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

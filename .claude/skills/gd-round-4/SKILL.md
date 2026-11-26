@@ -77,7 +77,7 @@ Guard chỉ cho phiên feature sửa code khi nhánh của nó có ít nhất m�
 Các mục: Làm gì, Thông số, Thông số theo giai đoạn, Trường hợp biên, Chưa rõ.
 
 ## Node cheat (`<feature>/cheat/`)
-Mỗi feature một node `cheat`. Nó vừa là bộ state để phiên code dựng ngay khi test và Play (không phải chơi tới nơi), vừa là **chỗ duy nhất đặt ảnh art** của feature. Vì vậy mỗi feature tối đa 3 ảnh màu, còn các node vòng 4 cứ có frame thoải mái.
+Mỗi feature một node `cheat`. Không hỏi GPT về node cheat (người quyết 2026-11-26). Nó vừa là bộ state để phiên code dựng ngay khi test và Play (không phải chơi tới nơi), vừa là **chỗ duy nhất đặt ảnh art** của feature. Vì vậy mỗi feature tối đa 3 ảnh màu, còn các node vòng 4 cứ có frame thoải mái.
 - **Vị trí:** ngay dưới node feature, ở chỗ của vòng 3, không có node con. Luật vòng 3 không áp cho nó.
 - **Bắt buộc** khi feature có ít nhất một frame giao diện (`kind: ui`), kể cả feature hạ tầng. Thiếu thì mọi node vòng 4 có frame `ui` của feature mang lỗi cấu trúc, không chốt được. Feature chỉ có frame chiến trường (`kind: field`) không cần.
 - **`data.md`:** mỗi ý là một state, tối đa 3 ý.

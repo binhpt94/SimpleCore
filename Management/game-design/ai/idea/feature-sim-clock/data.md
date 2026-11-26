@@ -1,5 +1,6 @@
 ---
 based-on: 6181a7c21bf0
+group: infra
 by: step-after-combat=gpt@r2-1#chot-giao-chien, spawn-after-results=gpt@r2-1#thu-tu-tha-quai, keep-drawn-spawn=gpt@r2-1#giu-lan-boc-khi-cho-tha, init-on-run=gpt@r2-1#khoi-tao-theo-luot, first-step-on-start=gpt@r2-1#moc-buoc-dau, seed-record-owner=gpt@r2-1#chu-so-huu-ban-ghi-seed, clock-drives-gameplay=gpt@r2-1#dong-ho-khi-tran-chay, continue-after-revive=gpt@r2-1#tiep-nhip-sau-hoi-sinh, clear-on-dispose=gpt@r2-1#don-trang-thai-nhip, tester-fast-run=gpt@r2-1#dieu-kien-chay-lai, revive-result-queued=gpt@r2-1#phat-lai-ket-qua-hoi-sinh, seeded-rng=gpt@r2-1#seed-dev-dung-config
 ---
 # Nhịp và ngẫu nhiên của trận

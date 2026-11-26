@@ -43,6 +43,10 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   go into the background session of a thread that has one (stopped, then started again
   with that prompt), so it stays live. `claude attach <name>` opens a background thread in a terminal (to answer a
   permission question); stop it before opening the thread in VS Code. Delete stops it first.
+- POST /api/sessions/model {id, model, effort} (no PIN): the human's pick of model and effort for one thread
+  (model-choice/<id>.json in the guard store), over the role's for every turn the server runs in it; an idle
+  background session is started again on it. GET /api/threads gives each thread `run` {model, effort}: what its next
+  server turn uses, and `choice`: whether that is the human's pick.
 - Inbox courier (a thread of its own while the server runs; dispatch.py holds the messages and settings): every few
   seconds it gives each waiting message of a feature, service, @Core or tool to that thread as a turn of its own
   (start it with the message as its prompt, or stop and start an idle background one), never as a cross-session
@@ -267,7 +271,8 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/inbox/config": MAX_BODY,
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
-              "/api/sessions/delete": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY}
+              "/api/sessions/delete": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY,
+              "/api/sessions/model": MAX_BODY}
 TRASH = ".deleted"      # inside the transcripts folder: threads() reads only *.jsonl at its top
 # Threads that run a headless turn right now (renew, reread, compact, a thread setup is creating): not deleted.
 BUSY = set()
@@ -399,6 +404,9 @@ def threads(include_unnamed=False):
                         "unlisted": entries == {HEADLESS_ENTRY},
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
                         "binding": (binding := guard.bound_feature(sid, guard.STORE_DIR) or ""),
+                        "choice": bool(model_choice(sid)),
+                        "run": dict(zip(("model", "effort"), (lambda m: (model_alias(m[0]), m[1]))(run_model(
+                            {"id": sid, "binding": binding, "feature": feature, "model": model, "effort": effort})))),
                         "profiled": profiled(binding or feature),
                         "live": (live.get(sid) or {}).get("kind", ""), "live_status": (live.get(sid) or {}).get("status", ""),
                         "live_state": (live.get(sid) or {}).get("state", ""),
@@ -768,10 +776,45 @@ def profile_args(feature):
     return args
 
 
+# The model and effort the human picked for one thread on the page (POST /api/sessions/model): model-choice/<id>.json
+# in the guard store, {model, effort}. It wins over the role's (ROLE_MODELS) for every turn the server runs in it,
+# and stays across a renew (same session). A chat opened by hand in VS Code picks its model there.
+MODEL_CHOICE_DIR = "model-choice"
+
+
+def model_choice_path(session_id):
+    path = guard.binding_path(session_id, guard.STORE_DIR) if isinstance(session_id, str) else None
+    return path and os.path.join(guard.STORE_DIR, MODEL_CHOICE_DIR, os.path.basename(path))
+
+
+def model_choice(session_id):
+    """(model, effort) the human picked for that thread, or None."""
+    path = model_choice_path(session_id)
+    got = bind_session.read_json(path, None) if path and os.path.isfile(path) else None
+    if isinstance(got, dict) and got.get("model") in MODELS and got.get("effort") in EFFORTS:
+        return got["model"], got["effort"]
+    return None
+
+
+def model_alias(model):
+    """The alias of MODELS a model id stands for ("claude-opus-5-5" -> "opus"), else the id itself."""
+    return next((a for a in MODELS if a in (model or "")), model or "")
+
+
+def run_model(t):
+    """(model, effort) the next turn the server runs in thread t uses: the human's pick, else the role's, else the
+    ones it last used."""
+    picked = model_choice(t.get("id"))
+    if picked:
+        return picked
+    return role_model(t.get("binding") or t.get("feature") or "", t.get("model") or "", t.get("effort") or "")
+
+
 def turn_args(t):
-    """The model and effort of the thread's role (else the ones it last used), and its role profile, as CLI flags."""
+    """The model and effort of the thread (run_model: the human's pick, the role's, else the ones it last used), and
+    its role profile, as CLI flags."""
     feature = t.get("binding") or t.get("feature") or ""
-    model, effort = role_model(feature, t.get("model") or "", t.get("effort") or "")
+    model, effort = run_model(t)
     args = []
     if model:
         args += ["--model", model]
@@ -956,6 +999,36 @@ def stop_live(session_id):
     except Exception as ex:
         return dict(head, ok=False, error=str(ex)[:300])
     return dict(head, ok=True, answer="đã tắt live")
+
+
+def set_model(session_id, model, effort):
+    """The confirm button of the Model and Effort pickers of one row: saves the human's pick for that thread
+    (model_choice), used by every turn the server runs in it from now on. A background session that is idle is
+    started again on it right away (one short turn); one in a turn keeps its model until it is started again. A
+    chat open in VS Code or a terminal keeps what it runs on there."""
+    if model not in MODELS or effort not in EFFORTS:
+        return {"ok": False, "error": f"model phải là một trong {MODELS}, effort một trong {EFFORTS}"}
+    t, no = eligible(session_id)
+    if no:
+        return no
+    path = model_choice_path(t["id"])
+    if not path:
+        return {"ok": False, "id": t["id"], "title": t["title"], "error": "thread chưa gán FEATURE: chạy Setup trước"}
+    bind_session.write_json(path, {"model": model, "effort": effort})
+    head = {"ok": True, "id": t["id"], "title": t["title"], "model": model, "effort": effort}
+    if t.get("live") == "interactive":
+        return dict(head, answer=f"đã lưu {model}, {effort} cho lượt trang chạy; chat đang mở ở VS Code giữ model chọn ở đó")
+    if t.get("live") != "background":
+        return dict(head, answer=f"đã lưu {model}, {effort}: áp từ lượt kế tiếp")
+    with BUSY_LOCK:
+        held = t["id"] in BUSY
+    if held or t.get("live_status") not in ("idle", ""):
+        return dict(head, answer=f"đã lưu {model}, {effort}; phiên nền đang chạy lượt nên giữ model cũ tới khi được bật lại")
+    try:
+        turn(t, LIVE_PROMPT, bg=True)
+    except Exception as ex:
+        return dict(head, ok=False, error=f"đã lưu {model}, {effort} nhưng chưa bật lại phiên nền được: " + str(ex)[:220])
+    return dict(head, answer=f"đã đổi sang {model}, {effort} và bật lại phiên nền")
 
 
 def reread(session_id):
@@ -2083,6 +2156,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, go_live(data.get("id")))
             if self.path == "/api/sessions/stop":
                 return self.send_json(200, stop_live(data.get("id")))
+            if self.path == "/api/sessions/model":
+                return self.send_json(200, set_model(data.get("id"), str(data.get("model") or ""), str(data.get("effort") or "")))
             if self.path == "/api/sessions/delete":
                 return self.send_json(200, delete_thread(data.get("id"), data.get("pin")))
             if self.path == "/api/vscode-groups":

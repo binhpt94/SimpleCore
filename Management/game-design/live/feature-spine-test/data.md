@@ -1,5 +1,7 @@
 ---
 based-on: 6181a7c21bf0
+by: dev-only=gpt@r2-core#chi-hien-ban-dev, pass-rule=gpt@r2-core#moc-dat-lan-thu, result-sheet=gpt@r2-core#phieu-ket-qua, owner-decides=gpt@r2-core#nguoi-chot-spine, spine-no-effect=gpt@r2-core#ngo-canh-hien-thi, spine-on-battle=gpt@r2-core#khoang-trong-mac-dinh, size-vs-hero=gpt@r2-core#co-theo-hero, pause-freeze=gpt@r2-core#dung-dung-khung, touch-lock=gpt@r2-core#khoa-cham-khi-dung, overlap-order=gpt@r2-core#thu-tu-khi-giao-hinh, material-check=gpt@r2-core#chat-lieu-tren-nen-tran, art-fit=gpt@r2-core#so-voi-khung-my-thuat, narrow-camera=gpt@r2-core#khung-camera-hep, flip-anchor=gpt@r2-core#lat-giu-moc-dat, mid-mix-switch=gpt@r2-core#doi-giua-luc-tron, perf-cost=gpt@r2-core#do-chi-phi-trong-tran, cheat-overlap=gpt@r2-core#ca-cheat-giao-hinh
+gpt-dropped: r2-core#o-dieu-khien-thu=control-zone, r2-core#node-cach-kiem=check-procedure
 ---
 # Nhân vật thử Spine
 
@@ -10,8 +12,8 @@ Một nhân vật hoạt hình xương Spine đứng trên chiến trường c�
 ### spine-purpose | AI 8 | Feature này để thử nhân vật Spine hiện và chạy animation thế nào trong game, không thêm gì vào lối chơi
 Người yêu cầu ngày 2026-11-26. Kết quả là ảnh và lần chơi thử cho người xem, trước khi quyết có dùng Spine cho hero, quái hay không.
 
-### spine-on-battle | AI 8 | Nhân vật thử đứng trên chiến trường của màn trận, chân chạm đất như hero và quái
-Màn trận có đủ thứ để đặt cạnh: nền, thành, hero, quái, hiệu ứng, HUD và popup. Đã loại: một màn riêng chỉ có nhân vật thử (không có gì để so).
+### spine-on-battle | AI 8 | Nhân vật thử đứng trên chiến trường của màn trận, chân chạm đất, cả vùng hoạt ảnh nằm ngoài thành, chỗ xuất hiện của hero, quái và khối thử
+Màn trận có đủ thứ để đặt cạnh: nền, thành, hero, quái, hiệu ứng, HUD và popup. Chỗ đứng đối chiếu với `feature-castle`, `feature-hero`, `feature-enemy`, `feature-cube-test`. Hero và quái đi ngang qua nhân vật trong trận là ca kiểm lớp vẽ riêng. Đã loại: một màn riêng chỉ có nhân vật thử (không có gì để so).
 
 ### spine-checks | AI 8 | Mỗi điều cần kiểm về Spine là một ý chấm được ở node bên dưới
 Ví dụ: nhân vật hiện đúng hình; đổi animation; animation lặp và animation chạy một lần rồi quay về; chuyển mượt giữa hai animation; quay mặt trái phải; thứ tự vẽ cạnh hero, quái; cỡ ở màn rộng; nằm dưới HUD và popup.
@@ -22,5 +24,50 @@ Thấy được chuyển từ animation này sang animation khác, là chỗ Spi
 ### spine-sample-asset | AI 7 | Nhân vật thử là một nhân vật Spine mẫu có sẵn, không đặt vẽ mới
 Studio của project không dựng được bộ xương Spine. Thử runtime trước, có kết quả mới tính tới art Spine riêng.
 
-### spine-no-effect | AI 8 | Nhân vật thử không đổi gì trong trận và không gửi, không đọc gì của feature khác
-Quái và hero đi xuyên qua nhân vật, không đánh nó, không bị chặn. Bỏ feature này đi thì trận vẫn y như cũ.
+### spine-no-effect | AI 8 | Nhân vật thử không đổi gì trong trận; nó nhận camera, mốc đất và tín hiệu dừng trận qua nơi lắp màn, không gọi thẳng feature khác
+Nơi lắp màn (`_Composition`) gắn nhân vật vào camera trận dùng chung, cấp mốc đất theo `feature-battlefield`, `feature-castle`, và chuyển tín hiệu dừng của `feature-run`. Quái và hero đi xuyên qua nhân vật, không đánh nó, không bị chặn. Bỏ feature này đi thì trận vẫn y như cũ.
+
+### dev-only | AI 8 | Nhân vật, nút và nhãn thử Spine chỉ có trên màn trận của bản dev
+Người thử vào đúng màn trận để xem; bản cho người chơi không có điều khiển thử.
+
+### pass-rule | AI 7 | Lần thử đạt khi mọi điều cần kiểm bắt buộc đều đạt trên bản dev, ở cấu hình đã chốt trước khi thử
+Một điều bắt buộc chưa có bằng chứng thì lần thử còn dở. Độ hợp style của bộ mẫu ghi riêng, để tách lỗi tích hợp khỏi khác biệt mĩ thuật.
+
+### result-sheet | AI 6 | Mỗi lần thử có một phiếu ngoài game ghi cấu hình, kết quả từng điều cần kiểm và bằng chứng
+Ghi bản dev, runtime, bộ mẫu, máy, tỉ lệ màn và cách dựng cảnh. Ảnh cho cỡ và lớp vẽ, clip cho lỗi chuyển động, số đo cho hiệu năng. Phiếu không thuộc `feature-save`.
+
+### owner-decides | AI 8 | Người xem phiếu thử rồi quyết riêng có dùng Spine cho hero và cho quái hay không
+Một mẫu chỉ cho thấy Spine chạy được trong trận. Hero và quái khác nhau về số con cùng lúc và yêu cầu hình, nên hai quyết định có thể khác nhau.
+
+### size-vs-hero | AI 7 | Ở tư thế đứng, đo từ mặt đất tới đỉnh đầu nhân vật thử và so với hộp hero
+Cùng camera và khung hình với `feature-hero`. Ghi thêm chênh với chiều cao nhìn thấy của hero, để bắt mẫu đúng cỡ hộp mà trông quá to hay quá nhỏ.
+
+### pause-freeze | AI 7 | Trận dừng thì nhân vật thử đứng nguyên tư thế, trận chạy lại thì animation chạy tiếp từ đúng chỗ đã dừng
+Thử cả lúc đang nhảy và lúc đang trộn hai animation. Theo mốc dừng của `feature-run`, kể cả trước khi popup tạm dừng, hồi sinh hay thua hiện. Khi trận chạy thì giữ tốc độ thực.
+
+### touch-lock | AI 7 | Nút thử Spine chỉ nhận chạm khi trận đang chạy và không có popup chặn bấm
+Kiểm cả lúc trận đã dừng mà popup chưa hiện, và lúc popup đã đóng mà trận chưa chạy lại; chạm bị chặn không được thành lệnh đổi animation khi trận chạy tiếp.
+
+### overlap-order | AI 8 | Hero hay quái đi ngang qua thì mọi phần của nhân vật thử giữ cùng thứ tự vẽ so với từng sprite, qua mọi khung hình
+Kiểm thân, tay và phụ kiện trong cùng một clip, để bắt lỗi một phần Spine lọt ra sau sprite hay đổi lớp giữa chừng.
+
+### material-check | AI 7 | Material của nhân vật thử giữ đúng màu và mép trong suốt trên cả vùng sáng lẫn vùng tối của nền trận
+So với ảnh mẫu trên máy chạy bản dev, ở cả hai hướng mặt. Thấy mảng hồng, ô đục, quầng viền hay mất chi tiết khi lật thì ghi shader và material. Dùng nền thật của `feature-battlefield`.
+
+### art-fit | AI 7 | Độ dễ đọc của nhân vật thử được chấm ở cỡ trong trận, đặt cạnh sprite hero
+So hình bóng, độ rõ của viền và độ lệch bảng màu với style của game. Chênh lệch là đầu vào cho quyết định làm art Spine riêng sau khi thử runtime.
+
+### narrow-camera | AI 7 | Ở tỉ lệ màn ngang hẹp nhất, camera giữ trọn hình nhân vật thử qua mọi animation và cả hai hướng mặt
+Đo tới đỉnh cú nhảy và điểm xa nhất của phụ kiện so với mép khung nhìn. Bổ sung cho ca màn rộng; tách lỗi bị camera cắt khỏi việc HUD hay popup che có chủ ý.
+
+### flip-anchor | AI 8 | Lật mặt giữ nguyên chỗ gốc của nhân vật thử trên chiến trường
+Đánh dấu chỗ chân trên mặt đất rồi lật qua lại ở cùng tư thế, để bắt mẫu bị trượt ngang hay nhấc khỏi đất.
+
+### mid-mix-switch | AI 7 | Có lệnh đổi mới giữa lúc đang trộn thì nhân vật chuyển từ tư thế đang hiện sang animation vừa chọn
+Bấm Chạy, Nhảy, Đứng liên tiếp trong thời gian trộn. Tư thế nối tiếp qua từng lần bấm; lần nhảy bị ngắt không tự kéo nhân vật về Đứng khi đã sang animation khác.
+
+### perf-cost | AI 6 | Trên máy yếu nhất được hỗ trợ, thời gian xử lý khung hình khi bật nhân vật thử phải nằm trong ngân sách FPS đã chốt
+Đo hai lượt cùng máy, đội, seed và thao tác, một bật một tắt nhân vật thử, cùng một đoạn trận đông sau khi máy chạy ổn định; ghi cả mức chậm và phần tăng khi bật. Dùng mốc tái lập của `feature-sim-clock`.
+
+### cheat-overlap | AI 7 | Cheat có một state dựng sẵn nhân vật thử chồng hình với hero và quái, trong khung trận có HUD
+Giữ state chạy quay mặt phải. State mới để chụp và lặp lại lỗi lớp vẽ mà không phải chờ hero, quái đi tới đúng chỗ trong lượt thật.

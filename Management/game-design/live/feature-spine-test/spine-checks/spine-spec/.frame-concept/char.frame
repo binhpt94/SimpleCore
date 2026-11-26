@@ -1,0 +1,16 @@
+kind: field
+title: Chỗ đứng của nhân vật Spine (cánh phải, x=+9u, chân trên mặt đất)
+view: x=-16u..16u y=-4u..14u
+ui: 11f59bd03c00
+ai: 7
+why: hộp nhân vật 1u x 1.5u bằng hộp hero (use hero-roster-values), tâm ngang ở +9u, đáy chạm mặt đất y=0
+why: mũi tên chỉ hướng mặt lúc màn trận mở: quay về phía thành (sang trái)
+why: chỉ vẽ dải đất và nhân vật; thành, khối thử, decor không vẽ vì node chưa khai refs tới chúng
+let char-left = 8.5u         # tâm +9u trừ nửa rộng 0.5u
+use ground-y = feature-battlefield/battlefield-layers/layer-values#ground-y
+use ground-h = feature-battlefield/battlefield-layers/layer-values#ground-h
+use hero-w = feature-hero/hero-list/hero-roster-values#hero-w
+use hero-h = feature-hero/hero-list/hero-roster-values#hero-h
+- ground       rect   x=-16u y=ground-y w=32u h=ground-h label="Dải đất trong màn 16:9 (layer-values)"
+- spine-char   rect   x=char-left y=0 w=hero-w h=hero-h label="Nhân vật Spine, tâm +9u, cao 1.5u"
+- face         arrow  from=9u,0.75u to=7.5u,0.75u overlap label="mặt trái lúc mở"

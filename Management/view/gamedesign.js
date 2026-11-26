@@ -1640,8 +1640,14 @@
         }
         if (idea && n.gptOwed) {
           var askTag = el("span", "gd-tag bad", "chưa hỏi GPT");
-          askTag.title = "Node vòng 1 và 2 bắt buộc có ít nhất một lần hỏi GPT (qua @DesignAdvisor); node này chưa có";
+          askTag.title = "Node vòng 1 và 2 bắt buộc có ít nhất một lần hỏi GPT (qua @DesignAdvisor), trừ feature hạ tầng, test; node này chưa có";
           chips.push(askTag);
+        }
+        if (n.group) {
+          var groupTag = el("span", "gd-tag", n.group === "infra" ? "hạ tầng" : "test");
+          groupTag.title = (n.group === "infra" ? "Feature hạ tầng: không cần hỏi GPT" : "Feature test: không hỏi GPT") +
+            ". @GameDesigner xếp bằng dòng group: trong data.md (feature mặc định và key đuôi -test tự xếp); sai thì sửa dòng đó";
+          chips.push(groupTag);
         }
         if (item.hidden > 0) chips.push(el("span", "gd-tag", "+" + item.hidden + (n.round === FOCUS_ROUND - 1 ? " feature ẩn" : " node con")));
         // Hai hàng ở đáy thẻ: trạng thái (nhìn trước) ở trên, thông tin ở dưới.
@@ -2268,7 +2274,7 @@
       var clashes = state.table === "idea" ? openClashes(node) : 0;
       if (clashes) add(body, el("p", "gd-clash-text", "Xung đột chưa giải quyết: " + clashes + " nhóm ý trái nhau. Trong mỗi khung \"Chọn 1\" bên dưới, " +
         "chấm để chỉ còn một ý đạt (từ " + passMin() + " trở lên), rồi Lưu chấm điểm. Các node con bị khoá với @GameDesigner cho tới khi hết xung đột."));
-      if (node.gptOwed) add(body, el("p", "bad-text", "Chưa hỏi GPT: node vòng 1 và 2 bắt buộc có ít nhất một lần hỏi GPT. " +
+      if (node.gptOwed) add(body, el("p", "bad-text", "Chưa hỏi GPT: node vòng 1 và 2 bắt buộc có ít nhất một lần hỏi GPT (trừ feature hạ tầng, test). " +
         "@GameDesigner nhắn @DesignAdvisor hỏi về node này."));
       var byCount = node.by || {}, gptSide = node.gpt || { dropped: [], missing: [], clarified: 0 };
       if (byCount.gpt || gptSide.clarified || gptSide.dropped.length || gptSide.missing.length || node.nodeBy) {

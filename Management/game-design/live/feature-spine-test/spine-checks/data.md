@@ -1,5 +1,5 @@
 ---
-based-on: 5033d18c216a
+based-on: 95aa661c0148
 refs: feature-battlefield/battlefield-layers@5c2132462329
 ---
 # Nhân vật thử và các điều kiểm về Spine
@@ -45,3 +45,37 @@ Unit thật đi cả hai chiều vì quái tới từ hai cánh; thử lật hì
 ### under-hud-popup | AI 8 | HUD và popup vẽ trên nhân vật; nền che của popup làm tối nhân vật như mọi thứ của trận
 
 ### shown-with-battle | AI 7 | Nhân vật và các nút thử hiện suốt màn trận và ẩn theo màn trận
+
+### dev-build-only | AI 8 | Nhân vật, nút và nhãn thử chỉ có ở bản dev; bản cho người chơi không có chúng
+Hiện thực `dev-only` của feature.
+
+### all-required | AI 7 | Mọi điều kiểm của node này là bắt buộc để lần thử đạt, trừ độ hợp style ghi riêng
+Hiện thực `pass-rule`: độ hợp style (`style-fit`) không làm lần thử trượt, chỉ là đầu vào cho quyết định làm art Spine riêng.
+
+### pause-freeze | AI 7 | Trận dừng thì nhân vật đứng nguyên tư thế; trận chạy lại thì animation chạy tiếp từ đúng chỗ
+Kể cả lúc đang nhảy và lúc đang chuyển mượt. Tín hiệu dừng của `feature-run` tới qua nơi lắp màn.
+
+### touch-lock | AI 7 | Nút thử chỉ nhận chạm khi trận đang chạy và không có popup chặn bấm
+Chạm lúc bị chặn bị bỏ, không thành lệnh khi trận chạy lại.
+
+### overlap-order | AI 8 | Hero hay quái đi ngang qua thì mọi phần của nhân vật giữ cùng thứ tự vẽ so với sprite đó, suốt clip
+Thân, tay, phụ kiện không phần nào lọt ra sau sprite hay đổi lớp giữa chừng.
+
+### flip-anchor | AI 8 | Lật mặt giữ nguyên chỗ chân trên mặt đất, không trượt ngang, không nhấc lên
+
+### mid-mix-switch | AI 7 | Đổi animation giữa lúc đang chuyển mượt thì chuyển tiếp từ tư thế đang hiện sang animation mới
+Lần nhảy bị ngắt không tự kéo nhân vật về đứng yên khi đã sang animation khác.
+
+### size-vs-hero | AI 7 | Nhân vật ở tư thế đứng cao bằng hộp hero; ghi thêm chênh với chiều cao nhìn thấy của sprite hero
+
+### narrow-camera | AI 7 | Ở tỉ lệ màn hẹp nhất được hỗ trợ, camera giữ trọn hình nhân vật qua mọi animation và cả hai mặt
+Đo tới đỉnh cú nhảy và phụ kiện xa nhất. Bổ sung cho `wide-screen`.
+
+### material-check | AI 7 | Màu và mép trong suốt của nhân vật đúng trên cả vùng sáng và vùng tối của nền trận, ở cả hai mặt
+Không mảng hồng, ô đục, quầng viền, không mất chi tiết khi lật.
+
+### style-fit | AI 7 | Hình bóng, viền và bảng màu của nhân vật được so với sprite hero ở cỡ trong trận
+Hiện thực `art-fit`; ghi riêng, không làm lần thử trượt.
+
+### perf-cost | AI 6 | Đo thời gian xử lý khung hình của một đoạn trận đông khi bật và khi tắt nhân vật thử, cùng máy và cùng cảnh
+Ghi phần tăng khi bật. Ngưỡng đạt theo ngân sách FPS khi thiết kế có ngân sách đó.

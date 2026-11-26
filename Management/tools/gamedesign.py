@@ -163,6 +163,21 @@ REF_RX = re.compile(rf"^({_SEG}(?:/{_SEG})*)(?:#({_SEG}))?@([0-9a-f]{{{HASH_LEN}
 ADVICE_DIR = "advice"
 ADVICE_ROOT, ADVICE_GENERAL = "_root", "_general"
 ADVICE_ROUNDS = (1, 2)      # rounds whose nodes must have been put to GPT at least once (said, not enforced: gptOwed)
+# The groups of a round-2 feature that GPT is not asked about (người quyết 2026-11-26): infra (no gameplay, nothing heard,
+# seen or felt: save, encryption, scene flow) need not be asked; test (and every cheat node) is not asked. Set by the
+# header `group:` of its data.md; INFRA_FEATURES are infra and a key ending in -test is test without it.
+FEATURE_GROUPS = {"infra": "hạ tầng", "test": "test"}
+TEST_SUFFIX = "-test"
+
+
+def feature_group(key, data):
+    """'infra' | 'test' | '' of the round-2 feature `key` whose data is `data` (read_data)."""
+    declared = (data or {}).get("group", "")
+    if declared in FEATURE_GROUPS:
+        return declared
+    if key in INFRA_FEATURES:
+        return "infra"
+    return "test" if key.endswith(TEST_SUFFIX) else ""
 ADVICE_TITLE = "Góp ý của GPT"
 BY_CLAUDE, BY_GPT = "claude", "gpt"
 BY_NAMES = {BY_CLAUDE: "Claude", BY_GPT: "GPT"}
@@ -450,7 +465,7 @@ def parse_data(text):
     """{based_on, refs, title, summary, items: [{id, text, ai, hash, by, sources}], nodeBy, dropped, hash, errors} of a
     data.md. sources: the points of GPT's advice the idea stands for [{advice, point}]; by: gpt when it has any,
     else claude (read_node turns a Claude idea that GPT only made clearer back into claude)."""
-    errors, based_on, refs, screen, frame_mode, by, node_by, dropped = [], "", [], "", "", {}, None, []
+    errors, based_on, refs, screen, frame_mode, by, node_by, dropped, group = [], "", [], "", "", {}, None, [], ""
     text = text.strip("\n")
     if text.startswith("---\n"):
         head, sep, rest = text[4:].partition("\n---")
@@ -464,6 +479,11 @@ def parse_data(text):
                     screen = value.strip()
                 elif key.strip() == "frame":
                     frame_mode = value.strip()
+                elif key.strip() == "group":
+                    group = value.strip()
+                    if group not in FEATURE_GROUPS:
+                        errors.append(f"group: '{group}' chỉ nhận " + " hoặc ".join(FEATURE_GROUPS))
+                        group = ""
                 elif key.strip() == "node-by":
                     m = BY_WHO_RX.match(value.strip())
                     if m:
@@ -563,7 +583,7 @@ def parse_data(text):
         errors.append(f"screen: '{screen}' phải là " + " hoặc ".join(SCREENS))
     if frame_mode and frame_mode != FRAME_NONE:
         errors.append(f"frame: chỉ nhận '{FRAME_NONE}' (node không có bố cục)")
-    return {"based_on": based_on, "refs": refs, "screen": screen, "frameMode": frame_mode, "title": title,
+    return {"based_on": based_on, "refs": refs, "screen": screen, "frameMode": frame_mode, "group": group, "title": title,
             "nodeBy": node_by, "dropped": dropped, "summary": summary, "items": out, "hash": data_hash, "errors": errors}
 
 
@@ -2296,8 +2316,12 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
                                                 f"hoặc {ADVICE_DIR}/{ADVICE_GENERAL}/{named}.md)"})
     by_count = {who: sum(1 for it in items if it["by"] == who) for who in BY_NAMES}
     # Asking GPT is a must in ADVICE_ROUNDS (the glossary is no feature). Not a structure problem: those stop promote.
+    group = feature_group(path, data) if depth == CODE_ROUND and path != GLOSSARY_KEY else ""
+    if data.get("group") and (depth != CODE_ROUND or path == GLOSSARY_KEY):
+        problems.append({"path": where, "text": f"{DATA_FILE}: group: chỉ đặt ở node feature (vòng 2)"})
+    # ... and not about a feature of the groups infra and test (người quyết 2026-11-26).
     gpt_owed = (Path(table).name != TABLES["live"][-1] and depth in ADVICE_ROUNDS and path != GLOSSARY_KEY
-                and not advice_ids(advice))
+                and not group and not advice_ids(advice))
     raw = read_text(folder / DATA_FILE) if (folder / DATA_FILE).is_file() else ""
     screen_key = ("screen", str(table))
     if screen_key not in cache:
@@ -2395,7 +2419,7 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
             "refStale": [r["label"] for r in refs["refs"] if r["ok"] is False], "terms": terms,
             "frames": frames, "frameNotes": frame_notes, "frameItems": ui_items, "uiWait": ui_owed,
             "ui": {k: ui[k] for k in ("elements", "interactions", "flow", "hash")} if ui else None, "frameNone": data["frameMode"] == FRAME_NONE, "cheat": cheat,
-            "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "gptOwed": gpt_owed, "clashOpen": open_clashes(items), "nodeBy": data.get("nodeBy"),
+            "screen": data["screen"], "styles": styles, "by": by_count, "gpt": gpt, "gptOwed": gpt_owed, "group": group, "clashOpen": open_clashes(items), "nodeBy": data.get("nodeBy"),
             "refText": raw + "\n" + doc, "_files": file_versions(folder), "excel": gd_excel.view(folder), "children": []}
     for child in sorted(p for p in folder.iterdir() if p.is_dir() and not p.name.startswith(".")):
         child_path = f"{path}/{child.name}" if path else child.name

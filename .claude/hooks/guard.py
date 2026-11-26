@@ -7,8 +7,8 @@ PIN live outside the project, in STORE_DIR. The FEATURE environment variable is 
 The value, by group:
     Master    @human                      no feature limits and no questions: every edit passes (HUMAN_ASK_ZONES)
     Leaders   @Manager                    coordinator: edits nothing (what needs the human it asks in its chat; tool
-                                          work the human decided goes to toolwork.py); runs scaffold.py, which makes
-                                          the folders the live design names (no code)
+                                          work the human decided goes to toolwork.py); runs scaffold.py (as @CodeLead does),
+                                          which makes the folders the live design names (no code)
               @CodeLead                   checks code, settles conflicts and owns the SKELETON: edits only the
                                           skeleton (below), of a feature once its code gate is open, of Core always; and
                                           all of Assets/_Composition (the wiring: Boot, scenes, catalogs; LEAD_AREA), its
@@ -74,7 +74,6 @@ cannot hand back their result); unknown zones and any error in this script are b
 Reads the hook JSON on stdin, writes the decision JSON on stdout. Standard library only.
 Tests: python .claude/hooks/test_guard.py
 """
-import hashlib
 import json
 import ntpath
 import os
@@ -126,12 +125,14 @@ ADVISOR_COMMANDS = [
     PY + r"Management/tools/gd_advise\.py " + ADVICE_NODE + " " + ADVICE_ID,
     PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?( --brief)?",
 ]
-# For @CodeLead only: mark the progress of a design leaf after checking the code, and look at the design's status.
+# For @CodeLead only: create the missing feature folders (scaffold.py, as @Manager does), mark the progress of a
+# design leaf after checking the code, and look at the design's status.
 CODELEAD_COMMANDS = [
+    PY + r"Management/tools/scaffold\.py( --dry-run)?",      # creates the missing folders too (người quyết 2026-11-26)
     PY + r"Management/tools/gd_progress\.py ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)* (idea|prototype|full) (todo|doing|done)",
     PY + r"Management/tools/gd_status\.py( ai/idea(/[a-z0-9]+(-[a-z0-9]+)*)*)?( --brief)?",
 ]
-# For @Manager only: create the feature, service, Core and _Composition folders the live design asks for and that
+# For @Manager (scaffold.py: @CodeLead too): create the feature, service, Core and _Composition folders the live design asks for and that
 # are missing (folders and .gitkeep only, never code; see scaffold.py), and look at the design's status (how far
 # @GameDesigner is: the first thing it checks after it is created or renewed, .claude/rules/manager.md).
 MANAGER_COMMANDS = [
@@ -157,6 +158,13 @@ PROPOSALS_MSG = ("Management/proposals is closed (2026-11-26): it is kept to be 
 EDIT_TOOLS = {"Edit", "Write", "NotebookEdit", "MultiEdit"}
 READ_TOOLS = {"Read", "Grep", "Glob"}
 SHELL_TOOLS = {"Bash", "PowerShell", "Monitor"}      # Monitor runs a shell command too: same allow-list
+# Every bound chat runs any shell command and any Python (người quyết 2026-11-26); the allow-lists above then hold
+# only for a chat with no FEATURE. False goes back to the allow-lists for every chat.
+FREE_SHELL = True
+# Every bound chat reads anywhere in the project with Read / Grep / Glob too, as its shell already can (người quyết
+# 2026-11-26). Still refused: Library, Temp, Logs, obj, UserSettings, the testers' Archive (but for the testers) and
+# outside the project (but for the session's own folders). False goes back to the read zones of each role.
+FREE_READ = True
 # Tools that do not touch project files.
 PASS_TOOLS = {"AskUserQuestion", "TodoWrite", "TaskCreate", "TaskUpdate", "TaskList", "TaskGet", "Task", "Agent",
               "Skill", "ToolSearch", "WebSearch", "WebFetch", "EnterPlanMode", "ExitPlanMode", "ListAgents",
@@ -222,8 +230,9 @@ LEADER_REDO = (STUDIO + r"redo _design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0
                + r' "[^"\\]+"')
 for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS, CODELEAD_COMMANDS, MANAGER_COMMANDS):
     _commands.append(LEADER_REDO)
-# Every Leader may look at what scaffold.py would create (it prints, it creates nothing); creating is @Manager's.
-for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS, CODELEAD_COMMANDS):
+# Every Leader may look at what scaffold.py would create (it prints, it creates nothing); creating is @Manager's and
+# @CodeLead's.
+for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS):
     _commands.append(PY + r"Management/tools/scaffold\.py --dry-run")
 # Every bound chat may run up to CHAIN_MAX allowed commands in one call, joined by ';' or '&&' (người quyết 2026-11-26:
 # fewer calls, fewer tokens). Every part must pass alone, the gated ones (gated(): review, cancel, send, doing/done)
@@ -293,8 +302,20 @@ INBOX_TOOLS = ("Codex", "Blender", "ClaudeImage", "DesignAdvisor")
 INBOX_FEATURE = r"(_Services/)?[A-Z][A-Za-z0-9]*"
 ALLOWED_COMMANDS.append(DISPATCH + r"list( (@(Core|" + "|".join(INBOX_TOOLS + tuple(TESTER_ROLES.values())) + r")|" + INBOX_FEATURE + r"))?")
 CODELEAD_COMMANDS.append(DISPATCH + r"cancel m[0-9]{8}-[0-9]{6}-[0-9a-f]{6}")
-DISPATCH_SEND_RX = re.compile(r"^python3? Management/tools/dispatch\.py send (@[A-Za-z]+|" + INBOX_FEATURE
-                              + r') --from @?([A-Za-z]+) "[^"\\]+"$')
+# The names may be quoted ('@Codex': PowerShell needs it) and a role may come without its @ (Codex = @Codex).
+DISPATCH_SEND_RX = re.compile(r"^python3? Management/tools/dispatch\.py send ['\"]?(@[A-Za-z]+|" + INBOX_FEATURE
+                              + r""")['"]? --from ['"]?@?([A-Za-z]+)['"]? "[^"\\]+"$""")
+# PowerShell reads a bare @Name as splatting the variable $Name: with no such variable the argument is gone, so
+# `dispatch.py send @Codex ...` reaches python without its target. Refused before it runs (2026-11-26).
+PS_SPLAT_RX = re.compile(r"(?:^|[\s(;|&])@[A-Za-z_]\w*")
+PS_QUOTED_RX = re.compile(r"""'[^']*'|"[^"]*\"""")
+
+
+def inbox_name(target):
+    """A role named without its @ (Codex, designadvisor) is that role, as dispatch.py reads it; anything else as is."""
+    if target.startswith("@"):
+        return target
+    return next((r for r in ROLES if r[1:].lower() == target.lower()), target)
 INBOX_SENDERS = {      # role -> the targets it may send to ("feature": any feature or service)
     # the tools too: CodeLead answers a tool that is blocked on an order of a feature (TRẢ LỜI, 2026-11-26)
     "@CodeLead": ("feature", "@Core", "@Codex", "@Blender", "@ClaudeImage") + tuple(TESTER_ROLES),
@@ -1188,113 +1209,6 @@ def unity_kind(tool, ti):
     return short, action, actions.get(action, actions.get(ANY))
 
 
-# The one Unity Editor of this project. unity-mcp sees every Editor that runs its plugin (other projects on this
-# machine too) and names each <folder>@<first 8 hex of sha1("<project>/Assets")>, e.g. UnityProject@638c2683; it
-# writes ~/.unity-mcp/unity-mcp-status-<hash>.json (project_path, refreshed with every heartbeat). A chat may name only
-# this project's instance (unity_instance, set_active_instance), and may not use unity-mcp at all while this Editor
-# is gone and another project's Editor runs (the calls would land in that project).
-UNITY_STATUS_ENV = "UNITY_MCP_STATUS_DIR"      # tests point it at a folder of their own
-UNITY_STALE_SECONDS = 600
-UNITY_PROJECT_DIR = "UnityProject"
-
-
-def unity_status_dir():
-    return os.environ.get(UNITY_STATUS_ENV) or os.path.join(os.path.expanduser("~"), ".unity-mcp")
-
-
-def unity_port_paths():
-    """The project paths the port files of ~/.unity-mcp name (unity-mcp-port.json is the default an unnamed call
-    may go to: a probe found a chat aimed at another project's Editor that way)."""
-    folder, out = unity_status_dir(), []
-    try:
-        names = os.listdir(folder)
-    except OSError:
-        return out
-    for n in names:
-        if re.fullmatch(r"unity-mcp-port(-[0-9a-f]{6,})?\.json", n):
-            try:
-                with open(os.path.join(folder, n), encoding="utf-8") as f:
-                    data = json.load(f)
-            except (OSError, ValueError):
-                continue
-            if isinstance(data, dict) and text_of(data.get("project_path")):
-                out.append(text_of(data.get("project_path")).replace("\\", "/").rstrip("/"))
-    return out
-
-
-def unity_statuses():
-    """[{hash, name, path, age}] of the Editors unity-mcp knows (their status files; age: seconds since the last write)."""
-    folder = unity_status_dir()
-    out = []
-    try:
-        names = os.listdir(folder)
-    except OSError:
-        return out
-    for n in names:
-        m = re.fullmatch(r"unity-mcp-status-([0-9a-f]{6,})\.json", n)
-        if not m:
-            continue
-        full = os.path.join(folder, n)
-        try:
-            with open(full, encoding="utf-8") as f:
-                data = json.load(f)
-            age = time.time() - os.path.getmtime(full)
-        except (OSError, ValueError):
-            continue
-        if isinstance(data, dict):
-            out.append({"hash": m.group(1), "name": text_of(data.get("project_name")),
-                        "path": text_of(data.get("project_path")).replace("\\", "/").rstrip("/"), "age": age})
-    return out
-
-
-def project_unity(root, statuses):
-    """(hashes, id) of this project's Editor: the sha1 of its Assets path, plus any status file naming that path."""
-    assets = root.rstrip("/") + "/" + UNITY_PROJECT_DIR + "/Assets"
-    # Unity names the path with a capital drive letter (D:/...); the session's root may come as d:/..., which gives
-    # another sha1, an id no Editor has. The id shown is the one of a status file (what the Editor really uses),
-    # else the capital-drive one.
-    upper = assets[:1].upper() + assets[1:] if assets[1:2] == ":" else assets
-    seen = sorted(st["hash"] for st in statuses if st["path"] and same(st["path"], assets))
-    hashes = {hashlib.sha1(a.encode("utf-8")).hexdigest()[:8] for a in (assets, upper)} | set(seen)
-    return hashes, f"{UNITY_PROJECT_DIR}@{seen[0] if seen else hashlib.sha1(upper.encode('utf-8')).hexdigest()[:8]}"
-
-
-def names_this_project(value, hashes):
-    """True when an instance named as unity-mcp takes it (Name@hash, a hash prefix of 4+ hex, a port) is this one."""
-    v = text_of(value).strip().lower()
-    if "@" in v:
-        return v.rsplit("@", 1)[1] in hashes
-    return bool(re.fullmatch(r"[0-9a-f]{4,}", v)) and any(h.startswith(v) for h in hashes)
-
-
-def unity_instance_problem(tool, ti, cmds, root):
-    """Why a unity-mcp call would reach an Editor that is not this project's, or ''."""
-    statuses = unity_statuses()
-    hashes, ident = project_unity(root, statuses)
-    named = [(tool, ti.get("unity_instance"))] + [(t, p.get("unity_instance")) for t, p in cmds]
-    named += [(t, p.get("instance")) for t, p in cmds if t == UNITY_PREFIX + "set_active_instance"]
-    for t, value in named:
-        if value not in (None, "") and not names_this_project(value, hashes):
-            return (f"unity-mcp may reach only this project's Editor ({ident}); '{text_of(value)}' is another one "
-                    "(a port is refused too: it changes each time Unity opens)")
-    # Another project's Editor is known on this machine (a status or a port file): a call that names no instance
-    # may go to the server's default, which can be that project. Then every call names this one.
-    assets = root.rstrip("/") + "/" + UNITY_PROJECT_DIR + "/Assets"
-    elsewhere = any(st["hash"] not in hashes for st in statuses) or any(not same(p, assets) for p in unity_port_paths())
-    unnamed = not text_of(ti.get("unity_instance")) and not all(
-        text_of(p.get("unity_instance")) or t == UNITY_PREFIX + "set_active_instance" for t, p in cmds)
-    if elsewhere and unnamed:
-        return (f"another Unity project is known on this machine, and a call without an instance may land in it: add "
-                f"\"unity_instance\": \"{ident}\" to this call (for batch_execute: to the call or to every command)")
-    mine = [st for st in statuses if st["hash"] in hashes]
-    others = [st for st in statuses if st["hash"] not in hashes and st["age"] < UNITY_STALE_SECONDS]
-    if others and not any(st["age"] < UNITY_STALE_SECONDS for st in mine):
-        names = ", ".join(sorted({st["name"] or st["hash"] for st in others}))
-        return (f"this project's Unity Editor ({ident}) is not running, and unity-mcp sees another project ({names}): "
-                "a call would land there. Open UnityProject in Unity (one Editor for this project), then try again.")
-    return ""
-
-
 def unity_commands(tool, ti):
     """[(tool, params)] a unity-mcp call runs: itself, or the commands of a batch_execute."""
     if tool != UNITY_PREFIX + "batch_execute":
@@ -1486,11 +1400,11 @@ def decide_unity_one(tool, ti, ctx, work):
 
 
 def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
-    """unity-mcp for every session but @human: see UNITY_RULES. The Editor lock is taken only when every command
-    of the call is allowed."""
-    if mode in ("none", "manager", "gamedesigner", "uidesigner", "advisor"):
-        return "deny", (f"{who or 'this chat'} does not use unity-mcp" if mode != "none"
-                        else "FEATURE is not set or is not an existing feature folder; unity-mcp is blocked")
+    """unity-mcp for every bound session but @human: see UNITY_RULES. Every role uses it (người quyết 2026-11-26),
+    within its zones and the Editor lock; no check of which Editor instance a call names. The Editor lock is taken
+    only when every command of the call is allowed."""
+    if mode == "none":
+        return "deny", "FEATURE is not set or is not an existing feature folder; unity-mcp is blocked"
     if tool in UNITY_RESOURCE_TOOLS:
         if text_of(ti.get("server")).lower() not in ("", UNITY_SERVER.lower()):
             return "deny", f"tool '{tool}' is allowed only for the {UNITY_SERVER} server"
@@ -1498,12 +1412,6 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
     cmds = unity_commands(tool, ti)
     if not cmds or len(cmds) > BATCH_MAX:
         return "deny", f"batch_execute takes 1 to {BATCH_MAX} commands"
-    wrong = unity_instance_problem(tool, ti, cmds, root)
-    if wrong:
-        if "is not running" in wrong:      # the Editor is down: stop, do not retry (FAIL_STOP)
-            set_fail(session, store, "unity", wrong)
-            return "deny", wrong + " " + fail_stop("unity")
-        return "deny", wrong
     session = session if isinstance(session, str) else ""
     held = read_lock(store)
     other = held if held and held.get("session") != session else None
@@ -1725,6 +1633,13 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all, store=No
         if peer:
             return "allow", f"tool output, agent results or scratch file of the {peer} session (read only)"
     name, readable, _ = zone(full, root, feature, area, read_all)
+    if FREE_READ and mode != "none" and name != "outside the project":
+        if name == TESTER_ARCHIVE_ZONE and mode != "tester":
+            return "deny", ("may not read: archived test runs. They were moved out so that they do not fill your "
+                            "context; ask the tester (or the human) when you need one.")
+        if name.lower() in FORBIDDEN_DIRS:
+            return "deny", f"may not read: {name} (Unity's generated files)"
+        return "allow", f"free read for a bound chat, in {name} (người quyết 2026-11-26)"
     if mode == "gamedesigner":      # sees the design tree, its own rules and the studio, nothing else
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
             same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
@@ -1867,6 +1782,13 @@ def decide_raw(data, session_value, root, store=None):
 
     if tool in SHELL_TOOLS:
         cmd = text_of(ti.get("command")).strip()
+        if tool == "PowerShell":
+            bare = PS_SPLAT_RX.search(PS_QUOTED_RX.sub("''", cmd))
+            if bare:
+                name = bare.group(0).lstrip(" \t(;|&")
+                return "deny", (f"PowerShell đọc {name} không có ngoặc là splatting biến ${name[1:]}: tham số đó biến mất "
+                                f"trước khi tới lệnh (dispatch.py send báo thiếu người nhận). Viết '{name}' trong ngoặc đơn, "
+                                "bỏ @ (dispatch.py hiểu Codex là @Codex), hoặc chạy lệnh bằng Bash")
         commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else []) + (
             UIDESIGNER_COMMANDS if mode == "uidesigner" else []) + (
             ADVISOR_COMMANDS if mode == "advisor" else []) + (
@@ -1897,7 +1819,7 @@ def decide_raw(data, session_value, root, store=None):
             m = DISPATCH_SEND_RX.match(one)
             # send to the inbox: a Leader, to its own part, naming itself; the text may hold "..", the rest may not.
             if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
-                target, sender = m.group(1), "@" + m.group(3)
+                target, sender = inbox_name(m.group(1)), "@" + m.group(3)
                 allowed = INBOX_SENDERS.get(role or "", ())
                 if sender != role:
                     return "deny", f"--from must name this chat's own role ({role or 'none'})"
@@ -1923,6 +1845,16 @@ def decide_raw(data, session_value, root, store=None):
         verdict = gated(cmd)
         if verdict:
             return verdict
+        # Free shell (người quyết 2026-11-26): every bound chat, and its subagents, runs any shell command and any
+        # Python. Only the gates above still hold (a dispatch send, a doing / done, a studio review / cancel, the
+        # phase gate), on each part of a chain too. The zones are kept on Edit / Write / Read only: a shell command
+        # is not checked against them. A chat with no FEATURE keeps the allow-list below.
+        if mode != "none" and FREE_SHELL:
+            for part in CHAIN_SPLIT_RX.split(cmd):
+                verdict = gated(part.strip())
+                if verdict and verdict[0] != "allow":
+                    return "deny", f"chain refused at `{part[:80]}`: {verdict[1]}"
+            return "allow", "free shell for a bound chat (người quyết 2026-11-26)"
         try:
             search = search_paths(cmd) if tool == "Bash" else None
         except ValueError as ex:

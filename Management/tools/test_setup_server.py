@@ -1090,6 +1090,46 @@ def profile_cases(check):
         shutil.rmtree(tdir, ignore_errors=True)
 
 
+def model_choice_cases(check):
+    """The Model and Effort pickers of one row: the human's pick is saved per thread and wins over the role's."""
+    real = (ss.threads, ss.guard.STORE_DIR, ss.run_claude, ss.start_bg, ss.stop_bg, ss.PROFILES)
+    store = tempfile.mkdtemp(prefix="model-store-")
+    started = []
+    try:
+        ss.guard.STORE_DIR = store
+        ss.PROFILES = True
+        ss.run_claude = lambda args: "ok"
+        ss.start_bg = lambda sid, extra, prompt: started.append((sid, extra))
+        ss.stop_bg = lambda sid: None
+        mgr = thread("aaaa1111", "Manager", binding="@Manager", model="claude-opus-x", effort="high")
+        idle = dict(thread("bbbb2222", "CodeLead", binding="@CodeLead"), live="background", live_status="idle")
+        working = dict(thread("cccc3333", "Core", binding="@Core"), live="background", live_status="busy")
+        listed = [mgr, idle, working, thread("dddd4444", "Shop")]
+        ss.threads = lambda include_unnamed=False: [dict(t) for t in listed]
+        for t in listed[:3]:
+            ss.bind(t["id"], t["binding"])
+        check("model: no pick yet, a turn runs on the role's model", ss.run_model(mgr), ("opus", "low"))
+        check("model: a wrong model or effort is refused before anything is saved",
+              (ss.set_model("aaaa1111", "gpt", "low")["ok"], ss.set_model("aaaa1111", "opus", "huge")["ok"], ss.model_choice("aaaa1111")),
+              (False, False, None))
+        check("model: an unbound thread is refused", ss.set_model("dddd4444", "sonnet", "low")["ok"], False)
+        res = ss.set_model("aaaa1111", "sonnet", "high")
+        check("model: a thread that is not live saves the pick, no turn", (res["ok"], ss.model_choice("aaaa1111"), started), (True, ("sonnet", "high"), []))
+        check("model: the pick wins over the role's in every server turn", ss.turn_args(mgr)[:4], ["--model", "sonnet", "--effort", "high"])
+        res = ss.set_model("bbbb2222", "haiku", "low")
+        check("model: an idle background session is started again on the pick",
+              (res["ok"], len(started), started[-1][1][2:6] if started else None), (True, 1, ["--model", "haiku", "--effort", "low"]))
+        res = ss.set_model("cccc3333", "opus", "max")
+        check("model: a background session in a turn is saved, not restarted",
+              (res["ok"], len(started), ss.model_choice("cccc3333")), (True, 1, ("opus", "max")))
+        check("model: the alias of a model id", (ss.model_alias("claude-opus-5-5"), ss.model_alias("claude-sonnet-5-5"), ss.model_alias("")),
+              ("opus", "sonnet", ""))
+        check("the page may post to the model path", "/api/sessions/model" in ss.POST_PATHS, True)
+    finally:
+        (ss.threads, ss.guard.STORE_DIR, ss.run_claude, ss.start_bg, ss.stop_bg, ss.PROFILES) = real
+        shutil.rmtree(store, ignore_errors=True)
+
+
 def main():
     store = tempfile.mkdtemp(prefix="setup-store-")
     profile_cases(check)
@@ -1314,6 +1354,7 @@ def main():
     delete_cases(check)
     unnamed_cases(check)
     usage_cases(check)
+    model_choice_cases(check)
     ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)

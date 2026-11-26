@@ -68,6 +68,15 @@ def folder(root):
     return Path(root).joinpath(*DIR)
 
 
+def role_name(target):
+    """A tool, tester, Leader or @Core named without its @ (Codex, designadvisor, Core) is that role; else as is.
+    PowerShell drops a bare @Name (splatting), so callers there write the name without it (2026-11-26)."""
+    if target.startswith("@"):
+        return target
+    names = TOOLS + TESTERS + NOT_TARGETS + ("@Core",)
+    return next((n for n in names if n[1:].lower() == target.lower()), target)
+
+
 def pool_of(target):
     """'tool', 'feature' or 'tester' for a valid target; None for anything else (a Leader, the human, a bad name)."""
     if target in TOOLS:
@@ -215,7 +224,7 @@ def send(root, target, text, source, key=None, check=None, now=None, once=False)
     returned instead of a second one (an automatic message sent again, a command run twice). once: also when one
     with that key was ever delivered (an event that happens once: a new order, a delivered version); a cancelled or
     failed one does not count. The returned message has "new": False when it was there already."""
-    target = (target or "").strip()
+    target = role_name((target or "").strip())
     pool = pool_of(target)
     if pool is None:
         raise ValueError(f"'{target}' không nhận tin qua hộp thư: chỉ feature, service, @Core, tool "
@@ -331,7 +340,8 @@ def prompt(ms, now=None):
     now = time.time() if now is None else now
     head = ("Việc giao qua hộp thư của trang Setup (thread này chạy theo việc, không sống suốt). Đây là lượt việc "
             "thật, làm như người giao trong chat: làm theo luật của vai, kết thúc bằng báo cáo nếu có sửa file. Cần "
-            "Leader thì nhắn Leader bằng SendMessage. Tin có mã đã làm rồi (giao lại sau sự cố) thì bỏ qua.")
+            "Leader thì nhắn Leader bằng SendMessage. Cần tool deferred (unity-mcp, SendMessage) thì nạp hết trong MỘT "
+            "ToolSearch ở đầu lượt. Tin có mã đã làm rồi (giao lại sau sự cố) thì bỏ qua.")
     body = "\n\n".join(f"[tin {m['id']} · từ {m['source']}]\n{stale_line(m, now)}{m['text']}" for m in ms)
     return head + "\n\n" + body
 
@@ -380,6 +390,10 @@ def main(argv):
         print(f"Lỗi: {ex}", file=sys.stderr)
         return 1
     print(__doc__.split("\n\n")[3], file=sys.stderr)
+    print(f"Nhận được: {args!r}", file=sys.stderr)
+    if args[:1] == ["send"] and len(args) == 4 and args[1] == "--from":
+        print("Thiếu <target>. Trong PowerShell, @Codex không có ngoặc là splatting một biến rỗng nên tên biến mất: "
+              "viết '@Codex' trong ngoặc đơn, bỏ @ (Codex), hoặc chạy bằng Bash.", file=sys.stderr)
     return 2
 
 

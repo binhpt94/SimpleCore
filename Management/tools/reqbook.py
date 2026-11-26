@@ -61,6 +61,14 @@ STATE_NAMES = {
 ORDER = ("doing", "rejected", "changed", "no-test", "todo", "done", "verified", "waived")
 MET = ("verified", "waived")
 TEST_RX = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*$")
+NAMESPACED_TEST_RX = re.compile(r"^(?:[A-Za-z_][A-Za-z0-9_]*\.)+([A-Za-z_][A-Za-z0-9_]*\.[A-Za-z_][A-Za-z0-9_]*)$")
+
+
+def short_test(name):
+    """Lớp.Hàm of a test named with its namespace (Game.Save.Tests.SavedRecordTests.X -> SavedRecordTests.X): the book
+    keys tests by class and method, and a chat that writes the full name would otherwise spend a call to try again."""
+    m = NAMESPACED_TEST_RX.match(name)
+    return m.group(1) if m else name
 REF_RX = re.compile(r"^([a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*)#([a-z0-9]+(?:-[a-z0-9]+)*)$")
 
 
@@ -529,13 +537,13 @@ def mark(root, feature, refs, action, by, note=None, tests=None, play=None):
             write(root, node, req, {"state": "doing", "note": check_note(note, True), "tests": saved.get("tests") or [],
                                     "play": saved.get("play") or ""}, by, note)
         elif action == "done":
-            names = [t.strip() for t in (tests or []) if t.strip()]
+            names = [short_test(t.strip()) for t in (tests or []) if t.strip()]
             play_text = check_note(play, False) if play is not None else ""
             if not names and not play_text:
-                raise ValueError("done cần tên test (Lớp.Hàm, cách nhau bằng dấu phẩy) hoặc play \"<cách thấy khi Play>\"")
+                raise ValueError("done cần tên test (Lớp.Hàm, cách nhau bằng dấu phẩy; namespace được tự bỏ) hoặc play \"<cách thấy khi Play>\"")
             bad = [t for t in names if not TEST_RX.match(t)]
             if bad:
-                raise ValueError("tên test phải có dạng Lớp.Hàm: " + ", ".join(bad))
+                raise ValueError("tên test phải có dạng Lớp.Hàm (namespace được tự bỏ): " + ", ".join(bad))
             have = {}
             for k in v["keys"]:
                 have.update(test_sources(test_folders(root, k, feature)))
@@ -644,7 +652,7 @@ def render(v):
            "Code: " + ("ĐƯỢC CODE" if v["allowed"] else "ĐANG KHOÁ, " + v["reason"]),
            "Tổng: " + counts_line(v),
            "Ghi: gd_req.py <F> doing <node>#<id> \"<đang làm gì>\" · gd_req.py <F> done <node>#<id> <Lớp.Hàm>[,...] "
-           "(hoặc play \"<cách thấy khi Play>\") · @CodeLead: verify | reject",
+           "(namespace tự bỏ; hoặc play \"<cách thấy khi Play>\") · @CodeLead: verify | reject",
            ""]
     open_rows = [r for n in v["nodes"] for r in n["reqs"] if r["state"] in ("doing", "rejected", "changed", "no-test")]
     if open_rows:

@@ -1,0 +1,15 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,skeleton_asset,Bộ xương mẫu,,spineboy,như IDEA,như IDEA,"Bộ mẫu đi kèm spine-unity, có đủ idle, run, jump"
+2,char_height,Chiều cao nhân vật ở tư thế idle,u,1.5,như IDEA,như IDEA,Bằng chiều cao hộp hero theo feature-hero/hero-list/hero-roster-values
+3,char_x,Toạ độ x của chân nhân vật,u,9,như IDEA,như IDEA,"Cánh phải, xa khối thử ở +5u và đá decor ở +6.5u"
+4,char_y,Toạ độ y của chân nhân vật,u,0,như IDEA,như IDEA,Mặt đất theo feature-battlefield/battlefield-layers/layer-values
+5,face_start,Mặt quay lúc mở màn,,left,như IDEA,như IDEA,"Quay về phía thành, như hero chờ quái ở cánh phải"
+6,anim_idle,Tên animation đứng yên (lặp),,idle,như IDEA,như IDEA,Tên trong spineboy
+7,anim_run,Tên animation chạy (lặp),,run,như IDEA,như IDEA,Tên trong spineboy
+8,anim_action,Tên animation một lần,,jump,như IDEA,như IDEA,"Tên trong spineboy; rời đất rồi về, thấy rõ chạy một lần"
+9,mix_time,Thời gian chuyển mượt mọi cặp animation,s,0.2,như IDEA,như IDEA,"Đủ ngắn để không trễ, đủ dài để thấy trộn (dự kiến)"
+10,time_scale,Tốc độ animation khi trận chạy,lần,1,như IDEA,như IDEA,Đúng tốc độ bộ mẫu; trận dừng thì 0
+11,sort_offset,Thứ tự vẽ so với hero và quái cùng lớp,bậc,1,như IDEA,như IDEA,"Ngay trên hero, quái; dưới hiệu ứng"
+12,perf_sample,Độ dài đoạn đo hiệu năng,s,60,như IDEA,như IDEA,Đủ dài để p95 ổn định ở đoạn trận đông (dự kiến)

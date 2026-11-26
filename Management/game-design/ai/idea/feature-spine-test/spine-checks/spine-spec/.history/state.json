@@ -1,5 +1,5 @@
 {
- "hash": "396ed200581f",
+ "hash": "41d348a9ece6",
  "items": {
   "sample-spineboy": {
    "hash": "69e7d09516dc",
@@ -29,9 +29,9 @@
    "hash": "008c78e882c5",
    "text": "Mọi lần đổi animation chuyển mượt trong 0.2 giây\nĐủ ngắn để không trễ, đủ dài để thấy trộn. Áp cho cả lúc jump chạy xong tự về idle."
   },
-  "real-time": {
-   "hash": "939c0ff03774",
-   "text": "Animation chạy theo thời gian thực, tốc độ 1, không đọc nhịp trận\nGiữ đúng ý không đọc gì của feature khác. Popup mở thì nhân vật vẫn chạy dưới nền che."
+  "match-time": {
+   "hash": "17e927d72842",
+   "text": "Animation chạy tốc độ 1 khi trận chạy; trận dừng thì đứng nguyên tư thế, trận chạy lại thì chạy tiếp từ đúng chỗ\nTín hiệu dừng của `feature-run` tới qua nơi lắp màn, nhân vật không gọi thẳng feature khác. Đang nhảy hay đang chuyển mượt lúc dừng cũng đứng nguyên, chạy lại thì làm tiếp phần còn lại."
   },
   "same-unit-layer": {
    "hash": "d476dd283e5d",
@@ -60,6 +60,30 @@
   "popup-dims": {
    "hash": "1778ce940fe2",
    "text": "Popup mở thì nền che tối phủ nhân vật, nút thử không bấm được tới khi popup đóng\nTheo `feature-popup/popup-layer/stack-rules`."
+  },
+  "touch-lock": {
+   "hash": "491c1b2e29f2",
+   "text": "Nút thử chỉ nhận chạm khi trận đang chạy và không có popup chặn bấm; chạm lúc bị chặn bị bỏ\nKể cả lúc trận đã dừng mà popup chưa hiện, và lúc popup đã đóng mà trận chưa chạy lại."
+  },
+  "dev-build": {
+   "hash": "10ad8b609b5b",
+   "text": "Nhân vật, nút và nhãn chỉ có trong Unity Editor và bản Development build\nBản phát hành không có, như mọi thứ chỉ để thử."
+  },
+  "flip-anchor": {
+   "hash": "9f29cfb2c204",
+   "text": "Lật mặt lấy gốc ở chân nhân vật: chân vẫn ở x=+9u, y=0 trước và sau khi lật"
+  },
+  "mid-mix-switch": {
+   "hash": "bd2e3289a846",
+   "text": "Đổi animation giữa lúc đang chuyển mượt thì chuyển mượt 0.2 giây từ tư thế đang hiện sang animation mới\nNhảy bị ngắt bởi Chạy hay Đứng thì không còn tự về idle."
+  },
+  "narrow-fits": {
+   "hash": "a38a7daa828b",
+   "text": "Ở 16:9, tỉ lệ hẹp nhất, đỉnh cú nhảy và phụ kiện xa nhất của nhân vật nằm trọn trong khung nhìn ở cả hai mặt\n16:9 thấy y tới +14u theo `feature-battlefield/battlefield-layers/layer-values`; spineboy cao 1.5u nhảy không tới đó. Mép phải x=+16u cách nhân vật 7u."
+  },
+  "perf-measure": {
+   "hash": "d99eb6e8e172",
+   "text": "Đo p95 thời gian khung hình của 60 giây trận đông, một lượt bật và một lượt tắt nhân vật thử\nCùng máy, đội, seed và thao tác; ghi p95 hai lượt và phần tăng khi bật. Chưa có ngưỡng đạt vì thiết kế chưa có ngân sách FPS; người xem số rồi quyết."
   }
  }
 }
