@@ -37,7 +37,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Đã tự quyết
 - **Đếm cả khi trận đứng yên.** Khoá nút theo trạng thái trận thì nút phải đọc `feature-run`, thêm một chỗ nối mà mục đích thử không cần. Thực tế các lúc đứng yên đều có popup che. Đã loại: khoá nút khi trận không đánh.
-- **Chỗ đặt để @UIDesigner quyết, chỉ ràng buộc không che HUD.** Mép trên và mép dưới đã kín phần HUD; nút thử có thể nằm trong dải chiến trường vì nó không phải HUD và chỉ để thử.
+- **Góc trái dưới, ngay trên thanh dưới của HUD** (người quyết 2026-11-26, thay cho bản đặt sát mép phải). Nút nằm trong dải chiến trường, đáy nút sát mép trên của mép dưới HUD, không đè lên nó; chỗ cụ thể để @UIDesigner quyết. Nút có che một góc nhỏ của cánh trái chiến trường, chấp nhận được vì nó chỉ để thử. Đã loại: sát mép phải (bản trước), mép trái giữa màn (bản frame đầu).
+- **Dòng số đếm bên phải nút, cùng hàng.** Số dài ra thì chữ giãn sang phải mà nút đứng yên. Đã loại: đặt phía trên nút.
 - **Không có hiệu ứng nhấn riêng.** Phản hồi của node là số đếm; hiệu ứng nhấn chung của nút (nếu có) theo style `ui-flat`.
 
 ## Chưa rõ

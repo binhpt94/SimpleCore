@@ -20,6 +20,12 @@ Chạm rồi kéo ra ngoài nút mới nhả thì không tính, như mọi nút 
 ### no-hud-overlap | AI 7 | Nút thử và dòng số đếm không che phần nào của HUD
 Chỗ cụ thể do @UIDesigner xếp trong frame; nút có cạnh chạm tối thiểu như các nút HUD ở `feature-hud/hud-layout/layout-spec`.
 
+### bottom-left | AI 8 | Nút thử nằm ở góc trái dưới màn trận, ngay trên thanh dưới của HUD
+Người quyết ngày 2026-11-26. Nút nằm trong dải chiến trường, sát mép trên của mép dưới HUD (`feature-hud/hud-layout/layout-spec`) và sát mép trái, không đè lên thanh dưới; chỗ cụ thể do @UIDesigner xếp trong frame. Đã loại: sát mép phải (bản trước), mép trái giữa màn (bản frame đầu).
+
+### counter-beside | AI 7 | Dòng số đếm nằm ngay bên phải nút thử, cùng hàng với nút
+Số dài ra thì chữ giãn sang phải, nút không phải dời chỗ; đọc nút rồi số theo chiều đọc. Đã loại: dòng số đếm phía trên nút (cao thêm một hàng, xa thanh dưới hơn).
+
 ### blocked-by-popup | AI 7 | Khi có popup mở, chạm vào chỗ nút thử không tính
 Lớp popup chặn mọi chạm phía dưới theo `feature-popup/popup-layer/stack-rules`; nút thử không có luật riêng.
 

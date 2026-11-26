@@ -1,0 +1,57 @@
+{
+ "hash": "3a45c1ce82c1",
+ "items": {
+  "three-cubes": {
+   "hash": "10222aecd15b",
+   "text": "Có ba khối thử, mỗi khối đứng ở một chỗ khác trong thứ tự vẽ của trận\nMột màn trận là thấy cả ba trường hợp thứ tự vẽ, không phải bật tắt. Thứ tự gốc theo `feature-battlefield/battlefield-layers`."
+  },
+  "behind-castle": {
+   "hash": "56fa631fcf48",
+   "text": "Một khối vẽ sau thành và trước decor, đứng chồng một phần lên mép thành\nThấy được thành che khối 3D có gọn không."
+  },
+  "between-castle-units": {
+   "hash": "e10eb254325a",
+   "text": "Một khối vẽ trước thành nhưng sau hero và quái, đứng trên đường quái đi qua\nQuái và hero đi qua thì che lên khối."
+  },
+  "front-of-units": {
+   "hash": "7c8dc5c6b1bd",
+   "text": "Một khối vẽ trước hero và quái nhưng sau hiệu ứng, đứng trên đường quái đi qua\nKhối che lên quái và hero đi qua; hiệu ứng đòn và kĩ năng vẫn vẽ đè lên khối."
+  },
+  "same-camera": {
+   "hash": "b5363fcbaf28",
+   "text": "Khối dùng chung camera với sprite 2D, chân khối đặt trên mặt đất như hero và quái\nKhông có camera riêng cho 3D, để thấy đúng cỡ và chỗ như khi trộn thật."
+  },
+  "tilted-faces": {
+   "hash": "db57426b5048",
+   "text": "Khối đặt nghiêng để thấy cả mặt trên và hai mặt bên\nNhìn thẳng từ bên cạnh thì khối chỉ là một hình vuông, không thấy gì là 3D."
+  },
+  "slow-spin": {
+   "hash": "b76158e90cd2",
+   "text": "Khối tự xoay chậm quanh trục đứng\nThấy sáng tối trên các mặt đổi theo góc. Đã loại: khối đứng yên (chỉ thấy một góc sáng)."
+  },
+  "light-from-top": {
+   "hash": "2425e5460be7",
+   "text": "Khối sáng từ trên như style của trận: mặt trên sáng nhất, các mặt bên tối hơn\nĐúng luật ánh sáng của `world-cartoon` và của vòng 1."
+  },
+  "ground-shadow": {
+   "hash": "f473eebd2898",
+   "text": "Dưới chân khối có bóng đổ bầu dục tối, như dưới chân hero và quái\nKhối không đổ bóng thật theo đèn; bóng là một hình phẳng để giống cách sprite đứng trên đất."
+  },
+  "outline-palette": {
+   "hash": "4fbc0bf03792",
+   "text": "Màu thân, sáng, tối và viền của khối lấy từ bảng màu chung\nViền là sắc đậm của màu thân, như luật viền của vòng 1, để so với viền sprite."
+  },
+  "wide-screen": {
+   "hash": "2a250a10890f",
+   "text": "Ở màn 16:9 và 21:9 khối giữ nguyên hình, cỡ và chỗ trên chiến trường\nMàn rộng chỉ thấy thêm chiến trường hai bên, khối không méo, không giãn."
+  },
+  "under-hud-popup": {
+   "hash": "047a5adad7d8",
+   "text": "HUD và popup vẽ trên khối; nền che của popup làm tối khối như mọi thứ của trận\nKhối không lòi lên trên HUD hay popup."
+  },
+  "shown-with-battle": {
+   "hash": "036a5336e06d",
+   "text": "Khối hiện suốt màn trận và ẩn theo màn trận"
+  }
+ }
+}

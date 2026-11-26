@@ -1,3 +1,8 @@
 {"at": "2026-11-26 10:26:59", "event": "data", "hash": "ba65fd883f9b", "previous": "", "added": ["button-text", "counter-text", "tap-adds-one", "no-hud-overlap", "blocked-by-popup", "works-when-still"], "removed": [], "rewritten": []}
 {"at": "2026-11-26 10:28:50", "event": "data", "hash": "dcef7b15d85b", "previous": "ba65fd883f9b", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-26 10:34:11", "event": "promote", "by": "người (Sync)", "hash": "dcef7b15d85b"}
+{"at": "2026-11-26 11:13:54", "event": "data", "hash": "15f81d08492e", "previous": "dcef7b15d85b", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-26 11:14:22", "event": "data", "hash": "52532a290994", "previous": "15f81d08492e", "added": ["right-side"], "removed": [], "rewritten": []}
+{"at": "2026-11-26 12:11:22", "event": "data", "hash": "0d2fa03c1e54", "previous": "52532a290994", "added": ["bottom-left", "counter-beside"], "removed": [{"id": "right-side", "text": "Nút thử và dòng số đếm nằm ở nửa bên phải màn trận\nNgười yêu cầu ngày 2026-11-26. Nằm trong dải chiến trường, sát mép phải; chỗ cụ thể do @UIDesigner xếp trong frame, vẫn theo `no-hud-overlap`. Đã loại: mép trái."}], "rewritten": []}
+{"at": "2026-11-26 12:12:06", "event": "data", "hash": "adaa04d093f9", "previous": "0d2fa03c1e54", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-26 12:13:06", "event": "promote", "by": "người (Sync)", "hash": "adaa04d093f9"}

@@ -1,0 +1,21 @@
+{
+ "hash": "ddff8d7773fa",
+ "items": {
+  "cube-purpose": {
+   "hash": "ef07452938a5",
+   "text": "Feature này để thử model 3D hiển thị thế nào trong game, không thêm gì vào lối chơi\nNgười yêu cầu ngày 2026-11-26. Kết quả là ảnh và lần chơi thử cho người xem, không phải thứ người chơi dùng."
+  },
+  "cube-on-battle": {
+   "hash": "27bee1aa7c73",
+   "text": "Khối thử nằm trên chiến trường của màn trận, đứng trên mặt đất như hero và quái\nMàn trận có đủ thứ để đặt cạnh: nền, thành, hero, quái, hiệu ứng, HUD và popup. Đã loại: một màn riêng chỉ có khối thử (không có gì để so)."
+  },
+  "cube-cases": {
+   "hash": "3419eabfc734",
+   "text": "Mỗi trường hợp hiển thị đáng thử là một ý chấm được ở node bên dưới\nVí dụ: thứ tự vẽ trước và sau thành, hero, quái; ánh sáng và bóng; viền và bảng màu; cỡ ở màn 16:9 và 21:9; nằm dưới popup."
+  },
+  "cube-no-effect": {
+   "hash": "7724a6e44d11",
+   "text": "Khối thử không đổi gì trong trận và không gửi, không đọc gì của feature khác\nQuái và hero đi xuyên qua khối, không bị chặn; chạm vào khối không làm gì. Bỏ feature này đi thì trận vẫn y như cũ."
+  }
+ }
+}

@@ -1,0 +1,75 @@
+{
+ "frame": "pressed-12",
+ "parts": [
+  {
+   "id": "1-band",
+   "w": 1920,
+   "h": 140,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "top"
+   ],
+   "from": {
+    "node": "feature-hud/hud-layout/layout-spec",
+    "frame": "main",
+    "part": "band",
+    "ref": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+    "version": 2
+   },
+   "text": true
+  },
+  {
+   "id": "2-strip",
+   "w": 1920,
+   "h": 760,
+   "slice": [
+    24,
+    24,
+    24,
+    24
+   ],
+   "shapes": [
+    "strip"
+   ],
+   "from": {
+    "node": "feature-hud/hud-layout/layout-spec",
+    "frame": "main",
+    "part": "strip",
+    "ref": "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+    "version": 2
+   },
+   "text": true
+  },
+  {
+   "id": "3-btn",
+   "w": 260,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "test-button"
+   ],
+   "from": {
+    "node": "feature-button-test/test-button/button-spec",
+    "frame": "main",
+    "part": "btn",
+    "ref": "_design/feature-button-test.test-button.button-spec/test-button-claude",
+    "version": 1
+   },
+   "text": true
+  }
+ ],
+ "kept": [
+  "test-counter"
+ ],
+ "skipped": []
+}

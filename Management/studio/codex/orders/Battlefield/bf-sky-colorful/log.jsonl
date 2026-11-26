@@ -1,0 +1,3 @@
+{"at": "2026-11-26 12:56:41", "event": "attempt", "item": "sky", "n": 1, "images": ["new-record.png", "sky.png"]}
+{"at": "2026-11-26 12:56:41", "event": "run", "tool": "codex", "item": "sky", "mode": "workspace-write", "exit": 1, "result": "không có kết quả", "files": [], "error": "Error loading config.toml: url is not supported for stdio\nin `mcp_servers.unityMCP`\n\n"}
+{"at": "2026-11-26 12:56:41", "event": "run", "tool": "codex", "item": "sky", "mode": "read-only", "exit": 1, "result": "không có kết quả", "files": [], "error": "Error loading config.toml: url is not supported for stdio\nin `mcp_servers.unityMCP`\n\n"}

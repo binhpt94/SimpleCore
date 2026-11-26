@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE780"/>
+      <stop offset="1" stop-color="#FFD84A"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFC61F"/>
+      <stop offset="1" stop-color="#F5AE14"/>
+    </linearGradient>
+    <linearGradient id="side" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F29A0E"/>
+      <stop offset="1" stop-color="#D9800A"/>
+    </linearGradient>
+  </defs>
+  <!-- khoi hoi nghieng: mat tren sang nhat, mat truoc than, mat ben bong; vua hop 240, day cham mep duoi -->
+  <!-- mat tren -->
+  <path d="M8 58 L56 10 L232 10 L184 58 Z" fill="url(#top)" stroke="#C26A00" stroke-width="8" stroke-linejoin="round"/>
+  <!-- mat ben phai -->
+  <path d="M184 58 L232 10 L232 184 L184 232 Z" fill="url(#side)" stroke="#C26A00" stroke-width="8" stroke-linejoin="round"/>
+  <!-- mat truoc -->
+  <rect x="8" y="58" width="176" height="174" rx="6" fill="url(#front)" stroke="#C26A00" stroke-width="8" stroke-linejoin="round"/>
+  <!-- vet bong sang nhu keo o mep tren mat truoc -->
+  <rect x="24" y="72" width="120" height="16" rx="8" fill="#FFFFFF" fill-opacity="0.45"/>
+  <!-- dom sang nho mat tren -->
+  <ellipse cx="118" cy="32" rx="34" ry="7" fill="#FFFFFF" fill-opacity="0.5"/>
+</svg>

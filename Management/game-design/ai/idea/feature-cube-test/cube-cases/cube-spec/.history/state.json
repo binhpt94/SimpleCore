@@ -1,0 +1,53 @@
+{
+ "hash": "4f60ddd6bbff",
+ "items": {
+  "cube-edge": {
+   "hash": "0e92f6eb30cc",
+   "text": "Mỗi khối là hình lập phương cạnh 1u (60 px trên màn chuẩn)\nRộng bằng hero (hộp 1u × 1.5u ở `feature-hero/hero-list/hero-roster-values`), thấp hơn hero, nên đặt cạnh nhau là so được cỡ."
+  },
+  "cube-ground": {
+   "hash": "dadc67bbcd1e",
+   "text": "Điểm thấp nhất của khối chạm mặt đất y=0, khối không lơ lửng, không lún\nMặt đất theo `feature-battlefield/battlefield-layers/layer-values`."
+  },
+  "cube-back-place": {
+   "hash": "ec1668431edf",
+   "text": "Khối sau thành có tâm ở x=+1.5u, đúng mép phải của thành, nên thành che nửa trái của khối\nMép thành theo `feature-castle/castle-core/castle-body-values`. Hero chỗ 2 xuất phát cũng ở x=+1.5u và đứng trước khối."
+  },
+  "cube-mid-place": {
+   "hash": "25c91edc66fc",
+   "text": "Khối giữa thành và hero, quái có tâm ở x=−5u, cánh trái\nQuái bên trái sinh ở x=−17u đi sang phải (`feature-enemy/enemy-behavior/enemy-move-values`), nên đi ngang qua khối trước khi tới thành. Nằm giữa cỏ ở −4u và đá ở −6.5u, không chạm decor."
+  },
+  "cube-front-place": {
+   "hash": "1b4c09e4a195",
+   "text": "Khối trước hero, quái có tâm ở x=+5u, cánh phải\nĐối xứng với khối giữa, để hai cánh cho thấy hai thứ tự vẽ khác nhau cùng lúc."
+  },
+  "cube-tilt": {
+   "hash": "f614bbd009f6",
+   "text": "Khối nghiêng 20° cho mặt trên ngả về phía camera, và quay sẵn 45° quanh trục đứng\nNhìn thấy mặt trên và hai mặt bên bằng nhau ngay lúc màn trận mở."
+  },
+  "cube-spin": {
+   "hash": "b88260b2da86",
+   "text": "Khối xoay đều 30° mỗi giây quanh trục đứng, theo thời gian thực\nMột vòng 12 giây: đủ chậm để không rối mắt. Khối không đọc nhịp trận nên vẫn xoay khi trận đứng yên."
+  },
+  "cube-light": {
+   "hash": "f56ec6946124",
+   "text": "Một đèn hướng chiếu từ trên xuống, nghiêng 30° về phía camera; mặt trên sáng nhất\nĐèn chỉ chiếu khối thử, không đổi gì của sprite. Màu nhắm tới: mặt trên gần màu vùng sáng, mặt bên gần màu thân và màu bóng của Vàng trong bảng màu chung."
+  },
+  "cube-shadow": {
+   "hash": "1d95782fefab",
+   "text": "Bóng dưới khối là hình bầu dục phẳng rộng 1.2u, cao 0.25u, tâm ở chân khối trên mặt đất, độ đục 30% (dự kiến)\nMàu bóng là Chữ tối của bảng màu chung. Bóng không xoay theo khối."
+  },
+  "cube-color": {
+   "hash": "f07cd96a1968",
+   "text": "Khối màu Vàng của bảng màu chung, viền ngoài màu viền của Vàng dày 3 px trên màn chuẩn (dự kiến)\nVàng khác hẳn tông của phe quái và nổi trên nền xanh. Cạnh giữa các mặt không có nét riêng; chỉ đường bao ngoài có viền."
+  },
+  "cube-wide": {
+   "hash": "3a8abee02ac7",
+   "text": "Ở màn 21:9 khối vẫn cạnh 60 px và đứng đúng toạ độ u như ở 16:9\nMàn giữ chiều cao 18u (`feature-battlefield/battlefield-layers/layer-values`), nên rộng ra chỉ thấy thêm chiến trường."
+  },
+  "cube-under-popup": {
+   "hash": "5fd4619d433e",
+   "text": "Popup mở thì nền che tối 60% phủ cả ba khối; khối không bao giờ vẽ trên HUD hay popup\nĐộ tối theo `feature-popup/popup-layer/stack-rules`. Khối cao tới khoảng 1.6u, nằm dưới mép dưới HUD trên (11.7u) và trên mép trên thanh dưới (−1.3u) nên không chạm HUD."
+  }
+ }
+}

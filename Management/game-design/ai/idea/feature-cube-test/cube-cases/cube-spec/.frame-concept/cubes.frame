@@ -1,0 +1,30 @@
+kind: field
+title: Ba khối thử trên chiến trường (nhìn ngang, chưa tính nghiêng 20° và quay 45°)
+view: x=-17u..17u y=-4u..14u
+ai: 7
+why: ba khối cạnh 1u đặt đúng ba tâm của data.md (+1.5u, −5u, +5u), đáy chạm mặt đất y=0; khối sau thành chồng nửa trái lên thành (cờ overlap) để thấy thành che nửa trái
+why: khối −5u nằm giữa cỏ ±4u và đá ±6.5u của layer-values, tức giữa thành và hàng hero, quái; khối +5u đối xứng ở cánh phải
+why: bóng là rect dẹt 1.2u × 0.25u, tâm ở chân khối trên mặt đất (frame không có hình bầu dục; ảnh concept vẽ bầu dục)
+why: vẽ cả mép dưới dải HUD trên (11.7u) và mép trên thanh dưới (−1.3u) để thấy khối nằm trọn trong vùng chơi, không chạm HUD
+let cube = 1u                # cạnh khối
+let shadow-w = 1.2u          # rộng bóng
+let shadow-h = 0.25u         # cao bóng
+use ground-y = feature-battlefield/battlefield-layers/layer-values#ground-y
+use ground-h = feature-battlefield/battlefield-layers/layer-values#ground-h
+use castle-left = feature-castle/castle-core/castle-body-values#castle-left
+use castle-w = feature-castle/castle-core/castle-body-values#castle-w
+use castle-h = feature-castle/castle-core/castle-body-values#castle-h
+- ground        rect  x=-17u y=ground-y w=34u h=ground-h label="Dải đất (layer-values)"
+- castle        rect  x=castle-left y=0 w=castle-w h=castle-h label="Thành −1.5u..+1.5u (castle-body-values)"
+- shadow-back   rect  x=0.9u y=-0.125u w=shadow-w h=shadow-h overlap label="bóng khối sau thành"
+- cube-back     rect  x=1u y=0 w=cube h=cube overlap label="Khối sau thành, tâm +1.5u (thành che nửa trái)"
+- shadow-mid    rect  x=-5.6u y=-0.125u w=shadow-w h=shadow-h overlap label="bóng khối giữa"
+- cube-mid      rect  x=-5.5u y=0 w=cube h=cube label="Khối giữa thành và hero, quái, tâm −5u"
+- shadow-front  rect  x=4.4u y=-0.125u w=shadow-w h=shadow-h overlap label="bóng khối trước"
+- cube-front    rect  x=4.5u y=0 w=cube h=cube label="Khối trước hero, quái, tâm +5u"
+- grass-l       line  from=-4u,0 to=-4u,0.5u overlap label="cỏ −4u"
+- stone-l       line  from=-6.5u,0 to=-6.5u,0.5u overlap label="đá −6.5u"
+- grass-r       line  from=4u,0 to=4u,0.5u overlap label="cỏ +4u"
+- stone-r       line  from=6.5u,0 to=6.5u,0.5u overlap label="đá +6.5u"
+- hud-top       line  from=-17u,11.7u to=17u,11.7u overlap label="mép dưới dải HUD trên"
+- hud-bot       line  from=-17u,-1.3u to=17u,-1.3u overlap label="mép trên thanh dưới HUD"

@@ -1,0 +1,3 @@
+{"parts": [
+  {"id": "btn", "same-as": "feature-popup-lose/lose-actions/actions-spec#btn-sub", "shapes": ["test-button"]}
+]}

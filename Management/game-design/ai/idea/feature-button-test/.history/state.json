@@ -1,9 +1,9 @@
 {
- "hash": "84bd60110434",
+ "hash": "8cf3be942238",
  "items": {
   "test-purpose": {
-   "hash": "f31596614a34",
-   "text": "Feature này chỉ để chạy thử quy trình làm game, không thêm gì vào lối chơi\nNgười yêu cầu ngày 2026-11-26. Giữ nhỏ nhất có thể để mỗi bước của quy trình (thiết kế, frame, code, kiểm, chơi thử) đều có việc thật mà không tốn công."
+   "hash": "a6006e8ea5f0",
+   "text": "Feature này chủ yếu để thử kiến trúc feature độc lập và quy trình làm game, không thêm gì vào lối chơi\nNgười yêu cầu ngày 2026-11-26. Thử kiến trúc là chính: một feature đứng riêng, có thư mục code riêng, nối dây vào màn trận mà không đụng feature nào. Giữ nhỏ nhất có thể để mỗi bước của quy trình (thiết kế, frame, code, kiểm, chơi thử) đều có việc thật mà không tốn công."
   },
   "test-on-battle": {
    "hash": "6b35e04269fb",

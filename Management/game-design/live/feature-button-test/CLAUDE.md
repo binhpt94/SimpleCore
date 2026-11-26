@@ -11,6 +11,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - Không feature nào gọi tới feature này, và nó không gọi feature nào.
 
 ## Đã tự quyết
+- **Mục đích chính là thử kiến trúc** (người yêu cầu 2026-11-26): feature độc lập, ranh giới thư mục, nối dây ở `_Composition`. Quy trình làm game được thử kèm. Độ quan trọng giữ IDEA.
 - **Đặt trên màn trận** (người nói "ở game scene"). Scene Game có cả màn bắt đầu, chọn đội và trận; chọn màn trận vì đó là màn chơi chính và có HUD để thử xếp chỗ cạnh nhau. Đã loại: màn bắt đầu (dễ tới hơn nhưng ít thứ để thử cạnh nhau; node cheat đã cho dựng thẳng state, nên đường tới màn trận không phải vấn đề).
 - **Feature riêng, không nằm trong `feature-hud`.** Nó là thứ để thử, sẽ bỏ được mà không đụng HUD. Đã loại: thêm một nút vào HUD.
 - **Không nối với feature nào.** Một feature đứng một mình là đủ để chạy hết quy trình, và kiểm được luật ranh giới feature. Đã loại: nút gửi tin cho feature khác (thêm contract, quá mục đích thử).

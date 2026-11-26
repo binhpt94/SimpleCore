@@ -1,5 +1,5 @@
 {
- "hash": "dcef7b15d85b",
+ "hash": "adaa04d093f9",
  "items": {
   "button-text": {
    "hash": "8aa39200a5d3",
@@ -16,6 +16,14 @@
   "no-hud-overlap": {
    "hash": "592bf804ff77",
    "text": "Nút thử và dòng số đếm không che phần nào của HUD\nChỗ cụ thể do @UIDesigner xếp trong frame; nút có cạnh chạm tối thiểu như các nút HUD ở `feature-hud/hud-layout/layout-spec`."
+  },
+  "bottom-left": {
+   "hash": "7ef42f23b978",
+   "text": "Nút thử nằm ở góc trái dưới màn trận, ngay trên thanh dưới của HUD\nNgười quyết ngày 2026-11-26. Nút nằm trong dải chiến trường, sát mép trên của mép dưới HUD (`feature-hud/hud-layout/layout-spec`) và sát mép trái, không đè lên thanh dưới; chỗ cụ thể do @UIDesigner xếp trong frame. Đã loại: sát mép phải (bản trước), mép trái giữa màn (bản frame đầu)."
+  },
+  "counter-beside": {
+   "hash": "a44db50b94ff",
+   "text": "Dòng số đếm nằm ngay bên phải nút thử, cùng hàng với nút\nSố dài ra thì chữ giãn sang phải, nút không phải dời chỗ; đọc nút rồi số theo chiều đọc. Đã loại: dòng số đếm phía trên nút (cao thêm một hàng, xa thanh dưới hơn)."
   },
   "blocked-by-popup": {
    "hash": "78e14bd022a3",

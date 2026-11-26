@@ -1,0 +1,34 @@
+{
+ "items": {
+  "cube-edge": {
+   "state": "done",
+   "note": "Dựng ba khối lập phương cạnh 1u bằng primitive, lớp luật CubeSpec thuần C# và test EditMode",
+   "tests": [
+    "CubeSpecTests.CubeEdge_IsOneUnit_AndSixtyPixelsOnReferenceScreen",
+    "CubeSpecTests.CubeEdge_EveryOneOfTheThreeCubesIsOneUnit"
+   ],
+   "play": "",
+   "hash": "0e92f6eb30cc",
+   "text": "Mỗi khối là hình lập phương cạnh 1u (60 px trên màn chuẩn)\nRộng bằng hero (hộp 1u × 1.5u ở `feature-hero/hero-list/hero-roster-values`), thấp hơn hero, nên đặt cạnh nhau là so được cỡ.",
+   "title": "Mỗi khối là hình lập phương cạnh 1u (60 px trên màn chuẩn)",
+   "by": "CubeTest",
+   "at": "2026-11-26 13:00:15"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-26 12:59:06",
+   "id": "cube-edge",
+   "state": "doing",
+   "by": "CubeTest",
+   "note": "Dựng ba khối lập phương cạnh 1u bằng primitive, lớp luật CubeSpec thuần C# và test EditMode"
+  },
+  {
+   "at": "2026-11-26 13:00:15",
+   "id": "cube-edge",
+   "state": "done",
+   "by": "CubeTest",
+   "note": "CubeSpecTests.CubeEdge_IsOneUnit_AndSixtyPixelsOnReferenceScreen, CubeSpecTests.CubeEdge_EveryOneOfTheThreeCubesIsOneUnit"
+  }
+ ]
+}

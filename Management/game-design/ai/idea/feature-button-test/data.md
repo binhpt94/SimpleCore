@@ -7,8 +7,8 @@ Một nút để thử trên màn trận: bấm thì thấy phản hồi ngay. F
 
 ## Ý cốt lõi
 
-### test-purpose | AI 8 | Feature này chỉ để chạy thử quy trình làm game, không thêm gì vào lối chơi
-Người yêu cầu ngày 2026-11-26. Giữ nhỏ nhất có thể để mỗi bước của quy trình (thiết kế, frame, code, kiểm, chơi thử) đều có việc thật mà không tốn công.
+### test-purpose | AI 8 | Feature này chủ yếu để thử kiến trúc feature độc lập và quy trình làm game, không thêm gì vào lối chơi
+Người yêu cầu ngày 2026-11-26. Thử kiến trúc là chính: một feature đứng riêng, có thư mục code riêng, nối dây vào màn trận mà không đụng feature nào. Giữ nhỏ nhất có thể để mỗi bước của quy trình (thiết kế, frame, code, kiểm, chơi thử) đều có việc thật mà không tốn công.
 
 ### test-on-battle | AI 7 | Nút thử nằm trên màn trận của scene Game
 Màn trận là nơi có nhiều feature cùng hiện nhất, nên thử ở đó kiểm được cả việc xếp chỗ cạnh HUD.
