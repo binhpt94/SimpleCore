@@ -1,0 +1,32 @@
+{
+ "frame": "main",
+ "parts": [
+  {
+   "id": "btn",
+   "w": 260,
+   "h": 120,
+   "slice": [
+    40,
+    36,
+    40,
+    40
+   ],
+   "shapes": [
+    "test-button"
+   ],
+   "from": {
+    "node": "feature-popup-lose/lose-actions/actions-spec",
+    "frame": "main",
+    "part": "btn-sub",
+    "ref": "_design/feature-popup-lose.lose-actions.actions-spec/lose-buttons-claude",
+    "version": 2
+   },
+   "text": true
+  }
+ ],
+ "kept": [
+  "strip",
+  "test-counter"
+ ],
+ "skipped": []
+}

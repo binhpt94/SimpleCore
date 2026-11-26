@@ -1,0 +1,24 @@
+{
+ "node": "feature-button-test/cheat",
+ "nodeHash": "5e1b412965c3",
+ "frames": {
+  "pressed-12": "633389444df8"
+ },
+ "styles": {
+  "ui-flat": "00fd85177d99"
+ },
+ "order": "_design/feature-button-test.cheat/button-cheat-claude",
+ "version": 1,
+ "at": "2026-11-26 12:57:14",
+ "stamp": 1795672634.6048915,
+ "sources": [
+  [
+   "_design/feature-button-test.test-button.button-spec/test-button-claude",
+   1
+  ],
+  [
+   "_design/feature-hud.hud-layout.layout-spec/hud-layout-claude",
+   2
+  ]
+ ]
+}
