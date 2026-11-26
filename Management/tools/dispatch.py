@@ -40,7 +40,7 @@ DIR = ("Management", "inbox")
 CONFIG = "config.json"
 MODES = ("always-live", "on-demand")
 # hung_note, hung_stop: minutes a running turn may be silent (no new line in its transcript) before the server tells
-# @Manager, and before it stops the thread and gives it its work again (0: never stops it). See setup_server.watch_tick.
+# the Leaders (a note in Management/reports), and before it stops the thread and gives it its work again (0: never stops it). See setup_server.watch_tick.
 # takeover_minutes: a chat of a thread that runs on demand, open in VS Code or a terminal and idle this long, is closed
 # when a message waits for it, and the thread runs in the background with the message (0: an open chat is never closed).
 DEFAULT_CONFIG = {"mode": "always-live", "limits": {"feature": 8, "tool": 8}, "idle_minutes": 20, "hung_note": 5, "hung_stop": 10,

@@ -225,7 +225,7 @@ def report(root, arg=""):
     names = {ph["key"]: ph["name"] for ph in gd.PHASES}
     if not stage:
         out += ["", "## Giai đoạn đang làm: CHƯA ĐẶT (người đặt ở tab Game design; cho tới lúc đó mọi node coi như tới hạn, "
-                    "và @Manager chưa giao việc dev)"]
+                    "và @CodeLead chưa giao việc dev)"]
     else:
         deepen = [n for n in gd.walk(node) if n.get("deepen")]
         later = [n for n in gd.walk(node) if not n.get("due", True) and not n["children"]]

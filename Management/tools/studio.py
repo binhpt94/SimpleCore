@@ -15,7 +15,7 @@ way Codex and Blender are run. Every run, delivery and refusal is kept, so a mis
     python Management/tools/studio.py anchor <_design/...>/<id> <item> the human: an art that passed guides its style (toggle)
     python Management/tools/studio.py pick <F>/<id> <item> <n>         the tool chat: take run n of an item as its result
     python Management/tools/studio.py debt close <n-k>                 the human: accept an art debt as it is
-    python Management/tools/studio.py cancel <F>/<id> "<why>"          the one who ordered, @Manager, the human: the order is dropped
+    python Management/tools/studio.py cancel <F>/<id> "<why>"          the one who ordered, @CodeLead, the human: the order is dropped
 
 Layout (see .claude/rules/studio.md):
     Management/studio/<tool>/lessons.md                    mistakes met and how to avoid them; put before every prompt
@@ -660,7 +660,7 @@ def read_status(folder):
     return out
 
 
-CANCELLED = "cancelled"      # dropped by the one who ordered, @Manager or the human: nobody works on it any more
+CANCELLED = "cancelled"      # dropped by the one who ordered, @CodeLead or the human: nobody works on it any more
 
 
 def view_state(status, items, reviews, unjudged=False):
@@ -691,7 +691,7 @@ def not_cancelled(root, ref):
 
 
 def cmd_cancel(root, ref, text):
-    """Drops an order: the one who ordered it, @Manager or the human (the guard checks who). Its tool chat is no
+    """Drops an order: the one who ordered it, @CodeLead or the human (the guard checks who). Its tool chat is no
     longer told of it, `check` and the tool's list leave it out, the Studio tab shows why. What was already
     delivered stays in Resources. An order whose every item is done is not cancelled: there is nothing left to stop."""
     tool, feature, oid, folder = find_order(root, ref)

@@ -1,6 +1,10 @@
 # Báo cáo cho @Manager
 Áp dụng cho nhóm Basic (@Core), Features, Services, @CodeLead khi sửa khung hoặc `Assets/_Composition`, @GameDesigner khi sửa cây thiết kế, @UIDesigner khi sửa frame, và nhóm Testers khi ghi một đợt chơi thử. @human, @Manager không phải báo.
-Báo cáo đi tới cả @CodeLead (kiểm code, biên dịch, chạy test) và @Manager (điều phối).
+Báo cáo được lưu thành file và liệt kê ở đầu tin của Leader nắm phần đó (từ 2026-11-26):
+- Basic, Features, Services, Testers, và @CodeLead khi sửa khung: tới @CodeLead (kiểm code, giao việc tiếp, xếp lịch chơi thử).
+- @CodeLead, @GameDesigner, @UIDesigner: tới @Manager (điều phối ba Leader).
+
+Tên khối vẫn là `## Báo cáo cho @Manager` cho mọi phiên, để hook nhận ra.
 
 ## Khi nào
 - Lượt nào có sửa file (Edit, Write, xoá qua unity-mcp) thì kết thúc câu trả lời bằng khối báo cáo bên dưới.
@@ -31,6 +35,7 @@ Báo cáo đi tới cả @CodeLead (kiểm code, biên dịch, chạy test) và 
 
 ## Đi đâu
 - Hook lưu khối vào `Management/reports/<thời gian>-<vai trò>.md` (không commit).
-- Phiên @CodeLead và @Manager mỗi bên thấy danh sách báo cáo mới ở đầu mỗi tin; trang quản lý có tab Báo cáo.
+- Đầu mỗi tin, @CodeLead thấy danh sách mọi báo cáo mới, @Manager chỉ thấy báo cáo của ba Leader (và ghi chú của server về họ); trang quản lý có tab Báo cáo.
 - @CodeLead kiểm code rồi nhắn lỗi về đúng phiên; phiên đó tự sửa.
-- @Manager điều phối bằng SendMessage (Leader, tester), hộp thư `dispatch.py send` (feature, service, @Core, tool) ; cần người quyết thì hỏi trong chat của nó (`manager.md`, mục "Hỏi người"); không sửa code.
+- @CodeLead giao việc cho tầng dưới bằng hộp thư `dispatch.py send` (feature, service, @Core, tester).
+- @Manager điều phối ba Leader bằng SendMessage; cần người quyết thì hỏi trong chat của nó (`manager.md`, mục "Hỏi người"); không sửa code, không gửi hộp thư.

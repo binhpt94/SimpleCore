@@ -370,7 +370,7 @@ def write_mode(root, mode):
 # The phase the project is being built for now (stage.json beside mode.json; only the human sets it, on the page,
 # with the PIN). A node whose own phase is that one or an earlier one is due: it must be designed down to round 4 and
 # its requirements are work. A node of a later phase (or an optional one) is only defined for now. No file: not set,
-# every node is due as before, and @Manager may not hand out development work (guard.py).
+# every node is due as before, and @CodeLead may not hand out development work (guard.py).
 STAGE_FILE = "stage.json"
 
 

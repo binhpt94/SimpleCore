@@ -5,7 +5,7 @@ description: Chỉ nhóm Testers (FEATURE=@UnityAutoPlay). Một đợt chơi th
 # Một đợt chơi thử
 Quyền, thư mục, bảng lệnh `tester.py` và ai được giao việc vẫn ở `.claude/rules/tester.md`.
 
-1. Nhận việc từ người hoặc @Manager (mục "Ai giao việc" của `tester.md`): test feature nào, mức nào (IDEA, PROTOTYPE, FULL), vì sao.
+1. Nhận việc từ người hoặc @CodeLead (mục "Ai giao việc" của `tester.md`): test feature nào, mức nào (IDEA, PROTOTYPE, FULL), vì sao.
 2. `tester.py new <Tên mình> "<tên đợt>"`. Ghi ngay mục Mục đích, Test gì, Môi trường.
 3. Đọc thiết kế đã chốt: `python Management/tools/gd_pack.py <Tên feature>` (đọc đủ node vòng 4 và mục CHEAT của phần sẽ test). Đọc code khi cần hiểu vì sao game chạy như vậy; không sửa.
 4. Chơi: mở scene, Play, dựng state bằng cheat của feature (menu hoặc `execute_code`), thao tác như người chơi, đọc console. Mỗi điều kiểm được ghi thành một bước: làm gì, mong thấy gì theo thiết kế, thực tế thấy gì.

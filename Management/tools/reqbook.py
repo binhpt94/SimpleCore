@@ -693,7 +693,7 @@ def status_all(root):
     phases = gd.leaf_phases(root) if stage else {}
     out = ["# Sổ yêu cầu theo feature (đã kiểm/tổng; chờ kiểm là việc của @CodeLead, bị trả và đổi thiết kế là việc của feature)",
            "Giai đoạn đang làm: " + (gd.stage_name(stage) + " (việc của giai đoạn sau ghi 'để sau', không giao)" if stage else
-                                    "CHƯA ĐẶT: người đặt ở tab Game design; @Manager chưa giao việc dev")]
+                                    "CHƯA ĐẶT: người đặt ở tab Game design; @CodeLead chưa giao việc dev")]
     for folder, key, declared in gd.live_feature_names(root):
         try:
             v = view(root, folder, phases)

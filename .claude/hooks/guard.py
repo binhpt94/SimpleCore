@@ -189,10 +189,14 @@ TESTER_DATA_EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".md", ".txt", ".js
 # Who reads Tester/: the Leaders, the code tiers and the testers. Old runs moved to Tester/<name>/Archive are read by
 # the testers only, so the other chats do not fill their context with them.
 TESTER_READERS = ("manager", "codelead", "gamedesigner", "uidesigner", "area", "feature", "tester")
-# Who may message a tester (SendMessage): it holds the Unity Editor while it plays, so only @Manager hands it a test
-# run (and the human, whose chat the guard lets through); the other Leaders may ask it to act one thing out as a
-# player to confirm a feature (.claude/rules/tester.md). Everybody else asks @Manager.
-TESTER_CALLERS = ("manager", "codelead", "gamedesigner", "uidesigner")
+# Who may message a tester (SendMessage): it holds the Unity Editor while it plays, so only @CodeLead hands it a test
+# run (and the human, whose chat the guard lets through); @GameDesigner and @UIDesigner may ask it to act one thing out
+# as a player to confirm a feature (.claude/rules/tester.md). @Manager keeps to the Leaders (decided 2026-11-26);
+# everybody else asks @CodeLead.
+TESTER_CALLERS = ("codelead", "gamedesigner", "uidesigner")
+# Who may message @Manager (SendMessage): the Leaders and the human. Features, services, @Core, the tools and the
+# testers report to @CodeLead (their part's Leader) since 2026-11-26, so @Manager is not woken for their news.
+MANAGER_CALLERS = ("manager", "codelead", "gamedesigner", "uidesigner", "human")
 # Tools: they take orders from the features and make images (Codex; ClaudeImage draws them itself as SVG) or 3D
 # models (Blender); they never code.
 TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender", "@ClaudeImage": "claudeimage"}
@@ -224,12 +228,12 @@ for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS, CODELEAD_COMMANDS):
 # studio status, validate, scaffold --dry-run). Every part must pass alone, so a chain grants nothing a single call
 # does not; a part with a quoted text (review, redo) is never chained.
 # The test runs (Management/tools/tester.py). Looking: whoever reads Tester/. A new run and moving old runs to the
-# archive: that tester; @Manager archives for any tester.
+# archive: that tester; @CodeLead (who hands the testers their runs) archives for any tester.
 TESTER_NAME = "(" + "|".join(TESTER_ROLES.values()) + ")"
 TESTER_TOOL = PY + r"Management/tools/tester\.py "
 TESTER_READ_COMMANDS = [TESTER_TOOL + r"(check|status( " + TESTER_NAME + r")?)"]
 TESTER_ARCHIVE_ARGS = r" (\d{8}-\d{6}|--keep [0-9]{1,3})"
-MANAGER_COMMANDS.append(TESTER_TOOL + "archive " + TESTER_NAME + TESTER_ARCHIVE_ARGS)
+CODELEAD_COMMANDS.append(TESTER_TOOL + "archive " + TESTER_NAME + TESTER_ARCHIVE_ARGS)
 
 
 TESTER_SHOT = r"[A-Za-z0-9_-][A-Za-z0-9._-]*\.([pP][nN][gG]|[jJ][pP][eE]?[gG])"      # a picture's name in UnityProject/Captures: no '/'
@@ -259,7 +263,8 @@ TOOL_COMMANDS = {
 # and no backslash inside; SHELL_META_RX refuses the shell characters). Only the feature that ordered runs it.
 FEATURE_STUDIO_RX = re.compile(r"^python3? Management/tools/studio\.py (review) (" + STUDIO_REF + r") " + STUDIO_ID
                                + r' [0-3]( "[^"\\]*")?$')
-# Dropping an order (studio.py cancel <F>/<id> "<why>"): the feature that ordered it, @Manager for any order, the human.
+# Dropping an order (studio.py cancel <F>/<id> "<why>"): the feature that ordered it, @CodeLead for any order (the
+# features are its part), the human.
 STUDIO_CANCEL_RX = re.compile(r"^python3? Management/tools/studio\.py cancel (" + STUDIO_REF + r') "[^"\\]+"$')
 # The requirement book of a feature (Management/tools/gd_req.py, reqbook.py). Reading one book: any chat; the line
 # per feature: the Leaders. doing / done: only the chat of that feature (FEATURE_REQ_RX, checked below), with its note
@@ -277,18 +282,19 @@ FEATURE_REQ_RX = re.compile(r"^python3? Management/tools/gd_req\.py (" + REQ_FEA
                             + r' "[^"\\]+"|done ' + REQ_REF + " (" + REQ_TEST + "(," + REQ_TEST + r')*|play "[^"\\]+"))$')
 # The inbox of the chats that run on demand (Management/tools/dispatch.py): features, services, @Core and the tool
 # chats get work through it, not through SendMessage (a chat that is not running would never get the message).
-# list: every bound chat. send: a Leader, to the chats of its own part, with --from naming itself. cancel: @Manager.
+# list: every bound chat. send: a Leader, to the chats of its own part, with --from naming itself. cancel: @CodeLead.
+# @Manager keeps to the Leaders (SendMessage) and sends to no inbox (decided 2026-11-26): the features, services, @Core
+# and the testers are @CodeLead's part; the tools get their orders from studio.py and @GameDesigner, @UIDesigner.
 # A tester stays live once it runs (SendMessage); every Leader may send to its inbox, which opens it when it is not
 # running (what the message may ask for is the written rule of .claude/rules/tester.md).
 DISPATCH = PY + r"Management/tools/dispatch\.py "
 INBOX_TOOLS = ("Codex", "Blender", "ClaudeImage", "DesignAdvisor")
 INBOX_FEATURE = r"(_Services/)?[A-Z][A-Za-z0-9]*"
 ALLOWED_COMMANDS.append(DISPATCH + r"list( (@(Core|" + "|".join(INBOX_TOOLS + tuple(TESTER_ROLES.values())) + r")|" + INBOX_FEATURE + r"))?")
-MANAGER_COMMANDS.append(DISPATCH + r"cancel m[0-9]{8}-[0-9]{6}-[0-9a-f]{6}")
+CODELEAD_COMMANDS.append(DISPATCH + r"cancel m[0-9]{8}-[0-9]{6}-[0-9a-f]{6}")
 DISPATCH_SEND_RX = re.compile(r"^python3? Management/tools/dispatch\.py send (@[A-Za-z]+|" + INBOX_FEATURE
                               + r') --from @?([A-Za-z]+) "[^"\\]+"$')
 INBOX_SENDERS = {      # role -> the targets it may send to ("feature": any feature or service)
-    "@Manager": ("feature", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor") + tuple(TESTER_ROLES),
     "@CodeLead": ("feature", "@Core") + tuple(TESTER_ROLES),
     "@GameDesigner": ("@DesignAdvisor", "@Codex") + tuple(TESTER_ROLES),
     "@UIDesigner": ("@ClaudeImage",) + tuple(TESTER_ROLES),
@@ -529,13 +535,13 @@ def own_skill(full, root, rx):
 # too long for the chat (~/.claude/projects/<project>/<session id>/tool-results), the output of its background
 # commands and subagents (<temp>/claude/<x>/<session id>/tasks) and its scratch files (.../scratchpad). They hold only
 # what tools the guard already let this session run printed, so reading them grants nothing new. Another session's
-# folders, the transcripts and everything else outside the project stay closed, with one exception: @CodeLead and
-# @Manager read (never write) the folders of a session bound to a feature or service, to see what its agents and
-# background commands returned (PEER_READERS).
+# folders, the transcripts and everything else outside the project stay closed, with one exception: @CodeLead reads
+# (never writes) the folders of a session bound to a feature or service, to see what its agents and background
+# commands returned (PEER_READERS). @Manager no longer does: it keeps to the Leaders (2026-11-26).
 OWN_ID_RX = re.compile(r"^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$")      # a real session id only
 OWN_WRITE_DIR = "scratchpad"
 OWN_HOME, OWN_TEMP = None, None      # tests point these at their own folders
-PEER_READERS = ("codelead", "manager")
+PEER_READERS = ("codelead",)
 
 
 def session_bases():
@@ -1662,7 +1668,7 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all, store=No
         return "allow", f"read inside {name}"
     return "deny", (f"may not read: {name}. Search and read only inside your own area or a readable zone"
                     + (" (outside the project only this session's own tool-results, tasks and scratchpad folders "
-                       "are readable; another session's are not, except that @CodeLead and @Manager read those of "
+                       "are readable; another session's are not, except that @CodeLead reads those of "
                        "a feature or service session)." if name == "outside the project" else "."))
 
 
@@ -1721,13 +1727,19 @@ def decide(data, session_value, root, store=None):
             to in {n.lower() for n in INBOX_TOOLS} | {"core"} or re.fullmatch(r"(_services/)?[a-z][a-z0-9]*", to))
         if on_demand and mode not in ("human", "none"):
             how = (f'python Management/tools/dispatch.py send <tên> --from {(role or "").lstrip("@")} "<việc>"'
-                   if role in INBOX_SENDERS else "nhờ Leader của phần đó (CodeLead, GameDesigner, UIDesigner, Manager)")
+                   if role in INBOX_SENDERS else "nhờ Leader của phần đó (CodeLead, GameDesigner, UIDesigner)")
             return "deny", ("this chat runs on demand and may not be running: a SendMessage to it would be lost. Give it "
                             f"work through its inbox: {how}. gd_req.py reject and studio.py check, review 0, deliver, redo "
                             "already put their message there.")
         if to in (n.lower() for n in TESTER_ROLES.values()) and mode not in TESTER_CALLERS:
-            return "deny", ("only @Manager (and the human) gives a tester work: it holds the Unity Editor while it plays. "
-                            "Message Manager instead: the feature and what you need confirmed.")
+            return "deny", ("only @CodeLead (and the human) gives a tester work: it holds the Unity Editor while it plays. "
+                            + ("@Manager keeps to the Leaders: ask CodeLead for the test run."
+                               if mode == "manager" else "Message CodeLead instead: the feature and what you need confirmed."))
+        if to == "manager" and mode not in MANAGER_CALLERS and mode != "none":
+            return "deny", ("@Manager keeps to the Leaders: features, services, @Core, the tools and the testers do not "
+                            "message it. Blocked or done: tell CodeLead (SendMessage, to: \"CodeLead\"); a design "
+                            "question: CodeLead passes it to GameDesigner. Your report at the end of the turn is saved "
+                            "for CodeLead anyway.")
     if tool in PASS_TOOLS:
         return None
 
@@ -1752,9 +1764,9 @@ def decide(data, session_value, root, store=None):
         m = STUDIO_CANCEL_RX.match(cmd)
         if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
             ordered = m.group(1).rpartition("/")[0]
-            if mode == "manager" or (mode == "feature" and ordered == feature):
+            if mode == "codelead" or (mode == "feature" and ordered == feature):
                 return "allow", f"studio: {who} cancels the order {m.group(1)}"
-            return "deny", (f"only the chat that ordered ({ordered}) or @Manager cancels an order; tell @Manager which "
+            return "deny", (f"only the chat that ordered ({ordered}) or @CodeLead cancels an order; tell @CodeLead which "
                             "order and why")
         m = DISPATCH_SEND_RX.match(cmd)
         # send to the inbox: a Leader, to its own part, naming itself; the text may hold "..", the rest may not.
@@ -1766,7 +1778,7 @@ def decide(data, session_value, root, store=None):
             if target in allowed or ("feature" in allowed and not target.startswith("@")):
                 # development work is handed out only once the human has said which phase the project is in
                 dev = not target.startswith("@") or target == "@Core"
-                if role == "@Manager" and dev and not stage_set(root):
+                if role == "@CodeLead" and dev and not stage_set(root):
                     return "deny", ("the phase the project is being built for is not set yet (Management/game-design/stage.json): "
                                     "ask the human which phase to work on (IDEA, PROTOTYPE or FULL); they set it on the page, "
                                     "tab Game design, 'Đang làm'. Until then no development work goes to a feature, a service or @Core")

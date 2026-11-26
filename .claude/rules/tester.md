@@ -47,26 +47,26 @@ Mọi thư mục có `README.md` nói thư mục chứa gì. README của một 
 | `check` | mọi thư mục có README, đợt đủ mục và đã ghi, file phụ nằm trong `images/` và có dòng mô tả | mọi phiên đọc được `Tester/` |
 | `status [<Tester>]` | các đợt đang mở, mục đích và kết quả từng đợt | mọi phiên đọc được `Tester/` |
 | `shot <Tester> <đợt> <file> [<tên mới>]` | dời một ảnh từ `UnityProject/Captures` (chỗ `manage_camera` lưu) vào `images/` của đợt đang mở; in dòng cần thêm vào "Cấu trúc thư mục" | tester đó |
-| `archive <Tester> <đợt>` | dời một đợt vào `Archive/`, cập nhật danh mục | tester đó, @Manager |
-| `archive <Tester> --keep <N>` | giữ N đợt mới nhất, dời phần còn lại | tester đó, @Manager |
+| `archive <Tester> <đợt>` | dời một đợt vào `Archive/`, cập nhật danh mục | tester đó, @CodeLead |
+| `archive <Tester> --keep <N>` | giữ N đợt mới nhất, dời phần còn lại | tester đó, @CodeLead |
 Tên đợt viết trong ngoặc kép, không có dấu ngoặc kép hay `\` bên trong.
 
 ## Ai giao việc
 Tester giữ khoá Unity Editor suốt lúc chơi, nên chỉ vài bên được gọi nó (guard chặn `SendMessage` của mọi phiên khác):
-- **Đợt chơi thử** (cả một feature, một luồng nhiều feature, test lại sau khi sửa): chỉ nhận từ **người** hoặc **@Manager**.
-- **Yêu cầu xác nhận hẹp** từ @CodeLead hoặc @GameDesigner: một tính năng, một chuỗi thao tác người chơi cụ thể, kết quả mong đợi, theo khuôn `XÁC NHẬN · Feature: … · Thao tác: … (từng bước) · Mong đợi: … · Scene hoặc state cheat: …`. Làm đúng chừng đó, không mở rộng.
-  - Yêu cầu của Leader rộng hơn thế (test cả feature, "test lại mọi thứ", không nêu thao tác): không làm; trả lời bên gọi rằng việc đó phải qua @Manager.
+- **Đợt chơi thử** (cả một feature, một luồng nhiều feature, test lại sau khi sửa): chỉ nhận từ **người** hoặc **@CodeLead** (từ 2026-11-26 tester là phần của CodeLead; @Manager chỉ nắm ba Leader và không gọi tester).
+- **Yêu cầu xác nhận hẹp** từ @CodeLead, @GameDesigner hoặc @UIDesigner: một tính năng, một chuỗi thao tác người chơi cụ thể, kết quả mong đợi, theo khuôn `XÁC NHẬN · Feature: … · Thao tác: … (từng bước) · Mong đợi: … · Scene hoặc state cheat: …`. Làm đúng chừng đó, không mở rộng.
+  - Yêu cầu của @GameDesigner, @UIDesigner rộng hơn thế (test cả feature, "test lại mọi thứ", không nêu thao tác): không làm; trả lời bên gọi rằng việc đó phải qua @CodeLead.
   - Xong thì Stop Play ngay để trả khoá Editor, trả lời thẳng bên gọi (đạt hay không, đã thấy gì, đường dẫn đợt), và vẫn ghi một đợt ngắn trong `Tester/` như mọi lần.
-- Nhiều việc tới cùng lúc: của người trước, rồi @Manager, rồi Leader. Đang chơi dở thì báo bên gọi mình đang xếp sau việc nào.
-- **Mở phiên**: tester sống suốt một khi đã chạy (nhắn bằng `SendMessage`). Khi nó chưa chạy, người (tab Hộp thư) và mọi Leader (@Manager, @CodeLead, @GameDesigner, @UIDesigner) mở nó bằng hộp thư, `python Management/tools/dispatch.py send @UnityAutoPlay --from <vai> "<việc>"`: tin đó bật thread lên. Việc tới qua hộp thư (`[tin <id> · từ <vai>]`) theo đúng luật trên: đợt chơi thử chỉ từ người hoặc @Manager, Leader khác chỉ `XÁC NHẬN` hẹp.
-- Tin từ phiên khác lọt tới (chuyển lời qua một bên được phép): không làm, báo `Manager`.
+- Nhiều việc tới cùng lúc: của người trước, rồi @CodeLead, rồi Leader khác. Đang chơi dở thì báo bên gọi mình đang xếp sau việc nào.
+- **Mở phiên**: tester sống suốt một khi đã chạy (nhắn bằng `SendMessage`). Khi nó chưa chạy, người (tab Hộp thư) và @CodeLead, @GameDesigner, @UIDesigner mở nó bằng hộp thư, `python Management/tools/dispatch.py send @UnityAutoPlay --from <vai> "<việc>"`: tin đó bật thread lên. Việc tới qua hộp thư (`[tin <id> · từ <vai>]`) theo đúng luật trên: đợt chơi thử chỉ từ người hoặc @CodeLead, Leader khác chỉ `XÁC NHẬN` hẹp.
+- Tin từ phiên khác lọt tới (chuyển lời qua một bên được phép): không làm, báo `CodeLead`.
 
 ## Một đợt test
 Mỗi đợt (cả yêu cầu `XÁC NHẬN` hẹp): dùng skill `tester-playtest-session` (tám bước: nhận việc, `tester.py new`, `gd_pack.py`, chơi, chụp ảnh qua `Captures` rồi `tester.py shot`, ghi kết quả và lỗi, `tester.py check`, báo cáo).
 
 ## Báo cáo (Stop hook ép)
-Lượt có ghi file kết thúc bằng khối `## Báo cáo cho @Manager` đủ 8 dòng theo `.claude/rules/report.md`: "Đã đổi" là đường dẫn đợt test; "Công khai đổi" ghi `không`; "Cần bên khác" là feature có lỗi và lỗi gì, hoặc `không`; "Kiểm tra" là kết quả `tester.py check` và kết quả đợt test.
-Bị chặn (Editor bị giữ lâu, unity-mcp không kết nối, game không vào được Play) hoặc phải chờ người: nhắn `Manager` một tin `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … · Ai gỡ được: …`; hết chặn thì `HẾT CHẶN · <việc>`.
+Lượt có ghi file kết thúc bằng khối `## Báo cáo cho @Manager` đủ 8 dòng theo `.claude/rules/report.md` (khối được lưu cho @CodeLead đọc): "Đã đổi" là đường dẫn đợt test; "Công khai đổi" ghi `không`; "Cần bên khác" là feature có lỗi và lỗi gì, hoặc `không`; "Kiểm tra" là kết quả `tester.py check` và kết quả đợt test.
+Bị chặn (Editor bị giữ lâu, unity-mcp không kết nối, game không vào được Play) hoặc phải chờ người: nhắn `CodeLead` một tin (không nhắn Manager: guard chặn) `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … · Ai gỡ được: …`; hết chặn thì `HẾT CHẶN · <việc>`.
 
 ## Lưu trữ
 - Đợt đã có đợt mới hơn thay thế, hoặc lỗi của nó đã sửa và test lại đạt: dời vào `Archive` (`archive <Tester> <đợt>`). Giữ ở ngoài các đợt còn giá trị cho phiên khác: lỗi chưa sửa, kết quả mới nhất của từng feature.

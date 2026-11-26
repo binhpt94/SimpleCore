@@ -46,7 +46,7 @@ design: feature-hero/hero-list/hero-roster-values                (không bắt b
 - Mỗi dòng Danh sách là đúng một kết quả. Muốn 3 ảnh thì 3 dòng. `kind: consult`: mỗi dòng là một câu hỏi cho GPT.
 - Không mơ hồ: viết điều kiện đo được trong Tiêu chí nhận. Phong cách thì đưa ảnh tham chiếu.
 - Viết xong: `python Management/tools/studio.py check`. Order hợp lệ tự vào hộp thư của tool (`dispatch.py`, mỗi order một lần): không nhắn tool bằng SendMessage (tool chạy theo việc, guard chặn).
-- Huỷ một order không cần nữa: `python Management/tools/studio.py cancel <F>/<id> "<lí do>"` (feature đã đặt order đó, @Manager, hoặc người). Order thành "đã huỷ": tool không được báo nữa, `check` bỏ qua, mọi lệnh chạy tool, giao, chấm cho nó bị từ chối, tin của nó còn trong hộp thư tự huỷ; bản đã giao vẫn ở `Resources`. Order đã xong thì không huỷ. Cần lại thì đặt order mới với id khác.
+- Huỷ một order không cần nữa: `python Management/tools/studio.py cancel <F>/<id> "<lí do>"` (feature đã đặt order đó, @CodeLead, hoặc người). Order thành "đã huỷ": tool không được báo nữa, `check` bỏ qua, mọi lệnh chạy tool, giao, chấm cho nó bị từ chối, tin của nó còn trong hộp thư tự huỷ; bản đã giao vẫn ở `Resources`. Order đã xong thì không huỷ. Cần lại thì đặt order mới với id khác.
 - Đặt order chỉ khi feature đã mở khoá code (cùng cổng thiết kế).
 - **Giai đoạn IDEA: ảnh đặt @ClaudeImage** (`tool: claudeimage`, `kind: image`) là đủ, không cần ảnh @Codex. Hình Claude vẽ là hình phẳng, rõ nghĩa, đúng kích thước; cần ảnh đẹp hơn (PROTOTYPE, FULL) thì đặt order mới cho @Codex.
 

@@ -1145,7 +1145,7 @@ def hung_note(t, h, action):
 
 
 def watch_tick(now=None):
-    """One pass of the watch: every thread whose running turn is silent gets, once per silence, a note for @Manager
+    """One pass of the watch: every thread whose running turn is silent gets, once per silence, a note for its Leader
     (after hung_note minutes) and, when it is a background thread that runs on demand (feature, service, @Core,
     tool), is stopped and given its work again through the inbox (after hung_stop minutes; once in
     HUNG_RETRY_SECONDS, after that only the note: the human decides). Never stopped: a chat open in VS Code or a
@@ -1193,7 +1193,7 @@ def watch_tick(now=None):
         elif not mark["noted"] and h["seconds"] >= max(cfg["hung_note"] * 60, floor):
             mark["noted"] = True
             hung_note(t, h, f"không: server tự tắt và giao lại sau {cfg['hung_stop']} phút im" if may_stop
-                      else "người hoặc @Manager: xem thread; server không tự tắt phiên này")
+                      else "người hoặc Leader của phần đó (tầng dưới: @CodeLead; Leader: @Manager): xem thread; server không tự tắt phiên này")
             did.append(("hung-noted", target))
     return did
 
@@ -1478,7 +1478,7 @@ def _courier_tick(now):
     return did
 
 
-WAIT_NOTE_SECONDS = 300      # a message that waits this long is told to @Manager, once
+WAIT_NOTE_SECONDS = 300      # a message that waits this long is told to @CodeLead (its part), once
 
 
 def wait_note(m, why, now):

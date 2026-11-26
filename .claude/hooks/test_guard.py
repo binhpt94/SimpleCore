@@ -866,13 +866,13 @@ def run_role_cases(payload):
     t(g + ": needs the decision", M, "deny", "Bash", sh(TW + 'add "Thêm lệnh huỷ order" --from Manager'))
     t(g + ": reads the list", M, "allow", "Bash", sh(TW + "list"))
     SC = "python Management/tools/studio.py cancel "
-    t(g + ": cancels any order", M, "allow", "Bash", sh(SC + 'Hud/hud-sprites "Trùng sprite đã đạt, style cũ"'))
-    t(g + ": cancel needs a reason", M, "deny", "Bash", sh(SC + "Hud/hud-sprites"))
-    t(g + ": no shell characters in the reason", M, "deny", "Bash", sh(SC + 'Hud/hud-sprites "x; rm -rf ."'))
+    t(g + ": cancels no order (2026-11-26: the features are CodeLead's part)", M, "deny", "Bash", sh(SC + 'Hud/hud-sprites "Trùng sprite đã đạt, style cũ"'))
+    t(g + ": @CodeLead cancels any order", "@CodeLead", "allow", "Bash", sh(SC + 'Hud/hud-sprites "Trùng sprite đã đạt, style cũ"'))
+    t(g + ": cancel needs a reason", "@CodeLead", "deny", "Bash", sh(SC + "Hud/hud-sprites"))
+    t(g + ": no shell characters in the reason", "@CodeLead", "deny", "Bash", sh(SC + 'Hud/hud-sprites "x; rm -rf ."'))
     t(g + ": a feature cancels its own order", "Wallet", "allow", "Bash", sh(SC + 'Wallet/coin-icons "Không cần nữa"'))
     t(g + ": not another feature's", "Wallet", "deny", "Bash", sh(SC + 'Hud/hud-sprites "Không cần nữa"'))
     t(g + ": a tool chat does not cancel", "@ClaudeImage", "deny", "Bash", sh(SC + 'Hud/hud-sprites "Không cần nữa"'))
-    t(g + ": @CodeLead does not cancel", "@CodeLead", "deny", "Bash", sh(SC + 'Hud/hud-sprites "Không cần nữa"'))
     t(g + ": only the human closes", M, "deny", "Bash", sh(TW + 'done w20261126-ab12 "xong"'))
     t(g + ": only the human drops", M, "deny", "Bash", sh(TW + 'drop w20261126-ab12 "thôi"'))
     t(g + ": a Leader adds", "@CodeLead", "allow", "Bash", sh(TW + 'add "Sổ nhận test chéo" --from CodeLead --decided "Người chọn B"'))
@@ -946,7 +946,10 @@ def run_role_cases(payload):
         peer = lambda sid: [os.path.join(store_of(sid), "subagents", "agent-1.jsonl"),      # noqa: E731
                             os.path.join(temp_of(sid), "tasks", "a1.output"), os.path.join(temp_of(sid), "scratchpad", "n.md")]
         try:
-            for who in ("@CodeLead", M):
+            for sid in (FEAT, SERV):      # @Manager keeps to the Leaders since 2026-11-26
+                for p in peer(sid):
+                    t(g + ": @Manager no longer reads a feature session's", M, "deny", "Read", {"file_path": p}, session=ME)
+            for who in ("@CodeLead",):
                 for sid in (FEAT, SERV):
                     for p in peer(sid):
                         t(g + ": leads read a feature session's", who, "allow", "Read", {"file_path": p}, session=ME)
@@ -1149,8 +1152,12 @@ def run_report_cases():
     check("stop report", "", True, "saved file holds the block and who wrote it",
           "## Báo cáo cho @Manager" in text and "FEATURE=Wallet" in text and "Xong rồi" not in text)
     first = bind_session.context({"session_id": "rep-mgr"}, FX, STORE)
-    check("stop report", "", True, "@Manager is told about every new report",
-          f"{len(saved)} báo cáo mới" in first and all(n in first for n in saved))
+    leads = [n for n in saved if bind_session.report_role(n) in bind_session.MANAGER_REPORT_ROLES]
+    check("stop report", "", True, "@Manager is told about the Leaders' new reports only (2026-11-26)",
+          f"{len(leads)} báo cáo mới" in first and all(n in first for n in leads)
+          and not any(n in first for n in saved if n not in leads))
+    lead_first = bind_session.context({"session_id": "rep-lead"}, FX, STORE)
+    check("stop report", "", True, "@CodeLead is told about every new report", all(n in lead_first for n in saved))
     again = bind_session.context({"session_id": "rep-mgr"}, FX, STORE)
     check("stop report", "", True, "and not again on its next prompt", "Không có báo cáo mới" in again)
 
@@ -1346,8 +1353,11 @@ def run_codelead_cases():
     check(g, L, True, "@CodeLead is told about new reports", "20990101-000000-Shop.md" in lead)
     again = bind_session.context({"session_id": "role-lead"}, FX, STORE)
     check(g, L, True, "and not again", "Không có báo cáo mới" in again)
+    Path(reports, "20990101-000001-GameDesigner.md").write_text("## Báo cáo cho @Manager\n- Phiên: FEATURE=@GameDesigner\n"
+                                                                "- Việc: x\n- Trạng thái: xong\n", encoding="utf-8")
     mgr = bind_session.context({"session_id": "rep-mgr"}, FX, STORE)
-    check(g, "@Manager", True, "@Manager keeps its own read list", "20990101-000000-Shop.md" in mgr)
+    check(g, "@Manager", True, "@Manager keeps its own read list, of the Leaders' reports only",
+          "20990101-000001-GameDesigner.md" in mgr and "20990101-000000-Shop.md" not in mgr)
     check(g, "", ["BÁO CHẶN"] * 3, "the Leaders are told to tell @Manager when they are blocked, and @Manager to plan again",
           [x for told in (lead, mgr, bind_session.context({"session_id": "rep-gd"}, FX, STORE)) for x in ["BÁO CHẶN"] if x in told])
 
@@ -1675,7 +1685,8 @@ def run_inbox_cases():
     D = 'python Management/tools/dispatch.py '
 
     def sh(f, x, cmd): t(g, f, x, "Bash", {"command": cmd})
-    # @Manager hands out development work only once the human has set the phase the project is in (stage.json)
+    # @CodeLead hands out development work only once the human has set the phase the project is in (stage.json);
+    # @Manager sends to no inbox since 2026-11-26
     stage_file = Path(FX + "/Management/game-design/stage.json")
     stage_file.parent.mkdir(parents=True, exist_ok=True)
     for text in (None, "{}", '{"stage": "later"}', "not json"):
@@ -1683,18 +1694,18 @@ def run_inbox_cases():
             stage_file.unlink(missing_ok=True)
         else:
             stage_file.write_text(text)
-        t(g + " (no stage set: no development work)", "@Manager", "deny", "Bash", {"command": D + 'send Wallet --from Manager "x"'})
-        t(g + " (no stage set: no development work)", "@Manager", "deny", "Bash", {"command": D + 'send @Core --from Manager "x"'})
-        t(g + " (no stage set: the tools still get work)", "@Manager", "allow", "Bash", {"command": D + 'send @Codex --from Manager "x"'})
-        t(g + " (no stage set: @CodeLead still sends its fixes)", "@CodeLead", "allow", "Bash", {"command": D + 'send Shop --from CodeLead "x"'})
+        t(g + " (no stage set: no development work)", "@CodeLead", "deny", "Bash", {"command": D + 'send Wallet --from CodeLead "x"'})
+        t(g + " (no stage set: no development work)", "@CodeLead", "deny", "Bash", {"command": D + 'send @Core --from CodeLead "x"'})
+        t(g + " (no stage set: the tester still gets work)", "@CodeLead", "allow", "Bash", {"command": D + 'send @UnityAutoPlay --from CodeLead "x"'})
     stage_file.write_text('{"stage": "idea", "at": "2026-11-25 22:00"}')
-    t(g + " (stage set)", "@Manager", "allow", "Bash", {"command": D + 'send @Core --from Manager "x"'})
+    t(g + " (stage set)", "@CodeLead", "allow", "Bash", {"command": D + 'send @Core --from CodeLead "x"'})
     for who in ("Wallet", "@Core", "@Codex", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@UnityAutoPlay"):
         sh(who, "allow", D + "list")
         sh(who, "allow", D + "list Wallet")
-    sh("@Manager", "allow", D + 'send Wallet --from Manager "Làm yêu cầu feature-wallet/x#y"')
-    sh("@Manager", "allow", D + 'send _Services/Popup --from @Manager "Việc ... với dấu chấm"')
-    sh("@Manager", "allow", D + 'send @Codex --from Manager "Order ảnh"')
+    for target in ("Wallet", "_Services/Popup", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor", "@UnityAutoPlay"):
+        sh("@Manager", "deny", D + 'send ' + target + ' --from Manager "x"')      # @Manager keeps to the Leaders
+    sh("@CodeLead", "allow", D + 'send Wallet --from CodeLead "Làm yêu cầu feature-wallet/x#y"')
+    sh("@CodeLead", "allow", D + 'send _Services/Popup --from @CodeLead "Việc ... với dấu chấm"')
     sh("@CodeLead", "allow", D + 'send Shop --from CodeLead "Sửa lỗi biên dịch ở Shop"')
     sh("@CodeLead", "allow", D + 'send @Core --from CodeLead "x"')
     sh("@CodeLead", "deny", D + 'send @Codex --from CodeLead "x"')           # not its part
@@ -1702,26 +1713,28 @@ def run_inbox_cases():
     sh("@GameDesigner", "deny", D + 'send Wallet --from GameDesigner "x"')
     sh("@UIDesigner", "allow", D + 'send @ClaudeImage --from UIDesigner "x"')
     sh("@UIDesigner", "deny", D + 'send @Codex --from UIDesigner "x"')
-    sh("@Manager", "deny", D + 'send Wallet --from CodeLead "x"')             # --from must be itself
+    sh("@CodeLead", "deny", D + 'send Wallet --from Manager "x"')             # --from must be itself
     sh("Wallet", "deny", D + 'send Shop --from Wallet "x"')                   # a feature sends to nobody
     sh("@Codex", "deny", D + 'send Wallet --from Codex "x"')
     sh("@Manager", "deny", D + 'send @CodeLead --from Manager "x"')           # a Leader is messaged with SendMessage
-    for lead in ("Manager", "CodeLead", "GameDesigner", "UIDesigner"):        # every Leader opens the tester through its inbox
+    for lead in ("CodeLead", "GameDesigner", "UIDesigner"):                   # these Leaders open the tester through its inbox
         sh("@" + lead, "allow", D + 'send @UnityAutoPlay --from ' + lead + ' "Chơi tiếp R1, B1"')
         sh("@" + lead, "allow", D + "list @UnityAutoPlay")
     for who in ("Wallet", "_Services/Popup", "@Core", "@Codex", "@DesignAdvisor", "@UnityAutoPlay"):
         sh(who, "deny", D + 'send @UnityAutoPlay --from ' + who.lstrip("@") + ' "x"')
-    sh("@Manager", "deny", D + 'send Wallet --from Manager "x $(rm -rf .)"')
-    sh("@Manager", "deny", D + 'send ../Wallet --from Manager "x"')
-    sh("@Manager", "deny", D + 'send Wallet --from Manager "x"; rm -rf Assets')
-    sh("@Manager", "allow", D + "cancel m20261125-174601-ecb94c")
-    sh("@CodeLead", "deny", D + "cancel m20261125-174601-ecb94c")
+    sh("@CodeLead", "deny", D + 'send Wallet --from CodeLead "x $(rm -rf .)"')
+    sh("@CodeLead", "deny", D + 'send ../Wallet --from CodeLead "x"')
+    sh("@CodeLead", "deny", D + 'send Wallet --from CodeLead "x"; rm -rf Assets')
+    sh("@CodeLead", "allow", D + "cancel m20261125-174601-ecb94c")
+    sh("@Manager", "deny", D + "cancel m20261125-174601-ecb94c")
     g = "inbox: SendMessage to a chat that runs on demand"
     for who in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "Wallet", "@Codex", "@DesignAdvisor"):
         for to in ("Wallet", "_Services/Popup", "Core", "Codex", "DesignAdvisor", "ClaudeImage"):
             t(g, who, "deny", "SendMessage", {"to": to, "message": "x"})
-        for to in ("Manager", "CodeLead", "GameDesigner", "UIDesigner"):
+        for to in ("CodeLead", "GameDesigner", "UIDesigner"):
             t(g + " (Leaders as before)", who, "pass", "SendMessage", {"to": to, "message": "x"})
+        leader = who in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner")
+        t(g + " (only the Leaders reach Manager)", who, "pass" if leader else "deny", "SendMessage", {"to": "Manager", "message": "x"})
     t(g + " (the human, and the page's unbound relay helper)", "@human", "pass", "SendMessage", {"to": "Wallet", "message": "x"})
     t(g + " (the human, and the page's unbound relay helper)", "", "pass", "SendMessage", {"to": "Wallet", "message": "x"})
 
@@ -1801,10 +1814,11 @@ def run_tester_cases():
         t(g, T, "deny", "Bash", {"command": cmd})
     for cmd in (TOOL + "archive UnityAutoPlay 20261120-101500", TOOL + "archive UnityAutoPlay --keep 3", TOOL + "status", TOOL + "check",
                 TOOL + "status; " + TOOL + "check"):
-        t(g + " (@Manager archives and looks)", M, "allow", "Bash", {"command": cmd})
+        t(g + " (@CodeLead archives and looks)", L, "allow", "Bash", {"command": cmd})
+    t(g + " (@Manager no longer archives)", M, "deny", "Bash", {"command": TOOL + "archive UnityAutoPlay --keep 3"})
     t(g + " (@Manager starts no run)", M, "deny", "Bash", {"command": TOOL + 'new UnityAutoPlay "x"'})
     t(g + " (@Manager moves no picture)", M, "deny", "Bash", {"command": TOOL + "shot UnityAutoPlay 20261125-131408 a.png"})
-    for who in (L, "@GameDesigner", "@Core", W):
+    for who in (M, "@GameDesigner", "@Core", W):
         t(g + " (readers look)", who, "allow", "Bash", {"command": TOOL + "status"})
         t(g + " (readers look)", who, "allow", "Bash", {"command": TOOL + "check"})
         t(g + " (readers do not archive)", who, "deny", "Bash", {"command": TOOL + "archive UnityAutoPlay --keep 3"})
@@ -1854,14 +1868,15 @@ def run_tester_cases():
 
     g = "tester: who may message it"
     for to in ("UnityAutoPlay", "unityautoplay", "@UnityAutoPlay", " UnityAutoPlay "):
-        for who in (M, L, "@GameDesigner"):
+        for who in (L, "@GameDesigner", "@UIDesigner"):
             t(g, who, "pass", "SendMessage", {"to": to, "message": "x"})
-        for who in (W, "_Services/Popup", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor", T, ""):
-            t(g + " (the others ask @Manager)", who, "deny", "SendMessage", {"to": to, "message": "x"})
+        for who in (M, W, "_Services/Popup", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor", T, ""):
+            t(g + " (the others ask @CodeLead)", who, "deny", "SendMessage", {"to": to, "message": "x"})
         t(g, "@human", "pass", "SendMessage", {"to": to, "message": "x"})
     for who in (W, "@Core", "@Codex", T, M):
-        for to in ("Manager", "CodeLead", ""):
+        for to in ("CodeLead", ""):
             t(g + " (other chats as before)", who, "pass", "SendMessage", {"to": to, "message": "x"})
+        t(g + " (only the Leaders reach Manager)", who, "pass" if who == M else "deny", "SendMessage", {"to": "Manager", "message": "x"})
         for to in ("Shop", "UnityAutoPlayer"):      # not a Leader or a tester: a chat that runs on demand
             t(g + " (on-demand chats only through the inbox)", who, "deny", "SendMessage", {"to": to, "message": "x"})
 

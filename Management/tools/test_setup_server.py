@@ -981,6 +981,7 @@ def main():
         check("reread: a thread not told before is told every file of its role, not those of other roles",
               ss.bind_session.rule_files("@CodeLead", str(ss.ROOT)),
               ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/codelead.md", ".claude/rules/unity.md",
+               ".claude/skills/codelead-dispatch/SKILL.md", ".claude/skills/codelead-verify-batch/SKILL.md",
                ".claude/skills/codelead-scaffold-feature/SKILL.md", ".claude/skills/codelead-resolve-issue/SKILL.md"])
         check("reread: a role with skills is told about them too (each SKILL.md is followed for changes)",
               ss.bind_session.rule_files("@UIDesigner", str(ss.ROOT)),
