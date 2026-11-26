@@ -1038,12 +1038,29 @@ def run_role_cases(payload):
     for bad in (CHAIN + "; ls", CHAIN + "; rm -rf UnityProject", "ls; " + CHAIN, CHAIN + " | more", CHAIN + " > out.txt",
                 CHAIN + "; $(ls)", CHAIN + ";", "; " + CHAIN, CHAIN.replace("; ", " & "), CHAIN.replace("; ", " || "),
                 "; ".join(["python Management/tools/validate.py"] * 7),
-                'python Management/tools/validate.py; python Management/tools/studio.py redo _design/feature-hero.cheat/a b "x"',
                 "python Management/tools/validate.py; python Management/tools/../tools/validate.py"):
         t(g + " (refused)", M, "deny", "Bash", sh(bad))
     t(g + " (refused)", "@CodeLead", "deny", "Bash", sh("python Management/tools/validate.py; python Management/tools/scaffold.py"))
-    for who in ("Wallet", "@Core", "@DesignAdvisor", "@Codex", ""):      # the others run one command a call
-        t(g + " (others)", who, "deny", "Bash", sh("python Management/tools/validate.py; python Management/tools/studio.py status"))
+    # every bound chat chains since 2026-11-26; an unbound one does not
+    for who in ("Wallet", "@Core", "@DesignAdvisor", "@Codex", "@UnityAutoPlay"):
+        t(g + " (every role)", who, "allow", "Bash", sh("python Management/tools/validate.py; python Management/tools/studio.py status"))
+    t(g + " (unbound)", "", "deny", "Bash", sh("python Management/tools/validate.py; python Management/tools/studio.py status"))
+    # a chain runs every gated part through its own check
+    stage_file = Path(FX + "/Management/game-design/stage.json")
+    stage_file.parent.mkdir(parents=True, exist_ok=True)
+    stage_file.write_text('{"stage": "idea", "at": "2026-11-25 22:00"}')
+    SEND = 'python Management/tools/dispatch.py send '
+    t(g + " (sends chained)", "@CodeLead", "allow", "Bash",
+      sh(SEND + 'Wallet --from CodeLead "a" ; ' + SEND + '@Core --from CodeLead "b"; python Management/tools/validate.py'))
+    t(g + " (send as another role)", "@CodeLead", "deny", "Bash", sh("python Management/tools/validate.py; " + SEND + 'Wallet --from Manager "a"'))
+    t(g + " (send not its part)", "@GameDesigner", "deny", "Bash", sh("python Management/tools/validate.py; " + SEND + 'Wallet --from GameDesigner "a"'))
+    t(g + " (';' inside the text cuts it)", "@CodeLead", "deny", "Bash", sh(SEND + 'Wallet --from CodeLead "a; python Management/tools/validate.py"'))
+    stage_file.unlink()
+    t(g + " (phase gate holds in a chain)", "@CodeLead", "deny", "Bash", sh("python Management/tools/validate.py; " + SEND + 'Wallet --from CodeLead "a"'))
+    REQB = "python Management/tools/gd_req.py "
+    t(g + " (own book chained)", "Wallet", "allow", "Bash", sh(REQB + 'Wallet doing feature-wallet/a/b#r1 "bắt đầu"; python Management/tools/validate.py'))
+    t(g + " (another book chained)", "Wallet", "deny", "Bash", sh("python Management/tools/validate.py; " + REQB + 'Shop doing feature-shop/a/b#r1 "x"'))
+    t(g + " (search not chained)", "Wallet", "deny", "Bash", sh("python Management/tools/validate.py; ls UnityProject/Assets/Features/Wallet"))
     t(g + " (others)", "@human", "pass", "Bash", sh(SCAFFOLD))
 
     g = "manager: reads the design's status"

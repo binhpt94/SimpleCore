@@ -1,0 +1,29 @@
+{
+ "hash": "5033d18c216a",
+ "items": {
+  "spine-purpose": {
+   "hash": "bfd9f4ea977c",
+   "text": "Feature này để thử nhân vật Spine hiện và chạy animation thế nào trong game, không thêm gì vào lối chơi\nNgười yêu cầu ngày 2026-11-26. Kết quả là ảnh và lần chơi thử cho người xem, trước khi quyết có dùng Spine cho hero, quái hay không."
+  },
+  "spine-on-battle": {
+   "hash": "faa568a9df94",
+   "text": "Nhân vật thử đứng trên chiến trường của màn trận, chân chạm đất như hero và quái\nMàn trận có đủ thứ để đặt cạnh: nền, thành, hero, quái, hiệu ứng, HUD và popup. Đã loại: một màn riêng chỉ có nhân vật thử (không có gì để so)."
+  },
+  "spine-checks": {
+   "hash": "5ed96bbd5700",
+   "text": "Mỗi điều cần kiểm về Spine là một ý chấm được ở node bên dưới\nVí dụ: nhân vật hiện đúng hình; đổi animation; animation lặp và animation chạy một lần rồi quay về; chuyển mượt giữa hai animation; quay mặt trái phải; thứ tự vẽ cạnh hero, quái; cỡ ở màn rộng; nằm dưới HUD và popup."
+  },
+  "spine-switch": {
+   "hash": "ce6b3505c710",
+   "text": "Người thử tự đổi animation ngay lúc đang xem, không phải mở lại màn trận\nThấy được chuyển từ animation này sang animation khác, là chỗ Spine hay lỗi nhất."
+  },
+  "spine-sample-asset": {
+   "hash": "0c7e6bb8502f",
+   "text": "Nhân vật thử là một nhân vật Spine mẫu có sẵn, không đặt vẽ mới\nStudio của project không dựng được bộ xương Spine. Thử runtime trước, có kết quả mới tính tới art Spine riêng."
+  },
+  "spine-no-effect": {
+   "hash": "21aabed4333f",
+   "text": "Nhân vật thử không đổi gì trong trận và không gửi, không đọc gì của feature khác\nQuái và hero đi xuyên qua nhân vật, không đánh nó, không bị chặn. Bỏ feature này đi thì trận vẫn y như cũ."
+  }
+ }
+}

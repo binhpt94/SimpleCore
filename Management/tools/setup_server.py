@@ -312,10 +312,37 @@ def archived_ids():
         return set()
 
 
-def threads():
-    """[{id, title, feature, group, legacy, archived, binding, model, effort, modified}] for this project's sessions
-    that have a name. feature: the FEATURE value the name stands for; legacy: a role named with its '@' (rename it).
-    model: of the last answer; effort: of the last request (both as the transcript recorded them)."""
+# A chat with no name shows in VS Code under a title the CLI or the extension made: its ai-title, else its last prompt,
+# else its first message (extension 2.1.332). The first message of a chat is often the human's "FEATURE=<value> <PIN>",
+# so such a title may hold the PIN: redact_title() hides it before the page sees it.
+AI_TITLE_RX = re.compile(r'"type"\s*:\s*"ai-title".*?"aiTitle"\s*:\s*"((?:[^"\\]|\\.)*)"')
+LAST_PROMPT_RX = re.compile(r'"type"\s*:\s*"last-prompt".*?"lastPrompt"\s*:\s*"((?:[^"\\]|\\.)*)"')
+PIN_RX = re.compile(r"(FEATURE\s*=\s*\S+)\s+\S+", re.I)
+TITLE_MAX = 80
+
+
+def redact_title(text):
+    """A made-up title as the page shows it: one line, at most TITLE_MAX characters, the PIN of a FEATURE line hidden."""
+    text = PIN_RX.sub(r"\1 ••••", " ".join(str(text).split()))
+    return text if len(text) <= TITLE_MAX else text[:TITLE_MAX - 1] + "…"
+
+
+def first_text(o):
+    """The text of a transcript's first real user message (not a meta line, not a tool result); "" otherwise."""
+    if o.get("type") != "user" or o.get("isMeta") or o.get("isSidechain"):
+        return ""
+    c = (o.get("message") or {}).get("content")
+    if isinstance(c, str):
+        return c
+    return " ".join(b.get("text", "") for b in c if isinstance(b, dict) and b.get("type") == "text") if isinstance(c, list) else ""
+
+
+def threads(include_unnamed=False):
+    """[{id, title, named, feature, group, legacy, archived, binding, model, effort, modified}] for this project's
+    sessions that have a name. feature: the FEATURE value the name stands for; legacy: a role named with its '@' (rename it).
+    model: of the last answer; effort: of the last request (both as the transcript recorded them).
+    include_unnamed: also the sessions with no name, under the title VS Code shows them by (named False, no feature):
+    the page lists every chat VS Code lists; every other caller works on named threads only."""
     hidden = archived_ids()
     live = live_sessions()
     waiting = {}
@@ -325,8 +352,19 @@ def threads():
     folder = transcripts_dir()
     for p in folder.glob("*.jsonl") if folder.is_dir() else []:
         title, model, effort, entries = None, "", "", set()
+        made, last_prompt, first = None, None, None
         with open(p, encoding="utf-8", errors="replace") as f:
             for line in f:
+                if include_unnamed and title is None:
+                    if '"ai-title"' in line and (m := AI_TITLE_RX.search(line)):
+                        made = m.group(1)
+                    elif '"last-prompt"' in line and (m := LAST_PROMPT_RX.search(line)):
+                        last_prompt = m.group(1)
+                    elif first is None and '"user"' in line:
+                        try:
+                            first = first_text(json.loads(line)) or None
+                        except ValueError:
+                            pass
                 if '"entrypoint"' in line:
                     m = ENTRY_RX.search(line)
                     if m:
@@ -343,13 +381,23 @@ def threads():
                         model = (json.loads(line).get("message") or {}).get("model") or model
                     except ValueError:
                         pass
+        named = bool(title)
+        if not named and include_unnamed:
+            raw = next((x for x in (made, last_prompt) if x), None)
+            try:
+                raw = json.loads(f'"{raw}"') if raw else first
+            except ValueError:
+                raw = first
+            title = redact_title(raw) if raw and raw.strip() else None
         if title:
             sid = p.stem
-            out.append({"id": sid, "title": title, "feature": feature_of(title), "group": group_of(feature_of(title)),
-                        "legacy": title in ROLE_GROUPS, "archived": sid in hidden,
+            feature = feature_of(title) if named else ""
+            out.append({"id": sid, "title": title, "named": named, "feature": feature, "group": group_of(feature) if named else "",
+                        "legacy": named and title in ROLE_GROUPS, "archived": sid in hidden,
                         "unlisted": entries == {HEADLESS_ENTRY},
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
-                        "binding": guard.bound_feature(sid, guard.STORE_DIR) or "",
+                        "binding": (binding := guard.bound_feature(sid, guard.STORE_DIR) or ""),
+                        "profiled": profiled(binding or feature),
                         "live": (live.get(sid) or {}).get("kind", ""), "live_status": (live.get(sid) or {}).get("status", ""),
                         "live_state": (live.get(sid) or {}).get("state", ""),
                         "hung": hang_text(h) if (h := hang_of({"id": sid}, live.get(sid), time.time())) else "",
@@ -478,7 +526,9 @@ def start_bg(session_id, extra, prompt):
     with BG_LOCK:
         for attempt in (1, 2):
             forget_bg(session_id[:8])
-            out = run_claude(["--bg", "--resume", session_id] + extra + [prompt])
+            # `--` before the prompt: --mcp-config (the role profile) takes several values, and a prompt after it
+            # was read as one more config file, so the session started with no prompt and never showed up.
+            out = run_claude(["--bg", "--resume", session_id] + extra + ["--", prompt])
             m = re.search(r"backgrounded\s*·\s*([0-9a-f]{6,})", out)
             if not m or session_id.startswith(m.group(1)):
                 break
@@ -541,7 +591,9 @@ ROLE_SKILLS = {"@Manager": "manager-", "@CodeLead": "codelead-", "@GameDesigner"
 GROUP_SKILLS = {"Services": "feature-", "Features": "feature-"}
 UNITY_ROLES = {"@CodeLead", "@Core", "@UnityAutoPlay"}      # and every Services and Features thread
 UNITY_SKILL = "unity-mcp-skill"
-KEEP_ALL_MCP = {"@Blender"}      # its Blender server is the user's, set outside the project
+# The MCP servers of .mcp.json each role runs with. blender is in .mcp.json but off for the chats opened in VS Code
+# (disabledMcpjsonServers in .claude/settings.json): only @Blender loads it (người quyết 2026-11-26).
+ROLE_SERVERS = {"@Blender": ("blender",)}
 OFF_TOOLS = "Artifact,Workflow,ScheduleWakeup,ReportFindings"
 OFF_PLUGINS = ("cc-plugin-easel@builtin", "plugin-authoring@builtin")
 CLAUDEAI_SKILL = "anthropic-skills:"
@@ -596,15 +648,16 @@ def uses_unity(feature):
 
 
 def role_mcp(feature):
-    """The MCP servers of that role: UnityMCP (as .mcp.json defines it) for the roles that drive Unity, none else."""
-    servers = {}
-    if uses_unity(feature):
-        try:
-            servers = {k: v for k, v in json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))["mcpServers"].items()
-                       if k == "UnityMCP"}
-        except (OSError, ValueError, KeyError):
-            servers = {}
-    return {"mcpServers": servers}
+    """The MCP servers of that role, as .mcp.json defines them: UnityMCP for the roles that drive Unity, blender for
+    @Blender (ROLE_SERVERS), none else."""
+    names = set(ROLE_SERVERS.get(feature, ())) | ({"UnityMCP"} if uses_unity(feature) else set())
+    if not names:
+        return {"mcpServers": {}}
+    try:
+        defined = json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))["mcpServers"]
+    except (OSError, ValueError, KeyError):
+        defined = {}
+    return {"mcpServers": {k: v for k, v in defined.items() if k in names}}
 
 
 def profile_args(feature):
@@ -618,10 +671,9 @@ def profile_args(feature):
     settings = folder / f"{stem}.settings.json"
     settings.write_text(json.dumps(role_settings(feature), ensure_ascii=False, indent=1), encoding="utf-8")
     args = ["--settings", str(settings), "--disallowedTools", OFF_TOOLS]
-    if feature not in KEEP_ALL_MCP:
-        mcp = folder / f"{stem}.mcp.json"
-        mcp.write_text(json.dumps(role_mcp(feature), ensure_ascii=False, indent=1), encoding="utf-8")
-        args += ["--strict-mcp-config", "--mcp-config", str(mcp)]
+    mcp = folder / f"{stem}.mcp.json"
+    mcp.write_text(json.dumps(role_mcp(feature), ensure_ascii=False, indent=1), encoding="utf-8")
+    args += ["--strict-mcp-config", "--mcp-config", str(mcp)]
     return args
 
 
@@ -1028,7 +1080,7 @@ def delete_thread(session_id, pin):
     """The Xoá button of one thread: moves its transcript (and its folder) into the trash of the transcripts folder,
     takes it out of the VS Code state and removes its binding. With the PIN, and only while VS Code is closed (it
     would write its chat list back). Archived and hidden threads may be deleted too."""
-    t = next((t for t in threads() if t["id"] == session_id), None) if isinstance(session_id, str) else None
+    t = next((t for t in threads(include_unnamed=True) if t["id"] == session_id), None) if isinstance(session_id, str) else None
     if t is None:
         return {"ok": False, "error": "không có thread này"}
     head = {"ok": False, "id": t["id"], "title": t["title"]}
@@ -1850,7 +1902,7 @@ class Handler(SimpleHTTPRequestHandler):
             if not self.api_ok():
                 return self.send_error(403)
             if path == "/api/threads":
-                return self.send_json(200, {"threads": threads(), "sets": sets(), "models": MODELS, "efforts": EFFORTS,
+                return self.send_json(200, {"threads": threads(include_unnamed=True), "sets": sets(), "models": MODELS, "efforts": EFFORTS,
                                             "defaults": {"model": DEFAULT_MODEL, "effort": DEFAULT_EFFORT},
                                             "vscode": vscode_view()})
             # Each tab of the page asks for its own data when it is first opened: nothing is built when the page is.

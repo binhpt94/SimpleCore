@@ -447,6 +447,202 @@ namespace Game.PopupRevive.Tests
             Assert.AreEqual(new List<string> { "DeclineRevive" }, _run.Calls);
         }
 
+        // order-values#params, #no-own-timer: the popup keeps no clock (timer count 0). It opens when the run asks,
+        // closes only on a tap or an ad result, and gives no order to the castle or the battle.
+
+        private const int ManySteps = 10000; // 250 s of the 0.025 s step: far past every timeline mark.
+
+        private void RunSteps(int count)
+        {
+            for (var i = 0; i < count; i++) _clock.Step();
+        }
+
+        [Test]
+        public void PopupKeepsNoClockOfItsOwnFromOfferToChoice()
+        {
+            Offer();
+            RunSteps(100);
+            _view.TapWatch();
+            RunSteps(100);
+            _ads.Reply(AdResult.Watched);
+            RunSteps(100);
+
+            Assert.IsEmpty(_clock.SteppedOwners);
+        }
+
+        [Test]
+        public void PopupOpensTheMomentTheRunAsksWithoutWaitingOnTheClock()
+        {
+            Offer();
+
+            Assert.AreEqual(0, _clock.StepCount);
+            Assert.AreEqual(1, _popups.Shown.Count);
+            Assert.IsTrue(_presenter.IsOpen);
+        }
+
+        [Test]
+        public void PopupWaitingForChoiceNeverClosesByItselfHoweverLongTheClockRuns()
+        {
+            Offer();
+
+            RunSteps(ManySteps);
+
+            Assert.IsTrue(_presenter.IsOpen);
+            Assert.IsFalse(_view.Waiting);
+            Assert.IsEmpty(_popups.Closed);
+            Assert.IsEmpty(_run.Calls);
+            Assert.IsEmpty(_ads.Requests);
+        }
+
+        [Test]
+        public void PopupWaitingForAdNeverClosesByItselfHoweverLongTheClockRuns()
+        {
+            Offer();
+            _view.TapWatch();
+
+            RunSteps(ManySteps);
+
+            Assert.IsTrue(_presenter.IsWaitingAd);
+            Assert.IsEmpty(_popups.Closed);
+            Assert.IsEmpty(_ads.Cancelled);
+            Assert.IsEmpty(_run.Calls);
+        }
+
+        [Test]
+        public void PopupGivesNoOrderToCastleOrBattleWhileOpen()
+        {
+            Offer();
+            _view.TapWatch();
+            RunSteps(100);
+
+            Assert.IsEmpty(_run.Calls);
+        }
+
+        [TestCase(AdResult.Watched, "Revive")]
+        [TestCase(AdResult.NotWatched, "FailRevive")]
+        public void PopupReportsOnlyTheAdChoiceAndNoOtherOrderAfterClosing(AdResult result, string choice)
+        {
+            Offer();
+            _view.TapWatch();
+            _ads.Reply(result);
+
+            RunSteps(ManySteps);
+
+            Assert.AreEqual(new List<string> { choice }, _run.Calls);
+            Assert.AreEqual(1, _popups.Shown.Count);
+        }
+
+        [Test]
+        public void PopupReportsOnlyTheEndChoiceAndNoOtherOrderAfterClosing()
+        {
+            Offer();
+            _view.TapEnd();
+
+            RunSteps(ManySteps);
+
+            Assert.AreEqual(new List<string> { "DeclineRevive" }, _run.Calls);
+            Assert.AreEqual(1, _popups.Shown.Count);
+        }
+
+        // order-values#edge-khong-co-truong-hop-bien-rieng-cua-popup: the popup has no edge handling of its own in
+        // the revive flow. It only follows the run's step: opens on the offer, closes silently on any other step,
+        // and never reports or orders anything because of a step.
+
+        [Test]
+        public void NoRunStepOtherThanTheOfferOpensThePopupOrReachesTheRun()
+        {
+            foreach (RunStep step in Enum.GetValues(typeof(RunStep)))
+            {
+                if (step == RunStep.ReviveOffer) continue;
+                _run.SetStep(step);
+            }
+
+            RunSteps(100);
+
+            Assert.IsEmpty(_popups.Shown);
+            Assert.IsEmpty(_run.Calls);
+            Assert.IsEmpty(_clock.QueuedOwners);
+        }
+
+        [Test]
+        public void AnyStepAwayFromTheOfferClosesThePopupSilentlyAndNothingElse()
+        {
+            foreach (RunStep step in Enum.GetValues(typeof(RunStep)))
+            {
+                if (step == RunStep.ReviveOffer) continue;
+                Offer();
+                _view.TapWatch();
+
+                _run.SetStep(step);
+                RunSteps(10);
+
+                Assert.IsFalse(_presenter.IsOpen, step.ToString());
+            }
+
+            var offers = Enum.GetValues(typeof(RunStep)).Length - 1;
+            Assert.AreEqual(offers, _popups.Shown.Count);
+            Assert.AreEqual(offers, _popups.Closed.Count);
+            Assert.AreEqual(offers, _ads.Cancelled.Count);
+            Assert.IsEmpty(_run.Calls);
+        }
+
+        // order-values#stage-prototype: in PROTOTYPE the revive flow exists with the full timeline (IDEA had none).
+        // The popup's part of that timeline: stays shut while the run waits, opens on the offer, closes on the
+        // choice and hands the run exactly that choice; the run then stands the castle up and plays on.
+
+        [TestCase(AdResult.Watched, "Revive")]
+        [TestCase(AdResult.NotWatched, "FailRevive")]
+        public void PrototypeReviveFlowWithAdRunsThePopupPartOfTheTimeline(AdResult result, string choice)
+        {
+            _run.SetStep(RunStep.ReviveWait);
+            Assert.IsEmpty(_popups.Shown, "shut during the run's wait");
+
+            _run.SetStep(RunStep.ReviveOffer);
+            Assert.IsTrue(_presenter.IsOpen, "open on the offer");
+
+            _view.TapWatch();
+            _ads.Reply(result);
+            Assert.IsFalse(_presenter.IsOpen, "closed on the result");
+            _clock.Step();
+
+            _run.SetStep(RunStep.Reviving);
+            _run.SetStep(RunStep.Playing);
+
+            Assert.AreEqual(new List<string> { choice }, _run.Calls);
+            Assert.AreEqual(1, _popups.Shown.Count);
+            Assert.AreEqual(1, _popups.Closed.Count);
+        }
+
+        [Test]
+        public void PrototypeReviveFlowWithEndRunRunsThePopupPartOfTheTimeline()
+        {
+            _run.SetStep(RunStep.ReviveWait);
+            _run.SetStep(RunStep.ReviveOffer);
+
+            _view.TapEnd();
+            Assert.IsFalse(_presenter.IsOpen);
+            _clock.Step();
+            _run.SetStep(RunStep.Lost);
+
+            Assert.AreEqual(new List<string> { "DeclineRevive" }, _run.Calls);
+            Assert.AreEqual(1, _popups.Shown.Count);
+            Assert.AreEqual(1, _popups.Closed.Count);
+        }
+
+        // revive-spec#stage-prototype (presenter side): PROTOTYPE has the full words, both buttons and the wait line.
+
+        [Test]
+        public void PrototypePopupFillsAllWordsBothButtonsAndTheWaitLine()
+        {
+            Offer();
+
+            Assert.AreEqual("Thành đã bị phá", _view.Title);
+            Assert.AreEqual("Xem quảng cáo để thành hồi 30% máu và chơi tiếp", _view.Gain);
+            Assert.AreEqual("Đang chờ quảng cáo...", _view.WaitingText);
+            Assert.AreEqual("Xem quảng cáo", _view.Watch);
+            Assert.AreEqual("Kết thúc lượt", _view.End);
+        }
+
         [Test]
         public void PopupWithoutViewIsClosedAndNamedInTheError()
         {
@@ -490,16 +686,17 @@ namespace Game.PopupRevive.Tests
             public event Action BattleCleared { add { } remove { } }
             public event Action ReviveStarted { add { } remove { } }
 
-            public void Play() { }
-            public void EnterBattle(RunTeam team) { }
-            public void Pause() { }
-            public void Resume() { }
-            public void Abandon() { }
-            public void Replay() { }
-            public void GoHome() { }
-            public void Lose() { }
-            public void CountClearedWave(int wave) { }
-            public void ReviveShown() { }
+            // Every other order is recorded too, so a test sees the popup giving the run or battle no command.
+            public void Play() => Record("Play");
+            public void EnterBattle(RunTeam team) => Record("EnterBattle");
+            public void Pause() => Record("Pause");
+            public void Resume() => Record("Resume");
+            public void Abandon() => Record("Abandon");
+            public void Replay() => Record("Replay");
+            public void GoHome() => Record("GoHome");
+            public void Lose() => Record("Lose");
+            public void CountClearedWave(int wave) => Record("CountClearedWave");
+            public void ReviveShown() => Record("ReviveShown");
 
             public void Revive() => Record("Revive");
             public void DeclineRevive() => Record("DeclineRevive");
@@ -528,8 +725,19 @@ namespace Game.PopupRevive.Tests
             public long GameplayStepCount => 0;
             public double GameplaySeconds => 0;
 
-            public IDisposable OnStep(string owner, Action<SimStep> onStep) =>
-                throw new InvalidOperationException("The revive popup does not step.");
+            /// <summary>Owners that asked to be stepped; the revive popup must never be one.</summary>
+            public List<string> SteppedOwners { get; } = new List<string>();
+
+            public IDisposable OnStep(string owner, Action<SimStep> onStep)
+            {
+                SteppedOwners.Add(owner);
+                return new NoStep();
+            }
+
+            private sealed class NoStep : IDisposable
+            {
+                public void Dispose() { }
+            }
 
             public void Enqueue(string owner, Action apply)
             {

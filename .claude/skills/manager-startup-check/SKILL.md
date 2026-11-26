@@ -1,6 +1,6 @@
 ---
 name: manager-startup-check
-description: Chỉ phiên FEATURE=@Manager. Kiểm tra đầu phiên ba bước đúng thứ tự - Leader có live không (ListAgents), tiến độ ba Leader (gd_status, gd_req.py status, báo cáo, hỏi từng Leader), bản tổng hợp cho người. Tầng dưới là của CodeLead, không rà ở đây. Dùng ở lượt làm việc đầu tiên sau khi phiên được tạo mới hoặc renew, trước mọi việc khác.
+description: Chỉ phiên FEATURE=@Manager. Kiểm tra đầu phiên ba bước đúng thứ tự - Leader có live không (ListAgents), tiến độ ba Leader từ gd_status, gd_req.py status và báo cáo (chỉ hỏi Leader điểm chưa rõ), bản tổng hợp cho người. Tầng dưới là của CodeLead, không rà ở đây. Dùng ở lượt làm việc đầu tiên sau khi phiên được tạo mới hoặc renew, trước mọi việc khác.
 ---
 # @Manager: kiểm tra đầu phiên
 Luật chung của @Manager (phạm vi chỉ ba Leader, quyền, chuỗi của một feature, giao việc) vẫn ở `.claude/rules/manager.md`.
@@ -19,26 +19,26 @@ Chạy ở **lượt làm việc đầu tiên sau khi phiên được tạo mớ
 - Bạn không tự đặt, không tự suy ra giai đoạn từ tiến độ.
 
 ## Bước 2. Tiến độ của ba Leader
-Chỉ làm khi bước 1 qua. Một lần gọi shell được nối tối đa 6 lệnh: `python Management/tools/gd_status.py --brief; python Management/tools/gd_req.py status; python Management/tools/toolwork.py list`.
+Chỉ làm khi bước 1 qua. **Tổng hợp từ status và báo cáo, không nhắn Leader để hỏi tiến độ** (người quyết 2026-11-26: mỗi tin hỏi là một lượt của Leader, khoảng 70K token). Một lần gọi: `python Management/tools/gd_status.py --brief; python Management/tools/gd_req.py status; python Management/tools/toolwork.py list`.
 - **@GameDesigner**: từ `gd_status.py` (cả cây), ghi lại:
   - mode và vòng đang làm;
   - node chưa đạt, node chưa hỏi GPT, node có xung đột chưa giải quyết (khoá vòng sau);
   - mục "Cổng code theo feature" ở đầu bản in: feature nào ĐƯỢC CODE, feature nào ĐANG KHOÁ và vì sao.
 
-  Đọc báo cáo mới của nó (đầu tin liệt kê). Rồi nhắn `GameDesigner`: đang làm gì, đang chờ người việc gì.
-- **@UIDesigner**: trong bản in `gd_status.py` ở trên, đếm dòng `CHỜ @UIDesigner` (frame thiếu, cũ, thiếu phần tử chính, bị chấm thấp); đọc báo cáo mới của nó. Rồi nhắn `UIDesigner`: đang xếp node nào, đang chờ người chấm frame nào.
+  Cộng thêm báo cáo mới của nó (đầu tin liệt kê).
+- **@UIDesigner**: trong bản in `gd_status.py` ở trên, đếm dòng `CHỜ @UIDesigner` (frame thiếu, cũ, thiếu phần tử chính, bị chấm thấp). Cộng thêm báo cáo mới của nó.
 - **@CodeLead**:
   - Từ `gd_req.py status` (một dòng mỗi feature), ghi đã kiểm/tổng, chờ kiểm, bị trả, đổi thiết kế. Feature ĐƯỢC CODE mà chưa có yêu cầu nào đã làm thì đánh dấu chưa giao.
-  - Đọc báo cáo mới của CodeLead.
-  - Rồi nhắn `CodeLead`: khung, nối dây, test, đợt chơi thử đang ở đâu; tầng dưới đang bị chặn gì; có cần người quyết gì không.
-  - Không rà từng feature, tool hay tester: CodeLead trả lời thay cho tầng dưới.
+  - Cộng thêm báo cáo mới của CodeLead (khung, nối dây, đợt chơi thử, tầng dưới bị chặn).
+  - Không rà từng feature, tool hay tester.
+- **Chỉ hỏi khi thật cần:** nhắn một Leader khi có một điểm cụ thể mà status và báo cáo không trả lời được, ví dụ có việc chờ kiểm hay bị trả nhưng không có báo cáo nào từ lần giao trước, hoặc báo cáo nói đang chặn mà không nêu chặn gì. Mỗi Leader nhiều nhất một tin trong lượt, chỉ nêu đúng câu cần hỏi. Không có điểm nào như vậy thì không nhắn.
 - **Hộp thư** (chỉ một việc): dòng `guard:` báo SERVER TẮT thì đưa "bật setup_server.py" lên đầu bản tổng hợp.
-- Leader chưa trả lời trong lượt đó: ghi "chưa trả lời" vào bản tổng hợp. Không coi là xong, không tự suy ra tiến độ thay Leader.
+- Trong bản tổng hợp, ghi nguồn của từng Leader: "theo status/báo cáo", hoặc "đã hỏi" kèm câu trả lời, hoặc "đã hỏi, chưa trả lời". Không tự suy ra điều status và báo cáo không nói.
 
 ## Bước 3. Bản tổng hợp cho người
 Một tin, theo thứ tự:
 1. Ba Leader: live, tiến độ, đang chờ gì.
-2. Tiến độ code tóm từ `gd_req.py status` và câu trả lời của CodeLead.
+2. Tiến độ code tóm từ `gd_req.py status` và báo cáo của CodeLead.
 3. Việc bị chặn và ai gỡ được.
 4. Việc công cụ đang chờ phiên `@human` (`toolwork.py list`).
 5. Các câu đang chờ người quyết (khuôn ở `manager.md`, mục "Hỏi người"), cùng câu hỏi xác nhận giai đoạn và **câu hỏi phạm vi việc** (`manager.md`, mục "Phạm vi việc": chạy hết mọi việc hay chỉ feature được nhắc).

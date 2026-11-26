@@ -215,6 +215,54 @@ namespace Game.Run.Tests
         }
 
         [Test]
+        public void ClockStepsWhileTheGameIsAwayDoNotCountTowardTheOneSecondBeforeTheRevivePopup()
+        {
+            var flow = InBattle(reviveOnce: true);
+            flow.Lose();
+            _clock.Step(20);
+
+            _waits.Hold();
+            _clock.Step(100);
+            Assert.AreEqual(RunStep.ReviveWait, flow.Step, "Steps while the game is off the screen do not count.");
+
+            _waits.Release();
+            _clock.Step(19);
+            Assert.AreEqual(RunStep.ReviveWait, flow.Step, "0.5 s before leaving + 0.475 s after coming back.");
+            _clock.Step(1);
+            Assert.AreEqual(RunStep.ReviveOffer, flow.Step, "1 s of steps on the screen in all: the revive popup shows.");
+        }
+
+        [Test]
+        public void ClockStepsWhileTheGameIsAwayDoNotCountTowardTheOneSecondBeforeTheLosePopup()
+        {
+            var flow = InBattle();
+            flow.Lose();
+
+            _waits.Hold();
+            _waits.Hold();
+            _clock.Step(100);
+            Assert.AreEqual(RunStep.Ending, flow.Step);
+
+            _waits.Release();
+            _clock.Step(39);
+            Assert.AreEqual(RunStep.Ending, flow.Step);
+            _clock.Step(1);
+            Assert.AreEqual(RunStep.Lost, flow.Step);
+        }
+
+        [Test]
+        public void HoldingTheWaitsStillLetsAWaveClearedEarlierInAStepCount()
+        {
+            var flow = InBattle();
+            _clock.OnStep("Wave", step => { if (step.Number == 1) flow.CountClearedWave(1); });
+            _waits.Hold();
+
+            _clock.Step(1);
+
+            Assert.AreEqual(1, _score.Score, "Holding stops only timed waits, not the next-frame count of a cleared wave.");
+        }
+
+        [Test]
         public void PlayAgainClearsTheClockBeforeTheBattleIsReportedClearedAndSetsUpTheNextRun()
         {
             var flow = Flow(skipMenus: true);

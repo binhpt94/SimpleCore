@@ -13,7 +13,9 @@ namespace Game.PopupRevive
     /// The popup always closes first and reports to the run after. The back key does nothing: no handler is given.
     /// The choice goes to the run through the shared clock's queue (feature-sim-clock#revive-result-queued): it is
     /// applied at the start of the next step and recorded with that step's number, so a replay hands the run the
-    /// recorded result at the same step. The popup has no timer of its own: the ad wait has no time limit.
+    /// recorded result at the same step. The popup has no timer of its own (feature-popup-revive/revive-order/
+    /// order-values#no-own-timer): it never steps on the clock, the ad wait has no time limit, and the timeline
+    /// marks (delay before opening, castle stand-up, resume, held clear) belong to the run and the castle.
     /// </summary>
     internal sealed class RevivePopupPresenter : IDisposable
     {

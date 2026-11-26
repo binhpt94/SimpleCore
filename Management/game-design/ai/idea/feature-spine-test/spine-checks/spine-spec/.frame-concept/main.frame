@@ -1,0 +1,28 @@
+kind: ui
+title: Bốn nút thử Spine và nhãn trạng thái (hàng ở góc trái trên dải chiến trường)
+ui: faa9d59fca56
+ai: 6
+why: bốn nút xếp một hàng ở góc trái trên của dải chiến trường, ngay dưới HUD trên (cách 24): không chồng HUD, xa nút Thử ở góc trái dưới (khoảng 450 px theo chiều dọc)
+why: ba nút đổi animation (Đứng, Chạy, Nhảy) cách nhau 16, nút Lật tách ra 40 vì nó làm việc khác (quay mặt, không đổi animation)
+why: ui.md ghi cả bốn nút là chính nên bốn nút cùng cỡ 200x120; đây là bảng nút thử, không có một hành động chính duy nhất (cảnh báo nút cùng cỡ là cố ý)
+why: nhãn trạng thái ngay dưới hàng nút, cách 16, neo mép trái, đọc nút xong thì đọc kết quả; rộng 520 đủ cho "jump · một lần · mặt phải" ở cỡ chữ 32
+why: hàng nút neo góc trái trên theo màn nên ở 21:9 vẫn đúng chỗ; nhân vật ở cánh phải (x=+9u) nên nút không che nhân vật và quái đi qua
+why: theo tham chiếu 20261125-225339-lose: chỉ lấy cỡ nút và khoảng thở, tham chiếu là popup nên không có bố cục trực tiếp
+use tap = feature-hud/hud-layout/layout-spec#tap
+use safe = feature-hud/hud-layout/layout-spec#safe
+use top-h = feature-hud/hud-layout/layout-spec#top-h
+let spine-w = 200            # rộng một nút thử
+let row-y = 24               # đỉnh hàng nút, tính trong dải chiến trường: cách HUD trên 24
+let run-x = 256              # safe 40 + spine-w 200 + khe 16
+let jump-x = 472             # run-x 256 + 200 + 16
+let flip-x = 712             # jump-x 472 + 200 + khe 40 (tách nhóm)
+let state-y = 160            # row-y 24 + tap 120 + khe 16
+let state-w = 520            # rộng nhãn trạng thái
+let state-h = 60             # cao nhãn trạng thái
+- strip        rect   x=0 y=top-h w=1920 h=760 label="Dải chiến trường (HUD ở trên và dưới, không vẽ)"
+- spine-idle   button x=safe y=row-y w=spine-w h=tap parent=strip label="Đứng (đang chọn)"
+- spine-run    button x=run-x y=row-y w=spine-w h=tap parent=strip label="Chạy"
+- spine-jump   button x=jump-x y=row-y w=spine-w h=tap parent=strip label="Nhảy"
+- spine-flip   button x=flip-x y=row-y w=spine-w h=tap parent=strip label="Lật"
+- spine-state  label  x=safe y=state-y w=state-w h=state-h parent=strip label="idle · lặp · mặt trái"
+- spine-char   rect   x=1470 y=610 w=60 h=90 parent=strip label="Nhân vật Spine: x=+9u là px 1500, chân ở mặt đất px 840, cao 90 (layer-values: 1u = 60 px)"

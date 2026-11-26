@@ -225,9 +225,10 @@ for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS, CODELEAD_COMMANDS, MAN
 # Every Leader may look at what scaffold.py would create (it prints, it creates nothing); creating is @Manager's.
 for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS, CODELEAD_COMMANDS):
     _commands.append(PY + r"Management/tools/scaffold\.py --dry-run")
-# A Leader may run several allowed commands in one call, joined by ';' or '&&' (its checks at the start of a session:
-# studio status, validate, scaffold --dry-run). Every part must pass alone, so a chain grants nothing a single call
-# does not; a part with a quoted text (review, redo) is never chained.
+# Every bound chat may run up to CHAIN_MAX allowed commands in one call, joined by ';' or '&&' (người quyết 2026-11-26:
+# fewer calls, fewer tokens). Every part must pass alone, the gated ones (gated(): review, cancel, send, doing/done)
+# through their own checks, so a chain grants nothing a single call does not. A quoted text cut by ';' leaves parts
+# that match nothing. The read-only searches (ls, grep...) are not chained.
 # The test runs (Management/tools/tester.py). Looking: whoever reads Tester/. A new run and moving old runs to the
 # archive: that tester; @CodeLead (who hands the testers their runs) archives for any tester.
 TESTER_NAME = "(" + "|".join(TESTER_ROLES.values()) + ")"
@@ -248,7 +249,6 @@ def tester_commands(name):
             TESTER_TOOL + "archive " + name + TESTER_ARCHIVE_ARGS]
 
 
-CHAIN_MODES = ("manager", "codelead", "gamedesigner", "uidesigner")
 CHAIN_SPLIT_RX = re.compile(r"\s*(?:;|&&)\s*")
 CHAIN_MAX = 6
 TOOL_COMMANDS = {
@@ -1874,46 +1874,55 @@ def decide_raw(data, session_value, root, store=None):
             TOOL_COMMANDS[TOOL_ROLES[role]] if mode == "tool" else []) + (
             TESTER_READ_COMMANDS if mode in TESTER_READERS else []) + (
             tester_commands(TESTER_ROLES[role]) if mode == "tester" else [])
-        m = FEATURE_STUDIO_RX.match(cmd)
-        # review: only the feature that ordered. The feedback text may hold "..", the part before it may not.
-        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
-            ordered = m.group(2).rpartition("/")[0]
-            if mode == "feature" and ordered == feature:
-                return "allow", f"studio: {m.group(1)} an order of {feature}"
-            if ordered.startswith("_design/"):
-                return "deny", "art concepts are judged by the human on the management page (tab Game design)"
-            return "deny", f"only the chat of {ordered} judges its own orders"
-        m = STUDIO_CANCEL_RX.match(cmd)
-        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
-            ordered = m.group(1).rpartition("/")[0]
-            if mode == "codelead" or (mode == "feature" and ordered == feature):
-                return "allow", f"studio: {who} cancels the order {m.group(1)}"
-            return "deny", (f"only the chat that ordered ({ordered}) or @CodeLead cancels an order; tell @CodeLead which "
-                            "order and why")
-        m = DISPATCH_SEND_RX.match(cmd)
-        # send to the inbox: a Leader, to its own part, naming itself; the text may hold "..", the rest may not.
-        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
-            target, sender = m.group(1), "@" + m.group(3)
-            allowed = INBOX_SENDERS.get(role or "", ())
-            if sender != role:
-                return "deny", f"--from must name this chat's own role ({role or 'none'})"
-            if target in allowed or ("feature" in allowed and not target.startswith("@")):
-                # development work is handed out only once the human has said which phase the project is in
-                dev = not target.startswith("@") or target == "@Core"
-                if role == "@CodeLead" and dev and not stage_set(root):
-                    return "deny", ("the phase the project is being built for is not set yet (Management/game-design/stage.json): "
-                                    "ask the human which phase to work on (IDEA, PROTOTYPE or FULL); they set it on the page, "
-                                    "tab Game design, 'Đang làm'. Until then no development work goes to a feature, a service or @Core")
-                return "allow", f"{role} sends a message to the inbox of {target}"
-            return "deny", (f"{role or 'this chat'} may not send to the inbox of {target}"
-                            + (f" (only: {', '.join(allowed)})" if allowed else ""))
-        m = FEATURE_REQ_RX.match(cmd)
-        # doing / done in a requirement book: only the chat of that feature. The note may hold "..", the rest may not.
-        if m and not SHELL_META_RX.search(cmd) and ".." not in cmd.split(' "')[0]:
-            if mode == "feature" and m.group(1).lower() == feature.lower():
-                return "allow", f"requirement book of {feature}: doing / done"
-            return "deny", (f"only the chat of {m.group(1)} writes doing / done in its requirement book; @CodeLead "
-                            "verifies or rejects (gd_req.py <F> verify | reject), the human waives on the page")
+        def gated(one):
+            """The verdict on one command that has checks of its own (studio review / cancel, dispatch.py send,
+            gd_req.py doing / done: who may, the phase gate); None for any other command. Run on the whole command
+            and on each part of a chain, so a chain never skips a gate."""
+            m = FEATURE_STUDIO_RX.match(one)
+            # review: only the feature that ordered. The feedback text may hold "..", the part before it may not.
+            if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
+                ordered = m.group(2).rpartition("/")[0]
+                if mode == "feature" and ordered == feature:
+                    return "allow", f"studio: {m.group(1)} an order of {feature}"
+                if ordered.startswith("_design/"):
+                    return "deny", "art concepts are judged by the human on the management page (tab Game design)"
+                return "deny", f"only the chat of {ordered} judges its own orders"
+            m = STUDIO_CANCEL_RX.match(one)
+            if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
+                ordered = m.group(1).rpartition("/")[0]
+                if mode == "codelead" or (mode == "feature" and ordered == feature):
+                    return "allow", f"studio: {who} cancels the order {m.group(1)}"
+                return "deny", (f"only the chat that ordered ({ordered}) or @CodeLead cancels an order; tell @CodeLead which "
+                                "order and why")
+            m = DISPATCH_SEND_RX.match(one)
+            # send to the inbox: a Leader, to its own part, naming itself; the text may hold "..", the rest may not.
+            if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
+                target, sender = m.group(1), "@" + m.group(3)
+                allowed = INBOX_SENDERS.get(role or "", ())
+                if sender != role:
+                    return "deny", f"--from must name this chat's own role ({role or 'none'})"
+                if target in allowed or ("feature" in allowed and not target.startswith("@")):
+                    # development work is handed out only once the human has said which phase the project is in
+                    dev = not target.startswith("@") or target == "@Core"
+                    if role == "@CodeLead" and dev and not stage_set(root):
+                        return "deny", ("the phase the project is being built for is not set yet (Management/game-design/stage.json): "
+                                        "ask the human which phase to work on (IDEA, PROTOTYPE or FULL); they set it on the page, "
+                                        "tab Game design, 'Đang làm'. Until then no development work goes to a feature, a service or @Core")
+                    return "allow", f"{role} sends a message to the inbox of {target}"
+                return "deny", (f"{role or 'this chat'} may not send to the inbox of {target}"
+                                + (f" (only: {', '.join(allowed)})" if allowed else ""))
+            m = FEATURE_REQ_RX.match(one)
+            # doing / done in a requirement book: only the chat of that feature. The note may hold "..", the rest may not.
+            if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
+                if mode == "feature" and m.group(1).lower() == feature.lower():
+                    return "allow", f"requirement book of {feature}: doing / done"
+                return "deny", (f"only the chat of {m.group(1)} writes doing / done in its requirement book; @CodeLead "
+                                "verifies or rejects (gd_req.py <F> verify | reject), the human waives on the page")
+            return None
+
+        verdict = gated(cmd)
+        if verdict:
+            return verdict
         try:
             search = search_paths(cmd) if tool == "Bash" else None
         except ValueError as ex:
@@ -1935,8 +1944,12 @@ def decide_raw(data, session_value, root, store=None):
         if listed(cmd):
             return "allow", "shell command is on the allow-list"
         parts = CHAIN_SPLIT_RX.split(cmd)
-        if mode in CHAIN_MODES and 1 < len(parts) <= CHAIN_MAX and all(listed(p) and '"' not in p for p in parts):
-            return "allow", "every command of the chain is on the allow-list"
+        if mode != "none" and 1 < len(parts) <= CHAIN_MAX:
+            for part in parts:
+                verdict = gated(part) or (("allow", "") if listed(part) else ("deny", "not on the allow-list in guard.py"))
+                if verdict[0] != "allow":
+                    return "deny", f"chain refused at `{part[:80]}`: {verdict[1]}. Every command of a chain must be allowed alone."
+            return "allow", "every command of the chain is allowed alone"
         return "deny", ("shell command is not on the allow-list in guard.py (python Management/tools/... commands of "
                         "CLAUDE.md, and the read-only searches: " + SEARCH_HELP + "). Stop and tell the human.")
 

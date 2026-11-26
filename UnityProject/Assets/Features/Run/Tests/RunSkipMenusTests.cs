@@ -190,9 +190,12 @@ namespace Game.Run.Tests
         private sealed class FakeSignals : IAppSignals
         {
             public event Action LeftApp;
+            public event Action CameBack;
             public event Action BackPressed;
 
             public void Leave() => LeftApp?.Invoke();
+
+            public void Return() => CameBack?.Invoke();
 
             public void Back() => BackPressed?.Invoke();
 

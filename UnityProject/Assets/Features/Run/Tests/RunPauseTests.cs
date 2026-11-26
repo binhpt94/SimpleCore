@@ -120,22 +120,47 @@ namespace Game.Run.Tests
         [Test]
         public void LeavingAfterTheCastleFellDoesNotPauseAndTheLosePopupStillShows()
         {
-            EnterBattle();
-            _flow.Lose();
-            _log.Clear();
+            _interrupts.Dispose();
+            using (new RunInterrupts(_flow, _signals, pauseOnLeave: true, backKeyPauses: true, waits: _delay))
+            {
+                EnterBattle();
+                _flow.Lose();
+                _log.Clear();
 
-            _signals.Leave();
-            _signals.Back();
-            Assert.AreEqual(RunStep.Ending, _flow.Step);
-            CollectionAssert.IsEmpty(_log);
+                _signals.Leave();
+                _signals.Back();
+                Assert.AreEqual(RunStep.Ending, _flow.Step);
+                CollectionAssert.IsEmpty(_log, "No pause popup during the wait after the castle fell.");
 
-            _delay.Fire();
-            Assert.AreEqual(RunStep.Lost, _flow.Step);
+                _signals.Return();
+                _delay.Fire();
+                Assert.AreEqual(RunStep.Lost, _flow.Step, "Coming back, the lose popup shows (not the pause).");
 
-            _signals.Leave();
-            _signals.Back();
-            Assert.AreEqual(RunStep.Lost, _flow.Step);
-            CollectionAssert.AreEqual(new[] { "step:Lost" }, _log);
+                _signals.Leave();
+                _signals.Back();
+                Assert.AreEqual(RunStep.Lost, _flow.Step);
+                CollectionAssert.AreEqual(new[] { "step:Lost" }, _log);
+            }
+        }
+
+        [Test]
+        public void TimeAwayDuringTheWaitAfterTheCastleFellDoesNotCountTowardTheLosePopup()
+        {
+            _interrupts.Dispose();
+            using (new RunInterrupts(_flow, _signals, pauseOnLeave: true, backKeyPauses: true, waits: _delay))
+            {
+                EnterBattle();
+                _flow.Lose();
+
+                _signals.Leave();
+                _delay.Fire();
+                Assert.AreEqual(RunStep.Ending, _flow.Step, "The wait stands still while the game is off the screen.");
+
+                _signals.Return();
+                Assert.AreEqual(RunStep.Ending, _flow.Step, "Coming back does not end the wait at once.");
+                _delay.Fire();
+                Assert.AreEqual(RunStep.Lost, _flow.Step);
+            }
         }
 
         [Test]
@@ -254,21 +279,30 @@ namespace Game.Run.Tests
             public bool Disposed { get; private set; }
 
             public event Action LeftApp;
+            public event Action CameBack;
             public event Action BackPressed;
 
             public void Leave() => LeftApp?.Invoke();
+
+            public void Return() => CameBack?.Invoke();
 
             public void Back() => BackPressed?.Invoke();
 
             public void Dispose() => Disposed = true;
         }
 
-        private sealed class FakeDelay : IRunDelay
+        /// <summary>Fire() is the wait's time passing; while held (game off the screen) that time does not count.</summary>
+        private sealed class FakeDelay : IRunDelay, IRunWaitHold
         {
             private Action _then;
             private Action _nextFrame;
+            private bool _held;
 
             public int Scheduled { get; private set; }
+
+            public void Hold() => _held = true;
+
+            public void Release() => _held = false;
 
             public IDisposable Schedule(float seconds, Action then)
             {
@@ -285,6 +319,7 @@ namespace Game.Run.Tests
 
             public void Fire()
             {
+                if (_held) return;
                 var then = _then;
                 _then = null;
                 then?.Invoke();

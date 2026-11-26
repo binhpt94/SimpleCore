@@ -1,0 +1,4 @@
+index,sheet,kind,key,rows,note
+int,string,enum:params|list|levels|formula|map,string,int,string
+Số thứ tự,Tên sheet,Loại bảng,Cột khoá của bảng,Số dòng dữ liệu (tool tự điền),Bảng chứa gì
+1,Params,params,key,0,"Thông số nhân vật Spine thử: bộ mẫu, cỡ, chỗ đứng, animation, chuyển mượt"

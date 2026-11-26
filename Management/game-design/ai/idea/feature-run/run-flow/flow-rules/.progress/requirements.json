@@ -195,18 +195,18 @@
    "at": "2026-11-25 18:32:07"
   },
   "edge-roi-game-dung-luc-thanh-vua-bi-pha": {
-   "state": "verified",
-   "note": "",
+   "state": "doing",
+   "note": "Đổi theo bản mới: không mở popup tạm dừng, thời gian ở ngoài không tính vào 1 giây chờ, quay lại mở hồi sinh hoặc thua",
    "tests": [
     "RunPauseTests.LeavingAfterTheCastleFellDoesNotPauseAndTheLosePopupStillShows",
     "RunReviveTests.LeavingTheGameOrBackKeyDuringTheReviveOpensNoPause"
    ],
    "play": "",
-   "hash": "159140d34854",
-   "text": "**Rời game đúng lúc thành vừa bị phá (trong 1 giây chờ):** không mở popup tạm dừng; quay lại thì popup thua hiện (lượt đã kết thúc, tạm dừng không áp dụng).",
+   "hash": "affe9229181c",
+   "text": "**Rời game đúng lúc thành vừa bị phá (trong 1 giây chờ):** không mở popup tạm dừng; thời gian ở ngoài không tính vào 1 giây; quay lại thì popup hiện (popup hồi sinh nếu là lần bị phá đầu trong lượt, popup thua nếu không).",
    "title": "Rời game đúng lúc thành vừa bị phá (trong 1 giây chờ)",
-   "by": "@CodeLead",
-   "at": "2026-11-25 18:32:07"
+   "by": "Run",
+   "at": "2026-11-26 15:04:18"
   },
   "edge-dang-o-man-bat-dau-hoac-man-chon": {
    "state": "verified",
@@ -669,6 +669,13 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-26 15:04:18",
+   "id": "edge-roi-game-dung-luc-thanh-vua-bi-pha",
+   "state": "doing",
+   "by": "Run",
+   "note": "Đổi theo bản mới: không mở popup tạm dừng, thời gian ở ngoài không tính vào 1 giây chờ, quay lại mở hồi sinh hoặc thua"
   }
  ]
 }

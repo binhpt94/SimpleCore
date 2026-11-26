@@ -695,13 +695,15 @@
         add(listBody, el("p", "muted", "Tên đề xuất theo key, node live chưa có code.json: " + suggested.join(", ") +
           ". @GameDesigner ghi code.json đúng tên này rồi bạn chốt lại; chưa có code.json thì vẫn khoá code."));
       }
-      if (!data.threads.length) { add(listBody, el("p", "muted", "Chưa có thread nào có tên.")); return; }
+      if (!data.threads.length) { add(listBody, el("p", "muted", "Chưa có thread nào.")); return; }
       var wanted = {};
       data.sets.full.forEach(function (n, i) { wanted[n] = i + 1; });
       // Gom theo tầng (Master, Leaders, Tools, Basic, Services, Features); trong một tầng theo thứ tự của bộ setup.
-      var order = (data.sets.order || []).concat([""]);
+      // Chat chưa đặt tên (VS Code hiện theo tên tự sinh) nằm ở tầng riêng cuối bảng.
+      var UNNAMED = "Chưa đặt tên (VS Code hiện theo tên tự sinh)";
+      var order = (data.sets.order || []).concat(["", UNNAMED]);
       var key = function (t) { return t.feature || t.title; };      // tên chat "Codex" là FEATURE "@Codex"
-      var tierOf = function (t) { var g = data.sets.groups[key(t)] || t.group || ""; return order.indexOf(g) >= 0 ? g : ""; };
+      var tierOf = function (t) { if (t.named === false) return UNNAMED; var g = data.sets.groups[key(t)] || t.group || ""; return order.indexOf(g) >= 0 ? g : ""; };
       var sorted = data.threads.slice().sort(function (a, b) {
         return (order.indexOf(tierOf(a)) - order.indexOf(tierOf(b))) || ((wanted[key(a)] || 1e9) - (wanted[key(b)] || 1e9))
           || a.title.localeCompare(b.title) || (a.modified < b.modified ? -1 : 1);
@@ -727,7 +729,8 @@
           cell.colSpan = 10;
           add(body, add(head, cell));
         }
-        var why = t.archived ? "thread đã archive" : t.unlisted ? "VS Code không hiện thread này"
+        var unnamed = t.named === false;
+        var why = unnamed ? "chat chưa đặt tên: mở nó trong VS Code rồi gõ /rename <tên>" : t.archived ? "thread đã archive" : t.unlisted ? "VS Code không hiện thread này"
           : !t.binding ? "thread chưa gán FEATURE: chạy Setup trước" : "";
         // Chat đang mở trong VS Code (hoặc terminal): tiến trình đó không thấy lượt trang chạy vào, nên không chạy.
         // Đọc lại vẫn chạy: server nhắn vào chat đó (SendMessage). Compact, Renew thì không: lệnh / qua tin nhắn chỉ là chữ.
@@ -784,21 +787,27 @@
           var pendNote = el("div", "muted", "⟳ chờ renew: làm mới khi hộp thư giao việc kế tiếp");
           needsNote = needsNote ? add(el("div"), needsNote, pendNote) : pendNote;
         }
-        var state = t.archived ? el("span", "muted", "đã archive, bỏ qua")
+        var state = unnamed ? el("span", "muted", (t.archived ? "đã archive · " : "") + "chưa đặt tên: mở chat rồi gõ /rename <tên>")
+          : t.archived ? el("span", "muted", "đã archive, bỏ qua")
           : t.unlisted ? el("span", "muted", "VS Code không hiện (tạo ngoài VS Code), bỏ qua")
           : (!wanted[key(t)] ? el("span", "muted", "ngoài bộ setup")
           : t.legacy ? el("span", "bad-text", "tên có @ nên không nhận được tin SendMessage: gõ /rename " + t.title.slice(1) + " trong chat này")
           : (t.binding === key(t) ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
+        // Một vai mở tay trong VS Code chạy không có profile của vai (mọi tool, skill, MCP): khoảng gấp đôi token mỗi lượt.
+        if (t.profiled && t.live === "interactive") {
+          var noProfile = el("div", "bad-text", "đang mở trong VS Code: không có profile (~2× token mỗi lượt). Đóng chat, bấm Live; xem hay trả lời bằng claude attach " + t.title);
+          needsNote = needsNote ? add(el("div"), needsNote, noProfile) : noProfile;
+        }
         if (needsNote) { var stateBox = el("span"); add(stateBox, state, needsNote); state = stateBox; }
         var inGroup = vs.groups[t.id] || "";
         var wantGroup = tier && vs.tierNames ? vs.tierNames[tier] : "";
-        var vsCell = !wanted[key(t)] || t.archived || t.unlisted ? el("span", "muted", inGroup || "—")
+        var vsCell = unnamed || !wanted[key(t)] || t.archived || t.unlisted ? el("span", "muted", inGroup || "—")
           : (inGroup === wantGroup ? el("span", "ok-text", inGroup) : el("span", "bad-text", (inGroup || "chưa nhóm") + " → " + wantGroup));
         add(body, row([t.title, t.binding || "—", vsCell, (t.model || "—").replace(/^claude-/, ""), t.effort || "—",
           t.modified, state, liveBtn, el("code", "", t.id.slice(0, 8)), rereadBox]));
       });
       var made = {};
-      data.threads.forEach(function (t) { if (!t.archived && !t.unlisted) made[key(t)] = true; });
+      data.threads.forEach(function (t) { if (t.named !== false && !t.archived && !t.unlisted) made[key(t)] = true; });
       var todo = data.sets.full.filter(function (n) { return !made[n]; });
       if (todo.length) add(listBody, el("p", "muted", "Chưa có thread (Setup full sẽ tạo): " + todo.join(", ") + "."));
     };

@@ -69,7 +69,7 @@ namespace Game.Run
             if (!_pauseOnLeave && !_backKeyPauses) return;
             var signals = _createSignals();
             WhenDisposed(signals.Dispose);
-            var interrupts = new RunInterrupts(_flow, signals, _pauseOnLeave, _backKeyPauses);
+            var interrupts = new RunInterrupts(_flow, signals, _pauseOnLeave, _backKeyPauses, _clockWaits);
             WhenDisposed(interrupts.Dispose);
         }
     }

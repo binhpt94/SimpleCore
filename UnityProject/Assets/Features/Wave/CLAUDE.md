@@ -13,7 +13,7 @@ Tầng: 6 · Features
 - Mốc: `RunStarted` đặt lại về đợt 1. `BattleStarted` hẹn đợt 1 ở bước gameplay đầu tiên (con đầu ra trong bước đó). `BattleStopped`/`BattleCleared` ngừng thả quái.
 - Dọn sạch đợt w, đúng thứ tự: `IWalletIncome.Add(20 + 5w)`, `IRunFlow.CountClearedWave(w)`, `WaveCleared(w)`, `CurrentWave = w+1`, rồi thở 3 giây và `WaveStarted(w+1)`.
 - Việc xét dọn sạch được hoãn tới bước nhịp kế tiếp: thành bị phá trong cùng bước thì không tính. Lúc thở đếm từ bước sau bước dọn sạch.
-- Luồng hồi sinh (`feature-popup-revive/revive-order/order-values#held-clear`): lượt đang ở `RunStep.ReviveWait`, `ReviveOffer` hoặc `Reviving` thì tin dọn sạch được giữ. Hồi sinh xong (trận chạy lại) thì trả thưởng, báo điểm, bắt đầu lúc thở 3 giây. Chốt thua thì `BattleStopped` bỏ tin: không thưởng, không điểm. Tạm dừng thường không giữ tin. Test: `HeldClearTests`.
+- Luồng hồi sinh (`feature-wave/wave-clear/clear-rules`, trường hợp biên thành bị phá cùng lúc con cuối bị hạ; Run giữ tin theo `feature-run/run-flow/flow-rules`): lượt đang ở `RunStep.ReviveWait`, `ReviveOffer` hoặc `Reviving` thì tin dọn sạch được giữ. Hồi sinh xong (trận chạy lại) thì trả thưởng, báo điểm, bắt đầu lúc thở 3 giây. Chốt thua thì `BattleStopped` bỏ tin: không thưởng, không điểm. Tạm dừng thường không giữ tin. Test: `HeldClearTests`.
 - Hệ số chỉ số `1 + 0.10×(w−1)` do Wave tính và đưa vào `EnemySpawn.StatScale`.
 - Logic C# thuần trong `Scripts/Internal`:
   - `WaveFormula`: số quái, nhịp, hệ số, số con từng loại.

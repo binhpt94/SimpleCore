@@ -206,7 +206,10 @@ namespace Game.Wave
             Send(0d);
         }
 
-        /// <summary>True while the run is in its revive flow (feature-popup-revive/revive-order/order-values#held-clear).</summary>
+        /// <summary>
+        /// True while the run is in its revive flow: the run holds the clear of that step
+        /// (feature-wave/wave-clear/clear-rules#edge-thanh-bi-pha-cung-luc-con-cuoi-bi, feature-run/run-flow/flow-rules).
+        /// </summary>
         private bool HeldByRevive =>
             _run.Step == RunStep.ReviveWait || _run.Step == RunStep.ReviveOffer || _run.Step == RunStep.Reviving;
 

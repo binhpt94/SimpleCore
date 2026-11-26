@@ -305,7 +305,7 @@ namespace Game.Run.Tests
         public void LeavingTheGameOrBackKeyDuringTheReviveOpensNoPause()
         {
             var signals = new FakeSignals();
-            using (new RunInterrupts(_flow, signals, pauseOnLeave: true, backKeyPauses: true))
+            using (new RunInterrupts(_flow, signals, pauseOnLeave: true, backKeyPauses: true, waits: _delay))
             {
                 EnterBattle();
                 _flow.Lose();
@@ -313,10 +313,58 @@ namespace Game.Run.Tests
                 signals.Back();
                 Assert.AreEqual(RunStep.ReviveWait, _flow.Step);
 
+                signals.Return();
                 _delay.Fire();
+                Assert.AreEqual(RunStep.ReviveOffer, _flow.Step, "Coming back shows the revive popup, not the pause.");
+
                 signals.Leave();
                 signals.Back();
-                Assert.AreEqual(RunStep.ReviveOffer, _flow.Step, "Coming back shows the revive popup, not the pause.");
+                Assert.AreEqual(RunStep.ReviveOffer, _flow.Step);
+            }
+        }
+
+        [Test]
+        public void TimeAwayDuringTheWaitAfterTheFirstCastleFallDoesNotCountTowardTheRevivePopup()
+        {
+            var signals = new FakeSignals();
+            using (new RunInterrupts(_flow, signals, pauseOnLeave: true, backKeyPauses: true, waits: _delay))
+            {
+                EnterBattle();
+                _flow.Lose();
+
+                signals.Leave();
+                _delay.Fire();
+                Assert.AreEqual(RunStep.ReviveWait, _flow.Step, "The wait stands still while the game is off the screen.");
+
+                signals.Return();
+                Assert.AreEqual(RunStep.ReviveWait, _flow.Step, "Coming back does not end the wait at once.");
+                _delay.Fire();
+                Assert.AreEqual(RunStep.ReviveOffer, _flow.Step, "First fall of the run: the revive popup shows.");
+            }
+        }
+
+        [Test]
+        public void LeavingDuringTheWaitAfterTheSecondCastleFallShowsTheLosePopupOnComingBack()
+        {
+            var signals = new FakeSignals();
+            using (new RunInterrupts(_flow, signals, pauseOnLeave: true, backKeyPauses: true, waits: _delay))
+            {
+                EnterBattle();
+                _flow.Lose();
+                _delay.Fire();
+                _revive.Revive();
+                _revive.ReviveShown();
+                _flow.Lose();
+                Assert.AreEqual(RunStep.Ending, _flow.Step);
+
+                signals.Leave();
+                signals.Back();
+                _delay.Fire();
+                Assert.AreEqual(RunStep.Ending, _flow.Step, "No pause, and time away does not count.");
+
+                signals.Return();
+                _delay.Fire();
+                Assert.AreEqual(RunStep.Lost, _flow.Step, "Not the first fall of the run: the lose popup shows.");
             }
         }
 
@@ -356,19 +404,28 @@ namespace Game.Run.Tests
         private sealed class FakeSignals : IAppSignals
         {
             public event Action LeftApp;
+            public event Action CameBack;
             public event Action BackPressed;
 
             public void Leave() => LeftApp?.Invoke();
+
+            public void Return() => CameBack?.Invoke();
 
             public void Back() => BackPressed?.Invoke();
 
             public void Dispose() { }
         }
 
-        private sealed class FakeDelay : IRunDelay
+        /// <summary>Fire() is the wait's time passing; while held (game off the screen) that time does not count.</summary>
+        private sealed class FakeDelay : IRunDelay, IRunWaitHold
         {
             private Action _then;
             private Action _nextFrame;
+            private bool _held;
+
+            public void Hold() => _held = true;
+
+            public void Release() => _held = false;
 
             public float LastSeconds { get; private set; }
             public bool Cancelled { get; private set; }
@@ -399,6 +456,7 @@ namespace Game.Run.Tests
 
             public void Fire()
             {
+                if (_held) return;
                 var then = _then;
                 _then = null;
                 then?.Invoke();

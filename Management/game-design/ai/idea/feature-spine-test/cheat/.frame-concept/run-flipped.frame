@@ -1,0 +1,21 @@
+kind: ui
+title: Cheat nhân vật Spine: đang chạy, quay mặt phải
+use tap = feature-hud/hud-layout/layout-spec#tap
+use safe = feature-hud/hud-layout/layout-spec#safe
+use top-h = feature-hud/hud-layout/layout-spec#top-h
+use spine-w = feature-spine-test/spine-checks/spine-spec#spine-w
+use row-y = feature-spine-test/spine-checks/spine-spec#row-y
+use run-x = feature-spine-test/spine-checks/spine-spec#run-x
+use jump-x = feature-spine-test/spine-checks/spine-spec#jump-x
+use flip-x = feature-spine-test/spine-checks/spine-spec#flip-x
+use state-y = feature-spine-test/spine-checks/spine-spec#state-y
+use state-w = feature-spine-test/spine-checks/spine-spec#state-w
+use state-h = feature-spine-test/spine-checks/spine-spec#state-h
+- top          rect   x=0 y=0 w=1920 h=top-h label="Mép trên của HUD (feature-hud)"
+- strip        rect   x=0 y=top-h w=1920 h=760 label="Dải chiến trường"
+- spine-idle   button x=safe y=row-y w=spine-w h=tap parent=strip label="Đứng"
+- spine-run    button x=run-x y=row-y w=spine-w h=tap parent=strip label="Chạy (đang chọn)"
+- spine-jump   button x=jump-x y=row-y w=spine-w h=tap parent=strip label="Nhảy"
+- spine-flip   button x=flip-x y=row-y w=spine-w h=tap parent=strip label="Lật"
+- spine-state  label  x=safe y=state-y w=state-w h=state-h parent=strip label="run · lặp · mặt phải"
+- spine-char   rect   x=1470 y=610 w=60 h=90 parent=strip label="Nhân vật Spine đang chạy, quay mặt phải (x=+9u, chân ở mặt đất px 840)"

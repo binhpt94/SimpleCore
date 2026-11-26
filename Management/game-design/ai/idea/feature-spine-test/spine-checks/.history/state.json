@@ -1,0 +1,61 @@
+{
+ "hash": "85ddd2d933a5",
+ "items": {
+  "one-character": {
+   "hash": "79e67abcefe0",
+   "text": "Có đúng một nhân vật Spine thử trên chiến trường\nMọi điều cần kiểm đều thấy được trên một nhân vật bằng cách đổi animation và quay mặt."
+  },
+  "unit-layer": {
+   "hash": "970cad5792b5",
+   "text": "Nhân vật vẽ ở lớp của quái và hero, như một hero thật\nTheo thứ tự vẽ ở `feature-battlefield/battlefield-layers`: trước thành, sau hiệu ứng. Thấy được Spine đứng chung lớp với sprite của unit có lỗi thứ tự không."
+  },
+  "same-camera": {
+   "hash": "b317f478110c",
+   "text": "Nhân vật dùng chung camera với sprite 2D, chân đặt trên mặt đất như hero và quái\nKhông có camera riêng, để thấy đúng cỡ và chỗ như khi dùng Spine cho unit thật."
+  },
+  "three-anims": {
+   "hash": "b1df60312bc5",
+   "text": "Có ba animation để thử: đứng yên, chạy, một hành động\nĐứng yên và chạy là hai animation lặp; hành động (nhảy hoặc đánh) là animation chạy một lần."
+  },
+  "loop-plays-on": {
+   "hash": "2ce3e5f5b191",
+   "text": "Animation lặp chạy mãi, nối vòng không giật, tới khi người thử đổi animation khác"
+  },
+  "once-then-idle": {
+   "hash": "7c5c2414a22e",
+   "text": "Animation một lần chạy hết rồi tự về đứng yên\nThử đúng kiểu đòn đánh của hero: làm một lần rồi về tư thế chờ."
+  },
+  "smooth-switch": {
+   "hash": "049a02bfc7dd",
+   "text": "Đổi animation thì chuyển mượt từ tư thế đang có, không nhảy khung\nChỗ Spine hay lỗi nhất khi dùng cho unit. Đổi giữa chừng một animation cũng phải mượt."
+  },
+  "run-in-place": {
+   "hash": "90451ff3c9f2",
+   "text": "Animation chạy diễn tại chỗ, nhân vật không rời chỗ đứng\nChỉ thử hình animation, không thử di chuyển; nhân vật không đi lên đè thứ khác."
+  },
+  "anim-buttons": {
+   "hash": "5fd5a77f77e6",
+   "text": "Mỗi animation có một nút riêng; bấm là đổi sang animation đó\nBấm lại nút của animation một lần đang chạy thì nó chạy lại từ đầu."
+  },
+  "flip-button": {
+   "hash": "2460952ed1e3",
+   "text": "Có một nút quay mặt nhân vật sang trái hoặc phải; animation đang chạy giữ nguyên\nUnit thật đi cả hai chiều vì quái tới từ hai cánh; thử lật hình Spine có đúng không."
+  },
+  "state-label": {
+   "hash": "d9b40ff98fff",
+   "text": "Một nhãn ghi animation đang chạy, lặp hay một lần, và mặt đang quay\nẢnh chụp và lần chơi thử đọc được ngay nhân vật đang ở trạng thái nào."
+  },
+  "wide-screen": {
+   "hash": "99020f62e360",
+   "text": "Ở màn rộng nhân vật giữ nguyên hình, cỡ và chỗ trên chiến trường"
+  },
+  "under-hud-popup": {
+   "hash": "b73c1b034959",
+   "text": "HUD và popup vẽ trên nhân vật; nền che của popup làm tối nhân vật như mọi thứ của trận"
+  },
+  "shown-with-battle": {
+   "hash": "14c8227df9fe",
+   "text": "Nhân vật và các nút thử hiện suốt màn trận và ẩn theo màn trận"
+  }
+ }
+}

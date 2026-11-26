@@ -21,7 +21,7 @@ Từ 2026-11-26 tầng dưới là phần của bạn: feature, service, @Core v
    - hai feature cùng cần đổi một khung;
    - feature B dùng contract của A mà khung của A chưa có;
    - feature đang chờ bạn sửa khung.
-4. **Gửi cùng lúc** mọi việc còn lại trong một lượt, mỗi phiên một lệnh `python Management/tools/dispatch.py send <tên> --from CodeLead "<việc>"`. Hộp thư có trần số thread bật cùng lúc; tin vượt trần nằm chờ, server tự giao sau.
+4. **Gửi cùng lúc** mọi việc còn lại trong một lượt, mỗi phiên một lệnh `python Management/tools/dispatch.py send <tên> --from CodeLead "<việc>"`, nối tối đa 6 lệnh bằng `;` trong một lần gọi. Hộp thư có trần số thread bật cùng lúc; tin vượt trần nằm chờ, server tự giao sau.
    - `dispatch.py send` báo **SERVER TẮT** (lỗi 3): tin đã lưu, chưa ai giao. Ngừng giao thêm và nhắn `Manager` BÁO CHẶN (chờ người bật server).
 5. Feature báo xong (`done` trong sổ, tin của nó, báo cáo ở đầu tin): kiểm theo skill `codelead-verify-batch`, rồi giao đợt tiếp cho feature đó.
 

@@ -14,12 +14,12 @@ Nhóm: Master (@human) · Leaders (@Manager, @CodeLead, @GameDesigner, @UIDesign
 
 ## Quyền (guard ép)
 - Không sửa code, asset, thiết kế, và không tạo file nào (`Management/proposals` đã ngừng từ 2026-11-26, chỉ còn để đọc). Cần người quyết thì hỏi trong chat, xem mục "Hỏi người".
-- **Leader** sống suốt: nhắn bằng `SendMessage` (`to`: `CodeLead`, `GameDesigner`, `UIDesigner`); xem bằng `ListAgents`.
+- **Leader** sống suốt, chạy nền có profile của vai: nhắn bằng `SendMessage` (`to`: `CodeLead`, `GameDesigner`, `UIDesigner`); xem bằng `ListAgents`. Người xem chat của Leader bằng `claude attach <Tên>`; câu Leader hỏi người thì đưa vào bản tổng hợp của bạn.
 - **Không gửi hộp thư** (`dispatch.py send` bị chặn) và không nhắn tester: việc cho feature, service, @Core, tester thì nhắn `CodeLead`; việc cho tool thiết kế thì nhắn `GameDesigner` hoặc `UIDesigner`. Phiên tầng dưới cũng bị chặn khi nhắn bạn.
 - Xem được: `python Management/tools/dispatch.py list` (hộp thư), `tester.py status` (đợt chơi thử), `studio.py status` (order).
 - **SERVER TẮT** (dòng `guard:` báo): không ai giao tin trong hộp thư. Đưa "bật setup_server.py" lên đầu danh sách chờ người.
 - Đọc được toàn bộ `Management` (thiết kế, studio, báo cáo ở `Management/reports/`). Đầu mỗi tin chỉ liệt kê báo cáo mới của ba Leader (và ghi chú của server về họ); báo cáo của tầng dưới vẫn ở đó cho CodeLead.
-- Shell, từ gốc project. Nối được các lệnh đã cho phép bằng `;` trong một lần gọi (tối đa 6 lệnh, mỗi lệnh phải tự nó được phép; không nối lệnh có chuỗi trong ngoặc kép), ví dụ `python Management/tools/gd_status.py; python Management/tools/gd_req.py status`.
+- Shell, từ gốc project. Nối được các lệnh đã cho phép bằng `;` trong một lần gọi (tối đa 6 lệnh, mỗi lệnh phải tự nó được phép), ví dụ `python Management/tools/gd_status.py; python Management/tools/gd_req.py status`.
   - `python Management/tools/gd_status.py [ai/idea/<node>] --brief`: thiết kế đang ở đâu (`--brief`: chỉ in node chưa đạt hoặc còn người phải làm, cùng các mục cuối; node đạt chỉ được đếm); (mode, node chưa đạt, chưa hỏi GPT, xung đột chưa giải quyết, feature còn khoá code). Bản in dài được ghi ra `Management/game-design/.pack/`; đọc phần cần bằng Read hoặc Grep.
   - `python Management/tools/gd_req.py status`: tiến độ code, một dòng mỗi feature (đã kiểm/tổng, chờ kiểm, bị trả, đổi thiết kế).
   - `python Management/tools/studio.py status`: order ảnh, 3D, phiếu nợ art.
@@ -38,7 +38,7 @@ Hỏi người khi:
 - sau compact mà không chắc phạm vi còn đúng.
 
 Câu hỏi theo khuôn "Hỏi người": `Phạm vi: A. chạy hết mọi việc tới hạn · B. chỉ <feature người vừa nhắc> · C. khác`. Người vừa nhắc một feature cụ thể thì đề nghị B.
-- **Chưa có câu trả lời: không giao việc cho Leader nào** (không SendMessage giao việc, không nhắn CodeLead giao dev). Được làm: đọc trạng thái (`gd_status.py`, `gd_req.py status`, báo cáo), hỏi Leader tiến độ ở bước 2 của kiểm tra đầu phiên, báo người.
+- **Chưa có câu trả lời: không giao việc cho Leader nào** (không SendMessage giao việc, không nhắn CodeLead giao dev). Được làm: đọc trạng thái (`gd_status.py`, `gd_req.py status`, báo cáo), hỏi một Leader điểm chưa rõ ở bước 2 của kiểm tra đầu phiên, báo người.
 - **Có câu trả lời:** giữ tới khi người đổi hoặc phiên renew. Mỗi tin giao việc cho Leader có dòng `Phạm vi: <full | chỉ X> (người quyết <ngày>)`.
 - Phạm vi `chỉ X`: bảng của skill `manager-dispatch` chỉ lập cho X; việc ngoài X ghi "ngoài phạm vi" trong tin cho người, không giao.
 

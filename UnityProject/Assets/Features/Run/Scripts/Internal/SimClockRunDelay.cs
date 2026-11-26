@@ -12,8 +12,11 @@ namespace Game.Run
     /// counts at the end of that step unless the castle fell in it.
     /// It listens to the clock from <see cref="Listen"/> (the scene session runs) or the first wait; dispose it when the session ends.
     /// </summary>
-    internal sealed class SimClockRunDelay : IRunDelay, IDisposable
+    internal sealed class SimClockRunDelay : IRunDelay, IRunWaitHold, IDisposable
     {
+        // While the game is off the screen, steps do not count toward timed waits (flow-rules: time away does not count).
+        private bool _held;
+
         // Step lengths are floats; a sum short by rounding still ends the wait.
         private const double Tolerance = 1e-6;
 
@@ -60,6 +63,12 @@ namespace Game.Run
             _listeningJob = _trackJob?.Invoke();
         }
 
+        /// <summary>The game left the screen: timed waits stand still on the steps that come (next-frame waits still run).</summary>
+        public void Hold() => _held = true;
+
+        /// <summary>The game is back: timed waits count again, keeping the time they had before leaving.</summary>
+        public void Release() => _held = false;
+
         public void Dispose()
         {
             if (_disposed) return;
@@ -89,7 +98,7 @@ namespace Game.Run
                 if (pending.Done) continue;
                 if (pending.Seconds.HasValue)
                 {
-                    if (step.Number <= pending.AskedAtStep) continue;
+                    if (step.Number <= pending.AskedAtStep || _held) continue;
                     pending.Elapsed += step.Seconds;
                     if (pending.Elapsed + Tolerance < pending.Seconds.Value) continue;
                 }

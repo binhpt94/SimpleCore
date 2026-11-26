@@ -6,8 +6,9 @@ using NUnit.Framework;
 namespace Game.Wave.Tests
 {
     /// <summary>
-    /// feature-popup-revive/revive-order/order-values#held-clear: a wave cleared in the step the castle fell for the
-    /// first time is held through the revive flow. Revived: the clear pays, scores and the 3 s break starts then.
+    /// feature-wave/wave-clear/clear-rules#edge-thanh-bi-pha-cung-luc-con-cuoi-bi (held clear, kept by
+    /// feature-run/run-flow/flow-rules): a wave cleared in the step the castle fell for the first time is held
+    /// through the revive flow. Revived: the clear pays, scores and the 3 s break starts then.
     /// Run lost: the clear is dropped, no clear reward, no score.
     /// </summary>
     public class HeldClearTests

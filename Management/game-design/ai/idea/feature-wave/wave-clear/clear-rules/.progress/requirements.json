@@ -68,17 +68,17 @@
    "at": "2026-11-25 12:01:19"
   },
   "edge-thanh-bi-pha-cung-luc-con-cuoi-bi": {
-   "state": "verified",
-   "note": "",
+   "state": "doing",
+   "note": "Đọc bản live mới, sửa code giữ tin dọn sạch cho feature-run, test",
    "tests": [
     "WaveDirectorTests.CastleFallingInTheSameStepAsTheLastKill_LosesTheClear"
    ],
    "play": "",
-   "hash": "43778c906dd9",
-   "text": "**Thành bị phá cùng lúc con cuối bị hạ** (ví dụ con cuối đánh thành rồi chết vì Sấm sét trong cùng một bước cập nhật): thua; không thưởng, không điểm.",
+   "hash": "69e597c11b57",
+   "text": "**Thành bị phá cùng lúc con cuối bị hạ** (ví dụ con cuối đánh thành rồi chết vì Sấm sét trong cùng một bước cập nhật): đợt chưa được tính; tin dọn sạch do `feature-run` giữ. Lượt chốt thua (không hồi sinh): không thưởng, không điểm. Hồi sinh thành công: `feature-run` thả tin, feature này cộng thưởng dọn đợt và bắt đầu lúc thở 3 giây như mọi lần dọn sạch. (Sửa 2026-11-26 khi chuyển ý held-clear từ nhánh thứ tự hồi sinh ở popup hồi sinh về lượt chơi; ý đó nay ở `feature-run/run-flow/flow-rules`.)",
    "title": "Thành bị phá cùng lúc con cuối bị hạ",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:01:19"
+   "by": "Wave",
+   "at": "2026-11-26 15:04:10"
   },
   "edge-con-cuoi-bi-ha-truoc-khi-ra-het": {
    "state": "verified",
@@ -350,6 +350,13 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-26 15:04:10",
+   "id": "edge-thanh-bi-pha-cung-luc-con-cuoi-bi",
+   "state": "doing",
+   "by": "Wave",
+   "note": "Đọc bản live mới, sửa code giữ tin dọn sạch cho feature-run, test"
   }
  ]
 }

@@ -3,6 +3,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 
 ## Luật chung
 - Việc chưa được duyệt thì không làm.
+- Leader (tầng 1) chạy nền có profile của vai (bật Live ở trang Setup; mở tay trong VS Code thì mất profile, tốn gấp đôi token). Người xem và trả lời bằng `claude attach <Tên>`.
 - Leader (tầng 1) cần người quyết thì hỏi ngay trong chat (vấn đề, các phương án, phương án đề nghị, ai đang bị chặn), rồi làm tiếp việc không phụ thuộc.
 - Tầng 2–6 chạy theo việc (headless), không ai trả lời câu hỏi: không hỏi người. Guard chặn AskUserQuestion và mọi lần cần người duyệt của các phiên này (người quyết 2026-11-26).
   - Cần người quyết hay bị chặn: dừng, nhắn Leader của phần mình (cột "Báo cáo, báo chặn tới") `BÁO CHẶN · chờ người · Việc: … · Vướng ở: … · Cần quyết: …`, rồi kết thúc lượt.
@@ -46,7 +47,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 | Thử lại guard | `python .claude/hooks/test_guard.py` |
 
 - Lệnh shell chạy từ gốc project.
-- Bốn Leader nối được các lệnh đã cho phép bằng `;` trong một lần gọi (tối đa 6, mỗi lệnh phải tự nó được phép) và chạy được `scaffold.py --dry-run`. Phiên khác mỗi lần gọi một lệnh.
+- Mọi phiên đã gán nối được các lệnh đã cho phép bằng `;` trong một lần gọi (tối đa 6, mỗi lệnh phải tự nó được phép, kể cả lệnh có chuỗi trong ngoặc kép; tìm kiếm vẫn mỗi lần một lệnh). Gộp lệnh để bớt lượt gọi. Bốn Leader chạy được `scaffold.py --dry-run`.
 
 ## Nhắn ai
 - Tầng 2, 4, 5, 6 chạy theo việc. Giao việc cho chúng bằng hộp thư: `python Management/tools/dispatch.py send <tên> --from <vai> "<việc>"` (Leader, theo phần mình) hoặc tab Hộp thư (người).

@@ -30,7 +30,7 @@ def RP(binding):
 
 
 def thread(sid, title, binding="", archived=False, unlisted=False, model="claude-opus-x", effort="medium"):
-    return {"id": sid, "title": title, "feature": ss.feature_of(title), "group": "", "legacy": False, "archived": archived,
+    return {"id": sid, "title": title, "named": True, "feature": ss.feature_of(title), "group": "", "legacy": False, "archived": archived,
             "unlisted": unlisted, "model": model, "effort": effort, "binding": binding, "modified": ""}
 
 
@@ -121,7 +121,7 @@ def job_cases(check):
         ss.JOB = None
         ss.bind_session.check_pin = lambda store_, pin: "" if pin == "1234" else "PIN sai"
         ss.sets = lambda: {"basic": ["@human", "@CodeLead", "Wallet"], "full": []}
-        ss.threads = lambda: [thread("aaaa1111", "human", binding="@human")]
+        ss.threads = lambda include_unnamed=False: [thread("aaaa1111", "human", binding="@human")]
 
         def slow(args):
             gate.wait(5)
@@ -196,7 +196,7 @@ def live_cases(check):
             return "stopped " + args[1]
         return "Đã đọc CLAUDE.md"
 
-    def listed():
+    def listed(include_unnamed=False):
         out = [thread("aaaa1111", "CodeLead", binding="@CodeLead"), thread("bbbb2222", "Wallet", binding="Wallet"),
                thread("cccc3333", "Shop"), thread("dead0000", "Hud", binding="Hud"), thread("copy0000", "Wave", binding="Wave"),
                thread("flak0000", "Hero", binding="Hero"),
@@ -224,7 +224,7 @@ def live_cases(check):
         res = ss.go_live("aaaa1111")
         check("live: runs the thread on in the background under its id and its name (else the CLI makes one up), with its model and effort",
               (res["ok"], calls[-1], live["aaaa1111"]["kind"]),
-              (True, ["--bg", "--resume", "aaaa1111", "-n", "CodeLead", "--model", "claude-opus-x", "--effort", "medium", ss.LIVE_PROMPT], "background"))
+              (True, ["--bg", "--resume", "aaaa1111", "-n", "CodeLead", "--model", "claude-opus-x", "--effort", "medium", "--", ss.LIVE_PROMPT], "background"))
         check("live: an ended job of the thread is removed first (else the CLI starts a copy)", calls[-2], ["rm", "aaaa1111"])
         before = len(calls)
         check("live: pressing it again starts nothing", (ss.go_live("aaaa1111")["ok"], len(calls)), (True, before))
@@ -288,6 +288,41 @@ def live_cases(check):
         shutil.rmtree(tdir, ignore_errors=True)
 
 
+def unnamed_cases(check):
+    """threads(include_unnamed=True) lists the chats with no name under the title VS Code shows them by, the PIN hidden."""
+    real = (ss.transcripts_dir, ss.archived_ids, ss.live_sessions, ss.dispatch.pending, ss.guard.STORE_DIR)
+    tmp = Path(tempfile.mkdtemp(prefix="setup-unnamed-"))
+    try:
+        folder = tmp / "projects"
+        folder.mkdir()
+        ss.transcripts_dir, ss.archived_ids = (lambda: folder), (lambda: {"u2"})
+        ss.live_sessions, ss.dispatch.pending = (lambda fresh=False: {}), (lambda root: [])
+        ss.guard.STORE_DIR = str(tmp / "store")
+        user = lambda text: {"type": "user", "entrypoint": "claude-vscode", "message": {"role": "user", "content": [{"type": "text", "text": text}]}}
+        lines = {
+            "named": [{"type": "custom-title", "customTitle": "Codex"}, {"type": "ai-title", "aiTitle": "khác"}, user("hi")],
+            "u1": [user("FEATURE=@human 123@abc"), {"type": "ai-title", "aiTitle": "FEATURE=@human 123@abc"}],
+            "u2": [user("đầu"), {"type": "last-prompt", "lastPrompt": "Codex"}],
+            "u3": [{"type": "user", "isMeta": True, "message": {"role": "user", "content": "meta"}}, user("tin   đầu\nhai dòng")],
+            "u4": [{"type": "queue-operation"}],
+        }
+        for sid, rows in lines.items():
+            (folder / f"{sid}.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+        check("unnamed: the default list keeps named threads only", sorted(t["id"] for t in ss.threads()), ["named"])
+        got = {t["id"]: t for t in ss.threads(include_unnamed=True)}
+        check("unnamed: every chat VS Code lists, none with no title", sorted(got), ["named", "u1", "u2", "u3"])
+        check("unnamed: custom-title wins over ai-title", (got["named"]["title"], got["named"]["named"], got["named"]["feature"]), ("Codex", True, "@Codex"))
+        check("unnamed: ai-title, PIN hidden", (got["u1"]["title"], got["u1"]["named"]), ("FEATURE=@human ••••", False))
+        check("unnamed: no PIN anywhere in the row", "123@abc" in json.dumps(got["u1"], ensure_ascii=False), False)
+        check("unnamed: last prompt before the first message, no role taken from it",
+              (got["u2"]["title"], got["u2"]["feature"], got["u2"]["group"], got["u2"]["legacy"], got["u2"]["archived"]), ("Codex", "", "", False, True))
+        check("unnamed: first real message, one line", got["u3"]["title"], "tin đầu hai dòng")
+        check("unnamed: a long title is cut", len(ss.redact_title("x" * 200)), ss.TITLE_MAX)
+    finally:
+        (ss.transcripts_dir, ss.archived_ids, ss.live_sessions, ss.dispatch.pending, ss.guard.STORE_DIR) = real
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def delete_cases(check):
     """Xoá: to the trash, with the PIN, only while VS Code is closed and the thread is not running a turn."""
     import json
@@ -320,7 +355,7 @@ def delete_cases(check):
         ss.transcripts_dir = lambda: folder
         ss.vscode_groups.vscode_state = lambda: db
         ss.bind_session.check_pin = lambda store_, pin: tries.append(pin) or ("" if pin == "1234" else "PIN sai")
-        ss.threads = lambda: [thread("aaaa1111", "Wallet", binding="Wallet", archived=True), thread("bbbb2222", "Shop", binding="Shop")]
+        ss.threads = lambda include_unnamed=False: [thread("aaaa1111", "Wallet", binding="Wallet", archived=True), thread("bbbb2222", "Shop", binding="Shop")]
         ss.bind("aaaa1111", "Wallet")
         ss.vscode_groups.vscode_running = lambda: True
         res = ss.delete_thread("aaaa1111", "1234")
@@ -440,7 +475,7 @@ def watch_cases(check):
 
     delete = {"action": "delete", "path": "Assets/Features/Wallet/X.cs", "unity_instance": "UnityProject@1ec6164a"}
     try:
-        ss.ROOT, ss.threads, ss.live_sessions = root, lambda: [dict(t) for t in listed], lambda fresh=False: dict(live)
+        ss.ROOT, ss.threads, ss.live_sessions = root, lambda include_unnamed=False: [dict(t) for t in listed], lambda fresh=False: dict(live)
         ss.stop_bg, ss.transcripts_dir = fake_stop, lambda: tdir
         ss.HUNG.clear()
         for t in listed:
@@ -546,7 +581,7 @@ def takeover_cases(check):
         return ss.dispatch.get(root, mid)
 
     try:
-        ss.ROOT, ss.threads, ss.live_sessions = root, lambda: [dict(t) for t in listed], lambda fresh=False: dict(live)
+        ss.ROOT, ss.threads, ss.live_sessions = root, lambda include_unnamed=False: [dict(t) for t in listed], lambda fresh=False: dict(live)
         ss.turn, ss.stop_bg, ss.transcripts_dir, ss.close_chat = fake_turn, lambda sid: None, lambda: tdir, fake_close
         chat("w0000000", minutes=2)
         a = ss.dispatch.send(root, "Wallet", "Việc cho Wallet", "@Manager")
@@ -695,7 +730,7 @@ def courier_cases(check):
         os.utime(tdir / f"{sid}.jsonl", (time.time() - minutes * 60, time.time() - minutes * 60))
 
     try:
-        ss.ROOT, ss.threads, ss.live_sessions = root, lambda: [dict(t) for t in listed], lambda fresh=False: dict(live)
+        ss.ROOT, ss.threads, ss.live_sessions = root, lambda include_unnamed=False: [dict(t) for t in listed], lambda fresh=False: dict(live)
         ss.turn, ss.stop_bg, ss.transcripts_dir = fake_turn, fake_stop, lambda: tdir
         now = time.time()
         check("courier: an empty inbox in always-live mode does nothing", ss.courier_tick(now), [])
@@ -993,8 +1028,10 @@ def profile_cases(check):
         args, settings, mcp, on = flags("@GameDesigner")
         check("profile: GameDesigner has no MCP and only gd- skills", (mcp, on), ({}, ["gd-round-1"]))
         args, settings, mcp, on = flags("@Blender")
-        check("profile: Blender keeps every MCP server (no strict list)", ("--strict-mcp-config" in args, on),
-              (False, ["studio-fulfill-order"]))
+        check("profile: Blender has only the blender server of .mcp.json, strictly", (sorted(mcp), "--strict-mcp-config" in args, on),
+              (["blender"], True, ["studio-fulfill-order"]))
+        args, settings, mcp, on = flags("@Codex")
+        check("profile: another tool has no MCP server", mcp, {})
         check("profile: models by role (người quyết 2026-11-26)",
               [ss.role_model(f, "sonnet", "high") for f in ("@Manager", "@UnityAutoPlay", feature, "@GameDesigner",
                                                            "@CodeLead", "@UIDesigner", "@human")],
@@ -1059,7 +1096,7 @@ def main():
         listed = [thread("aaaa1111", "CodeLead", binding="@CodeLead"), thread("bbbb2222", "Wallet", binding="Wallet", model="", effort=""),
                   thread("cccc3333", "Shop"), thread("dddd4444", "Hero", binding="Hero", archived=True),
                   thread("eeee5555", "Wave", binding="Wave", unlisted=True), thread("ffff6666", "Hud", binding="Hud", effort="turbo")]
-        ss.threads = lambda: listed
+        ss.threads = lambda include_unnamed=False: listed
         ss.run_claude = fake
         before = len(calls)
         for sid_, why in ((None, "không có thread này"), ("nope", "không có thread này"), (12, "không có thread này"),
@@ -1231,6 +1268,7 @@ def main():
     job_cases(check)
     live_cases(check)
     delete_cases(check)
+    unnamed_cases(check)
     ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)

@@ -70,6 +70,57 @@ namespace Game.PopupRevive.Tests
             Assert.AreEqual(new Vector2(800, 700), panel.rect.size);
         }
 
+        // revive-spec#stage-prototype: PROTOTYPE has all words, both buttons and the wait line; while waiting the
+        // buttons are dimmed by changing their opacity.
+
+        [Test]
+        public void PrototypePrefabHasTitleGainWaitLineAndBothButtons()
+        {
+            foreach (var name in new[] { "Title", "Gain", "Waiting", "Watch", "End", "WatchLabel", "EndLabel" })
+                Assert.IsNotNull(Find(name), name);
+        }
+
+        [Test]
+        public void PrototypeWaitingDimsBothButtonsByOpacityAndChoosingShowsThemFull()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
+            Assert.IsNotNull(prefab, PrefabPath);
+            var popup = UnityEngine.Object.Instantiate(prefab);
+            try
+            {
+                var view = popup.GetComponent<IRevivePopupView>();
+                Assert.IsNotNull(view, "root has the revive popup view");
+                var group = FindIn(popup, "Buttons").GetComponent<CanvasGroup>();
+                Assert.IsNotNull(group, "Buttons has a CanvasGroup");
+                Assert.IsTrue(FindIn(popup, "Watch").IsChildOf(group.transform), "Watch dims with Buttons");
+                Assert.IsTrue(FindIn(popup, "End").IsChildOf(group.transform), "End dims with Buttons");
+
+                view.SetWaiting(true);
+                Assert.Less(group.alpha, 1f, "dimmed while waiting");
+                Assert.Greater(group.alpha, 0f, "still visible while waiting");
+                Assert.IsFalse(group.interactable);
+                Assert.IsFalse(group.blocksRaycasts);
+                Assert.IsTrue(FindIn(popup, "Waiting").gameObject.activeSelf, "wait line shown");
+
+                view.SetWaiting(false);
+                Assert.AreEqual(1f, group.alpha, "full opacity while choosing");
+                Assert.IsTrue(group.interactable);
+                Assert.IsFalse(FindIn(popup, "Waiting").gameObject.activeSelf, "wait line hidden");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(popup);
+            }
+        }
+
+        private static Transform FindIn(GameObject root, string name)
+        {
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                if (t.name == name) return t;
+            Assert.Fail($"{root.name} has no child named {name}.");
+            return null;
+        }
+
         private static void AssertBox(string name, float x, float y, float w, float h)
         {
             var panel = Find("Panel");

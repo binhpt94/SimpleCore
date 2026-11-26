@@ -1,0 +1,9 @@
+{
+ "hash": "1fd904b5d5d3",
+ "items": {
+  "run-flipped": {
+   "hash": "d0c1de8d23b3",
+   "text": "Màn trận có nhân vật Spine đang chạy, quay mặt phải, nhãn \"run · lặp · mặt phải\"\nÉp: animation run, mặt phải, nút \"Chạy\" ở trạng thái đang chọn. Nhân vật, bốn nút và nhãn đúng chỗ của `feature-spine-test/spine-checks/spine-spec`. Không cần trận chạy phía sau. Bấm nút trong state này vẫn đổi animation và lật mặt như thường."
+  }
+ }
+}

@@ -2,6 +2,9 @@
   "enabledMcpjsonServers": [
     "UnityMCP"
   ],
+  "disabledMcpjsonServers": [
+    "blender"
+  ],
   "claudeMdExcludes": [
     "**/Management/game-design/**/CLAUDE.md",
     "**/.claude/rules/manager.md",

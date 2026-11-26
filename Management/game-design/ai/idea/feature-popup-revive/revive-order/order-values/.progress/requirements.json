@@ -122,15 +122,48 @@
    "at": "2026-11-26 00:33:45"
   },
   "params": {
-   "state": "done",
-   "note": "thông số dòng thời gian thuộc Run và Castle · popup không giữ số nào của node này",
+   "state": "doing",
+   "note": "Bám bản live mới: popup giữ 0 đồng hồ, mốc thời gian thuộc Run và Castle · thêm test popup không đăng ký bước đồng hồ, không tự đóng",
    "tests": [],
    "play": "Đo khi Play một lượt có hồi sinh · trễ trước popup hồi sinh 1 giây, thành hiện lại 0.5 giây, máu 30 phần trăm máu tối đa, không đếm ngược, từ chối thì popup thua 0 giây, lúc thở 3 giây sau đợt dọn cùng lúc · test Run RunReviveOrderTests, Castle CastleSessionTests, Wave HeldClearTests",
-   "hash": "aa477bbbae24",
-   "text": "## Làm gì\nDòng thời gian từ lúc thành bị phá lần đầu (t = 0):\n| t (giây) | Việc | Ai làm |\n|---|---|---|\n| 0 | Thành báo bị phá; trận dừng; bật cờ \"đã đề nghị\" | `feature-castle`, `feature-run` |\n| 0 – 0.5 | Thành thu nhỏ còn 0 | `feature-castle` |\n| 1.0 | Mở `PopupRevive/Main` | `feature-run` nhờ dịch vụ popup |\n| (người chơi chọn, có thể xem quảng cáo) | | popup hồi sinh, `feature-ads` |\n| T | Popup đóng, báo lựa chọn | popup hồi sinh |\n| T – T+0.5 | Hồi sinh: thành phóng lên đủ cỡ, máu 30% | `feature-castle` |\n| T+0.5 | Trận chạy tiếp; tin dọn sạch đang giữ (nếu có) được xử lí | `feature-run` |\n| T (không hồi sinh) | Chốt điểm, mở popup thua ngay | `feature-run` |\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Trễ trước popup hồi sinh | 1 (dự kiến) | giây | Bằng trễ trước popup thua ở `feature-run/run-flow/flow-rules` |\n| Thành hiện lại | 0.5 | giây | Ngược lúc bị phá ở `feature-castle/castle-core/castle-body-values` |\n| Máu khi hồi sinh | 30% máu tối đa lúc đó | | Như trên |\n| Đếm ngược khi chạy tiếp | 0 | giây | Trận đứng đúng chỗ, người chơi đã thấy thế trận |\n| Trễ trước popup thua sau khi từ chối | 0 | giây | Người chơi đã thấy thành bị phá từ trước |\n| Lúc thở sau đợt dọn cùng lúc (khi hồi sinh) | 3 | giây | Như mọi lần dọn sạch |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Luồng hồi sinh | Không có: thành bị phá là thua (popup thua sau 1 giây) | Có đủ dòng thời gian trên | Như PROTOTYPE, thêm hiệu ứng hồi sinh riêng |\n| Thành hiện lại | | Phóng từ 0 lên, 0.5 giây | Hiệu ứng dựng lại thành, âm thanh |",
+   "hash": "c451cf46557e",
+   "text": "## Làm gì\nDòng thời gian từ lúc thành bị phá lần đầu (t = 0), để đọc cả luồng; mỗi việc là yêu cầu của node ghi ở cột cuối, không phải của node này:\n| t (giây) | Việc | Ai làm | Ghi ở |\n|---|---|---|---|\n| 0 | Thành báo bị phá; trận dừng; bật cờ \"đã đề nghị\" | `feature-castle`, `feature-run` | `feature-run/run-flow/flow-rules` (`lose-stop-same-moment`, `offer-flag`) |\n| 0 – 0.5 | Thành thu nhỏ còn 0 | `feature-castle` | `feature-castle/castle-core/castle-body-values` (`castle-hit-feedback`) |\n| 1.0 | Mở `PopupRevive/Main` | `feature-run` nhờ dịch vụ popup | `feature-run/run-flow/flow-rules` (`lose-popup-delay`) |\n| (người chơi chọn, có thể xem quảng cáo) | | popup hồi sinh, `feature-ads` | `feature-popup-revive/revive-popup/revive-spec` |\n| T | Popup đóng, báo lựa chọn | popup hồi sinh | như trên |\n| T – T+0.5 | Hồi sinh: thành phóng lên đủ cỡ, máu 30% | `feature-castle` | `feature-castle/castle-core/castle-body-values` (trường hợp biên hồi sinh) |\n| T+0.5 | Trận chạy tiếp; tin dọn sạch đang giữ được thả | `feature-run`, `feature-wave` | `feature-run/run-flow/flow-rules` (`revive-step`, `held-clear`), nhánh dọn đợt của `feature-wave` |\n| T (không hồi sinh) | Chốt điểm, mở popup thua ngay | `feature-run` | `feature-run/run-flow/flow-rules` (`revive-step`) |\n\nViệc của popup hồi sinh: ý `no-own-timer`; nội dung và nút ở `feature-popup-revive/revive-popup/revive-spec`.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Đồng hồ do popup hồi sinh giữ | 0 | | Mọi mốc thời gian thuộc lượt chơi và thành |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Luồng hồi sinh | Không có: thành bị phá là thua | Có đủ dòng thời gian trên | Như PROTOTYPE |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "PopupRevive",
-   "at": "2026-11-26 00:33:47"
+   "at": "2026-11-26 15:04:27"
+  },
+  "no-own-timer": {
+   "state": "doing",
+   "note": "Test đã viết, chờ Editor bật để biên dịch · RevivePopupTests.PopupKeepsNoClockOfItsOwnFromOfferToChoice, PopupOpensTheMomentTheRunAsksWithoutWaitingOnTheClock, PopupWaitingForChoiceNeverClosesByItselfHoweverLongTheClockRuns, PopupWaitingForAdNeverClosesByItselfHoweverLongTheClockRuns, PopupGivesNoOrderToCastleOrBattleWhileOpen, PopupReportsOnlyTheAdChoiceAndNoOtherOrderAfterClosing, PopupReportsOnlyTheEndChoiceAndNoOtherOrderAfterClosing",
+   "tests": [],
+   "play": "",
+   "hash": "e704a6f0920c",
+   "text": "Popup hồi sinh không giữ mốc thời gian nào: mở khi lượt chơi nhờ, chỉ đóng khi người chơi chọn hoặc quảng cáo có kết quả\nPopup không tự đếm trễ trước khi mở, không tự đóng sau một thời gian, không ra lệnh cho thành hay trận.",
+   "title": "Popup hồi sinh không giữ mốc thời gian nào: mở khi lượt chơi nhờ, chỉ đóng khi người chơi chọn hoặc quảng cáo có kết quả",
+   "by": "PopupRevive",
+   "at": "2026-11-26 15:05:10"
+  },
+  "edge-khong-co-truong-hop-bien-rieng-cua-popup": {
+   "state": "doing",
+   "note": "Test popup chỉ theo bước của Run: mở ở ReviveOffer, bước khác đóng im, không tự xử lí biên nào · chờ Editor biên dịch",
+   "tests": [],
+   "play": "",
+   "hash": "47a1194255c9",
+   "text": "Không có trường hợp biên riêng của popup trong luồng này. Các trường hợp trước đây ghi ở đây đã chuyển về feature làm việc đó (xem \"Đã tự quyết\").",
+   "title": "Không có trường hợp biên riêng của popup trong luồng này. Các trường hợp trước đây ghi ở đây đã chuyển về feature làm việc đó (xem \"Đã tự quyết\").",
+   "by": "PopupRevive",
+   "at": "2026-11-26 15:06:28"
+  },
+  "stage-prototype": {
+   "state": "doing",
+   "note": "PROTOTYPE có đủ luồng hồi sinh · test popup phía mình: chờ, mở ở đề nghị, báo đủ ba lựa chọn · chờ Editor biên dịch",
+   "tests": [],
+   "play": "",
+   "hash": "9dc7550d7e8c",
+   "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Luồng hồi sinh: Có đủ dòng thời gian trên",
+   "title": "Thông số của giai đoạn PROTOTYPE",
+   "by": "PopupRevive",
+   "at": "2026-11-26 15:06:29"
   }
  },
  "log": [
@@ -357,6 +390,34 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-26 15:04:27",
+   "id": "params",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "Bám bản live mới: popup giữ 0 đồng hồ, mốc thời gian thuộc Run và Castle · thêm test popup không đăng ký bước đồng hồ, không tự đóng"
+  },
+  {
+   "at": "2026-11-26 15:05:10",
+   "id": "no-own-timer",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "Test đã viết, chờ Editor bật để biên dịch · RevivePopupTests.PopupKeepsNoClockOfItsOwnFromOfferToChoice, PopupOpensTheMomentTheRunAsksWithoutWaitingOnTheClock, PopupWaitingForChoiceNeverClosesByItselfHoweverLongTheClockRuns, PopupWaitingForAdNeverClosesByItselfHoweverLongTheClockRuns, PopupGivesNoOrderToCastleOrBattleWhileOpen, PopupReportsOnlyTheAdChoiceAndNoOtherOrderAfterClosing, PopupReportsOnlyTheEndChoiceAndNoOtherOrderAfterClosing"
+  },
+  {
+   "at": "2026-11-26 15:06:28",
+   "id": "edge-khong-co-truong-hop-bien-rieng-cua-popup",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "Test popup chỉ theo bước của Run: mở ở ReviveOffer, bước khác đóng im, không tự xử lí biên nào · chờ Editor biên dịch"
+  },
+  {
+   "at": "2026-11-26 15:06:29",
+   "id": "stage-prototype",
+   "state": "doing",
+   "by": "PopupRevive",
+   "note": "PROTOTYPE có đủ luồng hồi sinh · test popup phía mình: chờ, mở ở đề nghị, báo đủ ba lựa chọn · chờ Editor biên dịch"
   }
  ]
 }
