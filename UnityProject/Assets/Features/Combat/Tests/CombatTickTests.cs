@@ -136,7 +136,7 @@ namespace Game.Combat.Tests
             var heroes = new FakeOwner("Hero");
             heroes.Add(0, 100f);
             heroes.Add(1, 100f);
-            heroes.SetUnhittable(1); // appearing on revive
+            heroes.SetUnhittable(1); // defeated
             heroes.Add(2, 0f); // fallen
             var id = tick.AddReceiver(heroes);
             tick.Hit(new CombatHit(id, 0, 5f, CombatSource.Enemy));

@@ -9,7 +9,7 @@ namespace Game.Castle
         /// <summary>
         /// Takes the castle to 0 health through the usual fall path (feature-castle/castle-core/castle-body-values):
         /// it is reported to the run exactly once, like a real fall, so the run's own rules decide what comes next
-        /// (revive offer or lost). Does nothing when the castle is already destroyed or no battle is running.
+        /// (the run is lost). Does nothing when the castle is already destroyed or no battle is running.
         /// </summary>
         void Fall();
     }

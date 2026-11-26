@@ -112,21 +112,6 @@ namespace Game.Hud.Tests
         }
 
         [Test]
-        public void BannerTimeStandsStillWhilePaused()
-        {
-            _waves.Start(2);
-            _status.Tick(1f);
-            _run.SetStep(RunStep.Paused);
-            _status.Tick(5f);
-
-            Assert.IsTrue(_view.BannerShown);
-
-            _run.SetStep(RunStep.Playing);
-            _status.Tick(0.6f);
-            Assert.IsFalse(_view.BannerShown);
-        }
-
-        [Test]
         public void NewWaveWhileBannerIsUpReplacesItAndRestartsTheTime()
         {
             _waves.Start(2);

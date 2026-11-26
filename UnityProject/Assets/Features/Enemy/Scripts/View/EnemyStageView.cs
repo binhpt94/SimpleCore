@@ -57,7 +57,7 @@ namespace Game.Enemy
         private readonly List<Flying> _shots = new List<Flying>();
         private readonly List<Flying> _coins = new List<Flying>();
         private Sprite _boxSprite;
-        private bool _paused;
+        private bool _frozen;
         private Func<UnityEngine.Object, IDisposable> _trackView;
         private IDisposable _stageHandle;
 
@@ -177,7 +177,7 @@ namespace Game.Enemy
             ClearFlying(_coins);
         }
 
-        public void SetPaused(bool paused) => _paused = paused;
+        public void SetFrozen(bool frozen) => _frozen = frozen;
 
         public void Close()
         {
@@ -192,7 +192,7 @@ namespace Game.Enemy
         private void Update()
         {
             var dt = Time.deltaTime;
-            if (_paused) return;
+            if (_frozen) return;
 
             foreach (var drawn in _drawn.Values) Animate(drawn, dt);
 

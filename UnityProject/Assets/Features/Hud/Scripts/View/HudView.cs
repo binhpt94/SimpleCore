@@ -17,7 +17,6 @@ namespace Game.Hud
         private const float SkillSize = HudSkillSlots.Size;
         private const int SortingOrder = 10;
 
-        private static readonly Color PanelColor = new Color(0f, 0f, 0f, 0.45f);
         private static readonly Color HealthBack = new Color(0.15f, 0.05f, 0.05f, 0.85f);
         private static readonly Color HealthFill = new Color(0.85f, 0.2f, 0.2f, 1f);
         private static readonly Color CoinColor = new Color(1f, 0.8f, 0.15f, 1f);
@@ -35,14 +34,11 @@ namespace Game.Hud
         [SerializeField] private Sprite skillTraySprite;
         [Tooltip("One per cluster slot, left to right: Thunder, Frost, Rally.")]
         [SerializeField] private Sprite[] skillSprites = new Sprite[0];
-        [Tooltip("Pause button picture (two vertical bars). Empty: a dark square with two bars drawn in.")]
-        [SerializeField] private Sprite pauseSprite;
 
         private readonly List<SkillButton> _skills = new List<SkillButton>();
         private Canvas _canvas;
         private RectTransform _root;
         private RectTransform _safe;
-        private GameObject _pauseButton;
         private Rect _lastSafeArea;
         private Vector2Int _lastScreen;
         private Font _font;
@@ -56,7 +52,6 @@ namespace Game.Hud
 #endif
 
         public event Action<int> SkillPressed;
-        public event Action PausePressed;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         public event Action CheatPressed;
 #endif
@@ -240,9 +235,6 @@ namespace Game.Hud
                 Picture(Rect("Skill tray", _safe, new Vector2(1f, 0f), HudSkillSlots.ClusterLeft, HudSkillSlots.ClusterTop,
                     HudSkillSlots.ClusterWidth, SkillSize), skillTraySprite, Color.white);
 
-            // Pause: top-left corner (x 40..160, y 10..130), left of the money; two vertical bars, no text.
-            BuildPauseButton();
-
             // Money: coin icon + number, top band, left of the health bar.
             var coin = Rect("Coin", _safe, new Vector2(0f, 1f), 220f, 10f, 60f, 60f);
             if (coinSprite != null)
@@ -278,29 +270,6 @@ namespace Game.Hud
             _banner = Label("Banner", _safe, new Vector2(0.5f, 1f), 760f, 76f, 400f, 56f, 44, TextAnchor.MiddleCenter);
             _banner.color = new Color(1f, 0.92f, 0.5f, 1f);
             _banner.gameObject.SetActive(false);
-        }
-
-        public void ShowPauseButton(bool shown)
-        {
-            Build();
-            _pauseButton.SetActive(shown);
-        }
-
-        private void BuildPauseButton()
-        {
-            var rect = Rect("Pause", _safe, new Vector2(0f, 1f), 40f, 10f, 120f, 120f);
-            _pauseButton = rect.gameObject;
-            var back = rect.gameObject.AddComponent<Image>();
-            back.sprite = pauseSprite;
-            back.preserveAspect = pauseSprite != null;
-            back.color = pauseSprite != null ? Color.white : PanelColor;
-            var press = rect.gameObject.AddComponent<Button>();
-            press.onClick.AddListener(() => PausePressed?.Invoke());
-            if (pauseSprite != null) return;
-
-            var topLeft = new Vector2(0f, 1f);
-            Picture(Rect("Bar left", rect, topLeft, 34f, 28f, 20f, 64f), null, Color.white);
-            Picture(Rect("Bar right", rect, topLeft, 66f, 28f, 20f, 64f), null, Color.white);
         }
 
         /// <summary>

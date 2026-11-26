@@ -18,11 +18,6 @@ namespace Game.Wave
     {
         [SerializeField] private WaveConfig config;
 
-        [Tooltip("Dev cheat (editor and development builds only): on the first step after the battle starts, jump to this wave " +
-                 "and pause the run. 0 = off. Cheat state 'battle stands at wave 5, paused' uses 5.")]
-        [Min(0)]
-        [SerializeField] private int cheatPausedAtWave;
-
         public override void Install(IServiceRegistry registry)
         {
             if (registry == null) throw new ArgumentNullException(nameof(registry));
@@ -42,10 +37,6 @@ namespace Game.Wave
             registry.Register<IWaveCheat>(director);
 #endif
             session.Join(new WaveParticipant(director, clock));
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (cheatPausedAtWave > 0)
-                session.Join(new WaveStartCheat(director, run, cheatPausedAtWave));
-#endif
         }
     }
 }

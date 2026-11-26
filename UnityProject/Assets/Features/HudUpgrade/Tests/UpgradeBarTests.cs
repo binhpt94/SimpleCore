@@ -71,14 +71,6 @@ namespace Game.HudUpgrade.Tests
         }
 
         [Test]
-        public void Every_button_dims_while_shop_is_closed_by_pause()
-        {
-            _shop.Open = false;
-            _shop.Changed();
-            Assert.IsTrue(_view.Looks.Values.All(l => !l.Lit));
-        }
-
-        [Test]
         public void Tapping_a_lit_button_buys_one_level_bounces_and_shows_new_level()
         {
             _view.Tap(0);
@@ -184,17 +176,6 @@ namespace Game.HudUpgrade.Tests
         }
 
         [Test]
-        public void Every_button_shakes_on_tap_while_the_shop_is_closed_by_pause()
-        {
-            _shop.Open = false;
-            _shop.Changed();
-            _view.Tap(0);
-            _view.Tap(3);
-            CollectionAssert.AreEqual(new[] { 0, 3 }, _view.Shakes);
-            Assert.IsEmpty(_orders.Ordered);
-        }
-
-        [Test]
         public void Downed_hero_button_shows_the_down_mark_and_clears_it_when_the_hero_stands_up()
         {
             Assert.IsFalse(_view.Down[1]);
@@ -255,12 +236,10 @@ namespace Game.HudUpgrade.Tests
         }
 
         [Test]
-        public void Bar_shows_in_battle_pause_and_ending_and_hides_on_lose_popup_and_menus()
+        public void Bar_shows_in_battle_and_ending_and_hides_on_lose_popup_and_menus()
         {
             Assert.IsFalse(_view.Visible);
             _run.GoTo(RunStep.Playing);
-            Assert.IsTrue(_view.Visible);
-            _run.GoTo(RunStep.Paused);
             Assert.IsTrue(_view.Visible);
             _run.GoTo(RunStep.Ending);
             Assert.IsTrue(_view.Visible);
@@ -326,19 +305,6 @@ namespace Game.HudUpgrade.Tests
 
             Assert.AreEqual(0, _wallet.Coins);
             Assert.IsFalse(_view.Looks[0].Lit);
-        }
-
-        [Test]
-        public void Buttons_light_again_as_soon_as_the_pause_ends()
-        {
-            _shop.Open = false;
-            _shop.Changed();
-            Assert.IsFalse(_view.Looks[0].Lit);
-
-            _shop.Open = true;
-            _shop.Changed();
-
-            Assert.IsTrue(_view.Looks[0].Lit);
         }
 
         [Test]

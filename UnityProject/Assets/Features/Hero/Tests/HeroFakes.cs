@@ -36,14 +36,13 @@ namespace Game.Hero.Tests
 
         public sealed class RunFlow : IRunFlow
         {
-            public RunStep Step => IsPaused ? RunStep.Paused : RunStep.Playing;
+            public RunStep Step => RunStep.Playing;
             public event Action<RunStep> StepChanged { add { } remove { } }
             public RunTeam Team { get; private set; }
             public event Action<RunTeam> RunStarted;
             public event Action BattleStarted { add { } remove { } }
             public event Action BattleStopped;
             public event Action BattleCleared;
-            public bool IsPaused { get; set; }
 
             public void StartRun(params string[] heroCodes)
             {
@@ -57,9 +56,6 @@ namespace Game.Hero.Tests
 
             public void Play() { }
             public void EnterBattle(RunTeam team) { }
-            public void Pause() { }
-            public void Resume() { }
-            public void Abandon() { }
             public void Replay() { }
             public void GoHome() { }
             public void Lose() { }
@@ -170,7 +166,7 @@ namespace Game.Hero.Tests
 
             public readonly List<Game.Combat.ICombatActor> Actors = new List<Game.Combat.ICombatActor>();
 
-            /// <summary>False stands for steps the run does not let play (paused, waiting for a revive): no tick runs.</summary>
+            /// <summary>False stands for steps the run does not let play (outside the battle): no tick runs.</summary>
             public bool Gameplay = true;
 
             public void AddActor(Game.Combat.ICombatActor actor) => Actors.Add(actor);

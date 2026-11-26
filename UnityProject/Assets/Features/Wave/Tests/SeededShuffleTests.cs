@@ -17,7 +17,7 @@ namespace Game.Wave.Tests
             var log = new List<string>();
             var run = new FakeRun(log);
             var enemies = new FakeEnemies();
-            var clock = new FakeSimClock { Paused = () => run.IsPaused };
+            var clock = new FakeSimClock();
             var random = new FakeSimRandom(seed);
             var director = new WaveDirector(rules ?? new WaveRules(), run, enemies, new FakeIncome(log),
                 new StreamWaveRandom(random.Stream(WaveParticipant.Owner)));

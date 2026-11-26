@@ -73,6 +73,7 @@ Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm và ch�
 - Không đưa luật game vào Core; Core không biết tên feature.
 - Lớp base không chứa luật game cụ thể và không gọi feature khác ngoài Contracts; khung chỉ viết đủ cho thứ thiết kế đã chốt cần.
 - Thứ mà mọi feature và dịch vụ đều phải hiện thực hoặc kế thừa (ví dụ vòng đời phiên scene) đặt ở Core: interface `I<Tên>.cs` và lớp base `<Tên>Base.cs`, không đặt trong Contracts của một dịch vụ và không chép vào từng feature. Enum đi kèm một interface của Core khai trong cùng file interface. Vẫn không có luật game, không nhắc tên feature.
+- Thứ người đã bỏ khỏi thiết kế (mục "Giai đoạn" của `CLAUDE.md` gốc, người quyết 2026-11-27): code còn giữ nó dưới dạng cờ tắt, nhánh, config hay test "cho giai đoạn sau" là chưa xong; giao phiên sở hữu xoá hẳn.
 - Hai phiên muốn sửa cùng một thứ: cho từng phiên một, phiên sau chờ phiên trước báo xong.
 - Thiếu thông tin thì hỏi lại, không đoán; không đồng ý vì phiên kia "cần gấp".
 

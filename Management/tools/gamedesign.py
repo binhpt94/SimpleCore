@@ -177,7 +177,24 @@ REF_RX = re.compile(rf"^({_SEG}(?:/{_SEG})*)(?:#({_SEG}))?@([0-9a-f]{{{HASH_LEN}
 # point there is `### <point id> | <thêm | làm rõ <idea id> | thay <idea id>> | <title>` and its reasons below.
 ADVICE_DIR = "advice"
 ADVICE_ROOT, ADVICE_GENERAL = "_root", "_general"
-ADVICE_ROUNDS = (1, 2)      # rounds whose nodes must have been put to GPT at least once (said, not enforced: gptOwed)
+ADVICE_ROUNDS = (2,)      # rounds whose nodes must have been put to GPT at least once (said, not enforced: gptOwed)
+ASK_ROUNDS = (2, 3)       # rounds GPT may be asked about (người quyết 2026-11-27): 2 a must, 3 when @GameDesigner needs it
+# Picking GPT's points (người quyết 2026-11-27). An answer gd_advise.py writes now carries `filter: pick` in its head:
+# its points no longer go into the node asked. @DesignAdvisor keeps at most PICK_MAX ideas in <id>.pick.md, each
+# rewritten short and given the node it belongs to, and gives every other point a reason; gd_pick.py checks that file
+# and writes <id>.pick.json (what was kept, and where each idea goes, fixed at that moment):
+#     node   the target is not in live yet: @GameDesigner writes the idea into it, labelled by: <id>=gpt@<folder>/<aid>#<pick>
+#     side   the target is in live: the idea waits beside the node on the page; only the human moves it up
+#            (PICK_PROMOTE_SCORE as the human's score) or deletes it (a turned-down idea from then on)
+#     new    "Node mới: <parent>/<key>": @GameDesigner makes that node, node-by: gpt@<folder>/<aid>#<pick>
+# An answer without `filter: pick` keeps the earlier rule: every point becomes an idea of the node asked.
+PICK_MAX = 5
+PICK_PROMOTE_SCORE = 8
+PICK_FILTER = "pick"
+PICK_KEEP, PICK_DROP = "Giữ", "Bỏ"
+PICK_NEW = "Node mới:"
+ROUTE_NODE, ROUTE_SIDE, ROUTE_NEW = "node", "side", "new"
+PICK_STATES = ("promoted", "deleted")
 # The groups of a round-2 feature that GPT is not asked about (người quyết 2026-11-26): infra (no gameplay, nothing heard,
 # seen or felt: save, encryption, scene flow) need not be asked; test (and every cheat node) is not asked. Set by the
 # header `group:` of its data.md; INFRA_FEATURES are infra and a key ending in -test is test without it.
@@ -207,7 +224,14 @@ USER_IDEA_SCORE = 9
 USER_IDEA_TAG = "[Ý User]"      # put before the title of a human idea wherever it is shown (page, gd_status, gd_pack)
 BY_WHO_RX = re.compile(rf"^gpt@({_SEG})$")
 BY_RX = re.compile(rf"^({_SEG})=gpt@({_SEG})#({_SEG})$")
-DROPPED_RX = re.compile(rf"^({_SEG})#({_SEG})=({_SEG})$")
+_FOLDER = rf"(?:_general|_root|{_SEG}(?:\.{_SEG})*)"      # an advice folder: the node path with '.' for '/'
+BY_PICK_RX = re.compile(rf"^({_SEG})=gpt@({_FOLDER})/({_SEG})#({_SEG})$")
+BY_WHO_PICK_RX = re.compile(rf"^gpt@({_FOLDER})/({_SEG})#({_SEG})$")
+DROPPED_RX = re.compile(rf"^(?:({_FOLDER})/)?({_SEG})#({_SEG})=({_SEG})$")
+PICK_RX = re.compile(rf"^###\s+({_SEG})\s*\|\s*([^|]*?)\s*\|\s*(thêm|làm rõ\s+({_SEG})|thay\s+({_SEG}))\s*\|\s*(\S.*?)\s*$")
+PICK_SOURCE_RX = re.compile(r"^nguồn\s*:\s*(.*)$", re.I)
+PICK_DROP_RX = re.compile(rf"^\s*[-*]\s*`?({_SEG})`?\s*:\s*(.*?)\s*$")
+TARGET_RX = re.compile(rf"^{_SEG}(?:/{_SEG})*$")
 POINT_ADD, POINT_CLARIFY, POINT_REPLACE = "thêm", "làm rõ", "thay"
 POINT_RX = re.compile(rf"^###\s+({_SEG})\s*\|\s*(thêm|làm rõ\s+({_SEG})|thay\s+({_SEG}))\s*\|\s*(\S.*?)\s*$")
 POINT_LOOSE_RX = re.compile(r"^###\s")
@@ -510,19 +534,24 @@ def parse_data(text):
                         errors.append(f"group: '{group}' chỉ nhận " + " hoặc ".join(FEATURE_GROUPS))
                         group = ""
                 elif key.strip() == "node-by":
-                    m = BY_WHO_RX.match(value.strip())
-                    if m:
+                    m, p = BY_WHO_RX.match(value.strip()), BY_WHO_PICK_RX.match(value.strip())
+                    if p:
+                        node_by = {"who": BY_GPT, "advice": p.group(2), "folder": p.group(1), "pick": p.group(3)}
+                    elif m:
                         node_by = {"who": BY_GPT, "advice": m.group(1)}
                     else:
-                        errors.append(f"node-by: '{value.strip()}' phải có dạng gpt@<id lần hỏi>")
+                        errors.append(f"node-by: '{value.strip()}' phải có dạng gpt@<thư mục advice>/<id lần hỏi>#<id ý giữ> "
+                                      "(lần hỏi cũ: gpt@<id lần hỏi>)")
                 elif key.strip() == "by":
                     for entry in [e.strip() for e in value.split(",") if e.strip()]:
-                        m = BY_RX.match(entry)
-                        source = {"advice": m.group(2), "point": m.group(3)} if m else None
-                        if m and source not in [x for sources in by.values() for x in sources]:
-                            by.setdefault(m.group(1), []).append(source)
+                        m, p = BY_RX.match(entry), BY_PICK_RX.match(entry)
+                        source = ({"advice": p.group(3), "point": p.group(4), "folder": p.group(2)} if p else
+                                  {"advice": m.group(2), "point": m.group(3)} if m else None)
+                        if source and source not in [x for sources in by.values() for x in sources]:
+                            by.setdefault((p or m).group(1), []).append(source)
                         else:
-                            errors.append(f"by: '{entry}' phải có dạng <id ý>=gpt@<id lần hỏi>#<id góp ý>, mỗi góp ý một lần")
+                            errors.append(f"by: '{entry}' phải có dạng <id ý>=gpt@<thư mục advice>/<id lần hỏi>#<id ý giữ> "
+                                          "(lần hỏi cũ: <id ý>=gpt@<id lần hỏi>#<id góp ý>), mỗi góp ý một lần")
                 elif key.strip() == "user":
                     for entry in [e.strip() for e in value.split(",") if e.strip()]:
                         if KEY_RX.match(entry) and entry not in user_ids:
@@ -533,7 +562,8 @@ def parse_data(text):
                     for entry in [e.strip() for e in value.split(",") if e.strip()]:
                         m = DROPPED_RX.match(entry)
                         if m:
-                            dropped.append({"advice": m.group(1), "point": m.group(2), "item": m.group(3)})
+                            dropped.append(dict({"advice": m.group(2), "point": m.group(3), "item": m.group(4)},
+                                                **({"folder": m.group(1)} if m.group(1) else {})))
                         else:
                             errors.append(f"gpt-dropped: '{entry}' phải có dạng <id lần hỏi>#<id góp ý>=<id ý đã bị loại>")
                 elif key.strip() == "refs":
@@ -2373,12 +2403,19 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     stale = parent_hash is not None and data["based_on"] != parent_hash
     table = folder.parents[len(path.split("/")) - 1] if path else folder
     advice = advice_folder(table, path)
-    gpt = mark_sources(folder, table, path, data, items, mode, problems, where)
+    gpt = mark_sources(folder, table, path, data, items, mode, problems, where, cache)
     if Path(table).name != TABLES["live"][-1]:
         check_user_ideas(folder, data, problems, where)
-    named = (data.get("nodeBy") or {}).get("advice", "")
+    node_by = data.get("nodeBy") or {}
+    named = "" if node_by.get("folder") else node_by.get("advice", "")
     above = advice_folder(table, path.rpartition("/")[0]) if path else advice      # asked about the node above, or this one
     general = advice.parent / ADVICE_GENERAL      # the question put to all features of a round
+    if node_by.get("folder"):
+        pk = f"{node_by['folder']}/{node_by['advice']}#{node_by['pick']}"
+        pick = pick_index(design_base(table), cache)["byKey"].get(pk)
+        if pick is None or pick.get("route") != ROUTE_NEW or pick["target"] != path:
+            problems.append({"path": where, "text": f"{DATA_FILE}: node-by trỏ tới ý giữ '{pk}' "
+                                                    + ("không có" if pick is None else "không phải ý 'Node mới' cho node này")})
     if named and not any((d / f"{named}.md").is_file() for d in (advice, above, general)):
         problems.append({"path": where, "text": f"{DATA_FILE}: node-by trỏ tới lần hỏi '{named}' không có "
                                                 f"({ADVICE_DIR}/{above.name}/{named}.md, {ADVICE_DIR}/{advice.name}/{named}.md "
@@ -2580,24 +2617,299 @@ def read_advice(folder):
     return {aid: advice_points(Path(folder) / f"{aid}.md")[0] for aid in advice_ids(folder)}
 
 
-def mark_sources(folder, table, path, data, items, mode, problems, where):
+# ---------------------------------------------------------------- picking GPT's points (người quyết 2026-11-27)
+def design_base(table):
+    """Management/game-design of a table folder (ai/idea or live)."""
+    table = Path(table)
+    return table.parent if table.name == TABLES["live"][-1] else table.parent.parent
+
+
+def answer_filtered(path):
+    """True when an answer of GPT carries `filter: pick` in its head: its points go through a pick file."""
+    path = Path(path)
+    if not path.is_file():
+        return False
+    text = read_text(path)
+    if not text.startswith("---\n") or "\n---" not in text[4:]:
+        return False
+    head = text[4:].partition("\n---")[0]
+    return any(k.strip() == "filter" and v.strip() == PICK_FILTER for k, _, v in (l.partition(":") for l in head.split("\n")))
+
+
+def pick_files(base, folder_name, aid):
+    """(answer, pick file, pick state) of one question."""
+    folder = Path(base) / ADVICE_DIR / folder_name
+    return folder / f"{aid}.md", folder / f"{aid}.pick.md", folder / f"{aid}.pick.json"
+
+
+def read_pick(text):
+    """(keep, drop, errors) of a pick file. keep: [{id, target, new, kind, ref, title, detail, sources}];
+    drop: [{point, reason}]."""
+    keep, drop, errors, section, current = [], [], [], None, None
+    for line in text.replace("\r", "").split("\n"):
+        if line.startswith("## "):
+            name = line[3:].strip()
+            section = "keep" if name == PICK_KEEP else "drop" if name == PICK_DROP else "other"
+            if section == "other":
+                errors.append(f"mục '## {name}' không thuộc file lọc: chỉ có '## {PICK_KEEP}' và '## {PICK_DROP}'")
+            current = None
+            continue
+        if section == "keep":
+            if line.startswith("#"):
+                m = PICK_RX.match(line)
+                if not m:
+                    errors.append(f"dòng ý giữ sai dạng: {line.strip()[:70]}")
+                    current = None
+                    continue
+                target, new = m.group(2).strip(), False
+                if target.startswith(PICK_NEW):
+                    target, new = target[len(PICK_NEW):].strip(), True
+                kind = POINT_ADD if m.group(3) == POINT_ADD else POINT_CLARIFY if m.group(4) else POINT_REPLACE
+                current = {"id": m.group(1), "target": target, "new": new, "kind": kind,
+                           "ref": m.group(4) or m.group(5) or "", "title": m.group(6), "sources": None, "lines": []}
+                keep.append(current)
+            elif current is not None:
+                m = PICK_SOURCE_RX.match(line.strip())
+                if m and current["sources"] is None and not any(l.strip() for l in current["lines"]):
+                    current["sources"] = [s.strip().strip("`") for s in m.group(1).split(",") if s.strip()]
+                else:
+                    current["lines"].append(line)
+            elif line.strip():
+                errors.append(f"chữ nằm ngoài một ý giữ: {line.strip()[:50]}")
+        elif section == "drop":
+            if not line.strip():
+                continue
+            m = PICK_DROP_RX.match(line)
+            if m:
+                drop.append({"point": m.group(1), "reason": m.group(2)})
+            else:
+                errors.append(f"dòng bỏ phải có dạng '- <id góp ý>: <lí do>': {line.strip()[:60]}")
+        elif section is None and line.strip() and not line.startswith("# "):
+            errors.append(f"chữ nằm trước '## {PICK_KEEP}': {line.strip()[:50]}")
+    for k in keep:
+        k["detail"] = tidy("\n".join(k.pop("lines")))
+        k["sources"] = k["sources"] or []
+    return keep, drop, errors
+
+
+def pick_hash(k):
+    return short_hash(k["target"], str(k["new"]), k["kind"], k["ref"], k["title"], k["detail"], ",".join(k["sources"]))
+
+
+def check_pick(root, folder_name, aid, filed=None):
+    """(keep, drop, errors, routes) of a question's pick file, checked against its answer and the design as it is now.
+    routes: {id: node | side | new}. filed: {id: hash} of the kept ideas filed before; one unchanged since is not
+    checked against the design again (its node may have been made, its idea rewritten)."""
+    filed = filed or {}
+    base = Path(root).joinpath(*BASE)
+    answer, pick, _ = pick_files(base, folder_name, aid)
+    where = f"{ADVICE_DIR}/{folder_name}/{aid}"
+    if not answer.is_file():
+        return [], [], [f"chưa có câu trả lời {where}.md"], {}
+    if not answer_filtered(answer):
+        return [], [], [f"{where}.md là lần hỏi cũ (không có 'filter: {PICK_FILTER}'): nó theo luật cũ, không lọc"], {}
+    if not pick.is_file():
+        return [], [], [f"chưa có file lọc {where}.pick.md"], {}
+    keep, drop, errors = read_pick(read_text(pick))
+    points = {p["id"]: p for p in advice_points(answer)[0]}
+    if len(keep) > PICK_MAX:
+        errors.append(f"giữ {len(keep)} ý: tối đa {PICK_MAX} ý mỗi lần hỏi (ít hơn cũng được)")
+    count = {}
+    seen = set()
+    for k in keep:
+        if k["id"] in seen:
+            errors.append(f"id ý giữ '{k['id']}' trùng")
+        seen.add(k["id"])
+        if not k["sources"]:
+            errors.append(f"ý giữ '{k['id']}' thiếu dòng 'nguồn: <id góp ý>, ...' ngay dưới dòng ###")
+        for s in k["sources"]:
+            count[s] = count.get(s, 0) + 1
+    for d in drop:
+        count[d["point"]] = count.get(d["point"], 0) + 1
+        if not d["reason"]:
+            errors.append(f"góp ý bỏ '{d['point']}' chưa có lí do")
+    for pid in count:
+        if pid not in points:
+            errors.append(f"'{pid}' không phải góp ý của {where}.md")
+    for pid in points:
+        n = count.get(pid, 0)
+        if n != 1:
+            errors.append(f"góp ý '{pid}' " + ("chưa có ở '## Giữ' (nguồn:) hay '## Bỏ'" if not n else f"có mặt {n} lần"))
+    idea, live = table_dir(root, "idea"), table_dir(root, "live")
+    routes = {}
+    for k in keep:
+        label = f"ý giữ '{k['id']}'"
+        if filed.get(k["id"]) == pick_hash(k):
+            continue
+        if "|" in k["title"]:
+            errors.append(f"{label}: tiêu đề không được có dấu |")
+        if any(l.startswith("#") or l.strip() == "---" for l in k["detail"].split("\n")):
+            errors.append(f"{label}: chi tiết không được có dòng bắt đầu bằng # hay dòng ---")
+        parts = k["target"].split("/")
+        if not TARGET_RX.match(k["target"]):
+            errors.append(f"{label}: node đích '{k['target']}' phải là đường dẫn node (ví dụ feature-enemy/enemy-behavior) "
+                          f"hoặc '{PICK_NEW} <cha>/<tên>'")
+            continue
+        if len(parts) > 2 or parts[0] == GLOSSARY_KEY or parts[-1] == CHEAT_KEY:
+            errors.append(f"{label}: node đích phải ở vòng 2 hoặc 3 (không phải {GLOSSARY_KEY}, {CHEAT_KEY}); ý chi tiết "
+                          "của vòng 4 thì đưa vào '## Bỏ' kèm lí do")
+            continue
+        if k["new"]:
+            if k["kind"] != POINT_ADD:
+                errors.append(f"{label}: node mới chỉ dùng loại '{POINT_ADD}'")
+            if not (idea.joinpath(*parts[:-1]) / DATA_FILE).is_file():
+                errors.append(f"{label}: node cha của node mới không có trong ai/idea")
+            elif (idea.joinpath(*parts) / DATA_FILE).is_file():
+                errors.append(f"{label}: node '{k['target']}' đã có: ghi nó làm node đích, không phải node mới")
+            routes[k["id"]] = ROUTE_NEW
+            continue
+        data = read_data(idea.joinpath(*parts))
+        if data is None:
+            errors.append(f"{label}: không có node '{k['target']}' trong ai/idea")
+            continue
+        if k["ref"] and k["ref"] not in {it["id"] for it in data["items"]}:
+            errors.append(f"{label}: node '{k['target']}' không có ý '{k['ref']}'")
+        routes[k["id"]] = ROUTE_SIDE if (live.joinpath(*parts) / DATA_FILE).is_file() else ROUTE_NODE
+    return keep, drop, errors, routes
+
+
+def file_pick(root, folder_name, aid):
+    """gd_pick.py: checks a question's pick file and writes its state (<id>.pick.json). The route of an idea is fixed
+    the first time it is checked; an idea the human already moved up or deleted may not be changed or taken out.
+    Returns (state, errors); nothing is written when there are errors."""
+    base = Path(root).joinpath(*BASE)
+    _, pick, state_file = pick_files(base, folder_name, aid)
+    try:
+        old = read_json(state_file) or {}
+    except ValueError:
+        old = {}
+    old_items = old.get("items") if isinstance(old, dict) and isinstance(old.get("items"), dict) else {}
+    keep, drop, errors, routes = check_pick(root, folder_name, aid,
+                                            {k: v.get("hash") for k, v in old_items.items() if isinstance(v, dict)})
+    by_id = {k["id"]: k for k in keep}
+    for pid, rec in old_items.items():
+        if isinstance(rec, dict) and rec.get("state") in PICK_STATES:
+            k = by_id.get(pid)
+            if k is None or pick_hash(k) != rec.get("hash"):
+                errors.append(f"ý giữ '{pid}' đã được người {'chuyển lên' if rec['state'] == 'promoted' else 'xoá'}: "
+                              "giữ nguyên nó trong file lọc")
+    if errors:
+        return None, errors
+    items = {}
+    for k in keep:
+        rec = old_items.get(k["id"]) if isinstance(old_items.get(k["id"]), dict) else {}
+        h = pick_hash(k)
+        if rec.get("hash") == h:
+            items[k["id"]] = rec
+            continue
+        items[k["id"]] = {"target": k["target"], "new": k["new"], "kind": k["kind"], "ref": k["ref"], "title": k["title"],
+                          "detail": k["detail"], "sources": k["sources"], "route": routes[k["id"]], "hash": h, "checked": now()}
+    state = {"file": short_hash(read_text(pick)), "checked": now(), "dropped": drop, "items": items}
+    write_json(state_file, state)
+    return state, []
+
+
+def pick_index(base, cache=None):
+    """Every kept idea of every checked pick file under `base` (Management/game-design):
+    {"byKey": {key: pick}, "targets": {path: [pick]}, "new": {parent path: [pick]}, "filtered": {(folder, aid)},
+     "unchecked": [{folder, aid, why}]}. A pick: its state record plus key (<folder>/<aid>#<id>), folder, aid, id,
+    raw (GPT's own points it came from) and dropped (the points of that question left out, with the reason)."""
+    key = ("picks", str(base))
+    if cache is not None and key in cache:
+        return cache[key]
+    out = {"byKey": {}, "targets": {}, "new": {}, "filtered": set(), "unchecked": []}
+    adv = Path(base) / ADVICE_DIR
+    for d in sorted(p for p in adv.iterdir() if p.is_dir()) if adv.is_dir() else []:
+        for aid in advice_ids(d):
+            answer, pick, state_file = pick_files(base, d.name, aid)
+            if not answer_filtered(answer):
+                continue
+            out["filtered"].add((d.name, aid))
+            try:
+                state = read_json(state_file)
+            except ValueError:
+                state = None
+            if not isinstance(state, dict) or not isinstance(state.get("items"), dict):
+                out["unchecked"].append({"folder": d.name, "aid": aid,
+                                         "why": "chưa có file lọc" if not pick.is_file() else "chưa chạy gd_pick.py"})
+                continue
+            if not pick.is_file() or state.get("file") != short_hash(read_text(pick)):
+                out["unchecked"].append({"folder": d.name, "aid": aid, "why": "file lọc đã sửa sau lần chạy gd_pick.py"})
+            points = {p["id"]: p for p in advice_points(answer)[0]}
+            dropped = [{"point": x.get("point", ""), "reason": x.get("reason", ""),
+                        "title": points.get(x.get("point"), {}).get("title", "")}
+                       for x in state.get("dropped") or [] if isinstance(x, dict)]
+            for pid, rec in state["items"].items():
+                if not isinstance(rec, dict) or not rec.get("target"):
+                    continue
+                p = dict(rec, key=f"{d.name}/{aid}#{pid}", folder=d.name, aid=aid, id=pid, dropped=dropped,
+                         raw=[{"point": s, "title": points[s]["title"], "text": points[s]["text"]}
+                              for s in rec.get("sources") or [] if s in points])
+                out["byKey"][p["key"]] = p
+                if rec.get("route") == ROUTE_NEW:
+                    out["new"].setdefault(rec["target"].rpartition("/")[0], []).append(p)
+                else:
+                    out["targets"].setdefault(rec["target"], []).append(p)
+    if cache is not None:
+        cache[key] = out
+    return out
+
+
+def pick_deleted(root, path):
+    """The kept ideas for the node at `path` that the human deleted beside it: [{key, title, text}] (turned down)."""
+    idx = pick_index(Path(root).joinpath(*BASE))
+    return [{"key": p["key"], "title": p["title"], "text": p["title"] + ("\n" + p["detail"] if p.get("detail") else "")}
+            for p in idx["targets"].get(path, []) if p.get("state") == "deleted"]
+
+
+def mark_sources(folder, table, path, data, items, mode, problems, where, cache=None):
     """Ties the ideas of a node to GPT's advice about it and returns what the node owes that advice:
-    {"clarified": n, "dropped": [{advice, point, item, title}], "missing": [{advice, point, title}]}.
+    {"clarified": n, "dropped": [{advice, point, item, title}], "missing": [{advice, point, title, pick}],
+     "side": [pick], "newMissing": [pick]}.
     Sets on every idea: sources (each with the point's kind, target, title and GPT's own text), by (claude when GPT
     only made Claude's idea clearer), clarified, clash (ids of ideas that stand against it: a point that replaces
     an idea, and that idea, while both are in the node) and long.
-    In the proposed table every point must be an idea or be declared dropped; a drop in mode user needs the human's
-    score below PASS_MIN in the node's history, in mode auto the declaration is taken as it is."""
+    An answer of the earlier kind (no `filter: pick`): in the proposed table every point must be an idea of the node
+    asked or be declared dropped; a drop in mode user needs the human's score below PASS_MIN in the node's history, in
+    mode auto the declaration is taken as it is. A picked answer: every kept idea whose route is `node` must be an idea
+    of its target; one whose route is `side` waits beside the node until the human moves it up (side); one whose
+    route is `new` must be a child node of this one with node-by naming it (newMissing)."""
     proposed = Path(table).name != TABLES["live"][-1]
-    advice = read_advice(advice_folder(table, path))
-    name = f"{ADVICE_DIR}/{advice_name(path)}"
+    idx = pick_index(design_base(table), cache)
+    own = advice_name(path)
+    advice = {aid: pts for aid, pts in read_advice(advice_folder(table, path)).items() if (own, aid) not in idx["filtered"]}
+    name = f"{ADVICE_DIR}/{own}"
     known = {(aid, p["id"]): p for aid, points in advice.items() for p in points}
     ids = {it["id"] for it in items}
-    used = set()
+    used, used_picks = set(), set()
     for it in items:
         it["clash"], it["clarified"] = [], False
         it["long"] = len(it["title"]) > IDEA_TITLE_MAX or len(it["detail"]) > IDEA_DETAIL_MAX
         for src in it["sources"]:
+            if src.get("folder"):
+                pk = f"{src['folder']}/{src['advice']}#{src['point']}"
+                pick = idx["byKey"].get(pk)
+                if pick is None or pick.get("route") == ROUTE_NEW or pick["target"] != path:
+                    problems.append({"path": where, "text": f"{DATA_FILE}: nhãn của ý '{it['id']}' trỏ tới ý giữ '{pk}' "
+                                     + ("không có (file lọc chưa có ý đó, hoặc chưa chạy gd_pick.py)" if pick is None else
+                                        f"dành cho node '{pick['target']}', không phải node này")})
+                    src.update(kind="", target="", title="", text="")
+                    continue
+                if pick.get("route") == ROUTE_SIDE and pick.get("state") != "promoted":
+                    problems.append({"path": where, "text": f"AI TỰ CHUYỂN Ý TỪ NODE PHỤ: ý '{it['id']}' mang nhãn ý giữ '{pk}' "
+                                                            "đang chờ người lọc ở node phụ. Chỉ người chuyển nó lên (trang); "
+                                                            "gỡ ý đó khỏi node"})
+                used_picks.add(pk)
+                src.update(kind=pick["kind"], target=pick.get("ref", ""), title=pick["title"], pick=True,
+                           text=pick["title"] + ("\n" + pick["detail"] if pick.get("detail") else ""),
+                           raw=pick["raw"], dropped=pick["dropped"])
+                continue
+            if (own, src["advice"]) in idx["filtered"]:
+                problems.append({"path": where, "text": f"{DATA_FILE}: nhãn của ý '{it['id']}' trỏ thẳng tới góp ý "
+                                                        f"'{src['advice']}#{src['point']}', mà lần hỏi đó đã lọc: nhãn trỏ tới "
+                                                        f"ý giữ, dạng gpt@<thư mục advice>/{src['advice']}#<id ý giữ>"})
+                src.update(kind="", target="", title="", text="")
+                continue
             point = known.get((src["advice"], src["point"]))
             if point is None:
                 problems.append({"path": where, "text": f"{DATA_FILE}: nhãn của ý '{it['id']}' trỏ tới góp ý "
@@ -2619,12 +2931,22 @@ def mark_sources(folder, table, path, data, items, mode, problems, where):
     turned_down = {e.get("item") for e in rejected(folder) + human_deleted(folder)} if proposed else set()
     dropped = []
     for d in data.get("dropped") or []:
-        key = (d["advice"], d["point"])
-        if key not in known:
-            problems.append({"path": where, "text": f"{DATA_FILE}: gpt-dropped trỏ tới góp ý '{d['advice']}#{d['point']}' "
-                                                    f"không có trong {name}/{d['advice']}.md"})
-            continue
-        if key in used or d["item"] in ids:
+        if d.get("folder"):
+            pk = f"{d['folder']}/{d['advice']}#{d['point']}"
+            pick = idx["byKey"].get(pk)
+            if pick is None or pick["target"] != path:
+                problems.append({"path": where, "text": f"{DATA_FILE}: gpt-dropped trỏ tới ý giữ '{pk}' không dành cho node này"})
+                continue
+            key, title = ("pick", pk), pick["title"]
+            taken = pk in used_picks
+        else:
+            key = (d["advice"], d["point"])
+            if key not in known:
+                problems.append({"path": where, "text": f"{DATA_FILE}: gpt-dropped trỏ tới góp ý '{d['advice']}#{d['point']}' "
+                                                        f"không có trong {name}/{d['advice']}.md"})
+                continue
+            title, taken = known[key]["title"], key in used
+        if taken or d["item"] in ids:
             problems.append({"path": where, "text": f"{DATA_FILE}: gpt-dropped khai góp ý '{d['advice']}#{d['point']}' đã bị "
                                                     f"loại trong khi ý của nó vẫn còn trong node"})
             continue
@@ -2633,15 +2955,107 @@ def mark_sources(folder, table, path, data, items, mode, problems, where):
                                                     f"lịch sử chưa có ý '{d['item']}' bị người chấm dưới {PASS_MIN}. Đưa ý đó "
                                                     f"trở lại '## {ITEMS_TITLE}' và chờ người chấm"})
             continue
-        used.add(key)
-        dropped.append(dict(d, title=known[key]["title"]))
-    missing = [{"advice": aid, "point": pid, "title": p["title"]} for (aid, pid), p in known.items() if (aid, pid) not in used]
+        if key[0] == "pick":
+            used_picks.add(key[1])
+        else:
+            used.add(key)
+        dropped.append(dict(d, title=title))
+    missing = [{"advice": aid, "point": pid, "title": p["title"], "pick": False}
+               for (aid, pid), p in known.items() if (aid, pid) not in used]
+    picks_here = idx["targets"].get(path, [])
+    missing += [{"advice": f"{p['folder']}/{p['aid']}", "point": p["id"], "title": p["title"], "pick": True}
+                for p in picks_here if p.get("route") == ROUTE_NODE and p["key"] not in used_picks]
+    side = [p for p in picks_here if p.get("route") == ROUTE_SIDE and not p.get("state")] if proposed else []
+    new_missing = []
+    for p in idx["new"].get(path, []) if proposed else []:
+        child = Path(folder) / p["target"].rpartition("/")[2]
+        nb = (read_data(child) or {}).get("nodeBy") or {}
+        if not ((child / DATA_FILE).is_file() and f"{nb.get('folder')}/{nb.get('advice')}#{nb.get('pick')}" == p["key"]):
+            new_missing.append(p)
+            problems.append({"path": where, "text": f"NODE MỚI CHƯA TẠO: '{p['target']}' (ý giữ {p['key']}: {p['title']}). "
+                                                    f"Tạo node đó và khai node-by: gpt@{p['key']}"})
     if proposed:
         for m in missing:
-            problems.append({"path": where, "text": f"góp ý '{m['advice']}#{m['point']}' của GPT chưa vào '## {ITEMS_TITLE}' "
-                                                    f"({name}/{m['advice']}.md: {m['title']}). Viết nó thành một ý và khai "
-                                                    f"by: <id ý>=gpt@{m['advice']}#{m['point']}; ý của GPT không được bỏ"})
-    return {"clarified": sum(1 for it in items if it["clarified"]), "dropped": dropped, "missing": missing if proposed else []}
+            if m["pick"]:
+                problems.append({"path": where, "text": f"ý giữ '{m['advice']}#{m['point']}' của GPT chưa vào '## {ITEMS_TITLE}' "
+                                                        f"({m['title']}). Viết nó thành một ý và khai "
+                                                        f"by: <id ý>=gpt@{m['advice']}#{m['point']}"})
+            else:
+                problems.append({"path": where, "text": f"góp ý '{m['advice']}#{m['point']}' của GPT chưa vào '## {ITEMS_TITLE}' "
+                                                        f"({name}/{m['advice']}.md: {m['title']}). Viết nó thành một ý và khai "
+                                                        f"by: <id ý>=gpt@{m['advice']}#{m['point']}; ý của GPT không được bỏ"})
+    return {"clarified": sum(1 for it in items if it["clarified"]), "dropped": dropped,
+            "missing": missing if proposed else [], "side": side, "newMissing": new_missing}
+
+
+def gpt_pick(root, folder_name, aid, pick_id, action):
+    """The human moves a kept idea waiting beside a node up into it, or deletes it, from the page. promote writes the
+    idea into the node's data.md (ai/idea), labelled as GPT's, with PICK_PROMOTE_SCORE as the human's score; delete
+    makes it a turned-down idea. Only the page calls this. Returns the id of the idea (promote) or of the pick."""
+    if not isinstance(folder_name, str) or not re.fullmatch(_FOLDER, folder_name) \
+            or not isinstance(aid, str) or not KEY_RX.match(aid) or not isinstance(pick_id, str) or not KEY_RX.match(pick_id):
+        raise ValueError("folder, aid, id không hợp lệ")
+    if action not in ("promote", "delete"):
+        raise ValueError("action phải là promote hoặc delete")
+    _, _, state_file = pick_files(Path(root).joinpath(*BASE), folder_name, aid)
+    state = read_json(state_file)
+    rec = (state or {}).get("items", {}).get(pick_id) if isinstance(state, dict) else None
+    if not isinstance(rec, dict):
+        raise ValueError(f"không có ý giữ '{folder_name}/{aid}#{pick_id}'")
+    if rec.get("route") != ROUTE_SIDE:
+        raise ValueError("chỉ ý ở node phụ (node đích đã chốt) mới được chuyển lên hay xoá ở đây")
+    if rec.get("state"):
+        raise ValueError(f"ý này đã được {'chuyển lên' if rec['state'] == 'promoted' else 'xoá'}")
+    target = rec["target"]
+    folder = table_dir(root, "idea").joinpath(*check_path(target))
+    text_of = rec["title"] + ("\n" + rec["detail"] if rec.get("detail") else "")
+    key = f"{folder_name}/{aid}#{pick_id}"
+    if action == "delete":
+        rec.update(state="deleted", at=now())
+        write_json(state_file, state)
+        log(folder, "gpt-pick-delete", item=key, text=text_of)
+        return pick_id
+    file = folder / DATA_FILE
+    if not file.is_file():
+        raise ValueError(f"bảng đề xuất không có node '{target}'")
+    text = read_text(file)
+    data = parse_data(text)
+    if data["errors"]:
+        raise ValueError(f"{DATA_FILE} của node đang có lỗi, sửa trước: " + "; ".join(data["errors"][:3]))
+    ids = {it["id"] for it in data["items"]}
+    item_id, n = pick_id, 2
+    while item_id in ids:
+        item_id, n = f"{pick_id}-{n}", n + 1
+    if text.startswith("---\n") and "\n---" in text[4:]:
+        head, _, body = text[4:].partition("\n---")
+        head_lines = head.split("\n")
+    else:
+        head_lines, body = [], "\n" + text
+    lines = body.split("\n")
+    if not any(l.strip().lower() == f"## {ITEMS_TITLE}".lower() for l in lines):
+        while lines and not lines[-1].strip():
+            lines.pop()
+        lines += ["", f"## {ITEMS_TITLE}"]
+    while lines and not lines[-1].strip():
+        lines.pop()
+    lines += ["", f"### {item_id} | AI {PICK_PROMOTE_SCORE} | {rec['title']}"] + ([rec["detail"]] if rec.get("detail") else []) + [""]
+    entry = f"{item_id}=gpt@{key}"
+    if any(l.partition(":")[0].strip() == "by" for l in head_lines):
+        head_lines = [(l.rstrip() + ", " + entry if l.partition(":")[2].strip() else "by: " + entry)
+                      if l.partition(":")[0].strip() == "by" else l for l in head_lines]
+    else:
+        head_lines.append("by: " + entry)
+    head_lines = [l for l in head_lines if l.strip()]
+    new_text = "---\n" + "\n".join(head_lines) + "\n---" + "\n".join(lines)
+    check = parse_data(new_text)
+    if check["errors"]:
+        raise ValueError("không ghi được: " + "; ".join(check["errors"][:3]))
+    file.write_text(new_text, encoding="utf-8")
+    rec.update(state="promoted", at=now(), item=item_id)
+    write_json(state_file, state)
+    log(folder, "gpt-pick-promote", item=item_id, key=key, text=text_of)
+    save_review(root, target, {item_id: {"score": PICK_PROMOTE_SCORE, "feedback": ""}})
+    return item_id
 
 
 def user_ideas(folder):
@@ -2765,7 +3179,8 @@ def _drop_idea_text(text, item_id, sources, user):
     while lines and not lines[-1].strip():
         lines.pop()
     lines.append("")
-    out, drops = [], [f"{x['advice']}#{x['point']}={item_id}" for x in sources]
+    out, drops = [], [(f"{x['folder']}/" if x.get("folder") else "") + f"{x['advice']}#{x['point']}={item_id}"
+                      for x in sources]
     for line in head_lines:
         key, _, value = line.partition(":")
         k = key.strip()
@@ -2862,7 +3277,7 @@ def by_label(item):
     clearer; '' for one of Claude's own."""
     if item.get("by") == BY_USER:
         return " · Người"
-    sources = [f"{s['advice']}#{s['point']}" for s in item.get("sources", [])]
+    sources = [(f"{s['folder']}/" if s.get("folder") else "") + f"{s['advice']}#{s['point']}" for s in item.get("sources", [])]
     if not sources:
         return ""
     return (" · GPT làm rõ" if item.get("clarified") else " · GPT") + f" (góp ý {', '.join(sources)})"

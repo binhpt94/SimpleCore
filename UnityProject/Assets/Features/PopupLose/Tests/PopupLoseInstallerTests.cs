@@ -32,39 +32,7 @@ namespace Game.PopupLose.Tests
             registry.Register<IRunScore>(new LosePopupTests.FakeScore());
             registry.Register<IPopupService>(popups);
             registry.Register<IPopupViews>(popups);
-            registry.Register<IRunRevive>(new LosePopupTests.FakeRevive());
             return registry;
-        }
-
-        [Test]
-        public void MissingReviveIsNamedAtInstall()
-        {
-            var installer = LoadInstaller();
-            var registry = new ServiceRegistry();
-            var popups = new LosePopupTests.FakePopups();
-            registry.Register<ISessionScene>(new FakeSession());
-            registry.Register<IRunFlow>(new LosePopupTests.FakeFlow());
-            registry.Register<IRunScore>(new LosePopupTests.FakeScore());
-            registry.Register<IPopupService>(popups);
-            registry.Register<IPopupViews>(popups);
-
-            var error = Assert.Throws<InvalidOperationException>(() => installer.Install(registry));
-            Assert.That(error.Message, Does.Contain(nameof(IRunRevive)));
-        }
-
-        [Test]
-        public void AdNotCompletedLineSitsInTheNewRecordPlaceAsPlainTextHiddenByDefault()
-        {
-            var view = LoadView();
-            var line = ReferencedRect(view, "_adFailed");
-            var band = ReferencedRect(view, "_newRecord");
-
-            Assert.That(LabelText(line), Is.EqualTo("Quảng cáo chưa hoàn tất"));
-            Assert.That(line.anchoredPosition, Is.EqualTo(band.anchoredPosition), "same place as Kỉ lục mới!");
-            Assert.That(line.sizeDelta, Is.EqualTo(band.sizeDelta), "same size as Kỉ lục mới!");
-            Assert.That(CountComponents(line.gameObject, "Image"), Is.EqualTo(0), "plain text, no band");
-            Assert.That(line.gameObject.activeSelf, Is.False);
-            Assert.That(line.IsChildOf(band), Is.False, "does not pulse with the band");
         }
 
         [Test]
@@ -147,7 +115,7 @@ namespace Game.PopupLose.Tests
             Assert.That(replay.sizeDelta.x, Is.GreaterThan(home.sizeDelta.x), "main button stands out");
             Assert.That(replay.sizeDelta, Is.EqualTo(new Vector2(400, 120)));
             Assert.That(home.sizeDelta, Is.EqualTo(new Vector2(260, 120)));
-            Assert.That(CountComponents(view.gameObject, "Button"), Is.EqualTo(2), "exactly two buttons, no revive");
+            Assert.That(CountComponents(view.gameObject, "Button"), Is.EqualTo(2), "exactly two buttons");
         }
 
         [Test]

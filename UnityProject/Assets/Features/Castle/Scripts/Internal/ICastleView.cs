@@ -36,9 +36,6 @@ namespace Game.Castle
         /// <summary>Shrinks the castle to nothing over <paramref name="seconds"/>.</summary>
         void Collapse(float seconds);
 
-        /// <summary>Grows a collapsed castle back from nothing to full size over <paramref name="seconds"/>.</summary>
-        void GrowBack(float seconds);
-
         /// <summary>A shot drawing flies from <paramref name="fromX"/> to <paramref name="toX"/> in <paramref name="seconds"/>.</summary>
         void ShowShot(int targetHandle, float fromX, float toX, float seconds);
 
@@ -48,7 +45,7 @@ namespace Game.Castle
         /// <summary>The Thunder effect on an enemy at <paramref name="x"/>, shown for <paramref name="seconds"/>.</summary>
         void ShowThunder(float x, float seconds);
 
-        /// <summary>Moves every running effect on by <paramref name="seconds"/>; not called while paused.</summary>
+        /// <summary>Moves every running effect on by <paramref name="seconds"/>.</summary>
         void Advance(float seconds);
 
         void ClearEffects();

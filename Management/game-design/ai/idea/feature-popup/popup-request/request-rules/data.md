@@ -9,7 +9,7 @@ Chốt danh sách id popup của scene Game, việc popup được chuẩn bị 
 
 ## Ý cốt lõi
 
-### id-list | AI 8 | Scene Game có 1 id popup: `PopupLose/Main` (popup thua)
+### id-list | AI 8 | Scene Game có 2 id popup: `PopupLose/Main` (popup thua) và `PopupRating/Main` (popup mời đánh giá)
 Tên `Name` do feature sở hữu đặt; đây là tên dự kiến.
 
 ### preload | AI 8 | Mọi popup có id trong danh sách của scene được chuẩn bị ở bước tải, nên xin mở là popup hiện ngay trong khung hình đó

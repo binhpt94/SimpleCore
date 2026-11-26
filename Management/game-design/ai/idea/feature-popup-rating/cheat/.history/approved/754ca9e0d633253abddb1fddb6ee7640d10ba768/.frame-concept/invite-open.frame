@@ -1,0 +1,24 @@
+kind: ui
+title: Cheat popup mời đánh giá: đang mở, chưa chạm nút nào
+use panel-x = feature-popup/popup-layer/stack-rules#panel-x
+use panel-y = feature-popup/popup-layer/stack-rules#panel-y
+use panel-w = feature-popup/popup-layer/stack-rules#panel-w
+use panel-h = feature-popup/popup-layer/stack-rules#panel-h
+use tap = feature-hud/hud-layout/layout-spec#tap
+use text-x = feature-popup-rating/rating-invite/invite-spec#text-x
+use text-y = feature-popup-rating/rating-invite/invite-spec#text-y
+use text-w = feature-popup-rating/rating-invite/invite-spec#text-w
+use text-h = feature-popup-rating/rating-invite/invite-spec#text-h
+use rate-x = feature-popup-rating/rating-invite/invite-spec#rate-x
+use rate-y = feature-popup-rating/rating-invite/invite-spec#rate-y
+use rate-w = feature-popup-rating/rating-invite/invite-spec#rate-w
+use later-x = feature-popup-rating/rating-invite/invite-spec#later-x
+use later-y = feature-popup-rating/rating-invite/invite-spec#later-y
+use later-w = feature-popup-rating/rating-invite/invite-spec#later-w
+use later-h = feature-popup-rating/rating-invite/invite-spec#later-h
+- below       rect       x=0 y=0 w=1920 h=1080 label="Scene Game bên dưới (không nhận bấm)"
+- backdrop    rect       x=0 y=0 w=1920 h=1080 overlap label="Nền che của dịch vụ popup: chạm không làm gì"
+- panel       round-rect x=panel-x y=panel-y w=panel-w h=panel-h overlap label="PopupRating/Main đang mở"
+- invite-text label      x=text-x y=text-y w=text-w h=text-h parent=panel label="Đánh giá game trên Google Play"
+- rate        button     x=rate-x y=rate-y w=rate-w h=tap parent=panel label="Đánh giá (nút chính, chưa chạm)"
+- later       button     x=later-x y=later-y w=later-w h=later-h parent=panel label="Để sau (chưa chạm)"

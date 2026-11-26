@@ -1,0 +1,5 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,invite_delay,Thời gian từ lúc trận dừng tới lúc xin mở lời mời,giây,1.5,như IDEA,như IDEA,"Popup thua hiện sau 1 giây (feature-run/run-flow/flow-rules), thêm 0.5 giây để thấy dòng Kỉ lục mới (dự kiến)"
+2,max_invites_per_launch,Số lần mời tối đa mỗi lần mở game,lần,1,như IDEA,như IDEA,Không mời lại liên tục; không lưu xuống máy (người quyết 2026-11-27)

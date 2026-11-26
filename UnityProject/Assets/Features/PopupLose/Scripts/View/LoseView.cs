@@ -16,8 +16,6 @@ namespace Game.PopupLose
         [SerializeField] private TMP_Text _best;
         [Tooltip("The band and its \"Kỉ lục mới!\" text: shown only on a new best, and pulses.")]
         [SerializeField] private RectTransform _newRecord;
-        [Tooltip("Plain \"Quảng cáo chưa hoàn tất\" in the place of the new-record line, no band.")]
-        [SerializeField] private GameObject _adFailed;
         [SerializeField] private Button _replay;
         [SerializeField] private Button _home;
 
@@ -58,7 +56,6 @@ namespace Game.PopupLose
                 _newRecord.localScale = Vector3.one;
                 _newRecord.gameObject.SetActive(text.ShowNewRecord);
             }
-            if (_adFailed != null) _adFailed.SetActive(text.ShowAdFailed);
         }
 
         public void ShowHomeButton(bool shown)

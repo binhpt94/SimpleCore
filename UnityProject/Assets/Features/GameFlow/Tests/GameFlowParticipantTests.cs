@@ -186,12 +186,6 @@ namespace Game.GameFlow.Tests
             _battle.RaiseBuilt();
             _battle.RaiseLeft(RunLeaveChoice.BackToStart);
             Assert.That(_home.Shows, Is.EqualTo(2));
-
-            _home.PressPlay();
-            _teamSelect.PressEnter(Codes);
-            _battle.RaiseBuilt();
-            _battle.RaiseLeft(RunLeaveChoice.Abandon);
-            Assert.That(_home.Shows, Is.EqualTo(3));
         }
 
         [Test]

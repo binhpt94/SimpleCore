@@ -110,7 +110,6 @@ namespace Game.Upgrade.Tests
         {
             public RunStep Step => RunStep.Home;
             public RunTeam Team => default;
-            public bool IsPaused => false;
             public event Action<RunStep> StepChanged { add { } remove { } }
             public event Action<RunTeam> RunStarted { add { } remove { } }
             public event Action BattleStarted { add { } remove { } }
@@ -118,9 +117,6 @@ namespace Game.Upgrade.Tests
             public event Action BattleCleared { add { } remove { } }
             public void Play() { }
             public void EnterBattle(RunTeam team) { }
-            public void Pause() { }
-            public void Resume() { }
-            public void Abandon() { }
             public void Replay() { }
             public void GoHome() { }
             public void Lose() { }

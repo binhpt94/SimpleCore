@@ -29,7 +29,7 @@ namespace Game.Castle.Tests
             _enemyCombat = new FakeEnemyCombat();
             var hits = new CombatEnemyHits(_combat, _enemyCombat);
             _body = new CastleBody(_config, _run);
-            _skills = new CastleSkills(_config, _body, _run, _enemies, new FakeHeroSquad(), hits);
+            _skills = new CastleSkills(_config, _body, _enemies, new FakeHeroSquad(), hits);
             var upgrades = new CastleUpgrades(_body, _skills);
             _shot = new CastleAutoShot(_config, _body, _enemies, upgrades, hits);
         }
@@ -131,19 +131,6 @@ namespace Game.Castle.Tests
 
             Assert.That(foes, Is.Empty);
             Assert.That(_body.Health, Is.EqualTo(0f));
-        }
-
-        [Test]
-        public void Revived_castle_can_be_hit_through_combat_again()
-        {
-            _body.TakeTotal(0, 1000f);
-            _body.ReportFallen();
-
-            _body.Revive();
-
-            Assert.That(_body.CanBeHit(0), Is.True);
-            _body.TakeTotal(0, 100f);
-            Assert.That(_body.Health, Is.EqualTo(200f));
         }
 
         [Test]

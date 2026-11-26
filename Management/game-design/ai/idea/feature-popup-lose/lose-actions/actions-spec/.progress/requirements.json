@@ -97,17 +97,17 @@
    "at": "2026-11-25 20:45:27"
   },
   "edge-roi-game-khi-popup-thua-dang-mo": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "LosePopupTests.ComingBackToTheGameKeepsTheLosePopupAsItWasAndNeverPauses"
+    "LosePopupTests.ComingBackToTheGameKeepsTheLosePopupAsItWas"
    ],
    "play": "",
-   "hash": "d4a7f4abfa89",
-   "text": "**Rời game khi popup thua đang mở:** quay lại popup vẫn như cũ; không mở popup tạm dừng.",
+   "hash": "c7a65a1fca95",
+   "text": "**Rời game khi popup thua đang mở:** quay lại popup vẫn như cũ.",
    "title": "Rời game khi popup thua đang mở",
-   "by": "@CodeLead",
-   "at": "2026-11-25 18:31:11"
+   "by": "PopupLose",
+   "at": "2026-11-27 02:32:36"
   },
   "params": {
    "state": "verified",
@@ -450,6 +450,13 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 02:32:36",
+   "id": "edge-roi-game-khi-popup-thua-dang-mo",
+   "state": "done",
+   "by": "PopupLose",
+   "note": "LosePopupTests.ComingBackToTheGameKeepsTheLosePopupAsItWas"
   }
  ]
 }

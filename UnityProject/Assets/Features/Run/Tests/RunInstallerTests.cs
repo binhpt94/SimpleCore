@@ -40,8 +40,6 @@ namespace Game.Run.Tests
 
             Assert.IsTrue(registry.TryResolve<IRunFlow>(out var flow));
             Assert.IsTrue(registry.TryResolve<IRunScore>(out _));
-            Assert.IsTrue(registry.TryResolve<IRunRevive>(out var revive));
-            Assert.AreSame(flow, revive, "IRunRevive must be the same object as IRunFlow.");
             Assert.IsTrue(registry.TryResolve<IRunBattle>(out var battle));
             Assert.AreSame(flow, battle, "IRunBattle must be the same object as IRunFlow.");
             Assert.AreEqual(RunStep.Home, flow.Step);
@@ -67,15 +65,13 @@ namespace Game.Run.Tests
         [Test]
         public void ConfigAssetHoldsThePrototypeRunValues()
         {
-            // "Thông số theo giai đoạn", PROTOTYPE column of flow-rules, pause-rules, score-rules, start-values.
+            // "Thông số theo giai đoạn", PROTOTYPE column of flow-rules, score-rules, start-values.
             var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
             Assert.IsNotNull(config, $"Missing {ConfigPath}");
 
             Assert.AreEqual(1f, config.LoseDelaySeconds, "flow-rules: 1 s before the lose popup.");
             Assert.AreEqual(3, config.TeamSize);
             Assert.IsFalse(config.SkipMenus, "flow-rules: after Loading comes the start screen; Play again goes to team select.");
-            Assert.IsTrue(config.ReviveOnce, "flow-rules, start-values: one revive by ad per run.");
-            Assert.IsTrue(config.PauseEnabled, "pause-rules: pause button and pause popup.");
             CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, config.DefaultTeam.HeroCodes,
                 "feature-team-select/team-memory/memory-rules: default team (IDEA battle, dev cheats).");
         }
@@ -101,72 +97,23 @@ namespace Game.Run.Tests
             battle.BuildBattle(ChosenTeam);
             Assert.AreEqual(RunStep.Playing, flow.Step);
 
-            flow.Pause();
-            clock.Step(1);
-            flow.Abandon();
+            flow.Lose();
+            clock.Step(40);
+            flow.Replay();
 
-            CollectionAssert.AreEqual(new[] { "built", "left:Abandon:Home" }, answers);
+            CollectionAssert.AreEqual(new[] { "built", "left:PlayAgain:Home" }, answers);
             CollectionAssert.Contains(clock.Calls, "ClearRun", "The battle was cleared before the flow heard of it.");
             flow.Shutdown();
         }
 
         [Test]
-        public void ConfigAssetPausesThePrototypeBattleWhenLeavingTheGameOrPressingBack()
-        {
-            // pause-rules "Thông số theo giai đoạn": PROTOTYPE pauses when leaving the game and on the back key.
-            var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
-            Assert.IsNotNull(config, $"Missing {ConfigPath}");
-
-            Assert.IsTrue(config.PauseOnLeavingApp);
-            Assert.IsTrue(config.BackKeyPauses);
-        }
-
-        [Test]
-        public void PrototypeRunTakesPauseRequestsThroughTheClockQueue()
+        public void PrototypeRunHasBackToStart()
         {
             var clock = new FakeSimClock();
             var flow = InstalledRunInBattle(clock);
-            Assert.IsTrue(flow.PauseEnabled);
-
-            flow.Pause();
-            Assert.AreEqual(RunStep.Playing, flow.Step, "The press only queues the pause.");
-            clock.Step(1);
-
-            Assert.AreEqual(RunStep.Paused, flow.Step);
-            Assert.IsTrue(flow.IsPaused);
-            flow.Shutdown();
-        }
-
-        [Test]
-        public void PrototypeRunOffersOneReviveOnTheFirstCastleFall()
-        {
-            var clock = new FakeSimClock();
-            var flow = InstalledRunInBattle(clock);
-            Assert.IsTrue(flow.ReviveOnce);
 
             flow.Lose();
-            Assert.AreEqual(RunStep.ReviveWait, flow.Step);
             clock.Step(40);
-            Assert.AreEqual(RunStep.ReviveOffer, flow.Step, "The revive popup shows after 1 s of clock steps.");
-            flow.Shutdown();
-        }
-
-        [Test]
-        public void PrototypeRunHasBackToStartAndGivingUp()
-        {
-            var clock = new FakeSimClock();
-            var flow = InstalledRunInBattle(clock);
-
-            flow.Pause();
-            clock.Step(1);
-            flow.Abandon();
-            Assert.AreEqual(RunStep.Home, flow.Step, "Giving up from the pause popup goes to the start screen.");
-
-            flow.Play();
-            flow.EnterBattle(ChosenTeam);
-            flow.Lose();
-            clock.Step(40);
-            flow.DeclineRevive();
             Assert.AreEqual(RunStep.Lost, flow.Step);
             flow.GoHome();
             Assert.AreEqual(RunStep.Home, flow.Step, "Back to start on the lose popup goes to the start screen.");
@@ -174,7 +121,7 @@ namespace Game.Run.Tests
         }
 
         [Test]
-        public void ConfigAssetHasTheDevicePrefabThatHearsLeavingAndBackKey()
+        public void ConfigAssetHasTheDevicePrefabThatHearsLeavingTheGame()
         {
             var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
             Assert.IsNotNull(config, $"Missing {ConfigPath}");
@@ -219,12 +166,9 @@ namespace Game.Run.Tests
             flow.Lose();
             CollectionAssert.Contains(clock.Owners, "Run", "The run waits at its own place in the step order.");
             clock.Step(39);
-            Assert.AreEqual(RunStep.ReviveWait, flow.Step, "39 steps of 0.025 s are not yet the 1 s wait.");
+            Assert.AreEqual(RunStep.Ending, flow.Step, "39 steps of 0.025 s are not yet the 1 s wait.");
             clock.Step(1);
-            Assert.AreEqual(RunStep.ReviveOffer, flow.Step, "The revive popup shows after 1 s of clock steps.");
-            flow.DeclineRevive();
-            flow.Lose();
-            Assert.AreEqual(RunStep.Lost, flow.Step);
+            Assert.AreEqual(RunStep.Lost, flow.Step, "The lose popup shows after 1 s of clock steps.");
             flow.Shutdown();
             Assert.AreEqual("ClearRun", clock.Calls[clock.Calls.Count - 1]);
         }

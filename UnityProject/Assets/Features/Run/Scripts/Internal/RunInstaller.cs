@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Game.Run
 {
-    /// <summary>Wires the run: publishes IRunFlow, IRunRevive, IRunBattle (same object) and IRunScore and joins the scene session. Depends on ISessionScene, IPopupStack, ISimClock and ISimRunControl (installed before the run).</summary>
+    /// <summary>Wires the run: publishes IRunFlow, IRunBattle (same object) and IRunScore and joins the scene session. Depends on ISessionScene, IPopupStack, ISimClock and ISimRunControl (installed before the run).</summary>
     [CreateAssetMenu(menuName = "Game/Run/Run Installer", fileName = "RunInstaller")]
     public sealed class RunInstaller : InstallerAsset
     {
@@ -28,20 +28,19 @@ namespace Game.Run
             var score = new RunScore(new PlayerPrefsBestScoreStore());
             // Frame waits: the session begins on the frame after Run, the leftover popup check on the frame after the battle starts.
             var frames = new UniTaskRunDelay();
-            // Gameplay waits (before the lose and revive popups, counting cleared waves) on the shared clock, owner "Run".
+            // Gameplay waits (before the lose popup, counting cleared waves) on the shared clock, owner "Run".
             var clockWaits = new SimClockRunDelay(simClock);
             var flow = new RunFlow(score, clockWaits, config.LoseDelaySeconds, config.TeamSize,
-                config.SkipMenus, config.DefaultTeam, config.ReviveOnce, config.PauseEnabled,
+                config.SkipMenus, config.DefaultTeam,
                 new SimRunClock(simRun, simClock));
 
             registry.Register<IRunFlow>(flow);
-            registry.Register<IRunRevive>(flow);
             registry.Register<IRunBattle>(flow);
             registry.Register<IRunScore>(score);
             // The device signals are a Unity object: made when the session runs (Play), not here.
             var signalsPrefab = config.AppSignalsPrefab;
             session.Join(new RunSession(flow, score, frames, () => UnityAppSignals.Create(signalsPrefab),
-                config.PauseOnLeavingApp, config.BackKeyPauses, clockWaits));
+                clockWaits));
             session.Join(new LeftoverPopupCheck(flow, () => popups.OpenIds.Select(id => id.ToString()).ToList(),
                 frames, new UnityRunLog()));
         }

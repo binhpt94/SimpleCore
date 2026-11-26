@@ -44,8 +44,6 @@ namespace Game.HudUpgrade.Tests
             _wallet.CoinsChanged += _ => Changed();
         }
 
-        public bool Open { get; set; } = true;
-
         /// <summary>Buy refuses although Get still says CanBuy (the state changed between the read and the tap).</summary>
         public bool RejectBuys { get; set; }
         public int BuyCalls { get; private set; }
@@ -83,13 +81,13 @@ namespace Game.HudUpgrade.Tests
         {
             var it = _items[index];
             var price = Price(index);
-            return new UpgradeItem(it.kind, it.slot, it.code, it.level, price, Open && _wallet.Coins >= price);
+            return new UpgradeItem(it.kind, it.slot, it.code, it.level, price, _wallet.Coins >= price);
         }
 
         public PurchaseResult Buy(int index)
         {
             BuyCalls++;
-            if (RejectBuys || !Open || index < 0 || index >= _items.Count) return PurchaseResult.Unavailable;
+            if (RejectBuys || index < 0 || index >= _items.Count) return PurchaseResult.Unavailable;
             var price = Price(index);
             if (_wallet.Coins < price) return PurchaseResult.NotEnoughCoins;
             _wallet.TrySpend(price);
@@ -179,7 +177,6 @@ namespace Game.HudUpgrade.Tests
         public event Action BattleStarted;
         public event Action BattleStopped;
         public event Action BattleCleared;
-        public bool IsPaused => Step == RunStep.Paused;
 
         public void GoTo(RunStep step)
         {
@@ -196,9 +193,6 @@ namespace Game.HudUpgrade.Tests
 
         public void Play() { }
         public void EnterBattle(RunTeam team) { }
-        public void Pause() { }
-        public void Resume() { }
-        public void Abandon() { }
         public void Replay() { }
         public void GoHome() { }
         public void Lose() { }

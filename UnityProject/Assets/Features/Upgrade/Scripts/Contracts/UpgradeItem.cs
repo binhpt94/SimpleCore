@@ -44,7 +44,7 @@ namespace Game.Upgrade
     {
         Bought,
         NotEnoughCoins,
-        /// <summary>Not now: paused, run over, or no such item.</summary>
+        /// <summary>Not now: run over, or no such item.</summary>
         Unavailable,
     }
 }

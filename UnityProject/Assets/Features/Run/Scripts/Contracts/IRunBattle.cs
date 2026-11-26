@@ -2,7 +2,7 @@ using System;
 
 namespace Game.Run
 {
-    /// <summary>How the player left a battle, chosen on the lose popup or the pause popup.</summary>
+    /// <summary>How the player left a battle, chosen on the lose popup.</summary>
     public enum RunLeaveChoice
     {
         /// <summary>Lose popup: Play again.</summary>
@@ -10,9 +10,6 @@ namespace Game.Run
 
         /// <summary>Lose popup: Back to start.</summary>
         BackToStart = 1,
-
-        /// <summary>Pause popup: give up this run.</summary>
-        Abandon = 2,
     }
 
     /// <summary>

@@ -33,7 +33,7 @@ Phân xử mọi đòn trúng trong một nhịp giao chiến (một bước nh�
 
 ### ICombatReceiver
 - Chủ của các bên nhận đòn. Combat hỏi ai còn nhận đòn, giao một tổng mỗi bên, rồi để chủ báo bên bị hạ.
-- `CanBeHit(key)`: false khi bên không còn nhận đòn (đã hạ, đang hiện lại khi hồi sinh, bị đánh bại, bị phá). Hỏi trước khi trừ máu của nhịp; đòn vào bên false bị bỏ.
+- `CanBeHit(key)`: false khi bên không còn nhận đòn (đã hạ, bị đánh bại, bị phá). Hỏi trước khi trừ máu của nhịp; đòn vào bên false bị bỏ.
 - `TakeTotal(key, total)`: trừ tổng sát thương của nhịp, một lần mỗi bên mỗi nhịp. Chưa báo gì.
 - `ReportFallen()`: gọi sau khi mọi chủ bị trúng nhịp này đã trừ xong; báo mỗi bên có máu từ trên 0 về 0, một lần mỗi bên.
 - Hiện thực: Hero, Enemy, Castle.

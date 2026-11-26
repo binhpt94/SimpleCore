@@ -81,31 +81,6 @@ namespace Game.Run.Tests
         }
 
         [Test]
-        public void ThereIsNoGivingUp()
-        {
-            _flow.Begin();
-            _flow.Pause();
-            _flow.Abandon();
-            Assert.AreEqual(RunStep.Paused, _flow.Step);
-        }
-
-        [Test]
-        public void WithPauseOffNoPauseRequestStopsTheBattle()
-        {
-            var signals = new FakeSignals();
-            var flow = new RunFlow(_score, _delay, 1f, 3, skipMenus: true, defaultTeam: DefaultTeam, pauseEnabled: false);
-            using (new RunInterrupts(flow, signals, pauseOnLeave: true, backKeyPauses: true))
-            {
-                flow.Begin();
-                flow.Pause();
-                signals.Leave();
-                signals.Back();
-                Assert.AreEqual(RunStep.Playing, flow.Step);
-                Assert.IsFalse(flow.IsPaused);
-            }
-        }
-
-        [Test]
         public void WithMenusTheGameStaysOnTheStartScreen()
         {
             var flow = new RunFlow(_score, _delay, 1f, 3);
@@ -185,21 +160,6 @@ namespace Game.Run.Tests
                 public Cancel(Action cancel) => _cancel = cancel;
                 public void Dispose() => _cancel();
             }
-        }
-
-        private sealed class FakeSignals : IAppSignals
-        {
-            public event Action LeftApp;
-            public event Action CameBack;
-            public event Action BackPressed;
-
-            public void Leave() => LeftApp?.Invoke();
-
-            public void Return() => CameBack?.Invoke();
-
-            public void Back() => BackPressed?.Invoke();
-
-            public void Dispose() { }
         }
 
         private sealed class FakeStore : IBestScoreStore

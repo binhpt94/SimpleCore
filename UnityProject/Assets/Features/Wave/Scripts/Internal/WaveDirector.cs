@@ -102,16 +102,14 @@ namespace Game.Wave
         /// <summary>
         /// Wave's part of one step of the shared clock. Wave runs first in the step, so it sees the defeats and the
         /// run's verdict of the previous step (spawn-after-results). Waits only count gameplay steps: on a step that is
-        /// not gameplay (paused, waiting for a revive) the send clock and the break stand still.
+        /// not gameplay the send clock and the break stand still.
         /// </summary>
         public void Step(SimStep step)
         {
             // A clear noticed during the last step is settled now, after every feature had its say in that step:
             // if the castle fell in the same step the battle is already stopped and the clear does not count.
-            // If the castle fell for the first time in that step, the run is in its revive flow: the clear is held until
-            // the revive is done (then it pays and the break starts) or dropped when the run is lost (BattleStopped).
             var clearedNow = false;
-            if (_clearPending && !HeldByRevive)
+            if (_clearPending)
             {
                 _clearPending = false;
                 if (_phase == Phase.Sending)
@@ -205,13 +203,6 @@ namespace Game.Wave
             WaveStarted?.Invoke(wave);
             Send(0d);
         }
-
-        /// <summary>
-        /// True while the run is in its revive flow: the run holds the clear of that step
-        /// (feature-wave/wave-clear/clear-rules#edge-thanh-bi-pha-cung-luc-con-cuoi-bi, feature-run/run-flow/flow-rules).
-        /// </summary>
-        private bool HeldByRevive =>
-            _run.Step == RunStep.ReviveWait || _run.Step == RunStep.ReviveOffer || _run.Step == RunStep.Reviving;
 
         private void SetPhase(Phase phase)
         {

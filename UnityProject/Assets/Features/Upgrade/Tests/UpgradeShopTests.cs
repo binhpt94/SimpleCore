@@ -206,18 +206,6 @@ namespace Game.Upgrade.Tests
         }
 
         [Test]
-        public void Buying_while_paused_is_refused_even_with_enough_coins()
-        {
-            EnterBattle();
-            _wallet.Coins = 1000;
-            _run.SetStep(RunStep.Paused);
-
-            Assert.AreEqual(PurchaseResult.Unavailable, _shop.Buy(0));
-            Assert.AreEqual(1000, _wallet.Coins);
-            Assert.IsFalse(_shop.Get(0).CanBuy);
-        }
-
-        [Test]
         public void After_the_castle_falls_buying_is_refused()
         {
             EnterBattle();
@@ -251,7 +239,7 @@ namespace Game.Upgrade.Tests
         }
 
         [Test]
-        public void The_bar_is_told_when_coins_change_pause_toggles_or_a_level_is_bought()
+        public void The_bar_is_told_when_coins_change_or_a_level_is_bought()
         {
             EnterBattle();
             _changes = 0;
@@ -259,28 +247,10 @@ namespace Game.Upgrade.Tests
             _wallet.Grant(10);
             Assert.AreEqual(1, _changes);
 
-            _run.SetStep(RunStep.Paused);
-            Assert.AreEqual(2, _changes);
-
-            _run.SetStep(RunStep.Playing);
             _wallet.Coins = 100;
             _changes = 0;
             _shop.Buy(0);
             Assert.GreaterOrEqual(_changes, 1);
-        }
-
-        [Test]
-        public void The_bar_is_told_again_when_play_resumes_after_a_pause()
-        {
-            EnterBattle();
-            _wallet.Coins = 1000;
-            _run.SetStep(RunStep.Paused);
-            _changes = 0;
-
-            _run.SetStep(RunStep.Playing);
-
-            Assert.GreaterOrEqual(_changes, 1);
-            for (var i = 0; i < _shop.Count; i++) Assert.IsTrue(_shop.Get(i).CanBuy);
         }
 
         [Test]
@@ -321,8 +291,6 @@ namespace Game.Upgrade.Tests
             _wallet.Coins = 1000;
             _shop.Buy(1);
 
-            _run.SetStep(RunStep.Paused);
-            _run.SetStep(RunStep.Playing);
             _wallet.Grant(50);
             _run.CountClearedWave(1);
 
@@ -343,21 +311,9 @@ namespace Game.Upgrade.Tests
         }
 
         [Test]
-        public void Buying_works_again_after_resuming_from_pause()
-        {
-            EnterBattle();
-            _wallet.Coins = 1000;
-            _run.SetStep(RunStep.Paused);
-            _run.SetStep(RunStep.Playing);
-
-            Assert.IsTrue(_shop.Get(0).CanBuy);
-            Assert.AreEqual(PurchaseResult.Bought, _shop.Buy(0));
-        }
-
-        [Test]
         public void Buying_stays_open_the_whole_battle_including_the_break_between_waves()
         {
-            // The break between waves raises no run event: the shop closes only on pause or at the end of the run.
+            // The break between waves raises no run event: the shop closes only at the end of the run.
             EnterBattle();
             _wallet.Coins = 1000;
 
@@ -460,9 +416,6 @@ namespace Game.Upgrade.Tests
 
             _shop.Buy(0);                         // not enough coins
             _wallet.Coins = 1000;
-            _run.SetStep(RunStep.Paused);
-            _shop.Buy(0);                         // paused
-            _run.SetStep(RunStep.Playing);
             _shop.Buy(0);
             _run.Stop();
             _shop.Buy(0);                         // run over
@@ -558,24 +511,6 @@ namespace Game.Upgrade.Tests
             Assert.AreEqual(10, _wallet.Coins);
             Assert.AreEqual(2, _shop.Get(3).Level);
             Assert.AreEqual(1, _shop.Get(0).Level);
-        }
-
-        [Test]
-        public void A_buy_tap_followed_by_a_pause_before_the_step_is_refused()
-        {
-            EnterBattle();
-            _wallet.Coins = 1000;
-            var applied = new List<(int index, PurchaseResult result)>();
-            _shop.OrderApplied += (index, result) => applied.Add((index, result));
-
-            _shop.Order(0);
-            _run.SetStep(RunStep.Paused);
-            _clock.Step();
-
-            CollectionAssert.AreEqual(new[] { (0, PurchaseResult.Unavailable) }, applied);
-            Assert.AreEqual(1000, _wallet.Coins);
-            Assert.AreEqual(1, _shop.Get(0).Level);
-            Assert.IsEmpty(_heroes.Applied);
         }
 
         [Test]
@@ -684,7 +619,6 @@ namespace Game.Upgrade.Tests
         {
             public RunStep Step { get; private set; } = RunStep.Home;
             public RunTeam Team { get; private set; }
-            public bool IsPaused => Step == RunStep.Paused;
 
             public event Action<RunStep> StepChanged;
             public event Action<RunTeam> RunStarted;
@@ -716,9 +650,6 @@ namespace Game.Upgrade.Tests
 
             public void Play() { }
             public void EnterBattle(RunTeam team) { }
-            public void Pause() { }
-            public void Resume() { }
-            public void Abandon() { }
             public void Replay() { }
             public void GoHome() { }
             public void Lose() { }

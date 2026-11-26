@@ -64,10 +64,10 @@ namespace Game.Hud
             _run.BattleCleared -= HideBanner;
         }
 
-        /// <summary>Counts the banner down; stands still while the battle is paused.</summary>
+        /// <summary>Counts the banner down.</summary>
         public void Tick(float deltaSeconds)
         {
-            if (!_started || _bannerLeft <= 0f || _run.IsPaused || deltaSeconds <= 0f) return;
+            if (!_started || _bannerLeft <= 0f || deltaSeconds <= 0f) return;
             _bannerLeft -= deltaSeconds;
             if (_bannerLeft <= 0f) HideBanner();
         }

@@ -1,0 +1,12 @@
+---
+based-on: 4ddfae0df143
+refs: feature-popup-rating/rating-invite/invite-spec@00c235611bae, feature-popup/popup-layer/stack-rules@5f909869fc3d, feature-hud/hud-layout/layout-spec@aa79f655e44b
+---
+# Cheat: popup mời đánh giá
+
+State dựng nhanh popup mời đánh giá ở bản dev để test, Play và gen ảnh concept, không phải chơi tới lúc phá kỉ lục.
+
+## Ý cốt lõi
+
+### invite-open | AI 8 | Popup mời đánh giá đang mở, chưa chạm nút nào
+Ép: mở `PopupRating/Main` trên scene Game, bỏ qua điều kiện lúc mời. Có đủ mọi thành phần: dòng mời "Đánh giá game trên Google Play", nút "Đánh giá", nút "Để sau".

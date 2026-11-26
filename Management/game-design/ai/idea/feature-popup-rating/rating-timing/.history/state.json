@@ -1,0 +1,25 @@
+{
+ "hash": "60bcc7e2fce2",
+ "items": {
+  "trigger-new-record": {
+   "hash": "2dff3b82febd",
+   "text": "Lượt vừa chốt có cờ \"kỉ lục mới\" bật thì lượt đó được mời\nCờ do `feature-run/run-score` cấp. Lượt không phá kỉ lục thì không mời."
+  },
+  "show-over-lose": {
+   "hash": "e137ba426b0f",
+   "text": "Lời mời mở chồng lên popup thua đang hiện; popup thua nằm dưới, không nhận bấm tới khi lời mời đóng"
+  },
+  "back-to-lose": {
+   "hash": "620b4652b099",
+   "text": "Lời mời đóng thì popup thua nhận bấm lại, người chơi chọn Chơi lại hay Về màn bắt đầu như thường"
+  },
+  "once-per-launch": {
+   "hash": "e3c0b2d7c783",
+   "text": "Mỗi lần mở game có nhiều nhất một lần mời; tắt game mở lại thì được mời lại\n\"Lần mời\" tính khi popup mời đã hiện, dù người chơi chọn gì."
+  },
+  "memory-only": {
+   "hash": "3a93ac996710",
+   "text": "Việc đã mời chỉ nhớ trong lúc game đang mở, không lưu xuống máy\nNgười quyết 2026-11-27."
+  }
+ }
+}

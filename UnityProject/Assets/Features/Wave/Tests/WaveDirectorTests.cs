@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Game.Wave.Tests
 {
     /// <summary>
-    /// The director driven by a hand-stepped shared clock (0.025 s steps); a step is gameplay unless the run is paused.
+    /// The director driven by a hand-stepped shared clock (0.025 s steps); a step is gameplay unless the test says otherwise.
     /// </summary>
     public class WaveDirectorTests
     {
@@ -23,7 +23,7 @@ namespace Game.Wave.Tests
             _log = new List<string>();
             _run = new FakeRun(_log);
             _enemies = new FakeEnemies();
-            _clock = new FakeSimClock { Paused = () => _run.IsPaused };
+            _clock = new FakeSimClock();
             Make(new WaveRules());
             _director.WaveStarted += w => _log.Add("started " + w);
             _director.WaveCleared += w => _log.Add("cleared " + w);
@@ -174,25 +174,6 @@ namespace Game.Wave.Tests
         }
 
         [Test]
-        public void Pause_FreezesSendingAndTheBreak()
-        {
-            Begin();
-            _run.IsPaused = true;
-            Wait(10);
-            Assert.That(_enemies.Spawned.Count, Is.EqualTo(1));
-
-            _run.IsPaused = false;
-            ClearWaveOne();
-            _run.IsPaused = true;
-            Wait(10);
-            Assert.That(_log, Has.No.Member("started 2"));
-
-            _run.IsPaused = false;
-            Wait(3.01);
-            Assert.That(_log, Has.Member("started 2"));
-        }
-
-        [Test]
         public void FortyEnemiesAlive_HoldsTheNextOne_UntilOneFalls()
         {
             Make(new WaveRules { AliveCap = 3 });
@@ -289,56 +270,6 @@ namespace Game.Wave.Tests
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(8));
             Assert.That(_enemies.Spawned.FindAll(s => s.Side == EnemySide.Left).Count, Is.EqualTo(4));
             Assert.That(_enemies.Spawned.FindAll(s => s.Side == EnemySide.Right).Count, Is.EqualTo(4));
-        }
-
-        [Test]
-        public void PauseMidInterval_ResumesTheRestOfTheInterval_WithoutCatchingUp()
-        {
-            Begin();
-            Wait(0.4);
-            _run.IsPaused = true;
-            Wait(10);
-            _run.IsPaused = false;
-
-            Wait(0.59);
-            Assert.That(_enemies.Spawned.Count, Is.EqualTo(1), "0.6 s of the interval were still left");
-            Wait(0.02);
-            Assert.That(_enemies.Spawned.Count, Is.EqualTo(2), "one enemy, no make-up for the paused time");
-        }
-
-        [Test]
-        public void PauseDuringTheBreak_KeepsTheRestOfTheThreeSeconds()
-        {
-            Begin();
-            ClearWaveOne();
-            Wait(1.2);
-            _run.IsPaused = true;
-            Wait(10);
-            _run.IsPaused = false;
-
-            Wait(1.75);
-            Assert.That(_log, Has.No.Member("started 2"), "1.8 s were left when paused at 1.2 s");
-            Wait(0.1);
-            Assert.That(_log, Has.Member("started 2"));
-        }
-
-        [Test]
-        public void PauseRightAtTheClear_PaysAndScoresAtOnce_TheBreakCountsAfterResume()
-        {
-            Begin();
-            Wait(7.01);
-            _enemies.DefeatAll();
-            _run.IsPaused = true;
-            Step();
-
-            Assert.That(_log, Has.Member("coins 25"));
-            Assert.That(_log, Has.Member("score 1"));
-            Wait(10);
-            Assert.That(_log, Has.No.Member("started 2"), "the break does not count while paused");
-
-            _run.IsPaused = false;
-            Wait(3.01);
-            Assert.That(_log, Has.Member("started 2"));
         }
 
         [Test]
@@ -470,12 +401,12 @@ namespace Game.Wave.Tests
         [Test]
         public void StepsThatAreNotGameplay_DoNotStartTheFirstWave()
         {
-            _run.IsPaused = true;
+            _clock.Gameplay = () => false;
             _run.StartBattle();
             _clock.Steps(100);
             Assert.That(_enemies.Spawned, Is.Empty, "the first wave waits for the first gameplay step");
 
-            _run.IsPaused = false;
+            _clock.Gameplay = () => true;
             Step();
             Assert.That(_enemies.Spawned.Count, Is.EqualTo(1));
         }

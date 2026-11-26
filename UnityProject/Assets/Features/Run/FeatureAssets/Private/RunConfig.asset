@@ -19,8 +19,4 @@ MonoBehaviour:
   - knight
   - axeman
   - archer
-  pauseEnabled: 1
-  pauseOnLeavingApp: 1
-  backKeyPauses: 1
-  reviveOnce: 1
   appSignalsPrefab: {fileID: 4410000000000000001, guid: 9a4b2c6d8e0f41a3b5c7d9e1f2a3b4c5, type: 3}

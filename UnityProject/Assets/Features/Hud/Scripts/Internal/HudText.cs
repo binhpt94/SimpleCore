@@ -53,7 +53,7 @@ namespace Game.Hud
         /// <summary>True on the steps where the battle screen is up.</summary>
         public static bool IsBattle(RunStep step)
         {
-            return step == RunStep.Playing || step == RunStep.Paused || step == RunStep.Ending || step == RunStep.Lost;
+            return step == RunStep.Playing || step == RunStep.Ending || step == RunStep.Lost;
         }
 
         private static string Whole(float value)

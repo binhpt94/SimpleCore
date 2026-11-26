@@ -11,7 +11,7 @@ namespace Game.Upgrade
     /// <summary>
     /// The upgrade shop of a run: six items (heroes by slot, then castle health, attack, skills), each at
     /// level 1 when the run starts. Buying pays through the wallet and pushes the new level to the hero or castle
-    /// at once. Buying works only while the battle is running and not paused.
+    /// at once. Buying works only while the battle is running.
     /// A player tap goes through <see cref="Order"/>: it waits in the shared clock's queue and is bought at the start
     /// of the next step, checked again by the same rules then (feature-sim-clock clock-values#input-next-step).
     /// </summary>
@@ -51,7 +51,7 @@ namespace Game.Upgrade
 
         /// <summary>
         /// Queues one level of the item at <paramref name="index"/>. Nothing is paid until the next step; then the
-        /// order is bought by the usual rules (paused, battle over, coins) and <see cref="OrderApplied"/> tells the outcome.
+        /// order is bought by the usual rules (battle over, coins) and <see cref="OrderApplied"/> tells the outcome.
         /// An order left over from an earlier run is dropped without a report.
         /// </summary>
         public void Order(int index)
@@ -67,7 +67,7 @@ namespace Game.Upgrade
 
         public int Count => _items.Count;
 
-        private bool CanBuyNow => _battleOn && _run.Step == RunStep.Playing && !_run.IsPaused;
+        private bool CanBuyNow => _battleOn && _run.Step == RunStep.Playing;
 
         /// <summary>Starts listening to the run and the wallet. Call once; undo with <see cref="Detach"/>.</summary>
         public void Attach()

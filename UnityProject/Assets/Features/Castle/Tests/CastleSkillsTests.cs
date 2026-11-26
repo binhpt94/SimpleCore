@@ -20,7 +20,7 @@ namespace Game.Castle.Tests
             _enemies = new FakeEnemyField();
             _heroes = new FakeHeroSquad();
             _body = new CastleBody(_config, _run);
-            _skills = new CastleSkills(_config, _body, _run, _enemies, _heroes, _enemies);
+            _skills = new CastleSkills(_config, _body, _enemies, _heroes, _enemies);
         }
 
         [TearDown]
@@ -72,17 +72,6 @@ namespace Game.Castle.Tests
 
             Assert.That(_enemies.Slows, Is.EqualTo(new[] { 5f }));
             Assert.That(_heroes.Heals, Is.EqualTo(new[] { 0.3f }));
-        }
-
-        [Test]
-        public void Skills_cannot_be_used_while_paused_and_cooldowns_stand_still()
-        {
-            _skills.TryUse(CastleSkill.Rally);
-            _run.IsPaused = true;
-
-            Assert.That(_skills.TryUse(CastleSkill.Frost), Is.False);
-            _skills.Tick(10f);
-            Assert.That(_skills.GetState(CastleSkill.Rally).CooldownLeft, Is.EqualTo(25f));
         }
 
         [Test]

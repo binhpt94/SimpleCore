@@ -6,8 +6,8 @@ namespace Game.Run
 {
     /// <summary>
     /// The run's gameplay waits on the shared clock, at the run's place in each step (owner "Run", last in the order).
-    /// <see cref="Schedule"/> counts the length of every step after the one it was asked in, paused or not: the run's
-    /// own waits (before the lose popup, before the revive popup) happen while the battle is stopped.
+    /// <see cref="Schedule"/> counts the length of every step after the one it was asked in, gameplay on or not: the run's
+    /// own wait (before the lose popup) happens while the battle is stopped.
     /// <see cref="NextFrame"/> runs at the run's next place in a step, so a wave reported cleared earlier in a step
     /// counts at the end of that step unless the castle fell in it.
     /// It listens to the clock from <see cref="Listen"/> (the scene session runs) or the first wait; dispose it when the session ends.

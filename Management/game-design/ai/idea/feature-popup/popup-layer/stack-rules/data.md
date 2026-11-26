@@ -1,6 +1,6 @@
 ---
 based-on: 91d4f017d2fb
-refs: feature-popup/popup-request@ff4b78bc4b2c, feature-popup/popup-request/request-rules@2a7ea725bb37, feature-run/run-flow@45cc90c1501f
+refs: feature-popup/popup-request@ff4b78bc4b2c, feature-popup/popup-request/request-rules@f36090b274ea, feature-run/run-flow@45cc90c1501f
 ---
 # Luật xếp chồng và chặn bấm
 

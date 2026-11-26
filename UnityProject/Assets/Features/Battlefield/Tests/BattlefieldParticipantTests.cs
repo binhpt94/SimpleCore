@@ -56,17 +56,15 @@ namespace Game.Battlefield.Tests
         }
 
         [Test]
-        public void PauseCastleDestroyedAndRevive_LeaveTheBackdropUntouched()
+        public void CastleDestroyed_LeavesTheBackdropUntouched()
         {
             _participant.Run();
             _run.RaiseBattleStarted();
             var view = _views.Last;
 
-            _run.SetStep(RunStep.Paused);
-            _run.SetStep(RunStep.Playing);
             _run.SetStep(RunStep.Ending);
             _run.RaiseBattleStopped();
-            _run.SetStep(RunStep.Playing);
+            _run.SetStep(RunStep.Lost);
 
             Assert.That(_views.Created, Is.EqualTo(1));
             Assert.That(_views.Alive, Is.EqualTo(1));
@@ -230,7 +228,6 @@ namespace Game.Battlefield.Tests
             public event Action BattleStarted;
             public event Action BattleStopped;
             public event Action BattleCleared;
-            public bool IsPaused => Step == RunStep.Paused;
 
             public void SetStep(RunStep step)
             {
@@ -249,9 +246,6 @@ namespace Game.Battlefield.Tests
 
             public void Play() { }
             public void EnterBattle(RunTeam team) { }
-            public void Pause() { }
-            public void Resume() { }
-            public void Abandon() { }
             public void Replay() { }
             public void GoHome() { }
             public void Lose() { }

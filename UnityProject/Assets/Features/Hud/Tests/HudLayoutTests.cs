@@ -72,82 +72,6 @@ namespace Game.Hud.Tests
         [TestCase(Wide16By9)]
         [TestCase(Wide20By9)]
         [TestCase(Wide21By9)]
-        public void TopRowGoesPauseThenMoneyThenHealthThenWaveFromLeftToRight(float width)
-        {
-            var pause = Box("Pause", width);
-            var coin = Box("Coin", width);
-            var health = Box("Health", width);
-            var wave = Box("Wave", width);
-
-            Assert.Less(pause.xMax, coin.xMin);
-            Assert.Less(coin.xMax, health.xMin);
-            Assert.Less(health.xMax, wave.xMin);
-            Assert.AreEqual(width / 2f, health.center.x, 0.5f);
-        }
-
-        [TestCase(Wide16By9)]
-        [TestCase(Wide20By9)]
-        [TestCase(Wide21By9)]
-        public void WithoutThePauseButtonTheTopRowIsMoneyHealthWaveAndTheCornerStaysEmpty(float width)
-        {
-            // A stage with the pause button off (IDEA, or PROTOTYPE where it is optional): no pause button.
-            _view.ShowPauseButton(false);
-            var parts = Parts(width);
-
-            Assert.IsFalse(parts.ContainsKey("Pause"));
-            foreach (var part in parts)
-            {
-                if (part.Key == "Band") continue;
-                Assert.IsFalse(part.Value.Overlaps(Rect.MinMaxRect(40f, 10f, 160f, 130f)), part.Key + " sits in the pause corner");
-            }
-
-            Assert.Less(Box("Coins", width).xMax, Box("Health", width).xMin);
-            Assert.Less(Box("Health", width).xMax, Box("Wave", width).xMin);
-        }
-
-        [TestCase(Wide16By9)]
-        [TestCase(Wide20By9)]
-        [TestCase(Wide21By9)]
-        public void PauseButtonSitsInTheTopLeftCornerOnTheOtherEdgeFromTheSkills(float width)
-        {
-            var pause = Box("Pause", width);
-
-            Assert.AreEqual(40f, pause.xMin, 0.5f);
-            Assert.AreEqual(10f, pause.yMin, 0.5f);
-            Assert.AreEqual(120f, pause.width, 0.5f);
-            Assert.AreEqual(120f, pause.height, 0.5f);
-            Assert.LessOrEqual(pause.yMax, StripTop, "pause is on the top edge");
-            Assert.GreaterOrEqual(Box("Skill Sấm sét", width).yMin, StripBottom, "skills are on the bottom edge");
-        }
-
-        [Test]
-        public void PauseButtonIsOnePressableButtonWithTwoVerticalBarsAndNoText()
-        {
-            var pause = _root.Find("Pause");
-            Assert.IsNotNull(pause);
-
-            var selectables = 0;
-            foreach (var component in pause.GetComponentsInChildren<Component>(true))
-            {
-                Assert.IsFalse(component.GetType().Name == "Text", "pause button has text on " + component.name);
-                if (IsSelectable(component)) selectables++;
-            }
-
-            Assert.AreEqual(1, selectables);
-            Assert.AreEqual(1, CountNamed(_root, "Pause"), "exactly one pause button");
-
-            if (SpriteOf(pause.gameObject) != null) return;
-            var left = BoxOf((RectTransform)pause.Find("Bar left"), Wide16By9);
-            var right = BoxOf((RectTransform)pause.Find("Bar right"), Wide16By9);
-            Assert.Greater(left.height, left.width, "bars stand upright");
-            Assert.Greater(right.height, right.width, "bars stand upright");
-            Assert.Less(left.xMax, right.xMin);
-            Assert.AreEqual(left.yMin, right.yMin, 0.5f);
-        }
-
-        [TestCase(Wide16By9)]
-        [TestCase(Wide20By9)]
-        [TestCase(Wide21By9)]
         public void WithASafeAreaEveryPartStaysInsideItAndKeepsItsOrder(float width)
         {
             // Notch 80 on the left, rounded corner 60 on the right, navigation bar 30 at the bottom (beyond the margins).
@@ -161,7 +85,6 @@ namespace Game.Hud.Tests
                 Assert.LessOrEqual(box.yMax, Height - 30f + 0.5f, part.Key);
             }
 
-            Assert.Less(Box("Pause", width).xMax, Box("Coin", width).xMin);
             Assert.Less(Box("Skill Sấm sét", width).xMax, Box("Skill Băng giá", width).xMin);
             Assert.Less(Box("Skill Băng giá", width).xMax, Box("Skill Cổ vũ", width).xMin);
         }

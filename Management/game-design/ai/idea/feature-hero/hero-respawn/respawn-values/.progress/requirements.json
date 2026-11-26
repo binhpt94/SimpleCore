@@ -186,10 +186,10 @@
    "at": "2026-11-25 12:02:00"
   },
   "stage-prototype": {
-   "state": "verified",
+   "state": "done",
    "note": "squad đếm thời gian chờ hồi sinh còn lại theo slot, chờ CodeLead thêm vào contract IHeroDownState cho HUD đọc",
    "tests": [
-    "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud_and_stands_still_when_no_tick_runs",
+    "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud",
     "HeroInstallerTests.Installing_publishes_the_respawn_wait_left_from_the_squad",
     "HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
    ],
@@ -197,8 +197,8 @@
    "hash": "521dc64be449",
    "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Thời gian chờ hồi sinh: 8s (chỉnh sau chơi thử)\n- Hiện thời gian chờ còn lại: có (qua `feature-hud`)",
    "title": "Thông số của giai đoạn PROTOTYPE",
-   "by": "@CodeLead",
-   "at": "2026-11-26 01:18:15"
+   "by": "Hero",
+   "at": "2026-11-27 02:32:31"
   },
   "edge-hero-dang-cho-hoi-sinh-khi-thanh-bi": {
    "state": "verified",
@@ -453,6 +453,13 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 02:32:31",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroParticipantTests.The_respawn_wait_left_counts_down_for_the_hud, HeroInstallerTests.Installing_publishes_the_respawn_wait_left_from_the_squad, HeroConfigValuesTests.A_fallen_hero_shrinks_in_0_3s_waits_8s_and_grows_back_in_0_3s"
   }
  ]
 }

@@ -42,8 +42,8 @@ namespace Game.Enemy
         /// <summary>Stops drawing every enemy at once.</summary>
         void RemoveAll();
 
-        /// <summary>Freezes (or resumes) every running animation, flying shots and rising coin texts included.</summary>
-        void SetPaused(bool paused);
+        /// <summary>Freezes (or lets run again) every running animation, flying shots and rising coin texts included.</summary>
+        void SetFrozen(bool frozen);
 
         /// <summary>Destroys the stage and everything on it.</summary>
         void Close();

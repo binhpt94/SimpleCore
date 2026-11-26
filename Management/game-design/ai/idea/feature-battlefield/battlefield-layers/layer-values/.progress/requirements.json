@@ -45,18 +45,18 @@
    "at": "2026-11-25 12:10:47"
   },
   "sky-values": {
-   "state": "verified",
+   "state": "done",
    "note": "Lớp trời y 0..14, chờ biên dịch",
    "tests": [
     "BackdropLayoutTests.Sky_FillsFromTheGroundLineToY14",
-    "BattlefieldParticipantTests.PauseCastleDestroyedAndRevive_LeaveTheBackdropUntouched"
+    "BattlefieldParticipantTests.CastleDestroyed_LeavesTheBackdropUntouched"
    ],
    "play": "",
    "hash": "643b40bbf39c",
    "text": "Trời là một hình phủ từ y=0 tới y=14u, đứng yên\nPhần trời trên y=11.7u nằm sau dải HUD trên, vẫn được vẽ.",
    "title": "Trời là một hình phủ từ y=0 tới y=14u, đứng yên",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:10:47"
+   "by": "Battlefield",
+   "at": "2026-11-27 02:20:42"
   },
   "far-values": {
    "state": "verified",
@@ -737,6 +737,19 @@
    "title": "LayerParams: Đổi nền theo mốc đợt (backdrop_by_wave)",
    "by": "@CodeLead",
    "at": "2026-11-26 00:54:07"
+  },
+  "edge-thanh-bi-pha": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "BattlefieldParticipantTests.CastleDestroyed_LeavesTheBackdropUntouched"
+   ],
+   "play": "",
+   "hash": "b356d4813375",
+   "text": "**Thành bị phá:** nền không đổi gì.",
+   "title": "Thành bị phá",
+   "by": "Battlefield",
+   "at": "2026-11-27 02:20:42"
   }
  },
  "log": [
@@ -1628,6 +1641,20 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 02:20:42",
+   "id": "edge-thanh-bi-pha",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BattlefieldParticipantTests.CastleDestroyed_LeavesTheBackdropUntouched"
+  },
+  {
+   "at": "2026-11-27 02:20:42",
+   "id": "sky-values",
+   "state": "done",
+   "by": "Battlefield",
+   "note": "BackdropLayoutTests.Sky_FillsFromTheGroundLineToY14, BattlefieldParticipantTests.CastleDestroyed_LeavesTheBackdropUntouched"
   }
  ]
 }

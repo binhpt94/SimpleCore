@@ -41,7 +41,7 @@ namespace Game.Castle
 
         /// <summary>
         /// One gameplay step of the shared clock (or any length of battle time in tests); the caller does not call
-        /// this while paused or outside a battle. A shot is due on the first step at which a full interval has passed.
+        /// this while the run holds the battle still or outside a battle. A shot is due on the first step at which a full interval has passed.
         /// </summary>
         public void Tick(float deltaSeconds)
         {

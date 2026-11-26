@@ -21,7 +21,7 @@ namespace Game.Run.Tests
         public void SetUp()
         {
             _delay = new FakeDelay();
-            _flow = new RunFlow(new RunScore(new FakeStore()), _delay, 1f, 3, reviveOnce: true, pauseEnabled: true);
+            _flow = new RunFlow(new RunScore(new FakeStore()), _delay, 1f, 3);
             _battle = _flow;
             _log = new List<string>();
             _flow.StepChanged += s => _log.Add("step:" + s);
@@ -34,12 +34,11 @@ namespace Game.Run.Tests
             _battle.BattleLeft += choice => _log.Add("BattleLeft:" + choice);
         }
 
-        /// <summary>The castle falls twice (revive then loss), the lose popup shows.</summary>
+        /// <summary>The castle falls, the lose popup shows.</summary>
         private void LoseTheRun()
         {
             _flow.Lose();
             _delay.Fire();
-            _flow.DeclineRevive();
             Assert.AreEqual(RunStep.Lost, _flow.Step);
         }
 
@@ -96,7 +95,6 @@ namespace Game.Run.Tests
             StringAssert.Contains("no hero prefab", _log.Find(l => l.StartsWith("BuildFailed:")));
             CollectionAssert.Contains(_log, "BattleCleared", "Whatever was built is cleared.");
             Assert.AreEqual(RunStep.Home, _flow.Step);
-            Assert.IsFalse(_flow.IsPaused);
         }
 
         [Test]
@@ -160,18 +158,6 @@ namespace Game.Run.Tests
         }
 
         [Test]
-        public void GivingUpOnThePausePopupSettlesClearsThenTellsTheFlow()
-        {
-            _battle.BuildBattle(Team);
-            _flow.Pause();
-            _log.Clear();
-
-            _flow.Abandon();
-
-            CollectionAssert.AreEqual(new[] { "BattleStopped", "BattleCleared", "step:Home", "BattleLeft:Abandon" }, _log);
-        }
-
-        [Test]
         public void PressingPlayAgainAndBackToStartTogetherTellsTheFlowOnce()
         {
             _battle.BuildBattle(Team);
@@ -196,7 +182,6 @@ namespace Game.Run.Tests
             _battle.BuildBattle(Team);
 
             Assert.AreEqual("BattleBuilt", _log[_log.Count - 1]);
-            Assert.IsFalse(_flow.ReviveOffered, "The new run has its revive again.");
         }
 
         private sealed class FakeDelay : IRunDelay

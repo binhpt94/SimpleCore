@@ -7,7 +7,7 @@ namespace Game.Combat
     public interface ICombatReceiver
     {
         /// <summary>
-        /// False when the side named <paramref name="key"/> no longer takes hits (fallen, appearing on revive,
+        /// False when the side named <paramref name="key"/> no longer takes hits (fallen,
         /// defeated, destroyed). Asked before any health of the tick is taken.
         /// </summary>
         bool CanBeHit(int key);

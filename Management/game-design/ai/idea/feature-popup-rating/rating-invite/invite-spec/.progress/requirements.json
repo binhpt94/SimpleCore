@@ -1,0 +1,603 @@
+{
+ "items": {
+  "popup-id": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.TheInviteIsPopupRatingMain"
+   ],
+   "play": "",
+   "hash": "274d726a9db2",
+   "text": "Popup mời có id `PopupRating/Main`\nTheo cách đặt id của `feature-popup/popup-request/request-rules`.",
+   "title": "Popup mời có id `PopupRating/Main`",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:48"
+  },
+  "invite-text": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.InviteText_TheLineReadsDanhGiaGameTrenGooglePlay"
+   ],
+   "play": "",
+   "hash": "39a3135bebef",
+   "text": "Dòng mời ghi \"Đánh giá game trên Google Play\"\nChữ trung tính: không hỏi có thích game không, không nhắc số sao.",
+   "title": "Dòng mời ghi \"Đánh giá game trên Google Play\"",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:48"
+  },
+  "two-buttons": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.TwoButtons_RateIsMainLaterIsSecond",
+    "PopupRatingInstallerTests.PopupPrefabIsUiWithRatingViewAndTwoButtonsRateFirst"
+   ],
+   "play": "",
+   "hash": "4000c78590e2",
+   "text": "Có 2 nút: \"Đánh giá\" là nút chính, \"Để sau\" là nút phụ\nNút chính đặt trước và nổi hơn nút phụ; cách làm nổi do chuyên gia giao diện quyết.",
+   "title": "Có 2 nút: \"Đánh giá\" là nút chính, \"Để sau\" là nút phụ",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:49"
+  },
+  "rate-flow": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.RateClosesThePopupFirstThenOpensThePlayAppByThisBuildsPackage"
+   ],
+   "play": "",
+   "hash": "11a1f167db53",
+   "text": "Chạm \"Đánh giá\": nhờ dịch vụ đóng popup, rồi mở trang của game trên ứng dụng Google Play\nTrang mở theo mã gói (package) của chính bản game đang chạy, không ghi cứng trong thiết kế.",
+   "title": "Chạm \"Đánh giá\": nhờ dịch vụ đóng popup, rồi mở trang của game trên ứng dụng Google Play",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:49"
+  },
+  "store-web-fallback": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.StoreOpenOrder_NoPlayAppOrInTheEditorOpensTheWebPageInABrowser"
+   ],
+   "play": "",
+   "hash": "8a02cf5168c4",
+   "text": "Máy không mở được ứng dụng Google Play thì mở trang của game trên Google Play bằng trình duyệt\nVí dụ máy không cài Google Play, hoặc đang chạy trong Unity Editor.",
+   "title": "Máy không mở được ứng dụng Google Play thì mở trang của game trên Google Play bằng trình duyệt",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:50"
+  },
+  "later-flow": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.LaterOnlyClosesThePopup"
+   ],
+   "play": "",
+   "hash": "05132ca155cd",
+   "text": "Chạm \"Để sau\": nhờ dịch vụ đóng popup, không làm gì khác",
+   "title": "Chạm \"Để sau\": nhờ dịch vụ đóng popup, không làm gì khác",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:50"
+  },
+  "first-tap-only": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.OnlyTheFirstTouchCounts_ButtonsLockUntilClosed"
+   ],
+   "play": "",
+   "hash": "526a2d1b3a8f",
+   "text": "Chỉ lần chạm nút đầu tiên có tác dụng; sau đó cả 2 nút không nhận chạm tới khi popup đóng\nTheo luật `caller-one-press` của dịch vụ popup.",
+   "title": "Chỉ lần chạm nút đầu tiên có tác dụng; sau đó cả 2 nút không nhận chạm tới khi popup đóng",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:51"
+  },
+  "back-key-later": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.BackKeyWhileOnTopActsAsLater",
+    "RatingInviteTests.BackKeyWhenNotOnTopDoesNothing"
+   ],
+   "play": "",
+   "hash": "341f07cc9f25",
+   "text": "Nút quay lại của máy khi popup mời ở trên cùng tính như chạm \"Để sau\"\nDịch vụ chuyển nút quay lại cho feature của popup trên cùng (`feature-popup/popup-layer/stack-rules`). Đã loại: bỏ qua nút quay lại như popup thua (lời mời không phải lựa chọn bắt buộc).",
+   "title": "Nút quay lại của máy khi popup mời ở trên cùng tính như chạm \"Để sau\"",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:51"
+  },
+  "backdrop-no-close": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.BackdropTouchDoesNotCloseTheInvite"
+   ],
+   "play": "",
+   "hash": "e7180ba93771",
+   "text": "Chạm nền che hay chạm ngoài popup không đóng popup mời\nGiữ luật chung của dịch vụ; người chơi chọn bằng nút hoặc nút quay lại của máy.",
+   "title": "Chạm nền che hay chạm ngoài popup không đóng popup mời",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:52"
+  },
+  "open-fail-silent": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.NeitherAppNorBrowserOpens_PopupAlreadyClosedOnlyALogError"
+   ],
+   "play": "",
+   "hash": "5185f1532e18",
+   "text": "Không mở được cả ứng dụng lẫn trình duyệt thì không báo lỗi cho người chơi, chỉ ghi lỗi trong log\nPopup đã đóng trước đó, người chơi vẫn ở trong game như sau khi chạm \"Để sau\".",
+   "title": "Không mở được cả ứng dụng lẫn trình duyệt thì không báo lỗi cho người chơi, chỉ ghi lỗi trong log",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:52"
+  },
+  "edge-cham-2-nut-gan-nhu-cung-luc": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.TwoButtonsTouchedAlmostTogether_OnlyTheFirstCounts"
+   ],
+   "play": "",
+   "hash": "2189db6efed5",
+   "text": "**Chạm 2 nút gần như cùng lúc:** chỉ lần chạm đầu tính.",
+   "title": "Chạm 2 nút gần như cùng lúc",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:53"
+  },
+  "edge-nguoi-choi-roi-game-khi-popup-dang-mo": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.LeavingTheAppWithThePopupOpen_ItIsStillOpenOnReturnAndNoChoiceIsTaken"
+   ],
+   "play": "",
+   "hash": "597058573b2d",
+   "text": "**Người chơi rời game khi popup đang mở (không chạm gì):** popup vẫn mở khi quay lại; không tính là đã chọn.",
+   "title": "Người chơi rời game khi popup đang mở (không chạm gì)",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:53"
+  },
+  "edge-cham-danh-gia-roi-quay-lai-game": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.RateThenBackToTheGame_TheInviteIsGone"
+   ],
+   "play": "",
+   "hash": "5f757150f59c",
+   "text": "**Chạm \"Đánh giá\" rồi quay lại game:** popup đã đóng; người chơi về đúng chỗ bên dưới popup.",
+   "title": "Chạm \"Đánh giá\" rồi quay lại game",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:54"
+  },
+  "edge-may-khong-co-ung-dung-google-play-hoac": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.StoreOpenOrder_NoPlayAppOrInTheEditorOpensTheWebPageInABrowser"
+   ],
+   "play": "",
+   "hash": "7f508cf29cde",
+   "text": "**Máy không có ứng dụng Google Play, hoặc chạy trong Unity Editor:** mở trang web của game trên Google Play bằng trình duyệt.",
+   "title": "Máy không có ứng dụng Google Play, hoặc chạy trong Unity Editor",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:54"
+  },
+  "edge-khong-mo-duoc-ca-hai": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.NeitherAppNorBrowserOpens_PopupAlreadyClosedOnlyALogError"
+   ],
+   "play": "",
+   "hash": "43c50ea11dcb",
+   "text": "**Không mở được cả hai:** popup đã đóng; không báo lỗi cho người chơi, chỉ ghi lỗi trong log.",
+   "title": "Không mở được cả hai",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:55"
+  },
+  "edge-game-chua-phat-hanh-tren-google-play-trang": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.GameNotYetOnGooglePlay_StillOpensByPackageName"
+   ],
+   "play": "",
+   "hash": "2d8b13290b18",
+   "text": "**Game chưa phát hành trên Google Play (trang chưa tồn tại):** vẫn mở theo mã gói; Google Play báo không tìm thấy trang. Không phải việc của game.",
+   "title": "Game chưa phát hành trên Google Play (trang chưa tồn tại)",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:55"
+  },
+  "edge-scene-bi-huy-khi-popup-dang-mo": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.SceneEndsWithThePopupOpen_DisposedSilently"
+   ],
+   "play": "",
+   "hash": "877253dc6b0d",
+   "text": "**Scene bị huỷ khi popup đang mở:** dịch vụ huỷ popup và không báo lần chạm nào (`dispose-silent`); lần mời đó coi như xong.",
+   "title": "Scene bị huỷ khi popup đang mở",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:56"
+  },
+  "params": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "PopupRatingInstallerTests.RealConfigHoldsTheIdeaValuesOfInviteParamsAndTimingParams",
+    "RatingInviteTests.ParamsRowsAreTheSameAtEveryStage"
+   ],
+   "play": "",
+   "hash": "ec7e91342d2d",
+   "text": "## Làm gì\n- Đăng kí và mở popup `PopupRating/Main` qua dịch vụ popup (`feature-popup/popup-request/request-rules`). Lúc nào mở là việc của nhánh `rating-timing`.\n- Điền dòng mời và chữ 2 nút theo bảng `InviteParams`.\n- Chạm \"Đánh giá\": nhờ dịch vụ đóng popup, rồi mở trang của game trên Google Play: thử ứng dụng Google Play trước, không được thì mở trang web của game trên Google Play. Cả hai dùng mã gói của bản game đang chạy.\n- Chạm \"Để sau\" hoặc nút quay lại của máy: nhờ dịch vụ đóng popup.\n- Chỉ xử lí lần chạm đầu của mỗi lần mở (luật `caller-one-press` của dịch vụ).\n\n## Thông số\n- Bảng `InviteParams` (`params`) trong `.excel/`: `invite_text` dòng mời, `rate_label` chữ nút chính, `later_label` chữ nút phụ, `store_open_order` thứ tự nơi mở trang Google Play.\n- Chữ hiện bằng font chung của game (ý `art-ui-text-font` của node gốc). Art ở IDEA siêu cơ bản: khung và nút đơn giản, không có hình minh hoạ.\n\n## Thông số theo giai đoạn\n- Cột `idea`, `prototype`, `full` của bảng `InviteParams`. Mọi dòng giữ như IDEA: popup mời không đổi theo giai đoạn.",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:56"
+  },
+  "inviteparams-invite-text": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.InviteText_TheLineReadsDanhGiaGameTrenGooglePlay"
+   ],
+   "play": "",
+   "hash": "610450c0b0d3",
+   "text": "Bảng InviteParams (params), dòng invite_text\nkey (string): invite_text\nname (string): Dòng mời\nunit (string): chữ\nidea (string): Đánh giá game trên Google Play\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Trung tính, không hỏi có thích game không, không nhắc số sao (rating-neutral-text)",
+   "title": "InviteParams: Dòng mời (invite_text)",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:57"
+  },
+  "inviteparams-rate-label": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.RateLabel_TheMainButtonReadsDanhGia"
+   ],
+   "play": "",
+   "hash": "f50d0e8ee757",
+   "text": "Bảng InviteParams (params), dòng rate_label\nkey (string): rate_label\nname (string): Chữ nút chính\nunit (string): chữ\nidea (string): Đánh giá\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Nói đúng việc nút làm",
+   "title": "InviteParams: Chữ nút chính (rate_label)",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:57"
+  },
+  "inviteparams-later-label": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.LaterLabel_TheSecondButtonReadsDeSau"
+   ],
+   "play": "",
+   "hash": "32934e1baff7",
+   "text": "Bảng InviteParams (params), dòng later_label\nkey (string): later_label\nname (string): Chữ nút phụ\nunit (string): chữ\nidea (string): Để sau\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người quyết giữ Để sau (2026-11-27)",
+   "title": "InviteParams: Chữ nút phụ (later_label)",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:58"
+  },
+  "inviteparams-store-open-order": {
+   "state": "done",
+   "note": "code và test",
+   "tests": [
+    "RatingInviteTests.StoreOpenOrder_NoPlayAppOrInTheEditorOpensTheWebPageInABrowser"
+   ],
+   "play": "",
+   "hash": "79dbf8227a29",
+   "text": "Bảng InviteParams (params), dòng store_open_order\nkey (string): store_open_order\nname (string): Nơi mở trang Google Play\nunit (string): thứ tự\nidea (string): ứng dụng Google Play, không được thì trình duyệt\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Máy không có Google Play hay Unity Editor vẫn mở được trang",
+   "title": "InviteParams: Nơi mở trang Google Play (store_open_order)",
+   "by": "PopupRating",
+   "at": "2026-11-27 02:51:59"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-27 02:51:47",
+   "id": "popup-id",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:48",
+   "id": "popup-id",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.TheInviteIsPopupRatingMain"
+  },
+  {
+   "at": "2026-11-27 02:51:48",
+   "id": "invite-text",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:48",
+   "id": "invite-text",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.InviteText_TheLineReadsDanhGiaGameTrenGooglePlay"
+  },
+  {
+   "at": "2026-11-27 02:51:48",
+   "id": "two-buttons",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:49",
+   "id": "two-buttons",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.TwoButtons_RateIsMainLaterIsSecond, PopupRatingInstallerTests.PopupPrefabIsUiWithRatingViewAndTwoButtonsRateFirst"
+  },
+  {
+   "at": "2026-11-27 02:51:49",
+   "id": "rate-flow",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:49",
+   "id": "rate-flow",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.RateClosesThePopupFirstThenOpensThePlayAppByThisBuildsPackage"
+  },
+  {
+   "at": "2026-11-27 02:51:49",
+   "id": "store-web-fallback",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:50",
+   "id": "store-web-fallback",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.StoreOpenOrder_NoPlayAppOrInTheEditorOpensTheWebPageInABrowser"
+  },
+  {
+   "at": "2026-11-27 02:51:50",
+   "id": "later-flow",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:50",
+   "id": "later-flow",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.LaterOnlyClosesThePopup"
+  },
+  {
+   "at": "2026-11-27 02:51:50",
+   "id": "first-tap-only",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:51",
+   "id": "first-tap-only",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.OnlyTheFirstTouchCounts_ButtonsLockUntilClosed"
+  },
+  {
+   "at": "2026-11-27 02:51:51",
+   "id": "back-key-later",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:51",
+   "id": "back-key-later",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.BackKeyWhileOnTopActsAsLater, RatingInviteTests.BackKeyWhenNotOnTopDoesNothing"
+  },
+  {
+   "at": "2026-11-27 02:51:52",
+   "id": "backdrop-no-close",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:52",
+   "id": "backdrop-no-close",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.BackdropTouchDoesNotCloseTheInvite"
+  },
+  {
+   "at": "2026-11-27 02:51:52",
+   "id": "open-fail-silent",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:52",
+   "id": "open-fail-silent",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.NeitherAppNorBrowserOpens_PopupAlreadyClosedOnlyALogError"
+  },
+  {
+   "at": "2026-11-27 02:51:53",
+   "id": "edge-cham-2-nut-gan-nhu-cung-luc",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:53",
+   "id": "edge-cham-2-nut-gan-nhu-cung-luc",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.TwoButtonsTouchedAlmostTogether_OnlyTheFirstCounts"
+  },
+  {
+   "at": "2026-11-27 02:51:53",
+   "id": "edge-nguoi-choi-roi-game-khi-popup-dang-mo",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:53",
+   "id": "edge-nguoi-choi-roi-game-khi-popup-dang-mo",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.LeavingTheAppWithThePopupOpen_ItIsStillOpenOnReturnAndNoChoiceIsTaken"
+  },
+  {
+   "at": "2026-11-27 02:51:54",
+   "id": "edge-cham-danh-gia-roi-quay-lai-game",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:54",
+   "id": "edge-cham-danh-gia-roi-quay-lai-game",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.RateThenBackToTheGame_TheInviteIsGone"
+  },
+  {
+   "at": "2026-11-27 02:51:54",
+   "id": "edge-may-khong-co-ung-dung-google-play-hoac",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:54",
+   "id": "edge-may-khong-co-ung-dung-google-play-hoac",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.StoreOpenOrder_NoPlayAppOrInTheEditorOpensTheWebPageInABrowser"
+  },
+  {
+   "at": "2026-11-27 02:51:55",
+   "id": "edge-khong-mo-duoc-ca-hai",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:55",
+   "id": "edge-khong-mo-duoc-ca-hai",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.NeitherAppNorBrowserOpens_PopupAlreadyClosedOnlyALogError"
+  },
+  {
+   "at": "2026-11-27 02:51:55",
+   "id": "edge-game-chua-phat-hanh-tren-google-play-trang",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:55",
+   "id": "edge-game-chua-phat-hanh-tren-google-play-trang",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.GameNotYetOnGooglePlay_StillOpensByPackageName"
+  },
+  {
+   "at": "2026-11-27 02:51:56",
+   "id": "edge-scene-bi-huy-khi-popup-dang-mo",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:56",
+   "id": "edge-scene-bi-huy-khi-popup-dang-mo",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.SceneEndsWithThePopupOpen_DisposedSilently"
+  },
+  {
+   "at": "2026-11-27 02:51:56",
+   "id": "params",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:56",
+   "id": "params",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "PopupRatingInstallerTests.RealConfigHoldsTheIdeaValuesOfInviteParamsAndTimingParams, RatingInviteTests.ParamsRowsAreTheSameAtEveryStage"
+  },
+  {
+   "at": "2026-11-27 02:51:57",
+   "id": "inviteparams-invite-text",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:57",
+   "id": "inviteparams-invite-text",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.InviteText_TheLineReadsDanhGiaGameTrenGooglePlay"
+  },
+  {
+   "at": "2026-11-27 02:51:57",
+   "id": "inviteparams-rate-label",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:57",
+   "id": "inviteparams-rate-label",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.RateLabel_TheMainButtonReadsDanhGia"
+  },
+  {
+   "at": "2026-11-27 02:51:58",
+   "id": "inviteparams-later-label",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:58",
+   "id": "inviteparams-later-label",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.LaterLabel_TheSecondButtonReadsDeSau"
+  },
+  {
+   "at": "2026-11-27 02:51:58",
+   "id": "inviteparams-store-open-order",
+   "state": "doing",
+   "by": "PopupRating",
+   "note": "code và test"
+  },
+  {
+   "at": "2026-11-27 02:51:59",
+   "id": "inviteparams-store-open-order",
+   "state": "done",
+   "by": "PopupRating",
+   "note": "RatingInviteTests.StoreOpenOrder_NoPlayAppOrInTheEditorOpensTheWebPageInABrowser"
+  }
+ ]
+}

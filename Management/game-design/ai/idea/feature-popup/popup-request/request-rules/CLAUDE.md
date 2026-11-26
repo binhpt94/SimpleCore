@@ -13,13 +13,14 @@ Danh sách id của scene Game (đủ mọi giai đoạn; id nào có ở giai �
 | Id | Feature sở hữu | Số nút | Nút | Chặn gì |
 |---|---|---|---|---|
 | `PopupLose/Main` | `feature-popup-lose` | 2 | Chơi lại; Về màn bắt đầu | Mọi thứ bên dưới (trận đã dừng) |
+| `PopupRating/Main` | `feature-popup-rating` | 2 | Đánh giá; Để sau | Mọi thứ bên dưới, kể cả popup thua |
 
 Nội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup-lose/lose-result`); dịch vụ không biết.
 
 ## Thông số
 | Thông số | Giá trị | Đơn vị | Lí do |
 |---|---|---|---|
-| Số id popup scene Game | 1 | id | Theo các feature popup có trong scene Game |
+| Số id popup scene Game | 2 | id | Theo các feature popup có trong scene Game |
 | Thời gian từ lúc xin mở tới lúc popup hiện | 1 | khung hình | Đã chuẩn bị ở bước tải |
 | Số lần bấm nút được xử lí mỗi lần mở | 1 | lần | Chặn bấm đúp |
 | Popup trong scene Loading | 0 | popup | Loading không có popup |
@@ -27,7 +28,7 @@ Nội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup
 ## Thông số theo giai đoạn
 | Thông số | IDEA | PROTOTYPE | FULL |
 |---|---|---|---|
-| Số id popup scene Game | 1: `PopupLose/Main` | 1: `PopupLose/Main` | Theo danh sách popup lúc đó |
+| Số id popup scene Game | 2: `PopupLose/Main`, `PopupRating/Main` | 2: `PopupLose/Main`, `PopupRating/Main` | Theo danh sách popup lúc đó |
 | Thời gian từ xin mở tới hiện | 1 khung hình | 1 khung hình (hiệu ứng mở chạy sau đó) | Như PROTOTYPE |
 
 ## Trường hợp biên
@@ -46,6 +47,7 @@ Nội dung chữ, số trên popup do feature sở hữu quyết (`feature-popup
 - **Chặn bấm đúp ở feature gọi.** Dịch vụ không biết nút nào là nút; giữ dịch vụ không biết nội dung popup. Đã loại: dịch vụ tự khoá popup sau lần bấm đầu.
 - **Rời scene không báo bấm nút.** Tránh feature gọi làm việc (chơi lại, chuyển màn) khi scene đang huỷ.
 - **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ id `PopupPause/Main` và `PopupRevive/Main`; mọi giai đoạn chỉ có `PopupLose/Main`; bỏ mục đã tự quyết về hộp xác nhận bỏ lượt.
+- **Thêm `PopupRating/Main` (2026-11-27, người quyết, qua @Manager).** Popup mời đánh giá của `feature-popup-rating` chồng lên popup thua khi lượt vừa phá kỉ lục; nó thuộc IDEA nên có trong danh sách từ IDEA.
 
 ## Chưa rõ
 - Tên `Name` của từng popup do `feature-popup-lose` chốt; đổi tên thì sửa bảng này.

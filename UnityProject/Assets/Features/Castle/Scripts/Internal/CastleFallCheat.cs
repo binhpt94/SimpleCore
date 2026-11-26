@@ -5,7 +5,7 @@ namespace Game.Castle
 {
     /// <summary>
     /// Dev-only: brings the castle down through the same hit path enemies use, so the run is told it is lost exactly
-    /// once and the castle collapses as in a real fall (feature-popup-revive/cheat#waiting-ad).
+    /// once and the castle collapses as in a real fall.
     /// </summary>
     internal sealed class CastleFallCheat : ICastleFallCheat
     {

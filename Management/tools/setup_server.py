@@ -58,7 +58,8 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
   enough): POST /api/gamedesign/promote approves one idea node (or a branch) and rebuilds live (gamedesign.approve), /sync
   approves every passing node and rebuilds live (gamedesign.approve_passing), /user-idea adds, edits or
-  removes one of the human's own ideas of a proposed node (gamedesign.user_idea), /delete deletes the ideas and
+  removes one of the human's own ideas of a proposed node (gamedesign.user_idea), /gpt-pick moves a GPT idea waiting
+  beside a fixed node up into it or deletes it (gamedesign.gpt_pick), /delete deletes the ideas and
   nodes the human marked (gamedesign.human_delete), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
   human's importance score of a node, /progress the progress of a leaf. With the PIN: /mode switches Full Auto / User control,
@@ -265,7 +266,7 @@ LIVE_LOCK = threading.Lock()
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/stage": MAX_BODY,
-              "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/user-idea": 64 * 1024, "/api/gamedesign/delete": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
+              "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/user-idea": 64 * 1024, "/api/gamedesign/gpt-pick": 16 * 1024, "/api/gamedesign/delete": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/gamedesign/requirement": 64 * 1024, "/api/vscode-groups": MAX_BODY,
               "/api/references/upload": 12 * 1024 * 1024, "/api/references/note": 64 * 1024,
               "/api/references/delete": MAX_BODY,
@@ -1397,6 +1398,16 @@ def user_idea(data):
     return {"ok": True, "id": iid, "data": sync_page.write_gamedesign(ROOT)}
 
 
+def gpt_pick(data):
+    """The buttons Chuyển lên / Xoá of an idea GPT proposed for a node already in live (người quyết 2026-11-27): only
+    the human moves it into the node (scored PICK_PROMOTE_SCORE) or deletes it (gamedesign.gpt_pick). No PIN."""
+    try:
+        iid = gamedesign.gpt_pick(ROOT, data.get("folder"), data.get("aid"), data.get("id"), data.get("action"))
+    except (ValueError, OSError, TypeError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "id": iid, "data": sync_page.write_gamedesign(ROOT)}
+
+
 def human_delete(data):
     """The floating Save of the Game design tab: the ideas and nodes the human marked for deletion, in one go
     (gamedesign.human_delete). No PIN, like the scores."""
@@ -2149,6 +2160,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, promote(data.get("path"), data.get("deep") is True))
             if self.path == "/api/gamedesign/review":
                 return self.send_json(200, review(data.get("path"), data.get("items"), data.get("table")))
+            if self.path == "/api/gamedesign/gpt-pick":
+                return self.send_json(200, gpt_pick(data))
             if self.path == "/api/gamedesign/user-idea":
                 return self.send_json(200, user_idea(data))
             if self.path == "/api/gamedesign/delete":

@@ -1,0 +1,19 @@
+{
+  "name": "Game.PopupRating.Internal",
+  "rootNamespace": "Game.PopupRating",
+  "references": [
+    "Game.Core",
+    "Game.Run.Contracts",
+    "Game.Services.Popup.Contracts",
+    "UniTask"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

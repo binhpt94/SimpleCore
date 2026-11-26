@@ -149,8 +149,8 @@ namespace Game.HudUpgrade
         /// </summary>
         private void UpdateVisibility(RunStep step) => _view.SetVisible(IsBattleOnScreen(step) && _built.Count > 0);
 
-        /// <summary>From the battle's first frame until the lose popup, pause and the ending included.</summary>
+        /// <summary>From the battle's first frame until the lose popup, the ending included.</summary>
         private static bool IsBattleOnScreen(RunStep step) =>
-            step == RunStep.Playing || step == RunStep.Paused || step == RunStep.Ending;
+            step == RunStep.Playing || step == RunStep.Ending;
     }
 }

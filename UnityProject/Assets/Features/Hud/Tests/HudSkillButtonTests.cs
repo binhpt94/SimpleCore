@@ -78,11 +78,10 @@ namespace Game.Hud.Tests
         }
 
         [Test]
-        public void NoButtonTakesTapsWhilePausedOrAfterTheRunEnded()
+        public void NoButtonTakesTapsAfterTheRunEnded()
         {
-            _run.SetStep(RunStep.Paused);
-            _view.Press(0);
             _run.SetStep(RunStep.Ending);
+            _view.Press(0);
             _view.Press(1);
             _run.SetStep(RunStep.Lost);
             _view.Press(2);
@@ -106,22 +105,6 @@ namespace Game.Hud.Tests
 
             _buttons.Tick(0.2f);
             Assert.AreEqual(1f, _view.Skills[0].Scale);
-        }
-
-        [Test]
-        public void BounceStandsStillWhilePaused()
-        {
-            _skills.SetCooling(CastleSkill.Thunder, 0.1f, 20f);
-            _buttons.Tick(0.016f);
-            _skills.SetReady(CastleSkill.Thunder);
-            _buttons.Tick(0.016f);
-            _buttons.Tick(0.1f);
-            var before = _view.Skills[0].Scale;
-
-            _run.SetStep(RunStep.Paused);
-            _buttons.Tick(1f);
-
-            Assert.AreEqual(before, _view.Skills[0].Scale);
         }
 
         [Test]

@@ -30,12 +30,12 @@ namespace Game.Castle.Tests
             _run = new FakeRunFlow();
             _enemies = new FakeEnemyField();
             _body = new CastleBody(_config, _run);
-            _skills = new CastleSkills(_config, _body, _run, _enemies, new FakeHeroSquad(), _enemies);
+            _skills = new CastleSkills(_config, _body, _enemies, new FakeHeroSquad(), _enemies);
             _upgrades = new CastleUpgrades(_body, _skills);
             var autoShot = new CastleAutoShot(_config, _body, _enemies, _upgrades, _enemies);
             _spawner = new FakeSpawner();
             _clock = new FakeSimClock();
-            _session = new CastleSession(_config, _run, _run, _enemies, _body, _skills, _upgrades, autoShot, _spawner, _clock);
+            _session = new CastleSession(_config, _run, _enemies, _body, _skills, _upgrades, autoShot, _spawner, _clock);
             _session.Run();
         }
 
@@ -67,7 +67,7 @@ namespace Game.Castle.Tests
         }
 
         [Test]
-        public void Clock_loop_cooldowns_and_revive_wait_count_as_jobs_and_all_end_with_the_session()
+        public void Clock_loop_and_cooldowns_count_as_jobs_and_all_end_with_the_session()
         {
             Assert.That(Usage.RunningJobs, Is.EqualTo(1), "the clock loop");
 
@@ -75,10 +75,6 @@ namespace Game.Castle.Tests
             _skills.TryUse(CastleSkill.Thunder);
             _clock.Steps(1);
             Assert.That(Usage.RunningJobs, Is.EqualTo(2), "a cooldown runs down");
-
-            _body.Hit(0, 5000f);
-            _run.StartRevive();
-            Assert.That(Usage.RunningJobs, Is.EqualTo(3), "the revive grow-back wait");
 
             _session.DisposeAsync();
 
@@ -95,18 +91,6 @@ namespace Game.Castle.Tests
             Assert.That(Usage.RunningJobs, Is.EqualTo(2));
 
             _clock.Run(25f);
-
-            Assert.That(Usage.RunningJobs, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void Revive_wait_job_ends_once_the_castle_has_grown_back()
-        {
-            StartBattle();
-            _body.Hit(0, 5000f);
-            _run.StartRevive();
-
-            _spawner.View.Tick(0.6f);
 
             Assert.That(Usage.RunningJobs, Is.EqualTo(1));
         }
@@ -141,60 +125,10 @@ namespace Game.Castle.Tests
             Assert.That(_spawner.View.Damaged, Is.False);
         }
 
-        // feature-popup-revive/revive-order/order-values: the castle's part of the revive flow.
-
-        [Test]
-        public void Revive_anim_sets_thirty_percent_health_at_once_then_grows_back_over_half_a_second_and_tells_the_run()
-        {
-            StartBattle();
-            _upgrades.ApplyLevel(CastleUpgrade.Health, 2); // max 1150
-            _body.Hit(0, 5000f);
-
-            _run.StartRevive();
-            Assert.That(_body.Health, Is.EqualTo(345f), "30% of 1150, set at the start of the grow-back");
-            Assert.That(_spawner.View.GrowBackSeconds, Is.EqualTo(0.5f).Within(1e-5f));
-            Assert.That(_spawner.View.Calls, Does.Contain("grow"));
-
-            _spawner.View.Tick(0.375f);
-            Assert.That(_run.ReviveShownCalls, Is.EqualTo(0), "still growing");
-            _spawner.View.Tick(0.125f); // 0.375 + 0.125 = 0.5 exactly
-            Assert.That(_run.ReviveShownCalls, Is.EqualTo(1), "told once the castle is full size");
-            _spawner.View.Tick(1f);
-            Assert.That(_run.ReviveShownCalls, Is.EqualTo(1), "told only once");
-        }
-
-        [Test]
-        public void Edge_bang_gia_dang_lam_cham_quai_while_waiting_for_the_revive_the_castle_slows_nothing_more_and_its_cooldowns_stand_still()
-        {
-            StartBattle();
-            _enemies.AddEnemy(1, 3f);
-            _skills.TryUse(CastleSkill.Frost);
-            Assert.That(_enemies.Slows, Has.Count.EqualTo(1));
-            _clock.Run(2f);
-            _body.Hit(0, 5000f);
-            _run.Step = RunStep.ReviveWait;
-            _run.IsPaused = true;
-
-            _clock.Run(3f, gameplay: false);
-            _run.StartRevive();
-            _clock.Run(0.5f, gameplay: false);
-
-            Assert.That(_enemies.Slows, Has.Count.EqualTo(1), "the castle starts no new slow; the slow left is the enemies' own, counted in gameplay steps");
-            Assert.That(_skills.GetState(CastleSkill.Frost).CooldownLeft, Is.EqualTo(33f).Within(1e-4f));
-        }
-
         private void StartBattle()
         {
             _run.StartRun();
             _run.StartBattle();
-        }
-
-        /// <summary>Pause as the run does it: the run says paused and the clock's steps stop being gameplay.</summary>
-        private void PausedSteps(float seconds)
-        {
-            _run.Step = RunStep.Paused;
-            _run.IsPaused = true;
-            _clock.Run(seconds, gameplay: false);
         }
 
         [Test]
@@ -288,37 +222,6 @@ namespace Game.Castle.Tests
 
             Assert.That(_enemies.Damaged, Has.Count.EqualTo(1));
             Assert.That(_spawner.View.Calls, Does.Contain("shot 1"));
-        }
-
-        [Test]
-        public void Nothing_moves_while_paused()
-        {
-            StartBattle();
-            _enemies.AddEnemy(1, 3f);
-            _spawner.View.Calls.Clear();
-
-            PausedSteps(1f);
-            _spawner.View.Tick(1f);
-
-            Assert.That(_enemies.Damaged, Is.Empty);
-            Assert.That(_spawner.View.Calls, Does.Not.Contain("advance"));
-        }
-
-        [Test]
-        public void Shot_timer_stands_still_while_paused_and_goes_on_from_there()
-        {
-            StartBattle();
-            _enemies.AddEnemy(1, 3f);
-            _clock.Steps(1);
-            _clock.Run(0.5f);
-
-            PausedSteps(10f);
-            _run.IsPaused = false;
-            _clock.Run(0.45f);
-            Assert.That(_enemies.Damaged, Has.Count.EqualTo(1), "the paused 10s did not count");
-
-            _clock.Run(0.05f);
-            Assert.That(_enemies.Damaged, Has.Count.EqualTo(2));
         }
 
         [Test]
@@ -535,112 +438,11 @@ namespace Game.Castle.Tests
         }
 
         [Test]
-        public void Run_revive_stands_the_castle_up_at_thirty_percent_and_grows_it_back_over_half_a_second()
-        {
-            StartBattle();
-            _body.Hit(0, 5000f);
-
-            _run.StartRevive();
-
-            Assert.That(_body.IsDestroyed, Is.False);
-            Assert.That(_body.Health, Is.EqualTo(300f));
-            Assert.That(_spawner.View.Calls, Does.Contain("grow"));
-            Assert.That(_spawner.View.GrowBackSeconds, Is.EqualTo(0.5f).Within(1e-5f));
-        }
-
-        [Test]
-        public void Run_is_told_the_revive_is_shown_once_the_castle_has_grown_back()
-        {
-            StartBattle();
-            _body.Hit(0, 5000f);
-            _run.StartRevive();
-            _spawner.View.Calls.Clear();
-
-            _spawner.View.Tick(0.3f);
-            Assert.That(_run.ReviveShownCalls, Is.EqualTo(0), "still growing although the battle stands still");
-            Assert.That(_spawner.View.Calls, Does.Contain("advance"));
-
-            _spawner.View.Tick(0.25f);
-            _spawner.View.Tick(0.5f);
-            Assert.That(_run.ReviveShownCalls, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void While_reviving_the_castle_does_not_shoot_and_cooldowns_stand_still()
-        {
-            StartBattle();
-            _skills.TryUse(CastleSkill.Thunder);
-            _body.Hit(0, 5000f);
-            _enemies.AddEnemy(1, 3f);
-            var damageBefore = _enemies.Damaged.Count;
-            _run.StartRevive();
-
-            _clock.Run(0.4f, gameplay: false);
-            _spawner.View.Tick(0.4f);
-
-            Assert.That(_enemies.Damaged, Has.Count.EqualTo(damageBefore));
-            Assert.That(_skills.GetState(CastleSkill.Thunder).CooldownLeft, Is.EqualTo(20f).Within(1e-4f));
-        }
-
-        [Test]
-        public void Revived_castle_shoots_as_soon_as_the_battle_runs_again()
-        {
-            StartBattle();
-            _body.Hit(0, 5000f);
-            _enemies.AddEnemy(1, 3f);
-            _run.StartRevive();
-            _clock.Run(0.6f, gameplay: false);
-            _spawner.View.Tick(0.6f);
-
-            _run.Step = RunStep.Playing;
-            _run.IsPaused = false;
-            _clock.Steps(1);
-
-            Assert.That(_enemies.Damaged, Has.Count.EqualTo(1));
-        }
-
-        [Test]
-        public void Fall_keeps_shrinking_while_the_run_waits_to_offer_a_revive_but_not_in_the_pause_popup()
-        {
-            StartBattle();
-            _body.Hit(0, 5000f);
-            _run.Step = RunStep.ReviveWait;
-            _run.IsPaused = true;
-            _spawner.View.Calls.Clear();
-
-            _spawner.View.Tick(0.1f);
-            Assert.That(_spawner.View.Calls, Does.Contain("advance"));
-
-            _run.Step = RunStep.Paused;
-            _spawner.View.Calls.Clear();
-            _spawner.View.Tick(0.1f);
-            Assert.That(_spawner.View.Calls, Does.Not.Contain("advance"));
-        }
-
-        [Test]
-        public void Fall_keeps_shrinking_after_the_revive_popup_opened_before_the_half_second_was_over()
-        {
-            // Tester PROTOTYPE 2: the body stood at scale 0.6 when the revive popup opened early.
-            StartBattle();
-            _body.Hit(0, 5000f);
-            _run.Step = RunStep.ReviveWait;
-            _run.IsPaused = true;
-            _spawner.View.Tick(0.2f);
-
-            _run.Step = RunStep.ReviveOffer;
-            _spawner.View.Calls.Clear();
-            _spawner.View.Tick(0.1f);
-
-            Assert.That(_spawner.View.Calls, Does.Contain("advance"), "the fall's drawing goes on while the revive popup is up");
-        }
-
-        [Test]
         public void Fall_keeps_shrinking_while_the_run_waits_before_the_lose_popup()
         {
             StartBattle();
             _body.Hit(0, 5000f);
             _run.Step = RunStep.Ending;
-            _run.IsPaused = true;
             _spawner.View.Calls.Clear();
 
             _spawner.View.Tick(0.1f);

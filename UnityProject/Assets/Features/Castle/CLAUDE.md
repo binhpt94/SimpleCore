@@ -24,7 +24,7 @@ Feature dùng từng contract: chưa rà hết (guard không cho tìm ngoài vù
 - Skill người chơi bấm. Thành giữ mọi hồi chiêu; bên gọi chỉ hiển thị và yêu cầu.
 - `Skills`: các skill của trận này, theo thứ tự nút.
 - `GetState(skill)`: trả `CastleSkillState` hiện tại.
-- `TryUse(skill)`: dùng skill khi nó sẵn sàng, thành còn đứng và trận không tạm dừng; bắt đầu hồi chiêu, trả true. Ngoài ra trả false, không đổi gì.
+- `TryUse(skill)`: dùng skill khi nó sẵn sàng và thành còn đứng; bắt đầu hồi chiêu, trả true. Ngoài ra trả false, không đổi gì.
 
 ### CastleUpgrade
 - Enum phần thành nâng được trong lượt: `Health`, `Attack`, `Skills`.
@@ -40,6 +40,6 @@ Feature dùng từng contract: chưa rà hết (guard không cho tìm ngoài vù
 
 ### ICastleFallCheat
 - Chỉ bản dev: phá thành có chủ đích, cho các state cheat bắt đầu ngay sau khi thành sập.
-- `Fall()`: đưa máu về 0 theo đường sập thường (`feature-castle/castle-core/castle-body-values`), báo lượt đúng một lần như sập thật, luật của Run quyết tiếp (mời hồi sinh hoặc thua). Không làm gì khi thành đã bị phá hoặc không có trận đang chạy.
+- `Fall()`: đưa máu về 0 theo đường sập thường (`feature-castle/castle-core/castle-body-values`), báo lượt đúng một lần như sập thật, lượt thua. Không làm gì khi thành đã bị phá hoặc không có trận đang chạy.
 
 Test: assembly `Game.Castle.Tests` (EditMode).

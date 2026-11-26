@@ -70,6 +70,9 @@ Vòng 4 là vòng duy nhất được ghi dữ liệu theo giai đoạn, và ch�
 - Unit 2D: hiển thị được hình, sprite có nghĩa (ảnh @ClaudeImage vẽ là đủ); anim đơn giản bằng scale, move, rotate hoặc đổi màu.
 - Unit 3D: model low poly (làm qua blender mcp); anim cơ bản bằng scale, move, rotate, đổi màu.
 
+## Hỏi GPT
+Không hỏi GPT về node vòng 4 (người quyết 2026-11-27; `gd_advise.py` từ chối). Thông số và trường hợp biên là việc của bạn và của người.
+
 ## Mở khoá code
 Guard chỉ cho phiên feature sửa code khi nhánh của nó có ít nhất một node vòng 4 đã chốt trong `live`. Vì vậy vòng 4 phải đủ rõ để code theo; đừng viết sơ sài chỉ để mở khoá.
 

@@ -7,7 +7,7 @@ namespace Game.Hero.Tests
 {
     /// <summary>
     /// What the player sees of the team through the run: shown at run start, moved on by the shared clock's steps
-    /// (0.025 s each), frozen on pause, gone on clear.
+    /// (0.025 s each), gone on clear.
     /// </summary>
     public sealed class HeroParticipantTests
     {
@@ -128,26 +128,6 @@ namespace Game.Hero.Tests
             Assert.That(_squad.Units[0].IsStanding, Is.True, "8 s wait ends after 320 steps");
         }
 
-        /// <summary>feature-popup-revive/revive-order/order-values#edge-hero-dang-cho-hoi-sinh-khi-thanh-bi</summary>
-        [Test]
-        public void A_hero_respawn_wait_counts_gameplay_steps_stands_still_while_the_castle_waits_for_revive_and_goes_on_after()
-        {
-            StartWithOnlySlot1Standing();
-            _squad.Hit(0, 1000f);
-
-            _combat.RunSteps(100);                  // 2.5 s of the 8 s wait
-            _combat.Gameplay = false;               // the castle fell: the run waits for the revive popup
-            _combat.RunSteps(400);
-            Assert.That(_squad.Units[0].IsStanding, Is.False, "the wait does not run while the castle waits for revive");
-            Assert.That(_squad.Units[0].RespawnLeft, Is.EqualTo(5.5f).Within(1e-3f));
-
-            _combat.Gameplay = true;                // the castle revived: the same run goes on
-            _combat.RunSteps(219);
-            Assert.That(_squad.Units[0].IsStanding, Is.False, "319 gameplay steps: not yet");
-            _combat.RunSteps(1);
-            Assert.That(_squad.Units[0].IsStanding, Is.True, "back after 320 gameplay steps in all");
-        }
-
         [Test]
         public void Steps_the_run_does_not_let_play_leave_heroes_where_they_are()
         {
@@ -218,53 +198,6 @@ namespace Game.Hero.Tests
 
             Assert.That(_displays.Made[0].X, Is.EqualTo(0.5f).Within(1e-3f));
             Assert.That(_displays.Made[0].Moving, Is.True);
-        }
-
-        [Test]
-        public void While_paused_heroes_and_their_animations_stand_still()
-        {
-            StartWithOnlySlot1Standing();
-            _field.Add(10f);
-            _run.IsPaused = true;
-
-            Play(1f);
-
-            Assert.That(_displays.Made[0].X, Is.EqualTo(-1.5f));
-            Assert.That(_displays.Made[0].Animated, Is.EqualTo(0f));
-        }
-
-        [Test]
-        public void While_paused_a_hitting_hero_keeps_its_target_and_its_wait()
-        {
-            StartWithOnlySlot1Standing();
-            var enemy = _field.Add(0f);
-            _combat.RunSteps(1);                    // first hit, then 1.0 s to wait
-            _run.IsPaused = true;
-
-            for (var i = 0; i < 10; i++) Play(0.5f);
-
-            var hero = _squad.Units[0];
-            Assert.That(_field.Taken(enemy), Is.EqualTo(12f));
-            Assert.That(hero.TargetHandle, Is.EqualTo(enemy));
-            Assert.That(hero.Mode, Is.EqualTo(HeroMode.Attacking));
-            Assert.That(hero.Cooldown, Is.EqualTo(1f).Within(1e-4f));
-        }
-
-        [Test]
-        public void While_paused_the_respawn_wait_stands_still()
-        {
-            StartWithOnlySlot1Standing();
-            _squad.Hit(0, 1000f);
-            _run.IsPaused = true;
-
-            for (var i = 0; i < 20; i++) Play(1f);
-
-            Assert.That(_squad.Units[0].IsStanding, Is.False);
-            Assert.That(_squad.Units[0].RespawnLeft, Is.EqualTo(8f).Within(1e-4f));
-
-            _run.IsPaused = false;
-            Play(8.05f);
-            Assert.That(_squad.Units[0].IsStanding, Is.True);
         }
 
         [Test]
@@ -360,7 +293,7 @@ namespace Game.Hero.Tests
 
         /// <summary>feature-hero/hero-respawn/respawn-values#stage-prototype: the wait left is shown through the HUD.</summary>
         [Test]
-        public void The_respawn_wait_left_counts_down_for_the_hud_and_stands_still_when_no_tick_runs()
+        public void The_respawn_wait_left_counts_down_for_the_hud()
         {
             StartWithOnlySlot1Standing();
             Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(0f), "standing: nothing to wait for");
@@ -371,11 +304,6 @@ namespace Game.Hero.Tests
             _combat.RunSteps(100);
             Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(5.5f).Within(1e-3f));
 
-            _combat.Gameplay = false;              // paused or waiting for the castle's revive
-            _combat.RunSteps(200);
-            Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(5.5f).Within(1e-3f));
-
-            _combat.Gameplay = true;
             _combat.RunSteps(220);
             Assert.That(_squad.RespawnSecondsLeft(0), Is.EqualTo(0f), "back on its feet");
 

@@ -33,8 +33,8 @@ namespace Game.Hud.Tests
             _run = new FakeRun();
         }
 
-        private HudSession NewSession(HudCheat cheat = null, bool pauseButton = true, HudTimings? timings = null) =>
-            new HudSession(_spawner, _clock, _castle, _skills, _wallet, _waves, _run, timings ?? HudTestTimings.Default, pauseButton, cheat);
+        private HudSession NewSession(HudCheat cheat = null, HudTimings? timings = null) =>
+            new HudSession(_spawner, _clock, _castle, _skills, _wallet, _waves, _run, timings ?? HudTestTimings.Default, cheat);
 
         private const string ConfigPath = "Assets/Features/Hud/FeatureAssets/Private/HudConfig.asset";
 
@@ -102,42 +102,6 @@ namespace Game.Hud.Tests
             Assert.Greater(view.Skills[1].Scale, 1.1f);
             _clock.Tick(0.2f);
             Assert.AreEqual(1f, view.Skills[1].Scale);
-        }
-
-        [Test]
-        public void AtPrototypeTheConfigTurnsThePauseButtonOnAndATapReportsPause()
-        {
-            var config = AssetDatabase.LoadAssetAtPath<HudConfig>(ConfigPath);
-            Assert.IsNotNull(config, "missing " + ConfigPath);
-            Assert.IsTrue(config.ShowsPauseButton, "PROTOTYPE: 'Có nút tạm dừng' is optional; this game turns it on");
-
-            NewSession(pauseButton: config.ShowsPauseButton).Run();
-            _spawner.View.PressPause();
-
-            Assert.IsTrue(_spawner.View.PauseShown);
-            Assert.AreEqual(1, _run.PauseRequests);
-        }
-
-        [Test]
-        public void WithThePauseButtonOffTheHudHasNoneAndAPauseTapDoesNothing()
-        {
-            var session = NewSession(pauseButton: false);
-            session.Run();
-            _spawner.View.PressPause();
-
-            Assert.IsFalse(_spawner.View.PauseShown);
-            Assert.AreEqual(0, _spawner.View.PauseListeners);
-            Assert.AreEqual(0, _run.PauseRequests);
-        }
-
-        [Test]
-        public void WithThePauseButtonOnItIsShownAndReportsPause()
-        {
-            NewSession(pauseButton: true).Run();
-            _spawner.View.PressPause();
-
-            Assert.IsTrue(_spawner.View.PauseShown);
-            Assert.AreEqual(1, _run.PauseRequests);
         }
 
         private FakeCastleCheat _castleCheat;
@@ -210,30 +174,6 @@ namespace Game.Hud.Tests
             Assert.AreEqual(0, _castle.Listeners);
             Assert.AreEqual(0, _spawner.View.SkillListeners);
             Assert.IsNull(session.View);
-        }
-
-        [Test]
-        public void PauseButtonWorksFromBattleStartUntilTheBattleIsRemoved()
-        {
-            var session = NewSession();
-            session.Run();
-            Assert.AreEqual(1, _spawner.View.PauseListeners);
-
-            _spawner.View.PressPause();
-            Assert.AreEqual(1, _run.PauseRequests);
-
-            // Paused, ending and lost are battle steps: the HUD, and with it the button, stays on screen.
-            foreach (var step in new[] { RunStep.Paused, RunStep.Ending, RunStep.Lost })
-            {
-                _run.SetStep(step);
-                Assert.IsTrue(_spawner.View.Visible, step.ToString());
-            }
-
-            session.DisposeAsync();
-            _spawner.View.PressPause();
-
-            Assert.AreEqual(0, _spawner.View.PauseListeners);
-            Assert.AreEqual(1, _run.PauseRequests);
         }
 
         [Test]

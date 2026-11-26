@@ -355,6 +355,36 @@
    "at": "2026-11-27 00:26:06",
    "by": "tự duyệt (Full Auto)"
   },
+  "feature-popup-rating": {
+   "hash": "b4e94b2628634e1a464ca14746462043fa58d2ba",
+   "at": "2026-11-27 02:33:19",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-rating/cheat": {
+   "hash": "754ca9e0d633253abddb1fddb6ee7640d10ba768",
+   "at": "2026-11-27 02:37:29",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-rating/rating-invite": {
+   "hash": "f652966292829c05b758eb5d29ab3e017be7bdcd",
+   "at": "2026-11-27 02:35:52",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-rating/rating-invite/invite-spec": {
+   "hash": "f8acbb59d780e20679e8f0294c849e18ad0eb5a6",
+   "at": "2026-11-27 02:36:10",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-rating/rating-timing": {
+   "hash": "c0c3e2a454e94e5f670c3c2b19a0cad297e55873",
+   "at": "2026-11-27 02:35:52",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-popup-rating/rating-timing/timing-spec": {
+   "hash": "8e139edc133631df128fcff3ce7883a0ea83cb1e",
+   "at": "2026-11-27 02:35:52",
+   "by": "tự duyệt (Full Auto)"
+  },
   "feature-popup/cheat": {
    "hash": "3de84f75114eea4386cf9c9a89783b6b27694912",
    "at": "2026-11-27 00:26:06",
@@ -376,8 +406,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup/popup-request/request-rules": {
-   "hash": "a53275a422da251b1c0190c831674d3259d15d74",
-   "at": "2026-11-27 00:21:41",
+   "hash": "9189da31513affc0ae523c91e6e9c756522ef158",
+   "at": "2026-11-27 02:33:54",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-run": {

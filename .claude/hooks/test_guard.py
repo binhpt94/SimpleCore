@@ -605,12 +605,14 @@ def run_advisor_cases():
     for d in (idea, live, advice + "/feature-hero"):
         os.makedirs(d, exist_ok=True)
 
-    g = "advisor: writes only its questions and notes"
+    g = "advisor: writes only its questions, picks and notes"
     for p in (advice + "/feature-hero/q1.q.md", advice + "/feature-hero/q1.note.md", advice + "/feature-hero.hero-list/round-2.q.md",
+              advice + "/feature-hero/q1.pick.md", advice + "/_general/g1.pick.md",
               advice + "/_root/g1.q.md", advice + "/_general/g1.note.md"):
         w(g, V, "allow", p)
         e(g, V, "allow", p)
     for p in (advice + "/feature-hero/q1.md", advice + "/feature-hero/q1.v1.md", advice + "/feature-hero/q1.rejected.md",
+              advice + "/feature-hero/q1.pick.json",
               advice + "/q1.q.md", advice + "/feature-hero/sub/q1.q.md", advice + "/feature-hero/q1.q.txt",
               advice + "/_other/q1.q.md", advice + "/feature-hero/hero-list/q1.q.md", advice + "/feature_hero/q1.q.md"):
         w(g + " (the answers are the command's)", V, "deny", p)

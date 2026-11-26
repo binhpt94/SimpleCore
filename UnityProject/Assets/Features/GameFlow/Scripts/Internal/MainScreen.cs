@@ -20,8 +20,6 @@ namespace Game.GameFlow
         Replay,
         /// <summary>Lose popup: Back to start.</summary>
         GoHome,
-        /// <summary>Pause popup: Give up the run.</summary>
-        Abandon,
     }
 
     /// <summary>Corner of the screen a button sits in.</summary>

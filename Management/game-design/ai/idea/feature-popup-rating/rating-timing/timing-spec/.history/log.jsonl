@@ -1,0 +1,2 @@
+{"at": "2026-11-27 02:35:51", "event": "data", "hash": "9c59db0047bc", "previous": "", "added": ["start-signal", "invite-delay", "check-flag", "invited-flag", "cancel-on-leave", "refused-no-count", "background-pause", "lose-under-input"], "removed": [], "rewritten": []}
+{"at": "2026-11-27 02:35:52", "event": "approve", "hash": "8e139edc133631df128fcff3ce7883a0ea83cb1e", "by": "tự duyệt (Full Auto)"}

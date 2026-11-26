@@ -6,7 +6,7 @@ namespace Game.Wave.Tests
 {
     /// <summary>
     /// Proposal 2026-11-25-session-usage-tracking: Wave reports its running jobs to the session
-    /// (step subscription, send or break clock, the dev cheat's pending wait) and every count is back to 0 after clean-up.
+    /// (step subscription, send or break clock) and every count is back to 0 after clean-up.
     /// </summary>
     public class WaveSessionUsageTests
     {
@@ -22,7 +22,7 @@ namespace Game.Wave.Tests
             _log = new List<string>();
             _run = new FakeRun(_log);
             _enemies = new FakeEnemies();
-            _clock = new FakeSimClock { Paused = () => _run.IsPaused };
+            _clock = new FakeSimClock();
             _director = new WaveDirector(new WaveRules(), _run, _enemies, new FakeIncome(_log), new FirstRandom());
         }
 
@@ -77,29 +77,6 @@ namespace Game.Wave.Tests
 
             wave.DisposeAsync().GetAwaiter().GetResult();
 
-            Assert.That(Usage(wave).RunningJobs, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void DevCheat_CountsItsPendingWait_UntilItFires_OrTheSessionEnds()
-        {
-            var wave = new WaveParticipant(_director, _clock);
-            wave.Run();
-            var cheat = new WaveStartCheat(_director, _run, 5);
-            cheat.Run();
-            Assert.That(Usage(cheat).RunningJobs, Is.EqualTo(1), "waiting for the battle");
-
-            _run.StartBattle();
-            _clock.Steps(1);
-            Assert.That(Usage(cheat).RunningJobs, Is.EqualTo(0), "fired once, nothing left waiting");
-
-            var unused = new WaveStartCheat(_director, _run, 5);
-            unused.Run();
-            unused.DisposeAsync().GetAwaiter().GetResult();
-            Assert.That(Usage(unused).RunningJobs, Is.EqualTo(0), "a cheat that never fired is released at clean-up");
-
-            cheat.DisposeAsync().GetAwaiter().GetResult();
-            wave.DisposeAsync().GetAwaiter().GetResult();
             Assert.That(Usage(wave).RunningJobs, Is.EqualTo(0));
         }
     }

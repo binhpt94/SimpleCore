@@ -9,9 +9,9 @@ namespace Game.Castle
     /// <summary>
     /// The castle's part in the scene session, and its presenter: makes the view in Run, resets the castle when a
     /// run begins, steps the auto shot and the skill cooldowns on the shared clock during a battle and pushes what
-    /// happened down to the view. Drawing (effects, the fall, growing back) runs on frame time: it is only to look at.
-    /// For the session's clean-up check it reports the view it holds and its running jobs: the clock loop, the skill
-    /// cooldowns while any runs down, and the revive grow-back wait.
+    /// happened down to the view. Drawing (effects, the fall) runs on frame time: it is only to look at.
+    /// For the session's clean-up check it reports the view it holds and its running jobs: the clock loop and the skill
+    /// cooldowns while any runs down.
     /// </summary>
     internal sealed class CastleSession : SessionParticipantBase
     {
@@ -21,7 +21,6 @@ namespace Game.Castle
         private readonly CastleConfig _config;
         private readonly ISimClock _clock;
         private readonly IRunFlow _runFlow;
-        private readonly IRunRevive _revive;
         private readonly IEnemyField _enemies;
         private readonly CastleBody _body;
         private readonly CastleSkills _skills;
@@ -30,20 +29,16 @@ namespace Game.Castle
         private readonly ICastleViewSpawner _spawner;
         private ICastleView _view;
         private bool _inBattle;
-        private bool _reviving;
-        private float _reviveLeft;
-        private IDisposable _reviveJob;
         private IDisposable _cooldownJob;
 
         public CastleSession(
-            CastleConfig config, IRunFlow runFlow, IRunRevive revive, IEnemyField enemies,
+            CastleConfig config, IRunFlow runFlow, IEnemyField enemies,
             CastleBody body, CastleSkills skills, CastleUpgrades upgrades, CastleAutoShot autoShot,
             ICastleViewSpawner spawner, ISimClock clock)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _clock = clock ?? throw new ArgumentNullException(nameof(clock));
             _runFlow = runFlow ?? throw new ArgumentNullException(nameof(runFlow));
-            _revive = revive ?? throw new ArgumentNullException(nameof(revive));
             _enemies = enemies ?? throw new ArgumentNullException(nameof(enemies));
             _body = body ?? throw new ArgumentNullException(nameof(body));
             _skills = skills ?? throw new ArgumentNullException(nameof(skills));
@@ -93,8 +88,6 @@ namespace Game.Castle
             WhenDisposed(() => _runFlow.BattleStopped -= OnBattleStopped);
             _runFlow.BattleCleared += OnBattleCleared;
             WhenDisposed(() => _runFlow.BattleCleared -= OnBattleCleared);
-            _revive.ReviveStarted += OnReviveStarted;
-            WhenDisposed(() => _revive.ReviveStarted -= OnReviveStarted);
             _enemies.Defeated += OnEnemyDefeated;
             WhenDisposed(() => _enemies.Defeated -= OnEnemyDefeated);
             _body.Struck += OnStruck;
@@ -103,8 +96,6 @@ namespace Game.Castle
             WhenDisposed(() => _body.HealthChanged -= OnHealthChanged);
             _body.Destroyed += OnDestroyed;
             WhenDisposed(() => _body.Destroyed -= OnDestroyed);
-            _body.Revived += OnRevived;
-            WhenDisposed(() => _body.Revived -= OnRevived);
             _autoShot.Fired += OnFired;
             WhenDisposed(() => _autoShot.Fired -= OnFired);
             _skills.ThunderStruck += OnThunderStruck;
@@ -115,12 +106,12 @@ namespace Game.Castle
 
         /// <summary>
         /// One step of the shared clock. Only gameplay steps of a battle move the castle (the clock keeps stepping
-        /// while paused or waiting for a revive, with <see cref="SimStep.Gameplay"/> false): cooldowns run down
+        /// while the run holds the battle still, with <see cref="SimStep.Gameplay"/> false): cooldowns run down
         /// first, then the auto shot, in the same order the frame loop used.
         /// </summary>
         internal void OnStep(SimStep step)
         {
-            if (step.Gameplay && _inBattle && !_runFlow.IsPaused && step.Seconds > 0f)
+            if (step.Gameplay && _inBattle && step.Seconds > 0f)
             {
                 _skills.Tick(step.Seconds);
                 _autoShot.Tick(step.Seconds);
@@ -129,49 +120,13 @@ namespace Game.Castle
         }
 
         /// <summary>
-        /// One frame of <paramref name="seconds"/>, for drawing only. Nothing moves in the pause popup. In every other
-        /// step where the battle stands still (the wait before the revive or lose popup, the revive popup, reviving)
-        /// the castle's own drawing goes on: the fall shrinks all the way to 0 in its half second whichever step the
-        /// run has moved on to, and the castle grows back while reviving; the run is told once it has grown back.
+        /// One frame of <paramref name="seconds"/>, for drawing only. The drawing goes on whichever step the run is in,
+        /// so the fall shrinks all the way to 0 in its half second also while the run waits before the lose popup.
         /// </summary>
         internal void OnTicked(float seconds)
         {
             if (seconds <= 0f) return;
-            if (_runFlow.IsPaused)
-            {
-                if (_runFlow.Step == RunStep.Paused) return;
-                _view?.Advance(seconds);
-                if (_reviving)
-                {
-                    _reviveLeft -= seconds;
-                    if (_reviveLeft <= 0f) FinishRevive();
-                }
-                return;
-            }
             _view?.Advance(seconds);
-        }
-
-        private void OnReviveStarted()
-        {
-            _body.Revive();
-            _reviving = true;
-            _reviveLeft = _config.ReviveGrowSeconds;
-            if (_reviveJob == null) _reviveJob = TrackJob();
-            if (_reviveLeft <= 0f) FinishRevive();
-        }
-
-        private void FinishRevive()
-        {
-            StopRevive();
-            _revive.ReviveShown();
-        }
-
-        private void StopRevive()
-        {
-            _reviving = false;
-            _reviveLeft = 0f;
-            _reviveJob?.Dispose();
-            _reviveJob = null;
         }
 
         private void RefreshCooldownJob()
@@ -189,7 +144,6 @@ namespace Game.Castle
 
         private void StopJobs()
         {
-            StopRevive();
             _cooldownJob?.Dispose();
             _cooldownJob = null;
         }
@@ -197,7 +151,6 @@ namespace Game.Castle
         private void OnRunStarted(RunTeam team)
         {
             _inBattle = false;
-            StopRevive();
             _upgrades.Reset();
             _skills.Reset();
             _autoShot.Reset();
@@ -217,7 +170,6 @@ namespace Game.Castle
         private void OnBattleCleared()
         {
             _inBattle = false;
-            StopRevive();
             if (_view == null) return;
             _view.ClearEffects();
             _view.SetVisible(false);
@@ -237,8 +189,6 @@ namespace Game.Castle
             => _view?.ShowDamaged(!_body.IsDestroyed && _body.Health < _body.MaxHealth * _config.DamagedHealthFraction);
 
         private void OnDestroyed() => _view?.Collapse(_config.CollapseSeconds);
-
-        private void OnRevived() => _view?.GrowBack(_config.ReviveGrowSeconds);
 
         private void OnFired(int handle, float fromX, float toX) => _view?.ShowShot(handle, fromX, toX, _config.ShotFlightSeconds);
 

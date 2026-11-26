@@ -9,7 +9,7 @@ namespace Game.Hero
     {
         /// <summary>
         /// Seconds left before the hero in <paramref name="slot"/> comes back; 0 while it stands or when no run is going.
-        /// Counts only battle steps, so it stands still while the battle is paused or waits for the castle's revive.
+        /// Counts only battle steps, so it stands still once the battle stopped.
         /// </summary>
         float RespawnSecondsLeft(int slot);
     }

@@ -29,7 +29,6 @@ namespace Game.Castle
 
             var session = registry.Resolve<ISessionScene>();
             var runFlow = registry.Resolve<IRunFlow>();
-            var runRevive = registry.Resolve<IRunRevive>();
             var enemyField = registry.Resolve<IEnemyField>();
             var heroSquad = registry.Resolve<IHeroSquad>();
             var heroSpawnPoints = registry.Resolve<IHeroSpawnPoints>();
@@ -39,11 +38,11 @@ namespace Game.Castle
 
             var body = new CastleBody(config, runFlow);
             var hits = new CombatEnemyHits(combat, enemyCombat);
-            var skills = new CastleSkills(config, body, runFlow, enemyField, heroSquad, hits);
+            var skills = new CastleSkills(config, body, enemyField, heroSquad, hits);
             var upgrades = new CastleUpgrades(body, skills);
             var autoShot = new CastleAutoShot(config, body, enemyField, upgrades, hits);
             var castleSession = new CastleSession(
-                config, runFlow, runRevive, enemyField, body, skills, upgrades, autoShot,
+                config, runFlow, enemyField, body, skills, upgrades, autoShot,
                 new CastleViewSpawner(config.ViewPrefab), clock);
 
             registry.Register<ICastle>(body);

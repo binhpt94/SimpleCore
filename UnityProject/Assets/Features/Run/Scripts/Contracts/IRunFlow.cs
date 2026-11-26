@@ -24,32 +24,17 @@ namespace Game.Run
         /// <summary>Raised after every RunStarted handler ran: the battle may now start (the first wave).</summary>
         event Action BattleStarted;
 
-        /// <summary>The run ended (castle destroyed or run abandoned): nothing on the battlefield acts any more.</summary>
+        /// <summary>The castle was destroyed and the run ended: nothing on the battlefield acts any more.</summary>
         event Action BattleStopped;
 
         /// <summary>The player leaves the battle: remove everything the battle created.</summary>
         event Action BattleCleared;
-
-        /// <summary>
-        /// True while the battlefield stands still: <see cref="RunStep.Paused"/>, and the revive steps
-        /// <see cref="RunStep.ReviveWait"/>, <see cref="RunStep.ReviveOffer"/>, <see cref="RunStep.Reviving"/>.
-        /// </summary>
-        bool IsPaused { get; }
 
         /// <summary>Start screen: the player pressed Play.</summary>
         void Play();
 
         /// <summary>Team select: the player pressed Enter battle with a full team.</summary>
         void EnterBattle(RunTeam team);
-
-        /// <summary>In battle: the player asked to pause (pause button, back key, leaving the app).</summary>
-        void Pause();
-
-        /// <summary>Pause popup: the player chose Continue.</summary>
-        void Resume();
-
-        /// <summary>Pause popup: the player confirmed giving up this run.</summary>
-        void Abandon();
 
         /// <summary>Lose popup: the player chose Play again.</summary>
         void Replay();
@@ -58,9 +43,8 @@ namespace Game.Run
         void GoHome();
 
         /// <summary>
-        /// In battle: the castle fell. The first fall of a run, when revives are on, freezes the battle and goes to
-        /// <see cref="RunStep.ReviveWait"/> (see <see cref="IRunRevive"/>); otherwise the run is lost and the battle
-        /// stops at once. Ignored while the run is already ending or in a revive step.
+        /// In battle: the castle fell. The run is lost and the battle stops at once. Ignored while the run is
+        /// already ending.
         /// </summary>
         void Lose();
 

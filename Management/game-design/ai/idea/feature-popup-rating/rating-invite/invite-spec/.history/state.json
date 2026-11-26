@@ -1,0 +1,45 @@
+{
+ "hash": "4691669e25dd",
+ "items": {
+  "popup-id": {
+   "hash": "274d726a9db2",
+   "text": "Popup mời có id `PopupRating/Main`\nTheo cách đặt id của `feature-popup/popup-request/request-rules`."
+  },
+  "invite-text": {
+   "hash": "39a3135bebef",
+   "text": "Dòng mời ghi \"Đánh giá game trên Google Play\"\nChữ trung tính: không hỏi có thích game không, không nhắc số sao."
+  },
+  "two-buttons": {
+   "hash": "4000c78590e2",
+   "text": "Có 2 nút: \"Đánh giá\" là nút chính, \"Để sau\" là nút phụ\nNút chính đặt trước và nổi hơn nút phụ; cách làm nổi do chuyên gia giao diện quyết."
+  },
+  "rate-flow": {
+   "hash": "11a1f167db53",
+   "text": "Chạm \"Đánh giá\": nhờ dịch vụ đóng popup, rồi mở trang của game trên ứng dụng Google Play\nTrang mở theo mã gói (package) của chính bản game đang chạy, không ghi cứng trong thiết kế."
+  },
+  "store-web-fallback": {
+   "hash": "8a02cf5168c4",
+   "text": "Máy không mở được ứng dụng Google Play thì mở trang của game trên Google Play bằng trình duyệt\nVí dụ máy không cài Google Play, hoặc đang chạy trong Unity Editor."
+  },
+  "later-flow": {
+   "hash": "05132ca155cd",
+   "text": "Chạm \"Để sau\": nhờ dịch vụ đóng popup, không làm gì khác"
+  },
+  "first-tap-only": {
+   "hash": "526a2d1b3a8f",
+   "text": "Chỉ lần chạm nút đầu tiên có tác dụng; sau đó cả 2 nút không nhận chạm tới khi popup đóng\nTheo luật `caller-one-press` của dịch vụ popup."
+  },
+  "back-key-later": {
+   "hash": "341f07cc9f25",
+   "text": "Nút quay lại của máy khi popup mời ở trên cùng tính như chạm \"Để sau\"\nDịch vụ chuyển nút quay lại cho feature của popup trên cùng (`feature-popup/popup-layer/stack-rules`). Đã loại: bỏ qua nút quay lại như popup thua (lời mời không phải lựa chọn bắt buộc)."
+  },
+  "backdrop-no-close": {
+   "hash": "e7180ba93771",
+   "text": "Chạm nền che hay chạm ngoài popup không đóng popup mời\nGiữ luật chung của dịch vụ; người chơi chọn bằng nút hoặc nút quay lại của máy."
+  },
+  "open-fail-silent": {
+   "hash": "5185f1532e18",
+   "text": "Không mở được cả ứng dụng lẫn trình duyệt thì không báo lỗi cho người chơi, chỉ ghi lỗi trong log\nPopup đã đóng trước đó, người chơi vẫn ở trong game như sau khi chạm \"Để sau\"."
+  }
+ }
+}

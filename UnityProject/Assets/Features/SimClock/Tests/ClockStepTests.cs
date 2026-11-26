@@ -74,7 +74,7 @@ namespace Game.SimClock.Tests
         }
 
         [Test]
-        public void StepCounts_AreWholeNumbers_GameplayStepsStopWhilePaused()
+        public void StepCounts_AreWholeNumbers_GameplayStepsStopAfterRunEnded()
         {
             var clock = StartedClock(_config);
             clock.Advance(0.1);
@@ -317,7 +317,7 @@ namespace Game.SimClock.Tests
         }
 
         [Test]
-        public void Edge_RunNStepsWhilePaused_StepsRunGameplayStill()
+        public void Edge_RunNStepsAfterRunEnded_StepsRunGameplayStill()
         {
             var clock = StartedClock(_config);
             clock.SetGameplay(false);

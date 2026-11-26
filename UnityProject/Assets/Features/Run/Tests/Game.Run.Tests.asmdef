@@ -9,7 +9,6 @@
     "Game.Services.Popup.Contracts",
     "Game.Castle.Contracts",
     "Game.Wave.Contracts",
-    "Game.Ads.Contracts",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

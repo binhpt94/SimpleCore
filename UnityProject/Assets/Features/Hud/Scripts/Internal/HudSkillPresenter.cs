@@ -59,11 +59,11 @@ namespace Game.Hud
             _view.SkillPressed -= OnPressed;
         }
 
-        /// <summary>Shows the castle's current state; bounces stand still while the battle is paused.</summary>
+        /// <summary>Shows the castle's current state; and plays the ready bounce.</summary>
         public void Tick(float deltaSeconds)
         {
             if (!_started) return;
-            if (!_run.IsPaused && deltaSeconds > 0f)
+            if (deltaSeconds > 0f)
             {
                 for (var i = 0; i < _bounceTime.Count; i++)
                 {
@@ -79,7 +79,7 @@ namespace Game.Hud
         private void OnPressed(int index)
         {
             if (!_started || index < 0 || index >= _order.Count) return;
-            if (_run.Step != RunStep.Playing || _run.IsPaused) return;
+            if (_run.Step != RunStep.Playing) return;
 
             var skill = _order[index];
             if (!_skills.GetState(skill).Ready) return;

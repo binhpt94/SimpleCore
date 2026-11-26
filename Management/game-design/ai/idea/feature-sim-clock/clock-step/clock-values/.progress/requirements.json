@@ -55,18 +55,18 @@
    "at": "2026-11-25 22:54:21"
   },
   "steps-counted": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "ClockStepTests.StepCounts_AreWholeNumbers_GameplayStepsStopWhilePaused",
+    "ClockStepTests.StepCounts_AreWholeNumbers_GameplayStepsStopAfterRunEnded",
     "ClockStepTests.BattleTime_DoesNotDriftAfterManySteps"
    ],
    "play": "",
-   "hash": "d3ca9faee00c",
-   "text": "Nhịp đếm số bước chung và số bước gameplay bằng số nguyên; giờ của trận bằng số bước gameplay nhân 0.025 giây\nSố bước chung tăng ở mọi bước; số bước gameplay chỉ tăng ở bước lượt cho trận chạy. Thao tác ghi theo số bước chung; mọi chờ giờ đếm theo số bước gameplay nên đứng yên lúc tạm dừng. Không cộng dồn số lẻ, chạy lâu không lệch.",
+   "hash": "5e97d6a365b5",
+   "text": "Nhịp đếm số bước chung và số bước gameplay bằng số nguyên; giờ của trận bằng số bước gameplay nhân 0.025 giây\nSố bước chung tăng ở mọi bước; số bước gameplay chỉ tăng ở bước lượt cho trận chạy. Thao tác ghi theo số bước chung; mọi chờ giờ đếm theo số bước gameplay nên đứng yên lúc trận dừng. Không cộng dồn số lẻ, chạy lâu không lệch.",
    "title": "Nhịp đếm số bước chung và số bước gameplay bằng số nguyên; giờ của trận bằng số bước gameplay nhân 0.025 giây",
-   "by": "@CodeLead",
-   "at": "2026-11-25 22:54:21"
+   "by": "SimClock",
+   "at": "2026-11-27 02:36:55"
   },
   "timer-in-steps": {
    "state": "verified",
@@ -400,6 +400,19 @@
    "title": "ClockParams: Nội suy hình giữa hai bước (view_interpolation)",
    "by": "@CodeLead",
    "at": "2026-11-25 22:54:22"
+  },
+  "edge-chay-n-buoc-khi-tran-dung": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "ClockStepTests.Edge_RunNStepsAfterRunEnded_StepsRunGameplayStill"
+   ],
+   "play": "",
+   "hash": "8eeec1843c01",
+   "text": "**Chạy N bước khi trận dừng:** bước vẫn chạy, gameplay vẫn đứng yên.",
+   "title": "Chạy N bước khi trận dừng",
+   "by": "SimClock",
+   "at": "2026-11-27 02:36:55"
   }
  },
  "log": [
@@ -829,6 +842,20 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 02:36:55",
+   "id": "steps-counted",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.StepCounts_AreWholeNumbers_GameplayStepsStopAfterRunEnded, ClockStepTests.BattleTime_DoesNotDriftAfterManySteps"
+  },
+  {
+   "at": "2026-11-27 02:36:55",
+   "id": "edge-chay-n-buoc-khi-tran-dung",
+   "state": "done",
+   "by": "SimClock",
+   "note": "ClockStepTests.Edge_RunNStepsAfterRunEnded_StepsRunGameplayStill"
   }
  ]
 }

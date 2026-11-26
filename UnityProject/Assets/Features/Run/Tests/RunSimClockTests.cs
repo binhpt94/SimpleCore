@@ -7,9 +7,8 @@ using NUnit.Framework;
 namespace Game.Run.Tests
 {
     /// <summary>
-    /// The run on the shared clock of feature-sim-clock (init-on-run, first-step-on-start, continue-after-revive,
-    /// clear-on-dispose, input-next-step, timer-in-steps): when the run calls the clock, what goes through its queue,
-    /// and the run's waits counted in clock steps at the run's place in the step order.
+    /// The run on the shared clock of feature-sim-clock (init-on-run, first-step-on-start,
+    /// clear-on-dispose, timer-in-steps): when the run calls the clock, and the run's waits counted in clock steps at the run's place in the step order.
     /// </summary>
     public class RunSimClockTests
     {
@@ -34,10 +33,10 @@ namespace Game.Run.Tests
         [TearDown]
         public void TearDown() => _waits.Dispose();
 
-        private RunFlow Flow(bool skipMenus = false, bool reviveOnce = false)
+        private RunFlow Flow(bool skipMenus = false)
         {
-            var flow = new RunFlow(_score, _waits, 1f, 3, skipMenus, skipMenus ? Team : default, reviveOnce,
-                pauseEnabled: true, clock: new SimRunClock(_clock, _clock));
+            var flow = new RunFlow(_score, _waits, 1f, 3, skipMenus, skipMenus ? Team : default,
+                new SimRunClock(_clock, _clock));
             flow.StepChanged += s => _log.Add("step:" + s);
             flow.RunStarted += _ => _log.Add("RunStarted");
             flow.BattleStarted += () => _log.Add("BattleStarted");
@@ -46,9 +45,9 @@ namespace Game.Run.Tests
             return flow;
         }
 
-        private RunFlow InBattle(bool reviveOnce = false)
+        private RunFlow InBattle()
         {
-            var flow = Flow(reviveOnce: reviveOnce);
+            var flow = Flow();
             flow.Play();
             flow.EnterBattle(Team);
             _log.Clear();
@@ -76,63 +75,6 @@ namespace Game.Run.Tests
             flow.Play();
 
             CollectionAssert.IsEmpty(_log.Where(l => l.StartsWith("clock:")));
-        }
-
-        [Test]
-        public void PauseGoesThroughTheClockQueueAndAppliesAtTheStartOfTheNextStep()
-        {
-            var flow = InBattle();
-
-            flow.Pause();
-            Assert.AreEqual(RunStep.Playing, flow.Step, "The press only queues the pause.");
-            Assert.AreEqual(1, _clock.QueuedCount);
-            Assert.AreEqual("Run", _clock.QueuedOwners.Single());
-
-            _clock.Step(1);
-
-            Assert.AreEqual(RunStep.Paused, flow.Step);
-            Assert.IsTrue(flow.IsPaused);
-            Assert.IsFalse(_clock.Gameplay, "The battle stands still on the steps after the pause.");
-        }
-
-        [Test]
-        public void ContinueGoesThroughTheClockQueueAndTurnsTheBattleBackOn()
-        {
-            var flow = InBattle();
-            flow.Pause();
-            _clock.Step(1);
-
-            flow.Resume();
-            Assert.AreEqual(RunStep.Paused, flow.Step, "The press only queues the continue.");
-            _clock.Step(1);
-
-            Assert.AreEqual(RunStep.Playing, flow.Step);
-            Assert.IsTrue(_clock.Gameplay);
-        }
-
-        [Test]
-        public void TwoPausesQueuedInOneFramePauseOnce()
-        {
-            var flow = InBattle();
-            flow.Pause();
-            flow.Pause();
-
-            _clock.Step(1);
-
-            Assert.AreEqual(RunStep.Paused, flow.Step);
-            Assert.AreEqual(1, _log.Count(l => l == "step:Paused"));
-        }
-
-        [Test]
-        public void PauseQueuedJustBeforeTheCastleFallsIsIgnoredWhenItsStepComes()
-        {
-            var flow = InBattle();
-            flow.Pause();
-            flow.Lose();
-
-            _clock.Step(1);
-
-            Assert.AreEqual(RunStep.Ending, flow.Step);
         }
 
         [Test]
@@ -192,44 +134,6 @@ namespace Game.Run.Tests
 
             Assert.AreEqual(0, _score.Score);
             Assert.AreEqual(RunStep.Ending, flow.Step);
-        }
-
-        [Test]
-        public void WaitingForTheReviveStopsTheBattleAndTheReviveGoesOnWithoutResettingTheClock()
-        {
-            var flow = InBattle(reviveOnce: true);
-
-            flow.Lose();
-            Assert.AreEqual(RunStep.ReviveWait, flow.Step);
-            Assert.IsFalse(_clock.Gameplay);
-            _clock.Step(40);
-            Assert.AreEqual(RunStep.ReviveOffer, flow.Step, "The revive popup shows after 1 s of clock steps.");
-
-            flow.Revive();
-            flow.ReviveShown();
-
-            Assert.AreEqual(RunStep.Playing, flow.Step);
-            Assert.IsTrue(_clock.Gameplay, "The battle plays on from where it stopped.");
-            CollectionAssert.DoesNotContain(_log, "clock:SetUpRun", "A revive keeps the run's steps and streams.");
-            CollectionAssert.DoesNotContain(_log, "clock:ClearRun");
-        }
-
-        [Test]
-        public void ClockStepsWhileTheGameIsAwayDoNotCountTowardTheOneSecondBeforeTheRevivePopup()
-        {
-            var flow = InBattle(reviveOnce: true);
-            flow.Lose();
-            _clock.Step(20);
-
-            _waits.Hold();
-            _clock.Step(100);
-            Assert.AreEqual(RunStep.ReviveWait, flow.Step, "Steps while the game is off the screen do not count.");
-
-            _waits.Release();
-            _clock.Step(19);
-            Assert.AreEqual(RunStep.ReviveWait, flow.Step, "0.5 s before leaving + 0.475 s after coming back.");
-            _clock.Step(1);
-            Assert.AreEqual(RunStep.ReviveOffer, flow.Step, "1 s of steps on the screen in all: the revive popup shows.");
         }
 
         [Test]
@@ -293,19 +197,6 @@ namespace Game.Run.Tests
             flow.GoHome();
 
             CollectionAssert.AreEqual(new[] { "clock:ClearRun", "BattleCleared", "step:Home" }, _log);
-        }
-
-        [Test]
-        public void GivingUpClearsTheClockBeforeTheBattleIsReportedCleared()
-        {
-            var flow = InBattle();
-            flow.Pause();
-            _clock.Step(1);
-            _log.Clear();
-
-            flow.Abandon();
-
-            CollectionAssert.AreEqual(new[] { "BattleStopped", "clock:ClearRun", "BattleCleared", "step:Home" }, _log);
         }
 
         [Test]

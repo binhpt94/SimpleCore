@@ -11,7 +11,7 @@ namespace Game.Run.Tests
 {
     /// <summary>
     /// Proposal 2026-11-25-session-usage-tracking: the run reports its running jobs (clock listening, waits before
-    /// the lose and revive popups, the begin frame, the leftover popup check) and every count is 0 after the session ends.
+    /// the lose popup, the begin frame, the leftover popup check) and every count is 0 after the session ends.
     /// </summary>
     public class RunUsageTrackingTests
     {
@@ -136,7 +136,7 @@ namespace Game.Run.Tests
         {
             // feature-run/run-start/replay-checks#stage-prototype: 10 runs in a row in the Game scene; at the start of
             // run 10 the run holds the same jobs, clock listeners and queued actions as at the start of run 1.
-            // Each run pauses, resumes, clears a wave, loses after the 1 s wait and plays again.
+            // Each run clears a wave, loses after the 1 s wait and plays again.
             var session = StartedSession();
             var check = new LeftoverPopupCheck(_flow, () => Array.Empty<string>(), _frames, new FakeLog());
             check.Run();
@@ -152,10 +152,6 @@ namespace Game.Run.Tests
                 _frames.NextFrameArrives();
                 atStart.Add((Jobs(session), Jobs(check), _clock.Listening, _clock.QueuedCount));
 
-                _flow.Pause();
-                _clock.Step(1);
-                _flow.Resume();
-                _clock.Step(1);
                 _flow.CountClearedWave(1);
                 _clock.Step(1);
                 _flow.Lose();

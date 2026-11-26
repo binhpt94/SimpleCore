@@ -157,7 +157,6 @@ namespace Game.Hud.Tests
         public event Action BattleStarted;
         public event Action BattleStopped;
         public event Action BattleCleared;
-        public bool IsPaused => Step == RunStep.Paused;
 
         public void SetStep(RunStep step)
         {
@@ -167,21 +166,8 @@ namespace Game.Hud.Tests
 
         public void StopBattle() => BattleStopped?.Invoke();
 
-        /// <summary>How many times the HUD reported "pause pressed".</summary>
-        public int PauseRequests;
-
         public void Play() { }
         public void EnterBattle(RunTeam team) { }
-
-        /// <summary>Like the real run: counts the request and pauses only a running battle.</summary>
-        public void Pause()
-        {
-            PauseRequests++;
-            if (Step == RunStep.Playing) SetStep(RunStep.Paused);
-        }
-
-        public void Resume() { }
-        public void Abandon() { }
         public void Replay() { }
         public void GoHome() { }
         public void Lose() { }
@@ -204,7 +190,6 @@ namespace Game.Hud.Tests
         public string CheatLabel;
 
         public event Action<int> SkillPressed;
-        public event Action PausePressed;
         public event Action CheatPressed;
         public int SkillButtonsCreated;
         public HudInsets Insets;
@@ -216,10 +201,6 @@ namespace Game.Hud.Tests
             _root != null ? _root : _root = new UnityEngine.GameObject("FakeHudView") { hideFlags = UnityEngine.HideFlags.HideAndDontSave };
 
         public void ApplySafeArea(HudInsets insets) => Insets = insets;
-        public bool PauseShown = true;
-        public void ShowPauseButton(bool shown) => PauseShown = shown;
-        public void PressPause() => PausePressed?.Invoke();
-        public int PauseListeners => PausePressed?.GetInvocationList().Length ?? 0;
 
         public void SetVisible(bool visible) => Visible = visible;
 

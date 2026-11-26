@@ -1,9 +1,9 @@
 {
- "hash": "2a7ea725bb37",
+ "hash": "f36090b274ea",
  "items": {
   "id-list": {
-   "hash": "b15c93449a07",
-   "text": "Scene Game có 1 id popup: `PopupLose/Main` (popup thua)\nTên `Name` do feature sở hữu đặt; đây là tên dự kiến."
+   "hash": "2f2e9fa92266",
+   "text": "Scene Game có 2 id popup: `PopupLose/Main` (popup thua) và `PopupRating/Main` (popup mời đánh giá)\nTên `Name` do feature sở hữu đặt; đây là tên dự kiến."
   },
   "preload": {
    "hash": "fb1903e00112",

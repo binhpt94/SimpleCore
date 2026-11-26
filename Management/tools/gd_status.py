@@ -35,7 +35,8 @@ def quiet(node):
     advice to write in, no clash, no GPT question owed)."""
     gpt = node.get("gpt") or {}
     return bool(node["passed"] and not node.get("uiWait") and not node["refMissing"] and not node.get("refStale")
-                and not node["stale"] and not gpt.get("missing") and not node.get("clashOpen") and not node.get("gptOwed"))
+                and not node["stale"] and not gpt.get("missing") and not gpt.get("newMissing") and not node.get("clashOpen")
+                and not node.get("gptOwed"))
 
 
 def lines_for(root, node, out, brief=False, hidden=None):
@@ -125,10 +126,16 @@ def lines_for(root, node, out, brief=False, hidden=None):
     asked = gd.advice_ids(advice)
     where = "/".join(gd.BASE[1:] + (gd.ADVICE_DIR, advice.name))
     if node.get("nodeBy"):
-        out.append(f"- Node do GPT đề xuất (lần hỏi {node['nodeBy']['advice']})")
-    if asked:
-        out.append("- Góp ý của GPT (ngang hàng ý của bạn: mỗi góp ý phải thành một ý, không được bỏ; xem "
-                   "skill gd-integrate-advice): " + ", ".join(f"{where}/{a}.md" for a in asked))
+        nb = node["nodeBy"]
+        out.append(f"- Node do GPT đề xuất (lần hỏi "
+                   + (f"{nb['folder']}/{nb['advice']}#{nb['pick']}" if nb.get("folder") else nb["advice"]) + ")")
+    old = [a for a in asked if not gd.answer_filtered(advice / f"{a}.md")]
+    if old:
+        out.append("- Góp ý của GPT, lần hỏi cũ chưa lọc (mỗi góp ý phải thành một ý, không được bỏ; xem "
+                   "skill gd-integrate-advice): " + ", ".join(f"{where}/{a}.md" for a in old))
+    if len(old) < len(asked):
+        out.append("- Lần hỏi đã lọc (ý giữ nằm ở node đích của nó): "
+                   + ", ".join(f"{where}/{a}.pick.md" for a in asked if a not in old))
     if node.get("group") == "infra":
         out.append("- Nhóm: hạ tầng (không cần hỏi GPT; hỏi khi bạn thấy cần)")
     elif node.get("group") == "test":
@@ -138,8 +145,13 @@ def lines_for(root, node, out, brief=False, hidden=None):
                    f"qua hộp thư (python Management/tools/dispatch.py send @DesignAdvisor --from GameDesigner \"<node> · <hỏi gì>\") hỏi GPT về node này; câu trả lời sẽ nằm ở {where}/<id>.md")
     gpt = node.get("gpt") or {}
     for m in gpt.get("missing", []):
-        out.append(f"- GÓP Ý CHƯA VÀO NODE: {m['advice']}#{m['point']}: {m['title']} "
+        out.append(f"- {'Ý GIỮ' if m.get('pick') else 'GÓP Ý'} CHƯA VÀO NODE: {m['advice']}#{m['point']}: {m['title']} "
                    f"-> viết thành một ý, khai by: <id ý>=gpt@{m['advice']}#{m['point']}")
+    for p in gpt.get("newMissing", []):
+        out.append(f"- NODE MỚI CHƯA TẠO: {p['target']} (ý giữ {p['key']}: {p['title']}) -> tạo node, khai node-by: gpt@{p['key']}")
+    if gpt.get("side"):
+        out.append(f"- Bổ sung từ GPT chờ người lọc: {len(gpt['side'])} ý (người chuyển lên hay xoá trên trang; bạn không "
+                   "viết chúng vào node): " + "; ".join(p["title"] for p in gpt["side"]))
     for d in gpt.get("dropped", []):
         out.append(f"- Ý của GPT đã bị loại: {d['advice']}#{d['point']} (ý {d['item']}): {d['title']}")
     titles = {x["id"]: x["title"] for x in node["items"]}
@@ -169,6 +181,11 @@ def lines_for(root, node, out, brief=False, hidden=None):
             text = " ".join(str(e.get("text", "")).split())
             out.append(f"    [{e.get('at', '')}] {e.get('item', '')} (điểm {e.get('score')}): {text[:160]}"
                        + (f" | phản hồi: {e.get('feedback')}" if e.get("feedback") else ""))
+    side_deleted = gd.pick_deleted(root, node["path"])
+    if side_deleted:
+        out.append("- Người đã xoá ở phần bổ sung từ GPT (người đã loại: đừng đề xuất lại):")
+        for e in side_deleted:
+            out.append(f"    {e['key']}: {' '.join(e['text'].split())[:160]}")
     deleted = gd.human_deleted(folder)
     if deleted:
         out.append("- Người đã xoá ở node này (trung tính: không viết lại, không đưa lại):")
@@ -299,6 +316,11 @@ def report(root, arg="", brief=False):
         out.append(f"### Để sau: thuộc giai đoạn sau, không đào sâu thêm, yêu cầu code chưa giao ({len(later)})")
         out += [f"- {n['path']} ({names.get(n['priority'].get('phase'), n['priority'].get('phase'))}, vòng {n['round']}): {n['title']}"
                 for n in later] or ["- không có"]
+    unpicked = [u for u in gd.pick_index(Path(root).joinpath(*gd.BASE))["unchecked"]
+                if not path or u["folder"] == gd.advice_name(path)]
+    if unpicked:
+        out += ["", f"## Chưa lọc góp ý GPT (việc của @DesignAdvisor: viết <id>.pick.md, chạy gd_pick.py; skill advisor-ask-gpt)"] + [
+            f"- {gd.ADVICE_DIR}/{u['folder']}/{u['aid']}: {u['why']}" for u in unpicked]
     owed = [n for n in gd.walk(node) if n.get("gptOwed")]
     if owed:
         out += ["", f"## Chưa hỏi GPT (bắt buộc ở vòng {' và '.join(map(str, gd.ADVICE_ROUNDS))}, trừ feature hạ tầng, test; nhờ DesignAdvisor qua hộp thư dispatch.py send, kể cả node đã chốt)"] + [

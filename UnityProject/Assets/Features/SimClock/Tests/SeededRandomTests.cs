@@ -174,32 +174,6 @@ namespace Game.SimClock.Tests
         }
 
         [Test]
-        public void Edge_CastleRevivedByAd_KeepsSeedStepsAndStreamPosition()
-        {
-            var straight = NewClock(_config, true, out _, out _);
-            straight.SetUpRun();
-            straight.StartRun();
-            var expected = Draw(straight.Stream("wave"), 20);
-
-            var revived = NewClock(_config, true, out _, out var log);
-            revived.SetUpRun();
-            revived.StartRun();
-            var wave = revived.Stream("wave");
-            var got = Draw(wave, 10);
-            revived.Advance(0.1);
-            revived.SetGameplay(false);
-            revived.Advance(0.1);
-            revived.SetGameplay(true);
-            revived.Advance(0.025);
-            got.AddRange(Draw(wave, 10));
-
-            Assert.That(got, Is.EqualTo(expected));
-            Assert.That(revived.StepCount, Is.EqualTo(9));
-            Assert.That(revived.GameplayStepCount, Is.EqualTo(5));
-            Assert.That(log.Lines, Has.Count.EqualTo(1), "seed written once per run");
-        }
-
-        [Test]
         public void Edge_SetUpFailedBeforeStart_WritesNoSeed_AndNextSetUpPicksAgain()
         {
             var clock = NewClock(_config, false, out var seeds, out var log);

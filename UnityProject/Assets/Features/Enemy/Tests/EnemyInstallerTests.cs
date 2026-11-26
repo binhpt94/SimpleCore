@@ -356,7 +356,6 @@ namespace Game.Enemy.Tests
         {
             public RunStep Step => RunStep.Home;
             public RunTeam Team => default;
-            public bool IsPaused => false;
 #pragma warning disable 67
             public event Action<RunStep> StepChanged;
             public event Action<RunTeam> RunStarted;
@@ -366,9 +365,6 @@ namespace Game.Enemy.Tests
 #pragma warning restore 67
             public void Play() { }
             public void EnterBattle(RunTeam team) { }
-            public void Pause() { }
-            public void Resume() { }
-            public void Abandon() { }
             public void Replay() { }
             public void GoHome() { }
             public void Lose() { }

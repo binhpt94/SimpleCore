@@ -1,0 +1,21 @@
+{
+ "hash": "f84c671897ff",
+ "items": {
+  "invite-parts": {
+   "hash": "bf4eea9632a3",
+   "text": "Popup mời gồm một dòng mời đánh giá game và hai nút: Đánh giá và Để sau\nKhông có hình sao, ô chọn sao hay ô nhập chữ trong popup."
+  },
+  "rate-opens-store": {
+   "hash": "c381d5c10efd",
+   "text": "Chạm Đánh giá thì popup đóng và game mở trang của game trên Google Play\nNgười chơi chọn số sao và viết nhận xét trên Google Play. Game không biết người chơi có đánh giá thật hay không."
+  },
+  "later-closes": {
+   "hash": "1e785a6918d7",
+   "text": "Chạm Để sau thì popup đóng, không làm gì khác"
+  },
+  "one-answer": {
+   "hash": "eeb5b9c831c3",
+   "text": "Mỗi lần mời chỉ nhận một lựa chọn; popup đóng là lần mời đó xong"
+  }
+ }
+}

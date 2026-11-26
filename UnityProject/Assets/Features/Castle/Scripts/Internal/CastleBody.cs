@@ -40,27 +40,8 @@ namespace Game.Castle
         /// <summary>An enemy hit the standing castle (for the hit flash).</summary>
         public event Action Struck;
 
-        /// <summary>The fallen castle stood up again (for the grow-back drawing).</summary>
-        public event Action Revived;
-
         /// <summary>
-        /// Stands a fallen castle up again with the revive fraction of its current max health, rounded up; max health
-        /// and levels stay. No grace time: it takes damage, shoots and allows skills at once. A later fall tells the
-        /// run again. Returns false, changing nothing, when the castle is standing. How many revives a run allows is
-        /// the run's rule, not the castle's.
-        /// </summary>
-        public bool Revive()
-        {
-            if (!IsDestroyed) return false;
-            IsDestroyed = false;
-            Health = Math.Max(1f, (float)Math.Ceiling(MaxHealth * _config.ReviveFraction - 1e-3f));
-            HealthChanged?.Invoke();
-            Revived?.Invoke();
-            return true;
-        }
-
-        /// <summary>
-        /// Where the hero in team slot <paramref name="slot"/> (0 = the first chosen) starts the battle and revives:
+        /// Where the hero in team slot <paramref name="slot"/> (0 = the first chosen) starts the battle:
         /// at a castle edge, x in u. Slots past the configured ones repeat the pattern.
         /// </summary>
         public float HeroStartX(int slot)

@@ -18,7 +18,7 @@ namespace Game.Castle.Tests
             var run = new FakeRunFlow();
             _enemies = new FakeEnemyField();
             _body = new CastleBody(_config, run);
-            var skills = new CastleSkills(_config, _body, run, _enemies, new FakeHeroSquad(), _enemies);
+            var skills = new CastleSkills(_config, _body, _enemies, new FakeHeroSquad(), _enemies);
             _upgrades = new CastleUpgrades(_body, skills);
             _shot = new CastleAutoShot(_config, _body, _enemies, _upgrades, _enemies);
         }

@@ -15,7 +15,6 @@ MonoBehaviour:
   maxHealth: 1000
   halfWidth: 1.5
   healthPerLevel: 150
-  reviveFraction: 0.3
   heroSlotX:
   - -1.5
   - 1.5
@@ -38,7 +37,6 @@ MonoBehaviour:
   height: 4
   hitFlashSeconds: 0.1
   collapseSeconds: 0.5
-  reviveGrowSeconds: 0.5
   shotFlightSeconds: 0.15
   thunderEffectSeconds: 0.3
   levelUpPopScale: 1.1

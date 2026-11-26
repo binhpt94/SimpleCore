@@ -34,7 +34,7 @@ namespace Game.Hero
             Rebuild();
         }
 
-        /// <summary>Pushes positions and moves animations on by <paramref name="deltaSeconds"/> (0 while paused).</summary>
+        /// <summary>Pushes positions and moves animations on by <paramref name="deltaSeconds"/> (0 outside the battle).</summary>
         public void Refresh(float deltaSeconds)
         {
             foreach (var pair in _displays)

@@ -1,0 +1,9 @@
+{
+ "hash": "1fab83335edb",
+ "items": {
+  "invite-open": {
+   "hash": "14bc44169ab5",
+   "text": "Popup mời đánh giá đang mở, chưa chạm nút nào\nÉp: mở `PopupRating/Main` trên scene Game, bỏ qua điều kiện lúc mời. Có đủ mọi thành phần: dòng mời \"Đánh giá game trên Google Play\", nút \"Đánh giá\", nút \"Để sau\"."
+  }
+ }
+}

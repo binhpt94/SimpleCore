@@ -250,7 +250,7 @@ namespace Game.Enemy
             Clear();
         }
 
-        /// <summary>The castle fell or the run was abandoned: enemies stand still, nobody is defeated or paid.</summary>
+        /// <summary>The castle fell or the battle was left: enemies stand still, nobody is defeated or paid.</summary>
         public void Stop() => _stopped = true;
 
         /// <summary>The player left the battle: every enemy is removed, none counts as defeated.</summary>

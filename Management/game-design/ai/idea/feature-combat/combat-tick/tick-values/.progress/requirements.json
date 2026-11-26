@@ -48,22 +48,20 @@
    "at": "2026-11-25 13:46:40"
   },
   "pause-no-tick": {
-   "state": "verified",
+   "state": "done",
    "note": "CombatLoop doc IRunFlow.IsPaused, BattleStopped",
    "tests": [
-    "CombatLoopTests.NoTickRunsWhilePaused",
-    "CombatLoopTests.NoTickRunsWhileWaitingForARevive",
     "CombatLoopTests.NoTickRunsAfterTheRunEnded",
     "CombatLoopTests.NoTickRunsBeforeTheBattleStarts",
     "CombatLoopTests.CastleFallingInATickStopsTheRestOfTheFramesTicks",
     "CombatLoopTests.HitsWaitingWhenTheBattleIsClearedDoNotReachTheNextRun"
    ],
    "play": "",
-   "hash": "13c3b605b658",
-   "text": "Lúc tạm dừng, lúc chờ hồi sinh và sau khi lượt kết thúc không có nhịp nào chạy",
-   "title": "Lúc tạm dừng, lúc chờ hồi sinh và sau khi lượt kết thúc không có nhịp nào chạy",
-   "by": "@CodeLead",
-   "at": "2026-11-25 13:46:40"
+   "hash": "2cd50472aabc",
+   "text": "Sau khi lượt kết thúc không có nhịp nào chạy",
+   "title": "Sau khi lượt kết thúc không có nhịp nào chạy",
+   "by": "Combat",
+   "at": "2026-11-27 02:32:31"
   },
   "edge-don-vao-quai-da-ra-ngoai-man-16u": {
    "state": "verified",
@@ -635,6 +633,27 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 02:21:04",
+   "id": "pause-no-tick",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatLoopTests.NoTickRunsAfterTheRunEnded, CombatLoopTests.NoTickRunsBeforeTheBattleStarts, CombatLoopTests.CastleFallingInATickStopsTheRestOfTheFramesTicks, CombatLoopTests.HitsWaitingWhenTheBattleIsClearedDoNotReachTheNextRun"
+  },
+  {
+   "at": "2026-11-27 02:31:00",
+   "id": "pause-no-tick",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatLoopTests.NoTickRunsAfterTheRunEnded, CombatLoopTests.NoTickRunsBeforeTheBattleStarts, CombatLoopTests.CastleFallingInATickStopsTheRestOfTheFramesTicks, CombatLoopTests.HitsWaitingWhenTheBattleIsClearedDoNotReachTheNextRun"
+  },
+  {
+   "at": "2026-11-27 02:32:31",
+   "id": "pause-no-tick",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatLoopTests.NoTickRunsAfterTheRunEnded, CombatLoopTests.NoTickRunsBeforeTheBattleStarts, CombatLoopTests.CastleFallingInATickStopsTheRestOfTheFramesTicks, CombatLoopTests.HitsWaitingWhenTheBattleIsClearedDoNotReachTheNextRun"
   }
  ]
 }

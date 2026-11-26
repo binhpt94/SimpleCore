@@ -1,0 +1,7 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,invite_text,Dòng mời,chữ,Đánh giá game trên Google Play,như IDEA,như IDEA,"Trung tính, không hỏi có thích game không, không nhắc số sao (rating-neutral-text)"
+2,rate_label,Chữ nút chính,chữ,Đánh giá,như IDEA,như IDEA,Nói đúng việc nút làm
+3,later_label,Chữ nút phụ,chữ,Để sau,như IDEA,như IDEA,Người quyết giữ Để sau (2026-11-27)
+4,store_open_order,Nơi mở trang Google Play,thứ tự,"ứng dụng Google Play, không được thì trình duyệt",như IDEA,như IDEA,Máy không có Google Play hay Unity Editor vẫn mở được trang

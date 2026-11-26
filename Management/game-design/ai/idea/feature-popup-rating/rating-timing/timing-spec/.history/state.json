@@ -1,0 +1,37 @@
+{
+ "hash": "9c59db0047bc",
+ "items": {
+  "start-signal": {
+   "hash": "cf2889fdd759",
+   "text": "Bắt đầu đếm khi `feature-run` báo đã chốt kết quả thua, cùng tín hiệu popup thua dùng để mở\nLúc đó điểm, kỉ lục và cờ \"kỉ lục mới\" đã chốt (`feature-run/run-score/score-rules`)."
+  },
+  "invite-delay": {
+   "hash": "6c1efb201a0e",
+   "text": "Xin mở lời mời 1.5 giây sau lúc trận dừng, tức 0.5 giây sau khi popup thua hiện\nPopup thua hiện sau 1 giây (`feature-run/run-flow/flow-rules#lose-popup-delay`); thêm 0.5 giây (dự kiến) để người chơi kịp thấy dòng \"Kỉ lục mới!\" rồi mới bị che."
+  },
+  "check-flag": {
+   "hash": "4c3a66e11f94",
+   "text": "Đến lúc xin mở, cờ \"kỉ lục mới\" tắt hoặc cờ \"đã mời\" bật thì không mời"
+  },
+  "invited-flag": {
+   "hash": "e228aa92c6b9",
+   "text": "Cờ \"đã mời\" bật khi popup mời đã hiện, và giữ tới khi tắt game\nChỉ nằm trong bộ nhớ, không lưu xuống máy. Mở game thì cờ tắt."
+  },
+  "cancel-on-leave": {
+   "hash": "211c3d94db65",
+   "text": "Người chơi đã chạm nút trên popup thua trước lúc xin mở thì huỷ lần mời này, cờ \"đã mời\" giữ nguyên tắt\nHuỷ khi `feature-run` bắt đầu huỷ trận theo lựa chọn rời trận; lời mời không hiện đè lên trận mới."
+  },
+  "refused-no-count": {
+   "hash": "2278a45a43e9",
+   "text": "Dịch vụ từ chối mở (đã đủ popup chồng, id đang mở) thì không mời, cờ \"đã mời\" giữ nguyên tắt\nTheo `feature-popup/popup-layer/stack-rules`; ghi cảnh báo trong log."
+  },
+  "background-pause": {
+   "hash": "7ceca156d4a3",
+   "text": "Thời gian ở ngoài game không tính vào 1.5 giây chờ\nQuay lại game thì đếm tiếp phần còn lại."
+  },
+  "lose-under-input": {
+   "hash": "716466f2e4c6",
+   "text": "Trong lúc lời mời mở, popup thua không nhận chạm; nút quay lại của máy tới lời mời\nTheo luật chỉ popup trên cùng nhận bấm của dịch vụ popup."
+  }
+ }
+}

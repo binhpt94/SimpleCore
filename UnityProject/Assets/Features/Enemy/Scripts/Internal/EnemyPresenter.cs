@@ -9,7 +9,7 @@ namespace Game.Enemy
     /// <summary>
     /// Shows the field on the stage. The enemies walk and hit inside the combat tick (the field is a combat actor);
     /// after each tick the presenter pushes where they stand. On each step of the shared clock it works out whether
-    /// the stage is frozen (paused, waiting to revive, battle stopped).
+    /// the stage is frozen (a step that is not gameplay, battle stopped).
     /// </summary>
     internal sealed class EnemyPresenter : IDisposable
     {
@@ -44,7 +44,7 @@ namespace Game.Enemy
 
             _field.GetLooks(_looks);
             for (var i = 0; i < _looks.Count; i++) _stage.Show(_looks[i]);
-            _stage.SetPaused(_runFlow.IsPaused);
+            _stage.SetFrozen(_field.IsStopped);
 
             _stepHandle = clock.OnStep(ClockOwner, OnStep);
         }
@@ -64,13 +64,13 @@ namespace Game.Enemy
             _combat.TickDone -= OnTickDone;
         }
 
-        /// <summary>One step of the shared clock: the stage is frozen on a step that is not gameplay, while paused or after the battle stopped.</summary>
+        /// <summary>One step of the shared clock: the stage is frozen on a step that is not gameplay or after the battle stopped.</summary>
         /// <remarks>
         /// The stage's frozen state is worked out again on every step, so it never depends on the order in which
         /// the run's signals arrive (on replay StepChanged comes before RunStarted resets the field).
         /// </remarks>
         private void OnStep(SimStep step) =>
-            _stage.SetPaused(!step.Gameplay || _runFlow.IsPaused || _field.IsStopped);
+            _stage.SetFrozen(!step.Gameplay || _field.IsStopped);
 
         /// <summary>A combat tick is over: every enemy walked and hit, the fallen are gone; draw where they stand.</summary>
         private void OnTickDone()
@@ -87,6 +87,6 @@ namespace Game.Enemy
         private void OnEntered(int handle) => _stage.Enter(handle);
         private void OnDefeated(EnemyDefeat defeat) => _stage.Defeat(defeat.Handle);
         private void OnCleared() => _stage.RemoveAll();
-        private void OnStepChanged(RunStep step) => _stage.SetPaused(_runFlow.IsPaused || _field.IsStopped);
+        private void OnStepChanged(RunStep step) => _stage.SetFrozen(_field.IsStopped);
     }
 }

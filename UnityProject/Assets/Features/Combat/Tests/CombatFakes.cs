@@ -125,7 +125,7 @@ namespace Game.Combat.Tests
 
         public void Enqueue(string owner, Action apply) => apply();
 
-        /// <summary>Runs <paramref name="count"/> steps; <paramref name="gameplay"/> false is a paused step.</summary>
+        /// <summary>Runs <paramref name="count"/> steps; <paramref name="gameplay"/> false is a step that is not gameplay.</summary>
         public void Step(int count = 1, bool gameplay = true)
         {
             for (var i = 0; i < count; i++)
@@ -156,8 +156,6 @@ namespace Game.Combat.Tests
     {
         public RunStep Step { get; set; } = RunStep.Playing;
         public RunTeam Team => default;
-        public bool IsPaused => Step == RunStep.Paused || Step == RunStep.ReviveWait
-                                || Step == RunStep.ReviveOffer || Step == RunStep.Reviving;
 
         public event Action<RunStep> StepChanged;
         public event Action<RunTeam> RunStarted;
@@ -178,12 +176,14 @@ namespace Game.Combat.Tests
 
         public void Play() { }
         public void EnterBattle(RunTeam team) { }
-        public void Pause() => SetStep(RunStep.Paused);
-        public void Resume() => SetStep(RunStep.Playing);
-        public void Abandon() { }
         public void Replay() { }
         public void GoHome() { }
-        public void Lose() => SetStep(RunStep.ReviveWait);
+        /// <summary>The castle fell: the battle stops in the same frame.</summary>
+        public void Lose()
+        {
+            SetStep(RunStep.Ending);
+            StopBattle();
+        }
         public void CountClearedWave(int wave) { }
     }
 }

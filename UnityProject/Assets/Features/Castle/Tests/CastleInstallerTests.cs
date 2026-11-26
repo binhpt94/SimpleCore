@@ -28,7 +28,6 @@ namespace Game.Castle.Tests
             var run = new FakeRunFlow();
             registry.Register<ISessionScene>(session);
             registry.Register<IRunFlow>(run);
-            registry.Register<IRunRevive>(run);
             registry.Register<IEnemyField>(enemies);
             registry.Register<IHeroSquad>(new FakeHeroSquad());
             registry.Register<IHeroSpawnPoints>(spawnPoints);
@@ -64,7 +63,6 @@ namespace Game.Castle.Tests
             var run = new FakeRunFlow();
             registry.Register<ISessionScene>(new FakeSessionScene());
             registry.Register<IRunFlow>(run);
-            registry.Register<IRunRevive>(run);
             registry.Register<IEnemyField>(new FakeEnemyField());
             registry.Register<IHeroSquad>(new FakeHeroSquad());
             registry.Register<IHeroSpawnPoints>(new FakeHeroSpawnPoints());
@@ -82,7 +80,6 @@ namespace Game.Castle.Tests
             var run = new FakeRunFlow();
             registry.Register<ISessionScene>(new FakeSessionScene());
             registry.Register<IRunFlow>(run);
-            registry.Register<IRunRevive>(run);
             registry.Register<IEnemyField>(new FakeEnemyField());
             registry.Register<IHeroSquad>(new FakeHeroSquad());
             registry.Register<IHeroSpawnPoints>(new FakeHeroSpawnPoints());
@@ -110,7 +107,6 @@ namespace Game.Castle.Tests
             var run = new FakeRunFlow();
             registry.Register<ISessionScene>(new FakeSessionScene());
             registry.Register<IRunFlow>(run);
-            registry.Register<IRunRevive>(run);
             registry.Register<IEnemyField>(new FakeEnemyField());
             registry.Register<IHeroSquad>(new FakeHeroSquad());
 
@@ -161,7 +157,6 @@ namespace Game.Castle.Tests
             var run = new FakeRunFlow();
             registry.Register<ISessionScene>(new FakeSessionScene());
             registry.Register<IRunFlow>(run);
-            registry.Register<IRunRevive>(run);
             registry.Register<IHeroSquad>(new FakeHeroSquad());
             registry.Register<IHeroSpawnPoints>(new FakeHeroSpawnPoints());
 

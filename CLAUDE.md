@@ -66,6 +66,9 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 - Node của giai đoạn đang làm và trước đó là tới hạn: thiết kế tới vòng 4, yêu cầu của nó là việc dev.
 - Node của giai đoạn sau: sổ yêu cầu ghi "để sau", không giao, `doing`/`done` bị từ chối.
 - Chưa đặt giai đoạn: @CodeLead chưa giao được việc dev, @Manager hỏi người.
+- Nghĩa của giai đoạn (người quyết 2026-11-27): IDEA, PROTOTYPE, FULL là ba mức của cùng một game, lồng nhau. PROTOTYPE gồm mọi thứ của IDEA rồi thêm; FULL gồm mọi thứ của PROTOTYPE rồi thêm.
+- Người bỏ một thứ (ý, node, feature, luật) thì nó bị bỏ ở mọi giai đoạn: cả giai đoạn sau, cột PROTOTYPE, FULL của bảng "Thông số theo giai đoạn", bảng `.excel`, node để sau, cheat, code, test, asset. Chỉ giữ cho giai đoạn sau khi người nói rõ "bỏ ở <giai đoạn>, giữ cho <giai đoạn>".
+- "Chưa làm ở giai đoạn này" khác "bỏ": thứ chưa làm nằm ở node có điểm của giai đoạn sau. Thứ đã bỏ không được giữ lại dưới dạng cờ tắt, nhánh code, test, hay ghi chú "không thuộc IDEA".
 
 ## Vùng
 | Vùng | Đọc | Sửa |

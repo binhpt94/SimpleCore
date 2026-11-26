@@ -6,7 +6,7 @@ namespace Game.Battlefield
 {
     /// <summary>
     /// The backdrop's life in the Game scene: it appears when the battle is set up and goes when the player leaves
-    /// the battle (or the scene ends). Pause, castle destroyed and revive change nothing.
+    /// the battle (or the scene ends). Castle destroyed changes nothing.
     /// </summary>
     internal sealed class BattlefieldParticipant : SessionParticipantBase
     {
@@ -43,7 +43,7 @@ namespace Game.Battlefield
         }
 
         private static bool InBattle(RunStep step) =>
-            step == RunStep.Playing || step == RunStep.Paused || step == RunStep.Ending || step == RunStep.Lost;
+            step == RunStep.Playing || step == RunStep.Ending || step == RunStep.Lost;
 
         private void Show()
         {

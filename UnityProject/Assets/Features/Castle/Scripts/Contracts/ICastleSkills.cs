@@ -11,7 +11,7 @@ namespace Game.Castle
         CastleSkillState GetState(CastleSkill skill);
 
         /// <summary>
-        /// Uses the skill when it is ready, the castle stands and the battle is not paused; starts its cooldown.
+        /// Uses the skill when it is ready, the castle stands and the battle is running; starts its cooldown.
         /// Returns false and changes nothing otherwise.
         /// </summary>
         bool TryUse(CastleSkill skill);

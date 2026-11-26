@@ -18,7 +18,7 @@ namespace Game.Castle.Tests
             _run = new FakeRunFlow();
             _body = new CastleBody(_config, _run);
             var enemies = new FakeEnemyField();
-            _skills = new CastleSkills(_config, _body, _run, enemies, new FakeHeroSquad(), enemies);
+            _skills = new CastleSkills(_config, _body, enemies, new FakeHeroSquad(), enemies);
             _cheat = new CastleCheat(_body, _skills);
         }
 
@@ -85,7 +85,7 @@ namespace Game.Castle.Tests
             Assert.That(_skills.GetState(CastleSkill.Thunder).Ready, Is.True);
         }
 
-        // ICastleFallCheat, for feature-popup-revive/cheat#waiting-ad.
+        // ICastleFallCheat.
 
         [Test]
         public void Fall_cheat_brings_the_castle_to_zero_and_tells_the_run_once_like_a_real_fall()
@@ -137,15 +137,5 @@ namespace Game.Castle.Tests
             Assert.That(_run.LoseCalls, Is.EqualTo(0));
         }
 
-        [Test]
-        public void Fall_cheat_then_revive_stands_the_castle_up_at_thirty_percent()
-        {
-            var fall = new CastleFallCheat(_body, () => true);
-            fall.Fall();
-
-            _body.Revive();
-
-            Assert.That(_body.Health, Is.EqualTo(300f));
-        }
     }
 }

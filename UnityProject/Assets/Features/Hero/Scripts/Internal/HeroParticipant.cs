@@ -32,7 +32,7 @@ namespace Game.Hero
             _frames = frames ?? throw new ArgumentNullException(nameof(frames));
         }
 
-        private bool Playing => _running && _battleActive && !_run.IsPaused;
+        private bool Playing => _running && _battleActive;
 
         protected override void OnRun()
         {
@@ -76,7 +76,7 @@ namespace Game.Hero
             if (Playing) _squad.Strike();
         }
 
-        /// <summary>One frame of the view: draws the state after the frame's last step; animations stand still while paused.</summary>
+        /// <summary>One frame of the view: draws the state after the frame's last step.</summary>
         internal void RefreshView(float frameSeconds) => _presenter.Refresh(Playing ? frameSeconds : 0f);
 
         private async UniTaskVoid FrameLoop(CancellationToken cancellation)

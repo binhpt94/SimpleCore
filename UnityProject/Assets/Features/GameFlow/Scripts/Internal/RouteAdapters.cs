@@ -83,7 +83,6 @@ namespace Game.GameFlow
             {
                 case RunLeaveChoice.PlayAgain: return LeaveChoice.Replay;
                 case RunLeaveChoice.BackToStart: return LeaveChoice.GoHome;
-                case RunLeaveChoice.Abandon: return LeaveChoice.Abandon;
                 default: throw new ArgumentOutOfRangeException(nameof(choice), choice, "Unknown leave choice");
             }
         }

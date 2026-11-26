@@ -63,12 +63,8 @@ namespace Game.Battlefield.Tests
             public event Action BattleStarted { add { } remove { } }
             public event Action BattleStopped { add { } remove { } }
             public event Action BattleCleared { add { } remove { } }
-            public bool IsPaused => false;
             public void Play() { }
             public void EnterBattle(RunTeam team) { }
-            public void Pause() { }
-            public void Resume() { }
-            public void Abandon() { }
             public void Replay() { }
             public void GoHome() { }
             public void Lose() { }

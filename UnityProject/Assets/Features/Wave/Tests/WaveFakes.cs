@@ -16,7 +16,6 @@ namespace Game.Wave.Tests
 
         public RunStep Step { get; set; } = RunStep.Playing;
         public RunTeam Team => default;
-        public bool IsPaused { get; set; }
 
         public event Action<RunStep> StepChanged { add { } remove { } }
         public event Action<RunTeam> RunStarted;
@@ -35,13 +34,6 @@ namespace Game.Wave.Tests
 
         public void Play() { }
         public void EnterBattle(RunTeam team) { }
-        public void Pause()
-        {
-            IsPaused = true;
-            Log.Add("pause");
-        }
-        public void Resume() { }
-        public void Abandon() { }
         public void Replay() { }
         public void GoHome() { }
         public void Lose() => BattleStopped?.Invoke();
@@ -135,7 +127,7 @@ namespace Game.Wave.Tests
 
     /// <summary>
     /// The shared clock stepped by hand, like the real one in fixed-tick mode: 0.025 s steps, left-over time kept
-    /// (counted in whole microseconds so it never drifts). A step is gameplay unless <see cref="Paused"/> says otherwise.
+    /// (counted in whole microseconds so it never drifts). A step is gameplay while <see cref="Gameplay"/> says so.
     /// </summary>
     internal sealed class FakeSimClock : ISimClock
     {
@@ -145,7 +137,7 @@ namespace Game.Wave.Tests
         private readonly List<Action<SimStep>> _steps = new List<Action<SimStep>>();
         private long _leftMicros;
 
-        public Func<bool> Paused = () => false;
+        public Func<bool> Gameplay = () => true;
 
         public SimMode Mode => SimMode.FixedTick;
         public float StepSeconds => 0.025f;
@@ -179,7 +171,7 @@ namespace Game.Wave.Tests
         {
             for (var i = 0; i < count; i++)
             {
-                var gameplay = !Paused();
+                var gameplay = Gameplay();
                 StepCount++;
                 if (gameplay) GameplayStepCount++;
                 var step = new SimStep(StepCount, GameplayStepCount, StepSeconds, gameplay);

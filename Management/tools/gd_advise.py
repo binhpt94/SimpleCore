@@ -28,9 +28,12 @@ thêm: an idea the node lacks · làm rõ: an idea that is unclear, said clearly
 An answer whose points are not of that form, are too long (one point is one decision), or name an idea the node
 does not have is kept as <id>.rejected.md and the command fails: run it again. An earlier answer of the same id is
 kept as <id>.v<n>.md. There is no cap on runs.
-GPT's points weigh as much as Claude's ideas: @GameDesigner writes every one of them into the node's ideas (it may
-shorten the wording, not leave one out), labelled `by:` in data.md, and they are scored like any idea; what reaches
-live is still the human's decision. See .claude/rules/designadvisor.md.
+Only nodes of rounds 2 and 3 (gamedesign.ASK_ROUNDS) and _general are asked; the root and round 4 are refused
+(người quyết 2026-11-27). The answer carries `filter: pick`: @DesignAdvisor then keeps at most PICK_MAX ideas in
+<id>.pick.md, each with the node it belongs to, gives every other point a reason, and runs gd_pick.py; the kept
+ideas are what goes into the design (gamedesign.py, "picking GPT's points"). Answers written before that, without
+`filter: pick`, keep the earlier rule: every point becomes an idea of the node asked. See
+.claude/rules/designadvisor.md.
 Tests: python Management/tools/test_gd_advise.py
 """
 import re
@@ -232,6 +235,12 @@ def context_text(root, node, found, aid, skip, level):
         if dropped_by_human:
             out.append("--- Ý người chủ project ĐÃ XOÁ ở node này (không tốt không xấu, chỉ là không cần: đừng đề xuất lại)\n"
                        + "\n".join(f"- [{e.get('item', '')}] {one_line(str(e.get('text', '')))[:200]}" for e in dropped_by_human))
+        # Kept ideas waiting beside a fixed node that the human deleted: turned down (người quyết 2026-11-27).
+        side_deleted = [(p, e) for d in range(len(parts), 0, -1) for p in ["/".join(parts[:d])]
+                        for e in gd.pick_deleted(root, p)]
+        if side_deleted:
+            out.append("--- Ý người chủ project ĐÃ XOÁ ở phần bổ sung từ GPT (ý GPT đề xuất trước đây, người đã loại: đừng "
+                       "đề xuất lại)\n" + "\n".join(f"- [{p}] {one_line(e['text'])[:200]}" for p, e in side_deleted))
     asked = []
     names = ([gd.ADVICE_ROOT] + [".".join(parts[:d]) for d in range(1, len(parts) + 1)]) if found else [gd.ADVICE_GENERAL]
     for name in names:
@@ -307,10 +316,16 @@ def main(argv, root=ROOT):
     where = "/".join(folder.relative_to(root).parts)
     if not question_file.is_file() or not gd.read_text(question_file).strip():
         return fail(f"chưa có câu hỏi: viết {where}/{aid}.q.md trước (Write), rồi chạy lại")
+    if node == gd.ADVICE_ROOT:
+        return fail("vòng 1 (node gốc) không hỏi GPT (người quyết 2026-11-27): chỉ hỏi node vòng 2, vòng 3 hoặc "
+                    f"{gd.ADVICE_GENERAL}")
+    if node != gd.ADVICE_GENERAL and len(node.split(".")) + 1 not in gd.ASK_ROUNDS:
+        return fail(f"vòng {len(node.split('.')) + 1} không hỏi GPT (người quyết 2026-11-27): chỉ hỏi node vòng 2, "
+                    f"vòng 3 hoặc {gd.ADVICE_GENERAL}")
     found = node_folders(root, node)
     if node != gd.ADVICE_GENERAL and not found:
         return fail(f"không có node '{node.replace('.', '/')}' trong ai/idea hay live "
-                    f"(node gốc viết {gd.ADVICE_ROOT}, câu hỏi chung viết {gd.ADVICE_GENERAL})")
+                    f"(câu hỏi chung viết {gd.ADVICE_GENERAL})")
     question, also_names = split_question(gd.read_text(question_file))
     if not question:
         return fail(f"{where}/{aid}.q.md chỉ có dòng also: viết câu hỏi bên dưới dòng đó")
@@ -355,11 +370,12 @@ def main(argv, root=ROOT):
         head.append("node: (không gắn node nào)")
     if also:
         head.append("also: " + ", ".join(name.replace(".", "/") for name, _ in also))
-    head += [f"asked: {gd.now()}", "by: gpt (Codex CLI)", "---"]
+    head += [f"asked: {gd.now()}", "by: gpt (Codex CLI)", f"filter: {gd.PICK_FILTER}", "---"]
     target.write_text("\n".join(head) + f"\n# Góp ý {aid}\n\n## Câu hỏi\n\n{question}\n\n## {gd.ADVICE_TITLE}\n\n{answer}\n",
                       encoding="utf-8", newline="\n")
-    print(f"Đã ghi {where}/{aid}.md ({len(points)} góp ý). Mỗi góp ý phải thành một ý của node: @GameDesigner viết vào "
-          f"'## {gd.ITEMS_TITLE}' và khai by: <id ý>=gpt@{aid}#<id góp ý>; không được bỏ góp ý nào.")
+    print(f"Đã ghi {where}/{aid}.md ({len(points)} góp ý). Tiếp theo (@DesignAdvisor): viết {where}/{aid}.pick.md "
+          f"(giữ tối đa {gd.PICK_MAX} ý, mỗi ý một node đích, mỗi góp ý bỏ có lí do; skill advisor-ask-gpt), rồi chạy "
+          f"python Management/tools/gd_pick.py {node} {aid}")
     for p in points:
         kind = p["kind"] + (f" {p['target']}" if p["target"] else "")
         print(f"- {p['id']} ({kind}): {p['title']}")

@@ -1,0 +1,19 @@
+{
+  "name": "Game.PopupRating.View",
+  "rootNamespace": "Game.PopupRating",
+  "references": [
+    "Game.Core",
+    "Game.PopupRating.Internal",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

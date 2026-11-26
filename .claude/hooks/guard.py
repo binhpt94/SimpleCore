@@ -35,8 +35,9 @@ The value, by group:
                                           tests, load a scene, menu, camera, execute_code (a soft gate)
               @DesignAdvisor              asks GPT (Codex CLI, through gd_advise.py) about the design when the human or
                                           @GameDesigner asks it to; reads Management/game-design, writes only its questions
-                                          and notes in Management/game-design/advice (<node>/<id>.q.md, <id>.note.md); the
-                                          answers are written by gd_advise.py. GPT's points weigh as much as
+                                          picks and notes in Management/game-design/advice (<node>/<id>.q.md, <id>.pick.md,
+                                          <id>.note.md); the answers are written by gd_advise.py, <id>.pick.json by
+                                          gd_pick.py. GPT's points weigh as much as
                                           @GameDesigner's ideas: each becomes an idea of the node (gamedesign.py checks it)
     Basic     @Core                       edits only Assets/Core
     Features  <Name>                      edits only its feature
@@ -440,8 +441,9 @@ FRAME_DIR_NAME = ".frame-concept"      # the frames of a node (gamedesign.py FRA
 FRAME_FILE_RX = re.compile(r"^[a-z][a-z0-9-]*\.frame$")
 UI_LESSONS = "ui-lessons.md"      # Management/game-design/ai/ui-lessons.md: what @UIDesigner learned from the scores
 ADVISOR_RULES_RX = re.compile(r"^(designadvisor|gamedesigner)\.md$", CASE)
-# What @DesignAdvisor writes below advice/<node>/: its question and its own note. The answer is gd_advise.py's.
-ADVICE_FILE_RX = re.compile(r"^" + ADVICE_ID + r"\.(q|note)\.md$")
+# What @DesignAdvisor writes below advice/<node>/: its question, its pick of GPT's points (người quyết 2026-11-27) and
+# its own note. The answer is gd_advise.py's, the pick's state (<id>.pick.json) gd_pick.py's.
+ADVICE_FILE_RX = re.compile(r"^" + ADVICE_ID + r"\.(q|pick|note)\.md$")
 ADVICE_NODE_RX = re.compile(r"^" + ADVICE_NODE + r"$")
 # The skeleton: the public gates and base classes of the code, edited by @CodeLead only.
 SKELETON_DIRS_RX = re.compile(r"^Scripts/(Contracts|Internal/Base|View/Base)(/|$)", CASE)
@@ -1056,12 +1058,14 @@ def decide_studio_edit(tool, full, root, mode, feature, tool_name):
 
 
 def decide_advice_edit(full, root):
-    """@DesignAdvisor writing inside Management/game-design/advice: only <node>/<id>.q.md (the question it asks GPT)
-    and <node>/<id>.note.md (its own remarks). <node> is a node path with '.' for '/', _root or _general."""
+    """@DesignAdvisor writing inside Management/game-design/advice: only <node>/<id>.q.md (the question it asks GPT),
+    <node>/<id>.pick.md (what it keeps of GPT's points) and <node>/<id>.note.md (its own remarks). <node> is a node
+    path with '.' for '/', _root or _general."""
     seg = rel_segments(full, root)[3:]      # below Management/game-design/advice
     if len(seg) == 2 and ADVICE_NODE_RX.match(seg[0]) and ADVICE_FILE_RX.match(seg[1]):
-        return "allow", "a question or a note of @DesignAdvisor"
-    return "deny", ("in Management/game-design/advice you write only <node>/<id>.q.md and <node>/<id>.note.md (<node>: "
+        return "allow", "a question, a pick or a note of @DesignAdvisor"
+    return "deny", ("in Management/game-design/advice you write only <node>/<id>.q.md, <node>/<id>.pick.md and "
+                    "<node>/<id>.note.md (<node>: "
                     "the node path with '.' for '/', _root for the round-1 node, _general for no node; id: lower case, "
                     "digits, '-'). The answer <id>.md is written by: python Management/tools/gd_advise.py <node> <id>")
 

@@ -9,7 +9,7 @@ using UnityEditor;
 
 namespace Game.Enemy.Tests
 {
-    /// <summary>Walking, stopping at foes, hitting on rhythm, Frost and pause (live/feature-enemy/enemy-behavior/enemy-move-values).</summary>
+    /// <summary>Walking, stopping at foes, hitting on rhythm, Frost (live/feature-enemy/enemy-behavior/enemy-move-values).</summary>
     public sealed class EnemyCombatTests
     {
         private const string ConfigPath = "Assets/Features/Enemy/FeatureAssets/Private/EnemyConfig.asset";
@@ -218,24 +218,6 @@ namespace Game.Enemy.Tests
         }
 
         [Test]
-        public void While_paused_enemies_stand_still()
-        {
-            var runFlow = new FakeRunFlow();
-            var stage = new FakeStage();
-            var clock = new FakeClock();
-            using var presenter = Present(runFlow, clock, stage);
-            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
-
-            runFlow.Paused = true;
-            clock.Run(2f, gameplay: false);
-            Assert.That(X(), Is.EqualTo(17f));
-
-            runFlow.Paused = false;
-            clock.Run(1f);
-            Assert.That(X(), Is.EqualTo(15.5f).Within(0.001f));
-        }
-
-        [Test]
         public void The_stage_shows_spawned_enemies_flashes_hurt_ones_and_shrinks_defeated_ones()
         {
             var stage = new FakeStage();
@@ -338,27 +320,6 @@ namespace Game.Enemy.Tests
         }
 
         [Test]
-        public void While_paused_no_enemy_is_defeated_and_the_rising_coin_text_stands_still()
-        {
-            var runFlow = new FakeRunFlow();
-            var stage = new FakeStage();
-            var clock = new FakeClock();
-            using var presenter = Present(runFlow, clock, stage);
-            _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
-            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
-            _field.Spawn(new EnemySpawn(EnemyType.Wolf, EnemySide.Left, 1f));
-            _field.Damage(Handle(), 1000f);
-            Assert.That(stage.Coins.Count, Is.EqualTo(1));
-
-            runFlow.Paused = true;
-            clock.Run(3f, gameplay: false);
-
-            Assert.That(stage.Paused, Is.True, "the stage freezes everything it plays, the coin text too");
-            Assert.That(stage.Coins.Count, Is.EqualTo(1), "nothing defeated, nothing paid while paused");
-            Assert.That(_field.AliveCount, Is.EqualTo(1));
-        }
-
-        [Test]
         public void An_enemy_keeps_hitting_a_hero_that_walked_past_it_toward_the_edge()
         {
             _heroes.Foes.Add(new EnemyFoe(7, 17.6f, 0.5f));
@@ -416,24 +377,6 @@ namespace Game.Enemy.Tests
             _field.GetAlive(alive);
             Assert.That(alive[0].X, Is.EqualTo(3.0f).Within(0.05f));
             Assert.That(alive[1].X, Is.EqualTo(3.0f).Within(0.05f));
-        }
-
-        [Test]
-        public void Pause_keeps_the_time_left_on_Frost()
-        {
-            var runFlow = new FakeRunFlow();
-            var stage = new FakeStage();
-            var clock = new FakeClock();
-            using var presenter = Present(runFlow, clock, stage);
-            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
-            _field.SlowAll(2f);
-
-            runFlow.Paused = true;
-            clock.Run(5f, gameplay: false);
-            runFlow.Paused = false;
-            clock.Run(1f);
-
-            Assert.That(X(), Is.EqualTo(17f - 0.75f).Within(0.001f), "still slowed after the pause");
         }
 
         [Test]
@@ -549,30 +492,6 @@ namespace Game.Enemy.Tests
             Assert.That(X(), Is.EqualTo(x));
         }
 
-        [Test]
-        public void Pause_keeps_the_time_left_before_the_next_hit()
-        {
-            var runFlow = new FakeRunFlow();
-            var stage = new FakeStage();
-            var clock = new FakeClock();
-            using var presenter = Present(runFlow, clock, stage);
-            _heroes.Foes.Add(new EnemyFoe(7, 15.5f, 0.5f));
-            _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
-            clock.StepOnce();                      // hit at once, next due after 1.0s
-            clock.Run(0.4f);                       // 0.6s left
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(1));
-
-            runFlow.Paused = true;
-            clock.Run(3f, gameplay: false);
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "no hit while paused, even past 1.0s");
-
-            runFlow.Paused = false;
-            clock.Run(0.5f);
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(1), "0.1s still left");
-            clock.Run(0.1f);
-            Assert.That(_heroes.Hits.Count, Is.EqualTo(2), "next hit when the time left runs out");
-        }
-
         // Centre where each type stops before the castle (right side; left is the negative).
         [TestCase(EnemyType.Soldier, 3.0f)]
         [TestCase(EnemyType.Wolf, 3.1f)]
@@ -609,19 +528,19 @@ namespace Game.Enemy.Tests
             _field.Stop();
             runFlow.RaiseStepChanged(RunStep.Ending);
             runFlow.RaiseStepChanged(RunStep.Lost);
-            Assert.That(stage.Paused, Is.True, "frozen while the run is over");
+            Assert.That(stage.Frozen, Is.True, "frozen while the run is over");
 
             // Replay, in RunFlow's order: StepChanged(Playing) comes before RunStarted.
             runFlow.RaiseStepChanged(RunStep.Playing);
             _field.ResetForRun();                  // EnemyParticipant answers RunStarted with ResetForRun
             clock.StepOnce();
 
-            Assert.That(stage.Paused, Is.False, "run 2 is playing");
+            Assert.That(stage.Frozen, Is.False, "run 2 is playing");
             _field.Spawn(new EnemySpawn(EnemyType.Soldier, EnemySide.Right, 1f));
             _field.Damage(Handle(), 1000f);
             clock.StepOnce();
             Assert.That(stage.Defeated.Count, Is.EqualTo(1), "the enemy defeated in run 2 is shrunk away");
-            Assert.That(stage.Paused, Is.False);
+            Assert.That(stage.Frozen, Is.False);
         }
 
         [Test]
@@ -646,7 +565,7 @@ namespace Game.Enemy.Tests
         [Test]
         public void A_step_that_is_not_gameplay_moves_no_enemy_and_freezes_the_stage()
         {
-            // For example while the castle waits to revive: the clock steps, but the run does not let the battle play.
+            // The clock steps, but the run does not let the battle play.
             var stage = new FakeStage();
             var clock = new FakeClock();
             using var presenter = Present(new FakeRunFlow(), clock, stage);
@@ -656,11 +575,11 @@ namespace Game.Enemy.Tests
             clock.Run(3f, gameplay: false);
 
             Assert.That(_heroes.Hits, Is.Empty);
-            Assert.That(stage.Paused, Is.True);
+            Assert.That(stage.Frozen, Is.True);
 
             clock.StepOnce();
             Assert.That(_heroes.Hits.Count, Is.EqualTo(1));
-            Assert.That(stage.Paused, Is.False);
+            Assert.That(stage.Frozen, Is.False);
         }
 
         [TestCase(EnemyType.Wolf, 32)]      // 0.8s per hit
@@ -1017,8 +936,8 @@ namespace Game.Enemy.Tests
             public void Enter(int handle) => Entered.Add(handle);
             public void Defeat(int handle) => Defeated.Add(handle);
             public void RemoveAll() { }
-            public bool Paused { get; private set; }
-            public void SetPaused(bool paused) => Paused = paused;
+            public bool Frozen { get; private set; }
+            public void SetFrozen(bool frozen) => Frozen = frozen;
             public void Close() { }
         }
 
@@ -1127,11 +1046,9 @@ namespace Game.Enemy.Tests
 
         private sealed class FakeRunFlow : IRunFlow
         {
-            public bool Paused;
             private RunStep _step = RunStep.Playing;
-            public RunStep Step => Paused ? RunStep.Paused : _step;
+            public RunStep Step => _step;
             public RunTeam Team => default;
-            public bool IsPaused => Paused;
 
             public void RaiseStepChanged(RunStep step)
             {
@@ -1148,9 +1065,6 @@ namespace Game.Enemy.Tests
 #pragma warning restore 67
             public void Play() { }
             public void EnterBattle(RunTeam team) { }
-            public void Pause() { }
-            public void Resume() { }
-            public void Abandon() { }
             public void Replay() { }
             public void GoHome() { }
             public void Lose() { }

@@ -26,5 +26,8 @@ Node vòng 3 thuộc giai đoạn sau giai đoạn đang làm (điểm độ qua
 - Mục `## Định nghĩa` của node chỉ liệt kê các từ node dùng, mỗi dòng `` - `glossary#<id>` ``, và khai chúng trong refs.
 - Node cũ còn dòng `- **Từ**: nghĩa` thì chuyển dần sang glossary; `gd_status.py` (cả cây) liệt kê các định nghĩa còn nằm ngoài, các từ bị định nghĩa ở nhiều nơi.
 
+## Hỏi GPT
+Không bắt buộc: nhờ @DesignAdvisor hỏi khi bạn thấy cần (người quyết 2026-11-27), rồi đưa các ý nó giữ vào đúng node đích (skill `gd-integrate-advice`).
+
 ## `CLAUDE.md` của node
 Các mục: Quan hệ, Định nghĩa, Danh sách, Luật cơ bản, Chưa rõ.

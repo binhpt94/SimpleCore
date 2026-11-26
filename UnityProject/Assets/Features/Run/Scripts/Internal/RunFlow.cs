@@ -4,11 +4,11 @@ using System.Collections.Generic;
 namespace Game.Run
 {
     /// <summary>
-    /// The steps of a run in the Game scene (feature-run/run-flow/flow-rules, feature-run/run-pause/pause-rules).
+    /// The steps of a run in the Game scene (feature-run/run-flow/flow-rules).
     /// Only this class decides the next step; requests that do not fit the current step, or that arrive while
     /// a step change is still running, are ignored.
     /// </summary>
-    internal sealed class RunFlow : IRunFlow, IRunRevive, IRunBattle
+    internal sealed class RunFlow : IRunFlow, IRunBattle
     {
         private readonly RunScore _score;
         private readonly IRunDelay _delay;
@@ -17,16 +17,10 @@ namespace Game.Run
 
         private readonly bool _skipMenus;
         private readonly RunTeam _defaultTeam;
-        private readonly bool _reviveOnce;
-        private readonly bool _pauseEnabled;
         private readonly IRunClock _clock;
 
         // True between the clock's SetUpRun and ClearRun of the current battle.
         private bool _clockRun;
-
-        // Set when the revive is offered (the castle's first fall); cleared when a new run starts.
-        private bool _reviveOffered;
-        private bool _lostAfterFailedRevive;
 
         private bool _changing;
         private bool _begun;
@@ -38,22 +32,15 @@ namespace Game.Run
 
         /// <param name="skipMenus">
         /// IDEA stage: <see cref="Begin"/> goes straight into battle with <paramref name="defaultTeam"/>, Play again starts a new
-        /// battle with it, and there is no way back to the start screen (Back to start, Give up are ignored).
-        /// </param>
-        /// <param name="reviveOnce">
-        /// The castle's first fall in a run offers a revive (feature-popup-revive/revive-order/order-values); the popup
-        /// shows after <paramref name="loseDelaySeconds"/>. Off: every fall loses the run.
+        /// battle with it, and there is no way back to the start screen (Back to start is ignored).
         /// </param>
         /// <param name="clock">
-        /// The shared clock (feature-sim-clock): set up, started, gameplay on and off, cleared with the battle; pause and
-        /// continue go through its queue. Null: no clock, pause and continue apply at once (tests of the run alone).
+        /// The shared clock (feature-sim-clock): set up, started, gameplay on and off, cleared with the battle.
+        /// Null: no clock (tests of the run alone).
         /// </param>
         public RunFlow(RunScore score, IRunDelay delay, float loseDelaySeconds, int teamSize,
-            bool skipMenus = false, RunTeam defaultTeam = default, bool reviveOnce = false, bool pauseEnabled = true,
-            IRunClock clock = null)
+            bool skipMenus = false, RunTeam defaultTeam = default, IRunClock clock = null)
         {
-            _reviveOnce = reviveOnce;
-            _pauseEnabled = pauseEnabled;
             _clock = clock ?? new ImmediateRunClock();
             _score = score ?? throw new ArgumentNullException(nameof(score));
             _delay = delay ?? throw new ArgumentNullException(nameof(delay));
@@ -95,24 +82,7 @@ namespace Game.Run
 
         internal RunTeam DefaultTeam => _defaultTeam;
 
-        internal bool ReviveOnce => _reviveOnce;
-
-        internal bool PauseEnabled => _pauseEnabled;
-
-        /// <summary>
-        /// feature-popup-revive/revive-order/order-values#offer-flag: on from the castle's first fall of the run (the
-        /// revive is offered), off only when a new run starts. A fall while it is on loses the run.
-        /// </summary>
-        internal bool ReviveOffered => _reviveOffered;
-
         public RunTeam Team { get; private set; }
-
-        public bool IsPaused =>
-            Step == RunStep.Paused || Step == RunStep.ReviveWait || Step == RunStep.ReviveOffer || Step == RunStep.Reviving;
-
-        public bool LostAfterFailedRevive => Step == RunStep.Lost && _lostAfterFailedRevive;
-
-        public event Action ReviveStarted;
 
         public event Action BattleBuilt;
         public event Action<string> BuildFailed;
@@ -197,57 +167,10 @@ namespace Game.Run
             SetStep(RunStep.Home);
         }
 
-        public void Pause()
-        {
-            // pause-rules "Thông số theo giai đoạn": IDEA has no pause, every pause request is ignored.
-            if (!_pauseEnabled || Step != RunStep.Playing) return;
-            // A player action: applied at the start of the next step of the shared clock, checked again then.
-            _clock.Enqueue(ApplyPause);
-        }
-
-        public void Resume()
-        {
-            if (Step != RunStep.Paused) return;
-            _clock.Enqueue(ApplyResume);
-        }
-
-        private void ApplyPause()
-        {
-            if (!_pauseEnabled || !CanChange(RunStep.Playing)) return;
-            Change(() => SetStep(RunStep.Paused));
-        }
-
-        private void ApplyResume()
-        {
-            if (!CanChange(RunStep.Paused)) return;
-            Change(() => SetStep(RunStep.Playing));
-        }
-
-        public void Abandon()
-        {
-            if (_skipMenus || !CanChange(RunStep.Paused)) return;
-            Change(() =>
-            {
-                CommitClearedWaves();
-                _score.Settle();
-                BattleStopped?.Invoke();
-                ClearClockRun();
-                BattleCleared?.Invoke();
-                SetStep(RunStep.Home);
-            });
-            // The battle is gone: the screen flow shows the start screen.
-            BattleLeft?.Invoke(RunLeaveChoice.Abandon);
-        }
-
         public void Lose()
         {
             // The castle can fall while a step change is running (e.g. during a BattleStarted handler), so no lock here.
-            if (Step != RunStep.Playing && Step != RunStep.Paused) return;
-            if (_reviveOnce && !_reviveOffered)
-            {
-                OfferRevive();
-                return;
-            }
+            if (Step != RunStep.Playing) return;
             // The castle falling wins over a wave cleared in the same frame: that wave does not count.
             DropClearedWaves();
             _score.Settle();
@@ -284,38 +207,9 @@ namespace Game.Run
             BattleLeft?.Invoke(RunLeaveChoice.BackToStart);
         }
 
-        public void Revive()
-        {
-            if (!CanChange(RunStep.ReviveOffer)) return;
-            Change(() =>
-            {
-                SetStep(RunStep.Reviving);
-                ReviveStarted?.Invoke();
-            });
-        }
-
-        public void DeclineRevive() => EndAfterRevive(failed: false);
-
-        public void FailRevive() => EndAfterRevive(failed: true);
-
-        public void ReviveShown()
-        {
-            // No lock: the castle may report it is shown from inside its ReviveStarted handler.
-            if (Step != RunStep.Reviving) return;
-            SetStep(RunStep.Playing);
-            // Waves cleared in the frame the castle fell count now that the run goes on.
-            CommitClearedWaves();
-        }
-
         public void CountClearedWave(int wave)
         {
-            if (Step == RunStep.ReviveWait)
-            {
-                // Same frame as the castle's first fall: held until the revive is decided.
-                _clearedThisFrame.Add(wave);
-                return;
-            }
-            if (Step != RunStep.Playing && Step != RunStep.Paused) return;
+            if (Step != RunStep.Playing) return;
             _clearedThisFrame.Add(wave);
             if (_pendingClears == null) _pendingClears = _delay.NextFrame(OnNextFrameAfterClear);
         }
@@ -349,7 +243,7 @@ namespace Game.Run
             _pendingClears = null;
             var waves = _clearedThisFrame.ToArray();
             _clearedThisFrame.Clear();
-            if (Step != RunStep.Playing && Step != RunStep.Paused) return;
+            if (Step != RunStep.Playing) return;
             foreach (var wave in waves) _score.CountClearedWave(wave);
         }
 
@@ -360,42 +254,9 @@ namespace Game.Run
             _clearedThisFrame.Clear();
         }
 
-        private void OfferRevive()
-        {
-            _reviveOffered = true;
-            // Keep the waves reported this frame, but do not count them yet: the revive decides.
-            _pendingClears?.Dispose();
-            _pendingClears = null;
-            SetStep(RunStep.ReviveWait);
-            _pendingLose = _delay.Schedule(_loseDelaySeconds, ShowReviveOffer);
-        }
-
-        private void ShowReviveOffer()
-        {
-            _pendingLose = null;
-            if (Step != RunStep.ReviveWait) return;
-            SetStep(RunStep.ReviveOffer);
-        }
-
-        private void EndAfterRevive(bool failed)
-        {
-            if (!CanChange(RunStep.ReviveOffer)) return;
-            Change(() =>
-            {
-                // Lost first: the held waves do not count.
-                DropClearedWaves();
-                _lostAfterFailedRevive = failed;
-                _score.Settle();
-                BattleStopped?.Invoke();
-                SetStep(RunStep.Lost);
-            });
-        }
-
         private void StartBattle(RunTeam team)
         {
             DropClearedWaves();
-            _reviveOffered = false;
-            _lostAfterFailedRevive = false;
             // The clock resets for the new run before anyone hears of it, and runs its first gameplay step only once
             // the battle is built: building the battle spends no spawn or cooldown time.
             ClearClockRun();
@@ -434,7 +295,7 @@ namespace Game.Run
         private void SetStep(RunStep step)
         {
             Step = step;
-            // The battle plays only while Playing: paused, waiting for or showing the revive, ending and lost stand still.
+            // The battle plays only while Playing: ending and lost stand still.
             if (_clockRun) _clock.SetGameplay(step == RunStep.Playing);
             StepChanged?.Invoke(step);
         }

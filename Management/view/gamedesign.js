@@ -26,6 +26,7 @@
   var BY_NAMES = { "claude": "Claude", "gpt": "GPT", "user": "Người" };
   var USER_TAG = "[Ý User]";      // đứng đầu tiêu đề ý của người (chỉ khi hiện; data.md không có)   // AI nào đề xuất một ý
   var DATA_FILE = "data/gamedesign.js";
+  var SIDE = "#gpt";      // đuôi của node phụ "Bổ sung từ GPT" trong state.selected (đường dẫn node đích + SIDE)
   var SERVER_HINT = "Mở trang qua python Management/tools/setup_server.py để lưu.";
   // Ô nhập cao theo nội dung, để người gõ thấy hết phần mình gõ.
   var grow = function (area) {
@@ -64,6 +65,10 @@
     ".gd-card.by-gpt strong { color: var(--gpt); }",
     ".gd-card:hover { border-color: var(--accent); }",
     ".gd-card.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }",
+    // Node phụ "Bổ sung từ GPT" (người quyết 2026-11-27): ý GPT cho một node đã chốt, chờ người chuyển lên hay xoá.
+    ".gd-card.side { border-style: dashed; border-color: var(--gpt); border-left: 6px dashed var(--gpt); background: color-mix(in srgb, var(--gpt) 6%, var(--bg)); }",
+    ".gd-card.side strong { color: var(--gpt); }",
+    ".gd-card.side.sel { box-shadow: 0 0 0 2px var(--accent); }",
     // Màu của thẻ theo trạng thái xấu nhất của node cộng cả nhánh bên dưới (chỉ là hiển thị, không lưu ở đâu).
     ".gd-card.redo { border-left-color: var(--bad); background: color-mix(in srgb, var(--bad) 7%, var(--bg)); }",
     ".gd-card.wait { border-left-color: var(--clash); background: color-mix(in srgb, var(--clash) 8%, var(--bg)); }",
@@ -218,6 +223,11 @@
     ".gd-source { margin: 8px 0; padding: 8px 10px; border-left: 3px solid var(--gpt); background: var(--panel); border-radius: 0 6px 6px 0; }",
     ".gd-source b { display: block; font-size: 12px; color: var(--gpt); margin-bottom: 2px; }",
     ".gd-source p { margin: 0; white-space: pre-wrap; font-size: 13.5px; line-height: 1.5; }",
+    ".gd-source details { margin-top: 6px; font-size: 13px; }",
+    ".gd-source summary { cursor: pointer; color: var(--muted); }",
+    ".gd-source details p { margin: 4px 0 0; color: var(--muted); }",
+    ".gd-source ul { margin: 4px 0 0; padding-left: 18px; color: var(--muted); }",
+    ".gd-side-actions { display: flex; gap: 8px; margin: 2px 0 10px; }",
     ".gd-tag.gpt { border-color: var(--gpt); color: var(--gpt); }",
     ".gd-tag.clash { border-color: var(--clash); color: var(--clash); font-weight: 600; }",
     ".gd-clash-text { color: var(--clash); font-weight: 600; }",
@@ -444,6 +454,14 @@
     return null;
   };
   var each = function (node, fn) { if (node) { fn(node); node.children.forEach(function (c) { each(c, fn); }); } };
+  // Ý GPT đang chờ người lọc bên cạnh một node đã chốt (gamedesign.py: gpt.side).
+  var sidePicks = function (node) { return (node && node.gpt && node.gpt.side) || []; };
+  // Node đích của node phụ đang chọn (state.selected = đường dẫn + SIDE), hoặc null.
+  var sideOwner = function (root, selected) {
+    if (typeof selected !== "string" || selected.slice(-SIDE.length) !== SIDE) return null;
+    var owner = find(root, selected.slice(0, -SIDE.length));
+    return owner && sidePicks(owner).length ? owner : null;
+  };
 
   // Con được hiện của một node, theo chế độ: chung (tới OVERVIEW_LAST_ROUND) hay một nhánh (tới vòng cuối).
   var shownChildren = function (node, focus, lastRound) {
@@ -1545,6 +1563,16 @@
         ask.title = "Mở node để trả lời " + n.pending + " câu hỏi của @GameDesigner";
         out.push(ask);
       }
+      if (sidePicks(n).length) {      // ý GPT chờ bạn lọc ở node phụ
+        var side = button("GPT bổ sung " + sidePicks(n).length, function () {
+          state.selected = n.path + SIDE;
+          if (n.round === FOCUS_ROUND) state.focus = n.path;
+          state.message = null;
+          render();
+        }, null, "gd-chip ask");
+        side.title = "GPT đề xuất " + sidePicks(n).length + " ý cho node đã chốt này: bấm để chuyển lên hoặc xoá từng ý";
+        out.push(side);
+      }
       // Node cần bạn duyệt mang nhãn đỏ "Chưa duyệt" (bấm để mở node). Node đang đạt có thêm dấu ✓: duyệt nhanh,
       // chốt node sang live mà không cần mở. Node chưa đạt vì việc của @GameDesigner thì "cần làm lại".
       var todo = function (why) {
@@ -1619,6 +1647,17 @@
       var rounds = data.rounds || [];
       var lastRound = state.focus !== null || state.expandAll ? rounds.length : Math.min(OVERVIEW_LAST_ROUND, rounds.length);
       var plan = layout(root, state.focus, lastRound, dueFirst);
+      if (state.table === "idea") {      // node phụ "Bổ sung từ GPT": một hàng riêng ngay dưới node đích, các hàng sau dời xuống
+        var owners = plan.items.filter(function (it) { return sidePicks(it.node).length; });
+        var ownerRows = owners.map(function (it) { return it.row; });
+        var shift = function (row) { return row + ownerRows.filter(function (r) { return r < row; }).length; };
+        plan.items.forEach(function (it) { it.row = shift(it.row); });
+        owners.forEach(function (it) {
+          plan.items.push({ node: { path: it.node.path + SIDE, round: it.node.round, pseudo: true, owner: it.node, children: [] },
+                            parent: null, hidden: 0, row: it.row + 1 });
+        });
+        plan.rows += owners.length;
+      }
       var colX = function (round) { return (round - 1) * (CARD_W + GAP_X); };
       var rowY = function (row) { return HEAD_H + row * (CARD_H + GAP_Y); };
       var width = colX(lastRound) + CARD_W, height = rowY(plan.rows) - GAP_Y;
@@ -1651,6 +1690,22 @@
 
       plan.items.forEach(function (item) {
         var n = item.node, x = colX(n.round), y = rowY(item.row);
+        if (n.pseudo) {
+          var picks = sidePicks(n.owner);
+          var sideCard = el("button", "gd-card side" + (n.path === state.selected ? " sel" : ""));
+          sideCard.type = "button";
+          sideCard.style.left = x + "px";
+          sideCard.style.top = y + "px";
+          sideCard.style.width = CARD_W + "px";
+          sideCard.style.height = CARD_H + "px";
+          sideCard.title = "GPT đề xuất " + picks.length + " ý cho node đã chốt " + (n.owner.path || "(gốc)") +
+            ". Chúng chưa vào node: bấm để chuyển lên hoặc xoá từng ý.";
+          add(sideCard, el("strong", "", "Bổ sung từ GPT (" + picks.length + ")"), el("span", "id", "cho " + shortPath(n.owner.path, 40)),
+            el("span", "sum", picks.map(function (p) { return p.title; }).join(" · ")));
+          sideCard.addEventListener("click", function () { state.selected = n.path; state.message = null; render(); });
+          map.appendChild(sideCard);
+          return;
+        }
         if (item.parent) {
           var x0 = colX(item.parent.node.round) + CARD_W, y0 = rowY(item.parent.row) + CARD_H / 2;
           var y1 = y + CARD_H / 2, mid = (x0 + x) / 2;
@@ -1692,7 +1747,7 @@
         }
         if (idea && n.gpt && n.gpt.missing.length) {
           var owedTag = el("span", "gd-tag bad", "GPT thiếu " + n.gpt.missing.length);
-          owedTag.title = "GPT đã góp " + n.gpt.missing.length + " ý mà node chưa có; @GameDesigner phải đưa vào, không được bỏ";
+          owedTag.title = "GPT đã góp " + n.gpt.missing.length + " ý (đã lọc hoặc lần hỏi cũ) mà node chưa có; @GameDesigner phải đưa vào";
           chips.push(owedTag);
         }
         var clashes = idea ? openClashes(n) : 0;
@@ -1703,7 +1758,7 @@
         }
         if (idea && n.gptOwed) {
           var askTag = el("span", "gd-tag bad", "chưa hỏi GPT");
-          askTag.title = "Node vòng 1 và 2 bắt buộc có ít nhất một lần hỏi GPT (qua @DesignAdvisor), trừ feature hạ tầng, test; node này chưa có";
+          askTag.title = "Node vòng 2 bắt buộc có ít nhất một lần hỏi GPT (qua @DesignAdvisor), trừ feature hạ tầng, test; node này chưa có";
           chips.push(askTag);
         }
         if (n.group) {
@@ -1937,9 +1992,9 @@
         if (it.detail) renderText(ctx, put(editor, el("div", "gd-more")), it.detail);      // chi tiết của ý chỉ hiện khi đã bấm mở
         (it.sources || []).forEach(function (src) {      // lời của chính GPT, không qua tóm gọn của Claude
           if (!src.text) return;
-          var box = put(editor, el("div", "gd-source"));
           var kindText = src.kind + (src.target ? " " + src.target : "");
-          add(box, el("b", "", "Nguyên văn GPT · " + kindText + " · góp ý " + src.advice + "#" + src.point), el("p", "", src.text));
+          if (src.pick) gptBox(editor, src, "Ý giữ từ GPT · " + kindText + " · " + src.folder + "/" + src.advice + "#" + src.point);
+          else gptBox(editor, src, "Nguyên văn GPT · " + kindText + " · góp ý " + src.advice + "#" + src.point);
         });
         var code = put(editor, el("p", "gd-id", "Mã của ý: "));      // mã chỉ hiện khi đã bấm mở
         add(code, el("code", "", it.id));
@@ -2379,8 +2434,71 @@
       notes.forEach(function (n) { add(ul, el("li", "", n.path + ": " + n.text)); });
     };
 
+    // Lời GPT của một ý (ý của node, hoặc ý đang chờ ở node phụ). Ý từ lần hỏi đã lọc: chữ ngắn của @DesignAdvisor,
+    // rồi nguyên văn GPT và các góp ý bị bỏ của lần hỏi đó, gập lại (chỉ mở khi người muốn xem).
+    var gptBox = function (parent, src, label) {
+      var box = put(parent, el("div", "gd-source"));
+      add(box, el("b", "", label), el("p", "", src.text || ""));
+      if (src.raw && src.raw.length) {
+        var raw = put(box, el("details"));
+        add(raw, el("summary", "", "Nguyên văn GPT (" + src.raw.length + " góp ý)"));
+        src.raw.forEach(function (r) { add(raw, el("p", "", r.point + ": " + r.text)); });
+      }
+      if (src.dropped && src.dropped.length) {
+        var dropped = put(box, el("details"));
+        add(dropped, el("summary", "", "Góp ý bị bỏ của lần hỏi này (" + src.dropped.length + ")"));
+        var ul = put(dropped, el("ul"));
+        src.dropped.forEach(function (d) { add(ul, el("li", "", (d.title || d.point) + " · " + d.reason)); });
+      }
+      return box;
+    };
+    var kindOf = function (p) { return p.kind + (p.ref || p.target ? " " + (p.ref || p.target) : ""); };
+
+    // Node phụ "Bổ sung từ GPT" (người quyết 2026-11-27): ý GPT cho một node đã chốt. Chưa vào node, chưa đổi hash;
+    // chỉ người chuyển lên (ý vào node, điểm của người 8) hay xoá (ý bị loại, GPT không đề xuất lại).
+    var renderSide = function (owner) {
+      var body = put(detailBox, ctx.section(""));
+      body.className = "gd-detail";
+      add(body, el("h2", "", "Bổ sung từ GPT"));
+      add(body, el("p", "gd-path", "Cho node đã chốt: " + (owner.path || "(gốc)") + " · " + (owner.title || "")));
+      add(body, el("p", "muted", "Các ý này chưa vào node và chưa đổi hash. Chuyển lên: ý vào node với điểm của bạn 8, các node con " +
+        "sẽ cần làm lại. Xoá: ý bị loại, GPT không đề xuất lại. Bấm vào ý để xem lời GPT."));
+      sidePicks(owner).forEach(function (p) {
+        var block = put(body, el("div", "gd-item"));
+        var head = put(block, el("div", "gd-head"));
+        head.setAttribute("role", "button");
+        head.tabIndex = 0;
+        add(head, el("p", "text gpt", p.title), el("span", "gd-tag gpt", kindOf(p)));
+        var more = put(block, el("div", "gd-edit"));
+        more.hidden = true;
+        if (p.detail) renderText(ctx, put(more, el("div", "gd-more")), p.detail);
+        gptBox(more, { text: p.title + (p.detail ? "\n" + p.detail : ""), raw: p.raw, dropped: p.dropped },
+          "Ý giữ " + p.key + " (@DesignAdvisor viết gọn)");
+        head.addEventListener("click", function () { more.hidden = !more.hidden; });
+        head.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); more.hidden = !more.hidden; } });
+        var row = put(block, el("div", "gd-side-actions"));
+        var up = put(row, button("Chuyển lên node", function () {
+          up.disabled = true;
+          send("/api/gamedesign/gpt-pick", { folder: p.folder, aid: p.aid, id: p.id, action: "promote" },
+            function (res) { return "Đã chuyển ý " + res.id + " lên node " + (owner.path || "(gốc)") + " (điểm của bạn 8)."; },
+            function (err) { up.disabled = false; say("Không chuyển: " + err); });
+        }));
+        var sure = false;
+        var del = put(row, button("Xoá", function () {
+          if (!sure) { sure = true; del.textContent = "Bấm lần nữa để xoá"; return; }
+          del.disabled = true;
+          send("/api/gamedesign/gpt-pick", { folder: p.folder, aid: p.aid, id: p.id, action: "delete" },
+            function () { return "Đã xoá ý GPT: " + p.title; },
+            function (err) { del.disabled = false; sure = false; del.textContent = "Xoá"; say("Không xoá: " + err); });
+        }));
+        if (!ctx.setup) { up.disabled = true; del.disabled = true; up.title = del.title = SERVER_HINT; }
+      });
+    };
+
     var renderDetail = function (root) {
       detailBox.textContent = "";
+      var owner = state.table === "idea" ? sideOwner(root, state.selected) : null;
+      if (owner) { renderSide(owner); return; }
       var node = state.selected === null ? null : find(root, state.selected);
       if (!node) { add(detailBox, el("p", "muted gap", "Bấm một node trên bản đồ để xem và duyệt các ý cốt lõi của nó.")); return; }
       var body = put(detailBox, ctx.section(""));
@@ -2414,20 +2532,23 @@
       var clashes = state.table === "idea" ? openClashes(node) : 0;
       if (clashes) add(body, el("p", "gd-clash-text", "Xung đột chưa giải quyết: " + clashes + " nhóm ý trái nhau. Trong mỗi khung \"Chọn 1\" bên dưới, " +
         "chấm để chỉ còn một ý đạt (từ " + passMin() + " trở lên), rồi Lưu chấm điểm. Các node con bị khoá với @GameDesigner cho tới khi hết xung đột."));
-      if (node.gptOwed) add(body, el("p", "bad-text", "Chưa hỏi GPT: node vòng 1 và 2 bắt buộc có ít nhất một lần hỏi GPT (trừ feature hạ tầng, test). " +
+      if (node.gptOwed) add(body, el("p", "bad-text", "Chưa hỏi GPT: node vòng 2 bắt buộc có ít nhất một lần hỏi GPT (trừ feature hạ tầng, test). " +
         "@GameDesigner nhắn @DesignAdvisor hỏi về node này."));
       var byCount = node.by || {}, gptSide = node.gpt || { dropped: [], missing: [], clarified: 0 };
-      if (byCount.gpt || gptSide.clarified || gptSide.dropped.length || gptSide.missing.length || node.nodeBy) {
+      if (byCount.gpt || gptSide.clarified || gptSide.dropped.length || gptSide.missing.length || (gptSide.newMissing || []).length || node.nodeBy) {
         var byParts = ["Claude " + (byCount.claude || 0), "GPT " + (byCount.gpt || 0)];
         if (gptSide.clarified) byParts.push("GPT làm rõ " + gptSide.clarified);
         if (gptSide.dropped.length) byParts.push("GPT bị loại " + gptSide.dropped.length);
         add(body, el("p", "gd-note", "Ý theo AI đề xuất: " + byParts.join(" · ") +
-          (node.nodeBy ? ". Node này do GPT đề xuất (lần hỏi " + node.nodeBy.advice + ")" : "") + "."));
+          (node.nodeBy ? ". Node này do GPT đề xuất (lần hỏi " + (node.nodeBy.folder ? node.nodeBy.folder + "/" + node.nodeBy.advice + "#" + node.nodeBy.pick : node.nodeBy.advice) + ")" : "") + "."));
         gptSide.dropped.forEach(function (d) {
           add(body, el("p", "gd-note", "Ý của GPT đã bị loại: " + d.title + " (" + d.advice + "#" + d.point + ")"));
         });
         gptSide.missing.forEach(function (m) {
-          add(body, el("p", "bad-text", "Góp ý của GPT chưa vào node: " + m.title + " (" + m.advice + "#" + m.point + ")"));
+          add(body, el("p", "bad-text", (m.pick ? "Ý giữ của GPT chưa vào node: " : "Góp ý của GPT chưa vào node: ") + m.title + " (" + m.advice + "#" + m.point + ")"));
+        });
+        (gptSide.newMissing || []).forEach(function (p) {
+          add(body, el("p", "bad-text", "Node mới GPT đề xuất chưa được tạo: " + p.target + " · " + p.title));
         });
       }
       if (node.cheat) add(body, el("p", "gd-gate ok", "Node cheat: mỗi ý là một state dựng nhanh ở bản dev để test và review. " +
@@ -2754,7 +2875,10 @@
     var render = function () {
       var root = tree();
       if (root && state.focus !== null && !find(root, state.focus)) state.focus = null;
-      if (root && state.selected !== null && !find(root, state.selected)) state.selected = null;
+      if (root && state.selected !== null && !find(root, state.selected) && !(state.table === "idea" && sideOwner(root, state.selected))) {
+        var base = typeof state.selected === "string" && state.selected.slice(-SIDE.length) === SIDE ? state.selected.slice(0, -SIDE.length) : null;
+        state.selected = base !== null && find(root, base) ? base : null;      // node phụ vừa hết ý (hay bảng live): về node đích
+      }
       if (!root) { state.focus = null; state.selected = null; }
       renderBar();
       renderNotice();

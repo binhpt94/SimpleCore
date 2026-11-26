@@ -15,7 +15,6 @@ namespace Game.Castle
     {
         private readonly CastleConfig _config;
         private readonly ICastle _castle;
-        private readonly IRunFlow _runFlow;
         private readonly IEnemyField _enemies;
         private readonly IHeroSquad _heroes;
         private readonly ICastleEnemyHits _hits;
@@ -25,12 +24,11 @@ namespace Game.Castle
         private readonly List<EnemyTarget> _alive = new List<EnemyTarget>();
         private int _level = 1;
 
-        public CastleSkills(CastleConfig config, ICastle castle, IRunFlow runFlow, IEnemyField enemies, IHeroSquad heroes, ICastleEnemyHits hits)
+        public CastleSkills(CastleConfig config, ICastle castle, IEnemyField enemies, IHeroSquad heroes, ICastleEnemyHits hits)
         {
             _hits = hits ?? throw new ArgumentNullException(nameof(hits));
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _castle = castle ?? throw new ArgumentNullException(nameof(castle));
-            _runFlow = runFlow ?? throw new ArgumentNullException(nameof(runFlow));
             _enemies = enemies ?? throw new ArgumentNullException(nameof(enemies));
             _heroes = heroes ?? throw new ArgumentNullException(nameof(heroes));
             _skills = (CastleSkill[])(config.Skills ?? Array.Empty<CastleSkill>()).Clone();
@@ -74,12 +72,12 @@ namespace Game.Castle
         }
 
         /// <summary>
-        /// Cooldowns run down by one gameplay step of the shared clock (or any length of battle time in tests),
-        /// never while paused. A cooldown ends on the first step at which its full time has passed.
+        /// Cooldowns run down by one gameplay step of the shared clock (or any length of battle time in tests).
+        /// A cooldown ends on the first step at which its full time has passed.
         /// </summary>
         public void Tick(float deltaSeconds)
         {
-            if (deltaSeconds <= 0f || _runFlow.IsPaused) return;
+            if (deltaSeconds <= 0f) return;
             for (var i = 0; i < _cooldownLeft.Length; i++)
             {
                 var left = _cooldownLeft[i] - deltaSeconds;
@@ -109,7 +107,7 @@ namespace Game.Castle
         }
 #endif
 
-        private bool CanAct() => !_castle.IsDestroyed && !_runFlow.IsPaused;
+        private bool CanAct() => !_castle.IsDestroyed;
 
         private float Bonus => 1f + _config.SkillBonusPerLevel * (_level - 1);
 

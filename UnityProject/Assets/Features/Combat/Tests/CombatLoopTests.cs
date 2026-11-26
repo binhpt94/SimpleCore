@@ -98,36 +98,6 @@ namespace Game.Combat.Tests
             Assert.AreEqual(1.0, _actor.Steps.Sum(s => (double)s), 1e-5);
         }
 
-        // pause-no-tick
-
-        [Test]
-        public void NoTickRunsWhilePaused()
-        {
-            _run.Pause();
-            _clock.Step(5, gameplay: false);
-
-            Assert.AreEqual(0, _loop.TicksRun);
-            Assert.IsEmpty(_actor.Steps);
-
-            _run.Resume();
-            _clock.Step(5);
-            Assert.AreEqual(5, _loop.TicksRun);
-        }
-
-        [TestCase(RunStep.ReviveWait)]
-        [TestCase(RunStep.ReviveOffer)]
-        [TestCase(RunStep.Reviving)]
-        public void NoTickRunsWhileWaitingForARevive(RunStep step)
-        {
-            _run.SetStep(step);
-            _clock.Step(5, gameplay: false);
-            Assert.AreEqual(0, _loop.TicksRun);
-
-            // Even if a step still came marked as gameplay, the run's pause holds combat.
-            _clock.Step(1);
-            Assert.AreEqual(0, _loop.TicksRun);
-        }
-
         [Test]
         public void NoTickRunsAfterTheRunEnded()
         {
@@ -158,7 +128,7 @@ namespace Game.Combat.Tests
             castle.OnFall = (_, __) => _run.Lose();
             _tick.Hit(new CombatHit(id, 0, 5f, CombatSource.Enemy));
 
-            // Five steps in one frame: the castle falls in the first, the run waits for a revive.
+            // Five steps in one frame: the castle falls in the first and the battle stops.
             _clock.Step(5);
 
             Assert.AreEqual(1, _loop.TicksRun);

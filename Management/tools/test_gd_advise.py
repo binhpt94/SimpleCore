@@ -98,8 +98,15 @@ def advise_cases(root, tmp):
           (all(s in said for s in ("node: feature-hero", "table: ai/idea", f"hash: {gd.read_data(folder)['hash']}",
                                    "5 hero có nhiều quá không?", f"## {gd.ADVICE_TITLE}", "### add-bench | thêm | Có ghế dự bị 2 hero")),
            "binding" in said), (True, False))
-    check("the command prints the points with their kind and says none may be left out",
-          all(s in text for s in ("3 góp ý", "- add-bench (thêm): Có ghế dự bị 2 hero", "- four-heroes (thay hero-count):", "không được bỏ")))
+    check("the command prints the points with their kind and says the next step is the pick (người quyết 2026-11-27)",
+          all(s in text for s in ("3 góp ý", "- add-bench (thêm): Có ghế dự bị 2 hero", "- four-heroes (thay hero-count):",
+                                  "q1.pick.md", "gd_pick.py feature-hero q1")))
+    check("the answer is marked for the pick", "\nfilter: pick\n" in said)
+    for name, why in ((gd.ADVICE_ROOT, "vòng 1"), ("feature-hero.hero-list.hero-roster", "vòng 4")):
+        (advice / name).mkdir(parents=True, exist_ok=True)
+        (advice / name / "q9.q.md").write_text("Hỏi gì đó?", encoding="utf-8")
+        code, text = run(root, name, "q9")
+        check(f"{why} is not asked: refused, nothing written", (code, why in text, (advice / name / "q9.md").exists()), (1, True, False))
     logged = log.read_text(encoding="utf-8")
     first_line = logged.split("\n")[0].split(" ")
     check("Codex runs read-only at the project root, the prompt on stdin",
@@ -241,6 +248,12 @@ def context_cases(root, advice, log):
 
 
 def label_cases(root):
+    # These cases are the earlier rule (every point becomes an idea of the node asked): the answers become answers
+    # of before the pick (người quyết 2026-11-27), without `filter: pick`. The pick is tested in test_gd_pick.py.
+    for f in Path(root).joinpath(*gd.BASE, gd.ADVICE_DIR).glob("*/*.md"):
+        text = f.read_text(encoding="utf-8")
+        if f"\nfilter: {gd.PICK_FILTER}\n" in text:
+            f.write_text(text.replace(f"\nfilter: {gd.PICK_FILTER}\n", "\n"), encoding="utf-8")
     hero_node(root)
     n, problems = hero(root)
     check("an idea without a label is Claude's", [(it["by"], it["sources"]) for it in n["items"]], [("claude", []), ("claude", [])])
@@ -369,13 +382,14 @@ def owed_cases(root):
     (advice / "feature-shop" / "s1.q.md").write_text("Hỏi gì đó", encoding="utf-8")
     snap = gd.snapshot(root)
     owed = {x["path"]: x["gptOwed"] for x in gd.walk(snap["idea"])}
-    check("rounds 1 and 2 owe GPT a question until an answer is filed (a question alone is none); round 3 and the glossary owe none",
-          owed, {"": True, "feature-hero": False, "feature-shop": True, "feature-hero/hero-list": False, gd.GLOSSARY_KEY: False})
+    check("round 2 owes GPT a question until an answer is filed (a question alone is none); the root (round 1 is never "
+          "asked, người quyết 2026-11-27), round 3 and the glossary owe none",
+          owed, {"": False, "feature-hero": False, "feature-shop": True, "feature-hero/hero-list": False, gd.GLOSSARY_KEY: False})
     check("the live table owes no question", [x["gptOwed"] for x in gd.walk(snap["live"])], [False, False])
     check("not asking is no structure problem", [p for p in snap["problems"]["idea"] if "GPT" in p["text"] and "hỏi" in p["text"]], [])
     text = gd_status.report(root, "")
     check("gd_status says which nodes still owe the question",
-          ("- CHƯA HỎI GPT" in text, text.split("## Chưa hỏi GPT")[1].split("\n##")[0].count("\n- ")), (True, 2))
+          ("- CHƯA HỎI GPT" in text, text.split("## Chưa hỏi GPT")[1].split("\n##")[0].count("\n- ")), (True, 1))
     (advice / "feature-shop" / "s1.md").write_text("## Góp ý của GPT\n", encoding="utf-8")
     check("an answer settles it", next(x for x in gd.walk(gd.snapshot(root)["idea"]) if x["path"] == "feature-shop")["gptOwed"], False)
 

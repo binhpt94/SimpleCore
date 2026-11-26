@@ -25,10 +25,10 @@ namespace Game.SimClock
         /// <summary>The nominal step length in seconds (fixed mode: every step; frame mode: the cap is the frame clamp).</summary>
         float StepSeconds { get; }
 
-        /// <summary>Steps run since the run was set up, counting every step (paused ones too). Player actions are recorded against it.</summary>
+        /// <summary>Steps run since the run was set up, counting every step (stopped ones too). Player actions are recorded against it.</summary>
         long StepCount { get; }
 
-        /// <summary>Steps run while the run let the battle play. Every gameplay wait counts these, so it stands still while paused.</summary>
+        /// <summary>Steps run while the run let the battle play. Every gameplay wait counts these, so it stands still once the battle stopped.</summary>
         long GameplayStepCount { get; }
 
         /// <summary>Battle time so far: the sum of gameplay step lengths, in seconds.</summary>
@@ -42,7 +42,7 @@ namespace Game.SimClock
 
         /// <summary>
         /// Queues a player action; it is applied at the start of the next step, in the order queued, and recorded with that step's number.
-        /// The receiving feature still refuses it when its own rules forbid it (for example while paused).
+        /// The receiving feature still refuses it when its own rules forbid it (for example after the run ended).
         /// </summary>
         void Enqueue(string owner, Action apply);
     }

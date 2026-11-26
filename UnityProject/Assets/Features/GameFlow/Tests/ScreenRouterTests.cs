@@ -392,12 +392,6 @@ namespace Game.GameFlow.Tests
             _router.BattleBuilt();
             _router.RunLeft(LeaveChoice.GoHome);
             Assert.That(_router.Current, Is.EqualTo(MainScreen.Home));
-
-            _router.Play();
-            _router.EnterBattle(TeamA);
-            _router.BattleBuilt();
-            _router.RunLeft(LeaveChoice.Abandon);
-            Assert.That(_router.Current, Is.EqualTo(MainScreen.Home));
         }
 
         // ---- params ----

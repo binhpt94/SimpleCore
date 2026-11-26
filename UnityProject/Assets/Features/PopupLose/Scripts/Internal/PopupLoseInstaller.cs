@@ -39,18 +39,17 @@ namespace Game.PopupLose
             var score = Need<IRunScore>(registry, "Run");
             var popups = Need<IPopupService>(registry, "Popup");
             var views = Need<IPopupViews>(registry, "Popup");
-            var revive = Need<IRunRevive>(registry, "Run");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (_cheat != LoseCheatState.None)
             {
-                var cheatPopup = new LosePopupParticipant(flow, revive, FixedRunScore.For(_cheat), popups, views, new UnityLoseLog(), _homeButton);
+                var cheatPopup = new LosePopupParticipant(flow, FixedRunScore.For(_cheat), popups, views, new UnityLoseLog(), _homeButton);
                 session.Join(cheatPopup);
                 session.Join(new LoseCheatParticipant(cheatPopup));
                 return;
             }
 #endif
-            session.Join(new LosePopupParticipant(flow, revive, score, popups, views, new UnityLoseLog(), _homeButton));
+            session.Join(new LosePopupParticipant(flow, score, popups, views, new UnityLoseLog(), _homeButton));
         }
 
         private static T Need<T>(IServiceRegistry registry, string owner) where T : class

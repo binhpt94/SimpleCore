@@ -102,6 +102,20 @@ def page_cases(check):
                       (post("/api/gamedesign/user-idea", {"path": "feature-hero", "action": "add", "title": "Ý", "detail": ""})[1], calls),
                       ({"ok": True, "id": "user-1", "data": {"kind": "write_gamedesign"}}, [("feature-hero", "add", None, "Ý", "")]))
                 check("user-idea: needs the token", post("/api/gamedesign/user-idea", {"path": "", "action": "add"}, token="no")[0], 403)
+                picks, real_pick = [], ss.gamedesign.gpt_pick
+                ss.gamedesign.gpt_pick = lambda *a: picks.append(a[1:]) or "enemy-blocker"
+                try:
+                    check("gpt-pick: Chuyển lên reaches gamedesign.gpt_pick without a PIN and answers with fresh data",
+                          (post("/api/gamedesign/gpt-pick", {"folder": "feature-hero", "aid": "q1", "id": "enemy-blocker",
+                                                             "action": "promote"})[1], picks),
+                          ({"ok": True, "id": "enemy-blocker", "data": {"kind": "write_gamedesign"}},
+                           [("feature-hero", "q1", "enemy-blocker", "promote")]))
+                    check("gpt-pick: needs the token", post("/api/gamedesign/gpt-pick", {"folder": "x"}, token="no")[0], 403)
+                    ss.gamedesign.gpt_pick = lambda *a: (_ for _ in ()).throw(ValueError("ý này đã được xoá"))
+                    check("gpt-pick: a refusal comes back as an error", post("/api/gamedesign/gpt-pick", {"folder": "x"})[1],
+                          {"ok": False, "error": "ý này đã được xoá"})
+                finally:
+                    ss.gamedesign.gpt_pick = real_pick
                 dels, real_delete = [], ss.gamedesign.human_delete
                 ss.gamedesign.human_delete = lambda *a: dels.append(a[1:]) or {"ideas": 1, "nodes": 1}
                 try:

@@ -71,7 +71,7 @@ namespace Game.Wave.Tests
             var log = new List<string>();
             var run = new FakeRun(log);
             var enemies = new FakeEnemies();
-            var clock = new FakeSimClock { Paused = () => run.IsPaused };
+            var clock = new FakeSimClock();
             var director = new WaveDirector(RealRules(), run, enemies, new FakeIncome(log), new FirstRandom());
             director.Attach();
             IWaveProgress hud = director; // what Hud listens to

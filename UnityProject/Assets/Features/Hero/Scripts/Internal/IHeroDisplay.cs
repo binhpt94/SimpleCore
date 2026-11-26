@@ -5,7 +5,7 @@ namespace Game.Hero
     /// <summary>
     /// One hero drawn on the battlefield. Implemented in View; the presenter only pushes what to show.
     /// Positions are in battlefield units (u), x = 0 at the castle centre, feet at y = 0.
-    /// Animations move on only through <see cref="Animate"/>, so they stand still while the battle is paused.
+    /// Animations move on only through <see cref="Animate"/>, so they stand still while the battle does not run.
     /// </summary>
     internal interface IHeroDisplay
     {

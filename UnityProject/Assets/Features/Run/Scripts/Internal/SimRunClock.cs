@@ -25,11 +25,5 @@ namespace Game.Run
         public void SetGameplay(bool playing) => _control.SetGameplay(playing);
 
         public void ClearRun() => _control.ClearRun();
-
-        public void Enqueue(Action apply)
-        {
-            if (apply == null) throw new ArgumentNullException(nameof(apply));
-            _clock.Enqueue(Owner, apply);
-        }
     }
 }

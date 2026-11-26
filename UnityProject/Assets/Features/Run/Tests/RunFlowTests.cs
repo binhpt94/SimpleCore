@@ -104,29 +104,6 @@ namespace Game.Run.Tests
         }
 
         [Test]
-        public void PauseStandsTheBattleStillAndResumeRunsItAgain()
-        {
-            EnterBattle();
-            _flow.Pause();
-            Assert.IsTrue(_flow.IsPaused);
-            Assert.AreEqual(RunStep.Paused, _flow.Step);
-
-            _flow.Resume();
-            Assert.IsFalse(_flow.IsPaused);
-            Assert.AreEqual(RunStep.Playing, _flow.Step);
-        }
-
-        [Test]
-        public void PausingTwiceDoesNothingMore()
-        {
-            EnterBattle();
-            _flow.Pause();
-            _log.Clear();
-            _flow.Pause();
-            CollectionAssert.IsEmpty(_log);
-        }
-
-        [Test]
         public void CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay()
         {
             EnterBattle();
@@ -156,7 +133,6 @@ namespace Game.Run.Tests
         {
             EnterBattle();
             _flow.Lose();
-            _flow.Pause();
             _flow.Replay();
             _flow.GoHome();
             Assert.AreEqual(RunStep.Ending, _flow.Step);
@@ -187,26 +163,6 @@ namespace Game.Run.Tests
 
             _flow.GoHome();
             CollectionAssert.AreEqual(new[] { "BattleCleared", "step:Home" }, _log);
-        }
-
-        [Test]
-        public void GivingUpStopsAndClearsTheBattleAndGoesHomeWithoutLosePopup()
-        {
-            EnterBattle();
-            _flow.Pause();
-            _log.Clear();
-
-            _flow.Abandon();
-            CollectionAssert.AreEqual(new[] { "BattleStopped", "BattleCleared", "step:Home" }, _log);
-            Assert.AreEqual(0, _delay.Scheduled);
-        }
-
-        [Test]
-        public void GivingUpIsOnlyPossibleWhilePaused()
-        {
-            EnterBattle();
-            _flow.Abandon();
-            Assert.AreEqual(RunStep.Playing, _flow.Step);
         }
 
         [Test]
@@ -329,17 +285,6 @@ namespace Game.Run.Tests
         }
 
         [Test]
-        public void GivingUpSettlesTheScoreLikeLosing()
-        {
-            EnterBattle();
-            ClearWave(1);
-            _flow.Pause();
-            _flow.Abandon();
-            Assert.AreEqual(1, _score.Best);
-            Assert.IsTrue(_score.IsNewBest);
-        }
-
-        [Test]
         public void BrokenSavedBestCountsAsZero()
         {
             _store.Value = -5;
@@ -383,21 +328,6 @@ namespace Game.Run.Tests
             EnterBattle();
             ClearWave(1);
             Assert.AreEqual(1, _score.Score);
-        }
-
-        [Test]
-        public void GivingUpRightAfterEnteringBattleScoresZeroAndKeepsTheBest()
-        {
-            _store.Value = 2;
-            _score.LoadBest();
-            EnterBattle();
-            _flow.Pause();
-            _flow.Abandon();
-
-            Assert.AreEqual(0, _score.Score);
-            Assert.AreEqual(2, _score.Best);
-            Assert.IsFalse(_score.IsNewBest);
-            Assert.IsNull(_store.Saved);
         }
 
         [Test]

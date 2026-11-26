@@ -10,12 +10,6 @@ namespace Game.Hud
         [SerializeField, Min(1f)] private float bounceScale = 1.2f;
         [SerializeField, Min(0f)] private float bounceSeconds = 0.3f;
 
-        [Tooltip("feature-hud/hud-pause-button/pause-button-spec, 'Có nút tạm dừng': IDEA no, PROTOTYPE optional, FULL yes.")]
-        [SerializeField] private bool showPauseButton;
-
         public HudTimings Timings => new HudTimings(bannerSeconds, bounceScale, bounceSeconds);
-
-        /// <summary>Whether the battle HUD has its pause button at this stage of the game.</summary>
-        public bool ShowsPauseButton => showPauseButton;
     }
 }

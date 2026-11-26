@@ -45,14 +45,12 @@ namespace Game.Run.Tests
         public void NewRunWithAPopupStillOpenLogsAnErrorNamingIt()
         {
             _open.Add("PopupLose/Main");
-            _open.Add("PopupPause/Main");
             EnterBattle();
             _delay.NextFrameArrives();
 
             Assert.AreEqual(1, _log.Errors.Count);
             StringAssert.Contains("PopupLose/Main", _log.Errors[0]);
-            StringAssert.Contains("PopupPause/Main", _log.Errors[0]);
-            Assert.AreEqual(2, _open.Count, "The run does not close popups itself.");
+            Assert.AreEqual(1, _open.Count, "The run does not close popups itself.");
         }
 
         [Test]

@@ -11,7 +11,6 @@ namespace Game.PopupLose.Tests
     public sealed class LosePopupTests
     {
         private FakeFlow _flow;
-        private FakeRevive _revive;
         private FakeScore _score;
         private FakePopups _popups;
         private FakeLog _log;
@@ -21,16 +20,15 @@ namespace Game.PopupLose.Tests
         public void SetUp()
         {
             _flow = new FakeFlow();
-            _revive = new FakeRevive();
             _score = new FakeScore { Score = 12, Best = 15 };
             _popups = new FakePopups();
             _log = new FakeLog();
             // From PROTOTYPE on: both buttons. IDEA (no home button) has its own tests below.
-            _participant = new LosePopupParticipant(_flow, _revive, _score, _popups, _popups, _log, homeButton: true);
+            _participant = new LosePopupParticipant(_flow, _score, _popups, _popups, _log, homeButton: true);
         }
 
         private LosePopupParticipant IdeaParticipant() =>
-            new LosePopupParticipant(_flow, _revive, _score, _popups, _popups, _log, homeButton: false);
+            new LosePopupParticipant(_flow, _score, _popups, _popups, _log, homeButton: false);
 
         [Test]
         public void AtIdeaTheHomeButtonIsHiddenAndOnlyReplayShows()
@@ -297,7 +295,7 @@ namespace Game.PopupLose.Tests
         }
 
         [Test]
-        public void ComingBackToTheGameKeepsTheLosePopupAsItWasAndNeverPauses()
+        public void ComingBackToTheGameKeepsTheLosePopupAsItWas()
         {
             _participant.Run();
             _flow.GoTo(RunStep.Lost);
@@ -308,7 +306,6 @@ namespace Game.PopupLose.Tests
             Assert.That(_popups.Shown, Has.Count.EqualTo(1), "no second popup");
             Assert.That(_popups.OpenCount, Is.EqualTo(1));
             Assert.That(view.ShowCount, Is.EqualTo(1), "lines unchanged");
-            Assert.That(_flow.PauseCalls, Is.EqualTo(0), "no pause popup");
             view.PressReplay();
             Assert.That(_flow.ReplayCalls, Is.EqualTo(1), "buttons still take the first touch");
         }
@@ -338,57 +335,6 @@ namespace Game.PopupLose.Tests
             Assert.That(NewRecordPulse.ScaleAt(0.25f), Is.GreaterThan(1f).And.LessThan(1.15f));
             for (var t = 0f; t < 2f; t += 0.05f)
                 Assert.That(NewRecordPulse.ScaleAt(t), Is.InRange(1f - 1e-4f, 1.15f + 1e-4f));
-        }
-
-        [Test]
-        public void FailedReviveAdShowsTheAdNotCompletedLine()
-        {
-            _revive.LostAfterFailedRevive = true;
-            _participant.Run();
-            _flow.GoTo(RunStep.Lost);
-
-            var shown = _popups.View.Shown.Value;
-            Assert.That(shown.ShowAdFailed, Is.True);
-            Assert.That(shown.ShowNewRecord, Is.False);
-            Assert.That(LoseResultText.AdFailedText, Is.EqualTo("Quảng cáo chưa hoàn tất"));
-        }
-
-        [Test]
-        public void FailedReviveAdWithANewBestShowsOnlyTheNewRecordLine()
-        {
-            _revive.LostAfterFailedRevive = true;
-            _score.Score = 16;
-            _score.Best = 16;
-            _score.IsNewBest = true;
-            _participant.Run();
-            _flow.GoTo(RunStep.Lost);
-
-            Assert.That(_popups.View.Shown.Value.ShowNewRecord, Is.True);
-            Assert.That(_popups.View.Shown.Value.ShowAdFailed, Is.False);
-        }
-
-        [Test]
-        public void DeclinedOrNoReviveShowsNoAdLine()
-        {
-            _revive.LostAfterFailedRevive = false;
-            _participant.Run();
-            _flow.GoTo(RunStep.Lost);
-
-            Assert.That(_popups.View.Shown.Value.ShowAdFailed, Is.False);
-        }
-
-        [Test]
-        public void ANewLossAfterAFailedAdReadsTheFlagAgain()
-        {
-            _revive.LostAfterFailedRevive = true;
-            _participant.Run();
-            _flow.GoTo(RunStep.Lost);
-            _flow.GoTo(RunStep.Playing);
-
-            _revive.LostAfterFailedRevive = false;   // the run resets it when a new run starts
-            _flow.GoTo(RunStep.Lost);
-
-            Assert.That(_popups.View.Shown.Value.ShowAdFailed, Is.False);
         }
 
         [Test]
@@ -464,7 +410,7 @@ namespace Game.PopupLose.Tests
         [Test]
         public void NewRecordCheatOpensThePopupWithForcedValuesAtOnce()
         {
-            var cheatPopup = new LosePopupParticipant(_flow, _revive, FixedRunScore.For(LoseCheatState.NewRecord), _popups, _popups, _log, homeButton: true);
+            var cheatPopup = new LosePopupParticipant(_flow, FixedRunScore.For(LoseCheatState.NewRecord), _popups, _popups, _log, homeButton: true);
             var cheat = new LoseCheatParticipant(cheatPopup);
 
             cheatPopup.Run();
@@ -488,10 +434,8 @@ namespace Game.PopupLose.Tests
             public event Action BattleStarted { add { } remove { } }
             public event Action BattleStopped { add { } remove { } }
             public event Action BattleCleared { add { } remove { } }
-            public bool IsPaused => Step == RunStep.Paused;
             public int ReplayCalls;
             public int GoHomeCalls;
-            public int PauseCalls;
 
             public void GoTo(RunStep step)
             {
@@ -501,23 +445,10 @@ namespace Game.PopupLose.Tests
 
             public void Play() { }
             public void EnterBattle(RunTeam team) { }
-            public void Pause() => PauseCalls++;
-            public void Resume() { }
-            public void Abandon() { }
             public void Replay() => ReplayCalls++;
             public void GoHome() => GoHomeCalls++;
             public void Lose() { }
             public void CountClearedWave(int wave) { }
-        }
-
-        internal sealed class FakeRevive : IRunRevive
-        {
-            public event Action ReviveStarted { add { } remove { } }
-            public bool LostAfterFailedRevive { get; set; }
-            public void Revive() { }
-            public void DeclineRevive() { }
-            public void FailRevive() { }
-            public void ReviveShown() { }
         }
 
         internal sealed class FakeScore : IRunScore

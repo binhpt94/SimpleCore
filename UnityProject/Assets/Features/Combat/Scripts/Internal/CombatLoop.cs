@@ -8,7 +8,7 @@ namespace Game.Combat
     /// Runs exactly one combat tick on every step of the shared battle clock (feature-sim-clock), at the place of
     /// <see cref="Owner"/> in the clock's step order. Combat keeps no clock of its own: the step length comes from
     /// the clock. No tick runs before BattleStarted, after BattleStopped or BattleCleared, on a step that is not
-    /// gameplay, or while the run is paused (pause popup, waiting for a revive).
+    /// gameplay.
     /// </summary>
     internal sealed class CombatLoop : IDisposable
     {
@@ -46,7 +46,7 @@ namespace Game.Combat
 
         private void OnStep(SimStep step)
         {
-            if (!step.Gameplay || !_inBattle || _run.IsPaused) return;
+            if (!step.Gameplay || !_inBattle) return;
             _tick.Run(step.Seconds);
             TicksRun++;
         }

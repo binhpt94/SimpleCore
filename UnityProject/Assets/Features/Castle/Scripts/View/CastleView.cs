@@ -44,8 +44,6 @@ namespace Game.Castle
         private float _collapseLeft;
         private float _collapseTotal;
         private bool _collapsed;
-        private float _growLeft;
-        private float _growTotal;
         private float _shakeLeft;
         private float _shakeTotal;
         private Vector3 _bodyPosition;
@@ -105,7 +103,6 @@ namespace Game.Castle
             _popLeft = 0f;
             _collapseLeft = 0f;
             _collapsed = false;
-            _growLeft = 0f;
             _shakeLeft = 0f;
             _body.transform.localScale = _bodyScale;
             _body.transform.localPosition = _bodyPosition;
@@ -137,18 +134,6 @@ namespace Game.Castle
             _body.color = BodyColor;
             _collapseTotal = Mathf.Max(seconds, 1e-4f);
             _collapseLeft = _collapseTotal;
-        }
-
-        public void GrowBack(float seconds)
-        {
-            _collapsed = false;
-            _collapseLeft = 0f;
-            _flashLeft = 0f;
-            _popLeft = 0f;
-            _body.color = BodyColor;
-            _growTotal = Mathf.Max(seconds, 1e-4f);
-            _growLeft = _growTotal;
-            _body.transform.localScale = Vector3.zero;
         }
 
         public void ShowShot(int targetHandle, float fromX, float toX, float seconds)
@@ -208,12 +193,6 @@ namespace Game.Castle
             {
                 _collapseLeft = Mathf.Max(0f, _collapseLeft - seconds);
                 _body.transform.localScale = _bodyScale * (_collapseLeft / _collapseTotal);
-            }
-
-            if (_growLeft > 0f)
-            {
-                _growLeft = Mathf.Max(0f, _growLeft - seconds);
-                _body.transform.localScale = _bodyScale * (1f - _growLeft / _growTotal);
             }
 
             for (var i = _shots.Count - 1; i >= 0; i--)

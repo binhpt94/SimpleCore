@@ -1,0 +1,112 @@
+{
+ "file": "18e9e0d7b15a",
+ "checked": "2026-11-27 02:18:21",
+ "dropped": [
+  {
+   "point": "moc-da-luu",
+   "reason": "chi tiết vòng 4 (trường hợp ghi kỉ lục lỗi), để `feature-popup-rating` vòng 4"
+  },
+  {
+   "point": "bo-qua-khi-dich-vu-ban",
+   "reason": "chi tiết vòng 4 (trường hợp đang có popup khác), để `feature-popup-rating` vòng 4"
+  },
+  {
+   "point": "gioi-han-theo-tien-trinh",
+   "reason": "chi tiết vòng 4 (đếm lúc nào, đưa game xuống nền), để `feature-popup-rating` vòng 4; ý chính trùng `feature-popup-rating#rating-not-nagging`"
+  },
+  {
+   "point": "quyen-mo-cua-hang",
+   "reason": "trùng `feature-popup-rating#rating-role` và `feature-popup-rating#rating-two-choices`"
+  },
+  {
+   "point": "quyen-bao-lua-chon-thua",
+   "reason": "trùng `feature-popup#close-before-report` và `feature-popup#popup-close-owner`, đã cho popup thua tự báo lựa chọn sau khi dịch vụ đóng; chỉ đổi nơi ghi ý"
+  },
+  {
+   "point": "quay-lai-de-dong",
+   "reason": "chi tiết vòng 4 (nút Quay lại của điện thoại), để `feature-popup-rating` vòng 4"
+  }
+ ],
+ "items": {
+  "rating-record-milestone": {
+   "target": "feature-popup-rating",
+   "new": false,
+   "kind": "thay",
+   "ref": "rating-good-moment",
+   "title": "Chỉ mời khi kỉ lục lần đầu vượt qua một mốc cố định",
+   "detail": "Mời sau mỗi lần phá kỉ lục sẽ hỏi lại người đã đánh giá hay đã từ chối mỗi khi mở lại game. Một mốc cố định chỉ vượt được một lần chừng nào kỉ lục còn được lưu, nên không cần lưu thêm dữ liệu.",
+   "sources": [
+    "moc-trai-nghiem"
+   ],
+   "route": "side",
+   "hash": "98e3789f239e",
+   "checked": "2026-11-27 02:18:21",
+   "state": "deleted",
+   "at": "2026-11-27 02:27:34"
+  },
+  "run-record-before-after": {
+   "target": "feature-run",
+   "new": false,
+   "kind": "thêm",
+   "ref": "",
+   "title": "Lượt chơi cấp kỉ lục trước và sau khi chốt lượt cho feature khác dùng",
+   "detail": "Popup mời đánh giá dùng hai giá trị này để biết lượt vừa rồi có vượt mốc không. Popup thua vẫn dùng cùng kết quả đã chốt để hiện điểm và kỉ lục.",
+   "sources": [
+    "ket-qua-chot-luot"
+   ],
+   "route": "side",
+   "hash": "06d25bd053d2",
+   "checked": "2026-11-27 02:18:21"
+  },
+  "rating-on-target-ready": {
+   "target": "feature-popup-rating",
+   "new": false,
+   "kind": "làm rõ",
+   "ref": "rating-after-lose-popup",
+   "title": "Lời mời hiện khi `feature-game-flow` báo màn đích sau lượt thua đã sẵn sàng",
+   "detail": "Lúc đó popup thua đã đóng và trận đã dọn xong. Màn đích là màn chọn đội (Chơi lại) hoặc màn bắt đầu (Về màn bắt đầu).",
+   "sources": [
+    "hien-tren-man-dich"
+   ],
+   "route": "side",
+   "hash": "092b37fe4fd3",
+   "checked": "2026-11-27 02:18:21",
+   "state": "deleted",
+   "at": "2026-11-27 02:27:35"
+  },
+  "rating-store-page-skip": {
+   "target": "feature-popup-rating",
+   "new": false,
+   "kind": "làm rõ",
+   "ref": "rating-two-choices",
+   "title": "Nút Đánh giá mở trang Google Play của game; nút từ chối ghi \"Bỏ qua\"",
+   "detail": "Google không cho hỏi trước khi hiện khung đánh giá trong game (In-App Review), nên luồng có popup hỏi trước hợp với việc mở trang cửa hàng. \"Để sau\" gợi là game sẽ hỏi lại, còn mốc chỉ vượt một lần nên \"Bỏ qua\" đúng hơn.",
+   "sources": [
+    "mo-trang-google-play",
+    "nhan-bo-qua"
+   ],
+   "route": "side",
+   "hash": "82e5bbab0d33",
+   "checked": "2026-11-27 02:18:21",
+   "state": "deleted",
+   "at": "2026-11-27 02:27:35"
+  },
+  "rating-neutral-text": {
+   "target": "feature-popup-rating",
+   "new": false,
+   "kind": "làm rõ",
+   "ref": "rating-no-reward",
+   "title": "Lời mời dùng chữ trung tính, không hỏi mức hài lòng trước khi mở Google Play",
+   "detail": "Chữ kiểu \"Đánh giá game trên Google Play\". Dẫn tới 5 sao hay hỏi hài lòng để lọc người được đưa sang cửa hàng có rủi ro bị coi là thao túng đánh giá.",
+   "sources": [
+    "sao-do-nguoi-choi-chon"
+   ],
+   "route": "side",
+   "hash": "89589ad73d74",
+   "checked": "2026-11-27 02:18:21",
+   "state": "promoted",
+   "at": "2026-11-27 02:24:59",
+   "item": "rating-neutral-text"
+  }
+ }
+}

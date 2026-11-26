@@ -22,6 +22,7 @@ paths:
 - Trước khi code một phần, đọc đủ node vòng 4 và mục CHEAT của phần đó.
 - Bảng dữ liệu `.excel` của node chỉ là thiết kế: phiên feature đọc (`gd_excel.py show <node>`, cũng có trong `gd_pack.py`) rồi tự nhập vào config asset của mình.
 - Sổ yêu cầu `gd_req.py <Tên>`: làm từng yêu cầu theo skill `feature-implement-req`.
+- Thứ người đã bỏ khỏi thiết kế bị bỏ ở mọi giai đoạn (mục "Giai đoạn" của `CLAUDE.md` gốc, người quyết 2026-11-27): xoá hẳn code, test, config, asset của nó. Không giữ cờ tắt, nhánh hay test "cho giai đoạn sau".
 
 ## Kiểm ranh giới
 - `python Management/tools/validate.py --feature <Tên>`: kiểm tra ranh giới feature.
