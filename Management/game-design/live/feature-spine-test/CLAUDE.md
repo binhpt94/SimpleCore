@@ -9,7 +9,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - `feature-battlefield`: nhân vật đứng trên dải đất, theo camera và thứ tự vẽ của nền chiến trường.
 - `feature-hero`, `feature-enemy`, `feature-castle`: chỉ để đặt cạnh khi so cỡ và thứ tự vẽ; nhân vật không đọc, không gửi gì cho chúng.
 - `feature-hud`, `feature-popup`: HUD và popup vẽ trên nhân vật như trên mọi thứ của trận.
-- `feature-button-test`, `feature-cube-test`: hai feature thử khác cùng nằm trên màn trận; chỗ đứng và nút của Spine không chồng lên chúng.
+- `feature-cube-test`: feature thử khác cùng nằm trên màn trận; chỗ đứng và nút của Spine không chồng lên nó.
 - Không feature nào gọi tới feature này, và nó không gọi feature nào.
 
 ## Đã tự quyết

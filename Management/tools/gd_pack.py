@@ -77,7 +77,7 @@ def full_lines(node, out, doc=True, book=None):
     out.append("")
     out.append("### Ý cốt lõi")
     for it in node["items"]:
-        out.append(f"- {it['title']}{gd.by_label(it)}")
+        out.append(f"- {gd.shown_title(it)}{gd.by_label(it)}")
         for line in it["detail"].split("\n") if it["detail"] else []:
             out.append(f"    {line}")
     entry = (book or {}).get(node["path"])

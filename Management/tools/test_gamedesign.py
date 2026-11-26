@@ -1433,8 +1433,119 @@ def run_deco(root):
            "fr-safe" in concept, "fr-cut" in concept), (True, False, True))
 
 
+def run_user_ideas(root):
+    """The human's own ideas (người quyết 2026-11-26): added from the page as they are, labelled Người, scored 9 when
+    the human has no score for that text; only the human edits or removes them."""
+    mk(root, "", items=(("loop", 8, "Vòng lặp."),))
+    mk(root, "feature-hero")
+    before = gd.read_data(folder(root, "idea"))["hash"]
+    iid = gd.user_idea(root, "", "add", None, "Thành tự đánh quái", "Có kĩ năng hồi chiêu.")
+    data = gd.read_data(folder(root, "idea"))
+    it = next(x for x in data["items"] if x["id"] == iid)
+    check("add: a new id user-1, labelled user in data.md", (iid, data["user"], it["by"], it["title"], it["detail"]),
+          ("user-1", ["user-1"], gd.BY_USER, "Thành tự đánh quái", "Có kĩ năng hồi chiêu."))
+    check("add: the node's hash changes (children must follow)", data["hash"] != before)
+    n = snap_node(root)
+    mine = next(x for x in n["items"] if x["id"] == iid)
+    check("add: the human's score is 9", mine["user"], 9)
+    check("add: no structure problem", [p for p in gd.read_tree(root, "idea")[1] if p["path"] == "(gốc)"], [])
+    check("the label says Người", gd.by_label(mine), " · Người")
+    check("shown with [Ý User] first, data.md untouched", (gd.shown_title(mine), "[Ý User]" in folder(root, "idea/data.md").read_text(encoding="utf-8")),
+          ("[Ý User] Thành tự đánh quái", False))
+    check("gd_status prints the tag", "[Ý User]" in gd_status.report(root))
+    gd.save_review(root, "", {iid: {"score": 6, "feedback": ""}})
+    gd.user_idea(root, "", "edit", iid, "Thành tự đánh quái", "Có kĩ năng hồi chiêu.")
+    check("edit with the same text keeps the human's own score", next(x for x in snap_node(root)["items"] if x["id"] == iid)["user"], 6)
+    gd.user_idea(root, "", "edit", iid, "Thành đánh quái gần nhất", "")
+    check("edit to a new text: scored 9 again", next(x for x in snap_node(root)["items"] if x["id"] == iid)["user"], 9)
+    check("edit or delete an idea that is not the human's is refused", (refused(gd.user_idea, root, "", "edit", "loop", "x", ""),
+                                                                      refused(gd.user_idea, root, "", "delete", "loop")), (True, True))
+    check("a title with | or too long is refused", (refused(gd.user_idea, root, "", "add", None, "a | b", ""),
+                                                   refused(gd.user_idea, root, "", "add", None, "x" * 121, "")), (True, True))
+    check("history logs it", [e["action"] for e in gd.read_history(folder(root, "idea")) if e["event"] == "user-idea"], ["add", "edit", "edit"])
+    f = folder(root, "idea/data.md")
+    good = f.read_text(encoding="utf-8")
+    f.write_text(good.replace("Thành đánh quái gần nhất", "Thành đánh quái xa nhất"), encoding="utf-8")
+    check("someone else changes it: Ý CỦA NGƯỜI BỊ ĐỔI", any("BỊ ĐỔI" in p["text"] for p in gd.read_tree(root, "idea")[1]))
+    f.write_text(good.replace("user: user-1", "user: user-1, loop"), encoding="utf-8")
+    check("someone else labels an idea the human's: TỰ GẮN NHÃN NGƯỜI", any("TỰ GẮN NHÃN" in p["text"] for p in gd.read_tree(root, "idea")[1]))
+    f.write_text(good.replace("\nuser: user-1", ""), encoding="utf-8")
+    check("someone else drops the label: Ý CỦA NGƯỜI BỊ XOÁ", any("BỊ XOÁ" in p["text"] for p in gd.read_tree(root, "idea")[1]))
+    f.write_text(good, encoding="utf-8")
+    gd.sync_live(root)
+    check("live keeps the label", [x["by"] for x in gd.read_tree(root, "live")[0]["items"] if x["id"] == iid], [gd.BY_USER])
+    gd.user_idea(root, "", "delete", iid)
+    data = gd.read_data(folder(root, "idea"))
+    check("delete: gone from data.md and from user:", (iid in [x["id"] for x in data["items"]], data["user"]), (False, []))
+    check("delete: no structure problem", [p for p in gd.read_tree(root, "idea")[1] if p["path"] == "(gốc)"], [])
+    check("the next one is user-2: a number is not used again", gd.user_idea(root, "", "add", None, "Ý thứ hai", ""), "user-2")
+
+
+def run_human_delete(root):
+    """The human deletes ideas and nodes from the page (người quyết 2026-11-26): neutral, one Save, nothing written
+    when one part is wrong; a round-3 node left with no round-4 node is a design problem and closes the code gate."""
+    mk(root, "", items=(("loop", 8, "Vòng lặp."), ("win", 8, "Thắng.")))
+    mk(root, "feature-hero", items=(("core", 8, "Ý chính."),))
+    put(root, "idea/feature-hero/code.json", '{"unity": ["Hero"]}')
+    mk(root, "feature-hero/skills")
+    mk(root, "feature-hero/skills/skill-a")
+    mk(root, "feature-hero/skills/skill-b")
+    mk(root, "feature-hero/moves")
+    mk(root, "feature-hero/moves/move-a")
+    gd.sync_live(root)
+    check("set up: live has the whole branch", sorted(paths(gd.read_tree(root, "live")[0]))[-1], "feature-hero/skills/skill-b")
+    before = folder(root, "idea/data.md").read_text(encoding="utf-8")
+    check("a wrong part refuses everything", refused(gd.human_delete, root, [{"path": "", "id": "loop"}, {"path": "", "id": "nope"}], []))
+    check("... and nothing was written", folder(root, "idea/data.md").read_text(encoding="utf-8"), before)
+    check("the root node is not deleted", refused(gd.human_delete, root, [], [""]))
+    check("an unknown node is refused", refused(gd.human_delete, root, [], ["feature-none"]))
+    got = gd.human_delete(root, [{"path": "", "id": "win"}], ["feature-hero/skills/skill-a"])
+    check("one Save: an idea and a node", got, {"ideas": 1, "nodes": 1})
+    check("the idea is gone", [it["id"] for it in gd.read_data(folder(root, "idea"))["items"]], ["loop"])
+    check("a deleted idea is neutral: logged human-delete, not rejected",
+          ([e["item"] for e in gd.human_deleted(folder(root, "idea"))], gd.rejected(folder(root, "idea"))), (["win"], []))
+    check("the node is gone, its history kept with the parent",
+          (folder(root, "idea/feature-hero/skills/skill-a").exists(),
+           any(e.get("event") == "removed" and e.get("key") == "skill-a" and e.get("by") == "người"
+               for e in gd.read_history(folder(root, "idea/feature-hero/skills")))), (False, True))
+    check("a round-3 node that keeps a round-4 node has no problem",
+          [p for p in gd.read_tree(root, "idea")[1] if p["path"] == "feature-hero/skills"], [])
+    gd.human_delete(root, [], ["feature-hero/moves/move-a"])
+    probs = [p["text"] for p in gd.read_tree(root, "idea")[1] if p["path"] == "feature-hero/moves"]
+    check("a round-3 node left empty: NODE VÒNG 3 TRỐNG SAU KHI XOÁ", any("TRỐNG SAU KHI XOÁ" in t for t in probs))
+    ok, why = gd.code_allowed(root, "Hero")
+    check("... and the feature may not be coded", (ok, "feature-hero/moves" in why), (False, True))
+    mk(root, "feature-hero/moves/move-b")
+    check("a new round-4 node clears it", ([p for p in gd.read_tree(root, "idea")[1] if p["path"] == "feature-hero/moves"],
+                                           gd.code_allowed(root, "Hero")[0]), ([], True))
+    gd.promote(root, "feature-hero/skills", False)
+    check("promote: live loses the child the proposal deleted",
+          (folder(root, "live/feature-hero/skills/skill-a").exists(), folder(root, "live/feature-hero/skills/skill-b").exists()), (False, True))
+    got = gd.human_delete(root, [{"path": "feature-hero/skills/skill-b", "id": "core"}], ["feature-hero/skills", "feature-hero/skills/skill-b"])
+    check("a node and its child in one Save: the parent goes, the child's idea is skipped", got, {"ideas": 0, "nodes": 1})
+    check("... the branch is gone", folder(root, "idea/feature-hero/skills").exists(), False)
+    # GPT's idea and the human's own idea
+    put(root, "advice/feature-hero/q1.md", "### more | thêm | Thêm một ý\nVì sao.\n")
+    text = folder(root, "idea/feature-hero/data.md").read_text(encoding="utf-8")
+    text = text.replace("---\n", "---\nby: gpt-more=gpt@q1#more\n", 1) if text.startswith("---") else text
+    text += "\n### gpt-more | AI 6 | Thêm một ý\n"
+    folder(root, "idea/feature-hero/data.md").write_text(text, encoding="utf-8")
+    uid = gd.user_idea(root, "feature-hero", "add", None, "Ý của tôi", "")
+    gd.human_delete(root, [{"path": "feature-hero", "id": "gpt-more"}, {"path": "feature-hero", "id": uid}], [])
+    data = gd.read_data(folder(root, "idea/feature-hero"))
+    check("GPT's idea: gone, gpt-dropped written, no by: left",
+          ([it["id"] for it in data["items"]], data["dropped"], [p for p in gd.read_tree(root, "idea")[1]
+                                                                 if p["path"] == "feature-hero" and "gpt" in p["text"].lower()]),
+          (["core"], [{"advice": "q1", "point": "more", "item": "gpt-more"}], []))
+    check("in mode user too, the human's delete stands for the drop",
+          [p for p in gd.read_tree(root, "idea", "user")[1] if p["path"] == "feature-hero" and "không được bỏ" in p["text"]], [])
+    check("the human's own idea: gone and marked deleted, no structure problem",
+          (data["user"], gd.user_ideas(folder(root, "idea/feature-hero"))[uid]["deleted"],
+           [p for p in gd.read_tree(root, "idea")[1] if p["path"] == "feature-hero" and "NGƯỜI" in p["text"]]), ([], True, []))
+
+
 def main():
-    for case in (run_data, run_held, run_diff, run_scores, run_live_scores, run_priority, run_stage, run_progress, run_infra, run_code_names, run_flow, run_refs, run_follow, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco):
+    for case in (run_data, run_held, run_diff, run_scores, run_live_scores, run_priority, run_stage, run_progress, run_infra, run_code_names, run_flow, run_refs, run_follow, run_glossary, run_pack, run_frames, run_cheat, run_styles, run_ui, run_deco, run_user_ideas, run_human_delete):
         root = tempfile.mkdtemp(prefix="gdfx-")
         try:
             case(root)

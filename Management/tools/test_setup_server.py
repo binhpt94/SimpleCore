@@ -95,6 +95,23 @@ def page_cases(check):
             check("references: a bad upload answers why", post("/api/references/upload", {"name": "a.gif", "data": base64.b64encode(b"GIF89a").decode()})[1],
                   {"ok": False, "error": "chỉ nhận ảnh png, jpg hoặc webp"})
             check("references: an unknown action is refused", post("/api/references/rename", {"id": rid})[0], 403)
+            calls, real_user_idea = [], ss.gamedesign.user_idea
+            ss.gamedesign.user_idea = lambda *a: calls.append(a[1:]) or "user-1"
+            try:
+                check("user-idea: the page's Thêm ý reaches gamedesign.user_idea and answers with fresh data",
+                      (post("/api/gamedesign/user-idea", {"path": "feature-hero", "action": "add", "title": "Ý", "detail": ""})[1], calls),
+                      ({"ok": True, "id": "user-1", "data": {"kind": "write_gamedesign"}}, [("feature-hero", "add", None, "Ý", "")]))
+                check("user-idea: needs the token", post("/api/gamedesign/user-idea", {"path": "", "action": "add"}, token="no")[0], 403)
+                dels, real_delete = [], ss.gamedesign.human_delete
+                ss.gamedesign.human_delete = lambda *a: dels.append(a[1:]) or {"ideas": 1, "nodes": 1}
+                try:
+                    check("delete: the floating Save reaches gamedesign.human_delete",
+                          (post("/api/gamedesign/delete", {"ideas": [{"path": "", "id": "x"}], "nodes": ["feature-a"]})[1], dels),
+                          ({"ok": True, "ideas": 1, "nodes": 1, "data": {"kind": "write_gamedesign"}}, [([{"path": "", "id": "x"}], ["feature-a"])]))
+                finally:
+                    ss.gamedesign.human_delete = real_delete
+            finally:
+                ss.gamedesign.user_idea = real_user_idea
             check("references: the paths need the token", post("/api/references/delete", {"id": rid}, token="no")[0], 403)
             check("references: delete", (post("/api/references/delete", {"id": rid})[1]["ok"],
                                          [x.name for x in (tmp / "Management" / "references").iterdir()]), (True, ["index.json"]))

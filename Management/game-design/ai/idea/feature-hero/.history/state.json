@@ -1,5 +1,5 @@
 {
- "hash": "8cd1bf682940",
+ "hash": "72f3a14abd32",
  "items": {
   "hero-auto-combat": {
    "hash": "a06ca8a02eac",
@@ -65,10 +65,6 @@
    "hash": "c2429e2040e0",
    "text": "Máu hiện tại của hero, quái và thành chỉ do feature sở hữu bên đó cập nhật"
   },
-  "owner-reports-zero": {
-   "hash": "36a0e7778a44",
-   "text": "Feature sở hữu bên hết máu báo đúng một lần khi bên đó gục, bị hạ hoặc bị phá\nHai đòn chí tử cùng nhịp chỉ tạo một lần báo."
-  },
   "report-after-hp": {
    "hash": "c3cfc4a6da01",
    "text": "Kết quả của một nhịp chỉ được báo sau khi mọi bên trúng đã trừ máu xong\nChốt lượt hay đợt dựa trên trạng thái đã cập nhật đủ."
@@ -76,6 +72,18 @@
   "shared-target-word": {
    "hash": "4ec1acdaf40f",
    "text": "Mục tiêu là hero, quái hoặc thành mà đối phương đang nhắm để đánh\nDùng chung một từ cho quái nhắm hero, thành và hero nhắm quái."
+  },
+  "user-1": {
+   "hash": "808873efec91",
+   "text": "Hero theo phong cách fantasy"
+  },
+  "user-2": {
+   "hash": "8ab6fab3e621",
+   "text": "Hero có skill đặc trưng riêng"
+  },
+  "user-3": {
+   "hash": "e1e02dfa59ac",
+   "text": "Mỗi Hero có tầm đánh khác nhau, hồi chiêu khác nhau"
   }
  }
 }

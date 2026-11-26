@@ -23,7 +23,8 @@
   ];
   var STATES = { "new": "chưa có trong live", "changed": "khác live", "same": "giống live" };
   var PICK_KEEP = 8, PICK_DROP = 2;      // điểm nháp của nút "Chọn ý này" trong nhóm ý trái nhau: ý được chọn, các ý còn lại
-  var BY_NAMES = { "claude": "Claude", "gpt": "GPT" };   // AI nào đề xuất một ý
+  var BY_NAMES = { "claude": "Claude", "gpt": "GPT", "user": "Người" };
+  var USER_TAG = "[Ý User]";      // đứng đầu tiêu đề ý của người (chỉ khi hiện; data.md không có)   // AI nào đề xuất một ý
   var DATA_FILE = "data/gamedesign.js";
   var SERVER_HINT = "Mở trang qua python Management/tools/setup_server.py để lưu.";
   // Ô nhập cao theo nội dung, để người gõ thấy hết phần mình gõ.
@@ -179,6 +180,25 @@
     // Chữ của ý: đã chốt dùng màu chữ chính (trắng ở giao diện tối); chưa chốt mang màu của AI viết ra nó; trái nhau màu cam.
     ".gd-item .text.claude { color: var(--claude); }",
     ".gd-item .text.gpt { color: var(--gpt); }",
+    ".gd-item .text.user { color: var(--user); }",
+    ".gd-del-x { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin-right: 8px; border: 2px solid var(--bad); border-radius: 50%; color: var(--bad); font-size: 16px; font-weight: 700; line-height: 1; cursor: pointer; background: var(--bg); }",
+    ".gd-del-x:hover, .gd-del-x:focus-visible { background: var(--bad); color: #fff; outline: none; }",
+    ".gd-item.del .text, .gd-item.del .gd-said { text-decoration: line-through; color: var(--bad) !important; }",
+    ".gd-item.del .gd-del-x, .gd-card.del .gd-del-x, .gd-mini.del .gd-del-x { background: var(--bad); color: #fff; }",
+    ".gd-card .gd-del-x, .gd-mini .gd-del-x { position: absolute; bottom: 6px; right: 6px; margin: 0; z-index: 2; }",
+    ".gd-item.flash { box-shadow: 0 0 0 2px var(--user); transition: box-shadow 2s; }",
+    ".gd-mini { position: relative; }",
+    ".gd-mini.has-x { padding-right: 40px; }",
+    ".gd-card.has-x span.sum, .gd-card.has-x .gd-empty-warn { padding-right: 30px; }",
+    ".gd-card.del, .gd-mini.del { border-color: var(--bad) !important; background: color-mix(in srgb, var(--bad) 14%, var(--panel)) !important; }",
+    ".gd-card.del strong, .gd-mini.del strong { color: var(--bad) !important; text-decoration: line-through; }",
+    ".gd-empty-warn { display: block; color: var(--bad); font-size: 11px; }",
+    ".gd-delbar { position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--bad); border-radius: 10px; background: var(--panel); box-shadow: 0 4px 16px rgba(0,0,0,.18); max-width: calc(100vw - 32px); flex-wrap: wrap; }",
+    ".gd-delbar .gd-btn.main { background: var(--bad); border-color: var(--bad); color: #fff; }",
+    ".gd-user-form { margin: 10px 0; padding: 10px; border: 1px dashed var(--user); border-radius: 6px; }",
+    ".gd-user-form input, .gd-user-form textarea { display: block; width: 100%; margin-top: 6px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--text); font: inherit; }",
+    ".gd-user-form textarea { min-height: 54px; resize: vertical; }",
+    ".gd-user-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }",
     ".gd-item .text.clash { color: var(--clash); }",
     // Nhóm "Chọn 1": các ý trái nhau nằm chung một khung viền cam, mỗi ý một chữ cái.
     ".gd-pick { border: 1px solid var(--clash); border-radius: 8px; padding: 2px 10px 0; margin: 8px 0; }",
@@ -190,10 +210,11 @@
     ".gd-pick-btn:disabled { opacity: .5; cursor: default; }",
     ".gd-mark.by.claude { border-color: var(--claude); color: var(--claude); }",
     ".gd-mark.by.gpt { border-color: var(--gpt); color: var(--gpt); }",
+    ".gd-mark.by.user { border-color: var(--user); color: var(--user); }",
     ".gd-mark.by.clash { border-color: var(--clash); color: var(--clash); }",
     ".gd-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 6px; font-size: 12.5px; color: var(--muted); }",
     ".gd-legend b { font-weight: 600; }",
-    ".gd-legend .fixed { color: var(--text); } .gd-legend .claude { color: var(--claude); } .gd-legend .gpt { color: var(--gpt); } .gd-legend .clash { color: var(--clash); }",
+    ".gd-legend .fixed { color: var(--text); } .gd-legend .claude { color: var(--claude); } .gd-legend .gpt { color: var(--gpt); } .gd-legend .user { color: var(--user); } .gd-legend .clash { color: var(--clash); }",
     ".gd-source { margin: 8px 0; padding: 8px 10px; border-left: 3px solid var(--gpt); background: var(--panel); border-radius: 0 6px 6px 0; }",
     ".gd-source b { display: block; font-size: 12px; color: var(--gpt); margin-bottom: 2px; }",
     ".gd-source p { margin: 0; white-space: pre-wrap; font-size: 13.5px; line-height: 1.5; }",
@@ -314,7 +335,8 @@
     ".gd-history li { padding: 8px 0; border-bottom: 1px solid var(--line); }",
     ".gd-history time { display: block; font-size: 12px; color: var(--muted); }",
     ".gd-history .out { color: var(--bad); }",
-    ".gd-card.dim, .gd-chips.dim, .gd-mini.dim { opacity: .28; }",
+    ".gd-card.dim > :not(.gd-del-x), .gd-mini.dim > :not(.gd-del-x), .gd-chips.dim { opacity: .28; }",
+    ".gd-card.dim, .gd-mini.dim { border-color: color-mix(in srgb, var(--line) 40%, transparent); }",
     ".gd-tag.ph { font-weight: 600; }",
     ".gd-tag.cheat { border-color: var(--warn-text); color: var(--warn-text); font-weight: 600; }",
     ".gd-tag.ph-idea { border-color: var(--accent); background: var(--accent); color: var(--panel); }",
@@ -581,6 +603,79 @@
       }, function (e) { (failed || say)("Lỗi gọi server: " + e.message); });
     };
     var say = function (text) { state.message = { bad: true, text: text }; renderNotice(); };
+
+    // Xoá của người (người quyết 2026-11-26): bấm × chỉ đánh dấu đỏ; nút Lưu xoá nổi ở góc dưới phải ghi tất cả
+    // một lần. nodes: path -> "self" (người bấm) | "auto" (node vòng 3 tự theo khi node vòng 4 cuối của nó bị đánh dấu).
+    var pendingDel = { nodes: {}, ideas: {} };
+    var parentOf = function (path) { var i = path.lastIndexOf("/"); return i < 0 ? "" : path.slice(0, i); };
+    var delMarked = function (path) {      // node này hay một node phía trên nó đang bị đánh dấu xoá
+      for (var p = path; p; p = parentOf(p)) if (pendingDel.nodes[p]) return true;
+      return false;
+    };
+    var ideaMarked = function (path, id) { return !!(pendingDel.ideas[path] && pendingDel.ideas[path][id]) || delMarked(path); };
+    var willEmpty = function (n) {      // node vòng 3 còn giữ mà mọi node vòng 4 của nó đang bị đánh dấu
+      return n.round === 3 && !n.cheat && n.children && n.children.length > 0 && !delMarked(n.path) &&
+        n.children.every(function (c) { return delMarked(c.path); });
+    };
+    var delBar = null;
+    var renderDelBar = function () {
+      if (!delBar) delBar = put(pane, el("div", "gd-delbar"));
+      delBar.textContent = "";
+      var nodes = Object.keys(pendingDel.nodes).filter(function (p) { return !delMarked(parentOf(p)); });
+      var ideas = [];
+      Object.keys(pendingDel.ideas).forEach(function (p) {
+        if (delMarked(p)) return;
+        Object.keys(pendingDel.ideas[p]).forEach(function (id) { ideas.push({ path: p, id: id }); });
+      });
+      delBar.hidden = state.table !== "idea" || (!nodes.length && !ideas.length);
+      if (delBar.hidden) return;
+      var save = put(delBar, button("Lưu xoá · " + ideas.length + " ý · " + nodes.length + " node", function () {
+        save.disabled = true;
+        send("/api/gamedesign/delete", { ideas: ideas, nodes: nodes }, function (res) {
+          pendingDel = { nodes: {}, ideas: {} };
+          return "Đã xoá " + res.ideas + " ý và " + res.nodes + " node (cả nhánh bên dưới).";
+        }, function (err) { save.disabled = false; say("Không xoá: " + err); });
+      }, null, "gd-btn main"));
+      save.title = "Ghi mọi dấu xoá vào bảng đề xuất. Live mất node hay ý đó khi node cha được chốt lại.";
+      if (!ctx.setup) { save.disabled = true; save.title = SERVER_HINT; }
+      add(delBar, button("Bỏ hết", function () { pendingDel = { nodes: {}, ideas: {} }; render(); }));
+    };
+    var toggleNodeDel = function (n) {
+      if (!n.path) return;
+      var par = parentOf(n.path);
+      if (pendingDel.nodes[n.path]) {
+        delete pendingDel.nodes[n.path];
+        if (pendingDel.nodes[par] === "auto") delete pendingDel.nodes[par];
+      } else {
+        pendingDel.nodes[n.path] = "self";
+        var parent = n.round === 4 ? find(tree(), par) : null;
+        if (parent && parent.round === 3 && !parent.cheat && !pendingDel.nodes[par] &&
+            parent.children.every(function (c) { return delMarked(c.path); })) pendingDel.nodes[par] = "auto";
+      }
+      render();
+    };
+    var delX = function (label, onClick) {      // nút × đặt trong một nút khác: span có role button, không mở thứ bên ngoài
+      var x = el("span", "gd-del-x", "×");
+      x.tabIndex = 0;
+      x.setAttribute("role", "button");
+      x.title = label;
+      x.setAttribute("aria-label", label);
+      var go = function (ev) { if (ev) { ev.stopPropagation(); if (ev.preventDefault) ev.preventDefault(); } onClick(); };
+      x.addEventListener("click", go);
+      x.addEventListener("keydown", function (ev) { if (ev && (ev.key === "Enter" || ev.key === " ")) go(ev); });
+      return x;
+    };
+    var nodeDelX = function (card, n) {
+      if (state.table !== "idea" || !n.path || !ctx.setup) return;
+      card.className += " has-x";
+      var marked = delMarked(n.path);
+      if (marked) card.className += " del";
+      var ownMark = pendingDel.nodes[n.path];
+      if (marked && !ownMark) return;      // đỏ theo node cha: bỏ dấu ở node cha
+      add(card, delX(ownMark ? "Bỏ đánh dấu xoá node này" : "Đánh dấu xoá node này và cả nhánh bên dưới (bấm Lưu xoá để ghi)",
+                     function () { toggleNodeDel(n); }));
+      if (willEmpty(n)) add(card, el("span", "gd-empty-warn", "Sẽ trống: lỗi thiết kế, khoá code"));
+    };
 
     var button = function (label, onClick, pressed, className) {
       var b = el("button", className || "gd-btn", label);
@@ -1317,6 +1412,7 @@
           var card = put(grid, button("", function () { select(n); }, null, "gd-mini" + kind + (n.path === state.selected ? " sel" : "") + (needed(n) ? "" : " dim")));
           card.title = n.title + (n.summary ? "\n" + n.summary : "");
           add(card, el("strong", "", n.title || n.key));
+          nodeDelX(card, n);
           var tags = put(card, el("span", "gd-mini-tags"));
           if (n.key !== GLOSSARY) {
             var rows = rowsOf(n.key);
@@ -1612,6 +1708,7 @@
         idLine.title = "Id của node: " + (n.path || "(gốc)") + " (bấm để chép)";
         idLine.addEventListener("click", function (ev) { ev.stopPropagation(); copyText(n.path || "(gốc)", "id node"); });
         add(card, el("strong", "", n.title || "(chưa đặt tên)"), idLine, el("span", "sum", n.summary || "Chưa có tóm tắt."));
+        nodeDelX(card, n);
         if (lowest(n) !== null) {
           var low = num(lowest(n), "Điểm thấp nhất của node");
           low.className += " low";
@@ -1698,7 +1795,7 @@
       if (!node.items.length) { add(body, el("p", "muted", "Node chưa có ý nào trong data.md.")); return; }
       // Chú giải màu chữ: ý đã chốt (có trong live, đúng nội dung) và ý còn là đề xuất của từng AI.
       var legend = put(body, el("p", "gd-legend"));
-      [["fixed", "Đã chốt"], ["claude", "Claude đề xuất"], ["gpt", "GPT đề xuất"], ["clash", "Trái nhau: chọn 1"]].forEach(function (x) {
+      [["fixed", "Đã chốt"], ["claude", "Claude đề xuất"], ["gpt", "GPT đề xuất"], ["user", "Ý của bạn"], ["clash", "Trái nhau: chọn 1"]].forEach(function (x) {
         add(legend, el("b", x[0], x[1]));
       });
       var drafts = [];
@@ -1724,7 +1821,9 @@
         }
         g.ids.sort(function (a, b) { return node.items.indexOf(byId[a]) - node.items.indexOf(byId[b]); });
       });
-      node.items.forEach(function (it) {
+      var userFirst = node.items.filter(function (it) { return it.by === "user"; })
+        .concat(node.items.filter(function (it) { return it.by !== "user"; }));
+      userFirst.forEach(function (it) {
         var g = groupOf[it.id];
         if (!g || g.ids.length < 2) { order.push(it); return; }
         if (g.placed) return;
@@ -1732,6 +1831,48 @@
         g.ids.forEach(function (id) { order.push(byId[id]); });
       });
       var idea = state.table === "idea";
+      // Ý của người (Thêm ý, Sửa, Xoá): ghi thẳng vào node đề xuất, giữ nguyên chữ, nhãn "Người". Lưu mà bản đó chưa
+      // có điểm của bạn thì server chấm luôn 9; @GameDesigner không được sửa hay xoá ý này.
+      var userForm = null;
+      var openUserForm = function (spotEl, editing, prefill) {
+        if (userForm && userForm.parentNode) userForm.parentNode.removeChild(userForm);
+        userForm = put(spotEl, el("div", "gd-user-form"));
+        add(userForm, el("b", "", editing ? "Sửa ý của bạn" : "Thêm ý của bạn"));
+        var title = put(userForm, el("input"));
+        title.maxLength = 120;
+        title.placeholder = "Tiêu đề: chính ý đó, một câu ngắn (tối đa 120 kí tự)";
+        title.setAttribute("aria-label", "Tiêu đề ý");
+        var detail = put(userForm, el("textarea"));
+        detail.maxLength = 500;
+        detail.placeholder = "Chi tiết (không bắt buộc, tối đa 500 kí tự): lí do, ví dụ";
+        detail.setAttribute("aria-label", "Chi tiết ý");
+        var text = (prefill || "").trim();
+        if (editing) { title.value = editing.title || ""; detail.value = editing.detail || ""; }
+        else if (text) {
+          var cut = text.length <= 120 ? text.length : Math.max(text.lastIndexOf(" ", 120), 60);
+          title.value = text.slice(0, cut).trim();
+          detail.value = text.slice(cut).trim();
+        }
+        var note = el("span", "muted", "Lưu xong ý mang nhãn Người; bản chưa có điểm của bạn được chấm 9.");
+        var actions = put(userForm, el("div", "gd-user-actions"));
+        var ok = put(actions, button(editing ? "Lưu sửa" : "Thêm ý", function () {
+          ok.disabled = true;
+          send("/api/gamedesign/user-idea", { path: node.path, action: editing ? "edit" : "add", id: editing ? editing.id : null,
+                                              title: title.value, detail: detail.value },
+            function (res) { state.flashIdea = res.id; return (editing ? "Đã sửa ý " : "Đã thêm ý ") + res.id + " của bạn vào node " + where(node) + "."; },
+            function (err) { note.textContent = "Không lưu: " + err; ok.disabled = false; });
+        }, null, "gd-btn main"));
+        if (!ctx.setup) { ok.disabled = true; note.textContent = SERVER_HINT; }
+        add(actions, button("Huỷ", function () { userForm.parentNode.removeChild(userForm); userForm = null; }), note);
+        title.focus();
+      };
+      if (idea) {
+        var addRow = put(body, el("div", "gd-user-actions"));
+        var addBtn = put(addRow, button("Thêm ý", function () { openUserForm(addSpot, null, ""); }));
+        addBtn.title = "Ý của chính bạn: ghi đúng chữ bạn viết, nhãn Người, @GameDesigner không được sửa hay xoá";
+        if (!ctx.setup) addBtn.disabled = true;
+        var addSpot = put(body, el("div", ""));
+      }
       order.forEach(function (it) {
         if (idea && state.onlyChanged && it.change === "same" && !groupOf[it.id]) return;
         // Chữ của ý là chính. Dưới nó chỉ có hai khung nhỏ (điểm AI, điểm của bạn). Bấm vào ý mới mở phần cập nhật:
@@ -1745,8 +1886,16 @@
         }
         var change = idea && it.change && it.change !== "same" ? it.change : "";
         var look = change && it.user === null;
-        var block = put(group ? group.box : body, el("div", "gd-item" + (look ? " look" : "")));
+        var block = put(group ? group.box : body, el("div", "gd-item" + (look ? " look" : "") + (idea && ideaMarked(node.path, it.id) ? " del" : "")));
         var draft = { score: it.user, feedback: it.feedback || "" };
+        if (state.flashIdea === it.id) {
+          state.flashIdea = null;
+          block.className += " flash";
+          setTimeout(function () {
+            if (block.scrollIntoView) block.scrollIntoView({ block: "center", behavior: "smooth" });
+            setTimeout(function () { block.className = block.className.replace(/ flash\b/g, ""); }, 2000);
+          }, 0);
+        }
         var head = put(block, el("div", "gd-head"));
         head.tabIndex = 0;
         head.title = "Bấm để chấm điểm và ghi phản hồi cho ý này";
@@ -1755,11 +1904,20 @@
         // Một hàng: tiêu đề bên trái, rồi ý kiến đã ghi (rút gọn) và hai khung điểm bên phải.
         // Màu chữ: đã chốt (bảng live, hoặc live có ý này đúng nội dung) dùng màu chữ chính; hai ý trái nhau màu cam;
         // còn lại mang màu của AI viết ra nó.
-        var who = it.by === "gpt" ? "gpt" : "claude";
+        var who = it.by === "gpt" ? "gpt" : it.by === "user" ? "user" : "claude";
         var clash = it.clash && it.clash.length;
         var itemFixed = state.table === "live" || it.fixed;
+        if (idea && ctx.setup && !delMarked(node.path)) {
+          add(head, delX(ideaMarked(node.path, it.id) ? "Bỏ đánh dấu xoá ý này" : "Đánh dấu xoá ý này (trung tính; bấm Lưu xoá để ghi)", function () {
+            var m = pendingDel.ideas[node.path] = pendingDel.ideas[node.path] || {};
+            if (m[it.id]) delete m[it.id]; else m[it.id] = true;
+            if (!Object.keys(m).length) delete pendingDel.ideas[node.path];
+            block.className = block.className.replace(/ del\b/g, "") + (m[it.id] ? " del" : "");
+            renderDelBar();
+          }));
+        }
         if (group) add(head, el("span", "gd-pick-letter", String.fromCharCode(65 + group.ids.indexOf(it.id))));
-        add(head, inline(ctx, el("p", "text" + (clash ? " clash" : itemFixed ? "" : " " + who)), it.title));
+        add(head, inline(ctx, el("p", "text" + (clash ? " clash" : itemFixed ? "" : " " + who)), (who === "user" ? USER_TAG + " " : "") + it.title));
         var marks = put(head, el("div", "gd-marks"));
         var sources = (it.sources || []).map(function (x) { return x.advice + "#" + x.point; }).join(", ");
         if (change) {
@@ -1768,7 +1926,8 @@
             (it.changedAt ? " · đổi lúc " + it.changedAt : "") + (look ? " · bạn chưa chấm bản này" : "");
         }
         var byMark = put(marks, el("span", "gd-mark by " + who, BY_NAMES[who]));
-        byMark.title = who === "gpt" ? "GPT đề xuất (góp ý " + sources + "); Claude chỉ rút gọn câu chữ" : "Claude (@GameDesigner) đề xuất";
+        byMark.title = who === "gpt" ? "GPT đề xuất (góp ý " + sources + "); Claude chỉ rút gọn câu chữ" :
+          who === "user" ? "Ý của bạn: giữ nguyên chữ bạn viết, chỉ bạn sửa hay xoá" : "Claude (@GameDesigner) đề xuất";
         if (it.clarified) {
           var clearMark = put(marks, el("span", "gd-mark by gpt", "GPT làm rõ"));
           clearMark.title = "Ý của Claude, GPT viết lại cho rõ (góp ý " + sources + ")";
@@ -1838,10 +1997,29 @@
         area.placeholder = "Ý kiến của bạn về ý này (vì sao điểm này, muốn sửa gì).";
         area.setAttribute("aria-label", "Ý kiến của bạn về ý: " + it.title);
         area.addEventListener("input", function () { grow(area); draft.feedback = area.value || ""; refresh(); });
+        if (idea) {
+          var userRow = put(editor, el("div", "gd-user-actions"));
+          var spot = put(editor, el("div", ""));
+          var asIdea = put(userRow, button("Thành ý của người", function () { openUserForm(spot, null, area.value || it.feedback || ""); }));
+          asIdea.title = "Viết phản hồi này thành một ý mới của bạn (nhãn Người); ý này và điểm của nó giữ nguyên";
+          if (!ctx.setup) asIdea.disabled = true;
+          if (it.by === "user") {
+            var editBtn = put(userRow, button("Sửa ý", function () { openUserForm(spot, it, ""); }));
+            var sure = false;
+            var delBtn = put(userRow, button("Xoá ý", function () {
+              if (!sure) { sure = true; delBtn.textContent = "Bấm lần nữa để xoá"; return; }
+              delBtn.disabled = true;
+              send("/api/gamedesign/user-idea", { path: node.path, action: "delete", id: it.id },
+                function (res) { return "Đã xoá ý " + res.id + " của bạn."; },
+                function (err) { delBtn.disabled = false; sure = false; delBtn.textContent = "Xoá ý"; say("Không xoá: " + err); });
+            }));
+            if (!ctx.setup) { editBtn.disabled = true; delBtn.disabled = true; }
+          }
+        }
         var toggle = function () {
           editor.hidden = !editor.hidden;
           head.setAttribute("aria-expanded", editor.hidden ? "false" : "true");
-          block.className = editor.hidden ? "gd-item" : "gd-item open";
+          block.className = (editor.hidden ? "gd-item" : "gd-item open") + (idea && ideaMarked(node.path, it.id) ? " del" : "");
           showMarks();
           if (!editor.hidden) grow(area);
         };
@@ -2246,6 +2424,12 @@
       add(idP, el("code", "", node.path || "(gốc)"));
       idP.appendChild(document.createTextNode(" "));
       put(idP, button("Chép id", function () { copyText(node.path || "(gốc)", "id node"); }, null, "gd-link"));
+      if (state.table === "idea" && node.path && ctx.setup) {
+        var ownMark = pendingDel.nodes[node.path];
+        idP.appendChild(document.createTextNode(" "));
+        if (delMarked(node.path) && !ownMark) add(idP, el("span", "gd-empty-warn", "Đang đỏ theo node cha"));
+        else put(idP, button(ownMark ? "Bỏ đánh dấu xoá" : "Xoá node", function () { toggleNodeDel(node); }, null, "gd-link"));
+      }
       if (node.summary) add(body, el("p", "", node.summary));
       if (state.table === "idea") {
         var linkList = function (box, paths) {
@@ -2618,6 +2802,7 @@
       if (!root) { state.focus = null; state.selected = null; }
       renderBar();
       renderNotice();
+      renderDelBar();
       mapBox.textContent = "";
       detailBox.textContent = "";
       if (!data) {

@@ -4,7 +4,7 @@ Dữ liệu cốt lõi: [data.md](data.md) · UI cần có: [ui.md](ui.md)
 
 ## Làm gì
 - Khi màn trận mở, phiên `SpineTest` đặt một nhân vật Spine (bộ mẫu spineboy) trên mặt đất ở x=+9u, cao 1.5u, quay mặt trái, chạy idle lặp.
-- Bốn nút "Đứng", "Chạy", "Nhảy", "Lật" và một nhãn trạng thái hiện trên màn trận (bố cục do @UIDesigner xếp, không chồng HUD, không chồng nút của feature-button-test).
+- Bốn nút "Đứng", "Chạy", "Nhảy", "Lật" và một nhãn trạng thái hiện trên màn trận (bố cục do @UIDesigner xếp, không chồng HUD).
 - Đổi animation luôn chuyển mượt 0.2 giây. jump chạy một lần rồi tự về idle.
 - Nhân vật không chạm, không chặn; quái, hero đi xuyên qua. Trận dừng thì nhân vật đứng nguyên, nút không nhận chạm (tín hiệu dừng tới qua nơi lắp màn).
 - Chỉ có trong Unity Editor và bản Development build.
@@ -31,7 +31,7 @@ Cột `idea`, `prototype`, `full` của bảng `Params`. Mọi thông số có t
 
 ## Đã tự quyết
 - **spineboy**: bộ mẫu chính thức, ai cài runtime cũng có; đã loại: tự làm bộ xương (không có công cụ).
-- **x=+9u**: đã loại x=−9u (đối xứng được nhưng cánh trái đã có khối thử ở −5u và nút thử của button-test ở góc trái dưới, ảnh chụp rối hơn).
+- **x=+9u**: đã loại x=−9u (đối xứng được nhưng cánh trái đã có khối thử ở −5u, ảnh chụp rối hơn).
 - **Theo trận dừng, chạy** (`match-time`, thay ý `real-time` cũ): theo góp ý GPT `r2-core#dung-dung-khung` ở node feature; Spine dùng cho unit thì phải đứng khi trận dừng. Tín hiệu đi qua nơi lắp màn nên vẫn không gọi thẳng feature khác. Đã loại: thời gian thực bất kể trận dừng.
 - **Đo hiệu năng không có ngưỡng** (`perf-measure`): thiết kế chưa có ngân sách FPS và máy yếu nhất; ghi số để người quyết.
 - **Ngay trên hero, quái**: đã loại dưới hero, quái (khối thử giữa đã thử trường hợp bị che).

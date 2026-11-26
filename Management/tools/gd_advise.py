@@ -64,7 +64,8 @@ Việc cần làm, theo thứ tự ưu tiên:
 1. BỔ SUNG ý mà node còn thiếu để chơi được và để người code không phải đoán.
 2. LÀM RÕ ý còn mơ hồ: viết lại nó thành một câu rõ, đo được, không hiểu được hai cách.
 3. Đề xuất phương án THAY cho ý bạn thấy sai hoặc yếu, nhất là ý người chấm thấp.
-Ý nào đã ổn thì không viết gì về nó.
+Ý nào đã ổn thì không viết gì về nó. Ý ghi "Ý CỦA NGƯỜI CHỦ PROJECT" là quyết định của người: KHÔNG `thay`, KHÔNG
+`làm rõ` nó; các ý khác phải khớp với nó.
 
 Phần "Ngữ cảnh rộng hơn" cho biết các feature khác, các node bên cạnh, thứ đã quyết ở các node bên dưới, ý người chủ
 project đã loại và các góp ý bạn đã cho trước đây. Dùng nó để: KHÔNG đề xuất ngược với thứ đã quyết ở node bên dưới hay
@@ -141,7 +142,8 @@ def node_text(root, table, parts, role):
             score = "người chưa chấm"
         else:
             score = "người chấm " + gd.score_meaning(it["user"]) + (f" · phản hồi của người: {it['feedback']}" if it["feedback"] else "")
-        out.append(f"- [{it['id']}] {it['title']} ({score})")
+        mine = " · Ý CỦA NGƯỜI CHỦ PROJECT, không thay, không làm rõ, không bỏ" if it.get("by") == gd.BY_USER else ""
+        out.append(f"- [{it['id']}] {it['title']} ({score}{mine})")
         out += [f"    {line}" for line in it["detail"].split("\n") if line.strip()]
     if not data["items"]:
         out.append("- (chưa có ý nào)")
@@ -226,6 +228,10 @@ def context_text(root, node, found, aid, skip, level):
             out.append("--- Ý người chủ project ĐÃ LOẠI ở node này (đừng đề xuất lại)\n" + "\n".join(
                 f"- [{e.get('item', '')}] {one_line(str(e.get('text', '')))[:200]} (người chấm {e.get('score')}"
                 + (f"; phản hồi: {one_line(str(e['feedback']))}" if e.get("feedback") else "") + ")" for e in turned))
+        dropped_by_human = gd.human_deleted(gd.table_dir(root, "idea").joinpath(*parts))
+        if dropped_by_human:
+            out.append("--- Ý người chủ project ĐÃ XOÁ ở node này (không tốt không xấu, chỉ là không cần: đừng đề xuất lại)\n"
+                       + "\n".join(f"- [{e.get('item', '')}] {one_line(str(e.get('text', '')))[:200]}" for e in dropped_by_human))
     asked = []
     names = ([gd.ADVICE_ROOT] + [".".join(parts[:d]) for d in range(1, len(parts) + 1)]) if found else [gd.ADVICE_GENERAL]
     for name in names:

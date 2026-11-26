@@ -259,7 +259,7 @@ def label_cases(root):
     check("a point that adds or replaces makes the idea GPT's; one that only makes Claude's idea clearer leaves it Claude's",
           {k: (v["by"], v["clarified"]) for k, v in items.items()},
           {"hero-count": ("claude", True), "hero-speed": ("claude", False), "hero-bench": ("gpt", False), "hero-four": ("gpt", False)})
-    check("the node counts its ideas by AI", (n["by"], n["gpt"]["clarified"]), ({"claude": 2, "gpt": 2}, 1))
+    check("the node counts its ideas by AI", (n["by"], n["gpt"]["clarified"]), ({"claude": 2, "gpt": 2, "user": 0}, 1))
     check("an idea carries GPT's own words", items["hero-bench"]["sources"][0]["text"], "Có ghế dự bị 2 hero\nĐổi hero giữa trận.")
     check("the idea that replaces another and the one it replaces stand against each other",
           {k: v["clash"] for k, v in items.items()}, {"hero-count": ["hero-four"], "hero-speed": [], "hero-bench": [], "hero-four": ["hero-count"]})

@@ -34,7 +34,7 @@ def is_link(path):
     return stat.S_ISLNK(info.st_mode) or bool(getattr(info, "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT)
 
 
-def keep_history(node):
+def keep_history(node, by="@GameDesigner"):
     """Moves every .history folder inside a node that is about to be deleted into the parent's .history/removed/."""
     parent = node.parent
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -46,7 +46,7 @@ def keep_history(node):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(history), str(target))
     data = gamedesign.read_data(node)
-    gamedesign.log(parent, "removed", key=node.name, title=data["title"] if data else "",
+    gamedesign.log(parent, "removed", key=node.name, title=data["title"] if data else "", by=by,
                    items=[{"id": it["id"], "text": it["text"]} for it in data["items"]] if data else [])
 
 

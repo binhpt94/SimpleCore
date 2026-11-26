@@ -56,7 +56,9 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   idle `idle_minutes` is stopped; in both modes a thread that is not running is started only while its pool is under
   its limit (many messages at once must not start dozens of threads); "always-live" (default) stops nothing.
 - Game design tab: GET /api/gamedesign re-reads Management/game-design. Without the PIN (the page token is
-  enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /answers stores the
+  enough): POST /api/gamedesign/promote copies one idea node into live (gamedesign.promote), /user-idea adds, edits or
+  removes one of the human's own ideas of a proposed node (gamedesign.user_idea), /delete deletes the ideas and
+  nodes the human marked (gamedesign.human_delete), /answers stores the
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
   human's importance score of a node, /progress the progress of a leaf. With the PIN: /sync copies every passing node into live at once
   (gamedesign.sync_live), /mode switches Full Auto / User control. Nothing reaches live without promote or sync.
@@ -262,7 +264,7 @@ LIVE_LOCK = threading.Lock()
 # POST paths and the largest body each takes. Answers carry free text for every question of a node.
 POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api/gamedesign/mode": MAX_BODY,
               "/api/gamedesign/stage": MAX_BODY,
-              "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
+              "/api/gamedesign/answers": 64 * 1024, "/api/gamedesign/review": 64 * 1024, "/api/gamedesign/user-idea": 64 * 1024, "/api/gamedesign/delete": 64 * 1024, "/api/gamedesign/sync": MAX_BODY,
               "/api/gamedesign/priority": MAX_BODY, "/api/gamedesign/progress": 64 * 1024, "/api/gamedesign/requirement": 64 * 1024, "/api/vscode-groups": MAX_BODY,
               "/api/references/upload": 12 * 1024 * 1024, "/api/references/note": 64 * 1024,
               "/api/references/delete": MAX_BODY,
@@ -1386,6 +1388,27 @@ def review(path, items, table):
     return {"ok": True, "saved": count, "data": sync_page.write_gamedesign(ROOT)}
 
 
+def user_idea(data):
+    """The buttons Thêm ý / Sửa / Xoá of a node's panel: the human's own idea, written into the proposed node as it
+    is, labelled Người (gamedesign.user_idea). No PIN, like the scores."""
+    try:
+        iid = gamedesign.user_idea(ROOT, data.get("path"), data.get("action"), data.get("id"),
+                                   data.get("title") or "", data.get("detail") or "")
+    except (ValueError, OSError, TypeError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, "id": iid, "data": sync_page.write_gamedesign(ROOT)}
+
+
+def human_delete(data):
+    """The floating Save of the Game design tab: the ideas and nodes the human marked for deletion, in one go
+    (gamedesign.human_delete). No PIN, like the scores."""
+    try:
+        done = gamedesign.human_delete(ROOT, data.get("ideas") or [], data.get("nodes") or [])
+    except (ValueError, OSError, TypeError) as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": True, **done, "data": sync_page.write_gamedesign(ROOT)}
+
+
 def reference_call(action, data):
     """The tab Tham chiếu: upload a picture (base64), change its note, kind and tags, or delete it. No PIN, like the
     scores: the human's own notes."""
@@ -2128,6 +2151,10 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, promote(data.get("path"), data.get("deep") is True))
             if self.path == "/api/gamedesign/review":
                 return self.send_json(200, review(data.get("path"), data.get("items"), data.get("table")))
+            if self.path == "/api/gamedesign/user-idea":
+                return self.send_json(200, user_idea(data))
+            if self.path == "/api/gamedesign/delete":
+                return self.send_json(200, human_delete(data))
             if self.path.startswith("/api/inbox/"):
                 return self.send_json(200, inbox_call(self.path.rsplit("/", 1)[1], data))
             if self.path.startswith("/api/references/"):

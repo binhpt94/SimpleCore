@@ -144,7 +144,7 @@ def lines_for(root, node, out, brief=False, hidden=None):
     titles = {x["id"]: x["title"] for x in node["items"]}
     for it in node["items"]:
         user = "chưa chấm" if it["user"] is None else str(it["user"])
-        out.append(f"- Ý {it['id']}{gd.by_label(it)}: AI {it['ai']}, người {user}" + (f", phản hồi: {it['feedback']}" if it["feedback"] else "")
+        out.append(f"- Ý {it['id']}{gd.by_label(it)}{(' ' + gd.USER_IDEA_TAG) if it.get('by') == gd.BY_USER else ''}: AI {it['ai']}, người {user}" + (f", phản hồi: {it['feedback']}" if it["feedback"] else "")
                    + ("" if it["titled"] else " | THIẾU TIÊU ĐỀ: viết lại dòng thành '### id | AI n | tiêu đề ngắn'")
                    + (" | TRÁI NHAU với " + ", ".join(f"{c} ({titles.get(c, '?')})" for c in it["clash"])
                       + ": các ý này không cùng đúng (chọn 1), chờ chấm rồi loại một bên" if it.get("clash") else "")
@@ -168,6 +168,11 @@ def lines_for(root, node, out, brief=False, hidden=None):
             text = " ".join(str(e.get("text", "")).split())
             out.append(f"    [{e.get('at', '')}] {e.get('item', '')} (điểm {e.get('score')}): {text[:160]}"
                        + (f" | phản hồi: {e.get('feedback')}" if e.get("feedback") else ""))
+    deleted = gd.human_deleted(folder)
+    if deleted:
+        out.append("- Người đã xoá ở node này (trung tính: không viết lại, không đưa lại):")
+        for e in deleted:
+            out.append(f"    [{e.get('at', '')}] {e.get('item', '')}: {' '.join(str(e.get('text', '')).split())[:160]}")
     for child in node["children"]:
         lines_for(root, child, out, brief, hidden)
 

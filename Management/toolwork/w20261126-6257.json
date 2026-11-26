@@ -1,0 +1,10 @@
+{
+ "id": "w20261126-6257",
+ "text": "Xoá Management/game-design/live/feature-button-test, nhánh đã bị GameDesigner xoá khỏi ai/idea bằng gd_delete.py. Nút Sync không xoá được vì sync_live chỉ chép node đạt, giữ nguyên thư mục con live không còn trong idea. Nên thêm cho Sync hoặc trang một cách chốt việc xoá node, xong thì live không còn feature-button-test và gd_status báo node đã xoá trong mục thay đổi so với live",
+ "source": "@Manager",
+ "decided": "Người quyết 2026-11-26: xoá tính năng ButtonTest",
+ "state": "open",
+ "note": "",
+ "created": 1795706327.3771336,
+ "closed": 0
+}

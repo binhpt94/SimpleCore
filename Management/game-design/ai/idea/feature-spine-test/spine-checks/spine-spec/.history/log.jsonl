@@ -8,3 +8,4 @@
 {"at": "2026-11-26 20:58:01", "event": "data", "hash": "ea97e940b9e6", "previous": "f078f5fd1b35", "added": ["match-time", "touch-lock", "dev-build", "flip-anchor", "mid-mix-switch", "narrow-fits", "perf-measure"], "removed": [{"id": "real-time", "text": "Animation chạy theo thời gian thực, tốc độ 1, không đọc nhịp trận\nGiữ đúng ý không đọc gì của feature khác. Popup mở thì nhân vật vẫn chạy dưới nền che."}], "rewritten": []}
 {"at": "2026-11-26 20:58:25", "event": "data", "hash": "41d348a9ece6", "previous": "ea97e940b9e6", "added": [], "removed": [], "rewritten": []}
 {"at": "2026-11-26 20:58:34", "event": "promote", "by": "người (Sync)", "hash": "41d348a9ece6"}
+{"at": "2026-11-26 22:57:19", "event": "promote", "by": "người (Sync)", "hash": "41d348a9ece6"}

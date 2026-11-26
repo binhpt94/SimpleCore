@@ -1,7 +1,8 @@
 ---
 based-on: 6181a7c21bf0
-by: doi-hinh-xuyen-luot=gpt@r2-1#doi-hinh-xuyen-luot, hero-roles=gpt@r2-1#khac-biet-khi-tu-danh, combat-arbiter=gpt@r2-3#tach-phan-xu-giao-chien, enemy-picks-target=gpt@r2-3#quai-tu-chon-muc-tieu, enemy-prefers-blocker=gpt@r2-3#quai-uu-tien-hero-chan, castle-picks-target=gpt@r2-3#thanh-tu-chon-muc-tieu, attacker-picks-hits=gpt@r2-3#nguon-xac-dinh-ben-trung, attacker-sets-damage=gpt@r2-3#nguon-xac-dinh-sat-thuong, same-tick-snapshot=gpt@r2-3#cung-nhip-cung-co-hieu-luc, same-tick-sum=gpt@r2-3#cong-sat-thuong-cung-nhip, owner-applies-hp=gpt@r2-3#ben-trung-tu-tru-mau, owner-reports-zero=gpt@r2-3#chu-so-huu-xac-nhan-het-mau, report-after-hp=gpt@r2-3#bao-ket-qua-sau-khi-tru-mau, shared-target-word=gpt@r2-3#muc-tieu-dung-chung
-gpt-dropped: r2-3#tinh-dot-cuoi-khi-thanh-vo=last-wave-counts
+by: doi-hinh-xuyen-luot=gpt@r2-1#doi-hinh-xuyen-luot, hero-roles=gpt@r2-1#khac-biet-khi-tu-danh, combat-arbiter=gpt@r2-3#tach-phan-xu-giao-chien, enemy-picks-target=gpt@r2-3#quai-tu-chon-muc-tieu, enemy-prefers-blocker=gpt@r2-3#quai-uu-tien-hero-chan, castle-picks-target=gpt@r2-3#thanh-tu-chon-muc-tieu, attacker-picks-hits=gpt@r2-3#nguon-xac-dinh-ben-trung, attacker-sets-damage=gpt@r2-3#nguon-xac-dinh-sat-thuong, same-tick-snapshot=gpt@r2-3#cung-nhip-cung-co-hieu-luc, same-tick-sum=gpt@r2-3#cong-sat-thuong-cung-nhip, owner-applies-hp=gpt@r2-3#ben-trung-tu-tru-mau, report-after-hp=gpt@r2-3#bao-ket-qua-sau-khi-tru-mau, shared-target-word=gpt@r2-3#muc-tieu-dung-chung
+gpt-dropped: r2-3#tinh-dot-cuoi-khi-thanh-vo=last-wave-counts, r2-3#chu-so-huu-xac-nhan-het-mau=owner-reports-zero
+user: user-1, user-2, user-3
 ---
 # Hero
 
@@ -55,11 +56,14 @@ Hero và thành cùng đánh một con quái thì quái nhận tổng một lầ
 
 ### owner-applies-hp | AI 7 | Máu hiện tại của hero, quái và thành chỉ do feature sở hữu bên đó cập nhật
 
-### owner-reports-zero | AI 7 | Feature sở hữu bên hết máu báo đúng một lần khi bên đó gục, bị hạ hoặc bị phá
-Hai đòn chí tử cùng nhịp chỉ tạo một lần báo.
-
 ### report-after-hp | AI 5 | Kết quả của một nhịp chỉ được báo sau khi mọi bên trúng đã trừ máu xong
 Chốt lượt hay đợt dựa trên trạng thái đã cập nhật đủ.
 
 ### shared-target-word | AI 6 | Mục tiêu là hero, quái hoặc thành mà đối phương đang nhắm để đánh
 Dùng chung một từ cho quái nhắm hero, thành và hero nhắm quái.
+
+### user-1 | AI 9 | Hero theo phong cách fantasy
+
+### user-2 | AI 9 | Hero có skill đặc trưng riêng
+
+### user-3 | AI 9 | Mỗi Hero có tầm đánh khác nhau, hồi chiêu khác nhau

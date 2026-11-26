@@ -18,6 +18,7 @@ Cần GPT cùng nghĩ về một node thì nhờ @DesignAdvisor qua hộp thư (
   - `thêm`: viết thành ý mới.
   - `thay <id ý>`: viết thành ý mới **đặt cạnh** ý bị thay; không xoá ý cũ, không tự chọn một bên. Hai ý hiện chữ cam "trái nhau" cho tới khi điểm loại một bên.
   - `làm rõ <id ý>`: viết lại chính ý đó theo lời GPT và gắn nhãn vào nó (`hero-count=gpt@q1#clear-count`), hoặc thêm thành ý riêng.
+- **Góp ý đụng ý của người** (`user-<n>`, skill `gd-node-format`): lệnh dặn GPT không `thay`, không `làm rõ` ý đó; nếu GPT vẫn làm thì viết góp ý thành ý mới đặt cạnh, không đụng ý của người, và hỏi người trong chat nếu hai ý trái nhau.
 - **Chỉ được tóm gọn cách trình bày**: tiêu đề và chi tiết của ý được rút gọn, đổi câu cho hợp cách viết của node; nghĩa của góp ý giữ nguyên. Nguyên văn GPT vẫn nằm trong file góp ý và trang hiện nó khi mở ý.
 - **Không được bỏ góp ý nào**, ở cả hai mode. Góp ý chưa thành ý là lỗi cấu trúc của node (`gd_status.py`: "GÓP Ý CHƯA VÀO NODE"); bạn thấy góp ý sai thì vẫn đưa vào, chấm điểm AI thấp và ghi lí do ở `CLAUDE.md`.
 - **Chấm điểm như mọi ý.** Full Auto: bạn chấm điểm AI thật cho ý của GPT, không dìm điểm để loại và không nâng điểm ý của mình để thắng. User control: người chấm; bạn không tự quyết bên nào thắng.

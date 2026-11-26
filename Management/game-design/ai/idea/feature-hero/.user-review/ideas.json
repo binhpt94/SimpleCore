@@ -1,0 +1,19 @@
+{
+ "items": {
+  "user-1": {
+   "hash": "808873efec91",
+   "at": "2026-11-26 23:00:47",
+   "deleted": false
+  },
+  "user-2": {
+   "hash": "8ab6fab3e621",
+   "at": "2026-11-26 23:10:39",
+   "deleted": false
+  },
+  "user-3": {
+   "hash": "e1e02dfa59ac",
+   "at": "2026-11-26 23:15:33",
+   "deleted": false
+  }
+ }
+}

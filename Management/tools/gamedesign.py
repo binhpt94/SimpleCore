@@ -179,8 +179,17 @@ def feature_group(key, data):
         return "infra"
     return "test" if key.endswith(TEST_SUFFIX) else ""
 ADVICE_TITLE = "Góp ý của GPT"
-BY_CLAUDE, BY_GPT = "claude", "gpt"
-BY_NAMES = {BY_CLAUDE: "Claude", BY_GPT: "GPT"}
+BY_CLAUDE, BY_GPT, BY_USER = "claude", "gpt", "user"
+BY_NAMES = {BY_CLAUDE: "Claude", BY_GPT: "GPT", BY_USER: "Người"}
+# The human's own ideas (người quyết 2026-11-26): added on the page (user_idea), listed in the head of data.md as
+# `user: <id>, ...` (not hashed, like by:), written as `### user-<n> | AI 9 | <title>`. Their text and id are the
+# human's: .user-review/ideas.json (only the page writes there) keeps each one's hash, and a node whose human idea
+# was changed, removed or labelled by someone else has a structure problem. Saved without a score of the human for
+# that text, it gets USER_IDEA_SCORE.
+USER_IDEAS_FILE = "ideas.json"
+USER_IDEA_PREFIX = "user-"
+USER_IDEA_SCORE = 9
+USER_IDEA_TAG = "[Ý User]"      # put before the title of a human idea wherever it is shown (page, gd_status, gd_pack)
 BY_WHO_RX = re.compile(rf"^gpt@({_SEG})$")
 BY_RX = re.compile(rf"^({_SEG})=gpt@({_SEG})#({_SEG})$")
 DROPPED_RX = re.compile(rf"^({_SEG})#({_SEG})=({_SEG})$")
@@ -466,6 +475,7 @@ def parse_data(text):
     data.md. sources: the points of GPT's advice the idea stands for [{advice, point}]; by: gpt when it has any,
     else claude (read_node turns a Claude idea that GPT only made clearer back into claude)."""
     errors, based_on, refs, screen, frame_mode, by, node_by, dropped, group = [], "", [], "", "", {}, None, [], ""
+    user_ids = []
     text = text.strip("\n")
     if text.startswith("---\n"):
         head, sep, rest = text[4:].partition("\n---")
@@ -498,6 +508,12 @@ def parse_data(text):
                             by.setdefault(m.group(1), []).append(source)
                         else:
                             errors.append(f"by: '{entry}' phải có dạng <id ý>=gpt@<id lần hỏi>#<id góp ý>, mỗi góp ý một lần")
+                elif key.strip() == "user":
+                    for entry in [e.strip() for e in value.split(",") if e.strip()]:
+                        if KEY_RX.match(entry) and entry not in user_ids:
+                            user_ids.append(entry)
+                        else:
+                            errors.append(f"user: '{entry}' phải là id ý (chữ thường, số, gạch nối), mỗi ý một lần")
                 elif key.strip() == "gpt-dropped":
                     for entry in [e.strip() for e in value.split(",") if e.strip()]:
                         m = DROPPED_RX.match(entry)
@@ -574,17 +590,23 @@ def parse_data(text):
         out.append({"id": it["id"], "title": head, "detail": detail, "titled": titled,
                     "text": head + ("\n" + body if body else "") if titled else body,
                     "ai": it["ai"], "hash": short_hash(*parts), "parts": parts,
-                    "by": BY_GPT if by.get(it["id"]) else BY_CLAUDE, "sources": by.get(it["id"], [])})
+                    "by": BY_USER if it["id"] in user_ids else BY_GPT if by.get(it["id"]) else BY_CLAUDE,
+                    "sources": [] if it["id"] in user_ids else by.get(it["id"], [])})
     for item_id in by:
         if item_id not in seen:
             errors.append(f"by: node không có ý '{item_id}'")
+        elif item_id in user_ids:
+            errors.append(f"ý '{item_id}' là ý của người (user:), không mang nhãn GPT ở by:")
+    for item_id in user_ids:
+        if item_id not in seen:
+            errors.append(f"user: node không có ý '{item_id}'")
     data_hash = short_hash(title, summary, *[p for it in out for p in it.pop("parts")])
     if screen and screen not in SCREENS:
         errors.append(f"screen: '{screen}' phải là " + " hoặc ".join(SCREENS))
     if frame_mode and frame_mode != FRAME_NONE:
         errors.append(f"frame: chỉ nhận '{FRAME_NONE}' (node không có bố cục)")
     return {"based_on": based_on, "refs": refs, "screen": screen, "frameMode": frame_mode, "group": group, "title": title,
-            "nodeBy": node_by, "dropped": dropped, "summary": summary, "items": out, "hash": data_hash, "errors": errors}
+            "nodeBy": node_by, "dropped": dropped, "user": user_ids, "summary": summary, "items": out, "hash": data_hash, "errors": errors}
 
 
 def frame_files(folder):
@@ -896,6 +918,25 @@ def read_code(folder, where, depth, problems):
     return names
 
 
+EMPTIED_ROUND = 3      # a round-3 node whose round-4 nodes were all removed (người quyết 2026-11-26)
+
+
+def node_children(folder):
+    return [c for c in Path(folder).iterdir() if c.is_dir() and not c.name.startswith(".") and (c / DATA_FILE).is_file()] \
+        if Path(folder).is_dir() else []
+
+
+def emptied(folder):
+    """True for a node that had children and has none left: its log has a removal and no child is there."""
+    return not node_children(folder) and any(e.get("event") == "removed" for e in read_history(Path(folder)))
+
+
+def emptied_below(root, key):
+    """The proposed round-3 nodes of feature `key` that were emptied by a removal (paths)."""
+    top = table_dir(root, "idea") / key
+    return [f"{key}/{c.name}" for c in node_children(top) if c.name != CHEAT_KEY and emptied(c)]
+
+
 def code_allowed(root, feature):
     """(ok, reason): may the Unity feature folder `feature` be coded? Only when a round-2 node of the LIVE table
     names it in code.json and that node's branch has a round-4 node. Read straight from the files."""
@@ -916,6 +957,10 @@ def code_allowed(root, feature):
     if deepest < len(ROUNDS):
         return False, (f"thiết kế của '{feature}' ({', '.join(n.name for n in owners)}) mới được chốt tới vòng {deepest}; "
                        f"phải có quyết định chi tiết (vòng {len(ROUNDS)}) trong live mới được code")
+    empty = [p for node in owners for p in emptied_below(root, node.name)]
+    if empty:
+        return False, (f"node vòng {EMPTIED_ROUND} trống sau khi xoá: {', '.join(empty)} (lỗi thiết kế). @GameDesigner viết "
+                       "node vòng 4 mới, hoặc người xoá luôn node đó")
     return True, ""
 
 
@@ -1863,6 +1908,11 @@ def read_history(folder):
     return out
 
 
+def human_deleted(folder):
+    """The ideas the human deleted at this node (neutral: neither good nor bad): [{at, item, text, by}], oldest first."""
+    return [e for e in read_history(folder) if e.get("event") == "human-delete"]
+
+
 def rejected(folder):
     """What the human turned down at this node: [{at, item, text, score, feedback}], oldest first."""
     return [e for e in read_history(folder) if e.get("event") == "review" and e.get("rejected")]
@@ -2307,6 +2357,8 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     table = folder.parents[len(path.split("/")) - 1] if path else folder
     advice = advice_folder(table, path)
     gpt = mark_sources(folder, table, path, data, items, mode, problems, where)
+    if Path(table).name != TABLES["live"][-1]:
+        check_user_ideas(folder, data, problems, where)
     named = (data.get("nodeBy") or {}).get("advice", "")
     above = advice_folder(table, path.rpartition("/")[0]) if path else advice      # asked about the node above, or this one
     general = advice.parent / ADVICE_GENERAL      # the question put to all features of a round
@@ -2379,6 +2431,10 @@ def read_node(folder, path, depth, problems, mode=DEFAULT_MODE, parent_hash=None
     elif depth == FRAME_ROUND and frames and not cheat:
         frame_notes.append(f"chưa có {UI_FILE}: @GameDesigner liệt kê phần tử UI, tương tác và flow; bố cục (frame) là "
                            "việc của @UIDesigner")
+    if depth == EMPTIED_ROUND and not cheat and emptied(folder):
+        problems.append({"path": where, "text": f"NODE VÒNG {EMPTIED_ROUND} TRỐNG SAU KHI XOÁ: mọi node vòng {len(ROUNDS)} của "
+                                                "nó đã bị xoá. @GameDesigner viết node vòng 4 mới, hoặc người xoá luôn node "
+                                                "này; tới lúc đó feature không được code"})
     styles, style_errors = read_styles(folder)
     if path and (folder / STYLE_DIR).is_dir():
         problems.append({"path": where, "text": f"{STYLE_DIR} chỉ đặt ở node gốc (style là quyết định của vòng 1)"})
@@ -2543,7 +2599,7 @@ def mark_sources(folder, table, path, data, items, mode, problems, where):
                 for a, b in ((it, other), (other, it)):
                     if b["id"] not in a["clash"]:
                         a["clash"].append(b["id"])
-    turned_down = {e.get("item") for e in rejected(folder)} if proposed else set()
+    turned_down = {e.get("item") for e in rejected(folder) + human_deleted(folder)} if proposed else set()
     dropped = []
     for d in data.get("dropped") or []:
         key = (d["advice"], d["point"])
@@ -2571,9 +2627,224 @@ def mark_sources(folder, table, path, data, items, mode, problems, where):
     return {"clarified": sum(1 for it in items if it["clarified"]), "dropped": dropped, "missing": missing if proposed else []}
 
 
+def user_ideas(folder):
+    """{id: {hash, at, deleted}} of the human's ideas of an idea node (.user-review/ideas.json)."""
+    return {k: v for k, v in read_dict(Path(folder) / REVIEW_DIR / USER_IDEAS_FILE, "items").items() if isinstance(v, dict)}
+
+
+def check_user_ideas(folder, data, problems, where):
+    """The human's ideas are the human's: each one the page saved is still in data.md with the same text, and
+    data.md labels no idea as the human's that the page did not save."""
+    saved = user_ideas(folder)
+    have = {it["id"]: it for it in data["items"]}
+    for iid, rec in saved.items():
+        if rec.get("deleted"):
+            continue
+        it = have.get(iid)
+        if it is None or iid not in data.get("user", []):
+            problems.append({"path": where, "text": f"Ý CỦA NGƯỜI BỊ XOÁ: '{iid}' không còn là ý của người trong {DATA_FILE}. "
+                                                    "Chỉ người sửa hay xoá ý của mình (trên trang); đưa ý đó trở lại đúng như "
+                                                    "cũ (bản trong .history) và vào dòng user:"})
+        elif it["hash"] != rec.get("hash"):
+            problems.append({"path": where, "text": f"Ý CỦA NGƯỜI BỊ ĐỔI: '{iid}' khác bản người đã lưu. Chỉ người sửa ý của "
+                                                    "mình; trả lại đúng tiêu đề và chi tiết cũ (bản trong .history)"})
+    for iid in data.get("user", []):
+        if iid not in saved or saved[iid].get("deleted"):
+            problems.append({"path": where, "text": f"TỰ GẮN NHÃN NGƯỜI: '{iid}' ở dòng user: mà người chưa lưu ý đó trên "
+                                                    "trang. Bỏ nó khỏi dòng user:"})
+
+
+def _user_block(item_id, title, detail):
+    return [f"### {item_id} | AI {USER_IDEA_SCORE} | {title}"] + ([detail] if detail else []) + [""]
+
+
+def user_idea(root, path, action, item_id=None, title="", detail=""):
+    """The human adds, edits or removes one of their own ideas of an idea node, from the page. Writes data.md (the
+    idea's block and the head's user: line), .user-review/ideas.json (its hash) and, when the human has no score
+    for that text yet, the score USER_IDEA_SCORE. Returns the idea's id."""
+    parts = check_path(path)
+    folder = table_dir(root, "idea").joinpath(*parts)
+    file = folder / DATA_FILE
+    if not file.is_file():
+        raise ValueError(f"bảng đề xuất không có node '{path or '(gốc)'}'")
+    if action not in ("add", "edit", "delete"):
+        raise ValueError("action phải là add, edit hoặc delete")
+    title = " ".join(str(title or "").split())
+    detail = tidy(str(detail or "").replace("\r", ""))
+    if action != "delete":
+        if not title:
+            raise ValueError("ý cần tiêu đề")
+        if "|" in title:
+            raise ValueError("tiêu đề không được có dấu |")
+        if len(title) > IDEA_TITLE_MAX or len(detail) > IDEA_DETAIL_MAX:
+            raise ValueError(f"tiêu đề tối đa {IDEA_TITLE_MAX} kí tự, chi tiết tối đa {IDEA_DETAIL_MAX}: dài hơn thì là hai ý")
+        if any(line.startswith("#") or line.strip() == "---" for line in detail.split("\n")):
+            raise ValueError("chi tiết không được có dòng bắt đầu bằng # hay dòng ---")
+    text = read_text(file)
+    data = parse_data(text)
+    if data["errors"]:
+        raise ValueError(f"{DATA_FILE} của node đang có lỗi, sửa trước: " + "; ".join(data["errors"][:3]))
+    saved = user_ideas(folder)
+    ids = [it["id"] for it in data["items"]]
+    if action == "add":
+        used = [int(k[len(USER_IDEA_PREFIX):]) for k in list(saved) + ids
+                if k.startswith(USER_IDEA_PREFIX) and k[len(USER_IDEA_PREFIX):].isdigit()]
+        item_id = f"{USER_IDEA_PREFIX}{1 + max(used or [0])}"
+    elif item_id not in data.get("user", []) or item_id not in ids:
+        raise ValueError(f"'{item_id}' không phải ý của người ở node này: chỉ sửa, xoá được ý của người")
+    if text.startswith("---\n") and "\n---" in text[4:]:
+        head, _, body = text[4:].partition("\n---")
+        head_lines = head.split("\n")
+    else:
+        head_lines, body = [], "\n" + text
+    lines = body.split("\n")
+    if action == "add":
+        if not any(l.strip().lower() == f"## {ITEMS_TITLE}".lower() for l in lines):
+            while lines and not lines[-1].strip():
+                lines.pop()
+            lines += ["", f"## {ITEMS_TITLE}"]
+        while lines and not lines[-1].strip():
+            lines.pop()
+        lines += [""] + _user_block(item_id, title, detail)
+    else:
+        start = next(i for i, l in enumerate(lines) if (m := ITEM_RX.match(l)) and m.group(1) == item_id)
+        end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("#")), len(lines))
+        lines[start:end] = [] if action == "delete" else _user_block(item_id, title, detail)
+        while lines and not lines[-1].strip():
+            lines.pop()
+        lines.append("")
+    users = [u for u in data.get("user", []) if u != item_id] + ([item_id] if action != "delete" else [])
+    head_lines = [l for l in head_lines if l.partition(":")[0].strip() != "user"] + (["user: " + ", ".join(users)] if users else [])
+    head_lines = [l for l in head_lines if l.strip()]
+    new_text = ("---\n" + "\n".join(head_lines) + "\n---" if head_lines else "") + "\n".join(lines)
+    if not head_lines:
+        new_text = new_text.lstrip("\n")
+    check = parse_data(new_text)
+    if check["errors"]:
+        raise ValueError("không ghi được: " + "; ".join(check["errors"][:3]))
+    file.write_text(new_text, encoding="utf-8")
+    it = next((x for x in check["items"] if x["id"] == item_id), None)
+    saved[item_id] = {"hash": it["hash"] if it else saved.get(item_id, {}).get("hash", ""), "at": now(),
+                      "deleted": action == "delete"}
+    write_json(folder / REVIEW_DIR / USER_IDEAS_FILE, {"items": saved})
+    log(folder, "user-idea", action=action, item=item_id, text=it["text"] if it else "")
+    if it and it["hash"] not in review_versions(read_dict(folder / REVIEW_DIR / REVIEW_FILE, "items"), item_id):
+        save_review(root, path, {item_id: {"score": USER_IDEA_SCORE, "feedback": ""}})
+    return item_id
+
+
+def _drop_idea_text(text, item_id, sources, user):
+    """data.md without the idea `item_id`: its block, its id in user: and by:, and (GPT's) a gpt-dropped entry for
+    each point it stood for."""
+    if text.startswith("---\n") and "\n---" in text[4:]:
+        head, _, body = text[4:].partition("\n---")
+        head_lines = head.split("\n")
+    else:
+        head_lines, body = [], "\n" + text
+    lines = body.split("\n")
+    start = next(i for i, l in enumerate(lines) if (m := ITEM_RX.match(l)) and m.group(1) == item_id)
+    end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("#")), len(lines))
+    del lines[start:end]
+    while lines and not lines[-1].strip():
+        lines.pop()
+    lines.append("")
+    out, drops = [], [f"{x['advice']}#{x['point']}={item_id}" for x in sources]
+    for line in head_lines:
+        key, _, value = line.partition(":")
+        k = key.strip()
+        if k in ("user", "by"):
+            keep = [e.strip() for e in value.split(",") if e.strip() and
+                    (e.strip() != item_id if k == "user" else e.strip().partition("=")[0] != item_id)]
+            if keep:
+                out.append(f"{k}: " + ", ".join(keep))
+        elif k == "gpt-dropped":
+            old = [e.strip() for e in value.split(",") if e.strip()]
+            out.append("gpt-dropped: " + ", ".join(old + [d for d in drops if d not in old]))
+            drops = []
+        else:
+            out.append(line)
+    if drops:
+        out.append("gpt-dropped: " + ", ".join(drops))
+    out = [l for l in out if l.strip()]
+    return ("---\n" + "\n".join(out) + "\n---" if out else "") + "\n".join(lines) if out else "\n".join(lines).lstrip("\n")
+
+
+def human_delete(root, ideas=(), nodes=()):
+    """The human deletes ideas and nodes of the proposed table, from the page (one Save). Neutral: a deleted idea is
+    not a turned-down one. Everything is checked before anything is written. ideas: [{path, id}]; nodes: [path].
+    A node goes with its whole branch (its history moves to the parent, as gd_delete does); live loses it when its
+    parent is next promoted. Returns {"ideas": n, "nodes": n}."""
+    import gd_delete      # noqa: E402 (it imports this module)
+    idea_root = table_dir(root, "idea")
+    if not isinstance(ideas, (list, tuple)) or not isinstance(nodes, (list, tuple)):
+        raise ValueError("ideas và nodes phải là danh sách")
+    node_paths = []
+    for path in nodes:
+        parts = check_path(path)
+        if not parts:
+            raise ValueError("không xoá được node gốc")
+        if not (idea_root.joinpath(*parts) / DATA_FILE).is_file():
+            raise ValueError(f"bảng đề xuất không có node '{path}'")
+        node_paths.append("/".join(parts))
+    node_paths = sorted(set(node_paths))
+    top = [p for p in node_paths if not any(p.startswith(q + "/") for q in node_paths if q != p)]
+    plan = {}      # path -> [item ids]
+    for entry in ideas:
+        if not isinstance(entry, dict):
+            raise ValueError("mỗi ý cần {path, id}")
+        parts = check_path(entry.get("path") or "")
+        path = "/".join(parts)
+        if any(path == q or path.startswith(q + "/") for q in top):
+            continue      # its node goes anyway
+        plan.setdefault(path, [])
+        if entry.get("id") not in plan[path]:
+            plan[path].append(entry.get("id"))
+    writes = []
+    for path, ids in plan.items():
+        folder = idea_root.joinpath(*(path.split("/") if path else []))
+        if not (folder / DATA_FILE).is_file():
+            raise ValueError(f"bảng đề xuất không có node '{path or '(gốc)'}'")
+        text = read_text(folder / DATA_FILE)
+        data = parse_data(text)
+        if data["errors"]:
+            raise ValueError(f"{DATA_FILE} của '{path or '(gốc)'}' đang có lỗi, chưa xoá ý được: " + "; ".join(data["errors"][:2]))
+        known = {it["id"]: it for it in data["items"]}
+        gone = []
+        for iid in ids:
+            it = known.get(iid)
+            if it is None:
+                raise ValueError(f"node '{path or '(gốc)'}' không có ý '{iid}'")
+            text = _drop_idea_text(text, iid, it["sources"], data["user"])
+            gone.append(it)
+        if parse_data(text)["errors"]:
+            raise ValueError(f"không ghi được '{path or '(gốc)'}': " + "; ".join(parse_data(text)["errors"][:2]))
+        writes.append((path, folder, text, gone))
+    for path, folder, text, gone in writes:
+        (folder / DATA_FILE).write_text(text, encoding="utf-8")
+        saved = user_ideas(folder)
+        for it in gone:
+            if it["id"] in saved:
+                saved[it["id"]].update(deleted=True, at=now())
+            log(folder, "human-delete", item=it["id"], text=it["text"], by=it["by"])
+        if any(it["id"] in saved for it in gone):
+            write_json(folder / REVIEW_DIR / USER_IDEAS_FILE, {"items": saved})
+    for path in top:
+        target = idea_root.joinpath(*path.split("/"))
+        gd_delete.keep_history(target, by="người")
+        shutil.rmtree(target)
+    return {"ideas": sum(len(g) for *_, g in writes), "nodes": len(top)}
+
+
+def shown_title(item):
+    """The title as shown to a reader: a human idea starts with USER_IDEA_TAG (not in data.md, not hashed)."""
+    return f"{USER_IDEA_TAG} {item['title']}" if item.get("by") == BY_USER else item["title"]
+
+
 def by_label(item):
     """' · GPT (góp ý q1#p)' for an idea that is GPT's, ' · GPT làm rõ (...)' for one of Claude's that GPT made
     clearer; '' for one of Claude's own."""
+    if item.get("by") == BY_USER:
+        return " · Người"
     sources = [f"{s['advice']}#{s['point']}" for s in item.get("sources", [])]
     if not sources:
         return ""
@@ -2950,6 +3221,11 @@ def promote(root, path, deep, by="người"):
     finally:
         for leftover in (tmp, old):
             shutil.rmtree(leftover, ignore_errors=True)
+    if not deep:      # a child the proposal deleted goes from live too (người quyết 2026-11-26)
+        for child in node_children(dst):
+            if not (src / child.name / DATA_FILE).is_file():
+                patiently(shutil.rmtree, child)
+                log(src, "live-removed", key=child.name, by=by)
     for n in walk(node):
         log(table_dir(root, "idea").joinpath(*(n["path"].split("/") if n["path"] else [])), "promote", by=by, hash=n["dataHash"])
     return [n["path"] or "(gốc)" for n in walk(node)]
