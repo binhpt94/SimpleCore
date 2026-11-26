@@ -1,0 +1,9 @@
+{
+ "hash": "5e1b412965c3",
+ "items": {
+  "pressed-12": {
+   "hash": "892a4c153633",
+   "text": "Màn trận có nút \"Thử\" và nhãn \"Đã bấm: 12\"\nÉp: N = 12 (hai chữ số, thấy được nhãn đã đổi sau nhiều lần bấm). Nút và nhãn đúng chỗ của frame ở `feature-button-test/test-button/button-spec`; HUD trận vẽ ở chỗ của `feature-hud/hud-layout/layout-spec` để thấy nút không che HUD. Không cần trận chạy phía sau. Bấm nút trong state này vẫn tăng N như thường."
+  }
+ }
+}

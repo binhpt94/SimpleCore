@@ -1,0 +1,20 @@
+kind: ui
+title: Nút "Thử" và dòng "Đã bấm: N" trên màn trận
+ui: f7e6ee6e7238
+ai: 7
+why: không chạm HUD: cả hai nằm trong dải chiến trường (y 140–900), góc trên bên trái, phần trời phía trên mặt đất nên không che hero hay quái
+why: đọc trái sang phải: nút "Thử" trước, số đếm ngay bên phải cách 24 để mắt thấy số đổi ngay chỗ vừa bấm
+why: nút cao tap 120 như nút HUD (use từ layout-spec), lề trái safe 40 thẳng hàng với nút tạm dừng phía trên; cách mép trên dải 24
+why: dòng số đếm cao 60 căn giữa theo chiều cao nút (lệch 30), giữ đơn giản vì feature chỉ để thử quy trình
+use tap = feature-hud/hud-layout/layout-spec#tap
+use safe = feature-hud/hud-layout/layout-spec#safe
+use top-h = feature-hud/hud-layout/layout-spec#top-h
+let test-y = 24              # khoảng từ mép trên dải chiến trường tới nút thử
+let test-w = 200             # rộng nút thử
+let count-x = 264            # safe 40 + test-w 200 + khe 24
+let count-y = 54             # test-y 24 + (tap 120 - count-h 60) / 2
+let count-w = 300            # rộng dòng số đếm, đủ cho "Đã bấm: 9999"
+let count-h = 60             # cao dòng số đếm
+- strip         rect   x=0 y=top-h w=1920 h=760 label="Dải chiến trường (HUD ở trên và dưới, không vẽ)"
+- test-button   button x=safe y=test-y w=test-w h=tap parent=strip label="Thử"
+- test-counter  label  x=count-x y=count-y w=count-w h=count-h parent=strip label="Đã bấm: 0"

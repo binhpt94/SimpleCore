@@ -1,0 +1,3 @@
+{"at": "2026-11-26 10:26:59", "event": "data", "hash": "ba65fd883f9b", "previous": "", "added": ["button-text", "counter-text", "tap-adds-one", "no-hud-overlap", "blocked-by-popup", "works-when-still"], "removed": [], "rewritten": []}
+{"at": "2026-11-26 10:28:50", "event": "data", "hash": "dcef7b15d85b", "previous": "ba65fd883f9b", "added": [], "removed": [], "rewritten": []}
+{"at": "2026-11-26 10:34:11", "event": "promote", "by": "người (Sync)", "hash": "dcef7b15d85b"}

@@ -24,5 +24,5 @@ Nhịp thả chạm sàn 0.3 s ở đợt 15 làm quái dồn nhanh hơn.
 ### normal-break | AI 7 | Người chơi bình thường (đội trộn, mua rải đều) gãy ở khoảng đợt 15–19, lượt dài khoảng 7–10.5 phút
 Đợt 20 (Trùm, P khoảng 2.9) gần như chắc gãy với cách chơi này.
 
-### skill-gap | AI 6 | Chơi vụng gãy ở khoảng đợt 10 (Trùm đầu tiên), chơi khéo kéo tới khoảng đợt 20–25
-Khác nhau ở: đội có hero hợp loại quái, Sấm sét bắn lúc quái dồn đông, Băng giá dùng khi Trùm tới, không để tiền nằm yên.
+### skill-gap | AI 6 | Chơi khéo gãy muộn hơn chơi vụng ít nhất 4 đợt; vụng gãy khoảng đợt 10–12, khéo khoảng đợt 16–19
+Khéo và vụng định nghĩa bằng cách mua và cách bấm kĩ năng (ghi trong CLAUDE.md) để tester mô phỏng được. Mục tiêu cũ "khéo tới 20–25" bị bỏ: công thức áp lực cho đợt 20 P ≈ 2.9 cả với cách chơi thường.

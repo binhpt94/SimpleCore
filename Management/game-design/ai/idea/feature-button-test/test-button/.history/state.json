@@ -1,0 +1,21 @@
+{
+ "hash": "e1ced593e091",
+ "items": {
+  "one-button": {
+   "hash": "b15b725c00bf",
+   "text": "Có đúng một nút thử\nMột nút là đủ để thử trọn quy trình. Đã loại: nhiều nút, mỗi nút một kiểu phản hồi."
+  },
+  "counter-feedback": {
+   "hash": "f57ca66a5d92",
+   "text": "Phản hồi là số lần bấm hiện cạnh nút, mỗi lần chạm tăng một\nSố đếm kiểm được bằng mắt và bằng test: chạm N lần thì thấy N. Đã loại: chỉ nháy nút (khó chụp ảnh để kiểm, không đếm được)."
+  },
+  "counter-per-screen": {
+   "hash": "d1d5929fa778",
+   "text": "Số đếm về 0 mỗi lần màn trận mở, không lưu lại\nKhông lưu gì thì feature không phải đụng tới dữ liệu lưu của game."
+  },
+  "shown-with-battle": {
+   "hash": "7e4dc12cd784",
+   "text": "Nút và số đếm hiện khi màn trận hiện, ẩn theo màn trận"
+  }
+ }
+}
