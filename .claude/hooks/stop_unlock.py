@@ -15,14 +15,17 @@ import guard  # noqa: E402
 
 def release_ticket(session, store, root=None):
     """The end of a turn gives back the Editor ticket (editor_ticket.py) this chat holds, once it used it (a chat
-    granted in the middle of another turn keeps it for the turn the server's message opens)."""
+    granted in the middle of another turn keeps it for the turn the server's message opens). A job's ticket (a play
+    turn) is left to worker.end_play_ticket, which empties it first: released here, with its task still on it, it
+    would be queued again and the same play test would run without end."""
     try:
         who = guard.session_feature(session, store).strip().replace("\\", "/")
         if not who:
             return False
         root = root or os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
         mod = guard.ticket_module()
-        mine = [t for t in mod.holder(root) if t.get("session") == who and t.get("grant") in ("own", "fix") and t.get("used")]
+        mine = [t for t in mod.holder(root) if t.get("session") == who and t.get("grant") in ("own", "fix") and t.get("used")
+                and not t.get("job")]
         if mine:
             mod.release(root, who)
             return True

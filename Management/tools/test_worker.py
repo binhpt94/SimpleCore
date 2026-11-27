@@ -10,6 +10,7 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / ".claude" / "hooks"))
 import worker as w      # noqa: E402
 import editor_ticket as et      # noqa: E402
 
@@ -209,6 +210,22 @@ def main():
         check("play: after the turn the Editor is free and nothing is queued again (no second play turn)",
               (len(out["released"]), out["requeued"], [x for x in et.queue(root) if x.get("job") == jp["id"]], et.holder(root)),
               (1, [], [], []))
+        # the real order of a turn: the Stop hook runs inside claude, before worker.py ends the play ticket
+        import stop_unlock
+        jq2 = w.queue_play(root, "chơi thử đợt 2", source="@CodeLead", now=8)
+        held = et.grant_next(root, now=9)[1][0]
+        held["used"] = True
+        et.save(root, held)
+        real_who, stop_unlock.guard.session_feature = stop_unlock.guard.session_feature, lambda s, store: w.PLAY_ROLE
+        try:
+            early = stop_unlock.release_ticket("play-session", str(tmp), root=str(root))
+        finally:
+            stop_unlock.guard.session_feature = real_who
+        w.end_play_ticket(root, jq2["id"])
+        check("play: the Stop hook leaves a job's ticket to worker.py, so the play is not queued again",
+              (early, [x for x in et.queue(root) if x.get("job") == jq2["id"]], et.holder(root)), (False, [], []))
+        w.drop(root, jq2["id"])
+        shutil.rmtree(w.jobs_dir(root) / jq2["id"], ignore_errors=True)
         check("status: a line per job", len(w.status_lines(root)), 5)
         check("main: a wrong command is refused", w.main(["worker.py", "nope"]), 2)
         check("main: a bad job id is refused", w.main(["worker.py", "status", "../x"]), 2)
