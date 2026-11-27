@@ -1,0 +1,10 @@
+{
+ "id": "w20261127-830e",
+ "text": "Kiểm khoá Editor khi nạp code worker: tester báo worker w20261127-184720-castle nạp file vào Assets lúc đợt chơi thử đang Play và giữ khoá Editor, làm trận đứng, chưa kiểm lại nguyên nhân. Sửa ở worker.py hoặc server: khi phiên khác đang giữ phiếu Editor thì chưa nạp, chờ tới lượt. Xong thì không có lượt nạp nào xảy ra giữa một đợt chơi thử. Làm cùng: khi nạp xoá file mà thư mục cũ thành rỗng thì xoá cả thư mục và meta của nó, lần đổi id art Castle để lại ba thư mục rỗng Body, Shot, Thunder gây 1 error và 3 warning trên console",
+ "source": "@Manager",
+ "decided": "Người chọn Ghi việc sửa ngày 2026-11-27 trong chat Manager",
+ "state": "done",
+ "note": "worker.py apply: trước khi ghi file chờ Editor trống (phiếu đang cấp, khoá Editor của guard, người dùng Editor), tối đa 45 phút rồi dừng ở trạng thái apply-waiting (server báo CodeLead, chạy lại bằng worker.py apply). Xoá file thì xoá cả thư mục cha thành rỗng và .meta của nó tới Assets. Thêm 3 test, test_worker 40 ok, test_setup_server 305 ok. Đã xoá ba thư mục rỗng Body, Shot, Thunder của Castle. Server cần khởi động lại",
+ "created": 1795780655.1446116,
+ "closed": 1795780863.66924
+}

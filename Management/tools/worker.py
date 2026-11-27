@@ -392,8 +392,69 @@ def plan_apply(root, job):
     return writes, conflicts, merged
 
 
-def apply(root, job, now=None):
-    """Takes the worker's Assets files into the main project, all or nothing. Returns (ok, lines)."""
+# No file goes into Assets while another turn uses the Editor (người quyết 2026-11-27): Unity reloads the code at
+# once, and a play test in progress stops. The apply waits for the Editor to be free, then plans on what is there.
+APPLY_WAIT_SECONDS = 45 * 60
+APPLY_POLL_SECONDS = 15
+SLEEP = time.sleep
+
+
+def editor_busy(root):
+    """Who uses the shared Editor now (a granted ticket, the guard's lock, the human), or None."""
+    import editor_ticket
+    import guard
+    held = editor_ticket.holder(root)
+    if held:
+        return "phiếu " + ", ".join(f"{t['id']} ({t['session']})" for t in held)
+    lock = guard.read_lock(guard.STORE_DIR)
+    if lock:
+        return f"khoá Editor của {lock.get('who') or lock.get('session')}"
+    if guard.human_editor(guard.STORE_DIR):
+        return "người đang dùng Editor"
+    return None
+
+
+def wait_editor(root, job, seconds=None):
+    """Waits until nobody uses the Editor. Returns None when free, else who still holds it after `seconds`."""
+    deadline = time.time() + (APPLY_WAIT_SECONDS if seconds is None else seconds)
+    who, said = editor_busy(root), False
+    while who:
+        if not said:
+            log(root, job, f"chờ Editor trống rồi mới nạp: {who}")
+            said = True
+        if time.time() >= deadline:
+            return who
+        SLEEP(APPLY_POLL_SECONDS)
+        who = editor_busy(root)
+    return None
+
+
+def empty_folders(root, deleted):
+    """The folders under Assets that the deletions left empty (deepest first, up to Assets), each with its .meta."""
+    assets = Path(root, APPLY_ZONE).resolve()
+    out = []
+    for folder in sorted({Path(root, p).parent for p in deleted}, key=lambda f: -len(f.parts)):
+        while folder.resolve() != assets and assets in folder.resolve().parents and folder.is_dir() \
+                and not any(folder.iterdir()):
+            folder.rmdir()
+            meta = folder.with_name(folder.name + ".meta")
+            rel = folder.relative_to(root).as_posix()
+            if meta.is_file():
+                meta.unlink()
+                rel += " (và .meta)"
+            out.append(rel)
+            folder = folder.parent
+    return out
+
+
+def apply(root, job, now=None, wait=None):
+    """Takes the worker's Assets files into the main project, all or nothing, once the Editor is free. Returns (ok, lines)."""
+    busy = wait_editor(root, job, wait)
+    if busy:
+        job["state"] = "apply-waiting"
+        save(root, job)
+        return False, [f"CHƯA NẠP: Editor vẫn bận sau {round((APPLY_WAIT_SECONDS if wait is None else wait) / 60)} phút ({busy}). "
+                       f"Editor trống thì chạy worker.py apply {job['id']}."]
     writes, conflicts, merged = plan_apply(root, job)
     if conflicts:
         job["state"] = "drift"
@@ -411,8 +472,9 @@ def apply(root, job, now=None):
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(data)
     stamp = now or time.time()
+    gone = empty_folders(root, [p for p, d in writes if d is None])
     entry = {"at": stamp, "written": [p for p, d in writes if d is not None], "deleted": [p for p, d in writes if d is None],
-             "merged": merged}
+             "merged": merged, **({"folders": gone} if gone else {})}
     applied = job_dir(root, job["id"]) / "applied.json"
     history = json.loads(applied.read_text(encoding="utf-8")) if applied.is_file() else []
     applied.write_text(json.dumps(history + [entry], ensure_ascii=False, indent=1), encoding="utf-8")
@@ -421,7 +483,8 @@ def apply(root, job, now=None):
     job.setdefault("applied", []).append({"at": stamp, "files": len(writes)})
     job["applied_files"] = sorted(set(job.get("applied_files") or []) | {p for p, _ in writes})
     save(root, job)
-    return True, [f"Đã nạp {len(entry['written'])} file, xoá {len(entry['deleted'])}" + (f", trộn {len(merged)}" if merged else "")]
+    return True, [f"Đã nạp {len(entry['written'])} file, xoá {len(entry['deleted'])}" + (f", trộn {len(merged)}" if merged else "")
+                  + (f", xoá {len(gone)} thư mục rỗng" if gone else "")]
 
 
 # ---------------------------------------------------------------- 5. after the apply: book and Editor

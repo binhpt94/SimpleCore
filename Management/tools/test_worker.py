@@ -37,6 +37,8 @@ def make_project(root):
     write(root, "UnityProject/Assets/Features/Wave/Scripts/Contracts/IWave.cs", "interface IWave {}\n")
     write(root, "UnityProject/Assets/Features/Old/Gone.cs", "old\n")
     write(root, "UnityProject/Assets/Features/Old/Gone.cs.meta", "guid: 1\n")
+    write(root, "UnityProject/Assets/Features/Old.meta", "guid: 2\n")
+    write(root, "UnityProject/Assets/Features.meta", "guid: 3\n")
     write(root, ".gitignore", "/Management/workers/\n")
     subprocess.run(["git", "init", "-q"], cwd=root, check=True)
     subprocess.run(["git", *w.GIT_ID, "add", "-A"], cwd=root, check=True)
@@ -66,8 +68,9 @@ def _refused(fn):
 def main():
     tmp = Path(tempfile.mkdtemp(prefix="worker-test-"))
     root, home = tmp / "main", tmp / "work"
-    real = (w.WORK_HOME, w.turn, w.run_gates, w.bind, w.open_requirements)
+    real = (w.WORK_HOME, w.turn, w.run_gates, w.bind, w.open_requirements, w.editor_busy, w.SLEEP)
     try:
+        w.editor_busy = lambda r: None      # never the real guard store of this machine
         root.mkdir()
         make_project(root)
         w.WORK_HOME = home
@@ -101,9 +104,24 @@ def main():
         check("gate: a broken result.json fails", w.check(root, job)[0], False)
         worker_edits(wt)
 
+        # 3a. the Editor in use (a play test): nothing is written until it is free
+        busy, slept = ["phiếu t1 (@UnityAutoPlay)", "phiếu t1 (@UnityAutoPlay)"], []
+        w.editor_busy = lambda r: busy.pop(0) if busy else None
+        w.SLEEP = lambda s: slept.append(
+            (root / "UnityProject/Assets/Features/Wave/Scripts/Contracts/IWave.cs").read_text(encoding="utf-8"))
+        before_wave = (root / "UnityProject/Assets/Features/Wave/Scripts/Contracts/IWave.cs").read_text(encoding="utf-8")
+        w.editor_busy = lambda r: "khoá Editor của @UnityAutoPlay"
+        ok, lines = w.apply(root, job, now=1, wait=0)
+        check("apply: the Editor still busy at the end of the wait: nothing written, the job waits",
+              (ok, job["state"], (root / "UnityProject/Assets/Features/Wave/Scripts/Contracts/IWave.cs").read_text(encoding="utf-8"),
+               "CHƯA NẠP" in lines[0]), (False, "apply-waiting", before_wave, True))
+        job["state"] = "running"
+        w.editor_busy = lambda r: busy.pop(0) if busy else None
         # 3. apply: the main copy still the base copy -> written; the human edited line 5 meanwhile -> merged
         write(root, "UnityProject/Assets/Features/Run/Scripts/Internal/Run.cs", "line1\nline2\nline3\nline4\nline5 human again\n")
         ok, lines = w.apply(root, job, now=1)
+        check("apply: it waited while a play test held the Editor and wrote nothing meanwhile", slept, [before_wave, before_wave])
+        w.editor_busy = lambda r: None
         run_cs = (root / "UnityProject/Assets/Features/Run/Scripts/Internal/Run.cs").read_text(encoding="utf-8")
         check("apply: a file the human changed meanwhile is merged three ways (both edits kept)",
               (ok, run_cs), (True, "line1 worker\nline2\nline3\nline4\nline5 human again\n"))
@@ -113,6 +131,9 @@ def main():
         check("apply: a deleted file takes its .meta along",
               ((root / "UnityProject/Assets/Features/Old/Gone.cs").exists(), (root / "UnityProject/Assets/Features/Old/Gone.cs.meta").exists()),
               (False, False))
+        check("apply: a folder the deletions left empty goes, with its .meta, up to Assets",
+              ((root / "UnityProject/Assets/Features/Old").exists(), (root / "UnityProject/Assets/Features/Old.meta").exists(),
+               (root / "UnityProject/Assets/Features").is_dir(), any("thư mục rỗng" in x for x in lines)), (False, False, True, True))
         check("apply: result.json is not written into the main project", (root / "result.json").exists(), False)
         check("apply: the worktree is the new base, nothing left to apply", w.changes(wt, job["base"]), {})
 
@@ -230,7 +251,7 @@ def main():
         check("main: a wrong command is refused", w.main(["worker.py", "nope"]), 2)
         check("main: a bad job id is refused", w.main(["worker.py", "status", "../x"]), 2)
     finally:
-        (w.WORK_HOME, w.turn, w.run_gates, w.bind, w.open_requirements) = real
+        (w.WORK_HOME, w.turn, w.run_gates, w.bind, w.open_requirements, w.editor_busy, w.SLEEP) = real
         subprocess.run(["git", "worktree", "prune"], cwd=root, capture_output=True)
         shutil.rmtree(tmp, ignore_errors=True)
     failed = RESULTS.count(False)

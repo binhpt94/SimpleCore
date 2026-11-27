@@ -2534,7 +2534,7 @@ def start_worker(job_id, kind="code", message=None):
     return ("start" if message is None else "resume", kind, job_id)
 
 
-STOP_STATES = ("checks-failed", "drift", "needs-codelead", "error", "interrupted")
+STOP_STATES = ("checks-failed", "drift", "needs-codelead", "error", "interrupted", "apply-waiting")
 
 
 def stopped(job_id):
@@ -2864,7 +2864,7 @@ def job_transcript(job):
 JOB_STATE_NAMES = {"queued": "xếp hàng", "starting": "đang dựng worktree", "running": "chạy", "waiting-editor": "chờ phiếu Editor",
                    "applied": "đã nạp", "applied-partial": "đã nạp, còn dở", "applied-blocked": "chờ người trả lời",
                    "checks-failed": "hỏng cổng kiểm", "drift": "lệch project chính", "needs-codelead": "cần CodeLead",
-                   "interrupted": "bị ngắt", "error": "lỗi", "played": "đã chơi thử", "play-failed": "chơi thử lỗi", "dropped": "đã gỡ"}
+                   "interrupted": "bị ngắt", "apply-waiting": "chờ Editor để nạp", "error": "lỗi", "played": "đã chơi thử", "play-failed": "chơi thử lỗi", "dropped": "đã gỡ"}
 
 
 def activity_view(now=None, with_done=False):
