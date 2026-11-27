@@ -98,8 +98,8 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / ".claude" / "hooks"))
 import bind_session  # noqa: E402
 import ask  # noqa: E402
-import draft as drafts  # noqa: E402
-import editor_ticket  # noqa: E402
+import editor_ticket
+import worker  # noqa: E402
 import reqbook  # noqa: E402
 import dispatch  # noqa: E402
 import gamedesign  # noqa: E402
@@ -111,8 +111,10 @@ import validate  # noqa: E402
 import vscode_groups  # noqa: E402
 from vscode_groups import vscode_state  # noqa: E402
 
-BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor",
-         "@UnityAutoPlay", "@Core"]
+# The threads of the setup (người quyết 2026-11-27): the Leaders and above, and the tools. Features, services, @Core
+# and the tester are workers (worker.py), started by the server for each job, never a thread.
+BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor"]
+WORKER_GROUPS = ("Testers", "Basic", "Services", "Features")      # an old thread of these groups is shown as archived
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Managers", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
                "@UIDesigner": "Leaders", "@Codex": "Tools", "@Blender": "Tools", "@ClaudeImage": "Tools", "@DesignAdvisor": "Tools",
                "@UnityAutoPlay": "Testers", "@Core": "Basic"}
@@ -282,7 +284,8 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
               "/api/sessions/delete": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY,
-              "/api/sessions/model": MAX_BODY, "/api/sessions/reset-models": MAX_BODY}
+              "/api/sessions/model": MAX_BODY, "/api/sessions/reset-models": MAX_BODY,
+              "/api/workers/run": 16 * 1024, "/api/workers/resume": 16 * 1024, "/api/workers/drop": MAX_BODY}
 TRASH = ".deleted"      # inside the transcripts folder: threads() reads only *.jsonl at its top
 # Threads that run a headless turn right now (renew, reread, compact, a thread setup is creating): not deleted.
 BUSY = set()
@@ -410,7 +413,7 @@ def threads(include_unnamed=False):
             sid = p.stem
             feature = feature_of(title) if named else ""
             out.append({"id": sid, "title": title, "named": named, "feature": feature, "group": group_of(feature) if named else "",
-                        "legacy": named and title in ROLE_GROUPS, "archived": sid in hidden,
+                        "legacy": named and title in ROLE_GROUPS, "archived": sid in hidden or group_of(feature_of(title) if named else "") in WORKER_GROUPS,
                         "unlisted": entries == {HEADLESS_ENTRY},
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
                         "binding": (binding := guard.bound_feature(sid, guard.STORE_DIR) or ""),
@@ -540,7 +543,7 @@ def sets():
     features = folders + [n for n, _, _ in designed if n not in folders]
     services = sorted((f for f in features if f.startswith("_Services/")), key=str.lower)
     others = sorted((f for f in features if not f.startswith("_Services/")), key=str.lower)
-    full = BASIC + services + others
+    full = list(BASIC)      # features and services are workers now: no thread of their own
     return {"basic": BASIC, "full": full, "groups": {n: group_of(n) for n in full}, "order": GROUP_ORDER,
             "missing": [n for n, _, _ in designed if n not in folders],
             "suggested": [n for n, _, declared in designed if not declared]}
@@ -714,24 +717,7 @@ S_MID = ("sonnet", "medium")
 ROLE_MODELS = {"@Manager": S_MID, "@CodeLead": MID, "@GameDesigner": MID, "@UIDesigner": MID,
                "@DesignAdvisor": LOW, "@Codex": S_MID, "@ClaudeImage": MID,
                "@Blender": LOW,      # chỉ làm art tạm, tiết kiệm (người quyết 2026-11-27)
-               "@UnityAutoPlay": S_MID, "@Core": MID}
-GROUP_MODELS = {"Services": LOW, "Features": S_MID}
-# A feature or service whose round-2 node says "core": true in its live code.json (the heart of the gameplay,
-# marked by @GameDesigner, chốt by the human: skill gd-round-2) runs on CORE_MODEL instead of its group's.
-CORE_MODEL = MID
-CORE_CACHE = {"at": 0.0, "value": frozenset()}
-CORE_SECONDS = 5
-
-
-def core_names():
-    """{folder} of the core features of the live design, re-read at most every CORE_SECONDS (threads() asks per row)."""
-    if time.time() - CORE_CACHE["at"] >= CORE_SECONDS:
-        try:
-            value = frozenset(gamedesign.live_core_names(ROOT))
-        except Exception:
-            value = CORE_CACHE["value"]
-        CORE_CACHE.update(at=time.time(), value=value)
-    return CORE_CACHE["value"]
+               "@UnityAutoPlay": S_MID}      # the tester's profile (server's runner, play jobs); no thread of its own
 PROFILE_DIR = ".profiles"      # in the transcripts folder: the generated settings and MCP files of each role
 PROFILES = True      # tests of the plain CLI lines turn it off
 
@@ -753,13 +739,9 @@ def role_model(feature, model, effort):
 
 
 def recommended_model(feature):
-    """The recommended (model, effort) of that role, core feature or group, or None."""
-    if feature in ROLE_MODELS:
-        return ROLE_MODELS[feature]
-    group = group_of(feature)
-    if group in ("Features", "Services") and feature in core_names():
-        return CORE_MODEL
-    return GROUP_MODELS.get(group)
+    """The recommended (model, effort) of that role, or None. A worker's model is worker.py's (code opus/medium, play
+    sonnet/medium)."""
+    return ROLE_MODELS.get(feature)
 
 
 def skill_names():
@@ -1923,6 +1905,9 @@ def _courier_tick(now):
             continue
         pool = dispatch.pool_of(target)
         s = None
+        if pool in ("feature", "tester"):      # tiers 4-7 are workers now: no thread is made or woken for them
+            did += route_to_worker(target, ms, now)
+            continue
         if playing and pool == "feature" and not forced:      # features, services, @Core: their work is code
             wait(f"{playing.get('who')} đang chơi thử tới khoảng {time.strftime('%H:%M', time.localtime(playing['until']))}: việc code "
                  "được giữ lại để Unity không nạp lại giữa lúc Play, tự giao khi tester xong (hoặc bấm Giao ngay)", tell=False)
@@ -2138,17 +2123,19 @@ def inbox_reqs(feature):
 
 
 # ---------------------------------------------------------------- Editor tickets (người quyết 2026-11-27)
-# The server hands the shared Unity Editor to one ticket at a time (editor_ticket.py). A ticket of the chat's own work
-# (assets, scene) or CodeLead's fix: the chat gets one message and works; its Stop hook gives the Editor back. Every
-# waiting code-only ticket: the server loads their drafts together (draft.py apply) and a short headless run on a cheap
-# model compiles and reads the console; compile errors make a CodeLead fix ticket that goes first. When nothing else
+# The server hands the shared Unity Editor to one ticket at a time (editor_ticket.py). A ticket of CodeLead's work
+# (assets, scene) or fix: CodeLead gets one message and works; its Stop hook gives the Editor back. A play job's
+# ticket starts its turn. Every waiting code-only ticket (a worker's job, its code already applied by worker.py): one
+# short headless run on a cheap model compiles and reads the console; compile errors go back to the jobs (a fix round),
+# or make a CodeLead fix ticket that goes first when a load had other tickets. When nothing else
 # needs the Editor, one EditMode run serves every ticket waiting for its tests; the requirements whose tests pass are
 # marked done in their book, the chats with failures get one message.
 EDITOR_SOURCE = "phiếu Editor"
 RUNNER_ROLE = "@UnityAutoPlay"      # its role may compile, read the console and run tests; it writes nothing
 RUNNER_MODEL = "haiku"
 GRANT_UNUSED_SECONDS = 20 * 60      # a granted chat that did not touch the Editor by then gives its turn back
-RUNNER = {"busy": False, "last": None}
+RUNNER = {"busy": False, "last": None, "backoff_until": 0}
+RUNNER_BACKOFF_SECONDS = 120      # after the runner failed (Unity unreachable), no load or test run for this long
 RUNNER_LOCK = threading.Lock()
 JSON_TAIL_RX = re.compile(r"\{[^{}]*(\{[^{}]*\}[^{}]*)*\}\s*$", re.S)
 
@@ -2157,12 +2144,13 @@ RUNNER_LOAD = ("Bạn là phiên biên dịch của server (vai @UnityAutoPlay, 
                "Gọi refresh_unity (scope all, mode force, compile request, wait_for_ready true), rồi read_console lấy lỗi "
                "biên dịch (types error). In DÒNG CUỐI là đúng một JSON: {{\"clean\": true|false, \"errors\": "
                "[\"<file>:<dòng>: <mã>: <câu>\", ...]}} (tối đa 30 lỗi). Unity không kết nối được thì "
-               "{{\"clean\": false, \"errors\": [\"UNITY: <câu lỗi>\"]}}. Bản nháp vừa nạp: {files}.")
+               "{{\"clean\": false, \"errors\": [\"UNITY: <câu lỗi>\"]}}. Code vừa nạp của: {files}.")
 RUNNER_TEST = ("Bạn là phiên chạy test của server (vai @UnityAutoPlay, chỉ đọc, không sửa gì, không nhắn ai). Không đọc "
                "luật hay skill. Nạp tool bằng ToolSearch select:mcp__UnityMCP__run_tests,mcp__UnityMCP__get_test_job. "
                "Chạy run_tests mode EditMode với assembly_names {assemblies}, chờ get_test_job tới khi xong. In DÒNG CUỐI "
-               "là đúng một JSON: {{\"ok\": true|false, \"failed\": [{{\"name\": \"<tên đầy đủ>\", \"message\": "
-               "\"<câu lỗi ngắn>\"}}], \"passed\": [\"<tên đầy đủ>\", ...]}}. Unity không kết nối được thì "
+               "là đúng một JSON: {{\"ok\": true|false, \"total_passed\": <số test qua>, \"failed\": [{{\"name\": \"<tên đầy đủ>\", "
+               "\"message\": \"<câu lỗi ngắn>\"}}], \"passed\": [\"<tên đầy đủ>\", ...]}}. Trong passed chỉ ghi các test qua có "
+               "tên (Lớp.Hàm) nằm trong danh sách này, ghi đủ từng cái: {wanted}. Unity không kết nối được thì "
                "{{\"ok\": false, \"failed\": [{{\"name\": \"UNITY\", \"message\": \"<câu lỗi>\"}}], \"passed\": []}}.")
 
 
@@ -2179,7 +2167,7 @@ def runner_turn(prompt):
     bind(sid, RUNNER_ROLE)
     try:
         out = run_claude(["-p", "--model", RUNNER_MODEL, "--session-id", sid, "--no-session-persistence"]
-                         + profile_args(RUNNER_ROLE) + [prompt])
+                         + profile_args(RUNNER_ROLE) + ["--", prompt])      # --mcp-config takes several values: -- ends them
     finally:
         try:
             os.remove(guard.binding_path(sid, guard.STORE_DIR))
@@ -2195,8 +2183,25 @@ def runner_turn(prompt):
     raise RuntimeError("phiên chạy không in JSON: " + out[-300:])
 
 
-def tell(target, text, key):
-    """One message to a ticket's chat: the inbox of a chat on demand; CodeLead through its open thread; else nothing."""
+WORKER_ROLE = "@Worker"
+
+
+def tell(ticket, text, key):
+    """One message to a ticket's chat: the inbox of a chat on demand; CodeLead through its open thread; a worker's
+    job: its events.log (Management/workers/<job>/), nobody is woken; else nothing."""
+    target = ticket["session"]
+    if target == WORKER_ROLE:
+        job = str(ticket.get("job") or "")
+        if not re.fullmatch(r"[A-Za-z0-9-]+", job):
+            return ("no-job", target)
+        folder = ROOT / "Management" / "workers" / job
+        folder.mkdir(parents=True, exist_ok=True)
+        with open(folder / "events.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps({"at": time.time(), "key": key, "text": text}, ensure_ascii=False) + "\n")
+        if key.startswith("editor-test:"):      # tests broke after the load: the job fixes them, once
+            fix_round(job, "test_fixes", "Lô test của server sau khi nạp có test hỏng. Sửa đúng các test sau (code hay test, "
+                      "theo đúng ý của yêu cầu), kiểm lại rồi ghi lại result.json:\n" + text)
+        return ("logged", f"{target} {job}")
     try:
         if dispatch.pool_of(target):
             dispatch.send(ROOT, target, text, EDITOR_SOURCE, key=key)
@@ -2215,39 +2220,45 @@ def tell(target, text, key):
 def grant_text(t):
     notes = "; ".join(t.get("notes") or [])
     return (f"Tới lượt bạn dùng Unity Editor (phiếu {t['id']}): {editor_ticket.describe(t)}." + (f" Ghi chú: {notes}." if notes else "")
-            + " Làm hết rồi tắt bit bằng editor_ticket.py done --session " + t["session"] + " <việc>; nạp nháp bằng draft.py apply "
-            "nếu có; kết thúc lượt là trả Editor. Không giữ Editor sang việc khác.")
+            + " Làm hết rồi tắt bit bằng editor_ticket.py done --session " + t["session"] + " <việc>; kết thúc lượt là trả Editor. "
+            "Không giữ Editor sang việc khác.")
 
 
 def load_run(group):
     """The load of every waiting code-only ticket: drafts into Assets, one compile, the verdict to everyone."""
     did, loaded, files = [], [], []
-    for t in group:
-        name = ticket_feature(t["session"])
-        if name and drafts.entries(ROOT, name):
-            lines, ok = drafts.apply(ROOT, name)
-            if not ok:      # drifted from its base: this ticket leaves the load, the chat rebases and queues again
-                t.update(state="dropped", notes=(t.get("notes") or []) + ["nháp lệch gốc"])
-                editor_ticket.save(ROOT, t)
-                did.append(tell(t["session"], "Nháp chưa nạp được: " + " ".join(lines) + " Rebase rồi nộp phiếu lại.",
-                                f"editor-drift:{t['id']}"))
-                continue
-            files.append(name)
+    for t in group:      # the code is in Assets already (worker.py applied it): one compile for all
+        files += ticket_features(t)
         loaded.append(t)
     if not loaded:
         return did
     try:
         verdict = runner_turn(RUNNER_LOAD.format(files=", ".join(files) or "(không có, chỉ biên dịch)"))
+        unity = [str(e) for e in verdict.get("errors") or [] if str(e).startswith("UNITY")]
+        if unity and not verdict.get("clean"):      # Unity unreachable or the call refused: nothing was compiled
+            raise RuntimeError("; ".join(unity)[:200])
     except Exception as ex:
-        verdict = {"clean": False, "errors": [f"phiên biên dịch lỗi: {str(ex)[:200]}"]}
+        # The runner itself failed (CLI, MCP, Unity not connected): nothing is known about the code. The tickets go
+        # back to the queue with every need, no fix ticket for @CodeLead; the server log says why.
+        editor_ticket.release(ROOT, met=[], broken=False)
+        RUNNER["backoff_until"] = time.time() + RUNNER_BACKOFF_SECONDS      # Unity is likely down: do not try every pass
+        why = f"phiên biên dịch của server lỗi, phiếu xếp lại, thử lại sau {RUNNER_BACKOFF_SECONDS // 60} phút: {str(ex)[:200]}"
+        return did + [tell(t, why, f"editor-runner:{t['id']}") for t in loaded] + [("load", "runner-failed", why)]
     clean = bool(verdict.get("clean"))
-    result = editor_ticket.release(ROOT, met=["refresh", "clean"] if clean else ["refresh"])
+    only_workers = all(t["session"] == WORKER_ROLE and t.get("job") for t in loaded)
+    result = editor_ticket.release(ROOT, met=["refresh", "clean"] if clean else ["refresh"],
+                                   broken=False if only_workers and not clean else None)
     errors = [str(e) for e in verdict.get("errors") or []][:30]
+    if only_workers and not clean:      # the workers of this load fix what Unity found, once; CodeLead is not woken
+        for t in loaded:
+            fix_round(t["job"], "load_fixes", "Unity báo lỗi biên dịch sau khi nạp (compile_check ngoài Unity đã qua). Sửa "
+                      "đúng các lỗi sau, kiểm lại rồi ghi lại result.json:\n" + "\n".join(errors))
+        return did + [("load", ", ".join(t["job"] for t in loaded), f"{len(errors)} lỗi, worker sửa")]
     for t in loaded:
-        text = ("Nháp của bạn đã nạp vào Unity và project biên dịch sạch." if clean else
-                "Nháp đã nạp nhưng project còn lỗi biên dịch; CodeLead sửa trước. Lỗi: " + "; ".join(errors[:8]))
-        did.append(tell(t["session"], text, f"editor-load:{t['id']}"))
-    did += [tell(w["session"], "Phiếu của bạn xong: code mới đã nạp, project sạch.", f"editor-met:{w['id']}") for w in result["satisfied"]]
+        text = ("Code của bạn đã ở Unity và project biên dịch sạch." if clean else
+                "Code đã nạp nhưng project còn lỗi biên dịch; CodeLead sửa trước. Lỗi: " + "; ".join(errors[:8]))
+        did.append(tell(t, text, f"editor-load:{t['id']}"))
+    did += [tell(w, "Phiếu của bạn xong: code mới đã nạp, project sạch.", f"editor-met:{w['id']}") for w in result["satisfied"]]
     if result["fix"]:
         fix = result["fix"]
         fix["notes"] = (fix.get("notes") or []) + ["lỗi: " + "; ".join(errors[:12])]
@@ -2256,19 +2267,23 @@ def load_run(group):
     return did
 
 
+def ticket_features(t):
+    """Every feature a ticket stands for: its session's, and (a worker's job) the one of each requirement."""
+    names = [ticket_feature(t["session"])] + [r.get("feature") for r in t.get("reqs") or []]
+    return list(dict.fromkeys(n for n in names if n))
+
+
 def test_assemblies(group):
     """The EditMode test assemblies of the features in the run, and of the project assemblies depending on them."""
     import compile_check
     ch = compile_check.Checker(ROOT)
     names = set()
     for t in group:
-        name = ticket_feature(t["session"])
-        if not name:
-            continue
-        try:
-            names |= ch.dependents(ch.in_folder(ch.folder_of(name)))
-        except ValueError:
-            continue
+        for name in ticket_features(t):
+            try:
+                names |= ch.dependents(ch.in_folder(ch.folder_of(name)))
+            except ValueError:
+                continue
     return sorted(n for n in names if n.endswith(".Tests"))
 
 
@@ -2276,18 +2291,26 @@ def test_run(group):
     did = []
     assemblies = test_assemblies(group)
     try:
-        verdict = runner_turn(RUNNER_TEST.format(assemblies=json.dumps(assemblies)))
+        wanted = sorted({".".join(str(x).split(".")[-2:]) for t in group for r in t.get("reqs") or [] for x in r.get("tests") or []})
+        verdict = runner_turn(RUNNER_TEST.format(assemblies=json.dumps(assemblies), wanted=json.dumps(wanted, ensure_ascii=False)))
     except Exception as ex:
         verdict = {"ok": False, "failed": [{"name": "RUNNER", "message": str(ex)[:200]}], "passed": []}
+    try:      # the runner's last answer, kept for when a requirement is not written done as expected
+        (ROOT / "Management" / "editor-tickets" / "last-test.json").write_text(
+            json.dumps({"assemblies": assemblies, "verdict": verdict}, ensure_ascii=False, indent=1), encoding="utf-8")
+    except OSError:
+        pass
     passed = [str(x) for x in verdict.get("passed") or []]
     failed = [x for x in verdict.get("failed") or [] if isinstance(x, dict)]
     broken = any(f.get("name") in ("UNITY", "RUNNER") for f in failed)
     short = lambda full: ".".join(str(full).split(".")[-2:])      # noqa: E731  Lớp.Hàm, as the book keeps it
     ok_names = {short(x) for x in passed}
     for t in group:
-        name = ticket_feature(t["session"])
-        mine_failed = [f for f in failed if f.get("name") and name and f"Game.{name.replace('_Services/', 'Services.')}." in str(f["name"])]
+        mine = ticket_features(t)
+        mine_failed = [f for f in failed if f.get("name") and any(
+            f"Game.{n.replace('_Services/', 'Services.')}." in str(f["name"]) for n in mine)]
         for r in t.get("reqs") or []:
+            name = r.get("feature") or ticket_feature(t["session"])
             tests = [short(x) for x in r.get("tests") or []]
             if name and tests and not broken and all(x in ok_names for x in tests):
                 try:
@@ -2296,11 +2319,11 @@ def test_run(group):
                 except ValueError as ex:
                     did.append(("done-refused", name, r["ref"], str(ex)[:120]))
         if mine_failed:
-            did.append(tell(t["session"], "Test hỏng ở lô test của server: " + "; ".join(
-                f"{f['name']}: {str(f.get('message') or '')[:160]}" for f in mine_failed[:10]) + ". Sửa trong nháp rồi nộp phiếu lại.",
+            did.append(tell(t, "Test hỏng ở lô test của server: " + "; ".join(
+                f"{f['name']}: {str(f.get('message') or '')[:160]}" for f in mine_failed[:10]) + ". Sửa rồi ghi lại result.json.",
                 f"editor-test:{t['id']}"))
     editor_ticket.release(ROOT, met=[] if broken else ["test"])
-    did.append(("test", len(assemblies), f"{len(passed)} qua, {len(failed)} hỏng"))
+    did.append(("test", len(assemblies), f"{verdict.get('total_passed', len(passed))} qua, {len(failed)} hỏng"))
     return did
 
 
@@ -2336,10 +2359,14 @@ def editor_tick(now=None):
             did.append(("unused", t["session"]))
     if editor_ticket.holder(ROOT) or guard.human_editor(guard.STORE_DIR) or guard.read_lock(guard.STORE_DIR):
         return did
+    if now < RUNNER.get("backoff_until", 0):      # the runner failed a moment ago (Unity unreachable): wait
+        return did
     kind, group = editor_ticket.grant_next(ROOT, now=now)
-    if kind in ("own", "fix"):
+    if kind == "own" and group[0]["session"] == worker.PLAY_ROLE and group[0].get("job"):
+        did.append(start_worker(group[0]["job"], "play"))      # the play job starts on its grant
+    elif kind in ("own", "fix"):
         t = group[0]
-        did.append(tell(t["session"], grant_text(t), f"editor-grant:{t['id']}"))
+        did.append(tell(t, grant_text(t), f"editor-grant:{t['id']}"))
     elif kind in ("load", "test"):
         for t in group:
             t["runner"] = RUNNER_ROLE
@@ -2347,6 +2374,210 @@ def editor_tick(now=None):
         run_in_background(load_run if kind == "load" else test_run, group)
         did.append((kind, ", ".join(t["session"] for t in group)))
     return did
+
+
+# ---------------------------------------------------------------- workers (người quyết 2026-11-27)
+# Tiers 4-7 are workers: a message to a feature, a service or @Core is a code job (worker.py: one turn in its own
+# worktree, every feature at once); a message to @UnityAutoPlay is a play job (one turn in the main project, on its
+# Editor ticket). At most WORKER_SLOTS jobs run at once, never two of the same feature.
+WORKER_SLOTS = 3
+WORKER_THREADS = {}      # job id -> thread
+WORKER_LOCK = threading.Lock()
+WORKER_STARTED = {"done": False}
+WORKER_TARGET_RX = re.compile(r"^((_Services/)?[A-Za-z][A-Za-z0-9]*|@Core)$")
+
+
+def worker_name(target):
+    """The worker job's feature for an inbox target: Core for @Core, the feature or service itself."""
+    return "Core" if target == "@Core" else target
+
+
+def worker_jobs():
+    d = worker.jobs_dir(ROOT)
+    out = []
+    for p in sorted(d.iterdir()) if d.is_dir() else []:
+        if worker.ID_RX.match(p.name) and (p / "job.json").is_file():
+            try:
+                out.append(json.loads((p / "job.json").read_text(encoding="utf-8")))
+            except (OSError, ValueError):
+                continue
+    return out
+
+
+def running_jobs():
+    with WORKER_LOCK:
+        return {j: t for j, t in WORKER_THREADS.items() if t.is_alive()}
+
+
+def start_worker(job_id, kind="code", message=None):
+    """Starts one job (or a resume, with message) in a thread of its own. Returns what was done, for the log."""
+    def go():
+        try:
+            if kind == "play":
+                code, lines = worker.start_play(ROOT, job_id)
+            elif message is not None:
+                code, lines = worker.resume(ROOT, job_id, message)
+            else:
+                code, lines = worker.start(ROOT, job_id)
+            print(f"worker: {job_id} xong ({code}):", " · ".join(lines[-4:])[:400], flush=True)
+        except Exception as ex:
+            print(f"worker: {job_id} lỗi {ex}", file=sys.stderr, flush=True)
+            try:
+                job = worker.load(ROOT, job_id)
+                job["state"] = "error"
+                job["error"] = str(ex)[:300]
+                worker.save(ROOT, job)
+            except Exception:
+                pass
+    t = threading.Thread(target=go, name=f"worker-{job_id}", daemon=True)
+    with WORKER_LOCK:
+        WORKER_THREADS[job_id] = t
+    t.start()
+    return ("start" if message is None else "resume", kind, job_id)
+
+
+def fix_round(job_id, counter, message):
+    """One automatic fix round of a job (tests broke, Unity found compile errors, a drift); a second one in the same
+    kind stops the job with a report for CodeLead."""
+    try:
+        job = worker.load(ROOT, job_id)
+    except ValueError:
+        return
+    if job.get(counter, 0) >= 1:
+        job["state"] = "needs-codelead"
+        worker.save(ROOT, job)
+        worker.write_report(ROOT, job, "bị chặn", [f"tự sửa một lần chưa đủ ({counter}): " + message[:400]])
+        return
+    job[counter] = job.get(counter, 0) + 1
+    job["pending"] = message
+    worker.save(ROOT, job)
+
+
+ACTIVE_JOB_STATES = ("queued", "starting", "running", "waiting-editor")
+
+
+def worker_tick(now=None):
+    """One pass: jobs left running by a server that stopped, answers to the workers' questions, fix rounds, and the
+    queued jobs, while slots are free."""
+    did = []
+    jobs = worker_jobs()
+    alive = running_jobs()
+    if not WORKER_STARTED["done"]:      # the server just started: no thread runs any job
+        WORKER_STARTED["done"] = True
+        for j in jobs:
+            if j.get("state") in ("starting", "running") and j["id"] not in alive:
+                j["state"] = "interrupted"
+                worker.save(ROOT, j)
+                did.append(("interrupted", j["id"]))
+    try:
+        answered = {q["id"]: q for q in ask.items(ROOT, "answered") if q.get("source") == WORKER_ROLE}
+    except Exception:
+        answered = {}
+    for j in jobs:      # a question of the worker answered on Manager's side: the job goes on with the answer
+        done = set(j.get("answered") or [])
+        for qid in [q for q in j.get("asks") or [] if q in answered and q not in done]:
+            j.setdefault("answered", []).append(qid)
+            j["pending"] = "Người trả lời câu hỏi của bạn (qua Manager): " + str(answered[qid].get("answer") or "") + \
+                           "\nLàm tiếp theo câu trả lời đó, kiểm lại rồi ghi lại result.json."
+            worker.save(ROOT, j)
+            did.append(("answered", j["id"], qid))
+    busy = {j["feature"] for j in jobs if j["id"] in alive}
+    free = WORKER_SLOTS - len(alive)
+    for j in sorted(jobs, key=lambda x: x.get("created", 0)):
+        if free <= 0:
+            break
+        if j["id"] in alive or j["feature"] in busy:
+            continue
+        if j.get("pending") and j.get("kind", "code") == "code":
+            message = j.pop("pending")
+            j["state"] = "running"
+            worker.save(ROOT, j)
+            did.append(start_worker(j["id"], "code", message))
+        elif j.get("state") == "queued" and j.get("kind", "code") == "code":
+            did.append(start_worker(j["id"], "code"))
+        else:
+            continue
+        busy.add(j["feature"])
+        free -= 1
+    return did
+
+
+def route_to_worker(target, ms, now):
+    """Inbox messages to a feature, a service, @Core or the tester become a worker job (people quyết 2026-11-27: no
+    feature thread any more). Returns the steps done; the messages are marked delivered with the job's id."""
+    text = "\n".join(f"[tin {m['id']} · từ {m.get('source') or '?'}] {m.get('text') or ''}" for m in ms)
+    ids = [m["id"] for m in ms]
+    source = ", ".join(sorted({str(m.get("source") or "") for m in ms}))
+    if dispatch.pool_of(target) == "tester":
+        job = worker.queue_play(ROOT, text, source=source, messages=ids, now=now)
+    else:
+        name = worker_name(target)
+        jobs = [j for j in worker_jobs() if j.get("feature") == name and j.get("kind", "code") == "code"]
+        alive = running_jobs()
+        waiting = next((j for j in jobs if j.get("asks") and str(j.get("state", "")).startswith("applied-")
+                        and j["id"] not in alive and not j.get("pending")), None)
+        queued = next((j for j in jobs if j.get("state") == "queued"), None)
+        busy = next((j for j in jobs if j["id"] in alive or j.get("pending")), None)
+        if busy:      # the next job takes them, once this one is done
+            for m in ms:
+                if m["state"] != "waiting" or m.get("why", "").split(" ·")[0] != f"worker đang làm {busy['id']}":
+                    dispatch.mark(ROOT, m, "waiting", why=f"worker đang làm {busy['id']} · tin thành việc kế tiếp khi việc đó xong")
+            return [("wait", target, "worker đang làm " + busy["id"])]
+        if waiting:      # the feature's worker waits for an answer: the message is it (a Leader answered)
+            waiting["pending"] = "Tin mới cho việc của bạn:\n" + text + "\nLàm tiếp theo tin đó, kiểm lại rồi ghi lại result.json."
+            worker.save(ROOT, waiting)
+            job = waiting
+        elif queued:
+            queued["task"] = (queued.get("task") + "\n" if queued.get("task") else "") + text
+            queued["messages"] = (queued.get("messages") or []) + ids
+            worker.save(ROOT, queued)
+            job = queued
+        else:
+            job = worker.queue(ROOT, name, task=text, now=now, messages=ids, source=source)
+    for m in ms:
+        dispatch.mark(ROOT, m, "delivered", delivered_at=now, job=job["id"])
+    return [("worker", target, job["id"])]
+
+
+def worker_load_task(job_id):
+    return worker.load(ROOT, job_id).get("task", "")
+
+
+def workers_view():
+    """The jobs for the page, newest first."""
+    out = []
+    for j in sorted(worker_jobs(), key=lambda x: x.get("created", 0), reverse=True)[:60]:
+        r = j.get("result") or {}
+        out.append({"id": j["id"], "feature": j.get("feature"), "kind": j.get("kind", "code"), "state": j.get("state"),
+                    "requirements": j.get("requirements", 0), "turns": len(j.get("turns") or []),
+                    "cost": round(sum(t.get("cost_usd") or 0 for t in j.get("turns") or []), 2),
+                    "summary": str(r.get("summary") or j.get("task") or "")[:400], "question": r.get("question"),
+                    "created": j.get("created"), "running": j["id"] in running_jobs(), "pending": bool(j.get("pending"))})
+    return {"jobs": out, "slots": WORKER_SLOTS}
+
+
+def worker_call(action, data):
+    """The page: run (a feature and an extra task), resume (an id and a message), drop (an id)."""
+    try:
+        if action == "run":
+            target = str(data.get("feature") or "").strip()
+            if not WORKER_TARGET_RX.match(target) or not (target == "@Core" or guard.valid_feature(target, str(ROOT))):
+                return {"ok": False, "error": "feature không hợp lệ"}
+            job = worker.queue(ROOT, worker_name(target), task=str(data.get("task") or "").strip()[:4000], source="người")
+            return {"ok": True, "id": job["id"]}
+        job = worker.load(ROOT, str(data.get("id") or ""))
+        if job["id"] in running_jobs():
+            return {"ok": False, "error": "việc đang chạy"}
+        if action == "resume":
+            job["pending"] = str(data.get("message") or "").strip()[:4000] or "Làm tiếp việc đang dở, rồi ghi lại result.json."
+            worker.save(ROOT, job)
+            return {"ok": True, "id": job["id"]}
+        if action == "drop":
+            worker.drop(ROOT, job["id"])
+            return {"ok": True, "id": job["id"]}
+    except ValueError as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": False, "error": "lệnh không hợp lệ"}
 
 
 def courier_loop():
@@ -2364,6 +2595,8 @@ def courier_loop():
                 print("canh phiên:", *step, flush=True)
             for step in editor_tick():
                 print("phiếu Editor:", *step, flush=True)
+            for step in worker_tick():
+                print("worker:", *step, flush=True)
         except Exception as ex:      # the loop must survive anything a tick meets
             print(f"hộp thư: lỗi {ex}", file=sys.stderr, flush=True)
         time.sleep(COURIER_SECONDS)
@@ -2416,6 +2649,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, sync_page.write_studio(ROOT))
             if path == "/api/references":
                 return self.send_json(200, sync_page.write_references(ROOT))
+            if path == "/api/workers":
+                return self.send_json(200, workers_view())
             if path == "/api/inbox":
                 return self.send_json(200, inbox_view())
             if path == "/api/inbox/reqs":
@@ -2472,6 +2707,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, human_delete(data))
             if self.path.startswith("/api/inbox/"):
                 return self.send_json(200, inbox_call(self.path.rsplit("/", 1)[1], data))
+            if self.path.startswith("/api/workers/"):
+                return self.send_json(200, worker_call(self.path.rsplit("/", 1)[1], data))
             if self.path.startswith("/api/references/"):
                 return self.send_json(200, reference_call(self.path.rsplit("/", 1)[1], data))
             if self.path == "/api/gamedesign/progress":

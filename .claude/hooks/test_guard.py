@@ -10,6 +10,7 @@ import importlib.util
 import json
 import time
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -33,13 +34,26 @@ PIN = "tr0ng-test"
 results = []
 
 
+# Tiers 5-7 are no chat any more (người quyết 2026-11-27: features, services and @Core are workers, worker.py): a case
+# run as one of them is not run. The guard gives such a binding no mode at all ("bind: guard uses it" checks that).
+GONE_RX = re.compile(r"^((_Services[/\\])?[A-Za-z][A-Za-z0-9]*|@Core)$")
+
+
+def gone(feature):
+    return isinstance(feature, str) and bool(GONE_RX.match(feature.strip()))
+
+
 def check(group, feature, expect, label, got):
+    if gone(feature):
+        return
     results.append((got == expect, group, feature or "(unset)", expect, got, label.replace(FX, "")))
 
 
 def t(group, feature, expect, tool, ti, cwd=None, session="test-session"):
     """In-process: calls guard.decide exactly as main() does, including fail-closed on errors. The Editor lock
     lives in STORE, never in the real store."""
+    if gone(feature):
+        return
     data = {"tool_name": tool, "tool_input": ti, "cwd": cwd or FX, "session_id": session}
     try:
         result = guard.decide(data, feature, FX, STORE)
@@ -121,96 +135,33 @@ def run_cases():
 
     # ---- one group per row of the permission table
     g = "1 own feature"
-    r(g, W, "allow", F + "/Wallet/Scripts/Internal/W.cs")
-    e(g, W, "allow", F + "/Wallet/Scripts/Internal/W.cs")
-    w(g, W, "allow", F + "/Wallet/Scripts/View/V.cs")
-    w(g, W, "allow", F + "/Wallet/FeatureAssets/Private/cfg.asset")
-    w(g, W, "allow", F + "/Wallet/Tests/T.cs")
-    w(g, W, "allow", F + "/Wallet/CLAUDE.md")
 
     g = "2 own Contracts"
-    r(g, W, "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
-    e(g, W, "deny", F + "/Wallet/Scripts/Contracts/IWallet.cs")       # the skeleton: only @CodeLead edits it
-    w(g, W, "deny", F + "/Wallet/Scripts/Contracts/New.cs")
 
     g = "3 other public"
-    r(g, W, "allow", F + "/Shop/Scripts/Contracts/IShop.cs")
-    e(g, W, "deny", F + "/Shop/Scripts/Contracts/IShop.cs")
-    r(g, W, "allow", F + "/Shop/FeatureAssets/Public/icon.png")
-    w(g, W, "deny", F + "/Shop/FeatureAssets/Public/icon.png")
-    r(g, W, "allow", F + "/_Services/Popup/Scripts/Contracts/IPopup.cs")
-    e(g, W, "deny", F + "/_Services/Popup/Scripts/Contracts/IPopup.cs")
 
     g = "4 other private"
-    r(g, W, "deny", F + "/Shop/Scripts/Internal/S.cs")
-    e(g, W, "deny", F + "/Shop/Scripts/Internal/S.cs")
-    r(g, W, "deny", F + "/Shop/Scripts/View/V.cs")
-    w(g, W, "deny", F + "/Shop/Scripts/View/V.cs")
-    r(g, W, "deny", F + "/Shop/FeatureAssets/Private/cfg.asset")
-    w(g, W, "deny", F + "/Shop/FeatureAssets/Private/cfg.asset")
-    r(g, W, "deny", F + "/_Services/Popup/Scripts/Internal/P.cs")
-    e(g, W, "deny", F + "/_Services/Popup/Scripts/Internal/P.cs")
 
     g = "5 _Composition/Core"
-    r(g, W, "allow", A + "/_Composition/Boot.cs")
-    e(g, W, "deny", A + "/_Composition/Boot.cs")
-    r(g, W, "allow", A + "/Core/Base.cs")
-    w(g, W, "deny", A + "/Core/Base.cs")
 
     g = "6 Packages/ProjectSettings"
-    r(g, W, "allow", FX + "/UnityProject/Packages/manifest.json")
-    e(g, W, "deny", FX + "/UnityProject/Packages/manifest.json")
-    r(g, W, "allow", FX + "/UnityProject/ProjectSettings/ProjectVersion.txt")
-    w(g, W, "deny", FX + "/UnityProject/ProjectSettings/ProjectVersion.txt")
 
     g = "7 proposals"
-    r(g, W, "allow", FX + "/Management/proposals/old.md")
-    w(g, W, "deny", FX + "/Management/proposals/new.md")      # closed: asked in the chat, tool work goes to toolwork.py
-    w(g, W, "deny", FX + "/Management/proposals/old.md")
-    e(g, W, "deny", FX + "/Management/proposals/old.md")
 
     g = "8 Management"
-    r(g, W, "allow", FX + "/Management/data/idea.js")
-    e(g, W, "deny", FX + "/Management/data/idea.js")
-    w(g, W, "deny", FX + "/Management/data/new.js")
-    r(g, W, "allow", FX + "/Management/tools/validate.py")
-    w(g, W, "deny", FX + "/Management/tools/validate.py")
-    r(g, W, "allow", FX + "/Management/tools/rules.json")
-    e(g, W, "deny", FX + "/Management/tools/rules.json")
     e(g, "", "deny", FX + "/Management/tools/rules.json")
-    e(g, W, "deny", FX + "/Management/tools/sub/rules.json")
 
     g = "other feature's CLAUDE.md"
-    r(g, W, "allow", F + "/Shop/CLAUDE.md")
-    r(g, W, "allow" if WIN else "deny", F + "/Shop/claude.md")      # the same file as CLAUDE.md only on Windows
-    r(g, W, "allow", F + "/_Services/Popup/CLAUDE.md")
     r(g, "", "allow", F + "/Shop/CLAUDE.md")
-    e(g, W, "deny", F + "/Shop/CLAUDE.md")
-    w(g, W, "deny", F + "/_Services/Popup/CLAUDE.md")
-    r(g, W, "deny", F + "/Shop/Scripts/Internal/CLAUDE.md")
-    r(g, W, "deny", F + "/Shop/NOTES.md")
-    t(g, W, "deny", "mcp__unityMCP__manage_asset", {"action": "delete", "path": "Assets/Features/Shop/CLAUDE.md"})
-    r(g, W, "allow", FX + "/Management/index.html")
-    e(g, W, "deny", FX + "/Management/index.html")
 
     g = "9 .claude"
-    r(g, W, "allow", FX + "/.claude/settings.json")
-    e(g, W, "deny", FX + "/.claude/settings.json")
-    w(g, W, "deny", FX + "/.claude/hooks/guard.py")
-    w(g, W, "deny", FX + "/.claude/settings.local.json")
 
     g = "10 Library etc"
     for d in ("Library", "Temp", "Logs", "obj", "UserSettings"):
-        r(g, W, "deny", FX + f"/UnityProject/{d}/x.txt")
-        w(g, W, "deny", FX + f"/UnityProject/{d}/x.txt")
+        pass
 
     # ---- FEATURE variants
     g, P = "service agent", "_Services/Popup"
-    e(g, P, "allow", F + "/_Services/Popup/Scripts/Internal/P.cs")
-    e(g, P, "deny", F + "/_Services/Popup/Scripts/Contracts/IPopup.cs")      # the skeleton
-    r(g, P, "deny", F + "/Wallet/Scripts/Internal/W.cs")
-    e(g, P, "deny", F + "/Wallet/Scripts/Internal/W.cs")
-    r(g, P, "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
     e(g, r"_Services\Popup", "allow", F + "/_Services/Popup/Scripts/Internal/P.cs")
 
     g = "FEATURE unset"
@@ -222,149 +173,29 @@ def run_cases():
     t(g, "", "deny", "Bash", {"command": "ls"})
 
     g = "FEATURE invalid"
-    e(g, "Nope", "deny", F + "/Nope/Scripts/Internal/N.cs")
     e(g, "../Shop", "deny", F + "/Shop/Scripts/Internal/S.cs")
     e(g, "_Services", "deny", F + "/_Services/Popup/Scripts/Internal/P.cs")
     e(g, "Wallet/Scripts", "deny", F + "/Wallet/Scripts/Internal/W.cs")
     e(g, "*", "deny", F + "/Wallet/Scripts/Internal/W.cs")
-    e(g, "Wallet\n", "allow", F + "/Wallet/Scripts/Internal/W.cs")      # surrounding whitespace is trimmed
     e(g, "Wallet x", "deny", F + "/Wallet/Scripts/Internal/W.cs")
 
     # ---- unlisted zones
     g = "unlisted"
-    r(g, W, "deny", F + "/Shop/Tests/T.cs")
-    r(g, W, "allow", FX + "/CLAUDE.md")
-    e(g, W, "deny", FX + "/CLAUDE.md")
-    w(g, W, "deny", FX + "/notes.md")
-    w(g, W, "deny", A + "/Shared/Util.cs")
-    w(g, W, "deny", F + "/NewFeature/Scripts/Internal/N.cs")
-    r(g, W, "deny", r"C:\Windows\win.ini")
-    w(g, W, "deny", tempfile.gettempdir() + "/guard-out.txt")
-    r(g, W, "deny", FX)
-    r(g, W, "deny", FX + "2/CLAUDE.md")     # sibling folder that shares the root's prefix
 
     # ---- attempts to get around the guard
     g = "evasion"
-    e(g, W, "deny", F + "/Wallet/../Shop/Scripts/Internal/S.cs")
-    r(g, W, "deny", F + "/Wallet/../Shop/Scripts/Internal/S.cs")
-    r(g, W, "deny", (F + "/Shop/Scripts/Internal/S.cs").lower())
-    e(g, W, "deny", (F + "/Shop/Scripts/Internal/S.cs").replace("\\", "/"))
-    e(g, W, "allow", (F + "/Wallet/Scripts/Internal/W.cs").replace("\\", "/"))
-    t(g, W, "allow", "Edit", {"file_path": "Scripts/Internal/W.cs"}, F + "/Wallet")
-    t(g, W, "deny", "Edit", {"file_path": "../Shop/Scripts/Internal/S.cs"}, F + "/Wallet")
-    t(g, W, "deny", "Read", {"file_path": "~/x.txt"})                           # home-relative
-    t(g, W, "deny", "Glob", {"pattern": "~/**", "path": F + "/Wallet"})
-    t(g, W, "deny", "Read", {"file_path": F + "/Wallet/Scripts/Internal/W\x00.cs"})                # NUL
     if WIN:      # case-insensitive file system; backslash, drive, UNC, ADS, trailing dot/space, Git Bash paths
-        e(g, W, "allow", F + "/WALLET/scripts/internal/W.cs")
-        e(g, W, "allow", F + "/wallet/SCRIPTS/VIEW/V.cs")
-        e(g, W, "deny", F + "/wallet/SCRIPTS/CONTRACTS/I.cs")      # still the skeleton, in any letter case
-        t(g, W, "allow", "Edit", {"file_path": r"Scripts\Internal\W.cs"}, F + "/Wallet")
-        t(g, W, "deny", "Edit", {"file_path": r"..\Shop\Scripts\Internal\S.cs"}, F + "/Wallet")
         msys = "/" + FX[0].lower() + FX[2:].replace("\\", "/")
-        e(g, W, "deny", msys + "/UnityProject/Assets/Features/Shop/Scripts/Internal/S.cs")
-        e(g, W, "allow", msys + "/UnityProject/Assets/Features/Wallet/Scripts/Internal/W.cs")
-        r(g, W, "deny", F + "/Shop/Scripts/Internal/S.cs:stream")
-        r(g, W, "deny", F + "/Wallet/Scripts/Internal/W.cs::$DATA")
-        r(g, W, "deny", F + "\\Shop\\Scripts\\Internal.\\S.cs")
-        r(g, W, "deny", F + "\\Shop\\Scripts\\Internal \\S.cs")
-        r(g, W, "deny", F + "/Wallet/Scripts/Intern~1/W.cs")                   # 8.3 short name
-        r(g, W, "deny", "\\\\localhost\\" + FX[0] + "$" + FX[2:] + "/UnityProject/Assets/Features/Shop/Scripts/Internal/S.cs")
-        r(g, W, "deny", "\\\\?\\" + F + "/Shop/Scripts/Internal/S.cs")
-        r(g, W, "deny", FX[:2] + F[3:] + "/Shop/Scripts/Internal/S.cs")     # drive-relative: D:Users\...
-        r(g, W, "deny", F[2:] + "/Shop/Scripts/Internal/S.cs")              # root-relative: \Users\...
     else:        # case-sensitive file system; a backslash is a file-name character, not a separator
-        e(g, W, "deny", F + "/WALLET/scripts/internal/W.cs")                 # another folder, not Wallet
-        e(g, W, "deny", F + "/wallet/Scripts/Internal/W.cs")
-        e(g, W, "deny", A.replace("/Assets", "/assets") + "/Features/Wallet/Scripts/Internal/W.cs")
-        e(g, W, "deny", F.replace("/Features", "/features") + "/Wallet/Scripts/Internal/W.cs")
-        e(g, W, "deny", FX + "/management/proposals/new.md")                    # not Management/proposals
-        e(g, W, "deny", FX + "/Management/tools/RULES.json")                    # not rules.json: no ask
-        r(g, W, "deny", (F + "/Shop/Scripts/Internal/S.cs").upper())
-        r(g, W, "deny", F + "/Shop/scripts/contracts/IShop.cs")               # private, not Contracts
-        w(g, W, "deny", FX + "/.CLAUDE/settings.json")                          # deny zones match any case
-        w(g, W, "deny", FX + "/UnityProject/LIBRARY/x.txt")
-        t(g, W, "deny", "Edit", {"file_path": r"Scripts\Internal\W.cs"}, F + "/Wallet")
-        t(g, W, "deny", "Edit", {"file_path": r"..\Shop\Scripts\Internal\S.cs"}, F + "/Wallet")
-        r(g, W, "deny", F + "\\Shop\\Scripts\\Internal\\S.cs")
-        r(g, W, "deny", "//" + F.lstrip("/") + "/Shop/Scripts/Internal/S.cs")
-        e(g, W, "allow", "//" + F.lstrip("/") + "/Wallet/Scripts/Internal/W.cs")       # '//x' is '/x'
-        r(g, W, "allow", F + "/Wallet/Scripts/Internal/W.cs::$DATA")         # ':' is a normal character here
-        r(g, W, "deny", F + "/Shop/Scripts/Internal/S.cs:stream")
-        e(g, W, "allow", F + "/Wallet/Scripts/Internal/Intern~1.cs")         # '~1' is a normal name here
-        r(g, W, "deny", "/d/" + F.lstrip("/") + "/Shop/Scripts/Internal/S.cs")   # no Git Bash drive mapping
-    r(g, W, "deny", F + "/Wallet/link/S.cs")
-    w(g, W, "deny", F + "/Wallet/link/New.cs")
-    t(g, W, "deny", "NotebookEdit", {"notebook_path": F + "/Shop/Scripts/Internal/n.ipynb"})
-    t(g, W, "deny", "MultiEdit", {"file_path": F + "/Shop/Scripts/Internal/S.cs"})
-    t(g, W, "deny", "Write", {"file_path": ["not", "a", "string"]})
-    t(g, W, "deny", "Write", {})
+        pass
 
     # ---- search tools
     g = "search"
-    t(g, W, "deny", "Grep", {"pattern": "class", "path": FX})
-    t(g, W, "deny", "Grep", {"pattern": "class"})
-    t(g, W, "deny", "Grep", {"pattern": "class", "path": F})
-    t(g, W, "deny", "Grep", {"pattern": "class", "path": F + "/Shop"})
-    t(g, W, "allow", "Grep", {"pattern": "class", "path": F + "/Wallet"})
-    t(g, W, "allow", "Grep", {"pattern": r"a\.\.b", "path": F + "/Wallet"})
-    t(g, W, "allow", "Grep", {"pattern": "class", "path": F + "/Shop/Scripts/Contracts"})
-    t(g, W, "deny", "Grep", {"pattern": "class", "path": F + "/Wallet", "glob": "../Shop/**"})
-    t(g, W, "allow", "Glob", {"pattern": "**/*.cs", "path": F + "/Wallet"})
-    t(g, W, "allow", "Glob", {"pattern": "**/*.cs"}, F + "/Wallet")
-    t(g, W, "deny", "Glob", {"pattern": "**/*.cs"})
-    t(g, W, "deny", "Glob", {"pattern": "../Shop/**/*.cs", "path": F + "/Wallet"})
-    t(g, W, "deny", "Glob", {"pattern": (F + "/Shop/**/*.cs").replace("\\", "/"), "path": F + "/Wallet"})
-    t(g, W, "deny", "Glob", {"pattern": "*", "path": FX + "/UnityProject/Library"})
-    t(g, W, "allow", "Glob", {"pattern": "*", "path": A + "/Core"})
 
     # ---- read-only search commands (this CLI has no Glob and Grep tools: ls, find, grep, rg in Bash)
     g = "search: shell"
     def sh(f, x, cmd, cwd=None): t(g, f, x, "Bash", {"command": cmd}, cwd)
     WF = "UnityProject/Assets/Features/Wallet"
-    sh(W, "allow", "grep -rn 'class' " + WF)
-    sh(W, "allow", 'grep -rn "class Wallet" ' + WF + " --include='*.cs'")
-    sh(W, "allow", "grep -rniE -A3 'a|b$' " + WF + "/Scripts " + WF + "/Tests")
-    sh(W, "allow", "grep -rn -e 'x' -e 'y' " + WF)
-    sh(W, "allow", "grep -rn 'IShop' UnityProject/Assets/Features/Shop/Scripts/Contracts")
-    sh(W, "allow", "grep -rn 'x' Management/game-design/live")
-    sh(W, "deny", "grep -rn 'class' UnityProject/Assets/Features/Shop")
-    sh(W, "deny", "grep -rn 'class' UnityProject/Assets/Features")
-    sh(W, "deny", "grep -rn 'class' .")
-    sh(W, "deny", "grep -rn 'class'")
-    sh(W, "deny", "grep -rn class " + WF + " | head")
-    sh(W, "deny", "grep -rn class " + WF + " > out.txt")
-    sh(W, "deny", "grep -rn class " + WF + "; rm -rf x")
-    sh(W, "deny", 'grep -rn "$(id)" ' + WF)
-    sh(W, "deny", "grep -rn `id` " + WF)
-    sh(W, "deny", "grep -R class " + WF)
-    sh(W, "deny", "grep -f /etc/passwd " + WF)
-    sh(W, "deny", "grep -rn class " + WF + "/../Shop")
-    sh(W, "deny", "grep -rn class " + WF + " --include='../Shop/*'")
-    sh(W, "deny", "grep -rn class ~/x")
-    sh(W, "deny", "grep -rn class UnityProject/Library")
-    sh(W, "allow", "rg -n 'class' " + WF)
-    sh(W, "allow", "rg --files " + WF)
-    sh(W, "allow", "rg -n 'x' -g '*.cs' " + WF)
-    sh(W, "deny", "rg --pre cat 'x' " + WF)
-    sh(W, "deny", "rg -L 'x' " + WF)
-    sh(W, "deny", "rg -z 'x' " + WF)
-    sh(W, "allow", "find " + WF + " -name '*.cs'")
-    sh(W, "allow", "find " + WF + " " + WF + "/Tests -type f -iname '*test*' -maxdepth 3")
-    sh(W, "deny", "find " + WF + " -name *.cs")      # an unquoted glob: the shell would expand it
-    sh(W, "deny", "find " + WF + " -exec rm {} \\;")
-    sh(W, "deny", "find " + WF + " -delete")
-    sh(W, "deny", "find " + WF + " -fprint x")
-    sh(W, "deny", "find -L " + WF)
-    sh(W, "deny", "find UnityProject/Assets/Features -name '*.cs'")
-    sh(W, "allow", "ls -la " + WF)
-    sh(W, "allow", "ls " + WF + "/Scripts UnityProject/Assets/Core")
-    sh(W, "allow", "ls Scripts", F + "/Wallet")      # relative to the cwd of the shell
-    sh(W, "deny", "ls")
-    sh(W, "deny", "ls ../x")
-    sh(W, "deny", "ls --color=always " + WF)
-    sh(W, "deny", "ls UnityProject/Assets/Features/Shop/Scripts/Internal")
-    sh(W, "deny", "ls " + WF + " && rm x")
     sh("@GameDesigner", "allow", "ls Management/game-design/ai")
     sh("@GameDesigner", "deny", "ls UnityProject/Assets")
     sh("@CodeLead", "allow", "grep -rn 'IWallet' UnityProject/Assets/Features")
@@ -374,41 +205,16 @@ def run_cases():
     sh("@CodeLead", "deny", "ls Tester/UnityAutoPlay/Archive")
     sh("@Codex", "deny", "ls Tester")
     sh("", "allow", "ls Management/tools")
-    t(g, W, "deny", "PowerShell", {"command": "ls " + WF})
 
     # ---- shell and other tools
     g = "shell"
-    t(g, W, "deny", "Bash", {"command": "ls"})
-    t(g, W, "deny", "Bash", {"command": "cat UnityProject/Assets/Features/Shop/Scripts/Internal/S.cs"})
-    t(g, W, "deny", "Bash", {"command": "rm -rf UnityProject"})
-    t(g, W, "deny", "PowerShell", {"command": "Get-ChildItem"})
-    t(g, W, "deny", "PowerShell", {"command": '$env:FEATURE = "@human"'})
-    t(g, W, "allow", "PowerShell", {"command": VALIDATE})
-    t(g, W, "allow", "Bash", {"command": VALIDATE})
-    t(g, W, "allow", "Bash", {"command": "  " + VALIDATE + "\n"})
-    t(g, W, "deny", "Bash", {"command": VALIDATE + "; rm x"})
-    t(g, W, "deny", "Bash", {"command": VALIDATE + "\nrm x"})
-    t(g, W, "deny", "Bash", {"command": VALIDATE + r" --root C:\x"})
-    t(g, W, "deny", "Bash", {"command": "python Management/tools/test_validate.py"})
-    t(g, W, "deny", "Bash", {"command": "python Management/tools/validateXpy"})
-    t(g, W, "deny", "Bash", {"command": 'python -c "print(1)"'})
     t(g, "", "allow", "PowerShell", {"command": VALIDATE})      # read-only script, harmless without FEATURE
 
     g = "tools"
-    t(g, W, "deny", "mcp__unity__manage_script", {"path": "x"})      # not this project's unity-mcp
-    t(g, W, "deny", "Monitor", {"command": "ls"})      # a shell command: the Bash allow-list
-    t(g, W, "allow", "Monitor", {"command": VALIDATE})
-    t(g, W, "deny", "Artifact", {"file_path": F + "/Shop/Scripts/Internal/S.cs"})      # reads another feature's private
-    t(g, W, "deny", "Artifact", {"file_path": F + "/Wallet/a.html", "files": {"s.cs": F + "/Shop/Scripts/Internal/S.cs"}})
-    t(g, W, "deny", "Artifact", {"files": {"s.cs": {"from": "Scripts/Internal/S.cs"}}, "root": F + "/Shop"})
-    t(g, W, "pass", "Artifact", {"file_path": F + "/Wallet/a.html"})
-    t(g, W, "pass", "Artifact", {"action": "list"})
     # unknown tools pass (human decided 2026-11-26): a subagent hands back its result, a lead reads its tasks
     for who in (W, "@CodeLead", "@Manager", "@Core", "@UnityAutoPlay", "@Codex", "@GameDesigner", ""):
         for tool in ("SubagentHandback", "TaskOutput", "TaskStop", "ScheduleWakeup", "SomeNewTool"):
             t(g + " (unknown tools pass)", who, "pass", tool, {"result": "x"})
-    t(g, W, "pass", "TodoWrite", {"todos": []})
-    t(g, W, "deny", "AskUserQuestion", {"questions": []})
 
     # ---- unity-mcp: only deleting a file of the session's own feature
     g, U = "unity-mcp delete", "mcp__unityMCP__manage_asset"
@@ -454,24 +260,10 @@ def run_cases():
     d(W, "allow", "Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
     d("", "deny", "Assets/Features/Wallet/Scripts/Internal/Old.cs")
     d("@human", "pass", "Assets/Features/Shop/Scripts/Internal/S.cs")
-    t(g, W, "deny", "mcp__unityMCP__manage_script", {"action": "delete", "name": "Old", "path": "Assets/Features/Wallet/"})
-    t(g, W, "deny", "mcp__unityMCP__delete_script", {"uri": "Assets/Features/Wallet/Scripts/Internal/Old.cs"})
-    t(g, W, "deny", "mcp__unityMCP__execute_menu_item", {"menu_path": "Assets/Delete"})
 
     # ---- boundary files inside the agent's own feature
     g = "boundary files (the skeleton: only @CodeLead)"
-    w(g, W, "deny", F + "/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
-    e(g, W, "deny", F + "/Wallet/Tests/Game.Wallet.Tests.asmdef")
-    e(g, W, "deny", F + "/Wallet/Scripts/Internal/game.wallet.internal.ASMDEF")      # any letter case
-    w(g, W, "deny", F + "/Wallet/Scripts/Internal/x.asmref")
-    w(g, W, "deny", F + "/Wallet/Scripts/Internal/X.ASMREF")
-    e(g, W, "deny", F + "/Wallet/Scripts/Internal/AssemblyInfo.cs")
     other = F + "/Wallet/Scripts/Internal/Other.cs"
-    t(g, W, "deny", "Write", {"file_path": other, "content": '[assembly: InternalsVisibleTo("Game.Shop.Internal")]'})
-    t(g, W, "deny", "Edit", {"file_path": other, "old_string": "a", "new_string": 'InternalsVisibleTo("X")'})
-    t(g, W, "deny", "MultiEdit", {"file_path": other, "edits": [{"old_string": "a", "new_string": "InternalsVisibleTo"}]})
-    t(g, W, "allow", "Write", {"file_path": other, "content": "internal class Other {}"})
-    w(g, W, "deny", F + "/Shop/Scripts/Internal/Game.Shop.Internal.asmdef")
 
     # ---- human session
     g, H = "human", "@human"
@@ -487,24 +279,13 @@ def run_cases():
     # ---- the real process: wire format, binding, fail-closed
     g = "process"
     payload = lambda tool, ti: json.dumps({"tool_name": tool, "tool_input": ti, "cwd": FX})  # noqa: E731
-    cli(g, W, "allow", "Edit own feature", payload("Edit", {"file_path": F + "/Wallet/Scripts/Internal/W.cs"}))
-    cli(g, W, "deny", "Edit other feature", payload("Edit", {"file_path": F + "/Shop/Scripts/Internal/S.cs"}))
-    cli(g, W, "deny", "Edit Core", payload("Edit", {"file_path": A + "/Core/Base.cs"}))
-    cli(g, W, "pass", "TodoWrite", payload("TodoWrite", {}))
     cli(g, "", "deny", "Edit, FEATURE unset", payload("Edit", {"file_path": F + "/Wallet/Scripts/Internal/W.cs"}))
     cli(g, "@human", "pass", "Edit, @human", payload("Edit", {"file_path": F + "/Shop/Scripts/Internal/S.cs"}))
     cli(g, "@human", "pass", "Edit .claude, @human", payload("Edit", {"file_path": FX + "/.claude/settings.json"}))
-    cli(g, W, "deny", "malformed JSON", "{ not json")
-    cli(g, W, "deny", "empty input", " ")
-    cli(g, W, "deny", "JSON array instead of object", "[1,2]")
-    cli(g, W, "deny", "no tool_name", "{}")
-    cli(g, W, "allow", "UTF-8 path", payload("Write", {"file_path": F + "/Wallet/Scripts/Internal/Ví.cs"}))
     cli(g, "", "deny", "Edit, unbound, FEATURE=@human in the environment is ignored",
         payload("Edit", {"file_path": F + "/Shop/Scripts/Internal/S.cs"}), env_feature="@human")
     cli(g, "", "deny", "Edit, unbound, FEATURE=Wallet in the environment is ignored",
         payload("Edit", {"file_path": F + "/Wallet/Scripts/Internal/W.cs"}), env_feature=W)
-    cli(g, W, "deny", "Edit, bound to Wallet, FEATURE=@human in the environment is ignored",
-        payload("Edit", {"file_path": F + "/Shop/Scripts/Internal/S.cs"}), env_feature="@human")
     run_binding_cases(payload)
     run_role_cases(payload)
     run_report_cases()
@@ -758,26 +539,26 @@ def run_binding_cases(payload):
     say(g, "block, bound=None", "wrong PIN, wrapped in client context", ide + "\nFEATURE=Wallet 0000\n")
     say(g, "pass, bound=None", "the word only inside client context", ide + "\nSửa giúp tôi")
     say(g, "pass, bound=None", "a command-like line in the middle of a pasted text", "Xem đoạn này:\nFEATURE = 1\nđúng không?")
-    say(g, "block, bound=Wallet", "right PIN", f"FEATURE=Wallet {PIN}")
-    say(g, "block, bound=_Services/Popup", "right PIN, wrapped in client context", f"{ide}\nFEATURE=_Services/Popup {PIN}",
-        session="chat-ide")
-    say(g, "block, bound=Wallet", "status of a bound chat", "feature")
-    say(g, "pass, bound=Wallet", "next ordinary prompt tells the model its binding", "Làm tiếp đi")
-    say(g, "block, bound=Wallet", "wrong PIN keeps the old binding", "FEATURE=@human 0000")
-    say(g, "block, bound=_Services/Popup", "service, backslash, spaces, lower case",
-        f"  feature = _Services\\Popup   {PIN}\n", session="chat2")
+    say(g, "block, bound=None", "a feature is a worker's, not a chat's (người quyết 2026-11-27)", f"FEATURE=Wallet {PIN}")
+    say(g, "block, bound=None", "so is a service", f"{ide}\nFEATURE=_Services/Popup {PIN}", session="chat-ide")
+    say(g, "block, bound=None", "and @Core, and the tester", f"FEATURE=@Core {PIN}", session="chat-core")
+    say(g, "block, bound=None", "the tester is bound by the server only", f"FEATURE=@UnityAutoPlay {PIN}", session="chat-core")
+    say(g, "block, bound=@CodeLead", "right PIN", f"FEATURE=@CodeLead {PIN}")
+    say(g, "block, bound=@CodeLead", "status of a bound chat", "feature")
+    say(g, "pass, bound=@CodeLead", "next ordinary prompt tells the model its binding", "Làm tiếp đi")
+    say(g, "block, bound=@CodeLead", "wrong PIN keeps the old binding", "FEATURE=@human 0000")
+    say(g, "block, bound=@Codex", "spaces, lower case", f"  feature = @codex   {PIN}\n", session="chat2")
     say(g, "block, bound=@human", "human", f"FEATURE=@human {PIN}", session="chat3")
-    say(g, "block, bound=Shop", "the human may rebind", f"FEATURE=Shop {PIN}", session="chat3")
+    say(g, "block, bound=@GameDesigner", "the human may rebind", f"FEATURE=@GameDesigner {PIN}", session="chat3")
     say(g, "block, bound=@human", "and bind back", f"FEATURE=@human {PIN}", session="chat3")
     say(g, "pass, bound=@human", "after a rebind the context follows the new binding", "tiếp", session="chat3")
 
     # ---- the guard reads the binding of the chat that makes the call
     g = "bind: guard uses it"
-    b(g, "allow", "chat1", "Edit", {"file_path": own})
-    b(g, "deny", "chat1", "Edit", {"file_path": S})
-    b(g, "deny", "chat1", "Bash", {"command": "ls"})
-    b(g, "allow", "chat2", "Edit", {"file_path": F + "/_Services/Popup/Scripts/Internal/P.cs"})
+    b(g, "allow", "chat1", "Edit", {"file_path": A + "/_Composition/Boot.cs"})
+    b(g, "deny", "chat1", "Edit", {"file_path": FX + "/.claude/hooks/guard.py"})
     b(g, "deny", "chat2", "Edit", {"file_path": own})
+    b(g, "deny", "chat-ide", "Edit", {"file_path": F + "/_Services/Popup/Scripts/Internal/P.cs"})
     b(g, "pass", "chat3", "Edit", {"file_path": S})
     b(g, "pass", "chat3", "Edit", {"file_path": FX + "/.claude/hooks/guard.py"})
     b(g, "deny", "other-chat", "Edit", {"file_path": own})           # a binding belongs to one chat only
@@ -787,14 +568,13 @@ def run_binding_cases(payload):
     b(g, "deny", "broken", "Edit", {"file_path": own})
     Path(guard.binding_path("gone", STORE)).write_text('{"feature": "Nope"}')
     b(g, "deny", "gone", "Edit", {"file_path": own})                 # a binding to a missing feature
+    Path(guard.binding_path("old-feature", STORE)).write_text('{"feature": "Wallet"}')
+    b(g, "deny", "old-feature", "Edit", {"file_path": own})          # a chat bound to a feature before 2026-11-27: inert
     b(g, "allow", "chat1", "Bash", {"command": VALIDATE + " --feature Wallet"})
-    b(g, "allow", "chat1", "Bash", {"command": VALIDATE + " --feature _Services/Popup"})
-    b(g, "deny", "chat1", "Bash", {"command": VALIDATE + " --feature ../x"})
-    b(g, "deny", "chat1", "Bash", {"command": VALIDATE + " --feature Wallet --root x"})
 
     # ---- the real guard process reads the store it is given, and none when it is given none
     g = "bind: process"
-    with_session = lambda s: json.dumps({"tool_name": "Edit", "tool_input": {"file_path": own}, "cwd": FX,  # noqa: E731
+    with_session = lambda s: json.dumps({"tool_name": "Edit", "tool_input": {"file_path": A + "/_Composition/Boot.cs"}, "cwd": FX,  # noqa: E731
                                          "session_id": s})
     for expect, session, store in (("allow", "chat1", STORE), ("deny", "chat2", STORE), ("deny", "chat1", None)):
         args = [sys.executable, "-I", str(HERE / "guard.py"), "--root", FX] + (["--store", store] if store else [])
@@ -805,7 +585,7 @@ def run_binding_cases(payload):
             got = json.loads(p.stdout)["hookSpecificOutput"]["permissionDecision"]
         except Exception:
             got = "garbage"
-        check(g, "", expect, f"Edit own feature, session={session}, store={'yes' if store else 'no'}", got)
+        check(g, "", expect, f"Edit _Composition (@CodeLead), session={session}, store={'yes' if store else 'no'}", got)
 
     # ---- guessing the PIN locks binding; a missing PIN binds nothing
     g = "bind: PIN lock"
@@ -839,16 +619,15 @@ def run_binding_cases(payload):
     bind_session.write_json(guard.binding_path(sid, STORE), {"feature": "@CodeLead"})
     check(g, "", ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/codelead.md", ".claude/rules/unity.md"],
           "rule files of @CodeLead (what a reread names)", bind_session.rule_files("@CodeLead", FX))
-    check(g, "", [".claude/rules/feature.md"], "a feature chat reads feature.md itself (unity.md loads with the Unity files)", bind_session.must_read("Wallet"))
-    check(g, "", ([".claude/rules/feature.md"], [".claude/rules/feature.md"], [".claude/rules/manager.md"]),
-          "@Core and a service read feature.md too; a Leader reads only its own rules", (bind_session.must_read("@Core"), bind_session.must_read("_Services/Popup"), bind_session.must_read("@Manager")))
+    check(g, "", ([], [".claude/rules/manager.md"]), "a feature is a worker (no chat, nothing to read); a Leader reads only its own rules",
+          (bind_session.must_read("Wallet"), bind_session.must_read("@Manager")))
     check(g, "", ("tầng 0 · Master", "tầng 7 · Features"), "tiers are numbered top to bottom", (bind_session.tier_label("Master"), bind_session.tier_label("Features")))
     check(g, "", [".claude/rules/gamedesigner.md", ".claude/rules/designadvisor.md"],
           "@GameDesigner reads its rules itself: they no longer load with the design files", bind_session.must_read("@GameDesigner"))
     check(g, "", [".claude/rules/designadvisor.md", ".claude/rules/gamedesigner.md"],
           "@DesignAdvisor reads its rules itself", bind_session.must_read("@DesignAdvisor"))
     excludes = json.loads((HERE.parent / "settings.json").read_text(encoding="utf-8")).get("claudeMdExcludes", [])
-    for name in ("manager.md", "codelead.md", "gamedesigner.md", "designadvisor.md", "uidesigner.md", "tester.md", "studio.md", "feature.md"):
+    for name in ("manager.md", "codelead.md", "gamedesigner.md", "designadvisor.md", "uidesigner.md", "tester.md", "studio.md", "worker.md"):
         check(g, "", True, f"{name} never loads by itself into another role's chat (claudeMdExcludes)",
               f"**/.claude/rules/{name}" in excludes)
     check(g, "", True, "the node files of the design tree (CLAUDE.md) do not load near a Read",
@@ -917,14 +696,10 @@ def run_role_cases(payload):
     t(g + ": @CodeLead cancels any order", "@CodeLead", "allow", "Bash", sh(SC + 'Hud/hud-sprites "Trùng sprite đã đạt, style cũ"'))
     t(g + ": cancel needs a reason", "@CodeLead", "deny", "Bash", sh(SC + "Hud/hud-sprites"))
     t(g + ": no shell characters in the reason", "@CodeLead", "deny", "Bash", sh(SC + 'Hud/hud-sprites "x; rm -rf ."'))
-    t(g + ": a feature cancels its own order", "Wallet", "allow", "Bash", sh(SC + 'Wallet/coin-icons "Không cần nữa"'))
-    t(g + ": not another feature's", "Wallet", "deny", "Bash", sh(SC + 'Hud/hud-sprites "Không cần nữa"'))
     t(g + ": a tool chat does not cancel", "@ClaudeImage", "deny", "Bash", sh(SC + 'Hud/hud-sprites "Không cần nữa"'))
     t(g + ": only the human closes", M, "deny", "Bash", sh(TW + 'done w20261126-ab12 "xong"'))
     t(g + ": only the human drops", M, "deny", "Bash", sh(TW + 'drop w20261126-ab12 "thôi"'))
     t(g + ": a Leader adds", "@CodeLead", "allow", "Bash", sh(TW + 'add "Sổ nhận test chéo" --from CodeLead --decided "Người chọn B"'))
-    t(g + ": a feature reads", "Wallet", "allow", "Bash", sh(TW + "list --all"))
-    t(g + ": a feature does not add", "Wallet", "deny", "Bash", sh(TW + 'add "x" --from Manager --decided "y"'))
     r(g, M, "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
     r(g, M, "allow", A + "/Core/Old.cs")
     r(g, M, "deny", own_w)
@@ -977,21 +752,13 @@ def run_role_cases(payload):
             pad = os.path.join(temp_of(ME), "scratchpad", "l.output")
             os.symlink(os.path.join(sub, "agent-1.jsonl"), pad)
             t(g + ": link to its subagent", "@CodeLead", "allow", "Read", {"file_path": inner}, session=ME)
-            t(g + ": link to its subagent", "Wallet", "allow", "Read", {"file_path": inner}, session=ME)
             t(g + ": link out of the session", "@CodeLead", "deny", "Read", {"file_path": out}, session=ME)
-            t(g + ": link in scratchpad read only", "Wallet", "allow", "Read", {"file_path": pad}, session=ME)
-            t(g + ": link in scratchpad read only", "Wallet", "deny", "Write", {"file_path": pad, "content": "x"}, session=ME)
         if True:      # the CLI puts the temp folders in claude-<uid> (claude-0 on Windows)
             uid_pad = os.path.join(temp, f"claude-{os.getuid() if hasattr(os, 'getuid') else 0}", "abc123", ME, "scratchpad")
             os.makedirs(uid_pad)
-            t(g + ": claude-<uid> temp", "Wallet", "allow", "Read", {"file_path": os.path.join(uid_pad, "a.md")}, session=ME)
-            t(g + ": claude-<uid> temp", "Wallet", "allow", "Write", {"file_path": os.path.join(uid_pad, "a.md"), "content": "x"},
-              session=ME)
-            t(g + ": claude-<uid> temp", "Wallet", "deny", "Read", {"file_path": os.path.join(temp, "claude-x", "abc123", ME, "a.md")},
-              session=ME)
         for p in (mine[0], mine[1], os.path.join(temp_of(OTHER), "scratchpad", "note.py"), os.path.join(temp_of(ME), "scratchpad"),
                   os.path.join(temp_of(ME), "other", "x.txt")):
-            t(g + ": writes only inside its scratchpad", "Wallet", "deny", "Write", {"file_path": p, "content": "x"}, session=ME)
+            pass
 
         # @CodeLead and @Manager read (only) the folders of a session bound to a feature or service.
         FEAT, SERV, LEAD, CORE = ("aaaaaaaa-2222-3333-4444-555555555555", "bbbbbbbb-2222-3333-4444-555555555555",
@@ -1074,9 +841,6 @@ def run_role_cases(payload):
     stage_file.unlink()
     t(g + " (phase gate holds in a chain)", "@CodeLead", "deny", "Bash", sh("python Management/tools/validate.py; " + SEND + 'Wallet --from CodeLead "a"'))
     REQB = "python Management/tools/gd_req.py "
-    t(g + " (own book chained)", "Wallet", "allow", "Bash", sh(REQB + 'Wallet doing feature-wallet/a/b#r1 "bắt đầu"; python Management/tools/validate.py'))
-    t(g + " (another book chained)", "Wallet", "deny", "Bash", sh("python Management/tools/validate.py; " + REQB + 'Shop doing feature-shop/a/b#r1 "x"'))
-    t(g + " (search not chained)", "Wallet", "deny", "Bash", sh("python Management/tools/validate.py; ls UnityProject/Assets/Features/Wallet"))
     t(g + " (others)", "@human", "pass", "Bash", sh(SCAFFOLD))
 
     g = "manager: reads the design's status"
@@ -1094,7 +858,7 @@ def run_role_cases(payload):
             t(g, who, "allow", "Bash", sh(cmd))
     for cmd in (PACK, PACK + " ../x", PACK + " Hero; rm -rf UnityProject", PACK + " Hero && ls", PACK + " Hero --root /tmp",
                 PACK + " Hero Wallet", "python Management/tools/../tools/gd_pack.py Hero"):
-        t(g, "Wallet", "deny", "Bash", sh(cmd))
+        pass
     w(g, M, "deny", A + "/../UnityProject/Assets/Features/Hero/Scripts/Internal/.gitkeep")      # still no file edits
 
     g = "any chat: design frame command"
@@ -1105,19 +869,17 @@ def run_role_cases(payload):
             t(g, who, "allow", "Bash", sh(cmd))
     for cmd in (FRAME, FRAME + " ai/idea", FRAME + " ai/idea/feature-hero --html x.html", FRAME + " ai/idea/../x",
                 FRAME + " ai/other/feature-hero", FRAME + " ai/idea/feature-hero && ls", FRAME + " ai/idea/Feature-Hero"):
-        t(g, "Wallet", "deny", "Bash", sh(cmd))
+        pass
     t(g + " (html)", "@human", "pass", "Bash", sh(FRAME + " ai/idea/feature-hero --html x.html"))
 
     g = "role spelling"
     e(g, "@core", "deny", A + "/Core/Old.cs")          # stored values are exact; bind_session stores "@Core"
     e(g, "@MANAGER", "deny", A + "/Core/Old.cs")
     e(g, "@Cor", "deny", A + "/Core/Old.cs")
-    cli(g, "@Core", "allow", "process: @Core edits Core", payload("Edit", {"file_path": A + "/Core/Old.cs"}))
     cli(g, "@Manager", "deny", "process: @Manager edits Core", payload("Edit", {"file_path": A + "/Core/Old.cs"}))
 
     g = "bind: roles"
-    say(g, "block, bound=@Core", "bind @Core", f"FEATURE=@Core {PIN}", session="role-core")
-    say(g, "pass, bound=@Core", "@Core is told its area", "làm đi", session="role-core")
+    say(g, "block, bound=None", "@Core is a worker now", f"FEATURE=@Core {PIN}", session="role-core")
     say(g, "block, bound=None", "@Composition is no role any more", f"FEATURE=@Composition {PIN}", session="role-comp")
     say(g, "block, bound=@Manager", "bind @Manager", f"FEATURE=@Manager {PIN}", session="role-mgr")
     import bind_session
@@ -1328,7 +1090,6 @@ def run_codelead_cases():
     e(g, L, "deny", F + "/New.cs")
     for p in (FX + "/UnityProject/Library/x", FX + "/UnityProject/Temp/x", FX + "/secret.txt", r"C:\Windows\x"):
         r(g, L, "deny", p)
-    r(g + " (others still may not)", W, "deny", F + "/Shop/Scripts/Internal/S.cs")
     r(g + " (others still may not)", "@Manager", "deny", internal)
 
     g = "codelead: unity-mcp"
@@ -1377,8 +1138,6 @@ def run_codelead_cases():
                          ("manage_editor", "nonsense"), ("manage_scene", "")):
         u(name, expect="deny", action=action)
     u("manage_asset", expect="deny", action="create", path="Assets/Features/Wallet/FeatureAssets/Private/n.asset")
-    t(g + " (others)", W, "allow", "mcp__unityMCP__refresh_unity", {})
-    t(g + " (others)", W, "allow", "ReadMcpResourceTool", {"server": "unityMCP", "uri": "x"})
     for who in ("@Manager", "@GameDesigner"):      # every role uses unity-mcp (người quyết 2026-11-26)
         t(g + " (others)", who, "allow", "mcp__unityMCP__read_console", {"action": "get"})
     t(g + " (others)", "", "deny", "mcp__unityMCP__read_console", {"action": "get"})
@@ -1437,24 +1196,12 @@ def run_codelead_cases():
     t(g, L, "deny", guard.UNITY_ASSET_TOOL, {"action": "modify", "path": "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs"})
 
     g = "feature: skeleton read-only"
-    r(g, W, "allow", F + "/Wallet/Scripts/Internal/Base/HeroBase.cs")
-    e(g, W, "deny", F + "/Wallet/Scripts/Internal/Base/HeroBase.cs")
-    w(g, W, "deny", F + "/Wallet/Scripts/View/Base/New.cs")
-    w(g, W, "allow", F + "/Wallet/Scripts/Internal/HeroLogic.cs")          # the subclass
-    w(g, W, "allow", F + "/Wallet/Scripts/View/HeroView.cs")
-    r(g, "_Services/Popup", "deny", F + "/Wallet/Scripts/Internal/Base/HeroBase.cs")      # another feature's base is private
-    r(g, "_Services/Popup", "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
-    r(g, "@Core", "allow", A + "/Core/IServiceRegistry.cs")
-    e(g, "@Core", "deny", A + "/Core/IServiceRegistry.cs")
-    e(g, "@Core", "allow", A + "/Core/ServiceRegistry.cs")
     for who in ("@Manager", "@GameDesigner", ""):
         e(g + " (others)", who, "deny", F + "/Wallet/Scripts/Contracts/IWallet.cs")
     e(g + " (human)", "@human", "pass", F + "/Wallet/Scripts/Contracts/IWallet.cs")
     e(g + " (human)", "@human", "pass", A + "/Core/IServiceRegistry.cs")
     for p in (A + "/Core/Old.cs", A + "/_Composition/Old.cs"):
-        e(g + ": a feature never edits Core/_Composition", W, "deny", p)
-    e(g, W, "deny", FX + "/Management/tools/rules.json")
-    e(g, W, "deny", FX + "/Management/approvals/a.json")          # the old approval folder means nothing now
+        pass
 
     g = "codelead: bind and reports"
     say(g, "block, bound=@CodeLead", "bind @CodeLead", f"FEATURE=@codelead {PIN}", session="role-lead")
@@ -1770,15 +1517,8 @@ def run_fail_cases():
         bind(s, v)
         guard.clear_fails(s, STORE)
     out = post("PostToolUseFailure", read, {"action": "get"}, "Invalid value for 'count': must be a number", "fail-w")
-    check(g, "Wallet", (False, ""), "a unity-mcp error that is not a connection error: nothing",
-          (guard.read_fail("fail-w", STORE, "unity") is not None, out))
-    t(g, "Wallet", "allow", read, {"action": "get"}, session="fail-w")
     out = post("PostToolUseFailure", read, {"action": "get"},
                "Instance 'UnityProject@638c2683' not found. Available: Hitsort@a573ff35.", "fail-w")
-    check(g, "Wallet", (True, True, True), "unity-mcp connection error: flagged, told to stop and tell its Leader once",
-          (guard.read_fail("fail-w", STORE, "unity") is not None, "UNITY MCP LỖI KẾT NỐI" in out, "MỘT tin" in out))
-    t(g + " (the retry is refused)", "Wallet", "deny", read, {"action": "get"}, session="fail-w")
-    t(g + " (... other work goes on)", "Wallet", "allow", "Read", {"file_path": FX + "/CLAUDE.md"}, session="fail-w")
     out = post("PostToolUse", read, {"action": "get"}, {"success": False, "error": "Connection refused"}, "fail-lead")
     check(g, "@CodeLead", True, "a result with success false and a connection error flags too",
           guard.read_fail("fail-lead", STORE, "unity") is not None)
@@ -1798,13 +1538,10 @@ def run_fail_cases():
                 "python Management/tools/studio.py codex Wallet/coin-icons coin"):
         t(g + " (Codex run again refused)", "@Codex", "deny", "Bash", {"command": cmd}, session="fail-codex")
     out = post("PostToolUse", "Bash", {"command": "python Management/tools/studio.py check"}, {"stdout": "ok"}, "fail-w")
-    check(g, "Wallet", "", "an ordinary command output: nothing", out)
 
     for s in ("fail-w", "fail-adv"):
         p = subprocess.run([sys.executable, "-I", str(HERE / "bind_session.py"), "--root", FX, "--store", STORE],
                            input=json.dumps({"session_id": s, "prompt": "Unity đã mở lại"}).encode("utf-8"), capture_output=True)
-    check(g, "Wallet", (None, None), "a new turn clears the flags: it may try once again",
-          (guard.read_fail("fail-w", STORE, "unity"), guard.read_fail("fail-adv", STORE, "codex")))
 
 
 def run_inbox_cases():
@@ -1842,7 +1579,6 @@ def run_inbox_cases():
     sh("@UIDesigner", "allow", D + 'send @ClaudeImage --from UIDesigner "x"')
     sh("@UIDesigner", "deny", D + 'send @Codex --from UIDesigner "x"')
     sh("@CodeLead", "deny", D + 'send Wallet --from Manager "x"')             # --from must be itself
-    sh("Wallet", "deny", D + 'send Shop --from Wallet "x"')                   # a feature sends to nobody
     sh("@Codex", "deny", D + 'send Wallet --from Codex "x"')
     sh("@Manager", "deny", D + 'send @CodeLead --from Manager "x"')           # a Leader is messaged with SendMessage
     for lead in ("CodeLead", "GameDesigner", "UIDesigner"):                   # these Leaders open the tester through its inbox
@@ -2024,49 +1760,27 @@ def run_progress_cases():
     own = F + "/Shop/Scripts/Internal/S.cs"
 
     g = "code gate"
-    e(g, W, "allow", F + "/Wallet/Scripts/Internal/Old.cs")                 # live design names Wallet and reached round 4
     # any letter case of the bound name on Windows; on a case-sensitive system 'wallet' is not the Wallet folder
-    e(g, "wallet", "allow" if WIN else "deny", F + "/Wallet/Scripts/Internal/Old.cs")
-    e(g, "_Services/Popup", "allow", F + "/_Services/Popup/Scripts/Internal/P.cs")
     for p in (own, F + "/Shop/Scripts/Contracts/IShop.cs", F + "/Shop/Tests/T.cs", F + "/Shop/CLAUDE.md"):
-        w(g + " (no design names Shop)", S, "deny", p)
-    e(g + " (no design names Shop)", S, "deny", own)
-    t(g + " (no design names Shop)", S, "deny", "MultiEdit", {"file_path": own, "edits": []})
-    t(g + " (no design names Shop)", S, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Features/Shop/Scripts/Internal/S.cs"})
-    r(g + ": reading is not gated", S, "allow", own)
-    w(g + ": proposals are closed for everyone", S, "deny", FX + "/Management/proposals/shop-gate.md")
-    t(g + ": validate is not gated", S, "allow", "Bash", {"command": VALIDATE})
+        pass
     os.makedirs(live + "/feature-shop/detail")
     for d in ("/feature-shop", "/feature-shop/detail"):
         Path(live + d + "/data.md").write_text("# x\n")
     Path(live + "/feature-shop/code.json").write_text('{"unity": ["Shop"]}')
-    e(g + " (design stops at round 3)", S, "deny", own)
     os.makedirs(live + "/feature-shop/detail/tech")
     Path(live + "/feature-shop/detail/tech/data.md").write_text("# x\n")
-    e(g + " (round 4 in live)", S, "allow", own)
-    t(g + " (round 4 in live)", S, "allow", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Features/Shop/Scripts/Internal/S.cs"})
     Path(live + "/feature-shop/code.json").write_text("{ broken")
-    e(g + " (unreadable code.json)", S, "deny", own)
     Path(live + "/feature-shop/code.json").write_text('{"unity": ["Shop"]}')
-    e(g + ": others", "@Core", "allow", A + "/Core/Old.cs")
     e(g + ": others", "@CodeLead", "allow", A + "/_Composition/Old.cs")
     e(g + ": others", "@human", "pass", F + "/Shop/Scripts/Internal/S.cs")
-    cli(g + " (real process)", S, "allow", "Edit own code once the design reached round 4",
-        json.dumps({"tool_name": "Edit", "tool_input": {"file_path": own}, "cwd": FX}))
     os.rename(FX + "/Management/tools/gamedesign.py", FX + "/Management/tools/gamedesign.off")
     sys.modules.pop("gamedesign", None)
-    e(g + " (gate code missing: closed)", W, "deny", F + "/Wallet/Scripts/Internal/Old.cs")
-    e(g + " (gate code missing: closed)", "@Core", "allow", A + "/Core/Old.cs")
     os.rename(FX + "/Management/tools/gamedesign.off", FX + "/Management/tools/gamedesign.py")
     importlib.invalidate_caches()      # this process just failed to import it; a real hook is a new process each time
     shutil.rmtree(live + "/feature-shop")
-    cli(g + " (real process)", S, "deny", "Edit own code with no design",
-        json.dumps({"tool_name": "Edit", "tool_input": {"file_path": own}, "cwd": FX}))
     for session, value in (("gate-wallet", W), ("gate-shop", S)):
         Path(guard.binding_path(session, STORE)).write_text(json.dumps({"feature": value}))
-    check(g, W, True, "an open feature is told it may code", "được code" in bind_session.context({"session_id": "gate-wallet"}, FX, STORE))
     told = bind_session.context({"session_id": "gate-shop"}, FX, STORE)
-    check(g, S, True, "a locked feature is told so, and why", "ĐANG KHOÁ" in told and "chưa có node thiết kế nào" in told)
 
     g = "codelead: progress command"
     PROGRESS = "python Management/tools/gd_progress.py "
@@ -2100,18 +1814,15 @@ def run_req_cases():
            "Wallet done wallet-rules#start-50 WalletLogicTests.A,WalletLogicTests.B_c",
            'Wallet done wallet-rules#edge-tien-vua-du play "mua khi đủ đúng giá, số về 0"')
     for tail in own:
-        t(g + ": own book", "Wallet", "allow", "Bash", {"command": REQ + tail})
+        pass
     for tail in own:
-        t(g + ": another feature's book", "_Services/Popup", "deny", "Bash", {"command": REQ + tail})
         t(g + ": doing / done are the feature's", "@CodeLead", "deny", "Bash", {"command": REQ + tail})
         t(g + ": doing / done are the feature's", "@Manager", "deny", "Bash", {"command": REQ + tail})
-    t(g + ": service's own book", "_Services/Popup", "allow", "Bash",
-      {"command": REQ + '_Services/Popup doing popup-queue#one-at-a-time "x"'})
     for tail in ('Wallet doing wallet-rules#start-50 "a $(rm -rf x)"', 'Wallet doing wallet-rules#start-50 "a"; ls',
                  "Wallet doing wallet-rules#start-50", "Wallet done wallet-rules#start-50", "Wallet done wallet-rules#start-50 Tests",
                  "Wallet done ../x#y A.B", "Wallet done wallet-rules#start-50 A.B --root /tmp", 'Wallet doing Wallet-Rules#x "y"',
                  "Wallet verify wallet-rules#start-50", 'Wallet reject wallet-rules#start-50 "x"'):
-        t(g + ": refused shapes", "Wallet", "deny", "Bash", {"command": REQ + tail})
+        pass
     for tail in ("Wallet verify wallet-rules#start-50", "Wallet verify wallet-rules#start-50,income-amounts#kill-once",
                  'Wallet reject wallet-rules#start-50 "test không kiểm trần số dư"', "status"):
         t(g + ": @CodeLead", "@CodeLead", "allow", "Bash", {"command": REQ + tail})
@@ -2123,8 +1834,6 @@ def run_req_cases():
     for who in ("Wallet", "@Core"):
         t(g + ": status is the Leaders'", who, "deny", "Bash", {"command": REQ + "status"})
     t(g + ": a Leader may chain status", "@Manager", "allow", "Bash", {"command": REQ + "status; " + VALIDATE})
-    w(g + ": the book file only through the command", "Wallet", "deny",
-      FX + "/Management/game-design/ai/idea/feature-code/detail/tech/.progress/requirements.json")
     w(g + ": the book file only through the command", "@CodeLead", "deny",
       FX + "/Management/game-design/ai/idea/feature-code/detail/tech/.progress/requirements.json")
 
@@ -2167,23 +1876,7 @@ def run_tool_cases():
     w(g, B, "deny", order + "/work/coin.md")
 
     g = "tools: a feature orders for itself"
-    w(g, W, "allow", studio + "/codex/orders/Wallet/new-icons/order.md")
-    w(g, W, "allow", studio + "/blender/orders/Wallet/coin-model/order.md")
-    w(g, W, "deny", order + "/feedback-1.md")      # no feedback files any more: studio.py review
-    w(g, W, "deny", order + "/order.md")      # exists: written once
-    e(g, W, "deny", studio + "/codex/orders/Wallet/new-icons/order.md")
-    w(g, W, "deny", studio + "/codex/orders/Shop/x/order.md")
-    w(g, W, "deny", order + "/work/coin.md")
-    w(g, W, "deny", order + "/status.json")
-    w(g, W, "deny", order + "/feedback-0.md")
-    w(g, W, "deny", studio + "/codex/orders/Wallet/Bad_Id/order.md")
-    w(g, W, "deny", studio + "/codex/lessons.md")
-    w(g, W, "deny", studio + "/paint/orders/Wallet/x/order.md")
-    w(g, W, "deny", res + "/Wallet/codex/coin-icons/v2/coin.png")
-    w(g, "_Services/Popup", "allow", studio + "/codex/orders/_Services/Popup/pop-bg/order.md")
-    w(g, "Shop", "deny", studio + "/codex/orders/Shop/x/order.md")      # its code gate is locked
     w(g, "@Manager", "deny", studio + "/codex/orders/Wallet/m/order.md")
-    w(g, "@Core", "deny", studio + "/codex/orders/Core/m/order.md")
 
     g = "tools: @GameDesigner orders art for design nodes"
     art = studio + "/codex/orders/_design/feature-popup-lose.lose-actions.actions-spec/lose-art"
@@ -2198,7 +1891,6 @@ def run_tool_cases():
     os.makedirs(art, exist_ok=True)
     Path(art + "/order.md").write_text("x")
     w(g + " (written once)", D, "deny", art + "/order.md")
-    w(g, W, "deny", art + "/feedback-2.md")
     w(g, X, "allow", art + "/work/main.md")
     for who in (X, W, "@human"):
         w(g + " (the page writes the judgement)", who, "deny" if who != "@human" else "pass", art + "/review.json")
@@ -2226,14 +1918,12 @@ def run_tool_cases():
     for cmd in (P + " codex Wallet/coin-icons coin", P + " consult Wallet/coin-icons coin", P + " deliver codex Wallet/coin-icons"):
         t(g, X, "allow", "Bash", {"command": cmd})
         t(g, B, "deny", "Bash", {"command": cmd})
-        t(g, W, "deny", "Bash", {"command": cmd})
     for cmd in (P + " blender Wallet/coin-model coin", P + " deliver blender Wallet/coin-model"):
         t(g, B, "allow", "Bash", {"command": cmd})
         t(g, X, "deny", "Bash", {"command": cmd})
     for cmd in (P + " review Wallet/coin-icons coin 3", P + ' review Wallet/coin-icons gem 0 "gem bị mờ ở 64px... làm nét hơn, viền 2px"',
                 P + ' review Wallet/coin-icons gem 1 ""', P + ' review _Services/Popup/pop-bg bg 2 "tạm được"'):
         t(g, W if "Wallet" in cmd else "_Services/Popup", "allow", "Bash", {"command": cmd})
-        t(g, "Shop", "deny", "Bash", {"command": cmd})
         t(g, X, "deny", "Bash", {"command": cmd})
         t(g, "@GameDesigner", "deny", "Bash", {"command": cmd})
     for cmd in (P + " review Wallet/coin-icons coin 4", P + " review Wallet/coin-icons coin", P + " review Wallet/coin-icons coin 0 mờ quá",
@@ -2242,7 +1932,7 @@ def run_tool_cases():
                 P + ' review Wallet/coin-icons coin 0 "a | b"', P + ' review Wallet/../Shop/x coin 3',
                 P + ' review Wallet/coin-icons coin 0 "a\\"', P + ' review Wallet/coin-icons Coin 3',
                 P + " take Wallet/coin-icons", P + " reject Wallet/coin-icons"):
-        t(g + " (review: refused forms)", W, "deny", "Bash", {"command": cmd})
+        pass
     for cmd in (P + " codex Wallet/coin-icons coin; rm -rf x", P + " codex ../x coin", P + " codex Wallet/coin-icons",
                 P + " review Wallet/coin-icons coin 3 --root /tmp", "codex exec -s danger-full-access x", "blender -b -P x.py"):
         t(g, X, "deny", "Bash", {"command": cmd})
@@ -2280,7 +1970,6 @@ def run_tool_cases():
     t(g, X, "allow", "mcp__unityMCP__execute_menu_item", {"menu_path": "Tools/Codex"}, session="t-x")
     t(g, B, "deny", "mcp__unityMCP__execute_custom_tool", {"tool_name": "blender_run"}, session="t-b")      # @Codex holds the Editor
     guard.release_lock(STORE)
-    t(g, W, "deny", "mcp__unityMCP__execute_custom_tool", {"tool_name": "codex_exec"})
 
     g = "tools: @ClaudeImage draws SVG and runs only its own studio commands"
     CI = "@ClaudeImage"
@@ -2312,9 +2001,6 @@ def run_tool_cases():
         t(g + " (only @ClaudeImage)", who, "deny", "Bash", {"command": P + " claude Wallet/coin-icons coin"})
         t(g + " (only @ClaudeImage)", who, "deny", "Bash", {"command": P + " deliver claudeimage Wallet/coin-icons"})
         t(g + " (status for all)", who, "allow", "Bash", {"command": P + " status claudeimage"})
-    w(g + " (a feature orders from it)", W, "allow", studio + "/claudeimage/orders/Wallet/new-claude/order.md")
-    w(g + " (a feature orders from it)", W, "deny", studio + "/claudeimage/orders/Shop/x/order.md")
-    w(g + " (a feature orders from it)", W, "deny", studio + "/claudeimage/orders/Wallet/new-claude/work/a.svg")
     w(g + " (@UIDesigner orders a claude concept)", "@UIDesigner", "allow", cart + "/order.md")
     w(g + " (@GameDesigner no longer does)", "@GameDesigner", "deny", cart + "/order.md")
     w(g + " (@UIDesigner orders no Codex art)", "@UIDesigner", "deny", studio + "/codex/orders/_design/feature-a.cheat/a/order.md")
@@ -2375,80 +2061,19 @@ def run_unity_cases():
         t(g, who, expect, "mcp__unityMCP__" + tool_, ti, session=session)
 
     g = "unity: read"
-    u(g, W, "allow", "read_console", action="get", types=["error"])
     # the same server under the name of its stdio registration (UnityMCP, local scope of the CLI)
-    t(g, W, "allow", "mcp__UnityMCP__read_console", {"action": "get"})
-    t(g, W, "deny", "mcp__UnityMCP__create_script", {"path": "Assets/Features/Wallet/X.cs"})
-    t(g, W, "deny", "mcp__UnityMCP__manage_asset", {"action": "get_info", "path": "Assets/Features/Shop/FeatureAssets/Private/s.asset"})
-    t(g, W, "allow", "mcp__UnityMCP__batch_execute", {"commands": [{"tool": "mcp__UnityMCP__read_console", "params": {"action": "get"}}]})
-    t(g, W, "allow", "ReadMcpResourceTool", {"server": "UnityMCP", "uri": "mcpforunity://editor/state"})
-    t(g, W, "deny", "ReadMcpResourceTool", {"server": "blender", "uri": "x"})
     t(g, "@Manager", "allow", "mcp__UnityMCP__read_console", {"action": "get"})
-    u(g, W, "allow", "read_console")
-    u(g, W, "allow", "find_gameobjects", search_term="Coin")
-    u(g, W, "allow", "manage_scene", action="get_hierarchy")
-    u(g, W, "allow", "manage_asset", action="get_info", path=own + "/c.asset")
-    u(g, W, "allow", "manage_asset", action="search", path="Assets/Features/Wallet", search_pattern="*.prefab")
-    u(g, W, "allow", "manage_asset", action="get_info", path="Assets/Features/Shop/FeatureAssets/Public/x.prefab")
-    u(g, W, "deny", "manage_asset", action="get_info", path="Assets/Features/Shop/FeatureAssets/Private/s.asset")
-    u(g, W, "deny", "manage_asset", action="search", search_pattern="*.asset")      # no scope: the whole project
-    u(g, W, "deny", "manage_asset", action="search", path="Assets")
-    u(g, W, "deny", "manage_asset", action="get_info", path="Assets/../../Management/tools/rules.json")
-    u(g, W, "deny", "manage_asset", action="get_info", path="Assets/Features/Wallet/link/S.cs")
-    u(g, W, "allow", "find_in_file", uri="mcpforunity://path/Assets/Features/Wallet/Scripts/Internal/Old.cs", pattern="x")
-    u(g, W, "deny", "find_in_file", uri="mcpforunity://path/Assets/Features/Shop/Scripts/Internal/S.cs", pattern="x")
-    u(g, W, "deny", "find_in_file", uri="mcpforunity://path/Library/x", pattern="x")
-    u(g, W, "allow", "get_sha", uri="mcpforunity://path/Assets/Core/Old.cs")
-    u(g, W, "allow", "manage_prefabs", action="get_hierarchy", prefab_path="Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
-    u(g, W, "deny", "manage_prefabs", action="get_info")
-    u(g, W, "allow", "unity_docs", query="Rigidbody")
-    u(g, W, "deny", "manage_asset", action="frobnicate", path=own + "/c.asset")
-    u(g, W, "deny", "no_such_tool")
 
     g = "unity: write (own assets)"
-    u(g, W, "allow", "manage_asset", action="create", path=own + "/Config.asset", asset_type="ScriptableObject")
-    u(g, W, "allow", "manage_asset", action="create_folder", path=own + "/Prefabs")
-    u(g, W, "allow", "manage_prefabs", action="modify_contents", prefab_path="Assets/Features/Wallet/FeatureAssets/Public/Icon.prefab")
-    u(g, W, "allow", "manage_material", action="create", material_path=own + "/Coin.mat")
-    u(g, W, "allow", "manage_texture", action="create", path=own + "/Coin.png")
-    u(g, W, "allow", "manage_ui", action="create", path=own + "/Hud.uxml", contents="<ui:UXML/>")
-    u(g, W, "allow", "manage_asset", action="move", path=own + "/a.asset", destination=own + "/Prefabs/a.asset")
-    u(g, W, "deny", "manage_asset", action="move", path=own + "/a.asset", destination="Assets/Features/Shop/FeatureAssets/Private/a.asset")
-    u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Shop/FeatureAssets/Private/n.asset")
-    u(g, W, "deny", "manage_asset", action="create", path="Assets/Core/n.asset")
     SO = "manage_scriptable_object"      # config and installer assets: the owner, inside its own area
-    u(g, W, "allow", SO, action="create", type_name="Game.Wallet.WalletConfig", folder_path=own, asset_name="WalletConfig")
-    u(g, W, "allow", SO, action="create", type_name="Game.Wallet.WalletInstaller", asset_name="WalletInstaller",
-      folder_path="Assets/Features/Wallet/FeatureAssets/Public/")
-    u(g, W, "allow", SO, action="modify", target={"path": own + "/c.asset"}, patches=[])
-    u(g, W, "deny", SO, action="create", type_name="X", folder_path="Assets/Features/Shop/FeatureAssets/Private", asset_name="n")
-    u(g, W, "deny", SO, action="create", type_name="X", folder_path="Assets/Core", asset_name="n")
-    u(g, W, "deny", SO, action="create", type_name="X", folder_path=own, asset_name="../../Shop/FeatureAssets/Private/n")
-    u(g, W, "deny", SO, action="create", type_name="X", folder_path=own + "/../../../Shop/FeatureAssets/Private", asset_name="n")
-    u(g, W, "deny", SO, action="create", type_name="X", folder_path=own)                       # no name
-    u(g, W, "deny", SO, action="create", type_name="X", asset_name="n")                        # no folder
-    u(g, W, "deny", SO, action="modify", target={"path": "Assets/Features/Shop/FeatureAssets/Private/s.asset"})
-    u(g, W, "deny", SO, action="modify", target={"guid": "0123456789abcdef0123456789abcdef"})      # cannot be checked
-    u(g, W, "deny", SO, action="modify", target={"path": own + "/c.asset", "guid": "0123456789abcdef0123456789abcdef"})
-    u(g, W, "deny", SO, action="modify", target=own + "/c.asset")
-    u(g, W, "deny", SO, action="delete", target={"path": own + "/c.asset"})
     for who in ("@Manager", "@GameDesigner", "@Codex", ""):
         u(g, who, "deny", SO, action="create", type_name="X", folder_path=own, asset_name="n")
     u(g, "@CodeLead", "deny", SO, action="create", type_name="X", folder_path=own, asset_name="n")      # not its area
     u(g, "@CodeLead", "allow", SO, action="create", type_name="X", folder_path="Assets/_Composition", asset_name="Catalog")
-    u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Wallet/Scripts/Contracts/n.asset")      # skeleton
-    u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Wallet/Scripts/Internal/N.cs")
-    u(g, W, "deny", "manage_asset", action="create", path="Assets/Features/Wallet/Scripts/Internal/W.asmdef")
-    u(g, W, "deny", "manage_asset", action="rename", path=own + "/a.asset", destination=own + "/A.cs")
-    u(g, W, "deny", "manage_asset", action="create")
-    u(g, S, "deny", "manage_asset", action="create", path="Assets/Features/Shop/FeatureAssets/Private/n.asset")      # code gate
     u(g, C, "allow", "manage_asset", action="create", path="Assets/_Composition/Catalog.asset")
     u(g, C, "deny", "manage_asset", action="create", path=own + "/x.asset")
-    u(g, W, "allow", "manage_asset", action="delete", path="Assets/Features/Wallet/Scripts/Internal/Old.cs")      # unchanged
-    u(g, W, "deny", "manage_asset", action="delete", path="Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")
     u(g, L, "deny", "manage_asset", action="create", path=own + "/x.asset")
     for name in ("create_script", "script_apply_edits", "apply_text_edits", "delete_script", "manage_script"):
-        u(g + " (code only through Edit/Write)", W, "deny", name, uri="mcpforunity://path/Assets/Features/Wallet/Scripts/Internal/Old.cs")
         u(g + " (code only through Edit/Write)", L, "deny", name, uri="mcpforunity://path/Assets/Features/Wallet/Scripts/Internal/Old.cs")
     t(g, "@human", "pass", "mcp__unityMCP__create_script", {"path": "Assets/x.cs"})
 
@@ -2456,8 +2081,7 @@ def run_unity_cases():
     for name, ti in (("run_tests", {"mode": "EditMode"}), ("manage_editor", {"action": "play"}),
                      ("manage_editor", {"action": "add_tag", "tag_name": "x"}), ("execute_menu_item", {"menu_path": "File/Save"}),
                      ("manage_packages", {"action": "add"}), ("manage_camera", {"action": "screenshot"})):
-        u(g, W, "deny", name, **ti)
-        u(g, "@Core", "deny", name, **ti)
+        pass
     for who in ("@Manager", "@GameDesigner"):      # they read and compile, play and lead stay @CodeLead's
         u(g + " (leaders without code)", who, "allow", "read_console", action="get")
         u(g + " (leaders without code)", who, "allow", "refresh_unity")
@@ -2467,20 +2091,15 @@ def run_unity_cases():
 
     g = "unity: the Editor lock"
     guard.release_lock(STORE)
-    u(g, W, "allow", "refresh_unity", session="a")
-    u(g, W, "deny", "manage_gameobject", session="a", action="create", name="X")      # no scene of its own open
-    u(g, W, "allow", "manage_scene", session="a", action="create", path=own + "/Scenes", name="WalletTest")
+    u(g, C, "allow", "manage_scene", session="a", action="load", path="Assets/_Composition/Scenes/Game.unity")
     lock = guard.read_lock(STORE)
-    check(g, W, True, "the lock names the chat, its role and the scene it opened",
-          (lock["session"], lock["who"], lock["scene"]) == ("a", W, own + "/Scenes/WalletTest.unity"))
-    u(g, W, "allow", "manage_gameobject", session="a", action="create", name="Coin")
-    u(g, W, "allow", "manage_scene", session="a", action="save")
+    check(g, C, True, "the lock names the chat, its role and the scene it opened",
+          (lock["session"], lock["who"], lock["scene"]) == ("a", C, "Assets/_Composition/Scenes/Game.unity"))
     u(g, C, "deny", "manage_scene", session="b", action="load", path="Assets/_Composition/Scenes/Game.unity")
     u(g, C, "deny", "refresh_unity", session="b")      # compiling waits too
     u(g, C, "allow", "manage_asset", session="b", action="create", path="Assets/_Composition/Catalog.asset")      # assets do not
     u(g, C, "allow", "read_console", session="b", action="get")
     u(g, L, "deny", "manage_editor", session="c", action="play")
-    u(g, W, "deny", "manage_scene", session="a", action="load", path="Assets/_Composition/Scenes/Game.unity")      # not its scene
     check(g, "", True, "Stop of another chat keeps the lock", guard.release_lock(STORE, "b") is False and guard.read_lock(STORE) is not None)
     p = subprocess.run([sys.executable, "-I", str(HERE / "stop_unlock.py"), "--store", STORE],
                        input=json.dumps({"session_id": "a"}).encode(), capture_output=True)
@@ -2498,61 +2117,44 @@ def run_unity_cases():
     u(g, L, "allow", "manage_scene", session="c", action="load", path="Assets/Features/Shop/Scenes/S.unity")
     u(g, L, "deny", "manage_scene", session="c", action="save")      # @CodeLead looks and plays, saves no scene
     u(g, L, "allow", "execute_menu_item", session="c", menu_path="Assets/Refresh")
-    u(g, W, "deny", "read_console", session="a", action="clear")      # clearing the console needs the lock too
     p = subprocess.run([sys.executable, "-I", str(HERE / "stop_unlock.py"), "--release", "--store", STORE], capture_output=True)
     check(g, "", True, "the human frees any lock", p.returncode == 0 and guard.read_lock(STORE) is None)
     Path(guard.lock_path(STORE)).write_text("{ broken")
-    u(g, W, "allow", "read_console", session="a", action="clear")      # a broken lock file is no lock
 
     g = "tester plays: no writes into Assets"
     guard.write_lock(STORE, {"session": "tester-1", "who": "@UnityAutoPlay", "until": time.time() + 600})
-    t(g, W, "deny", "Write", {"file_path": F + "/Wallet/Scripts/Internal/New.cs"}, session="a")
-    t(g, W, "deny", "Edit", {"file_path": F + "/Wallet/Scripts/Internal/W.cs"}, session="a")
     t(g + ": @CodeLead too", L, "deny", "Edit", {"file_path": A + "/_Composition/Boot.cs"}, session="c")
-    t(g + ": @Core too", "@Core", "deny", "Write", {"file_path": A + "/Core/New.cs"}, session="d")
-    u(g + ": assets through unity-mcp too", W, "deny", "manage_asset", session="a", action="create", path=own + "/FeatureAssets/Private/c.asset")
-    u(g + ": reading goes on", W, "allow", "read_console", session="a", action="get")
-    t(g + ": reading goes on", W, "allow", "Read", {"file_path": F + "/Wallet/Scripts/Internal/W.cs"}, session="a")
     t(g + ": outside Assets is not held", "@GameDesigner", "allow", "Write", {"file_path": FX + "/Management/game-design/ai/idea/data.md"}, session="e")
     t(g + ": the human is never held", "@human", "pass", "Write", {"file_path": F + "/Wallet/Scripts/Internal/New.cs"}, session="h")
     marks = sorted(p.name for p in Path(STORE, guard.TESTER_BLOCKED_DIR).glob("*.json"))
-    check(g, "", True, "the refused chats are marked for the server to wake", marks == ["a.json", "c.json", "d.json"])
-    check(g, "", True, "the mark names who to wake", json.loads(Path(STORE, guard.TESTER_BLOCKED_DIR, "a.json").read_text())["target"] == "Wallet")
+    check(g, "", True, "the refused chats are marked for the server to wake", marks == ["c.json"])
     guard.write_lock(STORE, {"session": "b", "who": "@CodeLead", "until": time.time() + 600})
-    t(g + ": another chat holding the Editor does not stop writes", W, "allow", "Write", {"file_path": F + "/Wallet/Scripts/Internal/New.cs"}, session="a")
     guard.write_lock(STORE, {"session": "tester-1", "who": "@UnityAutoPlay", "until": time.time() - 1})
-    t(g + ": an expired lock holds nothing", W, "allow", "Write", {"file_path": F + "/Wallet/Scripts/Internal/New.cs"}, session="a")
     Path(guard.lock_path(STORE)).unlink()
     shutil.rmtree(Path(STORE, guard.TESTER_BLOCKED_DIR), ignore_errors=True)
 
     g = "unity: reading the lock file"
-    u("unity: the Editor lock", W, "allow", "manage_scene", session="a", action="create", path=own + "/Scenes", name="R")
     for who in (W, "@Manager", "@GameDesigner", "@Codex", "@DesignAdvisor", "@UnityAutoPlay", None):
         r(g, who, "allow", guard.lock_path(STORE))
-    r(g, W, "deny", STORE + "/pins.json")      # the rest of the store stays closed (PIN, bindings)
-    r(g, W, "deny", STORE)
-    t(g, W, "deny", "Grep", {"pattern": "x", "path": STORE})
-    t(g, W, "deny", "Edit", {"file_path": guard.lock_path(STORE)})
-    t(g, W, "deny", "Write", {"file_path": guard.lock_path(STORE)})
 
     g = "unity: batch_execute"
     guard.release_lock(STORE)
     B = "batch_execute"
-    u(g, W, "allow", B, commands=[{"tool": "read_console", "params": {"action": "get"}},
-                                  {"tool": "manage_asset", "params": {"action": "get_info", "path": own + "/c.asset"}}])
-    check(g, W, True, "a batch of reads takes no lock", guard.read_lock(STORE) is None)
-    u(g, W, "deny", B, commands=[{"tool": "read_console", "params": {"action": "get"}},
+    comp = "Assets/_Composition"
+    u(g, C, "allow", B, commands=[{"tool": "read_console", "params": {"action": "get"}},
+                                  {"tool": "manage_asset", "params": {"action": "get_info", "path": comp + "/Catalog.asset"}}])
+    check(g, C, True, "a batch of reads takes no lock", guard.read_lock(STORE) is None)
+    u(g, C, "deny", B, commands=[{"tool": "read_console", "params": {"action": "get"}},
                                  {"tool": "manage_asset", "params": {"action": "create", "path": "Assets/Core/x.asset"}}])
-    u(g, W, "allow", B, commands=[{"tool": "manage_scene", "params": {"action": "load", "path": own + "/Scenes/W.unity"}},
-                                  {"tool": "mcp__unityMCP__manage_gameobject", "params": {"action": "create", "name": "Coin"}},
-                                  {"tool": "manage_scene", "params": {"action": "save"}}])
-    check(g, W, True, "a batch that opens a scene takes the lock", (guard.read_lock(STORE) or {}).get("session") == "a")
+    u(g, C, "allow", B, commands=[{"tool": "manage_scene", "params": {"action": "load", "path": comp + "/Scenes/Game.unity"}},
+                                  {"tool": "manage_editor", "params": {"action": "play"}}])
+    check(g, C, True, "a batch that opens a scene takes the lock", (guard.read_lock(STORE) or {}).get("session") == "a")
     u(g, C, "deny", B, session="b", commands=[{"tool": "refresh_unity", "params": {}}])
-    u(g, W, "deny", B, commands=[{"tool": "batch_execute", "params": {"commands": []}}])
-    u(g, W, "deny", B, commands=[])
-    u(g, W, "deny", B, commands=[{"tool": "read_console", "params": {"action": "get"}}] * 26)
-    u(g, W, "deny", B, commands="x")
-    u(g, W, "deny", B, commands=[{"tool": "create_script", "params": {"path": own + "/a.cs"}}])
+    u(g, C, "deny", B, commands=[{"tool": "batch_execute", "params": {"commands": []}}])
+    u(g, C, "deny", B, commands=[])
+    u(g, C, "deny", B, commands=[{"tool": "read_console", "params": {"action": "get"}}] * 26)
+    u(g, C, "deny", B, commands="x")
+    u(g, C, "deny", B, commands=[{"tool": "create_script", "params": {"path": comp + "/a.cs"}}])
     guard.release_lock(STORE)
 
     g = "unity: what needs a report"
@@ -2569,7 +2171,7 @@ def run_unity_cases():
 def run_headless_cases():
     """Tiers 2-6 run headless: they never ask the human (2026-11-26)."""
     g = "headless: no asking"
-    low = ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor")
+    low = ("@UnityAutoPlay", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor")
     for who in low:
         t(g, who, "deny", "AskUserQuestion", {"questions": []})
     for who in ("@human", "@Manager"):
@@ -2577,83 +2179,91 @@ def run_headless_cases():
     for who in ("@CodeLead", "@GameDesigner", "@UIDesigner"):
         t(g + " (a Leader asks through Manager, 2026-11-27)", who, "deny", "AskUserQuestion", {"questions": []})
     data = {"tool_name": "AskUserQuestion", "tool_input": {}, "cwd": FX, "session_id": "test-session"}
-    for who, leader in (("Wallet", "CodeLead"), ("@Core", "CodeLead"), ("@UnityAutoPlay", "CodeLead"),
+    for who, leader in (("@UnityAutoPlay", "CodeLead"),
                         ("@DesignAdvisor", "GameDesigner"), ("@Codex", "gave the order")):
         reason = guard.decide(data, who, FX, STORE)[1]
         check(g + " (names the Leader)", who, True, "reason names " + leader, leader in reason and "BÁO CHẶN" in reason)
     edit = {"tool_name": "Edit", "tool_input": {"file_path": FX + "/Management/tools/rules.json"}, "cwd": FX,
             "session_id": "test-session"}
-    got = guard.decide(edit, "Wallet", FX, STORE)
-    check(g + " (an ask becomes a deny to the Leader)", "Wallet", True, "rules.json", got[0] == "deny" and "CodeLead" in got[1])
     deny = {"tool_name": "Bash", "tool_input": {"command": "dotnet build"}, "cwd": FX, "session_id": "test-session"}
-    got = guard.decide(deny, "Wallet", FX, STORE)
-    check(g + " (tell the human: through the Leader)", "Wallet", True, "dotnet build", got[0] == "deny" and "BÁO CHẶN" in got[1])
     got = guard.decide(deny, "@CodeLead", FX, STORE)
     check(g + " (Leaders: not BÁO CHẶN)", "@CodeLead", True, "dotnet build", got[0] == "deny" and "BÁO CHẶN" not in got[1])
 
 
-def run_draft_ticket_cases():
-    """Drafts and Editor tickets (người quyết 2026-11-27): a feature writes drafts under the same rules as its folder;
-    the Editor goes to the ticket holder; a direct edit of Assets code is let through with a reminder."""
-    import shutil
-    g = "drafts"
-    D = FX + "/UnityProject/Drafts"
-    w(g, "Wallet", "allow", D + "/Wallet/Scripts/Internal/New.cs")
-    w(g, "Wallet", "allow", D + "/Wallet/Tests/NewTests.cs")
-    w(g + " (the skeleton stays CodeLead's)", "Wallet", "deny", D + "/Wallet/Scripts/Contracts/IWallet.cs")
-    w(g + " (only .cs)", "Wallet", "deny", D + "/Wallet/Scripts/Internal/a.asset")
-    w(g + " (draft.py's own files)", "Wallet", "deny", D + "/Wallet/.draft.json")
-    w(g + " (another feature's draft)", "Wallet", "deny", D + "/Shop/Scripts/Internal/S.cs")
-    w(g + " (CodeLead drafts a contract)", "@CodeLead", "allow", D + "/Wallet/Scripts/Contracts/IWallet.cs")
-    w(g + " (a service)", "_Services/Popup", "allow", D + "/_Services/Popup/Scripts/Internal/P.cs")
-    w(g + " (Core)", "@Core", "allow", D + "/Core/NewThing.cs")
-    reason = guard.decide({"tool_name": "Write", "tool_input": {"file_path": F + "/Wallet/Scripts/Internal/W.cs", "content": "x"},
-                           "cwd": FX, "session_id": "test-session"}, "Wallet", FX, STORE)
-    check(g, "Wallet", True, "a direct edit of Assets code passes with a reminder (soft gate)",
-          reason[0] == "allow" and "Nhắc (soft gate)" in reason[1])
+def run_worker_cases():
+    """@Worker (worker.py, người quyết 2026-11-27): one big job in a worktree, every feature at once; the safe zones hold."""
+    g = "worker"
+    A = FX + "/UnityProject/Assets"
+    w(g + " (a feature's code)", "@Worker", "allow", F + "/Wallet/Scripts/Internal/W.cs")
+    w(g + " (another feature's private code)", "@Worker", "allow", F + "/Shop/Scripts/View/S.cs")
+    w(g + " (a contract)", "@Worker", "allow", F + "/Wallet/Scripts/Contracts/IWallet.cs")
+    w(g + " (an asmdef)", "@Worker", "allow", F + "/Wallet/Wallet.asmdef")
+    w(g + " (Core)", "@Worker", "allow", A + "/Core/Thing.cs")
+    w(g + " (_Composition)", "@Worker", "allow", A + "/_Composition/Boot.cs")
+    w(g + " (its result.json)", "@Worker", "allow", FX + "/result.json")
+    w(g + " (SimpleCoreTools)", "@Worker", "deny", A + "/SimpleCoreTools/Editor/X.cs")
+    w(g + " (.asmref)", "@Worker", "deny", F + "/Wallet/x.asmref")
+    w(g + " (.claude)", "@Worker", "deny", FX + "/.claude/rules/worker.md")
+    w(g + " (root CLAUDE.md)", "@Worker", "deny", FX + "/CLAUDE.md")
+    w(g + " (the design)", "@Worker", "deny", FX + "/Management/game-design/live/x/data.md")
+    w(g + " (Management)", "@Worker", "deny", FX + "/Management/tools/rules.json")
+    w(g + " (Packages)", "@Worker", "deny", FX + "/UnityProject/Packages/manifest.json")
+    w(g + " (ProjectSettings)", "@Worker", "deny", FX + "/UnityProject/ProjectSettings/x.asset")
+    sh = lambda cmd: {"command": cmd}      # noqa: E731
+    t(g + " (any shell)", "@Worker", "allow", "Bash", sh("python Management/tools/compile_check.py --all"))
+    t(g + " (reads the book)", "@Worker", "allow", "Bash", sh("python Management/tools/gd_req.py Wallet"))
+    t(g + " (design pack)", "@Worker", "allow", "Bash", sh("python Management/tools/gd_pack.py Wallet"))
+    t(g + " (writes the book)", "@Worker", "deny", "Bash", sh("python Management/tools/gd_req.py Wallet done a#b T.M"))
+    t(g + " (verifies)", "@Worker", "deny", "Bash", sh("python Management/tools/gd_req.py Wallet verify a#b"))
+    t(g + " (in a chain)", "@Worker", "deny", "Bash", sh("ls; python Management/tools/dispatch.py send Wallet --from CodeLead \"x\""))
+    t(g + " (ask.py)", "@Worker", "deny", "Bash", sh("python Management/tools/ask.py add --from Worker \"x\""))
+    t(g + " (editor ticket)", "@Worker", "deny", "Bash", sh("python Management/tools/editor_ticket.py add --session @Worker --common refresh"))
+    t(g + " (AskUserQuestion)", "@Worker", "deny", "AskUserQuestion", {"questions": []})
+    t(g + " (SendMessage)", "@Worker", "deny", "SendMessage", {"to": "CodeLead", "message": "x"})
+    t(g + " (unity-mcp)", "@Worker", "deny", "mcp__unityMCP__refresh_unity", {})
+    t(g + " (unity-mcp read)", "@Worker", "deny", "mcp__unityMCP__read_console", {})
+    t(g + " (reads another feature's private code)", "@Worker", "allow", "Read", {"file_path": F + "/Shop/Scripts/Internal/S.cs"})
 
+
+def run_ticket_cases():
+    """Editor tickets (người quyết 2026-11-27): the Editor goes to the ticket holder, or to the server's runner of a
+    load or a test run; the human using the Editor holds every chat off."""
+    import shutil
     g = "editor tickets"
     et = guard.ticket_module()
     tdir = os.path.join(FX, "Management", "editor-tickets")
     shutil.rmtree(tdir, ignore_errors=True)
     refresh = "mcp__unityMCP__refresh_unity"
+    sh = lambda cmd: {"command": cmd}      # noqa: E731
     try:
-        t(g + " (Editor free: use it)", "Wallet", "allow", refresh, {})
+        t(g + " (Editor free: use it)", "@CodeLead", "allow", refresh, {})
         guard.release_lock(STORE)
-        et.add(FX, "_Services/Popup", ["refresh"], ["tạo PopupConfig.asset"], now=1)
+        et.add(FX, "@Worker", ["refresh", "clean"], [], now=1, job="w20261127-000001-run")
         kind, group = et.grant_next(FX, now=2)
-        got = guard.decide({"tool_name": refresh, "tool_input": {}, "cwd": FX, "session_id": "test-session"}, "Wallet", FX, STORE)
-        check(g, "Wallet", True, "granted to another: refused with how to queue", got[0] == "deny" and "editor_ticket.py add --session Wallet" in got[1])
-        t(g + " (the holder uses it)", "_Services/Popup", "allow", refresh, {})
-        check(g, "_Services/Popup", True, "the holder's call marks its ticket used", et.holder(FX)[0].get("used"))
+        for x in group:
+            x["runner"] = "@UnityAutoPlay"
+            et.save(FX, x)
+        got = guard.decide({"tool_name": refresh, "tool_input": {}, "cwd": FX, "session_id": "test-session"}, "@CodeLead", FX, STORE)
+        check(g, "@CodeLead", True, "a load granted to the server's runner: CodeLead is refused with how to queue",
+              got[0] == "deny" and "editor_ticket.py add --session @CodeLead" in got[1])
+        t(g + " (the runner of the load uses it)", "@UnityAutoPlay", "allow", refresh, {})
         guard.release_lock(STORE)
-        t(g + " (reads stay open)", "Wallet", "allow", "mcp__unityMCP__read_console", {})
-        et.release(FX, "_Services/Popup", now=3)
+        t(g + " (reads stay open)", "@CodeLead", "allow", "mcp__unityMCP__read_console", {})
+        et.release(FX, now=3)
         with open(os.path.join(STORE, guard.HUMAN_EDITOR_FILE), "w", encoding="utf-8") as f:
             json.dump({"since": 1, "reason": "play"}, f)
-        got = guard.decide({"tool_name": refresh, "tool_input": {}, "cwd": FX, "session_id": "test-session"}, "Wallet", FX, STORE)
-        check(g, "Wallet", True, "the human uses the Editor: refused", got[0] == "deny" and "người đang dùng Unity Editor" in got[1])
+        got = guard.decide({"tool_name": refresh, "tool_input": {}, "cwd": FX, "session_id": "test-session"}, "@CodeLead", FX, STORE)
+        check(g, "@CodeLead", True, "the human uses the Editor: refused", got[0] == "deny" and "người đang dùng Unity Editor" in got[1])
         os.remove(os.path.join(STORE, guard.HUMAN_EDITOR_FILE))
-        sh = lambda cmd: {"command": cmd}      # noqa: E731
-        t(g + " (own draft)", "Wallet", "allow", "Bash", sh("python Management/tools/draft.py start Wallet Scripts/Internal/W.cs"))
-        t(g + " (another's draft)", "Wallet", "deny", "Bash", sh("python Management/tools/draft.py start Shop Scripts/Internal/S.cs"))
-        t(g + " (CodeLead: any draft)", "@CodeLead", "allow", "Bash", sh("python Management/tools/draft.py drop Shop"))
-        t(g + " (looking is free)", "Wallet", "allow", "Bash", sh("python Management/tools/draft.py status Shop"))
-        et.drop(FX, "_Services/Popup")      # what was left of its turn
-        t(g + " (apply while the Editor is free, nobody waiting)", "Wallet", "allow", "Bash", sh("python Management/tools/draft.py apply Wallet"))
-        et.add(FX, "_Services/Popup", ["refresh"], ["x"], now=5)
-        t(g + " (apply while others wait: queue first)", "Wallet", "deny", "Bash", sh("python Management/tools/draft.py apply Wallet"))
+        t(g + " (CodeLead: its own ticket)", "@CodeLead", "allow", "Bash", sh("python Management/tools/editor_ticket.py add --session @CodeLead --common clean"))
+        t(g + " (a Leader may not touch another's ticket)", "@GameDesigner", "deny", "Bash",
+          sh("python Management/tools/editor_ticket.py drop --session @CodeLead"))
+        t(g + " (draft.py is gone)", "@CodeLead", "allow", "Bash", sh("python Management/tools/editor_ticket.py list"))
+        et.add(FX, "@Worker", ["refresh"], ["x"], now=5, job="w20261127-000002-wave")
         et.grant_next(FX, now=6)
-        t(g + " (apply while granted to another)", "Wallet", "deny", "Bash", sh("python Management/tools/draft.py apply Wallet"))
-        t(g + " (the holder applies)", "_Services/Popup", "allow", "Bash", sh("python Management/tools/draft.py apply _Services/Popup"))
-        t(g + " (ticket of its own)", "Wallet", "allow", "Bash", sh("python Management/tools/editor_ticket.py add --session Wallet --common refresh"))
-        t(g + " (not another's)", "Wallet", "deny", "Bash", sh("python Management/tools/editor_ticket.py release --session _Services/Popup"))
-        t(g + " (in a chain too)", "Wallet", "deny", "Bash", sh("ls; python Management/tools/draft.py apply Wallet"))
         import bind_session
         check(g, "@CodeLead", True, "CodeLead's guard line shows who holds the Editor and what waits",
-              "Phiếu Editor:" in bind_session.editor_line(FX, None) and "_Services/Popup" in bind_session.editor_line(FX, None))
-        et.add(FX, "Wallet", ["refresh", "clean"], now=7)
-        check(g, "Wallet", True, "a feature's guard line shows its own ticket", "Phiếu Editor của bạn" in bind_session.editor_line(FX, "Wallet"))
+              "Phiếu Editor:" in bind_session.editor_line(FX, None) and "@Worker" in bind_session.editor_line(FX, None))
     finally:
         try:
             os.remove(os.path.join(STORE, guard.HUMAN_EDITOR_FILE))
@@ -2712,7 +2322,6 @@ def run_leader_ask_cases():
         t(g + " (the asker cancels)", "@GameDesigner", "allow", "Bash", sh(f'python Management/tools/ask.py cancel {mine["id"]} "thôi"'))
         t(g + " (another Leader does not)", "@UIDesigner", "deny", "Bash", sh(f'python Management/tools/ask.py cancel {mine["id"]} "thôi"'))
         t(g + " (Manager cancels)", "@Manager", "allow", "Bash", sh(f'python Management/tools/ask.py cancel {mine["id"]} "thôi"'))
-        t(g + " (every chat looks)", "Wallet", "allow", "Bash", sh("python Management/tools/ask.py list"))
     finally:
         shutil.rmtree(asks, ignore_errors=True)
 
@@ -2731,12 +2340,6 @@ def run_free_shell_cases():
             t(g, who, "allow", "PowerShell", {"command": "Get-ChildItem"})
             t(g, who, "allow", "Monitor", {"command": "ls"})
         t(g + " (no FEATURE: allow-list)", "", "deny", "Bash", {"command": 'python -c "print(1)"'})
-        t(g + " (gates hold)", "Wallet", "deny", "Bash",
-          {"command": 'python Management/tools/dispatch.py send Shop --from CodeLead "x"'})
-        t(g + " (gates hold)", "Wallet", "deny", "Bash",
-          {"command": 'ls; python Management/tools/gd_req.py Shop doing a/b#1 "x"'})
-        t(g + " (edit zones hold)", "Wallet", "deny", "Edit",
-          {"file_path": FX + "/UnityProject/Assets/Features/Shop/Scripts/Internal/S.cs"})
         g2 = "PowerShell: a bare @Name is splatting"
         send = 'python Management/tools/dispatch.py send {} --from GameDesigner "hỏi"'
         for cmd in (send.format("@DesignAdvisor"), "python Management/tools/dispatch.py list @Codex",
@@ -2761,7 +2364,7 @@ def run_free_read_cases():
         for who in ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay", "@Codex", "@DesignAdvisor", "@Manager",
                     "@CodeLead", "@GameDesigner", "@UIDesigner"):
             for path in ("/Management/tools/dispatch.py", "/UnityProject/Assets/Features/Shop/Scripts/Internal/S.cs",
-                         "/.claude/rules/feature.md", "/CLAUDE.md"):
+                         "/.claude/rules/worker.md", "/CLAUDE.md"):
                 t(g, who, "allow", "Read", {"file_path": FX + path})
             t(g, who, "allow", "Grep", {"pattern": "x", "path": FX + "/Management"})
             t(g, who, "allow", "Glob", {"pattern": "**/*.cs", "path": FX + "/UnityProject/Assets/Features"})
@@ -2782,7 +2385,8 @@ def main():
         run_cases()
         run_headless_cases()
         run_leader_ask_cases()
-        run_draft_ticket_cases()
+        run_ticket_cases()
+        run_worker_cases()
         run_free_shell_cases()
         run_free_read_cases()
     finally:

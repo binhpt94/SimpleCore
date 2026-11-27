@@ -55,19 +55,21 @@
       document.head.appendChild(st);
     }
     add(pane, el("h1", "", "Hộp thư"));
-    add(pane, el("p", "sub", "Tin cho các thread chạy theo việc: feature, service, @Core và tool (@Codex, @Blender, @ClaudeImage, @DesignAdvisor). " +
-      "Server giao từng tin thành một lượt của thread đó (thread đang tắt thì bật lên với tin làm prompt), và chỉ coi là đã giao khi mã tin có trong transcript. " +
-      "Leader và tester vẫn nhắn bằng SendMessage. Bạn vẫn mở chat của feature trong VS Code được: lúc chat mở, hộp thư không giao vào nó."));
+    add(pane, el("p", "sub", "Tin cho feature, service, @Core thành một việc worker (người quyết 2026-11-27): một lượt trong git worktree riêng, " +
+      "sửa được mọi feature, qua cổng kiểm thì tự nạp, server biên dịch, chạy test và ghi done. Tin cho @UnityAutoPlay là một đợt chơi thử, chạy khi tới phiếu Editor. " +
+      "Tin cho tool (@Codex, @Blender, @ClaudeImage, @DesignAdvisor) vẫn là một lượt của thread tool. Tối đa 3 worker cùng lúc."));
     if (!ctx.setup) {
       add(pane, el("p", "muted", "Hộp thư chỉ có khi mở trang qua python Management/tools/setup_server.py (server cũng là bên giao tin)."));
       return;
     }
     var msgBox = put(pane, el("p", ""));
+    var workBox = put(pane, el("div", "ib-box"));
     var poolsBox = put(pane, el("div", "ib-pools"));
     var cfgBox = put(pane, el("div", "ib-box"));
     var sendBox = put(pane, el("div", "ib-box"));
     var listBox = put(pane, el("div", "ib-box"));
     var armed = false;      // "Xoá cả hộp thư" phải bấm hai lần
+    var workers = null, workForm = { feature: "", task: "" };
     var data = null, sending = false, form = { target: "", text: "" }, reqs = { target: "", items: [], note: "" };
 
     var say = function (text, bad) {
@@ -106,9 +108,78 @@
       return p(d.getDate()) + "/" + p(d.getMonth() + 1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
     };
 
+    var postWorker = function (action, body) {
+      return fetch("/api/workers/" + action, {
+        method: "POST", cache: "no-store",
+        headers: { "Content-Type": "application/json", "X-Setup-Token": ctx.setup.token },
+        body: JSON.stringify(body)
+      }).then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      }).then(function (res) {
+        if (!res.ok) throw new Error(res.error || "lỗi");
+        refresh();
+        return res;
+      });
+    };
+    var STATE_NAMES = { queued: "chờ chỗ", starting: "đang dựng worktree", running: "đang chạy", "waiting-editor": "chờ phiếu Editor",
+      applied: "đã nạp", "applied-partial": "đã nạp, còn dở", "applied-blocked": "chờ người trả lời", "checks-failed": "hỏng cổng kiểm",
+      drift: "lệch project chính", "needs-codelead": "cần CodeLead", interrupted: "bị ngắt (server khởi động lại)", error: "lỗi",
+      played: "đã chơi thử", "play-failed": "chơi thử lỗi", dropped: "đã gỡ" };
+    var renderWorkers = function () {
+      workBox.textContent = "";
+      if (!workers) return;
+      var head = put(workBox, el("div", ""));
+      var running = workers.jobs.filter(function (j) { return j.running; }).length;
+      add(head, el("b", "", "Worker"), el("span", "muted", " · " + running + " / " + workers.slots + " đang chạy"));
+      var row = put(workBox, el("div", "ib-row"));
+      var sel = put(row, el("select", ""));
+      add(sel, el("option", "", "chọn feature…"));
+      ((data && data.targets) || []).filter(function (t) { return t.pool === "feature"; }).forEach(function (t) {
+        var o = put(sel, el("option", "", t.target));
+        o.value = t.target;
+        if (t.target === workForm.feature) o.selected = true;
+      });
+      sel.addEventListener("change", function () { workForm.feature = sel.value; });
+      var ta = put(row, el("input", ""));
+      ta.placeholder = "việc thêm (không bắt buộc: worker làm mọi yêu cầu mở của feature)";
+      ta.value = workForm.task;
+      ta.style.flex = "1";
+      ta.addEventListener("input", function () { workForm.task = ta.value; });
+      add(row, button("Làm bằng worker", function () {
+        if (!workForm.feature) { say("Chọn feature trước.", true); return; }
+        postWorker("run", { feature: workForm.feature, task: workForm.task }).then(function (res) { workForm.task = ""; say("Đã xếp việc " + res.id + "."); },
+                                                                                   function (e) { say(e.message, true); });
+      }));
+      if (!workers.jobs.length) { add(workBox, el("p", "muted", "Chưa có việc worker nào.")); return; }
+      var tbl = put(workBox, el("table", ""));
+      var hr = put(put(tbl, el("thead", "")), el("tr", ""));
+      ["Lúc tạo", "Việc", "Loại", "Feature", "Trạng thái", "Yêu cầu", "Lượt", "$", "Tóm tắt / câu hỏi", ""].forEach(function (h) { add(hr, el("th", "", h)); });
+      var tb = put(tbl, el("tbody", ""));
+      workers.jobs.forEach(function (j) {
+        var tr = put(tb, el("tr", ""));
+        var state = (STATE_NAMES[j.state] || j.state || "") + (j.running ? " ●" : "") + (j.pending ? " · sắp chạy tiếp" : "");
+        [when(j.created), j.id, j.kind === "play" ? "chơi thử" : "code", j.feature, state, String(j.requirements || 0), String(j.turns || 0),
+         j.cost ? j.cost.toFixed(2) : ""].forEach(function (x) { add(tr, el("td", "", x)); });
+        add(tr, el("td", "", (j.question ? "HỎI: " + j.question + " · " : "") + (j.summary || "")));
+        var act = put(tr, el("td", ""));
+        if (!j.running && j.kind !== "play" && ["applied", "dropped", "queued"].indexOf(j.state) < 0) {
+          add(act, button("Chạy tiếp", function () {
+            var msg = window.prompt("Lời nhắn cho worker (để trống: làm tiếp việc đang dở)", "") || "";
+            postWorker("resume", { id: j.id, message: msg }).then(function () { say("Việc " + j.id + " sẽ chạy tiếp ở vòng sau."); }, function (e) { say(e.message, true); });
+          }));
+        }
+        if (!j.running && j.state !== "dropped") {
+          add(act, button("Gỡ", function () {
+            postWorker("drop", { id: j.id }).then(function () { say("Đã gỡ " + j.id + "."); }, function (e) { say(e.message, true); });
+          }));
+        }
+      });
+    };
+
     var renderPools = function () {
       poolsBox.textContent = "";
-      ["feature", "tool"].forEach(function (pool) {
+      ["tool"].forEach(function (pool) {      // features and the tester are workers now (khung Worker ở trên)
         var p = data.pools[pool], on = data.config.mode === "on-demand";
         var card = put(poolsBox, el("div", "ib-pool"));
         add(card, el("div", "muted", pool === "feature" ? "Feature, service, @Core" : "Tool"));
@@ -196,7 +267,7 @@
       var sel = put(row, el("select"));
       var opt0 = put(sel, el("option", "", "— chọn thread nhận —"));
       opt0.value = "";
-      [["feature", "Feature, service, @Core"], ["tool", "Tool"], ["tester", "Tester (tin này mở thread)"]].forEach(function (g) {
+      [["feature", "Feature, service, @Core (worker code)"], ["tool", "Tool"], ["tester", "Tester (worker chơi thử, chờ phiếu Editor)"]].forEach(function (g) {
         var og = put(sel, el("optgroup"));
         og.label = g[1];
         data.targets.filter(function (t) { return t.pool === g[0]; }).forEach(function (t) {
@@ -212,7 +283,7 @@
         var list = put(sendBox, el("div", "ib-reqs"));
         reqs.items.forEach(function (r) {
           add(list, button("[" + (r.name || r.state) + "] " + r.ref + ": " + r.title, function () {
-            form.text = (form.text ? form.text.replace(/\s+$/, "") + "\n" : "") + "Làm yêu cầu " + r.ref + " (" + r.title + ") theo skill feature-implement-req.";
+            form.text = (form.text ? form.text.replace(/\s+$/, "") + "\n" : "") + "Làm yêu cầu " + r.ref + " (" + r.title + ").";
             renderSend();
           }));
         });
@@ -303,6 +374,11 @@
       if (!sendBox.firstChild) renderSend();      // giữ ô gõ dở khi bảng tự làm mới
     };
     var refresh = function () {
+      get("/api/workers").then(function (v) {
+        workers = v;
+        var typing = document.activeElement && workBox.contains(document.activeElement);
+        if (!typing) renderWorkers();      // giữ ô gõ dở khi bảng tự làm mới
+      }, function (e) { say("Không tải được danh sách worker: " + e.message, true); });
       return get("/api/inbox").then(function (v) { data = v; renderPools(); renderList(); if (!cfgBox.firstChild) renderConfig(); if (!sendBox.firstChild) renderSend(); },
         function (e) { say("Không tải được hộp thư: " + e.message, true); });
     };

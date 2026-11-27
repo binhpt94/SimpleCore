@@ -55,11 +55,9 @@ def project(root, version):
     return up
 
 
-def run(root, name, draft=False):
+def run(root, name):
     ch = cc.Checker(root)
     folder = ch.folder_of(name)
-    if draft:
-        ch.apply_draft(name, folder)
     targets = sorted(ch.dependents(ch.in_folder(folder)))
     buf = io.StringIO()
     with redirect_stdout(buf):
@@ -113,24 +111,6 @@ def compile_cases():
         check("a broken dependency outside the checked set: CHẶN, exit 3, its errors shown",
               (code, "CHẶN Game.Beta.Internal (phụ thuộc Game.Alpha.Contracts lỗi)" in out, "(ngoài phần kiểm)" in out), (3, True, True))
         put(up, "Assets/Features/Alpha/Scripts/Contracts/IAlpha.cs", "namespace Game.Alpha { public interface IAlpha { int Value { get; } } }\n")
-        put(up, "Drafts/Alpha/Scripts/Internal/Alpha.cs", "namespace Game.Alpha { class Alpha { int y = \"b\"; } }\n")
-        code, out, _ = run(root, "Alpha", draft=True)
-        check("--draft: the draft is compiled instead of the file in Assets", (code, "Drafts/Alpha/Scripts/Internal/Alpha.cs:1" in out), (1, True))
-        put(up, "Drafts/Alpha/Scripts/Internal/Alpha.cs", "namespace Game.Alpha { class Alpha { } }\n")
-        put(up, "Drafts/Alpha/Scripts/Internal/Extra.cs", "namespace Game.Alpha { class Extra { int z = \"c\"; } }\n")
-        code, out, _ = run(root, "Alpha", draft=True)
-        check("--draft: a new file joins the assembly of its folder", (code, "Drafts/Alpha/Scripts/Internal/Extra.cs:1" in out), (1, True))
-        put(up, "Drafts/Alpha/.draft.json", json.dumps({"delete": ["Scripts/Internal/Alpha.cs"]}))
-        (up / "Drafts/Alpha/Scripts/Internal/Extra.cs").write_text("namespace Game.Alpha { class Extra { } }\n", encoding="utf-8")
-        put(up, "Assets/Features/Alpha/Scripts/Internal/Alpha.cs", "broken in Assets but deleted by the draft")
-        code, out, _ = run(root, "Alpha", draft=True)
-        check("--draft: a file the draft deletes is left out", code, 0)
-        try:
-            cc.Checker(root).apply_draft("Beta", up / "Assets/Features/Beta")
-            no_draft = False
-        except ValueError:
-            no_draft = True
-        check("--draft without a draft folder is refused", no_draft, True)
         check("a name that is no feature is refused", _refused(lambda: cc.Checker(root).folder_of("../x")), True)
     finally:
         cc.CACHE = real_cache
@@ -146,7 +126,29 @@ def _refused(fn):
     return False
 
 
+def worktree_cases():
+    """A worker's worktree has no Library: the main project's PackageCache is used (WORKER_MAIN)."""
+    import os
+    tmp = Path(tempfile.mkdtemp(prefix="cc-wt-"))
+    old = os.environ.get("WORKER_MAIN")
+    try:
+        (tmp / "main" / "UnityProject" / "Library" / "PackageCache").mkdir(parents=True)
+        (tmp / "wt" / "UnityProject").mkdir(parents=True)
+        os.environ["WORKER_MAIN"] = str(tmp / "main")
+        check("worktree: no Library of its own, the main project's PackageCache is read",
+              cc.package_cache(tmp / "wt" / "UnityProject"), tmp / "main" / "UnityProject" / "Library" / "PackageCache")
+        check("main project: its own PackageCache", cc.package_cache(tmp / "main" / "UnityProject"),
+              tmp / "main" / "UnityProject" / "Library" / "PackageCache")
+    finally:
+        if old is None:
+            os.environ.pop("WORKER_MAIN", None)
+        else:
+            os.environ["WORKER_MAIN"] = old
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def main():
+    worktree_cases()
     pure_cases()
     compile_cases()
     failed = RESULTS.count(False)

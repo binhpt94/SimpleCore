@@ -43,14 +43,13 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 - Không đổi GUID trong `.meta` đã có. Xoá hay đổi tên asset ở `FeatureAssets/Public` là đổi contract: thống nhất với @CodeLead trước.
 - Asset giao cho dịch vụ (ví dụ prefab popup) là của feature gọi, đặt ở `FeatureAssets/Public` của nó, và đi qua id `<Owner>/<Name>` (ví dụ `Shop/Purchased`), không qua object Unity. Id khai báo một lần, `static readonly` (giá trị bất biến, không phải trạng thái), trong Internal của chủ; validator SRC-05 kiểm.
 
-## Nháp, phiếu Editor, kiểm biên dịch (người quyết 2026-11-27)
-Unity biên dịch chung cả project: một lỗi chặn mọi bên. Các bên viết code song song ở nháp, và vào Unity lần lượt.
-- **Nháp:** `UnityProject/Drafts/<Tên>/` chép đúng đường dẫn trong thư mục feature (`draft.py start|new|delete|status|diff|rebase|drop|apply`). Guard áp cùng luật vùng như file thật (khung vẫn chỉ @CodeLead). Nháp chỉ chứa `.cs` và được phép lỗi.
-- **Kiểm biên dịch ngoài Unity:** `python Management/tools/compile_check.py <Tên> [--draft] | --all` (vài giây, chạy song song được). `LỖI`: lỗi của assembly đó; `CHẶN`: một phụ thuộc đang lỗi; `BỎ`: defineConstraints không đạt. `gd_req.py done` tự chạy và cảnh báo (soft gate).
-- **Phiếu Editor:** `editor_ticket.py add|done|drop|release --session <Tên>`, `list`. Mã 32 bit: 10 bit đầu dùng chung (`refresh` nạp code mới, `clean` project sạch lỗi, `test` đã chạy test), 22 bit cho việc riêng. Mỗi phiên một phiếu; đến trước làm trước; chỉ phiếu "sửa lỗi biên dịch" của CodeLead (server tạo) đứng đầu.
-  - Server nạp chung nháp của mọi phiếu chỉ-code, một phiên Haiku biên dịch; lỗi thì CodeLead sửa trước.
-  - Phiếu có việc riêng (asset, prefab, scene) được cấp lần lượt; hết lượt là trả Editor (Stop hook), phần chưa làm xếp lại.
-  - Khi không còn việc cần Editor: một lô test EditMode cho các assembly bị đụng và phụ thuộc của chúng; test của yêu cầu qua hết thì server ghi `done`.
+## Phiếu Editor, kiểm biên dịch (người quyết 2026-11-27)
+Unity biên dịch chung cả project: một lỗi chặn mọi bên. Worker viết code trong worktree riêng, qua cổng kiểm thì `worker.py` nạp vào `Assets`; Unity chỉ biên dịch theo phiếu, lần lượt.
+- **Kiểm biên dịch ngoài Unity:** `python Management/tools/compile_check.py <Tên> | --all` (vài giây, chạy song song được, chạy cả trong worktree). `LỖI`: lỗi của assembly đó; `CHẶN`: một phụ thuộc đang lỗi; `BỎ`: defineConstraints không đạt. Là một cổng của `worker.py`.
+- **Phiếu Editor:** `editor_ticket.py add|done|drop|release --session <Tên>`, `list`. Mã 32 bit: 10 bit đầu dùng chung (`refresh` nạp code mới, `clean` project sạch lỗi, `test` đã chạy test), 22 bit cho việc riêng. Mỗi phiên một phiếu (mỗi việc worker một phiếu); đến trước làm trước; chỉ phiếu "sửa lỗi biên dịch" của CodeLead (server tạo) đứng đầu.
+  - Mọi phiếu chỉ-code (worker đã nạp code) được gộp thành một lượt: một phiên Haiku biên dịch và đọc console. Lỗi thì các việc worker trong lượt tự sửa một lần; lượt có phiếu khác thì CodeLead sửa trước.
+  - Phiếu có việc riêng (asset, prefab, scene của CodeLead; đợt chơi thử) được cấp lần lượt; hết lượt là trả Editor (Stop hook), phần chưa làm xếp lại.
+  - Khi không còn việc cần Editor: một lô test EditMode cho các assembly bị đụng và phụ thuộc của chúng; test của yêu cầu qua hết thì server ghi `done`; test hỏng thì việc worker đó tự sửa một lần.
 - **Editor đang cấp cho bên khác hay người đang dùng:** guard chặn lệnh cần Editor (biên dịch, ghi asset, scene, test). Nộp phiếu, làm việc khác; không BÁO CHẶN. Editor trống và không ai chờ thì cứ dùng.
 - **Người dùng Editor:** bấm Play (khi không chat nào giữ Editor), hoặc menu `SimpleCore/Tôi đang dùng Editor` (tự hết sau 30 phút), ghi `~/.coresimple-guard/human-editor.json`: không ai được cấp Editor cho tới khi Stop hay tắt menu. Script ở `Assets/SimpleCoreTools/Editor` (chỉ người sửa).
 

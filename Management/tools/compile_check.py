@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """Compiles the project's C# assemblies outside the Unity Editor, as Unity would, to catch compile errors before code
-reaches the shared Editor (người quyết 2026-11-27: soft gate; a draft may fail).
+reaches the shared Editor (người quyết 2026-11-27). worker.py runs it in a worker's worktree as one of its gates.
 
-    python Management/tools/compile_check.py <Tên> [--draft] [--quiet]
+    python Management/tools/compile_check.py <Tên> [--quiet]
     python Management/tools/compile_check.py --all [--quiet]
 
 <Tên>: a feature (Wallet), a service (_Services/Popup), Core (@Core), _Composition. It checks every assembly in that
-folder and every project assembly that depends on one of them (a broken contract shows where it is used). --draft
-reads the feature's drafts (UnityProject/Drafts/<Tên>/, same paths as inside its folder; .draft.json "delete" lists
-files the draft removes) over the files in Assets. --all: every project assembly.
+folder and every project assembly that depends on one of them (a broken contract shows where it is used). --all:
+every project assembly.
 
 How: the .asmdef / .asmref of Assets, Packages/, Library/PackageCache (read only: the one tool allowed to, người quyết
 2026-11-27) and the Editor's built-in packages; references by name or GUID; Unity's own netstandard 2.1 and engine
@@ -39,8 +38,6 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 UNITY_PROJECT = "UnityProject"
-DRAFTS = "Drafts"
-DRAFT_FILE = ".draft.json"
 CACHE = Path(os.environ.get("CORESIMPLE_COMPILE_CACHE") or Path.home() / ".cache" / "coresimple-compile")
 LANG_VERSION = "9.0"
 IMPLICIT = ("UnityEngine.UI",)      # the core UI package: Unity 6 references it from every assembly with engine references
@@ -123,6 +120,29 @@ def package_versions(up, data):
     return out
 
 
+def package_cache(up):
+    """Library/PackageCache of the Unity project. A worker's git worktree has no Library (Unity never opened it): the
+    one of the main project is used, named by WORKER_MAIN or found from the worktree's shared git folder."""
+    own = up / "Library" / "PackageCache"
+    if own.is_dir():
+        return own
+    mains = []
+    if os.environ.get("WORKER_MAIN"):
+        mains.append(Path(os.environ["WORKER_MAIN"]))
+    try:
+        common = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--git-common-dir"], cwd=str(up),
+                                capture_output=True, text=True, timeout=20).stdout.strip()
+        if common:
+            mains.append(Path(common).parent)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    for main in mains:
+        cache = main / up.name / "Library" / "PackageCache"
+        if cache.is_dir():
+            return cache
+    return own
+
+
 def package_folders(up, data):
     """The folders of the packages the project uses: embedded (Packages/<x>/), resolved (Library/PackageCache), and
     built-in ones of the Editor named by the lock file."""
@@ -130,7 +150,7 @@ def package_folders(up, data):
     for d in sorted((up / "Packages").iterdir()) if (up / "Packages").is_dir() else []:
         if d.is_dir() and (d / "package.json").is_file():
             out.append(d)
-    cache = up / "Library" / "PackageCache"
+    cache = package_cache(up)
     for d in sorted(cache.iterdir()) if cache.is_dir() else []:
         if d.is_dir() and (d / "package.json").is_file():
             out.append(d)
@@ -338,7 +358,7 @@ class Checker:
         self.versions = package_versions(self.up, self.data)
         self.base_defines = editor_defines(self.version, self.up)
         self.jobs = jobs or max(1, min(8, (os.cpu_count() or 2)))
-        self.overlay = {}      # assembly name -> (sources, draft digest)
+        self.overlay = {}      # assembly name -> sources to compile instead of its own (tests)
         managed = self.data / "Managed"
         net = self.data / "NetStandard"
         self.framework = [net / "ref" / "2.1.0" / "netstandard.dll"] + sorted((net / "compat" / "2.1.0" / "shims" / "netfx").glob("*.dll"))
@@ -370,34 +390,6 @@ class Checker:
                     out.add(a.name)
                     todo.append(a.name)
         return out
-
-    def apply_draft(self, name, folder):
-        """Puts the drafts of feature `name` over the sources of its assemblies (self.overlay)."""
-        draft = self.up / DRAFTS / name
-        if not draft.is_dir():
-            raise ValueError(f"chưa có nháp: {draft.relative_to(self.root)}")
-        meta = read_json(draft / DRAFT_FILE) or {}
-        deleted = {str(x).replace("\\", "/") for x in meta.get("delete", []) or []}
-        files = {}
-        for d, fs in walk(draft):
-            for f in fs:
-                if f.endswith(".cs"):
-                    files[(d / f).relative_to(draft).as_posix()] = d / f
-        mine = [self.asms[n] for n in self.in_folder(folder)]
-        for a in mine:
-            srcs = []
-            for s in a.sources:
-                rel = s.relative_to(folder).as_posix()
-                if rel in deleted:
-                    continue
-                srcs.append(files.pop(rel, s))
-            self.overlay[a.name] = srcs
-        for rel, path in files.items():      # new files: the assembly whose folder holds that path
-            target = folder / rel
-            owner = max((a for a in mine if a.folder in target.parents), key=lambda a: len(a.folder.parts), default=None)
-            if owner is None:
-                raise ValueError(f"nháp {rel} không nằm trong thư mục asmdef nào của {name}")
-            self.overlay.setdefault(owner.name, list(owner.sources)).append(path)
 
     # one assembly
     def plan(self, name, seen=None):
@@ -599,9 +591,8 @@ def report(checker, targets, quiet):
 def main(argv):
     args = argv[1:]
     quiet = "--quiet" in args
-    draft = "--draft" in args
-    rest = [a for a in args if a not in ("--quiet", "--draft")]
-    if not rest or (rest[0] == "--all" and (len(rest) > 1 or draft)) or (rest[0] != "--all" and len(rest) != 1):
+    rest = [a for a in args if a != "--quiet"]
+    if not rest or (rest[0] == "--all" and len(rest) > 1) or (rest[0] != "--all" and len(rest) != 1):
         print(__doc__, file=sys.stderr)
         return 2
     started = time.time()
@@ -615,8 +606,6 @@ def main(argv):
             if not own:
                 print(f"compile_check: {rest[0]} chưa có asmdef nào trong {folder.relative_to(checker.root)}", file=sys.stderr)
                 return 2
-            if draft:
-                checker.apply_draft(rest[0].strip().lstrip("@") if rest[0].strip() in ("@Core",) else rest[0].strip(), folder)
             targets = sorted(checker.dependents(own))
         code = report(checker, targets, quiet)
     except ToolMissing as ex:

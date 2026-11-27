@@ -55,4 +55,4 @@ Node làm lại và chốt thì tool xét từng phần, không đánh cũ cả 
 Chỉ khi phải vẽ (hình mới chưa có phần, phần không còn vừa, style đổi) ảnh mới mang nhãn "CẦN LÀM LẠI · cần vẽ: …". **Vẽ sau khi đã giao phải có lệnh của một Leader** (@UIDesigner, @GameDesigner, @CodeLead, @Manager, hoặc người): `python Management/tools/studio.py redo <ref> <frame> "<lí do>"` mở đúng 1 lượt cho frame đó; `status` in lí do. Không có lệnh thì `claude` từ chối mọi lần chạy có phần mới hoặc phần đổi hình; @ClaudeImage không tự quyết việc vẽ lại.
 
 ## Bộ phần là tham chiếu
-`gd_pack.py <Tên>` in bảng phần và tổng số hình của feature; phiên feature tự đặt order sprite theo đó, không chép phần vào `Assets`. Giai đoạn IDEA chỉ cần claude-concept; art-concept độc lập với nó, ảnh mốc style chỉ lấy từ ảnh Codex.
+`gd_pack.py <Tên>` in bảng phần và tổng số hình của feature; worker của feature tự đặt order sprite theo đó, không chép phần vào `Assets`. Giai đoạn IDEA chỉ cần claude-concept; art-concept độc lập với nó, ảnh mốc style chỉ lấy từ ảnh Codex.

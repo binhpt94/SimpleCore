@@ -1,7 +1,7 @@
 # Báo cáo cho @Manager
-Áp dụng cho nhóm Basic (@Core), Features, Services, @CodeLead khi sửa khung hoặc `Assets/_Composition`, @GameDesigner khi sửa cây thiết kế, @UIDesigner khi sửa frame, và nhóm Testers khi ghi một đợt chơi thử. @human, @Manager không phải báo.
+Áp dụng cho @CodeLead khi sửa khung hoặc `Assets/_Composition`, @GameDesigner khi sửa cây thiết kế, @UIDesigner khi sửa frame, và việc chơi thử (@UnityAutoPlay) khi ghi một đợt. @human, @Manager không phải báo. Worker không viết khối: server ghi báo cáo của nó (cùng 8 dòng) từ `result.json` và kết quả kiểm.
 Báo cáo được lưu thành file và liệt kê ở đầu tin của Leader nắm phần đó (từ 2026-11-26):
-- Basic, Features, Services, Testers, và @CodeLead khi sửa khung: tới @CodeLead (kiểm code, giao việc tiếp, xếp lịch chơi thử).
+- worker, việc chơi thử, và @CodeLead khi sửa khung: tới @CodeLead (kiểm code, giao việc tiếp, xếp lịch chơi thử).
 - @CodeLead, @GameDesigner, @UIDesigner: tới @Manager (điều phối ba Leader).
 
 Tên khối vẫn là `## Báo cáo cho @Manager` cho mọi phiên, để hook nhận ra.
@@ -27,7 +27,6 @@ Tên khối vẫn là `## Báo cáo cho @Manager` cho mọi phiên, để hook n
 ```
 
 - "Công khai đổi" và "Cần bên khác" là thứ Manager dùng để điều phối: ghi rõ tên feature, contract, id asset. Câu đang chờ người trả lời thì ghi id câu hỏi (`ask.py`, dạng `q…`).
-- Phiên Features, Services: "Việc" nêu id các yêu cầu trong sổ (`gd_req.py <Tên>`, dạng `<node>#<id>`) đã làm trong lượt, và đã ghi `doing`/`done` cho chúng. Lượt sửa `Scripts/` hoặc `Tests/` mà không ghi sổ thì Stop hook nhắc một lần. Hook tự thêm dòng `- Sổ yêu cầu:` vào báo cáo đã lưu.
 - Không ghi PIN hay nội dung bí mật.
 - Nhóm Testers điền theo đợt chơi thử: "Đã đổi" là đường dẫn đợt (`Tester/<Tên>/<đợt>/`); "Công khai đổi" ghi `không`; "Cần bên khác" là feature có lỗi và lỗi gì; "Kiểm tra" là kết quả `tester.py check` và kết quả đợt (`đạt`, `không đạt`, `dở`).
 - @GameDesigner điền theo thiết kế: "Đã đổi" là các node đã thêm, sửa, xoá; "Công khai đổi" là node đã chốt (có trong `live`) mà bản đề xuất vừa đổi, hoặc `không`; "Cần bên khác" là việc đang chờ ai (người: chấm, chọn ý trái nhau, chốt trên trang; câu hỏi cho người: id `ask.py` đã gửi Manager; @DesignAdvisor: lần hỏi GPT; @Codex, @ClaudeImage: order); "Kiểm tra" là kết quả `gd_status.py` (node chưa đạt, lỗi cấu trúc).
@@ -36,6 +35,6 @@ Tên khối vẫn là `## Báo cáo cho @Manager` cho mọi phiên, để hook n
 ## Đi đâu
 - Hook lưu khối vào `Management/reports/<thời gian>-<vai trò>.md` (không commit).
 - Đầu mỗi tin, @CodeLead thấy danh sách mọi báo cáo mới, @Manager chỉ thấy báo cáo của ba Leader (và ghi chú của server về họ); trang quản lý có tab Báo cáo.
-- @CodeLead kiểm code rồi nhắn lỗi về đúng phiên; phiên đó tự sửa.
-- @CodeLead giao việc cho tầng dưới bằng hộp thư `dispatch.py send` (feature, service, @Core, tester).
+- @CodeLead kiểm code; lỗi thì giao một việc worker mới cho feature đó (`gd_req.py reject` hay `dispatch.py send`).
+- @CodeLead giao việc cho worker và đợt chơi thử bằng hộp thư `dispatch.py send` (feature, service, @Core, @UnityAutoPlay).
 - @Manager điều phối ba Leader bằng SendMessage và là phiên duy nhất hỏi người (`manager.md`, mục "Hỏi người"); Leader cần người thì ghi `ask.py` và nhắn Manager. Manager không sửa code, không gửi hộp thư.

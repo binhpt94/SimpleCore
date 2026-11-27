@@ -14,7 +14,7 @@
     "**/.claude/rules/uidesigner.md",
     "**/.claude/rules/tester.md",
     "**/.claude/rules/studio.md",
-    "**/.claude/rules/feature.md"
+    "**/.claude/rules/worker.md"
   ],
   "env": {
     "CLAUDE_BG_ISOLATION": "none"

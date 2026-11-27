@@ -24,7 +24,7 @@ Resources/<Feature>/<tool>/<id>/v<n>/   mỗi lần giao một bản mới, khô
 ```
 Mọi phiên đã gán đọc được `Management/studio` và `Resources`. `<Feature>` là thư mục code (`Hero`, `_Services/Popup`); `<id>`, `<item>`: chữ thường, số, gạch nối.
 
-## Khung order (feature viết)
+## Khung order (worker viết qua `result.json`, Leader viết thẳng)
 ```
 ---
 tool: codex | blender | claudeimage
@@ -63,7 +63,7 @@ Nhận, làm, tự kiểm, giao, làm lại: dùng skill `studio-fulfill-order` 
 | 2 | Đúng phần lớn chi tiết | dùng |
 | 3 | Đạt | dùng; đóng mọi phiếu nợ của item; ảnh concept được đặt làm mốc style |
 - Chấm lại bất cứ lúc nào bản giao còn là bản mới nhất; mức sau ghi đè mức trước. Đang làm lại thì chờ bản mới rồi chấm.
-- Chấm của feature (`studio.py review … 0`) tự đưa tin làm lại vào hộp thư của tool. Chấm trên trang (ảnh art) chỉ lưu: muốn tool làm lại thì @GameDesigner giao bằng `dispatch.py send`.
+- Chấm của worker (server chạy `studio.py review … 0` theo `result.json`) tự đưa tin làm lại vào hộp thư của tool. Chấm trên trang (ảnh art) chỉ lưu: muốn tool làm lại thì @GameDesigner giao bằng `dispatch.py send`.
 
 ## Phiếu nợ art (`Management/studio/debt.json`, chỉ studio.py và trang ghi)
 - Mở khi tool giao item chưa chuẩn (loại "chưa chuẩn"), hoặc khi item bị chấm mức 1 (loại "người chấm", lý do là phản hồi).

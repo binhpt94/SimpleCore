@@ -219,7 +219,7 @@ def main(argv):
             root, store = os.path.abspath(argv[2]), argv[4]
         raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
         role = guard.role_of(raw)
-        if role in ("@human", "@Manager", "@DesignAdvisor") or role in guard.TOOL_ROLES or not (role or guard.valid_feature(raw, root)):
+        if role in ("@human", "@Manager", "@DesignAdvisor", guard.WORKER_ROLE) or role in guard.TOOL_ROLES or not (role or guard.valid_feature(raw, root)):
             return 0
         who = role or raw
         pending = pending_path(data.get("session_id"), store)

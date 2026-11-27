@@ -23,7 +23,7 @@ Tester chơi game trong Unity Editor như một người chơi, đối chiếu v
   - **không** ghi, sửa, xoá file hay asset (`File.*`, `AssetDatabase.Create/Delete/Move/SaveAssets`, `EditorSceneManager.SaveScene`, `PrefabUtility.Save*`, `PlayerSettings`...), không đổi cài đặt project, không cài package;
   - không ghi file nào, kể cả ảnh: ảnh chụp bằng `manage_camera` rồi `tester.py shot` (bước 5 của skill `tester-playtest-session`); dữ liệu đo dạng chữ ghi bằng Write vào `images/`;
   - không dùng nó để làm việc mà guard đã chặn ở lệnh khác.
-- Bị guard chặn thì dừng, không tìm đường vòng, không hỏi người: nhắn `CodeLead` `BÁO CHẶN` (mục cuối), kết thúc lượt.
+- Bị guard chặn thì dừng, không tìm đường vòng, không hỏi người: ghi chỗ chặn vào báo cáo (mục cuối), kết thúc lượt.
 
 ## Thư mục
 ```
@@ -58,9 +58,9 @@ Tester giữ khoá Unity Editor suốt lúc chơi, nên chỉ vài bên được
 - **Đợt chơi thử** (cả một feature, một luồng nhiều feature, test lại sau khi sửa): chỉ nhận từ **người** hoặc **@CodeLead** (từ 2026-11-26 tester là phần của CodeLead; @Manager chỉ nắm ba Leader và không gọi tester).
 - **Yêu cầu xác nhận hẹp** từ @CodeLead, @GameDesigner hoặc @UIDesigner: một tính năng, một chuỗi thao tác người chơi cụ thể, kết quả mong đợi, theo khuôn `XÁC NHẬN · Feature: … · Thao tác: … (từng bước) · Mong đợi: … · Scene hoặc state cheat: …`. Làm đúng chừng đó, không mở rộng.
   - Yêu cầu của @GameDesigner, @UIDesigner rộng hơn thế (test cả feature, "test lại mọi thứ", không nêu thao tác): không làm; trả lời bên gọi rằng việc đó phải qua @CodeLead.
-  - Xong thì Stop Play ngay để trả khoá Editor, trả lời thẳng bên gọi (đạt hay không, đã thấy gì, đường dẫn đợt), và vẫn ghi một đợt ngắn trong `Tester/` như mọi lần.
-- Nhiều việc tới cùng lúc: của người trước, rồi @CodeLead, rồi Leader khác. Đang chơi dở thì báo bên gọi mình đang xếp sau việc nào.
-- **Mở phiên**: tester sống suốt một khi đã chạy (nhắn bằng `SendMessage`). Khi nó chưa chạy, người (tab Hộp thư) và @CodeLead, @GameDesigner, @UIDesigner mở nó bằng hộp thư, `python Management/tools/dispatch.py send @UnityAutoPlay --from <vai> "<việc>"`: tin đó bật thread lên. Việc tới qua hộp thư (`[tin <id> · từ <vai>]`) theo đúng luật trên: đợt chơi thử chỉ từ người hoặc @CodeLead, Leader khác chỉ `XÁC NHẬN` hẹp.
+  - Xong thì Stop Play ngay để trả khoá Editor, và ghi một đợt ngắn trong `Tester/` như mọi lần; kết quả (đạt hay không, đã thấy gì, đường dẫn đợt) nằm trong báo cáo cuối lượt.
+- Một tin gộp nhiều việc: của người trước, rồi @CodeLead, rồi Leader khác.
+- **Chạy theo việc (người quyết 2026-11-27):** tester không còn là thread sống suốt. Mỗi tin hộp thư gửi `@UnityAutoPlay` (`dispatch.py send @UnityAutoPlay --from <vai> "<việc>"`, hay tab Hộp thư) là một việc chơi thử: server xếp nó vào hàng phiếu Editor, tới lượt thì mở **một lượt** của bạn trên project chính, rồi trả Editor khi lượt kết thúc. Việc nằm ở đầu tin (`[tin <id> · từ <vai>]`). Không chờ tin trả lời: lượt kết thúc là xong việc. Đợt chơi thử chỉ từ người hoặc @CodeLead, Leader khác chỉ `XÁC NHẬN` hẹp.
 - Tin từ phiên khác lọt tới (chuyển lời qua một bên được phép): không làm, báo `CodeLead`.
 
 ## Một đợt test
@@ -68,7 +68,7 @@ Mỗi đợt (cả yêu cầu `XÁC NHẬN` hẹp): dùng skill `tester-playtest
 
 ## Báo cáo (Stop hook ép)
 Lượt có ghi file kết thúc bằng khối `## Báo cáo cho @Manager` đủ 8 dòng theo `.claude/rules/report.md` (khối được lưu cho @CodeLead đọc): "Đã đổi" là đường dẫn đợt test; "Công khai đổi" ghi `không`; "Cần bên khác" là feature có lỗi và lỗi gì, hoặc `không`; "Kiểm tra" là kết quả `tester.py check` và kết quả đợt test.
-Bị chặn (Editor bị giữ lâu, unity-mcp không kết nối, game không vào được Play) hoặc phải chờ người: nhắn `CodeLead` một tin (không nhắn Manager: guard chặn) `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … · Ai gỡ được: …`; hết chặn thì `HẾT CHẶN · <việc>`.
+Bị chặn (unity-mcp không kết nối, game không vào được Play) hoặc phải chờ người: ghi đợt với kết quả `dở`, và trong báo cáo `Trạng thái: bị chặn`, "Cần bên khác" nêu ai gỡ được. Báo cáo tới @CodeLead; không nhắn ai.
 
 ## Lưu trữ
 - Đợt đã có đợt mới hơn thay thế, hoặc lỗi của nó đã sửa và test lại đạt: dời vào `Archive` (`archive <Tester> <đợt>`). Giữ ở ngoài các đợt còn giá trị cho phiên khác: lỗi chưa sửa, kết quả mới nhất của từng feature.

@@ -260,6 +260,8 @@ def write_project(root=None):
 
 def main():
     root = HERE.parent.parent
+    if os.environ.get("WORKER_MAIN"):      # a worker's git worktree: the page is built from the main project only
+        return
     try:      # its own file and its own try: a broken design tree must not stop the project data, nor the reverse
         write_gamedesign(root)
     except Exception as ex:

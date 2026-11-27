@@ -74,7 +74,7 @@ Vòng 4 là vòng duy nhất được ghi dữ liệu theo giai đoạn, và ch�
 Không hỏi GPT về node vòng 4 (người quyết 2026-11-27; `gd_advise.py` từ chối). Thông số và trường hợp biên là việc của bạn và của người.
 
 ## Mở khoá code
-Guard chỉ cho phiên feature sửa code khi nhánh của nó có ít nhất một node vòng 4 đã chốt trong `live`. Vì vậy vòng 4 phải đủ rõ để code theo; đừng viết sơ sài chỉ để mở khoá.
+Sổ yêu cầu chỉ giao việc code của một feature (cho worker) khi nhánh của nó có ít nhất một node vòng 4 đã chốt trong `live`. Vì vậy vòng 4 phải đủ rõ để code theo; đừng viết sơ sài chỉ để mở khoá.
 
 ## `CLAUDE.md` của node
 Các mục: Làm gì, Thông số, Thông số theo giai đoạn, Trường hợp biên, Chưa rõ.

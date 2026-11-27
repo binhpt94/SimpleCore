@@ -128,8 +128,9 @@ def describe(t):
     return ", ".join(common + tasks) or "trống"
 
 
-def add(root, session, common=(), tasks=(), reqs=(), now=None, priority=False):
-    """Puts needs on the session's open ticket (or a new one). Returns the ticket."""
+def add(root, session, common=(), tasks=(), reqs=(), now=None, priority=False, job=None):
+    """Puts needs on the session's open ticket (or a new one). Returns the ticket. A worker's ticket (job: its worker.py
+    id) names the feature of each requirement, since one job spans several features."""
     session = session_name(session)
     now = time.time() if now is None else now
     bits = 0
@@ -138,7 +139,8 @@ def add(root, session, common=(), tasks=(), reqs=(), now=None, priority=False):
             raise ValueError(f"nhu cầu chung phải là: {', '.join(COMMON)}")
         bits |= 1 << COMMON[c]
     tasks = [text(x, "việc") for x in tasks]
-    reqs = [{"ref": r["ref"], "tests": list(r.get("tests") or [])} for r in reqs]
+    reqs = [{"ref": r["ref"], "tests": list(r.get("tests") or []), **({"feature": r["feature"]} if r.get("feature") else {})}
+            for r in reqs]
     for r in reqs:
         if not REF_RX.match(r["ref"]):
             raise ValueError(f"yêu cầu phải có dạng <node>#<id>: '{r['ref']}'")
@@ -146,7 +148,7 @@ def add(root, session, common=(), tasks=(), reqs=(), now=None, priority=False):
         bits |= 1 << COMMON["test"]
     if not bits and not tasks:
         raise ValueError("phiếu cần ít nhất một nhu cầu (--common) hay một việc (--task)")
-    open_ = next((t for t in queue(root) if t["session"] == session), None)
+    open_ = next((t for t in queue(root) if t["session"] == session and t.get("job") == job), None)
     t = open_ or {"id": new_id(now), "session": session, "code": 0, "tasks": [], "reqs": [], "state": "waiting",
                   "created": now, "granted_at": 0, "priority": priority, "notes": []}
     for task in tasks:
@@ -165,15 +167,20 @@ def add(root, session, common=(), tasks=(), reqs=(), now=None, priority=False):
     for r in reqs:
         entry = known.setdefault(r["ref"], {"ref": r["ref"], "tests": []})
         entry["tests"] = sorted(set(entry["tests"]) | set(r["tests"]))
+        if r.get("feature"):
+            entry["feature"] = r["feature"]
     t["reqs"] = list(known.values())
+    if job:
+        t["job"] = job
     t["code"] |= bits
     t["new"] = open_ is None
     return save(root, t)
 
 
-def find(root, session, states=("granted", "waiting")):
+def find(root, session, states=("granted", "waiting"), job=None):
+    """The session's open ticket (granted first). A worker's job (job: its id) has a ticket of its own."""
     session = session_name(session)
-    mine = [t for t in tickets(root, states) if t["session"] == session]
+    mine = [t for t in tickets(root, states) if t["session"] == session and (job is None or t.get("job") == job)]
     if not mine:
         raise ValueError(f"{session} không có phiếu đang mở")
     return sorted(mine, key=lambda t: (t["state"] != "granted", t["created"]))[0]
@@ -190,8 +197,8 @@ def done(root, session, keys):
     return save(root, t)
 
 
-def drop(root, session, keys=None):
-    t = find(root, session, ("waiting", "granted"))
+def drop(root, session, keys=None, job=None):
+    t = find(root, session, ("waiting", "granted"), job)
     if not keys:
         t["code"] = 0
         t["state"] = "dropped" if t["state"] == "waiting" else t["state"]
@@ -207,7 +214,9 @@ def drop(root, session, keys=None):
 
 
 def code_only(t):
-    return t["code"] and not t["code"] & ~CODE_ONLY
+    """Common needs only (refresh, clean), nothing of its own. A test bit beside them does not make it one's own: the
+    load meets refresh and clean, and the test bit waits for the test run at the end of the round."""
+    return bool(t["code"] & CODE_ONLY) and not t["code"] & ~(CODE_ONLY | 1 << COMMON["test"])
 
 
 def needs_editor(t):
@@ -240,7 +249,7 @@ def grant_next(root, now=None):
     return kind, group
 
 
-def release(root, session=None, met=(), now=None):
+def release(root, session=None, met=(), now=None, broken=None):
     """Ends the grant (of `session`, or the whole load / test run when session is None). `met`: common needs met in
     this turn (refresh, clean, test), in addition to the common bits the holders cleared themselves. Returns a dict:
     {"released": [tickets], "satisfied": [waiting tickets that reached 0], "requeued": [new tickets with what was
@@ -258,15 +267,19 @@ def release(root, session=None, met=(), now=None):
         met_bits |= 1 << COMMON[m]
     for t in held:      # the common bits a holder had at its grant and has now cleared were met for everyone
         met_bits |= (t.get("granted_code", 0) & ~t["code"]) & COMMON_MASK
-    left_broken = any(t["code"] >> COMMON["clean"] & 1 and t.get("granted_code", 0) >> COMMON["clean"] & 1 for t in held) \
-        and not met_bits >> COMMON["clean"] & 1
+    # Only a turn that used the Editor (or a load, released by the server) can have left compile errors: a grant given
+    # back unused changed nothing, so no fix ticket for @CodeLead.
+    left_broken = any(t["code"] >> COMMON["clean"] & 1 and t.get("granted_code", 0) >> COMMON["clean"] & 1
+                      and (session is None or t.get("used")) for t in held) and not met_bits >> COMMON["clean"] & 1
+    if broken is False:      # the caller knows nothing ran (the server's runner failed): no fix ticket
+        left_broken = False
     for t in held:
         remaining = t["code"] & ~met_bits
         t.update(state="done", code=remaining, released_at=now)
         save(root, t)
         out["released"].append(t)
         rest = remaining & ~((1 << COMMON["clean"]) if left_broken else 0)
-        waiting = next((w for w in queue(root) if w["session"] == t["session"]), None)
+        waiting = next((w for w in queue(root) if w["session"] == t["session"] and w.get("job") == t.get("job")), None)
         if rest and waiting:      # one open ticket per session: what was left joins the one it already queued
             for i, task in enumerate(t.get("tasks", [])):
                 if task and rest >> (COMMON_BITS + i) & 1:
@@ -280,7 +293,7 @@ def release(root, session=None, met=(), now=None):
         elif rest:
             again = {"id": new_id(now), "session": t["session"], "code": rest, "tasks": list(t.get("tasks", [])),
                      "reqs": list(t.get("reqs", [])), "state": "waiting", "created": now, "granted_at": 0,
-                     "priority": False, "notes": [f"phần còn lại của {t['id']}"]}
+                     "priority": False, "notes": [f"phần còn lại của {t['id']}"], **({"job": t["job"]} if t.get("job") else {})}
             out["requeued"].append(save(root, again))
     if met_bits:
         for w in queue(root):

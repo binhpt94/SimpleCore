@@ -645,8 +645,8 @@ def takeover_cases(check):
     real = (ss.ROOT, ss.threads, ss.live_sessions, ss.turn, ss.stop_bg, ss.transcripts_dir, ss.close_chat, ss.kill_pid, ss.wait_live)
     root, tdir = Path(tempfile.mkdtemp(prefix="take-")), Path(tempfile.mkdtemp(prefix="take-t-"))
     live, given, closed, killed = {}, [], [], []
-    listed = [thread("w0000000", "Wallet", binding="Wallet"), thread("h0000000", "Hud", binding="Hud"),
-              thread("s0000000", "Shop", binding="Shop"), thread("u0000000", "UnityAutoPlay", binding="@UnityAutoPlay")]
+    listed = [thread("w0000000", "Blender", binding="@Blender"), thread("h0000000", "DesignAdvisor", binding="@DesignAdvisor"),
+              thread("s0000000", "ClaudeImage", binding="@ClaudeImage")]
     for t in listed:
         (tdir / f"{t['id']}.jsonl").write_text("{}\n", encoding="utf-8")
 
@@ -673,7 +673,7 @@ def takeover_cases(check):
         ss.ROOT, ss.threads, ss.live_sessions = root, lambda include_unnamed=False: [dict(t) for t in listed], lambda fresh=False: dict(live)
         ss.turn, ss.stop_bg, ss.transcripts_dir, ss.close_chat = fake_turn, lambda sid: None, lambda: tdir, fake_close
         chat("w0000000", minutes=2)
-        a = ss.dispatch.send(root, "Wallet", "Việc cho Wallet", "@Manager")
+        a = ss.dispatch.send(root, "@Blender", "Việc cho Wallet", "@Manager")
         ss.courier_tick(time.time())
         check("takeover: a chat idle for two minutes is left open; the message says when the server will close it",
               (msg(a["id"])["state"], "rảnh 2 phút: server tự đóng chat và giao khi rảnh đủ 5 phút" in msg(a["id"])["why"], closed, given),
@@ -686,10 +686,10 @@ def takeover_cases(check):
         chat("w0000000", minutes=6)
         did = ss.courier_tick(time.time())
         check("takeover: idle past takeover_minutes with a message waiting: the chat is closed and the thread runs in the background with it",
-              (list(closed), [g[0] for g in given], a["id"] in given[-1][1], msg(a["id"])["state"], ("took-over", "Wallet") in did),
+              (list(closed), [g[0] for g in given], a["id"] in given[-1][1], msg(a["id"])["state"], ("took-over", "@Blender") in did),
               (["w0000000"], ["w0000000"], True, "delivering", True))
         chat("h0000000", minutes=1)
-        b = ss.dispatch.send(root, "Hud", "Việc cho Hud", "@Manager")
+        b = ss.dispatch.send(root, "@DesignAdvisor", "Việc cho Hud", "@Manager")
         ss.courier_tick(time.time())
         n_closed = len(closed)
         res = ss.inbox_call("deliver", {"id": b["id"]})
@@ -697,18 +697,18 @@ def takeover_cases(check):
               (res["ok"], res.get("state"), closed[n_closed:], given[-1][0], msg(b["id"]).get("force")), (True, "delivering", ["h0000000"], "h0000000", False))
         ss.dispatch.set_config(root, takeover_minutes=0)
         chat("s0000000", minutes=600)
-        c = ss.dispatch.send(root, "Shop", "Việc cho Shop", "@Manager")
+        c = ss.dispatch.send(root, "@ClaudeImage", "Việc cho Shop", "@Manager")
         n_closed = len(closed)
         ss.courier_tick(time.time())
         check("takeover: takeover_minutes 0: an open chat is never closed by itself; the message says how to send it",
               (closed[n_closed:], "bấm Giao ngay" in msg(c["id"])["why"]), ([], True))
         check("deliver now: still closes it, the human asked", (ss.inbox_call("deliver", {"id": c["id"]})["ok"], closed[n_closed:]), (True, ["s0000000"]))
-        ss.dispatch.set_config(root, takeover_minutes=5, limits={"feature": 1})
+        ss.dispatch.set_config(root, takeover_minutes=5, limits={"tool": 1})
         live.clear()
         live["w0000000"] = {"kind": "background", "status": "busy", "state": "working", "short": "w0000000"}
         for m in ss.dispatch.pending(root):
             ss.dispatch.mark(root, m, "delivered")
-        d = ss.dispatch.send(root, "Hud", "Việc hai", "@Manager", now=time.time() - 400)
+        d = ss.dispatch.send(root, "@DesignAdvisor", "Việc hai", "@Manager", now=time.time() - 400)
         n = len(notes())
         did = ss.courier_tick(time.time())
         check("wait note: a message that has waited five minutes is told to @Manager, with why; once",
@@ -719,48 +719,6 @@ def takeover_cases(check):
         check("deliver now: a full pool is passed for this message; the thread is told the request may be old",
               (res["ok"], len(given) - n_given, "LƯU Ý: tin này gửi lúc" in given[-1][1]), (True, 1, True))
         check("deliver now: a message that is not waiting is refused", ss.inbox_call("deliver", {"id": d["id"]})["ok"], False)
-        # a tester plays: code work is held back, tools and testers still get theirs
-        store = Path(tempfile.mkdtemp(prefix="take-store-"))
-        real_store = ss.guard.STORE_DIR
-        ss.guard.STORE_DIR = str(store)
-        try:
-            live.clear()
-            for m in ss.dispatch.pending(root):
-                ss.dispatch.mark(root, m, "delivered")
-            ss.dispatch.set_config(root, limits={"feature": 8})
-            ss.guard.write_lock(str(store), {"session": "t1", "who": "@UnityAutoPlay", "until": time.time() + 600})
-            f = ss.dispatch.send(root, "Wallet", "Việc code", "@Manager", now=time.time() - 900)
-            n_given, n_notes = len(given), len(notes())
-            ss.courier_tick(time.time())
-            check("tester plays: code work for a feature is held back, with why and until when; no note is written for it",
-                  (msg(f["id"])["state"], "đang chơi thử tới khoảng" in msg(f["id"])["why"], len(given) - n_given, len(notes()) - n_notes),
-                  ("waiting", True, 0, 0))
-            check("tester plays: Giao ngay still sends it", (ss.inbox_call("deliver", {"id": f["id"]})["ok"], given[-1][0]), (True, "w0000000"))
-            (store / ss.guard.TESTER_BLOCKED_DIR).mkdir()
-            (root / "UnityProject/Assets/Features/Hud").mkdir(parents=True)
-            for name, target in (("a", "Hud"), ("b", "Hud"), ("c", "@CodeLead"), ("d", "Nope")):
-                (store / ss.guard.TESTER_BLOCKED_DIR / f"{name}.json").write_text(json.dumps({"session": name, "target": target}), encoding="utf-8")
-            check("tester plays: the chats it blocked are not woken yet", (ss.wake_blocked(), len(list((store / ss.guard.TESTER_BLOCKED_DIR).glob("*.json")))), ([], 4))
-            ss.guard.write_lock(str(store), {"session": "b", "who": "@CodeLead", "until": time.time() + 600})
-            did = ss.wake_blocked()
-            woke = [m for m in ss.dispatch.messages(root, "Hud") if m.get("key") == "tester-done:Hud"]
-            check("tester done: each blocked chat that runs on demand gets one message to go on; the marks are gone",
-                  (did, len(woke), "làm tiếp phần còn lại" in woke[0]["text"], list((store / ss.guard.TESTER_BLOCKED_DIR).glob("*.json")), ss.wake_blocked()),
-                  ([("woken", "Hud")], 1, True, [], []))
-            h2 = ss.dispatch.send(root, "Shop", "Việc code khác", "@Manager")
-            ss.courier_tick(time.time())
-            check("another chat holding the Editor holds no code work back", msg(h2["id"])["state"], "delivering")
-        finally:
-            ss.guard.STORE_DIR = real_store
-            shutil.rmtree(store, ignore_errors=True)
-        live.clear()
-        for m in ss.dispatch.pending(root):
-            ss.dispatch.mark(root, m, "delivered")
-        e = ss.dispatch.send(root, "@UnityAutoPlay", "Chơi thử", "@Manager")
-        chat("u0000000", minutes=600)
-        n_closed = len(closed)
-        ss.courier_tick(time.time())
-        check("takeover: a tester's open chat is not closed by itself", (closed[n_closed:], msg(e["id"])["state"]), ([], "waiting"))
         # close_chat itself
         ss.close_chat, ss.kill_pid, ss.wait_live = real[6], lambda pid: killed.append(pid), lambda sid, present: True
         chat("s0000000", status="busy")
@@ -795,10 +753,9 @@ def courier_cases(check):
     real = (ss.ROOT, ss.threads, ss.live_sessions, ss.turn, ss.stop_bg, ss.transcripts_dir)
     root, tdir = Path(tempfile.mkdtemp(prefix="courier-")), Path(tempfile.mkdtemp(prefix="courier-t-"))
     live, given, stopped = {}, [], []
-    listed = [thread("w0000000", "Wallet", binding="Wallet"), thread("s0000000", "Shop", binding="Shop"),
-              thread("h0000000", "Hud", binding="Hud"), thread("c0000000", "Codex", binding="@Codex"),
-              thread("l0000000", "CodeLead", binding="@CodeLead"), thread("o0000000", "Old", binding="Old", archived=True),
-              thread("u0000000", "UnityAutoPlay", binding="@UnityAutoPlay")]
+    listed = [thread("w0000000", "Blender", binding="@Blender"), thread("s0000000", "ClaudeImage", binding="@ClaudeImage"),
+              thread("h0000000", "DesignAdvisor", binding="@DesignAdvisor"), thread("c0000000", "Codex", binding="@Codex"),
+              thread("l0000000", "CodeLead", binding="@CodeLead"), thread("o0000000", "Old", binding="Old", archived=True)]
     for t in listed:
         (tdir / f"{t['id']}.jsonl").write_text("{}\n", encoding="utf-8")
     seen = {"write": True}
@@ -823,17 +780,17 @@ def courier_cases(check):
         ss.turn, ss.stop_bg, ss.transcripts_dir = fake_turn, fake_stop, lambda: tdir
         now = time.time()
         check("courier: an empty inbox in always-live mode does nothing", ss.courier_tick(now), [])
-        a = ss.dispatch.send(root, "Wallet", "Làm yêu cầu x#y", "@Manager")
+        a = ss.dispatch.send(root, "@Blender", "Làm yêu cầu x#y", "@Manager")
         did = ss.courier_tick(now)
         m = ss.dispatch.get(root, a["id"])
         check("courier: a thread that is not running is started with the message as its prompt",
               (did[0][:2], given[-1][0], a["id"] in given[-1][1], given[-1][3], m["state"], m["tries"]),
-              (("given", "Wallet"), "w0000000", True, True, "delivering", 1))
+              (("given", "@Blender"), "w0000000", True, True, "delivering", 1))
         ss.courier_tick(now + 1)
         check("courier: delivered once the id is in the transcript", ss.dispatch.get(root, a["id"])["state"], "delivered")
 
         live["w0000000"]["status"] = "busy"
-        b = ss.dispatch.send(root, "Wallet", "Việc thứ hai", "@CodeLead")
+        b = ss.dispatch.send(root, "@Blender", "Việc thứ hai", "@CodeLead")
         ss.courier_tick(now + 2)
         check("courier: a thread in the middle of a turn: the message waits",
               (ss.dispatch.get(root, b["id"])["state"], ss.dispatch.get(root, b["id"])["why"]), ("waiting", "thread đang chạy một lượt"))
@@ -844,10 +801,10 @@ def courier_cases(check):
               (len(given) - n_blocked, given[-1][0], b["id"] in given[-1][1], given[-1][2]), (1, "w0000000", True, "background"))
         ss.courier_tick(now + 2.6)
         live["w0000000"] = {"kind": "background", "status": "busy", "state": "working", "short": "w0000000"}
-        b = ss.dispatch.send(root, "Wallet", "Việc thứ ba", "@CodeLead")
+        b = ss.dispatch.send(root, "@Blender", "Việc thứ ba", "@CodeLead")
         ss.courier_tick(now + 2.7)
         live["w0000000"]["status"] = "idle"
-        c = ss.dispatch.send(root, "Wallet", "Việc thứ ba", "người")
+        c = ss.dispatch.send(root, "@Blender", "Việc thứ ba", "người")
         ss.courier_tick(now + 3)
         check("courier: an idle background thread gets every waiting message in one turn, as a background turn",
               (b["id"] in given[-1][1] and c["id"] in given[-1][1], given[-1][2], len([g for g in given if g[0] == "w0000000"])),
@@ -855,55 +812,13 @@ def courier_cases(check):
         ss.courier_tick(now + 4)
 
         live["s0000000"] = {"kind": "interactive", "status": "busy", "state": "", "short": "s0000000"}
-        d = ss.dispatch.send(root, "Shop", "Việc cho Shop", "@Manager")
+        d = ss.dispatch.send(root, "@ClaudeImage", "Việc cho Shop", "@Manager")
         ss.courier_tick(now + 5)
         check("courier: a chat open in VS Code is never given a turn: the message waits",
               (ss.dispatch.get(root, d["id"])["state"], "VS Code" in ss.dispatch.get(root, d["id"])["why"], given[-1][0] != "s0000000"),
               ("waiting", True, True))
-        e = ss.dispatch.send(root, "Hero", "Việc cho Hero", "@Manager")
-        ss.courier_tick(now + 6)
-        check("courier: no thread and no such feature folder: the message waits, no thread is made",
-              ("không có feature hay vai này" in ss.dispatch.get(root, e["id"])["why"], ss.can_create("Hero"), ss.can_create("@Manager")),
-              (True, False, False))
-        # a target that exists but has no thread yet: the courier makes the thread, then gives it the message
-        for name in ("Hero", "Castle"):
-            (root / "UnityProject/Assets/Features" / name).mkdir(parents=True)
-        made = []
-        real_create = ss.create
-
-        def fake_create(name, feature, model, effort):
-            if feature == "Castle" and not made_ok["castle"]:
-                raise RuntimeError("CLI lỗi")
-            sid = feature.lower()[:1] + "9999999"
-            made.append((name, feature, model, effort))
-            (tdir / f"{sid}.jsonl").write_text("{}\n", encoding="utf-8")
-            return sid
-        made_ok = {"castle": False}
-        ss.create = fake_create
-        try:
-            c1 = ss.dispatch.send(root, "Castle", "Việc cho Castle", "@Manager")
-            n_given = len(given)
-            did = ss.courier_tick(now + 6.5)
-            check("courier: a target with a folder and no thread gets one made (the model of the pool's last thread), then its message",
-                  (list(made), [x[:2] for x in did if x[0] == "created"], given[-1][0], e["id"] in given[-1][1], given[-1][3],
-                   ss.dispatch.get(root, e["id"])["state"]),
-                  ([("Hero", "Hero", "claude-opus-x", "medium")], [("created", "Hero")], "h9999999", True, True, "delivering"))
-            check("courier: one thread is made in a pass; the next target waits its turn",
-                  (len(given) - n_given, "mỗi vòng tạo một" in ss.dispatch.get(root, c1["id"])["why"]), (1, True))
-            ss.courier_tick(now + 6.6)
-            m = ss.dispatch.get(root, c1["id"])
-            check("courier: a thread that cannot be made: the message goes back to the queue with the reason",
-                  (m["state"], "không tạo được thread: CLI lỗi" in m["error"], len(made)), ("queued", True, 1))
-            made_ok["castle"] = True
-            ss.courier_tick(now + 6.7)
-            check("courier: made at the next try", (made[-1][:2], given[-1][0]), (("Castle", "Castle"), "c9999999"))
-        finally:
-            ss.create = real_create
-        for sid in ("h9999999", "c9999999"):
-            live.pop(sid, None)
-        ss.dispatch.cancel(root, c1["id"]) if ss.dispatch.get(root, c1["id"])["state"] in ss.dispatch.OPEN else None
         ss.busy("h0000000", True)
-        f = ss.dispatch.send(root, "Hud", "Việc cho Hud", "@Manager")
+        f = ss.dispatch.send(root, "@DesignAdvisor", "Việc cho Hud", "@Manager")
         ss.courier_tick(now + 7)
         check("courier: a thread the page is running a turn in: waits", "trang đang chạy" in ss.dispatch.get(root, f["id"])["why"])
         ss.busy("h0000000", False)
@@ -926,11 +841,11 @@ def courier_cases(check):
         seen["write"] = True
 
         ss.dispatch.cancel(root, d["id"])
-        ss.dispatch.set_config(root, mode="on-demand", limits={"feature": 1}, idle_minutes=10)
+        ss.dispatch.set_config(root, mode="on-demand", limits={"tool": 1}, idle_minutes=10)
         live.clear()
         live["w0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "w0000000"}
         age("w0000000", 1)
-        h = ss.dispatch.send(root, "Hud", "Việc mới cho Hud", "@Manager")
+        h = ss.dispatch.send(root, "@DesignAdvisor", "Việc mới cho Hud", "@Manager")
         ss.courier_tick(time.time())
         check("on-demand: the pool is full and its thread was busy a minute ago: the message waits, nothing is stopped",
               (ss.dispatch.get(root, h["id"])["state"], "hết chỗ" in ss.dispatch.get(root, h["id"])["why"], list(stopped)), ("waiting", True, []))
@@ -955,26 +870,26 @@ def courier_cases(check):
         # a Renew marked on the page runs right before the next job: wipe (headless), bind again, then the job
         real_store, ss.guard.STORE_DIR = ss.guard.STORE_DIR, tempfile.mkdtemp(prefix="courier-store-")
         try:
-            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "Shop"})
+            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "@ClaudeImage"})
             with open(tdir / "s0000000.jsonl", "a", encoding="utf-8") as f:      # a conversation to drop
                 f.write(json.dumps({"type": "user", "message": {"content": "việc cũ"}}, ensure_ascii=False) + "\n")
             live.pop("s0000000", None)
-            m = ss.dispatch.send(root, "Shop", "Làm yêu cầu shop-list#a", "@CodeLead")
+            m = ss.dispatch.send(root, "@ClaudeImage", "Làm yêu cầu shop-list#a", "@CodeLead")
             n = len(given)
             ss.dispatch.mark(root, m, "queued", force=True)      # the Giao ngay button: the pool limit does not hold
             did = ss.courier_tick(time.time() + 3)
             kept = [json.loads(x) for x in (tdir / "s0000000.jsonl").read_text(encoding="utf-8").splitlines()]
             check("renew mark: cleared first with no turn (old transcript in .renewed), then the job; bound again, mark gone",
-                  ([(g[0], g[3]) for g in given[n:]], ("renewed", "Shop") in did, ss.renew_pending("s0000000"),
+                  ([(g[0], g[3]) for g in given[n:]], ("renewed", "@ClaudeImage") in did, ss.renew_pending("s0000000"),
                    ss.guard.bound_feature("s0000000", ss.guard.STORE_DIR), len(list((tdir / ss.RENEWED).glob("*-s0000000/s0000000.jsonl"))),
                    kept[0]["message"]["content"]),
-                  ([("s0000000", True)], True, False, "Shop", 1, ss.RENEW_NOTE))
+                  ([("s0000000", True)], True, False, "@ClaudeImage", 1, ss.RENEW_NOTE))
             check("renew mark: the job prompt is the only thing after the renew turn",
                   (len(kept), kept[1]["type"], "shop-list#a" in kept[-1]["message"]["content"]), (3, "assistant", True))
             ss.courier_tick(time.time() + 4)
-            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "Shop"})
+            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "@ClaudeImage"})
             live["s0000000"] = {"kind": "background", "status": "idle", "state": "blocked", "short": "s0000000"}
-            m = ss.dispatch.send(root, "Shop", "Trả lời câu hỏi", "@CodeLead")
+            m = ss.dispatch.send(root, "@ClaudeImage", "Trả lời câu hỏi", "@CodeLead")
             ss.dispatch.mark(root, m, "queued", force=True)
             n = len(given)
             ss.courier_tick(time.time() + 5)
@@ -990,30 +905,17 @@ def courier_cases(check):
         n_stop = len(stopped)
         ss.courier_tick(time.time())
         check("always-live: nothing is ever stopped", len(stopped), n_stop)
-        u = ss.dispatch.send(root, "@UnityAutoPlay", "Chơi tiếp R1, B1", "@Manager")
-        did = ss.courier_tick(time.time())
-        check("tester: a Leader's message opens its thread although the other pools are full",
-              (("given", "@UnityAutoPlay", [u["id"]]) in did, given[-1][0], "u0000000" in live), (True, "u0000000", True))
-        ss.courier_tick(time.time() + 1)
-        live["u0000000"]["status"] = "idle"
-        age("u0000000", 300)
-        n_stop = len(stopped)
-        ss.courier_tick(time.time() + 2)
-        check("tester: delivered, and never stopped for being idle (it stays live, on-demand mode too)",
-              (ss.dispatch.get(root, u["id"])["state"], len(stopped), ss.can_stop(listed[-1], live, set(), dict(ss.dispatch.config(root), mode="on-demand"), time.time())),
-              ("delivered", n_stop, False))
-        live.pop("u0000000")
         v = ss.inbox_view()
         live["w0000000"] = {"kind": "background", "status": "idle", "state": "blocked", "short": "w0000000"}
-        who = ss.inbox_view()["pools"]["feature"]["threads"]
+        who = ss.inbox_view()["pools"]["tool"]["threads"]
         check("inbox view: who takes the places of a pool: the thread, where it runs, what it does, how long it has been quiet",
               [(x["title"], x["kind"], x["status"], x["state"], x["idle"] >= 0) for x in who if x["id"] == "w0000000"],
-              [("Wallet", "background", "idle", "blocked", True)])
+              [("Blender", "background", "idle", "blocked", True)])
         live.pop("w0000000")
         check("inbox view: settings, each pool with its limit and running threads, targets without Leaders",
-              (v["config"]["mode"], v["pools"]["feature"]["limit"], sorted(t["target"] for t in v["targets"])),
-              ("always-live", 1, ["@Codex", "@UnityAutoPlay", "Hud", "Shop", "Wallet"]))
-        res = ss.inbox_call("send", {"target": "Shop", "text": "Việc của người"})
+              (v["config"]["mode"], v["pools"]["tool"]["limit"], sorted(t["target"] for t in v["targets"])),
+              ("always-live", 1, ["@Blender", "@ClaudeImage", "@Codex", "@DesignAdvisor"]))
+        res = ss.inbox_call("send", {"target": "@ClaudeImage", "text": "Việc của người"})
         check("inbox send: from the page the source is the human", (res["ok"], ss.dispatch.get(root, res["id"])["source"]), (True, "người"))
         check("inbox send refused: a Leader", ss.inbox_call("send", {"target": "@CodeLead", "text": "x"})["ok"], False)
         check("inbox cancel and retry", (ss.inbox_call("cancel", {"id": res["id"]})["ok"], ss.inbox_call("retry", {"id": res["id"]})["ok"],
@@ -1026,21 +928,21 @@ def courier_cases(check):
         real_valid = ss.still_valid
         ss.still_valid = lambda check: (False, "đã sửa") if check == "gone" else (True, "")
         live.pop("w0000000", None)
-        stale = ss.dispatch.send(root, "Wallet", "Yêu cầu bị trả", "gd_req", key="reject:x", check="gone")
-        fresh = ss.dispatch.send(root, "Wallet", "Việc còn đúng", "@Manager", check="ok")
+        stale = ss.dispatch.send(root, "@Blender", "Yêu cầu bị trả", "gd_req", key="reject:x", check="gone")
+        fresh = ss.dispatch.send(root, "@Blender", "Việc còn đúng", "@Manager", check="ok")
         n = len(given)
-        ss.dispatch.set_config(root, mode="always-live", limits={"feature": 4})
+        ss.dispatch.set_config(root, mode="always-live", limits={"tool": 4})
         ss.courier_tick(time.time())
         ss.still_valid = real_valid
         check("courier: an automatic message whose event no longer holds is cancelled, not given; the others are",
               (ss.dispatch.get(root, stale["id"])["state"], ss.dispatch.get(root, stale["id"])["why"], fresh["id"] in given[-1][1],
                stale["id"] in given[-1][1], len(given) - n), ("cancelled", "hết hợp lệ: đã sửa", True, False, 1))
         check("still_valid: a check it cannot read lets the message go", (ss.still_valid(None), ss.still_valid("weird x")), ((True, ""), (True, "")))
-        ss.dispatch.set_config(root, mode="always-live", limits={"feature": 1})
+        ss.dispatch.set_config(root, mode="always-live", limits={"tool": 1})
         live.clear()
         live["w0000000"] = {"kind": "background", "status": "busy", "state": "working", "short": "w0000000"}
         age("w0000000", 300)
-        capped = ss.dispatch.send(root, "Hud", "Việc khi nhóm đã đầy", "@Manager")
+        capped = ss.dispatch.send(root, "@DesignAdvisor", "Việc khi nhóm đã đầy", "@Manager")
         n_stop, n_given = len(stopped), len(given)
         ss.courier_tick(time.time())
         check("always-live: the pool is full and its thread is in the middle of a turn: the message waits, nothing is stopped",
@@ -1121,21 +1023,13 @@ def profile_cases(check):
               (["blender"], True, ["studio-fulfill-order"]))
         args, settings, mcp, on = flags("@Codex")
         check("profile: another tool has no MCP server", mcp, {})
-        real_group, real_core = ss.group_of, ss.core_names
-        ss.group_of = lambda n: "Features" if n in ("Run", "Wallet") else "Services" if n.startswith("_Services/") else real_group(n)
-        ss.core_names = lambda: frozenset({"Run", "_Services/Popup"})
-        try:
-            check("profile: recommended models by role (người quyết 2026-11-27)",
-                  [ss.role_model(f, "haiku", "max") for f in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner",
-                                                             "@DesignAdvisor", "@Codex", "@ClaudeImage", "@Blender",
-                                                             "@UnityAutoPlay", "@Core", "_Services/Ads", "Wallet", "Run", "@human",
-                                                             "_Services/Popup")],
-                  [("sonnet", "medium"), ("opus", "medium"), ("opus", "medium"), ("opus", "medium"),
-                   ("opus", "low"), ("sonnet", "medium"), ("opus", "medium"), ("opus", "low"),
-                   ("sonnet", "medium"), ("opus", "medium"), ("opus", "low"), ("sonnet", "medium"), ("opus", "medium"),
-                   ("haiku", "max"), ("opus", "medium")])
-        finally:
-            ss.group_of, ss.core_names = real_group, real_core
+        check("profile: recommended models by role (người quyết 2026-11-27; workers run on worker.py's)",
+              [ss.role_model(f, "haiku", "max") for f in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner",
+                                                         "@DesignAdvisor", "@Codex", "@ClaudeImage", "@Blender",
+                                                         "@UnityAutoPlay", "@human")],
+              [("sonnet", "medium"), ("opus", "medium"), ("opus", "medium"), ("opus", "medium"),
+               ("opus", "low"), ("sonnet", "medium"), ("opus", "medium"), ("opus", "low"),
+               ("sonnet", "medium"), ("haiku", "max")])
         t = thread("aaaa1111", "Manager", binding="@Manager", model="claude-opus-x", effort="high")
         args = ss.turn_args(t)
         check("profile: a turn of an existing thread runs on its role's model and effort, with the profile",
@@ -1158,7 +1052,7 @@ def model_choice_cases(check):
         ss.stop_bg = lambda sid: None
         mgr = thread("aaaa1111", "Manager", binding="@Manager", model="claude-opus-x", effort="high")
         idle = dict(thread("bbbb2222", "CodeLead", binding="@CodeLead"), live="background", live_status="idle")
-        working = dict(thread("cccc3333", "Core", binding="@Core"), live="background", live_status="busy")
+        working = dict(thread("cccc3333", "Codex", binding="@Codex"), live="background", live_status="busy")
         listed = [mgr, idle, working, thread("dddd4444", "Shop")]
         ss.threads = lambda include_unnamed=False: [dict(t) for t in listed]
         for t in listed[:3]:
@@ -1184,10 +1078,10 @@ def model_choice_cases(check):
         res = ss.reset_models()
         check("reset: refused while a thread runs, picks kept",
               (res["ok"], sorted(res.get("running") or []), ss.model_choice("aaaa1111")),
-              (False, ["CodeLead", "Core"], ("sonnet", "high")))
+              (False, ["CodeLead", "Codex"], ("sonnet", "high")))
         human = dict(thread("eeee5555", "human", binding="@human"), live="interactive")
         ss.bind("eeee5555", "@human")
-        listed[:] = [mgr, thread("bbbb2222", "CodeLead", binding="@CodeLead"), thread("cccc3333", "Core", binding="@Core"), human]
+        listed[:] = [mgr, thread("bbbb2222", "CodeLead", binding="@CodeLead"), thread("cccc3333", "Codex", binding="@Codex"), human]
         with ss.BUSY_LOCK:
             ss.BUSY.add("cccc3333")
         try:
@@ -1198,11 +1092,160 @@ def model_choice_cases(check):
         check("reset: with only the human's chat open, every pick is removed",
               (res["ok"], res["removed"], ss.model_choice("aaaa1111"), ss.model_choice("cccc3333"), ss.run_model(mgr)),
               (True, 3, None, None, ("sonnet", "medium")))
-        check("reset: the answer lists the recommended model of each role", res["models"].get("Core"), "opus, medium")
+        check("reset: the answer lists the recommended model of each role", res["models"].get("Codex"), "sonnet, medium")
         check("the page may post to the reset path", "/api/sessions/reset-models" in ss.POST_PATHS, True)
     finally:
         (ss.threads, ss.guard.STORE_DIR, ss.run_claude, ss.start_bg, ss.stop_bg, ss.PROFILES) = real
         shutil.rmtree(store, ignore_errors=True)
+
+
+def worker_server_cases(check):
+    """Tiers 4-7 are workers (người quyết 2026-11-27): the inbox makes jobs, the server runs at most WORKER_SLOTS."""
+    et, wk = ss.editor_ticket, ss.worker
+    root = Path(tempfile.mkdtemp(prefix="worker-server-"))
+    started, alive = [], set()
+    real = (ss.ROOT, ss.start_worker, ss.running_jobs, ss.threads, ss.live_sessions, dict(ss.WORKER_STARTED), wk.open_requirements,
+            ss.runner_turn, ss.guard.STORE_DIR)
+    store = tempfile.mkdtemp(prefix="worker-server-store-")
+    try:
+        ss.ROOT = root
+        ss.guard.STORE_DIR = store
+        ss.threads, ss.live_sessions = (lambda include_unnamed=False: []), (lambda fresh=False: {})
+        ss.start_worker = lambda job_id, kind="code", message=None: started.append((job_id, kind, message)) or ("start", kind, job_id)
+        ss.running_jobs = lambda: {j: None for j in alive}
+        wk.open_requirements = lambda r, f, refs=None: (None, [])
+        for name in ("Run", "Wave", "Hud", "Save"):
+            (root / "UnityProject/Assets/Features" / name).mkdir(parents=True)
+        now = time.time()
+        a = ss.dispatch.send(root, "Run", "Làm yêu cầu run-rules#x", "@CodeLead", now=now - 10)
+        b = ss.dispatch.send(root, "Run", "Thêm: sửa nút", "người", now=now - 9)
+        did = ss.courier_tick(now)
+        jobs = ss.worker_jobs()
+        check("inbox: two messages to a feature make one worker job, no thread", (len(jobs), jobs[0]["feature"], jobs[0]["state"],
+              a["id"] in jobs[0]["task"] and b["id"] in jobs[0]["task"], [x[0] for x in did if x[0] in ("worker", "given")]),
+              (1, "Run", "queued", True, ["worker"]))
+        check("inbox: the messages are delivered, naming the job", [ss.dispatch.get(root, x["id"]).get("job") for x in (a, b)], [jobs[0]["id"]] * 2)
+        c = ss.dispatch.send(root, "Run", "Một tin nữa", "@CodeLead", now=now + 1)
+        ss.courier_tick(now + 2)
+        check("inbox: a message while the job still waits for a slot joins it", (len(ss.worker_jobs()), c["id"] in ss.worker_load_task(jobs[0]["id"])),
+              (1, True))
+        u = ss.dispatch.send(root, "@UnityAutoPlay", "Chơi thử đợt 3", "@CodeLead", now=now + 3)
+        ss.courier_tick(now + 4)
+        play = next(j for j in ss.worker_jobs() if j["kind"] == "play")
+        check("inbox: a message to the tester makes a play job waiting for an Editor ticket of its own",
+              (play["state"], et.find(root, "@UnityAutoPlay", job=play["id"])["tasks"], ss.dispatch.get(root, u["id"])["state"]),
+              ("waiting-editor", ["chơi thử"], "delivered"))
+        for name in ("Wave", "Hud", "Save"):
+            wk.queue(root, name, task="việc " + name, now=now + 5)
+        wk.queue(root, "Run", task="việc Run thứ hai", now=now + 6)
+        ss.WORKER_STARTED["done"] = True
+        ss.worker_tick(now + 7)
+        names = [wk.load(root, x[0])["feature"] for x in started]
+        check("tick: at most three jobs start, never two of the same feature", (len(started), len(set(names)), names.count("Run")), (3, 3, 1))
+        started.clear()
+        alive.update(j["id"] for j in ss.worker_jobs() if j["kind"] == "code" and j["feature"] in names)
+        d = ss.dispatch.send(root, "Run", "Tin khi Run đang chạy", "@CodeLead", now=now + 8)
+        ss.courier_tick(now + 9)
+        check("inbox: a feature whose worker runs: the message waits for the next job", ss.dispatch.get(root, d["id"])["state"], "waiting")
+        alive.clear()
+        job = ss.worker_jobs()[0]
+        job["state"] = "running"
+        wk.save(root, job)
+        ss.WORKER_STARTED["done"] = False
+        did = ss.worker_tick(now + 10)
+        check("tick: the first pass after a server start: a job left running is interrupted", ("interrupted", job["id"]) in did, True)
+        started.clear()
+        # fix rounds
+        w2 = wk.queue(root, "Wave", task="x", now=now + 11)
+        ss.tell({"session": "@Worker", "job": w2["id"]}, "Game.Wave.Tests.A.B: hỏng", "editor-test:t1")
+        w2 = wk.load(root, w2["id"])
+        check("fix: broken tests after the load give the job one fix round", (w2.get("test_fixes"), "A.B" in w2.get("pending", "")), (1, True))
+        ss.tell({"session": "@Worker", "job": w2["id"]}, "Game.Wave.Tests.A.B: vẫn hỏng", "editor-test:t2")
+        w2 = wk.load(root, w2["id"])
+        check("fix: a second time stops the job with a report for CodeLead",
+              (w2["state"], len(list((root / "Management" / "reports").glob("*-Worker-Wave*.md")))), ("needs-codelead", 1))
+        w3 = wk.queue(root, "Hud", task="y", now=now + 12)
+        t = et.add(root, "@Worker", ["refresh", "clean"], [], [], now=now + 12, job=w3["id"])
+        ss.runner_turn = lambda prompt: {"clean": False, "errors": ["Hud.cs:3: CS0103: x"]}
+        ss.load_run([t])
+        check("fix: Unity's compile errors after a load of workers only: the job fixes them, no CodeLead ticket",
+              ("CS0103" in wk.load(root, w3["id"]).get("pending", ""), [x["session"] for x in et.queue(root) if x.get("priority")]), (True, []))
+        # a question answered on Manager's side resumes the job
+        w4 = wk.queue(root, "Save", task="z", now=now + 14)
+        qid = wk.ask_human(root, w4, {"summary": "Save", "question": "A hay B?"})
+        ss.ask.answer(root, qid, "A")
+        ss.worker_tick(now + 15)
+        check("ask: the answer is given to the job, once", ("A" in wk.load(root, w4["id"]).get("answered_text", wk.load(root, w4["id"]).get("pending", "")) or
+              any(x[0] == w4["id"] and x[2] and "A" in x[2] for x in started), wk.load(root, w4["id"]).get("answered")), (True, [qid]))
+        # the page
+        res = ss.worker_call("run", {"feature": "Hud", "task": "làm từ trang"})
+        check("page: run queues a job for a feature", (res["ok"], wk.load(root, res["id"])["source"]), (True, "người"))
+        check("page: a feature that does not exist is refused", ss.worker_call("run", {"feature": "Nope"})["ok"], False)
+        check("page: resume sets the message for the next tick", (ss.worker_call("resume", {"id": res["id"], "message": "tiếp"})["ok"],
+              wk.load(root, res["id"])["pending"]), (True, "tiếp"))
+        check("page: the view lists the jobs", len(ss.workers_view()["jobs"]) >= 6)
+        # the play job starts on its Editor grant
+        started.clear()
+        for x in et.tickets(root, ("waiting", "granted")):
+            if x["session"] != "@UnityAutoPlay":
+                et.drop(root, x["session"], job=x.get("job"))
+        for x in et.holder(root):
+            et.release(root, x["session"])
+        ss.editor_tick(now + 20)
+        check("play: the grant of its ticket starts the play turn", [(x[0], x[1]) for x in started], [(play["id"], "play")])
+    finally:
+        (ss.ROOT, ss.start_worker, ss.running_jobs, ss.threads, ss.live_sessions, started_state, wk.open_requirements,
+         ss.runner_turn, ss.guard.STORE_DIR) = real
+        ss.WORKER_STARTED.update(started_state)
+        shutil.rmtree(root, ignore_errors=True)
+        shutil.rmtree(store, ignore_errors=True)
+
+
+def worker_ticket_cases(check):
+    """A worker's ticket (worker.py): one job, the requirements of several features; nobody is messaged."""
+    et = ss.editor_ticket
+    root = Path(tempfile.mkdtemp(prefix="worker-ticket-"))
+    marks = []
+    real = (ss.ROOT, ss.runner_turn, ss.test_assemblies, ss.reqbook.mark)
+    try:
+        ss.ROOT = root
+        ss.test_assemblies = lambda group: ["Game.Run.Tests", "Game.Wave.Tests"]
+        ss.reqbook.mark = lambda r, f, ref, action, by, tests=None, **k: marks.append((f, ref, action))
+        ss.runner_turn = lambda prompt: {"ok": False, "passed": ["Game.Run.Tests.RunTests.Starts"],
+                                         "failed": [{"name": "Game.Wave.Tests.WaveTests.Ends", "message": "sai"}]}
+        t = et.add(root, "@Worker", ["refresh", "clean"], [], [
+            {"ref": "run-rules#start", "tests": ["RunTests.Starts"], "feature": "Run"},
+            {"ref": "wave-rules#end", "tests": ["WaveTests.Ends"], "feature": "Wave"}], now=1, job="w1-run")
+        check("worker ticket: the features come from its requirements", ss.ticket_features(t), ["Run", "Wave"])
+        def broken_runner(prompt):
+            raise RuntimeError("Invalid MCP configuration")
+        ss.runner_turn = broken_runner
+        et.grant_next(root, now=2)
+        ss.load_run([t])
+        left = et.find(root, "@Worker")
+        check("load: a runner that fails puts the ticket back with every need, no CodeLead fix",
+              (left["state"], left["code"] & 0b111, [x["session"] for x in et.queue(root)]), ("waiting", 0b111, ["@Worker"]))
+        et.grant_next(root, now=3)
+        ss.runner_turn = lambda prompt: {"clean": False, "errors": ["UNITY: không kết nối được"]}
+        ss.load_run([left])
+        left = et.find(root, "@Worker")
+        check("load: Unity unreachable is a runner failure too, not compile errors",
+              (left["state"], [x["session"] for x in et.queue(root)]), ("waiting", ["@Worker"]))
+        check("load: after a runner failure the server waits before the next load", ss.editor_tick(now=time.time()), [])
+        ss.RUNNER["backoff_until"] = 0
+        ss.runner_turn = lambda prompt: {"ok": False, "passed": ["Game.Run.Tests.RunTests.Starts"],
+                                         "failed": [{"name": "Game.Wave.Tests.WaveTests.Ends", "message": "sai"}]}
+        t = left
+        did = ss.test_run([t])
+        check("worker ticket: the passing requirement is done in the book of its own feature",
+              marks, [("Run", "run-rules#start", "done")])
+        log = (root / "Management" / "workers" / "w1-run" / "events.log")
+        check("worker ticket: the failing test goes to the job's events.log, nobody is messaged",
+              (log.is_file() and "WaveTests.Ends" in log.read_text(encoding="utf-8"),
+               any(step[0] == "logged" for step in did)), (True, True))
+    finally:
+        (ss.ROOT, ss.runner_turn, ss.test_assemblies, ss.reqbook.mark) = real
+        shutil.rmtree(root, ignore_errors=True)
 
 
 def editor_cases(check):
@@ -1211,16 +1254,13 @@ def editor_cases(check):
     root = Path(tempfile.mkdtemp(prefix="editor-"))
     store = tempfile.mkdtemp(prefix="editor-store-")
     told, runs, marks = [], [], []
-    real = (ss.ROOT, ss.tell, ss.runner_turn, ss.run_in_background, ss.test_assemblies, ss.drafts.entries, ss.drafts.apply,
-            ss.reqbook.mark, ss.guard.STORE_DIR)
+    real = (ss.ROOT, ss.tell, ss.runner_turn, ss.run_in_background, ss.test_assemblies, ss.reqbook.mark, ss.guard.STORE_DIR)
     try:
         ss.ROOT = root
         ss.guard.STORE_DIR = store
-        ss.tell = lambda target, text, key: told.append((target, text, key)) or ("told", target)
+        ss.tell = lambda t, text, key: told.append((t["session"], text, key)) or ("told", t["session"])
         ss.run_in_background = lambda fn, group: runs.append(list(fn(group)))
         ss.test_assemblies = lambda group: ["Game.Wallet.Tests"]
-        ss.drafts.entries = lambda r, name: [("x.cs", "sửa", False)] if name in ("Wallet", "Hud") else []
-        ss.drafts.apply = lambda r, name: ([f"Đã nạp nháp {name}"], True)
         ss.reqbook.mark = lambda r, f, ref, action, by, tests=None, **k: marks.append((f, ref, action, tuple(tests or ())))
         ss.runner_turn = lambda prompt: {"clean": True, "errors": []}      # never a real claude turn in a test
         check("editor: nothing waits, nothing happens", ss.editor_tick(now=1), [])
@@ -1258,8 +1298,7 @@ def editor_cases(check):
             json.dump({"since": 1, "reason": "play"}, f)
         check("editor: the human uses the Editor: no grant", ss.editor_tick(now=10 ** 9 + 4), [])
     finally:
-        (ss.ROOT, ss.tell, ss.runner_turn, ss.run_in_background, ss.test_assemblies, ss.drafts.entries, ss.drafts.apply,
-         ss.reqbook.mark, ss.guard.STORE_DIR) = real
+        (ss.ROOT, ss.tell, ss.runner_turn, ss.run_in_background, ss.test_assemblies, ss.reqbook.mark, ss.guard.STORE_DIR) = real
         shutil.rmtree(root, ignore_errors=True)
         shutil.rmtree(store, ignore_errors=True)
 
@@ -1348,9 +1387,7 @@ def main():
             text = (ss.ROOT / ".claude" / "skills" / n / "SKILL.md").read_text(encoding="utf-8")
             heads.append((text.startswith("---\nname: " + n + "\ndescription: "), "Dùng khi" in text.split("---")[1] or "Dùng trước" in text.split("---")[1]))
         check("skills split out of the rules: each has a name and says when it is used", heads, [(True, True)] * 6)
-        check("reread: a feature follows the feature skills", [r for r in ss.bind_session.rule_files("Wallet", str(ss.ROOT)) if "skills" in r],
-              [".claude/skills/feature-implement-req/SKILL.md", ".claude/skills/feature-order-asset/SKILL.md",
-               ".claude/skills/feature-request-framework-change/SKILL.md"])
+        check("reread: a feature is a worker now, no skill of its own", [r for r in ss.bind_session.rule_files("Wallet", str(ss.ROOT)) if "skills" in r], [])
         sp = ss.reread_prompt([".claude/rules/uidesigner.md", ".claude/skills/ui-frame-syntax/SKILL.md"])
         check("reread: a changed rule file is Read again, a changed skill is only named (called again when used)",
               ("Read lại toàn bộ đúng các file đó" in sp, ".claude/rules/uidesigner.md" in sp, "Skill sau vừa đổi: ui-frame-syntax" in sp,
@@ -1490,6 +1527,8 @@ def main():
     usage_cases(check)
     model_choice_cases(check)
     editor_cases(check)
+    worker_ticket_cases(check)
+    worker_server_cases(check)
     ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)

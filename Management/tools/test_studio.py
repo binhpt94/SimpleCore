@@ -231,7 +231,7 @@ def run_deliver(root):
     import dispatch
     told = [m for m in dispatch.messages(root, "Wallet") if m["key"] == "delivered:codex/Wallet/coin-icons/v1"]
     check("deliver puts a message in the feature's inbox, with how to judge, once",
-          (len(told), "review Wallet/coin-icons" in told[0]["text"] if told else False, "hộp thư của Wallet" in out), (1, True, True))
+          (len(told), "order Wallet/coin-icons" in told[0]["text"] if told else False, "hộp thư của Wallet" in out), (1, True, True))
     check("deliver with no server running still succeeds, and says SERVER TẮT", (code, "SERVER TẮT" in out), (0, True))
     check("a blender chat cannot deliver a codex order", call(root, "deliver", "blender", "Wallet/coin-icons")[0], 1)
 

@@ -3,7 +3,7 @@ name: gd-excel-data
 description: Chỉ phiên FEATURE=@GameDesigner (phiên khác đọc để hiểu bảng). Làm dữ liệu config của một node thiết kế bằng bảng Excel trong <node>/.excel - chọn loại bảng (params, list, levels, formula, map), khuôn ba dòng đầu, cột index và sheet Index, sửa csv rồi gd_excel.py sync, xử lý khi người đã sửa file xlsx, chuyển một node cũ từ bảng markdown. Dùng khi viết hay sửa số liệu, danh sách, công thức của node vòng 4 hoặc node cheat.
 ---
 # @GameDesigner: dữ liệu config bằng Excel
-Số liệu config của một node (thông số, danh sách hero, quái, đợt, nâng cấp, công thức) nằm trong bảng, không viết tay thành bảng markdown. Bảng là **thiết kế**: phiên feature đọc qua `gd_pack.py` rồi tự nhập vào config asset của mình; không có gì tự chảy sang Unity.
+Số liệu config của một node (thông số, danh sách hero, quái, đợt, nâng cấp, công thức) nằm trong bảng, không viết tay thành bảng markdown. Bảng là **thiết kế**: worker của feature đọc qua `gd_pack.py` rồi tự nhập vào config asset của mình; không có gì tự chảy sang Unity.
 Luật chung ở `.claude/rules/gamedesigner.md`, khuôn node ở skill `gd-node-format`; vòng 4 ở skill `gd-round-4`.
 
 ## Node nào có `.excel`
@@ -48,7 +48,7 @@ Bạn không đọc được `.xlsx` (nhị phân) và guard không cho ghi nó:
 ## Mỗi dòng là một yêu cầu phải code và test
 Khi node được chốt (Full Auto: tự chốt khi đạt; `live` được dựng lại từ bản đã chốt), sổ yêu cầu của feature (`gd_req.py`) sinh yêu cầu từ bảng:
 - Bảng `list`, `params`, `formula`: **mỗi dòng một yêu cầu**, tên `<node>#<sheet>-<khoá>` (`Enemies` + `wolf` → `#enemies-wolf`). Bảng `levels`, `map`: cả bảng một yêu cầu `<node>#<sheet>`.
-- **Thêm một dòng là thêm một việc**: phiên feature phải code và viết test nhắc đúng khoá của dòng đó; dòng của bảng `list` không được `done` bằng `play`. Chỉ thêm dòng khi thứ đó thật sự cần có trong game ở giai đoạn ghi trong cột `stage`.
+- **Thêm một dòng là thêm một việc**: worker phải code và viết test nhắc đúng khoá của dòng đó; dòng của bảng `list` không được `done` bằng `play`. Chỉ thêm dòng khi thứ đó thật sự cần có trong game ở giai đoạn ghi trong cột `stage`.
 - Sửa một ô chỉ làm yêu cầu của dòng đó báo "đổi thiết kế". Thêm hay bỏ một cột làm mọi dòng của bảng báo đổi. Đổi chỗ dòng, đánh lại `index` không làm đổi gì.
 - **Không đổi khoá (`id`, `key`) khi không cần**: đổi khoá là bỏ yêu cầu cũ (cùng test đã kiểm) và sinh yêu cầu mới chưa làm. Xoá dòng là bỏ yêu cầu của nó.
 - Thứ chỉ để nhìn, không test được bằng code (một hiệu ứng): đặt trong bảng `params`, không đặt trong `list`.

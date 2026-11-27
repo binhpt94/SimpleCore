@@ -1667,9 +1667,9 @@ def cmd_deliver(root, tool, ref):
     below = "; ".join(f"{i}: {q['note']}" for i, q in quality.items() if not q["ok"])
     below_text = f" Chưa chuẩn (hết lượt, có phiếu nợ): {below}." if below else ""
     print(f"Đã giao bản v{version}: {rel} ({len(ids)} file).")
-    print(inbox(root, feature, f"Order {feature}/{oid} đã giao bản v{version} ở {rel}. Chấm từng item theo skill "
-                f"feature-order-asset: python Management/tools/studio.py review {feature}/{oid} <item> <0-3> \"<phản hồi>\" "
-                f"(0 làm lại ngay, 1 lỗi nhưng chưa cần làm ngay, 2 đúng phần lớn, 3 đạt); mức 1-3 được chép vào FeatureAssets."
+    print(inbox(root, feature, f"Order {feature}/{oid} đã giao bản v{version} ở {rel}. Chấm từng item (result.json, mục "
+                f"reviews: order {feature}/{oid}, item, score 0-3, feedback; 0 làm lại ngay, 1 lỗi nhưng chưa cần làm ngay, 2 đúng "
+                f"phần lớn, 3 đạt); mức 1-3 được chép vào FeatureAssets khi server chạy review."
                 + below_text, f"delivered:{tool}/{feature}/{oid}/v{version}", f"order-delivered {tool} {feature}/{oid} {version}"))
     return 0
 

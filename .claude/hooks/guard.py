@@ -31,6 +31,10 @@ The value, by group:
                                           studio.py; blender MCP (@Blender) and unity-mcp custom tools are a soft gate.
                                           @ClaudeImage draws each picture itself as an SVG in the work folder and
                                           studio.py makes the PNG
+    Workers   @Worker                     one big job (worker.py, người quyết 2026-11-27): runs in a git worktree,
+                                          edits all of UnityProject/Assets (every feature, Core, _Composition, skeleton
+                                          and contracts) but SimpleCoreTools; nothing else; no unity-mcp, no asking,
+                                          no messages, no doing/done/verify (worker.py and the server write the book)
     Testers   @UnityAutoPlay              plays the game in the Editor: reads all of UnityProject, edits nothing there;
                                           writes only Tester/UnityAutoPlay (runs, tester.py); unity-mcp: read, play,
                                           tests, load a scene, menu, camera, execute_code (a soft gate)
@@ -156,17 +160,13 @@ for _commands, _name in ((MANAGER_COMMANDS, "Manager"), (CODELEAD_COMMANDS, "Cod
 # that asked or @Manager drops one (cancel). Looking: every chat. Checked in gated() below, on each part of a chain.
 ASK = PY + r"Management/tools/ask\.py "
 ALLOWED_COMMANDS.append(ASK + r"(list( --all)?|show q[0-9]{8}-[0-9a-f]{4})")
-ALLOWED_COMMANDS.append(PY + r"Management/tools/draft\.py (status|diff) (_Services/)?@?[A-Za-z][A-Za-z0-9]*( [A-Za-z0-9_./-]+\.cs)?")
 ALLOWED_COMMANDS.append(PY + r"Management/tools/editor_ticket\.py list")
-ALLOWED_COMMANDS.append(PY + r"Management/tools/compile_check\.py ((_Services/)?@?[A-Za-z][A-Za-z0-9]*( --draft)?|--all)( --quiet)?")
+ALLOWED_COMMANDS.append(PY + r"Management/tools/compile_check\.py ((_Services/)?@?[A-Za-z][A-Za-z0-9]*|--all)( --quiet)?")
 ASK_RX = re.compile(r"^python3? Management/tools/ask\.py (add|answer|cancel)\b(.*)$", re.S)
 ASK_FROM_RX = re.compile(r"^ --from ['\"]?@?([A-Za-z]+)['\"]? ")
 ASK_ID_RX = re.compile(r"^ ['\"]?(q[0-9]{8}-[0-9a-f]{4})['\"]?( |$)")
 ASK_LEADERS = ("@CodeLead", "@GameDesigner", "@UIDesigner")
-# draft.py (a feature's drafts) and editor_ticket.py (Editor tickets): a chat works on its own drafts and tickets
-# only (@CodeLead on any); draft.py apply loads a draft into Assets, so only the Editor ticket holder (or anyone while
-# the Editor is free and nobody waits) runs it. Looking (status, diff, list) is free.
-DRAFT_RX = re.compile(r"^python3? Management/tools/draft\.py (start|new|delete|rebase|drop|apply) ['\"]?((?:_Services/)?@?[A-Za-z][A-Za-z0-9]*)['\"]?(\s|$)")
+# editor_ticket.py (Editor tickets): a chat works on its own tickets only (@CodeLead on any). Looking (list) is free.
 TICKET_RX = re.compile(r"^python3? Management/tools/editor_ticket\.py (add|done|drop|release) --session ['\"]?((?:_Services/)?@?[A-Za-z][A-Za-z0-9]*)['\"]?(\s|$)")
 PROPOSALS_ZONE = "Management/proposals"
 PROPOSALS_MSG = ("Management/proposals is closed (2026-11-26): it is kept to be read, nothing new is written there. What needs "
@@ -205,7 +205,17 @@ DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per ro
 HUMAN_ASK_ZONES = set()      # zone names where the human chat is still asked before an edit; the human emptied it
 # FEATURE values that are not feature folders.
 ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@Codex",
-         "@Blender", "@ClaudeImage", "@UnityAutoPlay")
+         "@Blender", "@ClaudeImage", "@UnityAutoPlay", "@Worker")
+# A worker (Management/tools/worker.py): one big job in its own git worktree, every feature at once. The architecture
+# is checked on the result (asmdef, validate.py, compile_check, tests) and worker.py applies only Assets files, so the
+# guard keeps the safe zones only. Its commands that write the books or message anyone are refused.
+WORKER_ROLE = "@Worker"
+WORKER_DENY_RX = re.compile(
+    r"Management/tools/(dispatch\.py send|ask\.py (add|answer|cancel)|editor_ticket\.py (add|done|drop|release)"
+    r"|gd_req\.py \S+ (doing|done|verify|reject)|toolwork\.py (add|done|drop)|scaffold\.py(?! --dry-run)"
+    r"|studio\.py (review|cancel|redo|deliver|check|pick)|gd_\w+\.py \S+ (set|write|sync|add|delete|pin))")
+WORKER_NOTE = ("a worker does its whole job alone: it does not ask, message, or write the books; put what is missing in "
+               "result.json (status blocked, question) and finish (.claude/rules/worker.md)")
 # Testers: they play the game in the Editor and write what they saw. They read all the code of UnityProject and
 # change none of it; each writes only its own folder Tester/<name> (.claude/rules/tester.md). A new tester is one
 # more line here.
@@ -1481,6 +1491,21 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
     return "allow", reasons[0] if len(reasons) == 1 else f"batch of {len(reasons)} unity-mcp commands"
 
 
+def decide_worker_edit(full, root, ti):
+    """A worker edits all of UnityProject/Assets (skeleton and contracts too) but SimpleCoreTools; nothing else."""
+    assets = under(root, "UnityProject", "Assets")
+    if same(full, under(root, "result.json")):
+        return "allow", "@Worker writes its result.json (worker.py reads it)"
+    if not inside(full, assets) or same(full, assets):
+        return "deny", ("a worker edits only UnityProject/Assets (code, tests, assets of every feature, Core, _Composition); "
+                        "not the design, the books, Management, .claude, Packages or ProjectSettings. " + WORKER_NOTE)
+    if inside(full, under(assets, "SimpleCoreTools")):
+        return "deny", "Assets/SimpleCoreTools is the human's (Editor scripts of the project)"
+    if any("InternalsVisibleTo" in s for s in edit_texts(ti)) and posixpath.basename(full) != "AssemblyInfo.cs":
+        return "deny", "InternalsVisibleTo belongs in AssemblyInfo.cs only"
+    return "allow", "@Worker edits UnityProject/Assets"
+
+
 def decide_tester_edit(full, root, name, who):
     """A tester writes only its own folder Tester/<name>: its README.md, and in a run folder <time>/ the README.md,
     other .md notes and the data under images/. Never the archive (tester.py moves runs there), never code."""
@@ -1721,29 +1746,6 @@ LEADER_ASK = ("only @Manager asks the human (người quyết 2026-11-27). Do no
               "A permission the human gives comes with it: the same call then passes")
 
 
-def draft_reminder(data, session_value, root, store, result):
-    """Soft gate: a feature, a service or @Core editing a .cs of Assets while it does not hold the Editor ticket is let
-    through with a reminder to write a draft instead."""
-    if not result or result[0] != "allow" or unity_name(data.get("tool_name")) not in EDIT_TOOLS:
-        return result
-    raw = (session_value or "").strip().replace("\\", "/")
-    role = role_of(raw)
-    who = role or raw
-    if role and role not in ROLE_AREAS:
-        return result
-    ti = data.get("tool_input") if isinstance(data.get("tool_input"), dict) else {}
-    path = text_of(ti.get("file_path"))
-    root = canonical_root(root)
-    full = resolve_target(path, root) if path else ""
-    if not full or not inside(full, under(root, "UnityProject", "Assets")) or not full.lower().endswith(".cs"):
-        return result
-    try:
-        held = {t.get("session") for t in ticket_module().holder(root) if t.get("grant") in ("own", "fix")}
-    except Exception:
-        held = set()
-    return result if who in held else (result[0], result[1] + DRAFT_REMINDER)
-
-
 def ask_leader(session_value):
     """The name of a Leader chat (CodeLead, GameDesigner, UIDesigner) for LEADER_ASK; None for any other chat."""
     role = role_of((session_value or "").strip().replace("\\", "/"))
@@ -1791,17 +1793,11 @@ def ask_gate(action, rest, role, mode, root):
     return "deny", "only the Leader that asked, or @Manager, cancels a question"
 
 
-# ---------------------------------------------------------------- drafts and Editor tickets (người quyết 2026-11-27)
-# A feature writes its code in UnityProject/Drafts/<Tên>/ (draft.py), loaded into Assets only by the holder of the
-# Editor ticket (editor_ticket.py). The Editor itself (scene, play, tests, compile, assets) goes to the ticket holder.
-DRAFTS_DIR = "Drafts"
-DRAFT_OWN_FILES = (".draft.json", ".applied")
+# ---------------------------------------------------------------- Editor tickets (người quyết 2026-11-27)
+# The Editor itself (scene, play, tests, compile, assets) goes to the holder of the Editor ticket (editor_ticket.py).
 HUMAN_EDITOR_FILE = "human-editor.json"      # in the store: the human uses the Editor (Play, or the Unity menu)
-DRAFT_REMINDER = (" Nhắc (soft gate): code của feature viết vào nháp UnityProject/Drafts/<Tên>/ (draft.py), nộp phiếu "
-                  "editor_ticket.py và chỉ nạp vào Assets khi tới lượt; sửa thẳng Assets lúc người khác dùng Editor có "
-                  "thể làm vỡ biên dịch của cả project.")
 CODELEAD_FIX_NOTE = (" Nhắc (soft gate, người quyết 2026-11-27): CodeLead sửa code của feature chỉ để gỡ lỗi biên dịch "
-                     "nhanh; đổi hành vi thì giao feature. Ghi vào báo cáo.")
+                     "nhanh; đổi hành vi thì giao việc cho worker (tin hộp thư cho feature đó). Ghi vào báo cáo.")
 CODE_PART_RX = re.compile(r"^(Features/(_Services/)?[A-Za-z][A-Za-z0-9]*/(Scripts/(Internal|View)|Tests)/|Core/).+\.cs$", re.I)
 
 
@@ -1849,28 +1845,7 @@ def ticket_block(root, who, store):
     names = ", ".join(sorted({t.get("runner") or t.get("session") for t in held}))
     return (f"Editor đang được cấp cho {names} (phiếu editor_ticket). Không BÁO CHẶN: nộp phiếu python "
             f"Management/tools/editor_ticket.py add --session {who} [--common refresh,clean] [--task \"<việc>\"] rồi làm việc "
-            "khác (viết nháp); server nhắn khi tới lượt.")
-
-
-def draft_gate(action, name, who, mode, root, store):
-    """draft.py start|new|delete|rebase|drop|apply <name>: own drafts only (CodeLead any); apply needs the ticket."""
-    own = name == who or (name in ("Core", "@Core") and who == "@Core")
-    if not (own or mode in ("human", "codelead")):
-        return "deny", f"draft of {name} belongs to that feature's chat; work on your own ({who})"
-    if action != "apply" or mode == "human":
-        return "allow", f"draft.py {action} {name}"
-    blocked = ticket_block(root, who, store)
-    if blocked:
-        return "deny", blocked
-    try:
-        held, waiting = ticket_module().holder(root), ticket_module().queue(root)
-    except Exception:
-        held, waiting = [], []
-    if not held and waiting:
-        return "deny", ("tickets wait for the Editor: put yours in the queue (editor_ticket.py add) and load the draft "
-                        "when the server says it is your turn")
-    mark_ticket_used(root, who)
-    return "allow", f"draft.py apply {name}: this chat may use the Editor now"
+            "khác; server nhắn khi tới lượt.")
 
 
 def mark_ticket_used(root, who):
@@ -1883,23 +1858,6 @@ def mark_ticket_used(root, who):
                 mod.save(root, t)
     except Exception:
         pass
-
-
-def draft_target(full, root):
-    """(feature name, the Assets path it mirrors, the draft-relative path) for a file in UnityProject/Drafts, else None."""
-    base = under(root, "UnityProject", DRAFTS_DIR)
-    if not inside(full, base):
-        return None
-    seg = rel_segments(full, base)
-    if len(seg) >= 2 and seg[0] == "_Services":
-        name, rest = "_Services/" + seg[1], seg[2:]
-    else:
-        name, rest = seg[0], seg[1:]
-    if name in ("Core", "_Composition"):
-        target = under(root, "UnityProject", "Assets", name, *rest)
-    else:
-        target = under(root, "UnityProject", "Assets", "Features", *name.split("/"), *rest)
-    return name, target, rest
 
 
 def leader_allowance(data, name, root):
@@ -1927,7 +1885,7 @@ def headless_leader(session_value, root):
     if role in TOOL_ROLES:
         return ("the Leader that gave the order (an order of a feature: CodeLead; _design: GameDesigner for Codex, "
                 "UIDesigner for ClaudeImage)")
-    if role in ROLE_AREAS or role in TESTER_ROLES or (not role and raw and valid_feature(raw, root)):
+    if role in TESTER_ROLES:
         return "CodeLead"
     return None
 
@@ -1942,7 +1900,8 @@ def decide(data, session_value, root, store=None):
     if name and unity_name(data.get("tool_name")) == "AskUserQuestion":
         return "deny", LEADER_ASK.format(name=name)
     result = decide_raw(data, session_value, root, store)
-    result = draft_reminder(data, session_value, root, store, result)
+    if role_of((session_value or "").strip()) == WORKER_ROLE and result and result[0] == "ask":
+        return "deny", result[1] + ". " + WORKER_NOTE
     if name and result and result[0] == "ask":
         item = leader_allowance(data, name, canonical_root(root))
         if item:
@@ -1985,16 +1944,16 @@ def decide_raw(data, session_value, root, store=None):
         mode = "uidesigner"
     elif role == "@DesignAdvisor":
         mode = "advisor"
-    elif role in ROLE_AREAS:
-        mode, area = "area", ROLE_AREAS[role]
     elif role in TOOL_ROLES:
         mode = "tool"
     elif role in TESTER_ROLES:
         mode = "tester"
-    elif valid_feature(raw, root):
-        mode, feature = "feature", raw
+    elif role == WORKER_ROLE:
+        mode = "worker"
+    # A feature, a service or @Core is no longer a chat (người quyết 2026-11-27): their work is done by workers. A chat
+    # still bound to one from before has mode "none": nothing is edited.
     who = role or raw
-    read_all = mode in ("codelead", "tester")      # they read the private parts of every feature
+    read_all = mode in ("codelead", "tester", "worker")      # they read the private parts of every feature
 
     edit_path = text_of(ti.get("file_path")) or text_of(ti.get("notebook_path"))
 
@@ -2002,6 +1961,14 @@ def decide_raw(data, session_value, root, store=None):
         retry = failed_retry(tool, ti, data.get("session_id"), store)
         if retry:
             return "deny", retry
+
+    if mode == "worker":
+        if tool in ("AskUserQuestion", "SendMessage"):
+            return "deny", f"{tool}: " + WORKER_NOTE
+        if tool.startswith(UNITY_PREFIX) or tool in UNITY_RESOURCE_TOOLS or re.match(r"mcp__[^_]*unity", tool, re.I):
+            return "deny", ("a worker runs in its own git worktree, which the Unity Editor does not have open: no unity-mcp. "
+                            "Check with compile_check.py --all and validate.py; the server compiles and runs the tests in "
+                            "Unity after worker.py applies your work")
 
     # --- human session: only the three sensitive zones ask
     if mode == "human":
@@ -2062,7 +2029,8 @@ def decide_raw(data, session_value, root, store=None):
                     return "allow", f"studio: {m.group(1)} an order of {feature}"
                 if ordered.startswith("_design/"):
                     return "deny", "art concepts are judged by the human on the management page (tab Game design)"
-                return "deny", f"only the chat of {ordered} judges its own orders"
+                return "deny", (f"the orders of {ordered} are judged by its worker (result.json reviews, run by the server); "
+                                "send the feature a message in the inbox to have them judged")
             m = STUDIO_CANCEL_RX.match(one)
             if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
                 ordered = m.group(1).rpartition("/")[0]
@@ -2090,9 +2058,6 @@ def decide_raw(data, session_value, root, store=None):
             m = ASK_RX.match(one)
             if m:
                 return ask_gate(m.group(1), m.group(2), role, mode, root)
-            m = DRAFT_RX.match(one)
-            if m:
-                return draft_gate(m.group(1), m.group(2), who, mode, root, store)
             m = TICKET_RX.match(one)
             if m:
                 name = m.group(2)
@@ -2104,10 +2069,14 @@ def decide_raw(data, session_value, root, store=None):
             if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
                 if mode == "feature" and m.group(1).lower() == feature.lower():
                     return "allow", f"requirement book of {feature}: doing / done"
-                return "deny", (f"only the chat of {m.group(1)} writes doing / done in its requirement book; @CodeLead "
-                                "verifies or rejects (gd_req.py <F> verify | reject), the human waives on the page")
+                return "deny", ("doing / done are written by the server from a worker's result and the test run (người quyết "
+                                "2026-11-27); @CodeLead verifies or rejects (gd_req.py <F> verify | reject), the human waives on the page")
             return None
 
+        if mode == "worker":
+            for part in CHAIN_SPLIT_RX.split(cmd):
+                if WORKER_DENY_RX.search(part):
+                    return "deny", f"`{part.strip()[:80]}`: " + WORKER_NOTE
         verdict = gated(cmd)
         if verdict:
             return verdict
@@ -2160,22 +2129,9 @@ def decide_raw(data, session_value, root, store=None):
         if mode == "none":
             return "deny", ("this chat has no valid FEATURE, so all edits are blocked. Only the human can set it "
                             "(by typing FEATURE=<name> <PIN> in the chat). Stop and tell the human.")
-        drafted = draft_target(full, root)
-        if drafted:      # a draft: the same rules as the file of Assets it stands for, without the Editor
-            name, target, rest = drafted
-            if not rest or rest[-1] in DRAFT_OWN_FILES or DRAFT_OWN_FILES[1] in rest:
-                return "deny", "Drafts/<Tên>/.draft.json and .applied are written by draft.py only"
-            if not rest[-1].lower().endswith(".cs"):
-                return "deny", "a draft holds .cs files only (assets and prefabs are made in the Editor, in the turn with the ticket)"
-            mirrored = dict(data, tool_input=dict(ti, file_path=target), _draft_of=name)
-            verdict = decide_raw(mirrored, session_value, root, store)
-            if verdict and verdict[0] == "allow":
-                return "allow", f"draft of {name} (as {'/'.join(rest)})"
-            return verdict
-        playing = (tester_playing(store, data.get("session_id")) if inside(full, under(root, "UnityProject", "Assets"))
-                   and not data.get("_draft_of") else None)      # a draft is not in Assets: a play-test does not mind it
+        playing = tester_playing(store, data.get("session_id")) if inside(full, under(root, "UnityProject", "Assets")) else None
         if playing:
-            return tester_block(store, data.get("session_id"), raw if mode == "feature" else who, playing)
+            return tester_block(store, data.get("session_id"), who, playing)
         # Files that define the boundary itself.
         if is_asmref(full):
             return "deny", ".asmref files are forbidden: they put code into another assembly"
@@ -2183,6 +2139,8 @@ def decide_raw(data, session_value, root, store=None):
             return "allow", "scratch file of this session"
         if mode == "tester":
             return decide_tester_edit(full, root, TESTER_ROLES[role], who)
+        if mode == "worker":
+            return decide_worker_edit(full, root, ti)
         if mode == "codelead":
             name, _, edit = zone(full, root, None, LEAD_AREA, True)
             if edit == "allow":      # Assets/_Composition, outside its skeleton

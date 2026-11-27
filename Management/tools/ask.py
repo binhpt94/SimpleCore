@@ -31,7 +31,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 DIR = ("Management", "asks")
-SOURCES = ("@CodeLead", "@GameDesigner", "@UIDesigner")
+SOURCES = ("@CodeLead", "@GameDesigner", "@UIDesigner", "@Worker")      # @Worker: written by worker.py / the server only
 ANSWERER = "@Manager"
 STATES = ("open", "answered", "cancelled")
 STATE_NAMES = {"open": "chờ người", "answered": "đã trả lời", "cancelled": "đã huỷ"}

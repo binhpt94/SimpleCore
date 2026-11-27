@@ -35,8 +35,8 @@ def reject_notices(root, feature, refs, note):
     out = []
     for ref in [r.strip() for r in refs.split(",") if r.strip()]:
         full = rb.find_req(v, ref)[1]["ref"]
-        text = (f"@CodeLead trả yêu cầu {full}: {note}\nSửa theo skill feature-implement-req, viết hoặc sửa test, rồi ghi lại "
-                f"python Management/tools/gd_req.py {feature} done {full} <Lớp.Hàm>[,...].")
+        text = (f"@CodeLead trả yêu cầu {full}: {note}\nSửa code và test cho đúng yêu cầu, rồi ghi nó vào result.json (reqs, "
+                f"kèm tên test); server chạy test và ghi done.")
         out.append(dispatch.notify(root, feature, text, "gd_req", key=f"reject:{full}",
                                    check=f"req-rejected {feature} {full}"))
     return out
