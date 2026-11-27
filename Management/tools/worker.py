@@ -3,7 +3,7 @@
 instead of many feature sessions messaging each other. The architecture is checked on the result, not by who may
 edit what: the worker edits all of UnityProject/Assets; worker.py takes back only Assets files, after the gates.
 
-    python Management/tools/worker.py run <F> [--reqs <ref>,...] [--task "<việc thêm>"] [--model opus] [--effort medium]
+    python Management/tools/worker.py run <F> [--reqs <ref>,...] [--task "<việc thêm>"] [--model <m>] [--effort <e>]   (none: the page's default)
     python Management/tools/worker.py resume <id> ["<lời nhắn>"]     the same session goes on (after a stop, a test failed)
     python Management/tools/worker.py check <id>                     the gates again, nothing applied
     python Management/tools/worker.py apply <id>                     gates, then take the work into the main project
@@ -604,9 +604,40 @@ def finish(root, job, answer):
     return 0, lines
 
 
-def queue(root, feature, refs=None, task=None, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT, now=None, kind="code",
+MODELS = ("opus", "sonnet", "haiku", "fable")
+EFFORTS = ("low", "medium", "high", "xhigh", "max")
+DEFAULTS = "defaults.json"      # in Management/workers: the model a code job takes when none is named (the page sets it)
+
+
+def defaults(root):
+    """(model, effort) of a code job that names none: Management/workers/defaults.json, else opus · medium."""
+    try:
+        raw = json.loads((jobs_dir(root) / DEFAULTS).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        raw = {}
+    raw = raw if isinstance(raw, dict) else {}
+    return (raw.get("model") if raw.get("model") in MODELS else DEFAULT_MODEL,
+            raw.get("effort") if raw.get("effort") in EFFORTS else DEFAULT_EFFORT)
+
+
+def set_defaults(root, model, effort):
+    if model not in MODELS or effort not in EFFORTS:
+        raise ValueError("model hay effort không hợp lệ")
+    d = jobs_dir(root)
+    d.mkdir(parents=True, exist_ok=True)
+    (d / DEFAULTS).write_text(json.dumps({"model": model, "effort": effort}), encoding="utf-8")
+    return model, effort
+
+
+def queue(root, feature, refs=None, task=None, model=None, effort=None, now=None, kind="code",
           messages=(), source=""):
-    """A job waiting for a free worker slot (the server starts it: start()). kind: code | play."""
+    """A job waiting for a free worker slot (the server starts it: start()). kind: code | play. model, effort: None
+    takes defaults(root)."""
+    if model is None or effort is None:
+        dm, de = defaults(root)
+        model, effort = model or dm, effort or de
+    if model not in MODELS or effort not in EFFORTS:
+        raise ValueError("model hay effort không hợp lệ")
     if kind == "code" and not task:
         lines = open_requirements(root, feature, refs)[1]
         if not lines:
@@ -636,7 +667,7 @@ def start(root, job_id):
     return finish(root, job, answer)
 
 
-def run(root, feature, refs=None, task=None, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT, now=None):
+def run(root, feature, refs=None, task=None, model=None, effort=None, now=None):
     return start(root, queue(root, feature, refs, task, model, effort, now)["id"])
 
 
@@ -778,8 +809,8 @@ def main(argv):
     ap.add_argument("message", nargs="?", default="")
     ap.add_argument("--reqs", default="")
     ap.add_argument("--task", default="")
-    ap.add_argument("--model", default=DEFAULT_MODEL)
-    ap.add_argument("--effort", default=DEFAULT_EFFORT)
+    ap.add_argument("--model", choices=MODELS)      # none: Management/workers/defaults.json (the page), else opus
+    ap.add_argument("--effort", choices=EFFORTS)
     try:
         a = ap.parse_args(argv[1:])
     except SystemExit:

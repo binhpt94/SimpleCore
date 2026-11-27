@@ -287,7 +287,8 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
               "/api/sessions/delete": MAX_BODY, "/api/sessions/delete-outside": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY,
               "/api/sessions/model": MAX_BODY, "/api/sessions/reset-models": MAX_BODY,
-              "/api/workers/run": 16 * 1024, "/api/workers/resume": 16 * 1024, "/api/workers/drop": MAX_BODY}
+              "/api/workers/run": 16 * 1024, "/api/workers/resume": 16 * 1024, "/api/workers/drop": MAX_BODY,
+              "/api/workers/defaults": MAX_BODY}
 TRASH = ".deleted"      # inside the transcripts folder: threads() reads only *.jsonl at its top
 # Threads that run a headless turn right now (renew, reread, compact, a thread setup is creating): not deleted.
 BUSY = set()
@@ -2568,9 +2569,12 @@ def workers_view():
         out.append({"id": j["id"], "feature": j.get("feature"), "kind": j.get("kind", "code"), "state": j.get("state"),
                     "requirements": j.get("requirements", 0), "turns": len(j.get("turns") or []),
                     "cost": round(sum(t.get("cost_usd") or 0 for t in j.get("turns") or []), 2),
+                    "model": j.get("model") or "", "effort": j.get("effort") or "",
                     "summary": str(r.get("summary") or j.get("task") or "")[:400], "question": r.get("question"),
                     "created": j.get("created"), "running": j["id"] in running_jobs(), "pending": bool(j.get("pending"))})
-    return {"jobs": out, "slots": WORKER_SLOTS}
+    model, effort = worker.defaults(ROOT)
+    return {"jobs": out, "slots": WORKER_SLOTS, "models": list(worker.MODELS), "efforts": list(worker.EFFORTS),
+            "defaults": {"model": model, "effort": effort}}
 
 
 # ---------------------------------------------------------------- tab "Đang chạy" (người duyệt 2026-11-27)
@@ -2774,13 +2778,18 @@ def activity_view(now=None):
 
 
 def worker_call(action, data):
-    """The page: run (a feature and an extra task), resume (an id and a message), drop (an id)."""
+    """The page: run (a feature, an extra task, model and effort: none takes the default), resume (an id and a
+    message), drop (an id), defaults (the model and effort of every code job that names none, inbox ones too)."""
     try:
+        if action == "defaults":
+            model, effort = worker.set_defaults(ROOT, str(data.get("model") or ""), str(data.get("effort") or ""))
+            return {"ok": True, "defaults": {"model": model, "effort": effort}}
         if action == "run":
             target = str(data.get("feature") or "").strip()
             if not WORKER_TARGET_RX.match(target) or not (target == "@Core" or guard.valid_feature(target, str(ROOT))):
                 return {"ok": False, "error": "feature không hợp lệ"}
-            job = worker.queue(ROOT, worker_name(target), task=str(data.get("task") or "").strip()[:4000], source="người")
+            job = worker.queue(ROOT, worker_name(target), task=str(data.get("task") or "").strip()[:4000], source="người",
+                               model=str(data.get("model") or "") or None, effort=str(data.get("effort") or "") or None)
             return {"ok": True, "id": job["id"]}
         job = worker.load(ROOT, str(data.get("id") or ""))
         if job["id"] in running_jobs():

@@ -69,7 +69,7 @@
     var sendBox = put(pane, el("div", "ib-box"));
     var listBox = put(pane, el("div", "ib-box"));
     var armed = false;      // "Xoá cả hộp thư" phải bấm hai lần
-    var workers = null, workForm = { feature: "", task: "" };
+    var workers = null, workForm = { feature: "", task: "", model: "", effort: "" };
     var data = null, sending = false, form = { target: "", text: "" }, reqs = { target: "", items: [], note: "" };
 
     var say = function (text, bad) {
@@ -132,6 +132,23 @@
       var head = put(workBox, el("div", ""));
       var running = workers.jobs.filter(function (j) { return j.running; }).length;
       add(head, el("b", "", "Worker"), el("span", "muted", " · " + running + " / " + workers.slots + " đang chạy"));
+      // Mặc định: model của mọi việc worker không ghi model riêng (tin hộp thư, việc Leader giao). Đổi là lưu ngay.
+      var dflt = workers.defaults || { model: "opus", effort: "medium" };
+      var pick = function (values, value, onChange) {
+        var s = el("select", "");
+        values.forEach(function (v) { var o = put(s, el("option", "", v)); o.value = v; if (v === value) o.selected = true; });
+        s.addEventListener("change", function () { onChange(s.value); });
+        return s;
+      };
+      var saveDefault = function (model, effort) {
+        postWorker("defaults", { model: model, effort: effort }).then(function () { say("Mặc định của worker: " + model + " · " + effort + "."); },
+                                                                       function (e) { say(e.message, true); });
+      };
+      var drow = put(workBox, el("div", "ib-row"));
+      add(drow, el("span", "", "Mặc định cho mọi việc worker:"),
+        pick(workers.models || [], dflt.model, function (v) { saveDefault(v, dflt.effort); }),
+        pick(workers.efforts || [], dflt.effort, function (v) { saveDefault(dflt.model, v); }),
+        el("span", "muted", "(tin hộp thư và việc Leader giao; chơi thử vẫn sonnet · medium)"));
       var row = put(workBox, el("div", "ib-row"));
       var sel = put(row, el("select", ""));
       add(sel, el("option", "", "chọn feature…"));
@@ -146,20 +163,23 @@
       ta.value = workForm.task;
       ta.style.flex = "1";
       ta.addEventListener("input", function () { workForm.task = ta.value; });
+      add(row, pick(["(mặc định)"].concat(workers.models || []), workForm.model || "(mặc định)", function (v) { workForm.model = v === "(mặc định)" ? "" : v; }),
+        pick(["(mặc định)"].concat(workers.efforts || []), workForm.effort || "(mặc định)", function (v) { workForm.effort = v === "(mặc định)" ? "" : v; }));
       add(row, button("Làm bằng worker", function () {
         if (!workForm.feature) { say("Chọn feature trước.", true); return; }
-        postWorker("run", { feature: workForm.feature, task: workForm.task }).then(function (res) { workForm.task = ""; say("Đã xếp việc " + res.id + "."); },
+        postWorker("run", { feature: workForm.feature, task: workForm.task, model: workForm.model, effort: workForm.effort }).then(function (res) { workForm.task = ""; say("Đã xếp việc " + res.id + "."); },
                                                                                    function (e) { say(e.message, true); });
       }));
       if (!workers.jobs.length) { add(workBox, el("p", "muted", "Chưa có việc worker nào.")); return; }
       var tbl = put(workBox, el("table", ""));
       var hr = put(put(tbl, el("thead", "")), el("tr", ""));
-      ["Lúc tạo", "Việc", "Loại", "Feature", "Trạng thái", "Yêu cầu", "Lượt", "$", "Tóm tắt / câu hỏi", ""].forEach(function (h) { add(hr, el("th", "", h)); });
+      ["Lúc tạo", "Việc", "Loại", "Feature", "Model", "Trạng thái", "Yêu cầu", "Lượt", "$", "Tóm tắt / câu hỏi", ""].forEach(function (h) { add(hr, el("th", "", h)); });
       var tb = put(tbl, el("tbody", ""));
       workers.jobs.forEach(function (j) {
         var tr = put(tb, el("tr", ""));
         var state = (STATE_NAMES[j.state] || j.state || "") + (j.running ? " ●" : "") + (j.pending ? " · sắp chạy tiếp" : "");
-        [when(j.created), j.id, j.kind === "play" ? "chơi thử" : "code", j.feature, state, String(j.requirements || 0), String(j.turns || 0),
+        [when(j.created), j.id, j.kind === "play" ? "chơi thử" : "code", j.feature,
+         (j.model || "") + (j.effort ? " · " + j.effort : ""), state, String(j.requirements || 0), String(j.turns || 0),
          j.cost ? j.cost.toFixed(2) : ""].forEach(function (x) { add(tr, el("td", "", x)); });
         add(tr, el("td", "", (j.question ? "HỎI: " + j.question + " · " : "") + (j.summary || "")));
         var act = put(tr, el("td", ""));

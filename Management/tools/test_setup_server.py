@@ -1221,6 +1221,12 @@ def worker_server_cases(check):
         check("page: resume sets the message for the next tick", (ss.worker_call("resume", {"id": res["id"], "message": "tiếp"})["ok"],
               wk.load(root, res["id"])["pending"]), (True, "tiếp"))
         check("page: the view lists the jobs", len(ss.workers_view()["jobs"]) >= 6)
+        check("page: the default model is set from the page", (ss.worker_call("defaults", {"model": "sonnet", "effort": "low"})["ok"],
+              ss.workers_view()["defaults"]), (True, {"model": "sonnet", "effort": "low"}))
+        check("page: a bad model is refused", ss.worker_call("defaults", {"model": "x", "effort": "low"})["ok"], False)
+        r = ss.worker_call("run", {"feature": "Hud", "task": "thử model", "model": "opus"})
+        check("page: a job run from the page keeps its model, the effort from the default",
+              (ss.worker.load(root, r["id"])["model"], ss.worker.load(root, r["id"])["effort"]), ("opus", "low"))
         # the play job starts on its Editor grant
         started.clear()
         for x in et.tickets(root, ("waiting", "granted")):
