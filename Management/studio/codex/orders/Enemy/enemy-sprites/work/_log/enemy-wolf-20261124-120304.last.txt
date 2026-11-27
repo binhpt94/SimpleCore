@@ -1,3 +1,0 @@
-Đã lưu một PNG nền trong suốt **512 × 341 px** tại [out/enemy-wolf.png](D:/AI/CoreSimple/Management/studio/codex/orders/Enemy/enemy-sprites/work/out/enemy-wolf.png).
-
-Tai cách mép trên 19 px, đuôi và mũi cách hai mép bên 11 px, hai chân chạm cùng hàng còn cách mép dưới 4 px. Sprite được thu đồng tỉ lệ. Viền `#1B2330` đo được từ 5 đến 14 px tại các vị trí kiểm tra.

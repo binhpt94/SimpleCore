@@ -1,3 +1,0 @@
-Đã tạo một sprite [out/thunder.png](D:/AI/CoreSimple/Management/studio/codex/orders/Castle/castle-sprites/work/out/thunder.png). PNG 512 × 512 có nền trong suốt, tia sét và chớp nổ nối liền thành một khối cao 410 px.
-
-Mình dùng ImageGen rồi chuẩn hóa hai mảng màu và viền tối `#1B2330` dày 12 px. Tia zigzag vẫn rõ ở 32 px và 96 px.

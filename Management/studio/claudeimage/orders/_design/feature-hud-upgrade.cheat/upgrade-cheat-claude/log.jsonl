@@ -1,9 +1,0 @@
-{"at": "2026-11-24 13:50:45", "event": "build", "tool": "claudeimage", "item": "mixed-buttons", "mode": "browser", "exit": 0, "parts": ["1-band", "2-upgrade", "3-group", "4-btn", "5-pic", "6-coin"], "result": "đã có work/out/mixed-buttons.png", "files": ["mixed-buttons.png"]}
-{"at": "2026-11-24 13:50:56", "event": "deliver", "version": 1, "files": ["meta.json", "mixed-buttons.png", "parts", "quality.json"], "below": []}
-{"at": "2026-11-25 00:36:37", "event": "build", "tool": "claudeimage", "item": "mixed-buttons", "mode": "browser", "exit": 0, "parts": ["1-band", "2-upgrade", "3-group", "4-btn", "5-pic", "6-coin"], "result": "đã có work/out/mixed-buttons.png", "files": ["mixed-buttons.png"]}
-{"at": "2026-11-25 00:36:42", "event": "deliver", "version": 2, "files": ["meta.json", "mixed-buttons.png", "parts", "quality.json"], "below": []}
-{"at": "2026-11-25 00:37:33", "event": "build", "tool": "claudeimage", "item": "mixed-buttons", "mode": "browser", "exit": 0, "parts": ["1-band", "2-upgrade", "3-group", "4-btn", "5-pic", "6-coin"], "result": "đã có work/out/mixed-buttons.png", "files": ["mixed-buttons.png"]}
-{"at": "2026-11-25 00:52:03", "event": "build", "tool": "claudeimage", "item": "mixed-buttons", "mode": "browser", "exit": 0, "parts": ["1-band", "2-upgrade", "3-group", "4-btn", "5-pic", "6-coin"], "result": "đã có work/out/mixed-buttons.png", "files": ["mixed-buttons.png"]}
-{"at": "2026-11-25 00:52:11", "event": "deliver", "version": 3, "files": ["meta.json", "mixed-buttons.png", "parts", "quality.json"], "below": []}
-{"at": "2026-11-25 23:27:14", "event": "build", "tool": "claudeimage", "item": "mixed-buttons", "mode": "browser", "exit": 0, "parts": ["1-band", "2-upgrade", "3-group", "4-btn", "5-pic", "6-coin"], "result": "đã có work/out/mixed-buttons.png", "files": ["mixed-buttons.png"]}
-{"at": "2026-11-25 23:27:51", "event": "deliver", "version": 4, "files": ["meta.json", "mixed-buttons.png", "parts", "quality.json"], "below": []}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The inbox of the threads that run on demand: the features, services and @Core (pool "feature") and the tool
-chats @Codex, @Blender, @ClaudeImage, @DesignAdvisor (pool "tool"). The Leaders stay live and are messaged with
+chat @DesignAdvisor (pool "tool"). The Leaders stay live and are messaged with
 SendMessage as before. A tester (pool "tester") stays live too once it runs, and is messaged with SendMessage then;
 its inbox is how a Leader or the human opens it when it is not running: the message starts its thread. That pool has
 no limit and the courier never stops its thread.
@@ -49,12 +49,12 @@ LIMIT_MAX, IDLE_MIN, IDLE_MAX = 32, 5, 240
 HUNG_KEYS = {"hung_note": (2, 120), "hung_stop": (0, 240), "takeover_minutes": (0, 240)}
 HUNG_NAMES = {"hung_note": "phút im lặng (báo)", "hung_stop": "phút im lặng (tắt và giao lại)", "takeover_minutes": "phút chat rảnh trước khi đóng"}
 STALE_SECONDS = 300      # a message given this long after it was sent tells the thread it may be out of date
-TOOLS = ("@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor")
+TOOLS = ("@DesignAdvisor",)
 TESTERS = ("@UnityAutoPlay",)
 ON_DEMAND = ("feature", "tool")     # the pools the courier limits and stops when idle; a tester stays live
 NOT_TARGETS = ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner")
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Z][A-Za-z0-9]*$")
-SOURCES = ("người", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "gd_req", "studio", "canh phiên", "phiếu Editor")
+SOURCES = ("người", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "gd_req", "canh phiên", "phiếu Editor")
 ID_RX = re.compile(r"^m\d{8}-\d{6}-[0-9a-f]{6}$")
 TEXT_MAX = 8000
 STATES = ("queued", "waiting", "delivering", "delivered", "error", "cancelled")
@@ -69,7 +69,7 @@ def folder(root):
 
 
 def role_name(target):
-    """A tool, tester, Leader or @Core named without its @ (Codex, designadvisor, Core) is that role; else as is.
+    """A tool, tester, Leader or @Core named without its @ (DesignAdvisor, designadvisor, Core) is that role; else as is.
     PowerShell drops a bare @Name (splatting), so callers there write the name without it (2026-11-26)."""
     if target.startswith("@"):
         return target
@@ -249,7 +249,7 @@ def send(root, target, text, source, key=None, check=None, now=None, once=False)
 
 
 def notify(root, target, text, source, key, check=None, once=False):
-    """send() for the commands that message a thread themselves (gd_req.py, studio.py): the line they print. A
+    """send() for the commands that message a thread themselves (gd_req.py): the line they print. A
     failure never breaks the command: it says the message did not go and to message by hand."""
     try:
         m = send(root, target, text, source, key=key, check=check, once=once)
@@ -392,8 +392,8 @@ def main(argv):
     print(__doc__.split("\n\n")[3], file=sys.stderr)
     print(f"Nhận được: {args!r}", file=sys.stderr)
     if args[:1] == ["send"] and len(args) == 4 and args[1] == "--from":
-        print("Thiếu <target>. Trong PowerShell, @Codex không có ngoặc là splatting một biến rỗng nên tên biến mất: "
-              "viết '@Codex' trong ngoặc đơn, bỏ @ (Codex), hoặc chạy bằng Bash.", file=sys.stderr)
+        print("Thiếu <target>. Trong PowerShell, @DesignAdvisor không có ngoặc là splatting một biến rỗng nên tên biến mất: "
+              "viết '@DesignAdvisor' trong ngoặc đơn, bỏ @ (DesignAdvisor), hoặc chạy bằng Bash.", file=sys.stderr)
     return 2
 
 

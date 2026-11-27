@@ -1,3 +1,0 @@
-Đã lưu đúng một ảnh [hero-swordsman.png](D:/AI/CoreSimple/Management/studio/codex/orders/Hero/hero-sprites/work/out/hero-swordsman.png). PNG 256×384 có nền alpha 0.
-
-Kiếm khách áo đỏ quay phải. Lưỡi kiếm dài khoảng 175 px, rộng 15–16 px và chĩa lên phải khoảng 29°. Đầu cách mép trên 24 px, chân cách mép dưới 3 px và mũi kiếm cách mép phải 9 px.

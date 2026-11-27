@@ -4,6 +4,7 @@ The claude CLI is replaced by a fake and the binding store is a temp folder; no 
 
     python Management/tools/test_setup_server.py
 """
+import contextlib
 import json
 import os
 import shutil
@@ -41,7 +42,7 @@ def page_cases(check):
     import urllib.request
     from http.server import ThreadingHTTPServer
     built = []
-    names = ("main", "write_project", "write_gamedesign", "write_studio", "write_references")
+    names = ("main", "write_project", "write_gamedesign", "write_art", "write_references")
     real = [getattr(ss.sync_page, n) for n in names]
     for n in names:
         setattr(ss.sync_page, n, lambda *a, n=n: built.append(n) or {"kind": n})
@@ -54,18 +55,18 @@ def page_cases(check):
         req = urllib.request.Request(f"http://127.0.0.1:{ss.Handler.port}{path}", headers={"X-Setup-Token": token} if token else {})
         try:
             with urllib.request.urlopen(req, timeout=10) as r:
-                return r.status, r.read().decode("utf-8")
+                return r.status, r.read().decode("utf-8", "replace")
         except urllib.error.HTTPError as ex:
             return ex.code, ""
     try:
         code, page = get("/")
         check("opening the page builds no data", (code, "CORESIMPLE_SETUP" in page, built), (200, True, []))
         check("the page does not load the large data files up front",
-              [f for f in ("data/project.js", "data/gamedesign.js", "data/studio.js") if f'src="{f}"' in page], [])
+              [f for f in ("data/project.js", "data/gamedesign.js", "data/art.js") if f'src="{f}"' in page], [])
         check("each tab's data is built when asked for, and only that one",
-              [(get(f"/api/{k}", "tok")[1], list(built), built.clear())[:2] for k in ("project", "gamedesign", "studio")],
+              [(get(f"/api/{k}", "tok")[1], list(built), built.clear())[:2] for k in ("project", "gamedesign", "art")],
               [('{"kind": "write_project"}', ["write_project"]), ('{"kind": "write_gamedesign"}', ["write_gamedesign"]),
-               ('{"kind": "write_studio"}', ["write_studio"])])
+               ('{"kind": "write_art"}', ["write_art"])])
         check("the data paths need the token", (get("/api/project")[0], get("/api/project", "no")[0], built), (403, 403, []))
         check("the references tab's data is built when asked for", (get("/api/references", "tok")[1], built), ('{"kind": "write_references"}', ["write_references"]))
         built.clear()
@@ -95,6 +96,21 @@ def page_cases(check):
             check("references: a bad upload answers why", post("/api/references/upload", {"name": "a.gif", "data": base64.b64encode(b"GIF89a").decode()})[1],
                   {"ok": False, "error": "chỉ nhận ảnh png, jpg hoặc webp"})
             check("references: an unknown action is refused", post("/api/references/rename", {"id": rid})[0], 403)
+            folder = tmp / "UnityProject/Assets/Features/Hero/FeatureAssets/Private/Resources/Art/Hero/knight"
+            folder.mkdir(parents=True)
+            for name in ("Simple.png", "Detail.png"):
+                (folder / name).write_bytes(b"\x89PNG\r\n\x1a\n" + b"\0" * 16)
+            (tmp / "UnityProject/Assets/secret.png").write_bytes(b"x")
+            code, res = post("/api/art/choose", {"key": "Hero/knight", "tier": "simple"})
+            check("art: a tick keeps the art on Simple, no PIN, and answers with fresh data",
+                  (code, res["ok"], res["data"], ss.art.read_choice(tmp)), (200, True, {"kind": "write_art"}, ["Hero/knight"]))
+            check("art: a tier the art does not have answers why",
+                  post("/api/art/choose", {"key": "Hero/none", "tier": "simple"})[1]["ok"], False)
+            check("art: needs the token", post("/api/art/choose", {"key": "Hero/knight", "tier": "detail"}, token="no")[0], 403)
+            base = "/art/UnityProject/Assets/Features/Hero/FeatureAssets/Private/Resources/Art/Hero/knight/"
+            check("art: a picture of an art folder is served; anything else under Assets is not",
+                  (get(base + "Simple.png")[0], get("/art/UnityProject/Assets/secret.png")[0], get(base + "../../../../../../secret.png")[0]),
+                  (200, 404, 404))
             calls, real_user_idea = [], ss.gamedesign.user_idea
             ss.gamedesign.user_idea = lambda *a: calls.append(a[1:]) or "user-1"
             try:
@@ -389,10 +405,10 @@ def unnamed_cases(check):
         ss.guard.STORE_DIR = str(tmp / "store")
         user = lambda text: {"type": "user", "entrypoint": "claude-vscode", "message": {"role": "user", "content": [{"type": "text", "text": text}]}}
         lines = {
-            "named": [{"type": "custom-title", "customTitle": "Codex"}, {"type": "ai-title", "aiTitle": "khác"}, user("hi")],
+            "named": [{"type": "custom-title", "customTitle": "DesignAdvisor"}, {"type": "ai-title", "aiTitle": "khác"}, user("hi")],
             "old": [{"type": "custom-title", "customTitle": "Wallet"}, user("cũ")],
             "u1": [user("FEATURE=@human 123@abc"), {"type": "ai-title", "aiTitle": "FEATURE=@human 123@abc"}],
-            "u2": [user("đầu"), {"type": "last-prompt", "lastPrompt": "Codex"}],
+            "u2": [user("đầu"), {"type": "last-prompt", "lastPrompt": "DesignAdvisor"}],
             "u3": [{"type": "user", "isMeta": True, "message": {"role": "user", "content": "meta"}}, user("tin   đầu\nhai dòng")],
             "u4": [{"type": "queue-operation"}],
         }
@@ -405,11 +421,11 @@ def unnamed_cases(check):
         check("outside: an old feature thread is outside, in no tier, and nothing runs in it",
               (got["old"]["outside"], got["old"]["group"], got["old"]["archived"]), (True, "", True))
         check("outside: a chat with no name is not outside", got["u3"]["outside"], False)
-        check("unnamed: custom-title wins over ai-title", (got["named"]["title"], got["named"]["named"], got["named"]["feature"]), ("Codex", True, "@Codex"))
+        check("unnamed: custom-title wins over ai-title", (got["named"]["title"], got["named"]["named"], got["named"]["feature"]), ("DesignAdvisor", True, "@DesignAdvisor"))
         check("unnamed: ai-title, PIN hidden", (got["u1"]["title"], got["u1"]["named"]), ("FEATURE=@human ••••", False))
         check("unnamed: no PIN anywhere in the row", "123@abc" in json.dumps(got["u1"], ensure_ascii=False), False)
         check("unnamed: last prompt before the first message, no role taken from it",
-              (got["u2"]["title"], got["u2"]["feature"], got["u2"]["group"], got["u2"]["legacy"], got["u2"]["archived"]), ("Codex", "", "", False, True))
+              (got["u2"]["title"], got["u2"]["feature"], got["u2"]["group"], got["u2"]["legacy"], got["u2"]["archived"]), ("DesignAdvisor", "", "", False, True))
         check("unnamed: first real message, one line", got["u3"]["title"], "tin đầu hai dòng")
         check("unnamed: a long title is cut", len(ss.redact_title("x" * 200)), ss.TITLE_MAX)
     finally:
@@ -676,14 +692,38 @@ def watch_cases(check):
         shutil.rmtree(tdir, ignore_errors=True)
 
 
+FAKE_TOOLS = ("@ToolA", "@ToolB", "@ToolC")
+
+
+@contextlib.contextmanager
+def fake_tools():
+    """Three more chats in the pool "tool" for the courier's cases, which need several threads that run on demand
+    (the project has one, @DesignAdvisor)."""
+    real = (ss.dispatch.TOOLS, ss.guard.ROLES, dict(ss.ROLE_GROUPS))
+    ss.dispatch.TOOLS = real[0] + FAKE_TOOLS
+    ss.guard.ROLES = real[1] + FAKE_TOOLS
+    ss.ROLE_GROUPS.update({n: "Tools" for n in FAKE_TOOLS})
+    try:
+        yield
+    finally:
+        ss.dispatch.TOOLS, ss.guard.ROLES = real[0], real[1]
+        ss.ROLE_GROUPS.clear()
+        ss.ROLE_GROUPS.update(real[2])
+
+
 def takeover_cases(check):
+    with fake_tools():
+        _takeover_cases(check)
+
+
+def _takeover_cases(check):
     """A message for a thread whose chat is open in VS Code: an idle chat of a thread that runs on demand is closed
     and the thread runs in the background; the Giao ngay button does it at once; a message that waits long is told."""
     real = (ss.ROOT, ss.threads, ss.live_sessions, ss.turn, ss.stop_bg, ss.transcripts_dir, ss.close_chat, ss.kill_pid, ss.wait_live)
     root, tdir = Path(tempfile.mkdtemp(prefix="take-")), Path(tempfile.mkdtemp(prefix="take-t-"))
     live, given, closed, killed = {}, [], [], []
-    listed = [thread("w0000000", "Blender", binding="@Blender"), thread("h0000000", "DesignAdvisor", binding="@DesignAdvisor"),
-              thread("s0000000", "ClaudeImage", binding="@ClaudeImage")]
+    listed = [thread("w0000000", "ToolA", binding="@ToolA"), thread("h0000000", "DesignAdvisor", binding="@DesignAdvisor"),
+              thread("s0000000", "ToolB", binding="@ToolB")]
     for t in listed:
         (tdir / f"{t['id']}.jsonl").write_text("{}\n", encoding="utf-8")
 
@@ -710,7 +750,7 @@ def takeover_cases(check):
         ss.ROOT, ss.threads, ss.live_sessions = root, lambda include_unnamed=False: [dict(t) for t in listed], lambda fresh=False: dict(live)
         ss.turn, ss.stop_bg, ss.transcripts_dir, ss.close_chat = fake_turn, lambda sid: None, lambda: tdir, fake_close
         chat("w0000000", minutes=2)
-        a = ss.dispatch.send(root, "@Blender", "Việc cho Wallet", "@Manager")
+        a = ss.dispatch.send(root, "@ToolA", "Việc cho Wallet", "@Manager")
         ss.courier_tick(time.time())
         check("takeover: a chat idle for two minutes is left open; the message says when the server will close it",
               (msg(a["id"])["state"], "rảnh 2 phút: server tự đóng chat và giao khi rảnh đủ 5 phút" in msg(a["id"])["why"], closed, given),
@@ -723,7 +763,7 @@ def takeover_cases(check):
         chat("w0000000", minutes=6)
         did = ss.courier_tick(time.time())
         check("takeover: idle past takeover_minutes with a message waiting: the chat is closed and the thread runs in the background with it",
-              (list(closed), [g[0] for g in given], a["id"] in given[-1][1], msg(a["id"])["state"], ("took-over", "@Blender") in did),
+              (list(closed), [g[0] for g in given], a["id"] in given[-1][1], msg(a["id"])["state"], ("took-over", "@ToolA") in did),
               (["w0000000"], ["w0000000"], True, "delivering", True))
         chat("h0000000", minutes=1)
         b = ss.dispatch.send(root, "@DesignAdvisor", "Việc cho Hud", "@Manager")
@@ -734,7 +774,7 @@ def takeover_cases(check):
               (res["ok"], res.get("state"), closed[n_closed:], given[-1][0], msg(b["id"]).get("force")), (True, "delivering", ["h0000000"], "h0000000", False))
         ss.dispatch.set_config(root, takeover_minutes=0)
         chat("s0000000", minutes=600)
-        c = ss.dispatch.send(root, "@ClaudeImage", "Việc cho Shop", "@Manager")
+        c = ss.dispatch.send(root, "@ToolB", "Việc cho Shop", "@Manager")
         n_closed = len(closed)
         ss.courier_tick(time.time())
         check("takeover: takeover_minutes 0: an open chat is never closed by itself; the message says how to send it",
@@ -785,13 +825,18 @@ def refused_cfg(root, **kw):
 
 
 def courier_cases(check):
+    with fake_tools():
+        _courier_cases(check)
+
+
+def _courier_cases(check):
     """The inbox courier: a message is given to its thread as a turn of its own, counted as delivered only when its id
     is in the transcript; on-demand mode stops idle threads and keeps each pool under its limit."""
     real = (ss.ROOT, ss.threads, ss.live_sessions, ss.turn, ss.stop_bg, ss.transcripts_dir)
     root, tdir = Path(tempfile.mkdtemp(prefix="courier-")), Path(tempfile.mkdtemp(prefix="courier-t-"))
     live, given, stopped = {}, [], []
-    listed = [thread("w0000000", "Blender", binding="@Blender"), thread("s0000000", "ClaudeImage", binding="@ClaudeImage"),
-              thread("h0000000", "DesignAdvisor", binding="@DesignAdvisor"), thread("c0000000", "Codex", binding="@Codex"),
+    listed = [thread("w0000000", "ToolA", binding="@ToolA"), thread("s0000000", "ToolB", binding="@ToolB"),
+              thread("h0000000", "DesignAdvisor", binding="@DesignAdvisor"), thread("c0000000", "ToolC", binding="@ToolC"),
               thread("l0000000", "CodeLead", binding="@CodeLead"), thread("o0000000", "Old", binding="Old", archived=True)]
     for t in listed:
         (tdir / f"{t['id']}.jsonl").write_text("{}\n", encoding="utf-8")
@@ -817,17 +862,17 @@ def courier_cases(check):
         ss.turn, ss.stop_bg, ss.transcripts_dir = fake_turn, fake_stop, lambda: tdir
         now = time.time()
         check("courier: an empty inbox in always-live mode does nothing", ss.courier_tick(now), [])
-        a = ss.dispatch.send(root, "@Blender", "Làm yêu cầu x#y", "@Manager")
+        a = ss.dispatch.send(root, "@ToolA", "Làm yêu cầu x#y", "@Manager")
         did = ss.courier_tick(now)
         m = ss.dispatch.get(root, a["id"])
         check("courier: a thread that is not running is started with the message as its prompt",
               (did[0][:2], given[-1][0], a["id"] in given[-1][1], given[-1][3], m["state"], m["tries"]),
-              (("given", "@Blender"), "w0000000", True, True, "delivering", 1))
+              (("given", "@ToolA"), "w0000000", True, True, "delivering", 1))
         ss.courier_tick(now + 1)
         check("courier: delivered once the id is in the transcript", ss.dispatch.get(root, a["id"])["state"], "delivered")
 
         live["w0000000"]["status"] = "busy"
-        b = ss.dispatch.send(root, "@Blender", "Việc thứ hai", "@CodeLead")
+        b = ss.dispatch.send(root, "@ToolA", "Việc thứ hai", "@CodeLead")
         ss.courier_tick(now + 2)
         check("courier: a thread in the middle of a turn: the message waits",
               (ss.dispatch.get(root, b["id"])["state"], ss.dispatch.get(root, b["id"])["why"]), ("waiting", "thread đang chạy một lượt"))
@@ -838,10 +883,10 @@ def courier_cases(check):
               (len(given) - n_blocked, given[-1][0], b["id"] in given[-1][1], given[-1][2]), (1, "w0000000", True, "background"))
         ss.courier_tick(now + 2.6)
         live["w0000000"] = {"kind": "background", "status": "busy", "state": "working", "short": "w0000000"}
-        b = ss.dispatch.send(root, "@Blender", "Việc thứ ba", "@CodeLead")
+        b = ss.dispatch.send(root, "@ToolA", "Việc thứ ba", "@CodeLead")
         ss.courier_tick(now + 2.7)
         live["w0000000"]["status"] = "idle"
-        c = ss.dispatch.send(root, "@Blender", "Việc thứ ba", "người")
+        c = ss.dispatch.send(root, "@ToolA", "Việc thứ ba", "người")
         ss.courier_tick(now + 3)
         check("courier: an idle background thread gets every waiting message in one turn, as a background turn",
               (b["id"] in given[-1][1] and c["id"] in given[-1][1], given[-1][2], len([g for g in given if g[0] == "w0000000"])),
@@ -849,7 +894,7 @@ def courier_cases(check):
         ss.courier_tick(now + 4)
 
         live["s0000000"] = {"kind": "interactive", "status": "busy", "state": "", "short": "s0000000"}
-        d = ss.dispatch.send(root, "@ClaudeImage", "Việc cho Shop", "@Manager")
+        d = ss.dispatch.send(root, "@ToolB", "Việc cho Shop", "@Manager")
         ss.courier_tick(now + 5)
         check("courier: a chat open in VS Code is never given a turn: the message waits",
               (ss.dispatch.get(root, d["id"])["state"], "VS Code" in ss.dispatch.get(root, d["id"])["why"], given[-1][0] != "s0000000"),
@@ -900,33 +945,33 @@ def courier_cases(check):
               ("c0000000" in stopped, "l0000000" in stopped, "s0000000" in stopped), (True, False, False))
         live["c0000000"] = {"kind": "background", "status": "idle", "state": "done", "short": "c0000000"}
         age("c0000000", 60)
-        ss.dispatch.send(root, "@Codex", "Order mới", "studio")
+        ss.dispatch.send(root, "@ToolC", "Việc mới", "@CodeLead")
         n_stop = len(stopped)
         ss.courier_tick(time.time())
         check("on-demand: a thread with a message waiting is given it, not stopped", (len(stopped), given[-1][0]), (n_stop, "c0000000"))
         # a Renew marked on the page runs right before the next job: wipe (headless), bind again, then the job
         real_store, ss.guard.STORE_DIR = ss.guard.STORE_DIR, tempfile.mkdtemp(prefix="courier-store-")
         try:
-            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "@ClaudeImage"})
+            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "@ToolB"})
             with open(tdir / "s0000000.jsonl", "a", encoding="utf-8") as f:      # a conversation to drop
                 f.write(json.dumps({"type": "user", "message": {"content": "việc cũ"}}, ensure_ascii=False) + "\n")
             live.pop("s0000000", None)
-            m = ss.dispatch.send(root, "@ClaudeImage", "Làm yêu cầu shop-list#a", "@CodeLead")
+            m = ss.dispatch.send(root, "@ToolB", "Làm yêu cầu shop-list#a", "@CodeLead")
             n = len(given)
             ss.dispatch.mark(root, m, "queued", force=True)      # the Giao ngay button: the pool limit does not hold
             did = ss.courier_tick(time.time() + 3)
             kept = [json.loads(x) for x in (tdir / "s0000000.jsonl").read_text(encoding="utf-8").splitlines()]
             check("renew mark: cleared first with no turn (old transcript in .renewed), then the job; bound again, mark gone",
-                  ([(g[0], g[3]) for g in given[n:]], ("renewed", "@ClaudeImage") in did, ss.renew_pending("s0000000"),
+                  ([(g[0], g[3]) for g in given[n:]], ("renewed", "@ToolB") in did, ss.renew_pending("s0000000"),
                    ss.guard.bound_feature("s0000000", ss.guard.STORE_DIR), len(list((tdir / ss.RENEWED).glob("*-s0000000/s0000000.jsonl"))),
                    kept[0]["message"]["content"]),
-                  ([("s0000000", True)], True, False, "@ClaudeImage", 1, ss.RENEW_NOTE))
+                  ([("s0000000", True)], True, False, "@ToolB", 1, ss.RENEW_NOTE))
             check("renew mark: the job prompt is the only thing after the renew turn",
                   (len(kept), kept[1]["type"], "shop-list#a" in kept[-1]["message"]["content"]), (3, "assistant", True))
             ss.courier_tick(time.time() + 4)
-            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "@ClaudeImage"})
+            ss.bind_session.write_json(ss.renew_mark_path("s0000000"), {"binding": "@ToolB"})
             live["s0000000"] = {"kind": "background", "status": "idle", "state": "blocked", "short": "s0000000"}
-            m = ss.dispatch.send(root, "@ClaudeImage", "Trả lời câu hỏi", "@CodeLead")
+            m = ss.dispatch.send(root, "@ToolB", "Trả lời câu hỏi", "@CodeLead")
             ss.dispatch.mark(root, m, "queued", force=True)
             n = len(given)
             ss.courier_tick(time.time() + 5)
@@ -947,12 +992,12 @@ def courier_cases(check):
         who = ss.inbox_view()["pools"]["tool"]["threads"]
         check("inbox view: who takes the places of a pool: the thread, where it runs, what it does, how long it has been quiet",
               [(x["title"], x["kind"], x["status"], x["state"], x["idle"] >= 0) for x in who if x["id"] == "w0000000"],
-              [("Blender", "background", "idle", "blocked", True)])
+              [("ToolA", "background", "idle", "blocked", True)])
         live.pop("w0000000")
         check("inbox view: settings, each pool with its limit and running threads, targets without Leaders",
               (v["config"]["mode"], v["pools"]["tool"]["limit"], sorted(t["target"] for t in v["targets"])),
-              ("always-live", 1, ["@Blender", "@ClaudeImage", "@Codex", "@DesignAdvisor"]))
-        res = ss.inbox_call("send", {"target": "@ClaudeImage", "text": "Việc của người"})
+              ("always-live", 1, ["@DesignAdvisor", "@ToolA", "@ToolB", "@ToolC"]))
+        res = ss.inbox_call("send", {"target": "@ToolB", "text": "Việc của người"})
         check("inbox send: from the page the source is the human", (res["ok"], ss.dispatch.get(root, res["id"])["source"]), (True, "người"))
         check("inbox send refused: a Leader", ss.inbox_call("send", {"target": "@CodeLead", "text": "x"})["ok"], False)
         check("inbox cancel and retry", (ss.inbox_call("cancel", {"id": res["id"]})["ok"], ss.inbox_call("retry", {"id": res["id"]})["ok"],
@@ -961,12 +1006,12 @@ def courier_cases(check):
                                                            ss.dispatch.config(root)["limits"]["tool"],
                                                            ss.inbox_call("config", {"mode": "wild"})["ok"]), (True, 2, False))
         check("inbox: an unknown action is refused", ss.inbox_call("delete", {})["ok"], False)
-        check("inbox reqs: a tool or @Core has no book", (ss.inbox_reqs("@Codex")["reqs"], ss.inbox_reqs("@Core")["reqs"]), ([], []))
+        check("inbox reqs: a tool or @Core has no book", (ss.inbox_reqs("@DesignAdvisor")["reqs"], ss.inbox_reqs("@Core")["reqs"]), ([], []))
         real_valid = ss.still_valid
         ss.still_valid = lambda check: (False, "đã sửa") if check == "gone" else (True, "")
         live.pop("w0000000", None)
-        stale = ss.dispatch.send(root, "@Blender", "Yêu cầu bị trả", "gd_req", key="reject:x", check="gone")
-        fresh = ss.dispatch.send(root, "@Blender", "Việc còn đúng", "@Manager", check="ok")
+        stale = ss.dispatch.send(root, "@ToolA", "Yêu cầu bị trả", "gd_req", key="reject:x", check="gone")
+        fresh = ss.dispatch.send(root, "@ToolA", "Việc còn đúng", "@Manager", check="ok")
         n = len(given)
         ss.dispatch.set_config(root, mode="always-live", limits={"tool": 4})
         ss.courier_tick(time.time())
@@ -1027,7 +1072,7 @@ def profile_cases(check):
         ss.PROFILES = True
         ss.transcripts_dir = lambda: tdir
         ss.skill_names = lambda: {"manager-startup-check", "codelead-dispatch", "gd-round-1", "feature-implement-req",
-                                  "tester-playtest-session", "studio-fulfill-order", "unity-mcp-skill", "skill-creator",
+                                  "tester-playtest-session", "advisor-ask-gpt", "unity-mcp-skill", "skill-creator",
                                   "anthropic-skills:docx"}
 
         def flags(feature):
@@ -1055,18 +1100,13 @@ def profile_cases(check):
               (sorted(mcp or {}), on), (["UnityMCP"], ["feature-implement-req", "unity-mcp-skill"]))
         args, settings, mcp, on = flags("@GameDesigner")
         check("profile: GameDesigner has no MCP and only gd- skills", (mcp, on), ({}, ["gd-round-1"]))
-        args, settings, mcp, on = flags("@Blender")
-        check("profile: Blender has only the blender server of .mcp.json, strictly", (sorted(mcp), "--strict-mcp-config" in args, on),
-              (["blender"], True, ["studio-fulfill-order"]))
-        args, settings, mcp, on = flags("@Codex")
-        check("profile: another tool has no MCP server", mcp, {})
+        args, settings, mcp, on = flags("@DesignAdvisor")
+        check("profile: DesignAdvisor has no MCP server and only advisor- skills", (mcp, on), ({}, ["advisor-ask-gpt"]))
         check("profile: recommended models by role (người quyết 2026-11-27; workers run on worker.py's)",
               [ss.role_model(f, "haiku", "max") for f in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner",
-                                                         "@DesignAdvisor", "@Codex", "@ClaudeImage", "@Blender",
-                                                         "@UnityAutoPlay", "@human")],
+                                                         "@DesignAdvisor", "@UnityAutoPlay", "@human")],
               [("sonnet", "medium"), ("opus", "medium"), ("opus", "medium"), ("opus", "medium"),
-               ("opus", "low"), ("sonnet", "medium"), ("opus", "medium"), ("opus", "low"),
-               ("sonnet", "medium"), ("haiku", "max")])
+               ("opus", "low"), ("sonnet", "medium"), ("haiku", "max")])
         t = thread("aaaa1111", "Manager", binding="@Manager", model="claude-opus-x", effort="high")
         args = ss.turn_args(t)
         check("profile: a turn of an existing thread runs on its role's model and effort, with the profile",
@@ -1089,7 +1129,7 @@ def model_choice_cases(check):
         ss.stop_bg = lambda sid: None
         mgr = thread("aaaa1111", "Manager", binding="@Manager", model="claude-opus-x", effort="high")
         idle = dict(thread("bbbb2222", "CodeLead", binding="@CodeLead"), live="background", live_status="idle")
-        working = dict(thread("cccc3333", "Codex", binding="@Codex"), live="background", live_status="busy")
+        working = dict(thread("cccc3333", "DesignAdvisor", binding="@DesignAdvisor"), live="background", live_status="busy")
         listed = [mgr, idle, working, thread("dddd4444", "Shop")]
         ss.threads = lambda include_unnamed=False: [dict(t) for t in listed]
         for t in listed[:3]:
@@ -1115,10 +1155,10 @@ def model_choice_cases(check):
         res = ss.reset_models()
         check("reset: refused while a thread runs, picks kept",
               (res["ok"], sorted(res.get("running") or []), ss.model_choice("aaaa1111")),
-              (False, ["CodeLead", "Codex"], ("sonnet", "high")))
+              (False, ["CodeLead", "DesignAdvisor"], ("sonnet", "high")))
         human = dict(thread("eeee5555", "human", binding="@human"), live="interactive")
         ss.bind("eeee5555", "@human")
-        listed[:] = [mgr, thread("bbbb2222", "CodeLead", binding="@CodeLead"), thread("cccc3333", "Codex", binding="@Codex"), human]
+        listed[:] = [mgr, thread("bbbb2222", "CodeLead", binding="@CodeLead"), thread("cccc3333", "DesignAdvisor", binding="@DesignAdvisor"), human]
         with ss.BUSY_LOCK:
             ss.BUSY.add("cccc3333")
         try:
@@ -1129,7 +1169,7 @@ def model_choice_cases(check):
         check("reset: with only the human's chat open, every pick is removed",
               (res["ok"], res["removed"], ss.model_choice("aaaa1111"), ss.model_choice("cccc3333"), ss.run_model(mgr)),
               (True, 3, None, None, ("sonnet", "medium")))
-        check("reset: the answer lists the recommended model of each role", res["models"].get("Codex"), "sonnet, medium")
+        check("reset: the answer lists the recommended model of each role", res["models"].get("DesignAdvisor"), "opus, low")
         check("the page may post to the reset path", "/api/sessions/reset-models" in ss.POST_PATHS, True)
     finally:
         (ss.threads, ss.guard.STORE_DIR, ss.run_claude, ss.start_bg, ss.stop_bg, ss.PROFILES) = real
@@ -1598,17 +1638,17 @@ def main():
               ss.bind_session.rule_files("@UIDesigner", str(ss.ROOT)),
               ["CLAUDE.md", ".claude/rules/report.md", ".claude/rules/uidesigner.md",
                ".claude/skills/ui-layout-screen/SKILL.md", ".claude/skills/ui-frame-syntax/SKILL.md",
-               ".claude/skills/ui-claude-concept-order/SKILL.md", ".claude/skills/gd-round-4/SKILL.md",
+               ".claude/skills/gd-round-4/SKILL.md",
                ".claude/skills/gd-node-format/SKILL.md"])
         check("reread: @GameDesigner follows the skills split out of gamedesigner.md",
               [r for r in ss.bind_session.rule_files("@GameDesigner", str(ss.ROOT))
-               if any(n in r for n in ("gd-node-format", "gd-scoring", "gd-glossary", "gd-art-concept", "gd-user-control"))],
-              [f".claude/skills/{n}/SKILL.md" for n in ("gd-node-format", "gd-scoring", "gd-glossary", "gd-art-concept", "gd-user-control")])
+               if any(n in r for n in ("gd-node-format", "gd-scoring", "gd-glossary", "gd-user-control"))],
+              [f".claude/skills/{n}/SKILL.md" for n in ("gd-node-format", "gd-scoring", "gd-glossary", "gd-user-control")])
         heads = []
-        for n in ("gd-node-format", "gd-scoring", "gd-glossary", "gd-art-concept", "gd-user-control", "codelead-wiring"):
+        for n in ("gd-node-format", "gd-scoring", "gd-glossary", "gd-user-control", "codelead-wiring"):
             text = (ss.ROOT / ".claude" / "skills" / n / "SKILL.md").read_text(encoding="utf-8")
             heads.append((text.startswith("---\nname: " + n + "\ndescription: "), "Dùng khi" in text.split("---")[1] or "Dùng trước" in text.split("---")[1]))
-        check("skills split out of the rules: each has a name and says when it is used", heads, [(True, True)] * 6)
+        check("skills split out of the rules: each has a name and says when it is used", heads, [(True, True)] * 5)
         check("reread: a feature is a worker now, no skill of its own", [r for r in ss.bind_session.rule_files("Wallet", str(ss.ROOT)) if "skills" in r], [])
         sp = ss.reread_prompt([".claude/rules/uidesigner.md", ".claude/skills/ui-frame-syntax/SKILL.md"])
         check("reread: a changed rule file is Read again, a changed skill is only named (called again when used)",

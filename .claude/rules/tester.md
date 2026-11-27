@@ -9,12 +9,12 @@ Tester chơi game trong Unity Editor như một người chơi, đối chiếu v
 ## Quyền (guard ép, trừ phần ghi "cổng mềm")
 | Việc | Được |
 |---|---|
-| Đọc | toàn bộ `UnityProject/Assets` (cả `Internal`, `View`, `FeatureAssets/Private` của mọi feature), `Packages`, `ProjectSettings`; `Management` như mọi phiên (thiết kế `live`, studio, báo cáo); toàn bộ `Tester/`, kể cả `Archive` |
+| Đọc | toàn bộ `UnityProject/Assets` (cả `Internal`, `View`, `FeatureAssets/Private` của mọi feature), `Packages`, `ProjectSettings`; `Management` như mọi phiên (thiết kế `live`, báo cáo); toàn bộ `Tester/`, kể cả `Archive` |
 | Ghi bằng Edit/Write | chỉ trong `Tester/<tên mình>/`: `README.md`; trong một đợt `<yyyymmdd-hhmmss>/`: `README.md`, ghi chú `.md` khác, và `images/**` (ảnh, `.json`, `.txt`, `.csv`, `.log`) |
-| Không ghi | mọi thứ khác: `UnityProject`, `Management`, `.claude`, `Resources`, `Tester/<tên>/Archive` (chỉ lệnh `archive` dời vào), thư mục của tester khác |
+| Không ghi | mọi thứ khác: `UnityProject`, `Management`, `.claude`, `Tester/<tên>/Archive` (chỉ lệnh `archive` dời vào), thư mục của tester khác |
 | unity-mcp | đọc (console, hierarchy, component, asset); `manage_editor` play/pause/stop; `run_tests`; `manage_scene load` (mở scene để chơi; **không** save, không create); `refresh_unity`; `execute_menu_item` (menu cheat của feature); `manage_camera` (chụp màn hình, `output_folder: "Captures"`); `execute_code` |
 | unity-mcp bị cấm | ghi hay sửa asset, object, component, prefab, material; lưu scene; package, tag/layer, cài đặt project; mọi lệnh viết code |
-| Shell | `tester.py` (bảng dưới, cả `shot` để dời ảnh), `gd_pack.py <Tên>`, `gd_frame.py live/<node>`, `validate.py`, `studio.py status` |
+| Shell | `tester.py` (bảng dưới, cả `shot` để dời ảnh), `gd_pack.py <Tên>`, `gd_frame.py live/<node>`, `validate.py`, `art.py list` |
 
 - **Khoá Editor**: play, test, load scene, menu, camera, `execute_code` đều giữ khoá Editor tới hết lượt (cùng khoá với @CodeLead). Phiên khác đang giữ thì chờ, không tìm đường vòng. Trước khi hết lượt: Stop Play.
 - Trong lúc bạn giữ khoá, guard chặn các phiên khác ghi vào `UnityProject/Assets` và hộp thư giữ lại việc code, để Unity không nạp lại giữa lúc Play. Vì vậy Stop Play và kết thúc lượt ngay khi chơi xong: giữ khoá lâu là giữ cả project đứng chờ.

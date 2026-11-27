@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 140" width="1920" height="140">
-  <!-- dai nen HUD: toi ban trong suot 45%, bo goc 12 (gon trong 24 px), giua mot mau phang -->
-  <rect x="0" y="0" width="1920" height="140" rx="12" fill="#0B132B" fill-opacity="0.45"/>
-  <!-- vien mong sang hon o mep tren va mep duoi, nam trong 24 px -->
-  <rect x="12" y="4" width="1896" height="3" fill="#5C6B99" fill-opacity="0.7"/>
-  <rect x="12" y="133" width="1896" height="3" fill="#5C6B99" fill-opacity="0.7"/>
-</svg>

@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 60" width="600" height="60">
-  <!-- bong cung lech xuong 4 px -->
-  <rect x="3" y="7" width="594" height="50" rx="14" fill="#000000"/>
-  <!-- khung thanh mau: long do tham rat toi, vien den 6 px, bo 14 (gon trong 24 px) -->
-  <rect x="3" y="3" width="594" height="50" rx="14" fill="#3A0A10" stroke="#000000" stroke-width="6"/>
-</svg>

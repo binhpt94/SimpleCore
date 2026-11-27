@@ -11,14 +11,6 @@
       ],
       "env": {},
       "timeout": 180000
-    },
-    "blender": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": [
-        "mcp-for-blender"
-      ],
-      "env": {}
     }
   }
 }

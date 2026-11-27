@@ -29,19 +29,19 @@ def main():
     root = Path(tempfile.mkdtemp(prefix="toolwork-"))
     try:
         check("empty: nothing to do", (tw.items(root), tw.summary(root)), ([], {"open": [], "recent": []}))
-        a = tw.add(root, "Thêm lệnh  huỷ order\nvào studio.py", "@Manager", "Người chọn A ngày 2026-11-26", now=1_800_000_000)
+        a = tw.add(root, "Thêm lệnh  huỷ order\nvào bugs.py", "@Manager", "Người chọn A ngày 2026-11-26", now=1_800_000_000)
         check("add: one open item, its text on one line, who asked and what the human decided",
               (a["new"], a["state"], a["text"], a["source"], a["decided"], bool(tw.ID_RX.match(a["id"]))),
-              (True, "open", "Thêm lệnh huỷ order vào studio.py", "@Manager", "Người chọn A ngày 2026-11-26", True))
+              (True, "open", "Thêm lệnh huỷ order vào bugs.py", "@Manager", "Người chọn A ngày 2026-11-26", True))
         check("add: the same work still open is not written twice",
-              (tw.add(root, "Thêm lệnh huỷ order vào studio.py", "@CodeLead", "x")["new"], len(tw.items(root))), (False, 1))
+              (tw.add(root, "Thêm lệnh huỷ order vào bugs.py", "@CodeLead", "x")["new"], len(tw.items(root))), (False, 1))
         check("add: refused without a text, without the decision, from someone who is no Leader",
               (refused(tw.add, root, " ", "@Manager", "x"), refused(tw.add, root, "x", "@Manager", ""),
                refused(tw.add, root, "x", "Wallet", "y"), refused(tw.add, root, "x" * 2001, "@Manager", "y")), (True, True, True, True))
         b = tw.add(root, "Chặn ghi code khi tester chơi", "@Manager", "Người chọn chặn ghi và hoãn giao", now=1_800_000_100)
-        done = tw.close(root, a["id"], "done", "Đã thêm studio.py cancel, commit abc1234", now=1_800_000_200)
+        done = tw.close(root, a["id"], "done", "Đã thêm bugs.py cancel, commit abc1234", now=1_800_000_200)
         check("done: closed with what was done", (done["state"], done["note"], [x["id"] for x in tw.items(root, "open")]),
-              ("done", "Đã thêm studio.py cancel, commit abc1234", [b["id"]]))
+              ("done", "Đã thêm bugs.py cancel, commit abc1234", [b["id"]]))
         check("done: not twice, not without a note, not an unknown id",
               (refused(tw.close, root, a["id"], "done", "x"), refused(tw.close, root, b["id"], "done", ""),
                refused(tw.close, root, "w00000000-0000", "done", "x"), refused(tw.close, root, "../x", "dropped", "x")),

@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60" width="160" height="60">
-  <!-- khom co thap, phang, chan cham mep duoi (y=60), chiem ~88% be rong, can giua; vien toi 4 px -->
-  <path d="M12 58 L24 24 L37 44 L53 10 L69 40 L82 18 L97 42 L113 12 L126 40 L138 24 L148 58 Z" fill="#4FA53A" stroke="#1E3A14" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M28 36 L37 50 L53 24 L58 48 Z" fill="#7CCB5A"/>
-</svg>

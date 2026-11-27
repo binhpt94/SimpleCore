@@ -1,4 +1,0 @@
-{"at": "2026-11-24 13:46:55", "event": "build", "tool": "claudeimage", "item": "mid-battle", "mode": "browser", "exit": 0, "parts": ["1-band", "2-btn", "3-coin", "4-hp", "5-tray", "6-skill-thunder", "7-skill-frost", "8-skill-rally"], "result": "đã có work/out/mid-battle.png", "files": ["mid-battle.png"]}
-{"at": "2026-11-24 13:47:06", "event": "deliver", "version": 1, "files": ["meta.json", "mid-battle.png", "parts", "quality.json"], "below": []}
-{"at": "2026-11-25 23:27:09", "event": "build", "tool": "claudeimage", "item": "mid-battle", "mode": "browser", "exit": 0, "parts": ["1-band", "2-btn", "3-coin", "4-hp", "5-tray", "6-skill-thunder", "7-skill-frost", "8-skill-rally"], "result": "đã có work/out/mid-battle.png", "files": ["mid-battle.png"]}
-{"at": "2026-11-25 23:27:49", "event": "deliver", "version": 2, "files": ["meta.json", "mid-battle.png", "parts", "quality.json"], "below": []}

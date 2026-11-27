@@ -1,7 +1,0 @@
-{"at": "2026-11-25 01:15:24", "event": "attempt", "item": "layers", "n": 1}
-{"at": "2026-11-25 01:15:27", "event": "run", "tool": "claudeimage", "item": "layers", "mode": "browser", "exit": 0, "parts": ["sky", "far", "ground", "grass", "stone"], "result": "đã có work/out/layers.png", "files": ["layers.png"]}
-{"at": "2026-11-25 01:15:36", "event": "deliver", "version": 1, "files": ["layers.png", "meta.json", "parts", "quality.json"], "below": []}
-{"at": "2026-11-25 23:13:30", "event": "redo", "item": "layers", "round": 1, "text": "Style vòng 1 đổi sang Colorful casual mobile, vẽ lại theo style mới, giữ nguyên bố cục frame", "version": 1}
-{"at": "2026-11-25 23:15:12", "event": "attempt", "item": "layers", "n": 2}
-{"at": "2026-11-25 23:15:17", "event": "run", "tool": "claudeimage", "item": "layers", "mode": "browser", "exit": 0, "parts": ["sky", "far", "ground", "grass", "stone"], "result": "đã có work/out/layers.png", "files": ["layers.png"]}
-{"at": "2026-11-25 23:15:22", "event": "deliver", "version": 2, "files": ["layers.png", "meta.json", "parts", "quality.json"], "below": []}

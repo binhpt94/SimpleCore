@@ -1,1 +1,0 @@
-Đã lưu sprite [out/hero-mage.png](D:/AI/CoreSimple/Management/studio/codex/orders/Hero/hero-sprites/work/out/hero-mage.png). PNG 256×384 có nền alpha 0, chóp mũ cách mép trên 14 px và đế giày cách mép dưới 4 px. Viền ở mép phải viên đá dày 6–8 px.

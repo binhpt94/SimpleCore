@@ -1,6 +1,0 @@
-{"at": "2026-11-25 01:25:15", "event": "attempt", "item": "main", "n": 1}
-{"at": "2026-11-25 01:25:16", "event": "run", "tool": "claudeimage", "item": "main", "mode": "browser", "exit": 0, "parts": ["btn-main", "btn-sub"], "result": "đã có work/out/main.png", "files": ["main.png"]}
-{"at": "2026-11-25 01:25:19", "event": "deliver", "version": 1, "files": ["main.png", "meta.json", "parts", "quality.json"], "below": []}
-{"at": "2026-11-25 23:14:29", "event": "redo", "item": "main", "round": 1, "text": "Style vòng 1 đổi sang Colorful casual mobile, vẽ lại theo style mới, giữ nguyên bố cục frame", "version": 1}
-{"at": "2026-11-25 23:19:34", "event": "build", "tool": "claudeimage", "item": "main", "mode": "browser", "exit": 0, "parts": ["btn-main", "btn-sub"], "result": "đã có work/out/main.png", "files": ["main.png"]}
-{"at": "2026-11-25 23:19:42", "event": "deliver", "version": 2, "files": ["main.png", "meta.json", "parts", "quality.json"], "below": []}

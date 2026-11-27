@@ -57,7 +57,7 @@
     add(pane, el("h1", "", "Hộp thư"));
     add(pane, el("p", "sub", "Tin cho feature, service, @Core thành một việc worker (người quyết 2026-11-27): một lượt trong git worktree riêng, " +
       "sửa được mọi feature, qua cổng kiểm thì tự nạp, server biên dịch, chạy test và ghi done. Tin cho @UnityAutoPlay là một đợt chơi thử, chạy khi tới phiếu Editor. " +
-      "Tin cho tool (@Codex, @Blender, @ClaudeImage, @DesignAdvisor) vẫn là một lượt của thread tool. Tối đa 3 worker cùng lúc."));
+      "Tin cho @DesignAdvisor vẫn là một lượt của thread đó. Tối đa 3 worker cùng lúc."));
     if (!ctx.setup) {
       add(pane, el("p", "muted", "Hộp thư chỉ có khi mở trang qua python Management/tools/setup_server.py (server cũng là bên giao tin)."));
       return;

@@ -73,7 +73,7 @@ def advise_cases(root, tmp):
     log = Path(tmp) / "fake.log"
     fake = Path(tmp) / "fake_codex.py"
     fake.write_text(FAKE, encoding="utf-8")
-    os.environ.update(STUDIO_CODEX=str(fake), FAKE_LOG=str(log))
+    os.environ.update(ADVISE_CODEX=str(fake), FAKE_LOG=str(log))
     node(root, "idea", "", "\n### loop | AI 8 | Vòng lặp chính\nĐánh, nhặt, nâng cấp.\n")
     folder = hero_node(root)
     gd.save_review(root, "feature-hero", {"hero-count": {"score": 7, "feedback": "Thử 4 xem sao"}})
@@ -433,7 +433,7 @@ def main():
     tmp = tempfile.mkdtemp(prefix="gd-advise-test-")
     root = Path(tmp) / "project"
     root.mkdir()
-    keep = {k: os.environ.get(k) for k in ("STUDIO_CODEX", "FAKE_LOG", "FAKE_ANSWER")}
+    keep = {k: os.environ.get(k) for k in ("ADVISE_CODEX", "FAKE_LOG", "FAKE_ANSWER")}
     try:
         advise_cases(root, tmp)
         label_cases(root)

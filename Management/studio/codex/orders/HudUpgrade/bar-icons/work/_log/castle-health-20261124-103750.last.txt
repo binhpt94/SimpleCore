@@ -1,3 +1,0 @@
-Đã lưu [castle-health.png](D:/AI/CoreSimple/Management/studio/codex/orders/HudUpgrade/bar-icons/work/out/castle-health.png). PNG 256 × 256, nền trong suốt, biểu tượng căn giữa và vẫn rõ ở 70 × 70 px.
-
-Ảnh được tạo bằng imagegen tích hợp từ mô tả tim đỏ phẳng trước tháp đá xám. Một vài đoạn viền tháp dày 11–13 px, nhỉnh hơn mức 8–10 px yêu cầu.

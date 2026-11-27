@@ -1,3 +1,0 @@
-Đã lưu [out/portrait-knight.png](/D:/AI/CoreSimple/Management/studio/codex/orders/TeamSelect/ts-card-colorful/work/out/portrait-knight.png). PNG đúng **240 × 200 px**, nền trong suốt, cả bốn góc có alpha 0. Mép khiên vàng cách góc dưới phải hơn 30 px.
-
-Đỉnh mũ bạc nằm khoảng y=38, thấp hơn mốc y≈16 trong bố cục chung.

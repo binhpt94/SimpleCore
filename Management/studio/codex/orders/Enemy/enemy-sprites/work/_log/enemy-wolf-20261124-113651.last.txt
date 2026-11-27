@@ -1,3 +1,0 @@
-Đã lưu [out/enemy-wolf.png](D:/AI/CoreSimple/Management/studio/codex/orders/Enemy/enemy-sprites/work/out/enemy-wolf.png), PNG **512 × 341 px** với nền trong suốt. Sprite tạo bằng ImageGen, vẽ một con sói xám tro đang phi sang phải, mắt đỏ và nhe nanh.
-
-Hai bên cách mép **8 px**, chân trước và chân sau cùng cách đáy **6 px**. Khoảng trống trên đỉnh tai là **45 px**, vượt mức yêu cầu 8–20 px. Tôi giữ nguyên tỉ lệ của hình sói khi đưa vào khung.

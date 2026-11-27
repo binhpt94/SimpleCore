@@ -1,4 +1,0 @@
-{"at": "2026-11-24 23:56:36", "event": "attempt", "item": "btn-sub", "n": 1}
-{"at": "2026-11-24 23:56:37", "event": "run", "tool": "claudeimage", "item": "btn-sub", "mode": "browser", "exit": 0, "result": "đã có work/out/btn-sub.png", "files": ["btn-sub.png"]}
-{"at": "2026-11-24 23:56:49", "event": "deliver", "version": 1, "files": ["btn-sub.png", "quality.json"], "below": []}
-{"at": "2026-11-24 23:57:06", "event": "review", "item": "btn-sub", "level": 3, "version": 1}

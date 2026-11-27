@@ -16,7 +16,8 @@ run:
      the worktree is .claude/rules/worker.md and the rule files are not loaded: a short context. Committed as `base`.
   2. one turn: `claude -p` bound to @Worker in the worktree, no MCP server, no skill. The packet (the open
      requirements of <F>, the task) is the prompt; the worker writes result.json at the worktree's root.
-  3. gates, in the worktree: every changed file inside UnityProject/Assets (not SimpleCoreTools); validate.py with
+  3. gates, in the worktree: every changed file inside UnityProject/Assets (not SimpleCoreTools, not a Detail art nor
+     ArtChoice.json: the human's); validate.py with
      no violation; compile_check.py --all clean. A failed gate is sent back once (resume with the lines).
   4. apply (automatic, người quyết): each changed file whose main copy is still the base copy is written; one that
      changed since is merged three ways (git merge-file); a conflict applies nothing (state drift). The worktree is
@@ -56,6 +57,8 @@ WORK_HOME = Path(os.environ.get("CORESIMPLE_WORK") or Path.home() / ".coresimple
 ID_RX = re.compile(r"^w\d{8}-\d{6}-[a-z0-9-]+$")
 APPLY_ZONE = "UnityProject/Assets/"
 NOT_APPLIED = ("UnityProject/Assets/SimpleCoreTools/",)
+# The human's art: a Detail (the production art) and the choice of tier (art.py, the Studio tab). A worker makes Simple.
+HUMAN_ART_RX = re.compile(r"^UnityProject/Assets/(?:.+/)?Resources/Art/.+/Detail\.[^/]+$|^UnityProject/Assets/_Composition/Resources/ArtChoice\.json(?:\.meta)?$")
 RESULT = "result.json"
 MERGE_DIR = ".worker-merge"      # in the worktree: the main project's copy of each file that drifted, to merge from
 WORK_STATES = ("rejected", "changed", "no-test", "doing", "todo")      # the book's states that are work now
@@ -117,7 +120,7 @@ def new_id(feature, now=None):
 
 
 def in_zone(path):
-    return path.startswith(APPLY_ZONE) and not path.startswith(NOT_APPLIED)
+    return path.startswith(APPLY_ZONE) and not path.startswith(NOT_APPLIED) and not HUMAN_ART_RX.match(path)
 
 
 def z_paths(text):
@@ -148,22 +151,6 @@ def worker_context(root, wt):
         settings.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def studio_folders(root, feature):
-    """The feature's studio orders and the files delivered for them (images, models), ignored files included: the
-    worker reads them to judge what was delivered and to see what is already ordered."""
-    found = []
-    if not feature:
-        return found
-    for tool in sorted(Path(root, "Management", "studio").glob("*")):
-        d = tool / "orders" / feature
-        if d.is_dir():
-            found.append(d.relative_to(root))
-    d = Path(root, "Resources", feature)
-    if d.is_dir():
-        found.append(d.relative_to(root))
-    return found
-
-
 def snapshot(root, wt, feature=None):
     """A worktree at HEAD with the main checkout's uncommitted state on top, committed as `base`. Returns its sha."""
     wt.parent.mkdir(parents=True, exist_ok=True)
@@ -179,8 +166,6 @@ def snapshot(root, wt, feature=None):
             (wt / rel).unlink()
         except FileNotFoundError:
             pass
-    for rel in studio_folders(root, feature):
-        shutil.copytree(Path(root, rel), wt / rel, dirs_exist_ok=True, ignore=shutil.ignore_patterns(".run.lock"))
     worker_context(root, wt)
     return commit(wt, "base: ảnh chụp project chính")
 
@@ -333,7 +318,7 @@ def check(root, job):
     outside = sorted(p for p in found if not in_zone(p))
     if outside:
         ok = False
-        lines.append("NGOÀI VÙNG (worker chỉ sửa UnityProject/Assets, trừ SimpleCoreTools): " + ", ".join(outside[:30]))
+        lines.append("NGOÀI VÙNG (worker chỉ sửa UnityProject/Assets, trừ SimpleCoreTools, art Detail và ArtChoice.json): " + ", ".join(outside[:30]))
     for gate, passed, gate_lines in run_gates(wt):
         lines.append(f"{gate}: {'qua' if passed else 'HỎNG'}")
         if not passed:
@@ -456,68 +441,9 @@ def after_apply(root, job, result):
         t = editor_ticket.add(root, ROLE, ["refresh", "clean"], [], tested, job=job["id"])
         job["ticket"] = t["id"]
         lines.append(f"Phiếu Editor {t['id']}: server nạp, biên dịch" + (f", chạy test của {len(tested)} yêu cầu" if tested else ""))
-    lines += studio_actions(root, job, result)
     if result.get("editor"):
         lines.append("Việc cần Editor (chưa tự động ở bước này): " + "; ".join(map(str, result["editor"])))
     save(root, job)
-    return lines
-
-
-STUDIO_TOOLS = ("claudeimage", "codex", "blender")
-ORDER_ID_RX = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
-OWNER_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")
-
-
-def job_features(job, result):
-    """The features a job may order for or judge: its own, those of its requirements and those whose files it wrote."""
-    names = {job["feature"]} | {r.get("feature") for r in result.get("reqs") or []}
-    for a in job.get("applied_files") or []:
-        m = re.match(r"^UnityProject/Assets/Features/((?:_Services/)?[A-Za-z][A-Za-z0-9]*)/", a)
-        if m:
-            names.add(m.group(1))
-    return {n for n in names if n}
-
-
-def studio_run(root, *args):
-    p = subprocess.run([sys.executable, str(Path(root, "Management", "tools", "studio.py")), *args], cwd=str(root),
-                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=600)
-    text = [x for x in (p.stdout + p.stderr).splitlines() if x.strip()]
-    return p.returncode == 0, text[-6:]
-
-
-def studio_actions(root, job, result):
-    """The worker's orders and judgements (result.json orders, reviews), run in the main project after the apply:
-    only for the features of the job. The studio's own rules (one order.md, written once; review 0-3) still hold."""
-    lines, owners = [], job_features(job, result)
-    made = 0
-    for o in result.get("orders") or []:
-        tool, oid, feature = str(o.get("tool") or ""), str(o.get("id") or ""), str(o.get("feature") or job["feature"])
-        if tool not in STUDIO_TOOLS or not ORDER_ID_RX.match(oid) or not OWNER_RX.match(feature) or feature not in owners:
-            lines.append(f"order bỏ qua (tool, id hay feature sai, hoặc không thuộc việc này): {tool} {feature}/{oid}")
-            continue
-        path = Path(root, "Management", "studio", tool, "orders", *feature.split("/"), oid, "order.md")
-        if path.exists():
-            lines.append(f"order {feature}/{oid} đã có, không ghi đè (đặt order mới với id khác)")
-            continue
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(str(o.get("order") or "").rstrip() + "\n", encoding="utf-8")
-        made += 1
-        lines.append(f"Đã đặt order {tool} {feature}/{oid}")
-    if made:
-        ok, text = studio_run(root, "check")
-        lines.append("studio.py check: " + ("qua, order vào hộp thư của tool" if ok else "LỖI: " + " / ".join(text)))
-    for r in result.get("reviews") or []:
-        order, item = str(r.get("order") or ""), str(r.get("item") or "")
-        feature = order.rpartition("/")[0]
-        try:
-            score = int(r.get("score"))
-        except (TypeError, ValueError):
-            score = -1
-        if feature not in owners or not 0 <= score <= 3 or not item:
-            lines.append(f"chấm bỏ qua (order không thuộc việc này, hay mức ngoài 0-3): {order} {item}")
-            continue
-        ok, text = studio_run(root, "review", order, item, str(score), str(r.get("feedback") or "")[:600])
-        lines.append(f"Chấm {order} {item}: {score}" + ("" if ok else " · LỖI: " + " / ".join(text)))
     return lines
 
 

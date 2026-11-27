@@ -125,7 +125,7 @@
   </main>
 </div>
 
-<!-- Trang này chỉ là vỏ. Mọi nội dung nằm trong data/. Dữ liệu lớn (project, gamedesign, studio) không nạp ở đây:
+<!-- Trang này chỉ là vỏ. Mọi nội dung nằm trong data/. Dữ liệu lớn (project, gamedesign, art) không nạp ở đây:
      tab nào cần thì tab đó nạp khi được mở lần đầu (hàm load bên dưới). -->
 <script src="data/idea.js"></script>
 <script src="data/sessions.js"></script>
@@ -206,7 +206,7 @@
 
   // Dữ liệu lớn, mỗi bộ nạp một lần khi có tab cần tới. Mở qua setup_server.py: server dựng mới đúng bộ đó.
   // Mở thẳng từ file: đọc file trong data/ (Stop hook sinh lại sau mỗi lượt chat); thiếu file thì trả null.
-  var KINDS = { project: "CORESIMPLE_PROJECT", gamedesign: "CORESIMPLE_GAMEDESIGN", studio: "CORESIMPLE_STUDIO",
+  var KINDS = { project: "CORESIMPLE_PROJECT", gamedesign: "CORESIMPLE_GAMEDESIGN", art: "CORESIMPLE_ART",
                 references: "CORESIMPLE_REFERENCES" };
   var loads = {};
   var load = function (kind) {
@@ -291,14 +291,14 @@
   if (views.gamedesign) {
     tab("game-design", "Game design", function (pane) {
       views.gamedesign(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
-    }, ["gamedesign", "studio"]);      // studio: phiếu nợ art hiện ở node
+    }, ["gamedesign"]);
   }
 
-  // ---------------------------------------------------------------- studio: order ảnh, art, model; phiếu nợ (view/studio.js)
+  // ---------------------------------------------------------------- studio: art Simple và Detail, bản game đang dùng (view/studio.js)
   if (views.studio) {
     tab("studio", "Studio", function (pane) {
       views.studio(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
-    }, ["studio"]);
+    }, ["art"]);
   }
 
   // ---------------------------------------------------------------- tham chiếu: ảnh người nạp, kèm nhận định (view/references.js)
@@ -690,7 +690,7 @@
       var order = (data.sets.order || []).concat(["", UNNAMED]);
       var outside = data.threads.filter(function (t) { return t.outside; });
       paintOutside(outside, vs0(data));
-      var key = function (t) { return t.feature || t.title; };      // tên chat "Codex" là FEATURE "@Codex"
+      var key = function (t) { return t.feature || t.title; };      // tên chat "Manager" là FEATURE "@Manager"
       var tierOf = function (t) { if (t.named === false) return UNNAMED; var g = data.sets.groups[key(t)] || t.group || ""; return order.indexOf(g) >= 0 ? g : ""; };
       var sorted = data.threads.slice().sort(function (a, b) {
         return (order.indexOf(tierOf(a)) - order.indexOf(tierOf(b))) || ((wanted[key(a)] || 1e9) - (wanted[key(b)] || 1e9))

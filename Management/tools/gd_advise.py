@@ -45,7 +45,30 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import gamedesign as gd  # noqa: E402
-import studio  # noqa: E402
+import os  # noqa: E402
+import shutil  # noqa: E402
+import subprocess  # noqa: E402
+
+TIMEOUT = int(os.environ.get("ADVISE_TIMEOUT") or 1800)
+
+
+def codex_exe():
+    """The command that starts Codex, as a list. ADVISE_CODEX overrides it (a .py file runs with this Python)."""
+    exe = os.environ.get("ADVISE_CODEX") or shutil.which("codex")
+    if not exe:
+        raise ValueError("không tìm thấy lệnh codex: báo bên giao việc một tin rồi dừng (người cài codex)")
+    return [sys.executable, exe] if exe.endswith(".py") else [exe]
+
+
+def run(cmd, stdin_text=None):
+    """(exit code, tail of stderr)."""
+    try:
+        p = subprocess.run(cmd, input=(stdin_text or "").encode("utf-8"), capture_output=True, timeout=TIMEOUT)
+        return p.returncode, (p.stderr or b"").decode("utf-8", "replace")[-1500:]
+    except subprocess.TimeoutExpired:
+        return -1, f"quá {TIMEOUT}s"
+    except OSError as ex:
+        return -2, str(ex)
 
 ROOT = HERE.parent.parent
 ID_RX = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -339,13 +362,13 @@ def main(argv, root=ROOT):
     if len(also) > ALSO_MAX:
         return fail(f"also: tối đa {ALSO_MAX} node mỗi lần hỏi (đang có {len(also)}); bản đồ feature đã tự được gửi kèm")
     try:
-        exe = studio.tool_exe("codex")
+        exe = codex_exe()
     except ValueError as ex:
         return codex_fail(str(ex))
     prompt = build_prompt(root, node, found, question, also, aid)
     with tempfile.TemporaryDirectory(prefix="gd-advise-") as tmp:
         out = Path(tmp) / "answer.md"
-        code, err = studio.run(exe + ["exec", "-C", str(root), "-s", "read-only", "--skip-git-repo-check",
+        code, err = run(exe + ["exec", "-C", str(root), "-s", "read-only", "--skip-git-repo-check",
                                       "-o", str(out), "-"], prompt)
         answer = gd.read_text(out).strip() if out.is_file() else ""
     if not answer:

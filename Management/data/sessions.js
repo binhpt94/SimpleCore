@@ -17,7 +17,7 @@ window.CORESIMPLE_SESSIONS = {
         { text: "Chạy sau khi clone, đổi máy hoặc sửa hook. Mỗi lệnh phải kết thúc bằng TOTAL: ... 0 failed.", command: "python .claude/hooks/test_guard.py" },
         { text: "Công cụ kiểm ranh giới và thiết kế:", command: "python Management/tools/test_validate.py" },
         { command: "python Management/tools/test_gamedesign.py" },
-        { command: "python Management/tools/test_studio.py" },
+        { command: "python Management/tools/test_art.py" },
         { text: "Setup, thư mục và nhóm chat:", command: "python Management/tools/test_scaffold.py\npython Management/tools/test_vscode_groups.py" },
         { text: "Mở một chat chưa gán rồi nhờ AI đọc một file bất kỳ. Guard phải trả lời (đọc được, hoặc chặn kèm lý do bắt đầu bằng guard:). Nếu báo lỗi đường dẫn thì dừng lại, đừng gán chat, chạy lại test_guard.py." }
       ] },
@@ -25,16 +25,15 @@ window.CORESIMPLE_SESSIONS = {
         { text: "PIN và các chat đã gán nằm ngoài project, trong ~/.coresimple-guard (Windows: C:\\Users\\<bạn>\\.coresimple-guard). Mỗi máy đặt PIN riêng bằng lệnh:", command: "python .claude/hooks/bind_session.py --set-pin" }
       ] },
       { title: "4. Trang quản lý và Setup", steps: [
-        { text: "Mở trang qua server cục bộ để lưu được điểm, câu trả lời, tạo thread, và chấm ảnh concept. Server chỉ nghe trên 127.0.0.1, cổng 8770.", command: "python Management/tools/setup_server.py" },
+        { text: "Mở trang qua server cục bộ để lưu được điểm, câu trả lời, tạo thread, và chọn art game dùng (tab Studio). Server chỉ nghe trên 127.0.0.1, cổng 8770.", command: "python Management/tools/setup_server.py" },
         { text: "Setup full gồm cả các feature mà thiết kế live đã khai trong code.json, kể cả khi chưa có thư mục trong Unity: thread được tạo và gán ngay, và sửa được sau khi @Manager tạo thư mục (lệnh dưới, có --dry-run để xem trước).", command: "python Management/tools/scaffold.py" },
         { text: "Sau khi đổi luật hay guard: ở tab Setup, bảng \"Thread hiện có\" có nút \"Đọc lại quy trình\" cho từng thread và nút \"Đọc lại quy trình: tất cả\". Server chỉ báo cho thread các file luật của vai trò nó (CLAUDE.md gốc, luật chung, luật vai trò) đã đổi từ lần đọc trước, bằng một lượt ngầm (claude --resume); thread không có file nào đổi thì không chạy lượt nào, nên bấm \"tất cả\" chỉ tốn lượt ở thread cần đọc. Chat đang mở trong VS Code có thể chưa thấy lượt này: mở lại chat đó. Thread do Setup tạo mới được gán trước rồi nhận luôn câu này ở lượt đầu." },
         { text: "Cùng cột đó có hai nút nữa, mỗi nút cũng có bản \"tất cả\". Compact: server chạy /compact trong thread để nén ngữ cảnh; không cần PIN, không đổi quyền. Renew: làm mới thread ngay trong chat đó: bỏ toàn bộ ngữ cảnh cũ, gán lại đúng FEATURE đang gán, rồi nhắc đọc quy trình; cần PIN (ô PIN của tab Setup) vì có gán quyền. Renew tốn ba lượt ngắn; việc dở dang chưa ghi ra file sẽ mất, nên chỉ bấm khi thread đang rảnh. Tin nhắn cũ vẫn còn trong lịch sử chat (phía trên vạch compact) nhưng thread không còn nhớ chúng. \"Renew: tất cả\" hỏi lại một lần và chạy từng thread một; PIN sai thì dừng ngay." },
         { text: "Gom các thread theo tầng (1 · Master … 6 · Features) trong danh sách chat của VS Code: tắt hẳn VS Code (mọi cửa sổ), chạy lệnh trong terminal ngoài VS Code, rồi mở lại. VS Code đang chạy thì lệnh từ chối, vì nó sẽ ghi đè. Có sao lưu; khôi phục bằng --restore. Nơi extension lưu nhóm không có trong tài liệu; nếu bản cập nhật đổi cách lưu, lệnh dừng và báo, khi đó gom tay bằng chuột phải vào session.", command: "python Management/tools/vscode_groups.py" },
         { text: "Tạo thread cần lệnh claude (Claude Code CLI) có trong PATH. Thread đã lưu trữ trong VS Code được bỏ qua: server tự đọc trạng thái VS Code ở đúng chỗ của từng hệ (Windows: %APPDATA%\\Code, macOS: ~/Library/Application Support/Code, Linux: ~/.config/Code).", command: "claude --version" }
       ] },
-      { title: "5. Codex và Blender (cho @Codex, @Blender)", steps: [
-        { text: "studio.py gọi lệnh codex (Codex CLI, đã đăng nhập) và blender (chạy headless). Thiếu lệnh nào thì phiên tool phải đi đường dự phòng (blender MCP, unity-mcp; xem .claude/rules/studio.md). Kiểm tra:", command: "codex --version\nblender --version" },
-        { text: "Codex chỉ đọc vẫn sinh ảnh vào ~/.codex/generated_images; studio.py lấy đúng ảnh mới ở đó. Đường dẫn khác thì đặt biến CODEX_HOME." }
+      { title: "5. Codex, Blender và công cụ vẽ SVG", steps: [
+        { text: "@DesignAdvisor hỏi GPT qua lệnh codex (Codex CLI, đã đăng nhập). Worker vẽ art Simple: model 3D bằng blender chạy headless, ảnh bằng SVG đổi ra PNG (art.py svg, cần rsvg-convert, inkscape, magick, Chrome hoặc Edge). Kiểm tra:", command: "codex --version\nblender --version\ninkscape --version" }
       ] },
       { title: "6. Git", steps: [
         { text: "Đặt tên và email tác giả cho riêng repo này (không thêm --global nếu không muốn đổi cả máy):", command: "git config user.name \"<tên>\"\ngit config user.email \"<email>\"" },

@@ -48,7 +48,7 @@ Node có giao diện (popup, màn hình, HUD) viết `ui.md` cạnh `data.md`. B
 - Node có bố cục chiến trường (vị trí, tầm, khoảng cách: frame `kind: field`) không có `ui.md`: nêu số trong ý, nhắn @UIDesigner vẽ frame. Node không có bố cục thì khai `frame: none` ở phần đầu `data.md`.
 - `ui.md` không ghi kích thước, vị trí, màu. Thứ tự quan trọng nói bằng mức chính/phụ, không bằng toạ độ.
 - Xem frame đã có: `python Management/tools/gd_frame.py ai/idea/<node>`. Frame hay dùng số của node khác (`use`): node đó phải nằm trong refs.
-- Ảnh art-concept (Codex) không đặt cho node vòng 4. Feature có frame `kind: ui` phải có node `cheat` (xem mục "Node cheat"); ảnh art chỉ đặt ở đó.
+- Thiết kế không đặt ảnh: art do worker làm theo frame (GreyBox, Simple), Detail do người đưa vào (`CLAUDE.md` gốc, mục Art). Feature có frame `kind: ui` phải có node `cheat` (xem mục "Node cheat").
 
 ## Không cụ thể tới mức này (có chuyên gia riêng)
 - Giao diện tương tác: màu, kiểu dáng. Vị trí và kích thước chỉ nằm trong frame của @UIDesigner. Sai: "Nút có màu xanh".
@@ -67,8 +67,9 @@ Vòng 4 là vòng duy nhất được ghi dữ liệu theo giai đoạn, và ch�
 
 ## Mức IDEA là gì
 - Các tính năng đủ để thấy được gameplay.
-- Unit 2D: hiển thị được hình, sprite có nghĩa (ảnh @ClaudeImage vẽ là đủ); anim đơn giản bằng scale, move, rotate hoặc đổi màu.
-- Unit 3D: model low poly (làm qua blender mcp); anim cơ bản bằng scale, move, rotate, đổi màu.
+- Unit 2D: GreyBox (hình vuông tô màu) là đủ; anim đơn giản bằng scale, move, rotate hoặc đổi màu.
+- Unit 3D: GreyBox (box) là đủ; anim cơ bản bằng scale, move, rotate, đổi màu.
+- Art Simple, Detail không phải điều kiện của giai đoạn nào: game hiện mức tốt nhất đang có.
 
 ## Hỏi GPT
 Không hỏi GPT về node vòng 4 (người quyết 2026-11-27; `gd_advise.py` từ chối). Thông số và trường hợp biên là việc của bạn và của người.
@@ -80,7 +81,7 @@ Sổ yêu cầu chỉ giao việc code của một feature (cho worker) khi nhá
 Các mục: Làm gì, Thông số, Thông số theo giai đoạn, Trường hợp biên, Chưa rõ.
 
 ## Node cheat (`<feature>/cheat/`)
-Mỗi feature một node `cheat`. Không hỏi GPT về node cheat (người quyết 2026-11-26). Nó vừa là bộ state để phiên code dựng ngay khi test và Play (không phải chơi tới nơi), vừa là **chỗ duy nhất đặt ảnh art** của feature. Vì vậy mỗi feature tối đa 3 ảnh màu, còn các node vòng 4 cứ có frame thoải mái.
+Mỗi feature một node `cheat`. Không hỏi GPT về node cheat (người quyết 2026-11-26). Nó là bộ state để phiên code dựng ngay khi test và Play (không phải chơi tới nơi).
 - **Vị trí:** ngay dưới node feature, ở chỗ của vòng 3, không có node con. Luật vòng 3 không áp cho nó.
 - **Bắt buộc** khi feature có ít nhất một frame giao diện (`kind: ui`), kể cả feature hạ tầng. Thiếu thì mọi node vòng 4 có frame `ui` của feature mang lỗi cấu trúc, không chốt được. Feature chỉ có frame chiến trường (`kind: field`) không cần.
 - **`data.md`:** mỗi ý là một state, tối đa 3 ý.

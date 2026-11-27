@@ -1,3 +1,0 @@
-Đã lưu một ảnh [out/shot.png](D:/AI/CoreSimple/Management/studio/codex/orders/Castle/castle-sprites/work/out/shot.png). PNG 512×512, nền trong suốt hoàn toàn ngoài viên đạn, đường kính 300 px và viền `#1B2330` dày 14 px.
-
-Sprite được tạo bằng ImageGen theo mô tả viên đạn vàng cam, với mảng sáng và chấm trắng ở trên trái, mảng tối hình lưỡi liềm ở dưới phải. Khi thu xuống 32×32, viền và hai mảng sáng tối vẫn phân biệt được.

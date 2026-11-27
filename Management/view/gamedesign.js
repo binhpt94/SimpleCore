@@ -301,38 +301,7 @@
     ".gd-lightbox .gd-lightbox-svg { width: 96vw; }",
     ".gd-lightbox-close { position: fixed; top: 12px; right: 16px; font-size: 28px; line-height: 1; color: #fff; background: none; border: 0; cursor: pointer; }",
     ".gd-lightbox-cap { position: fixed; bottom: 12px; left: 0; right: 0; text-align: center; color: #eee; font-size: 13px; }",
-    ".gd-art { display: flex; flex-wrap: wrap; gap: 14px; }",
-    ".gd-art figure { margin: 0; width: 280px; }",
-    ".gd-art .gd-art-pic { position: relative; }",
-    ".gd-parts { margin: 6px 0; font-size: 12px; }",
-    ".gd-parts summary { cursor: pointer; color: var(--muted, inherit); }",
-    ".gd-part { display: flex; align-items: center; gap: 8px; margin: 4px 0; }",
-    ".gd-art .gd-part img { width: 56px; height: 40px; max-height: 40px; flex: none; }",
-    ".gd-art img { display: block; width: 100%; max-height: 200px; object-fit: contain; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; }",
-    ".gd-art .gd-art-label { position: absolute; top: 6px; left: 6px; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; background: var(--panel); color: var(--text); border: 1px solid var(--line); }",
-    ".gd-art .gd-art-label.stale { background: var(--bad); color: #fff; border-color: var(--bad); }",
-    ".gd-art .gd-art-label.wait { border-color: var(--accent); color: var(--accent); }",
-    ".gd-art .gd-art-label.ok { background: var(--ok); color: #fff; border-color: var(--ok); }",
-    ".gd-art .gd-art-anchor { position: absolute; top: 6px; right: 6px; padding: 2px 8px; border-radius: 10px; font-size: 12px; background: var(--accent); color: var(--panel); }",
-    ".gd-art figcaption { font-size: 12.5px; color: var(--muted); margin-top: 4px; }",
-    ".gd-art .gd-art-below { position: absolute; bottom: 6px; left: 6px; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; background: var(--bad); color: #fff; }",
-    ".gd-art .gd-inline { margin: 6px 0 0; }",
-    ".gd-art .gd-art-review { margin-top: 6px; }",
-    ".gd-art .gd-art-level { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; }",
-    ".gd-art .gd-art-saved { font-size: 12px; color: var(--muted); }",
-    ".gd-art input[type=range] { width: 100%; margin: 4px 0 0; accent-color: var(--accent); }",
     // Vạch nấc: lề 8px mỗi bên để vạch nằm đúng dưới tâm nút kéo (nút rộng ~16px).
-    ".gd-art .gd-art-ticks { display: flex; justify-content: space-between; padding: 0 8px; margin: 0 0 8px; }",
-    ".gd-art .gd-art-tick { width: 0; display: flex; flex-direction: column; align-items: center; cursor: pointer; font-size: 11px; color: var(--muted); white-space: nowrap; }",
-    ".gd-art .gd-art-tick i { display: block; width: 2px; height: 7px; background: var(--muted); border-radius: 1px; margin-bottom: 2px; }",
-    ".gd-art .gd-art-tick:first-child { align-items: flex-start; }",
-    ".gd-art .gd-art-tick:first-child span { margin-left: -8px; }",
-    ".gd-art .gd-art-tick:last-child { align-items: flex-end; }",
-    ".gd-art .gd-art-tick:last-child span { margin-right: -8px; }",
-    ".gd-art .gd-art-tick.on { color: var(--text, inherit); font-weight: 600; }",
-    ".gd-art .gd-art-tick.on i { background: var(--accent); height: 9px; }",
-    ".gd-art .gd-note { margin: 4px 0 0; font-size: 12.5px; }",
-    ".gd-art textarea { width: 100%; min-height: 54px; font: inherit; font-size: 13px; }",
     ".gd-styles { display: grid; gap: 12px; }",
     ".gd-style { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }",
     ".gd-style h4 { margin: 0 0 4px; }",
@@ -403,7 +372,7 @@
 
   // Bấm một ảnh (hoặc hình frame) để xem to: lớp phủ toàn màn, đóng bằng Esc, bấm nền hoặc nút ×.
   var lightbox = function (source, caption) {
-    addStyle();      // other tabs (Studio, Tham chiếu) call it before this tab was ever opened
+    addStyle();      // other tabs (Tham chiếu) call it before this tab was ever opened
     var box = document.createElement("div");
     box.className = "gd-lightbox";
     box.setAttribute("role", "dialog");
@@ -810,7 +779,7 @@
     };
     var NEED_KINDS = [
       { key: "clash", label: "Chọn ý" }, { key: "ask", label: "Trả lời" }, { key: "score", label: "Chấm ý" },
-      { key: "lock", label: "Chốt" }, { key: "art", label: "Duyệt ảnh" }
+      { key: "lock", label: "Chốt" }
     ];
     // Mọi việc của người: [{kind, node, feature, text, blocks, table}], việc chặn nhiều feature (đang khoá code) nhất
     // lên đầu. Một node một dòng, theo việc đứng trước trong NEED_KINDS. "Chặn": feature của node, cộng các feature
@@ -847,18 +816,6 @@
           push("lock", n, "đạt, chờ chốt · " + diffShort(n));
         }
       });
-      if (data.live) {
-        each(data.live, function (n) {
-          var seen = {}, count = 0;
-          (n.art || []).forEach(function (a) {
-            var k = (a.tool || "codex") + "/" + a.frame;
-            if (seen[k]) return;
-            seen[k] = true;
-            if (a.reviewable && a.level === null && !a.stale.length) count++;
-          });
-          if (count) push("art", n, count + " ảnh concept chưa duyệt", "live");
-        });
-      }
       var order = NEED_KINDS.map(function (k) { return k.key; });
       out.sort(function (a, b) {
         return b.blocks - a.blocks || order.indexOf(a.kind) - order.indexOf(b.kind) || (a.node.path < b.node.path ? -1 : a.node.path > b.node.path ? 1 : 0);
@@ -2551,8 +2508,7 @@
           add(body, el("p", "bad-text", "Node mới GPT đề xuất chưa được tạo: " + p.target + " · " + p.title));
         });
       }
-      if (node.cheat) add(body, el("p", "gd-gate ok", "Node cheat: mỗi ý là một state dựng nhanh ở bản dev để test và review. " +
-        "Đây là nơi duy nhất đặt ảnh art của feature (tối đa 3 state, mỗi state một frame và một ảnh)."));
+      if (node.cheat) add(body, el("p", "gd-gate ok", "Node cheat: mỗi ý là một state dựng nhanh ở bản dev để test và review."));
       renderPriority(body, node);
       renderProgress(body, node);
       renderRequirements(body, node);
@@ -2596,155 +2552,6 @@
           }
         });
       }
-      // Art và Claude concept: ảnh theo frame của node (order _design), nhãn tính từ hash node và hash style.
-      // Art: @Codex gen. Claude concept: @ClaudeImage tự vẽ SVG, studio.py đổi ra PNG (đủ cho giai đoạn IDEA).
-      [["codex", "Art (ảnh concept)", "@Codex"], ["claudeimage", "Claude concept (ảnh Claude vẽ, đủ cho giai đoạn IDEA)", "@ClaudeImage"]].forEach(function (kind) {
-      var artTool = kind[0], artChat = kind[2];
-      var arts = (node.art || []).filter(function (a) { return (a.tool || "codex") === artTool; });
-      var artPending = (data.artPending || []).filter(function (o) { return o.node === node.path && (o.tool || "codex") === artTool; });
-      if (arts.length || artPending.length) {
-        add(body, el("h3", "", kind[1]));
-        artPending.forEach(function (o) {
-          var line = put(body, el("div", "gd-inline"));
-          add(line, el("span", "", "Order " + o.ref + ": " + o.title + " · " + o.items.length + " ảnh · style " + (o.style || "?") +
-            (o.version ? " · " + artChat + " đang làm lại (bản đang hiện là v" + o.version + ", chấm sau khi có bản mới)" : " · chờ " + artChat + (artTool === "codex" ? " gen" : " vẽ"))));
-        });
-        var levels = data.artLevels || [];
-        var levelText = function (v) { return v === null ? (data.artLevelNone || "Chưa duyệt") : levels[v]; };
-        var latest = {};
-        arts.forEach(function (a) { if (!latest[a.frame]) latest[a.frame] = a; });
-        var gallery = put(body, el("div", "gd-art"));
-        Object.keys(latest).forEach(function (frame) {
-          var a = latest[frame];
-          var fig = put(gallery, el("figure"));
-          var holder = put(fig, el("div", "gd-art-pic"));
-          var pic = put(holder, el("img"));
-          pic.src = "../" + a.file.split("/").map(encodeURIComponent).join("/");
-          pic.alt = frame;
-          pic.loading = "lazy";
-          zoomable(pic, null, frame + " · v" + a.version + " · " + a.label);
-          // Claude concept không ai chấm: nhãn chỉ nói đã giao, chờ ghép lại, hay cần vẽ lại.
-          var kindOf = function (v) {
-            if (artTool === "claudeimage") return a.stale.length ? "stale" : a.reglue ? "wait" : "ok";
-            return a.stale.length ? "stale" : v === null ? "wait" : v === 0 ? "stale" : v === 3 ? "ok" : "";
-          };
-          var tag = put(holder, el("span", "gd-art-label " + kindOf(a.level), a.label));
-          if (a.anchor) add(holder, el("span", "gd-art-anchor", "mốc"));
-          if (a.below) add(holder, el("span", "gd-art-below", "chưa chuẩn"));
-          add(fig, el("figcaption", "", frame + " · v" + a.version + " · " + a.ref + (a.styles.length ? " · style " + a.styles.join(", ") : "") +
-            (a.below ? " · " + artChat + " tự kiểm chưa đạt: " + a.below : "")));
-          // Claude concept: bảng phần (hình) của frame: kích thước, 9-slice, dùng ở mấy hình, lấy lại từ node nào.
-          if (a.parts && a.parts.length) {
-            var partBox = put(fig, el("details", "gd-parts"));
-            var sliced = a.parts.filter(function (p) { return p.slice; }).length;
-            var shared = a.parts.filter(function (p) { return p.shapes.length > 1; }).length;
-            add(partBox, el("summary", "", a.parts.length + " phần · 9-slice: " + sliced + " · dùng nhiều chỗ: " + shared));
-            a.parts.forEach(function (p) {
-              var row = put(partBox, el("div", "gd-part"));
-              var thumb = put(row, el("img"));
-              thumb.src = "../" + p.file.split("/").map(encodeURIComponent).join("/");
-              thumb.alt = p.id;
-              thumb.loading = "lazy";
-              zoomable(thumb, null, p.id + " · " + p.w + "x" + p.h + "px");
-              add(row, el("span", "", p.id + " · " + p.w + "x" + p.h + "px · " +
-                (p.slice ? "9-slice viền " + p.slice.join("/") : "không 9-slice") + " · " + p.shapes.length + " hình (" + p.shapes.join(", ") + ")" +
-                (p.from ? " · lấy lại từ " + p.from.node + "#" + p.from.part : "")));
-            });
-          } else if (a.parts) {
-            add(fig, el("p", "gd-note", "Frame này không có phần nào phải vẽ (chỉ có chữ, nét đo hoặc hình của node khác)."));
-          }
-          if (!a.reviewable) {
-            if (a.redoing) add(fig, el("p", "gd-note", artChat + " đang làm lại ảnh này và chưa giao bản mới." +
-              (artTool === "claudeimage" ? "" : " Thanh chấm hiện khi có bản giao mới.")));
-            if (a.feedback) add(fig, el("p", "gd-note", "Phản hồi đã ghi: " + a.feedback));
-            return;
-          }
-          // Chấm: một thanh trượt 5 nấc (nấc trái cùng = chưa duyệt) và một ô phản hồi; lưu ngay, không có nút gửi.
-          // Trang chỉ lưu. @GameDesigner đọc giá trị này khi bạn bảo nó cho làm lại.
-          var box = put(fig, el("div", "gd-art-review"));
-          var head = put(box, el("div", "gd-art-level"));
-          var name = put(head, el("strong", "", levelText(a.level)));
-          var saved = put(head, el("span", "gd-art-saved", ""));
-          var slider = put(box, el("input"));
-          slider.type = "range"; slider.min = "0"; slider.max = String(levels.length); slider.step = "1";
-          slider.value = String(a.level === null ? 0 : a.level + 1);
-          slider.setAttribute("aria-label", "Mức chấm ảnh " + frame);
-          // Nấc: 5 vạch có tên ngắn ngay dưới thanh trượt, bấm vào vạch cũng chọn được mức đó.
-          var ticks = put(box, el("div", "gd-art-ticks"));
-          ticks.setAttribute("aria-hidden", "true");
-          var tickEls = ["Chưa duyệt", "Làm lại", "Lỗi, để sau", "Phần lớn", "Đạt"].slice(0, levels.length + 1).map(function (label, i) {
-            var t = put(ticks, el("span", "gd-art-tick"));
-            add(t, el("i", ""), el("span", "", label));
-            t.title = i === 0 ? levelText(null) : levels[i - 1];
-            t.addEventListener("click", function () {
-              if (slider.disabled || slider.value === String(i)) return;
-              slider.value = String(i); paint(); save();
-            });
-            return t;
-          });
-          var note = put(box, el("textarea"));
-          note.placeholder = "Phản hồi (không bắt buộc; cần có khi muốn gen lại)";
-          note.value = a.feedback || "";
-          note.setAttribute("aria-label", "Phản hồi cho ảnh " + frame);
-          var hint = put(box, el("p", "gd-note", ""));
-          var anchorBox = put(box, el("div", "gd-inline"));
-          var current = function () { var n = parseInt(slider.value, 10); return n === 0 ? null : n - 1; };
-          var paint = function () {
-            var v = current();
-            name.textContent = levelText(v);
-            tickEls.forEach(function (t, i) { t.className = "gd-art-tick" + (String(i) === slider.value ? " on" : ""); });
-            tag.textContent = a.stale.length ? a.label : levelText(v);
-            tag.className = "gd-art-label " + kindOf(v);
-            hint.textContent = v === 0 && !note.value.trim() ? "Cần phản hồi thì " + artChat + " mới làm lại được ảnh này." :
-              v === 0 ? "Bảo @GameDesigner cho làm lại: " + artChat + " làm lại ảnh này 1 lượt theo phản hồi." :
-              v === 1 ? "Dùng tạm, ghi vào nợ art (tab Studio)." : "";
-            anchorBox.textContent = "";
-            if (artTool === "codex" && v === 3 && a.level === 3 && !a.stale.length) {
-              add(anchorBox, button(a.anchor ? "Bỏ mốc" : "Đặt làm mốc style", function () {
-                send("/api/studio/anchor", { ref: a.ref, item: a.frame }, function (res) { return res.message || "Đã đổi mốc."; });
-              }));
-            }
-          };
-          var timer = null, sent = null;
-          var save = function () {
-            if (timer) { clearTimeout(timer); timer = null; }
-            var body = { ref: a.ref, item: a.frame, level: current(), text: note.value.trim() };
-            var key = JSON.stringify(body);
-            if (key === sent) return;
-            sent = key;
-            saved.textContent = "đang lưu…";
-            api("POST", "/api/studio/review", body).then(function (res) {
-              if (!res.ok) { sent = null; saved.textContent = "CHƯA LƯU: " + res.error; saved.className = "gd-art-saved bad-text"; return; }
-              data = res.data;                         // không vẽ lại trang: giữ con trỏ trong ô phản hồi
-              if (res.studio) window.CORESIMPLE_STUDIO = res.studio;
-              a.level = body.level; a.feedback = body.text;
-              saved.className = "gd-art-saved";
-              saved.textContent = "đã lưu";
-              paint();
-            }, function (e) { sent = null; saved.textContent = "CHƯA LƯU: " + e.message; saved.className = "gd-art-saved bad-text"; });
-          };
-          sent = JSON.stringify({ ref: a.ref, item: a.frame, level: a.level, text: (a.feedback || "").trim() });
-          if (!ctx.setup) {
-            slider.disabled = true; note.disabled = true;
-          } else {
-            slider.addEventListener("input", paint);
-            slider.addEventListener("change", save);
-            note.addEventListener("input", function () { paint(); saved.textContent = ""; if (timer) clearTimeout(timer); timer = setTimeout(save, 1000); });
-            note.addEventListener("blur", save);
-          }
-          paint();
-        });
-        var owed = ((window.CORESIMPLE_STUDIO || {}).debts || []).filter(function (d) {
-          return d.state === "open" && (d.tool || "codex") === artTool && d.owner === "_design/" + node.path.split("/").join(".");
-        });
-        if (owed.length) add(body, el("p", "bad-text", owed.length + " phiếu nợ art đang mở cho node này (" +
-          owed.map(function (d) { return d.id + " " + d.item; }).join(", ") + "): xem tab Studio."));
-        var older = arts.filter(function (a) { return latest[a.frame] !== a; });
-        if (older.length) add(body, el("p", "gd-note", older.length + " bản cũ hơn vẫn giữ trong Resources (không ghi đè)."));
-        if (artTool === "claudeimage") add(body, el("p", "gd-note", "Claude concept không cần duyệt. Frame đổi mà phần còn vừa thì chỉ chờ ghép lại; chỉ khi phải vẽ hình mới nó mới mang nhãn CẦN LÀM LẠI, và vẽ lại cần lệnh của một Leader (studio.py redo)."));
-        else if (!ctx.setup) add(body, el("p", "gd-note", "Chấm ảnh và đặt mốc cần mở trang qua server Setup (python Management/tools/setup_server.py)."));
-      }
-      });
       // Frame: bố cục dạng chữ trong .frame-concept, đã được gamedesign.py giải số và vẽ sẵn thành SVG.
       if (node.ui) {
         add(body, el("h3", "", "UI cần có (ui.md, của @GameDesigner)"));
@@ -2774,7 +2581,6 @@
       if (node.frames && node.frames.length || node.frameNotes && node.frameNotes.length || node.frameNone) {
         add(body, el("h3", "", "Frame (bố cục của @UIDesigner)"));
         if (node.frameNone) add(body, el("p", "gd-note", "Node này không có bố cục (frame: none)."));
-        if (node.frames && node.frames.length && !node.cheat) add(body, el("p", "gd-note", "Ảnh art không đặt ở đây: order art chỉ đặt ở node cheat của feature."));
         (node.frameNotes || []).forEach(function (t) { add(body, el("p", "gd-note", t)); });
         if (node.frames && node.frames.length) {
           var tabs = node.frames.length > 1 ? put(body, el("div", "gd-frame-tabs")) : null;
@@ -2902,5 +2708,5 @@
 
   window.CORESIMPLE_VIEWS = window.CORESIMPLE_VIEWS || {};
   window.CORESIMPLE_VIEWS.gamedesign = build;
-  window.CORESIMPLE_VIEWS.lightbox = lightbox;      // dùng chung với tab Studio
+  window.CORESIMPLE_VIEWS.lightbox = lightbox;      // dùng chung với tab Tham chiếu
 })();

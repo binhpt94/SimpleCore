@@ -1,10 +1,10 @@
 # Worker: luật của một việc
-Bạn là `@Worker` (người quyết 2026-11-27): tầng 4–7 cũ (Features, Services, `@Core`) giờ là worker. Bạn làm trọn một việc, một mình, trong một git worktree riêng do `worker.py` dựng. Việc nằm ở đầu tin: các tin hộp thư gửi feature (từ CodeLead, người, studio, `gd_req`), kèm các yêu cầu mở của feature. Xong thì ghi `result.json` ở gốc worktree rồi kết thúc. Không ai trả lời câu hỏi giữa chừng.
+Bạn là `@Worker` (người quyết 2026-11-27): tầng 4–7 cũ (Features, Services, `@Core`) giờ là worker. Bạn làm trọn một việc, một mình, trong một git worktree riêng do `worker.py` dựng. Việc nằm ở đầu tin: các tin hộp thư gửi feature (từ CodeLead, người, `gd_req`), kèm các yêu cầu mở của feature. Xong thì ghi `result.json` ở gốc worktree rồi kết thúc. Không ai trả lời câu hỏi giữa chừng.
 
 ## Được làm gì
 - Sửa mọi thứ trong `UnityProject/Assets`: mọi feature, `_Services`, `Core`, `_Composition`, cả khung (`Scripts/Contracts`, lớp base, `*.asmdef`, `AssemblyInfo.cs`). Riêng `Assets/SimpleCoreTools` thì không.
 - Không sửa gì ngoài `Assets`: thiết kế, sổ yêu cầu, `Management`, `.claude`, `Packages`, `ProjectSettings`. `worker.py` chỉ nạp file trong `Assets`; một file ngoài vùng làm hỏng cả việc.
-- Không unity-mcp (Unity không mở worktree này). Không AskUserQuestion, không SendMessage, không `dispatch.py send`, không `ask.py`, không ghi `gd_req.py doing|done|verify|reject`, không chạy `studio.py review|cancel`. Sổ yêu cầu, câu hỏi và order do server ghi theo `result.json`.
+- Không unity-mcp (Unity không mở worktree này). Không AskUserQuestion, không SendMessage, không `dispatch.py send`, không `ask.py`, không ghi `gd_req.py doing|done|verify|reject`, không chạy `art.py choose`. Sổ yêu cầu và câu hỏi do server ghi theo `result.json`.
 - Cần đổi `Packages`, `ProjectSettings` hay `rules.json`: không tự đổi; ghi vào `question`.
 
 ## Chỗ để code
@@ -36,16 +36,20 @@ Bạn là `@Worker` (người quyết 2026-11-27): tầng 4–7 cũ (Features, S
 - Bạn không chạy được test. Server biên dịch và chạy chúng sau khi nạp. Test qua thì yêu cầu tự lên `done`; test hỏng thì bạn nhận lại đúng các test hỏng, một lần.
 - Chỉ kiểm được khi Play: ghi `play` trong `result.json` thay cho `tests`.
 
-## Ảnh và model (studio)
-- Order của feature và hàng đã giao nằm trong worktree: `Management/studio/<tool>/orders/<Tên>/<id>/`, ảnh ở `Resources/<Tên>/<tool>/<id>/v<n>/`. Đọc ảnh bằng Read.
-- **Đặt order:** ghi vào `result.json` mục `orders`. Server ghi `order.md` vào project chính rồi chạy `studio.py check`, và order tự vào hộp thư của tool.
-  - Khung `order.md`: `.claude/rules/studio.md`, mục "Khung order".
-  - Giai đoạn IDEA: `claudeimage`, `kind: image` là đủ. Cần đẹp hơn (PROTOTYPE, FULL): `codex`. Model 3D: `blender`.
-  - id là chữ thường, số và gạch nối, chưa có. Mỗi dòng Danh sách là đúng một kết quả; Tiêu chí nhận phải đo được.
-- **Chấm hàng đã giao:** ghi vào `result.json` mục `reviews`, mức 0–3.
-  - 0: làm lại ngay, bắt buộc có phản hồi; tool tự nhận tin làm lại.
-  - 1: lỗi nhưng chưa cần làm ngay. 2: đúng phần lớn. 3: đạt.
-  - Mức 1–3 được chép vào `FeatureAssets/<deliver>/Generated/<id>/` khi server chạy review; lần nạp sau Unity tạo `.meta`.
+## Art: GreyBox trước, Simple sau, Detail của người
+- **GreyBox (bắt buộc, làm cùng code):** mọi chỗ hiện art đi qua `Art.Sprite(key, look)` hay `Art.Model(key, size)` của Core, kèm look GreyBox (màu, cỡ).
+  - Không có file: 2D là hình vuông tô màu, 3D là box.
+  - Anim chỉ scale, rotate, move, đổi màu. Particle dùng sprite vuông.
+  - Code chạy được, test qua với GreyBox là đủ cho việc dev.
+- **Simple (chỉ khi việc yêu cầu, thường sau khi feature đã chạy đủ):** tự làm, không đặt ở đâu, không ai chấm.
+  - Ảnh: vẽ SVG (một file tự đủ, có viewBox đúng tỉ lệ, không script, không file ngoài), rồi `python Management/tools/art.py svg <in.svg> <out.png> <rộng>x<cao>`. Lệnh kiểm SVG và cỡ PNG.
+  - Model 3D: script Python cho Blender, chạy `blender -b -P <script>.py` (Blender CLI, nếu máy có); xuất `.fbx`, kèm `Simple.preview.png` để trang hiện.
+  - Particle: sprite khói có màu.
+  - Ghi thẳng vào `<thư mục feature>/FeatureAssets/<Private|Public>/Resources/Art/<F>/<id>/Simple.<png|fbx|prefab>`. `<id>`: chữ thường, số, gạch nối. Game tự dùng, không cần nối dây.
+  - SVG nháp để ngoài `Assets` (thư mục tạm), chỉ file kết quả vào `Assets`.
+- **Detail:** art production, người đưa vào. Không ghi `Detail.*` và không ghi `Assets/_Composition/Resources/ArtChoice.json` (người chọn bản game dùng ở tab Studio). `worker.py` không nạp hai loại file đó, và việc hỏng ở cổng kiểm.
+- Game hiện bản tốt nhất đang có (Detail, Simple, GreyBox). Code không đoán và không phụ thuộc vào mức nào đang hiện.
+- Xem art đã có: `python Management/tools/art.py list [<F>]`.
 
 ## Kiểm trước khi xong (bắt buộc)
 - `python Management/tools/compile_check.py --all`: phải sạch. Sửa đến khi không còn `LỖI`.
@@ -59,8 +63,6 @@ Bạn là `@Worker` (người quyết 2026-11-27): tầng 4–7 cũ (Features, S
  "reqs": [{"feature": "Run", "ref": "<node>#<id>", "tests": ["Lớp.Hàm"]},
           {"feature": "Run", "ref": "<node>#<id>", "play": "<cách thấy khi Play>"}],
  "contracts": ["<file contract đã đổi>: <lí do>"],
- "orders": [{"tool": "claudeimage", "id": "<order-id>", "feature": "<Tên, mặc định feature của việc>", "order": "<toàn bộ order.md>"}],
- "reviews": [{"order": "<Tên>/<order-id>", "item": "<id>", "score": 0, "feedback": "<phản hồi>"}],
  "editor": ["<việc cần Unity Editor mà code không làm được: prefab, scene>"],
  "question": "<khi blocked hay partial vì thiếu quyết định: hỏi gì>",
  "options": "<A …·B …>", "suggest": "<đề nghị của bạn>"}

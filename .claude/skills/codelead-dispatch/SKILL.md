@@ -12,6 +12,7 @@ Từ 2026-11-27 (người quyết) tầng dưới là worker: feature, service, 
    - thứ tự hay trọng tâm (ví dụ "làm các yêu cầu của run-score trước");
    - việc xuyên feature: giao **một lần** cho feature chính, nêu đủ các feature bị kéo theo và contract cần đổi. Worker sửa hết trong cùng việc; không chia nhỏ ra nhiều tin;
    - việc người đã quyết mà sổ không có id: "người quyết ngày <ngày>: <câu quyết định>".
+   - **Art Simple:** feature đã chạy đủ bằng GreyBox (yêu cầu của giai đoạn đang làm đã kiểm qua) thì giao một việc `Làm art Simple <F> · <các art, cỡ>`; worker tự vẽ (`.claude/rules/worker.md`, mục Art). Không ai chấm; Detail là của người.
    - Feature ĐƯỢC CODE mà chưa có thư mục hay khung: dựng khung trước (skill `codelead-scaffold-feature`), hoặc giao luôn cho worker dựng (nó sửa được asmdef, Contracts).
 3. **Gửi cùng lúc** mọi tin trong một lượt: `python Management/tools/dispatch.py send <tên> --from CodeLead "<việc>"`, nối tối đa 6 lệnh bằng `;` trong một lần gọi. Tin vượt 3 việc cùng lúc nằm chờ; server tự chạy sau. Tin gửi một feature đang có việc chạy thì thành việc kế tiếp của nó.
    - `dispatch.py send` báo **SERVER TẮT** (lỗi 3): tin đã lưu, chưa ai giao. Ngừng giao thêm và nhắn `Manager` BÁO CHẶN (chờ người bật server).
@@ -31,11 +32,10 @@ Từ 2026-11-27 (người quyết) tầng dưới là worker: feature, service, 
 - @GameDesigner, @UIDesigner tự giao đợt xác nhận hẹp bằng hộp thư (`XÁC NHẬN · Feature: … · Thao tác: … · Mong đợi: … · Scene hoặc state cheat: …`). @Manager không giao.
 
 ## Khi unity-mcp mất kết nối
-Không giao việc mới cho worker hay tester cho tới khi unity-mcp kết nối lại (worker vẫn chạy được, nhưng lượt nạp và lô test của server cần Unity). Chỉ sửa lỗi biên dịch đang chặn: `python Management/tools/compile_check.py --all`, sửa (`codelead.md`, quyền sửa code feature), rồi `refresh_unity`. Việc thiết kế, frame, order ảnh của Leader khác không bị ảnh hưởng.
+Không giao việc mới cho worker hay tester cho tới khi unity-mcp kết nối lại (worker vẫn chạy được, nhưng lượt nạp và lô test của server cần Unity). Chỉ sửa lỗi biên dịch đang chặn: `python Management/tools/compile_check.py --all`, sửa (`codelead.md`, quyền sửa code feature), rồi `refresh_unity`. Việc thiết kế, frame của Leader khác không bị ảnh hưởng.
 
 ## Câu hỏi, chỗ chặn
 - Worker không nhắn bạn và không BÁO CHẶN: câu hỏi của nó vào thẳng `ask.py` (Manager hỏi người). Bạn thấy nó ở dòng "Cần bên khác" của báo cáo.
-- Tool (@Codex, @Blender, @ClaudeImage) bị chặn ở order của feature vẫn nhắn bạn `BÁO CHẶN · …`. Tự quyết được thì trả lời bằng `dispatch.py send <tool> --from CodeLead "TRẢ LỜI · <việc> · …"`; không thì hỏi người qua Manager (`ask.py add --from CodeLead …`, rồi `HỎI NGƯỜI · <id>`).
 - Cần sửa `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json` (worker ghi trong câu hỏi): hỏi người qua Manager, từng lần (`ask.py add … --options "<đúng đường dẫn và thay đổi>"`). Người cho phép thì bạn tự sửa, rồi giao worker chạy tiếp.
 - Chỉ người gỡ được (guard, quyền, công cụ, server tắt): nhắn `Manager` một tin BÁO CHẶN gom các chỗ đó. Trong lúc chờ, giao việc không phụ thuộc cho feature khác.
 - Không trả lời tin "đã nhận", "cảm ơn".

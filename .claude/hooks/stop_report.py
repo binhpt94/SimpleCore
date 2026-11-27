@@ -4,8 +4,7 @@
 Applies to the groups Basic (@Core), Features and Services, to @CodeLead (it edits the skeleton and _Composition) and
 to @GameDesigner (it edits the design tree: @Manager must know when it is done and what waits for the human) and
 to the testers (@UnityAutoPlay: a turn that wrote a test run reports where it is and what it found).
-Not to @human, @Manager (it edits nothing), @DesignAdvisor (its work is the advice files), the tool chats
-@Codex, @Blender and @ClaudeImage (studio.py keeps their history) or unbound chats.
+Not to @human, @Manager (it edits nothing), @DesignAdvisor (its work is the advice files) or unbound chats.
 @CodeLead and @Manager are both shown new reports (bind_session.py).
 "Changed files" = an Edit/Write/MultiEdit/NotebookEdit, or a unity-mcp call that changes something (an asset, the
 open scene, a prefab stage, project settings: guard.unity_changes; also inside batch_execute), after the human's last prompt,
@@ -219,7 +218,7 @@ def main(argv):
             root, store = os.path.abspath(argv[2]), argv[4]
         raw = guard.session_feature(data.get("session_id"), store).strip().replace("\\", "/")
         role = guard.role_of(raw)
-        if role in ("@human", "@Manager", "@DesignAdvisor", guard.WORKER_ROLE) or role in guard.TOOL_ROLES or not (role or guard.valid_feature(raw, root)):
+        if role in ("@human", "@Manager", "@DesignAdvisor", guard.WORKER_ROLE) or not (role or guard.valid_feature(raw, root)):
             return 0
         who = role or raw
         pending = pending_path(data.get("session_id"), store)

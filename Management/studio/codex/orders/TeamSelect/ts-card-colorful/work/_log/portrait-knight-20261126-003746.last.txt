@@ -1,1 +1,0 @@
-Đã tạo một ảnh `portrait-knight.png`, PNG 240 × 200 px, nền trong suốt, không chữ. Ảnh được tạo bằng ImageGen và hiển thị trong cuộc trò chuyện. Thư mục `work` chỉ cho phép đọc nên ảnh chưa được lưu trực tiếp vào đó.

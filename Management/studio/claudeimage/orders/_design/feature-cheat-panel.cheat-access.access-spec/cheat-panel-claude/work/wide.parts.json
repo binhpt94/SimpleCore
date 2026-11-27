@@ -1,8 +1,0 @@
-{"parts": [
-  {"id": "panel", "w": 1840, "h": 880, "slice": null, "shapes": ["cheat-panel"]},
-  {"id": "list-bg", "w": 1760, "h": 728, "slice": [32, 32, 32, 32], "shapes": ["state-list"]},
-  {"id": "more-rows", "w": 1760, "h": 312, "slice": null, "shapes": ["more-rows"]},
-  {"id": "normal-row", "w": 1760, "h": 120, "slice": null, "shapes": ["normal-row"]},
-  {"id": "state-row", "w": 872, "h": 120, "slice": null, "shapes": ["state-row", "next-row"]},
-  {"id": "cheat-btn", "w": 160, "h": 96, "slice": null, "shapes": ["cheat-button"]}
-]}

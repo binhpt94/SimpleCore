@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" width="140" height="140">
-  <!-- khung nut chung: bong cung lech xuong 8 px, nen xanh duong, vien den 6 px, bo 20 -->
-  <rect x="3" y="11" width="134" height="126" rx="20" fill="#000000"/>
-  <rect x="3" y="3" width="134" height="126" rx="20" fill="#2F6FD6" stroke="#000000" stroke-width="6"/>
-  <!-- tia set vang o giua nua tren (y 14-80) -->
-  <polygon points="80,14 50,52 67,52 56,80 92,38 74,38 86,14" fill="#FFD60A" stroke="#000000" stroke-width="4" stroke-linejoin="round"/>
-</svg>

@@ -1,1 +1,0 @@
-Đã lưu một sprite PNG 256 × 384 tại [out/hero-knight.png](D:/AI/CoreSimple/Management/studio/codex/orders/Hero/hero-sprites/work/out/hero-knight.png). Hiệp sĩ quay phải, nền alpha 0, chân cách mép dưới 5 px. Mũ có thêm chùm lông xanh.

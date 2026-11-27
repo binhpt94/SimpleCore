@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 114" width="1920" height="114">
-  <!-- dai doi xanh tham dung tren mep duoi; tren duong doi trong suot; hai mep cung do cao y=60 de noi lien -->
-  <path d="M0 114 L0 60 Q120 22 240 50 Q360 14 480 46 Q600 24 720 56 Q840 16 960 48 Q1080 20 1200 52 Q1320 12 1440 46 Q1560 26 1680 54 Q1800 22 1920 60 L1920 114 Z" fill="#3F7650"/>
-  <path d="M0 60 Q120 22 240 50 Q360 14 480 46 Q600 24 720 56 Q840 16 960 48 Q1080 20 1200 52 Q1320 12 1440 46 Q1560 26 1680 54 Q1800 22 1920 60" fill="none" stroke="#1F3A28" stroke-width="3" stroke-linejoin="round"/>
-  <!-- lop doi gan hon, cung mau tham hon; hai mep cung y=88 -->
-  <path d="M0 114 L0 88 Q80 70 160 84 Q240 66 320 86 Q400 70 480 84 Q560 66 640 86 Q720 70 800 84 Q880 66 960 86 Q1040 70 1120 84 Q1200 66 1280 86 Q1360 70 1440 84 Q1520 66 1600 86 Q1680 70 1760 84 Q1840 68 1920 88 L1920 114 Z" fill="#33643F"/>
-</svg>

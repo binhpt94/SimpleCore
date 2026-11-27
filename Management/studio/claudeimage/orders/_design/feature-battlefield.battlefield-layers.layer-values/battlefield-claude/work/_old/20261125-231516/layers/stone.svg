@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="120" height="60">
-  <!-- da phang nam sat dat; vien toi 4 px; mang sang tren trai, bong hai bac -->
-  <path d="M6 58 Q8 26 40 16 Q76 6 102 24 Q116 36 114 58 Z" fill="#9AA3AD" stroke="#2A2F36" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M20 40 Q24 26 44 22 Q62 18 70 24 Q50 28 36 42 Z" fill="#C6CDD4"/>
-</svg>

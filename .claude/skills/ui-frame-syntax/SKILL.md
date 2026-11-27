@@ -43,7 +43,7 @@ Nút (hay khung) có viền, bóng, aura, hoa văn góc thì `x y w h` là **rec
 
 Tool tự tính (in ở `gd_frame.py`, `gd_pack.py`; ảnh `.measure.png` vẽ nét đứt):
 - **vùng chạm** = mặt + viền (không gồm bóng, aura): cỡ bấm tối thiểu đo trên rect này; phần thừa ra ngoài mặt là raycast padding của nút.
-- **rect dùng** = mọi thứ được vẽ (ảnh sau khi trim): ảnh claude-concept của phần tử đứng ở rect này; pivot ảnh = tâm cảm nhận trong rect dùng.
+- **rect dùng** = mọi thứ được vẽ (ảnh sau khi trim): ảnh art của phần tử đứng ở rect này; pivot ảnh = tâm cảm nhận trong rect dùng.
 - **an toàn max X** (rộng hết mặt, thụt trên dưới theo `cut`), **an toàn max Y** (cao hết mặt, thụt trái phải), **an toàn trong** (thụt cả hai). Cả ba cùng tâm với rect cảm nhận. Chữ đạt khi lọt max X hoặc max Y; cỡ chữ mặc định chọn theo an toàn trong.
 - Cảnh báo: vùng chạm của hai nút chồng nhau, aura hoặc bóng đè lên hình cùng cấp (cờ `overlap` nếu cố ý), vùng chạm tràn màn. Lỗi: `cut` chiếm hết mặt, số sai dạng.
 - Khoảng cách giữa các nút (thang 8/16/24/40/64) vẫn đo giữa các rect cảm nhận.

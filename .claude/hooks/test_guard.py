@@ -203,7 +203,6 @@ def run_cases():
     sh("@UnityAutoPlay", "allow", "ls UnityProject/Assets/Features/Shop/Scripts/Internal")
     sh("@UnityAutoPlay", "allow", "ls Tester/UnityAutoPlay/Archive")
     sh("@CodeLead", "deny", "ls Tester/UnityAutoPlay/Archive")
-    sh("@Codex", "deny", "ls Tester")
     sh("", "allow", "ls Management/tools")
 
     # ---- shell and other tools
@@ -212,7 +211,7 @@ def run_cases():
 
     g = "tools"
     # unknown tools pass (human decided 2026-11-26): a subagent hands back its result, a lead reads its tasks
-    for who in (W, "@CodeLead", "@Manager", "@Core", "@UnityAutoPlay", "@Codex", "@GameDesigner", ""):
+    for who in (W, "@CodeLead", "@Manager", "@Core", "@UnityAutoPlay", "@GameDesigner", ""):
         for tool in ("SubagentHandback", "TaskOutput", "TaskStop", "ScheduleWakeup", "SomeNewTool"):
             t(g + " (unknown tools pass)", who, "pass", tool, {"result": "x"})
 
@@ -296,7 +295,6 @@ def run_cases():
     run_progress_cases()
     run_req_cases()
     run_unity_cases()
-    run_tool_cases()
     run_tester_cases()
     run_inbox_cases()
     run_unity_leader_cases()
@@ -309,7 +307,7 @@ def run_cases():
 
 
 def run_uidesigner_cases():
-    """@UIDesigner lays the UI out: reads like @GameDesigner (design tree, studio, its rules and the designer's), writes
+    """@UIDesigner lays the UI out: reads like @GameDesigner (design tree, references, its rules and the designer's), writes
     frames only (the write gate is tested with @GameDesigner's), runs gd_status, gd_frame, deletes its frames, chains
     commands and may ask the tester to act one thing out, like the other Leaders; no unity-mcp, no code."""
     U = "@UIDesigner"
@@ -317,23 +315,22 @@ def run_uidesigner_cases():
     idea = base + "/ai/idea"
     os.makedirs(idea + "/feature-hero", exist_ok=True)
     g = "uidesigner: reads the design, its rules, never the code"
-    for p in (idea + "/feature-hero/data.md", base + "/live/data.md", FX + "/Management/studio/claudeimage/lessons.md",
+    for p in (idea + "/feature-hero/data.md", base + "/live/data.md", FX + "/Management/references/a.png",
               FX + "/.claude/rules/uidesigner.md", FX + "/.claude/rules/gamedesigner.md",
               FX + "/.claude/skills/ui-frame-syntax/SKILL.md", FX + "/.claude/skills/ui-frame-syntax/button-rects.png",
-              FX + "/.claude/skills/gd-round-4/SKILL.md", FX + "/.claude/skills/ui-layout-screen/SKILL.md",
-              FX + "/.claude/skills/ui-claude-concept-order/SKILL.md"):
+              FX + "/.claude/skills/gd-round-4/SKILL.md", FX + "/.claude/skills/ui-layout-screen/SKILL.md"):
         r(g, U, "allow", p)
     for p in (F + "/Wallet/Scripts/Internal/W.cs", FX + "/.claude/rules/codelead.md", FX + "/Management/tools/guard.py",
               FX + "/.claude/skills/gd-round-1/SKILL.md", FX + "/.claude/skills/codelead-scaffold-feature/SKILL.md",
-              FX + "/.claude/skills/studio-claude-concept/SKILL.md", FX + "/.claude/skills/ui-frame-syntax",
+              FX + "/.claude/skills/advisor-ask-gpt/SKILL.md", FX + "/.claude/skills/ui-frame-syntax",
               FX + "/.claude/skills/ui_x/SKILL.md", FX + "/.claude/rules/ui-frame-syntax/SKILL.md"):
         r(g + " (of the skills only its own)", U, "deny", p)
     for p in (FX + "/.claude/skills/ui-frame-syntax/SKILL.md", FX + "/.claude/skills/new-skill/SKILL.md"):
         w(g + " (the skills are the human's)", U, "deny", p)
     g = "skills: every other bound chat reads them, none writes them"
-    for who in ("Wallet", "@Core", "@CodeLead", "@Manager", "@Codex", "@ClaudeImage", "@UnityAutoPlay"):
-        r(g, who, "allow", FX + "/.claude/skills/studio-claude-concept/SKILL.md")
-        w(g, who, "deny", FX + "/.claude/skills/studio-claude-concept/SKILL.md")
+    for who in ("Wallet", "@Core", "@CodeLead", "@Manager", "@UnityAutoPlay"):
+        r(g, who, "allow", FX + "/.claude/skills/advisor-ask-gpt/SKILL.md")
+        w(g, who, "deny", FX + "/.claude/skills/advisor-ask-gpt/SKILL.md")
     g = "uidesigner: commands"
     for cmd in ("python Management/tools/gd_status.py", "python Management/tools/gd_status.py ai/idea/feature-hero",
                 "python Management/tools/gd_status.py --brief", "python Management/tools/gd_status.py ai/idea/feature-hero --brief",
@@ -376,7 +373,7 @@ def run_uidesigner_cases():
 
 
 def run_advisor_cases():
-    """@DesignAdvisor asks GPT about the design: reads the design tree, the studio, the root CLAUDE.md and the rules
+    """@DesignAdvisor asks GPT about the design: reads the design tree, the references, the root CLAUDE.md and the rules
     of the design roles; writes only its questions and notes in Management/game-design/advice; runs gd_advise.py and
     gd_status.py. It never writes the design, and nobody else writes in advice."""
     import bind_session
@@ -398,8 +395,7 @@ def run_advisor_cases():
               advice + "/_other/q1.q.md", advice + "/feature-hero/hero-list/q1.q.md", advice + "/feature_hero/q1.q.md"):
         w(g + " (the answers are the command's)", V, "deny", p)
     for p in (idea + "/data.md", idea + "/feature-hero/data.md", idea + "/notes.md", live + "/data.md", base + "/mode.json",
-              base + "/x.md", FX + "/Management/proposals/new.md", FX + "/Management/studio/codex/lessons.md",
-              FX + "/Management/studio/codex/orders/_design/feature-hero.cheat/a/order.md", FX + "/CLAUDE.md",
+              base + "/x.md", FX + "/Management/proposals/new.md", FX + "/Management/references/a.png", FX + "/CLAUDE.md",
               FX + "/.claude/rules/designadvisor.md", F + "/Wallet/Scripts/Internal/W.cs", A + "/Core/Base.cs"):
         w(g + " (never the design or anything else)", V, "deny", p)
     t(g, V, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
@@ -408,20 +404,20 @@ def run_advisor_cases():
     t(g, V, "pass", "SendMessage", {"to": "GameDesigner", "message": "x"})
 
     g = "advisor: the others do not write in advice"
-    for who in (W, D, "@Manager", "@CodeLead", "@Core", "@Codex", ""):
+    for who in (W, D, "@Manager", "@CodeLead", "@Core", ""):
         w(g, who, "deny", advice + "/feature-hero/q1.q.md")
         w(g, who, "deny", advice + "/feature-hero/q1.md")
-    for who in (W, D, "@Manager", "@CodeLead", "@Codex"):
+    for who in (W, D, "@Manager", "@CodeLead"):
         r(g + " (they read it)", who, "allow", advice + "/feature-hero/q1.md")
 
     g = "advisor: reads the design, not the code"
     for p in (idea + "/data.md", live + "/data.md", advice + "/feature-hero/q1.md", base, base + "/mode.json",
-              FX + "/Management/studio/codex/lessons.md", FX + "/CLAUDE.md", FX + "/.claude/rules/designadvisor.md",
+              FX + "/Management/references/a.png", FX + "/CLAUDE.md", FX + "/.claude/rules/designadvisor.md",
               FX + "/.claude/rules/gamedesigner.md", FX + "/.claude/skills/gd-round-3/SKILL.md",
               FX + "/.claude/skills/advisor-ask-gpt/SKILL.md", FX + "/.claude/skills/gd-integrate-advice/SKILL.md"):
         r(g, V, "allow", p)
     t(g, V, "allow", "Grep", {"pattern": "hero", "path": base})
-    for p in (FX + "/.claude/rules/codelead.md", FX + "/.claude/rules/studio.md", FX + "/.claude/hooks/guard.py",
+    for p in (FX + "/.claude/rules/codelead.md", FX + "/.claude/rules/worker.md", FX + "/.claude/hooks/guard.py",
               FX + "/.claude/skills/ui-frame-syntax/SKILL.md", FX + "/.claude/skills/manager-startup-check/SKILL.md",
               FX + "/Management/proposals/old.md", FX + "/Management/tools/gd_advise.py", FX + "/Management",
               F + "/Wallet/Scripts/Contracts/IWallet.cs", F + "/Wallet/CLAUDE.md", A + "/Core/Base.cs", "C:/Windows/x"):
@@ -433,17 +429,15 @@ def run_advisor_cases():
     for cmd in (ADVISE + " feature-hero q1", ADVISE + " feature-hero.hero-list.hero-roster round-2", ADVISE + " _root g1",
                 ADVISE + " _general g1", "python3 Management/tools/gd_advise.py feature-hero q1", STATUS, STATUS + " ai/idea/feature-hero",
                 "python Management/tools/gd_pack.py Wallet", "python Management/tools/gd_frame.py live/feature-hero/a/b",
-                "python Management/tools/studio.py status"):
+                "python Management/tools/art.py list"):
         t(g, V, "allow", "Bash", {"command": cmd})
     for cmd in (ADVISE, ADVISE + " feature-hero", ADVISE + " feature-hero q1 extra", ADVISE + " feature-hero/hero-list q1",
                 ADVISE + " ../x q1", ADVISE + " Feature-Hero q1", ADVISE + " feature-hero Q1", ADVISE + " feature-hero q1; ls",
                 ADVISE + " feature-hero q1 --root C:/x", ADVISE + " _other q1", "codex exec -s read-only x",
-                "python Management/tools/studio.py consult Wallet/a b", "python Management/tools/studio.py codex Wallet/a b",
-                "python Management/tools/gd_delete.py ai/idea/feature-hero",
-                'python Management/tools/studio.py redo _design/feature-hero.cheat/a b "x"',
+                "python Management/tools/gd_delete.py ai/idea/feature-hero", "python Management/tools/art.py choose Hero/a simple",
                 "python Management/tools/gd_progress.py ai/idea/a idea done", "ls"):
         t(g, V, "deny", "Bash", {"command": cmd})
-    for who in (W, D, "@Manager", "@CodeLead", "@Core", "@Codex", ""):
+    for who in (W, D, "@Manager", "@CodeLead", "@Core", ""):
         t(g + " (only the advisor asks GPT)", who, "deny", "Bash", {"command": ADVISE + " feature-hero q1"})
 
     g = "advisor: bind"
@@ -547,7 +541,7 @@ def run_binding_cases(payload):
     say(g, "block, bound=@CodeLead", "status of a bound chat", "feature")
     say(g, "pass, bound=@CodeLead", "next ordinary prompt tells the model its binding", "Làm tiếp đi")
     say(g, "block, bound=@CodeLead", "wrong PIN keeps the old binding", "FEATURE=@human 0000")
-    say(g, "block, bound=@Codex", "spaces, lower case", f"  feature = @codex   {PIN}\n", session="chat2")
+    say(g, "block, bound=@DesignAdvisor", "spaces, lower case", f"  feature = @designadvisor   {PIN}\n", session="chat2")
     say(g, "block, bound=@human", "human", f"FEATURE=@human {PIN}", session="chat3")
     say(g, "block, bound=@GameDesigner", "the human may rebind", f"FEATURE=@GameDesigner {PIN}", session="chat3")
     say(g, "block, bound=@human", "and bind back", f"FEATURE=@human {PIN}", session="chat3")
@@ -627,14 +621,14 @@ def run_binding_cases(payload):
     check(g, "", [".claude/rules/designadvisor.md", ".claude/rules/gamedesigner.md"],
           "@DesignAdvisor reads its rules itself", bind_session.must_read("@DesignAdvisor"))
     excludes = json.loads((HERE.parent / "settings.json").read_text(encoding="utf-8")).get("claudeMdExcludes", [])
-    for name in ("manager.md", "codelead.md", "gamedesigner.md", "designadvisor.md", "uidesigner.md", "tester.md", "studio.md", "worker.md"):
+    for name in ("manager.md", "codelead.md", "gamedesigner.md", "designadvisor.md", "uidesigner.md", "tester.md", "worker.md"):
         check(g, "", True, f"{name} never loads by itself into another role's chat (claudeMdExcludes)",
               f"**/.claude/rules/{name}" in excludes)
     check(g, "", True, "the node files of the design tree (CLAUDE.md) do not load near a Read",
           "**/Management/game-design/**/CLAUDE.md" in excludes)
     check(g, "", False, "report.md and unity.md still load (shared rules)",
           any(e.endswith(("report.md", "unity.md")) for e in excludes))
-    for name in ("manager.md", "codelead.md", "tester.md", "studio.md", "unity.md"):
+    for name in ("manager.md", "codelead.md", "tester.md", "unity.md"):
         head = (HERE.parent / "rules" / name).read_text(encoding="utf-8").split("\n", 2)[:2]
         check(g, "", ["---", "paths:"], f"{name} is path-scoped, not loaded into every chat", head)
 
@@ -691,12 +685,6 @@ def run_role_cases(payload):
     t(g + ": names itself", M, "deny", "Bash", sh(TW + 'add "Thêm lệnh huỷ order" --from CodeLead --decided "Người chọn A"'))
     t(g + ": needs the decision", M, "deny", "Bash", sh(TW + 'add "Thêm lệnh huỷ order" --from Manager'))
     t(g + ": reads the list", M, "allow", "Bash", sh(TW + "list"))
-    SC = "python Management/tools/studio.py cancel "
-    t(g + ": cancels no order (2026-11-26: the features are CodeLead's part)", M, "deny", "Bash", sh(SC + 'Hud/hud-sprites "Trùng sprite đã đạt, style cũ"'))
-    t(g + ": @CodeLead cancels any order", "@CodeLead", "allow", "Bash", sh(SC + 'Hud/hud-sprites "Trùng sprite đã đạt, style cũ"'))
-    t(g + ": cancel needs a reason", "@CodeLead", "deny", "Bash", sh(SC + "Hud/hud-sprites"))
-    t(g + ": no shell characters in the reason", "@CodeLead", "deny", "Bash", sh(SC + 'Hud/hud-sprites "x; rm -rf ."'))
-    t(g + ": a tool chat does not cancel", "@ClaudeImage", "deny", "Bash", sh(SC + 'Hud/hud-sprites "Không cần nữa"'))
     t(g + ": only the human closes", M, "deny", "Bash", sh(TW + 'done w20261126-ab12 "xong"'))
     t(g + ": only the human drops", M, "deny", "Bash", sh(TW + 'drop w20261126-ab12 "thôi"'))
     t(g + ": a Leader adds", "@CodeLead", "allow", "Bash", sh(TW + 'add "Sổ nhận test chéo" --from CodeLead --decided "Người chọn B"'))
@@ -723,7 +711,7 @@ def run_role_cases(payload):
     mine = [os.path.join(store_of(ME), "tool-results", "toolu_1.txt"), os.path.join(temp_of(ME), "tasks", "b1.output"),
             os.path.join(temp_of(ME), "scratchpad", "note.py")]
     try:
-        for who in ("Wallet", M, "@GameDesigner", "@DesignAdvisor", "@Codex", "@CodeLead", "@Core", ""):
+        for who in ("Wallet", M, "@GameDesigner", "@DesignAdvisor", "@CodeLead", "@Core", ""):
             for p in mine:
                 t(g + ": reads its own", who, "allow", "Read", {"file_path": p}, session=ME)
         t(g + ": searches its own", M, "allow", "Grep", {"pattern": "x", "path": os.path.join(store_of(ME), "tool-results")}, session=ME)
@@ -737,7 +725,7 @@ def run_role_cases(payload):
         for p in mine:      # the id must be this session's, and a real one
             t(g + ": not another session's", M, "deny", "Read", {"file_path": p}, session=OTHER)
             t(g + ": not without a real id", M, "deny", "Read", {"file_path": p})
-        for who in ("Wallet", M, "@GameDesigner", "@Codex"):
+        for who in ("Wallet", M, "@GameDesigner"):
             t(g + ": writes its scratchpad", who, "allow", "Write", {"file_path": mine[2], "content": "x"}, session=ME)
         t(g + ": unbound writes nothing", "", "deny", "Write", {"file_path": mine[2], "content": "x"}, session=ME)
         if not WIN:      # a link in its own folders: followed only when it stays in this session's folders, read only
@@ -788,7 +776,7 @@ def run_role_cases(payload):
                     t(g + ": only feature sessions'", who, "deny", "Read", {"file_path": peer(sid)[1]}, session=ME)
                 t(g + ": not the transcript", who, "deny", "Read",
                   {"file_path": os.path.join(home, ".claude", "projects", "d--proj", FEAT + ".jsonl")}, session=ME)
-            for who in ("Shop", "@GameDesigner", "@Core", "@UnityAutoPlay", "@Codex", ""):
+            for who in ("Shop", "@GameDesigner", "@Core", "@UnityAutoPlay", ""):
                 t(g + ": nobody else reads a feature session's", who, "deny", "Read", {"file_path": peer(FEAT)[1]}, session=ME)
         finally:
             for b in bound:
@@ -808,16 +796,16 @@ def run_role_cases(payload):
     t(g + " (@CodeLead creates the folders too, người quyết 2026-11-26)", "@CodeLead", "allow", "Bash", sh(SCAFFOLD))
     for who in ("@CodeLead", "@GameDesigner"):      # looking is every Leader's, creating is @Manager's
         t(g + " (dry run: every Leader)", who, "allow", "Bash", sh(SCAFFOLD + " --dry-run"))
-    for who in ("Wallet", "@Core", "@DesignAdvisor", "@Codex", ""):
+    for who in ("Wallet", "@Core", "@DesignAdvisor", ""):
         t(g + " (dry run: others)", who, "deny", "Bash", sh(SCAFFOLD + " --dry-run"))
 
     g = "leaders: a chain of allowed commands"
-    CHAIN = "python Management/tools/studio.py status; python Management/tools/validate.py; python Management/tools/scaffold.py --dry-run"
+    CHAIN = "python Management/tools/art.py list; python Management/tools/validate.py; python Management/tools/scaffold.py --dry-run"
     for who in (M, "@CodeLead", "@GameDesigner"):
         for tool in ("Bash", "PowerShell"):
             t(g, who, "allow", tool, sh(CHAIN))
         t(g, who, "allow", "Bash", sh("python Management/tools/validate.py && python Management/tools/gd_status.py"))
-        t(g, who, "allow", "Bash", sh("python Management/tools/validate.py;python Management/tools/studio.py check"))
+        t(g, who, "allow", "Bash", sh("python Management/tools/validate.py;python Management/tools/art.py list"))
     for bad in (CHAIN + "; ls", CHAIN + "; rm -rf UnityProject", "ls; " + CHAIN, CHAIN + " | more", CHAIN + " > out.txt",
                 CHAIN + "; $(ls)", CHAIN + ";", "; " + CHAIN, CHAIN.replace("; ", " & "), CHAIN.replace("; ", " || "),
                 "; ".join(["python Management/tools/validate.py"] * 7),
@@ -825,9 +813,9 @@ def run_role_cases(payload):
         t(g + " (refused)", M, "deny", "Bash", sh(bad))
     t(g, "@CodeLead", "allow", "Bash", sh("python Management/tools/validate.py; python Management/tools/scaffold.py"))
     # every bound chat chains since 2026-11-26; an unbound one does not
-    for who in ("Wallet", "@Core", "@DesignAdvisor", "@Codex", "@UnityAutoPlay"):
-        t(g + " (every role)", who, "allow", "Bash", sh("python Management/tools/validate.py; python Management/tools/studio.py status"))
-    t(g + " (unbound)", "", "deny", "Bash", sh("python Management/tools/validate.py; python Management/tools/studio.py status"))
+    for who in ("Wallet", "@Core", "@DesignAdvisor", "@UnityAutoPlay"):
+        t(g + " (every role)", who, "allow", "Bash", sh("python Management/tools/validate.py; python Management/tools/art.py list"))
+    t(g + " (unbound)", "", "deny", "Bash", sh("python Management/tools/validate.py; python Management/tools/art.py list"))
     # a chain runs every gated part through its own check
     stage_file = Path(FX + "/Management/game-design/stage.json")
     stage_file.parent.mkdir(parents=True, exist_ok=True)
@@ -863,7 +851,7 @@ def run_role_cases(payload):
 
     g = "any chat: design frame command"
     FRAME = "python Management/tools/gd_frame.py"
-    for who in ("Wallet", "_Services/Popup", "@CodeLead", "@GameDesigner", M, "@Codex"):
+    for who in ("Wallet", "_Services/Popup", "@CodeLead", "@GameDesigner", M):
         for cmd in (FRAME + " ai/idea/feature-hero/hero-list/hero-roster-values", FRAME + " live/feature-popup-lose/lose-actions/actions-spec",
                     "python3 Management/tools/gd_frame.py ai/idea/feature-hero"):
             t(g, who, "allow", "Bash", sh(cmd))
@@ -1064,7 +1052,7 @@ def run_codelead_cases():
     t(g, L, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/_Composition"})      # a Leader asks through Manager (2026-11-27)
     if not WIN:
         w(g + ": case-sensitive", L, "deny", A + "/_composition/Boot.cs")
-    for who in ("Wallet", "@Core", "@Manager", "@GameDesigner", "@Codex", ""):
+    for who in ("Wallet", "@Core", "@Manager", "@GameDesigner", ""):
         w(g + " (others)", who, "deny", A + "/_Composition/Boot.cs")
     e(g + " (others)", "@human", "pass", A + "/_Composition/Old.cs")
 
@@ -1083,7 +1071,7 @@ def run_codelead_cases():
     for p in (F, F + "/_Services"):      # one search across every feature, e.g. who uses a contract
         t(g, L, "allow", "Grep", {"pattern": "IPopupService", "path": p})
         t(g, L, "allow", "Glob", {"pattern": "**/*.cs", "path": p})
-        for who in (W, "@Core", "_Services/Popup", "@Manager", "@GameDesigner", "@Codex", ""):
+        for who in (W, "@Core", "_Services/Popup", "@Manager", "@GameDesigner", ""):
             t(g + " (others still may not)", who, "deny", "Grep", {"pattern": "x", "path": p})
     for p in (A, FX + "/UnityProject", FX):
         t(g, L, "deny", "Grep", {"pattern": "x", "path": p})
@@ -1304,7 +1292,7 @@ def run_designer_cases():
     for cmd in (X + 'new ai/idea/feature-hero/hero-list/hero-roster-values Heroes list "Danh sách hero"', X + "sync ai/idea/feature-hero",
                 X + "sync ai/idea/feature-hero --from xlsx", X + "reindex ai/idea/feature-hero Heroes", X + "sync ai/idea"):
         t(g, D, "allow", "Bash", {"command": cmd})
-        for who in ("Wallet", "@CodeLead", "@UIDesigner", "@Manager", "@Codex"):
+        for who in ("Wallet", "@CodeLead", "@UIDesigner", "@Manager"):
             t(g + " (only @GameDesigner changes them)", who, "deny", "Bash", {"command": cmd})
     for cmd in (X + 'new live/feature-hero Heroes list "x"', X + 'new ai/idea/feature-hero Heroes list "x"; ls', X + "sync live/feature-hero",
                 X + 'new ai/idea/feature-hero Heroes list "x $(rm -rf .)"', X + "sync ai/idea/../live", X + "sync ai/idea/feature-hero --from both",
@@ -1512,7 +1500,7 @@ def run_fail_cases():
         with open(guard.binding_path(session, STORE), "w", encoding="utf-8") as f:
             json.dump({"feature": value}, f)
     read = "mcp__UnityMCP__read_console"
-    for s, v in (("fail-w", "Wallet"), ("fail-lead", "@CodeLead"), ("fail-adv", "@DesignAdvisor"), ("fail-codex", "@Codex"),
+    for s, v in (("fail-w", "Wallet"), ("fail-lead", "@CodeLead"), ("fail-adv", "@DesignAdvisor"),
                  ("fail-human", "@human")):
         bind(s, v)
         guard.clear_fails(s, STORE)
@@ -1532,12 +1520,7 @@ def run_fail_cases():
     check(g, "@DesignAdvisor", (True, True), "a command that printed CODEX LỖI: flagged, told to stop",
           (guard.read_fail("fail-adv", STORE, "codex") is not None, "CODEX LỖI" in out))
     t(g + " (gd_advise.py again refused)", "@DesignAdvisor", "deny", "Bash", {"command": advise}, session="fail-adv")
-    post("PostToolUseFailure", "Bash", {"command": "python Management/tools/studio.py consult Wallet/ask palette"},
-         "Exit code 1\nCODEX LỖI: codex exec lỗi (mã 1): Error loading configuration", "fail-codex")
-    for cmd in ("python Management/tools/studio.py consult Wallet/ask palette",
-                "python Management/tools/studio.py codex Wallet/coin-icons coin"):
-        t(g + " (Codex run again refused)", "@Codex", "deny", "Bash", {"command": cmd}, session="fail-codex")
-    out = post("PostToolUse", "Bash", {"command": "python Management/tools/studio.py check"}, {"stdout": "ok"}, "fail-w")
+    out = post("PostToolUse", "Bash", {"command": "python Management/tools/validate.py"}, {"stdout": "ok"}, "fail-w")
 
     for s in ("fail-w", "fail-adv"):
         p = subprocess.run([sys.executable, "-I", str(HERE / "bind_session.py"), "--root", FX, "--store", STORE],
@@ -1564,27 +1547,25 @@ def run_inbox_cases():
         t(g + " (no stage set: the tester still gets work)", "@CodeLead", "allow", "Bash", {"command": D + 'send @UnityAutoPlay --from CodeLead "x"'})
     stage_file.write_text('{"stage": "idea", "at": "2026-11-25 22:00"}')
     t(g + " (stage set)", "@CodeLead", "allow", "Bash", {"command": D + 'send @Core --from CodeLead "x"'})
-    for who in ("Wallet", "@Core", "@Codex", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@UnityAutoPlay"):
+    for who in ("Wallet", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@UnityAutoPlay"):
         sh(who, "allow", D + "list")
         sh(who, "allow", D + "list Wallet")
-    for target in ("Wallet", "_Services/Popup", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor", "@UnityAutoPlay"):
+    for target in ("Wallet", "_Services/Popup", "@Core", "@DesignAdvisor", "@UnityAutoPlay"):
         sh("@Manager", "deny", D + 'send ' + target + ' --from Manager "x"')      # @Manager keeps to the Leaders
     sh("@CodeLead", "allow", D + 'send Wallet --from CodeLead "Làm yêu cầu feature-wallet/x#y"')
     sh("@CodeLead", "allow", D + 'send _Services/Popup --from @CodeLead "Việc ... với dấu chấm"')
     sh("@CodeLead", "allow", D + 'send Shop --from CodeLead "Sửa lỗi biên dịch ở Shop"')
     sh("@CodeLead", "allow", D + 'send @Core --from CodeLead "x"')
-    sh("@CodeLead", "allow", D + 'send @Codex --from CodeLead "TRẢ LỜI · order Shop/coin · người chọn A"')      # answers a tool
+    sh("@CodeLead", "deny", D + 'send @DesignAdvisor --from CodeLead "x"')      # @DesignAdvisor is @GameDesigner's
     sh("@GameDesigner", "allow", D + 'send @DesignAdvisor --from GameDesigner "Hỏi GPT về node feature-hero"')
     sh("@GameDesigner", "deny", D + 'send Wallet --from GameDesigner "x"')
-    sh("@UIDesigner", "allow", D + 'send @ClaudeImage --from UIDesigner "x"')
-    sh("@UIDesigner", "deny", D + 'send @Codex --from UIDesigner "x"')
+    sh("@UIDesigner", "deny", D + 'send @DesignAdvisor --from UIDesigner "x"')
     sh("@CodeLead", "deny", D + 'send Wallet --from Manager "x"')             # --from must be itself
-    sh("@Codex", "deny", D + 'send Wallet --from Codex "x"')
     sh("@Manager", "deny", D + 'send @CodeLead --from Manager "x"')           # a Leader is messaged with SendMessage
     for lead in ("CodeLead", "GameDesigner", "UIDesigner"):                   # these Leaders open the tester through its inbox
         sh("@" + lead, "allow", D + 'send @UnityAutoPlay --from ' + lead + ' "Chơi tiếp R1, B1"')
         sh("@" + lead, "allow", D + "list @UnityAutoPlay")
-    for who in ("Wallet", "_Services/Popup", "@Core", "@Codex", "@DesignAdvisor", "@UnityAutoPlay"):
+    for who in ("Wallet", "_Services/Popup", "@Core", "@DesignAdvisor", "@UnityAutoPlay"):
         sh(who, "deny", D + 'send @UnityAutoPlay --from ' + who.lstrip("@") + ' "x"')
     sh("@CodeLead", "deny", D + 'send Wallet --from CodeLead "x $(rm -rf .)"')
     sh("@CodeLead", "deny", D + 'send ../Wallet --from CodeLead "x"')
@@ -1592,8 +1573,8 @@ def run_inbox_cases():
     sh("@CodeLead", "allow", D + "cancel m20261125-174601-ecb94c")
     sh("@Manager", "deny", D + "cancel m20261125-174601-ecb94c")
     g = "inbox: SendMessage to a chat that runs on demand"
-    for who in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "Wallet", "@Codex", "@DesignAdvisor"):
-        for to in ("Wallet", "_Services/Popup", "Core", "Codex", "DesignAdvisor", "ClaudeImage"):
+    for who in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "Wallet", "@DesignAdvisor"):
+        for to in ("Wallet", "_Services/Popup", "Core", "DesignAdvisor"):
             t(g, who, "deny", "SendMessage", {"to": to, "message": "x"})
         for to in ("CodeLead", "GameDesigner", "UIDesigner"):
             t(g + " (Leaders as before)", who, "pass", "SendMessage", {"to": to, "message": "x"})
@@ -1630,7 +1611,7 @@ def run_tester_cases():
     for path in (F + "/Shop/Scripts/Internal/S.cs", F + "/Wallet/Scripts/Contracts/I.cs", A + "/Core/Old.cs", A + "/_Composition/Boot.cs",
                  F + "/Wallet/FeatureAssets/Private/c.asset", FX + "/Management/proposals/new.md", FX + "/Management/tools/rules.json",
                  FX + "/Management/game-design/ai/idea/data.md", FX + "/.claude/rules/tester.md", FX + "/CLAUDE.md",
-                 FX + "/Resources/x.png", FX + "/UnityProject/ProjectSettings/x.asset"):
+                 FX + "/Management/data/x.js", FX + "/UnityProject/ProjectSettings/x.asset"):
         w(g, T, "deny", path)
         e(g, T, "deny", path)
 
@@ -1643,7 +1624,7 @@ def run_tester_cases():
                  home + "/Archive/20261120-101500/images/a.png", FX + "/Tester/Other/README.md",
                  FX + "/Tester/Other/20261125-143000/README.md", FX + "/tester/UnityAutoPlay/README.md" if os.name != "nt" else FX + "/Tester/Nope/x.md"):
         w(g, T, "deny", path)
-    for who in (W, L, M, "@GameDesigner", "@Core", "@Codex", "@DesignAdvisor", ""):
+    for who in (W, L, M, "@GameDesigner", "@Core", "@DesignAdvisor", ""):
         w(g + " (nobody else writes there)", who, "deny", run + "/README.md")
         w(g + " (nobody else writes there)", who, "deny", run + "/images/x.png")
 
@@ -1652,12 +1633,12 @@ def run_tester_cases():
         for path in (FX + "/Tester/README.md", home + "/README.md", run + "/README.md", run + "/images/hud.png"):
             r(g, who, "allow", path)
         t(g, who, "allow", "Grep", {"pattern": "Kết quả", "path": home})
-    for who in ("@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor", ""):
+    for who in ("@DesignAdvisor", ""):
         r(g + " (not the tool chats)", who, "deny", run + "/README.md")
     g = "tester archive: the testers only"
     for path in (old + "/README.md", home + "/Archive/README.md", old + "/images/a.png", home + "/Archive"):
         r(g, T, "allow", path)
-        for who in (M, L, "@GameDesigner", "@Core", W, "@Codex", "@DesignAdvisor", ""):
+        for who in (M, L, "@GameDesigner", "@Core", W, "@DesignAdvisor", ""):
             r(g + " (others)", who, "deny", path)
     t(g + " (others)", M, "deny", "Grep", {"pattern": "x", "path": home + "/Archive"})
 
@@ -1687,7 +1668,7 @@ def run_tester_cases():
         t(g + " (readers look)", who, "allow", "Bash", {"command": TOOL + "check"})
         t(g + " (readers do not archive)", who, "deny", "Bash", {"command": TOOL + "archive UnityAutoPlay --keep 3"})
         t(g + " (readers start no run)", who, "deny", "Bash", {"command": TOOL + 'new UnityAutoPlay "x"'})
-    for who in ("@Codex", "@DesignAdvisor", ""):
+    for who in ("@DesignAdvisor", ""):
         t(g + " (not the tool chats)", who, "deny", "Bash", {"command": TOOL + "status"})
 
     g = "tester: unity-mcp plays and reads"
@@ -1726,7 +1707,7 @@ def run_tester_cases():
                      ("manage_script", {"action": "create"})):
         t(g, T, "deny", "mcp__unityMCP__" + name, ti, session="tester-a")
     check(g, T, None, "a refused call takes no lock", guard.read_lock(STORE))
-    for who in (W, L, M, "@GameDesigner", "@Core", "@Codex", "@ClaudeImage", "@DesignAdvisor", ""):
+    for who in (W, L, M, "@GameDesigner", "@Core", "@DesignAdvisor", ""):
         t("execute_code: the testers only", who, "deny", "mcp__unityMCP__execute_code", {"code": "x"}, session="other")
     guard.release_lock(STORE)
 
@@ -1734,10 +1715,10 @@ def run_tester_cases():
     for to in ("UnityAutoPlay", "unityautoplay", "@UnityAutoPlay", " UnityAutoPlay "):
         for who in (L, "@GameDesigner", "@UIDesigner"):
             t(g, who, "pass", "SendMessage", {"to": to, "message": "x"})
-        for who in (M, W, "_Services/Popup", "@Core", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor", T, ""):
+        for who in (M, W, "_Services/Popup", "@Core", "@DesignAdvisor", T, ""):
             t(g + " (the others ask @CodeLead)", who, "deny", "SendMessage", {"to": to, "message": "x"})
         t(g, "@human", "pass", "SendMessage", {"to": to, "message": "x"})
-    for who in (W, "@Core", "@Codex", T, M):
+    for who in (W, "@Core", T, M):
         for to in ("CodeLead", ""):
             t(g + " (other chats as before)", who, "pass", "SendMessage", {"to": to, "message": "x"})
         t(g + " (only the Leaders reach Manager)", who, "pass" if who == M else "deny", "SendMessage", {"to": "Manager", "message": "x"})
@@ -1838,213 +1819,6 @@ def run_req_cases():
       FX + "/Management/game-design/ai/idea/feature-code/detail/tech/.progress/requirements.json")
 
 
-def run_tool_cases():
-    """@Codex and @Blender: take orders from the features, write only their lessons and the work of an order, run
-    their tool through studio.py; everybody reads Management/studio and Resources."""
-    X, B, W = "@Codex", "@Blender", "Wallet"
-    studio, res = FX + "/Management/studio", FX + "/Resources"
-    order = studio + "/codex/orders/Wallet/coin-icons"
-    os.makedirs(order + "/work", exist_ok=True)
-    os.makedirs(res + "/Wallet/codex/coin-icons/v1", exist_ok=True)
-    Path(order + "/order.md").write_text("x")
-    Path(res + "/Wallet/codex/coin-icons/v1/coin.png").write_text("x")
-    P = "python Management/tools/studio.py"
-
-    g = "tools: everybody reads the studio and Resources"
-    for who in (W, "@Core", "@Manager", "@GameDesigner", "@CodeLead", X, B, "_Services/Popup"):
-        r(g, who, "allow", order + "/order.md")
-        r(g, who, "allow", res + "/Wallet/codex/coin-icons/v1/coin.png")
-        t(g, who, "allow", "Grep", {"pattern": "x", "path": studio})
-        t(g, who, "allow", "Glob", {"pattern": "**/*.png", "path": res})
-    r(g + " (still not the rest)", "@GameDesigner", "deny", FX + "/Management/proposals/old.md")
-    r(g + " (still not the rest)", X, "deny", F + "/Shop/Scripts/Internal/S.cs")
-    r(g + " (still not the rest)", X, "deny", F + "/Wallet/FeatureAssets/Private/c.asset")
-    r(g + " (still not the rest)", X, "allow", F + "/Wallet/FeatureAssets/Public/Icon.prefab")
-    r(g + " (still not the rest)", X, "allow", order + "/refs/ref.png")
-
-    g = "tools: what a tool chat writes"
-    w(g, X, "allow", studio + "/codex/lessons.md")
-    w(g, X, "allow", order + "/work/coin.md")
-    e(g, X, "allow", order + "/work/sub/draft.md")
-    w(g, X, "allow", studio + "/codex/orders/_Services/Popup/pop-bg/work/bg.md")
-    for p in (order + "/order.md", order + "/feedback-1.md", order + "/status.json", order + "/log.jsonl",
-              order + "/refs/ref.png", studio + "/blender/lessons.md", studio + "/blender/orders/Wallet/m/work/a.py",
-              studio + "/codex/other.md", res + "/Wallet/codex/coin-icons/v1/coin.png", F + "/Wallet/FeatureAssets/Private/x.png",
-              F + "/Wallet/Scripts/Internal/Old.cs", FX + "/Management/proposals/new.md", FX + "/CLAUDE.md"):
-        w(g, X, "deny", p)
-    w(g, B, "allow", studio + "/blender/orders/Wallet/coin-model/work/coin.py")
-    w(g, B, "deny", order + "/work/coin.md")
-
-    g = "tools: a feature orders for itself"
-    w(g, "@Manager", "deny", studio + "/codex/orders/Wallet/m/order.md")
-
-    g = "tools: @GameDesigner orders art for design nodes"
-    art = studio + "/codex/orders/_design/feature-popup-lose.lose-actions.actions-spec/lose-art"
-    D = "@GameDesigner"
-    w(g, D, "allow", art + "/order.md")
-    w(g, D, "deny", art + "/feedback-1.md")      # the human judges the pictures on the page
-    for p_ in (art + "/approval.json", art + "/status.json", art + "/work/main.md", studio + "/codex/anchors.json",
-               studio + "/codex/orders/Wallet/x/order.md", studio + "/blender/orders/_design/feature-a/x/order.md",
-               studio + "/codex/orders/_design/Feature.A/x/order.md", studio + "/codex/lessons.md",
-               res + "/_design/feature-a/codex/x/v1/main.png"):
-        w(g, D, "deny", p_)
-    os.makedirs(art, exist_ok=True)
-    Path(art + "/order.md").write_text("x")
-    w(g + " (written once)", D, "deny", art + "/order.md")
-    w(g, X, "allow", art + "/work/main.md")
-    for who in (X, W, "@human"):
-        w(g + " (the page writes the judgement)", who, "deny" if who != "@human" else "pass", art + "/review.json")
-    for cmd in (P + " codex _design/feature-popup-lose.lose-actions.actions-spec/lose-art main",
-                P + " deliver codex _design/feature-popup-lose.lose-actions.actions-spec/lose-art"):
-        t(g, X, "allow", "Bash", {"command": cmd})
-        t(g, D, "deny", "Bash", {"command": cmd})
-    for who in (D, X, W):
-        t(g + " (status for all)", who, "allow", "Bash", {"command": P + " status _design/feature-a.a1/lose-art"})
-        for cmd in (P + " approve _design/feature-a.a1/lose-art", P + " accept _design/feature-a.a1/lose-art",
-                    P + " anchor _design/feature-a.a1/lose-art main", P + " take _design/feature-a.a1/lose-art",
-                    P + " review _design/feature-a.a1/lose-art main 3",
-                    P + ' review _design/feature-a.a1/lose-art main 0 "làm lại"'):
-            t(g + " (the human judges and anchors, on the page)", who, "deny", "Bash", {"command": cmd})
-
-    g = "tools: studio commands"
-    for who in (W, X, B, "@Manager", "@GameDesigner", "@CodeLead"):
-        for cmd in (P + " check", P + " status", P + " status codex", P + " status Wallet/coin-icons",
-                    P + " measure Wallet/coin-icons", P + " measure Wallet/coin-icons coin",
-                    P + " measure _design/feature-a.a1/lose-art main"):
-            t(g, who, "allow", "Bash", {"command": cmd})
-        for cmd in (P + " measure", P + " measure Wallet/coin-icons coin extra", P + " measure ../x coin",
-                    P + " measure Wallet/coin-icons coin; rm x"):
-            t(g + " (measure: an order and at most one item)", who, "deny", "Bash", {"command": cmd})
-    for cmd in (P + " codex Wallet/coin-icons coin", P + " consult Wallet/coin-icons coin", P + " deliver codex Wallet/coin-icons"):
-        t(g, X, "allow", "Bash", {"command": cmd})
-        t(g, B, "deny", "Bash", {"command": cmd})
-    for cmd in (P + " blender Wallet/coin-model coin", P + " deliver blender Wallet/coin-model"):
-        t(g, B, "allow", "Bash", {"command": cmd})
-        t(g, X, "deny", "Bash", {"command": cmd})
-    for cmd in (P + " review Wallet/coin-icons coin 3", P + ' review Wallet/coin-icons gem 0 "gem bị mờ ở 64px... làm nét hơn, viền 2px"',
-                P + ' review Wallet/coin-icons gem 1 ""', P + ' review _Services/Popup/pop-bg bg 2 "tạm được"'):
-        t(g, W if "Wallet" in cmd else "_Services/Popup", "allow", "Bash", {"command": cmd})
-        t(g, X, "deny", "Bash", {"command": cmd})
-        t(g, "@GameDesigner", "deny", "Bash", {"command": cmd})
-    for cmd in (P + " review Wallet/coin-icons coin 4", P + " review Wallet/coin-icons coin", P + " review Wallet/coin-icons coin 0 mờ quá",
-                P + ' review Wallet/coin-icons coin 0 "a" "b"', P + ' review Wallet/coin-icons coin 0 "x"; rm -rf y',
-                P + ' review Wallet/coin-icons coin 0 "$(whoami)"', P + ' review Wallet/coin-icons coin 0 "a`b`"',
-                P + ' review Wallet/coin-icons coin 0 "a | b"', P + ' review Wallet/../Shop/x coin 3',
-                P + ' review Wallet/coin-icons coin 0 "a\\"', P + ' review Wallet/coin-icons Coin 3',
-                P + " take Wallet/coin-icons", P + " reject Wallet/coin-icons"):
-        pass
-    for cmd in (P + " codex Wallet/coin-icons coin; rm -rf x", P + " codex ../x coin", P + " codex Wallet/coin-icons",
-                P + " review Wallet/coin-icons coin 3 --root /tmp", "codex exec -s danger-full-access x", "blender -b -P x.py"):
-        t(g, X, "deny", "Bash", {"command": cmd})
-        t(g, B, "deny", "Bash", {"command": cmd})
-
-    g = "tools: limits and art debts"
-    for who in (X, B):
-        t(g, who, "allow", "Bash", {"command": P + " pick Wallet/coin-icons coin 2"})
-    for cmd in (P + " pick Wallet/coin-icons coin 0", P + " pick Wallet/coin-icons coin x", P + " pick Wallet/coin-icons coin 1 2"):
-        t(g, X, "deny", "Bash", {"command": cmd})
-    for who in (W, X, B, "@GameDesigner", "@Manager"):
-        t(g, who, "deny", "Bash", {"command": P + " pick Wallet/coin-icons coin 1"} if who not in (X, B) else
-          {"command": P + " debt close n-1"})
-        t(g, who, "deny", "Bash", {"command": P + " debt close n-1"})
-        w(g, who, "deny", studio + "/debt.json")
-        w(g, who, "deny", res + "/Wallet/codex/coin-icons/v1/quality.json")
-    t(g, "@human", "pass", "Bash", {"command": P + " debt close n-1"})
-
-    g = "tools: MCP"
-    t(g, B, "allow", "mcp__blender__execute_blender_code", {"code": "import bpy"})
-    t(g, B, "allow", "mcp__blender__get_scene_info", {})
-    for who in (X, W, "@CodeLead", "@GameDesigner"):
-        t(g, who, "deny", "mcp__blender__execute_blender_code", {"code": "import bpy"})
-    t(g, "@human", "pass", "mcp__blender__execute_blender_code", {"code": "import bpy"})
-    guard.release_lock(STORE)
-    for who in (X, B):
-        t(g, who, "allow", "mcp__unityMCP__read_console", {"action": "get"}, session="t-" + who)
-        t(g, who, "deny", "mcp__unityMCP__manage_asset", {"action": "create", "path": "Assets/Features/Wallet/FeatureAssets/Private/x.png"},
-          session="t-" + who)
-        t(g, who, "deny", "mcp__unityMCP__manage_scene", {"action": "load", "path": "Assets/Features/Wallet/FeatureAssets/Private/s.unity"},
-          session="t-" + who)
-        t(g, who, "deny", "mcp__unityMCP__run_tests", {"mode": "EditMode"}, session="t-" + who)
-        t(g, who, "allow", "mcp__unityMCP__execute_custom_tool", {"tool_name": "codex_exec"}, session="t-" + who)
-        guard.release_lock(STORE)
-    t(g, X, "allow", "mcp__unityMCP__execute_menu_item", {"menu_path": "Tools/Codex"}, session="t-x")
-    t(g, B, "deny", "mcp__unityMCP__execute_custom_tool", {"tool_name": "blender_run"}, session="t-b")      # @Codex holds the Editor
-    guard.release_lock(STORE)
-
-    g = "tools: @ClaudeImage draws SVG and runs only its own studio commands"
-    CI = "@ClaudeImage"
-    corder = studio + "/claudeimage/orders/Wallet/coin-icons"
-    cart = studio + "/claudeimage/orders/_design/feature-a.cheat/a-claude"
-    for p in (studio + "/claudeimage/lessons.md", corder + "/work/coin.svg", corder + "/work/coin.check.md",
-              cart + "/work/main.svg"):
-        w(g, CI, "allow", p)
-    for p in (corder + "/order.md", corder + "/status.json", corder + "/review.json", corder + "/log.jsonl",
-              studio + "/codex/lessons.md", order + "/work/coin.md", studio + "/blender/orders/Wallet/m/work/a.py",
-              res + "/Wallet/claudeimage/coin-icons/v1/coin.png", F + "/Wallet/FeatureAssets/Private/x.png",
-              F + "/Wallet/Scripts/Internal/Old.cs", FX + "/CLAUDE.md"):
-        w(g, CI, "deny", p)
-    w(g, X, "deny", corder + "/work/coin.svg")
-    w(g, B, "deny", studio + "/claudeimage/lessons.md")
-    r(g, CI, "allow", order + "/order.md")
-    r(g, CI, "allow", res + "/Wallet/codex/coin-icons/v1/coin.png")
-    for cmd in (P + " claude Wallet/coin-icons coin", P + " claude _design/feature-a.cheat/a-claude main",
-                P + " deliver claudeimage Wallet/coin-icons", P + " pick Wallet/coin-icons coin 2", P + " status claudeimage",
-                P + " measure Wallet/coin-icons coin", P + " check"):
-        t(g, CI, "allow", "Bash", {"command": cmd})
-    for cmd in (P + " codex Wallet/coin-icons coin", P + " consult Wallet/coin-icons coin", P + " blender Wallet/coin-model coin",
-                P + " deliver codex Wallet/coin-icons", P + " deliver blender Wallet/coin-model",
-                P + " review Wallet/coin-icons coin 3", P + " anchor _design/feature-a.cheat/a-claude main",
-                P + " claude Wallet/coin-icons coin extra", P + " claude Wallet/coin-icons coin; rm x",
-                "python Management/studio/claudeimage/orders/Wallet/coin-icons/work/x.py", "chrome --headless x.svg"):
-        t(g, CI, "deny", "Bash", {"command": cmd})
-    for who in (X, B, W, "@GameDesigner", "@CodeLead", "@Manager"):
-        t(g + " (only @ClaudeImage)", who, "deny", "Bash", {"command": P + " claude Wallet/coin-icons coin"})
-        t(g + " (only @ClaudeImage)", who, "deny", "Bash", {"command": P + " deliver claudeimage Wallet/coin-icons"})
-        t(g + " (status for all)", who, "allow", "Bash", {"command": P + " status claudeimage"})
-    w(g + " (@UIDesigner orders a claude concept)", "@UIDesigner", "allow", cart + "/order.md")
-    w(g + " (@GameDesigner no longer does)", "@GameDesigner", "deny", cart + "/order.md")
-    w(g + " (@UIDesigner orders no Codex art)", "@UIDesigner", "deny", studio + "/codex/orders/_design/feature-a.cheat/a/order.md")
-    for p in (cart + "/work/main.svg", cart + "/review.json", studio + "/claudeimage/orders/Wallet/x/order.md",
-              studio + "/claudeimage/lessons.md", studio + "/claudeimage/orders/_design/Feature.A/x/order.md"):
-        w(g + " (@UIDesigner orders a claude concept)", "@UIDesigner", "deny", p)
-    t(g, CI, "deny", "mcp__blender__execute_blender_code", {"code": "import bpy"})
-    guard.release_lock(STORE)
-    t(g, CI, "allow", "mcp__unityMCP__read_console", {"action": "get"}, session="t-ci")
-    for tool_, ti_ in (("mcp__unityMCP__execute_custom_tool", {"tool_name": "codex_exec"}),
-                       ("mcp__unityMCP__execute_menu_item", {"menu_path": "Tools/Codex"}),
-                       ("mcp__unityMCP__manage_asset", {"action": "create", "path": "Assets/Features/Wallet/FeatureAssets/Private/x.png"}),
-                       ("mcp__unityMCP__run_tests", {"mode": "EditMode"})):
-        t(g + " (no outside tool through unity-mcp)", CI, "deny", tool_, ti_, session="t-ci")
-    guard.release_lock(STORE)
-    for p in (studio + "/claudeimage/.run-1.lock", studio + "/claudeimage/.run-5.lock", corder + "/.coin.lock", cart + "/.main.lock"):
-        w(g + " (the run locks are studio.py's)", CI, "deny", p)
-    redo = P + ' redo _design/feature-a.a1.a-spec/a-claude main "nút chưa rõ, vẽ lại viền"'
-    for who in ("@GameDesigner", "@CodeLead", "@Manager"):
-        t(g + " (a Leader lets it draw again)", who, "allow", "Bash", {"command": redo})
-    for who in (CI, X, B, W, "@Core"):
-        t(g + " (drawing again is not the tool chat's decision)", who, "deny", "Bash", {"command": redo})
-    for cmd in (P + " redo _design/feature-a.a1.a-spec/a-claude main", P + ' redo Wallet/coin-icons coin "x"',
-                P + ' redo _design/feature-a.a1.a-spec/a-claude main "x"; rm y', P + ' redo _design/feature-a.a1.a-spec/a-claude main ""',
-                P + ' redo _design/feature-a.a1.a-spec/a-claude main "a" "b"'):
-        t(g + " (redo: a design order, a frame, a reason)", "@GameDesigner", "deny", "Bash", {"command": cmd})
-    check(g, CI, True, "the role is known and names its studio folder",
-          guard.role_of(CI) == CI and guard.TOOL_ROLES[CI] == "claudeimage")
-
-    g = "tools: no report needed"
-    os.makedirs(STORE + "/sessions", exist_ok=True)
-    for who, sid in ((X, "rep-codex"), (B, "rep-blender"), (CI, "rep-claudeimage")):
-        Path(guard.binding_path(sid, STORE)).write_text(json.dumps({"feature": who}))
-        tr = FX + f"/{sid}.jsonl"
-        entries = [{"type": "user", "message": {"content": "làm order"}},
-                   {"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Write",
-                                                                  "input": {"file_path": order + "/work/a.md"}}]}},
-                   {"type": "assistant", "message": {"content": [{"type": "text", "text": "Xong."}]}}]
-        Path(tr).write_text("\n".join(json.dumps(x) for x in entries))
-        p = subprocess.run([sys.executable, "-I", str(HERE / "stop_report.py"), "--root", FX, "--store", STORE],
-                           input=json.dumps({"session_id": sid, "transcript_path": tr}).encode(), capture_output=True)
-        check(g, who, True, "a tool chat stops without a report block", p.returncode == 0 and b'"block"' not in p.stdout)
-
-
 def run_unity_cases():
     """unity-mcp by what each command touches: read, write (own assets), shared (compile), state (the open scene,
     with the Editor lock), play and lead (@CodeLead), script (never)."""
@@ -2066,7 +1840,7 @@ def run_unity_cases():
 
     g = "unity: write (own assets)"
     SO = "manage_scriptable_object"      # config and installer assets: the owner, inside its own area
-    for who in ("@Manager", "@GameDesigner", "@Codex", ""):
+    for who in ("@Manager", "@GameDesigner", ""):
         u(g, who, "deny", SO, action="create", type_name="X", folder_path=own, asset_name="n")
     u(g, "@CodeLead", "deny", SO, action="create", type_name="X", folder_path=own, asset_name="n")      # not its area
     u(g, "@CodeLead", "allow", SO, action="create", type_name="X", folder_path="Assets/_Composition", asset_name="Catalog")
@@ -2135,7 +1909,7 @@ def run_unity_cases():
     shutil.rmtree(Path(STORE, guard.TESTER_BLOCKED_DIR), ignore_errors=True)
 
     g = "unity: reading the lock file"
-    for who in (W, "@Manager", "@GameDesigner", "@Codex", "@DesignAdvisor", "@UnityAutoPlay", None):
+    for who in (W, "@Manager", "@GameDesigner", "@DesignAdvisor", "@UnityAutoPlay", None):
         r(g, who, "allow", guard.lock_path(STORE))
 
     g = "unity: batch_execute"
@@ -2172,7 +1946,7 @@ def run_unity_cases():
 def run_headless_cases():
     """Tiers 2-6 run headless: they never ask the human (2026-11-26)."""
     g = "headless: no asking"
-    low = ("@UnityAutoPlay", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor")
+    low = ("@UnityAutoPlay", "@DesignAdvisor")
     for who in low:
         t(g, who, "deny", "AskUserQuestion", {"questions": []})
     for who in ("@human", "@Manager"):
@@ -2181,7 +1955,7 @@ def run_headless_cases():
         t(g + " (a Leader asks through Manager, 2026-11-27)", who, "deny", "AskUserQuestion", {"questions": []})
     data = {"tool_name": "AskUserQuestion", "tool_input": {}, "cwd": FX, "session_id": "test-session"}
     for who, leader in (("@UnityAutoPlay", "CodeLead"),
-                        ("@DesignAdvisor", "GameDesigner"), ("@Codex", "gave the order")):
+                        ("@DesignAdvisor", "GameDesigner")):
         reason = guard.decide(data, who, FX, STORE)[1]
         check(g + " (names the Leader)", who, True, "reason names " + leader, leader in reason and "BÁO CHẶN" in reason)
     edit = {"tool_name": "Edit", "tool_input": {"file_path": FX + "/Management/tools/rules.json"}, "cwd": FX,
@@ -2311,7 +2085,7 @@ def run_leader_ask_cases():
           sh('python Management/tools/ask.py add --from CodeLead "việc" --blocker "x" --options "A·B" --suggest "A" --waiting "x"'))
         t(g + " (add naming another)", "@CodeLead", "deny", "Bash",
           sh('python Management/tools/ask.py add --from GameDesigner "việc" --blocker "x" --options "A·B" --suggest "A" --waiting "x"'))
-        for who in ("Wallet", "@Core", "@Codex", "@Manager"):
+        for who in ("Wallet", "@Core", "@Manager"):
             t(g + " (only a Leader adds)", who, "deny", "Bash",
               sh(f'python Management/tools/ask.py add --from {who.lstrip("@")} "v" --blocker "x" --options "A" --suggest "A" --waiting "x"'))
         t(g + " (Manager answers)", "@Manager", "allow", "Bash", sh(f'python Management/tools/ask.py answer {item["id"]} "ok"'))
@@ -2329,11 +2103,11 @@ def run_leader_ask_cases():
 
 def run_free_shell_cases():
     """Free shell (người quyết 2026-11-26): every bound chat, and its subagents, runs any shell command and any
-    Python; the gates of dispatch send, gd_req doing / done, studio review still hold; a chat with no FEATURE does not."""
+    Python; the gates of dispatch send, gd_req doing / done, art choose still hold; a chat with no FEATURE does not."""
     g = "free shell"
     guard.FREE_SHELL = True
     try:
-        for who in ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay", "@Codex", "@Blender", "@ClaudeImage",
+        for who in ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay",
                     "@DesignAdvisor", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner"):
             for cmd in ('python -c "print(1)"', "python Management/tools/test_validate.py", "ls", "git status",
                         "python Management/tools/validate.py; git diff | head -5"):
@@ -2341,16 +2115,21 @@ def run_free_shell_cases():
             t(g, who, "allow", "PowerShell", {"command": "Get-ChildItem"})
             t(g, who, "allow", "Monitor", {"command": "ls"})
         t(g + " (no FEATURE: allow-list)", "", "deny", "Bash", {"command": 'python -c "print(1)"'})
+        for who in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@UnityAutoPlay", "@Worker"):
+            t(g + " (art: the tier the game uses is the human's)", who, "deny", "Bash",
+              {"command": "python Management/tools/art.py choose Hero/hero-knight simple"})
+            t(g + " (art: anyone lists)", who, "allow", "Bash", {"command": "python Management/tools/art.py list Hero"})
+        t(g + " (art: anyone lists)", "", "allow", "Bash", {"command": "python Management/tools/art.py list"})
         g2 = "PowerShell: a bare @Name is splatting"
         send = 'python Management/tools/dispatch.py send {} --from GameDesigner "hỏi"'
-        for cmd in (send.format("@DesignAdvisor"), "python Management/tools/dispatch.py list @Codex",
+        for cmd in (send.format("@DesignAdvisor"), "python Management/tools/dispatch.py list @Core",
                     "ls; python x.py @Core"):
             t(g2, "@GameDesigner", "deny", "PowerShell", {"command": cmd})
         for cmd in (send.format("'@DesignAdvisor'"), send.format("DesignAdvisor"), "$a = @(1, 2)", "$h = @{a = 1}",
                     'Write-Host "mail @x"', "git log --format=%H@x"):
             t(g2 + " (quoted, no @, arrays)", "@GameDesigner", "allow", "PowerShell", {"command": cmd})
         t(g2 + " (Bash keeps @)", "@GameDesigner", "allow", "Bash", {"command": send.format("@DesignAdvisor")})
-        for cmd in (send.format("'@Codex'"), send.format("Codex")):
+        for cmd in (send.format("'@DesignAdvisor'"), send.format("DesignAdvisor")):
             t(g2 + " (the gate still reads the quoted or bare name)", "@UIDesigner", "deny", "PowerShell", {"command": cmd})
     finally:
         guard.FREE_SHELL = False
@@ -2362,7 +2141,7 @@ def run_free_read_cases():
     g = "free read"
     guard.FREE_READ = True
     try:
-        for who in ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay", "@Codex", "@DesignAdvisor", "@Manager",
+        for who in ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay", "@DesignAdvisor", "@Manager",
                     "@CodeLead", "@GameDesigner", "@UIDesigner"):
             for path in ("/Management/tools/dispatch.py", "/UnityProject/Assets/Features/Shop/Scripts/Internal/S.cs",
                          "/.claude/rules/worker.md", "/CLAUDE.md"):

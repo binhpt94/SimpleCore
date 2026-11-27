@@ -1,4 +1,0 @@
-{"parts": [
-  {"id": "cube", "w": 240, "h": 240, "slice": null, "shapes": ["cube-back", "cube-mid", "cube-front"]},
-  {"id": "shadow", "w": 240, "h": 50, "slice": null, "shapes": ["shadow-back", "shadow-mid", "shadow-front"]}
-]}

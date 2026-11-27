@@ -1,3 +1,0 @@
-Đã lưu [out/portrait-axeman.png](D:/AI/CoreSimple/Management/studio/codex/orders/TeamSelect/ts-card-colorful/work/out/portrait-axeman.png). Đây là PNG 240×200 có nền trong suốt, với phần vai và ngực chạm mép dưới.
-
-Ảnh được tạo bằng ImageGen theo yêu cầu chân dung chibi góc 3/4, râu cam, áo da cam nâu và rìu bạc hai lưỡi, với ánh bóng kiểu Colorful từ mẫu popup.

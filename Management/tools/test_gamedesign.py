@@ -1147,17 +1147,17 @@ def run_frames(root):
     check("frame: gd_frame --html writes one page", (gd_frame.main(["gd_frame.py", "ai/idea/feature-a/a1/a1x", "--html", str(out),
                                                                    "--root", root]), "<svg" in out.read_text(encoding="utf-8")), (0, True))
     check("frame: gd_frame refuses a path outside the tables", gd_frame.main(["gd_frame.py", "ai/other/x", "--root", root]), 2)
-    import studio
-    widths, real_png = [], studio.frame_png_file
+    import render
+    widths, real_png = [], render.frame_png_file
     try:
-        studio.frame_png_file = lambda fr, dest, stem, concept=True, width=None: (widths.append((concept, width)), None)[1]
+        render.frame_png_file = lambda fr, dest, stem, concept=True, width=None: (widths.append((concept, width)), None)[1]
         gd_frame.write_pngs(root, table, node)
         small = sorted(set(widths))
         widths.clear()
         gd_frame.write_pngs(root, table, node, full=True)
         full = sorted(set(widths))
     finally:
-        studio.frame_png_file = real_png
+        render.frame_png_file = real_png
     check("frame: --png draws small (concept 960, measure 1280); --png-full draws 1920",
           (small, full), ([(False, 1280), (True, 960)], [(False, 1920), (True, 1920)]))
     d = folder(root, "idea/feature-a/a1/a1x/data.md")

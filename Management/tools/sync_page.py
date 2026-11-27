@@ -9,7 +9,7 @@ Runs from the Stop hook after every chat turn; running it by hand is fine too.
 - Each scene in _Composition: its Boot variant, installers in boot order, asset catalogs (kind, id -> asset).
 - Reports for @Manager in Management/reports (written by .claude/hooks/stop_report.py), newest first.
 - Management/data/gamedesign.js: the game-design trees (live and idea), read by gamedesign.py.
-- Management/data/studio.js: the studio orders, their runs and quality, the art debts (studio.py).
+- Management/data/art.js: the art at tier Simple and Detail, and the one the game uses (art.py).
 Unity YAML is read as text. Nothing here is written by an AI.
 On error the old project.js is kept and the exit code is 2.
 """
@@ -241,12 +241,12 @@ def write_references(root=None):
     return data
 
 
-def write_studio(root=None):
-    """Writes Management/data/studio.js (orders, runs, quality, art debts) for the Studio tab and returns it."""
-    import studio      # here: studio imports gamedesign, which this module already has
+def write_art(root=None):
+    """Writes Management/data/art.js (the art at tier Simple and Detail) for the Studio tab and returns it."""
+    import art
     root = Path(root) if root else HERE.parent.parent
-    data = studio.snapshot(root)
-    write_js(root / "Management" / "data" / "studio.js", "CORESIMPLE_STUDIO", data)
+    data = art.snapshot(root)
+    write_js(root / "Management" / "data" / "art.js", "CORESIMPLE_ART", data)
     return data
 
 
@@ -267,9 +267,9 @@ def main():
     except Exception as ex:
         print(f"sync_page.py: game design failed: {type(ex).__name__}: {ex}", file=sys.stderr)
     try:
-        write_studio(root)
+        write_art(root)
     except Exception as ex:
-        print(f"sync_page.py: studio failed: {type(ex).__name__}: {ex}", file=sys.stderr)
+        print(f"sync_page.py: art failed: {type(ex).__name__}: {ex}", file=sys.stderr)
     try:
         write_references(root)
     except Exception as ex:

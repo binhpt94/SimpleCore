@@ -1,1 +1,0 @@
-Đã lưu đúng một tệp [out/hero-axeman.png](/D:/AI/CoreSimple/Management/studio/codex/orders/HudUpgrade/bar-icons/work/out/hero-axeman.png). PNG 256×256 có nền alpha 0 và viền tối khoảng 8 px. Khi thu xuống 70×70, mặt quay phải, râu nâu đỏ, khăn đỏ và rìu hai lưỡi vẫn phân biệt rõ.

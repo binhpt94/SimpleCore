@@ -1,3 +1,0 @@
-Đã lưu một sprite [enemy-giant.png](/D:/AI/CoreSimple/Management/studio/codex/orders/Enemy/enemy-sprites/work/out/enemy-giant.png) bằng ImageGen. PNG có kích thước **410 × 512 px**, nền alpha trong suốt, với lề trái 11 px, trên 15 px, phải 10 px và dưới chân 4 px. Khổng lồ quay phải và cây chuỳ nằm trọn trong khung.
-
-Tôi xoay nhẹ 1,45° và thu đồng tỷ lệ để đạt các lề trên. Viền tối đo được 6–11 px ở các vị trí lấy mẫu, với màu gần `#171C25`. Tiêu chí viền 10 px và màu `#1B2330` đạt một phần.

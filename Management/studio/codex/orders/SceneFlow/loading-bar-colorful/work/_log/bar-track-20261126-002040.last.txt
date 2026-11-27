@@ -1,1 +1,0 @@
-Đã tạo đúng một ảnh [out/bar-track.png](D:/AI/CoreSimple/Management/studio/codex/orders/SceneFlow/loading-bar-colorful/work/out/bar-track.png). Đã kiểm tra PNG RGBA 1000 × 48 px, bốn góc trong suốt, viền tím `#4A1070` dày 6 px và hai đầu bo bán kính 24 px cho 9-slice. Lòng tím chuyển mượt từ tối ở mép trên sang sáng nhẹ ở mép dưới.

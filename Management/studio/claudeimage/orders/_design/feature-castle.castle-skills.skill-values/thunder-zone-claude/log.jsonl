@@ -1,6 +1,0 @@
-{"at": "2026-11-24 13:46:58", "event": "attempt", "item": "thunder-zone", "n": 1}
-{"at": "2026-11-24 13:46:59", "event": "run", "tool": "claudeimage", "item": "thunder-zone", "mode": "browser", "exit": 0, "parts": [], "result": "đã có work/out/thunder-zone.png", "files": ["thunder-zone.png"]}
-{"at": "2026-11-24 13:48:19", "event": "deliver", "version": 1, "files": ["meta.json", "parts", "quality.json", "thunder-zone.png"], "below": []}
-{"at": "2026-11-25 23:14:00", "event": "redo", "item": "thunder-zone", "round": 1, "text": "Style vòng 1 đổi sang Colorful casual mobile, vẽ lại theo style mới, giữ nguyên bố cục frame", "version": 1}
-{"at": "2026-11-25 23:20:50", "event": "build", "tool": "claudeimage", "item": "thunder-zone", "mode": "browser", "exit": 0, "parts": [], "result": "đã có work/out/thunder-zone.png", "files": ["thunder-zone.png"]}
-{"at": "2026-11-25 23:21:15", "event": "deliver", "version": 2, "files": ["meta.json", "parts", "quality.json", "thunder-zone.png"], "below": []}

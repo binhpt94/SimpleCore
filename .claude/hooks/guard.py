@@ -24,13 +24,8 @@ The value, by group:
                                           writable only when every node above it is approved (gamedesign.py).
                                           It lists the UI a round-4 node needs (ui.md); the layout is @UIDesigner's
               @UIDesigner                 lays the UI out: writes only the frames of the proposed tree
-                                          (ai/idea/**/.frame-concept/<name>.frame, same write gate as @GameDesigner) and
-                                          the claude-concept orders (claudeimage/orders/_design); reads like @GameDesigner
-    Tools     @Codex / @Blender /         take orders from the features (Management/studio, studio.py): write only their
-              @ClaudeImage                lessons.md and the work folder of an order; run Codex / Blender through
-                                          studio.py; blender MCP (@Blender) and unity-mcp custom tools are a soft gate.
-                                          @ClaudeImage draws each picture itself as an SVG in the work folder and
-                                          studio.py makes the PNG
+                                          (ai/idea/**/.frame-concept/<name>.frame, same write gate as @GameDesigner);
+                                          reads like @GameDesigner
     Workers   @Worker                     one big job (worker.py, người quyết 2026-11-27): runs in a git worktree,
                                           edits all of UnityProject/Assets (every feature, Core, _Composition, skeleton
                                           and contracts) but SimpleCoreTools; nothing else; no unity-mcp, no asking,
@@ -38,7 +33,7 @@ The value, by group:
     Testers   @UnityAutoPlay              plays the game in the Editor: reads all of UnityProject, edits nothing there;
                                           writes only Tester/UnityAutoPlay (runs, tester.py); unity-mcp: read, play,
                                           tests, load a scene, menu, camera, execute_code (a soft gate)
-              @DesignAdvisor              asks GPT (Codex CLI, through gd_advise.py) about the design when the human or
+    Tools     @DesignAdvisor              asks GPT (Codex CLI, through gd_advise.py) about the design when the human or
                                           @GameDesigner asks it to; reads Management/game-design, writes only its questions
                                           picks and notes in Management/game-design/advice (<node>/<id>.q.md, <id>.pick.md,
                                           <id>.note.md); the answers are written by gd_advise.py, <id>.pick.json by
@@ -49,9 +44,7 @@ The value, by group:
     Services  _Services/<Name>            edits only its service
     unset / invalid                       every edit is denied
 Basic, Features, Services and Tools read the public parts of features, Core, _Composition, Management, .claude and
-the root CLAUDE.md. Every bound chat (@GameDesigner too) reads Management/studio and Resources; a feature creates
-the order.md of its own orders there, once, and judges what was delivered (studio.py review; art concepts are
-judged by the human on the management page). rules.json and deleting folders ask the human
+the root CLAUDE.md. rules.json and deleting folders ask the human
 (@CodeLead deletes its own folders itself: skeleton folders, folders inside _Composition, and any file or folder of
 any feature or service, the whole feature too).
 unity-mcp (UNITY_RULES): code sessions read through it, change assets of their own area (write), compile
@@ -195,7 +188,7 @@ DESIGN_AI, DESIGN_LIVE, DESIGN_BASE = ("Management/game-design/ai", "Management/
 DESIGN_ADVICE = "Management/game-design/advice"      # GPT's points about the design, asked by @DesignAdvisor; each becomes an idea
 DESIGN_ZONES = {DESIGN_AI, DESIGN_LIVE, DESIGN_BASE, DESIGN_ADVICE}
 REFERENCES_ZONE = "Management/references"      # pictures the human uploads on the page (layout, art style), with notes
-READ_ALL_ZONES = {"Management/studio", "Resources", REFERENCES_ZONE}      # the orders and what was delivered: every bound chat reads
+READ_ALL_ZONES = {REFERENCES_ZONE}      # the human's reference pictures: every bound chat reads
 # Inside ai: the proposed tree; the human's answers file that sits beside each node's questions; and the folders
 # only the page and the history code write (the human's scores, the node's history).
 DESIGN_TREE, DESIGN_CHOOSE, DESIGN_ANSWERS = "idea", ".ai-need-user-choose", "answers.json"
@@ -204,8 +197,8 @@ EXCEL_DIR_NAME = ".excel"      # the config tables of a design node (Management/
 DESIGNER_RULES_DIR = ".claude/rules"      # the shared rules and one file per round
 HUMAN_ASK_ZONES = set()      # zone names where the human chat is still asked before an edit; the human emptied it
 # FEATURE values that are not feature folders.
-ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@Codex",
-         "@Blender", "@ClaudeImage", "@UnityAutoPlay", "@Worker")
+ROLES = ("@human", "@Core", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor", "@UnityAutoPlay",
+         "@Worker")
 # A worker (Management/tools/worker.py): one big job in its own git worktree, every feature at once. The architecture
 # is checked on the result (asmdef, validate.py, compile_check, tests) and worker.py applies only Assets files, so the
 # guard keeps the safe zones only. Its commands that write the books or message anyone are refused.
@@ -213,7 +206,7 @@ WORKER_ROLE = "@Worker"
 WORKER_DENY_RX = re.compile(
     r"Management/tools/(dispatch\.py send|ask\.py (add|answer|cancel)|editor_ticket\.py (add|done|drop|release)"
     r"|gd_req\.py \S+ (doing|done|verify|reject)|toolwork\.py (add|done|drop)|scaffold\.py(?! --dry-run)"
-    r"|studio\.py (review|cancel|redo|deliver|check|pick)|gd_\w+\.py \S+ (set|write|sync|add|delete|pin))")
+    r"|art\.py choose|gd_\w+\.py \S+ (set|write|sync|add|delete|pin))")
 WORKER_NOTE = ("a worker does its whole job alone: it does not ask, message, or write the books; put what is missing in "
                "result.json (status blocked, question) and finish (.claude/rules/worker.md)")
 # Testers: they play the game in the Editor and write what they saw. They read all the code of UnityProject and
@@ -236,30 +229,10 @@ TESTER_CALLERS = ("codelead", "gamedesigner", "uidesigner")
 # Who may message @Manager (SendMessage): the Leaders and the human. Features, services, @Core, the tools and the
 # testers report to @CodeLead (their part's Leader) since 2026-11-26, so @Manager is not woken for their news.
 MANAGER_CALLERS = ("manager", "codelead", "gamedesigner", "uidesigner", "human")
-# Tools: they take orders from the features and make images (Codex; ClaudeImage draws them itself as SVG) or 3D
-# models (Blender); they never code.
-TOOL_ROLES = {"@Codex": "codex", "@Blender": "blender", "@ClaudeImage": "claudeimage"}
-ART_ORDER_TOOLS = ("codex", "claudeimage")      # whose orders/_design/ design orders go into
-# Who orders for a design node: art concepts (Codex) @GameDesigner, claude-concepts (drawn from the frames) @UIDesigner.
-DESIGN_ORDERER = {"codex": "gamedesigner", "claudeimage": "uidesigner"}
-STUDIO_ZONE, RESOURCES_ZONE = "Management/studio", "Resources"
-# What studio.py alone writes in an order folder; the one who orders writes order.md, once.
-STUDIO_SCRIPT_FILES = {"status.json", "log.jsonl", ".run.lock", "review.json", "anchors.json"}
-STUDIO_FEATURE_FILE_RX = re.compile(r"^order\.md$")
-STUDIO_ID = r"[a-z0-9]+(-[a-z0-9]+)*"
-# An order's owner: a feature folder, or a design node (art concepts, ordered by @GameDesigner: _design/<a.b.c>).
-DESIGN_OWNER_RX = re.compile(r"^_design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*$")
-STUDIO_REF = r"((_Services/)?[A-Za-z][A-Za-z0-9]*|_design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*)/" + STUDIO_ID
-# The studio (orders to the tool chats; see studio.py). Reading it: any chat. Running a tool: that tool's chat.
-STUDIO = PY + r"Management/tools/studio\.py "
-ALLOWED_COMMANDS.append(STUDIO + r"measure " + STUDIO_REF + "( " + STUDIO_ID + ")?")
-ALLOWED_COMMANDS.append(STUDIO + r"(check|status( (codex|blender|claudeimage|" + STUDIO_REF + "))?)")
-# A Leader lets @ClaudeImage draw one frame of a delivered claude concept again (one run, with the reason in double
-# quotes). Drawing after a delivery is never the tool chat's own decision; the human runs it too.
-LEADER_REDO = (STUDIO + r"redo _design/[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*/" + STUDIO_ID + " " + STUDIO_ID
-               + r' "[^"\\]+"')
-for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS, CODELEAD_COMMANDS, MANAGER_COMMANDS):
-    _commands.append(LEADER_REDO)
+# The art of the game (Management/tools/art.py): what has a Simple or a Detail, any chat. Choosing the tier the game
+# uses is the human's (the Studio tab of the page); a worker draws a Simple with `art.py svg` (it runs any command).
+ART_CHOOSE_RX = re.compile(r"Management/tools/art\.py\s+choose\b")
+ALLOWED_COMMANDS.append(PY + r"Management/tools/art\.py list( (_Services/)?[A-Za-z][A-Za-z0-9]*)?")
 # Every Leader may look at what scaffold.py would create (it prints, it creates nothing); creating is @Manager's and
 # @CodeLead's.
 for _commands in (DESIGNER_COMMANDS, UIDESIGNER_COMMANDS):
@@ -290,22 +263,6 @@ def tester_commands(name):
 
 CHAIN_SPLIT_RX = re.compile(r"\s*(?:;|&&)\s*")
 CHAIN_MAX = 6
-TOOL_COMMANDS = {
-    # @ClaudeImage writes work/<item>.svg itself; `claude` checks it and makes the PNG (no outside tool is run).
-    "claudeimage": [STUDIO + r"claude " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver claudeimage " + STUDIO_REF,
-                    STUDIO + r"pick " + STUDIO_REF + " " + STUDIO_ID + r" [1-9][0-9]*"],
-    "codex": [STUDIO + r"(codex|consult) " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver codex " + STUDIO_REF,
-              STUDIO + r"pick " + STUDIO_REF + " " + STUDIO_ID + r" [1-9][0-9]*"],
-    "blender": [STUDIO + r"blender " + STUDIO_REF + " " + STUDIO_ID, STUDIO + r"deliver blender " + STUDIO_REF,
-                STUDIO + r"pick " + STUDIO_REF + " " + STUDIO_ID + r" [1-9][0-9]*"],
-}
-# The one who ordered judges one delivered item: a level 0-3 and an optional feedback in double quotes (no quote
-# and no backslash inside; SHELL_META_RX refuses the shell characters). Only the feature that ordered runs it.
-FEATURE_STUDIO_RX = re.compile(r"^python3? Management/tools/studio\.py (review) (" + STUDIO_REF + r") " + STUDIO_ID
-                               + r' [0-3]( "[^"\\]*")?$')
-# Dropping an order (studio.py cancel <F>/<id> "<why>"): the feature that ordered it, @CodeLead for any order (the
-# features are its part), the human.
-STUDIO_CANCEL_RX = re.compile(r"^python3? Management/tools/studio\.py cancel (" + STUDIO_REF + r') "[^"\\]+"$')
 # The requirement book of a feature (Management/tools/gd_req.py, reqbook.py). Reading one book: any chat; the line
 # per feature: the Leaders. doing / done: only the chat of that feature (FEATURE_REQ_RX, checked below), with its note
 # or the play text in double quotes, or the names of its tests. verify / reject: @CodeLead. The human waives on the page.
@@ -324,36 +281,35 @@ FEATURE_REQ_RX = re.compile(r"^python3? Management/tools/gd_req\.py (" + REQ_FEA
 # chats get work through it, not through SendMessage (a chat that is not running would never get the message).
 # list: every bound chat. send: a Leader, to the chats of its own part, with --from naming itself. cancel: @CodeLead.
 # @Manager keeps to the Leaders (SendMessage) and sends to no inbox (decided 2026-11-26): the features, services, @Core
-# and the testers are @CodeLead's part; the tools get their orders from studio.py and @GameDesigner, @UIDesigner.
+# and the testers are @CodeLead's part; @DesignAdvisor gets its questions from @GameDesigner.
 # A tester stays live once it runs (SendMessage); every Leader may send to its inbox, which opens it when it is not
 # running (what the message may ask for is the written rule of .claude/rules/tester.md).
 DISPATCH = PY + r"Management/tools/dispatch\.py "
-INBOX_TOOLS = ("Codex", "Blender", "ClaudeImage", "DesignAdvisor")
+INBOX_TOOLS = ("DesignAdvisor",)
 INBOX_FEATURE = r"(_Services/)?[A-Z][A-Za-z0-9]*"
 ALLOWED_COMMANDS.append(DISPATCH + r"list( (@(Core|" + "|".join(INBOX_TOOLS + tuple(TESTER_ROLES.values())) + r")|" + INBOX_FEATURE + r"))?")
 CODELEAD_COMMANDS.append(DISPATCH + r"cancel m[0-9]{8}-[0-9]{6}-[0-9a-f]{6}")
-# The names may be quoted ('@Codex': PowerShell needs it) and a role may come without its @ (Codex = @Codex).
+# The names may be quoted ('@Core': PowerShell needs it) and a role may come without its @ (Core = @Core).
 DISPATCH_SEND_RX = re.compile(r"^python3? Management/tools/dispatch\.py send ['\"]?(@[A-Za-z]+|" + INBOX_FEATURE
                               + r""")['"]? --from ['"]?@?([A-Za-z]+)['"]? "[^"\\]+"$""")
 # PowerShell reads a bare @Name as splatting the variable $Name: with no such variable the argument is gone, so
-# `dispatch.py send @Codex ...` reaches python without its target. Refused before it runs (2026-11-26).
+# `dispatch.py send @Core ...` reaches python without its target. Refused before it runs (2026-11-26).
 PS_SPLAT_RX = re.compile(r"(?:^|[\s(;|&])@[A-Za-z_]\w*")
 PS_QUOTED_RX = re.compile(r"""'[^']*'|"[^"]*\"""")
 
 
 def inbox_name(target):
-    """A role named without its @ (Codex, designadvisor) is that role, as dispatch.py reads it; anything else as is."""
+    """A role named without its @ (Core, designadvisor) is that role, as dispatch.py reads it; anything else as is."""
     if target.startswith("@"):
         return target
     return next((r for r in ROLES if r[1:].lower() == target.lower()), target)
 INBOX_SENDERS = {      # role -> the targets it may send to ("feature": any feature or service)
-    # the tools too: CodeLead answers a tool that is blocked on an order of a feature (TRẢ LỜI, 2026-11-26)
-    "@CodeLead": ("feature", "@Core", "@Codex", "@Blender", "@ClaudeImage") + tuple(TESTER_ROLES),
-    "@GameDesigner": ("@DesignAdvisor", "@Codex") + tuple(TESTER_ROLES),
-    "@UIDesigner": ("@ClaudeImage",) + tuple(TESTER_ROLES),
+    "@CodeLead": ("feature", "@Core") + tuple(TESTER_ROLES),
+    "@GameDesigner": ("@DesignAdvisor",) + tuple(TESTER_ROLES),
+    "@UIDesigner": tuple(TESTER_ROLES),
 }
 # Names SendMessage may still reach: the Leaders and the testers run all the time. Any other thread name (a feature,
-# a service, Core, a tool chat) runs on demand, so a message to it goes through the inbox.
+# a service, Core, @DesignAdvisor) runs on demand, so a message to it goes through the inbox.
 LIVE_NAMES = {"manager", "codelead", "gamedesigner", "uidesigner", "human"}
 ROLE_AREAS = {"@Core": "Core"}
 # The wiring (Boot, scenes, asset catalogs): @CodeLead edits all of it, not only its skeleton; no code gate.
@@ -369,9 +325,6 @@ LEAD_AREA = "_Composition"
 #   script  writes code: code is written with Edit/Write only                        nobody (@human passes)
 # "Code session": Basic, Features, Services. @human passes everything; @Manager, @GameDesigner and an unset chat get nothing.
 UNITY_PREFIX = "mcp__unityMCP__"
-BLENDER_PREFIX = "mcp__blender__"
-TOOL_UNITY = {"execute_custom_tool", "execute_menu_item"}      # the indirect way of a tool chat (soft gate), with the lock
-UNITY_TOOL_ROLES = ("@Codex", "@Blender")      # the tool chats that have an outside tool to run that way
 # What a tester may run besides reading, play and tests: a menu of the Editor (the cheats), the camera (screenshots)
 # and execute_code (C# in the Editor: press a button, call a cheat, read a state). The last is a soft gate, like the
 # tool chats' way above: the guard cannot read the code, the rule (.claude/rules/tester.md) forbids changing files.
@@ -698,7 +651,7 @@ UNITY_FAIL_RX = re.compile(r"not found\. Available|is not running|not connected|
                            r"connection (refused|reset|closed|error)|failed to connect|could not connect|disconnected|"
                            r"timed? ?out|econnrefused|unity (editor )?is not (open|running)", re.I)
 CODEX_FAIL_MARK = "CODEX LỖI:"
-CODEX_COMMAND_RX = re.compile(r"Management/tools/(gd_advise\.py|studio\.py\s+(codex|consult))\b")
+CODEX_COMMAND_RX = re.compile(r"Management/tools/gd_advise\.py\b")
 FAIL_STOP = {
     "unity": ("UNITY MCP LỖI KẾT NỐI{why}: DỪNG mọi việc cần Unity trong lượt này. Không gọi lại unity-mcp, không tìm đường "
               "khác. Nhắn Leader của bạn MỘT tin BÁO CHẶN kèm câu lỗi (tầng dưới: CodeLead; CodeLead: Manager), rồi kết thúc "
@@ -821,8 +774,6 @@ def zone(full, root, feature, area=None, read_all=False):
         return ".claude", True, "deny"
     if low[0] == "claude.md" and n == 1:
         return "root CLAUDE.md", True, "deny"
-    if low[0] == "resources":      # deliveries of the tool chats; only studio.py writes there
-        return RESOURCES_ZONE, same(seg[0], "Resources"), "deny"
     if low[0] == "management":
         if not same(seg[0], "Management"):
             return "Management", True, "deny"
@@ -832,10 +783,6 @@ def zone(full, root, feature, area=None, read_all=False):
             return "Management", True, "deny"
         if n >= 2 and low[1] == "references":      # only the page (setup_server.py) writes it
             return (REFERENCES_ZONE if exact(seg[:2], REFERENCES_ZONE) else "Management"), True, "deny"
-        if n >= 2 and low[1] == "studio":
-            if exact(seg[:2], STUDIO_ZONE):
-                return STUDIO_ZONE, True, "studio"
-            return "Management", True, "deny"
         if n >= 2 and low[1] == "game-design":
             if n >= 3 and low[2] == "ai" and exact(seg[:3], DESIGN_AI):
                 return DESIGN_AI, True, "design"
@@ -1038,51 +985,6 @@ def gamedesign_module(root):
         sys.path.insert(0, tools)
     import gamedesign
     return gamedesign
-
-
-def decide_studio_edit(tool, full, root, mode, feature, tool_name):
-    """Edits inside Management/studio. The tool chat: its own lessons.md and the work folder of its orders.
-    A feature (and @GameDesigner for an art order): creates the order.md of its own order, once. studio.py and the
-    page write the rest (the judgement of a delivery too: studio.py review)."""
-    seg = rel_segments(full, under(root, "Management", "studio"))
-    if mode == "tool":
-        if len(seg) == 2 and seg[0] == tool_name and seg[1] == "lessons.md":
-            return "allow", f"lessons of the {tool_name} chat"
-        if len(seg) >= 5 and seg[0] == tool_name and seg[1] == "orders" and "work" in seg[3:-1]:
-            at = seg.index("work", 3)
-            owner = "/".join(seg[2:at - 1])
-            if at >= 4 and (FEATURE_RX.match(owner) or DESIGN_OWNER_RX.match(owner)) and re.fullmatch(STUDIO_ID, seg[at - 1]):
-                return "allow", "the work folder of an order"
-        return "deny", (f"in Management/studio a tool chat writes only {tool_name}/lessons.md and "
-                        f"{tool_name}/orders/<F>/<id>/work/**; order.md, review.json, status.json, log.jsonl and refs are "
-                        "not its to write")
-    if mode == "feature" and len(seg) in (5, 6) and seg[0] in TOOL_ROLES.values() and seg[1] == "orders":
-        ordered, oid, name = "/".join(seg[2:-2]), seg[-2], seg[-1]
-        if not same(ordered, feature):
-            return "deny", f"FEATURE={feature} orders only for itself (orders/{feature}/<id>/)"
-        if not re.fullmatch(STUDIO_ID, oid) or not STUDIO_FEATURE_FILE_RX.match(name):
-            return "deny", ("a feature writes only order.md in an order folder (id: lower case, digits, '-'); it judges "
-                            "a delivery with: python Management/tools/studio.py review <F>/<id> <item> <0-3> \"<feedback>\"")
-        if tool != "Write" or os.path.lexists(full):
-            return "deny", "order.md is written once: a change is a new order"
-        locked = design_gate(root, feature)
-        if locked:
-            return "deny", locked
-        return "allow", f"new {name} for {seg[0]}"
-    if mode in ("gamedesigner", "uidesigner") and len(seg) == 6 and seg[0] in ART_ORDER_TOOLS and seg[1:3] == ["orders", "_design"]:
-        if DESIGN_ORDERER[seg[0]] != mode:
-            return "deny", ("art concepts (codex/orders/_design) are ordered by @GameDesigner, claude-concepts "
-                            "(claudeimage/orders/_design, drawn from the frames) by @UIDesigner")
-        owner, oid, name = "/".join(seg[2:4]), seg[4], seg[5]
-        if not DESIGN_OWNER_RX.match(owner) or not re.fullmatch(STUDIO_ID, oid) or not STUDIO_FEATURE_FILE_RX.match(name):
-            return "deny", ("an art order lives in <codex|claudeimage>/orders/_design/<node path with '.' for '/'>/<id>/ and "
-                            "holds only order.md from you; the human judges the pictures on the management page")
-        if tool != "Write" or os.path.lexists(full):
-            return "deny", "order.md is written once: a change is a new order"
-        return "allow", f"new {name} of an art order"
-    return "deny", ("Management/studio: the tool chats write their lessons and work, the features their orders, "
-                    "@GameDesigner the art orders (codex/orders/_design), @UIDesigner the claude-concept orders "
-                    "(claudeimage/orders/_design), studio.py and the page the rest")
 
 
 def decide_advice_edit(full, root):
@@ -1353,15 +1255,7 @@ def decide_unity_one(tool, ti, ctx, work):
         return "deny", f"unity-mcp {short} {action or ''}: not on the guard's list (guard.py UNITY_RULES); ask the human", False
     if kind == "script":
         return "deny", f"unity-mcp {short}: code is written with Edit/Write only, where the guard checks it", False
-    if mode == "tool":
-        if kind == "read" or (kind == "lead" and short in TOOL_UNITY and who in UNITY_TOOL_ROLES):
-            pass      # reads, and the indirect way to run Codex or Blender (it takes the Editor lock below)
-        elif kind == "lead" and short in TOOL_UNITY:
-            return "deny", f"unity-mcp {short}: {who} draws its pictures itself and runs no outside tool; it only reads", False
-        else:
-            return "deny", (f"unity-mcp {short} {action}: a tool chat only reads and, when its tool cannot run, "
-                            f"calls {' or '.join(sorted(TOOL_UNITY))}"), False
-    elif mode == "tester":
+    if mode == "tester":
         if not (kind in ("read", "shared", "play") or short in TESTER_UNITY or (short, action) == ("manage_scene", "load")):
             return "deny", (f"unity-mcp {short} {action}: {who} plays and reads, it changes nothing in the project (no "
                             "asset, object, scene save, setting or code). Report what is wrong to the owner."), False
@@ -1701,7 +1595,7 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all, store=No
         if name.lower() in FORBIDDEN_DIRS:
             return "deny", f"may not read: {name} (Unity's generated files)"
         return "allow", f"free read for a bound chat, in {name} (người quyết 2026-11-26)"
-    if mode == "gamedesigner":      # sees the design tree, its own rules and the studio, nothing else
+    if mode == "gamedesigner":      # sees the design tree, its own rules and the references, nothing else
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
             same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
             and bool(DESIGNER_RULES_RX.match(posixpath.basename(full)))) or own_skill(full, root, DESIGNER_SKILLS_RX)
@@ -1709,7 +1603,7 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all, store=No
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or (
             same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
             and bool(UIDESIGNER_RULES_RX.match(posixpath.basename(full)))) or own_skill(full, root, UIDESIGNER_SKILLS_RX)
-    if mode == "advisor":      # the design tree, the studio, the root CLAUDE.md, its rules and the designer's
+    if mode == "advisor":      # the design tree, the references, the root CLAUDE.md, its rules and the designer's
         readable = name in DESIGN_ZONES or name in READ_ALL_ZONES and readable or name == "root CLAUDE.md" or (
             same(posixpath.dirname(full), under(root, DESIGNER_RULES_DIR))
             and bool(ADVISOR_RULES_RX.match(posixpath.basename(full)))) or own_skill(full, root, ADVISOR_SKILLS_RX)
@@ -1882,9 +1776,6 @@ def headless_leader(session_value, root):
     role = role_of(raw)
     if role == "@DesignAdvisor":
         return "GameDesigner"
-    if role in TOOL_ROLES:
-        return ("the Leader that gave the order (an order of a feature: CodeLead; _design: GameDesigner for Codex, "
-                "UIDesigner for ClaudeImage)")
     if role in TESTER_ROLES:
         return "CodeLead"
     return None
@@ -1944,8 +1835,6 @@ def decide_raw(data, session_value, root, store=None):
         mode = "uidesigner"
     elif role == "@DesignAdvisor":
         mode = "advisor"
-    elif role in TOOL_ROLES:
-        mode = "tool"
     elif role in TESTER_ROLES:
         mode = "tester"
     elif role == WORKER_ROLE:
@@ -1987,8 +1876,7 @@ def decide_raw(data, session_value, root, store=None):
             how = (f'python Management/tools/dispatch.py send <tên> --from {(role or "").lstrip("@")} "<việc>"'
                    if role in INBOX_SENDERS else "nhờ Leader của phần đó (CodeLead, GameDesigner, UIDesigner)")
             return "deny", ("this chat runs on demand and may not be running: a SendMessage to it would be lost. Give it "
-                            f"work through its inbox: {how}. gd_req.py reject and studio.py check, review 0, deliver, redo "
-                            "already put their message there.")
+                            f"work through its inbox: {how}. gd_req.py reject already puts its message there.")
         if to in (n.lower() for n in TESTER_ROLES.values()) and mode not in TESTER_CALLERS:
             return "deny", ("only @CodeLead (and the human) gives a tester work: it holds the Unity Editor while it plays. "
                             + ("@Manager keeps to the Leaders: ask CodeLead for the test run."
@@ -2009,35 +1897,20 @@ def decide_raw(data, session_value, root, store=None):
                 name = bare.group(0).lstrip(" \t(;|&")
                 return "deny", (f"PowerShell đọc {name} không có ngoặc là splatting biến ${name[1:]}: tham số đó biến mất "
                                 f"trước khi tới lệnh (dispatch.py send báo thiếu người nhận). Viết '{name}' trong ngoặc đơn, "
-                                "bỏ @ (dispatch.py hiểu Codex là @Codex), hoặc chạy lệnh bằng Bash")
+                                "bỏ @ (dispatch.py hiểu Core là @Core), hoặc chạy lệnh bằng Bash")
         commands = ALLOWED_COMMANDS + (DESIGNER_COMMANDS if mode == "gamedesigner" else []) + (
             UIDESIGNER_COMMANDS if mode == "uidesigner" else []) + (
             ADVISOR_COMMANDS if mode == "advisor" else []) + (
             CODELEAD_COMMANDS if mode == "codelead" else []) + (MANAGER_COMMANDS if mode == "manager" else []) + (
-            TOOL_COMMANDS[TOOL_ROLES[role]] if mode == "tool" else []) + (
             TESTER_READ_COMMANDS if mode in TESTER_READERS else []) + (
             tester_commands(TESTER_ROLES[role]) if mode == "tester" else [])
         def gated(one):
-            """The verdict on one command that has checks of its own (studio review / cancel, dispatch.py send,
+            """The verdict on one command that has checks of its own (dispatch.py send,
             gd_req.py doing / done: who may, the phase gate); None for any other command. Run on the whole command
             and on each part of a chain, so a chain never skips a gate."""
-            m = FEATURE_STUDIO_RX.match(one)
-            # review: only the feature that ordered. The feedback text may hold "..", the part before it may not.
-            if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
-                ordered = m.group(2).rpartition("/")[0]
-                if mode == "feature" and ordered == feature:
-                    return "allow", f"studio: {m.group(1)} an order of {feature}"
-                if ordered.startswith("_design/"):
-                    return "deny", "art concepts are judged by the human on the management page (tab Game design)"
-                return "deny", (f"the orders of {ordered} are judged by its worker (result.json reviews, run by the server); "
-                                "send the feature a message in the inbox to have them judged")
-            m = STUDIO_CANCEL_RX.match(one)
-            if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
-                ordered = m.group(1).rpartition("/")[0]
-                if mode == "codelead" or (mode == "feature" and ordered == feature):
-                    return "allow", f"studio: {who} cancels the order {m.group(1)}"
-                return "deny", (f"only the chat that ordered ({ordered}) or @CodeLead cancels an order; tell @CodeLead which "
-                                "order and why")
+            if ART_CHOOSE_RX.search(one.replace("\\", "/")):
+                return "deny", ("which tier of an art the game uses (Simple or Detail) is the human's choice, on the Studio "
+                                "tab of the page; no chat makes it")
             m = DISPATCH_SEND_RX.match(one)
             # send to the inbox: a Leader, to its own part, naming itself; the text may hold "..", the rest may not.
             if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
@@ -2081,7 +1954,7 @@ def decide_raw(data, session_value, root, store=None):
         if verdict:
             return verdict
         # Free shell (người quyết 2026-11-26): every bound chat, and its subagents, runs any shell command and any
-        # Python. Only the gates above still hold (a dispatch send, a doing / done, a studio review / cancel, the
+        # Python. Only the gates above still hold (a dispatch send, a doing / done, the
         # phase gate), on each part of a chain too. The zones are kept on Edit / Write / Read only: a shell command
         # is not checked against them. A chat with no FEATURE keeps the allow-list below.
         if mode != "none" and FREE_SHELL:
@@ -2165,11 +2038,6 @@ def decide_raw(data, session_value, root, store=None):
                 return "deny", locked
             return "allow", f"@CodeLead edits {name}"
         name, _, edit = zone(full, root, feature, area)
-        if edit == "studio":
-            return decide_studio_edit(tool, full, root, mode, feature, TOOL_ROLES.get(role))
-        if mode == "tool":
-            return "deny", (f"{who} writes only inside Management/studio/{TOOL_ROLES[role]} (lessons.md, the work folder "
-                            "of an order) and never codes; results reach the feature through studio.py deliver")
         if mode == "gamedesigner":
             if edit == "design":
                 return decide_designer_edit(full, root, name)
@@ -2178,8 +2046,8 @@ def decide_raw(data, session_value, root, store=None):
         if mode == "uidesigner":
             if edit == "design":
                 return decide_uidesigner_edit(full, root, name)
-            return "deny", ("@UIDesigner writes only frames in Management/game-design/ai/idea (and claude-concept "
-                            "orders in Management/studio/claudeimage/orders/_design). See .claude/rules/uidesigner.md.")
+            return "deny", ("@UIDesigner writes only frames in Management/game-design/ai/idea. "
+                            "See .claude/rules/uidesigner.md.")
         if mode == "advisor":
             if edit == "advice":
                 return decide_advice_edit(full, root)
@@ -2230,11 +2098,6 @@ def decide_raw(data, session_value, root, store=None):
                 return "deny", 'glob may not be absolute or contain ".."; set the search folder with path instead'
         return read_verdict(resolve_target(target, cwd), root, data.get("session_id"), mode, feature, area, read_all,
                             store)
-
-    if tool.startswith(BLENDER_PREFIX):      # soft gate: the guard cannot read the Python it runs (.claude/rules/studio.md)
-        if mode == "tool" and TOOL_ROLES[role] == "blender":
-            return "allow", "@Blender uses blender MCP when headless Blender fails"
-        return "deny", "blender MCP is @Blender's; order a model from @Blender (.claude/rules/studio.md)"
 
     if tool.startswith(UNITY_PREFIX) or tool in UNITY_RESOURCE_TOOLS:
         return decide_unity(tool, ti, mode, feature, area, who, root, data.get("session_id"), store)

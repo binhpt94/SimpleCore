@@ -41,7 +41,7 @@ def main():
         check("add: the same bug again is not written twice", (bugs.add(root, "State Giữa trận  chỉ ra màn bắt đầu", "Hud", "người")["id"],
               len(bugs.items(root))), (b["id"], 1))
         check("add: an unknown feature is refused", refused(lambda: bugs.add(root, "x", "Nope", "người")))
-        check("add: an unknown source is refused", refused(lambda: bugs.add(root, "x", "Hud", "@Codex")))
+        check("add: an unknown source is refused", refused(lambda: bugs.add(root, "x", "Hud", "@Nobody")))
         check("list: by feature", ([x["id"] for x in bugs.items(root, feature="HudUpgrade")], bugs.items(root, feature="Run")), ([b["id"]], []))
         f = bugs.fix(root, b["id"], "người", now=2)
         m = dispatch.get(root, f["message"])

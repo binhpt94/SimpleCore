@@ -38,8 +38,8 @@ Thumbs.db
 /Management/data/project.js.tmp
 /Management/data/gamedesign.js
 /Management/data/gamedesign.js.tmp
-/Management/data/studio.js
-/Management/data/studio.js.tmp
+/Management/data/art.js
+/Management/data/art.js.tmp
 /Management/data/references.js
 /Management/data/references.js.tmp
 /Management/game-design/.promote-*/
@@ -51,16 +51,9 @@ Thumbs.db
 # Hộp thư của các thread chạy theo việc (dispatch.py, setup_server.py): trạng thái lúc chạy, không commit
 /Management/inbox/
 
-# Trung gian của studio.py claude (ảnh ghép có font nhúng, khoảng 1,4 MB mỗi lần chạy)
-/Management/studio/**/work/_log/*.compose.svg
-/Management/studio/**/work/_log/*.font.svg
-/Management/studio/**/work/_made/
-
 # Excel lock files (a workbook open in Excel)
 ~$*
 
-# studio.py: khoá của một lượt đang chạy, không commit
-Management/studio/**/.run.lock
 /Management/editor-tickets/
 # Việc của worker.py: job, kết quả, nhật ký (worktree ở ~/.coresimple-work)
 /Management/workers/

@@ -1,3 +1,0 @@
-Đã lưu một ảnh [out/hero-swordsman.png](D:/AI/CoreSimple/Management/studio/codex/orders/HudUpgrade/bar-icons/work/out/hero-swordsman.png) — PNG 256×256, nền alpha 0.
-
-Ở 70×70 px, hai đuôi khăn cam và lưỡi kiếm bạc vẫn tách rõ. Viền `#1B2330` dày khoảng 6–9 px ở các đoạn đo trên ảnh gốc.

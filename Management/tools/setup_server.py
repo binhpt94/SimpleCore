@@ -68,11 +68,9 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   human's answers to @GameDesigner's questions, /review the human's score and feedback per idea, /priority the
   human's importance score of a node, /progress the progress of a leaf. With the PIN: /mode switches Full Auto / User control,
   /stage the phase. live is only ever rebuilt from approved.json (gamedesign.build_live).
-- Art concepts (studio.py), all without the PIN: POST /api/studio/review stores the human's judgement of one
-  delivered picture (level 0-3 or null, and a feedback text; studio.save_review) and tells nobody,
-  /anchor marks a picture judged "Đạt" as a style anchor, /debt-close accepts an art debt as it is (GET /api/studio
-  re-reads the studio for the Studio tab). GET /Resources/<...> serves the delivered pictures (images
-  only, read only) so the page can show them.
+- Art (art.py), without the PIN: GET /api/art lists the art at tier Simple and Detail for the Studio tab, POST
+  /api/art/choose sets the tier the game uses for one art (art.cmd_choose: no confirm). GET /art/<path> serves a
+  picture of an art folder (under UnityProject/Assets, …/Resources/Art/…; images only, read only).
 """
 import argparse
 import calendar
@@ -108,18 +106,18 @@ import dispatch  # noqa: E402
 import gamedesign  # noqa: E402
 import guard  # noqa: E402
 import reqbook  # noqa: E402
-import studio  # noqa: E402
+import art  # noqa: E402
 import sync_page  # noqa: E402
 import vscode_groups  # noqa: E402
 from vscode_groups import vscode_state  # noqa: E402
 
 # The threads of the setup (người quyết 2026-11-27): the Leaders and above, and the tools. Features, services, @Core
 # and the tester are workers (worker.py), started by the server for each job, never a thread.
-BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor"]
+BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@DesignAdvisor"]
 # Every other named thread (an old feature, service, @Core or tester thread, or any other name) is "outside": the page
 # shows it in the group Ngoài chức năng, where it can only be deleted, and nothing runs, binds or delivers to it.
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Managers", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
-               "@UIDesigner": "Leaders", "@Codex": "Tools", "@Blender": "Tools", "@ClaudeImage": "Tools", "@DesignAdvisor": "Tools",
+               "@UIDesigner": "Leaders", "@DesignAdvisor": "Tools",
                "@UnityAutoPlay": "Testers", "@Core": "Basic"}
 GROUP_ORDER = [g for g in bind_session.TIERS if g in ROLE_GROUPS.values() and g != "Testers" and g != "Basic"]      # Master … Tools
 STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp", ".ttf")
@@ -127,12 +125,12 @@ STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp", "
 
 def thread_name(value):
     """The chat name for a FEATURE value: a role without its '@' (SendMessage reads 'name@team' as a team address,
-    so a session named '@Codex' cannot receive messages); a feature keeps its name."""
+    so a session named '@Manager' cannot receive messages); a feature keeps its name."""
     return value[1:] if value in ROLE_GROUPS else value
 
 
 def feature_of(title):
-    """The FEATURE value a chat name stands for: 'Codex' and the older '@Codex' are both '@Codex'."""
+    """The FEATURE value a chat name stands for: 'Manager' and the older '@Manager' are both '@Manager'."""
     return "@" + title if "@" + title in ROLE_GROUPS else title
 
 
@@ -284,7 +282,7 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/inbox/send": 16 * 1024, "/api/inbox/cancel": MAX_BODY, "/api/inbox/retry": MAX_BODY,
               "/api/inbox/remove": MAX_BODY, "/api/inbox/clear": MAX_BODY, "/api/inbox/deliver": MAX_BODY,
               "/api/inbox/config": MAX_BODY,
-              "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
+              "/api/art/choose": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
               "/api/sessions/delete": MAX_BODY, "/api/sessions/delete-outside": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY,
               "/api/sessions/model": MAX_BODY, "/api/sessions/reset-models": MAX_BODY,
@@ -691,14 +689,13 @@ def close_chat(session_id):
 # about 20-26k with it. A chat opened by hand in VS Code does not go through the server and gets none of this;
 # the human's own thread never does.
 ROLE_SKILLS = {"@Manager": "manager-", "@CodeLead": "codelead-", "@GameDesigner": "gd-", "@UIDesigner": "ui-",
-               "@Codex": "studio-", "@Blender": "studio-", "@ClaudeImage": "studio-", "@DesignAdvisor": "advisor-",
+               "@DesignAdvisor": "advisor-",
                "@UnityAutoPlay": "tester-", "@Core": "feature-"}
 GROUP_SKILLS = {"Services": "feature-", "Features": "feature-"}
 UNITY_ROLES = {"@CodeLead", "@Core", "@UnityAutoPlay"}      # and every Services and Features thread
 UNITY_SKILL = "unity-mcp-skill"
-# The MCP servers of .mcp.json each role runs with. blender is in .mcp.json but off for the chats opened in VS Code
-# (disabledMcpjsonServers in .claude/settings.json): only @Blender loads it (người quyết 2026-11-26).
-ROLE_SERVERS = {"@Blender": ("blender",)}
+# The MCP servers of .mcp.json each role runs with, beside UnityMCP for the roles that drive Unity.
+ROLE_SERVERS = {}
 OFF_TOOLS = "Artifact,Workflow,ScheduleWakeup,ReportFindings"
 OFF_PLUGINS = ("cc-plugin-easel@builtin", "plugin-authoring@builtin")
 CLAUDEAI_SKILL = "anthropic-skills:"
@@ -708,8 +705,7 @@ CLAUDEAI_SKILL = "anthropic-skills:"
 LOW, MID = ("opus", "low"), ("opus", "medium")
 S_MID = ("sonnet", "medium")
 ROLE_MODELS = {"@Manager": S_MID, "@CodeLead": MID, "@GameDesigner": MID, "@UIDesigner": MID,
-               "@DesignAdvisor": LOW, "@Codex": S_MID, "@ClaudeImage": MID,
-               "@Blender": LOW,      # chỉ làm art tạm, tiết kiệm (người quyết 2026-11-27)
+               "@DesignAdvisor": LOW,
                "@UnityAutoPlay": S_MID}      # the tester's profile (server's runner, play jobs); no thread of its own
 PROFILE_DIR = ".profiles"      # in the transcripts folder: the generated settings and MCP files of each role
 PROFILES = True      # tests of the plain CLI lines turn it off
@@ -764,8 +760,8 @@ def uses_unity(feature):
 
 
 def role_mcp(feature):
-    """The MCP servers of that role, as .mcp.json defines them: UnityMCP for the roles that drive Unity, blender for
-    @Blender (ROLE_SERVERS), none else."""
+    """The MCP servers of that role, as .mcp.json defines them: UnityMCP for the roles that drive Unity, those of
+    ROLE_SERVERS, none else."""
     names = set(ROLE_SERVERS.get(feature, ())) | ({"UnityMCP"} if uses_unity(feature) else set())
     if not names:
         return {"mcpServers": {}}
@@ -1529,33 +1525,19 @@ def reference_call(action, data):
     return {"ok": True, "data": sync_page.write_references(ROOT)}
 
 
-def studio_call(fn, *args):
-    """Runs one studio.py command for the page; its printed lines become the message."""
+def art_choose(key, tier):
+    """A tick on a picture of the Studio tab: the game uses that tier of the art. No PIN, no confirm, tells nobody."""
     import contextlib
     import io
+    if not isinstance(key, str) or not isinstance(tier, str):
+        return {"ok": False, "error": "thiếu art hay mức"}
     out = io.StringIO()
     try:
         with contextlib.redirect_stdout(out):
-            fn(ROOT, *args)
+            art.cmd_choose(ROOT, key, tier)
     except (ValueError, OSError) as ex:
         return {"ok": False, "error": str(ex)}
-    return {"ok": True, "message": out.getvalue().strip(), "data": sync_page.write_gamedesign(ROOT),
-            "studio": sync_page.write_studio(ROOT)}
-
-
-def art_review(ref, item, level, text):
-    """The slider and the feedback box under an art concept: stores the human's judgement of one picture (level
-    0-3, or None for "Chưa duyệt") and its feedback. No PIN, and it tells nobody: @GameDesigner reads it when the
-    human asks for the pictures to be made again."""
-    if not isinstance(ref, str) or not ref.startswith("_design/") or not isinstance(item, str):
-        return {"ok": False, "error": "không phải ảnh của order art"}
-    if level is not None and (not isinstance(level, int) or isinstance(level, bool)):
-        return {"ok": False, "error": "mức chấm không hợp lệ"}
-    try:
-        studio.save_review(ROOT, ref, item, level, text if isinstance(text, str) else "")
-    except (ValueError, OSError) as ex:
-        return {"ok": False, "error": str(ex)}
-    return {"ok": True, "data": sync_page.write_gamedesign(ROOT), "studio": sync_page.write_studio(ROOT)}
+    return {"ok": True, "message": out.getvalue().strip(), "data": sync_page.write_art(ROOT)}
 
 
 # ---------------------------------------------------------------- courier: the inbox of the on-demand threads
@@ -1816,25 +1798,13 @@ def can_create(target):
 
 def still_valid(check):
     """(True, '') when the event an automatic message tells of still holds, else (False, why). The checks gd_req.py
-    and studio.py attach: req-rejected <F> <ref> | order-open <tool> <ref> | item-redo <tool> <ref> <item> |
-    order-delivered <tool> <ref> <version>. Anything the courier cannot read is left to be delivered."""
+    attaches: req-rejected <F> <ref>. Anything the courier cannot read is left to be delivered."""
     parts = (check or "").split()
     try:
         if parts[:1] == ["req-rejected"] and len(parts) == 3:
             v = reqbook.view(ROOT, parts[1])
             node, req = reqbook.find_req(v, parts[2])
             return (req["state"] == "rejected", f"yêu cầu {parts[2]} không còn bị trả ({reqbook.STATE_NAMES.get(req['state'], req['state'])})")
-        if parts[:1] in (["order-open"], ["item-redo"], ["order-delivered"]):
-            row = next((r for r in studio.summary(ROOT, parts[1]) if r[0] == parts[2]), None)
-            if row is None:
-                return False, f"không còn order {parts[1]} {parts[2]}"
-            if parts[0] == "order-open":
-                return row[2] in ("new", "doing"), f"order {parts[2]} đã giao"
-            if parts[0] == "item-redo" and len(parts) == 4:
-                item = next((i for i in row[7] if i["id"] == parts[3]), None)
-                return bool(item and item["redo"]), f"item {parts[3]} không còn chờ làm lại"
-            if parts[0] == "order-delivered" and len(parts) == 4:
-                return str(row[3]) == parts[3], f"order {parts[2]} đã có bản giao mới hơn v{parts[3]}"
     except Exception:      # a book or an order that cannot be read: deliver, the thread will see
         return True, ""
     return True, ""
@@ -3056,8 +3026,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, sync_page.write_project(ROOT))
             if path == "/api/gamedesign":
                 return self.send_json(200, sync_page.write_gamedesign(ROOT))
-            if path == "/api/studio":
-                return self.send_json(200, sync_page.write_studio(ROOT))
+            if path == "/api/art":
+                return self.send_json(200, sync_page.write_art(ROOT))
             if path == "/api/references":
                 return self.send_json(200, sync_page.write_references(ROOT))
             if path == "/api/workers":
@@ -3083,18 +3053,20 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             return self.wfile.write(body)
-        if path.startswith("/Resources/"):
-            return self.send_resource(urllib.parse.unquote(path))
+        if path.startswith("/art/"):
+            return self.send_art(urllib.parse.unquote(path[len("/art/"):]))
         if path.startswith("/data/") or path.lower().endswith(STATIC_EXT):
             return super().do_GET()
         return self.send_error(404)
 
-    def send_resource(self, path):
-        """A delivered picture under Resources/, read only; anything else is 404."""
-        base = (ROOT / "Resources").resolve()
+    def send_art(self, path):
+        """A picture of an art folder (UnityProject/Assets/…/Resources/Art/…), read only; anything else is 404."""
+        base = ROOT.joinpath(*art.ASSETS).resolve()
         target = (ROOT / path.lstrip("/")).resolve()
-        types = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}
-        if base not in target.parents or target.suffix.lower() not in types or not target.is_file():
+        types = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+        rel = target.relative_to(base).as_posix() if base in target.parents else ""
+        if (not rel or f"/{art.ART_DIR}/" not in f"/{rel}" or target.suffix.lower() not in types
+                or not target.is_file()):
             return self.send_error(404)
         body = target.read_bytes()
         self.send_response(200)
@@ -3163,12 +3135,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, delete_outside(data.get("pin")))
             if self.path == "/api/vscode-groups":
                 return self.send_json(200, group_in_vscode())
-            if self.path == "/api/studio/review":
-                return self.send_json(200, art_review(data.get("ref"), data.get("item"), data.get("level"), data.get("text")))
-            if self.path == "/api/studio/debt-close":
-                return self.send_json(200, studio_call(studio.cmd_debt_close, str(data.get("id") or "")))
-            if self.path == "/api/studio/anchor":
-                return self.send_json(200, studio_call(studio.cmd_anchor, str(data.get("ref") or ""), str(data.get("item") or "")))
+            if self.path == "/api/art/choose":
+                return self.send_json(200, art_choose(data.get("key"), data.get("tier")))
             pin, mode = str(data.get("pin") or ""), str(data.get("mode") or "")
             model = str(data.get("model") or DEFAULT_MODEL)
             effort = str(data.get("effort") or DEFAULT_EFFORT)

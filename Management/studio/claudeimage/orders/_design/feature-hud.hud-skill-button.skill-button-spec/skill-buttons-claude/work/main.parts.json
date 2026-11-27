@@ -1,7 +1,0 @@
-{"parts": [
-  {"id": "band", "same-as": "feature-hud/hud-layout/layout-spec#band", "shapes": ["bottom"]},
-  {"id": "tray", "w": 460, "h": 140, "slice": [24, 24, 24, 24], "shapes": ["cluster"]},
-  {"id": "skill-thunder", "w": 140, "h": 140, "slice": null, "shapes": ["thunder"]},
-  {"id": "skill-frost", "w": 140, "h": 140, "slice": null, "shapes": ["frost"]},
-  {"id": "skill-rally", "w": 140, "h": 140, "slice": null, "shapes": ["rally"]}
-]}

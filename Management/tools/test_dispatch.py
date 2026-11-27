@@ -33,8 +33,8 @@ def main():
     root = Path(tempfile.mkdtemp(prefix="inbox-"))
     try:
         check("a role named without its @ is that role (PowerShell drops a bare @Name); a feature stays as it is",
-              [dp.role_name(x) for x in ("Codex", "designadvisor", "Core", "UnityAutoPlay", "Manager", "Wallet", "@Codex")],
-              ["@Codex", "@DesignAdvisor", "@Core", "@UnityAutoPlay", "@Manager", "Wallet", "@Codex"])
+              [dp.role_name(x) for x in ("DesignAdvisor", "designadvisor", "Core", "UnityAutoPlay", "Manager", "Wallet", "@Nobody")],
+              ["@DesignAdvisor", "@DesignAdvisor", "@Core", "@UnityAutoPlay", "@Manager", "Wallet", "@Nobody"])
         other = Path(tempfile.mkdtemp(prefix="inbox-"))
         try:
             check("send: DesignAdvisor without @ goes to @DesignAdvisor",
@@ -42,9 +42,9 @@ def main():
         finally:
             shutil.rmtree(other, ignore_errors=True)
         check("pools: features, services and @Core; the tools; the tester; never a Leader, the human or a bad name",
-              [dp.pool_of(x) for x in ("Wallet", "_Services/Popup", "@Core", "@Codex", "@DesignAdvisor", "@Manager",
+              [dp.pool_of(x) for x in ("Wallet", "_Services/Popup", "@Core", "@Nobody", "@DesignAdvisor", "@Manager",
                                        "@CodeLead", "@human", "@UnityAutoPlay", "wallet", "../x", "", None)],
-              ["feature", "feature", "feature", "tool", "tool", None, None, None, "tester", None, None, None, None])
+              ["feature", "feature", "feature", None, "tool", None, None, None, "tester", None, None, None, None])
         check("config: the defaults when there is no file (today's behaviour)", dp.config(root),
               {"mode": "always-live", "limits": {"feature": 8, "tool": 8}, "idle_minutes": 20, "hung_note": 5, "hung_stop": 10, "takeover_minutes": 5})
         (dp.folder(root)).mkdir(parents=True)
@@ -160,7 +160,7 @@ def main():
         check("server off with a message waiting: every Leader is told SERVER TẮT and not to give more work",
               ("SERVER TẮT: 1 tin" in line, "setup_server.py" in line, "BÁO CHẶN" in line,
                "SERVER TẮT" in bind_session.inbox_line(str(root), full=False)), (True, True, True, True))
-        note = dp.notify(root, "Hud", "Order đã giao", "studio", key="delivered:x", once=True)
+        note = dp.notify(root, "Hud", "Yêu cầu bị trả", "gd_req", key="delivered:x", once=True)
         check("notify with the server off: the message is kept, the line says SERVER TẮT",
               ("SERVER TẮT" in note, len(dp.messages(root, "Hud"))), (True, 1))
         out, err = io.StringIO(), io.StringIO()
@@ -184,7 +184,7 @@ def main():
                   (said, dp.courier_alive(root), code5, "SERVER TẮT" in line, "tin chưa giao" in line,
                    bind_session.inbox_line(str(root), full=False)), ("held", True, 0, False, True, ""))
             check("notify with the server on: says the server will deliver",
-                  "server sẽ giao" in dp.notify(root, "Hud", "Việc khác", "studio", key="delivered:y", once=True))
+                  "server sẽ giao" in dp.notify(root, "Hud", "Việc khác", "gd_req", key="delivered:y", once=True))
         finally:
             proc.kill()
             proc.wait()

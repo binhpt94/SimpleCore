@@ -1,7 +1,0 @@
-{"parts": [
-  {"id": "band", "w": 1920, "h": 140, "slice": [24, 24, 24, 24], "shapes": ["top", "bottom"]},
-  {"id": "strip", "w": 1920, "h": 760, "slice": [24, 24, 24, 24], "shapes": ["strip"]},
-  {"id": "btn", "w": 140, "h": 140, "slice": null, "shapes": ["pause", "skills"]},
-  {"id": "hp", "w": 600, "h": 60, "slice": [24, 24, 24, 24], "shapes": ["hp"]},
-  {"id": "upgrade", "w": 1340, "h": 150, "slice": [32, 32, 32, 40], "shapes": ["upgrade"]}
-]}

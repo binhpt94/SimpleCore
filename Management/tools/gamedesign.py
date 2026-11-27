@@ -244,7 +244,6 @@ DEFINITIONS_TITLE = "Định nghĩa"
 DEF_LINE_RX = re.compile(r"^\s*[-*]\s*\*\*(.+?)\*\*\s*:\s*(.*\S)?\s*$")
 # Frames: the layout of a round-4 node as text (.frame-concept/<name>.frame), drawn by the page, checked here.
 FRAME_DIR = ".frame-concept"
-ART_DIR = ".art-concept"          # generated art concepts (the next step; nothing reads it yet)
 FRAME_EXT = ".frame"
 FRAME_NONE = "none"               # `frame: none` in data.md: a round-4 node with no layout
 FRAME_ROUND = 4
@@ -306,18 +305,6 @@ UI_KIND_BUTTON = "nút"
 # Styles: the art direction of the game, decided in round 1 (.art-style/ of the root, in its data hash).
 STYLE_DIR = ".art-style"
 STYLE_IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp")
-# Art concepts: images @Codex makes from a round-4 node's frames (orders of the owner _design, see studio.py).
-DESIGN_OWNER = "_design"
-ART_TOOL = "codex"                 # art concepts: pictures made by Codex; the style anchors are kept with it
-CLAUDE_TOOL = "claudeimage"        # claude concepts: pictures drawn by the @ClaudeImage chat (SVG made into PNG)
-ART_TOOLS = (ART_TOOL, CLAUDE_TOOL)
-ART_NAMES = {ART_TOOL: "Art concept", CLAUDE_TOOL: "Claude concept"}
-# The human's judgement of one delivered picture (index = level; the same list as studio.py REVIEW_LEVELS, which
-# cannot be imported here: studio imports this module).
-ART_LEVELS = ("Làm lại ngay", "Lỗi nhưng chưa cần làm ngay", "Đúng phần lớn chi tiết", "Đạt")
-ART_LEVEL_NONE = "Chưa duyệt"
-ART_META = "meta.json"
-ANCHORS_FILE = "anchors.json"
 HISTORY_SHOWN = 30
 STATES = ("new", "changed", "same")      # an idea node against live
 
@@ -1518,40 +1505,8 @@ def deco_brief(r):
     return lines
 
 
-# What a claude concept does with each shape of a frame (see frame_roles).
-ROLE_OWN, ROLE_OTHER, ROLE_BACKDROP = "own", "other", "backdrop"
-ROLE_NAMES = {ROLE_OWN: "của node", ROLE_OTHER: "phụ", ROLE_BACKDROP: "nền phụ"}
-PART_SHAPES = ("rect", "round-rect", "button", "icon", "bar", "circle", "grid")      # shapes a picture can stand for
-BACKDROP_SHARE = 0.9
-
-
-def frame_roles(f, resolved):
-    """{shape id: (role, [source node paths])} of one parsed frame: what the node itself talks about.
-    own: the shape's place or size uses a `let` of this frame, or only plain numbers; a claude concept draws it.
-    other: it only uses numbers of other nodes (`use`): kept as the basic shape of the frame.
-    backdrop: plain numbers only and at least BACKDROP_SHARE of the screen or view: left out.
-    The sources are the nodes whose numbers the shape uses."""
-    view = resolved["view"]
-    area = max(1e-9, (view[2] - view[0]) * (view[3] - view[1]))
-    boxes = {r["id"]: r["bbox"] for r in resolved["shapes"]}
-    out = {}
-    for s in f["shapes"]:
-        names = set()
-        for key, (kind, raw) in s["params"].items():
-            if kind == "raw" and key != "parent":
-                names |= {t for t in raw.split(",") if t and not FRAME_NUM_RX.match(t)}
-        sources = sorted({f["uses"][n][0] for n in names if n in f["uses"]})
-        box = boxes.get(s["id"])
-        if names & set(f["lets"]):
-            role = ROLE_OWN
-        elif sources:
-            role = ROLE_OTHER
-        elif box and (box[2] - box[0]) * (box[3] - box[1]) >= BACKDROP_SHARE * area:
-            role = ROLE_BACKDROP
-        else:
-            role = ROLE_OWN
-        out[s["id"]] = (role, sources)
-    return out
+# The shapes a picture can stand for (shape_slots: where it goes).
+PART_SHAPES = ("rect", "round-rect", "button", "icon", "bar", "circle", "grid")
 
 
 def frame_scale(fr):
@@ -1579,36 +1534,6 @@ def shape_slots(fr, r):
     return [at(r["x"], r["y"], r["w"], r["h"])]
 
 
-CLAUDE_DONE = "Đã giao"      # the label of a claude concept: nobody judges it
-PART_RATIO = 0.02            # how far the shape of a picture that is not 9-sliced may be from the place it stands in
-
-
-def part_fits(part, slot):
-    """'' when a picture ({w, h, slice}) can stand in a place (left, top, width, height) px, else why not."""
-    w, h = slot[2], slot[3]
-    if part.get("slice"):
-        l, t, r, b = part["slice"]
-        return "" if w >= l + r and h >= t + b else f"chỗ {w:g}x{h:g} nhỏ hơn viền 9-slice ({l + r}x{t + b})"
-    off = abs(part["w"] / part["h"] - w / h) / (w / h)
-    return "" if off <= PART_RATIO else (f"tỉ lệ {part['w']}x{part['h']} lệch {off * 100:.0f}% so với chỗ {w:g}x{h:g} "
-                                         "(khai slice nếu 9-slice được, hoặc tách thành phần riêng)")
-
-
-def frame_roles_brief(fr):
-    """Lines for an AI: which shapes of the frame a claude concept draws, keeps as they are, or leaves out."""
-    groups = {ROLE_OWN: [], ROLE_OTHER: [], ROLE_BACKDROP: []}
-    for r in fr["shapes"]:
-        slots = shape_slots(fr, r) if r["shape"] in PART_SHAPES else []
-        size =f" {slots[0][2]:g}x{slots[0][3]:g}px" + (f" x{len(slots)}" if len(slots) > 1 else "") if slots else " (chữ hoặc nét: tool tự vẽ)"
-        groups[r.get("role", ROLE_OWN)].append(r["id"] + (size if r.get("role") == ROLE_OWN else ""))
-    lines = [f"  claude-concept của {fr['file']}:"]
-    lines.append("    của node (vẽ thành phần): " + (", ".join(groups[ROLE_OWN]) or "không có"))
-    lines.append("    phụ (giữ hình cơ bản): " + (", ".join(groups[ROLE_OTHER]) or "không có"))
-    if groups[ROLE_BACKDROP]:
-        lines.append("    nền phụ (bỏ qua): " + ", ".join(groups[ROLE_BACKDROP]))
-    return lines
-
-
 def read_frames(folder, where, problems, screen, lookup):
     """[{file, text, ...resolve_frame}] of the node's frames. Syntax errors go to `problems` (they block Chốt like
     any structure problem); measured warnings stay on each frame."""
@@ -1623,9 +1548,6 @@ def read_frames(folder, where, problems, screen, lookup):
         r.update(file=name, text=text, uses=[f"{p}#{n}" for p, n in f["uses"].values()],
                  ai=f["ai"], uiHash=f["ui"], why=f["why"], alt=f["alt"], ids=[sh["id"] for sh in f["shapes"]],
                  buttons=[sh["id"] for sh in f["shapes"] if sh["shape"] == "button"])
-        roles = frame_roles(f, r)
-        for shape in r["shapes"]:
-            shape["role"], shape["sources"] = roles.get(shape["id"], (ROLE_OWN, []))
         r["svg"] = frame_svg(r)
         out.append(r)
     return out
@@ -3938,16 +3860,7 @@ def live_feature_names(root):
     return sorted(((n, k, d) for n, (k, d) in out.items()), key=lambda x: x[0].lower())
 
 
-# ---------------------------------------------------------------- art concepts (read here, written by studio.py)
-def design_owner(path):
-    """The order owner of a design node: _design/<path with '.' for '/'>."""
-    return f"{DESIGN_OWNER}/{path.replace('/', '.')}"
-
-
-def art_orders_dir(root, tool=ART_TOOL):
-    return Path(root) / "Management" / "studio" / tool / "orders" / DESIGN_OWNER
-
-
+# ---------------------------------------------------------------- small helpers
 def _json(path):
     try:
         value = json.loads(read_text(path))
@@ -3958,118 +3871,6 @@ def _json(path):
 
 def frame_text_hash(text):
     return short_hash(tidy(text.replace("\r", "")))
-
-
-def read_art(root, live):
-    """What art each design node has, and the orders not delivered yet:
-        ({node path: [{frame, file, ref, version, state, level, feedback, label, stale, usable, anchor, at}]}, [pending order])
-    file is relative to the project root. One entry per frame: its newest delivery. level: the human's judgement of
-    the newest delivery (0-3, None for "Chưa duyệt"; review.json of the order, studio.py). state: "mới nhất" or "cũ
-    hơn". label: the level's name | CŨ · node đã đổi | CŨ · style đã đổi (stale wins). usable: newest, not stale and
-    not judged "Làm lại ngay".
-    live: the live tree (read_tree), for the node hashes and the styles they are checked against.
-    Every entry and pending order has tool: ART_TOOL (art concept) or CLAUDE_TOOL (claude concept). The two are
-    apart: each has its own newest picture of a frame."""
-    nodes = {n["path"]: n for n in walk(live)} if live else {}
-    styles = {s["id"]: s["hash"] for s in (nodes.get("", {}) or {}).get("styles", [])}
-    anchors = _json(Path(root) / "Management" / "studio" / ART_TOOL / ANCHORS_FILE) or []
-    anchored = {(a.get("ref"), a.get("version"), a.get("item")) for a in anchors if isinstance(a, dict)}
-    art, pending = {}, []
-    orders = [(tool, order) for tool in ART_TOOLS for order in
-              (sorted(art_orders_dir(root, tool).glob("*/*/order.md")) if art_orders_dir(root, tool).is_dir() else [])]
-    for tool, order in orders:
-        folder = order.parent
-        dotted, oid = folder.parent.name, folder.name
-        path = dotted.replace(".", "/")
-        ref = f"{DESIGN_OWNER}/{dotted}/{oid}"
-        status = _json(folder / "status.json") or {}
-        state, version = status.get("state") or "new", int(status.get("version") or 0)
-        if state not in ("new", "doing", "delivered"):      # a status written before judging replaced accept/reject
-            state = "delivered" if version else "new"
-        reviews = _json(folder / "review.json")
-        reviews = reviews if isinstance(reviews, dict) else {}
-        if state in ("new", "doing") or not version:      # being made (the first time, or again)
-            text = read_text(order)
-            title = next((l[2:].strip() for l in text.split("\n") if l.startswith("# ")), oid)
-            items = [m.group(1) for m in re.finditer(r"(?m)^\s*-\s*`?([a-z0-9]+(?:-[a-z0-9]+)*)`?\s*:", text)]
-            style = next((l.split(":", 1)[1].strip() for l in text.split("\n") if l.startswith("style:")), "")
-            pending.append({"ref": ref, "tool": tool, "node": path, "title": title, "items": items, "style": style,
-                            "state": "doing" if state == "doing" else "new", "version": version})
-        for v in range(1, version + 1):
-            vdir = Path(root) / "Resources" / DESIGN_OWNER / dotted / tool / oid / f"v{v}"
-            meta = _json(vdir / ART_META)
-            if not isinstance(meta, dict):
-                continue
-            node = nodes.get(path)
-            label_state = "cũ hơn" if v < version else "mới nhất"
-            claude = tool == CLAUDE_TOOL
-            style_changed = any(styles.get(sid) != h for sid, h in (meta.get("styles") or {}).items())
-            source_newer = False
-            for src in meta.get("sources") or []:      # parts taken from another node's claude concept
-                if isinstance(src, list) and len(src) == 2 and str(src[0]).startswith(DESIGN_OWNER + "/"):
-                    now_ = _json(Path(root) / "Management" / "studio" / tool / "orders" / Path(*str(src[0]).split("/")) / "status.json") or {}
-                    source_newer = source_newer or int(now_.get("version") or 0) != src[1]
-            whole = []      # what makes an art concept of Codex stale: it is one picture of the whole node
-            if not claude and (not node or meta.get("nodeHash") != node["dataHash"]):
-                whole.append("node đã đổi")
-            if not claude and style_changed:
-                whole.append("style đã đổi")
-            quality = _json(vdir / "quality.json") or {}
-            for name in sorted(x.name for x in vdir.iterdir() if x.is_file() and x.name not in (ART_META, "quality.json")):
-                item = Path(name).stem
-                redoing = v == version and state == "doing"     # the tool chat is remaking it: nothing to judge until the next delivery
-                table = _json(vdir / "parts" / item / "parts.json") if claude else None
-                parts = [{"id": p.get("id"), "w": p.get("w"), "h": p.get("h"), "slice": p.get("slice"),
-                          "shapes": p.get("shapes") or [], "from": p.get("from"),
-                          "file": (vdir / "parts" / item / f"{p.get('id')}.png").relative_to(Path(root)).as_posix()}
-                         for p in (table or {}).get("parts", []) if isinstance(p, dict)] if isinstance(table, dict) else None
-                if claude:
-                    # Nobody judges a claude concept, and a changed node does not make it stale by itself: the parts
-                    # that still stand for the shapes of the frame are kept. It has to be made again only when
-                    # something new must be drawn; when only the layout moved it waits to be put together again.
-                    level, feedback, stale, reglue = None, "", [], ""
-                    fr = next((f for f in (node or {}).get("frames", []) if Path(f["file"]).stem == item), None)
-                    if fr is None:
-                        stale.append("frame không còn trong live")
-                    else:
-                        cover = {sid: p for p in parts or [] for sid in p["shapes"]}
-                        # a cheat state is never drawn: it is put together from the parts of other nodes
-                        draw = [s["id"] for s in fr["shapes"] if not node.get("cheat") and s.get("role") == ROLE_OWN and s["shape"] in PART_SHAPES
-                                and (s["id"] not in cover or any(part_fits(cover[s["id"]], slot) for slot in shape_slots(fr, s)))]
-                        if draw:
-                            stale.append("cần vẽ: " + ", ".join(draw))
-                        if style_changed:
-                            stale.append("style đã đổi")
-                        if not stale:
-                            reglue = ("bố cục đổi" if (meta.get("frames") or {}).get(item) != frame_text_hash(fr["text"]) else
-                                      "phần nguồn có bản mới" if source_newer else "bản kiểu cũ chưa có bảng phần" if parts is None else "")
-                    label = ("cũ hơn" if v < version else "CẦN LÀM LẠI · " + stale[0] if stale else "đang làm lại" if redoing
-                             else f"{CLAUDE_DONE} · {reglue}, chờ ghép lại" if reglue else CLAUDE_DONE)
-                else:
-                    r = reviews.get(item) if v == version and isinstance(reviews.get(item), dict) else {}
-                    level = r.get("level")
-                    level = level if isinstance(level, int) and not isinstance(level, bool) and 0 <= level < len(ART_LEVELS) else None
-                    feedback, stale, reglue = str(r.get("text") or ""), whole, ""
-                    label = ("cũ hơn" if v < version else "CŨ · " + stale[0] if stale else "đang làm lại" if redoing
-                             else (ART_LEVEL_NONE if level is None else ART_LEVELS[level]))
-                entry = {"frame": item, "tool": tool, "file": (vdir / name).relative_to(Path(root)).as_posix(), "ref": ref,
-                         "version": v, "state": label_state, "label": label, "stale": stale, "reglue": reglue,
-                         "level": level, "feedback": feedback, "reviewable": not claude and v == version and state == "delivered",
-                         "redoing": redoing, "usable": v == version and not stale and level != 0,
-                         "anchor": tool == ART_TOOL and (ref, v, item) in anchored, "at": meta.get("at", ""), "stamp": meta.get("stamp", 0),
-                         "styles": sorted(meta.get("styles") or {})}
-                q = quality.get(item) if isinstance(quality.get(item), dict) else None
-                entry["below"] = (q.get("note") or "chưa đạt") if q and not q.get("ok") else ""
-                entry["parts"] = parts
-                art.setdefault(path, []).append(entry)
-    for path, entries in art.items():      # newest delivery of each frame first, the older ones after it
-        entries.sort(key=lambda e: (ART_TOOLS.index(e["tool"]), e["frame"], e["at"], e["stamp"]))
-        newest = {}
-        for e in entries:
-            newest[(e["tool"], e["frame"])] = e
-        art[path] = (sorted(newest.values(), key=lambda e: (ART_TOOLS.index(e["tool"]), e["frame"]))
-                     + [e for e in entries if newest[(e["tool"], e["frame"])] is not e])
-    return art, pending
 
 
 def snapshot(root):
@@ -4112,16 +3913,12 @@ def snapshot(root):
     for tree in (idea, live):
         for n in walk(tree):
             n["reqs"] = books.get(n["path"])
-    art, art_pending = read_art(root, live)
-    for name, tree in (("idea", idea), ("live", live)):
-        for n in walk(tree):
-            n["art"] = art.get(n["path"], [])
     glossary, term_notes = {}, {}
     for name, tree in (("idea", idea), ("live", live)):
         glossary[name], term_notes[name] = glossary_view(tree)
         for n in walk(tree):
             n.pop("refText", None)      # read by glossary_view only; the page does not need a second copy
     features = feature_rows(idea, live, views)
-    return {"features": features, "rounds": ROUNDS, "mode": mode, "stage": stage, "stages": stages(), "frameCss": font_css(embed=False) + "\n" + FRAME_CSS,"screens": SCREENS, "artPending": art_pending, "artLevels": list(ART_LEVELS), "artLevelNone": ART_LEVEL_NONE, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "reqStates": __import__("reqbook").STATE_NAMES, "live": live, "idea": idea,
+    return {"features": features, "rounds": ROUNDS, "mode": mode, "stage": stage, "stages": stages(), "frameCss": font_css(embed=False) + "\n" + FRAME_CSS,"screens": SCREENS, "glossary": glossary, "termNotes": term_notes, "bands": BANDS, "passMin": PASS_MIN, "phases": PHASES, "workStates": list(WORK_STATES), "reqStates": __import__("reqbook").STATE_NAMES, "live": live, "idea": idea,
             "problems": {"live": live_problems, "idea": idea_problems}, "missing": missing_infra(idea),
             "missingCode": missing_code(idea)}

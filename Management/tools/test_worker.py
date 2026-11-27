@@ -65,7 +65,7 @@ def _refused(fn):
 def main():
     tmp = Path(tempfile.mkdtemp(prefix="worker-test-"))
     root, home = tmp / "main", tmp / "work"
-    real = (w.WORK_HOME, w.turn, w.run_gates, w.bind, w.studio_run, w.open_requirements)
+    real = (w.WORK_HOME, w.turn, w.run_gates, w.bind, w.open_requirements)
     try:
         root.mkdir()
         make_project(root)
@@ -169,31 +169,15 @@ def main():
         check("flow: the report has the 8 lines of report.md", all(f"- {k}:" in report for k in
               ("Phiên", "Việc", "Trạng thái", "Đã đổi", "Công khai đổi", "Cần bên khác", "Kiểm tra", "Ghi chú")))
 
-        # 6. studio: the feature's order folder is in the worktree; orders and reviews run in the main project
-        write(root, "Management/studio/claudeimage/orders/Run/icons/order.md", "# order\n")
-        write(root, "Resources/Run/claudeimage/icons/v1/a.png", "png")
+        # 6. art: a worker makes Simple; a Detail and the choice of tier are the human's
+        art = "UnityProject/Assets/Features/Run/FeatureAssets/Private/Resources/Art/Run/coin/"
+        check("art: a Simple is applied, a Detail and ArtChoice.json are not",
+              (w.in_zone(art + "Simple.png"), w.in_zone(art + "Simple.png.meta"), w.in_zone(art + "Detail.png"),
+               w.in_zone(art + "Detail.fbx.meta"), w.in_zone("UnityProject/Assets/_Composition/Resources/ArtChoice.json")),
+              (True, True, False, False, False))
         job3 = {"id": "w20261127-120000-run", "feature": "Run", "worktree": str(home / "w20261127-120000-run")}
         w.save(root, job3)
         job3["base"] = w.snapshot(root, Path(job3["worktree"]), "Run")
-        check("studio: the feature's orders and delivered files are copied into the worktree",
-              ((Path(job3["worktree"]) / "Management/studio/claudeimage/orders/Run/icons/order.md").is_file(),
-               (Path(job3["worktree"]) / "Resources/Run/claudeimage/icons/v1/a.png").is_file()), (True, True))
-        ran = []
-        w.studio_run = lambda r, *a: ran.append(a) or (True, [])
-        lines = w.studio_actions(root, job3, {"reqs": [], "orders": [
-            {"tool": "claudeimage", "id": "button-bg", "order": "# Nút\n"},
-            {"tool": "claudeimage", "id": "x", "feature": "Wave", "order": "# không thuộc việc này"},
-            {"tool": "claudeimage", "id": "icons", "order": "# đã có"}],
-            "reviews": [{"order": "Run/icons", "item": "a", "score": 3, "feedback": "đạt"},
-                        {"order": "Wave/w", "item": "a", "score": 3}, {"order": "Run/icons", "item": "b", "score": 7}]})
-        check("studio: a new order of the job's feature is written, then studio.py check",
-              ((root / "Management/studio/claudeimage/orders/Run/button-bg/order.md").read_text(encoding="utf-8"), ran[0]),
-              ("# Nút\n", ("check",)))
-        check("studio: an order of another feature, or one already there, is not written",
-              ((root / "Management/studio/claudeimage/orders/Wave/x").exists(),
-               (root / "Management/studio/claudeimage/orders/Run/icons/order.md").read_text(encoding="utf-8")), (False, "# order\n"))
-        check("studio: only the job's reviews, scored 0-3, are run", ran[1:], [("review", "Run/icons", "a", "3", "đạt")])
-        check("studio: what was skipped is said", sum("bỏ qua" in x or "đã có" in x for x in lines), 4)
 
         # 7. a question goes to Manager's list; queue and play jobs
         qid = w.ask_human(root, job3, {"summary": "Run", "question": "A hay B?", "options": "A·B", "suggest": "A"})
@@ -229,7 +213,7 @@ def main():
         check("main: a wrong command is refused", w.main(["worker.py", "nope"]), 2)
         check("main: a bad job id is refused", w.main(["worker.py", "status", "../x"]), 2)
     finally:
-        (w.WORK_HOME, w.turn, w.run_gates, w.bind, w.studio_run, w.open_requirements) = real
+        (w.WORK_HOME, w.turn, w.run_gates, w.bind, w.open_requirements) = real
         subprocess.run(["git", "worktree", "prune"], cwd=root, capture_output=True)
         shutil.rmtree(tmp, ignore_errors=True)
     failed = RESULTS.count(False)

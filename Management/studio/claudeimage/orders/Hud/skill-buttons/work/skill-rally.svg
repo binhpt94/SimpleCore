@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" width="140" height="140">
-  <!-- khung nut chung: bong cung lech xuong 8 px, nen xanh duong, vien den 6 px, bo 20 -->
-  <rect x="3" y="11" width="134" height="126" rx="20" fill="#000000"/>
-  <rect x="3" y="3" width="134" height="126" rx="20" fill="#2F6FD6" stroke="#000000" stroke-width="6"/>
-  <!-- la co do tren can trang o giua nua tren (y 14-80) -->
-  <rect x="44" y="14" width="9" height="66" rx="3" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
-  <polygon points="53,16 98,26 80,36 98,48 53,52" fill="#E63946" stroke="#000000" stroke-width="4" stroke-linejoin="round"/>
-</svg>

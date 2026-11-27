@@ -1,4 +1,0 @@
-{"parts": [
-  {"id": "pic", "w": 70, "h": 70, "slice": null, "shapes": ["pic"]},
-  {"id": "coin", "same-as": "feature-hud/hud-status/status-spec#coin", "shapes": ["coin"]}
-]}

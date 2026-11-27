@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """PostToolUse / PostToolUseFailure hook: a service failed, so the session stops that work in this turn.
 Người quyết 2026-11-26: unity-mcp lỗi kết nối, hay Codex lỗi: dừng ngay, không thử lại, không đi đường khác, báo
-Leader (Unity) hay bên giao (Codex) MỘT tin; không probe, không báo ai khác.
+Leader (Unity) hay bên giao (Codex, của @DesignAdvisor) MỘT tin; không probe, không báo ai khác.
 
 - A unity-mcp call that failed with a connection error (guard.UNITY_FAIL_RX: the Editor is not there, refused,
   timed out...) sets the session's "unity" flag. Any other failure of a unity-mcp call (a wrong parameter, the
   command's own error) is left alone.
-- A Bash command whose output has guard.CODEX_FAIL_MARK (gd_advise.py and studio.py print it when Codex fails) sets
+- A Bash command whose output has guard.CODEX_FAIL_MARK (gd_advise.py prints it when Codex fails) sets
   the "codex" flag.
 Then the model is told to stop (additionalContext), and guard.py refuses every retry in the turn; bind_session.py
 clears the flags when the next turn starts. The human's own chat is never flagged.

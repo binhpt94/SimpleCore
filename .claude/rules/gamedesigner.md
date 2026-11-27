@@ -15,7 +15,7 @@ Thứ gì đã đọc thì nằm trong ngữ cảnh tới lần renew sau, và m
 - `CLAUDE.md` trong cây thiết kế không tự nạp vào ngữ cảnh (`claudeMdExcludes` trong `.claude/settings.json`); muốn biết nội dung thì phải đọc.
 
 ## Phạm vi việc (người quyết 2026-11-26)
-Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm, chỉ đặt order việc của các feature đó; việc của feature khác chờ tới khi Manager báo phạm vi đổi. `Phạm vi: full` thì làm như thường.
+Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm việc của các feature đó; việc của feature khác chờ tới khi Manager báo phạm vi đổi. `Phạm vi: full` thì làm như thường.
 
 ## Quy trình một lượt
 1. Xem mode ở dòng `guard:`, rồi chạy `gd_status.py --brief`.
@@ -35,7 +35,6 @@ Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm, chỉ �
 | Nhờ hỏi GPT, đưa góp ý của GPT vào node | `gd-integrate-advice` |
 | Bảng số liệu `.excel` | `gd-excel-data` |
 | Thêm, sửa, bỏ một từ của glossary | `gd-glossary` |
-| Đặt hay giao làm lại order art-concept | `gd-art-concept` |
 | Mode User control: tạo câu hỏi cho người | `gd-user-control` |
 
 ## Quyền (guard ép)
@@ -55,9 +54,9 @@ Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm, chỉ �
   - Đọc nhiều file của nhiều node trong một lệnh shell (`cat`, `head`, `sed -n '/^## Đã tự quyết/,/^## /p'`) thay vì nhiều lần Read.
   - `python Management/tools/gd_delete.py ai/<đường dẫn>`: xoá một file hoặc cả một node trong `ai`. Lịch sử của node bị xoá được giữ lại ở node cha. Xem frame của @UIDesigner đã giải ra số: `python Management/tools/gd_frame.py ai/idea/<node>`.
 - **Báo cáo cuối lượt (Stop hook ép):** lượt có sửa file kết thúc bằng khối `## Báo cáo cho @Manager` 8 dòng theo `.claude/rules/report.md` (phần điền của @GameDesigner); "Kiểm tra" là kết quả `gd_status.py`.
-- **Báo chặn:** khi gặp lỗi không tự gỡ được (guard chặn, lệnh hay công cụ lỗi, order hết lượt, @DesignAdvisor hay tool không trả lời) hoặc phải dừng chờ người chấm, chọn ý trái nhau, chốt ở User control (việc người làm trên trang), kể cả lượt không sửa file: trước khi kết thúc lượt nhắn `Manager` bằng SendMessage một tin `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … (file, node, lệnh, câu lỗi) · Ai gỡ được: … · Việc của mình vẫn chạy tiếp được: … · Việc của phiên khác bị kéo theo: …`; hết chặn thì nhắn `HẾT CHẶN · <việc>`; một tin cho mỗi lần bị chặn.
+- **Báo chặn:** khi gặp lỗi không tự gỡ được (guard chặn, lệnh hay công cụ lỗi, @DesignAdvisor không trả lời) hoặc phải dừng chờ người chấm, chọn ý trái nhau, chốt ở User control (việc người làm trên trang), kể cả lượt không sửa file: trước khi kết thúc lượt nhắn `Manager` bằng SendMessage một tin `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … (file, node, lệnh, câu lỗi) · Ai gỡ được: … · Việc của mình vẫn chạy tiếp được: … · Việc của phiên khác bị kéo theo: …`; hết chặn thì nhắn `HẾT CHẶN · <việc>`; một tin cho mỗi lần bị chặn.
 - **Không hỏi người (người quyết 2026-11-27)**: chỉ Manager hỏi người; guard chặn AskUserQuestion và mọi lần cần người duyệt của bạn. Có câu cần người trả lời (thông tin thiếu, chọn phương án, cho phép): ghi câu hỏi `python Management/tools/ask.py add --from GameDesigner "<việc>" --blocker "…" --options "A …·B …" --suggest "…" --waiting "…"` rồi nhắn `Manager` (SendMessage) `HỎI NGƯỜI · <id> · <việc>`; Manager hỏi người và trả `TRẢ LỜI · <id> · …`. Làm tiếp việc không phụ thuộc.
-- **Tool báo chặn:** @Codex, @DesignAdvisor không hỏi người (chạy headless): chúng nhắn bạn `BÁO CHẶN · chờ người · …`. Tự quyết được thì trả lời luôn, không thì hỏi người qua Manager (`ask.py`, như trên); có câu trả lời thì `python Management/tools/dispatch.py send <@Codex|@DesignAdvisor> --from GameDesigner "TRẢ LỜI · <việc> · <người quyết gì>"`.
+- **Tool báo chặn:** @DesignAdvisor không hỏi người (chạy headless): chúng nhắn bạn `BÁO CHẶN · chờ người · …`. Tự quyết được thì trả lời luôn, không thì hỏi người qua Manager (`ask.py`, như trên); có câu trả lời thì `python Management/tools/dispatch.py send @DesignAdvisor --from GameDesigner "TRẢ LỜI · <việc> · <người quyết gì>"`.
 - **Gọi tester:** được nhắn `UnityAutoPlay` chỉ khi cần giả lập một thao tác của người chơi để xem một state hay một luồng có đúng thiết kế đã chốt không, theo khuôn `XÁC NHẬN · Feature: … · Thao tác: … (từng bước) · Mong đợi: … · Scene hoặc state cheat: …`; nó giữ khoá Unity Editor nên không nhờ chơi thử cả feature, việc đó nhờ `CodeLead`. Giao bằng hộp thư: `python Management/tools/dispatch.py send @UnityAutoPlay --from GameDesigner "<việc>"` (người quyết 2026-11-27: tester là việc của server, không nhận SendMessage). Server chạy nó khi tới phiếu Editor; kết quả ở `Tester/UnityAutoPlay/<đợt>/README.md` (`tester.py status`).
 
 ## Bốn vòng

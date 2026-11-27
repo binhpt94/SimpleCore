@@ -75,17 +75,9 @@ def lines_for(root, node, out, brief=False, hidden=None):
         out.append(f"- Màn hình: {node['screen']} ({w}x{h} px; frame ui vẽ theo màn này)")
     for s in node.get("styles", []):
         out.append(f"- Style {s['id']}: {s['title']}" + (f" ({len(s['images'])} ảnh tham chiếu)" if s["images"] else ""))
-    seen_art = set()
-    for a in node.get("art", []):
-        tool = a.get("tool", gd.ART_TOOL)
-        if (tool, a["frame"]) not in seen_art:
-            seen_art.add((tool, a["frame"]))
-            out.append(f"- {'Claude concept' if tool == gd.CLAUDE_TOOL else 'Art'} {a['frame']}: {a['label']} (v{a['version']}, {a['ref']})"
-                       + (f", {len(a['parts'])} phần" if a.get("parts") else ""))
     if node.get("cheat"):
         out.append(f"- Node cheat: {len(node['items'])}/{gd.CHEAT_MAX} state, mỗi state một frame trùng id; "
-                   "state dựng nhanh ở bản dev, và là node duy nhất đặt order art-concept của Codex (mỗi state một ảnh); "
-                   "claude-concept của nó do tool dựng từ phần của các node vòng 4")
+                   "state dựng nhanh ở bản dev")
     if node.get("ui"):
         out += gd.ui_lines(node["ui"], "- ")
     for text in node.get("uiWait") or []:

@@ -1,3 +1,0 @@
-Đã lưu [hero-archer.png](/D:/AI/CoreSimple/Management/studio/codex/orders/HudUpgrade/bar-icons/work/out/hero-archer.png). Đây là tệp duy nhất được tạo cho mục này.
-
-PNG đã kiểm tra đúng **256 × 256 px**, nền ngoài hình có **alpha 0**, và viền `#1B2330` dày **8 px** tại đỉnh mũ. Hình chiếm 91% chiều rộng và 92% chiều cao khung.

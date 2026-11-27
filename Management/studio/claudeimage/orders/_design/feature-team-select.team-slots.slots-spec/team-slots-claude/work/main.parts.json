@@ -1,6 +1,0 @@
-{"parts": [
-  {"id": "card", "w": 300, "h": 400, "slice": null, "shapes": ["cards"]},
-  {"id": "slot", "w": 240, "h": 240, "slice": null, "shapes": ["slots"]},
-  {"id": "btn-main", "same-as": "feature-popup-lose/lose-actions/actions-spec#btn-main", "shapes": ["start"]},
-  {"id": "btn-sub", "same-as": "feature-popup-lose/lose-actions/actions-spec#btn-sub", "shapes": ["back"]}
-]}

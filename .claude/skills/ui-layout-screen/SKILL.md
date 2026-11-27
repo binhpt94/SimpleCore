@@ -8,7 +8,7 @@ Cú pháp frame: skill `ui-frame-syntax`. Quyền, `ui.md`, luật khớp `ui.md
 ## Quy trình một màn (để bố cục không máy móc)
 1. **Đầu lượt** đọc `Management/game-design/ai/ui-lessons.md` và chạy `references.py`; Read ảnh `bố cục` cùng tag với màn (HUD trận, popup thưởng...) cùng nhận định của người.
 2. **Phương án**: màn mới hoặc đổi nhiều thì làm 2 frame: một bản an toàn theo luật và tham chiếu, một bản táo bạo hơn (nhấn mạnh hơn, bất đối xứng, bố cục khác hẳn). Bản thứ hai ghi `alt: <tên frame thứ nhất>` ở phần đầu, tên file khác (`main-bold.frame`). Màn đổi nhỏ thì một frame. Người chọn một bằng cách chấm từ 5; sau đó `gd_status.py` ghi `CHỜ @UIDesigner: … xoá các phương án còn lại`: xoá bằng `gd_delete.py`, và bỏ dòng `alt:` của bản được chọn nếu nó là bản `alt`.
-3. **Vòng tự xem** (bắt buộc, 2–3 vòng trước khi báo xong): `gd_frame.py ai/idea/<node> --png`, Read `<tên>.png` (như concept sẽ thấy) và `<tên>.measure.png` (có số), trả lời bốn câu rồi sửa:
+3. **Vòng tự xem** (bắt buộc, 2–3 vòng trước khi báo xong): `gd_frame.py ai/idea/<node> --png`, Read `<tên>.png` (chỉ chữ người chơi đọc) và `<tên>.measure.png` (có số), trả lời bốn câu rồi sửa:
    - Mắt rơi vào đâu đầu tiên, có đúng phần tử chính không?
    - Nút hành động chính có nổi nhất không (cỡ, vị trí, khoảng trống quanh nó)?
    - Có chỗ nào chật, hay trống vô lý?

@@ -39,10 +39,10 @@ ITERATIONS = 200_000
 # Anything that starts like the command is handled here and never passed on: it may carry the PIN.
 COMMAND_RX = re.compile(r"feature\s*(\?|=(.*))?", re.I)
 CONTEXT_BLOCK_RX = re.compile(r"<([A-Za-z][\w-]*)\b[^>]*>.*?</\1>", re.S)
-# The values a human may bind a chat to (người quyết 2026-11-27): the Leaders and above, and the tools. Features,
+# The values a human may bind a chat to (người quyết 2026-11-27): the Leaders and above, and @DesignAdvisor. Features,
 # services, @Core and the tester are workers now (worker.py), bound by the server for one job only.
-HUMAN_BINDABLE = ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner") + tuple(guard.TOOL_ROLES) + ("@DesignAdvisor",)
-USAGE = ("Cách gõ: FEATURE=<@human, @Manager, @CodeLead, @GameDesigner, @UIDesigner, @Codex, @Blender, @ClaudeImage hoặc @DesignAdvisor> <PIN>. "
+HUMAN_BINDABLE = ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner") + ("@DesignAdvisor",)
+USAGE = ("Cách gõ: FEATURE=<@human, @Manager, @CodeLead, @GameDesigner, @UIDesigner hoặc @DesignAdvisor> <PIN>. "
          "Xem chat đang gán gì: FEATURE?")
 MAX_LISTED_REPORTS = 20
 # Role rules that are never loaded by themselves: .claude/settings.json lists them in `claudeMdExcludes` (người quyết
@@ -60,7 +60,7 @@ def tier_label(group):
     return f"tầng {TIERS.index(group)} · {group}"
 ROLE_RULES = {"@Manager": ("manager.md",), "@CodeLead": ("codelead.md",), "@UIDesigner": ("uidesigner.md",),
               "@GameDesigner": ("gamedesigner.md", "designadvisor.md"), "@DesignAdvisor": ("designadvisor.md", "gamedesigner.md"),
-              **{r: ("tester.md",) for r in guard.TESTER_ROLES}, **{r: ("studio.md",) for r in guard.TOOL_ROLES}}
+              **{r: ("tester.md",) for r in guard.TESTER_ROLES}}
 # The skills of each role (.claude/skills/<name>/SKILL.md): a task's procedure, loaded with the Skill tool only when the
 # chat does that task, so it does not sit in the context of every turn. The guard line names them; the rule files point
 # at them where the procedure used to be.
@@ -70,11 +70,9 @@ ROLE_SKILLS = {"@Manager": ("manager-startup-check", "manager-dispatch"),
                "@CodeLead": ("codelead-dispatch", "codelead-verify-batch", "codelead-scaffold-feature",
                              "codelead-resolve-issue", "codelead-wiring"),
                "@GameDesigner": GD_ROUNDS + ("gd-node-format", "gd-scoring", "gd-rework-node", "gd-integrate-advice", "gd-excel-data",
-                                             "gd-glossary", "gd-art-concept", "gd-user-control"),
+                                             "gd-glossary", "gd-user-control"),
                "@DesignAdvisor": ("advisor-ask-gpt", "gd-integrate-advice", "gd-node-format") + GD_ROUNDS,
-               "@UIDesigner": ("ui-layout-screen", "ui-frame-syntax", "ui-claude-concept-order", "gd-round-4", "gd-node-format"),
-               **{r: ("studio-fulfill-order",) for r in guard.TOOL_ROLES},
-               "@ClaudeImage": ("studio-fulfill-order", "studio-claude-concept"),
+               "@UIDesigner": ("ui-layout-screen", "ui-frame-syntax", "gd-round-4", "gd-node-format"),
                **{r: ("tester-playtest-session",) for r in guard.TESTER_ROLES}}
 RULES_READ_DIR = "rules-read"      # in the store: <session id>.json, {"role": ...} once the chat was told to read
 
@@ -235,18 +233,6 @@ def editor_status(store):
     until = time.strftime("%H:%M", time.localtime(lock["until"]))
     return f" Editor Unity: đang do {lock.get('who') or 'một chat khác'} giữ tới {until}" + (
         f" (scene {lock['scene']})" if lock.get("scene") else "") + "."
-
-
-def studio_pending(root, tool):
-    """What waits for a tool chat (studio.py), in one sentence; with no tool, where @GameDesigner's art orders stand."""
-    try:
-        tools = os.path.join(root, "Management", "tools")
-        if tools not in sys.path:
-            sys.path.insert(0, tools)
-        import studio
-        return studio.pending_line(root, tool) if tool else studio.art_line(root)
-    except Exception as ex:
-        return f" Không đọc được danh sách order ({ex})."
 
 
 def inbox_line(root, full=True):
@@ -539,38 +525,6 @@ def bound_context(data, root, store):
                 "đợt chơi thử chỉ nhận từ người hoặc CodeLead; GameDesigner và UIDesigner chỉ được nhờ một yêu cầu hẹp theo khuôn "
                 "XÁC NHẬN (một tính năng, thao tác cụ thể, kết quả mong đợi), rộng hơn thì bảo họ qua CodeLead; xong thì Stop Play "
                 "ngay để trả khoá Editor." + dyn(editor_status(store)))
-    if role in guard.TOOL_ROLES:
-        tool = guard.TOOL_ROLES[role]
-        how = ("ảnh (kind image) và tham vấn GPT (kind consult). Gen ảnh: python Management/tools/studio.py codex "
-               "<F>/<id> <item> (tự thử Codex ghi trực tiếp, rồi chỉ đọc ảnh Codex sinh ra); lệnh in CODEX LỖI hay không ra ảnh "
-               "thì dừng, không chạy lại, không đi đường khác, báo bên giao một tin. Tham vấn: studio.py consult <F>/<id> <item>."
-               if tool == "codex" else
-               "ảnh do chính mình vẽ (kind image cho feature, đủ dùng ở giai đoạn IDEA; kind art là claude-concept của một "
-               "node thiết kế). Order của feature, mỗi item: viết hình thành SVG vào work/<item>.svg bằng Write (một file tự đủ: có viewBox cùng tỉ lệ "
-               "với format của order, không script, không ảnh hay font ngoài file, chữ viết font-family Roboto; nền để trống khi order đòi trong suốt), "
-               "rồi python Management/tools/studio.py claude <F>/<id> <item>: lệnh kiểm SVG, đổi ra work/out/<item>.png "
-               "đúng kích thước, in số đo và TỰ GHI work/<item>.check.md (kích thước, đúng order): không phải mở ảnh ra xem, "
-               "không ghi check.md bằng tay. Được giao việc cho tối đa 5 agent con chạy song song, mỗi agent đúng một frame "
-               "hoặc một item và chỉ ghi file của nó (studio.py từ chối lần chạy thứ 6 và hai lần chạy cùng một item); phiên "
-               "chính gom lại rồi deliver. Claude-concept (order kind art của node thiết kế, mỗi item một frame): KHÔNG vẽ ảnh cả màn, "
-               "làm theo skill studio-claude-concept (vẽ từng phần theo frame, tool ghép; không ai chấm; vẽ lại sau khi giao cần "
-               "studio.py redo của một Leader, ghép lại thì không). Không chạy công cụ nào khác, không dùng unity-mcp để gen."
-               if tool == "claudeimage" else
-               "model 3D (kind model). Viết script vào work/<item>.py rồi chạy headless: python Management/tools/studio.py "
-               "blender <F>/<id> <item>; không được thì dùng blender MCP, rồi unity-mcp (execute_custom_tool, "
-               "execute_menu_item). Kết quả luôn để ở work/out/<item>.<đuôi>.")
-        return (f"guard: chat này gán FEATURE={role} ({tier_label('Tools')}): nhận order của các feature và làm {how} Không code, "
-                f"không sửa Assets. Chỉ ghi Management/studio/{tool}/lessons.md và work/ của các order. Đầu lượt: python "
-                f"Management/tools/studio.py status {tool}; đọc order.md và lessons.md trước khi gen. Phiên chạy theo việc: "
-                f"order mới, item làm lại tới ở đầu tin (hộp thư, [tin <id> · từ ...]), không cần báo đã nhận; tin có mã đã "
-                f"làm thì bỏ qua. Gen ĐÚNG số "
-                f"lượng: mỗi item một kết quả, không tự gen thêm. Xong: studio.py deliver {tool} <F>/<id>: lệnh tự đưa tin "
-                f"vào hộp thư của feature, không nhắn feature (guard chặn); order art (_design) thì nhắn Leader lệnh in ra. Lượt gen có trần: mỗi item 2 lượt đầu; sau khi giao chỉ "
-                f"chạy lại item bị chấm 'Làm lại ngay' có phản hồi, 1 lượt mỗi lần, tối đa 2 lần ({'đọc phản hồi ở studio.py status rồi sửa SVG theo đó' if tool == 'claudeimage' else 'phản hồi tự vào prompt'}). Ghi tự kiểm "
-                f"work/<item>.check.md (kích thước, nền trong suốt, % khung: đo bằng studio.py measure <F>/<id> <item>, "
-                f"không ước bằng mắt); hết lượt thì pick bản gần nhất và giao với nhãn chưa chuẩn, không tìm đường vòng. "
-                f"Phản hồi là một luật chung thì thêm một mục vào lessons.md. "
-                f"Luật ở .claude/rules/studio.md; mỗi order làm theo skill studio-fulfill-order." + dyn(studio_pending(root, tool)) + dyn(editor_status(store)))
     if role == "@GameDesigner":
         return (f"guard: chat này gán FEATURE=@GameDesigner ({tier_label('Leaders')})" ": thiết kế game, không code. Lượt có sửa file "
                 "phải kết thúc bằng khối '## Báo cáo cho @Manager' (8 dòng, xem gamedesigner.md; Stop hook ép): @Manager "
@@ -602,24 +556,16 @@ def bound_context(data, root, store):
                 "<id lần hỏi>#<id góp ý>=<id ý>. Node do GPT đề xuất: node-by: gpt@<id lần hỏi>. Mỗi ý một quyết định, không gộp dài. "
                 + advice_mode(root) + " Đưa góp ý vào node theo skill gd-integrate-advice."
                 " UI: ở node vòng 4 có giao diện bạn viết ui.md (phần tử: id, loại, chính/phụ, dùng để, trạng thái; tương "
-                "tác; flow; xem skill gd-round-4); bố cục (frame .frame-concept, vị trí, kích thước) và order "
-                "claude-concept là việc của @UIDesigner: viết hoặc đổi ui.md xong thì nhắn UIDesigner (to: \"UIDesigner\"). "
-                "Bạn không ghi được frame. Art-concept (codex/orders/_design, tool: codex; check tự đưa vào hộp thư của @Codex; chỉ "
-                "node cheat; cho PROTOTYPE/FULL) vẫn do bạn đặt."
-                " Viết order xong và python "
-                "Management/tools/studio.py check qua thì order tự vào hộp thư của phiên tool, không chờ duyệt, không nhắn. Art-concept: người chấm "
-                "từng ảnh trên trang; trang chỉ lưu. Khi người bảo cho làm lại: chạy python Management/tools/studio.py status "
-                "codex, giao @Codex các item 'Làm lại ngay' có phản hồi bằng python Management/tools/dispatch.py send @Codex --from "
-                "GameDesigner \"Làm lại <order> · <item>: <phản hồi>\", báo Manager các item thiếu phản hồi (ask.py); không tự chấm "
-                "thay người. Claude-concept (ảnh vẽ từ frame) do @UIDesigner đặt và theo dõi." + dyn(studio_pending(root, None)) +
+                "tác; flow; xem skill gd-round-4); bố cục (frame .frame-concept, vị trí, kích thước) "
+                "là việc của @UIDesigner: viết hoặc đổi ui.md xong thì nhắn UIDesigner (to: \"UIDesigner\"). "
+                "Bạn không ghi được frame. Art của game do worker tự làm (GreyBox, Simple), Detail do người đưa vào; thiết kế không đặt ảnh."
                 " Làm theo .claude/rules/gamedesigner.md; trước khi viết hay sửa node vòng N dùng skill gd-round-<N> (tool Skill)."
                 + dyn(inbox_line(root, full=False)))
     if role == "@UIDesigner":
         return (f"guard: chat này gán FEATURE=@UIDesigner ({tier_label('Leaders')})" ": bố cục UI của thiết kế, không code. @GameDesigner "
                 "liệt kê UI ở ui.md của node vòng 4 (phần tử, tương tác, flow); bạn quyết định vị trí, kích thước, nhóm, "
                 "khoảng cách, vùng an toàn bằng frame. Ghi: CHỈ Management/game-design/ai/idea/<node>/.frame-concept/<tên>.frame "
-                "(cùng cổng khoá node như @GameDesigner) và order.md mới của claude-concept trong "
-                "Management/studio/claudeimage/orders/_design/<node, '/' thay bằng '.'>/<id>/; data.md, ui.md và mọi thứ khác "
+                "(cùng cổng khoá node như @GameDesigner); data.md, ui.md và mọi thứ khác "
                 "không ghi được. Mỗi frame ghi ở phần đầu: 'ui: <hash ui.md>' (gd_status.py in hash), 'ai: <0-10>' (điểm của "
                 "bạn) và vài dòng 'why: <lý do bố cục>'; id hình trùng id phần tử trong ui.md, đủ mọi phần tử chính, nút "
                 "nào cũng có trong ui.md. Người chấm từng frame như chấm một ý; dưới 5 là bạn làm lại. ui.md thiếu hay mâu "
@@ -630,13 +576,11 @@ def bound_context(data, root, store):
                 "ui-frame-syntax (cú pháp, trang trí, các rect). Trước khi báo xong: python "
                 "Management/tools/gd_frame.py ai/idea/<node> --png, Read ảnh, tự hỏi mắt rơi vào đâu, nút chính có nổi nhất, "
                 "chỗ nào chật hay trống, nhóm có rõ; sửa 2-3 vòng; khoảng cách theo thang 8/16/24/40/64. Xoá frame: "
-                "python Management/tools/gd_delete.py ai/idea/<node>/.frame-concept/<tên>.frame. Claude-concept: đặt cho mọi "
-                "node vòng 4 có frame (mỗi frame một ảnh, node vòng 4 trước rồi mới tới cheat), python Management/tools/studio.py "
-                "check (order tự vào hộp thư của @ClaudeImage, không nhắn); vẽ lại sau khi giao: python Management/tools/studio.py redo <ref> <frame> \"<lí do>\" (cũng tự gửi); "
-                "việc khác cho @ClaudeImage: python Management/tools/dispatch.py send @ClaudeImage --from UIDesigner \"<việc>\". "
+                "python Management/tools/gd_delete.py ai/idea/<node>/.frame-concept/<tên>.frame. Art của game do worker tự làm "
+                "theo frame (GreyBox, Simple). "
                 "Lượt có sửa file kết thúc bằng khối '## Báo cáo cho @Manager' (8 dòng; Stop hook ép). Chờ người hay bị chặn: "
                 "nhắn Manager BÁO CHẶN, hết thì HẾT CHẶN. Tester UnityAutoPlay chỉ nhắn để xác nhận một thao tác (khuôn XÁC NHẬN), chơi thử rộng hơn thì nhờ CodeLead. Giao nó bằng hộp thư: python Management/tools/dispatch.py send @UnityAutoPlay --from UIDesigner \"<việc>\" (tester là việc của server, chạy khi tới phiếu Editor)."
-                + dyn(studio_pending(root, None)) + " Làm theo .claude/rules/uidesigner.md." + dyn(inbox_line(root, full=False)))
+                + " Làm theo .claude/rules/uidesigner.md." + dyn(inbox_line(root, full=False)))
     if role == "@DesignAdvisor":
         return (f"guard: chat này gán FEATURE=@DesignAdvisor ({tier_label('Tools')})" ": đưa GPT (Codex CLI) vào thiết kế game, theo yêu cầu của "
                 "người và @GameDesigner. Không code, không viết thiết kế. CHỈ nhận việc khi người hoặc @GameDesigner nhắn; "

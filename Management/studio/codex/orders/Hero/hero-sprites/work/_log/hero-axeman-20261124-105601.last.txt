@@ -1,3 +1,0 @@
-Đã lưu một sprite mới tại [out/hero-axeman.png](D:/AI/CoreSimple/Management/studio/codex/orders/Hero/hero-sprites/work/out/hero-axeman.png). PNG **256 × 384**, nền alpha 0, đỉnh đầu cách mép trên **24 px**, đế ủng cách mép dưới **4 px**. Rìu nằm trọn trong khung.
-
-Sprite tạo bằng ImageGen. Thân lệch trái để chừa chỗ cho rìu. Viền `#1B2330` đo được **3–11 px** tại các điểm lấy mẫu, nên độ dày chưa đều ở mức 8 px.

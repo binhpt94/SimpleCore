@@ -1,3 +1,0 @@
-Đã lưu [out/hero-mage.png](D:/AI/CoreSimple/Management/studio/codex/orders/HudUpgrade/bar-icons/work/out/hero-mage.png). PNG 256 × 256 có nền alpha 0 và hình căn giữa, cách mép trên 8 px và mép dưới 6 px.
-
-Chân dung được tạo bằng ImageGen theo mô tả pháp sư quay sang phải, mũ tím, râu trắng, cổ áo vàng và gậy đính đá xanh ngọc. Các mảng màu chính và viền tối vẫn rõ khi thu nhỏ còn 70 × 70 px.

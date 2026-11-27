@@ -1,5 +1,0 @@
-{"parts": [
-  {"id": "portrait", "w": 240, "h": 200, "slice": null, "shapes": ["portrait"]},
-  {"id": "role", "w": 48, "h": 48, "slice": null, "shapes": ["role"]},
-  {"id": "picked", "w": 56, "h": 56, "slice": null, "shapes": ["picked"]}
-]}

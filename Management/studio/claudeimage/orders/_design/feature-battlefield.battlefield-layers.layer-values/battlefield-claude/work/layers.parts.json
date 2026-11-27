@@ -1,7 +1,0 @@
-{"parts": [
-  {"id": "sky", "w": 1920, "h": 640, "slice": null, "shapes": ["sky"]},
-  {"id": "far", "w": 1920, "h": 114, "slice": null, "shapes": ["far"]},
-  {"id": "ground", "w": 1920, "h": 183, "slice": null, "shapes": ["ground"]},
-  {"id": "grass", "w": 160, "h": 60, "slice": null, "shapes": ["grass-l1", "grass-l2", "grass-l3", "grass-r1", "grass-r2", "grass-r3"]},
-  {"id": "stone", "w": 120, "h": 60, "slice": null, "shapes": ["stone-l1", "stone-l2", "stone-r1", "stone-r2"]}
-]}

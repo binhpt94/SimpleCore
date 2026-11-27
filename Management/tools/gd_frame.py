@@ -46,7 +46,6 @@ def text_report(table, node):
     for fr in node["frames"]:
         out.append("")
         out += gd.frame_brief(fr)
-        out += gd.frame_roles_brief(fr)
     out += [f"- nhắc: {t}" for t in node["frameNotes"]]
     return "\n".join(out)
 
@@ -78,14 +77,14 @@ PNG_WIDTH, MEASURE_WIDTH, FULL_WIDTH = 960, 1280, 1920
 
 def write_pngs(root, table, node, full=False):
     """Draws every frame of the node twice (as a concept, and with the numbers); returns the printed lines."""
-    import studio      # the SVG to PNG ways of the studio
+    import render      # the SVG to PNG ways of this machine
     dest = Path(root).joinpath(*PNG_DIR, (table + "." + node["path"].replace("/", ".")) if node["path"] else table)
     out, failed = [], False
     for fr in node["frames"]:
         stem = Path(fr["file"]).stem
         for name, concept in ((stem, True), (stem + ".measure", False)):
             width = FULL_WIDTH if full else PNG_WIDTH if concept else MEASURE_WIDTH
-            png = studio.frame_png_file(fr, dest, name, concept=concept, width=width)
+            png = render.frame_png_file(fr, dest, name, concept=concept, width=width)
             if png is None:
                 failed = True
                 continue

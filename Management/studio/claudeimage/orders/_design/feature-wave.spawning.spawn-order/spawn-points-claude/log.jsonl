@@ -1,6 +1,0 @@
-{"at": "2026-11-24 13:49:18", "event": "attempt", "item": "spawn-points", "n": 1}
-{"at": "2026-11-24 13:49:19", "event": "run", "tool": "claudeimage", "item": "spawn-points", "mode": "browser", "exit": 0, "parts": [], "result": "đã có work/out/spawn-points.png", "files": ["spawn-points.png"]}
-{"at": "2026-11-24 13:50:39", "event": "deliver", "version": 1, "files": ["meta.json", "parts", "quality.json", "spawn-points.png"], "below": []}
-{"at": "2026-11-25 23:13:50", "event": "redo", "item": "spawn-points", "round": 1, "text": "Style vòng 1 đổi sang Colorful casual mobile, vẽ lại theo style mới, giữ nguyên bố cục frame", "version": 1}
-{"at": "2026-11-25 23:21:37", "event": "build", "tool": "claudeimage", "item": "spawn-points", "mode": "browser", "exit": 0, "parts": [], "result": "đã có work/out/spawn-points.png", "files": ["spawn-points.png"]}
-{"at": "2026-11-25 23:21:44", "event": "deliver", "version": 2, "files": ["meta.json", "parts", "quality.json", "spawn-points.png"], "below": []}

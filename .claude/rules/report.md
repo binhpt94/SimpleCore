@@ -29,8 +29,8 @@ Tên khối vẫn là `## Báo cáo cho @Manager` cho mọi phiên, để hook n
 - "Công khai đổi" và "Cần bên khác" là thứ Manager dùng để điều phối: ghi rõ tên feature, contract, id asset. Câu đang chờ người trả lời thì ghi id câu hỏi (`ask.py`, dạng `q…`).
 - Không ghi PIN hay nội dung bí mật.
 - Nhóm Testers điền theo đợt chơi thử: "Đã đổi" là đường dẫn đợt (`Tester/<Tên>/<đợt>/`); "Công khai đổi" ghi `không`; "Cần bên khác" là feature có lỗi và lỗi gì; "Kiểm tra" là kết quả `tester.py check` và kết quả đợt (`đạt`, `không đạt`, `dở`).
-- @GameDesigner điền theo thiết kế: "Đã đổi" là các node đã thêm, sửa, xoá; "Công khai đổi" là node đã chốt (có trong `live`) mà bản đề xuất vừa đổi, hoặc `không`; "Cần bên khác" là việc đang chờ ai (người: chấm, chọn ý trái nhau, chốt trên trang; câu hỏi cho người: id `ask.py` đã gửi Manager; @DesignAdvisor: lần hỏi GPT; @Codex, @ClaudeImage: order); "Kiểm tra" là kết quả `gd_status.py` (node chưa đạt, lỗi cấu trúc).
-- @UIDesigner điền theo bố cục: "Đã đổi" là các frame (`<node>/<tên>.frame`); "Công khai đổi" là node đã có trong `live` mà frame vừa đổi, hoặc `không`; "Cần bên khác" là chờ người chấm frame, chờ @GameDesigner sửa `ui.md`, order claude-concept; "Kiểm tra" là các dòng `CHỜ @UIDesigner` còn lại của `gd_status.py`.
+- @GameDesigner điền theo thiết kế: "Đã đổi" là các node đã thêm, sửa, xoá; "Công khai đổi" là node đã chốt (có trong `live`) mà bản đề xuất vừa đổi, hoặc `không`; "Cần bên khác" là việc đang chờ ai (người: chấm, chọn ý trái nhau, chốt trên trang; câu hỏi cho người: id `ask.py` đã gửi Manager; @DesignAdvisor: lần hỏi GPT); "Kiểm tra" là kết quả `gd_status.py` (node chưa đạt, lỗi cấu trúc).
+- @UIDesigner điền theo bố cục: "Đã đổi" là các frame (`<node>/<tên>.frame`); "Công khai đổi" là node đã có trong `live` mà frame vừa đổi, hoặc `không`; "Cần bên khác" là chờ người chấm frame, chờ @GameDesigner sửa `ui.md`; "Kiểm tra" là các dòng `CHỜ @UIDesigner` còn lại của `gd_status.py`.
 
 ## Đi đâu
 - Hook lưu khối vào `Management/reports/<thời gian>-<vai trò>.md` (không commit).

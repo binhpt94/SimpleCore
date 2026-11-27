@@ -1,3 +1,0 @@
-Đã lưu [out/btn-start.png](/D:/AI/CoreSimple/Management/studio/codex/orders/TeamSelect/ts-start-colorful/work/out/btn-start.png). Sprite được dựng theo tọa độ pixel, với viền xanh đậm, dải bóng ngang và gờ tối ở đáy.
-
-Đã kiểm tra PNG 400×120, nền ngoài trong suốt và các lát 9-slice trái/trên/phải/dưới 40/36/40/40 px.
