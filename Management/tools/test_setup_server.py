@@ -1254,6 +1254,21 @@ def worker_server_cases(check):
         ss.worker_tick(now + 15)
         check("ask: the answer is given to the job, once", ("A" in wk.load(root, w4["id"]).get("answered_text", wk.load(root, w4["id"]).get("pending", "")) or
               any(x[0] == w4["id"] and x[2] and "A" in x[2] for x in started), wk.load(root, w4["id"]).get("answered")), (True, [qid]))
+        # prefabs and scenes of a load are imported again (a new asset of the same load may be imported after them)
+        w5 = wk.queue(root, "Wave", task="r", now=now + 16)
+        names = ["UnityProject/Assets/_Composition/" + n for n in ("A.unity", "Z.prefab", "N.asset", "Gone.prefab")]
+        for n in names[:3]:
+            (root / n).parent.mkdir(parents=True, exist_ok=True)
+            (root / n).write_text("x", encoding="utf-8")
+        w5["applied_files"] = names
+        wk.save(root, w5)
+        paths = ss.reimport_paths([{"session": "@Worker", "job": w5["id"]}, {"session": "@CodeLead"}])
+        check("load: the prefabs and scenes still there are reimported, prefabs first", paths,
+              ["Assets/_Composition/Z.prefab", "Assets/_Composition/A.unity"])
+        prompt = ss.load_prompt(["Wave"], paths)
+        check("load: the runner gets the reimport code and its tool",
+              ("mcp__UnityMCP__execute_code" in prompt, 'new string[] { "Assets/_Composition/Z.prefab", ' in prompt), (True, True))
+        check("load: without prefab or scene no reimport step", "execute_code" in ss.load_prompt(["Wave"], []), False)
         # the page
         res = ss.worker_call("run", {"feature": "Hud", "task": "làm từ trang"})
         check("page: run queues a job for a feature", (res["ok"], wk.load(root, res["id"])["source"]), (True, "người"))

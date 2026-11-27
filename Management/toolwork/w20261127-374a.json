@@ -1,0 +1,10 @@
+{
+ "id": "w20261127-374a",
+ "text": "Server nạp code worker: khi một lượt nạp có asset mới mà prefab hay scene cùng lượt trỏ tới, Unity import prefab trước nên ô tham chiếu bị lưu là thiếu, YAML vẫn trỏ đúng GUID. Sửa ở bước nạp của worker.py hoặc server: sau khi nạp, reimport lại các prefab và scene trong lượt rồi mới biên dịch và chạy test. Xong thì lượt nạp kiểu w20261127-175942-core không còn làm hỏng test Composition",
+ "source": "@Manager",
+ "decided": "Người chọn Ghi việc sửa ngày 2026-11-27 trong chat Manager",
+ "state": "done",
+ "note": "Lượt nạp của server (setup_server.py load_run): sau refresh, nếu không có lỗi biên dịch thì import lại ForceUpdate mọi prefab và scene các việc trong lượt đã nạp, prefab trước, rồi mới tới lô test. Reimport hỏng thì phiếu xếp lại. Thêm 3 test, test_setup_server 305 ok, test_worker 36 ok. Server cần khởi động lại để dùng bản mới",
+ "created": 1795778977.366137,
+ "closed": 1795779130.7159379
+}

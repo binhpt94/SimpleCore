@@ -2130,11 +2130,19 @@ RUNNER_LOCK = threading.Lock()
 JSON_TAIL_RX = re.compile(r"\{[^{}]*(\{[^{}]*\}[^{}]*)*\}\s*$", re.S)
 
 RUNNER_LOAD = ("Bạn là phiên biên dịch của server (vai @UnityAutoPlay, chỉ đọc, không sửa gì, không nhắn ai). Không đọc "
-               "luật hay skill. Nạp tool bằng ToolSearch select:mcp__UnityMCP__refresh_unity,mcp__UnityMCP__read_console. "
+               "luật hay skill. Nạp tool bằng ToolSearch select:{tools}. "
                "Gọi refresh_unity (scope all, mode force, compile request, wait_for_ready true), rồi read_console lấy lỗi "
-               "biên dịch (types error). In DÒNG CUỐI là đúng một JSON: {{\"clean\": true|false, \"errors\": "
+               "biên dịch (types error).{reimport} In DÒNG CUỐI là đúng một JSON: {{\"clean\": true|false, \"errors\": "
                "[\"<file>:<dòng>: <mã>: <câu>\", ...]}} (tối đa 30 lỗi). Unity không kết nối được thì "
                "{{\"clean\": false, \"errors\": [\"UNITY: <câu lỗi>\"]}}. Code vừa nạp của: {files}.")
+LOAD_TOOLS = ("mcp__UnityMCP__refresh_unity", "mcp__UnityMCP__read_console")
+# Unity may import a prefab or scene before a new asset of the same load that it points to: the imported object keeps
+# a missing reference although the YAML has the right GUID. Importing it again after the compile fixes it.
+REIMPORT_STEP = (" Không có lỗi biên dịch thì gọi execute_code (action execute) với đúng đoạn C# dưới đây, không sửa gì, "
+                 "để import lại prefab và scene vừa nạp. Gọi hỏng hay kết quả khác OK thì in clean false, errors "
+                 "[\"UNITY: reimport: <câu lỗi>\"]. Đoạn C#:\n{code}\n")
+REIMPORT_CODE = ("foreach (var p in new string[] {{ {paths} }}) "
+                 "UnityEditor.AssetDatabase.ImportAsset(p, UnityEditor.ImportAssetOptions.ForceUpdate);\nreturn \"OK\";")
 RUNNER_TEST = ("Bạn là phiên chạy test của server (vai @UnityAutoPlay, chỉ đọc, không sửa gì, không nhắn ai). Không đọc "
                "luật hay skill. Nạp tool bằng ToolSearch select:mcp__UnityMCP__run_tests,mcp__UnityMCP__get_test_job. "
                "Chạy run_tests mode EditMode với assembly_names {assemblies}, chờ get_test_job tới khi xong. In DÒNG CUỐI "
@@ -2238,6 +2246,28 @@ def grant_text(t):
             "Không giữ Editor sang việc khác.")
 
 
+def reimport_paths(group):
+    """The prefabs and scenes (Unity paths, prefabs first) the jobs of a load wrote and that still exist. Every apply of
+    a job counts: after a fix round the new asset may only compile in a later load than the prefab came in."""
+    paths = set()
+    for t in group:
+        try:
+            files = worker.load(ROOT, t["job"]).get("applied_files") or [] if t.get("job") else []
+        except (OSError, ValueError):
+            continue
+        paths |= {f[len("UnityProject/"):] for f in files if f.startswith("UnityProject/Assets/")
+                  and f.endswith((".prefab", ".unity")) and (ROOT / f).is_file()}
+    return sorted(paths, key=lambda p: (p.endswith(".unity"), p))
+
+
+def load_prompt(files, paths):
+    tools, step = list(LOAD_TOOLS), ""
+    if paths:
+        tools.append("mcp__UnityMCP__execute_code")
+        step = REIMPORT_STEP.format(code=REIMPORT_CODE.format(paths=", ".join(json.dumps(p, ensure_ascii=False) for p in paths)))
+    return RUNNER_LOAD.format(tools=",".join(tools), reimport=step, files=", ".join(files) or "(không có, chỉ biên dịch)")
+
+
 def load_run(group):
     """The load of every waiting code-only ticket: drafts into Assets, one compile, the verdict to everyone."""
     did, loaded, files = [], [], []
@@ -2247,7 +2277,7 @@ def load_run(group):
     if not loaded:
         return did
     try:
-        verdict = runner_turn(RUNNER_LOAD.format(files=", ".join(files) or "(không có, chỉ biên dịch)"))
+        verdict = runner_turn(load_prompt(files, reimport_paths(loaded)))
         unity = [str(e) for e in verdict.get("errors") or [] if str(e).startswith("UNITY")]
         if unity and not verdict.get("clean"):      # Unity unreachable or the call refused: nothing was compiled
             raise RuntimeError("; ".join(unity)[:200])
