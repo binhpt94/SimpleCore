@@ -53,8 +53,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: catalogs.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'catalogs.Array.data[0]'
+      value:
+      objectReference: {fileID: 11400000, guid: a7710000000000000000000000000002, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: installers.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[0]'
@@ -62,10 +70,14 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 5e551000000000000000000000000004, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[1]'
+      value:
+      objectReference: {fileID: 11400000, guid: a7710000000000000000000000000003, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'installers.Array.data[2]'
       value: 
       objectReference: {fileID: 11400000, guid: dfad3aec2bbb47f61bb41c47c7ff9127, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
-      propertyPath: 'installers.Array.data[2]'
+      propertyPath: 'installers.Array.data[3]'
       value:
       objectReference: {fileID: 11400000, guid: 5cef1000000000000000000000000008, type: 2}
     m_RemovedComponents: []

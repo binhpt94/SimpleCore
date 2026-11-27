@@ -1,36 +1,43 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Game.Core
 {
     /// <summary>
-    /// Art of one key <c>F/id</c>: files at Resources/Art/F/id/Simple and /Detail. Picks the level with
-    /// <see cref="ArtTiers.Pick"/> and the person's <see cref="ArtChoice"/>, falls back to <see cref="GreyBox"/>.
-    /// Static and stateless: reads files on every call, caches nothing.
+    /// <see cref="IArt"/> read from the scene's catalog of kind <see cref="Kind"/>: id <c>F/id/Simple</c> and
+    /// <c>F/id/Detail</c> for the files, id <see cref="ChoiceId"/> for the person's <see cref="ArtChoice"/> TextAsset.
+    /// No catalog or no ArtChoice counts as empty: everything without a file is GreyBox, nothing throws.
     /// </summary>
-    public static class Art
+    internal sealed class Art : IArt
     {
-        internal const string ChoicePath = "ArtChoice";
+        internal const string Kind = "Art";
+        internal const string ChoiceId = "ArtChoice";
 
-        /// <summary>The level the key would show with these files.</summary>
-        internal static ArtTier TierOf(string key, IArtFiles files)
+        private readonly AssetCatalog catalog;
+        private readonly ISet<string> kept;
+
+        /// <param name="catalog">The Art catalog of the scene, or null when the scene has none.</param>
+        internal Art(AssetCatalog catalog)
         {
-            CheckKey(key);
-            var choice = files.Load(ChoicePath) as TextAsset;
-            var kept = ArtChoice.Parse(choice != null ? choice.text : null);
-            var hasDetail = files.Load(PathOf(key, ArtTier.Detail)) != null;
-            var hasSimple = files.Load(PathOf(key, ArtTier.Simple)) != null;
-            return ArtTiers.Pick(hasDetail, hasSimple, kept.Contains(key));
+            this.catalog = catalog;
+            var choice = Find(ChoiceId) as TextAsset;
+            kept = ArtChoice.Parse(choice != null ? choice.text : null);
         }
 
-        /// <summary>
-        /// The sprite of the key. A Sprite file is returned as is; a Texture2D file becomes a centred sprite
-        /// <c>look.Size</c> units wide; no usable file gives <see cref="GreyBox.Sprite"/>.
-        /// </summary>
-        internal static Sprite Sprite(string key, GreyBox.Look look, IArtFiles files)
+        internal static string IdOf(string key, ArtTier tier) => $"{key}/{tier}";
+
+        public ArtTier TierOf(string key)
         {
-            var file = FileOf(key, files);
+            CheckKey(key);
+            return ArtTiers.Pick(Find(IdOf(key, ArtTier.Detail)) != null, Find(IdOf(key, ArtTier.Simple)) != null,
+                kept.Contains(key));
+        }
+
+        public Sprite Sprite(string key, GreyBox.Look look)
+        {
+            var file = FileOf(key);
             if (file is Sprite sprite) return sprite;
             if (file is Texture2D texture)
             {
@@ -43,13 +50,9 @@ namespace Game.Core
             return GreyBox.Sprite(look);
         }
 
-        /// <summary>
-        /// A new instance of the key's model (a GameObject file, for example an imported .fbx), or a
-        /// <see cref="GreyBox.Model"/> cube of <paramref name="size"/> when there is none. The caller destroys it.
-        /// </summary>
-        internal static GameObject Model(string key, Vector3 size, IArtFiles files)
+        public GameObject Model(string key, Vector3 size)
         {
-            if (FileOf(key, files) is GameObject prefab)
+            if (FileOf(key) is GameObject prefab)
             {
                 var model = Object.Instantiate(prefab);
                 model.name = key;
@@ -59,13 +62,13 @@ namespace Game.Core
             return GreyBox.Model(size);
         }
 
-        internal static string PathOf(string key, ArtTier tier) => $"Art/{key}/{tier}";
-
-        private static Object FileOf(string key, IArtFiles files)
+        private Object FileOf(string key)
         {
-            var tier = TierOf(key, files);
-            return tier == ArtTier.GreyBox ? null : files.Load(PathOf(key, tier));
+            var tier = TierOf(key);
+            return tier == ArtTier.GreyBox ? null : Find(IdOf(key, tier));
         }
+
+        private Object Find(string id) => catalog != null && catalog.TryGet(id, out var asset) ? asset : null;
 
         private static void CheckKey(string key)
         {

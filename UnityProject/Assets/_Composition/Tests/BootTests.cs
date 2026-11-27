@@ -11,11 +11,12 @@ namespace Game.Composition.Tests
         private const string BasePath = "Assets/_Composition/Boot.prefab";
         private const string SessionScene = "SessionSceneInstaller";
         private const string SimClock = "SimClockInstaller";
+        private const string Art = "ArtInstaller";
 
         private static readonly object[] Scenes =
         {
-            new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 3 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 22 },
+            new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 4 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 23 },
         };
 
         [Test]
@@ -51,13 +52,14 @@ namespace Game.Composition.Tests
 
         // feature-session-scene/session-steps/participant-order: the scene's participants join in install order,
         // between SessionScene (first) and the scene's SceneFlow side (last). Loading now also has CheatPanel before SceneFlow;
+        // ArtInstaller right after SessionScene only registers IArt, it is not a participant;
         // the test keeps its name because the requirement book cites it.
         [Test]
         public void LoadingScene_HasOnlySceneFlowAsParticipant()
         {
             var names = Load("Assets/_Composition/Boot.Loading.prefab").Installers.Select(i => i.name).ToList();
 
-            Assert.That(names, Is.EqualTo(new[] { SessionScene, "CheatPanelInstaller", "SceneFlowLoadingInstaller" }));
+            Assert.That(names, Is.EqualTo(new[] { SessionScene, Art, "CheatPanelInstaller", "SceneFlowLoadingInstaller" }));
         }
 
         // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 16 participants
@@ -72,14 +74,14 @@ namespace Game.Composition.Tests
 
             Assert.That(names, Is.EqualTo(new[]
             {
-                SessionScene, SimClock,
+                SessionScene, Art, SimClock,
                 "PopupInstaller", "SaveInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
                 "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
                 "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller",
                 "CheatPanelInstaller", "SceneFlowGameInstaller",
             }));
-            Assert.That(names.Skip(1).Count(n => n != "SaveInstaller"), Is.EqualTo(16),
-                "participants after SessionScene (Save only registers ISavedRecord, it is not a participant); CheatPanel holds the cheat overlay of every scene");
+            Assert.That(names.Skip(1).Count(n => n != "SaveInstaller" && n != Art), Is.EqualTo(16),
+                "participants after SessionScene (Save only registers ISavedRecord and Art only registers IArt, they are not participants); CheatPanel holds the cheat overlay of every scene");
         }
 
         // The build stays at PROTOTYPE (human, 2026-11-27): at IDEA Enemy needs Combat, which the design puts at
@@ -129,7 +131,7 @@ namespace Game.Composition.Tests
 
             Assert.That(names, Is.EqualTo(new[]
             {
-                SessionScene, SimClock,
+                SessionScene, Art, SimClock,
                 "PopupInstaller", "SaveInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "CombatInstaller",
                 "EnemyInstaller", "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
                 "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller", "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "CheatPanelInstaller", "SceneFlowGameInstaller",

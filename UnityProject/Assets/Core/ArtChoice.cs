@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Game.Core
 {
     /// <summary>
-    /// Reads the person's art choice, the text of Resources/ArtChoice: <c>{"simple": ["F/id", ...]}</c>, the keys
+    /// Reads the person's art choice, the TextAsset of id <c>ArtChoice</c> in the Art catalog (_Composition/ArtChoice.json): <c>{"simple": ["F/id", ...]}</c>, the keys
     /// that stay on Simple even when a Detail file exists. Pure: takes the text, holds nothing.
     /// </summary>
     public static class ArtChoice

@@ -26,9 +26,15 @@ namespace Game.Core
 
         public AssetCatalog Get(string kind)
         {
-            if (kind != null && byKind.TryGetValue(kind, out var catalog)) return catalog;
+            if (TryGet(kind, out var catalog)) return catalog;
             throw new InvalidOperationException(
                 $"This scene has no asset catalog of kind '{kind}'. Add one to the scene's Boot (_Composition).");
+        }
+
+        public bool TryGet(string kind, out AssetCatalog catalog)
+        {
+            catalog = null;
+            return kind != null && byKind.TryGetValue(kind, out catalog);
         }
     }
 }

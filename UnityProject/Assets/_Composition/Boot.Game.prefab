@@ -54,16 +54,20 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: catalogs.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: installers.Array.size
-      value: 22
+      value: 23
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'catalogs.Array.data[0]'
       value:
       objectReference: {fileID: 11400000, guid: a19bce1a4b585b24f9092f689d12b129, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'catalogs.Array.data[1]'
+      value:
+      objectReference: {fileID: 11400000, guid: a7710000000000000000000000000002, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[0]'
       value:
@@ -71,85 +75,89 @@ PrefabInstance:
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[1]'
       value:
-      objectReference: {fileID: 11400000, guid: 120a7e126e86f6940a14c9907337df35, type: 2}
+      objectReference: {fileID: 11400000, guid: a7710000000000000000000000000003, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[2]'
       value:
-      objectReference: {fileID: 11400000, guid: 33330000000000000000000000000004, type: 2}
+      objectReference: {fileID: 11400000, guid: 120a7e126e86f6940a14c9907337df35, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[3]'
       value:
-      objectReference: {fileID: 11400000, guid: 72729dfd9ae382e4bae387061a08f3ed, type: 2}
+      objectReference: {fileID: 11400000, guid: 33330000000000000000000000000004, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[4]'
       value:
-      objectReference: {fileID: 11400000, guid: 272bb11ca2b1c6f48a9221c53d310db8, type: 2}
+      objectReference: {fileID: 11400000, guid: 72729dfd9ae382e4bae387061a08f3ed, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[5]'
       value:
-      objectReference: {fileID: 11400000, guid: 11110000000000000000000000000004, type: 2}
+      objectReference: {fileID: 11400000, guid: 272bb11ca2b1c6f48a9221c53d310db8, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[6]'
       value:
-      objectReference: {fileID: 11400000, guid: 0db512e300c38549c8a2fbfc0ff6601b, type: 2}
+      objectReference: {fileID: 11400000, guid: 11110000000000000000000000000004, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[7]'
       value:
-      objectReference: {fileID: 11400000, guid: 39439eaa92b4b2e428ac51a90839013a, type: 2}
+      objectReference: {fileID: 11400000, guid: 0db512e300c38549c8a2fbfc0ff6601b, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[8]'
       value:
-      objectReference: {fileID: 11400000, guid: ce494e5c4b71c91479e3f664dfdbcf2b, type: 2}
+      objectReference: {fileID: 11400000, guid: 39439eaa92b4b2e428ac51a90839013a, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[9]'
       value:
-      objectReference: {fileID: 11400000, guid: af20df59bc4e8794b90bbd8d2467941b, type: 2}
+      objectReference: {fileID: 11400000, guid: ce494e5c4b71c91479e3f664dfdbcf2b, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[10]'
       value:
-      objectReference: {fileID: 11400000, guid: 0e0449e203e09c1408a0cfdab68adc1c, type: 2}
+      objectReference: {fileID: 11400000, guid: af20df59bc4e8794b90bbd8d2467941b, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[11]'
       value:
-      objectReference: {fileID: 11400000, guid: 8df1a6c5370913443ac2741eee1390a8, type: 2}
+      objectReference: {fileID: 11400000, guid: 0e0449e203e09c1408a0cfdab68adc1c, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[12]'
       value:
-      objectReference: {fileID: 11400000, guid: 00f23f9993862104b96b0f22a80127de, type: 2}
+      objectReference: {fileID: 11400000, guid: 8df1a6c5370913443ac2741eee1390a8, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[13]'
       value:
-      objectReference: {fileID: 11400000, guid: 88fa1790102310647b5f86fea20615b3, type: 2}
+      objectReference: {fileID: 11400000, guid: 00f23f9993862104b96b0f22a80127de, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[14]'
       value:
-      objectReference: {fileID: 11400000, guid: bb84bc2cf45c3d94e9c0687b8fd21555, type: 2}
+      objectReference: {fileID: 11400000, guid: 88fa1790102310647b5f86fea20615b3, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[15]'
       value:
-      objectReference: {fileID: 11400000, guid: 27993bb9e73eee745bec7c4975ceb697, type: 2}
+      objectReference: {fileID: 11400000, guid: bb84bc2cf45c3d94e9c0687b8fd21555, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[16]'
       value:
-      objectReference: {fileID: 11400000, guid: 4646c683f2ed99c4d85a09fe6cd8791c, type: 2}
+      objectReference: {fileID: 11400000, guid: 27993bb9e73eee745bec7c4975ceb697, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[17]'
       value:
-      objectReference: {fileID: 11400000, guid: 61e8d4b2f0a94c37a5d9e2b7c4f1068d, type: 2}
+      objectReference: {fileID: 11400000, guid: 4646c683f2ed99c4d85a09fe6cd8791c, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[18]'
       value:
-      objectReference: {fileID: 11400000, guid: 4815f009cfc28749489506dd1e13ffea, type: 2}
+      objectReference: {fileID: 11400000, guid: 61e8d4b2f0a94c37a5d9e2b7c4f1068d, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[19]'
       value:
-      objectReference: {fileID: 11400000, guid: 77b692e007ef4328c96d1c1d8d4db9c9, type: 2}
+      objectReference: {fileID: 11400000, guid: 4815f009cfc28749489506dd1e13ffea, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[20]'
       value:
-      objectReference: {fileID: 11400000, guid: dfad3aec2bbb47f61bb41c47c7ff9127, type: 2}
+      objectReference: {fileID: 11400000, guid: 77b692e007ef4328c96d1c1d8d4db9c9, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[21]'
+      value:
+      objectReference: {fileID: 11400000, guid: dfad3aec2bbb47f61bb41c47c7ff9127, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'installers.Array.data[22]'
       value:
       objectReference: {fileID: 11400000, guid: 5cef1000000000000000000000000009, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}

@@ -13,11 +13,11 @@ namespace Game.Core
     {
         /// <summary>
         /// Detail when it exists and the person did not keep the key on Simple (<paramref name="keptSimple"/>);
-        /// otherwise Simple when it exists; otherwise GreyBox. A kept key without a Simple file is GreyBox.
+        /// otherwise Simple when it exists; otherwise GreyBox. A kept key without a Simple file shows Detail.
         /// </summary>
         public static ArtTier Pick(bool hasDetail, bool hasSimple, bool keptSimple)
         {
-            if (hasDetail && !keptSimple) return ArtTier.Detail;
+            if (hasDetail && (!keptSimple || !hasSimple)) return ArtTier.Detail;
             if (hasSimple) return ArtTier.Simple;
             return ArtTier.GreyBox;
         }
