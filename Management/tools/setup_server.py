@@ -29,6 +29,8 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
 - POST /api/setup {pin, mode, model, effort} checks the PIN, then runs the setup in the background and answers at
   once with the job; GET /api/setup/job is that job as it goes (each name: waiting, running, bound, created or
   error), so the page shows how far it is and which thread failed. One setup runs at a time.
+- POST /api/sessions/delete-outside {pin}: the same for every thread of the group Ngoài chức năng (named, outside the
+  setup), the PIN checked once.
 - POST /api/sessions/delete {id, pin} (with the PIN, and only while VS Code is closed: it keeps the chat list in
   memory and writes it back): moves the thread's transcript and its folder into
   ~/.claude/projects/<project>/.deleted/<time>-<id>/ (with its binding and an info.json), takes its id out of the
@@ -107,18 +109,18 @@ import guard  # noqa: E402
 import reqbook  # noqa: E402
 import studio  # noqa: E402
 import sync_page  # noqa: E402
-import validate  # noqa: E402
 import vscode_groups  # noqa: E402
 from vscode_groups import vscode_state  # noqa: E402
 
 # The threads of the setup (người quyết 2026-11-27): the Leaders and above, and the tools. Features, services, @Core
 # and the tester are workers (worker.py), started by the server for each job, never a thread.
 BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor"]
-WORKER_GROUPS = ("Testers", "Basic", "Services", "Features")      # an old thread of these groups is shown as archived
+# Every other named thread (an old feature, service, @Core or tester thread, or any other name) is "outside": the page
+# shows it in the group Ngoài chức năng, where it can only be deleted, and nothing runs, binds or delivers to it.
 ROLE_GROUPS = {"@human": "Master", "@Manager": "Managers", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
                "@UIDesigner": "Leaders", "@Codex": "Tools", "@Blender": "Tools", "@ClaudeImage": "Tools", "@DesignAdvisor": "Tools",
                "@UnityAutoPlay": "Testers", "@Core": "Basic"}
-GROUP_ORDER = list(bind_session.TIERS)      # the tiers of CLAUDE.md, top to bottom
+GROUP_ORDER = [g for g in bind_session.TIERS if g in ROLE_GROUPS.values() and g != "Testers" and g != "Basic"]      # Master … Tools
 STATIC_EXT = (".css", ".js", ".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp", ".ttf")
 
 
@@ -283,7 +285,7 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/inbox/config": MAX_BODY,
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
-              "/api/sessions/delete": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY,
+              "/api/sessions/delete": MAX_BODY, "/api/sessions/delete-outside": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY,
               "/api/sessions/model": MAX_BODY, "/api/sessions/reset-models": MAX_BODY,
               "/api/workers/run": 16 * 1024, "/api/workers/resume": 16 * 1024, "/api/workers/drop": MAX_BODY}
 TRASH = ".deleted"      # inside the transcripts folder: threads() reads only *.jsonl at its top
@@ -412,8 +414,9 @@ def threads(include_unnamed=False):
         if title:
             sid = p.stem
             feature = feature_of(title) if named else ""
-            out.append({"id": sid, "title": title, "named": named, "feature": feature, "group": group_of(feature) if named else "",
-                        "legacy": named and title in ROLE_GROUPS, "archived": sid in hidden or group_of(feature_of(title) if named else "") in WORKER_GROUPS,
+            outside = named and feature not in BASIC
+            out.append({"id": sid, "title": title, "named": named, "feature": feature, "group": "" if outside or not named else group_of(feature),
+                        "legacy": named and title in ROLE_GROUPS, "outside": outside, "archived": sid in hidden or outside,
                         "unlisted": entries == {HEADLESS_ENTRY},
                         "model": "" if model == "<synthetic>" else model, "effort": effort,
                         "binding": (binding := guard.bound_feature(sid, guard.STORE_DIR) or ""),
@@ -530,23 +533,10 @@ def job_needs(session_id):
 
 
 def sets():
-    """The names of the basic and the full setup, in the order of the groups (Master, Managers, Leaders, Basic, Services,
-    Features). The full one adds every service and feature folder, and every feature of the fixed design (live):
-    the folder its code.json names, or the name GD will give it from its key when it has no code.json yet
-    (`suggested`). Their chats are made and bound now and may edit once @Manager has made the folder (scaffold.py)
-    and the design has reached round 4. `missing`: those names without a folder yet."""
-    cfg = json.loads((HERE / "rules.json").read_text(encoding="utf-8-sig"))
-    ids = validate.Scan(ROOT, cfg)
-    ids.discover()
-    folders = [f["id"] for f in ids.features]
-    designed = gamedesign.live_feature_names(ROOT)
-    features = folders + [n for n, _, _ in designed if n not in folders]
-    services = sorted((f for f in features if f.startswith("_Services/")), key=str.lower)
-    others = sorted((f for f in features if not f.startswith("_Services/")), key=str.lower)
-    full = list(BASIC)      # features and services are workers now: no thread of their own
-    return {"basic": BASIC, "full": full, "groups": {n: group_of(n) for n in full}, "order": GROUP_ORDER,
-            "missing": [n for n, _, _ in designed if n not in folders],
-            "suggested": [n for n, _, declared in designed if not declared]}
+    """The names of the setup (người quyết 2026-11-27): the Leaders and above, and the tools, in the order of the
+    groups. Features, services, @Core and the tester are workers, never a thread. `full` is the same list (the page
+    has one Setup button; the API still takes mode basic or full)."""
+    return {"basic": BASIC, "full": list(BASIC), "groups": {n: group_of(n) for n in BASIC}, "order": GROUP_ORDER}
 
 
 def bind(session_id, value):
@@ -1316,11 +1306,13 @@ def setup(pin, mode, model=DEFAULT_MODEL, effort=DEFAULT_EFFORT):
     return {"ok": True, "results": results}
 
 
-def delete_thread(session_id, pin):
+def delete_thread(session_id, pin, listed=None, pin_ok=False):
     """The Xoá button of one thread: moves its transcript (and its folder) into the trash of the transcripts folder,
     takes it out of the VS Code state and removes its binding. With the PIN, and only while VS Code is closed (it
-    would write its chat list back). Archived and hidden threads may be deleted too."""
-    t = next((t for t in threads(include_unnamed=True) if t["id"] == session_id), None) if isinstance(session_id, str) else None
+    would write its chat list back). Archived and hidden threads may be deleted too. listed, pin_ok: from
+    delete_outside, which reads the list and checks the PIN once."""
+    pool = listed if listed is not None else threads(include_unnamed=True)
+    t = next((t for t in pool if t["id"] == session_id), None) if isinstance(session_id, str) else None
     if t is None:
         return {"ok": False, "error": "không có thread này"}
     head = {"ok": False, "id": t["id"], "title": t["title"]}
@@ -1336,7 +1328,7 @@ def delete_thread(session_id, pin):
         return dict(head, error="VS Code đang chạy: tắt hẳn VS Code (mọi cửa sổ) rồi bấm lại", vscode=True)
     if t.get("live") == "interactive":
         return dict(head, error="thread đang mở trong một terminal: thoát chat đó rồi bấm lại")
-    error = bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
+    error = None if pin_ok else bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
     if error:
         return dict(head, error=error, pin=True)
     try:
@@ -1363,6 +1355,31 @@ def delete_thread(session_id, pin):
         "vscode_groups": was_in,
         "restore": f"chép {t['id']}.jsonl và thư mục {t['id']}/ (nếu có) về {folder}, rồi bấm Setup để gán lại"})
     return {"ok": True, "id": t["id"], "title": t["title"], "trash": str(trash)}
+
+
+def delete_outside(pin):
+    """The button "Xoá cả nhóm": deletes every thread of the group Ngoài chức năng (a named thread outside the setup:
+    old feature, service, @Core, tester threads) like delete_thread, the PIN checked once. Chats with no name and
+    the threads of the setup are never touched."""
+    listed = threads(include_unnamed=True)
+    todo = [t for t in listed if t.get("outside")]
+    if not todo:
+        return {"ok": True, "deleted": [], "failed": [], "trash": ""}
+    if vscode_groups.vscode_running():
+        return {"ok": False, "error": "VS Code đang chạy: tắt hẳn VS Code (mọi cửa sổ) rồi bấm lại", "vscode": True}
+    error = bind_session.check_pin(guard.STORE_DIR, pin if isinstance(pin, str) else "")
+    if error:
+        return {"ok": False, "error": error, "pin": True}
+    deleted, failed, trash = [], [], ""
+    for t in todo:
+        res = delete_thread(t["id"], None, listed=listed, pin_ok=True)
+        if res.get("ok"):
+            deleted.append(t["title"])
+            trash = str(Path(res["trash"]).parent)
+        else:
+            failed.append(f'{t["title"]} ({t["id"][:8]}): {res.get("error")}')
+    return {"ok": not failed, "deleted": deleted, "failed": failed, "trash": trash,
+            "error": "; ".join(failed) if failed else ""}
 
 
 def promote(path, deep):
@@ -2741,6 +2758,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, reset_models())
             if self.path == "/api/sessions/delete":
                 return self.send_json(200, delete_thread(data.get("id"), data.get("pin")))
+            if self.path == "/api/sessions/delete-outside":
+                return self.send_json(200, delete_outside(data.get("pin")))
             if self.path == "/api/vscode-groups":
                 return self.send_json(200, group_in_vscode())
             if self.path == "/api/studio/review":

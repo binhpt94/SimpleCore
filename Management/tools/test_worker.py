@@ -208,6 +208,12 @@ def main():
         jp = w.queue_play(root, "chơi thử đợt 1", source="@CodeLead", now=6)
         t = et.find(root, "@UnityAutoPlay", job=jp["id"])
         check("play: a play job waits for an Editor ticket of its own", (jp["state"], jp["kind"], t["tasks"]), ("waiting-editor", "play", ["chơi thử"]))
+        g = et.grant_next(root, now=7)
+        check("play: the play ticket is granted on its own", (g[0], g[1][0]["job"]), ("own", jp["id"]))
+        out = w.end_play_ticket(root, jp["id"])
+        check("play: after the turn the Editor is free and nothing is queued again (no second play turn)",
+              (len(out["released"]), out["requeued"], [x for x in et.queue(root) if x.get("job") == jp["id"]], et.holder(root)),
+              (1, [], [], []))
         check("status: a line per job", len(w.status_lines(root)), 5)
         check("main: a wrong command is refused", w.main(["worker.py", "nope"]), 2)
         check("main: a bad job id is refused", w.main(["worker.py", "status", "../x"]), 2)

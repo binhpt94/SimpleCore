@@ -390,6 +390,7 @@ def unnamed_cases(check):
         user = lambda text: {"type": "user", "entrypoint": "claude-vscode", "message": {"role": "user", "content": [{"type": "text", "text": text}]}}
         lines = {
             "named": [{"type": "custom-title", "customTitle": "Codex"}, {"type": "ai-title", "aiTitle": "khác"}, user("hi")],
+            "old": [{"type": "custom-title", "customTitle": "Wallet"}, user("cũ")],
             "u1": [user("FEATURE=@human 123@abc"), {"type": "ai-title", "aiTitle": "FEATURE=@human 123@abc"}],
             "u2": [user("đầu"), {"type": "last-prompt", "lastPrompt": "Codex"}],
             "u3": [{"type": "user", "isMeta": True, "message": {"role": "user", "content": "meta"}}, user("tin   đầu\nhai dòng")],
@@ -397,9 +398,13 @@ def unnamed_cases(check):
         }
         for sid, rows in lines.items():
             (folder / f"{sid}.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
-        check("unnamed: the default list keeps named threads only", sorted(t["id"] for t in ss.threads()), ["named"])
+        check("unnamed: the default list keeps named threads only", sorted(t["id"] for t in ss.threads()), ["named", "old"])
         got = {t["id"]: t for t in ss.threads(include_unnamed=True)}
-        check("unnamed: every chat VS Code lists, none with no title", sorted(got), ["named", "u1", "u2", "u3"])
+        check("unnamed: every chat VS Code lists, none with no title", sorted(got), ["named", "old", "u1", "u2", "u3"])
+        check("outside: a thread of the setup is not outside", (got["named"]["outside"], got["named"]["group"], got["named"]["archived"]), (False, "Tools", False))
+        check("outside: an old feature thread is outside, in no tier, and nothing runs in it",
+              (got["old"]["outside"], got["old"]["group"], got["old"]["archived"]), (True, "", True))
+        check("outside: a chat with no name is not outside", got["u3"]["outside"], False)
         check("unnamed: custom-title wins over ai-title", (got["named"]["title"], got["named"]["named"], got["named"]["feature"]), ("Codex", True, "@Codex"))
         check("unnamed: ai-title, PIN hidden", (got["u1"]["title"], got["u1"]["named"]), ("FEATURE=@human ••••", False))
         check("unnamed: no PIN anywhere in the row", "123@abc" in json.dumps(got["u1"], ensure_ascii=False), False)
@@ -483,6 +488,38 @@ def delete_cases(check):
         (ss.threads, ss.transcripts_dir, ss.bind_session.check_pin, ss.guard.STORE_DIR, ss.JOB,
          ss.vscode_groups.vscode_running, ss.vscode_groups.vscode_state, ss.live_sessions, ss.run_claude) = real
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+def delete_outside_cases(check):
+    """Xoá cả nhóm Ngoài chức năng: every named thread outside the setup, the PIN checked once; the setup's threads
+    and unnamed chats stay."""
+    real = (ss.threads, ss.delete_thread, ss.bind_session.check_pin, ss.vscode_groups.vscode_running)
+    tries, gone = [], []
+    try:
+        rows = [dict(thread("aaaa1111", "Wallet"), outside=True), dict(thread("bbbb2222", "Hero"), outside=True),
+                dict(thread("cccc3333", "CodeLead", binding="@CodeLead"), outside=False),
+                dict(thread("dddd4444", "chat lạ"), named=False, outside=False)]
+        ss.threads = lambda include_unnamed=False: rows
+        ss.bind_session.check_pin = lambda store_, pin: tries.append(pin) or ("" if pin == "1234" else "PIN sai")
+        ss.delete_thread = lambda sid, pin, listed=None, pin_ok=False: (gone.append((sid, pin_ok)),
+            {"ok": True, "trash": "/x/.deleted/t-" + sid} if sid != "bbbb2222" else {"ok": False, "error": "đang mở"})[1]
+        ss.vscode_groups.vscode_running = lambda: True
+        res = ss.delete_outside("1234")
+        check("delete all: refused while VS Code runs, before the PIN", (res["ok"], res.get("vscode"), tries, gone), (False, True, [], []))
+        ss.vscode_groups.vscode_running = lambda: False
+        res = ss.delete_outside("0000")
+        check("delete all: a wrong PIN deletes nothing", (res["ok"], res.get("pin"), gone), (False, True, []))
+        tries.clear()
+        res = ss.delete_outside("1234")
+        check("delete all: only the outside threads, the PIN checked once", (gone, tries), ([("aaaa1111", True), ("bbbb2222", True)], ["1234"]))
+        check("delete all: what was deleted and what failed", (res["ok"], res["deleted"], len(res["failed"]), res["trash"]),
+              (False, ["Wallet"], 1, "/x/.deleted"))
+        rows[:2] = []
+        check("delete all: nothing outside is ok, no PIN asked", (ss.delete_outside("")["ok"], tries), (True, ["1234"]))
+        check("the page may post to the delete-all path", "/api/sessions/delete-outside" in ss.POST_PATHS)
+        check("sets: only the Leaders and above and the tools, no feature", (ss.sets()["full"], "missing" in ss.sets()), (ss.BASIC, False))
+    finally:
+        (ss.threads, ss.delete_thread, ss.bind_session.check_pin, ss.vscode_groups.vscode_running) = real
 
 
 def cli_cases(check):
@@ -1523,6 +1560,7 @@ def main():
     job_cases(check)
     live_cases(check)
     delete_cases(check)
+    delete_outside_cases(check)
     unnamed_cases(check)
     usage_cases(check)
     model_choice_cases(check)

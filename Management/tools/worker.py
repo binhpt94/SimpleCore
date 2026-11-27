@@ -662,6 +662,20 @@ def play_prompt(job):
             "cho CodeLead). Không chờ tin trả lời: lượt này kết thúc là xong việc.")
 
 
+def end_play_ticket(root, job_id):
+    """Gives the Editor back after a play turn, its ticket emptied first: the turn is the whole job (played or failed),
+    so nothing is left for release() to queue again; a ticket left with its task bit would start the job once more."""
+    import editor_ticket
+    try:
+        t = editor_ticket.find(root, PLAY_ROLE, ("granted",), job_id)
+    except ValueError:
+        t = None
+    if t is not None:
+        t["code"] = 0
+        editor_ticket.save(root, t)
+    return editor_ticket.release(root, PLAY_ROLE)
+
+
 def start_play(root, job_id):
     """The play turn, in the main project (the Editor is there), bound to the tester role; the Editor is given back after."""
     import bind_session
@@ -686,7 +700,7 @@ def start_play(root, job_id):
     except (subprocess.TimeoutExpired, ValueError) as ex:
         answer = {"is_error": True, "result": str(ex)[:300]}
     finally:
-        editor_ticket.release(root, PLAY_ROLE)
+        end_play_ticket(root, job_id)
     job.setdefault("turns", []).append({"at": started, "seconds": round(time.time() - started), "cost_usd": answer.get("total_cost_usd"),
                                         "usage": answer.get("usage") or {}, "num_turns": answer.get("num_turns"),
                                         "error": bool(answer.get("is_error"))})

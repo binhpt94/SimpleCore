@@ -2129,7 +2129,9 @@ def decide_raw(data, session_value, root, store=None):
         if mode == "none":
             return "deny", ("this chat has no valid FEATURE, so all edits are blocked. Only the human can set it "
                             "(by typing FEATURE=<name> <PIN> in the chat). Stop and tell the human.")
-        playing = tester_playing(store, data.get("session_id")) if inside(full, under(root, "UnityProject", "Assets")) else None
+        # A worker writes in its own git worktree, which Unity does not open: a tester's Play is not disturbed by it.
+        playing = (tester_playing(store, data.get("session_id"))
+                   if mode != "worker" and inside(full, under(root, "UnityProject", "Assets")) else None)
         if playing:
             return tester_block(store, data.get("session_id"), who, playing)
         # Files that define the boundary itself.

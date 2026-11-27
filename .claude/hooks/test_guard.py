@@ -2126,6 +2126,7 @@ def run_unity_cases():
     t(g + ": @CodeLead too", L, "deny", "Edit", {"file_path": A + "/_Composition/Boot.cs"}, session="c")
     t(g + ": outside Assets is not held", "@GameDesigner", "allow", "Write", {"file_path": FX + "/Management/game-design/ai/idea/data.md"}, session="e")
     t(g + ": the human is never held", "@human", "pass", "Write", {"file_path": F + "/Wallet/Scripts/Internal/New.cs"}, session="h")
+    t(g + ": a worker writes in its own worktree, never held", "@Worker", "allow", "Write", {"file_path": F + "/Hero/Tests/HeroStageIdeaTests.cs"}, session="wk")
     marks = sorted(p.name for p in Path(STORE, guard.TESTER_BLOCKED_DIR).glob("*.json"))
     check(g, "", True, "the refused chats are marked for the server to wake", marks == ["c.json"])
     guard.write_lock(STORE, {"session": "b", "who": "@CodeLead", "until": time.time() + 600})
