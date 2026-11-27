@@ -92,7 +92,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 | `Management/asks` | được | chỉ `ask.py` (`add`: Leader; `answer`: @Manager) |
 | `Management/editor-tickets` | được | chỉ `editor_ticket.py` và server |
 | `Management/workers` | được | chỉ `worker.py` và server |
-| Art Detail (`…/Resources/Art/<F>/<id>/Detail.*`) và `Assets/_Composition/Resources/ArtChoice.json` | được | chỉ người (Detail: người đưa vào; lựa chọn: tab Studio, `art.py choose`); `worker.py` không nạp |
+| Art Detail (`…/Art/<F>/<id>/Detail.*`) và `Assets/_Composition/ArtChoice.json` | được | chỉ người (Detail: người đưa vào; lựa chọn: tab Studio, `art.py choose`); `worker.py` không nạp |
 | `Management/game-design/ai` | được | chỉ @GameDesigner; `.frame-concept/*.frame` chỉ @UIDesigner |
 | `Management/game-design/advice` | được | chỉ @DesignAdvisor và `gd_advise.py` |
 | Phần còn lại của `Management` (`game-design/live` là thiết kế đã chốt: bám theo nó) | được | cấm |

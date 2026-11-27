@@ -96,7 +96,7 @@ def page_cases(check):
             check("references: a bad upload answers why", post("/api/references/upload", {"name": "a.gif", "data": base64.b64encode(b"GIF89a").decode()})[1],
                   {"ok": False, "error": "chỉ nhận ảnh png, jpg hoặc webp"})
             check("references: an unknown action is refused", post("/api/references/rename", {"id": rid})[0], 403)
-            folder = tmp / "UnityProject/Assets/Features/Hero/FeatureAssets/Private/Resources/Art/Hero/knight"
+            folder = tmp / "UnityProject/Assets/Features/Hero/FeatureAssets/Private/Art/Hero/knight"
             folder.mkdir(parents=True)
             for name in ("Simple.png", "Detail.png"):
                 (folder / name).write_bytes(b"\x89PNG\r\n\x1a\n" + b"\0" * 16)
@@ -107,7 +107,7 @@ def page_cases(check):
             check("art: a tier the art does not have answers why",
                   post("/api/art/choose", {"key": "Hero/none", "tier": "simple"})[1]["ok"], False)
             check("art: needs the token", post("/api/art/choose", {"key": "Hero/knight", "tier": "detail"}, token="no")[0], 403)
-            base = "/art/UnityProject/Assets/Features/Hero/FeatureAssets/Private/Resources/Art/Hero/knight/"
+            base = "/art/UnityProject/Assets/Features/Hero/FeatureAssets/Private/Art/Hero/knight/"
             check("art: a picture of an art folder is served; anything else under Assets is not",
                   (get(base + "Simple.png")[0], get("/art/UnityProject/Assets/secret.png")[0], get(base + "../../../../../../secret.png")[0]),
                   (200, 404, 404))

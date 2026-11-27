@@ -44,8 +44,8 @@ def put(root, rel, data=PNG_1x1):
 def main():
     root = Path(tempfile.mkdtemp(prefix="art-"))
     try:
-        hero = "UnityProject/Assets/Features/Hero/FeatureAssets/Private/Resources/Art/Hero"
-        popup = "UnityProject/Assets/Features/_Services/Popup/FeatureAssets/Public/Resources/Art/_Services/Popup"
+        hero = "UnityProject/Assets/Features/Hero/FeatureAssets/Private/Art/Hero"
+        popup = "UnityProject/Assets/Features/_Services/Popup/FeatureAssets/Public/Art/_Services/Popup"
         check("list: nothing yet means GreyBox", ("GreyBox" in call(root, "list")[1], art.items(root)), (True, []))
         put(root, f"{hero}/hero-knight/Simple.png")
         put(root, f"{hero}/hero-knight/Simple.png.meta", b"meta")
@@ -56,9 +56,11 @@ def main():
         put(root, f"{popup}/panel/Simple.png")
         put(root, f"{hero}/Bad_Id/Simple.png")
         put(root, f"{hero}/hero-note/readme.txt", b"x")
+        put(root, "UnityProject/Assets/Features/Hero/Scripts/Art/Hero/stray/Simple.png")      # not an art folder
+        put(root, "UnityProject/Assets/Core/Art/Core/smoke/Simple.png")
         rows = {r["key"]: r for r in art.items(root)}
         check("items: every art folder with a tier, bad ids and folders without a tier left out",
-              sorted(rows), ["Hero/castle-3d", "Hero/hero-knight", "Hero/hero-mage", "_Services/Popup/panel"])
+              sorted(rows), ["Core/smoke", "Hero/castle-3d", "Hero/hero-knight", "Hero/hero-mage", "_Services/Popup/panel"])
         check("items: Detail wins when there is one", (rows["Hero/hero-knight"]["use"], rows["Hero/hero-mage"]["use"]), ("detail", "simple"))
         check("items: a model shows its preview", (rows["Hero/castle-3d"]["kind"], rows["Hero/castle-3d"]["simple"]["preview"].endswith("Simple.preview.png")),
               ("model", True))

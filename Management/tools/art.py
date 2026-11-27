@@ -12,11 +12,13 @@ although it has a Detail (the Studio tab of the page): that choice is the only t
     python Management/tools/art.py choose <F>/<id> simple|detail      the human (the page): which tier the game uses
     python Management/tools/art.py svg <in.svg> <out.png> <w>x<h>     a worker: draw a Simple picture
 
-Layout, one rule and no wiring (a Detail dropped in its folder is used at once):
-    UnityProject/Assets/<feature folder>/FeatureAssets/<Private|Public>/Resources/Art/<F>/<id>/Simple.<ext>
-                                                                                            /Detail.<ext>
+Layout (no Resources folder: SRC-04; the game reaches each file through the AssetCatalog of kind "Art" on the Boot,
+wired by hand, ids <F>/<id>/Simple and <F>/<id>/Detail, and ArtChoice for the choice file):
+    UnityProject/Assets/<feature folder>/FeatureAssets/<Private|Public>/Art/<F>/<id>/Simple.<ext>
+                                                                                  /Detail.<ext>
+    UnityProject/Assets/Core/Art/Core/<id>/...            the art of Core itself (the smoke of a particle)
     <ext>: png, jpg (a picture) or fbx, obj, prefab (a model; <Tier>.preview.png beside it is what the page shows)
-    UnityProject/Assets/_Composition/Resources/ArtChoice.json   {"simple": ["<F>/<id>", ...]}  this code only
+    UnityProject/Assets/_Composition/ArtChoice.json       {"simple": ["<F>/<id>", ...]}  this code only
 <F> is the code folder of the feature (Hero, _Services/Popup, Core); <id>: lower case, digits, '-'.
 Standard library only; Windows and Linux.
 """
@@ -31,8 +33,9 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 ASSETS = ("UnityProject", "Assets")
-ART_DIR = "Resources/Art"
-CHOICE = ("UnityProject", "Assets", "_Composition", "Resources", "ArtChoice.json")
+# An art folder: <feature folder>/FeatureAssets/<Private|Public>/Art/<F>/<id>/, or Core/Art/<F>/<id>/.
+ART_RX = re.compile(r"^(?:Features/(?:_Services/)?[A-Za-z][A-Za-z0-9]*/FeatureAssets/(?:Private|Public)|Core)/Art/(.+)$")
+CHOICE = ("UnityProject", "Assets", "_Composition", "ArtChoice.json")
 TIERS = ("Simple", "Detail")
 PICTURES = (".png", ".jpg", ".jpeg")
 MODELS = (".fbx", ".obj", ".prefab")
@@ -41,6 +44,11 @@ ID_RX = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 FEATURE_RX = re.compile(r"^(_Services/)?[A-Za-z_][A-Za-z0-9_]*$")
 SIZE_RX = re.compile(r"^(\d{1,4})x(\d{1,4})$")
 SKIP = {"Library", "Temp", "Logs", "obj", "UserSettings"}
+
+
+def in_art(rel):
+    """True for a path under UnityProject/Assets (relative to it) that lies in an art folder."""
+    return bool(ART_RX.match(rel))
 
 
 def tier_file(name):
@@ -53,15 +61,15 @@ def tier_file(name):
 
 
 def art_folders(root):
-    """{key: folder} of every art folder under UnityProject/Assets (…/Resources/Art/<F>/<id>/)."""
+    """{key: folder} of every art folder under UnityProject/Assets (…/FeatureAssets/<P>/Art/<F>/<id>/, Core/Art/<F>/<id>/)."""
     assets = Path(root).joinpath(*ASSETS)
     found = {}
     for dirpath, dirnames, filenames in os.walk(assets):
         dirnames[:] = sorted(d for d in dirnames if d not in SKIP and not d.startswith("."))
-        rel = Path(dirpath).relative_to(assets).as_posix()
-        if f"/{ART_DIR}/" not in f"/{rel}/" or not any(tier_file(f) for f in filenames):
+        m = ART_RX.match(Path(dirpath).relative_to(assets).as_posix())
+        if not m or not any(tier_file(f) for f in filenames):
             continue
-        key = rel.split(f"{ART_DIR}/", 1)[1]
+        key = m.group(1)
         feature, _, aid = key.rpartition("/")
         if feature and FEATURE_RX.match(feature) and ID_RX.match(aid):
             found.setdefault(key, Path(dirpath))

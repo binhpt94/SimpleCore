@@ -58,7 +58,7 @@ ID_RX = re.compile(r"^w\d{8}-\d{6}-[a-z0-9-]+$")
 APPLY_ZONE = "UnityProject/Assets/"
 NOT_APPLIED = ("UnityProject/Assets/SimpleCoreTools/",)
 # The human's art: a Detail (the production art) and the choice of tier (art.py, the Studio tab). A worker makes Simple.
-HUMAN_ART_RX = re.compile(r"^UnityProject/Assets/(?:.+/)?Resources/Art/.+/Detail\.[^/]+$|^UnityProject/Assets/_Composition/Resources/ArtChoice\.json(?:\.meta)?$")
+HUMAN_ART_RX = re.compile(r"^UnityProject/Assets/(?:.+/)?Art/.+/Detail\.[^/]+$|^UnityProject/Assets/_Composition/ArtChoice\.json(?:\.meta)?$")
 RESULT = "result.json"
 MERGE_DIR = ".worker-merge"      # in the worktree: the main project's copy of each file that drifted, to merge from
 WORK_STATES = ("rejected", "changed", "no-test", "doing", "todo")      # the book's states that are work now

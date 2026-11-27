@@ -170,10 +170,10 @@ def main():
               ("Phiên", "Việc", "Trạng thái", "Đã đổi", "Công khai đổi", "Cần bên khác", "Kiểm tra", "Ghi chú")))
 
         # 6. art: a worker makes Simple; a Detail and the choice of tier are the human's
-        art = "UnityProject/Assets/Features/Run/FeatureAssets/Private/Resources/Art/Run/coin/"
+        art = "UnityProject/Assets/Features/Run/FeatureAssets/Private/Art/Run/coin/"
         check("art: a Simple is applied, a Detail and ArtChoice.json are not",
               (w.in_zone(art + "Simple.png"), w.in_zone(art + "Simple.png.meta"), w.in_zone(art + "Detail.png"),
-               w.in_zone(art + "Detail.fbx.meta"), w.in_zone("UnityProject/Assets/_Composition/Resources/ArtChoice.json")),
+               w.in_zone(art + "Detail.fbx.meta"), w.in_zone("UnityProject/Assets/_Composition/ArtChoice.json")),
               (True, True, False, False, False))
         job3 = {"id": "w20261127-120000-run", "feature": "Run", "worktree": str(home / "w20261127-120000-run")}
         w.save(root, job3)

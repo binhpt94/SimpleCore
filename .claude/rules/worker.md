@@ -37,10 +37,10 @@ Bạn là `@Worker` (người quyết 2026-11-27): tầng 4–7 cũ (Features, S
 - Chỉ kiểm được khi Play: ghi `play` trong `result.json` thay cho `tests`.
 
 ## Art
-- Key `<F>/<id>` = thư mục `<feature>/FeatureAssets/<Private|Public>/Resources/Art/<F>/<id>/`.
-- **GreyBox** (bắt buộc, làm cùng code): hiện art qua `Art.Sprite(key, look)` / `Art.Model(key, size)` của Core. Không file: vuông (2D), box (3D); anim chỉ scale, rotate, move, màu. Test chạy được khi chỉ có GreyBox.
+- Key `<F>/<id>` = thư mục `<feature>/FeatureAssets/<Private|Public>/Art/<F>/<id>/` (không dùng `Resources`). Nối dây tay: mỗi file một dòng trong catalog `Art` của Boot, id `<F>/<id>/Simple`.
+- **GreyBox** (bắt buộc, làm cùng code): hiện art qua `IArt` của Core (lấy từ `IServiceRegistry` trong `Install`): `Sprite(key, look)`, `Model(key, size)`. Không file: vuông (2D), box (3D); anim chỉ scale, rotate, move, màu. Test chạy được khi chỉ có GreyBox.
 - **Simple** (chỉ khi tin việc nêu đích danh art): SVG rồi `art.py svg <in> <out> <w>x<h>`, hoặc `blender -b -P <script>.py` ra `.fbx` kèm `Simple.preview.png`. Ghi `Simple.<đuôi>` vào thư mục của key; nháp để ngoài `Assets`. Không tự viết `.meta`; không ghi đè Simple đã có nếu tin không bảo.
-- **Detail** và `ArtChoice.json` là của người: không ghi.
+- **Detail** và `ArtChoice.json` là của người: không ghi; chỉ nối Detail vào catalog khi tin việc bảo.
 
 ## Kiểm trước khi xong (bắt buộc)
 - `python Management/tools/compile_check.py --all`: phải sạch. Sửa đến khi không còn `LỖI`.

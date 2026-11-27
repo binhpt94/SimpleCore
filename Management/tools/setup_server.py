@@ -70,7 +70,7 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
   /stage the phase. live is only ever rebuilt from approved.json (gamedesign.build_live).
 - Art (art.py), without the PIN: GET /api/art lists the art at tier Simple and Detail for the Studio tab, POST
   /api/art/choose sets the tier the game uses for one art (art.cmd_choose: no confirm). GET /art/<path> serves a
-  picture of an art folder (under UnityProject/Assets, …/Resources/Art/…; images only, read only).
+  picture of an art folder (under UnityProject/Assets, …/FeatureAssets/<P>/Art/…; images only, read only).
 """
 import argparse
 import calendar
@@ -3060,12 +3060,12 @@ class Handler(SimpleHTTPRequestHandler):
         return self.send_error(404)
 
     def send_art(self, path):
-        """A picture of an art folder (UnityProject/Assets/…/Resources/Art/…), read only; anything else is 404."""
+        """A picture of an art folder (UnityProject/Assets/…/FeatureAssets/<P>/Art/…), read only; anything else is 404."""
         base = ROOT.joinpath(*art.ASSETS).resolve()
         target = (ROOT / path.lstrip("/")).resolve()
         types = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
         rel = target.relative_to(base).as_posix() if base in target.parents else ""
-        if (not rel or f"/{art.ART_DIR}/" not in f"/{rel}" or target.suffix.lower() not in types
+        if (not rel or not art.in_art(rel) or target.suffix.lower() not in types
                 or not target.is_file()):
             return self.send_error(404)
         body = target.read_bytes()
