@@ -106,6 +106,11 @@
       if (r.task) { add(td, el("b", "", "Việc")); add(td, el("pre", "", r.task)); }
       if (r.asks && r.asks.length) add(td, el("div", "", "Chờ người trả lời: " + r.asks.join(", ")));
       if (r.job_seconds) add(td, el("div", "muted", "Các lượt đã xong của việc: " + dur(r.job_seconds) + " · " + money(r.cost)));
+      if (r.events && r.events.length) {
+        add(td, el("b", "", "Server đã làm"));
+        var ev = put(td, el("ol"));
+        r.events.forEach(function (e) { add(ev, el("li", "", e.text + " · " + dur(now - e.at) + " trước")); });
+      }
       if (r.tools && r.tools.length) {
         add(td, el("b", "", "Tool gọi gần nhất"));
         var ol = put(td, el("ol"));
@@ -150,8 +155,10 @@
         var ul = put(doneBox, el("ul", "ac-done"));
         v.done.forEach(function (d) {
           var li = put(ul, el("li"));
-          add(li, el("span", "", d.name + " · " + dur(d.seconds) + " · " + money(d.cost) + " · " + d.model + " · " + d.state));
-          if (d.summary) li.title = d.summary;
+          var lastEv = d.events && d.events.length ? d.events[d.events.length - 1] : null;
+          add(li, el("b", "", d.name), el("span", "", " · " + d.state + " · " + dur(d.seconds) + " · " + money(d.cost) + " · " + d.model + (d.effort ? " · " + d.effort : "")));
+          if (lastEv) add(li, el("div", lastEv.key.indexOf("editor-test-ok") === 0 ? "ok-text" : "muted", "→ " + lastEv.text));
+          if (d.summary) add(li, el("div", "muted", d.summary));
         });
       }
     };

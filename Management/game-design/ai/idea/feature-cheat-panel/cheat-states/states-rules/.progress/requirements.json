@@ -1,0 +1,412 @@
+{
+ "items": {
+  "rows-order": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.NormalRowComesFirst_ThenStateRowsByFeatureTitleAToZ_KeepingEachFeaturesOrder"
+   ],
+   "play": "",
+   "hash": "2107eb58060f",
+   "text": "Dòng \"Chơi bình thường\" đứng đầu, sau đó là các dòng state xếp theo tên feature A tới Z\nTrong một feature, các state theo đúng thứ tự ý ở node cheat của feature đó.",
+   "title": "Dòng \"Chơi bình thường\" đứng đầu, sau đó là các dòng state xếp theo tên feature A tới Z",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "rows-label": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.EachStateRowReadsFeatureTitleColonStateTitle_TakenFromTheSource"
+   ],
+   "play": "",
+   "hash": "552a3b843411",
+   "text": "Mỗi dòng state ghi \"<tên feature>: <tiêu đề state>\"\nLấy tên feature và tiêu đề ý của node cheat, ví dụ \"Popup thua: Popup thua đang mở, lượt vừa phá kỉ lục\".",
+   "title": "Mỗi dòng state ghi \"<tên feature>: <tiêu đề state>\"",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "rows-mark-active": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.RunningStatesRowIsMarked_NoStateMarksTheNormalRow"
+   ],
+   "play": "",
+   "hash": "b53d8fe275f3",
+   "text": "Dòng của state đang chạy được đánh dấu đang chọn; không có state thì dòng \"Chơi bình thường\" được đánh dấu",
+   "title": "Dòng của state đang chạy được đánh dấu đang chọn; không có state thì dòng \"Chơi bình thường\" được đánh dấu",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "apply-reload-scene": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.TappingAStateRow_PicksItAndReloadsItsScene_PanelClosesAndForcesNothingElse"
+   ],
+   "play": "",
+   "hash": "5ba936e871d7",
+   "text": "Chạm một dòng state thì game tải lại scene chứa state đó, và feature sở hữu dựng state ngay khi scene chạy\nĐang ở scene khác thì chuyển sang qua `feature-scene-flow`. Đang ở đúng scene thì vẫn tải lại, để state luôn dựng từ đầu như khi chọn trên asset rồi bấm Play.",
+   "title": "Chạm một dòng state thì game tải lại scene chứa state đó, và feature sở hữu dựng state ngay khi scene chạy",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "apply-same-again": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.TappingTheRunningStatesRowAgain_ReloadsItsSceneSoTheStateIsBuiltFromTheStart"
+   ],
+   "play": "",
+   "hash": "d366855659a5",
+   "text": "Chạm lại dòng của state đang chạy thì dựng lại state đó từ đầu",
+   "title": "Chạm lại dòng của state đang chạy thì dựng lại state đó từ đầu",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "apply-normal-restart": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.TappingNormalPlay_DropsTheCheatStateAndRestartsFromTheFirstScene"
+   ],
+   "play": "",
+   "hash": "1aba77bd09b7",
+   "text": "Chạm \"Chơi bình thường\" thì bỏ state cheat và game chạy lại từ scene đầu tiên như lúc mới mở\nKhông giữ gì của state cheat vừa chạy.",
+   "title": "Chạm \"Chơi bình thường\" thì bỏ state cheat và game chạy lại từ scene đầu tiên như lúc mới mở",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "apply-no-save": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.CheatStateWritesNothingToTheDevice_PickStaysInMemoryAndPanelOpenReportsRunning"
+   ],
+   "play": "",
+   "hash": "351627ecc974",
+   "text": "State cheat không ghi gì xuống máy\nKỉ lục ép trong một state không đè kỉ lục thật đã lưu.",
+   "title": "State cheat không ghi gì xuống máy",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "apply-missing-state": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.OnlyStatesTheBuildCanBuildHaveRows_AStateMissingFromTheCatalogHasNoRow"
+   ],
+   "play": "",
+   "hash": "0ad020e829a1",
+   "text": "State có ở node cheat nhưng bản build không dựng được thì không có dòng\nVí dụ bản build không mang code cheat của feature đó.",
+   "title": "State có ở node cheat nhưng bản build không dựng được thì không có dòng",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-khong-co-state-nao": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.NoStateInTheBuild_OnlyTheNormalRowAndTheEmptyLabel"
+   ],
+   "play": "",
+   "hash": "0a3b737bee34",
+   "text": "Không có state nào: chỉ có dòng \"Chơi bình thường\".",
+   "title": "Không có state nào",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-state-thuoc-scene-tran-can-doi": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.TappingAStateRow_PicksItAndReloadsItsScene_PanelClosesAndForcesNothingElse"
+   ],
+   "play": "",
+   "hash": "b7d590b1ab07",
+   "text": "State thuộc scene trận cần đội: state tự ép đủ giá trị nó cần như khi chọn trên asset; panel không ép thêm.",
+   "title": "State thuộc scene trận cần đội",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-chon-state-khi-dang-chuyen-scene": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.WhileTheSceneSwitches_EveryRowIsLockedAndATapDoesNothing_TheButtonStillOpensAndCloses"
+   ],
+   "play": "",
+   "hash": "a813e83e7450",
+   "text": "Chọn state khi đang chuyển scene: dòng đang khoá (xem `ui.md` của node config, nút, panel), không có gì xảy ra.",
+   "title": "Chọn state khi đang chuyển scene",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-cham-dong-cua-state-dang-chay": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.TappingTheRunningStatesRowAgain_ReloadsItsSceneSoTheStateIsBuiltFromTheStart"
+   ],
+   "play": "",
+   "hash": "a1b96f403827",
+   "text": "Chạm dòng của state đang chạy: dựng lại từ đầu.",
+   "title": "Chạm dòng của state đang chạy",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-state-co-o-thiet-ke-nhung-code-cua": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.OnlyStatesTheBuildCanBuildHaveRows_AStateMissingFromTheCatalogHasNoRow"
+   ],
+   "play": "",
+   "hash": "8698fa71f940",
+   "text": "State có ở thiết kế nhưng code của feature chưa làm: không có dòng.",
+   "title": "State có ở thiết kế nhưng code của feature chưa làm",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-state-cheat-khong-ghi-xuong-may": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.CheatStateWritesNothingToTheDevice_PickStaysInMemoryAndPanelOpenReportsRunning"
+   ],
+   "play": "",
+   "hash": "839f73533c5c",
+   "text": "State cheat không ghi xuống máy: kỉ lục thật trên máy giữ nguyên sau khi chơi state.",
+   "title": "State cheat không ghi xuống máy",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.EachStateRowReadsFeatureTitleColonStateTitle_TakenFromTheSource",
+    "CheatPanelTests.NormalRowComesFirst_ThenStateRowsByFeatureTitleAToZ_KeepingEachFeaturesOrder"
+   ],
+   "play": "",
+   "hash": "a87a015c210b",
+   "text": "## Làm gì\n- Mỗi feature có node cheat khai các state của mình cho panel; panel không giữ danh sách cố định.\n- Panel dựng danh sách: dòng \"Chơi bình thường\", rồi các state theo tên feature A-Z, trong feature theo thứ tự ý.\n- Chạm dòng state: nhớ state được chọn, tải lại scene chứa state (chuyển scene nếu cần), feature sở hữu dựng state khi scene chạy.\n- Chạm \"Chơi bình thường\": quên state, chạy lại game từ scene đầu tiên.\n- Chỗ dựng mỗi state vẫn là code cheat sẵn có của feature sở hữu; panel chỉ chọn state nào và lúc nào.\n\n## Thông số\n- Không có số. Chữ của dòng lấy từ tên feature và tiêu đề ý ở node cheat, không có bảng riêng.\n\n## Thông số theo giai đoạn\n- Không có thông số theo giai đoạn: luật của node như nhau ở mọi giai đoạn.",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "rows-order",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.NormalRowComesFirst_ThenStateRowsByFeatureTitleAToZ_KeepingEachFeaturesOrder"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "rows-label",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.EachStateRowReadsFeatureTitleColonStateTitle_TakenFromTheSource"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "rows-mark-active",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.RunningStatesRowIsMarked_NoStateMarksTheNormalRow"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "apply-reload-scene",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingAStateRow_PicksItAndReloadsItsScene_PanelClosesAndForcesNothingElse"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "apply-same-again",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingTheRunningStatesRowAgain_ReloadsItsSceneSoTheStateIsBuiltFromTheStart"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "apply-normal-restart",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingNormalPlay_DropsTheCheatStateAndRestartsFromTheFirstScene"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "apply-no-save",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatStateWritesNothingToTheDevice_PickStaysInMemoryAndPanelOpenReportsRunning"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "apply-missing-state",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.OnlyStatesTheBuildCanBuildHaveRows_AStateMissingFromTheCatalogHasNoRow"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-khong-co-state-nao",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.NoStateInTheBuild_OnlyTheNormalRowAndTheEmptyLabel"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-state-thuoc-scene-tran-can-doi",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingAStateRow_PicksItAndReloadsItsScene_PanelClosesAndForcesNothingElse"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-chon-state-khi-dang-chuyen-scene",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.WhileTheSceneSwitches_EveryRowIsLockedAndATapDoesNothing_TheButtonStillOpensAndCloses"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-cham-dong-cua-state-dang-chay",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingTheRunningStatesRowAgain_ReloadsItsSceneSoTheStateIsBuiltFromTheStart"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-state-co-o-thiet-ke-nhung-code-cua",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.OnlyStatesTheBuildCanBuildHaveRows_AStateMissingFromTheCatalogHasNoRow"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-state-cheat-khong-ghi-xuong-may",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatStateWritesNothingToTheDevice_PickStaysInMemoryAndPanelOpenReportsRunning"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "params",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.NormalRowComesFirst_ThenStateRowsByFeatureTitleAToZ_KeepingEachFeaturesOrder, CheatPanelTests.TappingAStateRow_PicksItAndReloadsItsScene_PanelClosesAndForcesNothingElse"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "rows-order",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.NormalRowComesFirst_ThenStateRowsByFeatureTitleAToZ_KeepingEachFeaturesOrder"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "rows-label",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.EachStateRowReadsFeatureTitleColonStateTitle_TakenFromTheSource"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "rows-mark-active",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.RunningStatesRowIsMarked_NoStateMarksTheNormalRow"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "apply-reload-scene",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingAStateRow_PicksItAndReloadsItsScene_PanelClosesAndForcesNothingElse"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "apply-same-again",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingTheRunningStatesRowAgain_ReloadsItsSceneSoTheStateIsBuiltFromTheStart"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "apply-normal-restart",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingNormalPlay_DropsTheCheatStateAndRestartsFromTheFirstScene"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "apply-no-save",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatStateWritesNothingToTheDevice_PickStaysInMemoryAndPanelOpenReportsRunning"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "apply-missing-state",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.OnlyStatesTheBuildCanBuildHaveRows_AStateMissingFromTheCatalogHasNoRow"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-khong-co-state-nao",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.NoStateInTheBuild_OnlyTheNormalRowAndTheEmptyLabel"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-state-thuoc-scene-tran-can-doi",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingAStateRow_PicksItAndReloadsItsScene_PanelClosesAndForcesNothingElse"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-chon-state-khi-dang-chuyen-scene",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.WhileTheSceneSwitches_EveryRowIsLockedAndATapDoesNothing_TheButtonStillOpensAndCloses"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-cham-dong-cua-state-dang-chay",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TappingTheRunningStatesRowAgain_ReloadsItsSceneSoTheStateIsBuiltFromTheStart"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-state-co-o-thiet-ke-nhung-code-cua",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.OnlyStatesTheBuildCanBuildHaveRows_AStateMissingFromTheCatalogHasNoRow"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-state-cheat-khong-ghi-xuong-may",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatStateWritesNothingToTheDevice_PickStaysInMemoryAndPanelOpenReportsRunning"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "params",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.EachStateRowReadsFeatureTitleColonStateTitle_TakenFromTheSource, CheatPanelTests.NormalRowComesFirst_ThenStateRowsByFeatureTitleAToZ_KeepingEachFeaturesOrder"
+  }
+ ]
+}

@@ -2204,6 +2204,33 @@ def runner_turn(prompt):
 WORKER_ROLE = "@Worker"
 
 
+def job_event(job, key, text):
+    """One line in a worker job's events.log (Management/workers/<job>/); nobody is woken."""
+    if not re.fullmatch(r"[A-Za-z0-9-]+", str(job or "")):
+        return
+    folder = ROOT / "Management" / "workers" / job
+    folder.mkdir(parents=True, exist_ok=True)
+    with open(folder / "events.log", "a", encoding="utf-8") as f:
+        f.write(json.dumps({"at": time.time(), "key": key, "text": text}, ensure_ascii=False) + "\n")
+
+
+def job_events(job, n=4):
+    """The last n lines of a job's events.log, oldest first: [{at, key, text}]."""
+    try:
+        lines = (ROOT / "Management" / "workers" / job / "events.log").read_text(encoding="utf-8").splitlines()[-n:]
+    except OSError:
+        return []
+    out = []
+    for line in lines:
+        try:
+            o = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(o, dict):
+            out.append({"at": o.get("at") or 0, "key": str(o.get("key") or ""), "text": str(o.get("text") or "")[:300]})
+    return out
+
+
 def tell(ticket, text, key):
     """One message to a ticket's chat: the inbox of a chat on demand; CodeLead through its open thread; a worker's
     job: its events.log (Management/workers/<job>/), nobody is woken; else nothing."""
@@ -2212,10 +2239,7 @@ def tell(ticket, text, key):
         job = str(ticket.get("job") or "")
         if not re.fullmatch(r"[A-Za-z0-9-]+", job):
             return ("no-job", target)
-        folder = ROOT / "Management" / "workers" / job
-        folder.mkdir(parents=True, exist_ok=True)
-        with open(folder / "events.log", "a", encoding="utf-8") as f:
-            f.write(json.dumps({"at": time.time(), "key": key, "text": text}, ensure_ascii=False) + "\n")
+        job_event(job, key, text)
         if key.startswith("editor-test:"):      # tests broke after the load: the job fixes them, once
             fix_round(job, "test_fixes", "Lô test của server sau khi nạp có test hỏng. Sửa đúng các test sau (code hay test, "
                       "theo đúng ý của yêu cầu), kiểm lại rồi ghi lại result.json:\n" + text)
@@ -2336,6 +2360,11 @@ def test_run(group):
                     did.append(("done", name, r["ref"]))
                 except ValueError as ex:
                     did.append(("done-refused", name, r["ref"], str(ex)[:120]))
+        if t.get("session") == WORKER_ROLE and t.get("job"):      # the job's page line says how its tests went, passed too
+            ok_n = sum(1 for r in t.get("reqs") or [] if any(d[:3] == ("done", r.get("feature") or ticket_feature(t["session"]), r["ref"]) for d in did))
+            job_event(t["job"], f"editor-test-ok:{t['id']}" if not mine_failed and not broken else f"editor-test-result:{t['id']}",
+                      ("Unity không chạy được test" if broken else f"Test: {len(passed)} qua, {len(mine_failed)} hỏng") +
+                      f" · {ok_n}/{len(t.get('reqs') or [])} yêu cầu ghi done (chờ CodeLead kiểm)")
         if mine_failed:
             did.append(tell(t, "Test hỏng ở lô test của server: " + "; ".join(
                 f"{f['name']}: {str(f.get('message') or '')[:160]}" for f in mine_failed[:10]) + ". Sửa rồi ghi lại result.json.",
@@ -2722,7 +2751,10 @@ def job_transcript(job):
     return project_dir(job["worktree"]) / f"{job['session']}.jsonl"
 
 
-JOB_STATE_NAMES = {"queued": "xếp hàng", "starting": "đang mở", "running": "chạy", "waiting-editor": "chờ phiếu Editor"}
+JOB_STATE_NAMES = {"queued": "xếp hàng", "starting": "đang dựng worktree", "running": "chạy", "waiting-editor": "chờ phiếu Editor",
+                   "applied": "đã nạp", "applied-partial": "đã nạp, còn dở", "applied-blocked": "chờ người trả lời",
+                   "checks-failed": "hỏng cổng kiểm", "drift": "lệch project chính", "needs-codelead": "cần CodeLead",
+                   "interrupted": "bị ngắt", "error": "lỗi", "played": "đã chơi thử", "play-failed": "chơi thử lỗi", "dropped": "đã gỡ"}
 
 
 def activity_view(now=None):
@@ -2748,6 +2780,13 @@ def activity_view(now=None):
         row["subs"] = subagent_rows(path, now)
         rows.append(row)
     alive = running_jobs()
+    open_tickets = {}      # job id -> its Editor ticket still open: the server loads, compiles, tests after the turn
+    try:
+        for tk in editor_ticket.tickets(ROOT, ("waiting", "granted")):
+            if tk.get("job"):
+                open_tickets[tk["job"]] = tk["state"]
+    except Exception:
+        pass
     done, cost_today = [], 0.0
     day = time.strftime("%Y-%m-%d", time.localtime(now))
     for j in sorted(worker_jobs(), key=lambda x: x.get("created", 0)):
@@ -2756,18 +2795,23 @@ def activity_view(now=None):
         cost_today += sum(x.get("cost_usd") or 0 for x in turns if time.strftime("%Y-%m-%d", time.localtime(x.get("at") or 0)) == day)
         name = ("Tester" if j.get("kind") == "play" else "W " + str(j.get("feature") or "?"))
         running = j["id"] in alive
-        if running or j.get("state") in ACTIVE_JOB_STATES or j.get("pending"):
+        ticket = open_tickets.get(j["id"])
+        if running or j.get("state") in ACTIVE_JOB_STATES or j.get("pending") or ticket:
             path = job_transcript(j) if running else None
-            state = "chạy" if running else ("chạy tiếp ở vòng sau" if j.get("pending") else JOB_STATE_NAMES.get(j.get("state"), j.get("state")))
+            state = ("chạy" if running else "chạy tiếp ở vòng sau" if j.get("pending")
+                     else "ở Editor: nạp, biên dịch, test" if ticket == "granted" and j.get("kind", "code") == "code"
+                     else "chờ Editor để nạp và test" if ticket == "waiting" and j.get("kind", "code") == "code"
+                     else JOB_STATE_NAMES.get(j.get("state"), j.get("state")))
             row = agent_row("worker" if j.get("kind", "code") == "code" else "tester", name, path, now, model=j.get("model"),
                             effort=j.get("effort"), state=state, task=j.get("task"), ident=j["id"],
                             total=(usage_of(path).get("cost", 0) if path else 0))
             row.update(cost=round(cost, 2), job_seconds=sum(x.get("seconds") or 0 for x in turns), asks=j.get("asks") or [],
-                       created=j.get("created") or 0)
+                       created=j.get("created") or 0, events=job_events(j["id"]))
             row["subs"] = subagent_rows(path, now) if path else []
             rows.append(row)
         elif time.strftime("%Y-%m-%d", time.localtime(j.get("updated") or j.get("created") or 0)) == day:
-            done.append({"id": j["id"], "name": name, "state": j.get("state"), "seconds": sum(x.get("seconds") or 0 for x in turns),
+            done.append({"id": j["id"], "name": name, "state": JOB_STATE_NAMES.get(j.get("state"), j.get("state")),
+                         "events": job_events(j["id"]), "seconds": sum(x.get("seconds") or 0 for x in turns),
                          "cost": round(cost, 2), "model": model_short(j.get("model")), "effort": j.get("effort") or "",
                          "summary": str((j.get("result") or {}).get("summary") or "")[:300], "updated": j.get("updated") or 0})
     done.sort(key=lambda d: d["updated"], reverse=True)

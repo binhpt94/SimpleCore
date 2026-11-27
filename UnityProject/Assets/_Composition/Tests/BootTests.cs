@@ -14,8 +14,8 @@ namespace Game.Composition.Tests
 
         private static readonly object[] Scenes =
         {
-            new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 2 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 21 },
+            new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 3 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 22 },
         };
 
         [Test]
@@ -56,7 +56,7 @@ namespace Game.Composition.Tests
         {
             var names = Load("Assets/_Composition/Boot.Loading.prefab").Installers.Select(i => i.name).ToList();
 
-            Assert.That(names, Is.EqualTo(new[] { SessionScene, "SceneFlowLoadingInstaller" }));
+            Assert.That(names, Is.EqualTo(new[] { SessionScene, "CheatPanelInstaller", "SceneFlowLoadingInstaller" }));
         }
 
         // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 15 participants
@@ -64,7 +64,7 @@ namespace Game.Composition.Tests
         // resolve it), then 13 features (PopupRating after PopupLose, it opens over it), then scene-flow last (a participant with no view). SessionScene installs
         // first and runs the session; it is not a participant.
         [Test]
-        public void GameScene_AtIdea_HasFifteenParticipantsInTheDesignedOrder_SimClockFirst_SceneFlowLast()
+        public void GameScene_AtIdea_HasSixteenParticipantsInTheDesignedOrder_SimClockFirst_CheatPanelThenSceneFlowLast()
         {
             var names = Load("Assets/_Composition/Boot.Game.prefab").InstallersAt(GameStage.Idea).Select(i => i.name).ToList();
 
@@ -74,10 +74,10 @@ namespace Game.Composition.Tests
                 "PopupInstaller", "SaveInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
                 "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
                 "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller",
-                "SceneFlowGameInstaller",
+                "CheatPanelInstaller", "SceneFlowGameInstaller",
             }));
-            Assert.That(names.Skip(1).Count(n => n != "SaveInstaller"), Is.EqualTo(15),
-                "participants after SessionScene (Save only registers ISavedRecord, it is not a participant)");
+            Assert.That(names.Skip(1).Count(n => n != "SaveInstaller"), Is.EqualTo(16),
+                "participants after SessionScene (Save only registers ISavedRecord, it is not a participant); CheatPanel holds the cheat overlay of every scene");
         }
 
         // The build stays at PROTOTYPE (human, 2026-11-27): at IDEA Enemy needs Combat, which the design puts at
@@ -130,7 +130,7 @@ namespace Game.Composition.Tests
                 SessionScene, SimClock,
                 "PopupInstaller", "SaveInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "CombatInstaller",
                 "EnemyInstaller", "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
-                "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller", "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "SceneFlowGameInstaller",
+                "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller", "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "CheatPanelInstaller", "SceneFlowGameInstaller",
             }));
         }
 

@@ -175,6 +175,21 @@
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
    "at": "2026-11-25 13:03:33"
+  },
+  "stage-idea": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroStageIdeaTests.At_idea_heroes_target_within_16u_and_walk_within_15u",
+    "HeroStageIdeaTests.At_idea_the_hero_sprite_faces_where_it_walks_or_its_target",
+    "HeroStageIdeaTests.At_idea_the_hero_view_flips_its_sprite_when_facing_left"
+   ],
+   "play": "",
+   "hash": "94395eb83f65",
+   "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Luật nhắm: như bảng\n- Vùng nhắm / vùng đi: ±16u / ±15u\n- Quay mặt: lật sprite theo hướng đi hoặc hướng mục tiêu",
+   "title": "Thông số của giai đoạn IDEA",
+   "by": "Hero",
+   "at": "2026-11-27 16:08:44"
   }
  },
  "log": [
@@ -394,6 +409,13 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 16:08:44",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroStageIdeaTests.At_idea_heroes_target_within_16u_and_walk_within_15u, HeroStageIdeaTests.At_idea_the_hero_sprite_faces_where_it_walks_or_its_target, HeroStageIdeaTests.At_idea_the_hero_view_flips_its_sprite_when_facing_left"
   }
  ]
 }

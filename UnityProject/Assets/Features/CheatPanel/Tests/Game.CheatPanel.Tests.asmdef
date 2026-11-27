@@ -5,6 +5,7 @@
     "Game.Core",
     "Game.CheatPanel.Internal",
     "Game.SceneFlow.Contracts",
+    "Game.CheatPanel.View",
     "UniTask",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"

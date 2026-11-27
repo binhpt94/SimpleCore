@@ -1,0 +1,34 @@
+{
+ "items": {
+  "panel-open": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.CheatPanelOpen_IsIgnoredOnceSomethingWasPickedInThisRun",
+    "CheatPanelTests.CheatPanelOpen_PanelIsOpenAsSoonAsTheSceneRuns_WithNormalRowAndEveryStateRow_ButtonShowsOpen"
+   ],
+   "play": "",
+   "hash": "e4ff49bbd78e",
+   "text": "Panel cheat đang mở trên trận, đủ dòng state của các feature và dòng chơi bình thường\nÉp: config cheat bật, panel mở ngay khi scene trận chạy; danh sách có dòng chơi bình thường và mọi state cheat mà bản đang chạy dựng được; nút cheat ở trạng thái đang mở. Phần tử và chữ theo `feature-cheat-panel/cheat-access/access-spec`.",
+   "title": "Panel cheat đang mở trên trận, đủ dòng state của các feature và dòng chơi bình thường",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:10"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "panel-open",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatPanelOpen_IsIgnoredOnceSomethingWasPickedInThisRun, CheatPanelTests.CheatPanelOpen_PanelIsOpenAsSoonAsTheSceneRuns_WithNormalRowAndEveryStateRow_ButtonShowsOpen"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "panel-open",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatPanelOpen_IsIgnoredOnceSomethingWasPickedInThisRun, CheatPanelTests.CheatPanelOpen_PanelIsOpenAsSoonAsTheSceneRuns_WithNormalRowAndEveryStateRow_ButtonShowsOpen"
+  }
+ ]
+}

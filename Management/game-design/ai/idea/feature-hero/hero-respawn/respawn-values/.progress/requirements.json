@@ -213,6 +213,21 @@
    "title": "Hero đang chờ hồi sinh khi thành bị phá lần đầu (luồng hồi sinh thành)",
    "by": "@CodeLead",
    "at": "2026-11-26 01:18:55"
+  },
+  "stage-idea": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "HeroStageIdeaTests.At_idea_a_fallen_hero_waits_8s_before_it_respawns",
+    "HeroStageIdeaTests.At_idea_a_falling_hero_shrinks_away_in_0_3s",
+    "HeroStageIdeaTests.At_idea_a_respawning_hero_grows_back_in_0_3s"
+   ],
+   "play": "",
+   "hash": "124c1a98af51",
+   "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Thời gian chờ hồi sinh: 8s\n- Gục: thu nhỏ 0.3s\n- Hồi sinh: phóng to 0.3s",
+   "title": "Thông số của giai đoạn IDEA",
+   "by": "Hero",
+   "at": "2026-11-27 16:08:44"
   }
  },
  "log": [
@@ -495,6 +510,20 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 16:06:50",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroStageIdeaTests.At_idea_a_fallen_hero_waits_8s_before_it_respawns, HeroStageIdeaTests.At_idea_a_falling_hero_shrinks_away_in_0_3s, HeroStageIdeaTests.At_idea_a_respawning_hero_grows_back_in_0_3s"
+  },
+  {
+   "at": "2026-11-27 16:08:44",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Hero",
+   "note": "HeroStageIdeaTests.At_idea_a_fallen_hero_waits_8s_before_it_respawns, HeroStageIdeaTests.At_idea_a_falling_hero_shrinks_away_in_0_3s, HeroStageIdeaTests.At_idea_a_respawning_hero_grows_back_in_0_3s"
   }
  ]
 }

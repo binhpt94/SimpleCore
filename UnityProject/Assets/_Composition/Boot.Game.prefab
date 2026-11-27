@@ -58,7 +58,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: installers.Array.size
-      value: 21
+      value: 22
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'catalogs.Array.data[0]'
@@ -146,6 +146,10 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 77b692e007ef4328c96d1c1d8d4db9c9, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[20]'
+      value:
+      objectReference: {fileID: 11400000, guid: dfad3aec2bbb47f61bb41c47c7ff9127, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'installers.Array.data[21]'
       value:
       objectReference: {fileID: 11400000, guid: 5cef1000000000000000000000000009, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}

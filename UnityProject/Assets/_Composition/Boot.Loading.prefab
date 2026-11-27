@@ -54,7 +54,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: installers.Array.size
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[0]'
@@ -63,6 +63,10 @@ PrefabInstance:
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: 'installers.Array.data[1]'
       value: 
+      objectReference: {fileID: 11400000, guid: dfad3aec2bbb47f61bb41c47c7ff9127, type: 2}
+    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
+      propertyPath: 'installers.Array.data[2]'
+      value:
       objectReference: {fileID: 11400000, guid: 5cef1000000000000000000000000008, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

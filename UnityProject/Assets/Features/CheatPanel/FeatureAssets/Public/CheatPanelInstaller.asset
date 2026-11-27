@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: CheatPanelInstaller
   m_EditorClassIdentifier: Game.CheatPanel.Internal::Game.CheatPanel.CheatPanelInstaller
   _config: {fileID: 11400000, guid: 8c3c801e63c730d0e9c90baae321e258, type: 2}
-  _overlayPrefab: {fileID: 0}
+  _overlayPrefab: {fileID: 1000000000000000001, guid: 9504f85612354f7e8de72ca65525500b, type: 3}
+  _cheat: 0

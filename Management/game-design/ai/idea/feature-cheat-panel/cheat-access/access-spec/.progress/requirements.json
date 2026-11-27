@@ -1,7 +1,7 @@
 {
  "items": {
   "spec-config-asset": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.CheatEnabledSwitchLivesInTheConfigAssetTheInstallerShips"
@@ -10,11 +10,11 @@
    "hash": "84109674c547",
    "text": "Công tắc là một ô bật tắt `cheat_enabled` trong asset config của feature, đi kèm bản build\nNgười làm game đổi ô này trước khi build; bản build mang giá trị lúc build. Đã loại: đọc từ file ngoài trên máy (thêm đường bật cheat cho người chơi thật).",
    "title": "Công tắc là một ô bật tắt `cheat_enabled` trong asset config của feature, đi kèm bản build",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "spec-default-on": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.CheatEnabledIsOnByDefault"
@@ -23,11 +23,11 @@
    "hash": "67c7a75ed5ac",
    "text": "`cheat_enabled` mặc định là bật\nBản build bây giờ đều là bản test. Tắt là việc của người làm game khi cần một bản sạch.",
    "title": "`cheat_enabled` mặc định là bật",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "spec-any-build": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.CheatEnabledOnCreatesTheOverlayWhenTheSceneRuns",
@@ -37,11 +37,11 @@
    "hash": "eec365254260",
    "text": "Chỉ `cheat_enabled` quyết có nút hay không, ở cả Editor và mọi loại bản build\nLoại build không tự ẩn nút; state nào có trong panel thì theo `feature-cheat-panel/cheat-states`.",
    "title": "Chỉ `cheat_enabled` quyết có nút hay không, ở cả Editor và mọi loại bản build",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "spec-off-nothing": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.CheatEnabledOffCreatesNothingAndJoinsNothing",
@@ -51,11 +51,11 @@
    "hash": "0fa22d3513b1",
    "text": "`cheat_enabled` tắt thì không tạo nút, không tạo panel, không chặn chạm nào\nGame y như không có feature này.",
    "title": "`cheat_enabled` tắt thì không tạo nút, không tạo panel, không chặn chạm nào",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "edge-config-tat": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.CheatEnabledOffCreatesNothingAndJoinsNothing",
@@ -65,11 +65,11 @@
    "hash": "b517829324e9",
    "text": "Config tắt: không có nút, không có nền che, không bắt chạm nào; state chọn trên asset trong Editor vẫn chạy như trước.",
    "title": "Config tắt",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "edge-thieu-asset-config": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.MissingConfigFailsAtInstallNamingCheatPanelConfig"
@@ -78,11 +78,11 @@
    "hash": "315566219182",
    "text": "Thiếu asset config: lỗi ngay lúc khởi động, nêu tên config bị thiếu, như mọi config khác.",
    "title": "Thiếu asset config",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "accessparams-cheat-enabled": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.AccessParams_CheatEnabled_IsTrue"
@@ -91,11 +91,11 @@
    "hash": "0f5a3e0484bc",
    "text": "Bảng AccessParams (params), dòng cheat_enabled\nkey (string): cheat_enabled\nname (string): Bật nút và panel cheat\nunit (string): true/false\nidea (string): true\nprototype (string): \nfull (string): \nreason (string): Bản build hiện đều là bản test; người làm game tắt khi cần bản sạch",
    "title": "AccessParams: Bật nút và panel cheat (cheat_enabled)",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "accessparams-button-label": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.AccessParams_ButtonLabel_IsCheat"
@@ -104,11 +104,11 @@
    "hash": "17fb826aac93",
    "text": "Bảng AccessParams (params), dòng button_label\nkey (string): button_label\nname (string): Chữ trên nút cheat\nunit (string): \nidea (string): Cheat\nprototype (string): \nfull (string): \nreason (string): Art IDEA siêu cơ bản; chữ đủ để hiểu",
    "title": "AccessParams: Chữ trên nút cheat (button_label)",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "accessparams-panel-title": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.AccessParams_PanelTitle_IsCheat"
@@ -117,11 +117,11 @@
    "hash": "c88e51074bc5",
    "text": "Bảng AccessParams (params), dòng panel_title\nkey (string): panel_title\nname (string): Tiêu đề panel\nunit (string): \nidea (string): Cheat\nprototype (string): \nfull (string): \nreason (string): Trùng chữ trên nút để biết panel từ nút nào",
    "title": "AccessParams: Tiêu đề panel (panel_title)",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "accessparams-normal-row-label": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.AccessParams_NormalRowLabel_IsChoiBinhThuong"
@@ -130,11 +130,11 @@
    "hash": "7a198a3fd111",
    "text": "Bảng AccessParams (params), dòng normal_row_label\nkey (string): normal_row_label\nname (string): Chữ dòng chơi bình thường\nunit (string): \nidea (string): Chơi bình thường\nprototype (string): \nfull (string): \nreason (string): Nói rõ dòng này bỏ cheat",
    "title": "AccessParams: Chữ dòng chơi bình thường (normal_row_label)",
-   "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
   },
   "accessparams-empty-label": {
-   "state": "done",
+   "state": "verified",
    "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
    "tests": [
     "CheatAccessTests.AccessParams_EmptyLabel_SaysTheBuildHasNoCheatState"
@@ -143,8 +143,158 @@
    "hash": "72b9c742db99",
    "text": "Bảng AccessParams (params), dòng empty_label\nkey (string): empty_label\nname (string): Chữ khi không có state\nunit (string): \nidea (string): Bản này không có state cheat\nprototype (string): \nfull (string): \nreason (string): Cho người test biết bản build không mang state nào",
    "title": "AccessParams: Chữ khi không có state (empty_label)",
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:03:40"
+  },
+  "spec-button-label": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen"
+   ],
+   "play": "",
+   "hash": "997b01ff84cc",
+   "text": "Nút cheat mang chữ \"Cheat\"\nChữ thay cho hình: art IDEA siêu cơ bản, người test đọc là hiểu.",
+   "title": "Nút cheat mang chữ \"Cheat\"",
    "by": "CheatPanel",
-   "at": "2026-11-27 11:10:30"
+   "at": "2026-11-27 16:14:10"
+  },
+  "spec-button-state": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen"
+   ],
+   "play": "",
+   "hash": "f87df85f9e7c",
+   "text": "Nút cheat có hai trạng thái nhìn khác nhau: panel đóng và panel đang mở",
+   "title": "Nút cheat có hai trạng thái nhìn khác nhau: panel đóng và panel đang mở",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:10"
+  },
+  "spec-panel-parts": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.PanelHasTitleCheat_AScrollableRowList_AndAShadeThatBlocksTapsBelow",
+    "CheatPanelTests.ShippedOverlayPrefabCarriesTheCheatPanelView"
+   ],
+   "play": "",
+   "hash": "9c39503662bc",
+   "text": "Panel gồm tiêu đề \"Cheat\", danh sách dòng cuộn được và nền che chặn chạm phía dưới\nNền che phủ cả màn hình dưới panel, trên game và popup.",
+   "title": "Panel gồm tiêu đề \"Cheat\", danh sách dòng cuộn được và nền che chặn chạm phía dưới",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:10"
+  },
+  "spec-close-ways": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.PanelOpensAndClosesWithTheButton_AndClosesWhenARowIsChosen",
+    "CheatPanelTests.SceneChangeWithThePanelOpen_ClosesIt_TheNextSceneHasTheButtonWithThePanelClosed"
+   ],
+   "play": "",
+   "hash": "b37aaefe9ddf",
+   "text": "Panel đóng khi chạm lại nút cheat, khi chọn một dòng, hoặc khi game đổi scene\nChạm vào nền che không đóng panel, để chạm nhầm không làm mất chỗ đang cuộn.",
+   "title": "Panel đóng khi chạm lại nút cheat, khi chọn một dòng, hoặc khi game đổi scene",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:10"
+  },
+  "spec-transition-lock": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.LockedRowsAreNotInteractable_InTheView",
+    "CheatPanelTests.WhileTheSceneSwitches_EveryRowIsLockedAndATapDoesNothing_TheButtonStillOpensAndCloses"
+   ],
+   "play": "",
+   "hash": "7018f8949a58",
+   "text": "Trong lúc game đang chuyển scene, các dòng của panel bị khoá\nTránh chọn state chồng lên một lần chuyển scene đang chạy; nút cheat vẫn đóng mở panel được.",
+   "title": "Trong lúc game đang chuyển scene, các dòng của panel bị khoá",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:10"
+  },
+  "edge-doi-scene-khi-panel-dang-mo": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.SceneChangeWithThePanelOpen_ClosesIt_TheNextSceneHasTheButtonWithThePanelClosed"
+   ],
+   "play": "",
+   "hash": "4e4093189032",
+   "text": "Đổi scene khi panel đang mở: panel đóng; nút vẫn có ở scene mới.",
+   "title": "Đổi scene khi panel đang mở",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-dang-chuyen-scene-man-loading-dang-chay": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.TheViewIsRedrawnWhenASceneSwitchStartsAndEnds",
+    "CheatPanelTests.WhileTheSceneSwitches_EveryRowIsLockedAndATapDoesNothing_TheButtonStillOpensAndCloses"
+   ],
+   "play": "",
+   "hash": "a4a4841221e8",
+   "text": "Đang chuyển scene (màn Loading đang chạy): nút mở panel được, nhưng mọi dòng khoá tới khi chuyển xong.",
+   "title": "Đang chuyển scene (màn Loading đang chạy)",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-popup-dang-mo": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.PopupOpen_ButtonAndPanelSitAboveEveryPopup"
+   ],
+   "play": "",
+   "hash": "4ff4a88706d7",
+   "text": "Popup đang mở: nút vẫn chạm được; panel và nền che nằm trên popup.",
+   "title": "Popup đang mở",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-danh-sach-dai-hon-panel": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.ListLongerThanThePanel_ScrollsVerticallyWithoutShrinkingText"
+   ],
+   "play": "",
+   "hash": "2c8ef013c090",
+   "text": "Danh sách dài hơn panel: cuộn dọc; không thu nhỏ chữ.",
+   "title": "Danh sách dài hơn panel",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "edge-khong-co-state-nao-trong-ban-build": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.NoStateInTheBuild_OnlyTheNormalRowAndTheEmptyLabel",
+    "CheatPanelTests.NoStateInTheBuild_ViewShowsTheNormalRowAndTheEmptyLabel"
+   ],
+   "play": "",
+   "hash": "3cc3ff1e0c03",
+   "text": "Không có state nào trong bản build: panel chỉ có dòng \"Chơi bình thường\" và nhãn \"Bản này không có state cheat\".",
+   "title": "Không có state nào trong bản build",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
+  },
+  "params": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen",
+    "CheatPanelTests.NoStateInTheBuild_OnlyTheNormalRowAndTheEmptyLabel",
+    "CheatPanelTests.PanelHasTitleCheat_AScrollableRowList_AndAShadeThatBlocksTapsBelow"
+   ],
+   "play": "",
+   "hash": "c05b457a6934",
+   "text": "## Làm gì\n- Feature `CheatPanel` có một asset config chứa ô `cheat_enabled`. Lúc game khởi động, đọc ô này một lần.\n- Bật: tạo nút cheat nổi trên cùng ở mọi scene, mọi màn, trên cả popup. Tắt: không tạo gì.\n- Chạm nút: mở panel (tiêu đề, danh sách dòng cuộn được, nền che). Chạm lại: đóng.\n- Phần tử, tương tác và flow ở `ui.md`; bố cục do @UIDesigner vẽ.\n- Nội dung và thứ tự các dòng, việc xảy ra khi chạm một dòng: `feature-cheat-panel/cheat-states/states-rules`.\n\n## Thông số\n- Bảng `.excel/AccessParams.csv` (`params`): `cheat_enabled` và các chữ hiện trên nút, panel.\n\n## Thông số theo giai đoạn\n- Cùng bảng `AccessParams`, cột `idea`. Phạm vi việc chỉ gồm IDEA (Manager giao 2026-11-27), nên cột `prototype`, `full` để trống.",
+   "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
+   "by": "CheatPanel",
+   "at": "2026-11-27 16:14:11"
   }
  },
  "log": [
@@ -378,6 +528,237 @@
    "state": "done",
    "by": "CheatPanel",
    "note": "CheatAccessTests.AccessParams_EmptyLabel_SaysTheBuildHasNoCheatState"
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "spec-config-asset",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "spec-default-on",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "spec-any-build",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "spec-off-nothing",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "edge-config-tat",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "edge-thieu-asset-config",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "accessparams-cheat-enabled",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "accessparams-button-label",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "accessparams-panel-title",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "accessparams-normal-row-label",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:03:40",
+   "id": "accessparams-empty-label",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-button-label",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen, CheatPanelTests.PrefabSpawner_DrawsTheConfigTexts_ButtonLabelPanelTitleNormalRowLabelEmptyLabel"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-button-state",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-panel-parts",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.PanelHasTitleCheat_AScrollableRowList_AndAShadeThatBlocksTapsBelow"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-close-ways",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.PanelOpensAndClosesWithTheButton_AndClosesWhenARowIsChosen, CheatPanelTests.SceneChangeWithThePanelOpen_ClosesIt_TheNextSceneHasTheButtonWithThePanelClosed"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-transition-lock",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.LockedRowsAreNotInteractable_InTheView, CheatPanelTests.WhileTheSceneSwitches_EveryRowIsLockedAndATapDoesNothing_TheButtonStillOpensAndCloses"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-doi-scene-khi-panel-dang-mo",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.SceneChangeWithThePanelOpen_ClosesIt_TheNextSceneHasTheButtonWithThePanelClosed"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-dang-chuyen-scene-man-loading-dang-chay",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TheViewIsRedrawnWhenASceneSwitchStartsAndEnds, CheatPanelTests.WhileTheSceneSwitches_EveryRowIsLockedAndATapDoesNothing_TheButtonStillOpensAndCloses"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-popup-dang-mo",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.PopupOpen_ButtonAndPanelSitAboveEveryPopup"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-danh-sach-dai-hon-panel",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.ListLongerThanThePanel_ScrollsVerticallyWithoutShrinkingText"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "edge-khong-co-state-nao-trong-ban-build",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.NoStateInTheBuild_ViewShowsTheNormalRowAndTheEmptyLabel"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "params",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.AccessParams_ButtonLabel_IsCheat, CheatAccessTests.AccessParams_CheatEnabled_IsTrue, CheatAccessTests.AccessParams_EmptyLabel_SaysTheBuildHasNoCheatState, CheatAccessTests.AccessParams_NormalRowLabel_IsChoiBinhThuong, CheatAccessTests.AccessParams_PanelTitle_IsCheat, CheatPanelTests.PrefabSpawner_DrawsTheConfigTexts_ButtonLabelPanelTitleNormalRowLabelEmptyLabel"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-button-label",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-button-state",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-panel-parts",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.PanelHasTitleCheat_AScrollableRowList_AndAShadeThatBlocksTapsBelow, CheatPanelTests.ShippedOverlayPrefabCarriesTheCheatPanelView"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-close-ways",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.PanelOpensAndClosesWithTheButton_AndClosesWhenARowIsChosen, CheatPanelTests.SceneChangeWithThePanelOpen_ClosesIt_TheNextSceneHasTheButtonWithThePanelClosed"
+  },
+  {
+   "at": "2026-11-27 16:14:10",
+   "id": "spec-transition-lock",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.LockedRowsAreNotInteractable_InTheView, CheatPanelTests.WhileTheSceneSwitches_EveryRowIsLockedAndATapDoesNothing_TheButtonStillOpensAndCloses"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-doi-scene-khi-panel-dang-mo",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.SceneChangeWithThePanelOpen_ClosesIt_TheNextSceneHasTheButtonWithThePanelClosed"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-dang-chuyen-scene-man-loading-dang-chay",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.TheViewIsRedrawnWhenASceneSwitchStartsAndEnds, CheatPanelTests.WhileTheSceneSwitches_EveryRowIsLockedAndATapDoesNothing_TheButtonStillOpensAndCloses"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-popup-dang-mo",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.PopupOpen_ButtonAndPanelSitAboveEveryPopup"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-danh-sach-dai-hon-panel",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.ListLongerThanThePanel_ScrollsVerticallyWithoutShrinkingText"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "edge-khong-co-state-nao-trong-ban-build",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.NoStateInTheBuild_OnlyTheNormalRowAndTheEmptyLabel, CheatPanelTests.NoStateInTheBuild_ViewShowsTheNormalRowAndTheEmptyLabel"
+  },
+  {
+   "at": "2026-11-27 16:14:11",
+   "id": "params",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen, CheatPanelTests.NoStateInTheBuild_OnlyTheNormalRowAndTheEmptyLabel, CheatPanelTests.PanelHasTitleCheat_AScrollableRowList_AndAShadeThatBlocksTapsBelow"
   }
  ]
 }

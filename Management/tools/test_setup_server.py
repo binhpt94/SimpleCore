@@ -1301,6 +1301,11 @@ def activity_cases(check):
         check("activity: only the subagent still running is listed under it", [s["name"] for s in w.get("subs", [])], ["Explore"])
         check("activity: the finished job is under done with its time and cost",
               [(d["name"], d["seconds"], d["cost"]) for d in v["done"]], [("W Run", 300, 1.5)])
+        ss.editor_ticket.add(root, "@Worker", ["refresh", "clean", "test"], [], [], now=now, job="w20261127-090000-run")
+        v2 = ss.activity_view(now)
+        check("activity: a job whose Editor ticket is still open stays in the table, waiting for the load and tests",
+              ([r["state"] for r in v2["rows"] if r["id"] == "w20261127-090000-run"], [d["id"] for d in v2["done"]]),
+              (["chờ Editor để nạp và test"], []))
         check("activity: today's worker cost sums the turns of today", v["totals"]["cost_today"],
               1.5 if time.strftime("%Y-%m-%d", time.localtime(now - 3000)) == time.strftime("%Y-%m-%d", time.localtime(now)) else 0)
     finally:
@@ -1351,6 +1356,8 @@ def worker_ticket_cases(check):
         check("worker ticket: the failing test goes to the job's events.log, nobody is messaged",
               (log.is_file() and "WaveTests.Ends" in log.read_text(encoding="utf-8"),
                any(step[0] == "logged" for step in did)), (True, True))
+        check("worker ticket: the test result goes to the job's events.log too (passed and failed, requirements done)",
+              any("Test: 1 qua, 1 hỏng · 1/2 yêu cầu ghi done" in e["text"] for e in ss.job_events("w1-run")), True)
     finally:
         (ss.ROOT, ss.runner_turn, ss.test_assemblies, ss.reqbook.mark) = real
         shutil.rmtree(root, ignore_errors=True)
