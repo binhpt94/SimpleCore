@@ -300,7 +300,9 @@ def live_cases(check):
         before = len(calls)
         res = ss.go_live("ffff6666")
         check("live: the human's own chat is never run in the background (VS Code could not open it)",
-              (res["ok"], "thread của người" in res["error"], len(calls), "ffff6666" in live), (False, True, before, False))
+              (res["ok"], "chat người dùng trực tiếp" in res["error"], len(calls), "ffff6666" in live), (False, True, before, False))
+        check("live: @Manager is a chat the human talks to in VS Code too (người quyết 2026-11-27)",
+              (ss.human_thread({"binding": "@Manager"}), ss.human_thread({"binding": "@CodeLead"})), (True, False))
         real_pin = ss.bind_session.check_pin
         ss.bind_session.check_pin = lambda store_, pin: ""
         try:
@@ -1119,15 +1121,25 @@ def profile_cases(check):
               (["blender"], True, ["studio-fulfill-order"]))
         args, settings, mcp, on = flags("@Codex")
         check("profile: another tool has no MCP server", mcp, {})
-        check("profile: models by role (người quyết 2026-11-26)",
-              [ss.role_model(f, "sonnet", "high") for f in ("@Manager", "@UnityAutoPlay", feature, "@GameDesigner",
-                                                           "@CodeLead", "@UIDesigner", "@human")],
-              [("opus", "low"), ("opus", "low"), ("opus", "low"), ("opus", "medium"), ("opus", "medium"),
-               ("sonnet", "high"), ("sonnet", "high")])
+        real_group, real_core = ss.group_of, ss.core_names
+        ss.group_of = lambda n: "Features" if n in ("Run", "Wallet") else "Services" if n.startswith("_Services/") else real_group(n)
+        ss.core_names = lambda: frozenset({"Run", "_Services/Popup"})
+        try:
+            check("profile: recommended models by role (người quyết 2026-11-27)",
+                  [ss.role_model(f, "haiku", "max") for f in ("@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner",
+                                                             "@DesignAdvisor", "@Codex", "@ClaudeImage", "@Blender",
+                                                             "@UnityAutoPlay", "@Core", "_Services/Ads", "Wallet", "Run", "@human",
+                                                             "_Services/Popup")],
+                  [("sonnet", "medium"), ("opus", "medium"), ("opus", "medium"), ("opus", "medium"),
+                   ("opus", "low"), ("sonnet", "medium"), ("opus", "medium"), ("opus", "low"),
+                   ("sonnet", "medium"), ("opus", "medium"), ("opus", "low"), ("sonnet", "medium"), ("opus", "medium"),
+                   ("haiku", "max"), ("opus", "medium")])
+        finally:
+            ss.group_of, ss.core_names = real_group, real_core
         t = thread("aaaa1111", "Manager", binding="@Manager", model="claude-opus-x", effort="high")
         args = ss.turn_args(t)
         check("profile: a turn of an existing thread runs on its role's model and effort, with the profile",
-              (args[:4], "--settings" in args), (["--model", "opus", "--effort", "low"], True))
+              (args[:4], "--settings" in args), (["--model", "sonnet", "--effort", "medium"], True))
     finally:
         ss.transcripts_dir, ss.skill_names, ss.PROFILES = real
         shutil.rmtree(tdir, ignore_errors=True)
@@ -1151,7 +1163,7 @@ def model_choice_cases(check):
         ss.threads = lambda include_unnamed=False: [dict(t) for t in listed]
         for t in listed[:3]:
             ss.bind(t["id"], t["binding"])
-        check("model: no pick yet, a turn runs on the role's model", ss.run_model(mgr), ("opus", "low"))
+        check("model: no pick yet, a turn runs on the role's model", ss.run_model(mgr), ("sonnet", "medium"))
         check("model: a wrong model or effort is refused before anything is saved",
               (ss.set_model("aaaa1111", "gpt", "low")["ok"], ss.set_model("aaaa1111", "opus", "huge")["ok"], ss.model_choice("aaaa1111")),
               (False, False, None))
@@ -1168,6 +1180,26 @@ def model_choice_cases(check):
         check("model: the alias of a model id", (ss.model_alias("claude-opus-5-5"), ss.model_alias("claude-sonnet-5-5"), ss.model_alias("")),
               ("opus", "sonnet", ""))
         check("the page may post to the model path", "/api/sessions/model" in ss.POST_PATHS, True)
+        # Đặt lại model khuyến nghị: chỉ khi không thread nào chạy (trừ chat của người).
+        res = ss.reset_models()
+        check("reset: refused while a thread runs, picks kept",
+              (res["ok"], sorted(res.get("running") or []), ss.model_choice("aaaa1111")),
+              (False, ["CodeLead", "Core"], ("sonnet", "high")))
+        human = dict(thread("eeee5555", "human", binding="@human"), live="interactive")
+        ss.bind("eeee5555", "@human")
+        listed[:] = [mgr, thread("bbbb2222", "CodeLead", binding="@CodeLead"), thread("cccc3333", "Core", binding="@Core"), human]
+        with ss.BUSY_LOCK:
+            ss.BUSY.add("cccc3333")
+        try:
+            check("reset: refused while the server runs a turn in a thread", ss.reset_models()["ok"], False)
+        finally:
+            ss.busy("cccc3333", False)
+        res = ss.reset_models()
+        check("reset: with only the human's chat open, every pick is removed",
+              (res["ok"], res["removed"], ss.model_choice("aaaa1111"), ss.model_choice("cccc3333"), ss.run_model(mgr)),
+              (True, 3, None, None, ("sonnet", "medium")))
+        check("reset: the answer lists the recommended model of each role", res["models"].get("Core"), "opus, medium")
+        check("the page may post to the reset path", "/api/sessions/reset-models" in ss.POST_PATHS, True)
     finally:
         (ss.threads, ss.guard.STORE_DIR, ss.run_claude, ss.start_bg, ss.stop_bg, ss.PROFILES) = real
         shutil.rmtree(store, ignore_errors=True)

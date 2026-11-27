@@ -3,7 +3,7 @@ paths:
   - "UnityProject/Assets/Features/**"
 ---
 # Basic, Services, Features: luật của phiên code
-Áp cho tầng 4 (`@Core`), tầng 5 (`_Services/<Tên>`), tầng 6 (`<Tên>`). Luật code Unity ở `.claude/rules/unity.md`; quy trình từng việc ở skill `feature-*`.
+Áp cho tầng 5 (`@Core`), tầng 6 (`_Services/<Tên>`), tầng 7 (`<Tên>`). Luật code Unity ở `.claude/rules/unity.md`; quy trình từng việc ở skill `feature-*`.
 
 ## Chỗ để code
 - Feature nằm ở `UnityProject/Assets/Features/<Tên>/`.
@@ -37,7 +37,7 @@ paths:
 - Code mới viết trên lớp con.
 - Xung đột code do @CodeLead giải quyết.
 - Lỗi @CodeLead báo về thì phiên sở hữu tự sửa.
-- Cần sửa `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json`: báo @CodeLead; @CodeLead hỏi người, từng lần.
+- Cần sửa `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json`: báo @CodeLead; @CodeLead hỏi người qua Manager, từng lần.
 - Cấm `*.asmref`.
 
 ## CLAUDE.md của feature (DOC-02)

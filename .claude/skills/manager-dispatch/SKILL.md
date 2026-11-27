@@ -27,7 +27,7 @@ Quyền, phạm vi (chỉ ba Leader, người quyết 2026-11-26), chuỗi của
 1. Ghi vào bảng theo Leader: bị chặn ở đâu, chờ ai, kéo theo những gì.
 2. **Dừng nhắn các việc phụ thuộc** vào thứ đang bị chặn. Ví dụ: @GameDesigner chờ người chốt node cha (User control) thì không giục @UIDesigner xếp frame cho node con.
 3. **Nhắn ngay đợt mới cho các Leader không phụ thuộc.** Một Leader đứng không phải là cả project đứng.
-4. **Chờ người**: gom mọi việc đang chờ người thành một danh sách ngắn trong câu trả lời: việc gì, làm ở đâu (tab, node), đang chặn những gì; việc chặn nhiều nhất xếp trước. Không để từng Leader hỏi người lẻ tẻ.
+4. **Chờ người**: câu hỏi của Leader nằm trong `ask.py` (tin `HỎI NGƯỜI · <id>`): hỏi người ngay bằng AskUserQuestion theo `manager.md`, mục "Hỏi người", rồi `ask.py answer` và nhắn Leader `TRẢ LỜI`. Việc người làm trên trang (chấm, chọn ý trái nhau, chốt, đặt giai đoạn) thì gom thành một danh sách ngắn trong câu trả lời: việc gì, làm ở đâu (tab, node), đang chặn những gì; việc chặn nhiều nhất xếp trước.
 5. **Lỗi mà Leader khác gỡ được**: nhắn đúng Leader đó, kèm file và câu lỗi. Lỗi chỉ người gỡ được (guard, quyền, công cụ, hạn mức, server tắt): báo người, nêu rõ lệnh và câu lỗi.
 6. Nhận `HẾT CHẶN`: lập lại bảng và nhắn đợt tiếp.
 

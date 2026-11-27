@@ -130,6 +130,7 @@ PROGRESS_DIR = ".progress"
 PROGRESS_FILE = "progress.json"
 WORK_STATES = ("todo", "doing", "done")
 CODE_FILE = "code.json"      # on a round-2 node: the Unity feature folders that implement it
+CODE_CORE_KEY = "core"      # code.json: true for a feature at the heart of the gameplay (its thread runs on a stronger model)
 CODE_ROUND = 2
 CODE_NAME_RX = re.compile(r"^(_Services/)?[A-Za-z][A-Za-z0-9]*$")      # the same shape guard.py takes as a FEATURE
 # Round 2 always has these infrastructure features: key of the node -> the code folder its code.json names.
@@ -953,6 +954,9 @@ def read_code(folder, where, depth, problems):
     names = data.get("unity") if isinstance(data, dict) else None
     if not isinstance(names, list) or any(not isinstance(n, str) or not CODE_NAME_RX.match(n) for n in names):
         problems.append({"path": where, "text": f'{CODE_FILE} phải có dạng {{"unity": ["Wallet", "_Services/Popup"]}}'})
+        return []
+    if CODE_CORE_KEY in data and not isinstance(data[CODE_CORE_KEY], bool):
+        problems.append({"path": where, "text": f'{CODE_FILE}: "{CODE_CORE_KEY}" phải là true hoặc false'})
         return []
     if depth != CODE_ROUND:
         problems.append({"path": where, "text": f"{CODE_FILE} chỉ đặt ở node feature (vòng {CODE_ROUND})"})
@@ -3904,6 +3908,18 @@ def live_code_names(root):
         for name in read_code(node, node.name, CODE_ROUND, []):
             seen.setdefault(name, node.name)
     return sorted(seen.items(), key=lambda kv: kv[0].lower())
+
+
+def live_core_names(root):
+    """{folder} of every code folder a round-2 node of the LIVE table names in a code.json that says "core": true:
+    the features at the heart of the gameplay (setup_server runs their threads on a stronger model)."""
+    live = table_dir(root, "live")
+    out = set()
+    for node in sorted(c for c in live.iterdir() if c.is_dir() and not c.name.startswith(".")) if live.is_dir() else []:
+        names = read_code(node, node.name, CODE_ROUND, [])
+        if names and (_json(node / CODE_FILE) or {}).get(CODE_CORE_KEY) is True:
+            out.update(names)
+    return out
 
 
 def live_feature_names(root):

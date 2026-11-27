@@ -46,7 +46,9 @@ Then open http://127.0.0.1:8770/ (the script prints the link). Run it yourself; 
 - POST /api/sessions/model {id, model, effort} (no PIN): the human's pick of model and effort for one thread
   (model-choice/<id>.json in the guard store), over the role's for every turn the server runs in it; an idle
   background session is started again on it. GET /api/threads gives each thread `run` {model, effort}: what its next
-  server turn uses, and `choice`: whether that is the human's pick.
+  server turn uses, and `choice`: whether that is the human's pick. POST /api/sessions/reset-models {} (no PIN)
+  removes every pick, so each thread runs on its role's recommended model (ROLE_MODELS) again; refused while any
+  thread but the human's runs.
 - Inbox courier (a thread of its own while the server runs; dispatch.py holds the messages and settings): every few
   seconds it gives each waiting message of a feature, service, @Core or tool to that thread as a turn of its own
   (start it with the message as its prompt, or stop and start an idle background one), never as a cross-session
@@ -95,6 +97,7 @@ ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / ".claude" / "hooks"))
 import bind_session  # noqa: E402
+import ask  # noqa: E402
 import dispatch  # noqa: E402
 import gamedesign  # noqa: E402
 import guard  # noqa: E402
@@ -107,7 +110,7 @@ from vscode_groups import vscode_state  # noqa: E402
 
 BASIC = ["@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor",
          "@UnityAutoPlay", "@Core"]
-ROLE_GROUPS = {"@human": "Master", "@Manager": "Leaders", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
+ROLE_GROUPS = {"@human": "Master", "@Manager": "Managers", "@CodeLead": "Leaders", "@GameDesigner": "Leaders",
                "@UIDesigner": "Leaders", "@Codex": "Tools", "@Blender": "Tools", "@ClaudeImage": "Tools", "@DesignAdvisor": "Tools",
                "@UnityAutoPlay": "Testers", "@Core": "Basic"}
 GROUP_ORDER = list(bind_session.TIERS)      # the tiers of CLAUDE.md, top to bottom
@@ -126,7 +129,7 @@ def feature_of(title):
 
 
 def group_of(name):
-    """Master, Leaders, Tools, Testers, Basic, Services or Features for a session name; "" for a name outside the setup."""
+    """Master, Managers, Leaders, Tools, Testers, Basic, Services or Features for a session name; "" for a name outside the setup."""
     if name in ROLE_GROUPS:
         return ROLE_GROUPS[name]
     if name.startswith("@"):
@@ -276,7 +279,7 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/studio/review": 64 * 1024, "/api/studio/anchor": MAX_BODY, "/api/studio/debt-close": MAX_BODY,
               "/api/sessions/reread": MAX_BODY, "/api/sessions/compact": MAX_BODY, "/api/sessions/renew": MAX_BODY,
               "/api/sessions/delete": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY,
-              "/api/sessions/model": MAX_BODY}
+              "/api/sessions/model": MAX_BODY, "/api/sessions/reset-models": MAX_BODY}
 TRASH = ".deleted"      # inside the transcripts folder: threads() reads only *.jsonl at its top
 # Threads that run a headless turn right now (renew, reread, compact, a thread setup is creating): not deleted.
 BUSY = set()
@@ -521,7 +524,7 @@ def job_needs(session_id):
 
 
 def sets():
-    """The names of the basic and the full setup, in the order of the groups (Master, Leaders, Basic, Services,
+    """The names of the basic and the full setup, in the order of the groups (Master, Managers, Leaders, Basic, Services,
     Features). The full one adds every service and feature folder, and every feature of the fixed design (live):
     the folder its code.json names, or the name GD will give it from its key when it has no code.json yet
     (`suggested`). Their chats are made and bound now and may edit once @Manager has made the folder (scaffold.py)
@@ -700,10 +703,32 @@ ROLE_SERVERS = {"@Blender": ("blender",)}
 OFF_TOOLS = "Artifact,Workflow,ScheduleWakeup,ReportFindings"
 OFF_PLUGINS = ("cc-plugin-easel@builtin", "plugin-authoring@builtin")
 CLAUDEAI_SKILL = "anthropic-skills:"
-# (model, effort) by role; a role not named keeps what the page chose.
+# (model, effort) by role, the recommended ones (người quyết 2026-11-27): a new thread is created on them and every
+# server turn runs on them unless the human picked another for that thread (model_choice; the page's "Đặt lại model
+# khuyến nghị" removes every pick). A name not in these tables keeps what the page chose.
 LOW, MID = ("opus", "low"), ("opus", "medium")
-ROLE_MODELS = {"@Manager": LOW, "@UnityAutoPlay": LOW, "@Core": LOW, "@GameDesigner": MID, "@CodeLead": MID}
-GROUP_MODELS = {"Services": LOW, "Features": LOW}
+S_MID = ("sonnet", "medium")
+ROLE_MODELS = {"@Manager": S_MID, "@CodeLead": MID, "@GameDesigner": MID, "@UIDesigner": MID,
+               "@DesignAdvisor": LOW, "@Codex": S_MID, "@ClaudeImage": MID,
+               "@Blender": LOW,      # chỉ làm art tạm, tiết kiệm (người quyết 2026-11-27)
+               "@UnityAutoPlay": S_MID, "@Core": MID}
+GROUP_MODELS = {"Services": LOW, "Features": S_MID}
+# A feature or service whose round-2 node says "core": true in its live code.json (the heart of the gameplay,
+# marked by @GameDesigner, chốt by the human: skill gd-round-2) runs on CORE_MODEL instead of its group's.
+CORE_MODEL = MID
+CORE_CACHE = {"at": 0.0, "value": frozenset()}
+CORE_SECONDS = 5
+
+
+def core_names():
+    """{folder} of the core features of the live design, re-read at most every CORE_SECONDS (threads() asks per row)."""
+    if time.time() - CORE_CACHE["at"] >= CORE_SECONDS:
+        try:
+            value = frozenset(gamedesign.live_core_names(ROOT))
+        except Exception:
+            value = CORE_CACHE["value"]
+        CORE_CACHE.update(at=time.time(), value=value)
+    return CORE_CACHE["value"]
 PROFILE_DIR = ".profiles"      # in the transcripts folder: the generated settings and MCP files of each role
 PROFILES = True      # tests of the plain CLI lines turn it off
 
@@ -720,8 +745,18 @@ def profiled(feature):
 
 def role_model(feature, model, effort):
     """The (model, effort) a thread of that role runs on: the role's own when it has one, else the ones given."""
-    pick = ROLE_MODELS.get(feature) or GROUP_MODELS.get(group_of(feature)) if profiled(feature) else None
+    pick = recommended_model(feature) if profiled(feature) else None
     return pick or (model, effort)
+
+
+def recommended_model(feature):
+    """The recommended (model, effort) of that role, core feature or group, or None."""
+    if feature in ROLE_MODELS:
+        return ROLE_MODELS[feature]
+    group = group_of(feature)
+    if group in ("Features", "Services") and feature in core_names():
+        return CORE_MODEL
+    return GROUP_MODELS.get(group)
 
 
 def skill_names():
@@ -962,8 +997,15 @@ def turn(t, prompt, bg=None):
 HUMAN = "@human"      # the human's own chat: never run in the background, VS Code could not open it any more
 
 
+# The chats the human talks to in VS Code's chat panel (người quyết 2026-11-27): the human's own and @Manager. They
+# are never run in the background (VS Code could not open them then); @Manager runs there without its role profile
+# (about twice the tokens a turn: the panel takes no per-chat flags; người quyết 2026-11-27 to keep the panel).
+VSCODE_CHATS = (HUMAN, "@Manager")
+
+
 def human_thread(t):
-    return t.get("binding") == HUMAN or t.get("feature") == HUMAN
+    """A chat the human talks to in VS Code (VSCODE_CHATS): never run in the background."""
+    return t.get("binding") in VSCODE_CHATS or t.get("feature") in VSCODE_CHATS
 
 
 def go_live(session_id):
@@ -975,7 +1017,7 @@ def go_live(session_id):
         return no
     if human_thread(t) and not t.get("live"):
         return {"ok": False, "id": t["id"], "title": t["title"],
-                "error": "thread của người: không chạy nền (VS Code sẽ không mở được nó); mở nó trong VS Code là live"}
+                "error": "chat người dùng trực tiếp (@human, @Manager): không chạy nền (VS Code sẽ không mở được nó); mở nó trong VS Code là live"}
     if t.get("live"):
         where = "nền" if t["live"] == "background" else "VS Code hoặc terminal"
         return {"ok": True, "id": t["id"], "title": t["title"], "answer": f"đã live sẵn ({where})"}
@@ -1033,6 +1075,46 @@ def set_model(session_id, model, effort):
     except Exception as ex:
         return dict(head, ok=False, error=f"đã lưu {model}, {effort} nhưng chưa bật lại phiên nền được: " + str(ex)[:220])
     return dict(head, answer=f"đã đổi sang {model}, {effort} và bật lại phiên nền")
+
+
+def asks_view():
+    """The questions for the human that wait (ask.py, read only), for the page: the human sees them before opening
+    the Manager's chat; Manager asks them and writes the answers."""
+    try:
+        return [{k: x.get(k) for k in ("id", "source", "job", "blocker", "options", "suggest", "waiting", "created")}
+                for x in ask.items(ROOT, "open")]
+    except Exception:
+        return []
+
+
+def reset_models():
+    """The page's "Đặt lại model khuyến nghị": removes the human's pick of every thread (model-choice/), so each runs
+    on its role's recommended model and effort again. Only while no thread runs: none live (background, VS Code or a
+    terminal; the human's own chat aside), no turn of this server, no setup job. A running one would keep its old
+    model until started again."""
+    with BUSY_LOCK:
+        held = set(BUSY)
+    with JOB_LOCK:
+        job_running = bool(JOB and not JOB["done"])
+    listed = [t for t in threads() if not t["archived"] and not t["unlisted"]]
+    running = [t["title"] for t in listed if (t.get("live") or t["id"] in held) and not human_thread(t)]
+    if job_running or running:
+        why = "Setup đang chạy" if job_running else "còn thread đang chạy: " + ", ".join(sorted(running))
+        return {"ok": False, "error": why + ". Tắt live (hoặc đóng chat trong VS Code) rồi bấm lại.", "running": running}
+    folder = os.path.join(guard.STORE_DIR, MODEL_CHOICE_DIR)
+    removed = 0
+    if os.path.isdir(folder):
+        for name in os.listdir(folder):
+            if name.endswith(".json"):
+                try:
+                    os.remove(os.path.join(folder, name))
+                    removed += 1
+                except OSError:
+                    pass
+    table = {t["title"]: "{}, {}".format(*recommended_model(t["binding"])) for t in listed
+             if t["binding"] and profiled(t["binding"]) and recommended_model(t["binding"])}
+    return {"ok": True, "removed": removed, "models": table,
+            "answer": f"đã bỏ {removed} lựa chọn riêng; mọi thread chạy theo model khuyến nghị của vai"}
 
 
 def reread(session_id):
@@ -1174,6 +1256,11 @@ def run_job(job, model, effort):
                 sid = create(thread_name(name), name, model, effort)
                 m, e = role_model(name, model, effort)
                 done = {"state": "created", "ids": [sid], "model": m, "effort": e}
+                if name in VSCODE_CHATS:
+                    done.update(live=False, detail="chat người dùng trực tiếp: mở nó trong VS Code, không chạy nền")
+                    with JOB_LOCK:
+                        item.update(done, ended=time.time())
+                    continue
                 if dispatch.pool_of(name) in dispatch.ON_DEMAND and dispatch.config(ROOT)["mode"] == "on-demand":
                     done.update(live=False, detail="chạy theo việc (hộp thư): không bật live")
                     with JOB_LOCK:
@@ -2100,7 +2187,7 @@ class Handler(SimpleHTTPRequestHandler):
             if path == "/api/threads":
                 return self.send_json(200, {"threads": threads(include_unnamed=True), "sets": sets(), "models": MODELS, "efforts": EFFORTS,
                                             "defaults": {"model": DEFAULT_MODEL, "effort": DEFAULT_EFFORT},
-                                            "vscode": vscode_view()})
+                                            "vscode": vscode_view(), "asks": asks_view()})
             # Each tab of the page asks for its own data when it is first opened: nothing is built when the page is.
             if path == "/api/setup/job":
                 return self.send_json(200, {"job": job_view()})
@@ -2196,6 +2283,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, stop_live(data.get("id")))
             if self.path == "/api/sessions/model":
                 return self.send_json(200, set_model(data.get("id"), str(data.get("model") or ""), str(data.get("effort") or "")))
+            if self.path == "/api/sessions/reset-models":
+                return self.send_json(200, reset_models())
             if self.path == "/api/sessions/delete":
                 return self.send_json(200, delete_thread(data.get("id"), data.get("pin")))
             if self.path == "/api/vscode-groups":

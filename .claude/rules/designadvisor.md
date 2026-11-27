@@ -20,7 +20,7 @@ Nhóm Tools. Không code, không đụng Unity, **không viết thiết kế**. 
 - Không có báo cáo cuối lượt.
 
 ## Ai được nhờ
-- Chỉ **người** và **@GameDesigner**. Việc tới ở đầu tin (hộp thư, `[tin <id> · từ @GameDesigner]`) hoặc trong chat của người. Phiên khác nhờ thì trả lời một câu: việc này đi qua @GameDesigner. Trả lời @GameDesigner bằng `SendMessage` (Leader, luôn sống).
+- Chỉ **người** và **@GameDesigner**. Việc tới ở đầu tin (hộp thư, `[tin <id> · từ @GameDesigner]`) hoặc trong tin người gửi qua tab Hộp thư. Phiên khác nhờ thì trả lời một câu: việc này đi qua @GameDesigner. Trả lời @GameDesigner bằng `SendMessage` (Leader, luôn sống).
 - Không tự rà cây, không tự hỏi GPT khi chưa ai nhờ, không tự nhắn góp ý cho phiên code.
 - Không hỏi GPT về feature test (`group: test` hay key đuôi `-test`) và node cheat (`<feature>/cheat`), người quyết 2026-11-26: được nhờ thì nhắn lại GameDesigner một câu theo luật này, không chạy `gd_advise.py`. Feature hạ tầng (`group: infra`) không bắt buộc hỏi, nhưng được nhờ thì vẫn hỏi.
 

@@ -22,7 +22,7 @@ Luật chung: `.claude/rules/gamedesigner.md`. Skill này là khuôn file của 
   .history/                  log.jsonl, bản sao mọi phiên bản data.md               chỉ đọc
   <key con>/                 node của vòng sau
 ```
-Key (tên thư mục): tiếng Anh, chữ thường, số, gạch nối. Key đã chốt trong `live` thì không đổi tên; muốn đổi thì hỏi người.
+Key (tên thư mục): tiếng Anh, chữ thường, số, gạch nối. Key đã chốt trong `live` thì không đổi tên; muốn đổi thì hỏi người qua Manager (`ask.py`).
 
 ### `data.md`: chỉ gồm đúng ba phần
 ```
@@ -54,7 +54,7 @@ Nhân vật người chơi điều khiển, có máu và kĩ năng.
   - Ý viết theo dạng cũ (không có tiêu đề) vẫn đọc được nhưng `gd_status.py` sẽ nhắc "THIẾU TIÊU ĐỀ": lần tới sửa node đó thì thêm tiêu đề. Thêm tiêu đề làm đổi hash data.
 - **Ý của người** (người quyết 2026-11-26): người thêm, sửa, xoá ý của mình trên trang (nút Thêm ý, Sửa ý, Xoá ý, Thành ý của người). Trang ghi thẳng vào `data.md`: khối `### user-<n> | AI 9 | <tiêu đề>` cuối `## Ý cốt lõi`, và id đó ở dòng `user: user-1, user-2` của phần đầu (không tính hash). Bản nào của ý chưa có điểm người thì trang chấm 9.
   - Bạn **không** sửa tiêu đề, chi tiết hay id của ý đó, không xoá nó, không thêm id nào vào `user:`, không khai nó ở `by:`. Trang giữ hash từng ý ở `.user-review/ideas.json`; lệch thì `gd_status.py` báo `Ý CỦA NGƯỜI BỊ ĐỔI`, `Ý CỦA NGƯỜI BỊ XOÁ` hay `TỰ GẮN NHÃN NGƯỜI`, và node không chốt được. Lỡ sửa thì trả lại đúng bản trong `.history`.
-  - Ý của người là quyết định của người: ý khác trái với nó thì sửa ý khác cho khớp. Thấy ý của người cần đổi hay trái với node đã chốt thì hỏi người trong chat, không tự đổi. Điểm AI của nó không có nghĩa (điểm người là tuyệt đối); để nguyên `AI 9`.
+  - Ý của người là quyết định của người: ý khác trái với nó thì sửa ý khác cho khớp. Thấy ý của người cần đổi hay trái với node đã chốt thì hỏi người qua Manager (`ask.py`), không tự đổi. Điểm AI của nó không có nghĩa (điểm người là tuyệt đối); để nguyên `AI 9`.
   - Thêm ý của người làm đổi hash data như mọi ý: node con thành "cần làm lại".
 - **Người xoá ý, node** (người quyết 2026-11-26): người xoá ý hay node trên trang (nút ×, rồi Lưu xoá). Đó là xoá trung tính, không phải ý bị loại: không viết lại ý đó, không đưa lại nó dưới tên khác (`gd_status.py` liệt kê "Người đã xoá"); ý GPT bị xoá thì trang đã tự ghi `gpt-dropped`. Node vòng 3 mà mọi node vòng 4 bị xoá là lỗi `NODE VÒNG 3 TRỐNG SAU KHI XOÁ` và feature bị khoá code: viết node vòng 4 mới, hoặc hỏi người có xoá luôn node vòng 3 không.
 - Danh sách ý cốt lõi chỉ nằm ở `data.md`. Không chép lại thành mục "Cốt lõi" trong `CLAUDE.md`: hai danh sách sẽ lệch nhau và người duyệt sẽ thấy hai thứ khác nhau.

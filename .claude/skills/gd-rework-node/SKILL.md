@@ -12,7 +12,7 @@ Lúc node đạt ở `.claude/rules/gamedesigner.md`; khuôn node ở skill `gd-
 3. **Chưa có ý nào**: viết các ý cốt lõi và chấm điểm.
 4. **Ref đã đổi hoặc thiếu ref**: đọc node đích (cả `CLAUDE.md`) hoặc từ trong glossary, rà các ý dùng nó, sửa ý nào không còn khớp (con số, tên, luật), rồi ghi hash mới vào `refs`. Rà xong không phải sửa gì thì chỉ đổi hash.
 
-5. **Node vòng 3 trống sau khi xoá** (người xoá mọi node vòng 4 của nó): viết node vòng 4 mới theo node vòng 3, hoặc hỏi người có xoá luôn node vòng 3 không. Tới lúc đó feature bị khoá code.
+5. **Node vòng 3 trống sau khi xoá** (người xoá mọi node vòng 4 của nó): viết node vòng 4 mới theo node vòng 3, hoặc hỏi người qua Manager (`ask.py`) có xoá luôn node vòng 3 không. Tới lúc đó feature bị khoá code.
 
-Trước khi viết lại, **đọc lịch sử của node** (mục "Đã bị người loại" trong `gd_status.py`, hoặc `.history/log.jsonl`): không đề xuất lại ý đã bị loại hay một biến thể gần giống, và không đưa lại ý người đã xoá (mục "Người đã xoá": xoá trung tính, chỉ là không cần); nếu thấy vẫn cần ý đó thì hỏi người, nêu rõ nó đã bị loại lúc nào và vì sao lần này khác.
+Trước khi viết lại, **đọc lịch sử của node** (mục "Đã bị người loại" trong `gd_status.py`, hoặc `.history/log.jsonl`): không đề xuất lại ý đã bị loại hay một biến thể gần giống, và không đưa lại ý người đã xoá (mục "Người đã xoá": xoá trung tính, chỉ là không cần); nếu thấy vẫn cần ý đó thì hỏi người qua Manager (`ask.py`), nêu rõ nó đã bị loại lúc nào và vì sao lần này khác.
 Làm lại từ trên xuống: node cha đạt rồi mới tới node con.

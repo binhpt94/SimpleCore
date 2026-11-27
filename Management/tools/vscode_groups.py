@@ -13,7 +13,7 @@ documented: today the VS Code state database (globalStorage/state.vscdb), table 
 changes anything, so a write made while it runs is lost: this script refuses to write then.
 
 What it does: every thread of the setup (setup_server: named after a FEATURE value, not archived, shown in VS Code)
-goes into the group of its tier, "1 · Master" ... "5 · Features", and out of any other group. Groups of your own and
+goes into the group of its tier, "1 · Master", "2 · Managers" ... "8 · Features", and out of any other group. Groups of your own and
 sessions outside the setup are kept. A tier group left empty is dropped. Running it again changes nothing.
 Safety: the format is checked first (anything unexpected: nothing is written), the database is copied to
 state.vscdb.coresimple-bak before each write, and --restore copies that back.
@@ -34,7 +34,8 @@ HERE = Path(__file__).resolve().parent
 STATE_KEY = "Anthropic.claude-code"
 GROUPS_PREFIX = "sessionGroups:"
 WORKSPACE_PREFIXES = (GROUPS_PREFIX, "sessionUnread:", "sessionSectionCollapseState:")
-TIERS = ["Master", "Leaders", "Tools", "Testers", "Basic", "Services", "Features"]      # the order of CLAUDE.md, top to bottom
+sys.path.insert(0, str(HERE.parents[1] / ".claude" / "hooks"))
+from bind_session import TIERS      # noqa: E402  the order of CLAUDE.md, top to bottom (one list for the hooks, the page, this)
 TIER_NAMES = {tier: f"{i} · {tier}" for i, tier in enumerate(TIERS, 1)}
 TIER_NAME_RX = re.compile(r"^\d+ · (" + "|".join(TIERS) + r")$")      # also a tier group of an older numbering
 

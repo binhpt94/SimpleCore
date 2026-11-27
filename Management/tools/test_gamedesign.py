@@ -803,6 +803,16 @@ def run_code_names(root):
     check("a broken code.json suggests nothing; code.json without a node still declares",
           [n for n, _, _ in gd.live_feature_names(root)], ["_Services/Popup", "Hero", "Lost"])
     check("the code gate still needs code.json in live", gd.code_allowed(root, "Wallet")[0], False)
+    # "core": true marks a feature at the heart of the gameplay (its thread runs on a stronger model).
+    check("no core feature until a live code.json says so", gd.live_core_names(root), set())
+    put(root, "live/feature-hero/code.json", '{"unity": ["Hero"], "core": true}')
+    put(root, "live/feature-popup/code.json", '{"unity": ["_Services/Popup"], "core": false}')
+    check("core: the folders of a live code.json with core true", gd.live_core_names(root), {"Hero"})
+    check("core: the flag does not change the declared names", [n for n, _ in gd.live_code_names(root)][:2], ["_Services/Popup", "Hero"])
+    put(root, "idea/feature-hero/code.json", '{"unity": ["Hero"], "core": "yes"}')
+    check("core: a flag that is not true or false is a structure problem",
+          any('"core"' in p["text"] for p in gd.snapshot(root)["problems"]["idea"]), True)
+    put(root, "idea/feature-hero/code.json", '{"unity": ["Hero"]}')
 
 
 def add_refs(root, path, line, table="idea"):

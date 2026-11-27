@@ -63,16 +63,16 @@ ASSIGN = [("s-human", "Master"), ("s-mgr", "Leaders"), ("s-lead", "Leaders"), ("
 def run_plan():
     out = vg.plan_groups([], ASSIGN)
     check("tier groups in tier order, empty tiers dropped", [g["name"] for g in out],
-          ["1 · Master", "2 · Leaders", "6 · Services", "7 · Features"])
+          ["1 · Master", "3 · Leaders", "7 · Services", "8 · Features"])
     check("sessions in setup order", out[1]["sessionIds"], ["s-mgr", "s-lead"])
     check("new groups are open", all(g["collapsed"] is False for g in out))
     mine = {"id": "g-mine", "name": "Việc riêng", "collapsed": True, "sessionIds": ["s-other", "s-hero"]}
-    old = {"id": "g-lead", "name": "2 · Leaders", "collapsed": True, "sessionIds": ["s-lead", "s-gone"]}
+    old = {"id": "g-lead", "name": "3 · Leaders", "collapsed": True, "sessionIds": ["s-lead", "s-gone"]}
     out = vg.plan_groups([mine, old], ASSIGN)
     by = {g["name"]: g for g in out}
-    check("an existing tier group keeps its id and collapsed state", (by["2 · Leaders"]["id"], by["2 · Leaders"]["collapsed"]),
+    check("an existing tier group keeps its id and collapsed state", (by["3 · Leaders"]["id"], by["3 · Leaders"]["collapsed"]),
           ("g-lead", True))
-    check("its order is kept, newcomers appended, sessions no longer in the setup removed", by["2 · Leaders"]["sessionIds"],
+    check("its order is kept, newcomers appended, sessions no longer in the setup removed", by["3 · Leaders"]["sessionIds"],
           ["s-lead", "s-mgr"])
     check("your own group is kept after the tiers, without the sessions moved into a tier",
           (out[-1]["name"], out[-1]["sessionIds"], out[-1]["collapsed"]), ("Việc riêng", ["s-other"], True))
@@ -80,9 +80,9 @@ def run_plan():
     older = {"id": "g-pop", "name": "4 · Services", "collapsed": True, "sessionIds": ["s-pop"]}
     out = vg.plan_groups([older], ASSIGN + [("s-codex", "Tools")])
     check("a tier group of the older numbering is renamed, keeping its id and state",
-          [(g["name"], g["id"], g["collapsed"]) for g in out if g["id"] == "g-pop"], [("6 · Services", "g-pop", True)])
+          [(g["name"], g["id"], g["collapsed"]) for g in out if g["id"] == "g-pop"], [("7 · Services", "g-pop", True)])
     check("the Tools tier sits between Leaders and Basic", [g["name"] for g in out][:4],
-          ["1 · Master", "2 · Leaders", "3 · Tools", "6 · Services"])
+          ["1 · Master", "3 · Leaders", "4 · Tools", "7 · Services"])
     check("no leftover group of the old name", any(g["name"] == "4 · Services" for g in out), False)
 
 
@@ -111,7 +111,7 @@ def run_apply(folder):
     check("refused while VS Code runs, nothing written", (refused(vg.apply, ROOT, ASSIGN, db=db, running=RUNNING), read(db)), (True, before))
     vg.apply(ROOT, ASSIGN, db=db, running=NOT_RUNNING)
     after = json.loads(read(db))
-    check("groups written for this project", [g["name"] for g in groups_of(db)], ["1 · Master", "2 · Leaders", "6 · Services", "7 · Features"])
+    check("groups written for this project", [g["name"] for g in groups_of(db)], ["1 · Master", "3 · Leaders", "7 · Services", "8 · Features"])
     check("every other field unchanged", {k: v for k, v in after.items() if k != vg.GROUPS_PREFIX + ROOT}, data)
     check("written the compact way the extension writes", read(db), json.dumps(after, separators=(",", ":"), ensure_ascii=False))
     check("other rows untouched", read(db, "other.key"), "keep me")
@@ -119,7 +119,7 @@ def run_apply(folder):
     second = read(db)
     vg.apply(ROOT, ASSIGN, db=db, running=NOT_RUNNING)
     check("a second run writes the same groups", read(db), second)
-    check("current_groups shows each session's group", vg.current_groups(ROOT, db)["s-lead"], "2 · Leaders")
+    check("current_groups shows each session's group", vg.current_groups(ROOT, db)["s-lead"], "3 · Leaders")
     check("restore refused while VS Code runs", refused(vg.restore, db, running=RUNNING))
     vg.restore(db, running=NOT_RUNNING)
     check("restore brings back the backup (the state before the last write)", read(db), second)
@@ -147,17 +147,17 @@ def run_forget(folder):
     sub = Path(folder) / "forget"
     sub.mkdir()
     data = {"hiddenSessionIds": ["s-del", "s-x"], "sessionUnread:" + ROOT: ["s-del"], "nested": {"s-del": 1, "k": [1, "s-x"]},
-            vg.GROUPS_PREFIX + ROOT: [{"id": "g", "name": "7 · Features", "collapsed": True, "sessionIds": ["s-a", "s-del"]}]}
+            vg.GROUPS_PREFIX + ROOT: [{"id": "g", "name": "8 · Features", "collapsed": True, "sessionIds": ["s-a", "s-del"]}]}
     db = make_db(sub, data)
     before = read(db)
     check("forget: refused while VS Code runs, nothing written",
           (refused(vg.forget_session, "s-del", db=db, running=RUNNING), read(db)), (True, before))
     was = vg.forget_session("s-del", db=db, running=NOT_RUNNING)
     after = json.loads(read(db))
-    check("forget: the groups it was in", was, ["7 · Features"])
+    check("forget: the groups it was in", was, ["8 · Features"])
     check("forget: out of groups, hidden, unread and any other map, the rest kept", after,
           {"hiddenSessionIds": ["s-x"], "sessionUnread:" + ROOT: [], "nested": {"k": [1, "s-x"]},
-           vg.GROUPS_PREFIX + ROOT: [{"id": "g", "name": "7 · Features", "collapsed": True, "sessionIds": ["s-a"]}]})
+           vg.GROUPS_PREFIX + ROOT: [{"id": "g", "name": "8 · Features", "collapsed": True, "sessionIds": ["s-a"]}]})
     check("forget: a backup of the state before the write", read(vg.backup_path(db)), before)
     check("forget: other rows untouched", read(db, "other.key"), "keep me")
     check("forget: an id that is nowhere writes nothing", (vg.forget_session("s-none", db=db, running=NOT_RUNNING), read(db)),

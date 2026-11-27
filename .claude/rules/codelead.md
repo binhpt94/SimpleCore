@@ -56,12 +56,13 @@ Tin của Manager nêu `Phạm vi: chỉ <feature,...>` thì chỉ làm và ch�
 
 ## Báo chặn
 - **Tầng dưới báo chặn tới bạn**: xử lý theo skill `codelead-dispatch`, mục "Khi tầng dưới báo chặn".
+- **Không hỏi người (người quyết 2026-11-27)**: chỉ Manager hỏi người. Guard chặn AskUserQuestion và mọi lần cần người duyệt của bạn. Cần người (quyết, chọn, cho phép sửa `Packages`, `ProjectSettings`, `rules.json`, xoá thư mục có file, câu tầng dưới báo chặn chờ người): ghi câu hỏi `python Management/tools/ask.py add --from CodeLead "<việc>" --blocker "…" --options "A …·B …" --suggest "…" --waiting "…"` rồi nhắn `Manager` (SendMessage) `HỎI NGƯỜI · <id> · <việc>`; Manager hỏi người và trả `TRẢ LỜI · <id> · …`. Người cho phép một lệnh thì đúng lệnh đó chạy được (số lần người cho, trong 30 phút). Làm tiếp việc không phụ thuộc trong lúc chờ.
 - **Chính bạn bị chặn**, hoặc tầng dưới bị chặn mà chỉ người gỡ được: nhắn `Manager`. @Manager chỉ điều phối lại được khi biết bạn đang đứng, mà khối báo cáo cuối lượt chỉ có ở lượt có sửa file.
   - **Khi nào**:
     - (a) lỗi không tự gỡ được: guard chặn, unity-mcp hay công cụ không chạy, server tắt;
-    - (b) phải dừng chờ người: một câu hỏi đã hỏi người trong chat, quyết `rules.json`, `Packages`, `ProjectSettings`, hay một lựa chọn chỉ người quyết được;
+    - (b) phải dừng chờ người: dùng `ask.py` + `HỎI NGƯỜI` (ở trên), tin đó thay cho BÁO CHẶN chờ người;
     - (c) cần @GameDesigner hay @UIDesigner mà nhắn thẳng không xong.
-  - **Làm gì**: trước khi kết thúc lượt, nhắn `Manager` bằng SendMessage một tin theo khuôn `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … (file, node, lệnh, câu lỗi) · Ai gỡ được: … · Việc của mình vẫn chạy tiếp được: … · Feature bị kéo theo: …`. Vẫn báo người trong câu trả lời như cũ; tin cho Manager là thêm, không thay.
+  - **Làm gì**: trước khi kết thúc lượt, nhắn `Manager` bằng SendMessage một tin theo khuôn `BÁO CHẶN · <lỗi | chờ người> · Việc đang làm: … · Vướng ở: … (file, node, lệnh, câu lỗi) · Ai gỡ được: … · Việc của mình vẫn chạy tiếp được: … · Feature bị kéo theo: …`. Không có ai đọc chat của bạn: tin cho Manager là nơi duy nhất người biết bạn bị chặn.
   - Hết bị chặn: nhắn `Manager` một dòng `HẾT CHẶN · <việc>`.
   - Một tin cho mỗi lần bị chặn; nhắn lại khi tình trạng đổi. Gom nhiều feature bị cùng một chỗ chặn vào một tin.
   - Lượt có sửa file thì khối báo cáo vẫn phải có, với `Trạng thái: bị chặn` và "Cần bên khác" ghi đúng bên gỡ được.

@@ -68,4 +68,4 @@ Validator ép ranh giới. File này ghi phần còn lại; người duyệt s�
 
 ## Không lách
 - Không viết code để né regex của validator (tách chuỗi, gọi gián tiếp API cấm).
-- Validator báo sai thì dừng và báo @CodeLead; sửa `rules.json`: @CodeLead hỏi người, từng lần.
+- Validator báo sai thì dừng và báo @CodeLead; sửa `rules.json`: @CodeLead hỏi người qua Manager (`ask.py`), từng lần.

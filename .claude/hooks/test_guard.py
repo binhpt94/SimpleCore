@@ -674,7 +674,10 @@ def run_advisor_cases():
     check(g, V, False, "the context never has the PIN", PIN in told)
     check(g, V, True, "a headless chat is told not to ask, and whom to tell", "KHÔNG HỎI NGƯỜI" in told and "GameDesigner" in told)
     told = bind_session.context({"session_id": "role-gd"}, FX, STORE)
-    check(g, D, False, "a Leader asks the human itself", "KHÔNG HỎI NGƯỜI" in told)
+    check(g, D, True, "a Leader asks the human through Manager (2026-11-27)",
+          "KHÔNG HỎI NGƯỜI" in told and "ask.py add --from GameDesigner" in told and "BÁO CHẶN" not in told.split("KHÔNG HỎI NGƯỜI")[1])
+    mgr = bind_session.context({"session_id": "role-mgr"}, FX, STORE) if os.path.exists(guard.binding_path("role-mgr", STORE) or "") else ""
+    check(g, "@Manager", False, "Manager asks the human itself", "KHÔNG HỎI NGƯỜI" in mgr)
 
     g = "guard line: the fixed text once"
     gd = {"session_id": "role-gd"}
@@ -683,7 +686,7 @@ def run_advisor_cases():
     again = bind_session.prompt_context(gd, FX, STORE)
     check(g, D, True, "the first prompt has the whole text, with the skills", "NGANG HÀNG" in first and "Skill của vai" in first)
     check(g, D, True, "the next one: the first line and what changes only",
-          again.startswith("guard: chat này gán FEATURE=@GameDesigner (tầng 1 · Leaders)") and "NGANG HÀNG" not in again
+          again.startswith("guard: chat này gán FEATURE=@GameDesigner (tầng 2 · Leaders)") and "NGANG HÀNG" not in again
           and "Skill của vai" not in again and len(again) < len(first) // 3)
     check(g, D, True, "the mode is part of the fixed text: a change sends the whole line again",
           "Mode hiện tại" not in again and "Mode hiện tại" in first)
@@ -839,7 +842,7 @@ def run_binding_cases(payload):
     check(g, "", [".claude/rules/feature.md"], "a feature chat reads feature.md itself (unity.md loads with the Unity files)", bind_session.must_read("Wallet"))
     check(g, "", ([".claude/rules/feature.md"], [".claude/rules/feature.md"], [".claude/rules/manager.md"]),
           "@Core and a service read feature.md too; a Leader reads only its own rules", (bind_session.must_read("@Core"), bind_session.must_read("_Services/Popup"), bind_session.must_read("@Manager")))
-    check(g, "", ("tầng 0 · Master", "tầng 6 · Features"), "tiers are numbered top to bottom", (bind_session.tier_label("Master"), bind_session.tier_label("Features")))
+    check(g, "", ("tầng 0 · Master", "tầng 7 · Features"), "tiers are numbered top to bottom", (bind_session.tier_label("Master"), bind_session.tier_label("Features")))
     check(g, "", [".claude/rules/gamedesigner.md", ".claude/rules/designadvisor.md"],
           "@GameDesigner reads its rules itself: they no longer load with the design files", bind_session.must_read("@GameDesigner"))
     check(g, "", [".claude/rules/designadvisor.md", ".claude/rules/gamedesigner.md"],
@@ -1290,7 +1293,7 @@ def run_codelead_cases():
     t(g, L, "allow", "Write", {"file_path": A + "/_Composition/AssemblyInfo.cs",
                                "content": '[assembly: InternalsVisibleTo("Game.Composition.Tests")]'})
     t(g, L, "allow", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/_Composition/Old.cs"})
-    t(g, L, "ask", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/_Composition"})
+    t(g, L, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/_Composition"})      # a Leader asks through Manager (2026-11-27)
     if not WIN:
         w(g + ": case-sensitive", L, "deny", A + "/_composition/Boot.cs")
     for who in ("Wallet", "@Core", "@Manager", "@GameDesigner", "@Codex", ""):
@@ -1415,11 +1418,11 @@ def run_codelead_cases():
     os.makedirs(A + "/_Composition/Scenes", exist_ok=True)
     dl("allow", "Assets/Features/Wallet/Scripts/Internal/Base")
     dl("allow", "Assets/_Composition/Scenes")
-    dl("ask", "Assets/_Composition")                                   # the whole wiring area: the human decides
-    dl("ask", "Assets/Features/Wallet/Scripts/Contracts/Missing")      # nothing there: not a folder it can be sure of
+    dl("deny", "Assets/_Composition")                                   # the whole wiring area: the human decides
+    dl("deny", "Assets/Features/Wallet/Scripts/Contracts/Missing")      # nothing there: not a folder it can be sure of
     dl("allow", "Assets/Features/Wallet/Scripts/Internal")
     dl("allow", "Assets/Features/Wallet")
-    dl("ask", "Assets/Features/Shop/Scripts/Internal/Base")            # nothing there: not a folder it can be sure of
+    dl("deny", "Assets/Features/Shop/Scripts/Internal/Base")            # nothing there: not a folder it can be sure of
     for top in ("Assets/Features", "Assets/Features/_Services"):
         dl("deny", top)
     dl("deny", "Assets/Core")
@@ -2001,7 +2004,7 @@ def run_tester_cases():
     Path(guard.binding_path("role-tester", STORE)).write_text(json.dumps({"feature": T}))
     told = bind_session.context({"session_id": "role-tester"}, FX, STORE)
     check(g, T, [], "the guard line names the folder, the commands, the soft gate and the report",
-          [x for x in ("tầng 3 · Testers", "Tester/UnityAutoPlay/", "tester.py new UnityAutoPlay", "execute_code", "cổng mềm", "XÁC NHẬN",
+          [x for x in ("tầng 4 · Testers", "Tester/UnityAutoPlay/", "tester.py new UnityAutoPlay", "execute_code", "cổng mềm", "XÁC NHẬN",
                        "Báo cáo cho @Manager", ".claude/rules/tester.md") if x not in told])
 
 
@@ -2561,8 +2564,10 @@ def run_headless_cases():
     low = ("Wallet", "_Services/Popup", "@Core", "@UnityAutoPlay", "@Codex", "@Blender", "@ClaudeImage", "@DesignAdvisor")
     for who in low:
         t(g, who, "deny", "AskUserQuestion", {"questions": []})
-    for who in ("@human", "@Manager", "@CodeLead", "@GameDesigner", "@UIDesigner"):
-        t(g + " (Leaders and the human ask)", who, "pass", "AskUserQuestion", {"questions": []})
+    for who in ("@human", "@Manager"):
+        t(g + " (only the human and Manager ask)", who, "pass", "AskUserQuestion", {"questions": []})
+    for who in ("@CodeLead", "@GameDesigner", "@UIDesigner"):
+        t(g + " (a Leader asks through Manager, 2026-11-27)", who, "deny", "AskUserQuestion", {"questions": []})
     data = {"tool_name": "AskUserQuestion", "tool_input": {}, "cwd": FX, "session_id": "test-session"}
     for who, leader in (("Wallet", "CodeLead"), ("@Core", "CodeLead"), ("@UnityAutoPlay", "CodeLead"),
                         ("@DesignAdvisor", "GameDesigner"), ("@Codex", "gave the order")):
@@ -2576,7 +2581,61 @@ def run_headless_cases():
     got = guard.decide(deny, "Wallet", FX, STORE)
     check(g + " (tell the human: through the Leader)", "Wallet", True, "dotnet build", got[0] == "deny" and "BÁO CHẶN" in got[1])
     got = guard.decide(deny, "@CodeLead", FX, STORE)
-    check(g + " (Leaders: as before)", "@CodeLead", True, "dotnet build", got[0] == "deny" and "BÁO CHẶN" not in got[1])
+    check(g + " (Leaders: not BÁO CHẶN)", "@CodeLead", True, "dotnet build", got[0] == "deny" and "BÁO CHẶN" not in got[1])
+
+
+def run_leader_ask_cases():
+    """Only @Manager asks the human (người quyết 2026-11-27): a Leader writes the question in ask.py and messages
+    Manager; a permission the human gives through Manager lets the same call through, as many times as given."""
+    import shutil
+    g = "leader ask"
+    ask = guard.ask_module(FX)
+    asks = os.path.join(FX, "Management", "asks")
+    shutil.rmtree(asks, ignore_errors=True)
+    try:
+        q = {"tool_name": "AskUserQuestion", "tool_input": {}, "cwd": FX, "session_id": "test-session"}
+        got = guard.decide(q, "@GameDesigner", FX, STORE)
+        check(g, "@GameDesigner", True, "AskUserQuestion points to ask.py and Manager",
+              got[0] == "deny" and "ask.py add --from GameDesigner" in got[1] and "HỎI NGƯỜI" in got[1])
+        edit = {"tool_name": guard.UNITY_ASSET_TOOL, "tool_input": {"action": "delete", "path": "Assets/_Composition"},
+                "cwd": FX, "session_id": "test-session"}
+        raw = guard.decide_raw(edit, "@CodeLead", FX, STORE)
+        got = guard.decide(edit, "@CodeLead", FX, STORE)
+        check(g, "@CodeLead", ("ask", "deny", True), "an ask of the guard becomes a deny to Manager",
+              (raw[0], got[0], "ask.py add --from CodeLead" in got[1]))
+        check(g, "@human", True, "the human's chat is not stopped", (guard.decide(edit, "@human", FX, STORE) or ("pass",))[0] != "deny")
+        late = ask.add(FX, "@CodeLead", "xoá cũ", "x", "A·B", "A", "CodeLead")
+        ask.answer(FX, late["id"], "ok", allow="Assets/_Composition", now=0)
+        wrong = ask.add(FX, "@CodeLead", "khác", "x", "A·B", "A", "CodeLead")
+        ask.answer(FX, wrong["id"], "ok", allow="UnityProject/Packages/manifest.json")
+        other = ask.add(FX, "@GameDesigner", "việc khác", "x", "A·B", "A", "GD")
+        ask.answer(FX, other["id"], "ok", allow="Assets/_Composition")
+        check(g, "@CodeLead", "deny", "a permission out of time, for another path or of another Leader does not pass",
+              guard.decide(edit, "@CodeLead", FX, STORE)[0])
+        item = ask.add(FX, "@CodeLead", "xoá _Composition", "guard hỏi", "A xoá·B thôi", "A", "CodeLead")
+        ask.answer(FX, item["id"], "cho xoá", allow="Assets/_Composition", uses=2)
+        got = [guard.decide(edit, "@CodeLead", FX, STORE)[0] for _ in range(3)]
+        check(g, "@CodeLead", ["allow", "allow", "deny"], "the permission passes the call as many times as given", got)
+        sh = lambda cmd: {"command": cmd}      # noqa: E731
+        t(g + " (add naming itself)", "@CodeLead", "allow", "Bash",
+          sh('python Management/tools/ask.py add --from CodeLead "việc" --blocker "x" --options "A·B" --suggest "A" --waiting "x"'))
+        t(g + " (add naming another)", "@CodeLead", "deny", "Bash",
+          sh('python Management/tools/ask.py add --from GameDesigner "việc" --blocker "x" --options "A·B" --suggest "A" --waiting "x"'))
+        for who in ("Wallet", "@Core", "@Codex", "@Manager"):
+            t(g + " (only a Leader adds)", who, "deny", "Bash",
+              sh(f'python Management/tools/ask.py add --from {who.lstrip("@")} "v" --blocker "x" --options "A" --suggest "A" --waiting "x"'))
+        t(g + " (Manager answers)", "@Manager", "allow", "Bash", sh(f'python Management/tools/ask.py answer {item["id"]} "ok"'))
+        for who in ("@CodeLead", "@GameDesigner", "Wallet"):
+            t(g + " (only Manager answers)", who, "deny", "Bash", sh(f'python Management/tools/ask.py answer {item["id"]} "ok"'))
+        t(g + " (only Manager answers, in a chain too)", "@CodeLead", "deny", "Bash",
+          sh(f'echo hi; python Management/tools/ask.py answer {item["id"]} "ok"'))
+        mine = ask.add(FX, "@GameDesigner", "câu của GD", "x", "A·B", "A", "GD")
+        t(g + " (the asker cancels)", "@GameDesigner", "allow", "Bash", sh(f'python Management/tools/ask.py cancel {mine["id"]} "thôi"'))
+        t(g + " (another Leader does not)", "@UIDesigner", "deny", "Bash", sh(f'python Management/tools/ask.py cancel {mine["id"]} "thôi"'))
+        t(g + " (Manager cancels)", "@Manager", "allow", "Bash", sh(f'python Management/tools/ask.py cancel {mine["id"]} "thôi"'))
+        t(g + " (every chat looks)", "Wallet", "allow", "Bash", sh("python Management/tools/ask.py list"))
+    finally:
+        shutil.rmtree(asks, ignore_errors=True)
 
 
 def run_free_shell_cases():
@@ -2643,6 +2702,7 @@ def main():
         build_fixture()
         run_cases()
         run_headless_cases()
+        run_leader_ask_cases()
         run_free_shell_cases()
         run_free_read_cases()
     finally:

@@ -6,10 +6,11 @@ made when the human types `FEATURE=<value> <PIN>` in the chat; see bind_session.
 PIN live outside the project, in STORE_DIR. The FEATURE environment variable is not used.
 The value, by group:
     Master    @human                      no feature limits and no questions: every edit passes (HUMAN_ASK_ZONES)
-    Leaders   @Manager                    coordinator: edits nothing (what needs the human it asks in its chat; tool
-                                          work the human decided goes to toolwork.py); runs scaffold.py (as @CodeLead does),
-                                          which makes the folders the live design names (no code)
-              @CodeLead                   checks code, settles conflicts and owns the SKELETON: edits only the
+    Managers  @Manager                    coordinator: edits nothing; the ONLY chat that asks the human (the Leaders
+                                          put what they need of the human in ask.py, LEADER_ASK); tool work the human
+                                          decided goes to toolwork.py; runs scaffold.py (as @CodeLead does), which makes
+                                          the folders the live design names (no code)
+    Leaders   @CodeLead                   checks code, settles conflicts and owns the SKELETON: edits only the
                                           skeleton (below), of a feature once its code gate is open, of Core always; and
                                           all of Assets/_Composition (the wiring: Boot, scenes, catalogs; LEAD_AREA), its
                                           assets and scenes through unity-mcp too; reads all source of Basic/Features/Services; compiles,
@@ -150,6 +151,15 @@ ALLOWED_COMMANDS.append(TOOLWORK + r"list( --all)?")
 for _commands, _name in ((MANAGER_COMMANDS, "Manager"), (CODELEAD_COMMANDS, "CodeLead"), (DESIGNER_COMMANDS, "GameDesigner"),
                          (UIDESIGNER_COMMANDS, "UIDesigner")):
     _commands.append(TOOLWORK + r'add "[^"\\]+" --from @?' + _name + r' --decided "[^"\\]+"')
+# The questions for the human (Management/tools/ask.py, người quyết 2026-11-27): only @Manager asks the human. A
+# Leader writes what it needs of the human there (add, naming itself), @Manager writes the answer (answer), the Leader
+# that asked or @Manager drops one (cancel). Looking: every chat. Checked in gated() below, on each part of a chain.
+ASK = PY + r"Management/tools/ask\.py "
+ALLOWED_COMMANDS.append(ASK + r"(list( --all)?|show q[0-9]{8}-[0-9a-f]{4})")
+ASK_RX = re.compile(r"^python3? Management/tools/ask\.py (add|answer|cancel)\b(.*)$", re.S)
+ASK_FROM_RX = re.compile(r"^ --from ['\"]?@?([A-Za-z]+)['\"]? ")
+ASK_ID_RX = re.compile(r"^ ['\"]?(q[0-9]{8}-[0-9a-f]{4})['\"]?( |$)")
+ASK_LEADERS = ("@CodeLead", "@GameDesigner", "@UIDesigner")
 PROPOSALS_ZONE = "Management/proposals"
 PROPOSALS_MSG = ("Management/proposals is closed (2026-11-26): it is kept to be read, nothing new is written there. What needs "
                  "the human's decision is asked in the chat (the problem, the options, the one you advise, who is blocked). "
@@ -1680,16 +1690,88 @@ def read_verdict(full, root, session_id, mode, feature, area, read_all, store=No
                        "a feature or service session)." if name == "outside the project" else "."))
 
 
-# Tiers 2-6 (tools, testers, @Core, services, features) run headless (claude -p, opened by the inbox): nobody answers a
+# Tiers 3-7 (tools, testers, @Core, services, features) run headless (claude -p, opened by the inbox): nobody answers a
 # question there, nor an "ask" of the guard. Human decided 2026-11-26: they never ask the human; they stop, send their
-# Leader BÁO CHẶN and end the turn; the Leader asks the human in its chat and sends the answer back through the inbox.
+# Leader BÁO CHẶN and end the turn; the Leader asks the human through @Manager (ask.py, 2026-11-27) and sends the
+# answer back through the inbox.
 HEADLESS_ASK = ("this chat runs headless (on demand): nobody can answer a question here. Do not ask the human. Stop, "
                 "message {leader} (SendMessage) one line 'BÁO CHẶN · chờ người · Việc: … · Vướng ở: … · Cần quyết: …' and "
-                "end the turn; the Leader asks the human and sends the answer through your inbox (TRẢ LỜI · …).")
+                "end the turn; the Leader asks the human through Manager and sends the answer through your inbox (TRẢ LỜI · …).")
+
+
+# The Leaders (người quyết 2026-11-27) do not ask the human either: only @Manager does. What a Leader needs of the
+# human (a decision, a choice, a permission the guard asks for) goes to ask.py and to @Manager, who asks and answers.
+LEADER_ASK = ("only @Manager asks the human (người quyết 2026-11-27). Do not ask here. Write the question: python "
+              "Management/tools/ask.py add --from {name} \"<việc>\" --blocker \"<vướng ở>\" --options \"<A …·B …>\" "
+              "--suggest \"<đề nghị>\" --waiting \"<ai đang chờ>\", then SendMessage Manager one line 'HỎI NGƯỜI · <id> · <việc>' "
+              "and go on with the work that does not depend on it; the answer comes back as 'TRẢ LỜI · <id> · …'. "
+              "A permission the human gives comes with it: the same call then passes")
+
+
+def ask_leader(session_value):
+    """The name of a Leader chat (CodeLead, GameDesigner, UIDesigner) for LEADER_ASK; None for any other chat."""
+    role = role_of((session_value or "").strip().replace("\\", "/"))
+    return role[1:] if role in ASK_LEADERS else None
+
+
+def ask_module(root):
+    """ask.py of this guard's own project (the data root is passed to each call: a test fixture has no tools)."""
+    mod = sys.modules.get("coresimple_ask")
+    if mod is None:      # loaded by path: putting Management/tools on sys.path would change what other imports find
+        import importlib.util
+        path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "Management", "tools", "ask.py"))
+        spec = importlib.util.spec_from_file_location("coresimple_ask", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        sys.modules["coresimple_ask"] = mod
+    return mod
+
+
+def ask_gate(action, rest, role, mode, root):
+    """The verdict on ask.py add / answer / cancel: add by a Leader naming itself; answer by @Manager; cancel by the
+    Leader that asked or @Manager. The human's own chat runs them all."""
+    if mode == "human":
+        return "allow", f"ask.py {action}: the human's chat"
+    if action == "add":
+        m = ASK_FROM_RX.match(rest)
+        if role not in ASK_LEADERS:
+            return "deny", ("only a Leader (CodeLead, GameDesigner, UIDesigner) writes a question for the human; "
+                            + ("you ask the human yourself (AskUserQuestion)" if mode == "manager"
+                               else "a lower tier sends its Leader BÁO CHẶN"))
+        if not m or "@" + m.group(1) != role:
+            return "deny", f"--from must name this chat's own role ({role[1:]})"
+        return "allow", f"{role} writes a question for the human"
+    if action == "answer":
+        if mode != "manager":
+            return "deny", "only @Manager writes the human's answer (ask.py answer); send your question to Manager"
+        return "allow", "@Manager writes the human's answer"
+    m = ASK_ID_RX.match(rest)
+    try:
+        source = ask_module(root).get(root, m.group(1))["source"] if m else None
+    except ValueError:
+        source = None
+    if mode == "manager" or (source and source == role):
+        return "allow", f"{role} cancels a question"
+    return "deny", "only the Leader that asked, or @Manager, cancels a question"
+
+
+def leader_allowance(data, name, root):
+    """An answered question of that Leader whose --allow covers this call (its paths, its command), or None."""
+    ti = data.get("tool_input")
+    text = json.dumps(ti, ensure_ascii=False) if isinstance(ti, dict) else ""
+    text = text.replace("\\\\", "/").replace("\\", "/")
+    for prefix in {root.replace("\\", "/").rstrip("/") + "/", canonical_root(root).replace("\\", "/").rstrip("/") + "/"}:
+        text = text.replace(prefix, "")
+    try:
+        mod = ask_module(root)
+        item = mod.allowance(root, "@" + name, text)
+        return mod.use(root, item) if item else None
+    except Exception:
+        return None
 
 
 def headless_leader(session_value, root):
-    """The Leader a headless chat (tiers 2-6) reports to, as words for a message; None for the human, the Leaders and
+    """The Leader a headless chat (tiers 3-7) reports to, as words for a message; None for the human, the Leaders and
     an unbound chat."""
     raw = (session_value or "").strip().replace("\\", "/")
     role = role_of(raw)
@@ -1704,12 +1786,23 @@ def headless_leader(session_value, root):
 
 
 def decide(data, session_value, root, store=None):
-    """Returns (decision, reason), or None to leave the call to the normal permission flow. A headless chat (tiers 2-6)
+    """Returns (decision, reason), or None to leave the call to the normal permission flow. A headless chat (tiers 3-7)
     is never asked: AskUserQuestion and every "ask" become a deny that sends it to its Leader."""
     leader = headless_leader(session_value, canonical_root(root))
     if leader and unity_name(data.get("tool_name")) == "AskUserQuestion":
         return "deny", HEADLESS_ASK.format(leader=leader)
+    name = ask_leader(session_value)
+    if name and unity_name(data.get("tool_name")) == "AskUserQuestion":
+        return "deny", LEADER_ASK.format(name=name)
     result = decide_raw(data, session_value, root, store)
+    if name and result and result[0] == "ask":
+        item = leader_allowance(data, name, canonical_root(root))
+        if item:
+            return "allow", (f"the human allowed it through @Manager (question {item['id']}, "
+                             f"{item['allow_uses']} use(s) left)")
+        return "deny", result[1] + ". " + LEADER_ASK.format(name=name)
+    if name and result and result[0] == "deny" and "human" in result[1]:
+        return "deny", result[1] + " (" + LEADER_ASK.format(name=name) + ")"
     if leader and result and result[0] == "ask":
         return "deny", result[1] + ". " + HEADLESS_ASK.format(leader=leader)
     if leader and result and result[0] == "deny" and "human" in result[1]:
@@ -1846,6 +1939,9 @@ def decide_raw(data, session_value, root, store=None):
                     return "allow", f"{role} sends a message to the inbox of {target}"
                 return "deny", (f"{role or 'this chat'} may not send to the inbox of {target}"
                                 + (f" (only: {', '.join(allowed)})" if allowed else ""))
+            m = ASK_RX.match(one)
+            if m:
+                return ask_gate(m.group(1), m.group(2), role, mode, root)
             m = FEATURE_REQ_RX.match(one)
             # doing / done in a requirement book: only the chat of that feature. The note may hold "..", the rest may not.
             if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:

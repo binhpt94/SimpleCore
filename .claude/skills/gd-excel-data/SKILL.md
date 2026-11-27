@@ -72,6 +72,6 @@ Lệnh chạy từ gốc project; `<node>` là `ai/idea/<feature>/…`.
 
 ## Chuyển một node cũ từ bảng markdown
 1. Mỗi bảng markdown trong `## Thông số` thành một bảng: thông số đơn lẻ → `params` (gộp luôn bảng "theo giai đoạn" vào ba cột `idea`, `prototype`, `full`); bảng mỗi dòng một thực thể → `list`; bảng theo cấp, theo đợt → `levels`; công thức → `formula`.
-2. Giữ nguyên số và lí do; không nhân dịp này đổi thiết kế. Thứ bảng cũ không nói (ví dụ giá trị PROTOTYPE của một thông số) thì ghi `như IDEA` nếu chắc, không chắc thì hỏi người.
+2. Giữ nguyên số và lí do; không nhân dịp này đổi thiết kế. Thứ bảng cũ không nói (ví dụ giá trị PROTOTYPE của một thông số) thì ghi `như IDEA` nếu chắc, không chắc thì hỏi người qua Manager (`ask.py`).
 3. Xoá bảng markdown khỏi `CLAUDE.md`, để lại dòng trỏ tới bảng (bước 6 ở trên).
 Mẫu đã chuyển: `feature-castle/castle-attack/auto-shot-values` (`params`), `feature-hero/hero-list/hero-roster-values` (`list` + `params`).

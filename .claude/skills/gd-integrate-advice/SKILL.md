@@ -31,7 +31,7 @@ Giữ luật cũ: **mỗi góp ý thành một ý** của chính node được h
 - `thêm`: viết thành ý mới.
 - `thay <id ý>`: viết thành ý mới **đặt cạnh** ý bị thay; không xoá ý cũ, không tự chọn một bên. Hai ý hiện chữ cam "trái nhau" cho tới khi điểm loại một bên.
 - `làm rõ <id ý>`: viết lại chính ý đó theo lời GPT và gắn nhãn vào nó, hoặc thêm thành ý riêng.
-- **Góp ý đụng ý của người** (`user-<n>`, skill `gd-node-format`): không `thay`, không `làm rõ` ý đó; viết thành ý mới đặt cạnh, không đụng ý của người, và hỏi người trong chat nếu hai ý trái nhau.
+- **Góp ý đụng ý của người** (`user-<n>`, skill `gd-node-format`): không `thay`, không `làm rõ` ý đó; viết thành ý mới đặt cạnh, không đụng ý của người, và hỏi người qua Manager (`ask.py`) nếu hai ý trái nhau.
 - **Chỉ được tóm gọn cách trình bày**: tiêu đề và chi tiết được rút gọn, đổi câu cho hợp cách viết của node; nghĩa giữ nguyên. Nguyên văn GPT vẫn nằm trong file advice và trang hiện nó khi mở ý.
 - **Chấm điểm như mọi ý.** Full Auto: bạn chấm điểm AI thật cho ý của GPT, không dìm điểm để loại và không nâng điểm ý của mình để thắng. User control: người chấm; bạn không tự quyết bên nào thắng.
 - **Loại một ý của GPT** chỉ khi nó bị chấm dưới 5, theo skill `gd-rework-node`: xoá ý và khai `gpt-dropped:` ở phần đầu `data.md` (`<lần hỏi>#<góp ý>=<id ý đã xoá>`; lần hỏi đã lọc: `<thư mục advice>/<lần hỏi>#<id ý giữ>=<id ý đã xoá>`), lí do ghi ở `CLAUDE.md`. User control: máy chỉ nhận khi lịch sử có ý đó bị **người** chấm dưới 5; chưa có thì là lỗi cấu trúc.

@@ -1125,7 +1125,7 @@ def compose_frame(fr, placed):
     k = gd.frame_scale(fr)
     vw, vh = round((fr["view"][2] - fr["view"][0]) * k, 3), round((fr["view"][3] - fr["view"][1]) * k, 3)
     css = frame_css()
-    defs, body, seen = [], [], {}
+    defs, body, seen, clips = [], [], {}, []
     for r in fr["shapes"]:
         if r["role"] == gd.ROLE_BACKDROP:
             continue
@@ -1148,11 +1148,17 @@ def compose_frame(fr, placed):
                 rows = [(0, t, y, t), (t, ph - t - b, y + t, h - t - b), (ph - b, b, y + h - b, b)]
             else:
                 cols, rows = [(0, pw, x, w)], [(0, ph, y, h)]
+            # Each cell: the picture scaled and moved so its source cell lands on the target cell, cut by a clip of
+            # exactly that cell. Not a nested <svg> with a shifted viewBox: inkscape does not clip to it, so every
+            # 9-slice cell spilled the whole picture over its neighbours (toolwork w20261127-3181).
             for sx, sw, dx, dw in cols:
                 for sy, sh, dy, dh in rows:
                     if sw > 0 and sh > 0 and dw > 0 and dh > 0:
-                        body.append(f'<svg x="{dx:g}" y="{dy:g}" width="{dw:g}" height="{dh:g}" viewBox="{sx:g} {sy:g} {sw:g} {sh:g}" '
-                                    f'preserveAspectRatio="none"><use href="#{seen[key]}"/></svg>')
+                        clip = f"clip-{len(clips) + 1}"
+                        clips.append(f'<clipPath id="{clip}"><rect x="{dx:g}" y="{dy:g}" width="{dw:g}" height="{dh:g}"/></clipPath>')
+                        a, d = dw / sw, dh / sh
+                        body.append(f'<g clip-path="url(#{clip})"><use href="#{seen[key]}" '
+                                    f'transform="matrix({a:.6g} 0 0 {d:.6g} {dx - sx * a:.6g} {dy - sy * d:.6g})"/></g>')
             text = gd.display_text(r) if part.get("text", True) else ""
             if text:      # the text the player reads, over the picture: readable on any colour
                 size = gd.fit_text(text, w, h)
@@ -1161,7 +1167,7 @@ def compose_frame(fr, placed):
                             f'dominant-baseline="middle">{gd._esc(text)}</text>')
     css += ("\n.pt-text { font-family: Roboto, system-ui, sans-serif; fill: #1f2a37; stroke: #ffffff; paint-order: stroke; "
             "stroke-linejoin: round; }")
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {vw:g} {vh:g}"><style>{css}</style><defs>{"".join(defs)}</defs>'
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {vw:g} {vh:g}"><style>{css}</style><defs>{"".join(defs + clips)}</defs>'
             + "".join(body) + "</svg>"), (max(1, round(vw)), max(1, round(vh)))
 
 

@@ -1,0 +1,16 @@
+{
+ "id": "q20261127-b018",
+ "source": "@GameDesigner",
+ "job": "Panel cheat ở bản phát hành: có mang code dựng state cheat không",
+ "blocker": "Luật unity.md: code cheat chỉ chạy ở bản dev. Thiết kế mới: nút, panel cheat chỉ theo config cheat_enabled ở mọi loại build, nên ở bản phát hành panel hiện nhưng không có dòng state nào",
+ "options": "A Giữ luật: bản phát hành không có state, test dùng Development Build·B Đổi luật: config bật thì bản phát hành cũng mang code state cheat, cần toolwork sửa unity.md",
+ "suggest": "A, vì bản build test hiện là Development Build và tránh lọt cheat ra bản phát hành",
+ "waiting": "Không ai bị chặn, thiết kế đã viết theo A, chỉ đổi số dòng state ở bản phát hành",
+ "state": "answered",
+ "answer": "Người chọn A ngày 2026-11-27: giữ luật unity.md, bản phát hành không có state cheat, test dùng Development Build",
+ "allow": "",
+ "allow_uses": 0,
+ "allow_until": 0,
+ "created": 1795750534.1913064,
+ "closed": 1795750598.7811763
+}

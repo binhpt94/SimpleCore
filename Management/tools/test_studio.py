@@ -873,7 +873,7 @@ def run_claude(root):
           ("2 phần (vẽ mới 2, lấy lại 0)" in out, "- btn: 320x120px, 9-slice viền [20, 20, 20, 20], dùng ở 3 chỗ (replay, home, big)" in out,
            "- slot: 80x80px, không 9-slice, dùng ở 3 chỗ (slots)" in out, "giữ hình cơ bản của frame: panel, title, reach" in out), (True,) * 4)
     whole = sorted((sfolder / "work/_log").glob("main-*.compose.svg"))[-1].read_text(encoding="utf-8")
-    place = lambda x, y, w, h: f'<svg x="{x}" y="{y}" width="{w}" height="{h}" viewBox='      # noqa: E731
+    place = lambda x, y, w, h: f'"><rect x="{x}" y="{y}" width="{w}" height="{h}"/></clipPath>'      # noqa: E731  the clip of one cell
     check("parts: the frame is put together at the places the frame gives",
           (whole.count('<image id="part-'), place(980, 590, 20, 20) in whole,          # home: top left corner of the 9-slice
            place(1000, 590, 280, 20) in whole,                                          # home: its top edge stretches
@@ -881,6 +881,10 @@ def run_claude(root):
            place(820, 290, 80, 80) in whole,                                            # the third cell of the grid
            'data-id="panel"' in whole, 'data-id="title"' in whole, 'data-id="backdrop"' in whole, 'data-id="replay"' in whole),
           (2, True, True, True, True, True, True, False, False))
+    check("parts: every 9-slice cell is cut by a clip of its own, no nested svg with a shifted viewBox (inkscape does not clip it)",
+          (whole.count("<clipPath ") == whole.count('clip-path="url(#clip-'), "preserveAspectRatio=\"none\"><use" in whole,
+           'transform="matrix(1 0 0 1 980 590)"' in whole),      # home's top left corner: the picture as is, at the corner
+          (True, False, True))
     check("text: the frame put together shows what the player reads, in Roboto, over a drawn button too",
           ('data-over="replay"' in whole and ">Chơi lại</text>" in whole, ">Thua</text>" in whole, "font-family: 'Roboto'" in whole,
            "(chính)" in whole.split("</style>")[1].replace("<title>", "\n").split("\n")[0], "320x120</text>" in whole, 'data-over="home"' in whole),

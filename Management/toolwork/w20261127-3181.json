@@ -1,0 +1,10 @@
+{
+ "id": "w20261127-3181",
+ "text": "Sửa compose_frame trong Management/tools/studio.py: ảnh ghép dùng svg lồng có viewBox lệch gốc, inkscape không cắt theo nên mọi phần 9-slice tràn ra. Order cheat-panel-claude v1 hỏng vì lỗi này. Xong thì ảnh ghép có 9-slice qua inkscape cắt đúng khung",
+ "source": "@Manager",
+ "decided": "Người đồng ý sửa ngày 2026-11-27, ClaudeImage báo qua UIDesigner",
+ "state": "done",
+ "note": "compose_frame trong studio.py: moi o 9-slice cat bang clipPath rieng va use co transform matrix, bo svg long viewBox lech goc. Da render thu bang inkscape: ngoai khung trong suot, goc canh giua dung. test_studio.py 250 ok. Chua commit. Order cheat-panel-claude can redo de ghep lai.",
+ "created": 1795751297.5700572,
+ "closed": 1795751553.6967318
+}

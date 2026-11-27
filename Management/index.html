@@ -403,7 +403,7 @@
     // Gom thread theo tầng trong danh sách chat của VS Code (Management/tools/vscode_groups.py).
     var vsBox = put(pane, section("Nhóm trong VS Code"));
     vsBox.style.marginTop = "16px";
-    add(vsBox, el("p", "muted", "Xếp mọi thread của Setup full vào 5 nhóm theo tầng (1 · Master … 5 · Features) trong danh sách chat của VS Code. " +
+    add(vsBox, el("p", "muted", "Xếp mọi thread của Setup full vào các nhóm theo tầng (1 · Master, 2 · Managers … 8 · Features) trong danh sách chat của VS Code. " +
       "VS Code đang chạy sẽ ghi đè thay đổi, nên phải tắt hẳn VS Code (mọi cửa sổ) rồi chạy lệnh dưới trong terminal ngoài VS Code; mở lại VS Code để thấy. " +
       "Có sao lưu trước khi ghi; khôi phục bằng --restore. Nút bên dưới chỉ chạy được khi server này chạy ngoài VS Code."));
     add(vsBox, commandBlock("python Management/tools/vscode_groups.py"));
@@ -412,6 +412,19 @@
     vsBtn.type = "button";
     var vsStatus = put(vsBox, el("p", "gap", ""));
 
+    // Câu hỏi chờ người (ask.py): Leader ghi, chỉ Manager hỏi và trả lời (người quyết 2026-11-27). Trang chỉ hiện.
+    var askBox = put(pane, section("Câu hỏi chờ người"));
+    askBox.style.marginTop = "16px";
+    var askBody = put(askBox, el("div"));
+    var paintAsks = function (asks) {
+      askBody.textContent = "";
+      if (!asks || !asks.length) { add(askBody, el("p", "muted", "Không có câu nào chờ. Leader cần người thì ghi ask.py và nhắn Manager; Manager hỏi bạn trong chat của nó.")); return; }
+      add(askBody, el("p", "muted", asks.length + " câu chờ. Trả lời trong chat Manager (Manager hỏi bạn, ghi câu trả lời và báo Leader)."));
+      var tbl = put(askBody, el("table"));
+      add(tbl, headRow(["Id", "Từ", "Việc", "Vướng ở", "Phương án", "Đề nghị", "Ai đang chờ"]));
+      var tb = put(tbl, el("tbody"));
+      asks.forEach(function (q) { add(tb, row([q.id, (q.source || "").replace("@", ""), q.job, q.blocker, q.options, q.suggest, q.waiting])); });
+    };
     var listBox = put(pane, section("Thread hiện có"));
     listBox.style.marginTop = "16px";
     // Ba thao tác trên một thread, server chạy lượt ngầm (claude --resume) trong chính thread đó:
@@ -537,6 +550,36 @@
       yes.addEventListener("click", function () { confirmRow.textContent = ""; runAll("renew"); });
       no.addEventListener("click", function () { confirmRow.textContent = ""; });
     });
+    // Đặt lại model khuyến nghị: bỏ mọi lựa chọn model riêng của từng thread; chỉ chạy khi không thread nào chạy
+    // (trừ chat của người). Server kiểm lại lúc bấm.
+    var resetRow = put(listBox, el("div", "gap"));
+    var resetBtn = put(resetRow, el("button", "copy", "Đặt lại model khuyến nghị"));
+    resetBtn.type = "button";
+    var resetNote = put(resetRow, el("span", "muted", ""));
+    resetNote.style.marginLeft = "8px";
+    var resetBlock = "";      // lý do khoá nút, tính lại mỗi lần vẽ bảng
+    var paintReset = function (running, picks) {
+      resetBlock = running.length ? "còn thread đang chạy: " + running.join(", ") + ". Tắt live (hoặc đóng chat trong VS Code) trước" : "";
+      resetBtn.disabled = !!resetBlock;
+      resetBtn.title = resetBlock || "bỏ lựa chọn riêng của " + picks + " thread; mọi thread chạy theo model, effort khuyến nghị của vai";
+      if (!resetNote.dataset.result) {
+        resetNote.className = resetBlock ? "bad-text" : "muted";
+        resetNote.textContent = resetBlock || (picks ? picks + " thread đang theo lựa chọn riêng của bạn" : "mọi thread đang theo model khuyến nghị");
+      }
+    };
+    resetBtn.addEventListener("click", function () {
+      resetBtn.disabled = true;
+      resetNote.dataset.result = "1";
+      resetNote.className = "muted";
+      resetNote.textContent = "Đang đặt lại…";
+      api("POST", "/api/sessions/reset-models", {}).then(function (res) {
+        resetNote.className = res.ok ? "ok-text" : "bad-text";
+        resetNote.textContent = res.ok ? res.answer : "lỗi: " + res.error;
+      }, function (e) {
+        resetNote.className = "bad-text";
+        resetNote.textContent = "lỗi gọi server: " + e.message;
+      }).then(function () { setTimeout(function () { delete resetNote.dataset.result; }, 8000); refresh(); });
+    });
     var listBody = put(listBox, el("div"));
     // Xoá một thread: dời transcript vào thùng rác (~/.claude/projects/<project>/.deleted/), cần PIN, VS Code phải tắt.
     var askDelete = function (t, note) {
@@ -592,7 +635,7 @@
       if (!data.threads.length) { add(listBody, el("p", "muted", "Chưa có thread nào.")); return; }
       var wanted = {};
       data.sets.full.forEach(function (n, i) { wanted[n] = i + 1; });
-      // Gom theo tầng (Master, Leaders, Tools, Basic, Services, Features); trong một tầng theo thứ tự của bộ setup.
+      // Gom theo tầng (Master, Managers, Leaders, Tools, Testers, Basic, Services, Features); trong một tầng theo thứ tự của bộ setup.
       // Chat chưa đặt tên (VS Code hiện theo tên tự sinh) nằm ở tầng riêng cuối bảng.
       var UNNAMED = "Chưa đặt tên (VS Code hiện theo tên tự sinh)";
       var order = (data.sets.order || []).concat(["", UNNAMED]);
@@ -602,6 +645,10 @@
         return (order.indexOf(tierOf(a)) - order.indexOf(tierOf(b))) || ((wanted[key(a)] || 1e9) - (wanted[key(b)] || 1e9))
           || a.title.localeCompare(b.title) || (a.modified < b.modified ? -1 : 1);
       });
+      paintAsks(data.asks);
+      paintReset(data.threads.filter(function (t) {
+        return t.live && !t.archived && !t.unlisted && ["@human", "@Manager"].indexOf(t.binding) < 0 && ["@human", "@Manager"].indexOf(t.feature) < 0;
+      }).map(function (t) { return t.title; }), data.threads.filter(function (t) { return t.choice; }).length);
       var vs = data.vscode || { groups: {}, running: false, tierNames: {} };
       vsBtn.disabled = !!vs.running;
       if (!vsStatus.dataset.result) {
@@ -647,9 +694,9 @@
           : liveState === "vscode" ? "● VS Code" + (t.hung ? " · TREO " + t.hung.split(" ở ")[0] : "") : "○ Live") + (t.inbox ? " · ✉ " + t.inbox : "") + (liveState === "on" ? " · ⏹ tắt" : ""));
         liveBtn.type = "button";
         liveBtn.setAttribute("aria-pressed", liveState === "off" ? "false" : "true");
-        var isHuman = t.binding === "@human" || t.feature === "@human";
+        var isHuman = ["@human", "@Manager"].indexOf(t.binding) >= 0 || ["@human", "@Manager"].indexOf(t.feature) >= 0;      // chat người dùng trực tiếp trong VS Code
         var liveOff = liveState === "vscode" ? "đang mở ở VS Code hoặc terminal (live): tắt ở đó"
-          : liveState === "off" ? (why || (isHuman ? "thread của người không chạy nền (VS Code sẽ không mở được nó): mở nó trong VS Code là live" : "")) : "";
+          : liveState === "off" ? (why || (isHuman ? "chat người dùng trực tiếp (@human, @Manager) không chạy nền (VS Code sẽ không mở được nó): mở nó trong VS Code là live" : "")) : "";
         liveBtn.title = (liveOff || (liveState === "on" ? (blocked ? "phiên nền đang dừng chờ người (hỏi quyền hoặc hỏi lại) và sẽ không tự chạy tiếp. " : "") +
             "Bấm để TẮT phiên nền này: thread không mất, tin trong hộp thư sẽ bật nó lại và được giao. Muốn xem hoặc trả lời nó: claude attach " + t.title
           : "phiên khác không thấy thread này; bấm để bật live (một lượt ngắn)"))
@@ -734,7 +781,7 @@
           : t.legacy ? el("span", "bad-text", "tên có @ nên không nhận được tin SendMessage: gõ /rename " + t.title.slice(1) + " trong chat này")
           : (t.binding === key(t) ? el("span", "ok-text", "đã gán đúng") : el("span", "bad-text", t.binding ? "gán khác tên" : "chưa gán")));
         // Một vai mở tay trong VS Code chạy không có profile của vai (mọi tool, skill, MCP): khoảng gấp đôi token mỗi lượt.
-        if (t.profiled && t.live === "interactive") {
+        if (t.profiled && t.live === "interactive" && !isHuman) {      // Manager: người chọn khung chat, chịu không profile
           var noProfile = el("div", "bad-text", "đang mở trong VS Code: không có profile (~2× token mỗi lượt). Đóng chat, bấm Live; xem hay trả lời bằng claude attach " + t.title);
           needsNote = needsNote ? add(el("div"), needsNote, noProfile) : noProfile;
         }

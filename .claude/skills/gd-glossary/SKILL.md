@@ -16,4 +16,4 @@ Luật chung: `.claude/rules/gamedesigner.md`.
 - Không đưa vào: từ mà tên đã nói đủ nghĩa (tiền hạ quái, nút tạm dừng, tên game); từ mà nghĩa thực chất là luật hay con số; chi tiết giao diện chỉ một node dùng.
 - Bỏ một từ: xoá ý trong glossary, gỡ `glossary#<id>@...` khỏi `refs` và dòng `` `glossary#<id>` `` khỏi mục "Định nghĩa" của mọi node dùng nó, rồi chạy `gd_status.py` cho cả cây để chắc không còn chỗ nhắc từ không có.
 - Node dùng một từ thì nhắc `` `glossary#wave` `` và khai `glossary#wave@<hash>` trong refs. Đổi nghĩa một từ là đổi quyết định: mọi node khai từ đó thành "cần làm lại"; sửa từ khác thì không ảnh hưởng.
-- Chỉ thêm từ khi đã có node dùng. Thấy từ định nghĩa ở hai nơi, hoặc một node định nghĩa lại từ đã có, thì `gd_status.py` (cả cây) nhắc ở mục "Thuật ngữ": gom về glossary, nghĩa khác nhau thì quyết một (User control: hỏi người).
+- Chỉ thêm từ khi đã có node dùng. Thấy từ định nghĩa ở hai nơi, hoặc một node định nghĩa lại từ đã có, thì `gd_status.py` (cả cây) nhắc ở mục "Thuật ngữ": gom về glossary, nghĩa khác nhau thì quyết một (User control: hỏi người qua Manager, `ask.py`).

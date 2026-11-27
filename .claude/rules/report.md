@@ -26,11 +26,11 @@ Tên khối vẫn là `## Báo cáo cho @Manager` cho mọi phiên, để hook n
 - Ghi chú: <rủi ro, câu hỏi cho người; hoặc không>
 ```
 
-- "Công khai đổi" và "Cần bên khác" là thứ Manager dùng để điều phối: ghi rõ tên feature, contract, id asset.
+- "Công khai đổi" và "Cần bên khác" là thứ Manager dùng để điều phối: ghi rõ tên feature, contract, id asset. Câu đang chờ người trả lời thì ghi id câu hỏi (`ask.py`, dạng `q…`).
 - Phiên Features, Services: "Việc" nêu id các yêu cầu trong sổ (`gd_req.py <Tên>`, dạng `<node>#<id>`) đã làm trong lượt, và đã ghi `doing`/`done` cho chúng. Lượt sửa `Scripts/` hoặc `Tests/` mà không ghi sổ thì Stop hook nhắc một lần. Hook tự thêm dòng `- Sổ yêu cầu:` vào báo cáo đã lưu.
 - Không ghi PIN hay nội dung bí mật.
 - Nhóm Testers điền theo đợt chơi thử: "Đã đổi" là đường dẫn đợt (`Tester/<Tên>/<đợt>/`); "Công khai đổi" ghi `không`; "Cần bên khác" là feature có lỗi và lỗi gì; "Kiểm tra" là kết quả `tester.py check` và kết quả đợt (`đạt`, `không đạt`, `dở`).
-- @GameDesigner điền theo thiết kế: "Đã đổi" là các node đã thêm, sửa, xoá; "Công khai đổi" là node đã chốt (có trong `live`) mà bản đề xuất vừa đổi, hoặc `không`; "Cần bên khác" là việc đang chờ ai (người: chấm, trả lời, chọn ý trái nhau, chốt; @DesignAdvisor: lần hỏi GPT; @Codex, @ClaudeImage: order); "Kiểm tra" là kết quả `gd_status.py` (node chưa đạt, lỗi cấu trúc).
+- @GameDesigner điền theo thiết kế: "Đã đổi" là các node đã thêm, sửa, xoá; "Công khai đổi" là node đã chốt (có trong `live`) mà bản đề xuất vừa đổi, hoặc `không`; "Cần bên khác" là việc đang chờ ai (người: chấm, chọn ý trái nhau, chốt trên trang; câu hỏi cho người: id `ask.py` đã gửi Manager; @DesignAdvisor: lần hỏi GPT; @Codex, @ClaudeImage: order); "Kiểm tra" là kết quả `gd_status.py` (node chưa đạt, lỗi cấu trúc).
 - @UIDesigner điền theo bố cục: "Đã đổi" là các frame (`<node>/<tên>.frame`); "Công khai đổi" là node đã có trong `live` mà frame vừa đổi, hoặc `không`; "Cần bên khác" là chờ người chấm frame, chờ @GameDesigner sửa `ui.md`, order claude-concept; "Kiểm tra" là các dòng `CHỜ @UIDesigner` còn lại của `gd_status.py`.
 
 ## Đi đâu
@@ -38,4 +38,4 @@ Tên khối vẫn là `## Báo cáo cho @Manager` cho mọi phiên, để hook n
 - Đầu mỗi tin, @CodeLead thấy danh sách mọi báo cáo mới, @Manager chỉ thấy báo cáo của ba Leader (và ghi chú của server về họ); trang quản lý có tab Báo cáo.
 - @CodeLead kiểm code rồi nhắn lỗi về đúng phiên; phiên đó tự sửa.
 - @CodeLead giao việc cho tầng dưới bằng hộp thư `dispatch.py send` (feature, service, @Core, tester).
-- @Manager điều phối ba Leader bằng SendMessage; cần người quyết thì hỏi trong chat của nó (`manager.md`, mục "Hỏi người"); không sửa code, không gửi hộp thư.
+- @Manager điều phối ba Leader bằng SendMessage và là phiên duy nhất hỏi người (`manager.md`, mục "Hỏi người"); Leader cần người thì ghi `ask.py` và nhắn Manager. Manager không sửa code, không gửi hộp thư.
