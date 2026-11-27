@@ -14,6 +14,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 - Tầng 3 (Tools) chạy theo việc (headless), không ai trả lời câu hỏi: không hỏi người. Guard chặn AskUserQuestion và mọi lần cần người duyệt của các phiên này (người quyết 2026-11-26).
   - Cần người quyết hay bị chặn: dừng, nhắn Leader đã giao order `BÁO CHẶN · chờ người · Việc: … · Vướng ở: … · Cần quyết: …`, rồi kết thúc lượt.
   - Leader tự trả lời nếu được; không thì hỏi người qua Manager (như trên). Có câu trả lời thì Leader gửi `TRẢ LỜI · <việc> · <người quyết gì>` vào hộp thư của tool (`dispatch.py send`). Tin đó mở lượt mới; tool làm tiếp từ chỗ dừng.
+- Bug người muốn để sau (người quyết 2026-11-27): ghi vào sổ bug, không giao ngay: `python Management/tools/bugs.py add "<thấy gì, mong gì>" --feature <F>[,<F>] --from <vai> [--seen "<ở đâu>"]`. Ghi không giao ai. Người bảo sửa thì bấm "Giao sửa" ở tab Bug, hoặc @CodeLead chạy `bugs.py fix <id> --from CodeLead`; worker sửa xong, @CodeLead kiểm rồi `bugs.py done <id> "<…>"`.
 - Việc người đã quyết mà phải sửa công cụ, guard hay luật: Leader ghi bằng `python Management/tools/toolwork.py add "<việc>" --from <vai> --decided "<người quyết gì, ngày nào>"`. Mọi phiên xem bằng `toolwork.py list`. Phiên `@human` làm rồi ghi `done` hoặc `drop`.
 - Quyền do `.claude/hooks/guard.py` ép theo `FEATURE` của phiên.
 - Người gán trong chat bằng `FEATURE=<giá trị> <PIN>`, chỉ cho các vai tầng 0–3. Chưa gán thì cấm mọi thao tác sửa. AI không tự gán. Worker và tester do server gán, mỗi việc một lần.
@@ -51,6 +52,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 | Chơi thử, `tester.py` | `.claude/rules/tester.md` |
 | Tạo thư mục feature `scaffold.py` (@Manager, @CodeLead) | `.claude/rules/codelead.md`, `.claude/rules/manager.md` |
 | Hỏi người, `ask.py` (Leader ghi, Manager hỏi và trả lời) | `.claude/rules/manager.md`, mục "Hỏi người" |
+| Bug để sửa sau, `bugs.py` (người quyết 2026-11-27) | đầu `Management/tools/bugs.py`; tab Bug của trang |
 | Phiếu Editor `editor_ticket.py`, kiểm biên dịch `compile_check.py` | `.claude/rules/unity.md`, mục "Phiếu Editor" |
 | Thử lại guard | `python .claude/hooks/test_guard.py` |
 
@@ -86,6 +88,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 | `Assets/SimpleCoreTools` (script Editor của project) | được | chỉ `@human` |
 | `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json` | được | báo @CodeLead; @CodeLead hỏi người qua Manager (`ask.py`, `--allow`), từng lần |
 | `Management/toolwork` | được | chỉ `toolwork.py` |
+| `Management/bugs` | được | chỉ `bugs.py` và trang: `add` mọi Leader và tester; `fix` (giao worker) chỉ khi người bảo; `done`, `drop` @CodeLead hay người |
 | `Management/asks` | được | chỉ `ask.py` (`add`: Leader; `answer`: @Manager) |
 | `Management/editor-tickets` | được | chỉ `editor_ticket.py` và server |
 | `Management/workers` | được | chỉ `worker.py` và server |

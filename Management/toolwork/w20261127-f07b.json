@@ -1,0 +1,10 @@
+{
+ "id": "w20261127-f07b",
+ "text": "setup_server.py worker_tick: khi server khởi động lại, việc chơi thử (kind play) bị đánh interrupted thì phải được chạy tiếp hoặc xếp lại, và phiếu Editor của nó được trả ngay. Xong thì thấy: khởi động lại server giữa một đợt chơi thử, đợt đó tự chạy lại, không còn phiếu granted treo chờ 20 phút",
+ "source": "@Manager",
+ "decided": "Người chọn A: ghi việc sửa, 2026-11-27",
+ "state": "done",
+ "note": "Làm theo quyết định sau của người, 2026-11-27: server khởi động lại thì trả ngay phiếu và khoá Editor của đợt chơi thử bị ngắt, KHÔNG tự chạy lại việc nào (dễ deadlock), viết thư Management/reports/<giờ>-Server.md cho Manager và nhắn ngay nếu Manager đang mở; Manager điều phối CodeLead giao lại. Commit 5de34ec",
+ "created": 1795772421.63047,
+ "closed": 1795772515.2506516
+}

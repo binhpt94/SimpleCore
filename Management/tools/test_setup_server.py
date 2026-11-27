@@ -1315,6 +1315,24 @@ def activity_cases(check):
         shutil.rmtree(root, ignore_errors=True)
 
 
+def bugs_page_cases(check):
+    """Tab Bug: the human writes a bug (nobody is given it), gives it to a worker, drops one."""
+    root = Path(tempfile.mkdtemp(prefix="bugs-page-"))
+    real = ss.ROOT
+    try:
+        ss.ROOT = root
+        (root / "UnityProject/Assets/Features/Hud").mkdir(parents=True)
+        r = ss.bugs_call("add", {"text": "Giữa trận chỉ ra màn bắt đầu", "features": "Hud", "seen": "đợt x"})
+        check("bugs page: a bug written from the page waits, from the human",
+              (r["ok"], [(b["state"], b["source"]) for b in ss.bugs_view()["bugs"]], ss.dispatch.messages(root)), (True, [("open", "người")], []))
+        f = ss.bugs_call("fix", {"id": r["id"]})
+        check("bugs page: Giao sửa puts one message in the feature's inbox", (f["ok"], ss.dispatch.get(root, f["message"])["target"]), (True, "Hud"))
+        check("bugs page: a bad action or id is refused", (ss.bugs_call("x", {})["ok"], ss.bugs_call("drop", {"id": "nope", "note": "x"})["ok"]), (False, False))
+    finally:
+        ss.ROOT = real
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def recover_cases(check):
     """A server that starts again finds jobs it left running (người quyết 2026-11-27): it gives the Editor back,
     starts nothing again, and writes one letter to Manager."""
@@ -1737,6 +1755,7 @@ def main():
     activity_cases(check)
     after_tests_cases(check)
     recover_cases(check)
+    bugs_page_cases(check)
     ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)

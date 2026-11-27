@@ -135,6 +135,7 @@
 <script src="view/references.js"></script>
 <script src="view/inbox.js"></script>
 <script src="view/activity.js"></script>
+<script src="view/bugs.js"></script>
 <script>
 (function () {
   var idea = window.CORESIMPLE_IDEA || null;
@@ -311,6 +312,13 @@
   if (views.inbox) {
     tab("hop-thu", "Hộp thư", function (pane) {
       views.inbox(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
+    });
+  }
+
+  // ---------------------------------------------------------------- bug: bug để sửa sau (view/bugs.js)
+  if (views.bugs) {
+    tab("bug", "Bug", function (pane) {
+      views.bugs(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
     });
   }
 

@@ -1,0 +1,15 @@
+{
+ "id": "b20261127-ab7a",
+ "text": "Chọn state cheat trận của Hud hay HudUpgrade (Giữa trận) chỉ ra màn bắt đầu, state chỉ hiện sau khi bấm Chơi rồi Vào trận: HudSession.ApplyCheatOnceBattleRuns chỉ áp khi RunStep.Playing. Mong: hai state này tự vào thẳng trận",
+ "features": [
+  "Hud",
+  "HudUpgrade"
+ ],
+ "source": "người",
+ "seen": "đợt chơi thử CheatPanel Tester/UnityAutoPlay/20261127-163037 (không đạt)",
+ "state": "open",
+ "message": "",
+ "note": "",
+ "created": 1795772629.9652195,
+ "closed": 0
+}

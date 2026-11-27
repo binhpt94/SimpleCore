@@ -17,7 +17,7 @@ namespace Game.CheatPanel
         private static readonly Vector2 Reference = new Vector2(1920, 1080);
         private static readonly Rect ButtonRect = new Rect(1396, 24, 160, 96);
         private static readonly Rect PanelRect = new Rect(40, 160, 1840, 880);
-        private const float Pad = 40, TitleY = 24, TitleH = 64, ListY = 112, ListH = 728, RowH = 120, Gap = 16, ColW = 872;
+        private const float Pad = 40, TitleY = 24, TitleH = 64, ListY = 112, ListH = 728, RowH = 120, Gap = 16, ColW = 872, LabelPad = 16;
 
         [Tooltip("Above the HUD and every popup.")]
         [SerializeField] private int sortingOrder = 30000;
@@ -120,27 +120,37 @@ namespace Game.CheatPanel
             _shownRows = screen.Rows;
             var width = PanelRect.width - 2 * Pad;
             var y = 0f;
+            var labels = new List<TextMeshProUGUI>();
             for (var i = 0; i < screen.Rows.Count; i++)
             {
-                Rect rect;
+                var index = i;
+                var w = i == 0 ? width : ColW;
+                var go = Box(i == 0 ? "normal-row" : "state-row", _content, new Rect(0, 0, w, RowH), row, true);
+                go.AddComponent<Button>().onClick.AddListener(() => _input?.PressRow(index));
+                var label = Label("label", go.transform, new Rect(LabelPad, 0, w - 2 * LabelPad, RowH));
+                label.fontSize = 40;
+                label.overflowMode = TextOverflowModes.Overflow;
+                label.text = screen.Rows[i].Label;
+                labels.Add(label);
+                _rowObjects.Add(go);
+            }
+            // Each row is as tall as its text (never cut, never shrunk); the two state rows of a line share the taller one.
+            for (var i = 0; i < labels.Count; i++)
+            {
                 if (i == 0)
                 {
-                    rect = new Rect(0, 0, width, RowH);
-                    y = RowH + Gap;
+                    var h = RowHeight(labels[0], width);
+                    Resize(0, new Rect(0, 0, width, h));
+                    y = h + Gap;
+                    continue;
                 }
-                else
-                {
-                    var col = (i - 1) % 2;
-                    rect = new Rect(col * (ColW + Gap), y, ColW, RowH);
-                    if (col == 1 || i == screen.Rows.Count - 1) y += RowH + Gap;
-                }
-                var index = i;
-                var go = Box(i == 0 ? "normal-row" : "state-row", _content, rect, row, true);
-                go.AddComponent<Button>().onClick.AddListener(() => _input?.PressRow(index));
-                var label = Label("label", go.transform, new Rect(16, 0, rect.width - 32, rect.height));
-                label.text = screen.Rows[i].Label;
-                label.fontSize = 40;
-                _rowObjects.Add(go);
+                var hasPair = i + 1 < labels.Count;
+                var lineH = RowHeight(labels[i], ColW);
+                if (hasPair) lineH = Mathf.Max(lineH, RowHeight(labels[i + 1], ColW));
+                Resize(i, new Rect(0, y, ColW, lineH));
+                if (hasPair) Resize(i + 1, new Rect(ColW + Gap, y, ColW, lineH));
+                y += lineH + Gap;
+                i++;
             }
             if (screen.EmptyLabel != null)
             {
@@ -150,6 +160,20 @@ namespace Game.CheatPanel
                 _rowObjects.Add(empty.gameObject);
             }
             _content.sizeDelta = new Vector2(width, y);
+        }
+
+        private static float RowHeight(TextMeshProUGUI label, float rowWidth)
+        {
+            var textH = label.GetPreferredValues(label.text, rowWidth - 2 * LabelPad, 0).y;
+            return Mathf.Max(RowH, Mathf.Ceil(textH) + 2 * LabelPad);
+        }
+
+        private void Resize(int index, Rect rect)
+        {
+            var go = _rowObjects[index];
+            Place((RectTransform)go.transform, rect, false);
+            var label = go.GetComponentInChildren<TextMeshProUGUI>();
+            Place(label.rectTransform, new Rect(LabelPad, 0, rect.width - 2 * LabelPad, rect.height), false);
         }
 
         private static GameObject Box(string name, Transform parent, Rect rect, Color color, bool takesTaps)

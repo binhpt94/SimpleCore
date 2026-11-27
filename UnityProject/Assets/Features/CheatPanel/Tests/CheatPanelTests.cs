@@ -320,6 +320,28 @@ namespace Game.CheatPanel.Tests
         }
 
         [Test]
+        public void StateRowWithAThreeLineTitle_GrowsToFitTheText_NotCutNorShrunk()
+        {
+            const string longTitle = "Popup thua sau khi đạt kỉ lục mới ở màn cuối cùng, có đủ phần thưởng, quảng cáo nhân đôi và nút chơi lại hiện ra cùng lúc";
+            var entries = new[] { new CheatEntry("Dịch vụ popup", "Popup/Long", longTitle, "Game"), new CheatEntry("HUD", "Hud/Mid", "Giữa trận", "Game") };
+            var view = View();
+            new CheatPanelPresenter(Config(), new FakeStates(entries), new FakeSwitch()).Attach(view);
+            var content = Content(view);
+            var rows = content.GetComponentsInChildren<RectTransform>().Where(r => r.name == "state-row").ToArray();
+            var normal = content.GetComponentsInChildren<RectTransform>().First(r => r.name == "normal-row");
+            var longRow = rows.First(r => ((string)Get(CompsInChildren(r.gameObject, "TMP_Text")[0], "text")).Contains(longTitle));
+            var label = CompsInChildren(longRow.gameObject, "TMP_Text")[0];
+            var labelRect = (RectTransform)label.transform;
+            Assert.That(Get(label, "overflowMode").ToString(), Is.EqualTo("Overflow"), "no ellipsis, no truncation");
+            Assert.That(Get(label, "enableAutoSizing"), Is.False, "text is not shrunk");
+            Assert.That((float)Get(label, "fontSize"), Is.EqualTo(40f));
+            Assert.That(labelRect.sizeDelta.y, Is.GreaterThanOrEqualTo((float)Get(label, "preferredHeight") - 0.5f), "the whole title fits in its row");
+            Assert.That(longRow.sizeDelta.y, Is.GreaterThan(normal.sizeDelta.y), "the three-line row is taller than a one-line row");
+            Assert.That(rows.Select(r => r.sizeDelta.y).Distinct().Count(), Is.EqualTo(1), "the two state rows of a line share the height");
+            Assert.That(((RectTransform)content.transform).sizeDelta.y, Is.GreaterThanOrEqualTo(-longRow.anchoredPosition.y + longRow.sizeDelta.y), "the list scrolls over the taller row");
+        }
+
+        [Test]
         public void NoStateInTheBuild_ViewShowsTheNormalRowAndTheEmptyLabel()
         {
             var view = View();

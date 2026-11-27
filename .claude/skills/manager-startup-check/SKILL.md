@@ -1,6 +1,6 @@
 ---
 name: manager-startup-check
-description: Chỉ phiên FEATURE=@Manager. Kiểm tra đầu phiên ba bước đúng thứ tự - Leader có live không (ListAgents), tiến độ ba Leader từ gd_status, gd_req.py status, ask.py và báo cáo (chỉ hỏi Leader điểm chưa rõ), bản tổng hợp cho người kèm các câu hỏi chờ người. Tầng dưới là của CodeLead, không rà ở đây. Dùng ở lượt làm việc đầu tiên sau khi phiên được tạo mới hoặc renew, trước mọi việc khác.
+description: Chỉ phiên FEATURE=@Manager. Kiểm tra đầu phiên ba bước đúng thứ tự - Leader có live không (ListAgents), tiến độ ba Leader từ gd_status, gd_req.py status, ask.py và báo cáo (chỉ hỏi Leader điểm chưa rõ), bản tổng hợp cho người kèm các câu hỏi chờ người và các bug trong sổ bug để người kiểm tra. Tầng dưới là của CodeLead, không rà ở đây. Dùng ở lượt làm việc đầu tiên sau khi phiên được tạo mới hoặc renew, trước mọi việc khác.
 ---
 # @Manager: kiểm tra đầu phiên
 Luật chung của @Manager (phạm vi chỉ ba Leader, quyền, chuỗi của một feature, giao việc) vẫn ở `.claude/rules/manager.md`.
@@ -19,7 +19,7 @@ Chạy ở **lượt làm việc đầu tiên sau khi phiên được tạo mớ
 - Bạn không tự đặt, không tự suy ra giai đoạn từ tiến độ.
 
 ## Bước 2. Tiến độ của ba Leader
-Chỉ làm khi bước 1 qua. **Tổng hợp từ status và báo cáo, không nhắn Leader để hỏi tiến độ** (người quyết 2026-11-26: mỗi tin hỏi là một lượt của Leader, khoảng 70K token). Một lần gọi: `python Management/tools/gd_status.py --brief; python Management/tools/gd_req.py status; python Management/tools/toolwork.py list; python Management/tools/ask.py list`.
+Chỉ làm khi bước 1 qua. **Tổng hợp từ status và báo cáo, không nhắn Leader để hỏi tiến độ** (người quyết 2026-11-26: mỗi tin hỏi là một lượt của Leader, khoảng 70K token). Một lần gọi: `python Management/tools/gd_status.py --brief; python Management/tools/gd_req.py status; python Management/tools/toolwork.py list; python Management/tools/ask.py list; python Management/tools/bugs.py list`.
 - **@GameDesigner**: từ `gd_status.py` (cả cây), ghi lại:
   - mode và vòng đang làm;
   - node chưa đạt, node chưa hỏi GPT, node có xung đột chưa giải quyết (khoá vòng sau);
@@ -41,7 +41,12 @@ Một tin, theo thứ tự:
 2. Tiến độ code tóm từ `gd_req.py status` và báo cáo của CodeLead.
 3. Việc bị chặn và ai gỡ được.
 4. Việc công cụ đang chờ phiên `@human` (`toolwork.py list`).
-5. Các câu đang chờ người quyết: câu của Leader trong `ask.py list` (giữ nguyên văn phương án) và câu của bạn (khuôn ở `manager.md`, mục "Hỏi người"), cùng câu hỏi xác nhận giai đoạn và **câu hỏi phạm vi việc** (`manager.md`, mục "Phạm vi việc": chạy hết mọi việc hay chỉ feature được nhắc).
-6. Bước tiếp bạn đề nghị.
+5. **Sổ bug** (người quyết 2026-11-27: mỗi lần renew nhắc người các bug để người kiểm tra), từ `bugs.py list`:
+   - mỗi bug một dòng: id, feature, trạng thái (chờ sửa, đang sửa), bug là gì (rút gọn), ghi từ lúc nào;
+   - nhắc người xem ở tab Bug: bug nào giao sửa ngay ("Giao sửa"), bug nào bỏ, bug "đang sửa" nào đã sửa xong;
+   - sổ trống thì ghi một dòng "Sổ bug: không có bug chờ";
+   - không tự giao sửa, không tự bỏ bug: chờ người quyết. Người bảo sửa bug nào thì nhắn `CodeLead` chạy `bugs.py fix <id> --from CodeLead` (hoặc người bấm ở trang).
+6. Các câu đang chờ người quyết: câu của Leader trong `ask.py list` (giữ nguyên văn phương án) và câu của bạn (khuôn ở `manager.md`, mục "Hỏi người"), cùng câu hỏi xác nhận giai đoạn và **câu hỏi phạm vi việc** (`manager.md`, mục "Phạm vi việc": chạy hết mọi việc hay chỉ feature được nhắc).
+7. Bước tiếp bạn đề nghị.
 
 Người trả lời phạm vi (và giai đoạn) rồi mới làm việc người giao và điều phối tiếp, theo skill `manager-dispatch`. Chưa trả lời thì không giao việc cho Leader nào.

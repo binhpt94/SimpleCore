@@ -102,6 +102,7 @@ import bind_session  # noqa: E402
 import ask  # noqa: E402
 import editor_ticket
 import worker  # noqa: E402
+import bugs  # noqa: E402
 import reqbook  # noqa: E402
 import dispatch  # noqa: E402
 import gamedesign  # noqa: E402
@@ -288,7 +289,8 @@ POST_PATHS = {"/api/setup": MAX_BODY, "/api/gamedesign/promote": MAX_BODY, "/api
               "/api/sessions/delete": MAX_BODY, "/api/sessions/delete-outside": MAX_BODY, "/api/sessions/live": MAX_BODY, "/api/sessions/stop": MAX_BODY,
               "/api/sessions/model": MAX_BODY, "/api/sessions/reset-models": MAX_BODY,
               "/api/workers/run": 16 * 1024, "/api/workers/resume": 16 * 1024, "/api/workers/drop": MAX_BODY,
-              "/api/workers/defaults": MAX_BODY}
+              "/api/workers/defaults": MAX_BODY,
+              "/api/bugs/add": 16 * 1024, "/api/bugs/fix": MAX_BODY, "/api/bugs/done": 16 * 1024, "/api/bugs/drop": 16 * 1024}
 TRASH = ".deleted"      # inside the transcripts folder: threads() reads only *.jsonl at its top
 # Threads that run a headless turn right now (renew, reread, compact, a thread setup is creating): not deleted.
 BUSY = set()
@@ -2934,6 +2936,32 @@ def activity_view(now=None, with_done=False):
                        "tokens_live": sum(r["tokens"] for r in rows if r["kind"] == "thread")}}
 
 
+def bugs_view():
+    """GET /api/bugs: every bug, newest first, and the features a bug can name (the inbox's feature targets)."""
+    try:
+        names = [t["target"] for t in inbox_view().get("targets") or [] if t.get("pool") == "feature"]
+    except Exception:
+        names = []
+    return {"bugs": list(reversed(bugs.items(ROOT))), "features": names, "states": bugs.STATE_NAMES}
+
+
+def bugs_call(action, data):
+    """POST /api/bugs/<action> from the human: add {text, features, seen}, fix {id}, done {id, note}, drop {id, note}."""
+    try:
+        if action == "add":
+            b = bugs.add(ROOT, data.get("text"), data.get("features"), "người", str(data.get("seen") or ""))
+            return {"ok": True, "id": b["id"], "new": b["new"]}
+        if action == "fix":
+            b = bugs.fix(ROOT, str(data.get("id") or ""), "người")
+            return {"ok": True, "id": b["id"], "message": b["message"]}
+        if action in ("done", "drop"):
+            b = bugs.close(ROOT, str(data.get("id") or ""), "fixed" if action == "done" else "dropped", data.get("note"))
+            return {"ok": True, "id": b["id"]}
+    except ValueError as ex:
+        return {"ok": False, "error": str(ex)}
+    return {"ok": False, "error": "lệnh không hợp lệ"}
+
+
 def worker_call(action, data):
     """The page: run (a feature, an extra task, model and effort: none takes the default), resume (an id and a
     message), drop (an id), defaults (the model and effort of every code job that names none, inbox ones too)."""
@@ -3034,6 +3062,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, sync_page.write_references(ROOT))
             if path == "/api/workers":
                 return self.send_json(200, workers_view())
+            if path == "/api/bugs":
+                return self.send_json(200, bugs_view())
             if path == "/api/activity":
                 query = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
                 return self.send_json(200, activity_view(with_done=(query.get("done") or [""])[0] == "1"))
@@ -3093,6 +3123,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, human_delete(data))
             if self.path.startswith("/api/inbox/"):
                 return self.send_json(200, inbox_call(self.path.rsplit("/", 1)[1], data))
+            if self.path.startswith("/api/bugs/"):
+                return self.send_json(200, bugs_call(self.path.rsplit("/", 1)[1], data))
             if self.path.startswith("/api/workers/"):
                 return self.send_json(200, worker_call(self.path.rsplit("/", 1)[1], data))
             if self.path.startswith("/api/references/"):
