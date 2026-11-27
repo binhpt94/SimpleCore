@@ -36,20 +36,11 @@ Bạn là `@Worker` (người quyết 2026-11-27): tầng 4–7 cũ (Features, S
 - Bạn không chạy được test. Server biên dịch và chạy chúng sau khi nạp. Test qua thì yêu cầu tự lên `done`; test hỏng thì bạn nhận lại đúng các test hỏng, một lần.
 - Chỉ kiểm được khi Play: ghi `play` trong `result.json` thay cho `tests`.
 
-## Art: GreyBox trước, Simple sau, Detail của người
-- **GreyBox (bắt buộc, làm cùng code):** mọi chỗ hiện art đi qua `Art.Sprite(key, look)` hay `Art.Model(key, size)` của Core, kèm look GreyBox (màu, cỡ).
-  - Không có file: 2D là hình vuông tô màu, 3D là box.
-  - Anim chỉ scale, rotate, move, đổi màu. Particle dùng sprite vuông.
-  - Code chạy được, test qua với GreyBox là đủ cho việc dev.
-- **Simple (chỉ khi việc yêu cầu, thường sau khi feature đã chạy đủ):** tự làm, không đặt ở đâu, không ai chấm.
-  - Ảnh: vẽ SVG (một file tự đủ, có viewBox đúng tỉ lệ, không script, không file ngoài), rồi `python Management/tools/art.py svg <in.svg> <out.png> <rộng>x<cao>`. Lệnh kiểm SVG và cỡ PNG.
-  - Model 3D: script Python cho Blender, chạy `blender -b -P <script>.py` (Blender CLI, nếu máy có); xuất `.fbx`, kèm `Simple.preview.png` để trang hiện.
-  - Particle: sprite khói có màu.
-  - Ghi thẳng vào `<thư mục feature>/FeatureAssets/<Private|Public>/Resources/Art/<F>/<id>/Simple.<png|fbx|prefab>`. `<id>`: chữ thường, số, gạch nối. Game tự dùng, không cần nối dây.
-  - SVG nháp để ngoài `Assets` (thư mục tạm), chỉ file kết quả vào `Assets`.
-- **Detail:** art production, người đưa vào. Không ghi `Detail.*` và không ghi `Assets/_Composition/Resources/ArtChoice.json` (người chọn bản game dùng ở tab Studio). `worker.py` không nạp hai loại file đó, và việc hỏng ở cổng kiểm.
-- Game hiện bản tốt nhất đang có (Detail, Simple, GreyBox). Code không đoán và không phụ thuộc vào mức nào đang hiện.
-- Xem art đã có: `python Management/tools/art.py list [<F>]`.
+## Art
+- Key `<F>/<id>` = thư mục `<feature>/FeatureAssets/<Private|Public>/Resources/Art/<F>/<id>/`.
+- **GreyBox** (bắt buộc, làm cùng code): hiện art qua `Art.Sprite(key, look)` / `Art.Model(key, size)` của Core. Không file: vuông (2D), box (3D); anim chỉ scale, rotate, move, màu. Test chạy được khi chỉ có GreyBox.
+- **Simple** (chỉ khi tin việc nêu đích danh art): SVG rồi `art.py svg <in> <out> <w>x<h>`, hoặc `blender -b -P <script>.py` ra `.fbx` kèm `Simple.preview.png`. Ghi `Simple.<đuôi>` vào thư mục của key; nháp để ngoài `Assets`. Không tự viết `.meta`; không ghi đè Simple đã có nếu tin không bảo.
+- **Detail** và `ArtChoice.json` là của người: không ghi.
 
 ## Kiểm trước khi xong (bắt buộc)
 - `python Management/tools/compile_check.py --all`: phải sạch. Sửa đến khi không còn `LỖI`.

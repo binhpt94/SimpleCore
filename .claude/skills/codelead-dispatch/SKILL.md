@@ -12,7 +12,7 @@ Từ 2026-11-27 (người quyết) tầng dưới là worker: feature, service, 
    - thứ tự hay trọng tâm (ví dụ "làm các yêu cầu của run-score trước");
    - việc xuyên feature: giao **một lần** cho feature chính, nêu đủ các feature bị kéo theo và contract cần đổi. Worker sửa hết trong cùng việc; không chia nhỏ ra nhiều tin;
    - việc người đã quyết mà sổ không có id: "người quyết ngày <ngày>: <câu quyết định>".
-   - **Art Simple:** feature đã chạy đủ bằng GreyBox (yêu cầu của giai đoạn đang làm đã kiểm qua) thì giao một việc `Làm art Simple <F> · <các art, cỡ>`; worker tự vẽ (`.claude/rules/worker.md`, mục Art). Không ai chấm; Detail là của người.
+   - **Art Simple:** feature đã chạy đủ bằng GreyBox (yêu cầu của giai đoạn đang làm đã kiểm qua) thì giao một việc `Làm art Simple <F> · <các art, cỡ>`; worker tự vẽ (`.claude/rules/worker.md`, mục Art). Việc này kiểm như mọi việc worker (cổng kiểm, test, `codelead-verify-batch`); Detail là của người.
    - Feature ĐƯỢC CODE mà chưa có thư mục hay khung: dựng khung trước (skill `codelead-scaffold-feature`), hoặc giao luôn cho worker dựng (nó sửa được asmdef, Contracts).
 3. **Gửi cùng lúc** mọi tin trong một lượt: `python Management/tools/dispatch.py send <tên> --from CodeLead "<việc>"`, nối tối đa 6 lệnh bằng `;` trong một lần gọi. Tin vượt 3 việc cùng lúc nằm chờ; server tự chạy sau. Tin gửi một feature đang có việc chạy thì thành việc kế tiếp của nó.
    - `dispatch.py send` báo **SERVER TẮT** (lỗi 3): tin đã lưu, chưa ai giao. Ngừng giao thêm và nhắn `Manager` BÁO CHẶN (chờ người bật server).

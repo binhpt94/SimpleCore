@@ -48,7 +48,7 @@ Node có giao diện (popup, màn hình, HUD) viết `ui.md` cạnh `data.md`. B
 - Node có bố cục chiến trường (vị trí, tầm, khoảng cách: frame `kind: field`) không có `ui.md`: nêu số trong ý, nhắn @UIDesigner vẽ frame. Node không có bố cục thì khai `frame: none` ở phần đầu `data.md`.
 - `ui.md` không ghi kích thước, vị trí, màu. Thứ tự quan trọng nói bằng mức chính/phụ, không bằng toạ độ.
 - Xem frame đã có: `python Management/tools/gd_frame.py ai/idea/<node>`. Frame hay dùng số của node khác (`use`): node đó phải nằm trong refs.
-- Thiết kế không đặt ảnh: art do worker làm theo frame (GreyBox, Simple), Detail do người đưa vào (`CLAUDE.md` gốc, mục Art). Feature có frame `kind: ui` phải có node `cheat` (xem mục "Node cheat").
+- Thiết kế không đặt ảnh: art do worker làm theo frame (GreyBox, Simple), Detail do người đưa vào (`.claude/rules/worker.md`, mục Art). Feature có frame `kind: ui` phải có node `cheat` (xem mục "Node cheat").
 
 ## Không cụ thể tới mức này (có chuyên gia riêng)
 - Giao diện tương tác: màu, kiểu dáng. Vị trí và kích thước chỉ nằm trong frame của @UIDesigner. Sai: "Nút có màu xanh".

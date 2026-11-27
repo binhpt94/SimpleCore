@@ -46,7 +46,7 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 | Code của feature, service, @Core (worker): chỗ để code, kiến trúc, `validate.py`, `gd_pack.py`, `CLAUDE.md` của feature, `result.json` | `.claude/rules/worker.md`; đầu `Management/tools/worker.py` |
 | Sổ yêu cầu `gd_req.py` | server ghi `done` theo kết quả worker và lô test; phía kiểm: skill `codelead-verify-batch` |
 | unity-mcp, khoá Editor, chụp màn hình, xoá file | `.claude/rules/unity.md` |
-| Art (GreyBox, Simple, Detail), `art.py` | mục Art dưới đây; worker làm art: `.claude/rules/worker.md`; đầu `Management/tools/art.py` |
+| Art (GreyBox, Simple, Detail), `art.py` | `.claude/rules/worker.md`, mục Art; đầu `Management/tools/art.py` |
 | Bảng dữ liệu `.excel`, `gd_excel.py` | skill `gd-excel-data` |
 | Frame bố cục `gd_frame.py`, ảnh tham chiếu `references.py` | `.claude/rules/uidesigner.md` |
 | Chơi thử, `tester.py` | `.claude/rules/tester.md` |
@@ -78,16 +78,6 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 - Nghĩa của giai đoạn (người quyết 2026-11-27): IDEA, PROTOTYPE, FULL là ba mức của cùng một game, lồng nhau. PROTOTYPE gồm mọi thứ của IDEA rồi thêm; FULL gồm mọi thứ của PROTOTYPE rồi thêm.
 - Người bỏ một thứ (ý, node, feature, luật) thì nó bị bỏ ở mọi giai đoạn: cả giai đoạn sau, cột PROTOTYPE, FULL của bảng "Thông số theo giai đoạn", bảng `.excel`, node để sau, cheat, code, test, asset. Chỉ giữ cho giai đoạn sau khi người nói rõ "bỏ ở <giai đoạn>, giữ cho <giai đoạn>".
 - "Chưa làm ở giai đoạn này" khác "bỏ": thứ chưa làm nằm ở node có điểm của giai đoạn sau. Thứ đã bỏ không được giữ lại dưới dạng cờ tắt, nhánh code, test, hay ghi chú "không thuộc IDEA".
-
-## Art (người quyết 2026-11-27)
-- Mỗi art có ba mức:
-  - **GreyBox**: không có file, code tự dựng. 2D là hình vuông, 3D là box; anim chỉ scale, rotate, move, đổi màu; particle dùng sprite vuông.
-  - **Simple**: worker tự làm. Ảnh vẽ SVG rồi `art.py svg`; model bằng Blender CLI; particle dùng sprite khói có màu.
-  - **Detail**: art production chính thức, người đưa vào.
-- Chạy được trước: phải có GreyBox; feature chạy đủ rồi mới làm Simple; sau đó mới tới Detail.
-- Game hiện mức tốt nhất đang có: Detail, không có thì Simple, không có nữa thì GreyBox.
-- Simple trở xuống tự nhận, không ai duyệt hay chấm. Bản game dùng khi có cả Simple và Detail là lựa chọn của người (tab Studio); AI không quan tâm.
-- Chỗ để: `<thư mục feature>/FeatureAssets/<Private|Public>/Resources/Art/<F>/<id>/Simple.<png|fbx|prefab>` và `Detail.<…>`, cùng một quy ước, không cần nối dây. `python Management/tools/art.py list` liệt kê.
 
 ## Vùng
 | Vùng | Đọc | Sửa |
