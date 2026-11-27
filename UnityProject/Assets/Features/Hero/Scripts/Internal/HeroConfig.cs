@@ -41,8 +41,7 @@ namespace Game.Hero
             public float moveSpeed;
             [Tooltip("FrontCleave: length of the cleave from the hero's front edge. Blast: radius around the target's centre. SingleTarget: unused.")]
             public float areaSize;
-            [Tooltip("Battlefield sprite, drawn facing right. Empty: a box in the placeholder colour.")]
-            public Sprite sprite;
+            [Tooltip("GreyBox colour when art Hero/<code> has no file. The sprite comes from Core's IArt, drawn facing right.")]
             public Color placeholderColor = Color.white;
         }
 

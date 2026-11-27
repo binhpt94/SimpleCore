@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game.Core;
 using UnityEngine;
 
 namespace Game.Enemy
@@ -7,7 +8,8 @@ namespace Game.Enemy
     /// <summary>
     /// Draws the enemies as 2D sprites standing on the ground (y = 0, 1 world unit = 1u) and plays the shared unit
     /// motions: bob while walking, lunge when hitting, flash when hit, shrink away when defeated. Only shows what the
-    /// presenter pushes; decides nothing.
+    /// presenter pushes; decides nothing. Each type's picture comes from <see cref="IArt"/> (key
+    /// <see cref="ArtKey"/>, e.g. <c>Enemy/soldier</c>); without a file it is a GreyBox square in the type's box colour.
     /// </summary>
     internal sealed class EnemyStageView : MonoBehaviour, IEnemyStage
     {
@@ -15,8 +17,6 @@ namespace Game.Enemy
         private struct TypeLook
         {
             public EnemyType Type;
-            [Tooltip("Sprite facing right, pivot at the bottom centre. Empty: a coloured box.")]
-            public Sprite Sprite;
             public Color BoxColor;
         }
 
@@ -57,6 +57,9 @@ namespace Game.Enemy
         private readonly List<Flying> _shots = new List<Flying>();
         private readonly List<Flying> _coins = new List<Flying>();
         private Sprite _boxSprite;
+        private readonly Dictionary<EnemyType, Sprite> _pictures = new Dictionary<EnemyType, Sprite>();
+        private readonly List<Sprite> _ownedPictures = new List<Sprite>();
+        private IArt _art;
         private bool _frozen;
         private Func<UnityEngine.Object, IDisposable> _trackView;
         private IDisposable _stageHandle;
@@ -68,30 +71,34 @@ namespace Game.Enemy
             _stageHandle = trackView(gameObject);
         }
 
+        /// <summary>Art key of an enemy type: <c>Enemy/</c> and the type in lower case.</summary>
+        public static string ArtKey(EnemyType type) => "Enemy/" + type.ToString().ToLowerInvariant();
+
+        public void UseArt(IArt art)
+        {
+            _art = art ?? throw new ArgumentNullException(nameof(art));
+            ReleasePictures();
+        }
+
         public void Show(EnemyLook look)
         {
             if (_drawn.ContainsKey(look.Handle)) return;
 
             var go = new GameObject($"Enemy {look.Type} #{look.Handle}");
             go.transform.SetParent(transform, false);
-            var renderer = go.AddComponent<SpriteRenderer>();
+            // The picture sits on a child raised so its bottom edge is at the enemy's feet, whatever its pivot.
+            var body = new GameObject("Picture");
+            body.transform.SetParent(go.transform, false);
+            var renderer = body.AddComponent<SpriteRenderer>();
             renderer.sortingOrder = _sortingOrder;
 
-            var typeLook = FindLook(look.Type);
-            Vector3 baseScale;
-            if (typeLook.Sprite != null)
-            {
-                renderer.sprite = typeLook.Sprite;
-                var size = typeLook.Sprite.bounds.size;
-                baseScale = new Vector3(look.Width / Mathf.Max(size.x, 0.001f), look.Height / Mathf.Max(size.y, 0.001f), 1f);
-                renderer.color = Color.white;
-            }
-            else
-            {
-                renderer.sprite = BoxSprite();
-                baseScale = new Vector3(look.Width, look.Height, 1f);
-                renderer.color = typeLook.BoxColor.a > 0f ? typeLook.BoxColor : Color.gray;
-            }
+            var sprite = Picture(look.Type);
+            renderer.sprite = sprite;
+            var bounds = sprite.bounds;
+            body.transform.localPosition = new Vector3(-bounds.center.x, -bounds.min.y, 0f);
+            var baseScale = new Vector3(look.Width / Mathf.Max(bounds.size.x, 0.001f),
+                look.Height / Mathf.Max(bounds.size.y, 0.001f), 1f);
+            renderer.color = Color.white;
 
             renderer.flipX = look.Direction < 0;
             go.transform.localScale = baseScale;
@@ -244,6 +251,47 @@ namespace Game.Enemy
             _stageHandle?.Dispose();
             _stageHandle = null;
             if (_boxSprite != null) DestroyObject(_boxSprite);
+            ReleasePictures();
+        }
+
+        /// <summary>The type's sprite: the art file, else a GreyBox square in its box colour (kept for reuse).</summary>
+        private Sprite Picture(EnemyType type)
+        {
+            if (_pictures.TryGetValue(type, out var known) && known != null) return known;
+
+            var typeLook = FindLook(type);
+            var color = typeLook.BoxColor.a > 0f ? typeLook.BoxColor : Color.gray;
+            var key = ArtKey(type);
+            Sprite sprite;
+            if (_art != null)
+            {
+                sprite = _art.Sprite(key, new GreyBox.Look(color, 1f));
+                if (_art.TierOf(key) == ArtTier.GreyBox) _ownedPictures.Add(sprite);
+            }
+            else
+            {
+                sprite = GreyBox.Sprite(new GreyBox.Look(color, 1f));
+                _ownedPictures.Add(sprite);
+            }
+
+            _pictures[type] = sprite;
+            return sprite;
+        }
+
+        // Only the GreyBox squares are the view's own; a Sprite file from the catalog is shared and stays.
+        private void ReleasePictures()
+        {
+            for (var i = 0; i < _ownedPictures.Count; i++)
+            {
+                var sprite = _ownedPictures[i];
+                if (sprite == null) continue;
+                var texture = sprite.texture;
+                DestroyObject(sprite);
+                DestroyObject(texture);
+            }
+
+            _ownedPictures.Clear();
+            _pictures.Clear();
         }
 
         private IDisposable Track(GameObject go) => _trackView?.Invoke(go);

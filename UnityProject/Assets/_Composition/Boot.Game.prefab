@@ -162,7 +162,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 5cef1000000000000000000000000009, type: 2}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: fromPrototype.Array.size
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
       propertyPath: prototypeCatalogs.Array.size
@@ -184,10 +184,6 @@ PrefabInstance:
       propertyPath: 'fromPrototype.Array.data[2]'
       value:
       objectReference: {fileID: 11400000, guid: 77b692e007ef4328c96d1c1d8d4db9c9, type: 2}
-    - target: {fileID: 4000000000000003, guid: 44440000000000000000000000000002, type: 3}
-      propertyPath: 'fromPrototype.Array.data[3]'
-      value:
-      objectReference: {fileID: 11400000, guid: 39439eaa92b4b2e428ac51a90839013a, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

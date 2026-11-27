@@ -27,7 +27,7 @@ namespace Game.Hero.Tests
             var config = HeroFakes.LoadConfig();
             _squad = new HeroSquad(config, _field);
             _displays = new HeroFakes.DisplayFactory();
-            _presenter = new HeroPresenter(_squad, config, _displays);
+            _presenter = new HeroPresenter(_squad, config, _displays, new HeroFakes.Art());
             _presenter.Attach();
         }
 
@@ -224,7 +224,7 @@ namespace Game.Hero.Tests
             try
             {
                 var display = instance.GetComponent<IHeroDisplay>();
-                display.Setup("knight", null, Color.white, 1f, 1.5f);
+                display.Setup("knight", null, 1f, 1.5f);
                 var body = instance.transform.Find("Body").GetComponent<SpriteRenderer>();
 
                 display.SetPose(0f, 1, true);

@@ -31,6 +31,7 @@ namespace Game.Enemy.Tests
             registry.Register<ISimClock>(new FakeClock());
             var combat = new FakeCombat();
             registry.Register<ICombat>(combat);
+            registry.Register<IArt>(new EnemyFakeArt());
 
             installer.Install(registry);
 

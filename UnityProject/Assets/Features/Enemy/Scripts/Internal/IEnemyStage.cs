@@ -15,6 +15,9 @@ namespace Game.Enemy
         /// </summary>
         void TrackWith(Func<UnityEngine.Object, IDisposable> trackView);
 
+        /// <summary>Takes each enemy type's picture from <paramref name="art"/> (key <c>Enemy/&lt;type&gt;</c>); called once, before anything is shown.</summary>
+        void UseArt(Game.Core.IArt art);
+
         /// <summary>Starts drawing an enemy.</summary>
         void Show(EnemyLook look);
 

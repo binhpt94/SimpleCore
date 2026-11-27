@@ -32,6 +32,7 @@ namespace Game.Hero
             var enemyField = registry.Resolve<IEnemyField>();
             var enemyCombat = registry.Resolve<IEnemyCombat>();
             var combat = registry.Resolve<ICombat>();
+            var art = registry.Resolve<IArt>();
 
             var roster = new HeroRoster(config);
             var squad = new HeroSquad(config, enemyField, new CombatHeroHits(combat, enemyCombat));
@@ -42,7 +43,7 @@ namespace Game.Hero
             registry.Register<IHeroRespawnTime>(squad);
             enemyCombat.AddCombatFoes(squad, combat.AddReceiver(squad));
 
-            var presenter = new HeroPresenter(squad, config, new PrefabHeroDisplayFactory(config.HeroPrefab));
+            var presenter = new HeroPresenter(squad, config, new PrefabHeroDisplayFactory(config.HeroPrefab), art);
             session.Join(new HeroParticipant(run, squad, presenter, combat, new UnityFrameClock()));
         }
     }

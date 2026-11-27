@@ -68,32 +68,32 @@ namespace Game.Composition.Tests
         // then scene-flow last (a participant with no view). SessionScene installs first and runs the session; it is not a participant.
         // The design table still lists 15 (CheatPanel not yet in it): the design needs feature-cheat-panel added before scene-flow.
         [Test]
-        public void GameScene_AtIdea_HasSixteenParticipantsInTheDesignedOrder_SimClockFirst_CheatPanelThenSceneFlowLast()
+        // Combat runs at IDEA (human, 2026-11-27, option A): Enemy, Hero and Castle fight through it.
+        public void GameScene_AtIdea_HasSeventeenParticipantsInTheDesignedOrder_SimClockFirst_CheatPanelThenSceneFlowLast()
         {
             var names = Load("Assets/_Composition/Boot.Game.prefab").InstallersAt(GameStage.Idea).Select(i => i.name).ToList();
 
             Assert.That(names, Is.EqualTo(new[]
             {
                 SessionScene, Art, SimClock,
-                "PopupInstaller", "SaveInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
+                "PopupInstaller", "SaveInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "CombatInstaller", "EnemyInstaller",
                 "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
                 "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller",
                 "CheatPanelInstaller", "SceneFlowGameInstaller",
             }));
-            Assert.That(names.Skip(1).Count(n => n != "SaveInstaller" && n != Art), Is.EqualTo(16),
+            Assert.That(names.Skip(1).Count(n => n != "SaveInstaller" && n != Art), Is.EqualTo(17),
                 "participants after SessionScene (Save only registers ISavedRecord and Art only registers IArt, they are not participants); CheatPanel holds the cheat overlay of every scene");
         }
 
-        // The build stays at PROTOTYPE (human, 2026-11-27): at IDEA Enemy needs Combat, which the design puts at
-        // PROTOTYPE, so the Game scene could not boot. Kept until the stages of Combat and the PROTOTYPE features are reviewed.
+        // The build is at IDEA, the stage being worked on (human, 2026-11-27, option A: Combat moved to IDEA).
         [Test]
-        public void EveryScene_IsAtPrototype_SetOnceOnTheBasePrefab()
+        public void EveryScene_IsAtIdea_SetOnceOnTheBasePrefab()
         {
-            Assert.That(Load(BasePath).Stage, Is.EqualTo(GameStage.Prototype));
+            Assert.That(Load(BasePath).Stage, Is.EqualTo(GameStage.Idea));
             foreach (var scene in Scenes)
             {
                 var variant = (string)((object[])scene)[0];
-                Assert.That(Load(variant).Stage, Is.EqualTo(GameStage.Prototype), variant);
+                Assert.That(Load(variant).Stage, Is.EqualTo(GameStage.Idea), variant);
             }
         }
 
@@ -114,7 +114,7 @@ namespace Game.Composition.Tests
 
             Assert.That(names, Is.EquivalentTo(new[]
             {
-                "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "CombatInstaller",
+                "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller",
             }));
         }
 

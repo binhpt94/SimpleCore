@@ -42,6 +42,8 @@ namespace Game.Enemy.Tests
         public void TearDown()
         {
             if (_config != null) UnityEngine.Object.DestroyImmediate(_config);
+            foreach (var made in _made) if (made != null) UnityEngine.Object.DestroyImmediate(made);
+            _made.Clear();
         }
 
         // enemy-type-values IDEA: "Loại có trong game: Lính, Sói, Khổng lồ".
@@ -182,21 +184,46 @@ namespace Game.Enemy.Tests
         [TestCase(EnemyType.Giant)]
         public void At_IDEA_each_type_in_the_game_is_drawn_with_its_own_sprite(EnemyType type)
         {
-            var looks = new SerializedObject(Stage()).FindProperty("_looks");
-            Assert.That(looks, Is.Not.Null, "stage has no _looks");
 
-            UnityEngine.Object sprite = null;
-            var others = new List<UnityEngine.Object>();
-            for (var i = 0; i < looks.arraySize; i++)
+            var art = new EnemyFakeArt();
+            var sprites = new Dictionary<EnemyType, Sprite>();
+            foreach (var t in new[] { EnemyType.Soldier, EnemyType.Wolf, EnemyType.Giant })
             {
-                var look = looks.GetArrayElementAtIndex(i);
-                var value = look.FindPropertyRelative("Sprite").objectReferenceValue;
-                if (look.FindPropertyRelative("Type").intValue == (int)type) sprite = value;
-                else others.Add(value);
+                var sprite = MakeSprite();
+                sprites[t] = sprite;
+                art.Simple["Enemy/" + t.ToString().ToLowerInvariant()] = sprite;
             }
 
-            Assert.That(sprite, Is.Not.Null, $"{type} has a sprite");
-            Assert.That(others, Has.No.Member(sprite), $"{type} does not share its sprite");
+            var go = UnityEngine.Object.Instantiate(Stage().gameObject);
+            _made.Add(go);
+            var stage = go.GetComponent<IEnemyStage>();
+            stage.UseArt(art);
+            stage.Show(new EnemyLook(1, type, 2f, 0.8f, 1.2f, 1, true, false));
+
+            SpriteRenderer renderer = null;
+            for (var i = 0; i < go.transform.childCount; i++)
+            {
+                var child = go.transform.GetChild(i);
+                if (child.name.EndsWith("#1")) renderer = child.GetComponentInChildren<SpriteRenderer>();
+            }
+
+            Assert.That(renderer, Is.Not.Null, $"{type} is drawn");
+            Assert.That(renderer.sprite, Is.SameAs(sprites[type]), $"{type} gets its own Simple sprite");
+            foreach (var other in sprites)
+            {
+                if (other.Key != type) Assert.That(renderer.sprite, Is.Not.SameAs(other.Value), $"not shared with {other.Key}");
+            }
+        }
+
+        private readonly List<UnityEngine.Object> _made = new List<UnityEngine.Object>();
+
+        private Sprite MakeSprite()
+        {
+            var texture = new Texture2D(8, 16);
+            _made.Add(texture);
+            var sprite = Sprite.Create(texture, new Rect(0, 0, 8, 16), new Vector2(0.5f, 0f), 8f);
+            _made.Add(sprite);
+            return sprite;
         }
 
         /// <summary>A copy of the real config set to the IDEA column: Archer and Boss are not in the game.</summary>

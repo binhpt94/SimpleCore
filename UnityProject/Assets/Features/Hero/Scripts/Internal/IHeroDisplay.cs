@@ -9,7 +9,7 @@ namespace Game.Hero
     /// </summary>
     internal interface IHeroDisplay
     {
-        void Setup(string heroCode, Sprite sprite, Color placeholderColor, float width, float height);
+        void Setup(string heroCode, Sprite sprite, float width, float height);
 
         void SetPose(float x, int facing, bool moving);
 

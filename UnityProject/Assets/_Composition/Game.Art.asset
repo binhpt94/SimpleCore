@@ -20,3 +20,23 @@ MonoBehaviour:
     asset: {fileID: 21300000, guid: 9d510c2247940144793ada8d77645bbe, type: 3}
   - id: Castle/thunder/Simple
     asset: {fileID: 21300000, guid: 6e3ef11aeb4ae54409d4b6d08c3d9428, type: 3}
+  - id: Hero/archer/Simple
+    asset: {fileID: 21300000, guid: 245a60a8259bf66488ef9824cc1b733c, type: 3}
+  - id: Hero/axeman/Simple
+    asset: {fileID: 21300000, guid: a0641efdebd71f241b3580f831c72ebe, type: 3}
+  - id: Hero/knight/Simple
+    asset: {fileID: 21300000, guid: ab71b2128077c024d815f53b723b6404, type: 3}
+  - id: Hero/mage/Simple
+    asset: {fileID: 21300000, guid: d550bb54918481c48be2ed978735a4ca, type: 3}
+  - id: Hero/swordsman/Simple
+    asset: {fileID: 21300000, guid: 4394e4327e5a16b4f9638029f6cc68b2, type: 3}
+  - id: Enemy/archer/Simple
+    asset: {fileID: 21300000, guid: 0b49a7a728a40384eb4f5407dcc6a265, type: 3}
+  - id: Enemy/boss/Simple
+    asset: {fileID: 21300000, guid: 92eed772145258742b56a14216dd58d9, type: 3}
+  - id: Enemy/giant/Simple
+    asset: {fileID: 21300000, guid: a76519f7ac1ee1f4d8f8b67ea36ff68a, type: 3}
+  - id: Enemy/soldier/Simple
+    asset: {fileID: 21300000, guid: 2895595838965e747b43045ff381833a, type: 3}
+  - id: Enemy/wolf/Simple
+    asset: {fileID: 21300000, guid: 8ad557321db5e5849a7c8e19b33ba8f1, type: 3}

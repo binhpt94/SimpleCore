@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Game.Combat.Tests
 {
     /// <summary>
-    /// One test per row of the TickParams table (feature-combat/combat-tick/tick-values), at its PROTOTYPE value.
+    /// One test per row of the TickParams table (feature-combat/combat-tick/tick-values), at its IDEA value (same at PROTOTYPE and FULL).
     /// step_seconds and max_steps_per_frame belong to the shared clock: combat only reads the step it is given.
     /// </summary>
     public class TickParamsTests
@@ -36,7 +36,7 @@ namespace Game.Combat.Tests
         [Test]
         public void CombatEnabled_EverySharedStepRunsOneCombatTickThatSettlesItsHitsTogether()
         {
-            // combat_enabled at PROTOTYPE: yes, one combat tick per step of the shared clock.
+            // combat_enabled from IDEA on: yes, one combat tick per step of the shared clock.
             var enemies = new FakeOwner("Enemy");
             enemies.Add(1, 100f);
             var id = _tick.AddReceiver(enemies);
@@ -54,7 +54,7 @@ namespace Game.Combat.Tests
         [Test]
         public void StepSeconds_TickIsAsLongAsTheSharedStepOfOneFortiethOfASecond()
         {
-            // step_seconds at PROTOTYPE: 0.025 s, from the shared clock.
+            // step_seconds from IDEA on: 0.025 s, from the shared clock.
             _clock.Step(2);
 
             Assert.That(_actor.Steps, Is.All.EqualTo(Step));

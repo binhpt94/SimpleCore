@@ -208,9 +208,29 @@ namespace Game.Hero.Tests
             }
         }
 
+        /// <summary>Core's art stand-in: Simple sprites by key, GreyBox for every other key.</summary>
+        public sealed class Art : IArt
+        {
+            public readonly Dictionary<string, Sprite> Simple = new Dictionary<string, Sprite>();
+            public readonly List<string> Asked = new List<string>();
+            public readonly List<GreyBox.Look> Looks = new List<GreyBox.Look>();
+
+            public Sprite Sprite(string key, GreyBox.Look look)
+            {
+                Asked.Add(key);
+                Looks.Add(look);
+                return Simple.TryGetValue(key, out var sprite) ? sprite : GreyBox.Sprite(look);
+            }
+
+            public GameObject Model(string key, Vector3 size) => GreyBox.Model(size);
+
+            public ArtTier TierOf(string key) => Simple.ContainsKey(key) ? ArtTier.Simple : ArtTier.GreyBox;
+        }
+
         public sealed class Display : IHeroDisplay
         {
             public string HeroCode;
+            public Sprite Sprite;
             public float X;
             public int Facing;
             public bool Moving;
@@ -218,7 +238,11 @@ namespace Game.Hero.Tests
             public int Strikes, Hurts, Falls, Respawns, LevelUps;
             public float Animated;
 
-            public void Setup(string heroCode, Sprite sprite, Color placeholderColor, float width, float height) => HeroCode = heroCode;
+            public void Setup(string heroCode, Sprite sprite, float width, float height)
+            {
+                HeroCode = heroCode;
+                Sprite = sprite;
+            }
 
             public void SetPose(float x, int facing, bool moving)
             {

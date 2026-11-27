@@ -37,6 +37,7 @@ namespace Game.Hero.Tests
             _registry.Register<IEnemyField>(_field);
             _registry.Register<IEnemyCombat>(_enemyCombat);
             _registry.Register<Game.Combat.ICombat>(_combat);
+            _registry.Register<IArt>(new HeroFakes.Art());
         }
 
         private static HeroInstaller LoadInstaller()
@@ -117,6 +118,7 @@ namespace Game.Hero.Tests
             _registry.Register<IEnemyField>(_field);
             if (missing != typeof(IEnemyCombat)) _registry.Register<IEnemyCombat>(_enemyCombat);
             if (missing != typeof(Game.Combat.ICombat)) _registry.Register<Game.Combat.ICombat>(_combat);
+            _registry.Register<IArt>(new HeroFakes.Art());
 
             var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(_registry));
 

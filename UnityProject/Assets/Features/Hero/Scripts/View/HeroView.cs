@@ -61,7 +61,7 @@ namespace Game.Hero
         private HeroLevelLabel _label;
         private float _labelLeft;
 
-        public void Setup(string heroCode, Sprite sprite, Color placeholderColor, float width, float height)
+        public void Setup(string heroCode, Sprite sprite, float width, float height)
         {
             gameObject.name = $"Hero {heroCode}";
             _width = width;
@@ -80,7 +80,7 @@ namespace Game.Hero
             else
             {
                 _body.sprite = Box();
-                _bodyColor = placeholderColor;
+                _bodyColor = Color.white;
                 _bodySize = new Vector2(width, height);
                 _bodyBaseY = height * 0.5f;
             }

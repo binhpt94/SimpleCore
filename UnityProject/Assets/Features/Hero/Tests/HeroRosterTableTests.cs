@@ -184,7 +184,7 @@ namespace Game.Hero.Tests
         public void Effects_walk_bob_shows_while_walking_and_stops_when_the_hero_stops()
         {
             var displays = new HeroFakes.DisplayFactory();
-            var presenter = new HeroPresenter(_squad, HeroFakes.LoadConfig(), displays);
+            var presenter = new HeroPresenter(_squad, HeroFakes.LoadConfig(), displays, new HeroFakes.Art());
             presenter.Attach();
             _squad.Begin(new Game.Run.RunTeam(new[] { "knight", "axeman", "archer" }));
             _squad.Hit(1, 1000f);
@@ -217,7 +217,7 @@ namespace Game.Hero.Tests
         {
             var fields = HeroViewFields();
             var displays = new HeroFakes.DisplayFactory();
-            var presenter = new HeroPresenter(_squad, HeroFakes.LoadConfig(), displays);
+            var presenter = new HeroPresenter(_squad, HeroFakes.LoadConfig(), displays, new HeroFakes.Art());
             presenter.Attach();
             _squad.Begin(new Game.Run.RunTeam(new[] { "knight", "axeman", "archer" }));
 
@@ -234,7 +234,7 @@ namespace Game.Hero.Tests
         {
             var fields = HeroViewFields();
             var displays = new HeroFakes.DisplayFactory();
-            var presenter = new HeroPresenter(_squad, HeroFakes.LoadConfig(), displays);
+            var presenter = new HeroPresenter(_squad, HeroFakes.LoadConfig(), displays, new HeroFakes.Art());
             presenter.Attach();
             _squad.Begin(new Game.Run.RunTeam(new[] { "axeman", "knight", "archer" }));
             _squad.Hit(1, 1000f);
@@ -257,7 +257,7 @@ namespace Game.Hero.Tests
         {
             var fields = HeroViewFields();
             var displays = new HeroFakes.DisplayFactory();
-            var presenter = new HeroPresenter(_squad, HeroFakes.LoadConfig(), displays);
+            var presenter = new HeroPresenter(_squad, HeroFakes.LoadConfig(), displays, new HeroFakes.Art());
             presenter.Attach();
             StartWithOnlyTheMage();
             _field.Add(3f);
@@ -331,8 +331,11 @@ namespace Game.Hero.Tests
         [Test]
         public void StageParams_visuals_at_idea_give_each_hero_one_sprite()
         {
+            var catalog = AssetDatabase.LoadAssetAtPath<Game.Core.AssetCatalog>("Assets/_Composition/Game.Art.asset");
+            Assert.That(catalog, Is.Not.Null, "Game.Art catalog");
             foreach (var hero in HeroFakes.LoadConfig().HeroesAt(HeroConfig.Stage.Idea))
-                Assert.That(hero.sprite, Is.Not.Null, $"visuals: {hero.code} has its sprite");
+                Assert.That(catalog.TryGet($"Hero/{hero.code}/Simple", out var sprite) && sprite is Sprite, Is.True,
+                    $"visuals: {hero.code} has its sprite");
         }
     }
 }

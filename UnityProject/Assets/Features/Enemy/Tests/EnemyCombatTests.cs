@@ -917,6 +917,7 @@ namespace Game.Enemy.Tests
 
         private sealed class FakeStage : IEnemyStage
         {
+            public void UseArt(Game.Core.IArt art) { }
             public readonly List<int> Shown = new List<int>();
             public readonly List<int> Flashed = new List<int>();
             public readonly List<int> Defeated = new List<int>();

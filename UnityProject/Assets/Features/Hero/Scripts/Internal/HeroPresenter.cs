@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game.Core;
 
 namespace Game.Hero
 {
@@ -9,14 +10,16 @@ namespace Game.Hero
         private readonly HeroSquad _squad;
         private readonly HeroConfig _config;
         private readonly IHeroDisplayFactory _factory;
+        private readonly IArt _art;
         private readonly Dictionary<HeroUnit, IHeroDisplay> _displays = new Dictionary<HeroUnit, IHeroDisplay>();
         private bool _attached;
 
-        public HeroPresenter(HeroSquad squad, HeroConfig config, IHeroDisplayFactory factory)
+        public HeroPresenter(HeroSquad squad, HeroConfig config, IHeroDisplayFactory factory, IArt art)
         {
             _squad = squad ?? throw new ArgumentNullException(nameof(squad));
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _art = art ?? throw new ArgumentNullException(nameof(art));
         }
 
         public int DisplayCount => _displays.Count;
@@ -65,11 +68,15 @@ namespace Game.Hero
             {
                 var display = _factory.Create();
                 var hero = unit.Hero;
-                display.Setup(hero.code, hero.sprite, hero.placeholderColor, _config.BoxWidth, _config.BoxHeight);
+                var sprite = _art.Sprite(ArtKey(hero.code), new GreyBox.Look(hero.placeholderColor, _config.BoxHeight));
+                display.Setup(hero.code, sprite, _config.BoxWidth, _config.BoxHeight);
                 display.SetPose(unit.X, unit.Facing, unit.IsMoving);
                 _displays.Add(unit, display);
             }
         }
+
+        /// <summary>The art key of a hero: <c>Hero/&lt;code&gt;</c>.</summary>
+        internal static string ArtKey(string heroCode) => $"Hero/{heroCode}";
 
         private void RemoveAll()
         {

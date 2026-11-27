@@ -27,7 +27,7 @@ namespace Game.Hero.Tests
             _displays = new HeroFakes.DisplayFactory();
             _combat = new HeroFakes.Combat();
             _squad = new HeroSquad(config, _field);
-            var presenter = new HeroPresenter(_squad, config, _displays);
+            var presenter = new HeroPresenter(_squad, config, _displays, new HeroFakes.Art());
             _participant = new HeroParticipant(_run, _squad, presenter, _combat, new HeroFakes.StillClock());
             _participant.Run();
         }

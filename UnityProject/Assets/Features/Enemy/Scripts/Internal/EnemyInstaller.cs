@@ -11,7 +11,7 @@ namespace Game.Enemy
 {
     /// <summary>
     /// Wires the enemy feature: publishes <see cref="IEnemyField"/> and joins the scene session.
-    /// Needs SessionScene, SimClock, Combat, Run and Wallet installed earlier. Publishes <see cref="IEnemyCombat"/> too:
+    /// Needs SessionScene, SimClock, Combat, Run, Wallet and Art (Core) installed earlier. Publishes <see cref="IEnemyCombat"/> too:
     /// the enemies join combat as a receiver and an actor here. Foes (heroes, castle) add themselves later through
     /// <see cref="IEnemyCombat.AddCombatFoes"/> (or the older <see cref="IEnemyField.AddFoes"/>).
     /// </summary>
@@ -45,6 +45,7 @@ namespace Game.Enemy
             var income = registry.Resolve<IWalletIncome>();
             var clock = registry.Resolve<ISimClock>();
             var combat = registry.Resolve<ICombat>();
+            var art = registry.Resolve<IArt>();
 
             var field = new EnemyField(_config, income);
             field.JoinCombat(combat);
@@ -53,7 +54,12 @@ namespace Game.Enemy
 
             var prefab = _stagePrefab;
             session.Join(new EnemyParticipant(field, runFlow, clock, combat,
-                () => Object.Instantiate(prefab).GetComponent<IEnemyStage>()));
+                () =>
+                {
+                    var stage = Object.Instantiate(prefab).GetComponent<IEnemyStage>();
+                    stage.UseArt(art);
+                    return stage;
+                }));
         }
     }
 }

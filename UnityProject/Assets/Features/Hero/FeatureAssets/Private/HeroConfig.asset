@@ -24,7 +24,6 @@ MonoBehaviour:
     range: 1.2
     moveSpeed: 2
     areaSize: 0
-    sprite: {fileID: 21300000, guid: ab71b2128077c024d815f53b723b6404, type: 3}
     placeholderColor: {r: 0.35, g: 0.55, b: 0.95, a: 1}
   - code: axeman
     displayName: "\u0110\u1EA5u s\u0129 r\xECu"
@@ -37,7 +36,6 @@ MonoBehaviour:
     range: 1.3
     moveSpeed: 2.4
     areaSize: 1.5
-    sprite: {fileID: 21300000, guid: a0641efdebd71f241b3580f831c72ebe, type: 3}
     placeholderColor: {r: 0.9, g: 0.55, b: 0.2, a: 1}
   - code: swordsman
     displayName: "Ki\u1EBFm kh\xE1ch"
@@ -50,7 +48,6 @@ MonoBehaviour:
     range: 1.2
     moveSpeed: 3.5
     areaSize: 0
-    sprite: {fileID: 21300000, guid: 4394e4327e5a16b4f9638029f6cc68b2, type: 3}
     placeholderColor: {r: 0.9, g: 0.25, b: 0.25, a: 1}
   - code: archer
     displayName: "Cung th\u1EE7"
@@ -63,7 +60,6 @@ MonoBehaviour:
     range: 7
     moveSpeed: 3
     areaSize: 0
-    sprite: {fileID: 21300000, guid: 245a60a8259bf66488ef9824cc1b733c, type: 3}
     placeholderColor: {r: 0.3, g: 0.75, b: 0.3, a: 1}
   - code: mage
     displayName: "Ph\xE1p s\u01B0"
@@ -76,7 +72,6 @@ MonoBehaviour:
     range: 6
     moveSpeed: 2.6
     areaSize: 1.5
-    sprite: {fileID: 21300000, guid: d550bb54918481c48be2ed978735a4ca, type: 3}
     placeholderColor: {r: 0.65, g: 0.35, b: 0.9, a: 1}
   heroPrefab: {fileID: 4210000000000000001, guid: db0ef26bcc72a194f82be7654fbc0dbc, type: 3}
   targetHalfRange: 16

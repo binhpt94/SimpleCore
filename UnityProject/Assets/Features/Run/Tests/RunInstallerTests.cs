@@ -64,9 +64,7 @@ namespace Game.Run.Tests
         }
 #endif
 
-        private static readonly RunTeam ChosenTeam = new RunTeam(new[] { "knight", "axeman", "archer" });
-
-        /// <summary>Installs the real asset and goes from the start screen into battle with a chosen team.</summary>
+        /// <summary>Installs the real asset; menus are skipped (IDEA), so Begin goes straight into battle with the default team.</summary>
         private static RunFlow InstalledRunInBattle(FakeSimClock clock)
         {
             var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
@@ -75,23 +73,92 @@ namespace Game.Run.Tests
             installer.Install(registry);
             var flow = (RunFlow)registry.Resolve<IRunFlow>();
             flow.Begin();
-            flow.Play();
-            flow.EnterBattle(ChosenTeam);
+            Assert.AreEqual(RunStep.Playing, flow.Step);
             return flow;
         }
 
         [Test]
-        public void ConfigAssetHoldsThePrototypeRunValues()
+        public void ConfigAssetSkipsMenusAndHoldsTheDefaultTeam()
         {
-            // "Thông số theo giai đoạn", PROTOTYPE column of flow-rules, score-rules, start-values.
+            // People decided 2026-11-27: build is at IDEA, the hand-set skipMenus flag is on (turned off at PROTOTYPE).
             var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
             Assert.IsNotNull(config, $"Missing {ConfigPath}");
 
             Assert.AreEqual(1f, config.LoseDelaySeconds, "flow-rules: 1 s before the lose popup.");
             Assert.AreEqual(3, config.TeamSize);
-            Assert.IsFalse(config.SkipMenus, "flow-rules: after Loading comes the start screen; Play again goes to team select.");
+            Assert.IsTrue(config.SkipMenus, "IDEA: the run goes straight into battle (no Home, TeamSelect, GameFlow).");
             CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, config.DefaultTeam.HeroCodes,
                 "feature-team-select/team-memory/memory-rules: default team (IDEA battle, dev cheats).");
+        }
+
+        [Test]
+        public void InstalledIdeaRunReplaysStraightIntoANewBattleWithTheDefaultTeam()
+        {
+            // People decided 2026-11-27: build is at IDEA (no Home, TeamSelect, GameFlow), so menus are skipped.
+            var clock = new FakeSimClock();
+            var flow = InstalledRunInBattle(clock);
+
+            flow.Lose();
+            clock.Step(40);
+            Assert.AreEqual(RunStep.Lost, flow.Step);
+            flow.Replay();
+            Assert.AreEqual(RunStep.Playing, flow.Step, "IDEA: Play again goes straight into a new battle.");
+            CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, flow.Team.HeroCodes);
+            flow.Shutdown();
+        }
+
+        private static readonly RunTeam ChosenTeam = new RunTeam(new[] { "knight", "axeman", "archer" });
+
+        /// <summary>
+        /// PROTOTYPE copy of the real assets: RunConfig.asset and RunInstaller.asset instantiated, skipMenus turned off
+        /// through SerializedObject, every other value of the asset kept. Destroy both with <see cref="DestroyPrototype"/>.
+        /// </summary>
+        private static RunInstaller PrototypeInstaller(out RunConfig config)
+        {
+            var realInstaller = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
+            var realConfig = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
+            Assert.IsNotNull(realInstaller, $"Missing {InstallerPath}");
+            Assert.IsNotNull(realConfig, $"Missing {ConfigPath}");
+
+            config = UnityEngine.Object.Instantiate(realConfig);
+            var configObject = new SerializedObject(config);
+            configObject.FindProperty("skipMenus").boolValue = false;
+            configObject.ApplyModifiedPropertiesWithoutUndo();
+
+            var installer = UnityEngine.Object.Instantiate(realInstaller);
+            var installerObject = new SerializedObject(installer);
+            installerObject.FindProperty("config").objectReferenceValue = config;
+            installerObject.ApplyModifiedPropertiesWithoutUndo();
+            return installer;
+        }
+
+        private static void DestroyPrototype(RunInstaller installer, RunConfig config)
+        {
+            UnityEngine.Object.DestroyImmediate(installer);
+            UnityEngine.Object.DestroyImmediate(config);
+        }
+
+        [Test]
+        public void ConfigAssetHoldsThePrototypeRunValues()
+        {
+            // "Thông số theo giai đoạn", PROTOTYPE column of flow-rules and start-values: numbers read from the real asset.
+            var config = AssetDatabase.LoadAssetAtPath<RunConfig>(ConfigPath);
+            Assert.IsNotNull(config, $"Missing {ConfigPath}");
+            Assert.AreEqual(1f, config.LoseDelaySeconds, "flow-rules: 1 s before the lose popup.");
+            Assert.AreEqual(3, config.TeamSize, "start-values: team of 3.");
+            CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, config.DefaultTeam.HeroCodes);
+
+            // The PROTOTYPE copy keeps those numbers, only menus are no longer skipped.
+            var installer = PrototypeInstaller(out var copy);
+            try
+            {
+                Assert.IsFalse(copy.SkipMenus);
+                Assert.AreEqual(config.LoseDelaySeconds, copy.LoseDelaySeconds);
+                Assert.AreEqual(config.TeamSize, copy.TeamSize);
+                CollectionAssert.AreEqual(config.DefaultTeam.HeroCodes, copy.DefaultTeam.HeroCodes);
+                Assert.AreSame(config.AppSignalsPrefab, copy.AppSignalsPrefab);
+            }
+            finally { DestroyPrototype(installer, copy); }
         }
 
         [Test]
@@ -99,43 +166,85 @@ namespace Game.Run.Tests
         {
             // flow-rules "Thông số theo giai đoạn", PROTOTYPE: feature-game-flow picks the screens; the run builds,
             // clears and hands back the leave choice.
-            var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
-            var clock = new FakeSimClock();
-            var registry = Registry(clock: clock);
-            installer.Install(registry);
-            var battle = registry.Resolve<IRunBattle>();
-            var flow = (RunFlow)registry.Resolve<IRunFlow>();
-            var answers = new List<string>();
-            battle.BattleBuilt += () => answers.Add("built");
-            battle.BuildFailed += _ => answers.Add("failed");
-            battle.BattleLeft += choice => answers.Add("left:" + choice + ":" + flow.Step);
+            var installer = PrototypeInstaller(out var config);
+            try
+            {
+                var clock = new FakeSimClock();
+                var registry = Registry(clock: clock);
+                installer.Install(registry);
+                var battle = registry.Resolve<IRunBattle>();
+                var flow = (RunFlow)registry.Resolve<IRunFlow>();
+                var answers = new List<string>();
+                battle.BattleBuilt += () => answers.Add("built");
+                battle.BuildFailed += _ => answers.Add("failed");
+                battle.BattleLeft += choice => answers.Add("left:" + choice + ":" + flow.Step);
 
-            flow.Begin();
-            Assert.AreEqual(RunStep.Home, flow.Step, "The run does not go into battle on its own.");
-            battle.BuildBattle(ChosenTeam);
-            Assert.AreEqual(RunStep.Playing, flow.Step);
+                flow.Begin();
+                Assert.AreEqual(RunStep.Home, flow.Step, "The run does not go into battle on its own.");
+                battle.BuildBattle(ChosenTeam);
+                Assert.AreEqual(RunStep.Playing, flow.Step);
 
-            flow.Lose();
-            clock.Step(40);
-            flow.Replay();
+                flow.Lose();
+                clock.Step(40);
+                flow.Replay();
 
-            CollectionAssert.AreEqual(new[] { "built", "left:PlayAgain:Home" }, answers);
-            CollectionAssert.Contains(clock.Calls, "ClearRun", "The battle was cleared before the flow heard of it.");
-            flow.Shutdown();
+                CollectionAssert.AreEqual(new[] { "built", "left:PlayAgain:Home" }, answers);
+                CollectionAssert.Contains(clock.Calls, "ClearRun", "The battle was cleared before the flow heard of it.");
+                flow.Shutdown();
+            }
+            finally { DestroyPrototype(installer, config); }
         }
 
         [Test]
         public void PrototypeRunHasBackToStart()
         {
-            var clock = new FakeSimClock();
-            var flow = InstalledRunInBattle(clock);
+            var installer = PrototypeInstaller(out var config);
+            try
+            {
+                var clock = new FakeSimClock();
+                var registry = Registry(clock: clock);
+                installer.Install(registry);
+                var flow = (RunFlow)registry.Resolve<IRunFlow>();
+                flow.Begin();
+                flow.Play();
+                flow.EnterBattle(ChosenTeam);
 
-            flow.Lose();
-            clock.Step(40);
-            Assert.AreEqual(RunStep.Lost, flow.Step);
-            flow.GoHome();
-            Assert.AreEqual(RunStep.Home, flow.Step, "Back to start on the lose popup goes to the start screen.");
-            flow.Shutdown();
+                flow.Lose();
+                clock.Step(40);
+                Assert.AreEqual(RunStep.Lost, flow.Step);
+                flow.GoHome();
+                Assert.AreEqual(RunStep.Home, flow.Step, "Back to start on the lose popup goes to the start screen.");
+                flow.Shutdown();
+            }
+            finally { DestroyPrototype(installer, config); }
+        }
+
+        [Test]
+        public void InstalledRunUsesTheConfigAndOpensOnTheStartScreen()
+        {
+            var installer = PrototypeInstaller(out var config);
+            try
+            {
+                var registry = Registry();
+                installer.Install(registry);
+
+                var flow = registry.Resolve<IRunFlow>() as RunFlow;
+                Assert.IsNotNull(flow, "IRunFlow is not the run's RunFlow.");
+                Assert.AreEqual(1f, flow.LoseDelaySeconds);
+                Assert.AreEqual(3, flow.TeamSize);
+                Assert.IsFalse(flow.SkipMenus);
+
+                flow.Begin();
+                Assert.AreEqual(RunStep.Home, flow.Step, "PROTOTYPE: the Game scene opens on the start screen.");
+                flow.Play();
+                Assert.AreEqual(RunStep.TeamSelect, flow.Step);
+                flow.EnterBattle(ChosenTeam);
+                Assert.AreEqual(RunStep.Playing, flow.Step);
+                CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, flow.Team.HeroCodes,
+                    "The battle uses the team chosen in team select.");
+                flow.Shutdown();
+            }
+            finally { DestroyPrototype(installer, config); }
         }
 
         [Test]
@@ -149,7 +258,7 @@ namespace Game.Run.Tests
         }
 
         [Test]
-        public void InstalledRunUsesTheConfigAndOpensOnTheStartScreen()
+        public void InstalledRunUsesTheConfigAndOpensStraightInBattle()
         {
             var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
             Assert.IsNotNull(installer, $"Missing {InstallerPath}");
@@ -161,16 +270,12 @@ namespace Game.Run.Tests
             Assert.IsNotNull(flow, "IRunFlow is not the run's RunFlow.");
             Assert.AreEqual(1f, flow.LoseDelaySeconds);
             Assert.AreEqual(3, flow.TeamSize);
-            Assert.IsFalse(flow.SkipMenus);
+            Assert.IsTrue(flow.SkipMenus);
 
             flow.Begin();
-            Assert.AreEqual(RunStep.Home, flow.Step, "PROTOTYPE: the Game scene opens on the start screen.");
-            flow.Play();
-            Assert.AreEqual(RunStep.TeamSelect, flow.Step);
-            flow.EnterBattle(ChosenTeam);
-            Assert.AreEqual(RunStep.Playing, flow.Step);
+            Assert.AreEqual(RunStep.Playing, flow.Step, "IDEA: the Game scene opens straight in battle.");
             CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, flow.Team.HeroCodes,
-                "The battle uses the team chosen in team select.");
+                "The battle uses the default team of RunConfig.");
             flow.Shutdown();
         }
 
@@ -218,8 +323,6 @@ namespace Game.Run.Tests
             score.LoadBest();
             Assert.AreEqual(0, score.Best);
             flow.Begin();
-            flow.Play();
-            flow.EnterBattle(ChosenTeam);
             flow.CountClearedWave(1);
             clock.Step(1);
             flow.Lose();
