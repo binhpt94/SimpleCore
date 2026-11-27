@@ -212,6 +212,19 @@
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
    "at": "2026-11-25 11:39:01"
+  },
+  "stage-idea": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "WalletLogicTests.StageIdea_WalletRules_Start50FromConfig_RefusalsAreLogged_CapIs999999999"
+   ],
+   "play": "",
+   "hash": "fb8d29eed611",
+   "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Tiền đầu lượt: 50\n- Ghi log khi cộng/trừ bị từ chối: có\n- Số dư lớn nhất: 999.999.999",
+   "title": "Thông số của giai đoạn IDEA",
+   "by": "Wallet",
+   "at": "2026-11-27 15:26:32"
   }
  },
  "log": [
@@ -550,6 +563,13 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 15:26:32",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Wallet",
+   "note": "WalletLogicTests.StageIdea_WalletRules_Start50FromConfig_RefusalsAreLogged_CapIs999999999"
   }
  ]
 }
