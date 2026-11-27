@@ -3,8 +3,8 @@
  "text": "Bỏ Studio cũ (Codex, Blender, ClaudeImage, phiếu nợ), thay bằng ba mức art GreyBox Simple Detail, art.py, tab Studio mới",
  "source": "người",
  "decided": "Người quyết 2026-11-27 trong chat @human",
- "state": "open",
- "note": "",
+ "state": "done",
+ "note": "Đã làm, commit a4e29fe",
  "created": 1795776053.7149026,
- "closed": 0
+ "closed": 1795776071.67331
 }
