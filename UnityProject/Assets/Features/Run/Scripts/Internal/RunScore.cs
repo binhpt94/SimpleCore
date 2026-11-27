@@ -1,20 +1,23 @@
 using System;
+using Game.Save;
 
 namespace Game.Run
 {
     /// <summary>
-    /// Score of a run and the saved best (feature-run/run-score/score-rules): starts at 0, +1 per cleared wave
-    /// (once per wave number), settled once when the run ends; a higher settled score becomes the best and is saved at once.
+    /// Score of a run and the best (feature-run/run-score/score-rules): starts at 0, +1 per cleared wave
+    /// (once per wave number), settled once when the run ends; a higher settled score becomes the best and is handed
+    /// to feature-save at once. The run never reads or writes the device itself. A failed write keeps the best in
+    /// memory, marked unsaved, and is tried again when the game comes back to the screen and at the next settle.
     /// </summary>
     internal sealed class RunScore : IRunScore
     {
-        private readonly IBestScoreStore _store;
+        private readonly ISavedRecord _saved;
         private int _lastCountedWave;
         private bool _settled = true;
 
-        public RunScore(IBestScoreStore store)
+        public RunScore(ISavedRecord saved)
         {
-            _store = store ?? throw new ArgumentNullException(nameof(store));
+            _saved = saved ?? throw new ArgumentNullException(nameof(saved));
         }
 
         public int Score { get; private set; }
@@ -23,22 +26,15 @@ namespace Game.Run
 
         public bool IsNewBest { get; private set; }
 
+        /// <summary>The best changed but feature-save has not stored it yet (the last write failed).</summary>
+        internal bool IsBestUnsaved { get; private set; }
+
         public event Action ScoreChanged;
 
-        /// <summary>Reads the saved best; missing, negative or unreadable counts as 0.</summary>
+        /// <summary>Asks feature-save for the saved best; "none yet" or a negative number counts as 0.</summary>
         public void LoadBest()
         {
-            int saved;
-            try
-            {
-                saved = _store.Load();
-            }
-            catch (Exception)
-            {
-                saved = 0;
-            }
-
-            Best = saved < 0 ? 0 : saved;
+            Best = _saved.TryRead(out var saved) && saved > 0 ? saved : 0;
             ScoreChanged?.Invoke();
         }
 
@@ -61,7 +57,10 @@ namespace Game.Run
             ScoreChanged?.Invoke();
         }
 
-        /// <summary>The run ended: settle the score once and update the best.</summary>
+        /// <summary>
+        /// The run ended: settle the score once and update the best. A new best is handed to feature-save now;
+        /// a best still unsaved from before is tried again now too, even when this run set no new best.
+        /// </summary>
         public void Settle()
         {
             if (_settled) return;
@@ -71,17 +70,21 @@ namespace Game.Run
             {
                 Best = Score;
                 IsNewBest = true;
-                try
-                {
-                    _store.Save(Best);
-                }
-                catch (Exception)
-                {
-                    // The best stays right for this session; the player is not told (score-rules).
-                }
+                IsBestUnsaved = true;
             }
 
+            WriteIfUnsaved();
             ScoreChanged?.Invoke();
+        }
+
+        /// <summary>The game is on the screen again: one more try for a best that is still unsaved.</summary>
+        public void RetryUnsavedBest() => WriteIfUnsaved();
+
+        private void WriteIfUnsaved()
+        {
+            if (!IsBestUnsaved) return;
+            // A failed write is not shown to the player; the best stays right in memory (record-keep-on-fail).
+            IsBestUnsaved = !_saved.Write(Best);
         }
     }
 }

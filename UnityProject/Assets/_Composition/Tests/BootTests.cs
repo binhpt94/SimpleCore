@@ -15,7 +15,7 @@ namespace Game.Composition.Tests
         private static readonly object[] Scenes =
         {
             new object[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Loading.unity", "SceneFlowLoadingInstaller", 2 },
-            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 20 },
+            new object[] { "Assets/_Composition/Boot.Game.prefab", "Assets/_Composition/Game.unity", "SceneFlowGameInstaller", 21 },
         };
 
         [Test]
@@ -60,7 +60,7 @@ namespace Game.Composition.Tests
         }
 
         // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 15 participants
-        // in this order: SimClock first (no view, drives the shared clock each frame, so every gameplay feature can
+        // in this order (plus SaveInstaller before Run: not a participant, it only registers ISavedRecord for the run): SimClock first (no view, drives the shared clock each frame, so every gameplay feature can
         // resolve it), then 13 features (PopupRating after PopupLose, it opens over it), then scene-flow last (a participant with no view). SessionScene installs
         // first and runs the session; it is not a participant.
         [Test]
@@ -71,12 +71,13 @@ namespace Game.Composition.Tests
             Assert.That(names, Is.EqualTo(new[]
             {
                 SessionScene, SimClock,
-                "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
+                "PopupInstaller", "SaveInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "EnemyInstaller",
                 "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
                 "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller",
                 "SceneFlowGameInstaller",
             }));
-            Assert.That(names.Skip(1).Count(), Is.EqualTo(15), "participants after SessionScene");
+            Assert.That(names.Skip(1).Count(n => n != "SaveInstaller"), Is.EqualTo(15),
+                "participants after SessionScene (Save only registers ISavedRecord, it is not a participant)");
         }
 
         // The build stays at PROTOTYPE (human, 2026-11-27): at IDEA Enemy needs Combat, which the design puts at
@@ -127,7 +128,7 @@ namespace Game.Composition.Tests
             Assert.That(names, Is.EqualTo(new[]
             {
                 SessionScene, SimClock,
-                "PopupInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "CombatInstaller",
+                "PopupInstaller", "SaveInstaller", "RunInstaller", "WalletInstaller", "BattlefieldInstaller", "CombatInstaller",
                 "EnemyInstaller", "HeroInstaller", "CastleInstaller", "WaveInstaller", "UpgradeInstaller", "HudInstaller",
                 "HudUpgradeInstaller", "PopupLoseInstaller", "PopupRatingInstaller", "HomeInstaller", "TeamSelectInstaller", "GameFlowInstaller", "SceneFlowGameInstaller",
             }));

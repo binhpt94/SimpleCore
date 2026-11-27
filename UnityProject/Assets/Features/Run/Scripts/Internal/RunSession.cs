@@ -6,7 +6,7 @@ using Game.Core;
 namespace Game.Run
 {
     /// <summary>
-    /// The run inside the Game scene session: reads the saved best before play, begins the run on the frame after
+    /// The run inside the Game scene session: asks feature-save for the saved best before play, begins the run on the frame after
     /// Run (participants installed after the run get their Run call later in the same frame, so they already listen
     /// to RunStarted by then), holds its timed waits while the game is off the screen, and drops
     /// pending waits at the end.
@@ -65,7 +65,7 @@ namespace Game.Run
             if (_createSignals == null) return;
             var signals = _createSignals();
             WhenDisposed(signals.Dispose);
-            var interrupts = new RunInterrupts(signals, _clockWaits);
+            var interrupts = new RunInterrupts(signals, _clockWaits, _score.RetryUnsavedBest);
             WhenDisposed(interrupts.Dispose);
         }
     }

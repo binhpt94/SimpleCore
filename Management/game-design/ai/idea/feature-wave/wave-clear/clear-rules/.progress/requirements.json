@@ -1,45 +1,45 @@
 {
  "items": {
   "clear-check": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "WaveDirectorTests.ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave",
+    "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave",
     "WaveDirectorTests.LastEnemyDefeatedBeforeAllCame_DoesNotClearTheWave"
    ],
    "play": "",
    "hash": "66b4fc08c77b",
    "text": "Đợt dọn sạch khi đã ra hết và số quái sống của đợt bằng 0\nXét mỗi lần một con quái bị hạ, sau khi mục cuối danh sách đã ra. Ai hạ cũng tính.",
    "title": "Đợt dọn sạch khi đã ra hết và số quái sống của đợt bằng 0",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:01:19"
+   "by": "Wave",
+   "at": "2026-11-27 14:29:39"
   },
   "clear-bonus": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "WaveDirectorTests.ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave",
-    "WaveDirectorTests.CheatMidWave_EnemiesLeftOnTheField_MustFallBeforeTheNewWaveClears"
+    "WaveDirectorTests.CheatMidWave_EnemiesLeftOnTheField_MustFallBeforeTheNewWaveClears",
+    "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
    ],
    "play": "",
    "hash": "5ac826998026",
    "text": "Thưởng dọn đợt w là 20 + 5×w xu (đợt 1: 25 xu, đợt 10: 70 xu, đợt 20: 120 xu)\nCộng vào `feature-wallet` một lần, ngay lúc dọn sạch. Không phụ thuộc máu thành hay hero còn sống.",
    "title": "Thưởng dọn đợt w là 20 + 5×w xu (đợt 1: 25 xu, đợt 10: 70 xu, đợt 20: 120 xu)",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:01:19"
+   "by": "Wave",
+   "at": "2026-11-27 14:29:39"
   },
   "clear-score-plus": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "WaveDirectorTests.ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave"
+    "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
    ],
    "play": "",
    "hash": "b6694a8c6d64",
    "text": "Mỗi lần dọn sạch, điểm của lượt tăng đúng 1 (dọn xong đợt 5 thì điểm là 5)\nBáo cho `feature-run`; node này không giữ điểm.",
    "title": "Mỗi lần dọn sạch, điểm của lượt tăng đúng 1 (dọn xong đợt 5 thì điểm là 5)",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:01:19"
+   "by": "Wave",
+   "at": "2026-11-27 14:29:39"
   },
   "clear-order": {
    "state": "verified",
@@ -68,17 +68,18 @@
    "at": "2026-11-25 12:01:19"
   },
   "edge-thanh-bi-pha-cung-luc-con-cuoi-bi": {
-   "state": "doing",
+   "state": "done",
    "note": "Đọc bản live mới, sửa code giữ tin dọn sạch cho feature-run, test",
    "tests": [
-    "WaveDirectorTests.CastleFallingInTheSameStepAsTheLastKill_LosesTheClear"
+    "WaveDirectorTests.CastleFallingInTheSameStepAsTheLastKill_LosesTheClear",
+    "WaveDirectorTests.CastleFallingInTheStepTheClearIsReported_GivesNoRewardAndNoBreak"
    ],
    "play": "",
-   "hash": "69e597c11b57",
-   "text": "**Thành bị phá cùng lúc con cuối bị hạ** (ví dụ con cuối đánh thành rồi chết vì Sấm sét trong cùng một bước cập nhật): đợt chưa được tính; tin dọn sạch do `feature-run` giữ. Lượt chốt thua (không hồi sinh): không thưởng, không điểm. Hồi sinh thành công: `feature-run` thả tin, feature này cộng thưởng dọn đợt và bắt đầu lúc thở 3 giây như mọi lần dọn sạch. (Sửa 2026-11-26 khi chuyển ý held-clear từ nhánh thứ tự hồi sinh ở popup hồi sinh về lượt chơi; ý đó nay ở `feature-run/run-flow/flow-rules`.)",
+   "hash": "b476bacd0efe",
+   "text": "**Thành bị phá cùng lúc con cuối bị hạ** (ví dụ con cuối đánh thành rồi chết vì Sấm sét trong cùng một bước cập nhật): đợt chưa được tính; tin dọn sạch bị `feature-run` bỏ (ý held-clear ở `feature-run/run-flow/flow-rules`). Không thưởng, không điểm.",
    "title": "Thành bị phá cùng lúc con cuối bị hạ",
    "by": "Wave",
-   "at": "2026-11-26 15:04:10"
+   "at": "2026-11-27 14:29:39"
   },
   "edge-con-cuoi-bi-ha-truoc-khi-ra-het": {
    "state": "verified",
@@ -120,45 +121,45 @@
    "at": "2026-11-25 12:01:19"
   },
   "edge-quai-bi-ha-khi-con-ngoai-man-hinh": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "WaveDirectorTests.ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave"
+    "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
    ],
    "play": "",
    "hash": "c4cf293308ea",
    "text": "**Quái bị hạ khi còn ngoài màn hình** (ví dụ ở x = ±16.5u bởi Cung thủ): vẫn tính, vẫn cho tiền.",
    "title": "Quái bị hạ khi còn ngoài màn hình",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:01:19"
+   "by": "Wave",
+   "at": "2026-11-27 14:29:39"
   },
   "params": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
     "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers",
-    "WaveDirectorTests.ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave"
+    "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
    ],
    "play": "",
    "hash": "dd01ba94d6f3",
    "text": "## Làm gì\n- Đếm số quái sống của đợt: +1 khi một con ra, −1 khi một con bị hạ.\n- Mỗi lần một con bị hạ: nếu `feature-wave/spawning/spawn-order` đã báo \"đã ra hết\" và số sống = 0, và thành chưa bị phá trong cùng lúc đó, thì đợt dọn sạch.\n- Khi dọn sạch: cộng thưởng vào `feature-wallet`, báo `feature-run` tăng điểm 1, rồi giao cho `feature-wave/wave-gap/gap-timer`.\n\n## Thông số\n| Thông số | Giá trị (dự kiến) | Đơn vị | Lí do |\n|---|---|---|---|\n| Thưởng dọn đợt | 20 + 5×w | xu | Nhỏ hơn tiền hạ quái của cùng đợt (đợt 1: 25 so với 40, đợt 10: 70 so với 272), giữ tiền hạ quái là nguồn chính |\n| Điểm thêm mỗi lần dọn | 1 | điểm | Điểm = số đợt dọn sạch |\n\nVí dụ: đợt 1: 25 xu; đợt 5: 45 xu; đợt 10: 70 xu; đợt 15: 95 xu; đợt 20: 120 xu.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Thưởng dọn đợt | 20 + 5×w xu | như IDEA, chỉnh sau chơi thử | chốt sau chơi thử |\n| Điểm mỗi lần dọn | 1 | 1 | 1 |\n| Báo dọn sạch cho `feature-hud` | không bắt buộc | có | có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "@CodeLead",
-   "at": "2026-11-26 00:30:14"
+   "by": "Wave",
+   "at": "2026-11-27 14:29:39"
   },
   "stage-prototype": {
-   "state": "verified",
+   "state": "done",
    "note": "Test báo dọn sạch qua IWaveProgress cho Hud",
    "tests": [
     "PrototypeStageTests.ClearRulesStagePrototype_And_GapTimerStagePrototype_HudHearsTheClearAndTheNewWave",
-    "WaveDirectorTests.ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave"
+    "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
    ],
    "play": "",
    "hash": "a45c32ff2b41",
    "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Thưởng dọn đợt: như IDEA, chỉnh sau chơi thử\n- Báo dọn sạch cho `feature-hud`: có",
    "title": "Thông số của giai đoạn PROTOTYPE",
-   "by": "@CodeLead",
-   "at": "2026-11-26 01:18:14"
+   "by": "Wave",
+   "at": "2026-11-27 14:29:39"
   }
  },
  "log": [
@@ -357,6 +358,104 @@
    "state": "doing",
    "by": "Wave",
    "note": "Đọc bản live mới, sửa code giữ tin dọn sạch cho feature-run, test"
+  },
+  {
+   "at": "2026-11-27 14:27:14",
+   "id": "edge-thanh-bi-pha-cung-luc-con-cuoi-bi",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.CastleFallingInTheSameStepAsTheLastKill_LosesTheClear, WaveDirectorTests.CastleFallingInTheStepTheClearIsReported_GivesNoRewardAndNoBreak"
+  },
+  {
+   "at": "2026-11-27 14:27:14",
+   "id": "clear-check",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave, WaveDirectorTests.LastEnemyDefeatedBeforeAllCame_DoesNotClearTheWave"
+  },
+  {
+   "at": "2026-11-27 14:27:14",
+   "id": "clear-bonus",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.CheatMidWave_EnemiesLeftOnTheField_MustFallBeforeTheNewWaveClears, WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-27 14:27:14",
+   "id": "clear-score-plus",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-27 14:27:14",
+   "id": "edge-quai-bi-ha-khi-con-ngoai-man-hinh",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-27 14:27:14",
+   "id": "params",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers, WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-27 14:27:14",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Wave",
+   "note": "PrototypeStageTests.ClearRulesStagePrototype_And_GapTimerStagePrototype_HudHearsTheClearAndTheNewWave, WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-27 14:29:39",
+   "id": "edge-thanh-bi-pha-cung-luc-con-cuoi-bi",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.CastleFallingInTheSameStepAsTheLastKill_LosesTheClear, WaveDirectorTests.CastleFallingInTheStepTheClearIsReported_GivesNoRewardAndNoBreak"
+  },
+  {
+   "at": "2026-11-27 14:29:39",
+   "id": "clear-check",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave, WaveDirectorTests.LastEnemyDefeatedBeforeAllCame_DoesNotClearTheWave"
+  },
+  {
+   "at": "2026-11-27 14:29:39",
+   "id": "clear-bonus",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.CheatMidWave_EnemiesLeftOnTheField_MustFallBeforeTheNewWaveClears, WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-27 14:29:39",
+   "id": "clear-score-plus",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-27 14:29:39",
+   "id": "edge-quai-bi-ha-khi-con-ngoai-man-hinh",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-27 14:29:39",
+   "id": "params",
+   "state": "done",
+   "by": "Wave",
+   "note": "WaveConfigTests.RealConfig_HoldsTheDesignedPrototypeNumbers, WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
+  },
+  {
+   "at": "2026-11-27 14:29:39",
+   "id": "stage-prototype",
+   "state": "done",
+   "by": "Wave",
+   "note": "PrototypeStageTests.ClearRulesStagePrototype_And_GapTimerStagePrototype_HudHearsTheClearAndTheNewWave, WaveDirectorTests.ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave"
   }
  ]
 }

@@ -219,12 +219,12 @@
    "state": "done",
    "note": "gỡ hồi sinh, tạm dừng, bỏ lượt theo thiết kế mới",
    "tests": [],
-   "play": "Play: bam Escape o man bat dau, trong tran, trong 1 giay cho va tren popup thua khong co gi xay ra, RunAppSignalsView khong con nghe nut quay lai",
-   "hash": "702b9a76f67d",
-   "text": "**Nút quay lại của máy (Android):** ở màn bắt đầu, màn chọn đội, trong trận đang đánh, popup thua và trong 1 giây chờ: không làm gì (trong trận: tự quyết 2026-11-26, vì không còn tạm dừng; đã loại: thoát game, hỏi rời trận).",
+   "play": "Play: bấm Escape ở màn bắt đầu, màn chọn đội, trong trận, trong 1 giây chờ và trên popup thua: Run không làm gì. RunAppSignalsView chỉ nghe rời game và quay lại (OnApplicationPause, OnApplicationFocus), không nghe nút quay lại.",
+   "hash": "d87196ac66f3",
+   "text": "**Nút quay lại của máy (Android):** ở màn bắt đầu, màn chọn đội, trong trận đang đánh, popup thua và trong 1 giây chờ: không làm gì (trong trận: tự quyết 2026-11-26; đã loại: thoát game, hỏi rời trận).",
    "title": "Nút quay lại của máy (Android)",
    "by": "Run",
-   "at": "2026-11-27 02:26:43"
+   "at": "2026-11-27 14:13:29"
   },
   "stage-prototype": {
    "state": "done",
@@ -240,6 +240,36 @@
    "title": "Thông số của giai đoạn PROTOTYPE",
    "by": "Run",
    "at": "2026-11-27 02:26:44"
+  },
+  "held-clear": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunFlowTests.WaveClearedCountsOnceTheFrameEndsWithoutTheCastleFalling",
+    "RunFlowTests.WaveClearedInTheSameFrameJustBeforeTheCastleFallsDoesNotCount"
+   ],
+   "play": "",
+   "hash": "551968241c53",
+   "text": "Tin dọn sạch đợt tới cùng khung hình thành bị phá thì bị bỏ\nĐợt đó không được cộng điểm, `feature-wave` không thưởng tiền, không bắt đầu lúc thở.",
+   "title": "Tin dọn sạch đợt tới cùng khung hình thành bị phá thì bị bỏ",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
+  },
+  "stage-idea": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay",
+    "RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam",
+    "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam",
+    "RunSkipMenusTests.ThereIsNoBackToStartOnTheLosePopup"
+   ],
+   "play": "",
+   "hash": "96cdc4096524",
+   "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Màn sau Loading: Vào thẳng trận với đội mặc định (`feature-team-select/team-memory/memory-rules`)\n- Chơi lại ở popup thua: Vào thẳng trận mới với đội mặc định\n- Về màn bắt đầu ở popup thua: Không có (chưa có màn bắt đầu)\n- Ai chọn và hiện màn đích (bắt đầu, chọn đội, trận): Feature này (chỉ có màn trận)\n- Trạng thái màn chính (bắt đầu, chọn đội, trận): Không cần (luôn là trận)",
+   "title": "Thông số của giai đoạn IDEA",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
   }
  },
  "log": [
@@ -760,6 +790,27 @@
    "state": "done",
    "by": "Run",
    "note": "RunLeaveAppTests.LeavingOnTheStartScreenOrTeamSelectDoesNothing"
+  },
+  {
+   "at": "2026-11-27 14:13:29",
+   "id": "edge-nut-quay-lai-cua-may-android",
+   "state": "done",
+   "by": "Run",
+   "note": "Play: bấm Escape ở màn bắt đầu, màn chọn đội, trong trận, trong 1 giây chờ và trên popup thua: Run không làm gì. RunAppSignalsView chỉ nghe rời game và quay lại (OnApplicationPause, OnApplicationFocus), không nghe nút quay lại."
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "held-clear",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.WaveClearedCountsOnceTheFrameEndsWithoutTheCastleFalling, RunFlowTests.WaveClearedInTheSameFrameJustBeforeTheCastleFallsDoesNotCount"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.CastleDestroyedStopsTheBattleAtOnceAndShowsLosePopupAfterTheDelay, RunSkipMenusTests.GameGoesStraightIntoBattleWithTheDefaultTeam, RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam, RunSkipMenusTests.ThereIsNoBackToStartOnTheLosePopup"
   }
  ]
 }

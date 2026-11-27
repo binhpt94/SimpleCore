@@ -285,31 +285,9 @@ namespace Game.Run.Tests
         }
 
         [Test]
-        public void BrokenSavedBestCountsAsZero()
-        {
-            _store.Value = -5;
-            _score.LoadBest();
-            Assert.AreEqual(0, _score.Best);
-
-            _store.ThrowOnLoad = true;
-            _score.LoadBest();
-            Assert.AreEqual(0, _score.Best);
-        }
-
-        [Test]
-        public void FailedSaveKeepsTheBestForThisSession()
-        {
-            _store.ThrowOnSave = true;
-            EnterBattle();
-            ClearWave(1);
-            Assert.DoesNotThrow(() => _flow.Lose());
-            Assert.AreEqual(1, _score.Best);
-        }
-
-        [Test]
         public void NoSavedBestCountsAsZero()
         {
-            _store.Value = 0;
+            _store.Value = null; // feature-save: none yet
             _score.LoadBest();
             Assert.AreEqual(0, _score.Best);
         }
@@ -412,23 +390,22 @@ namespace Game.Run.Tests
             }
         }
 
-        private sealed class FakeStore : IBestScoreStore
+        /// <summary>feature-save, faked: Value null is "none yet"; Saved is the last number written.</summary>
+        private sealed class FakeStore : Game.Save.ISavedRecord
         {
-            public int Value;
+            public int? Value;
             public int? Saved;
-            public bool ThrowOnLoad;
-            public bool ThrowOnSave;
 
-            public int Load()
+            public bool TryRead(out int record)
             {
-                if (ThrowOnLoad) throw new InvalidOperationException("unreadable");
-                return Value;
+                record = Value ?? 0;
+                return Value.HasValue;
             }
 
-            public void Save(int best)
+            public bool Write(int record)
             {
-                if (ThrowOnSave) throw new InvalidOperationException("disk full");
-                Saved = best;
+                Saved = record;
+                return true;
             }
         }
     }

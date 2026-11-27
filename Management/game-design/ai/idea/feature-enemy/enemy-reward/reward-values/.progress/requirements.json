@@ -165,6 +165,19 @@
    "title": "Thông số của giai đoạn PROTOTYPE",
    "by": "@CodeLead",
    "at": "2026-11-26 01:18:14"
+  },
+  "stage-idea": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "EnemyIdeaStageTests.At_IDEA_defeating_an_enemy_pays_the_coins_of_its_type"
+   ],
+   "play": "",
+   "hash": "e4f768315a18",
+   "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Loại có tiền: Lính 5, Sói 4, Khổng lồ 15",
+   "title": "Thông số của giai đoạn IDEA",
+   "by": "Enemy",
+   "at": "2026-11-27 15:10:20"
   }
  },
  "log": [
@@ -377,6 +390,20 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 15:08:05",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyIdeaStageTests.At_IDEA_defeating_an_enemy_pays_the_coins_of_its_type"
+  },
+  {
+   "at": "2026-11-27 15:10:20",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyIdeaStageTests.At_IDEA_defeating_an_enemy_pays_the_coins_of_its_type"
   }
  ]
 }

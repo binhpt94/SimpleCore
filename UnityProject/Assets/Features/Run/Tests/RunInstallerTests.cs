@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Game.Core;
 using NUnit.Framework;
+using Game.Save;
 using Game.Services.Popup;
 using Game.SimClock;
 using UnityEditor;
@@ -16,7 +17,7 @@ namespace Game.Run.Tests
         private const string ConfigPath = "Assets/Features/Run/FeatureAssets/Private/RunConfig.asset";
 
         /// <summary>Everything the run needs installed before it, faked.</summary>
-        private static ServiceRegistry Registry(FakeSession session = null, FakeSimClock clock = null)
+        private static ServiceRegistry Registry(FakeSession session = null, FakeSimClock clock = null, FakeSave save = null)
         {
             var registry = new ServiceRegistry();
             registry.Register<ISessionScene>(session ?? new FakeSession());
@@ -24,6 +25,7 @@ namespace Game.Run.Tests
             clock = clock ?? new FakeSimClock();
             registry.Register<ISimClock>(clock);
             registry.Register<ISimRunControl>(clock);
+            registry.Register<ISavedRecord>(save ?? new FakeSave());
             return registry;
         }
 
@@ -174,6 +176,58 @@ namespace Game.Run.Tests
         }
 
         [Test]
+        public void InstalledRunPlaysWithTheDefaultTeamOfTheConfig()
+        {
+            // start-values: the default team (Hiệp sĩ, Đấu sĩ rìu, Cung thủ) comes from RunConfig.asset into the run.
+            var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
+            var registry = Registry();
+            installer.Install(registry);
+            var flow = (RunFlow)registry.Resolve<IRunFlow>();
+            CollectionAssert.AreEqual(new[] { "knight", "axeman", "archer" }, flow.DefaultTeam.HeroCodes);
+            flow.Shutdown();
+        }
+
+        [Test]
+        public void InstalledRunReadsTheBestFromSaveAndHandsTheNewBestBackToIt()
+        {
+            // score-rules#params: the run asks feature-save; it never reads or writes the device itself.
+            var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
+            var clock = new FakeSimClock();
+            var save = new FakeSave { Stored = 0 };
+            var registry = Registry(clock: clock, save: save);
+            installer.Install(registry);
+            var score = (RunScore)registry.Resolve<IRunScore>();
+            var flow = (RunFlow)registry.Resolve<IRunFlow>();
+
+            score.LoadBest();
+            Assert.AreEqual(0, score.Best);
+            flow.Begin();
+            flow.Play();
+            flow.EnterBattle(ChosenTeam);
+            flow.CountClearedWave(1);
+            clock.Step(1);
+            flow.Lose();
+
+            Assert.AreEqual(1, score.Best);
+            CollectionAssert.AreEqual(new[] { 1 }, save.Writes, "Handed to feature-save before the lose popup.");
+            flow.Shutdown();
+        }
+
+        [Test]
+        public void InstallWithoutSaveFailsNamingIt()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IPopupStack>(new FakePopupStack());
+            var clock = new FakeSimClock();
+            registry.Register<ISimClock>(clock);
+            registry.Register<ISimRunControl>(clock);
+            var error = Assert.Throws<InvalidOperationException>(() => installer.Install(registry));
+            StringAssert.Contains(nameof(ISavedRecord), error.Message);
+        }
+
+        [Test]
         public void InstallWithoutSessionSceneFailsNamingIt()
         {
             var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
@@ -263,6 +317,26 @@ namespace Game.Run.Tests
                 private Action _undo;
                 public Unsubscribe(Action undo) => _undo = undo;
                 public void Dispose() { _undo?.Invoke(); _undo = null; }
+            }
+        }
+
+        /// <summary>feature-save, faked. Stored null: "none yet".</summary>
+        private sealed class FakeSave : ISavedRecord
+        {
+            public int? Stored;
+            public readonly List<int> Writes = new List<int>();
+
+            public bool TryRead(out int record)
+            {
+                record = Stored ?? 0;
+                return Stored.HasValue;
+            }
+
+            public bool Write(int record)
+            {
+                Stored = record;
+                Writes.Add(record);
+                return true;
             }
         }
 

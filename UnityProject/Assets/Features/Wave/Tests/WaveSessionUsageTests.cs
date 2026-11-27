@@ -56,7 +56,7 @@ namespace Game.Wave.Tests
             _clock.Seconds(7.01);
             Assert.That(_director.Waiting, Is.EqualTo(0), "all 8 enemies of wave 1 came");
             _enemies.DefeatAll();
-            _clock.Steps(1);
+            _clock.Steps(2); // the clear is reported to the run, then paid and the break begins
             Assert.That(_director.InBreak, Is.True);
             Assert.That(Usage(wave).RunningJobs, Is.EqualTo(2), "the break clock");
 

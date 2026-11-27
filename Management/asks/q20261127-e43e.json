@@ -1,0 +1,16 @@
+{
+ "id": "q20261127-e43e",
+ "source": "@Worker",
+ "job": "worker w20261127-151411-hero (Hero): Các thông số IDEA của respawn-values, hero-level-values, targeting-values đã có sẵn trong code và HeroConfig.asset; chỉ còn thiếu test riêng cho cột IDEA. Đã sửa HeroFakes.Display để ghi số giây PlayF",
+ "blocker": "Guard khoá ghi Assets trong lúc @UnityAutoPlay chơi thử nên chưa ghi được file test. Khi hết khoá, cho việc này chạy tiếp để ghi Tests/HeroStageIdeaTests.cs (10 test cho cột IDEA của 3 node) rồi báo done.",
+ "options": "A chạy lại việc này sau khi hết khoá · B chấp nhận partial, giao lại sau",
+ "suggest": "A: chạy lại ngay khi @UnityAutoPlay xong; bản test đã soạn đủ, chỉ cần ghi file.",
+ "waiting": "worker w20261127-151411-hero",
+ "state": "open",
+ "answer": "",
+ "allow": "",
+ "allow_uses": 0,
+ "allow_until": 0,
+ "created": 1795767399.054751,
+ "closed": 0
+}

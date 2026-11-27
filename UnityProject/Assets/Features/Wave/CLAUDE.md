@@ -11,8 +11,11 @@ Tầng: 6 · Features
 - Nhịp chung: `WaveParticipant` đăng kí `ISimClock.OnStep("Wave", WaveDirector.Step)`; Wave chạy đầu bước nên thấy tin bị hạ và kết quả lượt của bước trước. Không đọc thời gian khung hình. Mọi chờ (nhịp thả, lúc thở) chỉ đếm bước `Gameplay`; bước không gameplay thì đứng yên.
 - Ngẫu nhiên: xáo loại và gán bên lấy từ `ISimRandom.Stream("Wave")` qua `StreamWaveRandom`; không tự tạo bộ ngẫu nhiên. Danh sách thả lập một lần đầu đợt, con chờ trần giữ nguyên loại và bên.
 - Mốc: `RunStarted` đặt lại về đợt 1. `BattleStarted` hẹn đợt 1 ở bước gameplay đầu tiên (con đầu ra trong bước đó). `BattleStopped`/`BattleCleared` ngừng thả quái.
-- Dọn sạch đợt w, đúng thứ tự: `IWalletIncome.Add(20 + 5w)`, `IRunFlow.CountClearedWave(w)`, `WaveCleared(w)`, `CurrentWave = w+1`, rồi thở 3 giây và `WaveStarted(w+1)`.
-- Việc xét dọn sạch được hoãn tới bước nhịp kế tiếp: thành bị phá trong cùng bước thì không tính. Lúc thở đếm từ bước sau bước dọn sạch.
+- Dọn sạch đợt w, ba bước nhịp (người quyết 2026-11-27, phương án a):
+  - Bước k: con cuối bị hạ sau khi đã ra hết. Wave chỉ ghi nhận.
+  - Bước k+1, chỗ của Wave: trận còn chạy thì `IRunFlow.CountClearedWave(w)`. Run giữ tin tới cuối bước này và bỏ nếu thành bị phá trong bước đó.
+  - Bước k+2, chỗ của Wave: trận còn chạy (thành không bị phá ở k+1) thì `IWalletIncome.Add(20 + 5w)`, `WaveCleared(w)`, `CurrentWave = w+1`, vào lúc thở. Thành bị phá ở bước k hay k+1 thì không thưởng, không lúc thở.
+- Lúc thở đếm từ bước sau bước trả thưởng; hết 3 giây thì `WaveStarted(w+1)`.
 - Hệ số chỉ số `1 + 0.10×(w−1)` do Wave tính và đưa vào `EnemySpawn.StatScale`.
 - Logic C# thuần trong `Scripts/Internal`:
   - `WaveFormula`: số quái, nhịp, hệ số, số con từng loại.

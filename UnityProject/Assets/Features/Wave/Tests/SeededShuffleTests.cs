@@ -36,8 +36,10 @@ namespace Game.Wave.Tests
                         if (enemies.AliveCount > 0) enemies.Defeat(1);
                     }
                     enemies.DefeatAll();
-                    clock.Steps(1);
+                    // One step reports the clear to the run, the next pays it and begins the break.
+                    clock.Steps(2);
                     Assert.That(log, Has.Member("score " + wave), "wave " + wave + " was cleared");
+                    Assert.That(log, Has.Member("coins " + (20 + 5 * wave)), "wave " + wave + " was paid");
                     clock.Seconds(3.01);
                 }
             }

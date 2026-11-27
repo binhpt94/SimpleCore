@@ -9,8 +9,8 @@ namespace Game.Wave
 {
     /// <summary>
     /// Runs the waves of a battle: starts wave 1 on the first gameplay step after the battle starts, sends the enemies
-    /// of the wave one by one, notices the clear, pays the reward, counts the wave for the run, then waits the break
-    /// and starts the next wave.
+    /// of the wave one by one, notices the clear, counts the wave for the run, pays the reward on the next step unless
+    /// the castle fell in between, then waits the break and starts the next wave.
     /// Driven by <see cref="Step"/>, one call per step of the shared clock (owner "Wave", first in the step order);
     /// knows nothing of Unity and never reads frame time.
     /// </summary>
@@ -46,6 +46,7 @@ namespace Game.Wave
         private int _alive;
         private double _breakLeft;
         private bool _clearPending;
+        private bool _rewardPending;
         private bool _startPending;
 
         public WaveDirector(WaveRules rules, IRunFlow run, IEnemyField enemies, IWalletIncome income, IWaveRandom random)
@@ -106,17 +107,26 @@ namespace Game.Wave
         /// </summary>
         public void Step(SimStep step)
         {
+            // A clear reported to the run in the last step is paid now, like the run counts it: the run drops the clear
+            // if the castle falls in the step it was reported in, and the battle is then already stopped here, so the
+            // wave gives no reward and no break either.
+            var clearedNow = false;
+            if (_rewardPending)
+            {
+                _rewardPending = false;
+                if (_phase == Phase.Sending)
+                {
+                    PayClearedWave();
+                    clearedNow = true;
+                }
+            }
+
             // A clear noticed during the last step is settled now, after every feature had its say in that step:
             // if the castle fell in the same step the battle is already stopped and the clear does not count.
-            var clearedNow = false;
             if (_clearPending)
             {
                 _clearPending = false;
-                if (_phase == Phase.Sending)
-                {
-                    ClearWave();
-                    clearedNow = true;
-                }
+                if (_phase == Phase.Sending) ClearWave();
             }
 
             if (step.Gameplay)
@@ -149,6 +159,7 @@ namespace Game.Wave
 
             var stillOnField = _phase == Phase.Sending ? _alive : 0;
             _clearPending = false;
+            _rewardPending = false;
             CurrentWave = wave;
             CurrentWaveChanged?.Invoke(CurrentWave);
             BeginWave(wave, stillOnField);
@@ -162,6 +173,7 @@ namespace Game.Wave
             _nextIndex = 0;
             _alive = 0;
             _clearPending = false;
+            _rewardPending = false;
             _startPending = false;
             CurrentWave = 1;
             CurrentWaveChanged?.Invoke(CurrentWave);
@@ -177,6 +189,7 @@ namespace Game.Wave
         {
             SetPhase(Phase.Stopped);
             _clearPending = false;
+            _rewardPending = false;
             _startPending = false;
             _list.Clear();
             _nextIndex = 0;
@@ -242,14 +255,24 @@ namespace Game.Wave
             }
         }
 
+        /// <summary>
+        /// The wave is cleared: the run hears of it now and holds it to the end of this step; the reward and the break
+        /// wait for Wave's next step (<see cref="PayClearedWave"/>), so a castle falling in this step costs both.
+        /// </summary>
         private void ClearWave()
+        {
+            _run.CountClearedWave(_plan.Number);
+            _rewardPending = true;
+        }
+
+        /// <summary>The clear held over from the last step stands: reward, tell, next wave number, then the break.</summary>
+        private void PayClearedWave()
         {
             var wave = _plan.Number;
             SetPhase(Phase.Break);
             _breakLeft = _rules.GapSeconds;
 
             _income.Add(_rules.ClearRewardBase + _rules.ClearRewardPerWave * wave);
-            _run.CountClearedWave(wave);
             WaveCleared?.Invoke(wave);
 
             CurrentWave = wave + 1;

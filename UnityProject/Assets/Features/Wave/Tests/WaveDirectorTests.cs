@@ -60,12 +60,28 @@ namespace Game.Wave.Tests
 
         private void Step() => _clock.Steps(1);
 
-        /// <summary>Lets wave 1 send all 8 enemies (7 s) and defeats them, then settles the clear on the next step.</summary>
+        /// <summary>
+        /// Lets wave 1 send all 8 enemies (7 s) and defeats them; the next step reports the clear to the run, the one
+        /// after pays it and begins the break.
+        /// </summary>
         private void ClearWaveOne()
         {
             Wait(7.01);
             _enemies.DefeatAll();
             Step();
+            Step();
+        }
+
+        /// <summary>A castle that falls at its place in the step, after Wave's part, on the step it is told to.</summary>
+        private IDisposable CastleFallsOnNextStep()
+        {
+            var armed = true;
+            return _clock.OnStep("Castle", _ =>
+            {
+                if (!armed) return;
+                armed = false;
+                _run.Lose();
+            });
         }
 
         [Test]
@@ -107,14 +123,14 @@ namespace Game.Wave.Tests
         }
 
         [Test]
-        public void ClearingAWave_PaysThenScoresThenTells_ThenMovesToTheNextWave()
+        public void ClearingAWave_ScoresThenPaysThenTells_ThenMovesToTheNextWave()
         {
             Begin();
             _log.Clear();
 
             ClearWaveOne();
 
-            Assert.That(_log, Is.EqualTo(new[] { "coins 25", "score 1", "cleared 1", "current 2" }));
+            Assert.That(_log, Is.EqualTo(new[] { "score 1", "coins 25", "cleared 1", "current 2" }));
             Assert.That(_director.CurrentWave, Is.EqualTo(2));
             Assert.That(_director.InBreak, Is.True);
         }
@@ -126,7 +142,9 @@ namespace Game.Wave.Tests
             Wait(2.5);
             _enemies.DefeatAll();
             Step();
+            Step();
 
+            Assert.That(_log, Has.No.Member("score 1"), "not reported to the run");
             Assert.That(_log, Has.No.Member("cleared 1"));
         }
 
@@ -154,10 +172,55 @@ namespace Game.Wave.Tests
             _enemies.DefeatAll();
             _run.Lose();
             Step();
+            Step();
 
             Assert.That(_log, Has.No.Member("coins 25"));
             Assert.That(_log, Has.No.Member("score 1"));
             Assert.That(_log, Has.No.Member("cleared 1"));
+        }
+
+        [Test]
+        public void WaveClearedWithTheCastleStanding_RewardAndBreakComeOnTheStepAfterTheRunHearsOfIt()
+        {
+            Begin();
+            Wait(7.01);
+            _enemies.DefeatAll();
+            _log.Clear();
+
+            Step();
+            Assert.That(_log, Is.EqualTo(new[] { "score 1" }), "the run hears of the clear and holds it to the end of the step");
+            Assert.That(_director.InBreak, Is.False, "no break yet");
+            Assert.That(_director.CurrentWave, Is.EqualTo(1));
+
+            Step();
+            Assert.That(_log, Is.EqualTo(new[] { "score 1", "coins 25", "cleared 1", "current 2" }),
+                "the castle stood through that step: the reward comes now and the break begins");
+            Assert.That(_director.InBreak, Is.True);
+            Assert.That(_director.CurrentWave, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void CastleFallingInTheStepTheClearIsReported_GivesNoRewardAndNoBreak()
+        {
+            Begin();
+            Wait(7.01);
+            _enemies.DefeatAll();
+            _log.Clear();
+
+            using (CastleFallsOnNextStep())
+            {
+                Step();
+            }
+            Assert.That(_log, Is.EqualTo(new[] { "score 1", "lose" }),
+                "the castle falls in the same step as the report, so the run drops the clear");
+
+            Wait(10);
+            Assert.That(_log, Has.No.Member("coins 25"));
+            Assert.That(_log, Has.No.Member("cleared 1"));
+            Assert.That(_log, Has.No.Member("current 2"));
+            Assert.That(_log, Has.No.Member("started 2"));
+            Assert.That(_director.InBreak, Is.False);
+            Assert.That(_director.CurrentWave, Is.EqualTo(1));
         }
 
         [Test]
@@ -220,6 +283,7 @@ namespace Game.Wave.Tests
             Assert.That(_log, Has.No.Member("cleared 2"), "the left-over enemies are still on the field");
 
             _enemies.Defeat(leftOver);
+            Step();
             Step();
             Assert.That(_log, Has.Member("cleared 2"));
             Assert.That(_log, Has.Member("coins 30"));
@@ -334,7 +398,8 @@ namespace Game.Wave.Tests
             _log.Clear();
 
             Step();
-            Assert.That(_director.CurrentWave, Is.EqualTo(2), "the number moves on in the step of the clear");
+            Step();
+            Assert.That(_director.CurrentWave, Is.EqualTo(2), "the number moves on in the step the clear is paid");
             Assert.That(_log, Has.Member("current 2"));
 
             _log.Clear();

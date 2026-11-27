@@ -1,7 +1,7 @@
 # Run
 Tầng: 6 · Features
 
-Giữ các bước của một lượt trong scene Game: dựng và dọn trận, thành bị phá, chờ 1 giây, thua; đếm điểm (số đợt dọn sạch) và lưu kỉ lục. Run không phụ thuộc feature khác ngoài SimClock; từ PROTOTYPE màn đích do GameFlow chọn.
+Giữ các bước của một lượt trong scene Game: dựng và dọn trận, thành bị phá, chờ 1 giây, thua; đếm điểm (số đợt dọn sạch) và giữ luật kỉ lục. Run không phụ thuộc feature khác ngoài SimClock và Save (`ISavedRecord`: Run quyết giá trị và lúc ghi, không tự đọc ghi xuống máy); từ PROTOTYPE màn đích do GameFlow chọn.
 
 ## Contracts
 Mục "Dùng bởi" theo gói thiết kế; Wave, Wallet, Hud, Upgrade đã ghi trong `CLAUDE.md` của họ là dùng `IRunFlow`. Feature khác thêm hay bớt chỗ dùng thì báo phiên Run (qua @CodeLead) để sửa mục này.
@@ -38,7 +38,8 @@ Các bước của lượt và tin của trận. Yêu cầu không hợp bước
 ### IRunScore
 Điểm của lượt và kỉ lục.
 - `Score`: số đợt đã dọn sạch của lượt đang hoặc vừa chơi; về 0 khi lượt mới bắt đầu.
-- `Best`: kỉ lục đã lưu trên máy (đọc lúc tải phiên). `IsNewBest`: true khi lượt vừa kết thúc lập kỉ lục mới.
+- `Best`: kỉ lục của game, đọc qua Save lúc tải phiên (Save báo chưa có, hoặc số âm, thì 0). `IsNewBest`: true khi lượt vừa kết thúc lập kỉ lục mới.
+- Kỉ lục đổi thì giao Save ghi ngay lúc chốt, trước popup thua. Save báo ghi thất bại: `Best` vẫn giữ số mới tới khi tắt game, không báo người chơi; Run thử ghi lại một lần mỗi khi game trở lại màn hình và ở lần chốt lượt kế tiếp (kể cả khi lượt đó không phá kỉ lục), ghi được thì thôi.
 - `ScoreChanged`: báo sau khi `Score`, `Best` hoặc `IsNewBest` đổi.
 - Điểm chốt một lần, lúc thành bị phá.
 - Dùng bởi: Hud, PopupLose, Home.
@@ -56,8 +57,9 @@ Enum: cách rời trận, kèm trong `IRunBattle.BattleLeft`.
 - Dùng bởi: GameFlow.
 
 ## Bên trong
-- Logic C# thuần trong `Scripts/Internal`: `RunFlow` (máy bước), `RunScore`, `RunInterrupts` (rời game, quay lại: giữ các lần chờ), `SimClockRunDelay` (chờ đếm theo bước của đồng hồ chung, đứng yên khi game ở ngoài màn hình qua `IRunWaitHold`).
+- Logic C# thuần trong `Scripts/Internal`: `RunFlow` (máy bước), `RunScore` (điểm, kỉ lục, ghi qua `ISavedRecord`, cờ chưa lưu), `RunInterrupts` (rời game, quay lại: giữ các lần chờ; quay lại thì thử ghi kỉ lục chưa lưu), `SimClockRunDelay` (chờ đếm theo bước của đồng hồ chung, đứng yên khi game ở ngoài màn hình qua `IRunWaitHold`).
 - View `RunAppSignalsView` chỉ chuyển tín hiệu máy (rời game, quay lại).
+- Cần `ISavedRecord` đăng ký trước Run (`SaveInstaller` đứng trước `RunInstaller` trong `Boot.Game.prefab`).
 - Số cân bằng ở `RunConfig` trong `FeatureAssets/Private`; installer ở `FeatureAssets/Public`.
 
 Test: assembly `Game.Run.Tests` (EditMode).

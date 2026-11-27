@@ -86,9 +86,9 @@ namespace Game.Wave.Tests
                 clock.Seconds(7.01);
                 enemies.DefeatAll();
                 log.Clear();
-                clock.Steps(1);
+                clock.Steps(2);
 
-                Assert.That(log, Is.EqualTo(new[] { "coins 25", "score 1", "hud cleared 1", "hud wave 2" }),
+                Assert.That(log, Is.EqualTo(new[] { "score 1", "coins 25", "hud cleared 1", "hud wave 2" }),
                     "Hud is told of the clear (after the reward) and of the upcoming wave number");
 
                 log.Clear();

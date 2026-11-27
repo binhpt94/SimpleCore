@@ -406,6 +406,49 @@ namespace Game.Wallet.Tests
             }
         }
 
+        // ---- stage IDEA columns ----
+
+        // wallet-rules#stage-idea: start coins 50 (from the config asset), refused add/spend is logged, cap 999.999.999.
+        [Test]
+        public void StageIdea_WalletRules_Start50FromConfig_RefusalsAreLogged_CapIs999999999()
+        {
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IRunFlow>(new FakeRunFlow());
+            LoadInstaller().Install(registry);
+            Assert.That(registry.Resolve<IWalletBalance>().Coins, Is.EqualTo(50), "IDEA start coins");
+
+            var log = new FakeLog();
+            var wallet = new WalletLogic(50, log);
+            wallet.Add(-1);
+            Assert.That(wallet.TrySpend(-1), Is.EqualTo(SpendResult.InvalidAmount));
+            Assert.That(log.Messages, Has.Count.EqualTo(2), "IDEA logs every refused add and spend");
+            Assert.That(wallet.Coins, Is.EqualTo(50));
+
+            Assert.That(WalletLogic.MaxCoins, Is.EqualTo(999_999_999));
+            wallet.Add(int.MaxValue);
+            Assert.That(wallet.Coins, Is.EqualTo(999_999_999), "IDEA cap");
+        }
+
+        // income-amounts#stage-idea: takes coins from a fallen enemy and from a cleared wave; ignores calls after the run ended.
+        [Test]
+        public void StageIdea_IncomeAmounts_TakesEnemyAndWaveClearIncome_IgnoresIncomeAfterRunEnd()
+        {
+            var wallet = NewWallet(50);
+            var run = new FakeRunFlow();
+            new WalletRunReset(wallet, run).Run();
+            run.StartRun();
+            IWalletIncome income = wallet;
+
+            income.Add(5);           // enemy (Lính) falls
+            income.Add(20 + 5 * 1);  // wave 1 cleared
+            Assert.That(wallet.Coins, Is.EqualTo(80));
+
+            run.StopBattle();
+            income.Add(15);
+            Assert.That(wallet.Coins, Is.EqualTo(80), "income after the run ended is ignored");
+        }
+
         // ---- helpers and fakes ----
 
         private static WalletLogic NewWallet(int startCoins)

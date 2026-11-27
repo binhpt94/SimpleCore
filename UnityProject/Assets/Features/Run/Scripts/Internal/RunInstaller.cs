@@ -1,13 +1,14 @@
 using System;
 using System.Linq;
 using Game.Core;
+using Game.Save;
 using Game.Services.Popup;
 using Game.SimClock;
 using UnityEngine;
 
 namespace Game.Run
 {
-    /// <summary>Wires the run: publishes IRunFlow, IRunBattle (same object) and IRunScore and joins the scene session. Depends on ISessionScene, IPopupStack, ISimClock and ISimRunControl (installed before the run).</summary>
+    /// <summary>Wires the run: publishes IRunFlow, IRunBattle (same object) and IRunScore and joins the scene session. Depends on ISessionScene, IPopupStack, ISimClock, ISimRunControl and ISavedRecord (installed before the run).</summary>
     [CreateAssetMenu(menuName = "Game/Run/Run Installer", fileName = "RunInstaller")]
     public sealed class RunInstaller : InstallerAsset
     {
@@ -24,8 +25,10 @@ namespace Game.Run
             var popups = registry.Resolve<IPopupStack>();
             var simClock = registry.Resolve<ISimClock>();
             var simRun = registry.Resolve<ISimRunControl>();
+            // The best is kept on the device by feature-save; the run only decides its value and when to write.
+            var saved = registry.Resolve<ISavedRecord>();
 
-            var score = new RunScore(new PlayerPrefsBestScoreStore());
+            var score = new RunScore(saved);
             // Frame waits: the session begins on the frame after Run, the leftover popup check on the frame after the battle starts.
             var frames = new UniTaskRunDelay();
             // Gameplay waits (before the lose popup, counting cleared waves) on the shared clock, owner "Run".

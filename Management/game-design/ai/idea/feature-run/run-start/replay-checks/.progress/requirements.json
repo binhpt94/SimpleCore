@@ -34,15 +34,17 @@
    "at": "2026-11-25 12:23:21"
   },
   "only-record-saved": {
-   "state": "verified",
+   "state": "done",
    "note": "",
-   "tests": [],
-   "play": "Play: pha ki luc, dung Play roi Play lai: ki luc con, moi thu khac ve dau luot. Run chi ghi khoa PlayerPrefs Run/Best",
-   "hash": "f10ab1f79ffa",
-   "text": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game\nKỉ lục do `feature-run/run-score/score-rules` lưu. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống lúc game đang mở.",
+   "tests": [
+    "RunSavedBestTests.OnlyTheBestIsHandedToSave"
+   ],
+   "play": "",
+   "hash": "a328613df48b",
+   "text": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game\nKỉ lục do `feature-run/run-score/score-rules` quyết và giao `feature-save` ghi xuống máy. Đội đã nhớ (`feature-team-select/team-memory`) chỉ sống lúc game đang mở.",
    "title": "Kỉ lục là thứ duy nhất được ghi lại để còn sau khi tắt game",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:23:21"
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
   },
   "edge-luot-ket-thuc-luc-dang-co-hieu-ung": {
    "state": "verified",
@@ -275,6 +277,13 @@
    "state": "done",
    "by": "Run",
    "note": "RunUsageTrackingTests.ReplayChecksStagePrototype_TenRunsInARowLeaveTheRunHoldingNoMoreThanAtTheStartOfTheFirst"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "only-record-saved",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSavedBestTests.OnlyTheBestIsHandedToSave"
   }
  ]
 }

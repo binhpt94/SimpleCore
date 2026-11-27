@@ -5,6 +5,7 @@
     "Game.Core",
     "Game.SimClock.Contracts",
     "Game.Run.Contracts",
+    "Game.Save.Contracts",
     "Game.Services.Popup.Contracts",
     "Game.Castle.Contracts",
     "Game.Wave.Contracts",

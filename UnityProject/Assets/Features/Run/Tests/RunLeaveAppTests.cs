@@ -163,11 +163,16 @@ namespace Game.Run.Tests
             }
         }
 
-        private sealed class FakeStore : IBestScoreStore
+        /// <summary>feature-save, faked: nothing saved yet, every write succeeds.</summary>
+        private sealed class FakeStore : Game.Save.ISavedRecord
         {
-            public int Load() => 0;
+            public bool TryRead(out int record)
+            {
+                record = 0;
+                return false;
+            }
 
-            public void Save(int best) { }
+            public bool Write(int record) => true;
         }
     }
 }

@@ -15,19 +15,18 @@
    "at": "2026-11-25 12:03:29"
   },
   "score-lock-once": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount",
     "RunFlowTests.SecondCastleDestroyedReportIsIgnored",
-    "RunFlowTests.GivingUpSettlesTheScoreLikeLosing"
+    "RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount"
    ],
    "play": "",
-   "hash": "e82b9756e080",
-   "text": "Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thua hoặc đồng ý bỏ lượt)\nSau khi chốt, báo dọn sạch tới muộn không làm đổi điểm.",
-   "title": "Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thua hoặc đồng ý bỏ lượt)",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:03:29"
+   "hash": "56740aeef3a6",
+   "text": "Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thành bị phá)\nSau khi chốt, báo dọn sạch tới muộn không làm đổi điểm.",
+   "title": "Điểm chốt đúng một lần, ngay lúc lượt kết thúc (thành bị phá)",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
   },
   "record-update": {
    "state": "verified",
@@ -45,31 +44,33 @@
    "at": "2026-11-25 12:03:29"
   },
   "record-default-zero": {
-   "state": "verified",
+   "state": "done",
    "note": "NoSavedBestCountsAsZero dùng kho giả trả về 0, qua nhờ đồ giả. Thêm test kho thật PlayerPrefsBestScoreStore khi chưa có khoá kỉ lục thì đọc ra 0, dọn khoá trước và sau test",
    "tests": [
-    "RunBestScoreStoreTests.NothingSavedOnTheDeviceMeansTheBestIsZero",
-    "RunFlowTests.NoSavedBestCountsAsZero"
+    "RunFlowTests.NoSavedBestCountsAsZero",
+    "RunSavedBestTests.SaveSayingNoneYetMeansTheBestIsZero"
    ],
    "play": "",
-   "hash": "8862664f3c2d",
-   "text": "Chưa có kỉ lục lưu trên máy thì kỉ lục là 0\nLần mở game đầu tiên, hoặc dữ liệu lưu đọc không được, đều coi là 0.",
-   "title": "Chưa có kỉ lục lưu trên máy thì kỉ lục là 0",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:06:48"
+   "hash": "f0cccc1e1ea1",
+   "text": "`feature-save` báo chưa có kỉ lục thì kỉ lục là 0\nLần mở game đầu tiên, hoặc dữ liệu lưu đọc không được, `feature-save` đều báo chưa có; lượt chơi coi là 0.",
+   "title": "`feature-save` báo chưa có kỉ lục thì kỉ lục là 0",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
   },
   "record-save-now": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup"
+    "RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup",
+    "RunInstallerTests.InstalledRunReadsTheBestFromSaveAndHandsTheNewBestBackToIt",
+    "RunSavedBestTests.NewBestIsHandedToSaveTheMomentTheRunIsSettled"
    ],
    "play": "",
-   "hash": "403c316e6e09",
-   "text": "Kỉ lục mới được ghi xuống máy ngay khi đổi, trước khi popup thua hiện\nTắt game ngay trên popup thua vẫn giữ kỉ lục mới.",
-   "title": "Kỉ lục mới được ghi xuống máy ngay khi đổi, trước khi popup thua hiện",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:03:29"
+   "hash": "03dfb27bc6b1",
+   "text": "Kỉ lục mới được giao `feature-save` ghi xuống máy ngay khi đổi, trước khi popup thua hiện\nTắt game ngay trên popup thua vẫn giữ kỉ lục mới.",
+   "title": "Kỉ lục mới được giao `feature-save` ghi xuống máy ngay khi đổi, trước khi popup thua hiện",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
   },
   "record-read-anytime": {
    "state": "verified",
@@ -168,20 +169,21 @@
    "at": "2026-11-25 12:03:29"
   },
   "params": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
     "RunFlowTests.EachClearedWaveAddsOnePoint",
     "RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup",
     "RunFlowTests.NewRunStartsTheScoreAtZero",
-    "RunSkipMenusTests.PlayAgainStartsANewBattleWithTheDefaultTeam"
+    "RunInstallerTests.InstallWithoutSaveFailsNamingIt",
+    "RunInstallerTests.InstalledRunReadsTheBestFromSaveAndHandsTheNewBestBackToIt"
    ],
    "play": "",
-   "hash": "e6823e82f128",
-   "text": "## Làm gì\n- Đặt điểm về 0 khi lượt mới bắt đầu.\n- Nghe báo dọn sạch đợt từ `feature-wave`; cộng 1 điểm mỗi lần, chỉ khi lượt chưa kết thúc.\n- Khi lượt kết thúc: chốt điểm, so với kỉ lục, cập nhật kỉ lục và cờ kỉ lục mới, ghi kỉ lục xuống máy nếu đổi.\n- Lúc mở game: đọc kỉ lục đã lưu (không có hoặc hỏng thì 0).\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Điểm đầu lượt | 0 | đợt | Chưa dọn đợt nào |\n| Điểm cộng mỗi lần dọn sạch | 1 | đợt | Điểm = số đợt đã dọn |\n| Kỉ lục mặc định | 0 | đợt | Chưa chơi lượt nào |\n| Kiểu số | số nguyên không âm | | Không có điểm lẻ |\n| Số kỉ lục lưu | 1 cho cả game | | Không theo đội |\n| Lúc ghi kỉ lục | ngay khi đổi | | Người chơi hay tắt ngang |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Đếm điểm | Có | Có | Có |\n| Kỉ lục nhớ trong lúc game mở | Có | Có | Có |\n| Kỉ lục lưu khi tắt game | Không bắt buộc | Có | Có |\n| Cờ kỉ lục mới | Có | Có | Có |",
+   "hash": "f81b79cca273",
+   "text": "## Làm gì\n- Đặt điểm về 0 khi lượt mới bắt đầu.\n- Nghe báo dọn sạch đợt từ `feature-wave`; cộng 1 điểm mỗi lần, chỉ khi lượt chưa kết thúc.\n- Khi lượt kết thúc: chốt điểm, so với kỉ lục, cập nhật kỉ lục và cờ kỉ lục mới; kỉ lục đổi thì giao `feature-save` ghi.\n- Lúc mở game: nhờ `feature-save` đọc kỉ lục đã lưu (báo chưa có thì 0).\n- Không tự đọc, ghi xuống máy: việc đó của `feature-save` (người quyết tách, 2026-11-26).\n- `feature-save` báo ghi thất bại: giữ kỉ lục trong bộ nhớ, đánh dấu \"chưa lưu\"; thử ghi lại khi game trở lại màn hình và lúc chốt lượt kế tiếp.\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Điểm đầu lượt | 0 | đợt | Chưa dọn đợt nào |\n| Điểm cộng mỗi lần dọn sạch | 1 | đợt | Điểm = số đợt đã dọn |\n| Kỉ lục mặc định | 0 | đợt | Chưa chơi lượt nào |\n| Kiểu số | số nguyên không âm | | Không có điểm lẻ |\n| Số kỉ lục lưu | 1 cho cả game | | Không theo đội |\n| Lúc ghi kỉ lục | ngay khi đổi | | Người chơi hay tắt ngang |\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Đếm điểm | Có | Có | Có |\n| Kỉ lục nhớ trong lúc game mở | Có | Có | Có |\n| Kỉ lục lưu khi tắt game | Có, qua `feature-save` | Có, qua `feature-save` | Có, qua `feature-save` |\n| Cờ kỉ lục mới | Có | Có | Có |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "@CodeLead",
-   "at": "2026-11-25 12:03:29"
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
   },
   "edge-thanh-bi-pha-lan-dau-roi-hoi-sinh": {
    "state": "verified",
@@ -197,18 +199,17 @@
    "at": "2026-11-25 18:32:07"
   },
   "edge-dot-don-sach-cung-khung-hinh-thanh-bi": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
-    "RunReviveTests.WaveClearedInTheFrameOfTheFirstFallCountsWhenTheCastleIsRevived",
-    "RunReviveTests.WaveClearedInTheFrameOfTheFirstFallDoesNotCountWhenTheRunIsLost"
+    "RunFlowTests.WaveClearedInTheSameFrameJustBeforeTheCastleFallsDoesNotCount"
    ],
    "play": "",
-   "hash": "fdc5b2a196fd",
-   "text": "**Đợt dọn sạch cùng khung hình thành bị phá lần đầu:** giữ chờ: hồi sinh thành công thì cộng; chốt thua thì không cộng, theo luật \"thua trước\" (ý `same-tick-clear` của `feature-popup-revive`; sửa 2026-11-25).",
-   "title": "Đợt dọn sạch cùng khung hình thành bị phá lần đầu",
-   "by": "@CodeLead",
-   "at": "2026-11-25 18:32:07"
+   "hash": "7fcc6eda4cdf",
+   "text": "**Đợt dọn sạch cùng khung hình thành bị phá:** tin dọn sạch bị bỏ, không cộng, theo luật \"thua trước\".",
+   "title": "Đợt dọn sạch cùng khung hình thành bị phá",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
   },
   "stage-prototype": {
    "state": "verified",
@@ -225,6 +226,89 @@
    "title": "Thông số của giai đoạn PROTOTYPE",
    "by": "@CodeLead",
    "at": "2026-11-26 01:03:28"
+  },
+  "record-keep-on-fail": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunSavedBestTests.FailedWriteKeepsTheNewBestInMemoryWithoutTellingThePlayer"
+   ],
+   "play": "",
+   "hash": "fde6ed33e844",
+   "text": "`feature-save` báo ghi thất bại thì kỉ lục mới vẫn giữ trong bộ nhớ tới khi tắt game\nMàn bắt đầu và popup thua vẫn thấy kỉ lục mới; không báo lỗi cho người chơi.",
+   "title": "`feature-save` báo ghi thất bại thì kỉ lục mới vẫn giữ trong bộ nhớ tới khi tắt game",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
+  },
+  "record-retry": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunSavedBestTests.ComingBackWithTheBestAlreadySavedWritesNothing",
+    "RunSavedBestTests.UnsavedBestIsWrittenAgainAtTheNextSettleEvenWithoutANewBest",
+    "RunSavedBestTests.UnsavedBestIsWrittenAgainWhenTheGameComesBackToTheScreen"
+   ],
+   "play": "",
+   "hash": "cc371d34e8e3",
+   "text": "Kỉ lục chưa ghi được thì thử ghi lại khi game trở lại màn hình, và ở lần chốt lượt kế tiếp\nMỗi dịp thử một lần; ghi được thì thôi. Lượt sau không phá kỉ lục vẫn thử.",
+   "title": "Kỉ lục chưa ghi được thì thử ghi lại khi game trở lại màn hình, và ở lần chốt lượt kế tiếp",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
+  },
+  "edge-du-lieu-luu-khong-phai-so": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunSavedBestTests.SavedDataThatIsNotANumberCountsAsZeroAndTheNextNewBestOverwritesIt"
+   ],
+   "play": "",
+   "hash": "db02362fef64",
+   "text": "**Dữ liệu lưu không phải số:** `feature-save` báo chưa có; coi kỉ lục là 0, ghi đè ở lần phá kỉ lục kế tiếp.",
+   "title": "Dữ liệu lưu không phải số",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
+  },
+  "edge-du-lieu-luu-la-so-am": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunSavedBestTests.NegativeSavedBestCountsAsZero"
+   ],
+   "play": "",
+   "hash": "eb74014b4b83",
+   "text": "**Dữ liệu lưu là số âm:** lượt chơi coi kỉ lục là 0 (luật giá trị là của lượt chơi, `feature-save` không xét).",
+   "title": "Dữ liệu lưu là số âm",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
+  },
+  "edge-feature-save-ghi-that-bai": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunSavedBestTests.FailedWriteKeepsTheNewBestInMemoryWithoutTellingThePlayer"
+   ],
+   "play": "",
+   "hash": "45e9aa9b887f",
+   "text": "**`feature-save` ghi thất bại:** kỉ lục trong lúc game mở vẫn đúng; không báo lỗi cho người chơi.",
+   "title": "`feature-save` ghi thất bại",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
+  },
+  "stage-idea": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "RunFlowTests.EachClearedWaveAddsOnePoint",
+    "RunFlowTests.EqualScoreIsNotANewBest",
+    "RunFlowTests.ScoreBestAndNewBestCanBeReadAtAnyTime",
+    "RunInstallerTests.InstalledRunReadsTheBestFromSaveAndHandsTheNewBestBackToIt"
+   ],
+   "play": "",
+   "hash": "9cb00dda126d",
+   "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Đếm điểm: Có\n- Kỉ lục nhớ trong lúc game mở: Có\n- Kỉ lục lưu khi tắt game: Có, qua `feature-save`\n- Cờ kỉ lục mới: Có",
+   "title": "Thông số của giai đoạn IDEA",
+   "by": "Run",
+   "at": "2026-11-27 14:22:00"
   }
  },
  "log": [
@@ -507,6 +591,83 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "score-lock-once",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.SecondCastleDestroyedReportIsIgnored, RunFlowTests.WaveClearedAfterTheCastleFellDoesNotCount"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "record-default-zero",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.NoSavedBestCountsAsZero, RunSavedBestTests.SaveSayingNoneYetMeansTheBestIsZero"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "record-save-now",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup, RunInstallerTests.InstalledRunReadsTheBestFromSaveAndHandsTheNewBestBackToIt, RunSavedBestTests.NewBestIsHandedToSaveTheMomentTheRunIsSettled"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "record-keep-on-fail",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSavedBestTests.FailedWriteKeepsTheNewBestInMemoryWithoutTellingThePlayer"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "record-retry",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSavedBestTests.ComingBackWithTheBestAlreadySavedWritesNothing, RunSavedBestTests.UnsavedBestIsWrittenAgainAtTheNextSettleEvenWithoutANewBest, RunSavedBestTests.UnsavedBestIsWrittenAgainWhenTheGameComesBackToTheScreen"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "edge-du-lieu-luu-khong-phai-so",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSavedBestTests.SavedDataThatIsNotANumberCountsAsZeroAndTheNextNewBestOverwritesIt"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "edge-du-lieu-luu-la-so-am",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSavedBestTests.NegativeSavedBestCountsAsZero"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "edge-feature-save-ghi-that-bai",
+   "state": "done",
+   "by": "Run",
+   "note": "RunSavedBestTests.FailedWriteKeepsTheNewBestInMemoryWithoutTellingThePlayer"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "edge-dot-don-sach-cung-khung-hinh-thanh-bi",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.WaveClearedInTheSameFrameJustBeforeTheCastleFallsDoesNotCount"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "params",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.EachClearedWaveAddsOnePoint, RunFlowTests.HigherScoreBecomesTheBestAndIsSavedBeforeTheLosePopup, RunFlowTests.NewRunStartsTheScoreAtZero, RunInstallerTests.InstallWithoutSaveFailsNamingIt, RunInstallerTests.InstalledRunReadsTheBestFromSaveAndHandsTheNewBestBackToIt"
+  },
+  {
+   "at": "2026-11-27 14:22:00",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Run",
+   "note": "RunFlowTests.EachClearedWaveAddsOnePoint, RunFlowTests.EqualScoreIsNotANewBest, RunFlowTests.ScoreBestAndNewBestCanBeReadAtAnyTime, RunInstallerTests.InstalledRunReadsTheBestFromSaveAndHandsTheNewBestBackToIt"
   }
  ]
 }

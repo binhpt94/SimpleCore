@@ -230,8 +230,19 @@ namespace Game.Hero.Tests
             public void Animate(float deltaSeconds) => Animated += deltaSeconds;
             public void PlayStrike(HeroStrike strike) => Strikes++;
             public void PlayHurt() => Hurts++;
-            public void PlayFall(float seconds) => Falls++;
-            public void PlayRespawn(float seconds) => Respawns++;
+            public float FallSeconds, RespawnGrowSeconds;
+
+            public void PlayFall(float seconds)
+            {
+                Falls++;
+                FallSeconds = seconds;
+            }
+
+            public void PlayRespawn(float seconds)
+            {
+                Respawns++;
+                RespawnGrowSeconds = seconds;
+            }
             public float PopScale, PopSeconds;
 
             public void PlayLevelUp(float peakScale, float seconds)

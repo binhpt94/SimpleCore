@@ -36,7 +36,12 @@ namespace Game.Wave.Tests
         public void EnterBattle(RunTeam team) { }
         public void Replay() { }
         public void GoHome() { }
-        public void Lose() => BattleStopped?.Invoke();
+        /// <summary>The castle fell: logged, then the battle stops (the real run also drops a clear reported in this step).</summary>
+        public void Lose()
+        {
+            Log.Add("lose");
+            BattleStopped?.Invoke();
+        }
         public void CountClearedWave(int wave) => Log.Add("score " + wave);
     }
 
