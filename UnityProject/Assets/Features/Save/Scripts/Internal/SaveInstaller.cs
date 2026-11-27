@@ -7,7 +7,8 @@ namespace Game.Save
 {
     /// <summary>
     /// Wires Save: publishes <see cref="ISavedRecord"/> backed by one file in Application.persistentDataPath.
-    /// No dependencies, no view, no session participant. Dev builds log failed writes as warnings.
+    /// No feature dependencies, no view, no session participant. Dev builds log failed writes as warnings and,
+    /// when Core's ICheatSelection is registered, skip writes while a cheat state runs.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Save/Save Installer", fileName = "SaveInstaller")]
     public sealed class SaveInstaller : InstallerAsset
@@ -18,7 +19,12 @@ namespace Game.Save
         {
             if (registry == null) throw new ArgumentNullException(nameof(registry));
             var store = new FileRecordStore(Path.Combine(Application.persistentDataPath, FileName));
-            registry.Register<ISavedRecord>(new SavedRecord(store, DevWarning()));
+            ISavedRecord saved = new SavedRecord(store, DevWarning());
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // apply-no-save: while a cheat state runs, writes are skipped (reported as success).
+            if (registry.TryResolve<ICheatSelection>(out var cheats)) saved = new CheatSafeSavedRecord(saved, cheats);
+#endif
+            registry.Register(saved);
         }
 
         private static Action<string> DevWarning()

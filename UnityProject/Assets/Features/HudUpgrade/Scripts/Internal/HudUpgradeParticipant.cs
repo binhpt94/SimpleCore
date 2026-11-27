@@ -30,6 +30,9 @@ namespace Game.HudUpgrade
             _cheat = cheat;
         }
 
+        /// <summary>The cheat state this participant builds when the battle starts; None when the cheat is off.</summary>
+        internal HudUpgradeCheatState CheatState => _cheat.State;
+
         protected override void OnRun()
         {
             var view = _views.Create();

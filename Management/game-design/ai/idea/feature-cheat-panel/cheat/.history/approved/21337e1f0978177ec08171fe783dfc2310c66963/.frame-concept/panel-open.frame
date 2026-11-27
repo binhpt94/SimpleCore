@@ -1,0 +1,36 @@
+kind: ui
+title: Cheat: panel cheat đang mở trên trận
+ai: 7
+why: state panel-open dựng đúng bố cục main của feature-cheat-panel/cheat-access/access-spec, mọi số use từ đó
+why: dưới nền che là trận và HUD đang chạy; danh sách có Chơi bình thường và vài dòng state của các feature để xem cuộn
+why: nút Cheat ở trạng thái đang mở, nằm trên nền che
+use row-h = feature-cheat-panel/cheat-access/access-spec#row-h
+use btn-x = feature-cheat-panel/cheat-access/access-spec#btn-x
+use btn-y = feature-cheat-panel/cheat-access/access-spec#btn-y
+use btn-w = feature-cheat-panel/cheat-access/access-spec#btn-w
+use btn-h = feature-cheat-panel/cheat-access/access-spec#btn-h
+use panel-x = feature-cheat-panel/cheat-access/access-spec#panel-x
+use panel-y = feature-cheat-panel/cheat-access/access-spec#panel-y
+use panel-w = feature-cheat-panel/cheat-access/access-spec#panel-w
+use panel-h = feature-cheat-panel/cheat-access/access-spec#panel-h
+use pad = feature-cheat-panel/cheat-access/access-spec#pad
+use title-y = feature-cheat-panel/cheat-access/access-spec#title-y
+use title-h = feature-cheat-panel/cheat-access/access-spec#title-h
+use list-y = feature-cheat-panel/cheat-access/access-spec#list-y
+use list-w = feature-cheat-panel/cheat-access/access-spec#list-w
+use list-h = feature-cheat-panel/cheat-access/access-spec#list-h
+use state-y = feature-cheat-panel/cheat-access/access-spec#state-y
+let row2-y = 280             # state-y + row-h + 16
+let row3-y = 416
+let row4-y = 552
+- battle       rect       x=0 y=0 w=1920 h=1080 label="Trận và HUD đang chạy phía dưới (không nhận chạm)"
+- cheat-shade  rect       x=0 y=0 w=1920 h=1080 overlap label="Nền che"
+- cheat-panel  round-rect x=panel-x y=panel-y w=panel-w h=panel-h overlap label="Panel cheat"
+- panel-title  label      x=pad y=title-y w=list-w h=title-h parent=cheat-panel label="Cheat"
+- state-list   rect       x=pad y=list-y w=list-w h=list-h parent=cheat-panel label="Danh sách dòng, cuộn dọc"
+- normal-row   button     x=0 y=0 w=list-w h=row-h parent=state-list label="Chơi bình thường"
+- state-row    button     x=0 y=state-y w=list-w h=row-h parent=state-list label="Trận: Đợt 10"
+- state-row-2  button     x=0 y=row2-y w=list-w h=row-h parent=state-list label="Popup thua: Kỉ lục mới"
+- state-row-3  button     x=0 y=row3-y w=list-w h=row-h parent=state-list label="Chọn đội: Đủ đội"
+- state-row-4  button     x=0 y=row4-y w=list-w h=row-h parent=state-list label="HUD: Giữa trận"
+- cheat-button button     x=btn-x y=btn-y w=btn-w h=btn-h overlap label="Cheat (đang mở)"

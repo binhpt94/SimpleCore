@@ -1,0 +1,19 @@
+{
+  "name": "Game.CheatPanel.View",
+  "rootNamespace": "Game.CheatPanel",
+  "references": [
+    "Game.Core",
+    "Game.CheatPanel.Internal",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

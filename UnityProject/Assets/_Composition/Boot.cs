@@ -36,7 +36,23 @@ namespace Game.Composition
         [Tooltip("From PROTOTYPE on, each of these replaces the catalog of the same kind (or adds a new kind).")]
         [SerializeField] private AssetCatalog[] prototypeCatalogs = new AssetCatalog[0];
 
+        [Header("Cheat (dev builds only; set once on Boot.prefab)")]
+        [Tooltip("The CheatSelectionAsset shared by every scene. Typed as ScriptableObject so release builds keep the same layout.")]
+        [SerializeField] private ScriptableObject cheatSelection;
+        [Tooltip("Every scene with its Boot variant, so the cheat list holds the states of every scene, not only this one.")]
+        [SerializeField] private CheatScene[] cheatScenes = new CheatScene[0];
+
+        /// <summary>A scene name (as SceneFlow loads it) and the Boot variant that boots it.</summary>
+        [Serializable]
+        internal struct CheatScene
+        {
+            public string scene;
+            public Boot boot;
+        }
+
         internal GameStage Stage => stage;
+
+        internal IReadOnlyList<CheatScene> CheatScenes => cheatScenes;
 
         internal IReadOnlyList<InstallerAsset> Installers => installers;
 
@@ -72,11 +88,55 @@ namespace Game.Composition
         {
             var registry = new ServiceRegistry();
             registry.Register<IAssetCatalogs>(new AssetCatalogs(CatalogsAt(atStage)));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            RegisterCheats(registry, atStage);
+#endif
             foreach (var installer in InstallersAt(atStage))
             {
                 installer.Install(registry);
             }
             return registry;
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>
+        /// Before any installer: starts the scene on the shared cheat selection (keeps the pick, clears the running
+        /// state) and registers it with the catalog of every cheat state source the build boots, in every scene.
+        /// </summary>
+        private void RegisterCheats(IServiceRegistry registry, GameStage atStage)
+        {
+            if (!(cheatSelection is CheatSelectionAsset asset))
+                throw new InvalidOperationException(
+                    $"Boot ({name}): cheatSelection is not set to a CheatSelectionAsset (set it on Boot.prefab).");
+            var selection = asset.Selection;
+            selection.BeginScene();
+            registry.Register<ICheatSelection>(selection);
+            registry.Register<ICheatStateCatalog>(new CheatStateCatalog(CheatSourcesAt(atStage)));
+        }
+
+        /// <summary>Each cheat state source booted at <paramref name="atStage"/> with its scene; a source listed in two scenes counts once, at the first.</summary>
+        internal IReadOnlyList<CheatStateSceneSource> CheatSourcesAt(GameStage atStage)
+        {
+            var sources = new List<CheatStateSceneSource>();
+            foreach (var entry in cheatScenes)
+            {
+                if (entry.boot == null || string.IsNullOrEmpty(entry.scene))
+                    throw new InvalidOperationException($"Boot ({name}): a cheatScenes entry has no scene name or no Boot.");
+                foreach (var installer in entry.boot.InstallersAt(atStage))
+                {
+                    if (installer is ICheatStateSource source && sources.All(s => s.Source != source))
+                        sources.Add(new CheatStateSceneSource(entry.scene, source));
+                }
+            }
+            return sources;
+        }
+
+        private sealed class CheatStateCatalog : ICheatStateCatalog
+        {
+            internal CheatStateCatalog(IReadOnlyList<CheatStateSceneSource> sources) => Sources = sources;
+
+            public IReadOnlyList<CheatStateSceneSource> Sources { get; }
+        }
+#endif
     }
 }

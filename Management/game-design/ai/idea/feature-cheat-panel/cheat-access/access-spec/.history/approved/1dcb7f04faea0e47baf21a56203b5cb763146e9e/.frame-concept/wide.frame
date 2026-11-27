@@ -1,0 +1,42 @@
+kind: ui
+title: Nút và panel cheat, panel rộng hai cột (16:9, panel đang mở)
+ui: d0ea90a68280
+ai: 6
+why: bản táo bạo: panel chiếm gần hết màn dưới mép trên, dòng state xếp hai cột nên thấy gấp đôi số state mà không cuộn (mỗi feature có vài state, danh sách nhanh dài)
+why: nút Cheat giữ đúng chỗ của bản main (khe trống mép trên chung mọi màn), panel bắt đầu ngay dưới nó cách 40
+why: Chơi bình thường trải hết bề ngang ở đầu: dòng đặc biệt, tách nhóm với lưới state (khe 24, giữa các dòng state 16)
+why: đổi lại panel che hết màn nên không nhìn thấy game phía sau lúc chọn; chấp nhận vì panel là chỗ chọn state, không phải chỗ xem
+why: ba nút chính theo ui.md (cheat-button, normal-row, state-row), như bản main: công tắc và các mục của một danh sách
+why: số trùng tên với bản main giữ cùng giá trị, chỉ bề rộng là riêng; lề 40 và cỡ dòng 120 trùng số của feature-hud/hud-layout/layout-spec (node chưa ref nên không use được)
+why: theo tham chiếu 20261125-225339-lose: khung lớn trên nền tối, chữ to đọc ngay
+why: empty-label vẽ ở dòng thứ ba để không chồng mẫu dòng state; nó chỉ hiện khi không có dòng state nào, lúc đó đứng ngay dưới Chơi bình thường (khe 24)
+let row-h = 120
+let btn-x = 1396
+let btn-y = 24
+let btn-w = 160
+let btn-h = 96
+let pad = 40
+let panel-y = 160
+let panel-h = 880
+let title-y = 24
+let title-h = 64
+let list-y = 112
+let list-h = 728
+let state-y = 144
+let empty-y = 280            # vẽ tách ra cho dễ đọc; khi hiện nó đứng ở state-y
+let more-y = 416
+let more-h = 312
+let wide-panel-w = 1840
+let wide-list-w = 1760
+let col-w = 872              # hai cột: 872 + 16 + 872 = 1760
+let col2-x = 888
+- cheat-shade  rect       x=0 y=0 w=1920 h=1080 label="Nền che: phủ game và popup, chặn mọi chạm, chạm không làm gì"
+- cheat-panel  round-rect x=pad y=panel-y w=wide-panel-w h=panel-h overlap label="Panel cheat"
+- panel-title  label      x=pad y=title-y w=wide-list-w h=title-h parent=cheat-panel label="Cheat"
+- state-list   rect       x=pad y=list-y w=wide-list-w h=list-h parent=cheat-panel label="Danh sách dòng, hai cột, cuộn dọc"
+- normal-row   button     x=0 y=0 w=wide-list-w h=row-h parent=state-list label="Chơi bình thường"
+- state-row    button     x=0 y=state-y w=col-w h=row-h parent=state-list label="Trận: Đợt 10 (mẫu dòng state)"
+- empty-label  label      x=0 y=empty-y w=wide-list-w h=row-h parent=state-list label="Bản này không có state cheat (chỉ hiện khi không có dòng state, đứng ngay dưới Chơi bình thường)"
+- next-row     rect       x=col2-x y=state-y w=col-w h=row-h parent=state-list label="Dòng state kế, cột phải"
+- more-rows    rect       x=0 y=more-y w=wide-list-w h=more-h parent=state-list label="Các dòng state tiếp theo, hai cột, cách nhau 16, cuộn dọc"
+- cheat-button button     x=btn-x y=btn-y w=btn-w h=btn-h overlap label="Cheat (trạng thái panel đang mở)"

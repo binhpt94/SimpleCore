@@ -1,0 +1,41 @@
+{
+ "hash": "f6f63bb22ff4",
+ "items": {
+  "spec-config-asset": {
+   "hash": "84109674c547",
+   "text": "Công tắc là một ô bật tắt `cheat_enabled` trong asset config của feature, đi kèm bản build\nNgười làm game đổi ô này trước khi build; bản build mang giá trị lúc build. Đã loại: đọc từ file ngoài trên máy (thêm đường bật cheat cho người chơi thật)."
+  },
+  "spec-default-on": {
+   "hash": "67c7a75ed5ac",
+   "text": "`cheat_enabled` mặc định là bật\nBản build bây giờ đều là bản test. Tắt là việc của người làm game khi cần một bản sạch."
+  },
+  "spec-any-build": {
+   "hash": "eec365254260",
+   "text": "Chỉ `cheat_enabled` quyết có nút hay không, ở cả Editor và mọi loại bản build\nLoại build không tự ẩn nút; state nào có trong panel thì theo `feature-cheat-panel/cheat-states`."
+  },
+  "spec-off-nothing": {
+   "hash": "0fa22d3513b1",
+   "text": "`cheat_enabled` tắt thì không tạo nút, không tạo panel, không chặn chạm nào\nGame y như không có feature này."
+  },
+  "spec-button-label": {
+   "hash": "997b01ff84cc",
+   "text": "Nút cheat mang chữ \"Cheat\"\nChữ thay cho hình: art IDEA siêu cơ bản, người test đọc là hiểu."
+  },
+  "spec-button-state": {
+   "hash": "f87df85f9e7c",
+   "text": "Nút cheat có hai trạng thái nhìn khác nhau: panel đóng và panel đang mở"
+  },
+  "spec-panel-parts": {
+   "hash": "9c39503662bc",
+   "text": "Panel gồm tiêu đề \"Cheat\", danh sách dòng cuộn được và nền che chặn chạm phía dưới\nNền che phủ cả màn hình dưới panel, trên game và popup."
+  },
+  "spec-close-ways": {
+   "hash": "b37aaefe9ddf",
+   "text": "Panel đóng khi chạm lại nút cheat, khi chọn một dòng, hoặc khi game đổi scene\nChạm vào nền che không đóng panel, để chạm nhầm không làm mất chỗ đang cuộn."
+  },
+  "spec-transition-lock": {
+   "hash": "7018f8949a58",
+   "text": "Trong lúc game đang chuyển scene, các dòng của panel bị khoá\nTránh chọn state chồng lên một lần chuyển scene đang chạy; nút cheat vẫn đóng mở panel được."
+  }
+ }
+}

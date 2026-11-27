@@ -1,0 +1,79 @@
+{
+ "frame": "wide",
+ "parts": [
+  {
+   "id": "panel",
+   "w": 1840,
+   "h": 880,
+   "slice": null,
+   "shapes": [
+    "cheat-panel"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "list-bg",
+   "w": 1760,
+   "h": 728,
+   "slice": null,
+   "shapes": [
+    "state-list"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "more-rows",
+   "w": 1760,
+   "h": 312,
+   "slice": null,
+   "shapes": [
+    "more-rows"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "normal-row",
+   "w": 1760,
+   "h": 120,
+   "slice": null,
+   "shapes": [
+    "normal-row"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "state-row",
+   "w": 872,
+   "h": 120,
+   "slice": null,
+   "shapes": [
+    "state-row",
+    "next-row"
+   ],
+   "from": null,
+   "text": true
+  },
+  {
+   "id": "cheat-btn",
+   "w": 160,
+   "h": 96,
+   "slice": null,
+   "shapes": [
+    "cheat-button"
+   ],
+   "from": null,
+   "text": true
+  }
+ ],
+ "kept": [
+  "panel-title",
+  "empty-label"
+ ],
+ "skipped": [
+  "cheat-shade"
+ ]
+}

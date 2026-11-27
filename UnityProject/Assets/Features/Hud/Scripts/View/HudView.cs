@@ -47,14 +47,8 @@ namespace Game.Hud
         private RectTransform _healthFill;
         private Text _wave;
         private Text _banner;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        private GameObject _cheatButton;
-#endif
 
         public event Action<int> SkillPressed;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        public event Action CheatPressed;
-#endif
 
         private void Awake() => Build();
 
@@ -165,24 +159,6 @@ namespace Game.Hud
             button.Cover.anchorMax = new Vector2(1f, share);
             button.Root.localScale = new Vector3(scale, scale, 1f);
         }
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        public void ShowCheatButton(string label)
-        {
-            Build();
-            if (_cheatButton != null) return;
-            // Dev only, not part of the released HUD. Inside the top band, between the health bar and the wave box
-            // (x 1290..1550, y 15..65), so it never covers the battle strip; anchored like the health bar to stay there.
-            var rect = Rect("Cheat", _safe, new Vector2(0.5f, 1f), 1290f, 15f, 260f, 50f);
-            var back = rect.gameObject.AddComponent<Image>();
-            back.color = new Color(0.6f, 0.1f, 0.6f, 0.8f);
-            var press = rect.gameObject.AddComponent<Button>();
-            press.onClick.AddListener(() => CheatPressed?.Invoke());
-            var text = Label("Label", rect, 0f, 0f, 260f, 50f, 22, TextAnchor.MiddleCenter);
-            text.text = label;
-            _cheatButton = rect.gameObject;
-        }
-#endif
 
         public UnityEngine.Object Root => gameObject;
 

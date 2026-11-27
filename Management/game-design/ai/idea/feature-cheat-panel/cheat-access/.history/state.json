@@ -1,0 +1,33 @@
+{
+ "hash": "b9aace0d5890",
+ "items": {
+  "access-one-switch": {
+   "hash": "7fdd11dd6c1c",
+   "text": "Một config duy nhất quyết cả nút lẫn panel: bật thì có nút, tắt thì không có cả hai\nKhông có cách nào khác để mở panel khi config tắt."
+  },
+  "access-switch-at-start": {
+   "hash": "dd5870f3c52d",
+   "text": "Config được đọc một lần lúc game khởi động\nĐổi config thì có hiệu lực ở lần mở game sau. Đã loại: đổi trong lúc chơi (cần thêm một chỗ bật tắt nằm ngoài panel)."
+  },
+  "access-button-every-scene": {
+   "hash": "c43f4f4e5627",
+   "text": "Khi config bật, nút cheat có mặt ở mọi scene và mọi màn của game\nKể cả màn Loading, màn bắt đầu, trận và lúc popup đang mở."
+  },
+  "access-button-on-top": {
+   "hash": "e88ed8c5468e",
+   "text": "Nút cheat nằm trên mọi phần khác của game, kể cả popup\nPopup đang mở vẫn chạm được nút cheat."
+  },
+  "access-button-opens-panel": {
+   "hash": "5458f9e6e75b",
+   "text": "Chạm nút cheat thì mở panel cheat; chạm lần nữa thì đóng\nMột nút làm cả hai việc."
+  },
+  "access-panel-blocks-below": {
+   "hash": "519db9041745",
+   "text": "Panel đang mở thì phần game bên dưới không nhận chạm\nTránh chạm nhầm vào trận hay popup khi đang chọn state."
+  },
+  "access-game-keeps-running": {
+   "hash": "20baee94d817",
+   "text": "Mở panel không dừng game; trận vẫn chạy phía sau\nĐã loại: dừng trận khi mở panel (phải nối thêm với `feature-sim-clock`, việc test không cần)."
+  }
+ }
+}

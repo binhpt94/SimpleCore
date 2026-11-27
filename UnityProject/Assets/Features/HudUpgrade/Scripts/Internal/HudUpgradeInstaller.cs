@@ -13,7 +13,7 @@ namespace Game.HudUpgrade
     /// Install after SessionScene, Run, Wallet, Hero and Upgrade.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/HudUpgrade/Installer", fileName = "HudUpgradeInstaller")]
-    public sealed class HudUpgradeInstaller : InstallerAsset
+    public sealed partial class HudUpgradeInstaller : InstallerAsset
     {
         [SerializeField] private HudUpgradeConfig config;
         [SerializeField] private GameObject barPrefab;
@@ -21,6 +21,9 @@ namespace Game.HudUpgrade
         public override void Install(IServiceRegistry registry)
         {
             if (registry == null) throw new ArgumentNullException(nameof(registry));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var cheats = NeedCheatSelection(registry);
+#endif
             if (config == null) throw new InvalidOperationException("HudUpgradeInstaller: missing config (HudUpgradeConfig).");
             if (barPrefab == null) throw new InvalidOperationException("HudUpgradeInstaller: missing barPrefab (UpgradeBar).");
             if (barPrefab.GetComponent<IUpgradeBarView>() == null)
@@ -35,10 +38,14 @@ namespace Game.HudUpgrade
 
             var cheat = default(HudUpgradeParticipant.CheatSetup);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (config.CheatState != HudUpgradeCheatState.None)
-                cheat = new HudUpgradeParticipant.CheatSetup(config.CheatState, config.MixedButtonsCoins,
+            var cheatState = CheatToBuild(cheats);
+            if (cheatState != HudUpgradeCheatState.None)
+            {
+                cheat = new HudUpgradeParticipant.CheatSetup(cheatState, config.MixedButtonsCoins,
                     config.MixedButtonsLevels, registry.Resolve<IWalletBalance>(), registry.Resolve<IWalletIncome>(),
                     registry.Resolve<IWalletService>(), config.MixedButtonsTeam);
+                cheats.ReportRunning(HudUpgradeCheats.KeyOf(cheatState));
+            }
 #endif
 
             session.Join(new HudUpgradeParticipant(shop, orders, roster, run, down, new PrefabBarViewFactory(barPrefab), cheat));

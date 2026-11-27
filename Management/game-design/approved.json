@@ -51,9 +51,9 @@
    "by": "chuyển từ live cũ"
   },
   "feature-battlefield": {
-   "hash": "d9123235551bc01cb1c996c904c336a33c355320",
-   "at": "2026-11-26 23:46:56",
-   "by": "chuyển từ live cũ"
+   "hash": "20d198841bf6e6ffda1e700496daee925917f040",
+   "at": "2026-11-27 09:33:20",
+   "by": "tự duyệt (Full Auto)"
   },
   "feature-battlefield/battlefield-layers": {
    "hash": "6044fea67df37bf4f3ec1e33186b08af3b21a31f",
@@ -61,9 +61,9 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-battlefield/battlefield-layers/layer-values": {
-   "hash": "0e50f66404712f696953bf058d366245c3e1745f",
-   "at": "2026-11-27 00:11:41",
-   "by": "người (Sync)"
+   "hash": "5c69e171ab86a3a5cc26c5ff1f3102987103db82",
+   "at": "2026-11-27 09:07:59",
+   "by": "tự duyệt (Full Auto)"
   },
   "feature-castle": {
    "hash": "a382ba7eb4e372b41855c3e0baa71eaf66ae268b",
@@ -76,9 +76,9 @@
    "by": "chuyển từ live cũ"
   },
   "feature-castle/castle-attack/auto-shot-values": {
-   "hash": "23e40541286e8d517d390c798430aa65c379c9ea",
-   "at": "2026-11-27 00:11:45",
-   "by": "người (Sync)"
+   "hash": "1a3b0985fab26bb30a9e3325b111efc81009ef55",
+   "at": "2026-11-27 09:07:59",
+   "by": "tự duyệt (Full Auto)"
   },
   "feature-castle/castle-core": {
    "hash": "e6235d394249f63ad8222331c4bbe69ca230d84f",
@@ -110,10 +110,40 @@
    "at": "2026-11-27 00:12:20",
    "by": "người (Sync)"
   },
+  "feature-cheat-panel": {
+   "hash": "2339fb6d0af7c9248b4cbc67b6d9ea67c16b5e5e",
+   "at": "2026-11-27 10:33:31",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-cheat-panel/cheat": {
+   "hash": "ca78efedc1f07aba6ef7356fd94a63374cc2ff77",
+   "at": "2026-11-27 10:42:03",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-cheat-panel/cheat-access": {
+   "hash": "075472d1c7e18e2444f57531c54d337272d1df72",
+   "at": "2026-11-27 10:36:07",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-cheat-panel/cheat-access/access-spec": {
+   "hash": "1dcb7f04faea0e47baf21a56203b5cb763146e9e",
+   "at": "2026-11-27 10:41:27",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-cheat-panel/cheat-states": {
+   "hash": "42b7f16814cab31de556147438bb84497fb45aed",
+   "at": "2026-11-27 10:36:07",
+   "by": "tự duyệt (Full Auto)"
+  },
+  "feature-cheat-panel/cheat-states/states-rules": {
+   "hash": "e315dd14f12649994345841e261e8547453b9327",
+   "at": "2026-11-27 10:36:07",
+   "by": "tự duyệt (Full Auto)"
+  },
   "feature-combat": {
-   "hash": "6743f03ce078dfcd89288b34fc20b73829ada0a4",
-   "at": "2026-11-26 23:46:56",
-   "by": "chuyển từ live cũ"
+   "hash": "18a4af0a0430b74c121665c5666d57b76ee6e84f",
+   "at": "2026-11-27 09:33:20",
+   "by": "tự duyệt (Full Auto)"
   },
   "feature-combat/combat-tick": {
    "hash": "3aa338449b97954cfd8c44a70a261f5d74f46cf1",
@@ -121,8 +151,8 @@
    "by": "người (Sync)"
   },
   "feature-combat/combat-tick/tick-values": {
-   "hash": "e079eacd42b044bf57ade4cd434230dcd087153b",
-   "at": "2026-11-27 00:21:41",
+   "hash": "7cf3b327bdc34c6882f782fd2e710ee462483b81",
+   "at": "2026-11-27 09:07:59",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-enemy": {
@@ -196,9 +226,9 @@
    "by": "chuyển từ live cũ"
   },
   "feature-hero/hero-list/hero-roster-values": {
-   "hash": "2411f8136d74d9321e63448a7cec0bb33b3222cd",
-   "at": "2026-11-26 23:46:56",
-   "by": "chuyển từ live cũ"
+   "hash": "42581492dd0886b6adc68bf3c123d0837315d89c",
+   "at": "2026-11-27 09:07:59",
+   "by": "tự duyệt (Full Auto)"
   },
   "feature-hero/hero-respawn": {
    "hash": "b73103fa716253fe56e89e168c74e66cf4ab0dc9",
@@ -371,8 +401,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup-rating/rating-invite/invite-spec": {
-   "hash": "f8acbb59d780e20679e8f0294c849e18ad0eb5a6",
-   "at": "2026-11-27 02:36:10",
+   "hash": "e1b0a59bd50bc3ffcef995d7b2e70ac64c850828",
+   "at": "2026-11-27 09:07:59",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup-rating/rating-timing": {
@@ -381,8 +411,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup-rating/rating-timing/timing-spec": {
-   "hash": "8e139edc133631df128fcff3ce7883a0ea83cb1e",
-   "at": "2026-11-27 02:35:52",
+   "hash": "2958a61b8b0fa1b6642e3c37abc1fb3a1ab826ce",
+   "at": "2026-11-27 09:07:59",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-popup/cheat": {
@@ -411,8 +441,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-run": {
-   "hash": "81e350537317e5ec74b910b06d216b796d5b05d3",
-   "at": "2026-11-27 00:21:41",
+   "hash": "f28c9bcccbb7ec38bec8fec6159fd2f350c6ac12",
+   "at": "2026-11-27 09:33:20",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-run/run-flow": {
@@ -461,9 +491,9 @@
    "by": "chuyển từ live cũ"
   },
   "feature-save/save-io/io-rules": {
-   "hash": "17588580e1ba838d72c07509e41cfb8bcd2206a1",
-   "at": "2026-11-26 23:46:56",
-   "by": "chuyển từ live cũ"
+   "hash": "960300f3f3c1eb50f4e09338b8ce2c3e792ed587",
+   "at": "2026-11-27 09:07:59",
+   "by": "tự duyệt (Full Auto)"
   },
   "feature-scene-flow": {
    "hash": "404af6767e8724bd24de5653f9230a2c82c3ea39",
@@ -531,8 +561,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-sim-clock/clock-step/clock-values": {
-   "hash": "2c930b41a831ce87196da667ee18d1e526bc6afa",
-   "at": "2026-11-27 00:21:41",
+   "hash": "4b4210e8ad860f41c531894b89bc17022a8feb6b",
+   "at": "2026-11-27 09:07:59",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-sim-clock/seeded-random": {
@@ -541,8 +571,8 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-sim-clock/seeded-random/random-values": {
-   "hash": "d59f179cb3cfad97143780c58348a9caf01eb9c1",
-   "at": "2026-11-27 00:21:41",
+   "hash": "3936fa790afdbc9999e03c12fd8f7780c066fd4c",
+   "at": "2026-11-27 09:07:59",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-team-select": {
@@ -646,9 +676,9 @@
    "by": "chuyển từ live cũ"
   },
   "feature-wave": {
-   "hash": "5d63ee0fbf5d32b5fdfe7c295540bfef206c1b09",
-   "at": "2026-11-26 23:46:56",
-   "by": "chuyển từ live cũ"
+   "hash": "fee80d536bcf4c20e2d59ffa562fba1074eaf1e9",
+   "at": "2026-11-27 09:33:20",
+   "by": "tự duyệt (Full Auto)"
   },
   "feature-wave/difficulty-scaling": {
    "hash": "7f42f5fcbd369cd086843ee7cef107dae9c6180d",

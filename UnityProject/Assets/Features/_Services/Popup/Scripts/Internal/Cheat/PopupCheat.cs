@@ -1,5 +1,6 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
+using System.Collections.Generic;
 using Game.Core;
 using UnityEngine;
 
@@ -14,6 +15,28 @@ namespace Game.Services.Popup
     {
         // The design names it Popup/DevSample; ids owned by a service carry its folder (validator SRC-05).
         internal static readonly PopupId DevSample = new PopupId("_Services/Popup/DevSample");
+
+        /// <summary>Title of the design node feature-popup.</summary>
+        internal const string FeatureTitle = "Dịch vụ popup";
+
+        internal const string SamplePopupKey = "Popup/SamplePopup";
+
+        /// <summary>In the order of the ideas of node feature-popup/cheat, titled as those ideas.</summary>
+        internal static readonly IReadOnlyList<CheatState> States = new[]
+        {
+            new CheatState(SamplePopupKey,
+                "Popup mẫu của dịch vụ đang mở trên scene đang chạy: phần bên dưới không nhận bấm, nền che, khung popup trống trên cùng"),
+        };
+
+        /// <summary>The state a picked key stands for: None when it is not this service's (or normal play).</summary>
+        internal static PopupCheatState StateOf(string pickedKey) =>
+            pickedKey == SamplePopupKey ? PopupCheatState.SamplePopup : PopupCheatState.None;
+
+        internal static string KeyOf(PopupCheatState state) => state switch
+        {
+            PopupCheatState.SamplePopup => SamplePopupKey,
+            _ => throw new ArgumentOutOfRangeException(nameof(state), state, "not a cheat state"),
+        };
 
         /// <summary>Throws, naming the field, when the state needs the sample prefab and the config has none.</summary>
         internal static void Check(PopupCheatState state, PopupConfig config)

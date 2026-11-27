@@ -15,4 +15,5 @@ MonoBehaviour:
   side: 0
   config: {fileID: 11400000, guid: 5cef1000000000000000000000000007, type: 2}
   loadingScreenPrefab: {fileID: 100000, guid: 5cef1000000000000000000000000006, type: 3}
-  gateCarrierPrefab: {fileID: 0}
+  gateCarrierPrefab: {fileID: 100000, guid: 5cef1000000000000000000000000005, type: 3}
+  switchHostPrefab: {fileID: 100000, guid: 5cef100000000000000000000000000b, type: 3}

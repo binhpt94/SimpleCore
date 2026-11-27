@@ -23,9 +23,11 @@ namespace Game.PopupLose.Tests
             return installer;
         }
 
-        private static ServiceRegistry FullRegistry(FakeSession session, LosePopupTests.FakeFlow flow)
+        private static ServiceRegistry FullRegistry(FakeSession session, LosePopupTests.FakeFlow flow,
+            FakeCheatSelection cheats = null)
         {
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(cheats ?? new FakeCheatSelection());
             var popups = new LosePopupTests.FakePopups();
             registry.Register<ISessionScene>(session);
             registry.Register<IRunFlow>(flow);
@@ -54,6 +56,7 @@ namespace Game.PopupLose.Tests
         {
             var installer = LoadInstaller();
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
             registry.Register<ISessionScene>(new FakeSession());
 
             var error = Assert.Throws<InvalidOperationException>(() => installer.Install(registry));
@@ -65,6 +68,7 @@ namespace Game.PopupLose.Tests
         {
             var installer = LoadInstaller();
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
             registry.Register<ISessionScene>(new FakeSession());
             registry.Register<IRunFlow>(new LosePopupTests.FakeFlow());
             registry.Register<IRunScore>(new LosePopupTests.FakeScore());
@@ -81,16 +85,100 @@ namespace Game.PopupLose.Tests
             {
                 installer.Cheat = LoseCheatState.NewRecord;
                 var session = new FakeSession();
+                var cheats = new FakeCheatSelection();
 
-                installer.Install(FullRegistry(session, new LosePopupTests.FakeFlow()));
+                installer.Install(FullRegistry(session, new LosePopupTests.FakeFlow(), cheats));
 
                 Assert.That(session.Joined, Has.Count.EqualTo(2));
                 Assert.That(session.Joined[1], Is.InstanceOf<LoseCheatParticipant>());
+                Assert.That(cheats.Reported, Is.EqualTo(new[] { "PopupLose/NewRecord" }), "a state built from the asset is reported");
             }
             finally
             {
                 UnityEngine.Object.DestroyImmediate(installer);
             }
+        }
+
+        // --- Cheat list (ICheatStateSource) and the pick (ICheatSelection) ---
+
+        [Test]
+        public void MissingCheatSelectionIsNamedAtTheStartOfInstall()
+        {
+            var installer = LoadInstaller();
+
+            var error = Assert.Throws<InvalidOperationException>(() => installer.Install(new ServiceRegistry()));
+            Assert.That(error.Message, Does.Contain(nameof(ICheatSelection)));
+        }
+
+        [Test]
+        public void RealInstallerListsTheFeatureAndItsStatesInTheOrderOfTheCheatNode()
+        {
+            ICheatStateSource source = LoadInstaller();
+
+            Assert.That(source.CheatFeatureTitle, Is.EqualTo("Popup thua"));
+            Assert.That(source.CheatStates.Count, Is.EqualTo(1));
+            Assert.That(source.CheatStates[0].Key, Is.EqualTo("PopupLose/NewRecord"));
+            Assert.That(source.CheatStates[0].Title, Is.EqualTo("Popup thua đang mở, lượt vừa phá kỉ lục"));
+        }
+
+        [Test]
+        public void PickOfOwnStateBuildsItAndReportsItRunning()
+        {
+            var installer = ScriptableObject.CreateInstance<PopupLoseInstaller>();
+            try
+            {
+                var cheats = new FakeCheatSelection();
+                cheats.Pick("PopupLose/NewRecord");
+                var session = new FakeSession();
+
+                installer.Install(FullRegistry(session, new LosePopupTests.FakeFlow(), cheats));
+
+                Assert.That(session.Joined, Has.Count.EqualTo(2));
+                Assert.That(session.Joined[0], Is.InstanceOf<LosePopupParticipant>());
+                Assert.That(session.Joined[1], Is.InstanceOf<LoseCheatParticipant>());
+                Assert.That(cheats.Reported, Is.EqualTo(new[] { "PopupLose/NewRecord" }));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+            }
+        }
+
+        [TestCase("SceneFlow/LoadError")]
+        [TestCase(null)]
+        public void PickOfAnotherFeatureOrNormalPlayBuildsNothingEvenWithACheatOnTheAsset(string pickedKey)
+        {
+            var installer = ScriptableObject.CreateInstance<PopupLoseInstaller>();
+            try
+            {
+                installer.Cheat = LoseCheatState.NewRecord;
+                var cheats = new FakeCheatSelection();
+                cheats.Pick(pickedKey);
+                var session = new FakeSession();
+
+                installer.Install(FullRegistry(session, new LosePopupTests.FakeFlow(), cheats));
+
+                Assert.That(session.Joined, Has.Count.EqualTo(1), "only the normal popup joins");
+                Assert.That(session.Joined[0], Is.InstanceOf<LosePopupParticipant>());
+                Assert.That(cheats.Reported, Is.Empty, "no state was built");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+            }
+        }
+
+        [Test]
+        public void RealInstallerWithoutPickBuildsNoState()
+        {
+            var installer = LoadInstaller();
+            var cheats = new FakeCheatSelection();
+            var session = new FakeSession();
+
+            installer.Install(FullRegistry(session, new LosePopupTests.FakeFlow(), cheats));
+
+            Assert.That(session.Joined, Has.Count.EqualTo(1));
+            Assert.That(cheats.Reported, Is.Empty);
         }
 
         [Test]
@@ -165,6 +253,29 @@ namespace Game.PopupLose.Tests
             foreach (var component in root.GetComponentsInChildren<Component>(true))
                 if (component != null && component.GetType().Name == typeName) count++;
             return count;
+        }
+
+        /// <summary>Stand-in for Core's cheat selection; records every ReportRunning.</summary>
+        internal sealed class FakeCheatSelection : ICheatSelection
+        {
+            public readonly List<string> Reported = new List<string>();
+            public bool HasPick { get; private set; }
+            public string PickedKey { get; private set; }
+            public string RunningKey { get; private set; }
+
+            public void Pick(string key)
+            {
+                PickedKey = string.IsNullOrEmpty(key) ? null : key;
+                HasPick = true;
+            }
+
+            public void ReportRunning(string key)
+            {
+                Reported.Add(key);
+                RunningKey = key;
+            }
+
+            public void BeginScene() => RunningKey = null;
         }
 
         internal sealed class FakeSession : ISessionScene

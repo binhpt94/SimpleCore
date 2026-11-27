@@ -1,8 +1,8 @@
 {
  "items": {
   "mid-battle": {
-   "state": "verified",
-   "note": "gắn test có sẵn của cheat mid-battle",
+   "state": "doing",
+   "note": "panel cheat: dựng mid-battle theo ICheatSelection, áp ở khung đầu trận, bỏ nút. Chưa biên dịch vì Unity tắt, test mới chưa chạy",
    "tests": [
     "HudSessionTests.CheatButtonShowsTheWholeMidBattleState",
     "HudSessionTests.CheatStartsTheWaveBeforeSettingHealthAndCooldowns",
@@ -11,11 +11,11 @@
     "HudSessionTests.CheatBringsCoinsDownThroughSpendingWhenThereAreMore"
    ],
    "play": "",
-   "hash": "9d31746133cb",
-   "text": "Đợt 7 vừa bắt đầu, thành còn 30% máu, Băng giá đang hồi\nÉp: máu thành 300/1000, tiền 245, đợt 7 vừa bắt đầu (thông báo \"Đợt 7\" đang hiện); Sấm sét sẵn sàng, Băng giá đang hồi còn 12 trên 35 giây, Cổ vũ sẵn sàng. Có đủ mọi thành phần của HUD: nút tạm dừng, ô tiền, thanh máu kèm số, ô đợt, thông báo đợt, 3 nút kĩ năng ở cả hai trạng thái sẵn sàng và đang hồi.",
+   "hash": "124dbc5f9bee",
+   "text": "Đợt 7 vừa bắt đầu, thành còn 30% máu, Băng giá đang hồi\nÉp: máu thành 300/1000, tiền 245, đợt 7 vừa bắt đầu (thông báo \"Đợt 7\" đang hiện); Sấm sét sẵn sàng, Băng giá đang hồi còn 12 trên 35 giây, Cổ vũ sẵn sàng. Có đủ mọi thành phần của HUD: ô tiền, thanh máu kèm số, ô đợt, thông báo đợt, 3 nút kĩ năng ở cả hai trạng thái sẵn sàng và đang hồi.",
    "title": "Đợt 7 vừa bắt đầu, thành còn 30% máu, Băng giá đang hồi",
-   "by": "@CodeLead",
-   "at": "2026-11-25 11:39:09"
+   "by": "Hud",
+   "at": "2026-11-27 10:55:58"
   },
   "params": {
    "state": "verified",
@@ -68,6 +68,13 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 10:55:58",
+   "id": "mid-battle",
+   "state": "doing",
+   "by": "Hud",
+   "note": "panel cheat: dựng mid-battle theo ICheatSelection, áp ở khung đầu trận, bỏ nút. Chưa biên dịch vì Unity tắt, test mới chưa chạy"
   }
  ]
 }

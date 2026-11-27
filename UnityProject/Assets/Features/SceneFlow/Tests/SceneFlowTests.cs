@@ -350,7 +350,7 @@ namespace Game.SceneFlow.Tests
         [Test]
         public void WhenTheLoadingSceneRuns_ItAsksToSwitchToTheGameScene()
         {
-            var flow = new LoadingToGameFlow(session, switcher, "Game");
+            var flow = new LoadingToGameFlow(session, switcher, new SceneGate(progress), "Game");
 
             flow.Run();
 
@@ -360,7 +360,7 @@ namespace Game.SceneFlow.Tests
         [Test]
         public void WhenTheLoadingSessionEnds_TheLoadingScreenStays_BecauseItIsTheSwitchCover()
         {
-            var flow = new LoadingToGameFlow(session, switcher, "Game");
+            var flow = new LoadingToGameFlow(session, switcher, new SceneGate(progress), "Game");
             flow.Run();
 
             flow.DisposeAsync().Forget();
@@ -496,7 +496,7 @@ namespace Game.SceneFlow.Tests
         [Test]
         public void CheatLoadError_ShowsTheLoadingScreenStoppedAt40Percent_WithTheErrorNamingWallet()
         {
-            var cheat = new LoadErrorCheat(screens, Settings());
+            var cheat = new LoadErrorCheat(screens, Settings(), new SceneGate(progress));
 
             cheat.Run();
 
@@ -508,7 +508,7 @@ namespace Game.SceneFlow.Tests
         [Test]
         public void CheatLoadError_ClosesItsScreen_WhenTheLoadingSessionEnds()
         {
-            var cheat = new LoadErrorCheat(screens, Settings());
+            var cheat = new LoadErrorCheat(screens, Settings(), new SceneGate(progress));
             cheat.Run();
 
             cheat.DisposeAsync().Forget();
@@ -521,7 +521,7 @@ namespace Game.SceneFlow.Tests
         [Test]
         public void CheatLoadError_ReportsItsScreenAsAHeldView_AndNothingOnceTheSessionEnds()
         {
-            var cheat = new LoadErrorCheat(screens, Settings());
+            var cheat = new LoadErrorCheat(screens, Settings(), new SceneGate(progress));
             var usage = (ISessionParticipantUsage)cheat;
 
             cheat.Run();
@@ -540,7 +540,7 @@ namespace Game.SceneFlow.Tests
         public void LoadingScene_DoesNotCountTheSwitchCover_AsAHeldView()
         {
             // The cover outlives the Loading session on purpose; counting it would mark the clean-up as failed.
-            var flow = new LoadingToGameFlow(session, switcher, "Game");
+            var flow = new LoadingToGameFlow(session, switcher, new SceneGate(progress), "Game");
             var usage = (ISessionParticipantUsage)flow;
 
             flow.Run();
@@ -580,6 +580,251 @@ namespace Game.SceneFlow.Tests
             var installer = new SerializedObject(LoadInstaller("SceneFlowLoadingInstaller"));
 
             Assert.That(installer.FindProperty("cheat").intValue, Is.EqualTo((int)SceneFlowCheatState.None));
+        }
+
+        // --- ISceneSwitch: direct loads for the cheat panel (feature-cheat-panel/cheat-states/states-rules) ---
+
+        private SceneSwitchService SwitchIn(string runningScene)
+        {
+            switcher = new SceneSwitcher(runningScene, scenes, screens, timer, Settings(), flowLog);
+            return new SceneSwitchService(switcher, session, "Loading");
+        }
+
+        [Test]
+        public void Reload_OfTheSceneRunning_LoadsItAgainThroughTheLoadingScreen()
+        {
+            var sceneSwitch = SwitchIn("Game");
+
+            sceneSwitch.Reload("Game");
+
+            Assert.That(log, Is.EqualTo(new[] { "screen shown", "end session", "load Game" }));
+            scenes.Gate.Open();
+            timer.Elapse(MinTime);
+            Assert.That(screens.Screen.Closed, Is.True);
+            Assert.That(sceneSwitch.IsSwitching, Is.False);
+        }
+
+        [Test]
+        public void Reload_OfAnotherScene_SwitchesToIt()
+        {
+            var sceneSwitch = SwitchIn("Game");
+
+            sceneSwitch.Reload("Loading");
+
+            Assert.That(log, Is.EqualTo(new[] { "screen shown", "end session", "load Loading" }));
+        }
+
+        [Test]
+        public void Reload_OfAnUnknownScene_IsRefused_WithAnErrorNamingIt()
+        {
+            var sceneSwitch = SwitchIn("Game");
+
+            sceneSwitch.Reload("Shop");
+
+            Assert.That(flowLog.Errors, Has.Count.EqualTo(1));
+            Assert.That(flowLog.Errors[0], Does.Contain("'Shop'"));
+            Assert.That(log, Is.Empty);
+            Assert.That(sceneSwitch.IsSwitching, Is.False);
+        }
+
+        [Test]
+        public void ANormalRequestForTheSceneRunning_IsStillIgnored_OnlyReloadLoadsItAgain()
+        {
+            SwitchIn("Game");
+
+            Assert.That(switcher.Request("Game", session.EndAsync), Is.False);
+            Assert.That(log, Is.Empty);
+        }
+
+        [TestCase("Game")]
+        [TestCase("Loading")]
+        public void Restart_RunsTheGameAgainFromTheLoadingScene_EvenWhenItIsRunning(string runningScene)
+        {
+            var sceneSwitch = SwitchIn(runningScene);
+
+            sceneSwitch.Restart();
+
+            Assert.That(log, Is.EqualTo(new[] { "screen shown", "end session", "load Loading" }));
+        }
+
+        [Test]
+        public void IsSwitching_IsTrueFromTheStartOfASwitch_UntilTheNewSceneIsReady_AndEachChangeIsRaised()
+        {
+            var sceneSwitch = SwitchIn("Game");
+            var seen = new List<bool>();
+            sceneSwitch.SwitchingChanged += () => seen.Add(sceneSwitch.IsSwitching);
+
+            sceneSwitch.Reload("Game");
+            Assert.That(sceneSwitch.IsSwitching, Is.True);
+
+            scenes.Gate.Open();
+            Assert.That(sceneSwitch.IsSwitching, Is.True, "the loading screen still stays its minimum time");
+
+            timer.Elapse(MinTime);
+            Assert.That(sceneSwitch.IsSwitching, Is.False);
+            Assert.That(seen, Is.EqualTo(new[] { true, false }));
+        }
+
+        [Test]
+        public void WhileSwitching_ReloadAndRestart_DoNothing()
+        {
+            var sceneSwitch = SwitchIn("Game");
+            sceneSwitch.Reload("Game");
+            log.Clear();
+
+            sceneSwitch.Reload("Game");
+            sceneSwitch.Restart();
+
+            Assert.That(log, Is.Empty);
+            Assert.That(flowLog.Warnings, Is.Empty, "the cheat panel's taps are not requests: nothing to warn about");
+        }
+
+        [Test]
+        public void ASceneSwitchListener_IsDropped_OnceItsSceneEnds()
+        {
+            var sceneSwitch = SwitchIn("Game");
+            var raised = 0;
+            sceneSwitch.SwitchingChanged += () => raised++;
+
+            session.Raise(SessionState.Disposing);
+            switcher.Request("Loading", session.EndAsync);
+
+            Assert.That(raised, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void ARestartedLoadingScene_EndsTheRestart_ThenGoesOnToTheGameScene_AsWhenTheAppOpens()
+        {
+            var sceneSwitch = SwitchIn("Game");
+            var loadingGate = new SceneGate(progress);
+            scenes.Gates["Loading"] = loadingGate;
+            sceneSwitch.Restart();
+            log.Clear();
+
+            var flow = new LoadingToGameFlow(session, switcher, loadingGate, "Game");
+            flow.Run();
+            Assert.That(log, Is.Empty, "the restart's loading screen still stays its minimum time");
+
+            timer.Elapse(MinTime);
+
+            Assert.That(log, Is.EqualTo(new[] { "screen closed", "screen shown", "end session", "load Game" }));
+            Assert.That(sceneSwitch.IsSwitching, Is.True, "now switching to the Game scene");
+        }
+
+        [Test]
+        public void CheatLoadError_EndsASwitchIntoTheLoadingScene_OnceItsScreenIsBuilt()
+        {
+            var gate = new SceneGate(progress);
+            var cheat = new LoadErrorCheat(screens, Settings(), gate);
+
+            cheat.Run();
+
+            Assert.That(Answer(gate), Is.True);
+        }
+
+        [TestCase("SceneFlowLoadingInstaller")]
+        [TestCase("SceneFlowGameInstaller")]
+        public void InstallerAsset_RegistersTheSceneSwitch(string assetName)
+        {
+            var registry = InstallerRegistry();
+
+            LoadInstaller(assetName).Install(registry);
+
+            Assert.That(registry.TryResolve<ISceneSwitch>(out var sceneSwitch), Is.True);
+            Assert.That(sceneSwitch.IsSwitching, Is.False);
+        }
+
+        // --- Cheat states for the cheat list (ICheatStateSource, ICheatSelection) ---
+
+        [Test]
+        public void LoadingInstallerAsset_DeclaresTheCheatStateOfTheCheatNode()
+        {
+            var source = (ICheatStateSource)LoadInstaller("SceneFlowLoadingInstaller");
+
+            Assert.That(source.CheatFeatureTitle, Is.EqualTo("Chuyển scene"));
+            Assert.That(source.CheatStates.Count, Is.EqualTo(1));
+            Assert.That(source.CheatStates[0].Key, Is.EqualTo("SceneFlow/LoadError"));
+            Assert.That(source.CheatStates[0].Title, Is.EqualTo("Màn Loading dừng vì một feature tải lỗi"));
+        }
+
+        [Test]
+        public void GameInstallerAsset_DeclaresNoCheatState()
+        {
+            var source = (ICheatStateSource)LoadInstaller("SceneFlowGameInstaller");
+
+            Assert.That(source.CheatStates, Is.Empty);
+        }
+
+        [Test]
+        public void WhenTheLoadErrorStateIsPicked_TheLoadingSceneBuildsIt_AndReportsItRunning()
+        {
+            var selection = new CheatSelection();
+            selection.Pick("SceneFlow/LoadError");
+            var registry = InstallerRegistry(selection);
+
+            LoadInstaller("SceneFlowLoadingInstaller").Install(registry);
+
+            Assert.That(session.Joined, Has.Count.EqualTo(1));
+            Assert.That(session.Joined[0], Is.InstanceOf<LoadErrorCheat>());
+            Assert.That(selection.RunningKey, Is.EqualTo("SceneFlow/LoadError"));
+        }
+
+        [TestCase(null)]
+        [TestCase("PopupLose/NewRecord")]
+        public void OnceSomethingElseIsPicked_TheLoadingSceneIgnoresTheStateOnItsAsset_AndRunsTheRealFlow(string picked)
+        {
+            var installer = UnityEngine.Object.Instantiate(LoadInstaller("SceneFlowLoadingInstaller"));
+            try
+            {
+                SetCheatOnAsset(installer, SceneFlowCheatState.LoadError);
+                var selection = new CheatSelection();
+                selection.Pick(picked);
+
+                installer.Install(InstallerRegistry(selection));
+
+                Assert.That(session.Joined[0], Is.InstanceOf<LoadingToGameFlow>());
+                Assert.That(selection.RunningKey, Is.Null);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+            }
+        }
+
+        [Test]
+        public void WhenNothingIsPicked_TheStateOnTheAssetIsBuilt_AndReportedRunning()
+        {
+            var installer = UnityEngine.Object.Instantiate(LoadInstaller("SceneFlowLoadingInstaller"));
+            try
+            {
+                SetCheatOnAsset(installer, SceneFlowCheatState.LoadError);
+                var selection = new CheatSelection();
+
+                installer.Install(InstallerRegistry(selection));
+
+                Assert.That(session.Joined[0], Is.InstanceOf<LoadErrorCheat>());
+                Assert.That(selection.RunningKey, Is.EqualTo("SceneFlow/LoadError"));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+            }
+        }
+
+        private ServiceRegistry InstallerRegistry(ICheatSelection selection = null)
+        {
+            var registry = new ServiceRegistry();
+            registry.Register<ISessionScene>(session);
+            registry.Register<ISessionLoadProgress>(progress);
+            if (selection != null) registry.Register(selection);
+            return registry;
+        }
+
+        private static void SetCheatOnAsset(SceneFlowInstaller installer, SceneFlowCheatState state)
+        {
+            var serialized = new SerializedObject(installer);
+            serialized.FindProperty("cheat").intValue = (int)state;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
         // --- Assets ---
@@ -836,10 +1081,16 @@ namespace Game.SceneFlow.Tests
             public SceneGate Gate;
             public Exception LoadError;
 
+            /// <summary>Gate of a given scene; scenes not listed here find <see cref="Gate"/>.</summary>
+            public readonly Dictionary<string, SceneGate> Gates = new Dictionary<string, SceneGate>();
+
+            private string lastLoaded;
+
             public UniTask LoadReplacingAsync(string sceneName)
             {
                 log.Add("load " + sceneName);
                 if (LoadError != null) throw LoadError;
+                lastLoaded = sceneName;
                 return UniTask.CompletedTask;
             }
 
@@ -850,7 +1101,7 @@ namespace Game.SceneFlow.Tests
 
             public SceneGate FindGate()
             {
-                return Gate;
+                return lastLoaded != null && Gates.TryGetValue(lastLoaded, out var gate) ? gate : Gate;
             }
         }
 

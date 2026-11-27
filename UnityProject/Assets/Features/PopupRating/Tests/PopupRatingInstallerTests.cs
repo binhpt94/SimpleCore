@@ -24,9 +24,10 @@ namespace Game.PopupRating.Tests
             return installer;
         }
 
-        private static ServiceRegistry FullRegistry(FakeSession session)
+        private static ServiceRegistry FullRegistry(FakeSession session, FakeCheatSelection cheats = null)
         {
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(cheats ?? new FakeCheatSelection());
             var popups = new RatingFakes.FakePopups();
             registry.Register<ISessionScene>(session);
             registry.Register<IRunFlow>(new RatingFakes.FakeFlow());
@@ -66,6 +67,7 @@ namespace Game.PopupRating.Tests
         public void MissingRunIsNamedAtInstall()
         {
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
             registry.Register<ISessionScene>(new FakeSession());
             var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(registry));
             Assert.That(error.Message, Does.Contain(nameof(IRunFlow)));
@@ -93,15 +95,95 @@ namespace Game.PopupRating.Tests
                 installer.Config = config;
                 installer.Cheat = RatingCheatState.InviteOpen;
                 var session = new FakeSession();
-                installer.Install(FullRegistry(session));
+                var cheats = new FakeCheatSelection();
+                installer.Install(FullRegistry(session, cheats));
                 Assert.That(session.Joined, Has.Count.EqualTo(2));
                 Assert.That(session.Joined[1], Is.InstanceOf<RatingCheatParticipant>());
+                Assert.That(cheats.Reported, Is.EqualTo(new[] { "PopupRating/InviteOpen" }), "a state built from the asset is reported");
             }
             finally
             {
                 UnityEngine.Object.DestroyImmediate(installer);
                 UnityEngine.Object.DestroyImmediate(config);
             }
+        }
+
+        // --- Cheat list (ICheatStateSource) and the pick (ICheatSelection) ---
+
+        [Test]
+        public void MissingCheatSelectionIsNamedAtTheStartOfInstall()
+        {
+            var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(new ServiceRegistry()));
+            Assert.That(error.Message, Does.Contain(nameof(ICheatSelection)));
+        }
+
+        [Test]
+        public void RealInstallerListsTheFeatureAndItsStatesInTheOrderOfTheCheatNode()
+        {
+            ICheatStateSource source = LoadInstaller();
+            Assert.That(source.CheatFeatureTitle, Is.EqualTo("Popup mời đánh giá"));
+            Assert.That(source.CheatStates.Count, Is.EqualTo(1));
+            Assert.That(source.CheatStates[0].Key, Is.EqualTo("PopupRating/InviteOpen"));
+            Assert.That(source.CheatStates[0].Title, Is.EqualTo("Popup mời đánh giá đang mở, chưa chạm nút nào"));
+        }
+
+        [Test]
+        public void PickOfOwnStateBuildsItAndReportsItRunning()
+        {
+            var installer = ScriptableObject.CreateInstance<PopupRatingInstaller>();
+            var config = ScriptableObject.CreateInstance<RatingConfig>();
+            try
+            {
+                installer.Config = config;
+                var cheats = new FakeCheatSelection();
+                cheats.Pick("PopupRating/InviteOpen");
+                var session = new FakeSession();
+                installer.Install(FullRegistry(session, cheats));
+                Assert.That(session.Joined, Has.Count.EqualTo(2));
+                Assert.That(session.Joined[0], Is.InstanceOf<RatingParticipant>());
+                Assert.That(session.Joined[1], Is.InstanceOf<RatingCheatParticipant>());
+                Assert.That(cheats.Reported, Is.EqualTo(new[] { "PopupRating/InviteOpen" }));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+                UnityEngine.Object.DestroyImmediate(config);
+            }
+        }
+
+        [TestCase("PopupLose/NewRecord")]
+        [TestCase(null)]
+        public void PickOfAnotherFeatureOrNormalPlayBuildsNothingEvenWithACheatOnTheAsset(string pickedKey)
+        {
+            var installer = ScriptableObject.CreateInstance<PopupRatingInstaller>();
+            var config = ScriptableObject.CreateInstance<RatingConfig>();
+            try
+            {
+                installer.Config = config;
+                installer.Cheat = RatingCheatState.InviteOpen;
+                var cheats = new FakeCheatSelection();
+                cheats.Pick(pickedKey);
+                var session = new FakeSession();
+                installer.Install(FullRegistry(session, cheats));
+                Assert.That(session.Joined, Has.Count.EqualTo(1), "only the normal invite joins");
+                Assert.That(session.Joined[0], Is.InstanceOf<RatingParticipant>());
+                Assert.That(cheats.Reported, Is.Empty, "no state was built");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+                UnityEngine.Object.DestroyImmediate(config);
+            }
+        }
+
+        [Test]
+        public void RealInstallerWithoutPickBuildsNoState()
+        {
+            var cheats = new FakeCheatSelection();
+            var session = new FakeSession();
+            LoadInstaller().Install(FullRegistry(session, cheats));
+            Assert.That(session.Joined, Has.Count.EqualTo(1));
+            Assert.That(cheats.Reported, Is.Empty);
         }
 
         [Test]
@@ -150,6 +232,28 @@ namespace Game.PopupRating.Tests
             for (var t = c.GetType(); t != null; t = t.BaseType)
                 if (t.Name == typeName) return true;
             return false;
+        }
+
+        internal sealed class FakeCheatSelection : ICheatSelection
+        {
+            public readonly List<string> Reported = new List<string>();
+            public bool HasPick { get; private set; }
+            public string PickedKey { get; private set; }
+            public string RunningKey { get; private set; }
+
+            public void Pick(string key)
+            {
+                PickedKey = string.IsNullOrEmpty(key) ? null : key;
+                HasPick = true;
+            }
+
+            public void ReportRunning(string key)
+            {
+                Reported.Add(key);
+                RunningKey = key;
+            }
+
+            public void BeginScene() => RunningKey = null;
         }
 
         internal sealed class FakeSession : ISessionScene

@@ -23,6 +23,7 @@ namespace Game.Home.Tests
         private static ServiceRegistry FullRegistry(FakeSessionScene session)
         {
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(new HomeInstallerCheatTests.FakeCheatSelection());
             registry.Register<IRunScore>(new FakeRunScore());
             registry.Register<ISessionScene>(session);
             return registry;
@@ -75,6 +76,7 @@ namespace Game.Home.Tests
         public void InstallWithoutScoreFailsNamingIt()
         {
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(new HomeInstallerCheatTests.FakeCheatSelection());
             registry.Register<ISessionScene>(new FakeSessionScene());
 
             var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(registry));
@@ -85,6 +87,7 @@ namespace Game.Home.Tests
         public void InstallWithoutSessionFailsNamingIt()
         {
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(new HomeInstallerCheatTests.FakeCheatSelection());
             registry.Register<IRunScore>(new FakeRunScore());
 
             var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(registry));

@@ -10,18 +10,28 @@ namespace Game.Home
     /// screen flow. Needs IRunScore and ISessionScene installed first.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Home/Home Installer")]
-    public sealed class HomeInstaller : InstallerAsset
+    public sealed partial class HomeInstaller : InstallerAsset
     {
         [SerializeField] private HomeConfig config;
         [SerializeField] private HomeScreenFactoryAsset screenFactory;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         [Tooltip("Dev only: a state of feature-home/cheat to build at start.")]
         [SerializeField] private HomeCheatState cheat = HomeCheatState.None;
+
+        /// <summary>The state chosen on the asset (tests set it and put it back).</summary>
+        internal HomeCheatState Cheat
+        {
+            get => cheat;
+            set => cheat = value;
+        }
 #endif
 
         public override void Install(IServiceRegistry registry)
         {
             if (registry == null) throw new ArgumentNullException(nameof(registry));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var cheats = NeedCheatSelection(registry);
+#endif
             if (config == null) throw new InvalidOperationException($"{name}: Home config is missing.");
             if (screenFactory == null) throw new InvalidOperationException($"{name}: Home screen factory is missing.");
             config.Check();
@@ -29,7 +39,12 @@ namespace Game.Home
             var score = Need<IRunScore>(registry);
             var session = Need<ISessionScene>(registry);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            score = HomeCheat.Apply(cheat, score);
+            var state = CheatToBuild(cheats);
+            if (state != HomeCheatState.None)
+            {
+                score = HomeCheat.Apply(state, score);
+                cheats.ReportRunning(HomeCheats.KeyOf(state));
+            }
 #endif
             var screen = new HomeScreenPresenter(score, config);
             registry.Register<IHomeScreen>(screen);

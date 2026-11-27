@@ -2,3 +2,4 @@
 {"at": "2026-11-25 21:26:29", "event": "data", "hash": "f625ef87b6a9", "previous": "1eb999425654", "added": [], "removed": [], "rewritten": [{"id": "dev-seed-per-run", "old": "Bản dev: lượt thứ k trong một lần mở game dùng seed bằng seed của config cộng (k − 1)\nLượt đầu dùng đúng seed của config; chơi lại nhiều lượt liên tiếp vẫn có thứ tự quái khác nhau mà vẫn lặp lại được.", "new": "Bản dev: mọi lượt trong một lần mở game dùng đúng seed đang ghi trong config\nChơi lại ngay trong cùng lần mở game ra đúng lượt vừa chơi; muốn thứ tự quái khác thì đổi seed trong config."}]}
 {"at": "2026-11-25 21:29:13", "event": "promote", "by": "người", "hash": "f625ef87b6a9"}
 {"at": "2026-11-27 00:21:41", "event": "approve", "hash": "d59f179cb3cfad97143780c58348a9caf01eb9c1", "by": "tự duyệt (Full Auto)"}
+{"at": "2026-11-27 09:07:59", "event": "approve", "hash": "3936fa790afdbc9999e03c12fd8f7780c066fd4c", "by": "tự duyệt (Full Auto)"}

@@ -248,8 +248,46 @@ namespace Game.HudUpgrade.Tests
             var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
             Assert.IsNotNull(installer, "missing " + InstallerPath);
 
-            var registry = new FakeRegistry();
             var session = new FakeSession();
+            var cheats = new FakeCheatSelection();
+
+            installer.Install(FullRegistry(session, cheats));
+
+            Assert.AreEqual(1, session.Joined.Count);
+            Assert.AreEqual(HudUpgradeCheatState.None, ((HudUpgradeParticipant)session.Joined[0]).CheatState,
+                "the shipped config keeps the cheat off");
+            Assert.IsEmpty(cheats.Reported);
+        }
+
+        [Test]
+        public void Installer_fails_at_once_naming_the_missing_shop()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
+            var registry = new FakeRegistry();
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
+            registry.Register<ISessionScene>(new FakeSession());
+            var error = Assert.Throws<System.InvalidOperationException>(() => installer.Install(registry));
+            StringAssert.Contains("IUpgradeShop", error.Message);
+        }
+
+        [Test]
+        public void Installer_fails_at_once_naming_the_missing_buy_orders()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
+            var registry = new FakeRegistry();
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
+            registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<IUpgradeShop>(new FakeShop(new FakeWallet()));
+            var error = Assert.Throws<System.InvalidOperationException>(() => installer.Install(registry));
+            StringAssert.Contains("IUpgradeOrders", error.Message);
+        }
+    
+        // --- Cheat list (ICheatStateSource) and the pick (ICheatSelection) ---
+
+        private static FakeRegistry FullRegistry(FakeSession session, FakeCheatSelection cheats)
+        {
+            var registry = new FakeRegistry();
+            if (cheats != null) registry.Register<ICheatSelection>(cheats);
             var wallet = new FakeWallet();
             registry.Register<ISessionScene>(session);
             var shop = new FakeShop(wallet);
@@ -261,31 +299,114 @@ namespace Game.HudUpgrade.Tests
             registry.Register<IWalletBalance>(wallet);
             registry.Register<IWalletIncome>(wallet);
             registry.Register<IWalletService>(wallet);
+            return registry;
+        }
 
-            installer.Install(registry);
+        /// <summary>An installer like the shipped one, but its config has <paramref name="assetState"/> chosen. Caller destroys both.</summary>
+        private static HudUpgradeInstaller InstallerWithCheatOnAsset(HudUpgradeCheatState assetState, out HudUpgradeConfig config)
+        {
+            var shipped = AssetDatabase.LoadAssetAtPath<HudUpgradeInstaller>(InstallerPath);
+            Assert.IsNotNull(shipped, "missing " + InstallerPath);
+            config = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<HudUpgradeConfig>(ConfigPath));
+            var configSo = new SerializedObject(config);
+            configSo.FindProperty("cheatState").enumValueIndex = (int)assetState;
+            configSo.ApplyModifiedPropertiesWithoutUndo();
 
-            Assert.AreEqual(1, session.Joined.Count);
+            var installer = UnityEngine.Object.Instantiate(shipped);
+            var installerSo = new SerializedObject(installer);
+            installerSo.FindProperty("config").objectReferenceValue = config;
+            installerSo.ApplyModifiedPropertiesWithoutUndo();
+            return installer;
+        }
+
+        private static HudUpgradeCheatState BuiltState(FakeSession session) =>
+            ((HudUpgradeParticipant)session.Joined.Single()).CheatState;
+
+        [Test]
+        public void Installer_fails_at_the_start_naming_the_missing_cheat_selection()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
+            var error = Assert.Throws<System.InvalidOperationException>(
+                () => installer.Install(FullRegistry(new FakeSession(), null)));
+            StringAssert.Contains(nameof(ICheatSelection), error.Message);
         }
 
         [Test]
-        public void Installer_fails_at_once_naming_the_missing_shop()
+        public void Shipped_installer_lists_the_bar_and_its_states_in_the_order_of_the_cheat_node()
         {
-            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
-            var registry = new FakeRegistry();
-            registry.Register<ISessionScene>(new FakeSession());
-            var error = Assert.Throws<System.InvalidOperationException>(() => installer.Install(registry));
-            StringAssert.Contains("IUpgradeShop", error.Message);
+            var source = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath) as ICheatStateSource;
+            Assert.IsNotNull(source, "the installer asset must be a cheat state source");
+
+            Assert.AreEqual("Thanh nâng cấp", source.CheatFeatureTitle);
+            CollectionAssert.AreEqual(new[] { "HudUpgrade/MixedButtons" }, source.CheatStates.Select(s => s.Key).ToArray());
+            CollectionAssert.AreEqual(new[] { "Giữa trận, đủ tiền mua năm mục, thiếu tiền cho một mục" },
+                source.CheatStates.Select(s => s.Title).ToArray());
         }
 
         [Test]
-        public void Installer_fails_at_once_naming_the_missing_buy_orders()
+        public void Pick_of_own_state_builds_it_and_reports_it_running()
         {
-            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>(InstallerPath);
-            var registry = new FakeRegistry();
-            registry.Register<ISessionScene>(new FakeSession());
-            registry.Register<IUpgradeShop>(new FakeShop(new FakeWallet()));
-            var error = Assert.Throws<System.InvalidOperationException>(() => installer.Install(registry));
-            StringAssert.Contains("IUpgradeOrders", error.Message);
+            var installer = InstallerWithCheatOnAsset(HudUpgradeCheatState.None, out var config);
+            try
+            {
+                var cheats = new FakeCheatSelection();
+                cheats.Pick("HudUpgrade/MixedButtons");
+                var session = new FakeSession();
+
+                installer.Install(FullRegistry(session, cheats));
+
+                Assert.AreEqual(HudUpgradeCheatState.MixedButtons, BuiltState(session));
+                CollectionAssert.AreEqual(new[] { "HudUpgrade/MixedButtons" }, cheats.Reported);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+                UnityEngine.Object.DestroyImmediate(config);
+            }
+        }
+
+        [TestCase("PopupLose/NewRecord")]
+        [TestCase(null)]
+        public void Pick_of_another_feature_or_normal_play_builds_nothing_even_with_a_state_on_the_asset(string pickedKey)
+        {
+            var installer = InstallerWithCheatOnAsset(HudUpgradeCheatState.MixedButtons, out var config);
+            try
+            {
+                var cheats = new FakeCheatSelection();
+                cheats.Pick(pickedKey);
+                var session = new FakeSession();
+
+                installer.Install(FullRegistry(session, cheats));
+
+                Assert.AreEqual(HudUpgradeCheatState.None, BuiltState(session));
+                Assert.IsEmpty(cheats.Reported, "no state was built");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+                UnityEngine.Object.DestroyImmediate(config);
+            }
+        }
+
+        [Test]
+        public void Without_a_pick_the_state_on_the_asset_is_built_and_reported_running()
+        {
+            var installer = InstallerWithCheatOnAsset(HudUpgradeCheatState.MixedButtons, out var config);
+            try
+            {
+                var cheats = new FakeCheatSelection();
+                var session = new FakeSession();
+
+                installer.Install(FullRegistry(session, cheats));
+
+                Assert.AreEqual(HudUpgradeCheatState.MixedButtons, BuiltState(session));
+                CollectionAssert.AreEqual(new[] { "HudUpgrade/MixedButtons" }, cheats.Reported);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+                UnityEngine.Object.DestroyImmediate(config);
+            }
         }
     }
 }

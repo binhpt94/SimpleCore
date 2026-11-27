@@ -1,0 +1,8 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,cheat_enabled,Bật nút và panel cheat,true/false,true,,,Bản build hiện đều là bản test; người làm game tắt khi cần bản sạch
+2,button_label,Chữ trên nút cheat,,Cheat,,,Art IDEA siêu cơ bản; chữ đủ để hiểu
+3,panel_title,Tiêu đề panel,,Cheat,,,Trùng chữ trên nút để biết panel từ nút nào
+4,normal_row_label,Chữ dòng chơi bình thường,,Chơi bình thường,,,Nói rõ dòng này bỏ cheat
+5,empty_label,Chữ khi không có state,,Bản này không có state cheat,,,Cho người test biết bản build không mang state nào

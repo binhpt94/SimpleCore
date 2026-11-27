@@ -425,6 +425,7 @@ namespace Game.Services.Popup.Tests
             var session = new FakeSession();
             registry.Register<IAssetCatalogs>(new AssetCatalogs(new[] { Catalog("GamePopups", ("Test/A", prefabs[IdA])) }));
             registry.Register<ISessionScene>(session);
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
 
             LoadInstallerAsset().Install(registry);
 
@@ -442,6 +443,7 @@ namespace Game.Services.Popup.Tests
             var registry = new ServiceRegistry();
             registry.Register<IAssetCatalogs>(new AssetCatalogs(new AssetCatalog[0]));
             registry.Register<ISessionScene>(new FakeSession());
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
 
             var error = Assert.Throws<InvalidOperationException>(() => LoadInstallerAsset().Install(registry));
 
@@ -453,6 +455,7 @@ namespace Game.Services.Popup.Tests
         {
             var registry = new ServiceRegistry();
             registry.Register<IAssetCatalogs>(new AssetCatalogs(new[] { Catalog("GamePopups") }));
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
 
             Assert.That(() => LoadInstallerAsset().Install(registry), Throws.Exception);
         }
@@ -480,7 +483,7 @@ namespace Game.Services.Popup.Tests
 
         // ---- helpers
 
-        private static PopupInstaller LoadInstallerAsset()
+        internal static PopupInstaller LoadInstallerAsset()
         {
             var installer = AssetDatabase.LoadAssetAtPath<PopupInstaller>(
                 "Assets/Features/_Services/Popup/FeatureAssets/Public/PopupInstaller.asset");
@@ -572,7 +575,7 @@ namespace Game.Services.Popup.Tests
             public void Error(string message) => Errors.Add(message);
         }
 
-        private sealed class FakeSession : ISessionScene
+        internal sealed class FakeSession : ISessionScene
         {
             internal readonly List<ISessionParticipant> Joined = new List<ISessionParticipant>();
 

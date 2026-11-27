@@ -1,0 +1,37 @@
+{
+ "hash": "92e35b523d22",
+ "items": {
+  "rows-order": {
+   "hash": "2107eb58060f",
+   "text": "Dòng \"Chơi bình thường\" đứng đầu, sau đó là các dòng state xếp theo tên feature A tới Z\nTrong một feature, các state theo đúng thứ tự ý ở node cheat của feature đó."
+  },
+  "rows-label": {
+   "hash": "552a3b843411",
+   "text": "Mỗi dòng state ghi \"<tên feature>: <tiêu đề state>\"\nLấy tên feature và tiêu đề ý của node cheat, ví dụ \"Popup thua: Popup thua đang mở, lượt vừa phá kỉ lục\"."
+  },
+  "rows-mark-active": {
+   "hash": "b53d8fe275f3",
+   "text": "Dòng của state đang chạy được đánh dấu đang chọn; không có state thì dòng \"Chơi bình thường\" được đánh dấu"
+  },
+  "apply-reload-scene": {
+   "hash": "5ba936e871d7",
+   "text": "Chạm một dòng state thì game tải lại scene chứa state đó, và feature sở hữu dựng state ngay khi scene chạy\nĐang ở scene khác thì chuyển sang qua `feature-scene-flow`. Đang ở đúng scene thì vẫn tải lại, để state luôn dựng từ đầu như khi chọn trên asset rồi bấm Play."
+  },
+  "apply-same-again": {
+   "hash": "d366855659a5",
+   "text": "Chạm lại dòng của state đang chạy thì dựng lại state đó từ đầu"
+  },
+  "apply-normal-restart": {
+   "hash": "1aba77bd09b7",
+   "text": "Chạm \"Chơi bình thường\" thì bỏ state cheat và game chạy lại từ scene đầu tiên như lúc mới mở\nKhông giữ gì của state cheat vừa chạy."
+  },
+  "apply-no-save": {
+   "hash": "351627ecc974",
+   "text": "State cheat không ghi gì xuống máy\nKỉ lục ép trong một state không đè kỉ lục thật đã lưu."
+  },
+  "apply-missing-state": {
+   "hash": "0ad020e829a1",
+   "text": "State có ở node cheat nhưng bản build không dựng được thì không có dòng\nVí dụ bản build không mang code cheat của feature đó."
+  }
+ }
+}

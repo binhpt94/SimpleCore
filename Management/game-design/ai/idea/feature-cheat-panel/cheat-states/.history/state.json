@@ -1,0 +1,29 @@
+{
+ "hash": "1a6897ef3a27",
+ "items": {
+  "states-from-features": {
+   "hash": "db7c08ba0bb8",
+   "text": "Mỗi state ở node cheat của một feature là một dòng trong panel\nFeature thêm hay bỏ state ở node cheat của mình thì panel đổi theo, panel không giữ danh sách riêng."
+  },
+  "states-built-in-build": {
+   "hash": "e0e3ffae1915",
+   "text": "Panel chỉ liệt kê state mà bản build đang chạy dựng được\nKhông có dòng nào chạm vào mà không có gì xảy ra."
+  },
+  "states-feature-builds": {
+   "hash": "2794c42beaac",
+   "text": "Chạm một dòng thì feature sở hữu state đó dựng state, panel không tự ép giá trị\nGiữ đúng một chỗ dựng mỗi state, giống khi chọn trên asset trong Editor."
+  },
+  "states-one-at-a-time": {
+   "hash": "80f4d27fe438",
+   "text": "Mỗi lần chỉ có một state cheat; chọn state mới thì bỏ state đang có\nKhông chồng hai state lên nhau."
+  },
+  "states-normal-play": {
+   "hash": "69152e7999f0",
+   "text": "Panel có một dòng chơi bình thường để bỏ state cheat và quay lại game không cheat"
+  },
+  "states-close-after-pick": {
+   "hash": "efee33c673d8",
+   "text": "Chọn một dòng xong thì panel tự đóng\nNgười test thấy ngay state vừa chọn."
+  }
+ }
+}

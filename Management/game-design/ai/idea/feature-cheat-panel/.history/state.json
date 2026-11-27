@@ -1,0 +1,29 @@
+{
+ "hash": "75d09f183702",
+ "items": {
+  "panel-test-tool": {
+   "hash": "b44579b4fac4",
+   "text": "Panel cheat là công cụ cho người làm game test, không phải tính năng của người chơi\nKhông tính vào vòng chơi, không thưởng phạt, không lưu gì."
+  },
+  "panel-own-feature": {
+   "hash": "c27a77c9ba44",
+   "text": "Nút và panel cheat là một feature riêng, không đặt trong feature nào có sẵn\nNút nổi ở mọi scene và gom state của nhiều feature, nên cắt ngang nhiều feature. Đã loại: đặt trong `feature-hud` (HUD chỉ có trong trận), đặt trong `feature-popup` (dịch vụ popup không biết state của feature khác)."
+  },
+  "panel-in-build": {
+   "hash": "9a558be15262",
+   "text": "Nút và panel chạy được trong bản build cài lên máy, không chỉ trong Editor\nNgười test cầm máy thật là nhảy được tới state cần xem, không cần mở Unity."
+  },
+  "panel-config-switch": {
+   "hash": "e96dcc46a94d",
+   "text": "Một config bật hoặc tắt cả nút lẫn panel cheat\nTắt thì nút không hiện và không ai mở được panel."
+  },
+  "panel-lists-states": {
+   "hash": "4427891476e4",
+   "text": "Panel liệt kê các state cheat mà các feature đã khai ở node cheat của mình\nPanel không tự đặt ra state; mỗi state vẫn do feature sở hữu dựng."
+  },
+  "panel-apply-state": {
+   "hash": "196fb0c1de81",
+   "text": "Chạm một state trong panel thì game chuyển ngay tới state đó\nThay cho việc chọn state trên asset trong Editor rồi bấm Play."
+  }
+ }
+}

@@ -1,0 +1,383 @@
+{
+ "items": {
+  "spec-config-asset": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.CheatEnabledSwitchLivesInTheConfigAssetTheInstallerShips"
+   ],
+   "play": "",
+   "hash": "84109674c547",
+   "text": "Công tắc là một ô bật tắt `cheat_enabled` trong asset config của feature, đi kèm bản build\nNgười làm game đổi ô này trước khi build; bản build mang giá trị lúc build. Đã loại: đọc từ file ngoài trên máy (thêm đường bật cheat cho người chơi thật).",
+   "title": "Công tắc là một ô bật tắt `cheat_enabled` trong asset config của feature, đi kèm bản build",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "spec-default-on": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.CheatEnabledIsOnByDefault"
+   ],
+   "play": "",
+   "hash": "67c7a75ed5ac",
+   "text": "`cheat_enabled` mặc định là bật\nBản build bây giờ đều là bản test. Tắt là việc của người làm game khi cần một bản sạch.",
+   "title": "`cheat_enabled` mặc định là bật",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "spec-any-build": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.CheatEnabledOnCreatesTheOverlayWhenTheSceneRuns",
+    "CheatAccessTests.OnlyCheatEnabledDecides_NoBuildTypeConditionInTheAccessCode"
+   ],
+   "play": "",
+   "hash": "eec365254260",
+   "text": "Chỉ `cheat_enabled` quyết có nút hay không, ở cả Editor và mọi loại bản build\nLoại build không tự ẩn nút; state nào có trong panel thì theo `feature-cheat-panel/cheat-states`.",
+   "title": "Chỉ `cheat_enabled` quyết có nút hay không, ở cả Editor và mọi loại bản build",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "spec-off-nothing": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.CheatEnabledOffCreatesNothingAndJoinsNothing",
+    "CheatAccessTests.ConfigOffNeedsNothingElse_NoSessionNoPrefab"
+   ],
+   "play": "",
+   "hash": "0fa22d3513b1",
+   "text": "`cheat_enabled` tắt thì không tạo nút, không tạo panel, không chặn chạm nào\nGame y như không có feature này.",
+   "title": "`cheat_enabled` tắt thì không tạo nút, không tạo panel, không chặn chạm nào",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "edge-config-tat": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.CheatEnabledOffCreatesNothingAndJoinsNothing",
+    "CheatAccessTests.ConfigOffNeedsNothingElse_NoSessionNoPrefab"
+   ],
+   "play": "",
+   "hash": "b517829324e9",
+   "text": "Config tắt: không có nút, không có nền che, không bắt chạm nào; state chọn trên asset trong Editor vẫn chạy như trước.",
+   "title": "Config tắt",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "edge-thieu-asset-config": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.MissingConfigFailsAtInstallNamingCheatPanelConfig"
+   ],
+   "play": "",
+   "hash": "315566219182",
+   "text": "Thiếu asset config: lỗi ngay lúc khởi động, nêu tên config bị thiếu, như mọi config khác.",
+   "title": "Thiếu asset config",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "accessparams-cheat-enabled": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.AccessParams_CheatEnabled_IsTrue"
+   ],
+   "play": "",
+   "hash": "0f5a3e0484bc",
+   "text": "Bảng AccessParams (params), dòng cheat_enabled\nkey (string): cheat_enabled\nname (string): Bật nút và panel cheat\nunit (string): true/false\nidea (string): true\nprototype (string): \nfull (string): \nreason (string): Bản build hiện đều là bản test; người làm game tắt khi cần bản sạch",
+   "title": "AccessParams: Bật nút và panel cheat (cheat_enabled)",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "accessparams-button-label": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.AccessParams_ButtonLabel_IsCheat"
+   ],
+   "play": "",
+   "hash": "17fb826aac93",
+   "text": "Bảng AccessParams (params), dòng button_label\nkey (string): button_label\nname (string): Chữ trên nút cheat\nunit (string): \nidea (string): Cheat\nprototype (string): \nfull (string): \nreason (string): Art IDEA siêu cơ bản; chữ đủ để hiểu",
+   "title": "AccessParams: Chữ trên nút cheat (button_label)",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "accessparams-panel-title": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.AccessParams_PanelTitle_IsCheat"
+   ],
+   "play": "",
+   "hash": "c88e51074bc5",
+   "text": "Bảng AccessParams (params), dòng panel_title\nkey (string): panel_title\nname (string): Tiêu đề panel\nunit (string): \nidea (string): Cheat\nprototype (string): \nfull (string): \nreason (string): Trùng chữ trên nút để biết panel từ nút nào",
+   "title": "AccessParams: Tiêu đề panel (panel_title)",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "accessparams-normal-row-label": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.AccessParams_NormalRowLabel_IsChoiBinhThuong"
+   ],
+   "play": "",
+   "hash": "7a198a3fd111",
+   "text": "Bảng AccessParams (params), dòng normal_row_label\nkey (string): normal_row_label\nname (string): Chữ dòng chơi bình thường\nunit (string): \nidea (string): Chơi bình thường\nprototype (string): \nfull (string): \nreason (string): Nói rõ dòng này bỏ cheat",
+   "title": "AccessParams: Chữ dòng chơi bình thường (normal_row_label)",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  },
+  "accessparams-empty-label": {
+   "state": "done",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done",
+   "tests": [
+    "CheatAccessTests.AccessParams_EmptyLabel_SaysTheBuildHasNoCheatState"
+   ],
+   "play": "",
+   "hash": "72b9c742db99",
+   "text": "Bảng AccessParams (params), dòng empty_label\nkey (string): empty_label\nname (string): Chữ khi không có state\nunit (string): \nidea (string): Bản này không có state cheat\nprototype (string): \nfull (string): \nreason (string): Cho người test biết bản build không mang state nào",
+   "title": "AccessParams: Chữ khi không có state (empty_label)",
+   "by": "CheatPanel",
+   "at": "2026-11-27 11:10:30"
+  }
+ },
+ "log": [
+  {
+   "at": "2026-11-27 10:47:34",
+   "id": "spec-config-asset",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: config asset cheat_enabled và AccessParams, quyết định có nút"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "spec-default-on",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "spec-any-build",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "spec-off-nothing",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "edge-config-tat",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "edge-thieu-asset-config",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "accessparams-cheat-enabled",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "accessparams-button-label",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "accessparams-panel-title",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "accessparams-normal-row-label",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 10:49:26",
+   "id": "accessparams-empty-label",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: code và test đã viết, chờ Unity để biên dịch và tạo asset"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "spec-config-asset",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "spec-default-on",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "spec-any-build",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "spec-off-nothing",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "edge-config-tat",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "edge-thieu-asset-config",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "accessparams-cheat-enabled",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "accessparams-button-label",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "accessparams-panel-title",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "accessparams-normal-row-label",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:02:44",
+   "id": "accessparams-empty-label",
+   "state": "doing",
+   "by": "CheatPanel",
+   "note": "Đợt 1: đã sửa lỗi biên dịch SessionState trong CheatAccessTests, chờ CodeLead biên dịch rồi tạo asset và ghi done"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "spec-config-asset",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.CheatEnabledSwitchLivesInTheConfigAssetTheInstallerShips"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "spec-default-on",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.CheatEnabledIsOnByDefault"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "spec-any-build",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.CheatEnabledOnCreatesTheOverlayWhenTheSceneRuns, CheatAccessTests.OnlyCheatEnabledDecides_NoBuildTypeConditionInTheAccessCode"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "spec-off-nothing",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.CheatEnabledOffCreatesNothingAndJoinsNothing, CheatAccessTests.ConfigOffNeedsNothingElse_NoSessionNoPrefab"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "edge-config-tat",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.CheatEnabledOffCreatesNothingAndJoinsNothing, CheatAccessTests.ConfigOffNeedsNothingElse_NoSessionNoPrefab"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "edge-thieu-asset-config",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.MissingConfigFailsAtInstallNamingCheatPanelConfig"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "accessparams-cheat-enabled",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.AccessParams_CheatEnabled_IsTrue"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "accessparams-button-label",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.AccessParams_ButtonLabel_IsCheat"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "accessparams-panel-title",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.AccessParams_PanelTitle_IsCheat"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "accessparams-normal-row-label",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.AccessParams_NormalRowLabel_IsChoiBinhThuong"
+  },
+  {
+   "at": "2026-11-27 11:10:30",
+   "id": "accessparams-empty-label",
+   "state": "done",
+   "by": "CheatPanel",
+   "note": "CheatAccessTests.AccessParams_EmptyLabel_SaysTheBuildHasNoCheatState"
+  }
+ ]
+}

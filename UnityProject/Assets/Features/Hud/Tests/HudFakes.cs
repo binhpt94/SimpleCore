@@ -187,10 +187,8 @@ namespace Game.Hud.Tests
         public readonly List<int> SkillSlots = new List<int>();
         public readonly List<SkillShown> Skills = new List<SkillShown>();
         public bool Destroyed;
-        public string CheatLabel;
 
         public event Action<int> SkillPressed;
-        public event Action CheatPressed;
         public int SkillButtonsCreated;
         public HudInsets Insets;
 
@@ -235,8 +233,6 @@ namespace Game.Hud.Tests
         public void ShowSkill(int index, bool ready, string seconds, float cover, float scale) =>
             Skills[index] = new SkillShown { Ready = ready, Seconds = seconds, Cover = cover, Scale = scale };
 
-        public void ShowCheatButton(string label) => CheatLabel = label;
-
         public void Destroy()
         {
             Destroyed = true;
@@ -244,7 +240,6 @@ namespace Game.Hud.Tests
         }
 
         public void Press(int index) => SkillPressed?.Invoke(index);
-        public void PressCheat() => CheatPressed?.Invoke();
 
         public int SkillListeners => SkillPressed?.GetInvocationList().Length ?? 0;
 

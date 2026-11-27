@@ -11,7 +11,7 @@ namespace Game.TeamSelect
     /// Asset: FeatureAssets/Public/TeamSelectInstaller.asset.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/TeamSelect/Installer", fileName = "TeamSelectInstaller")]
-    public sealed class TeamSelectInstaller : InstallerAsset
+    public sealed partial class TeamSelectInstaller : InstallerAsset
     {
         [SerializeField] private TeamSelectConfig config;
         [SerializeField] private GameObject viewPrefab;
@@ -19,6 +19,9 @@ namespace Game.TeamSelect
         public override void Install(IServiceRegistry registry)
         {
             if (registry == null) throw new ArgumentNullException(nameof(registry));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var cheats = NeedCheatSelection(registry);
+#endif
             if (config == null) throw new InvalidOperationException("TeamSelectInstaller: missing TeamSelectConfig.");
             if (viewPrefab == null) throw new InvalidOperationException("TeamSelectInstaller: missing view prefab.");
 
@@ -28,6 +31,9 @@ namespace Game.TeamSelect
                 new PrefabViewFactory(viewPrefab));
             registry.Resolve<ISessionScene>().Join(session);
             registry.Register<ITeamSelectScreen>(new TeamSelectScreen(session.Presenter));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            BuildCheat(CheatToBuild(cheats), session, cheats);
+#endif
         }
     }
 }

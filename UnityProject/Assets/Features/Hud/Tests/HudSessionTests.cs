@@ -177,12 +177,10 @@ namespace Game.Hud.Tests
         }
 
         [Test]
-        public void CheatButtonShowsTheWholeMidBattleState()
+        public void BuiltCheatShowsTheWholeMidBattleStateOnTheFirstFrameOfTheBattle()
         {
             NewSession(NewCheat()).Run();
-            Assert.IsNotNull(_spawner.View.CheatLabel);
 
-            _spawner.View.PressCheat();
             _clock.Tick(0.016f);
 
             Assert.AreEqual("300/1000", _spawner.View.Health);
@@ -228,13 +226,44 @@ namespace Game.Hud.Tests
         }
 
         [Test]
-        public void CheatWarnsAboutSkippedPartsWhenPressed()
+        public void BuiltCheatWarnsAboutSkippedPartsWhenApplied()
         {
             _skills.Skills = new[] { CastleSkill.Thunder };
             NewSession(NewCheat()).Run();
 
             LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("Hud cheat.*Frost"));
-            _spawner.View.PressCheat();
+            _clock.Tick(0.016f);
+        }
+
+        [Test]
+        public void BuiltCheatWaitsForTheBattleAndIsAppliedOnlyOnce()
+        {
+            _run.SetStep(RunStep.Home);
+            var cheat = NewCheat();
+            var log = new System.Collections.Generic.List<string>();
+            _waves.Calls = log;
+            _castleCheat.Calls = log;
+            NewSession(cheat).Run();
+
+            _clock.Tick(0.016f);
+            Assert.IsEmpty(log, "nothing is forced before the battle runs");
+
+            _run.SetStep(RunStep.Playing);
+            _clock.Tick(0.016f);
+            _clock.Tick(0.016f);
+            Assert.AreEqual(1, log.FindAll(c => c == "wave 7").Count, "applied once, on the first frame of the battle");
+        }
+
+        [Test]
+        public void WithoutABuiltCheatTheBattleKeepsItsOwnValues()
+        {
+            NewSession().Run();
+
+            _clock.Tick(0.016f);
+
+            Assert.AreEqual("1000/1000", _spawner.View.Health);
+            Assert.AreEqual("50", _spawner.View.Coins);
+            Assert.AreEqual("Đợt 1", _spawner.View.Wave);
         }
 
         [Test]
@@ -279,6 +308,7 @@ namespace Game.Hud.Tests
             var installer = AssetDatabase.LoadAssetAtPath<HudInstaller>(InstallerPath);
             Assert.IsNotNull(installer, "missing " + InstallerPath);
             var registry = new FakeRegistry();
+            registry.Register<Game.Core.ICheatSelection>(new HudInstallerCheatTests.FakeCheatSelection());
             registry.Register<Game.Core.ISessionScene>(new FakeSessionScene());
 
             var error = Assert.Throws<InvalidOperationException>(() => installer.Install(registry));
@@ -289,6 +319,7 @@ namespace Game.Hud.Tests
         {
             scene = new FakeSessionScene();
             var registry = new FakeRegistry();
+            registry.Register<Game.Core.ICheatSelection>(new HudInstallerCheatTests.FakeCheatSelection());
             registry.Register<Game.Core.ISessionScene>(scene);
             registry.Register<IRunFlow>(_run);
             registry.Register<ICastle>(_castle);

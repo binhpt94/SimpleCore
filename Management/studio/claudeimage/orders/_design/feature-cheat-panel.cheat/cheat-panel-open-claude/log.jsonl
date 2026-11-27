@@ -1,0 +1,4 @@
+{"at": "2026-11-27 10:47:37", "event": "build", "tool": "claudeimage", "item": "panel-open", "mode": "inkscape", "exit": 0, "parts": ["1-panel", "2-list-bg", "3-normal-row", "4-state-row", "5-cheat-btn"], "result": "đã có work/out/panel-open.png", "files": ["panel-open.png"]}
+{"at": "2026-11-27 10:47:45", "event": "deliver", "version": 1, "files": ["meta.json", "panel-open.png", "parts", "quality.json"], "below": []}
+{"at": "2026-11-27 10:57:29", "event": "build", "tool": "claudeimage", "item": "panel-open", "mode": "inkscape", "exit": 0, "parts": ["1-panel", "2-list-bg", "3-normal-row", "4-state-row", "5-cheat-btn"], "result": "đã có work/out/panel-open.png", "files": ["panel-open.png"]}
+{"at": "2026-11-27 10:57:38", "event": "deliver", "version": 2, "files": ["meta.json", "panel-open.png", "parts", "quality.json"], "below": []}

@@ -1,0 +1,11 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,data_version,Phiên bản dữ liệu hiện tại,,1,như IDEA,như IDEA,Dạng bản ghi đầu tiên
+2,record_type,Kiểu số của kỉ lục,,số nguyên 32 bit có dấu,như IDEA,như IDEA,Đủ lớn cho số đợt; số âm vẫn cất được và feature-run xử lí
+3,record_count,Số bản ghi,bản ghi,1,như IDEA,như IDEA,Một kỉ lục cho cả game
+4,io_time_budget,Thời gian một lần đọc hoặc ghi,ms,dưới 10,như IDEA,như IDEA,Dự kiến; chỉ một số nguyên
+5,read_times,Số lần đọc trong một lần mở game,lần,1,như IDEA,như IDEA,Lúc mở game trước màn bắt đầu
+6,write_result,Báo kết quả mỗi lần ghi,,Có,như IDEA,như IDEA,feature-run cần biết kỉ lục đã lưu hay chưa
+7,write_whole,Ghi không để bản dở,,Có,như IDEA,như IDEA,Tắt ngang lúc ghi không mất kỉ lục cũ
+8,newer_reject,Từ chối ghi đè bản ghi phiên bản mới hơn,,Có,như IDEA,như IDEA,Bản game cũ không phá dữ liệu bản mới

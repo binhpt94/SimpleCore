@@ -44,23 +44,10 @@ namespace Game.Hud.Tests
             _view.ShowWave("Đợt 1");
             _view.ShowBanner("Đợt 1");
             _view.CreateSkillButtons(new[] { "Sấm sét", "Băng giá", "Cổ vũ" }, new[] { 0, 1, 2 });
-            _view.ShowCheatButton("Cheat: mid-battle");
 
             // Awake does not run in EditMode: the view builds itself on the first call above.
             _root = (RectTransform)_canvasRoot.Find("Safe");
             Assert.IsNotNull(_root, "HUD parts must sit in the safe-area box 'Safe'");
-        }
-
-        [TestCase(Wide16By9)]
-        [TestCase(Wide20By9)]
-        [TestCase(Wide21By9)]
-        public void DevCheatButtonSitsInTheTopBandBetweenHealthAndWave(float width)
-        {
-            var cheat = Box("Cheat", width);
-
-            Assert.LessOrEqual(cheat.yMax, StripTop);
-            Assert.Greater(cheat.xMin, Box("Health", width).xMax);
-            Assert.Less(cheat.xMax, Box("Wave", width).xMin);
         }
 
         [TearDown]

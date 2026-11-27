@@ -199,6 +199,46 @@ namespace Game.Composition.Tests
             Assert.DoesNotThrow(() => new AssetCatalogs(boot.CatalogsAt(GameStage.Prototype)));
         }
 
+        // feature-cheat-panel/cheat-states/states-rules: the cheat list holds the states of every scene, with the
+        // scene to reload, and every scene shares one selection.
+        [TestCaseSource(nameof(Scenes))]
+        public void Variant_SharesTheCheatSelectionAndKnowsEveryScene(string variant, string scene, string last, int count)
+        {
+            var boot = Load(variant);
+            var selection = new SerializedObject(boot).FindProperty("cheatSelection").objectReferenceValue;
+
+            Assert.That(selection, Is.InstanceOf<CheatSelectionAsset>());
+            Assert.That(boot.CheatScenes.Select(s => s.scene), Is.EqualTo(new[] { "Loading", "Game" }));
+            Assert.That(boot.CheatScenes.Select(s => AssetDatabase.GetAssetPath(s.boot.gameObject)),
+                Is.EqualTo(new[] { "Assets/_Composition/Boot.Loading.prefab", "Assets/_Composition/Boot.Game.prefab" }));
+        }
+
+        [TestCaseSource(nameof(Scenes))]
+        public void CheatCatalog_ListsEveryCheatStateSourceOfTheScene_WithThatScene(string variant, string scene, string last, int count)
+        {
+            var boot = Load(variant);
+            var sceneName = System.IO.Path.GetFileNameWithoutExtension(scene);
+            var catalog = Load(BasePath).CheatSourcesAt(GameStage.Idea);
+            var sources = boot.InstallersAt(GameStage.Idea).OfType<ICheatStateSource>().ToList();
+
+            foreach (var source in sources)
+            {
+                var entry = catalog.Where(c => c.Source == source).ToList();
+                Assert.That(entry.Count, Is.EqualTo(1), ((Object)source).name + " is not in the cheat catalog once");
+                Assert.That(entry[0].Scene, Is.EqualTo(sceneName), ((Object)source).name);
+            }
+        }
+
+        [Test]
+        public void CheatCatalog_LeavesOutInstallersSkippedAtTheStage()
+        {
+            var game = Load("Assets/_Composition/Boot.Game.prefab");
+            var catalog = Load(BasePath).CheatSourcesAt(GameStage.Idea);
+
+            foreach (var later in game.FromPrototype.OfType<ICheatStateSource>())
+                Assert.That(catalog.Any(c => c.Source == later), Is.False, ((Object)later).name);
+        }
+
         private static Boot Load(string path)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);

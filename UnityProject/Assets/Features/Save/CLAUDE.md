@@ -13,6 +13,7 @@ Cất một bản ghi duy nhất xuống máy (phiên bản dữ liệu 1 và m�
 ## Bên trong
 - `SavedRecord` (Internal): luật đọc ghi của `feature-save/save-io/io-rules`. Dạng bản ghi: hai dòng văn bản, `1` rồi kỉ lục.
 - `FileRecordStore`: cổng thiết bị, một file `record.save` trong `Application.persistentDataPath`. Ghi đủ vào `record.save.tmp` rồi mới thay file chính, nên tắt game giữa lúc ghi vẫn còn bản cũ hoặc bản mới.
+- Bản dev: lúc `Install` lấy `ICheatSelection` của Core từ registry; khi `RunningKey` khác null, `CheatSafeSavedRecord` bỏ qua mọi lần ghi nhưng trả `true`, không cảnh báo, kỉ lục thật trên máy giữ nguyên (`feature-cheat-panel/cheat-states/states-rules#apply-no-save`); bản phát hành không có nhánh này.
 - `SaveInstaller.asset` trong `FeatureAssets/Public`: đăng ký `ISavedRecord`. Không phụ thuộc feature nào, không tham gia phiên.
 
 Test: assembly `Game.Save.Tests` (EditMode); đồ giả máy hết chỗ `FakeStore` trong `SavedRecordTests.cs`.

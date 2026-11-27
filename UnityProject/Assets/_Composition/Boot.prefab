@@ -43,7 +43,15 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 44440000000000000000000000000001, type: 3}
   m_Name: 
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
   stage: 1
   installers: []
+  fromPrototype: []
   catalogs: []
+  prototypeCatalogs: []
+  cheatSelection: {fileID: 11400000, guid: b3a3939c3ba0f7ef38df13dd57b3728e, type: 2}
+  cheatScenes:
+  - scene: Loading
+    boot: {fileID: 9138022264744760655, guid: 500a982524f48474b8eed8a0e900c913, type: 3}
+  - scene: Game
+    boot: {fileID: 8927267537584196067, guid: 493a2c61295c8c34e9ffcf6a7c7917a6, type: 3}

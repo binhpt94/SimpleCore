@@ -8,7 +8,9 @@ namespace Game.SceneFlow
     /// Carries out a switch from the running scene to another (design: feature-scene-flow/scene-request/switch-rules),
     /// in six steps: take the name, show the cover, end the old scene's session, load the new scene in its place,
     /// let it run, take the cover away. The cover is the loading screen: it belongs to neither scene and is the only
-    /// thing of this feature that lives through the switch. Lives as long as the game, not as long as a scene.
+    /// thing of this feature that lives through the switch. Lives as long as the game, not as long as a scene: one
+    /// instance is shared by every scene (it is kept on <see cref="ISceneSwitchHost"/>), so a switch started in one
+    /// scene is still seen as going in the next one until that scene is ready.
     /// </summary>
     internal sealed class SceneSwitcher
     {
@@ -41,6 +43,9 @@ namespace Game.SceneFlow
         /// <summary>True from the moment the cover shows until it is taken away. Stays true when the switch failed.</summary>
         internal bool IsSwitching => switching;
 
+        /// <summary>Raised each time <see cref="IsSwitching"/> changes.</summary>
+        internal event Action SwitchingChanged;
+
         /// <summary>
         /// Step 1: checks the request and, when it is valid, starts the switch. Returns false for a refused request:
         /// an unknown scene (logged as an error), a switch already going (logged as a warning, no queue), or the
@@ -48,6 +53,21 @@ namespace Game.SceneFlow
         /// </summary>
         /// <param name="endCurrentSession">Ends the running scene's session: every participant lets go of what it holds.</param>
         internal bool Request(string sceneName, Func<UniTask> endCurrentSession)
+        {
+            return Start(sceneName, endCurrentSession, false);
+        }
+
+        /// <summary>
+        /// Like <see cref="Request"/>, but also goes when <paramref name="sceneName"/> is the scene running now: the
+        /// scene is loaded again from its start through the usual cover (cheat panel). Unknown names and a switch
+        /// already going are refused the same way.
+        /// </summary>
+        internal bool Reload(string sceneName, Func<UniTask> endCurrentSession)
+        {
+            return Start(sceneName, endCurrentSession, true);
+        }
+
+        private bool Start(string sceneName, Func<UniTask> endCurrentSession, bool evenIfRunning)
         {
             if (!settings.IsKnownScene(sceneName))
             {
@@ -61,10 +81,10 @@ namespace Game.SceneFlow
                 return false;
             }
 
-            if (sceneName == currentScene) return false;
+            if (sceneName == currentScene && !evenIfRunning) return false;
 
-            switching = true;
             failed = false;
+            SetSwitching(true);
 
             // Step 2, at once: from here every tap lands on the cover.
             cover = covers.Create();
@@ -99,7 +119,7 @@ namespace Game.SceneFlow
                 if (gate == null)
                 {
                     throw new InvalidOperationException(
-                        $"Scene '{sceneName}' has no SceneFlow gate: add the SceneFlow game installer " +
+                        $"Scene '{sceneName}' has no SceneFlow gate: add its SceneFlow installer " +
                         "as the last installer of its Boot.");
                 }
 
@@ -122,7 +142,7 @@ namespace Game.SceneFlow
                 StopFollowingProgress();
                 cover.Close();
                 cover = null;
-                switching = false;
+                SetSwitching(false);
             }
             catch (Exception e)
             {
@@ -131,6 +151,13 @@ namespace Game.SceneFlow
                 log.Exception(e);
                 cover?.ShowError(settings.LoadFailedMessage);
             }
+        }
+
+        private void SetSwitching(bool value)
+        {
+            if (switching == value) return;
+            switching = value;
+            SwitchingChanged?.Invoke();
         }
 
         private async UniTask WarnIfSlowAsync(string sceneName)

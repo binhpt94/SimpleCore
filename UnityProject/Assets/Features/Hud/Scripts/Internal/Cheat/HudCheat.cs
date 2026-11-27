@@ -2,12 +2,52 @@
 using System;
 using System.Collections.Generic;
 using Game.Castle;
+using Game.Core;
 using Game.Run;
 using Game.Wallet;
 using Game.Wave;
+#endif
 
 namespace Game.Hud
 {
+    /// <summary>
+    /// States of node feature-hud/cheat, picked on the installer asset. The type stays in every build so the
+    /// asset serializes the same; release builds ignore it (the code below is dev only).
+    /// </summary>
+    internal enum HudCheatState
+    {
+        None,
+
+        /// <summary>Wave 7 just started, castle 300/1000, 245 coins, Frost cooling 12 of 35 s.</summary>
+        MidBattle,
+    }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    /// <summary>Names and keys of this feature's cheat states, for the cheat list (Core's ICheatStateSource).</summary>
+    internal static class HudCheats
+    {
+        /// <summary>Title of the design node feature-hud.</summary>
+        internal const string FeatureTitle = "HUD trận";
+
+        internal const string MidBattleKey = "Hud/MidBattle";
+
+        /// <summary>In the order of the ideas of node feature-hud/cheat, titled as those ideas.</summary>
+        internal static readonly IReadOnlyList<CheatState> States = new[]
+        {
+            new CheatState(MidBattleKey, "Đợt 7 vừa bắt đầu, thành còn 30% máu, Băng giá đang hồi"),
+        };
+
+        /// <summary>The state a picked key stands for: <see cref="HudCheatState.None"/> when it is not this feature's (or normal play).</summary>
+        internal static HudCheatState StateOf(string pickedKey) =>
+            pickedKey == MidBattleKey ? HudCheatState.MidBattle : HudCheatState.None;
+
+        internal static string KeyOf(HudCheatState state) => state switch
+        {
+            HudCheatState.MidBattle => MidBattleKey,
+            _ => throw new ArgumentOutOfRangeException(nameof(state), state, "not a cheat state"),
+        };
+    }
+
     /// <summary>
     /// Dev-only state of feature-hud/cheat: "mid-battle" (castle 300/1000, 245 coins, wave 7 just started,
     /// Frost cooling with 12 of 35 s left, Thunder and Rally ready). Every value goes through its owner's own
@@ -82,5 +122,5 @@ namespace Game.Hud
             return false;
         }
     }
-}
 #endif
+}

@@ -31,6 +31,42 @@ namespace Game.SceneFlow
         }
     }
 
+    internal sealed class PrefabSceneSwitchHostSource : ISceneSwitchHostSource
+    {
+        private readonly GameObject prefab;
+
+        internal PrefabSceneSwitchHostSource(GameObject prefab)
+        {
+            this.prefab = prefab;
+        }
+
+        public ISceneSwitchHost Find()
+        {
+            // Kept with DontDestroyOnLoad, so it sits in no scene the next one can list: look through live objects.
+            foreach (var behaviour in UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (behaviour is ISceneSwitchHost host && host.Switcher != null) return host;
+            }
+
+            return null;
+        }
+
+        public ISceneSwitchHost Create()
+        {
+            var instance = UnityEngine.Object.Instantiate(prefab);
+            UnityEngine.Object.DontDestroyOnLoad(instance);
+            var host = instance.GetComponent<ISceneSwitchHost>();
+            if (host == null)
+            {
+                UnityEngine.Object.Destroy(instance);
+                throw new InvalidOperationException(
+                    $"Prefab '{prefab.name}' has no component implementing ISceneSwitchHost (expected SceneSwitchHost).");
+            }
+
+            return host;
+        }
+    }
+
     internal sealed class PrefabSceneGateCarrierSource : ISceneGateCarrierSource
     {
         private readonly GameObject prefab;

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06f3beeb02f9d96e3965d23e0bcc7d65, type: 3}
+  m_Name: CheatPanelConfig
+  m_EditorClassIdentifier: Game.CheatPanel.Internal::Game.CheatPanel.CheatPanelConfig
+  _cheatEnabled: 1
+  _buttonLabel: Cheat
+  _panelTitle: Cheat
+  _normalRowLabel: "Ch\u01A1i b\xECnh th\u01B0\u1EDDng"
+  _emptyLabel: "B\u1EA3n n\xE0y kh\xF4ng c\xF3 state cheat"

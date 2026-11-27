@@ -1,0 +1,12 @@
+---
+based-on: 75d09f183702
+refs: feature-cheat-panel/cheat-access/access-spec@f6f63bb22ff4
+---
+# Cheat: panel cheat
+
+State dựng nhanh panel cheat để test và review bố cục, không phải tự chạm nút.
+
+## Ý cốt lõi
+
+### panel-open | AI 8 | Panel cheat đang mở trên trận, đủ dòng state của các feature và dòng chơi bình thường
+Ép: config cheat bật, panel mở ngay khi scene trận chạy; danh sách có dòng chơi bình thường và mọi state cheat mà bản đang chạy dựng được; nút cheat ở trạng thái đang mở. Phần tử và chữ theo `feature-cheat-panel/cheat-access/access-spec`.

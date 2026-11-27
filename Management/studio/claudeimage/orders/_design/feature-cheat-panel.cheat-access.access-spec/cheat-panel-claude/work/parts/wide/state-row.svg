@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 872 120" width="872" height="120">
+  <defs>
+    <clipPath id="b"><rect x="3" y="3" width="866" height="106" rx="28"/></clipPath>
+  </defs>
+  <!-- bong do cung lech xuong 8 px -->
+  <rect x="3" y="11" width="866" height="106" rx="28" fill="#0B4C94"/>
+  <!-- than xanh duong, mang toi o mep duoi, vet sang o mep tren -->
+  <g clip-path="url(#b)">
+    <rect x="3" y="3" width="866" height="106" fill="#22A0F0"/>
+    <rect x="3" y="80" width="866" height="29" fill="#1270C8"/>
+  </g>
+  <rect x="24" y="12" width="824" height="18" rx="9" fill="#7CD0FF"/>
+  <rect x="3" y="3" width="866" height="106" rx="28" fill="none" stroke="#0B4C94" stroke-width="6"/>
+</svg>

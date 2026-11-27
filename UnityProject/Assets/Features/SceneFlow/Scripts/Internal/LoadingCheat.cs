@@ -1,10 +1,14 @@
 using Game.Core;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+using System.Collections.Generic;
+#endif
 
 namespace Game.SceneFlow
 {
     /// <summary>
-    /// States of the design node feature-scene-flow/cheat. Chosen on the Loading installer asset; only acted on in
-    /// dev builds. The enum stays in every build so the asset's serialized field reads the same everywhere.
+    /// States of the design node feature-scene-flow/cheat. Chosen on the Loading installer asset or picked in the
+    /// cheat panel; only acted on in dev builds. The enum stays in every build so the asset's serialized field reads
+    /// the same everywhere.
     /// </summary>
     internal enum SceneFlowCheatState
     {
@@ -15,6 +19,27 @@ namespace Game.SceneFlow
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+    /// <summary>What the cheat list shows of this feature, from the design (feature-scene-flow and its cheat node). Fixed values, no state.</summary>
+    internal static class SceneFlowCheats
+    {
+        /// <summary>Title of the design node feature-scene-flow.</summary>
+        internal const string FeatureTitle = "Chuyển scene";
+
+        internal const string LoadErrorKey = "SceneFlow/LoadError";
+
+        /// <summary>In the order of the ideas of the cheat node.</summary>
+        internal static readonly IReadOnlyList<CheatState> States = new[]
+        {
+            new CheatState(LoadErrorKey, "Màn Loading dừng vì một feature tải lỗi")
+        };
+
+        /// <summary>The state a picked key stands for: <see cref="SceneFlowCheatState.None"/> when it is not this feature's.</summary>
+        internal static SceneFlowCheatState StateOf(string pickedKey)
+        {
+            return pickedKey == LoadErrorKey ? SceneFlowCheatState.LoadError : SceneFlowCheatState.None;
+        }
+    }
+
     /// <summary>
     /// Cheat state load-error: shows the loading screen as it looks when the Game scene fails, without breaking any
     /// real asset. The bar stands at 40% and the error names Wallet; the Game scene is not loaded.
@@ -27,11 +52,13 @@ namespace Game.SceneFlow
 
         private readonly ILoadingScreenSource screens;
         private readonly SceneFlowSettings settings;
+        private readonly SceneGate gate;
 
-        internal LoadErrorCheat(ILoadingScreenSource screens, SceneFlowSettings settings)
+        internal LoadErrorCheat(ILoadingScreenSource screens, SceneFlowSettings settings, SceneGate gate)
         {
             this.screens = screens;
             this.settings = settings;
+            this.gate = gate;
         }
 
         protected override bool OpensViewsOnRun => true;
@@ -48,6 +75,9 @@ namespace Game.SceneFlow
             });
             screen.ShowProgress(ForcedProgress);
             screen.ShowError(settings.FailedMessageFor(ForcedFailedFeature));
+
+            // A switch into this scene (the cheat panel reloading it) ends here: the state is built.
+            gate.Open();
         }
     }
 #endif

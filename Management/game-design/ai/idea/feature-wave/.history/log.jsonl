@@ -12,3 +12,4 @@
 {"at": "2026-11-24 23:10:02", "event": "data", "hash": "34c92f9b0c18", "previous": "b7e27c074d6b", "added": ["enemy-creates-spawn", "alive-cap-owner", "defeat-per-spawn", "castle-damage-to-enemy", "lose-before-clear", "balance-sets-kill-reward", "enemy-computes-reward", "wave-computes-reward", "balance-sets-clear-reward", "balance-scope"], "removed": [], "rewritten": []}
 {"at": "2026-11-24 23:40:47", "event": "promote", "by": "người (Sync)", "hash": "34c92f9b0c18"}
 {"at": "2026-11-25 23:12:41", "event": "promote", "by": "tự chốt theo (gốc)", "hash": "34c92f9b0c18"}
+{"at": "2026-11-27 09:33:20", "event": "approve", "hash": "fee80d536bcf4c20e2d59ffa562fba1074eaf1e9", "by": "tự duyệt (Full Auto)"}

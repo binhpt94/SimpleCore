@@ -9,7 +9,7 @@ namespace Game.Services.Popup
     /// installed earlier). Publishes <see cref="IPopupService"/> and <see cref="IPopupViews"/>.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Installers/Popup")]
-    public sealed class PopupInstaller : InstallerAsset
+    public sealed partial class PopupInstaller : InstallerAsset
     {
         [SerializeField] private PopupConfig config;
         [Tooltip("Dev builds only (feature-popup/cheat). Release builds ignore it.")]
@@ -17,17 +17,21 @@ namespace Game.Services.Popup
 
         public override void Install(IServiceRegistry registry)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var cheats = NeedCheatSelection(registry);
+            var state = CheatToBuild(cheats);
+#endif
             if (config == null) throw new InvalidOperationException($"Popup installer '{name}': config is missing.");
             config.Check();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            PopupCheat.Check(cheat, config);
+            PopupCheat.Check(state, config);
 #endif
             var catalog = registry.Resolve<IAssetCatalogs>().Get(CatalogPopupPrefabs.Kind);
             var session = registry.Resolve<ISessionScene>();
 
             IPopupPrefabs prefabs = new CatalogPopupPrefabs(catalog);
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            prefabs = PopupCheat.Prefabs(cheat, config, prefabs);
+            prefabs = PopupCheat.Prefabs(state, config, prefabs);
 #endif
             var presenter = new UnityPopupPresenter(config.LayerPrefab, config.BackdropPrefab);
             var service = new PopupService(presenter, prefabs, new UnityPopupLog(), config.MaxOpen);
@@ -37,7 +41,8 @@ namespace Game.Services.Popup
             registry.Register<IPopupStack>(service);
             session.Join(new PopupParticipant(service, prefabs));
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            PopupCheat.Join(cheat, session, service);   // after the service's part: its Run opens the stack first
+            PopupCheat.Join(state, session, service);   // after the service's part: its Run opens the stack first
+            if (state != PopupCheatState.None) cheats.ReportRunning(PopupCheat.KeyOf(state));
 #endif
         }
     }

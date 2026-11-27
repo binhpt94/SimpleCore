@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1760 120" width="1760" height="120">
+  <defs>
+    <clipPath id="b"><rect x="3" y="3" width="1754" height="106" rx="28"/></clipPath>
+  </defs>
+  <!-- bong do cung lech xuong 8 px -->
+  <rect x="3" y="11" width="1754" height="106" rx="28" fill="#1D6B0C"/>
+  <!-- than xanh la (dong dac biet), mang toi o mep duoi, vet sang o mep tren -->
+  <g clip-path="url(#b)">
+    <rect x="3" y="3" width="1754" height="106" fill="#4CC21E"/>
+    <rect x="3" y="80" width="1754" height="29" fill="#2E9414"/>
+  </g>
+  <rect x="24" y="12" width="1712" height="18" rx="9" fill="#9BEA5C"/>
+  <rect x="3" y="3" width="1754" height="106" rx="28" fill="none" stroke="#1D6B0C" stroke-width="6"/>
+  <!-- dau tam giac choi o dau dong de phan biet voi dong state -->
+  <path d="M44 34 L44 78 L80 56 Z" fill="#FFFFFF" stroke="#1D6B0C" stroke-width="4" stroke-linejoin="round"/>
+</svg>

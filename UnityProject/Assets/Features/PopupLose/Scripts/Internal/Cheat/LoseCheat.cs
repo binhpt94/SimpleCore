@@ -1,5 +1,8 @@
 using System;
 using Game.Core;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+using System.Collections.Generic;
+#endif
 using Game.Run;
 
 namespace Game.PopupLose
@@ -17,6 +20,31 @@ namespace Game.PopupLose
     }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+    /// <summary>Names and keys of this feature's cheat states, for the cheat list (Core's ICheatStateSource).</summary>
+    internal static class LoseCheats
+    {
+        /// <summary>Title of the design node feature-popup-lose.</summary>
+        internal const string FeatureTitle = "Popup thua";
+
+        internal const string NewRecordKey = "PopupLose/NewRecord";
+
+        /// <summary>In the order of the ideas of node feature-popup-lose/cheat, titled as those ideas.</summary>
+        internal static readonly IReadOnlyList<CheatState> States = new[]
+        {
+            new CheatState(NewRecordKey, "Popup thua đang mở, lượt vừa phá kỉ lục"),
+        };
+
+        /// <summary>The state a picked key stands for: <see cref="LoseCheatState.None"/> when it is not this feature's (or normal play).</summary>
+        internal static LoseCheatState StateOf(string pickedKey) =>
+            pickedKey == NewRecordKey ? LoseCheatState.NewRecord : LoseCheatState.None;
+
+        internal static string KeyOf(LoseCheatState state) => state switch
+        {
+            LoseCheatState.NewRecord => NewRecordKey,
+            _ => throw new ArgumentOutOfRangeException(nameof(state), state, "not a cheat state"),
+        };
+    }
+
     /// <summary>The forced values of one cheat state, read by the popup exactly like the run's real score.</summary>
     internal sealed class FixedRunScore : IRunScore
     {

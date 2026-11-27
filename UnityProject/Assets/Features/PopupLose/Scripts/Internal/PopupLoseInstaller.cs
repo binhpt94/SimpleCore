@@ -9,11 +9,13 @@ namespace Game.PopupLose
     /// <summary>
     /// Wires the lose popup into the scene session. Install after Popup and Run.
     /// The popup prefab itself is listed under id PopupLose/Main in the scene's popup catalog (_Composition).
+    /// Dev builds: the cheat list half of this class is in Cheat/PopupLoseInstaller.Cheat.cs.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/PopupLose/Installer", fileName = "PopupLoseInstaller")]
-    public sealed class PopupLoseInstaller : InstallerAsset
+    public sealed partial class PopupLoseInstaller : InstallerAsset
     {
-        [Tooltip("Dev builds only: build this cheat state as soon as the session runs (node feature-popup-lose/cheat).")]
+        [Tooltip("Dev builds only: build this cheat state as soon as the session runs (node feature-popup-lose/cheat). " +
+                 "Ignored once a state or normal play was picked in this run of the game.")]
         [SerializeField] private LoseCheatState _cheat = LoseCheatState.None;
 
         [Tooltip("Shows \"Về màn bắt đầu\". Off at IDEA (no start screen yet); on from PROTOTYPE (node actions-spec, Thông số theo giai đoạn).")]
@@ -34,6 +36,9 @@ namespace Game.PopupLose
         public override void Install(IServiceRegistry registry)
         {
             if (registry == null) throw new ArgumentNullException(nameof(registry));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var cheats = NeedCheatSelection(registry);
+#endif
             var session = Need<ISessionScene>(registry, "SessionScene");
             var flow = Need<IRunFlow>(registry, "Run");
             var score = Need<IRunScore>(registry, "Run");
@@ -41,9 +46,11 @@ namespace Game.PopupLose
             var views = Need<IPopupViews>(registry, "Popup");
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (_cheat != LoseCheatState.None)
+            var state = CheatToBuild(cheats);
+            if (state != LoseCheatState.None)
             {
-                var cheatPopup = new LosePopupParticipant(flow, FixedRunScore.For(_cheat), popups, views, new UnityLoseLog(), _homeButton);
+                cheats.ReportRunning(LoseCheats.KeyOf(state));
+                var cheatPopup = new LosePopupParticipant(flow, FixedRunScore.For(state), popups, views, new UnityLoseLog(), _homeButton);
                 session.Join(cheatPopup);
                 session.Join(new LoseCheatParticipant(cheatPopup));
                 return;

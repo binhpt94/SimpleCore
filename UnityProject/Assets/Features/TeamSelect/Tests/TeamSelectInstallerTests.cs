@@ -31,6 +31,7 @@ namespace Game.TeamSelect.Tests
         public void InstallerAssetJoinsTheGameSession()
         {
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
             var session = new FakeSession();
             registry.Register<IHeroRoster>(new FakeRoster());
             registry.Register<ISessionScene>(session);
@@ -45,6 +46,7 @@ namespace Game.TeamSelect.Tests
         public void InstallerAssetPublishesTheScreenForTheFlow()
         {
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
             var session = new FakeSession();
             registry.Register<IHeroRoster>(new FakeRoster());
             registry.Register<ISessionScene>(session);
@@ -63,6 +65,7 @@ namespace Game.TeamSelect.Tests
         public void InstallerFailsAtOnceNamingMissingHeroRoster()
         {
             var registry = new ServiceRegistry();
+            registry.Register<ICheatSelection>(new FakeCheatSelection());
             var session = new FakeSession();
             registry.Register<ISessionScene>(session);
             var error = Assert.Throws<InvalidOperationException>(() => LoadInstaller().Install(registry));

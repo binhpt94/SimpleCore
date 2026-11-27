@@ -23,7 +23,8 @@ namespace Game.Hud
         private readonly IRunFlow _run;
         private readonly HudTimings _timings;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        private readonly HudCheat _cheat;
+        /// <summary>The cheat state this scene builds; null when none. Applied once, on the first frame of a running battle.</summary>
+        private HudCheat _cheat;
 #endif
         private IHudView _view;
         private HudStatusPresenter _status;
@@ -51,6 +52,11 @@ namespace Game.Hud
 
         /// <summary>The view on screen while the session runs; null before and after.</summary>
         internal IHudView View => _view;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+
+        /// <summary>True while a cheat state was built for this scene and is not applied yet.</summary>
+        internal bool CheatPending => _cheat != null;
+#endif
 
         protected override void OnRun()
         {
@@ -71,15 +77,6 @@ namespace Game.Hud
             _skillButtons = new HudSkillPresenter(view, _skills, _run, _timings);
             _skillButtons.Start();
             WhenDisposed(_skillButtons.Stop);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            if (_cheat != null)
-            {
-                view.ShowCheatButton("Cheat: " + HudCheat.MidBattle);
-                view.CheatPressed += OnCheatPressed;
-                WhenDisposed(() => view.CheatPressed -= OnCheatPressed);
-            }
-#endif
-
             _run.StepChanged += OnStepChanged;
             WhenDisposed(() => _run.StepChanged -= OnStepChanged);
             OnStepChanged(_run.Step);
@@ -99,14 +96,24 @@ namespace Game.Hud
 
         private void OnTick(float deltaSeconds)
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            ApplyCheatOnceBattleRuns();
+#endif
             _status?.Tick(deltaSeconds);
             _skillButtons?.Tick(deltaSeconds);
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        private void OnCheatPressed()
+        /// <summary>
+        /// Builds the cheat state on the first frame the battle is being played, after every owner has set its own
+        /// start values (so wave 1 starting cannot undo wave 7), then shows it the same frame.
+        /// </summary>
+        private void ApplyCheatOnceBattleRuns()
         {
-            var missing = _cheat.ApplyMidBattle();
+            if (_cheat == null || _run.Step != RunStep.Playing) return;
+            var cheat = _cheat;
+            _cheat = null;
+            var missing = cheat.ApplyMidBattle();
             if (missing.Count > 0)
                 Debug.LogWarning("Hud cheat '" + HudCheat.MidBattle + "': not applied: " + string.Join(", ", missing));
         }

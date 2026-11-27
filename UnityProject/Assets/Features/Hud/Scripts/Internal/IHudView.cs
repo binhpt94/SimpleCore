@@ -42,13 +42,6 @@ namespace Game.Hud
         /// </summary>
         void ApplySafeArea(HudInsets insets);
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        /// <summary>Dev only: a button that applies a cheat state.</summary>
-        void ShowCheatButton(string label);
-
-        event Action CheatPressed;
-#endif
-
         void Destroy();
     }
 

@@ -1,0 +1,9 @@
+{
+ "hash": "7a48112eb347",
+ "items": {
+  "panel-open": {
+   "hash": "e4ff49bbd78e",
+   "text": "Panel cheat đang mở trên trận, đủ dòng state của các feature và dòng chơi bình thường\nÉp: config cheat bật, panel mở ngay khi scene trận chạy; danh sách có dòng chơi bình thường và mọi state cheat mà bản đang chạy dựng được; nút cheat ở trạng thái đang mở. Phần tử và chữ theo `feature-cheat-panel/cheat-access/access-spec`."
+  }
+ }
+}

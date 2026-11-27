@@ -273,3 +273,100 @@ namespace Game.Save.Tests
         }
     }
 }
+
+namespace Game.Save.Tests
+{
+    /// <summary>Stand-in for Core's cheat selection: only RunningKey matters to Save.</summary>
+    internal sealed class FakeCheatSelection : Game.Core.ICheatSelection
+    {
+        public string Running;
+        public bool HasPick => false;
+        public string PickedKey => null;
+        public void Pick(string key) { }
+        public string RunningKey => Running;
+        public void ReportRunning(string key) => Running = key;
+        public void BeginScene() => Running = null;
+    }
+
+    // feature-cheat-panel/cheat-states/states-rules#apply-no-save
+    public class CheatStateNoSaveTests
+    {
+        private string dir;
+        private string file;
+        private FakeCheatSelection cheats;
+        private List<string> warnings;
+        private ISavedRecord save;
+
+        [SetUp]
+        public void SetUp()
+        {
+            dir = Path.Combine(Path.GetTempPath(), "SaveTests_" + Guid.NewGuid().ToString("N"));
+            file = Path.Combine(dir, "record.save");
+            cheats = new FakeCheatSelection();
+            warnings = new List<string>();
+            save = new CheatSafeSavedRecord(new SavedRecord(new FileRecordStore(file), warnings.Add), cheats);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            if (Directory.Exists(dir)) Directory.Delete(dir, true);
+        }
+
+        [Test]
+        public void CheatStateRunning_WriteReportsSuccess_ButRealRecordFileStaysUnchanged()
+        {
+            Assert.That(save.Write(10), Is.True);
+            var before = File.ReadAllText(file);
+
+            cheats.ReportRunning("Run/RecordForced");
+            Assert.That(save.Write(999), Is.True, "looks like a successful write");
+            Assert.That(save.Write(-3), Is.True);
+
+            Assert.That(File.ReadAllText(file), Is.EqualTo(before));
+            Assert.That(warnings, Is.Empty, "no failure is reported");
+            Assert.That(save.TryRead(out var record), Is.True);
+            Assert.That(record, Is.EqualTo(10), "the real record stays");
+        }
+
+        [Test]
+        public void CheatStateRunning_NothingSavedYet_NoFileIsCreated()
+        {
+            cheats.ReportRunning("Run/RecordForced");
+            Assert.That(save.Write(5), Is.True);
+            Assert.That(File.Exists(file), Is.False);
+            Assert.That(save.TryRead(out _), Is.False);
+        }
+
+        [Test]
+        public void NoCheatState_WritesAsUsual()
+        {
+            Assert.That(save.Write(7), Is.True);
+            Assert.That(File.ReadAllText(file), Is.EqualTo("1\n7"));
+        }
+
+        [Test]
+        public void CheatStateCleared_NextWriteGoesToTheDeviceAgain()
+        {
+            save.Write(1);
+            cheats.ReportRunning("Run/RecordForced");
+            save.Write(50);
+            cheats.BeginScene();
+            Assert.That(save.Write(2), Is.True);
+            Assert.That(File.ReadAllText(file), Is.EqualTo("1\n2"));
+        }
+
+        [Test]
+        public void RealInstaller_WithCheatSelectionRegistered_PublishesCheatSafeRecord()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<InstallerAsset>("Assets/Features/Save/FeatureAssets/Public/SaveInstaller.asset");
+            Assert.That(installer, Is.Not.Null);
+            var registry = new ServiceRegistry();
+            registry.Register<Game.Core.ICheatSelection>(cheats);
+
+            installer.Install(registry);
+
+            Assert.That(registry.Resolve<ISavedRecord>(), Is.InstanceOf<CheatSafeSavedRecord>());
+        }
+    }
+}

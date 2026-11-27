@@ -11,17 +11,32 @@ namespace Game.Hud
     /// <summary>
     /// Wires the battle HUD: reads Castle, Wallet, Wave and Run through their contracts and joins the scene session.
     /// Install after SessionScene, Run, Castle, Wallet and Wave. Registers nothing (Hud has no contracts).
-    /// Dev builds also need IWalletIncome, IWalletService, ICastleCheat and IWaveCheat for the mid-battle cheat.
+    /// Dev builds also need Core's ICheatSelection, and, only while building the mid-battle cheat state,
+    /// IWalletIncome, IWalletService, ICastleCheat and IWaveCheat. The cheat list half of this class is in
+    /// Cheat/HudInstaller.Cheat.cs.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Hud/Installer", fileName = "HudInstaller")]
-    public sealed class HudInstaller : InstallerAsset
+    public sealed partial class HudInstaller : InstallerAsset
     {
         [SerializeField] private HudConfig config;
         [SerializeField] private GameObject viewPrefab;
 
+        [Tooltip("Dev builds only: build this cheat state once the battle is being played (node feature-hud/cheat). " +
+                 "Ignored once a state or normal play was picked in this run of the game.")]
+        [SerializeField] private HudCheatState _cheat = HudCheatState.None;
+
+        internal HudCheatState Cheat
+        {
+            get => _cheat;
+            set => _cheat = value;
+        }
+
         public override void Install(IServiceRegistry registry)
         {
             if (registry == null) throw new ArgumentNullException(nameof(registry));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            var cheats = NeedCheatSelection(registry);
+#endif
             if (config == null) throw new InvalidOperationException("HudInstaller: missing HudConfig (config).");
             if (viewPrefab == null) throw new InvalidOperationException("HudInstaller: missing HUD view prefab (viewPrefab).");
             if (viewPrefab.GetComponent<IHudView>() == null)
@@ -35,8 +50,14 @@ namespace Game.Hud
             var waves = registry.Resolve<IWaveProgress>();
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            var cheat = new HudCheat(run, wallet, registry.Resolve<IWalletIncome>(), registry.Resolve<IWalletService>(),
-                skills, registry.Resolve<ICastleCheat>(), registry.Resolve<IWaveCheat>());
+            HudCheat cheat = null;
+            var state = CheatToBuild(cheats);
+            if (state != HudCheatState.None)
+            {
+                cheat = new HudCheat(run, wallet, registry.Resolve<IWalletIncome>(), registry.Resolve<IWalletService>(),
+                    skills, registry.Resolve<ICastleCheat>(), registry.Resolve<IWaveCheat>());
+                cheats.ReportRunning(HudCheats.KeyOf(state));
+            }
             session.Join(new HudSession(new PrefabHudViewSpawner(viewPrefab), new UnityHudClock(),
                 castle, skills, wallet, waves, run, config.Timings, cheat));
 #else

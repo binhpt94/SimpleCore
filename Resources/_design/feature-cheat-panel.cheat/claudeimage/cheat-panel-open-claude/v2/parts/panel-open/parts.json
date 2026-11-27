@@ -1,0 +1,107 @@
+{
+ "frame": "panel-open",
+ "parts": [
+  {
+   "id": "1-panel",
+   "w": 1840,
+   "h": 880,
+   "slice": null,
+   "shapes": [
+    "cheat-panel"
+   ],
+   "from": {
+    "node": "feature-cheat-panel/cheat-access/access-spec",
+    "frame": "wide",
+    "part": "panel",
+    "ref": "_design/feature-cheat-panel.cheat-access.access-spec/cheat-panel-claude",
+    "version": 4
+   },
+   "text": true
+  },
+  {
+   "id": "2-list-bg",
+   "w": 1760,
+   "h": 728,
+   "slice": [
+    32,
+    32,
+    32,
+    32
+   ],
+   "shapes": [
+    "state-list"
+   ],
+   "from": {
+    "node": "feature-cheat-panel/cheat-access/access-spec",
+    "frame": "wide",
+    "part": "list-bg",
+    "ref": "_design/feature-cheat-panel.cheat-access.access-spec/cheat-panel-claude",
+    "version": 4
+   },
+   "text": true
+  },
+  {
+   "id": "3-normal-row",
+   "w": 1760,
+   "h": 120,
+   "slice": null,
+   "shapes": [
+    "normal-row"
+   ],
+   "from": {
+    "node": "feature-cheat-panel/cheat-access/access-spec",
+    "frame": "wide",
+    "part": "normal-row",
+    "ref": "_design/feature-cheat-panel.cheat-access.access-spec/cheat-panel-claude",
+    "version": 4
+   },
+   "text": true
+  },
+  {
+   "id": "4-state-row",
+   "w": 872,
+   "h": 120,
+   "slice": null,
+   "shapes": [
+    "state-row",
+    "state-row-2",
+    "state-row-3",
+    "state-row-4",
+    "state-row-5",
+    "state-row-6"
+   ],
+   "from": {
+    "node": "feature-cheat-panel/cheat-access/access-spec",
+    "frame": "wide",
+    "part": "state-row",
+    "ref": "_design/feature-cheat-panel.cheat-access.access-spec/cheat-panel-claude",
+    "version": 4
+   },
+   "text": true
+  },
+  {
+   "id": "5-cheat-btn",
+   "w": 160,
+   "h": 96,
+   "slice": null,
+   "shapes": [
+    "cheat-button"
+   ],
+   "from": {
+    "node": "feature-cheat-panel/cheat-access/access-spec",
+    "frame": "wide",
+    "part": "cheat-btn",
+    "ref": "_design/feature-cheat-panel.cheat-access.access-spec/cheat-panel-claude",
+    "version": 4
+   },
+   "text": true
+  }
+ ],
+ "kept": [
+  "panel-title"
+ ],
+ "skipped": [
+  "battle",
+  "cheat-shade"
+ ]
+}

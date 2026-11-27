@@ -47,6 +47,23 @@ namespace Game.SceneFlow
         ISceneGateCarrier Create();
     }
 
+    /// <summary>The object, kept across scenes, that holds the one switcher of the game process.</summary>
+    internal interface ISceneSwitchHost
+    {
+        SceneSwitcher Switcher { get; }
+
+        void Hold(SceneSwitcher switcher);
+    }
+
+    internal interface ISceneSwitchHostSource
+    {
+        /// <summary>The host made by an earlier scene of this run of the game, or null when there is none yet.</summary>
+        ISceneSwitchHost Find();
+
+        /// <summary>Makes the host; it lives as long as the game.</summary>
+        ISceneSwitchHost Create();
+    }
+
     /// <summary>What the player sees while a scene gets ready: the loading screen, which is also the switch cover.</summary>
     internal interface ILoadingScreen
     {

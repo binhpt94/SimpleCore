@@ -322,4 +322,27 @@ namespace Game.HudUpgrade.Tests
             return found;
         }
     }
+
+    /// <summary>Stand-in for Core's cheat selection; records every ReportRunning.</summary>
+    internal sealed class FakeCheatSelection : ICheatSelection
+    {
+        public readonly List<string> Reported = new List<string>();
+        public bool HasPick { get; private set; }
+        public string PickedKey { get; private set; }
+        public string RunningKey { get; private set; }
+
+        public void Pick(string key)
+        {
+            PickedKey = string.IsNullOrEmpty(key) ? null : key;
+            HasPick = true;
+        }
+
+        public void ReportRunning(string key)
+        {
+            Reported.Add(key);
+            RunningKey = key;
+        }
+
+        public void BeginScene() => RunningKey = null;
+    }
 }
