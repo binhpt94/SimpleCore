@@ -1314,6 +1314,43 @@ def activity_cases(check):
         shutil.rmtree(root, ignore_errors=True)
 
 
+def after_tests_cases(check):
+    """The end of a worker job's chain: a report after the tests, one message to a live CodeLead (người quyết
+    2026-11-27: worker làm xong phải báo, không thì không tự động được)."""
+    root = Path(tempfile.mkdtemp(prefix="after-tests-"))
+    sent = []
+    real = (ss.ROOT, ss.threads, ss.relay, set(ss.NOTIFIED))
+    try:
+        ss.ROOT = root
+        ss.NOTIFIED.clear()
+        lead = {"id": "c1", "title": "CodeLead", "binding": "@CodeLead", "live": "background"}
+        ss.threads = lambda include_unnamed=False: [lead]
+        ss.relay = lambda t, text: sent.append((t["title"], text)) or "ok"
+        for jid, state in (("w20261127-100000-run", "applied"), ("w20261127-100001-wave", "checks-failed")):
+            ss.worker.save(root, {"id": jid, "feature": jid.split("-")[-1].title(), "kind": "code", "state": state, "task": "x"})
+        r = ss.after_tests("w20261127-100000-run", "Test: 3 qua, 0 hỏng · 2/2 yêu cầu ghi done (chờ CodeLead kiểm)", 2, [])
+        reports = sorted((root / "Management" / "reports").glob("*Worker-Run*.md"))
+        check("after tests: a report 'xong' with the test line", (len(reports), "Trạng thái: xong" in reports[-1].read_text(encoding="utf-8"),
+              "2/2 yêu cầu ghi done" in reports[-1].read_text(encoding="utf-8")) if reports else 0, (1, True, True))
+        check("after tests: the live CodeLead gets one message to check them", (r[-1], [x[0] for x in sent], "LÔ TEST XONG · Run" in sent[0][1] if sent else False),
+              (("notified", "tests-done:w20261127-100000-run"), ["CodeLead"], True))
+        ss.after_tests("w20261127-100000-run", "lại", 2, [])
+        check("after tests: never twice for the same job", len(sent), 1)
+        ss.after_tests("w20261127-100000-run", "Test: 1 qua, 1 hỏng", 1, [{"name": "x"}])
+        check("after tests: broken tests (worker fixes once) report 'dở' and wake nobody", len(sent), 1)
+        check("stopped: a job stopped at its gates tells CodeLead", (ss.stopped("w20261127-100001-wave")[0], "WORKER DỪNG · Wave" in sent[-1][1]), ("notified", True))
+        check("stopped: a job that ended well tells nobody here", ss.stopped("w20261127-100000-run"), None)
+        lead["live"] = ""
+        ss.NOTIFIED.clear()
+        check("notify: CodeLead not live, nothing is sent (the report waits for its next message)",
+              ss.notify_codelead("x", "k")[0], "codelead-not-live")
+    finally:
+        (ss.ROOT, ss.threads, ss.relay) = real[:3]
+        ss.NOTIFIED.clear()
+        ss.NOTIFIED.update(real[3])
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def worker_ticket_cases(check):
     """A worker's ticket (worker.py): one job, the requirements of several features; nobody is messaged."""
     et = ss.editor_ticket
@@ -1356,6 +1393,8 @@ def worker_ticket_cases(check):
         check("worker ticket: the failing test goes to the job's events.log, nobody is messaged",
               (log.is_file() and "WaveTests.Ends" in log.read_text(encoding="utf-8"),
                any(step[0] == "logged" for step in did)), (True, True))
+        check("worker ticket: a failing test reports nothing and wakes nobody when there is no such job",
+              [d for d in did if d and d[0] in ("reported", "no-job")], [("no-job", "w1-run")])
         check("worker ticket: the test result goes to the job's events.log too (passed and failed, requirements done)",
               any("Test: 1 qua, 1 hỏng · 1/2 yêu cầu ghi done" in e["text"] for e in ss.job_events("w1-run")), True)
     finally:
@@ -1646,6 +1685,7 @@ def main():
     worker_ticket_cases(check)
     worker_server_cases(check)
     activity_cases(check)
+    after_tests_cases(check)
     ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)

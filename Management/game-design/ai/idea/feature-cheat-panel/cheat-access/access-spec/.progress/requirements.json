@@ -147,7 +147,7 @@
    "at": "2026-11-27 16:03:40"
   },
   "spec-button-label": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen"
@@ -156,11 +156,11 @@
    "hash": "997b01ff84cc",
    "text": "Nút cheat mang chữ \"Cheat\"\nChữ thay cho hình: art IDEA siêu cơ bản, người test đọc là hiểu.",
    "title": "Nút cheat mang chữ \"Cheat\"",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:10"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "spec-button-state": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen"
@@ -169,11 +169,11 @@
    "hash": "f87df85f9e7c",
    "text": "Nút cheat có hai trạng thái nhìn khác nhau: panel đóng và panel đang mở",
    "title": "Nút cheat có hai trạng thái nhìn khác nhau: panel đóng và panel đang mở",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:10"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "spec-panel-parts": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.PanelHasTitleCheat_AScrollableRowList_AndAShadeThatBlocksTapsBelow",
@@ -183,11 +183,11 @@
    "hash": "9c39503662bc",
    "text": "Panel gồm tiêu đề \"Cheat\", danh sách dòng cuộn được và nền che chặn chạm phía dưới\nNền che phủ cả màn hình dưới panel, trên game và popup.",
    "title": "Panel gồm tiêu đề \"Cheat\", danh sách dòng cuộn được và nền che chặn chạm phía dưới",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:10"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "spec-close-ways": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.PanelOpensAndClosesWithTheButton_AndClosesWhenARowIsChosen",
@@ -197,11 +197,11 @@
    "hash": "b37aaefe9ddf",
    "text": "Panel đóng khi chạm lại nút cheat, khi chọn một dòng, hoặc khi game đổi scene\nChạm vào nền che không đóng panel, để chạm nhầm không làm mất chỗ đang cuộn.",
    "title": "Panel đóng khi chạm lại nút cheat, khi chọn một dòng, hoặc khi game đổi scene",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:10"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "spec-transition-lock": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.LockedRowsAreNotInteractable_InTheView",
@@ -211,11 +211,11 @@
    "hash": "7018f8949a58",
    "text": "Trong lúc game đang chuyển scene, các dòng của panel bị khoá\nTránh chọn state chồng lên một lần chuyển scene đang chạy; nút cheat vẫn đóng mở panel được.",
    "title": "Trong lúc game đang chuyển scene, các dòng của panel bị khoá",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:10"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "edge-doi-scene-khi-panel-dang-mo": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.SceneChangeWithThePanelOpen_ClosesIt_TheNextSceneHasTheButtonWithThePanelClosed"
@@ -224,11 +224,11 @@
    "hash": "4e4093189032",
    "text": "Đổi scene khi panel đang mở: panel đóng; nút vẫn có ở scene mới.",
    "title": "Đổi scene khi panel đang mở",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:11"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "edge-dang-chuyen-scene-man-loading-dang-chay": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.TheViewIsRedrawnWhenASceneSwitchStartsAndEnds",
@@ -238,11 +238,11 @@
    "hash": "a4a4841221e8",
    "text": "Đang chuyển scene (màn Loading đang chạy): nút mở panel được, nhưng mọi dòng khoá tới khi chuyển xong.",
    "title": "Đang chuyển scene (màn Loading đang chạy)",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:11"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "edge-popup-dang-mo": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.PopupOpen_ButtonAndPanelSitAboveEveryPopup"
@@ -251,11 +251,11 @@
    "hash": "4ff4a88706d7",
    "text": "Popup đang mở: nút vẫn chạm được; panel và nền che nằm trên popup.",
    "title": "Popup đang mở",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:11"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "edge-danh-sach-dai-hon-panel": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.ListLongerThanThePanel_ScrollsVerticallyWithoutShrinkingText"
@@ -264,11 +264,11 @@
    "hash": "2c8ef013c090",
    "text": "Danh sách dài hơn panel: cuộn dọc; không thu nhỏ chữ.",
    "title": "Danh sách dài hơn panel",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:11"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "edge-khong-co-state-nao-trong-ban-build": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.NoStateInTheBuild_OnlyTheNormalRowAndTheEmptyLabel",
@@ -278,11 +278,11 @@
    "hash": "3cc3ff1e0c03",
    "text": "Không có state nào trong bản build: panel chỉ có dòng \"Chơi bình thường\" và nhãn \"Bản này không có state cheat\".",
    "title": "Không có state nào trong bản build",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:11"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen",
@@ -293,8 +293,8 @@
    "hash": "c05b457a6934",
    "text": "## Làm gì\n- Feature `CheatPanel` có một asset config chứa ô `cheat_enabled`. Lúc game khởi động, đọc ô này một lần.\n- Bật: tạo nút cheat nổi trên cùng ở mọi scene, mọi màn, trên cả popup. Tắt: không tạo gì.\n- Chạm nút: mở panel (tiêu đề, danh sách dòng cuộn được, nền che). Chạm lại: đóng.\n- Phần tử, tương tác và flow ở `ui.md`; bố cục do @UIDesigner vẽ.\n- Nội dung và thứ tự các dòng, việc xảy ra khi chạm một dòng: `feature-cheat-panel/cheat-states/states-rules`.\n\n## Thông số\n- Bảng `.excel/AccessParams.csv` (`params`): `cheat_enabled` và các chữ hiện trên nút, panel.\n\n## Thông số theo giai đoạn\n- Cùng bảng `AccessParams`, cột `idea`. Phạm vi việc chỉ gồm IDEA (Manager giao 2026-11-27), nên cột `prototype`, `full` để trống.",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "CheatPanel",
-   "at": "2026-11-27 16:14:11"
+   "by": "@CodeLead",
+   "at": "2026-11-27 16:22:40"
   }
  },
  "log": [
@@ -759,6 +759,83 @@
    "state": "done",
    "by": "CheatPanel",
    "note": "CheatPanelTests.CheatButtonReadsCheat_AndLooksDifferentWhenThePanelIsOpen, CheatPanelTests.NoStateInTheBuild_OnlyTheNormalRowAndTheEmptyLabel, CheatPanelTests.PanelHasTitleCheat_AScrollableRowList_AndAShadeThatBlocksTapsBelow"
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "spec-button-label",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "spec-button-state",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "spec-panel-parts",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "spec-close-ways",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "spec-transition-lock",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "edge-doi-scene-khi-panel-dang-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "edge-dang-chuyen-scene-man-loading-dang-chay",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "edge-popup-dang-mo",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "edge-danh-sach-dai-hon-panel",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "edge-khong-co-state-nao-trong-ban-build",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 16:22:40",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

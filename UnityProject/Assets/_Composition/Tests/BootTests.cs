@@ -50,7 +50,8 @@ namespace Game.Composition.Tests
         }
 
         // feature-session-scene/session-steps/participant-order: the scene's participants join in install order,
-        // between SessionScene (first) and the scene's SceneFlow side (last).
+        // between SessionScene (first) and the scene's SceneFlow side (last). Loading now also has CheatPanel before SceneFlow;
+        // the test keeps its name because the requirement book cites it.
         [Test]
         public void LoadingScene_HasOnlySceneFlowAsParticipant()
         {
@@ -59,10 +60,11 @@ namespace Game.Composition.Tests
             Assert.That(names, Is.EqualTo(new[] { SessionScene, "CheatPanelInstaller", "SceneFlowLoadingInstaller" }));
         }
 
-        // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 15 participants
+        // feature-session-scene/session-steps/participant-order#game-list: at IDEA the Game scene has 16 participants
         // in this order (plus SaveInstaller before Run: not a participant, it only registers ISavedRecord for the run): SimClock first (no view, drives the shared clock each frame, so every gameplay feature can
-        // resolve it), then 13 features (PopupRating after PopupLose, it opens over it), then scene-flow last (a participant with no view). SessionScene installs
-        // first and runs the session; it is not a participant.
+        // resolve it), then 13 features (PopupRating after PopupLose, it opens over it), then CheatPanel (its button sits in every scene),
+        // then scene-flow last (a participant with no view). SessionScene installs first and runs the session; it is not a participant.
+        // The design table still lists 15 (CheatPanel not yet in it): the design needs feature-cheat-panel added before scene-flow.
         [Test]
         public void GameScene_AtIdea_HasSixteenParticipantsInTheDesignedOrder_SimClockFirst_CheatPanelThenSceneFlowLast()
         {

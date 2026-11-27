@@ -2362,9 +2362,11 @@ def test_run(group):
                     did.append(("done-refused", name, r["ref"], str(ex)[:120]))
         if t.get("session") == WORKER_ROLE and t.get("job"):      # the job's page line says how its tests went, passed too
             ok_n = sum(1 for r in t.get("reqs") or [] if any(d[:3] == ("done", r.get("feature") or ticket_feature(t["session"]), r["ref"]) for d in did))
-            job_event(t["job"], f"editor-test-ok:{t['id']}" if not mine_failed and not broken else f"editor-test-result:{t['id']}",
-                      ("Unity không chạy được test" if broken else f"Test: {len(passed)} qua, {len(mine_failed)} hỏng") +
-                      f" · {ok_n}/{len(t.get('reqs') or [])} yêu cầu ghi done (chờ CodeLead kiểm)")
+            line = (("Unity không chạy được test" if broken else f"Test: {len(passed)} qua, {len(mine_failed)} hỏng") +
+                    f" · {ok_n}/{len(t.get('reqs') or [])} yêu cầu ghi done (chờ CodeLead kiểm)")
+            job_event(t["job"], f"editor-test-ok:{t['id']}" if not mine_failed and not broken else f"editor-test-result:{t['id']}", line)
+            if not broken:      # a broken runner puts the ticket back: the tests run again, the report comes then
+                did.append(after_tests(t["job"], line, ok_n, mine_failed))
         if mine_failed:
             did.append(tell(t, "Test hỏng ở lô test của server: " + "; ".join(
                 f"{f['name']}: {str(f.get('message') or '')[:160]}" for f in mine_failed[:10]) + ". Sửa rồi ghi lại result.json.",
@@ -2372,6 +2374,46 @@ def test_run(group):
     editor_ticket.release(ROOT, met=[] if broken else ["test"])
     did.append(("test", len(assemblies), f"{verdict.get('total_passed', len(passed))} qua, {len(failed)} hỏng"))
     return did
+
+
+def after_tests(job_id, line, ok_n, failed):
+    """The end of a worker job's chain (the server's tests ran): a report for CodeLead (Management/reports) and one
+    message to its live thread, so the requirements written done get checked. Tests that broke send the job back to
+    its worker once (tell, fix_round): the report says so and CodeLead is not woken for it."""
+    try:
+        job = worker.load(ROOT, job_id)
+    except ValueError:
+        return ("no-job", job_id)
+    if failed:
+        if job.get("test_fixes", 0) >= 1:      # its fix round was used: fix_round reports and wakes CodeLead
+            return ("left-to-fix-round", job_id)
+        worker.write_report(ROOT, job, "dở", [line, "worker tự sửa test hỏng một lần, rồi server test lại"])
+        return ("reported", job_id, "dở")
+    worker.write_report(ROOT, job, "xong", [line])
+    if not ok_n:
+        return ("reported", job_id, "xong")
+    return ("reported", job_id, "xong", notify_codelead(
+        f"LÔ TEST XONG · {job['feature']} · việc {job_id} · {line}. Kiểm theo skill codelead-verify-batch.",
+        f"tests-done:{job_id}"))
+
+
+NOTIFIED = set()      # keys already sent to CodeLead (one message per job and kind)
+
+
+def notify_codelead(text, key):
+    """One message to @CodeLead's live thread (relay: SendMessage through a cheap helper turn). Not live: nothing is
+    sent, the report waits at the head of its next message."""
+    if key in NOTIFIED:
+        return ("already", key)
+    lead = next((t for t in threads() if t.get("binding") == "@CodeLead" and t.get("live")), None)
+    if not lead:
+        return ("codelead-not-live", key)
+    try:
+        relay(lead, text)
+    except Exception as ex:
+        return ("notify-failed", key, str(ex)[:120])
+    NOTIFIED.add(key)
+    return ("notified", key)
 
 
 def run_in_background(fn, group):
@@ -2467,6 +2509,7 @@ def start_worker(job_id, kind="code", message=None):
             else:
                 code, lines = worker.start(ROOT, job_id)
             print(f"worker: {job_id} xong ({code}):", " · ".join(lines[-4:])[:400], flush=True)
+            stopped(job_id)
         except Exception as ex:
             print(f"worker: {job_id} lỗi {ex}", file=sys.stderr, flush=True)
             try:
@@ -2483,6 +2526,22 @@ def start_worker(job_id, kind="code", message=None):
     return ("start" if message is None else "resume", kind, job_id)
 
 
+STOP_STATES = ("checks-failed", "drift", "needs-codelead", "error", "interrupted")
+
+
+def stopped(job_id):
+    """A job that ended stopped (its gates failed twice, a drift, an error): CodeLead is told once; worker.py has
+    written the report. A job that waits for the human (asks) goes through Manager, not here."""
+    try:
+        job = worker.load(ROOT, job_id)
+    except ValueError:
+        return None
+    if job.get("state") not in STOP_STATES:
+        return None
+    return notify_codelead(f"WORKER DỪNG · {job['feature']} · việc {job_id} · {job['state']}. Xem báo cáo mới và làm theo "
+                           "skill codelead-resolve-issue.", f"stopped:{job_id}:{job['state']}")
+
+
 def fix_round(job_id, counter, message):
     """One automatic fix round of a job (tests broke, Unity found compile errors, a drift); a second one in the same
     kind stops the job with a report for CodeLead."""
@@ -2494,6 +2553,8 @@ def fix_round(job_id, counter, message):
         job["state"] = "needs-codelead"
         worker.save(ROOT, job)
         worker.write_report(ROOT, job, "bị chặn", [f"tự sửa một lần chưa đủ ({counter}): " + message[:400]])
+        notify_codelead(f"WORKER CẦN CODELEAD · {job['feature']} · việc {job_id} · tự sửa một lần chưa đủ ({counter}). "
+                        "Xem báo cáo mới và làm theo skill codelead-resolve-issue.", f"needs-codelead:{job_id}")
         return
     job[counter] = job.get(counter, 0) + 1
     job["pending"] = message
