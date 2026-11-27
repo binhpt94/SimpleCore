@@ -1238,6 +1238,71 @@ def worker_server_cases(check):
         shutil.rmtree(store, ignore_errors=True)
 
 
+def activity_cases(check):
+    """Tab "Đang chạy" (người duyệt 2026-11-27): the last turn, the recent calls and the tokens from a transcript; a
+    running worker with its subagent; a finished job under done."""
+    home = Path(tempfile.mkdtemp(prefix="activity-home-"))
+    root = Path(tempfile.mkdtemp(prefix="activity-root-"))
+    real = (ss.ROOT, ss.threads, ss.live_sessions, ss.running_jobs, ss.PROJECTS_HOME)
+    def ts(sec):
+        return time.strftime("%Y-%m-%dT%H:%M:%S.000Z", time.gmtime(sec))
+    def write(p, rows):
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text("\n".join(json.dumps(r, separators=(",", ":")) for r in rows) + "\n", encoding="utf-8")
+    try:
+        ss.ROOT = root
+        ss.PROJECTS_HOME = home / "projects"
+        now = time.time()
+        use = {"input_tokens": 10, "output_tokens": 2, "cache_read_input_tokens": 100, "cache_creation_input_tokens": 0}
+        rows = [
+            {"type": "user", "timestamp": ts(now - 900), "message": {"role": "user", "content": "lượt cũ"}},
+            {"type": "assistant", "timestamp": ts(now - 890), "message": {"id": "a0", "role": "assistant", "model": "claude-opus-5-5", "usage": use,
+             "content": [{"type": "tool_use", "id": "t0", "name": "Read", "input": {"file_path": "/x/Old.cs"}}]}},
+            {"type": "user", "timestamp": ts(now - 120), "message": {"role": "user", "content": "làm Hero"}},
+            {"type": "assistant", "timestamp": ts(now - 100), "message": {"id": "a1", "role": "assistant", "model": "claude-opus-5-5", "usage": use,
+             "content": [{"type": "tool_use", "id": "t1", "name": "Edit", "input": {"file_path": "/w/Assets/HeroFakes.cs"}}]}},
+            {"type": "user", "timestamp": ts(now - 90), "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t1", "content": "ok"}]}},
+            {"type": "assistant", "timestamp": ts(now - 80), "message": {"id": "a2", "role": "assistant", "model": "claude-opus-5-5", "usage": use,
+             "content": [{"type": "tool_use", "id": "t2", "name": "Bash", "input": {"command": "python x.py", "description": "Chạy kiểm"}}]}},
+        ]
+        wt = home / ".coresimple-work" / "w20261127-100000-hero"
+        sid = "11111111-2222-3333-4444-555555555555"
+        tp = ss.project_dir(wt) / f"{sid}.jsonl"
+        write(tp, rows)
+        info = ss.tail_info(tp)
+        check("activity: the turn starts at the last prompt, not at a tool result", int(info["start"]), int(now - 120))
+        check("activity: the newest call first, the one without a result marked open",
+              [(t["text"], t["open"]) for t in info["tools"]], [("Bash Chạy kiểm", True), ("Edit HeroFakes.cs", False)])
+        check("activity: the turn's tokens count only the answers since its prompt", info["turn_cost"], 2 * (10 + 10 + 10))
+        sub = tp.with_suffix("") / "subagents"
+        write(sub / "agent-a1.jsonl", rows[2:4])
+        (sub / "agent-a1.meta.json").write_text(json.dumps({"agentType": "Explore", "description": "Tìm test", "model": "claude-sonnet-5-5", "finished": False}), encoding="utf-8")
+        write(sub / "agent-a2.jsonl", rows[2:4])
+        (sub / "agent-a2.meta.json").write_text(json.dumps({"agentType": "Plan", "finished": True}), encoding="utf-8")
+        jobs = root / "Management" / "workers"
+        for jid, state, extra in (("w20261127-100000-hero", "running", {"session": sid, "worktree": str(wt)}),
+                                  ("w20261127-090000-run", "applied", {"turns": [{"at": now - 3000, "seconds": 300, "cost_usd": 1.5}]})):
+            (jobs / jid).mkdir(parents=True)
+            (jobs / jid / "job.json").write_text(json.dumps(dict({"id": jid, "feature": jid.split("-")[-1].title(), "kind": "code",
+                                                  "state": state, "model": "opus", "effort": "medium", "task": "làm việc",
+                                                  "created": now - 3600, "updated": now - 60}, **extra)), encoding="utf-8")
+        ss.threads, ss.live_sessions = (lambda include_unnamed=False: []), (lambda fresh=False: {})
+        ss.running_jobs = lambda: {"w20261127-100000-hero": None}
+        v = ss.activity_view(now)
+        w = next((r for r in v["rows"] if r["id"] == "w20261127-100000-hero"), {})
+        check("activity: a running worker shows model, what it does, and its live tokens",
+              (w.get("name"), w.get("model"), w.get("state"), w.get("doing"), w.get("tokens", 0) > 0), ("W Hero", "opus", "chạy", "Bash Chạy kiểm", True))
+        check("activity: only the subagent still running is listed under it", [s["name"] for s in w.get("subs", [])], ["Explore"])
+        check("activity: the finished job is under done with its time and cost",
+              [(d["name"], d["seconds"], d["cost"]) for d in v["done"]], [("W Run", 300, 1.5)])
+        check("activity: today's worker cost sums the turns of today", v["totals"]["cost_today"],
+              1.5 if time.strftime("%Y-%m-%d", time.localtime(now - 3000)) == time.strftime("%Y-%m-%d", time.localtime(now)) else 0)
+    finally:
+        (ss.ROOT, ss.threads, ss.live_sessions, ss.running_jobs, ss.PROJECTS_HOME) = real
+        shutil.rmtree(home, ignore_errors=True)
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def worker_ticket_cases(check):
     """A worker's ticket (worker.py): one job, the requirements of several features; nobody is messaged."""
     et = ss.editor_ticket
@@ -1567,6 +1632,7 @@ def main():
     editor_cases(check)
     worker_ticket_cases(check)
     worker_server_cases(check)
+    activity_cases(check)
     ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)

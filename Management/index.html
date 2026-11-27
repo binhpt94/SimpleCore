@@ -134,6 +134,7 @@
 <script src="view/studio.js"></script>
 <script src="view/references.js"></script>
 <script src="view/inbox.js"></script>
+<script src="view/activity.js"></script>
 <script>
 (function () {
   var idea = window.CORESIMPLE_IDEA || null;
@@ -310,6 +311,13 @@
   if (views.inbox) {
     tab("hop-thu", "Hộp thư", function (pane) {
       views.inbox(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
+    });
+  }
+
+  // ---------------------------------------------------------------- đang chạy: mọi agent đang chạy (view/activity.js)
+  if (views.activity) {
+    tab("dang-chay", "Đang chạy", function (pane) {
+      views.activity(pane, { el: el, add: add, put: put, section: section, setup: window.CORESIMPLE_SETUP || null });
     });
   }
 

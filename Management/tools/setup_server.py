@@ -2573,6 +2573,206 @@ def workers_view():
     return {"jobs": out, "slots": WORKER_SLOTS}
 
 
+# ---------------------------------------------------------------- tab "Đang chạy" (người duyệt 2026-11-27)
+# Every agent that runs now, in one place: Leaders and tool threads, workers, the tester, their subagents; how long its
+# turn runs, its model, what it does (the last tool calls of its transcript), the tokens. Read only, nothing started.
+ACTIVITY_TAIL = 400_000      # bytes of a transcript read for the turn and the recent calls
+ACTIVITY_TOOLS = 10
+SUB_FRESH_SECONDS = 600      # a subagent not marked finished whose transcript is older is left over, not running
+TAIL_CACHE = {}
+TAIL_LOCK = threading.Lock()
+PROJECTS_HOME = Path.home() / ".claude" / "projects"
+
+
+def project_dir(path):
+    """~/.claude/projects/<path with every non-alphanumeric character as '-'>: where the CLI keeps a cwd's transcripts."""
+    return PROJECTS_HOME / re.sub(r"[^A-Za-z0-9]", "-", str(path))
+
+
+def iso_seconds(stamp):
+    try:
+        return calendar.timegm(time.strptime(str(stamp)[:19], "%Y-%m-%dT%H:%M:%S"))      # the CLI writes UTC
+    except (ValueError, OverflowError):
+        return 0
+
+
+def call_text(name, inp):
+    """'Edit HeroFakes.cs', 'Bash python …', 'Agent: List files': one tool call, short, for the page."""
+    if not isinstance(inp, dict):
+        return name
+    short = name.replace("mcp__UnityMCP__", "unity:")
+    if inp.get("file_path") or inp.get("notebook_path"):
+        what = Path(str(inp.get("file_path") or inp.get("notebook_path"))).name
+    elif name in ("Bash", "PowerShell"):
+        what = str(inp.get("description") or inp.get("command") or "")
+    elif name in ("Agent", "Task"):
+        what = str(inp.get("description") or inp.get("subagent_type") or "")
+    elif name in ("Grep", "Glob"):
+        what = str(inp.get("pattern") or "")
+    else:
+        what = " ".join(f"{k}={v}" for k, v in inp.items() if isinstance(v, (str, int, float)) and k != "unity_instance")
+    return (short + " " + re.sub(r"\s+", " ", what).strip())[:140].strip()
+
+
+def tail_info(path):
+    """{start, model, tools: [{at, text, open}], turn_cost} of the last turn in a transcript: start is the time of its
+    last prompt (not a tool result), turn_cost the tokens since then (priced as usage_of does). {} with no file."""
+    try:
+        st = os.stat(path)
+    except OSError:
+        return {}
+    stamp = (st.st_mtime_ns, st.st_size)
+    with TAIL_LOCK:
+        hit = TAIL_CACHE.get(str(path))
+    if hit and hit[0] == stamp:
+        return hit[1]
+    try:
+        with open(path, "rb") as f:
+            f.seek(max(0, st.st_size - ACTIVITY_TAIL))
+            lines = f.read().decode("utf-8", errors="replace").splitlines()
+    except OSError:
+        return {}
+    start, model, calls, done, cost, seen = 0, "", [], set(), 0, set()
+    for line in lines:
+        if '"type":"user"' not in line and '"type":"assistant"' not in line and '"type": "user"' not in line:
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue      # the first line of the tail may be cut
+        if not isinstance(row, dict) or row.get("type") not in ("assistant", "user"):
+            continue
+        m = row.get("message") or {}
+        content = m.get("content")
+        at = iso_seconds(row.get("timestamp"))
+        if row["type"] == "user":
+            blocks = content if isinstance(content, list) else []
+            results = [b for b in blocks if isinstance(b, dict) and b.get("type") == "tool_result"]
+            done.update(b.get("tool_use_id") for b in results)
+            if not results and not row.get("isMeta") and (isinstance(content, str) or blocks):
+                start, calls, cost, seen = at, [], 0, set()      # a new prompt: a new turn
+            continue
+        if m.get("model") and m.get("model") != SYNTHETIC_MODEL:
+            model = m["model"]
+        u = m.get("usage")
+        if isinstance(u, dict) and m.get("id") not in seen:
+            seen.add(m.get("id"))
+            write = int(u.get("cache_creation_input_tokens") or 0)
+            hour = int((u.get("cache_creation") or {}).get("ephemeral_1h_input_tokens") or 0) if isinstance(u.get("cache_creation"), dict) else 0
+            cost += (int(u.get("input_tokens") or 0) + hour * 2 + max(write - hour, 0) * 1.25 +
+                     int(u.get("cache_read_input_tokens") or 0) * 0.1 + int(u.get("output_tokens") or 0) * 5)
+        for b in content if isinstance(content, list) else []:
+            if isinstance(b, dict) and b.get("type") == "tool_use":
+                calls.append({"at": at, "id": b.get("id"), "text": call_text(str(b.get("name") or ""), b.get("input"))})
+    tools = [{"at": c["at"], "text": c["text"], "open": c["id"] not in done} for c in calls[-ACTIVITY_TOOLS:]][::-1]
+    info = {"start": start, "model": model, "tools": tools, "turn_cost": int(round(cost))}
+    with TAIL_LOCK:
+        TAIL_CACHE[str(path)] = (stamp, info)
+    return info
+
+
+def model_short(model):
+    """'claude-opus-5-5' -> 'opus'; an alias stays as it is."""
+    m = re.search(r"(opus|sonnet|haiku|fable)", str(model or ""))
+    return m.group(1) if m else str(model or "")
+
+
+def agent_row(kind, name, path, now, model="", effort="", state="", task="", total=None, ident=""):
+    """One row of the tab from a transcript: its last turn, what it does, its tokens."""
+    info = tail_info(path) if path else {}
+    try:
+        quiet = int(now - os.stat(path).st_mtime) if path else 0
+    except OSError:
+        quiet = 0
+    tools = info.get("tools") or []
+    return {"kind": kind, "name": name, "id": ident, "model": model_short(info.get("model") or model), "effort": effort,
+            "state": state, "task": str(task or "")[:2000], "start": info.get("start") or 0, "quiet": quiet,
+            "doing": (tools[0]["text"] if tools else ""), "doing_open": bool(tools and tools[0]["open"]),
+            "tools": tools, "turn_tokens": info.get("turn_cost", 0),
+            "tokens": (total if total is not None else (usage_of(path).get("cost", 0) if path else 0)), "subs": []}
+
+
+def subagent_rows(path, now):
+    """The subagents of the transcript at `path` that still run (<session>/subagents/*.jsonl, meta not finished)."""
+    folder = Path(str(path)[:-len(".jsonl")]) / "subagents"
+    rows = []
+    for p in sorted(folder.glob("*.jsonl")) if folder.is_dir() else []:
+        try:
+            meta = json.loads(p.with_suffix(".meta.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            meta = {}
+        try:
+            age = now - p.stat().st_mtime
+        except OSError:
+            continue
+        if meta.get("finished") or age > SUB_FRESH_SECONDS:
+            continue
+        rows.append(agent_row("subagent", meta.get("agentType") or "subagent", p, now, model=meta.get("model") or "",
+                              state="chạy", task=meta.get("description") or "", ident=p.stem))
+    return rows
+
+
+def job_transcript(job):
+    if not job.get("session") or not job.get("worktree"):
+        return None
+    return project_dir(job["worktree"]) / f"{job['session']}.jsonl"
+
+
+JOB_STATE_NAMES = {"queued": "xếp hàng", "starting": "đang mở", "running": "chạy", "waiting-editor": "chờ phiếu Editor"}
+
+
+def activity_view(now=None):
+    """GET /api/activity: {now, rows, done, totals}. rows: what runs now (threads that are live or in a server turn,
+    workers and the tester that run or wait), each with its running subagents; done: the jobs that ended today."""
+    now = now or time.time()
+    live = live_sessions()
+    with BUSY_LOCK:
+        busy_ids = set(BUSY)
+    rows = []
+    for t in threads():
+        s = live.get(t["id"]) or {}
+        if not s and t["id"] not in busy_ids:
+            continue
+        path = transcripts_dir() / f"{t['id']}.jsonl"
+        state = "chờ người" if s.get("state") == "blocked" else ("chạy" if s.get("status") == "busy" or t["id"] in busy_ids else "rảnh")
+        h = hang_of(t, s, now)
+        row = agent_row("thread", t["title"], path, now, model=(t.get("run") or {}).get("model") or t.get("model"),
+                        effort=(t.get("run") or {}).get("effort") or t.get("effort"), state=state,
+                        total=thread_usage(t["id"]).get("cost", 0), ident=t["id"])
+        row["hang"] = hang_text(h) if h else ""
+        row["where"] = "VS Code" if s.get("kind") == "interactive" else ("nền" if s else "lượt của server")
+        row["subs"] = subagent_rows(path, now)
+        rows.append(row)
+    alive = running_jobs()
+    done, cost_today = [], 0.0
+    day = time.strftime("%Y-%m-%d", time.localtime(now))
+    for j in sorted(worker_jobs(), key=lambda x: x.get("created", 0)):
+        turns = j.get("turns") or []
+        cost = sum(x.get("cost_usd") or 0 for x in turns)
+        cost_today += sum(x.get("cost_usd") or 0 for x in turns if time.strftime("%Y-%m-%d", time.localtime(x.get("at") or 0)) == day)
+        name = ("Tester" if j.get("kind") == "play" else "W " + str(j.get("feature") or "?"))
+        running = j["id"] in alive
+        if running or j.get("state") in ACTIVE_JOB_STATES or j.get("pending"):
+            path = job_transcript(j) if running else None
+            state = "chạy" if running else ("chạy tiếp ở vòng sau" if j.get("pending") else JOB_STATE_NAMES.get(j.get("state"), j.get("state")))
+            row = agent_row("worker" if j.get("kind", "code") == "code" else "tester", name, path, now, model=j.get("model"),
+                            effort=j.get("effort"), state=state, task=j.get("task"), ident=j["id"],
+                            total=(usage_of(path).get("cost", 0) if path else 0))
+            row.update(cost=round(cost, 2), job_seconds=sum(x.get("seconds") or 0 for x in turns), asks=j.get("asks") or [],
+                       created=j.get("created") or 0)
+            row["subs"] = subagent_rows(path, now) if path else []
+            rows.append(row)
+        elif time.strftime("%Y-%m-%d", time.localtime(j.get("updated") or j.get("created") or 0)) == day:
+            done.append({"id": j["id"], "name": name, "state": j.get("state"), "seconds": sum(x.get("seconds") or 0 for x in turns),
+                         "cost": round(cost, 2), "model": model_short(j.get("model")), "effort": j.get("effort") or "",
+                         "summary": str((j.get("result") or {}).get("summary") or "")[:300], "updated": j.get("updated") or 0})
+    done.sort(key=lambda d: d["updated"], reverse=True)
+    running_n = sum(1 for r in rows if r["state"] == "chạy") + sum(len(r["subs"]) for r in rows)
+    return {"now": now, "rows": rows, "done": done,
+            "totals": {"running": running_n, "slots": WORKER_SLOTS, "workers": len(alive), "cost_today": round(cost_today, 2),
+                       "tokens_live": sum(r["tokens"] for r in rows if r["kind"] == "thread")}}
+
+
 def worker_call(action, data):
     """The page: run (a feature and an extra task), resume (an id and a message), drop (an id)."""
     try:
@@ -2668,6 +2868,8 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(200, sync_page.write_references(ROOT))
             if path == "/api/workers":
                 return self.send_json(200, workers_view())
+            if path == "/api/activity":
+                return self.send_json(200, activity_view())
             if path == "/api/inbox":
                 return self.send_json(200, inbox_view())
             if path == "/api/inbox/reqs":
