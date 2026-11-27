@@ -9,10 +9,11 @@ Chốt danh sách và thứ tự feature tham gia của scene Loading và scene 
 
 ## Ý cốt lõi
 
-### loading-list | AI 8 | Scene Loading chỉ có một feature tham gia: `feature-scene-flow` (màn Loading)
+### loading-list | AI 8 | Scene Loading có hai feature tham gia: `feature-cheat-panel` rồi `feature-scene-flow` (màn Loading)
+Nút cheat có ở mọi scene, kể cả màn Loading; scene-flow vẫn đứng cuối.
 
-### game-list | AI 8 | Scene Game có 15 feature tham gia, `feature-sim-clock` đứng đầu, `feature-scene-flow` luôn đứng cuối
-Thứ tự: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, popup-rating, scene-flow. Scene-flow không view, không tải; nó mở cổng cho scene Loading bỏ lớp che khi mọi feature đã chạy. Không có màn bắt đầu, màn chọn đội. `feature-balance` không tham gia.
+### game-list | AI 8 | Scene Game có 16 feature tham gia, `feature-sim-clock` đứng đầu, `feature-cheat-panel` ngay trước `feature-scene-flow` luôn đứng cuối
+Thứ tự: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, popup-rating, cheat-panel, scene-flow. Cheat-panel đứng sau mọi feature có cheat để gom được state của chúng. Scene-flow không view, không tải; nó mở cổng cho scene Loading bỏ lớp che khi mọi feature đã chạy. Không có màn bắt đầu, màn chọn đội. `feature-balance` không tham gia.
 
 ### load-timeout | AI 7 | Mỗi feature tải tối đa 10 giây (dự kiến); quá thì coi là tải lỗi
 Các feature tải lần lượt theo thứ tự danh sách.

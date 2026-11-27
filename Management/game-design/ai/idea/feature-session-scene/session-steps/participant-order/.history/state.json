@@ -1,13 +1,13 @@
 {
- "hash": "3cfb8fc5bd71",
+ "hash": "7e05c38b2af5",
  "items": {
   "loading-list": {
-   "hash": "ec6f826570ce",
-   "text": "Scene Loading chỉ có một feature tham gia: `feature-scene-flow` (màn Loading)"
+   "hash": "0d3b5ff1bec9",
+   "text": "Scene Loading có hai feature tham gia: `feature-cheat-panel` rồi `feature-scene-flow` (màn Loading)\nNút cheat có ở mọi scene, kể cả màn Loading; scene-flow vẫn đứng cuối."
   },
   "game-list": {
-   "hash": "65b86a030232",
-   "text": "Scene Game có 15 feature tham gia, `feature-sim-clock` đứng đầu, `feature-scene-flow` luôn đứng cuối\nThứ tự: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, popup-rating, scene-flow. Scene-flow không view, không tải; nó mở cổng cho scene Loading bỏ lớp che khi mọi feature đã chạy. Không có màn bắt đầu, màn chọn đội. `feature-balance` không tham gia."
+   "hash": "a9b0152a17f8",
+   "text": "Scene Game có 16 feature tham gia, `feature-sim-clock` đứng đầu, `feature-cheat-panel` ngay trước `feature-scene-flow` luôn đứng cuối\nThứ tự: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, popup-rating, cheat-panel, scene-flow. Cheat-panel đứng sau mọi feature có cheat để gom được state của chúng. Scene-flow không view, không tải; nó mở cổng cho scene Loading bỏ lớp che khi mọi feature đã chạy. Không có màn bắt đầu, màn chọn đội. `feature-balance` không tham gia."
   },
   "load-timeout": {
    "hash": "af81b03fe983",

@@ -181,7 +181,9 @@ def report_field(text, name):
 
 # Whose reports @Manager is shown: the Leaders only (2026-11-26). The features, services, @Core, the tools and the
 # testers report to @CodeLead, whose part they are; their files stay in Management/reports for anyone to read.
-MANAGER_REPORT_ROLES = ("CodeLead", "GameDesigner", "UIDesigner")
+# Server: the server's letters (setup_server.server_letter, người quyết 2026-11-27: server báo thư cho Manager, Manager
+# điều phối; server không tự chạy lại việc).
+MANAGER_REPORT_ROLES = ("CodeLead", "GameDesigner", "UIDesigner", "Server")
 
 
 def report_role(name):

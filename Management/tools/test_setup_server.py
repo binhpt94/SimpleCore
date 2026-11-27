@@ -1190,7 +1190,7 @@ def worker_server_cases(check):
         wk.save(root, job)
         ss.WORKER_STARTED["done"] = False
         did = ss.worker_tick(now + 10)
-        check("tick: the first pass after a server start: a job left running is interrupted", ("interrupted", job["id"]) in did, True)
+        check("tick: the first pass after a server start: a job left running is interrupted", any(d[:2] == ("interrupted", job["id"]) for d in did), True)
         started.clear()
         # fix rounds
         w2 = wk.queue(root, "Wave", task="x", now=now + 11)
@@ -1294,7 +1294,8 @@ def activity_cases(check):
                                                   "created": now - 3600, "updated": now - 60}, **extra)), encoding="utf-8")
         ss.threads, ss.live_sessions = (lambda include_unnamed=False: []), (lambda fresh=False: {})
         ss.running_jobs = lambda: {"w20261127-100000-hero": None}
-        v = ss.activity_view(now)
+        check("activity: done jobs are only counted until the page opens them", (ss.activity_view(now)["done"], ss.activity_view(now)["done_count"]), ([], 1))
+        v = ss.activity_view(now, with_done=True)
         w = next((r for r in v["rows"] if r["id"] == "w20261127-100000-hero"), {})
         check("activity: a running worker shows model, what it does, and its live tokens",
               (w.get("name"), w.get("model"), w.get("state"), w.get("doing"), w.get("tokens", 0) > 0), ("W Hero", "opus", "chạy", "Bash Chạy kiểm", True))
@@ -1302,7 +1303,7 @@ def activity_cases(check):
         check("activity: the finished job is under done with its time and cost",
               [(d["name"], d["seconds"], d["cost"]) for d in v["done"]], [("W Run", 300, 1.5)])
         ss.editor_ticket.add(root, "@Worker", ["refresh", "clean", "test"], [], [], now=now, job="w20261127-090000-run")
-        v2 = ss.activity_view(now)
+        v2 = ss.activity_view(now, with_done=True)
         check("activity: a job whose Editor ticket is still open stays in the table, waiting for the load and tests",
               ([r["state"] for r in v2["rows"] if r["id"] == "w20261127-090000-run"], [d["id"] for d in v2["done"]]),
               (["chờ Editor để nạp và test"], []))
@@ -1312,6 +1313,55 @@ def activity_cases(check):
         (ss.ROOT, ss.threads, ss.live_sessions, ss.running_jobs, ss.PROJECTS_HOME) = real
         shutil.rmtree(home, ignore_errors=True)
         shutil.rmtree(root, ignore_errors=True)
+
+
+def recover_cases(check):
+    """A server that starts again finds jobs it left running (người quyết 2026-11-27): it gives the Editor back,
+    starts nothing again, and writes one letter to Manager."""
+    root = Path(tempfile.mkdtemp(prefix="recover-"))
+    store = tempfile.mkdtemp(prefix="recover-store-")
+    real = (ss.ROOT, ss.guard.STORE_DIR, ss.running_jobs, dict(ss.WORKER_STARTED), ss.threads, ss.relay, ss.threading.Thread)
+    sent = []
+    class NowThread:      # the relay runs here at once, so the test sees it
+        def __init__(self, target, args=(), daemon=None):
+            self.go = lambda: target(*args)
+        def start(self):
+            self.go()
+    try:
+        ss.ROOT = root
+        ss.guard.STORE_DIR = store
+        ss.running_jobs = lambda: {}
+        ss.threads = lambda include_unnamed=False: [{"id": "m1", "title": "Manager", "binding": "@Manager", "live": "interactive"}]
+        ss.relay = lambda t, text: sent.append((t["title"], text)) or "ok"
+        ss.threading.Thread = NowThread
+        et, wk = ss.editor_ticket, ss.worker
+        play = wk.queue_play(root, "chơi thử CheatPanel", source="@CodeLead", now=1)
+        et.grant_next(root, now=2)
+        wk.save(root, dict(play, state="running", session="s-play"))
+        ss.guard.write_lock(store, {"session": "s-play", "who": "@UnityAutoPlay", "until": time.time() + 600, "scene": "", "prefab": ""})
+        code = wk.save(root, dict(wk.queue(root, "Run", task="x", now=3), state="running", session="s-code"))
+        ss.WORKER_STARTED["done"] = False
+        did = ss.worker_tick(now=10)
+        jobs = {j["id"]: j for j in ss.worker_jobs()}
+        check("recover: the play test's ticket and the guard's lock are given back",
+              (et.holder(root), ss.guard.read_lock(store)), ([], None))
+        check("recover: nothing is started again: no new play test, no resume, the code job is not run",
+              (len(jobs), jobs[play["id"]]["state"], jobs[code["id"]]["state"], jobs[code["id"]].get("pending"),
+               [d for d in did if d and d[0] == "start"]), (2, "interrupted", "interrupted", None, []))
+        letters = sorted((root / "Management" / "reports").glob("*-Server*.md"))
+        text = letters[0].read_text(encoding="utf-8") if letters else ""
+        check("recover: one letter to Manager lists both jobs", (len(letters), play["id"] in text, code["id"] in text), (1, True, True))
+        check("recover: Manager is shown the server's letters",
+              ss.bind_session.report_role(letters[0].name) in ss.bind_session.MANAGER_REPORT_ROLES if letters else False, True)
+        check("recover: Manager open in VS Code is messaged at once, naming the letter",
+              ([x[0] for x in sent], bool(letters) and letters[0].name in sent[0][1] if sent else False), (["Manager"], True))
+    finally:
+        (ss.ROOT, ss.guard.STORE_DIR, ss.running_jobs) = real[:3]
+        (ss.threads, ss.relay, ss.threading.Thread) = real[4:]
+        ss.WORKER_STARTED.clear()
+        ss.WORKER_STARTED.update(real[3])
+        shutil.rmtree(root, ignore_errors=True)
+        shutil.rmtree(store, ignore_errors=True)
 
 
 def after_tests_cases(check):
@@ -1686,6 +1736,7 @@ def main():
     worker_server_cases(check)
     activity_cases(check)
     after_tests_cases(check)
+    recover_cases(check)
     ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)

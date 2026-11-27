@@ -2403,11 +2403,17 @@ NOTIFIED = set()      # keys already sent to CodeLead (one message per job and k
 def notify_codelead(text, key):
     """One message to @CodeLead's live thread (relay: SendMessage through a cheap helper turn). Not live: nothing is
     sent, the report waits at the head of its next message."""
+    return notify_role("@CodeLead", text, key)
+
+
+def notify_role(role, text, key):
+    """One message (per key) to the live thread of `role` (a Leader in the background, or @Manager open in VS Code).
+    Not live: nothing is sent, the report waits at the head of its next message."""
     if key in NOTIFIED:
         return ("already", key)
-    lead = next((t for t in threads() if t.get("binding") == "@CodeLead" and t.get("live")), None)
+    lead = next((t for t in threads() if t.get("binding") == role and t.get("live")), None)
     if not lead:
-        return ("codelead-not-live", key)
+        return (role.strip("@").lower() + "-not-live", key)
     try:
         relay(lead, text)
     except Exception as ex:
@@ -2564,6 +2570,40 @@ def fix_round(job_id, counter, message):
 ACTIVE_JOB_STATES = ("queued", "starting", "running", "waiting-editor")
 
 
+def recover(j, jobs):
+    """A job a server that stopped left running. The server starts nothing by itself (người quyết 2026-11-27: tự chạy
+    lại dễ deadlock; Manager điều phối): a play test gives the Editor back at once (its ticket, the guard's lock), so
+    nobody waits on a dead turn; every such job is marked interrupted and listed in one letter to Manager."""
+    j["state"] = "interrupted"
+    worker.save(ROOT, j)
+    if j.get("kind") == "play":
+        try:
+            worker.end_play_ticket(ROOT, j["id"])
+        except Exception:
+            pass
+        if j.get("session"):
+            guard.release_lock(guard.STORE_DIR, j["session"])
+        return ("interrupted", j["id"], "chơi thử; Editor đã trả lại")
+    return ("interrupted", j["id"], "code; " + ("worktree và session còn, chạy tiếp được" if j.get("session") else "chưa có session"))
+
+
+def server_letter(subject, state, lines, need):
+    """A letter from the server to @Manager: a report file of role Server in Management/reports (Manager is shown it
+    at the head of its next message, CodeLead too). Nothing is started; Manager decides who does what."""
+    folder = ROOT / "Management" / "reports"
+    folder.mkdir(parents=True, exist_ok=True)
+    stamp, n = time.strftime("%Y%m%d-%H%M%S"), 1
+    path = folder / f"{stamp}-Server.md"
+    while path.exists():
+        n += 1
+        path = folder / f"{stamp}-Server-{n}.md"
+    body = (f"<!-- {time.strftime('%Y-%m-%d %H:%M:%S')} · ghi bởi setup_server.py -->\n## Báo cáo cho @Manager\n"
+            f"- Phiên: FEATURE=server\n- Việc: {subject}\n- Trạng thái: {state}\n- Đã đổi: Management/workers (trạng thái việc)\n"
+            f"- Công khai đổi: không\n- Cần bên khác: {need}\n- Kiểm tra: {' · '.join(lines)}\n- Ghi chú: server không tự chạy lại việc nào\n")
+    path.write_text(body, encoding="utf-8", newline="\n")
+    return path
+
+
 def worker_tick(now=None):
     """One pass: jobs left running by a server that stopped, answers to the workers' questions, fix rounds, and the
     queued jobs, while slots are free."""
@@ -2572,11 +2612,18 @@ def worker_tick(now=None):
     alive = running_jobs()
     if not WORKER_STARTED["done"]:      # the server just started: no thread runs any job
         WORKER_STARTED["done"] = True
-        for j in jobs:
-            if j.get("state") in ("starting", "running") and j["id"] not in alive:
-                j["state"] = "interrupted"
-                worker.save(ROOT, j)
-                did.append(("interrupted", j["id"]))
+        cut = [recover(j, jobs) for j in jobs if j.get("state") in ("starting", "running") and j["id"] not in alive]
+        did.extend(cut)
+        if cut:
+            letter = server_letter("server khởi động lại giữa chừng, " + str(len(cut)) + " việc worker bị ngắt", "bị chặn",
+                          [f"{c[1]}: {c[2]}" for c in cut],
+                          "@CodeLead: quyết từng việc - chạy tiếp (worker.py resume <id>, hay nút Chạy tiếp ở tab Hộp thư), "
+                          "giao lại, hay bỏ; đợt chơi thử thì giao lại nếu còn cần")
+            text = (f"THƯ CỦA SERVER · server khởi động lại, {len(cut)} việc worker bị ngắt, không việc nào tự chạy lại. "
+                    f"Đọc Management/reports/{letter.name} rồi điều phối CodeLead.")
+            # Manager open in VS Code gets it now (người quyết 2026-11-27); the relay is a helper turn: not in this tick
+            threading.Thread(target=notify_role, args=("@Manager", text, f"letter:{letter.name}"), daemon=True).start()
+            did.append(("letter", letter.name))
     try:
         answered = {q["id"]: q for q in ask.items(ROOT, "answered") if q.get("source") == WORKER_ROLE}
     except Exception:
@@ -2818,9 +2865,10 @@ JOB_STATE_NAMES = {"queued": "xếp hàng", "starting": "đang dựng worktree",
                    "interrupted": "bị ngắt", "error": "lỗi", "played": "đã chơi thử", "play-failed": "chơi thử lỗi", "dropped": "đã gỡ"}
 
 
-def activity_view(now=None):
-    """GET /api/activity: {now, rows, done, totals}. rows: what runs now (threads that are live or in a server turn,
-    workers and the tester that run or wait), each with its running subagents; done: the jobs that ended today."""
+def activity_view(now=None, with_done=False):
+    """GET /api/activity[?done=1]: {now, rows, done, done_count, totals}. rows: what runs now (threads that are live or
+    in a server turn, workers and the tester that run or wait), each with its running subagents; done: the jobs that
+    ended today, only when asked (the page shows them folded: done_count is enough until they are opened)."""
     now = now or time.time()
     live = live_sessions()
     with BUSY_LOCK:
@@ -2871,13 +2919,17 @@ def activity_view(now=None):
             row["subs"] = subagent_rows(path, now) if path else []
             rows.append(row)
         elif time.strftime("%Y-%m-%d", time.localtime(j.get("updated") or j.get("created") or 0)) == day:
+            if not with_done:
+                done.append(None)
+                continue
             done.append({"id": j["id"], "name": name, "state": JOB_STATE_NAMES.get(j.get("state"), j.get("state")),
                          "events": job_events(j["id"]), "seconds": sum(x.get("seconds") or 0 for x in turns),
                          "cost": round(cost, 2), "model": model_short(j.get("model")), "effort": j.get("effort") or "",
                          "summary": str((j.get("result") or {}).get("summary") or "")[:300], "updated": j.get("updated") or 0})
-    done.sort(key=lambda d: d["updated"], reverse=True)
+    done_count = len(done)
+    done = sorted((d for d in done if d), key=lambda d: d["updated"], reverse=True)
     running_n = sum(1 for r in rows if r["state"] == "chạy") + sum(len(r["subs"]) for r in rows)
-    return {"now": now, "rows": rows, "done": done,
+    return {"now": now, "rows": rows, "done": done, "done_count": done_count,
             "totals": {"running": running_n, "slots": WORKER_SLOTS, "workers": len(alive), "cost_today": round(cost_today, 2),
                        "tokens_live": sum(r["tokens"] for r in rows if r["kind"] == "thread")}}
 
@@ -2983,7 +3035,8 @@ class Handler(SimpleHTTPRequestHandler):
             if path == "/api/workers":
                 return self.send_json(200, workers_view())
             if path == "/api/activity":
-                return self.send_json(200, activity_view())
+                query = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+                return self.send_json(200, activity_view(with_done=(query.get("done") or [""])[0] == "1"))
             if path == "/api/inbox":
                 return self.send_json(200, inbox_view())
             if path == "/api/inbox/reqs":

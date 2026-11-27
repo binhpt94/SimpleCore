@@ -27,7 +27,11 @@
     ".ac-warn { color: var(--bad); }",
     ".ac-open { color: var(--accent); }",
     ".ac-done { font-size: 13.5px; }",
-    ".ac-done li { margin: 0 0 4px; }"
+    ".ac-done li { margin: 0 0 4px; cursor: pointer; }",
+    ".ac-done li .ac-more { cursor: auto; margin: 2px 0 6px; }",
+    ".ac-fold { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; }",
+    ".ac-fold button { padding: 3px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; font-size: 13px; cursor: pointer; }",
+    ".ac-fold button:hover { border-color: var(--accent); }"
   ].join("\n");
 
   var REFRESH_MS = 3000;
@@ -67,7 +71,9 @@
     var sumBox = put(pane, el("div", "ac-sum"));
     var tableBox = put(pane, el("div", "ac-wrap"));
     var doneBox = put(pane, el("div", ""));
-    var open = {};      // id -> mở chi tiết
+    var open = {};      // id -> mở chi tiết (dòng của bảng và việc đã xong)
+    var showDone = false;      // "Xong hôm nay" thu gọn: chỉ đếm; mở ra mới tải danh sách
+    var drawn = { top: "", done: "" };      // dữ liệu đã vẽ: chỉ vẽ lại khi đổi
 
     var get = function (path) {
       return fetch(path, { headers: { "X-Setup-Token": ctx.setup.token }, cache: "no-store" }).then(function (r) {
@@ -123,8 +129,15 @@
       return add(el("tr", "ac-detail"), td);
     };
 
-    var render = function (v) {
+    var render = function (v, force) {
       var now = v.now, T = v.totals;
+      // Có agent đang chạy thì cột "Chạy" đổi theo giây: vẽ lại. Chỉ có thread rảnh thì "im bao lâu" không tính là đổi.
+      var ticking = v.rows.some(function (r) { return r.state === "chạy" || r.subs.length; });
+      var top = JSON.stringify([v.rows, T, open, ticking ? now : 0], function (k, val) { return k === "quiet" && !ticking ? undefined : val; }), dn = JSON.stringify([v.done, v.done_count, showDone, open]);
+      if (force || top !== drawn.top) { drawn.top = top; renderTop(v, now, T); }
+      if (force || dn !== drawn.done) { drawn.done = dn; renderDone(v, now); }
+    };
+    var renderTop = function (v, now, T) {
       sumBox.textContent = "";
       add(sumBox,
         add(el("span"), el("b", "", String(T.running)), document.createTextNode(" đang chạy")),
@@ -143,29 +156,56 @@
         v.rows.forEach(function (r) {
           var key = r.id || r.name;
           var tr = put(body, line(r, now, false));
-          tr.addEventListener("click", function () { open[key] = !open[key]; render(v); });
+          tr.addEventListener("click", function () { open[key] = !open[key]; render(v, true); });
           if (open[key]) add(body, detail(r, now));
           r.subs.forEach(function (s) { add(body, line(s, now, true)); });
         });
       }
 
+    };
+    var renderDone = function (v, now) {
       doneBox.textContent = "";
-      if (v.done.length) {
-        add(doneBox, el("b", "", "Xong hôm nay"));
-        var ul = put(doneBox, el("ul", "ac-done"));
-        v.done.forEach(function (d) {
-          var li = put(ul, el("li"));
-          var lastEv = d.events && d.events.length ? d.events[d.events.length - 1] : null;
-          add(li, el("b", "", d.name), el("span", "", " · " + d.state + " · " + dur(d.seconds) + " · " + money(d.cost) + " · " + d.model + (d.effort ? " · " + d.effort : "")));
-          if (lastEv) add(li, el("div", lastEv.key.indexOf("editor-test-ok") === 0 ? "ok-text" : "muted", "→ " + lastEv.text));
-          if (d.summary) add(li, el("div", "muted", d.summary));
+      if (!v.done_count) return;
+      var head = put(doneBox, el("div", "ac-fold"));
+      var btn = el("button", "", showDone ? "Thu gọn" : "Hiện");
+      btn.type = "button";
+      btn.setAttribute("aria-expanded", showDone ? "true" : "false");
+      btn.addEventListener("click", function () {
+        showDone = !showDone;
+        if (showDone) refresh(); else render(last, true);      // mở: tải danh sách; thu gọn: không tải gì
+      });
+      add(head, el("b", "", "Xong hôm nay (" + v.done_count + ")"), btn);
+      if (!showDone) return;
+      if (!v.done.length) { add(doneBox, el("p", "muted", "Đang tải…")); return; }
+      var ul = put(doneBox, el("ul", "ac-done"));
+      v.done.forEach(function (d) {
+        var key = "done:" + d.id;
+        var li = put(ul, el("li"));
+        var lastEv = d.events && d.events.length ? d.events[d.events.length - 1] : null;
+        var ok = lastEv && lastEv.key.indexOf("editor-test-ok") === 0;
+        add(li, el("span", "", open[key] ? "▾ " : "▸ "), el("b", "", d.name),
+          el("span", "", " · " + d.state + " · " + dur(d.seconds) + " · " + money(d.cost) + " · " + d.model + (d.effort ? " · " + d.effort : "")),
+          lastEv ? el("span", ok ? "ok-text" : "muted", " · " + lastEv.text) : null);
+        li.addEventListener("click", function (e) {
+          if (e.target.closest && e.target.closest(".ac-more")) return;      // chọn chữ trong phần mở không đóng nó
+          open[key] = !open[key];
+          render(last, true);
         });
-      }
+        if (open[key]) {
+          var more = put(li, el("div", "ac-more"));
+          add(more, el("div", "muted", "id: " + d.id));
+          if (d.summary) add(more, el("div", "", d.summary));
+          if (d.events && d.events.length) {
+            var ol = put(more, el("ol"));
+            d.events.forEach(function (e) { add(ol, el("li", "", e.text + " · " + dur(now - e.at) + " trước")); });
+          }
+        }
+      });
     };
 
     var last = null;
     var refresh = function () {
-      return get("/api/activity").then(function (v) { last = v; msgBox.textContent = ""; render(v); },
+      return get("/api/activity" + (showDone ? "?done=1" : "")).then(function (v) { last = v; msgBox.textContent = ""; render(v); },
         function (e) { msgBox.className = "bad-text"; msgBox.textContent = "Không tải được: " + e.message; });
     };
     refresh();

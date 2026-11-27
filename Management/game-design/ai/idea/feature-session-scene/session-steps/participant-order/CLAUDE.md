@@ -3,7 +3,7 @@
 Dữ liệu cốt lõi: [data.md](data.md)
 
 ## Làm gì
-- Scene Loading: danh sách gồm `feature-scene-flow` (view màn Loading, `feature-scene-flow/scene-list/boot-loading`).
+- Scene Loading: danh sách gồm `feature-cheat-panel` (nút cheat, có ở mọi scene) rồi `feature-scene-flow` (view màn Loading, `feature-scene-flow/scene-list/boot-loading`).
 - Scene Game: danh sách theo thứ tự dưới đây. Tải và chạy từ đầu tới cuối danh sách; huỷ từ cuối về đầu.
 
 | # | Feature | Vì sao đứng ở đây |
@@ -22,7 +22,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 | 12 | `feature-hud-upgrade` | Thanh nâng cấp; cần upgrade, wallet |
 | 13 | `feature-popup-lose` | Popup thua; cần popup, run |
 | 14 | `feature-popup-rating` | Popup mời đánh giá; cần popup, run; đứng sau popup thua vì lời mời mở chồng lên popup thua |
-| 15 | `feature-scene-flow` | Luôn cuối: đặt Game làm scene chính lúc tải; lúc chạy mở cổng báo scene Loading bỏ lớp che (mọi feature trước đã chạy xong); phiên lỗi thì báo tên feature lỗi cho màn Loading. Không view, không tải |
+| 15 | `feature-cheat-panel` | Nút và panel cheat; đứng sau mọi feature có cheat để gom state của chúng, trước scene-flow để nút đã có khi scene Loading bỏ lớp che. Không có gì khi config cheat tắt |
+| 16 | `feature-scene-flow` | Luôn cuối: đặt Game làm scene chính lúc tải; lúc chạy mở cổng báo scene Loading bỏ lớp che (mọi feature trước đã chạy xong); phiên lỗi thì báo tên feature lỗi cho màn Loading. Không view, không tải |
 
 - Bước tải: lần lượt từng feature, feature sau bắt đầu tải khi feature trước xong. Báo tiến độ sau mỗi feature (thanh tiến độ của màn Loading).
 - Bước chạy: lần lượt từng feature tạo view; cả bước xong trong một khung hình.
@@ -31,8 +32,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 ## Thông số
 | Thông số | Giá trị | Đơn vị | Lí do |
 |---|---|---|---|
-| Số feature tham gia scene Loading | 1 | feature | Chỉ có màn Loading |
-| Số feature tham gia scene Game | 15 | feature | Mọi feature có view hoặc cần tải ở mức đang chơi được, cộng `feature-sim-clock` (nhịp chung) và `feature-scene-flow` (cổng báo scene Loading); trừ `feature-session-scene` (chính dịch vụ phiên), `feature-balance` |
+| Số feature tham gia scene Loading | 2 | feature | Nút cheat và màn Loading |
+| Số feature tham gia scene Game | 16 | feature | Mọi feature có view hoặc cần tải ở mức đang chơi được, cộng `feature-sim-clock` (nhịp chung), `feature-cheat-panel` (nút cheat ở mọi scene) và `feature-scene-flow` (cổng báo scene Loading); trừ `feature-session-scene` (chính dịch vụ phiên), `feature-balance` |
 | Thời gian tải tối đa một feature | 10 (dự kiến) | giây | Đủ rộng cho máy yếu; quá mức này gần như chắc là lỗi |
 | Thời gian bước chạy cả scene | 1 | khung hình | Không tải gì thêm ở bước chạy |
 | Thời gian bước huỷ cả scene | không giới hạn, không chờ tải | — | Huỷ chỉ dọn, không chờ mạng hay file |
@@ -43,7 +44,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 |---|---|---|---|
 | Cách tải các feature | Lần lượt | Lần lượt | Lần lượt (xét tải song song nếu quá 3 giây) |
 | Thời gian tải tối đa một feature | 10 giây (dự kiến) | 10 giây | 10 giây |
-| Số feature scene Game | 15: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, popup-rating, scene-flow | 19: sim-clock vẫn đầu; thêm `feature-combat` (trước hero, enemy, castle là bên ra đòn; chờ installer), và sau popup-rating theo thứ tự home, team-select (cần run, hero), game-flow; scene-flow vẫn cuối | Theo danh sách feature lúc đó |
+| Số feature scene Game | 16: sim-clock, popup, run, wallet, battlefield, enemy, hero, castle, wave, upgrade, hud, hud-upgrade, popup-lose, popup-rating, cheat-panel, scene-flow | 20: sim-clock vẫn đầu; thêm `feature-combat` (trước hero, enemy, castle là bên ra đòn; chờ installer), và sau popup-rating theo thứ tự home, team-select (cần run, hero), game-flow; cheat-panel ngay trước scene-flow, scene-flow vẫn cuối | Theo danh sách feature lúc đó |
 
 ## Trường hợp biên
 - **Feature thứ k tải lỗi**: không tải feature k+1 trở đi; huỷ feature k (phần đã tải được) rồi k-1 về 1; báo lỗi nêu tên feature k.
@@ -67,6 +68,8 @@ Dữ liệu cốt lõi: [data.md](data.md)
 - **Lỗi tải, chạy thì dừng; lỗi huỷ thì đi tiếp.** Tải thiếu là chơi sai; huỷ dở là rò rỉ.
 - **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ popup-pause, ads, popup-revive khỏi danh sách scene Game ở PROTOTYPE; số feature PROTOTYPE từ 21 còn 18.
 - **Thêm `feature-popup-rating` (2026-11-27, người quyết).** Popup mời đánh giá thuộc IDEA, mở chồng lên popup thua, nên đứng ngay sau `feature-popup-lose`; scene Game từ 14 thành 15 feature, PROTOTYPE từ 18 thành 19. Khớp với Boot.Game và BootTests @CodeLead đã nối.
+
+- **Thêm `feature-cheat-panel` vào scene Loading và scene Game, ngay trước `feature-scene-flow` (2026-11-27, theo @CodeLead).** Thiết kế đã chốt của cheat-panel nói nút cheat có ở mọi scene; code đã nối CheatPanelInstaller vào Boot.Loading và Boot.Game ngay trước SceneFlow. Đứng sau mọi feature có cheat để gom state của chúng; scene-flow vẫn cuối để cổng chỉ mở khi nút đã có. Loading từ 1 thành 2, Game IDEA từ 15 thành 16, PROTOTYPE từ 19 thành 20. Đã loại: để cheat-panel ngoài phiên (nút không theo vòng đời scene, huỷ scene không dọn nút).
 
 ## Chưa rõ
 - Không còn điểm chặn về thứ tự enemy, hero, castle (đã chốt theo phụ thuộc trong code, 2026-11-25).
