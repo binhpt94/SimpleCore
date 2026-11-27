@@ -166,7 +166,7 @@
    "at": "2026-11-26 01:18:14"
   },
   "stage-idea": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "EnemyIdeaStageTests.At_IDEA_a_defeated_enemy_leaves_the_field_at_once_and_shrinks_away_in_0_3s",
@@ -178,8 +178,8 @@
    "hash": "11d6d11e660c",
    "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Loại có chỉ số: Lính, Sói, Khổng lồ\n- Hệ số đợt: 1 + 0.10×(đợt-1)\n- Bị hạ: thu nhỏ 0.3s",
    "title": "Thông số của giai đoạn IDEA",
-   "by": "Enemy",
-   "at": "2026-11-27 15:10:20"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:21:01"
   }
  },
  "log": [
@@ -420,6 +420,13 @@
    "state": "done",
    "by": "Enemy",
    "note": "EnemyIdeaStageTests.At_IDEA_a_defeated_enemy_leaves_the_field_at_once_and_shrinks_away_in_0_3s, EnemyIdeaStageTests.At_IDEA_an_enemy_spawns_with_full_base_health, EnemyIdeaStageTests.At_IDEA_each_type_in_the_game_has_its_base_stats, EnemyIdeaStageTests.At_IDEA_health_and_damage_grow_by_the_wave_scale"
+  },
+  {
+   "at": "2026-11-27 19:21:01",
+   "id": "stage-idea",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

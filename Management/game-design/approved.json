@@ -146,13 +146,13 @@
    "by": "tự duyệt (Full Auto)"
   },
   "feature-combat/combat-tick": {
-   "hash": "3aa338449b97954cfd8c44a70a261f5d74f46cf1",
-   "at": "2026-11-27 00:12:35",
-   "by": "người (Sync)"
+   "hash": "b9bf399866e43f3c81659889f12a434b3a6c266a",
+   "at": "2026-11-27 19:26:24",
+   "by": "tự duyệt (Full Auto)"
   },
   "feature-combat/combat-tick/tick-values": {
-   "hash": "7cf3b327bdc34c6882f782fd2e710ee462483b81",
-   "at": "2026-11-27 09:07:59",
+   "hash": "00902c40b128516ea22104c0e82d80f13de80100",
+   "at": "2026-11-27 19:26:24",
    "by": "tự duyệt (Full Auto)"
   },
   "feature-enemy": {

@@ -30,7 +30,7 @@
    "at": "2026-11-25 12:02:39"
   },
   "castle-destroyed-once": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleAutoShotTests.Castle_does_not_shoot_after_it_fell",
@@ -42,11 +42,11 @@
    "hash": "90d3480912c4",
    "text": "Máu hiện tại nhỏ hơn hoặc bằng 0 thì thành bị phá, báo `feature-run` đúng 1 lần\nSau khi bị phá, thành không nhận thêm sát thương, không tự bắn, không cho dùng kĩ năng, cho tới hết lượt. Nhiều đòn cùng lúc đưa máu xuống dưới 0 vẫn chỉ báo 1 lần; máu hiện ra là 0, không âm.",
    "title": "Máu hiện tại nhỏ hơn hoặc bằng 0 thì thành bị phá, báo `feature-run` đúng 1 lần",
-   "by": "Castle",
-   "at": "2026-11-27 18:59:31"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:08:06"
   },
   "castle-hit-feedback": {
-   "state": "done",
+   "state": "verified",
    "note": "Sửa lỗi hình thu nhỏ khi thành vỡ đứng lại ở bước ReviveOffer và Ending",
    "tests": [
     "CastleSessionTests.Enemy_hit_flashes_the_castle_and_its_fall_collapses_it",
@@ -57,8 +57,8 @@
    "hash": "596acd6245c9",
    "text": "Thành bị đánh thì nháy 0.1s; bị phá thì thu nhỏ còn 0 trong 0.5s\nNgười chơi thấy ngay thành đang bị đánh dù không nhìn thanh máu. Nháy nhiều đòn liên tiếp thì đặt lại 0.1s, không cộng dồn.",
    "title": "Thành bị đánh thì nháy 0.1s; bị phá thì thu nhỏ còn 0 trong 0.5s",
-   "by": "Castle",
-   "at": "2026-11-27 18:59:31"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:08:07"
   },
   "edge-nhieu-quai-danh-trung-cung-mot-khung-hinh": {
    "state": "verified",
@@ -128,7 +128,7 @@
    "at": "2026-11-25 12:02:39"
   },
   "params": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleConfigTests.Castle_body_numbers_match_the_design"
@@ -137,11 +137,11 @@
    "hash": "75bf075a9c45",
    "text": "## Làm gì\n- Đặt một thành 2D đứng yên ở giữa dải đất, chân trên mặt đất (y=0).\n- Giữ máu tối đa và máu hiện tại; nhận sát thương từ quái; báo `feature-run` khi bị phá.\n- Cho `feature-hero/hero-respawn` biết điểm xuất phát của từng chỗ trong đội.\n- Nhận lệnh \"tăng máu\" từ `feature-castle/castle-upgrade-effects` (cộng vào cả máu tối đa và máu hiện tại).\n\n## Thông số\n| Thông số | Giá trị | Đơn vị | Lí do |\n|---|---|---|---|\n| Tâm thành | x=0 | u | Thành ở giữa màn hình (màn thấy x=-16u tới +16u) |\n| Kích thước | rộng 3 × cao 4 | u | Bộ số chung; đủ lớn để nhận ra giữa các unit cao 0.8-3.5u |\n| Mép thành | x=-1.5 và x=+1.5 | u | Mọi tầm tính từ đây |\n| Máu tối đa lúc vào trận | 1000 | máu | Dự kiến; xem cân bằng ở \"Chưa rõ\" |\n| Tự hồi | 0 | máu/s | Luật vòng 3 |\n| Điểm xuất phát chỗ 1, 2, 3 | -1.5 / +1.5 / -1.5 | x (u) | Chia hai bên, không chồng toàn bộ |\n| Nháy khi bị đánh | 0.1 | s | Đủ thấy, không nhấp nháy liên tục khó chịu |\n| Thu nhỏ khi bị phá | 0.5 | s | Cho người chơi thấy khoảnh khắc thua trước khi `feature-run` báo |\n\nCân bằng dự kiến: đợt 10 có 26 quái, Lính 40×1.9=76 máu, 5×1.9=9.5 sát thương/1.0s. 10 Lính đứng đánh thành cùng lúc trừ 95 máu/s, thành 1000 máu trụ khoảng 10.5s: đủ để người chơi kịp bấm Sấm sét và mua máu.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Máu tối đa lúc vào trận | 1000 | 1000 (chỉnh sau khi chơi thử) | theo số đã chỉnh |\n| Hình thành | 1 sprite gen bằng AI | 1 sprite, có hình khi máu dưới 50% | đủ hình theo mức máu (100%, 50%, 25%) |\n| Phản hồi bị đánh | nháy 0.1s | nháy 0.1s + rung nhẹ 0.1s | đủ hiệu ứng và âm thanh |\n| Phản hồi bị phá | thu nhỏ còn 0 trong 0.5s | như IDEA | hiệu ứng sụp đổ riêng |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "Castle",
-   "at": "2026-11-27 18:59:31"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:08:07"
   },
   "castle-hero-points": {
-   "state": "done",
+   "state": "verified",
    "note": "cho contract cua CodeLead: Castle dua diem xuat phat va hoi sinh cho Hero, dung sau khi choi duoc IDEA",
    "tests": [
     "CastleBodyTests.Heroes_start_and_revive_at_the_castle_edges_two_left_one_right",
@@ -152,8 +152,8 @@
    "hash": "fa4fa02ddee5",
    "text": "Hero xuất phát và hồi sinh ở mép thành: chỗ 1 và 3 ở x=-1.5u, chỗ 2 ở x=+1.5u\nChỗ theo thứ tự hero trong đội đã chọn ở `feature-team-select`. Hai hero ở bên trái, một bên phải; hero sẽ tự đi theo quái gần nhất nên chỗ đứng ban đầu chỉ để đội không chồng lên nhau. Đã loại: cả đội ở x=0 (chồng hình, khó đếm hero).",
    "title": "Hero xuất phát và hồi sinh ở mép thành: chỗ 1 và 3 ở x=-1.5u, chỗ 2 ở x=+1.5u",
-   "by": "Castle",
-   "at": "2026-11-27 18:59:16"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:08:06"
   },
   "castle-revive-30": {
    "state": "verified",
@@ -202,7 +202,7 @@
    "at": "2026-11-25 13:43:56"
   },
   "stage-prototype": {
-   "state": "done",
+   "state": "verified",
    "note": "Trỏ test cột PROTOTYPE: 1000 máu, hình dưới 50 phần trăm, nháy và rung 0.1s, hồi sinh 30 phần trăm",
    "tests": [
     "CastleConfigTests.Castle_body_prototype_numbers_shake_a_tenth_of_a_second_and_show_damage_under_half_health",
@@ -213,11 +213,11 @@
    "hash": "385ffe546309",
    "text": "Cột PROTOTYPE của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Máu tối đa lúc vào trận: 1000 (chỉnh sau khi chơi thử)\n- Hình thành: 1 sprite, có hình khi máu dưới 50%\n- Phản hồi bị đánh: nháy 0.1s + rung nhẹ 0.1s",
    "title": "Thông số của giai đoạn PROTOTYPE",
-   "by": "Castle",
-   "at": "2026-11-27 18:59:31"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:08:07"
   },
   "stage-idea": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleConfigTests.Castle_body_idea_stage_is_1000_health_a_tenth_second_flash_and_a_half_second_shrink"
@@ -226,8 +226,8 @@
    "hash": "81064246b88b",
    "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Máu tối đa lúc vào trận: 1000\n- Hình thành: 1 sprite gen bằng AI\n- Phản hồi bị đánh: nháy 0.1s\n- Phản hồi bị phá: thu nhỏ còn 0 trong 0.5s",
    "title": "Thông số của giai đoạn IDEA",
-   "by": "Castle",
-   "at": "2026-11-27 18:59:31"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:08:07"
   }
  },
  "log": [
@@ -608,6 +608,48 @@
    "state": "done",
    "by": "Castle",
    "note": "CastleConfigTests.Castle_body_prototype_numbers_shake_a_tenth_of_a_second_and_show_damage_under_half_health, CastleSessionTests.Castle_shows_its_damaged_picture_under_half_health, CastleSessionTests.Hit_flashes_and_shakes_the_castle_lightly_for_a_tenth_of_a_second"
+  },
+  {
+   "at": "2026-11-27 19:08:06",
+   "id": "castle-destroyed-once",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:08:06",
+   "id": "castle-hero-points",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:08:07",
+   "id": "castle-hit-feedback",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:08:07",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:08:07",
+   "id": "stage-idea",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:08:07",
+   "id": "stage-prototype",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

@@ -11,7 +11,7 @@ Dữ liệu cốt lõi: [data.md](data.md)
 Bảng `TickParams` trong `.excel/` (loại `params`, chuyển từ bảng markdown cũ ngày 2026-11-25, giữ nguyên số trừ bước cập nhật): `combat_enabled`, `step_seconds`, `max_steps_per_frame`, `damage_rounding`, `lightning_hits`, `kill_reward_times`. Bước và trần lấy từ nhịp chung của `feature-sim-clock`; Sấm sét theo `feature-castle/castle-skills/skill-values`; nhịp đòn nhanh nhất theo `feature-hero/hero-list/hero-roster-values`.
 
 ## Thông số theo giai đoạn
-Ba cột `idea`, `prototype`, `full` của bảng `TickParams`. IDEA không có giao chiến (mỗi bên trừ máu ngay khi trúng); từ PROTOTYPE mỗi bước nhịp chung chạy một nhịp giao chiến.
+Ba cột `idea`, `prototype`, `full` của bảng `TickParams`. Từ IDEA mỗi bước nhịp chung chạy một nhịp giao chiến (người quyết 2026-11-27: giao chiến thuộc IDEA); PROTOTYPE và FULL giữ như IDEA.
 
 ## Trường hợp biên
 - **Hero và quái kết liễu nhau cùng nhịp:** cả hai hết máu; hero gục, quái bị hạ, quái vẫn cho tiền.

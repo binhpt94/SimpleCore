@@ -1,0 +1,14 @@
+{
+ "id": "b20261127-d028",
+ "text": "Cảnh báo biên dịch CS0108: EnemyStageView.DestroyObject che hàm Object.DestroyObject ở EnemyStageView.cs dòng 307. Mong: đổi tên hàm, không còn cảnh báo",
+ "features": [
+  "Enemy"
+ ],
+ "source": "@CodeLead",
+ "seen": "console khi biên dịch",
+ "state": "open",
+ "message": "",
+ "note": "",
+ "created": 1795782193.9432967,
+ "closed": 0
+}

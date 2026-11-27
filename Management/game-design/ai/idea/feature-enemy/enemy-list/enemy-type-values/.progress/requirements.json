@@ -135,8 +135,8 @@
    "at": "2026-11-26 01:18:14"
   },
   "stage-idea": {
-   "state": "done",
-   "note": "",
+   "state": "verified",
+   "note": "Việc art vừa bỏ trường Sprite khỏi _looks của EnemyStage, nhưng test EnemyIdeaStageTests.At_IDEA_each_type_in_the_game_is_drawn_with_its_own_sprite vẫn đọc look.FindPropertyRelative Sprite ở EnemyIdeaStageTests.cs dòng 193, nên hỏng NullReferenceException cho Soldier, Wolf, Giant. Viết lại test theo cách mới: mỗi loại có key art riêng Enemy/soldier, wolf, giant, và với catalog chứa Simple thì view nhận đúng sprite riêng của loại đó, không loại nào dùng chung sprite. Không đổi hành vi khác, chỉ Enemy.",
    "tests": [
     "EnemyIdeaStageTests.At_IDEA_asking_for_an_archer_or_a_boss_fails_naming_it_and_spawns_nothing",
     "EnemyIdeaStageTests.At_IDEA_each_type_in_the_game_is_drawn_with_its_own_sprite",
@@ -146,8 +146,8 @@
    "hash": "6b2d8a5e052a",
    "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Loại có trong game (có hình, sinh được): Lính, Sói, Khổng lồ\n- Hình: 1 sprite mỗi loại, anim bằng move/scale/nháy",
    "title": "Thông số của giai đoạn IDEA",
-   "by": "Enemy",
-   "at": "2026-11-27 15:10:20"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:22:14"
   }
  },
  "log": [
@@ -367,6 +367,27 @@
    "state": "done",
    "by": "Enemy",
    "note": "EnemyIdeaStageTests.At_IDEA_asking_for_an_archer_or_a_boss_fails_naming_it_and_spawns_nothing, EnemyIdeaStageTests.At_IDEA_each_type_in_the_game_is_drawn_with_its_own_sprite, EnemyIdeaStageTests.At_IDEA_soldier_wolf_and_giant_are_in_the_game_and_can_be_spawned"
+  },
+  {
+   "at": "2026-11-27 19:20:15",
+   "id": "stage-idea",
+   "state": "rejected",
+   "by": "@CodeLead",
+   "note": "Việc art vừa bỏ trường Sprite khỏi _looks của EnemyStage, nhưng test EnemyIdeaStageTests.At_IDEA_each_type_in_the_game_is_drawn_with_its_own_sprite vẫn đọc look.FindPropertyRelative Sprite ở EnemyIdeaStageTests.cs dòng 193, nên hỏng NullReferenceException cho Soldier, Wolf, Giant. Viết lại test theo cách mới: mỗi loại có key art riêng Enemy/soldier, wolf, giant, và với catalog chứa Simple thì view nhận đúng sprite riêng của loại đó, không loại nào dùng chung sprite. Không đổi hành vi khác, chỉ Enemy."
+  },
+  {
+   "at": "2026-11-27 19:22:03",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Enemy",
+   "note": "EnemyIdeaStageTests.At_IDEA_asking_for_an_archer_or_a_boss_fails_naming_it_and_spawns_nothing, EnemyIdeaStageTests.At_IDEA_each_type_in_the_game_is_drawn_with_its_own_sprite, EnemyIdeaStageTests.At_IDEA_soldier_wolf_and_giant_are_in_the_game_and_can_be_spawned"
+  },
+  {
+   "at": "2026-11-27 19:22:14",
+   "id": "stage-idea",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

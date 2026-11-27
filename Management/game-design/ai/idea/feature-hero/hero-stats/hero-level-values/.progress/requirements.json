@@ -209,7 +209,7 @@
    "at": "2026-11-26 01:18:15"
   },
   "stage-idea": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "HeroStageIdeaTests.At_idea_a_level_up_pops_the_hero_to_1_2_times_and_back_in_0_3s",
@@ -221,8 +221,8 @@
    "hash": "1948d4726ba7",
    "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Máu, sát thương mỗi cấp: +15% lv1\n- Tốc độ đánh mỗi cấp: +3%, trần 60%\n- Phản hồi lên cấp: hero phóng to 1.2 lần rồi về trong 0.3s\n- Hình đạn đòn xa: 1 sprite bay thẳng 0.15s",
    "title": "Thông số của giai đoạn IDEA",
-   "by": "Hero",
-   "at": "2026-11-27 16:08:44"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:21:37"
   }
  },
  "log": [
@@ -470,6 +470,13 @@
    "state": "done",
    "by": "Hero",
    "note": "HeroStageIdeaTests.At_idea_a_level_up_pops_the_hero_to_1_2_times_and_back_in_0_3s, HeroStageIdeaTests.At_idea_a_ranged_hit_shows_one_sprite_flying_straight_from_the_hero_to_the_target_in_0_15s, HeroStageIdeaTests.At_idea_each_level_adds_15_percent_of_level_1_health_and_damage, HeroStageIdeaTests.At_idea_each_level_adds_3_percent_attack_speed_up_to_60_percent"
+  },
+  {
+   "at": "2026-11-27 19:21:37",
+   "id": "stage-idea",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

@@ -26,7 +26,7 @@ Các bước của một nhịp:
 - Giao chiến không giữ máu hay chỉ số.
 
 ## Đã tự quyết
-- **Ở IDEA không có giao chiến (độ quan trọng 6).** Mỗi bên tự trừ máu ngay khi trúng theo luật của nhánh chỉ số hero; kết quả khác nhau chỉ ở đòn trùng đúng một bước, hiếm ở nhịp game này.
+- **Giao chiến thuộc IDEA (độ quan trọng 8, người quyết 2026-11-27).** Code IDEA của quái và hero trừ máu qua giao chiến, nên thiếu nó thì trận ở IDEA không chạy.
 - **Băng giá, Cổ vũ không đi qua giao chiến.** Chúng không trừ máu.
 - **Bỏ tạm dừng, quảng cáo và popup hồi sinh (2026-11-26, người quyết).** Bỏ luật "tạm dừng: không có nhịp nào chạy".
 

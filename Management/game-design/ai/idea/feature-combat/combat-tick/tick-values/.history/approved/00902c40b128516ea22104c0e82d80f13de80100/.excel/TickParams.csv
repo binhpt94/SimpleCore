@@ -1,0 +1,9 @@
+index,key,name,unit,idea,prototype,full,reason
+int,string,string,string,string,string,string,string
+Số thứ tự,Mã thông số,Tên thông số,Đơn vị,Giá trị ở IDEA,Giá trị ở PROTOTYPE,Giá trị ở FULL,Lí do
+1,combat_enabled,Có giao chiến,,có: mỗi bước nhịp chung một nhịp,như IDEA,như IDEA,Người quyết 2026-11-27: giao chiến thuộc IDEA vì quái và hero ở IDEA cần nó
+2,step_seconds,Bước cập nhật,giây,0.025 (theo nhịp chung),như IDEA,như IDEA,Người yêu cầu nhịp chung 40 lần mỗi giây; giữ ở feature-sim-clock/clock-step/clock-values; nhịp đòn nhanh nhất 0.7 giây (Kiếm khách ở feature-hero/hero-list/hero-roster-values) nên đủ mịn
+3,max_steps_per_frame,Số bước tối đa trong một khung hình,bước,theo nhịp chung,theo nhịp chung,như PROTOTYPE,Giữ ở feature-sim-clock; giao chiến không có trần riêng
+4,damage_rounding,Làm tròn sát thương,,không,như IDEA,như IDEA,Hệ số đợt cho số lẻ
+5,lightning_hits,Đòn Sấm sét,đòn,một đòn mỗi quái trong vùng,như IDEA,như IDEA,Theo feature-castle/castle-skills/skill-values
+6,kill_reward_times,Tiền khi hạ quái,lần,một lần mỗi quái,như IDEA,như IDEA,Dù nhiều bên cùng hạ

@@ -163,7 +163,7 @@
    "at": "2026-11-25 12:02:39"
   },
   "edge-thanh-da-bi-pha": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleSessionTests.Fallen_castle_does_not_pop_on_a_level",
@@ -173,11 +173,11 @@
    "hash": "c60aa5398fb7",
    "text": "Thành đã bị phá: không nhận lệnh mua (`feature-upgrade` chặn).",
    "title": "Thành đã bị phá",
-   "by": "Castle",
-   "at": "2026-11-27 18:59:31"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:08:07"
   },
   "stage-idea": {
-   "state": "done",
+   "state": "verified",
    "note": "",
    "tests": [
     "CastleConfigTests.Upgrade_idea_stage_sells_three_items_150_health_a_fifth_attack_a_fifth_skills_and_pops_1_1_for_0_3s"
@@ -186,8 +186,8 @@
    "hash": "a4d6580c01b3",
    "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Mục mua được: Máu, Sức đánh, Kĩ năng\n- Máu mỗi cấp: +150\n- Sức đánh mỗi cấp: +20% lv1\n- Kĩ năng mỗi cấp: +20% hiệu lực lv1\n- Phản hồi khi lên cấp: thành phóng to 1.1 lần rồi về cỡ cũ trong 0.3s",
    "title": "Thông số của giai đoạn IDEA",
-   "by": "Castle",
-   "at": "2026-11-27 18:59:31"
+   "by": "@CodeLead",
+   "at": "2026-11-27 19:08:07"
   }
  },
  "log": [
@@ -386,6 +386,20 @@
    "state": "done",
    "by": "Castle",
    "note": "CastleConfigTests.Upgrade_idea_stage_sells_three_items_150_health_a_fifth_attack_a_fifth_skills_and_pops_1_1_for_0_3s"
+  },
+  {
+   "at": "2026-11-27 19:08:07",
+   "id": "edge-thanh-da-bi-pha",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:08:07",
+   "id": "stage-idea",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
   }
  ]
 }

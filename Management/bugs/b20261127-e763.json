@@ -1,0 +1,14 @@
+{
+ "id": "b20261127-e763",
+ "text": "Test CheatPanelTests.StateRowWithAThreeLineTitle_GrowsToFitTheText_NotCutNorShrunk hỏng ổn định: chiều cao nhãn 215 trong khi preferredHeight của TMP là 688. Test chỉ dùng đồ giả, không do đổi stage. Mong: test qua, hoặc dòng cheat có tiêu đề dài giãn theo chữ",
+ "features": [
+  "CheatPanel"
+ ],
+ "source": "@CodeLead",
+ "seen": "EditMode toàn project 2026-11-27, hai lần chạy liền",
+ "state": "open",
+ "message": "",
+ "note": "",
+ "created": 1795782812.1180599,
+ "closed": 0
+}

@@ -84,11 +84,11 @@
     "CombatLoopTests.TickTakesTheStepLengthOfTheSharedClock"
    ],
    "play": "",
-   "hash": "888144a03e10",
-   "text": "## Làm gì\n- Mỗi bước nhịp chung của trận (0.025 giây, theo `feature-sim-clock`): chạy một nhịp theo thứ tự ở `tick-order`.\n- Nhận đòn trúng từ hero, quái, thành (đòn tự bắn, Sấm sét), lọc theo trạng thái đầu nhịp, cộng theo bên trúng.\n- Chuyển tổng cho feature sở hữu; chờ mọi bên trừ máu và báo xong; báo nhịp xong cho `feature-wave` và `feature-run`.\n\n## Thông số\nBảng `TickParams` trong `.excel/` (loại `params`, chuyển từ bảng markdown cũ ngày 2026-11-25, giữ nguyên số trừ bước cập nhật): `combat_enabled`, `step_seconds`, `max_steps_per_frame`, `damage_rounding`, `lightning_hits`, `kill_reward_times`. Bước và trần lấy từ nhịp chung của `feature-sim-clock`; Sấm sét theo `feature-castle/castle-skills/skill-values`; nhịp đòn nhanh nhất theo `feature-hero/hero-list/hero-roster-values`.\n\n## Thông số theo giai đoạn\nBa cột `idea`, `prototype`, `full` của bảng `TickParams`. IDEA không có giao chiến (mỗi bên trừ máu ngay khi trúng); từ PROTOTYPE mỗi bước nhịp chung chạy một nhịp giao chiến.",
+   "hash": "97ec97570caa",
+   "text": "## Làm gì\n- Mỗi bước nhịp chung của trận (0.025 giây, theo `feature-sim-clock`): chạy một nhịp theo thứ tự ở `tick-order`.\n- Nhận đòn trúng từ hero, quái, thành (đòn tự bắn, Sấm sét), lọc theo trạng thái đầu nhịp, cộng theo bên trúng.\n- Chuyển tổng cho feature sở hữu; chờ mọi bên trừ máu và báo xong; báo nhịp xong cho `feature-wave` và `feature-run`.\n\n## Thông số\nBảng `TickParams` trong `.excel/` (loại `params`, chuyển từ bảng markdown cũ ngày 2026-11-25, giữ nguyên số trừ bước cập nhật): `combat_enabled`, `step_seconds`, `max_steps_per_frame`, `damage_rounding`, `lightning_hits`, `kill_reward_times`. Bước và trần lấy từ nhịp chung của `feature-sim-clock`; Sấm sét theo `feature-castle/castle-skills/skill-values`; nhịp đòn nhanh nhất theo `feature-hero/hero-list/hero-roster-values`.\n\n## Thông số theo giai đoạn\nBa cột `idea`, `prototype`, `full` của bảng `TickParams`. Từ IDEA mỗi bước nhịp chung chạy một nhịp giao chiến (người quyết 2026-11-27: giao chiến thuộc IDEA); PROTOTYPE và FULL giữ như IDEA.",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
    "by": "@CodeLead",
-   "at": "2026-11-25 23:56:00"
+   "at": "2026-11-27 19:29:44"
   },
   "skill-is-hit": {
    "state": "verified",
@@ -136,11 +136,11 @@
     "CombatTickTests.CastleAndLastEnemyFallingTogetherAreReportedOnlyAfterBothTookHealth"
    ],
    "play": "",
-   "hash": "c972296dbd9c",
-   "text": "**Thành và con quái cuối cùng hết máu cùng nhịp:** thành bị phá xét trước; luồng hồi sinh giữ tin dọn sạch.",
+   "hash": "a8cafc7035e0",
+   "text": "**Thành và con quái cuối cùng hết máu cùng nhịp:** thành bị phá xét trước; tin dọn sạch bị bỏ.",
    "title": "Thành và con quái cuối cùng hết máu cùng nhịp",
    "by": "@CodeLead",
-   "at": "2026-11-25 13:46:40"
+   "at": "2026-11-27 19:29:44"
   },
   "edge-co-vu-hoi-mau-cung-nhip-hero-nhan": {
    "state": "verified",
@@ -162,11 +162,11 @@
     "TickParamsTests.CombatEnabled_EverySharedStepRunsOneCombatTickThatSettlesItsHitsTogether"
    ],
    "play": "",
-   "hash": "bd8ce4d687a4",
-   "text": "Bảng TickParams (params), dòng combat_enabled\nkey (string): combat_enabled\nname (string): Có giao chiến\nunit (string): \nidea (string): không: mỗi bên trừ máu ngay khi trúng\nprototype (string): có: mỗi bước nhịp chung một nhịp\nfull (string): như PROTOTYPE\nreason (string): Ở IDEA đòn trùng đúng một bước hiếm",
+   "hash": "60f75ff6b6a4",
+   "text": "Bảng TickParams (params), dòng combat_enabled\nkey (string): combat_enabled\nname (string): Có giao chiến\nunit (string): \nidea (string): có: mỗi bước nhịp chung một nhịp\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người quyết 2026-11-27: giao chiến thuộc IDEA vì quái và hero ở IDEA cần nó",
    "title": "TickParams: Có giao chiến (combat_enabled)",
    "by": "@CodeLead",
-   "at": "2026-11-26 00:29:50"
+   "at": "2026-11-27 19:29:44"
   },
   "tickparams-step-seconds": {
    "state": "verified",
@@ -175,11 +175,11 @@
     "TickParamsTests.StepSeconds_TickIsAsLongAsTheSharedStepOfOneFortiethOfASecond"
    ],
    "play": "",
-   "hash": "3ff978bfec52",
-   "text": "Bảng TickParams (params), dòng step_seconds\nkey (string): step_seconds\nname (string): Bước cập nhật\nunit (string): giây\nidea (string): theo nhịp chung\nprototype (string): 0.025 (theo nhịp chung)\nfull (string): như PROTOTYPE\nreason (string): Người yêu cầu nhịp chung 40 lần mỗi giây; giữ ở feature-sim-clock/clock-step/clock-values; nhịp đòn nhanh nhất 0.7 giây (Kiếm khách ở feature-hero/hero-list/hero-roster-values) nên đủ mịn",
+   "hash": "9c046521ea4f",
+   "text": "Bảng TickParams (params), dòng step_seconds\nkey (string): step_seconds\nname (string): Bước cập nhật\nunit (string): giây\nidea (string): 0.025 (theo nhịp chung)\nprototype (string): như IDEA\nfull (string): như IDEA\nreason (string): Người yêu cầu nhịp chung 40 lần mỗi giây; giữ ở feature-sim-clock/clock-step/clock-values; nhịp đòn nhanh nhất 0.7 giây (Kiếm khách ở feature-hero/hero-list/hero-roster-values) nên đủ mịn",
    "title": "TickParams: Bước cập nhật (step_seconds)",
    "by": "@CodeLead",
-   "at": "2026-11-26 00:10:34"
+   "at": "2026-11-27 19:29:44"
   },
   "tickparams-max-steps-per-frame": {
    "state": "verified",
@@ -658,6 +658,62 @@
   {
    "at": "2026-11-27 03:06:04",
    "id": "pause-no-tick",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:29:29",
+   "id": "edge-thanh-va-con-quai-cuoi-cung-het-mau",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatTickTests.CastleAndLastEnemyFallingTogetherAreReportedOnlyAfterBothTookHealth"
+  },
+  {
+   "at": "2026-11-27 19:29:29",
+   "id": "params",
+   "state": "done",
+   "by": "Combat",
+   "note": "CombatLoopTests.BattleRunsFortyTicksEachSecondOfTheSharedClock, CombatLoopTests.TickTakesTheStepLengthOfTheSharedClock"
+  },
+  {
+   "at": "2026-11-27 19:29:29",
+   "id": "tickparams-combat-enabled",
+   "state": "done",
+   "by": "Combat",
+   "note": "TickParamsTests.CombatEnabled_EverySharedStepRunsOneCombatTickThatSettlesItsHitsTogether"
+  },
+  {
+   "at": "2026-11-27 19:29:29",
+   "id": "tickparams-step-seconds",
+   "state": "done",
+   "by": "Combat",
+   "note": "TickParamsTests.StepSeconds_TickIsAsLongAsTheSharedStepOfOneFortiethOfASecond"
+  },
+  {
+   "at": "2026-11-27 19:29:44",
+   "id": "edge-thanh-va-con-quai-cuoi-cung-het-mau",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:29:44",
+   "id": "params",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:29:44",
+   "id": "tickparams-combat-enabled",
+   "state": "verified",
+   "by": "@CodeLead",
+   "note": ""
+  },
+  {
+   "at": "2026-11-27 19:29:44",
+   "id": "tickparams-step-seconds",
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
