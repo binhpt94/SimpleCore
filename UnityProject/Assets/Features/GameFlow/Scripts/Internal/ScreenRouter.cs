@@ -23,6 +23,7 @@ namespace Game.GameFlow
         private RunTeam _buildingTeam;
         private float _buildSeconds;
         private bool _appActive = true;
+        private bool _intoBattleAtStart;
 
         public ScreenRouter(RouteSettings settings, IMainScreens screens, ITeamSelectPanel teamSelect,
             IBattleBuilder builder, ITeamMemory memory, IFlowLog log)
@@ -54,6 +55,28 @@ namespace Game.GameFlow
 
             _homeShownOnce = true;
             SwitchTo(MainScreen.Home);
+        }
+
+        /// <summary>
+        /// Dev cheat (a state shown in battle): the scene is ready, and instead of the start screen the battle is built
+        /// at once for <paramref name="team"/>, with no start screen and no team select. Once per load, like
+        /// <see cref="SceneReady"/>. A failed build falls back to the start screen.
+        /// </summary>
+        public void SceneReadyIntoBattle(RunTeam team)
+        {
+            if (_homeShownOnce)
+            {
+                _log.Warning("GameFlow: scene ready reported again; ignored.");
+                return;
+            }
+
+            _homeShownOnce = true;
+            _locked = true;
+            _building = true;
+            _intoBattleAtStart = true;
+            _buildingTeam = team;
+            _buildSeconds = 0f;
+            _builder.Build(team);
         }
 
         /// <summary>Start screen: Play.</summary>
@@ -122,6 +145,7 @@ namespace Game.GameFlow
             }
 
             _building = false;
+            _intoBattleAtStart = false;
             _memory.Remember(_buildingTeam);
             SwitchTo(MainScreen.Battle);
         }
@@ -174,6 +198,14 @@ namespace Game.GameFlow
         {
             _building = false;
             _log.Warning(message);
+            if (_intoBattleAtStart)
+            {
+                // No team select was shown to carry the error: open on the start screen as a normal load would.
+                _intoBattleAtStart = false;
+                SwitchTo(MainScreen.Home);
+                return;
+            }
+
             _teamSelect.ShowBuildError(_settings.BuildFailedText);
             _teamSelect.SetEnterBattleEnabled(true);
             _locked = false;

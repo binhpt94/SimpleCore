@@ -323,6 +323,16 @@ namespace Game.HudUpgrade.Tests
         }
     }
 
+    /// <summary>Stand-in for the run's IRunCheatStart; records every request.</summary>
+    internal sealed class FakeCheatStart : IRunCheatStart
+    {
+        public readonly List<RunTeam> Requests = new List<RunTeam>();
+        public bool BattleRequested => Requests.Count > 0;
+        public RunTeam Team => Requests.Count > 0 ? Requests[Requests.Count - 1] : default;
+
+        public void RequestBattle(RunTeam team) => Requests.Add(team);
+    }
+
     /// <summary>Stand-in for Core's cheat selection; records every ReportRunning.</summary>
     internal sealed class FakeCheatSelection : ICheatSelection
     {

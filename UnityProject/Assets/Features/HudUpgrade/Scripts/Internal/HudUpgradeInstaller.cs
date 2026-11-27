@@ -44,6 +44,8 @@ namespace Game.HudUpgrade
                 cheat = new HudUpgradeParticipant.CheatSetup(cheatState, config.MixedButtonsCoins,
                     config.MixedButtonsLevels, registry.Resolve<IWalletBalance>(), registry.Resolve<IWalletIncome>(),
                     registry.Resolve<IWalletService>(), config.MixedButtonsTeam);
+                // Shown in battle: open straight in battle with the state's team, not on the start screen.
+                registry.Resolve<IRunCheatStart>().RequestBattle(new RunTeam(config.MixedButtonsTeam ?? Array.Empty<string>()));
                 cheats.ReportRunning(HudUpgradeCheats.KeyOf(cheatState));
             }
 #endif

@@ -12,7 +12,8 @@ namespace Game.Hud
     /// Wires the battle HUD: reads Castle, Wallet, Wave and Run through their contracts and joins the scene session.
     /// Install after SessionScene, Run, Castle, Wallet and Wave. Registers nothing (Hud has no contracts).
     /// Dev builds also need Core's ICheatSelection, and, only while building the mid-battle cheat state,
-    /// IWalletIncome, IWalletService, ICastleCheat and IWaveCheat. The cheat list half of this class is in
+    /// IWalletIncome, IWalletService, ICastleCheat, IWaveCheat and the run's IRunCheatStart (the state is shown in
+    /// battle, so it asks for the scene to open straight in battle). The cheat list half of this class is in
     /// Cheat/HudInstaller.Cheat.cs.
     /// </summary>
     [CreateAssetMenu(menuName = "Game/Hud/Installer", fileName = "HudInstaller")]
@@ -56,6 +57,8 @@ namespace Game.Hud
             {
                 cheat = new HudCheat(run, wallet, registry.Resolve<IWalletIncome>(), registry.Resolve<IWalletService>(),
                     skills, registry.Resolve<ICastleCheat>(), registry.Resolve<IWaveCheat>());
+                // Shown in battle: open straight in battle (run's default team), not on the start screen.
+                registry.Resolve<IRunCheatStart>().RequestBattle(default);
                 cheats.ReportRunning(HudCheats.KeyOf(state));
             }
             session.Join(new HudSession(new PrefabHudViewSpawner(viewPrefab), new UnityHudClock(),

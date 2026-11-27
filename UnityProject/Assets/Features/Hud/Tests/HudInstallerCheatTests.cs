@@ -20,7 +20,10 @@ namespace Game.Hud.Tests
             return installer;
         }
 
-        private static FakeRegistry FullRegistry(FakeCheatSelection cheats, out FakeSessionScene scene)
+        private static FakeRegistry FullRegistry(FakeCheatSelection cheats, out FakeSessionScene scene) =>
+            FullRegistry(cheats, new FakeCheatStart(), out scene);
+
+        private static FakeRegistry FullRegistry(FakeCheatSelection cheats, FakeCheatStart start, out FakeSessionScene scene)
         {
             scene = new FakeSessionScene();
             var castle = new FakeCastle();
@@ -39,18 +42,22 @@ namespace Game.Hud.Tests
             registry.Register<Game.Wave.IWaveProgress>(waves);
             registry.Register<ICastleCheat>(new FakeCastleCheat(castle, skills));
             registry.Register<Game.Wave.IWaveCheat>(waves);
+            registry.Register<IRunCheatStart>(start);
             return registry;
         }
 
         /// <summary>Installs with the asset's cheat set to <paramref name="onAsset"/>, then puts the asset back.</summary>
-        private static HudSession Install(FakeCheatSelection cheats, HudCheatState onAsset)
+        private static HudSession Install(FakeCheatSelection cheats, HudCheatState onAsset) =>
+            Install(cheats, onAsset, new FakeCheatStart());
+
+        private static HudSession Install(FakeCheatSelection cheats, HudCheatState onAsset, FakeCheatStart start)
         {
             var installer = LoadInstaller();
             var before = installer.Cheat;
             try
             {
                 installer.Cheat = onAsset;
-                installer.Install(FullRegistry(cheats, out var scene));
+                installer.Install(FullRegistry(cheats, start, out var scene));
                 Assert.AreEqual(1, scene.Joined.Count);
                 Assert.IsInstanceOf<HudSession>(scene.Joined[0]);
                 return (HudSession)scene.Joined[0];
@@ -124,6 +131,34 @@ namespace Game.Hud.Tests
             Assert.IsEmpty(cheats.Reported);
         }
 
+        // Bug b20261127-ab7a: picking "Giữa trận" opened the start screen; the state only showed after Play then
+        // Enter battle. Building the state now asks the run to open the scene straight in battle.
+        [Test]
+        public void PickedMidBattleAsksToOpenStraightInBattleWithTheDefaultTeam()
+        {
+            var cheats = new FakeCheatSelection();
+            cheats.Pick("Hud/MidBattle");
+            var start = new FakeCheatStart();
+
+            Install(cheats, HudCheatState.None, start);
+
+            Assert.AreEqual(1, start.Requests.Count, "asked for a battle once");
+            Assert.AreEqual(0, start.Requests[0].Count, "empty team: the run's default team");
+        }
+
+        [TestCase("PopupLose/NewRecord")]
+        [TestCase(null)]
+        public void NoHudStateBuiltAsksForNoBattle(string pickedKey)
+        {
+            var cheats = new FakeCheatSelection();
+            cheats.Pick(pickedKey);
+            var start = new FakeCheatStart();
+
+            Install(cheats, HudCheatState.MidBattle, start);
+
+            Assert.IsEmpty(start.Requests);
+        }
+
         [Test]
         public void NothingPickedAndNothingOnTheAssetBuildsNothing()
         {
@@ -133,6 +168,16 @@ namespace Game.Hud.Tests
 
             Assert.IsFalse(session.CheatPending);
             Assert.IsEmpty(cheats.Reported);
+        }
+
+        /// <summary>Stand-in for the run's IRunCheatStart; records every request.</summary>
+        internal sealed class FakeCheatStart : IRunCheatStart
+        {
+            public readonly List<RunTeam> Requests = new List<RunTeam>();
+            public bool BattleRequested => Requests.Count > 0;
+            public RunTeam Team => Requests.Count > 0 ? Requests[Requests.Count - 1] : default;
+
+            public void RequestBattle(RunTeam team) => Requests.Add(team);
         }
 
         /// <summary>Stand-in for Core's cheat selection; records every ReportRunning.</summary>

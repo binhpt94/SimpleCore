@@ -40,6 +40,10 @@ namespace Game.Run
             registry.Register<IRunFlow>(flow);
             registry.Register<IRunBattle>(flow);
             registry.Register<IRunScore>(score);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // Cheat states shown in battle ask here for the scene to open straight in battle (GameFlow builds it).
+            registry.Register<IRunCheatStart>(new RunCheatStart(config.DefaultTeam));
+#endif
             // The device signals are a Unity object: made when the session runs (Play), not here.
             var signalsPrefab = config.AppSignalsPrefab;
             session.Join(new RunSession(flow, score, frames, () => UnityAppSignals.Create(signalsPrefab),

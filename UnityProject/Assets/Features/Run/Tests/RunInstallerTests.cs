@@ -48,6 +48,22 @@ namespace Game.Run.Tests
             Assert.AreEqual(2, session.Joined.Count, "The run and its leftover popup check join the session.");
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        [Test]
+        public void InstalledRunPublishesACheatStartWithNoBattleRequested()
+        {
+            var installer = AssetDatabase.LoadAssetAtPath<RunInstaller>(InstallerPath);
+            Assert.IsNotNull(installer);
+            var registry = Registry(new FakeSession());
+
+            installer.Install(registry);
+
+            Assert.IsTrue(registry.TryResolve<IRunCheatStart>(out var start));
+            Assert.IsFalse(start.BattleRequested);
+            Assert.That(start.Team.Count, Is.EqualTo(3), "Default team of RunConfig.");
+        }
+#endif
+
         private static readonly RunTeam ChosenTeam = new RunTeam(new[] { "knight", "axeman", "archer" });
 
         /// <summary>Installs the real asset and goes from the start screen into battle with a chosen team.</summary>

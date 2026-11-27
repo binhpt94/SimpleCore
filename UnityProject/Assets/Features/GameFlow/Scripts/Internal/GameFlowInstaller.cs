@@ -41,8 +41,16 @@ namespace Game.GameFlow
                 new TeamMemoryAdapter(teamSelect),
                 new UnityFlowLog());
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // A cheat state shown in battle asked the run for a battle while installing (all before GameFlow).
+            registry.TryResolve<IRunCheatStart>(out var cheatStart);
+            session.Join(new GameFlowParticipant(
+                router, home, teamSelect, battle, () => Need<IGameSceneReady>(registry), new UnityFlowClock(),
+                cheatStart));
+#else
             session.Join(new GameFlowParticipant(
                 router, home, teamSelect, battle, () => Need<IGameSceneReady>(registry), new UnityFlowClock()));
+#endif
         }
 
         private static T Need<T>(IServiceRegistry registry) where T : class

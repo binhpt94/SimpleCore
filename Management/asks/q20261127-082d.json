@@ -1,0 +1,16 @@
+{
+ "id": "q20261127-082d",
+ "source": "@Worker",
+ "job": "worker w20261127-175942-core (Core): Đã viết API art ở Assets/Core: ArtTier + ArtTiers.Pick(hasDetail, hasSimple, keptSimple) (hàm thuần; đã đổi tên vì enum ArtTier không chứa được hàm), ArtChoice.Parse(json) trả ISet<string> (file thiếu",
+ "blocker": "Luật SRC-04 trong rules.json cấm Resources.Load ở mọi lớp trừ Tests, mà Art.Sprite(key, look) / Art.Model(key, size) cần Resources.Load để nạp Resources/Art/F/id/Simple|Detail và Resources/ArtChoice. Người có duyệt một ngoại lệ trong rules.json, chỉ cho đúng một file Core, không?",
+ "options": "A Thêm vào exceptions của rules.json: {rule: SRC-04, path: UnityProject/Assets/Core/ResourcesArtFiles.cs, reason: 'Art đọc art theo key F/id ở Resources (luật art 2026-11-27)', approvedBy: người, date: 2026-11-27}, rồi worker viết ResourcesArtFiles : IArtFiles và hai hàm public hai tham số · B Không dùng Resources: nạp art qua AssetCatalog trên Boot (như popup), khi đó Art cần nhận catalog và không còn đúng chữ ký Art.Sprite(key, look) mà luật worker đang dùng",
+ "suggest": "A: ngoại lệ hẹp đúng một file. Phần chọn mức và GreyBox đã có test, việc tiếp chỉ là thêm một lớp vài dòng cùng hai hàm public. Một điểm khác: tôi làm đúng chữ trong tin, nên key nằm trong danh sách simple mà không có file Simple thì hiện GreyBox dù có Detail (test Pick_KeptOnSimpleButNoSimpleFile_ShowsGreyBox). Nếu muốn khi đó hiện Detail thì đổi một dòng trong ArtTiers.Pick.",
+ "waiting": "worker w20261127-175942-core",
+ "state": "answered",
+ "answer": "Người chọn B: không dùng Resources, không sửa rules.json, nối dây tay. 1. Bỏ IArtFiles kiểu Resources. Art thành service có instance, không static: contract IArt trong Core gồm Sprite key look, Model key size, TierOf key, cài bằng ArtInstaller của Core, đăng ký qua IServiceRegistry. Feature lấy IArt trong Install. 2. Nguồn: AssetCatalog kind Art, id dạng F/id/Simple và F/id/Detail, thêm id ArtChoice trỏ tới TextAsset _Composition/ArtChoice.json. Thiếu catalog Art hay thiếu ArtChoice thì coi như rỗng, mọi art về GreyBox, không lỗi. 3. Ở _Composition: tạo catalog Game.Art.asset kind Art, chưa có dòng nào, gắn vào mọi Boot variant đang có, thêm ArtInstaller vào danh sách installer ngay sau SessionScene. Không tạo ArtChoice.json, server tạo. Việc nào cần Editor thì ghi vào editor của result.json. 4. Sửa ArtTiers.Pick: key nằm trong danh sách simple mà không có Simple thì hiện Detail, không về GreyBox. 5. Thư mục art là FeatureAssets/Private hoặc Public/Art/F/id, Core là Core/Art/Core/id, không có Resources. 6. Giữ các test cũ còn đúng, thêm test: catalog thiếu id về GreyBox, override khi thiếu Simple ra Detail, installer nạp catalog thật trong EditMode.",
+ "allow": "",
+ "allow_uses": 0,
+ "allow_until": 0,
+ "created": 1795777358.9351773,
+ "closed": 1795777732.2008202
+}

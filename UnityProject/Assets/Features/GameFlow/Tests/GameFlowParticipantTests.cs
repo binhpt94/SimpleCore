@@ -47,6 +47,85 @@ namespace Game.GameFlow.Tests
             return new GameFlowParticipant(router, home, teamSelect, battle, ready, clock);
         }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private GameFlowParticipant MakeWithCheat(FakeCheatStart cheat)
+        {
+            var router = new ScreenRouter(new RouteSettings(), new MainScreensAdapter(_home, _teamSelect),
+                new TeamSelectPanelAdapter(_teamSelect), new BattleBuilderAdapter(_battle),
+                new TeamMemoryAdapter(_teamSelect), new SilentLog());
+            return new GameFlowParticipant(router, _home, _teamSelect, _battle, () => _ready, _clock, cheat);
+        }
+
+        // Bug b20261127-ab7a: a cheat state shown in battle (Hud, HudUpgrade "Giữa trận") opened on the start screen
+        // and only showed after Play then Enter battle. A cheat that asked for a battle now opens straight in it.
+        [Test]
+        public void CheatThatAskedForABattleSkipsTheStartScreenAndTeamSelectAndBuildsItOnceTheSceneIsReady()
+        {
+            var cheat = new FakeCheatStart { BattleRequested = true, Team = new RunTeam(Codes) };
+            var participant = MakeWithCheat(cheat);
+
+            participant.Run();
+            Assert.That(_battle.Builds, Is.Empty, "not before the scene is ready");
+            _ready.Raise();
+
+            Assert.That(_battle.Builds, Has.Count.EqualTo(1));
+            Assert.That(_battle.Builds[0].HeroCodes, Is.EqualTo(Codes));
+            Assert.That(_home.Shows, Is.Zero);
+            Assert.That(_teamSelect.Shows, Is.Zero);
+        }
+
+        [Test]
+        public void CheatBattleBuiltShowsTheBattleAndLeavingItWorksAsUsual()
+        {
+            var participant = MakeWithCheat(new FakeCheatStart { BattleRequested = true, Team = new RunTeam(Codes) });
+            _ready.IsReady = true;
+            participant.Run();
+
+            _battle.RaiseBuilt();
+            _battle.RaiseLeft(RunLeaveChoice.PlayAgain);
+
+            Assert.That(_home.Shows, Is.Zero);
+            Assert.That(_teamSelect.Shows, Is.EqualTo(1), "Play again after the cheat battle goes to team select");
+        }
+
+        [Test]
+        public void CheatBattleThatFailsToBuildOpensOnTheStartScreen()
+        {
+            var participant = MakeWithCheat(new FakeCheatStart { BattleRequested = true, Team = new RunTeam(Codes) });
+            _ready.IsReady = true;
+            participant.Run();
+
+            _battle.RaiseFailed("no prefab");
+
+            Assert.That(_home.Shows, Is.EqualTo(1));
+            Assert.That(_teamSelect.ErrorText, Is.Null);
+        }
+
+        [Test]
+        public void WithoutACheatAskingForABattleTheSceneOpensOnTheStartScreen()
+        {
+            var participant = MakeWithCheat(new FakeCheatStart { BattleRequested = false });
+            _ready.IsReady = true;
+
+            participant.Run();
+
+            Assert.That(_home.Shows, Is.EqualTo(1));
+            Assert.That(_battle.Builds, Is.Empty);
+        }
+
+        private sealed class FakeCheatStart : IRunCheatStart
+        {
+            public bool BattleRequested { get; set; }
+            public RunTeam Team { get; set; }
+
+            public void RequestBattle(RunTeam team)
+            {
+                BattleRequested = true;
+                Team = team;
+            }
+        }
+#endif
+
         [Test]
         public void SceneReadyIsTakenOnlyWhenTheSessionRuns()
         {

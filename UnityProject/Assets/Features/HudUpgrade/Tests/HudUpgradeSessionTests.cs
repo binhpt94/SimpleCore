@@ -284,9 +284,10 @@ namespace Game.HudUpgrade.Tests
     
         // --- Cheat list (ICheatStateSource) and the pick (ICheatSelection) ---
 
-        private static FakeRegistry FullRegistry(FakeSession session, FakeCheatSelection cheats)
+        private static FakeRegistry FullRegistry(FakeSession session, FakeCheatSelection cheats, FakeCheatStart start = null)
         {
             var registry = new FakeRegistry();
+            registry.Register<IRunCheatStart>(start ?? new FakeCheatStart());
             if (cheats != null) registry.Register<ICheatSelection>(cheats);
             var wallet = new FakeWallet();
             registry.Register<ISessionScene>(session);
@@ -380,6 +381,51 @@ namespace Game.HudUpgrade.Tests
 
                 Assert.AreEqual(HudUpgradeCheatState.None, BuiltState(session));
                 Assert.IsEmpty(cheats.Reported, "no state was built");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+                UnityEngine.Object.DestroyImmediate(config);
+            }
+        }
+
+        // Bug b20261127-ab7a: picking "Giữa trận" opened the start screen; the bar's state only showed after Play then
+        // Enter battle. Building the state now asks the run to open the scene straight in battle, with the state's team.
+        [Test]
+        public void Picked_mixed_buttons_asks_to_open_straight_in_battle_with_the_states_team()
+        {
+            var installer = InstallerWithCheatOnAsset(HudUpgradeCheatState.None, out var config);
+            try
+            {
+                var cheats = new FakeCheatSelection();
+                cheats.Pick("HudUpgrade/MixedButtons");
+                var start = new FakeCheatStart();
+
+                installer.Install(FullRegistry(new FakeSession(), cheats, start));
+
+                Assert.AreEqual(1, start.Requests.Count, "asked for a battle once");
+                CollectionAssert.AreEqual(config.MixedButtonsTeam, start.Requests[0].HeroCodes);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(installer);
+                UnityEngine.Object.DestroyImmediate(config);
+            }
+        }
+
+        [Test]
+        public void Pick_of_another_feature_asks_for_no_battle()
+        {
+            var installer = InstallerWithCheatOnAsset(HudUpgradeCheatState.MixedButtons, out var config);
+            try
+            {
+                var cheats = new FakeCheatSelection();
+                cheats.Pick("PopupLose/NewRecord");
+                var start = new FakeCheatStart();
+
+                installer.Install(FullRegistry(new FakeSession(), cheats, start));
+
+                Assert.IsEmpty(start.Requests);
             }
             finally
             {

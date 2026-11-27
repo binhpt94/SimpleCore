@@ -56,6 +56,13 @@ Enum: cách rời trận, kèm trong `IRunBattle.BattleLeft`.
 - `PlayAgain` (popup thua: Chơi lại, GameFlow sang màn chọn đội), `BackToStart` (popup thua: Về màn bắt đầu).
 - Dùng bởi: GameFlow.
 
+### IRunCheatStart
+Chỉ bản dev (`UNITY_EDITOR || DEVELOPMENT_BUILD`). State cheat hiện trong trận xin mở scene Game thẳng vào trận, không qua màn bắt đầu và màn chọn đội (bug b20261127-ab7a). Run đăng kí một cái mới mỗi lần scene Game cài; không luật game.
+- `RequestBattle(team)`: gọi trong `Install` của feature dựng state. Đội rỗng: đội mặc định của `RunConfig`; đội không rỗng gọi sau thay đội trước.
+- `BattleRequested`: true khi có state đã xin trong lần nạp scene này.
+- `Team`: đội để dựng trận: đội không rỗng xin sau cùng, không có thì đội mặc định.
+- Dùng bởi: Hud, HudUpgrade (xin), GameFlow (đọc lúc scene sẵn sàng, dựng trận qua `IRunBattle` thay cho hiện màn bắt đầu).
+
 ## Bên trong
 - Logic C# thuần trong `Scripts/Internal`: `RunFlow` (máy bước), `RunScore` (điểm, kỉ lục, ghi qua `ISavedRecord`, cờ chưa lưu), `RunInterrupts` (rời game, quay lại: giữ các lần chờ; quay lại thì thử ghi kỉ lục chưa lưu), `SimClockRunDelay` (chờ đếm theo bước của đồng hồ chung, đứng yên khi game ở ngoài màn hình qua `IRunWaitHold`).
 - View `RunAppSignalsView` chỉ chuyển tín hiệu máy (rời game, quay lại).

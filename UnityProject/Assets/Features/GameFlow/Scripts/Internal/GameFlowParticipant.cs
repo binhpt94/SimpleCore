@@ -21,10 +21,20 @@ namespace Game.GameFlow
         private readonly IRunBattle _battle;
         private readonly Func<IGameSceneReady> _sceneReady;
         private readonly IFlowClock _clock;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        private readonly IRunCheatStart _cheatStart;
+#endif
 
         public GameFlowParticipant(ScreenRouter router, IHomeScreen home, ITeamSelectScreen teamSelect,
-            IRunBattle battle, Func<IGameSceneReady> sceneReady, IFlowClock clock)
+            IRunBattle battle, Func<IGameSceneReady> sceneReady, IFlowClock clock
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            , IRunCheatStart cheatStart = null
+#endif
+            )
         {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            _cheatStart = cheatStart;
+#endif
             _router = router ?? throw new ArgumentNullException(nameof(router));
             _home = home ?? throw new ArgumentNullException(nameof(home));
             _teamSelect = teamSelect ?? throw new ArgumentNullException(nameof(teamSelect));
@@ -72,13 +82,26 @@ namespace Game.GameFlow
 
             if (ready.IsReady)
             {
-                _router.SceneReady();
+                OnSceneReady();
                 return;
             }
 
-            Action onReady = _router.SceneReady;
+            Action onReady = OnSceneReady;
             ready.Ready += onReady;
             WhenDisposed(() => ready.Ready -= onReady);
+        }
+
+        /// <summary>The start screen, or (dev cheat state shown in battle) straight into the battle it asked for.</summary>
+        private void OnSceneReady()
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (_cheatStart != null && _cheatStart.BattleRequested)
+            {
+                _router.SceneReadyIntoBattle(_cheatStart.Team);
+                return;
+            }
+#endif
+            _router.SceneReady();
         }
     }
 }

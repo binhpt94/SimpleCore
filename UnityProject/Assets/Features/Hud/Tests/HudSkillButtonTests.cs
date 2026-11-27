@@ -90,6 +90,25 @@ namespace Game.Hud.Tests
         }
 
         [Test]
+        public void AfterTheRunEndedTheSecondsStandStillWhileFramesPass()
+        {
+            _skills.SetCooling(CastleSkill.Frost, 12f, 35f);
+            _buttons.Tick(0.016f);
+            _run.SetStep(RunStep.Ending);
+
+            // The castle stops its cooldowns when the battle stops; the HUD counts no time of its own.
+            _buttons.Tick(1f);
+            _buttons.Tick(1f);
+            _run.SetStep(RunStep.Lost);
+            _buttons.Tick(1f);
+
+            Assert.AreEqual("12", _view.Skills[1].Seconds);
+            Assert.AreEqual(12f / 35f, _view.Skills[1].Cover, 1e-5f);
+            _view.Press(1);
+            CollectionAssert.IsEmpty(_skills.Used);
+        }
+
+        [Test]
         public void ButtonBouncesOnceWhenItsCooldownEnds()
         {
             _skills.SetCooling(CastleSkill.Thunder, 0.1f, 20f);
