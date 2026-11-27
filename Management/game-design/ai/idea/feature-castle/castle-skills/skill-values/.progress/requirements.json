@@ -206,17 +206,17 @@
    "at": "2026-11-25 12:02:39"
   },
   "params": {
-   "state": "verified",
+   "state": "done",
    "note": "",
    "tests": [
     "CastleConfigTests.Skill_numbers_match_the_design_with_all_three_skills_at_the_prototype_stage"
    ],
    "play": "",
-   "hash": "e28e1840b359",
-   "text": "## Làm gì\n- Giữ trạng thái sẵn sàng và thời gian hồi còn lại của từng kĩ năng; báo cho `feature-hud` để hiện nút.\n- Nhận lệnh bấm từ `feature-hud`. Nếu kĩ năng sẵn sàng, thành còn đứng, không tạm dừng: áp hiệu lực ngay, bắt đầu hồi chiêu.\n- Sấm sét: lấy mọi quái còn sống có khoảng cách tới mép thành gần nhất ≤ 6u (hai bên), trừ máu mỗi con bằng sát thương Sấm sét hiện tại.\n- Băng giá: gắn trạng thái \"chậm\" lên mọi quái đang sống trong thời gian chậm hiện tại; quái bị chậm có tốc độ đi ×0.5 và giây mỗi đòn ×2 (`feature-enemy/enemy-behavior/enemy-move-values`).\n- Cổ vũ: mọi hero đang đứng trên chiến trường (không gục) cộng máu = tỉ lệ hồi hiện tại × máu tối đa hiện tại của nó, chặn ở máu tối đa.\n- Nhận mức tăng hiệu lực từ `feature-castle/castle-upgrade-effects`; hồi chiêu không đổi theo cấp.\n\n## Thông số\n| Kĩ năng | Hiệu lực lv1 | Vùng / đối tượng | Hồi chiêu | Lí do |\n|---|---|---|---|---|\n| Sấm sét | 80 máu mỗi quái | Quái cách mép thành ≤ 6u, cả hai bên | 20s | Giải vây sát thành; hồi ngắn nhất để là nút bấm chính |\n| Băng giá | chậm 50% đi và đánh, 5s | Mọi quái đang sống | 35s | Mạnh nhất (cả màn) nên hồi lâu nhất |\n| Cổ vũ | hồi 30% máu tối đa mỗi hero | Mọi hero đang đứng | 25s | Hiệp sĩ 300 máu hồi 90; Pháp sư 100 máu hồi 30 |\n\n| Hiệu ứng | Xuất hiện | Biến mất |\n|---|---|---|\n| Sấm sét trên quái | lúc trúng | sau 0.3s (kể cả khi quái bị hạ) |\n| Dấu chậm trên quái | lúc trúng Băng giá | hết thời gian chậm hoặc quái bị hạ |\n| Cổ vũ trên hero | lúc được hồi | sau 0.5s |\n\nCân bằng dự kiến: Sấm sét dùng được 3 lần mỗi phút, mỗi lần dọn mọi Lính/Sói sát thành tới đợt 10. Băng giá 5s trong 35s nghĩa là quái bị chậm khoảng 14% thời gian.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số kĩ năng có trong trận | 1 (Sấm sét) | 3 (Sấm sét, Băng giá, Cổ vũ) | 3 |\n| Sấm sét | 80 máu, 6u, hồi 20s | như IDEA | theo số đã chỉnh sau chơi thử |\n| Băng giá | không có | chậm 50%, 5s, hồi 35s | theo số đã chỉnh |\n| Cổ vũ | không có | 30% máu tối đa, hồi 25s | theo số đã chỉnh |\n| Hiệu ứng | sprite hiện 0.3s trên quái trúng (scale lên rồi tắt) | đủ ba hiệu ứng ở bảng trên | hiệu ứng toàn màn, âm thanh riêng từng kĩ năng |",
+   "hash": "c4e07fa636a1",
+   "text": "## Làm gì\n- Giữ trạng thái sẵn sàng và thời gian hồi còn lại của từng kĩ năng; báo cho `feature-hud` để hiện nút.\n- Nhận lệnh bấm từ `feature-hud`. Nếu kĩ năng sẵn sàng, thành còn đứng: áp hiệu lực ngay, bắt đầu hồi chiêu.\n- Sấm sét: lấy mọi quái còn sống có khoảng cách tới mép thành gần nhất ≤ 6u (hai bên), trừ máu mỗi con bằng sát thương Sấm sét hiện tại.\n- Băng giá: gắn trạng thái \"chậm\" lên mọi quái đang sống trong thời gian chậm hiện tại; quái bị chậm có tốc độ đi ×0.5 và giây mỗi đòn ×2 (`feature-enemy/enemy-behavior/enemy-move-values`).\n- Cổ vũ: mọi hero đang đứng trên chiến trường (không gục) cộng máu = tỉ lệ hồi hiện tại × máu tối đa hiện tại của nó, chặn ở máu tối đa.\n- Nhận mức tăng hiệu lực từ `feature-castle/castle-upgrade-effects`; hồi chiêu không đổi theo cấp.\n\n## Thông số\n| Kĩ năng | Hiệu lực lv1 | Vùng / đối tượng | Hồi chiêu | Lí do |\n|---|---|---|---|---|\n| Sấm sét | 80 máu mỗi quái | Quái cách mép thành ≤ 6u, cả hai bên | 20s | Giải vây sát thành; hồi ngắn nhất để là nút bấm chính |\n| Băng giá | chậm 50% đi và đánh, 5s | Mọi quái đang sống | 35s | Mạnh nhất (cả màn) nên hồi lâu nhất |\n| Cổ vũ | hồi 30% máu tối đa mỗi hero | Mọi hero đang đứng | 25s | Hiệp sĩ 300 máu hồi 90; Pháp sư 100 máu hồi 30 |\n\n| Hiệu ứng | Xuất hiện | Biến mất |\n|---|---|---|\n| Sấm sét trên quái | lúc trúng | sau 0.3s (kể cả khi quái bị hạ) |\n| Dấu chậm trên quái | lúc trúng Băng giá | hết thời gian chậm hoặc quái bị hạ |\n| Cổ vũ trên hero | lúc được hồi | sau 0.5s |\n\nCân bằng dự kiến: Sấm sét dùng được 3 lần mỗi phút, mỗi lần dọn mọi Lính/Sói sát thành tới đợt 10. Băng giá 5s trong 35s nghĩa là quái bị chậm khoảng 14% thời gian.\n\n## Thông số theo giai đoạn\n| Thông số | IDEA | PROTOTYPE | FULL |\n|---|---|---|---|\n| Số kĩ năng có trong trận | 1 (Sấm sét) | 3 (Sấm sét, Băng giá, Cổ vũ) | 3 |\n| Sấm sét | 80 máu, 6u, hồi 20s | như IDEA | theo số đã chỉnh sau chơi thử |\n| Băng giá | không có | chậm 50%, 5s, hồi 35s | theo số đã chỉnh |\n| Cổ vũ | không có | 30% máu tối đa, hồi 25s | theo số đã chỉnh |\n| Hiệu ứng | sprite hiện 0.3s trên quái trúng (scale lên rồi tắt) | đủ ba hiệu ứng ở bảng trên | hiệu ứng toàn màn, âm thanh riêng từng kĩ năng |",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "@CodeLead",
-   "at": "2026-11-26 00:30:01"
+   "by": "Castle",
+   "at": "2026-11-27 18:59:31"
   },
   "edge-quai-bi-cham-roi-bi-ha": {
    "state": "verified",
@@ -245,6 +245,19 @@
    "title": "Thông số của giai đoạn PROTOTYPE",
    "by": "@CodeLead",
    "at": "2026-11-26 01:18:13"
+  },
+  "stage-idea": {
+   "state": "done",
+   "note": "",
+   "tests": [
+    "CastleConfigTests.Skill_idea_stage_has_thunder_80_damage_6_units_20_second_cooldown_and_a_three_tenths_effect"
+   ],
+   "play": "",
+   "hash": "0806431689df",
+   "text": "Cột IDEA của bảng 'Thông số theo giai đoạn' (các dòng giai đoạn này đòi mới hoặc khác giai đoạn trước)\n- Số kĩ năng có trong trận: 1 (Sấm sét)\n- Sấm sét: 80 máu, 6u, hồi 20s\n- Hiệu ứng: sprite hiện 0.3s trên quái trúng (scale lên rồi tắt)",
+   "title": "Thông số của giai đoạn IDEA",
+   "by": "Castle",
+   "at": "2026-11-27 18:59:31"
   }
  },
  "log": [
@@ -520,6 +533,34 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 18:59:16",
+   "id": "params",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Skill_numbers_match_the_design_with_all_three_skills_at_the_prototype_stage, CastleSkillsTests.Skills_cannot_be_used_after_the_castle_fell"
+  },
+  {
+   "at": "2026-11-27 18:59:16",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Skill_idea_stage_has_thunder_80_damage_6_units_20_second_cooldown_and_a_three_tenths_effect, CastleSessionTests.Thunder_effect_lasts_three_tenths_of_a_second"
+  },
+  {
+   "at": "2026-11-27 18:59:31",
+   "id": "params",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Skill_numbers_match_the_design_with_all_three_skills_at_the_prototype_stage"
+  },
+  {
+   "at": "2026-11-27 18:59:31",
+   "id": "stage-idea",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Skill_idea_stage_has_thunder_80_damage_6_units_20_second_cooldown_and_a_three_tenths_effect"
   }
  ]
 }

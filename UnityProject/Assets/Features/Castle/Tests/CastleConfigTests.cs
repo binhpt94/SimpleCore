@@ -117,5 +117,41 @@ namespace Game.Castle.Tests
             Assert.That(config.LevelUpPopScale, Is.EqualTo(1.1f).Within(1e-5f));
             Assert.That(config.LevelUpPopSeconds, Is.EqualTo(0.3f).Within(1e-5f));
         }
+    
+        [Test]
+        public void Castle_body_idea_stage_is_1000_health_a_tenth_second_flash_and_a_half_second_shrink()
+        {
+            var config = Load();
+
+            Assert.That(config.MaxHealth, Is.EqualTo(1000f), "IDEA: 1000 max health on entering the battle");
+            Assert.That(config.HitFlashSeconds, Is.EqualTo(0.1f).Within(1e-5f), "IDEA: flash 0.1s on a hit");
+            Assert.That(config.CollapseSeconds, Is.EqualTo(0.5f).Within(1e-5f), "IDEA: shrink to 0 in 0.5s on a fall");
+        }
+
+        [Test]
+        public void Skill_idea_stage_has_thunder_80_damage_6_units_20_second_cooldown_and_a_three_tenths_effect()
+        {
+            var config = Load();
+
+            Assert.That(config.Skills, Does.Contain(CastleSkill.Thunder), "IDEA: Thunder is in the battle");
+            Assert.That(config.ThunderDamage, Is.EqualTo(80f));
+            Assert.That(config.ThunderRange, Is.EqualTo(6f));
+            Assert.That(config.ThunderCooldown, Is.EqualTo(20f));
+            Assert.That(config.ThunderEffectSeconds, Is.EqualTo(0.3f).Within(1e-5f));
+        }
+
+        [Test]
+        public void Upgrade_idea_stage_sells_three_items_150_health_a_fifth_attack_a_fifth_skills_and_pops_1_1_for_0_3s()
+        {
+            var config = Load();
+
+            Assert.That(System.Enum.GetValues(typeof(CastleUpgrade)), Is.EquivalentTo(
+                new[] { CastleUpgrade.Health, CastleUpgrade.Attack, CastleUpgrade.Skills }));
+            Assert.That(config.HealthPerLevel, Is.EqualTo(150f));
+            Assert.That(config.AttackBonusPerLevel, Is.EqualTo(0.2f).Within(1e-5f));
+            Assert.That(config.SkillBonusPerLevel, Is.EqualTo(0.2f).Within(1e-5f));
+            Assert.That(config.LevelUpPopScale, Is.EqualTo(1.1f).Within(1e-5f));
+            Assert.That(config.LevelUpPopSeconds, Is.EqualTo(0.3f).Within(1e-5f));
+        }
     }
 }

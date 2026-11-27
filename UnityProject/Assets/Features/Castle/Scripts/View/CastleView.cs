@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Game.Core;
 using UnityEngine;
 
 namespace Game.Castle
@@ -7,18 +8,20 @@ namespace Game.Castle
     /// <summary>
     /// Draws the castle, its shots and the Thunder effect in world units (1 world unit = 1 battlefield unit,
     /// ground at y = 0). Sizes from the design apply to the drawn part of each sprite (its content rect), so the
-    /// transparent margin of the generated art does not shrink it. Sprites left empty are drawn as plain coloured boxes.
+    /// transparent margin of the Simple art does not shrink it. The pictures come from <see cref="IArt"/> (keys
+    /// <see cref="BodyKey"/>, <see cref="ShotKey"/>, <see cref="ThunderKey"/>); without a file each is a GreyBox square in
+    /// the old placeholder colour.
     /// </summary>
     internal sealed class CastleView : MonoBehaviour, ICastleView
     {
-        [SerializeField] private Sprite castleSprite;
-        [Tooltip("PROTOTYPE: the castle under half health. Empty: the whole castle is drawn darker instead.")]
-        [SerializeField] private Sprite damagedSprite;
+        internal const string BodyKey = "Castle/body";
+        internal const string ShotKey = "Castle/shot";
+        internal const string ThunderKey = "Castle/thunder";
+
+        [Tooltip("PROTOTYPE: under half health the castle is drawn darker with this tint.")]
         [SerializeField] private Color damagedTint = new Color(0.8f, 0.7f, 0.65f);
         [Tooltip("How far the castle moves sideways while it shakes from a hit (u).")]
         [SerializeField] private float shakeAmplitude = 0.08f;
-        [SerializeField] private Sprite shotSprite;
-        [SerializeField] private Sprite thunderSprite;
         [Tooltip("Drawn part of each sprite as a fraction of the image (x, y from bottom left, width, height); sizes apply to this part, not to the transparent margin.")]
         [SerializeField] private Rect castleContent = new Rect(70f / 512f, 0f, 372f / 512f, 496f / 512f);
         [SerializeField] private Rect shotContent = new Rect(106f / 512f, 106f / 512f, 300f / 512f, 300f / 512f);
@@ -34,7 +37,13 @@ namespace Game.Castle
 
         private readonly List<Shot> _shots = new List<Shot>();
         private readonly List<Effect> _thunders = new List<Effect>();
-        private Sprite _placeholder;
+        private readonly List<UnityEngine.Object> _owned = new List<UnityEngine.Object>();
+        private Sprite _castleSprite;
+        private Sprite _shotSprite;
+        private Sprite _thunderSprite;
+        private Rect _castleRect = FullImage;
+        private Rect _shotRect = FullImage;
+        private Rect _thunderRect = FullImage;
         private SpriteRenderer _body;
         private Vector3 _bodyScale = Vector3.one;
         private float _flashLeft;
@@ -53,26 +62,49 @@ namespace Game.Castle
 
         public UnityEngine.Object ViewObject => gameObject;
 
-        private void Awake()
+        public void UseArt(IArt art)
         {
+            if (art == null) throw new ArgumentNullException(nameof(art));
+            if (_body) return;
+            _castleSprite = Picture(art, BodyKey, castleColor, castleContent, out _castleRect);
+            _shotSprite = Picture(art, ShotKey, shotColor, shotContent, out _shotRect);
+            _thunderSprite = Picture(art, ThunderKey, thunderColor, thunderContent, out _thunderRect);
+
             var bodyObject = new GameObject("Body");
             bodyObject.transform.SetParent(transform, false);
             _body = bodyObject.AddComponent<SpriteRenderer>();
-            _body.sprite = castleSprite ? castleSprite : Placeholder();
-            _body.color = castleSprite ? Color.white : castleColor;
+            _body.sprite = _castleSprite;
+            _body.color = BodyColor;
         }
 
         private void Update() => Ticked?.Invoke(Time.deltaTime);
 
         private void OnDestroy()
         {
-            if (_placeholder) Destroy(_placeholder);
+            // Only the GreyBox squares are the view's own; a Sprite file from the catalog is shared and stays.
+            foreach (var owned in _owned)
+                if (owned) Destroy(owned);
+            _owned.Clear();
+        }
+
+        /// <summary>The key's sprite; a file uses its content rect, a GreyBox square the whole image.</summary>
+        private Sprite Picture(IArt art, string key, Color color, Rect content, out Rect drawn)
+        {
+            var greyBox = art.TierOf(key) == ArtTier.GreyBox;
+            var sprite = art.Sprite(key, new GreyBox.Look(color, 1f));
+            drawn = greyBox ? FullImage : content;
+            if (greyBox)
+            {
+                _owned.Add(sprite);
+                if (sprite.texture) _owned.Add(sprite.texture);
+            }
+            return sprite;
         }
 
         public void Place(float halfWidth, float height)
         {
             transform.position = Vector3.zero;
-            var drawn = Drawn(_body.sprite, castleSprite ? castleContent : FullImage);
+            var drawn = Drawn(_body.sprite, _castleRect);
             _bodyScale = new Vector3(2f * halfWidth / Mathf.Max(drawn.width, 1e-4f), height / Mathf.Max(drawn.height, 1e-4f), 1f);
             _bodyPosition = new Vector3(-drawn.center.x * _bodyScale.x, -drawn.yMin * _bodyScale.y, 0f);
             _body.transform.localPosition = _bodyPosition;
@@ -90,8 +122,6 @@ namespace Game.Castle
         {
             if (_damaged == damaged) return;
             _damaged = damaged;
-            // The damaged picture uses the whole castle's size and content rect so swapping keeps the box.
-            _body.sprite = damaged && damagedSprite ? damagedSprite : (castleSprite ? castleSprite : Placeholder());
             if (_flashLeft <= 0f) _body.color = BodyColor;
         }
 
@@ -113,7 +143,7 @@ namespace Game.Castle
         {
             if (_collapsed) return;
             _flashLeft = seconds;
-            _body.color = castleSprite ? flashColor : Color.Lerp(castleColor, flashColor, 0.8f);
+            _body.color = flashColor;
         }
 
         public void PopLevelUp(float scale, float seconds)
@@ -138,7 +168,7 @@ namespace Game.Castle
 
         public void ShowShot(int targetHandle, float fromX, float toX, float seconds)
         {
-            var renderer = MakeEffect("Shot", shotSprite, shotContent, shotColor, shotSize);
+            var renderer = MakeEffect("Shot", _shotSprite, _shotRect, shotSize);
             renderer.transform.position = new Vector3(fromX, shotHeight, 0f);
             _shots.Add(new Shot
             {
@@ -159,7 +189,7 @@ namespace Game.Castle
 
         public void ShowThunder(float x, float seconds)
         {
-            var renderer = MakeEffect("Thunder", thunderSprite, thunderContent, thunderColor, thunderSize * 0.5f);
+            var renderer = MakeEffect("Thunder", _thunderSprite, _thunderRect, thunderSize * 0.5f);
             renderer.transform.position = new Vector3(x, thunderHeight, 0f);
             _thunders.Add(new Effect { Renderer = renderer, Total = Mathf.Max(seconds, 1e-4f) });
         }
@@ -221,7 +251,7 @@ namespace Game.Castle
                     continue;
                 }
                 var size = Mathf.Lerp(thunderSize * 0.5f, thunderSize, effect.Elapsed / effect.Total);
-                effect.Renderer.transform.localScale = Scale(effect.Renderer.sprite, thunderSprite ? thunderContent : FullImage, size);
+                effect.Renderer.transform.localScale = Scale(effect.Renderer.sprite, _thunderRect, size);
                 _thunders[i] = effect;
             }
         }
@@ -234,27 +264,19 @@ namespace Game.Castle
             _thunders.Clear();
         }
 
-        private Color BodyColor
-        {
-            get
-            {
-                var whole = castleSprite ? Color.white : castleColor;
-                // Without a damaged picture the castle is drawn darker under half health.
-                return _damaged && !damagedSprite ? whole * damagedTint : whole;
-            }
-        }
+        /// <summary>The castle is drawn darker under half health (no damaged picture yet).</summary>
+        private Color BodyColor => _damaged ? Color.white * damagedTint : Color.white;
 
         private static readonly Rect FullImage = new Rect(0f, 0f, 1f, 1f);
 
-        private SpriteRenderer MakeEffect(string effectName, Sprite sprite, Rect content, Color placeholderColor, float size)
+        private SpriteRenderer MakeEffect(string effectName, Sprite sprite, Rect content, float size)
         {
             var effectObject = new GameObject(effectName);
             effectObject.transform.SetParent(transform, false);
             var renderer = effectObject.AddComponent<SpriteRenderer>();
-            renderer.sprite = sprite ? sprite : Placeholder();
-            renderer.color = sprite ? Color.white : placeholderColor;
+            renderer.sprite = sprite;
             renderer.sortingOrder = 10;
-            renderer.transform.localScale = Scale(renderer.sprite, sprite ? content : FullImage, size);
+            renderer.transform.localScale = Scale(sprite, content, size);
             return renderer;
         }
 
@@ -274,13 +296,6 @@ namespace Game.Castle
             return new Rect(
                 bounds.min.x + content.x * size.x, bounds.min.y + content.y * size.y,
                 content.width * size.x, content.height * size.y);
-        }
-
-        private Sprite Placeholder()
-        {
-            if (!_placeholder)
-                _placeholder = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 4f, 4f), new Vector2(0.5f, 0.5f), 4f);
-            return _placeholder;
         }
 
         private struct Shot

@@ -1,4 +1,5 @@
 using System;
+using Game.Core;
 
 namespace Game.Castle
 {
@@ -19,6 +20,9 @@ namespace Game.Castle
 
         /// <summary>Shows the damaged picture of the castle (health under half) or the whole one.</summary>
         void ShowDamaged(bool damaged);
+
+        /// <summary>Takes the castle, shot and Thunder pictures from <paramref name="art"/>; called once, before anything else.</summary>
+        void UseArt(IArt art);
 
         void Place(float halfWidth, float height);
 

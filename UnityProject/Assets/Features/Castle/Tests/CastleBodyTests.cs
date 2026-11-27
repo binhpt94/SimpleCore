@@ -130,7 +130,7 @@ namespace Game.Castle.Tests
         }
 
         [Test]
-        public void Heroes_start_at_the_castle_edges_two_left_one_right()
+        public void Heroes_start_and_revive_at_the_castle_edges_two_left_one_right()
         {
             Assert.That(_body.HeroStartX(0), Is.EqualTo(-1.5f), "slot 1");
             Assert.That(_body.HeroStartX(1), Is.EqualTo(1.5f), "slot 2");

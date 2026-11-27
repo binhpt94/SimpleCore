@@ -34,6 +34,7 @@ namespace Game.Castle.Tests
             registry.Register<ISimClock>(new FakeSimClock());
             registry.Register<ICombat>(new FakeCombat());
             registry.Register<IEnemyCombat>(new FakeEnemyCombat());
+            registry.Register<IArt>(new FakeArt());
             return registry;
         }
 

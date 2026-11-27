@@ -85,17 +85,17 @@
    "at": "2026-11-25 12:02:39"
   },
   "params": {
-   "state": "verified",
+   "state": "done",
    "note": "Rà số đòn tự bắn theo bảng ShotParams, test từng dòng",
    "tests": [
     "CastleConfigTests.Auto_shot_numbers_match_the_design"
    ],
    "play": "",
-   "hash": "9cc70172d05c",
-   "text": "## Làm gì\n- Mỗi khung hình: nếu thành còn đứng, không tạm dừng, đã đủ thời gian chờ và có quái trong tầm thì bắn.\n- Chọn mục tiêu: quái còn sống, trên màn (tâm |x| ≤ 16u), khoảng cách tới mép thành gần nhất ≤ 6u; nhỏ nhất thì chọn.\n- Trừ máu mục tiêu ngay lúc bắn bằng sức đánh hiện tại của thành (lv1 là 10, cộng nâng cấp ở `feature-castle/castle-upgrade-effects`).\n- Hiện hình viên đạn bay từ mép thành phía mục tiêu tới mục tiêu trong 0.15s; hình biến mất khi tới nơi hoặc khi mục tiêu đã biến mất.\n\n## Thông số\nSố liệu nằm ở bảng `ShotParams` trong `.excel/` (loại `params`: mỗi thông số một dòng, có đơn vị, giá trị từng giai đoạn và lí do). Xem: `python Management/tools/gd_excel.py show ai/idea/feature-castle/castle-attack/auto-shot-values`.\n\nCân bằng dự kiến: 10 sát thương/s ở lv1. Đợt 10, Lính 76 máu cần 8 phát; thành một mình không giữ được nếu hero dồn hết về một bên, đúng ý \"tuyến cuối\".\n\n## Thông số theo giai đoạn\nCác cột `idea`, `prototype`, `full` của bảng `ShotParams`. \"như IDEA\": giai đoạn đó giữ giá trị của IDEA.",
+   "hash": "e90848d7eb9a",
+   "text": "## Làm gì\n- Mỗi khung hình: nếu thành còn đứng, đã đủ thời gian chờ và có quái trong tầm thì bắn.\n- Chọn mục tiêu: quái còn sống, trên màn (tâm |x| ≤ 16u), khoảng cách tới mép thành gần nhất ≤ 6u; nhỏ nhất thì chọn.\n- Trừ máu mục tiêu ngay lúc bắn bằng sức đánh hiện tại của thành (lv1 là 10, cộng nâng cấp ở `feature-castle/castle-upgrade-effects`).\n- Hiện hình viên đạn bay từ mép thành phía mục tiêu tới mục tiêu trong 0.15s; hình biến mất khi tới nơi hoặc khi mục tiêu đã biến mất.\n\n## Thông số\nSố liệu nằm ở bảng `ShotParams` trong `.excel/` (loại `params`: mỗi thông số một dòng, có đơn vị, giá trị từng giai đoạn và lí do). Xem: `python Management/tools/gd_excel.py show ai/idea/feature-castle/castle-attack/auto-shot-values`.\n\nCân bằng dự kiến: 10 sát thương/s ở lv1. Đợt 10, Lính 76 máu cần 8 phát; thành một mình không giữ được nếu hero dồn hết về một bên, đúng ý \"tuyến cuối\".\n\n## Thông số theo giai đoạn\nCác cột `idea`, `prototype`, `full` của bảng `ShotParams`. \"như IDEA\": giai đoạn đó giữ giá trị của IDEA.",
    "title": "Số và việc của node (Làm gì, Thông số, Thông số theo giai đoạn)",
-   "by": "@CodeLead",
-   "at": "2026-11-25 23:23:34"
+   "by": "Castle",
+   "at": "2026-11-27 18:59:31"
   },
   "edge-phat-ban-lam-quai-ve-0-mau": {
    "state": "verified",
@@ -623,6 +623,20 @@
    "state": "verified",
    "by": "@CodeLead",
    "note": ""
+  },
+  {
+   "at": "2026-11-27 18:59:16",
+   "id": "params",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleAutoShotTests.Castle_does_not_shoot_after_it_fell, CastleConfigTests.Auto_shot_numbers_match_the_design"
+  },
+  {
+   "at": "2026-11-27 18:59:31",
+   "id": "params",
+   "state": "done",
+   "by": "Castle",
+   "note": "CastleConfigTests.Auto_shot_numbers_match_the_design"
   }
  ]
 }

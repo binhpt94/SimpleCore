@@ -77,6 +77,8 @@ namespace Game.Castle.Tests
         public void ShakeHit(float seconds) { ShakeSeconds = seconds; Calls.Add("shake"); }
         public void ShowDamaged(bool damaged) => Damaged = damaged;
         public void Tick(float seconds) => Ticked?.Invoke(seconds);
+        public Game.Core.IArt Art;
+        public void UseArt(Game.Core.IArt art) => Art = art;
         public void Place(float halfWidth, float height) => Calls.Add($"place {halfWidth} {height}");
         public void SetVisible(bool visible) => Visible = visible;
         public void ResetBody() => Calls.Add("reset");
@@ -187,5 +189,24 @@ namespace Game.Castle.Tests
         public readonly List<float> Heals = new List<float>();
         public void HealAll(float fractionOfMaxHealth) => Heals.Add(fractionOfMaxHealth);
         public void ApplyLevel(int slot, int level) { }
+    }
+
+    /// <summary>
+    /// Core's art with a hand-made catalog: a key given a sprite answers Simple with it, any other key GreyBox.
+    /// </summary>
+    internal sealed class FakeArt : IArt
+    {
+        public readonly Dictionary<string, UnityEngine.Sprite> Simple = new Dictionary<string, UnityEngine.Sprite>();
+        public readonly List<string> Asked = new List<string>();
+
+        public UnityEngine.Sprite Sprite(string key, GreyBox.Look look)
+        {
+            Asked.Add(key);
+            return Simple.TryGetValue(key, out var sprite) ? sprite : GreyBox.Sprite(look);
+        }
+
+        public UnityEngine.GameObject Model(string key, UnityEngine.Vector3 size) => GreyBox.Model(size);
+
+        public ArtTier TierOf(string key) => Simple.ContainsKey(key) ? ArtTier.Simple : ArtTier.GreyBox;
     }
 }
