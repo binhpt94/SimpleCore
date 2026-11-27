@@ -380,6 +380,13 @@ def marked_context(data, root, store):
                  f"lần guard cần người duyệt đều bị chặn. Cần người quyết hay bị chặn: dừng, nhắn {leader} (SendMessage) "
                  "một tin 'BÁO CHẶN · chờ người · Việc: … · Vướng ở: … · Cần quyết: …' rồi kết thúc lượt; Leader hỏi người qua Manager "
                  "và gửi câu trả lời vào hộp thư của bạn (TRẢ LỜI · …), tin đó mở lượt mới.")
+    role = guard.role_of(raw)
+    if role == "@CodeLead":
+        text += dyn(editor_line(root, None))
+    elif role in guard.ROLE_AREAS or (not role and raw and guard.valid_feature(raw, guard.canonical_root(root))):
+        text += (" NHÁP VÀ PHIẾU EDITOR (người quyết 2026-11-27): code viết ở UnityProject/Drafts/<Tên> (draft.py), kiểm bằng "
+                 "compile_check.py <Tên> --draft, rồi nộp phiếu editor_ticket.py add --session <Tên> …; Editor bận thì làm việc "
+                 "khác, không BÁO CHẶN (feature.md, mục Nháp và phiếu Editor).") + dyn(editor_line(root, raw if not role else role))
     name = guard.ask_leader(raw)
     if name:
         text += (f" KHÔNG HỎI NGƯỜI (người quyết 2026-11-27): chỉ Manager hỏi người. AskUserQuestion và mọi lần guard cần "
@@ -391,6 +398,24 @@ def marked_context(data, root, store):
     elif guard.role_of(raw) == "@Manager":
         text += dyn(ask_line(root, None))
     return text
+
+
+def editor_line(root, who):
+    """Editor tickets (editor_ticket.py). @CodeLead (who None): who holds the Editor and what waits. A feature: its
+    own open ticket."""
+    try:
+        mod = guard.ticket_module()
+        root = guard.canonical_root(root)
+        if who is None:
+            line = mod.summary_line(root)
+            return f" Phiếu Editor: {line}." if line else ""
+        mine = [t for t in mod.tickets(root, ("waiting", "granted")) if t.get("session") == who]
+    except Exception:
+        return ""
+    if not mine:
+        return ""
+    return " Phiếu Editor của bạn: " + "; ".join(
+        f"{t['id']} {'ĐANG ĐƯỢC CẤP' if t['state'] == 'granted' else 'đang chờ'} ({mod.describe(t)})" for t in mine) + "."
 
 
 def ask_line(root, leader):

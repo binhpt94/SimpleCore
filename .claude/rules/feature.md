@@ -24,6 +24,19 @@ paths:
 - Sổ yêu cầu `gd_req.py <Tên>`: làm từng yêu cầu theo skill `feature-implement-req`.
 - Thứ người đã bỏ khỏi thiết kế bị bỏ ở mọi giai đoạn (mục "Giai đoạn" của `CLAUDE.md` gốc, người quyết 2026-11-27): xoá hẳn code, test, config, asset của nó. Không giữ cờ tắt, nhánh hay test "cho giai đoạn sau".
 
+## Nháp và phiếu Editor (người quyết 2026-11-27)
+Unity biên dịch chung cả project: code lỗi của một bên chặn mọi bên. Vì vậy code viết ở **nháp**, chỉ vào `Assets` khi tới lượt dùng Editor.
+- **Viết nháp:** `python Management/tools/draft.py start <Tên> <đường dẫn trong thư mục của mình>` (file đã có) hoặc `draft.py new <Tên> <đường dẫn>` (file mới), rồi Edit/Write trong `UnityProject/Drafts/<Tên>/<đường dẫn>`. Xoá file: `draft.py delete`. Nháp được phép lỗi, kể cả dùng contract đang xin.
+- **Kiểm nháp (nên làm, vài giây, không cần Editor):** `python Management/tools/compile_check.py <Tên> --draft`. `LỖI` là lỗi của mình; `CHẶN` là phụ thuộc ngoài mình đang lỗi, không phải lỗi của mình.
+- **Nộp phiếu Editor:** `python Management/tools/editor_ticket.py add --session <Tên> --common refresh,clean [--task "<việc cần Editor: tạo asset, prefab>"]... [--req <node>#<id> --test <Lớp.Hàm>[,...]]...`. Rồi làm việc khác hoặc kết thúc lượt; **không BÁO CHẶN vì Editor bận**.
+  - Phiếu chỉ có `refresh,clean` (chỉ nạp code): server nạp nháp của mọi phiếu như vậy cùng một lượt, biên dịch, báo kết quả. Lỗi biên dịch thì CodeLead sửa.
+  - Phiếu có `--task`: tới lượt, server nhắn "Tới lượt bạn". Khi đó: `draft.py apply <Tên>` (nếu còn nháp), `refresh_unity`, đọc console, sửa lỗi, làm việc cần Editor, rồi `editor_ticket.py done --session <Tên> <việc>` cho từng việc. Kết thúc lượt là trả Editor.
+  - `--req ... --test ...`: test của yêu cầu chạy ở lô test cuối vòng của server; qua hết thì server tự ghi `done` cho yêu cầu. Hỏng thì bạn nhận một tin.
+  - Phiếu đang chờ: thêm việc thì `add` lại (giữ chỗ); huỷ: `editor_ticket.py drop --session <Tên> [<việc>]`. Xem hàng: `editor_ticket.py list`.
+- **Nạp bị từ chối "lệch gốc":** file trong `Assets` đã đổi từ lúc bắt đầu nháp (thường là CodeLead sửa lỗi biên dịch). `draft.py diff`, trộn thay đổi đó vào nháp, `draft.py rebase <Tên> <file>`, nộp phiếu lại.
+- Sửa thẳng `Assets` vẫn được (soft gate, guard nhắc), nhưng chỉ nên làm khi Editor trống và không ai chờ.
+- Code của mình có thể được CodeLead sửa để gỡ lỗi biên dịch. Đầu việc mới, xem `git diff` thư mục của mình nếu cần.
+
 ## Kiểm ranh giới
 - `python Management/tools/validate.py --feature <Tên>`: kiểm tra ranh giới feature.
 - Bỏ `--feature` là kiểm cả project.

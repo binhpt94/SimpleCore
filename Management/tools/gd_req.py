@@ -14,6 +14,7 @@ feature session has got with each (see reqbook.py for where the list comes from 
 chat of <F> write doing and done, and only @CodeLead verify and reject; the human waives a requirement on the page.
 A leaf's phase is marked done (gd_progress.py, the page) only when every requirement of it is verified or waived.
 """
+import subprocess
 import sys
 from pathlib import Path
 
@@ -41,6 +42,27 @@ def reject_notices(root, feature, refs, note):
     return out
 
 
+def compile_note(root, feature):
+    """Soft gate (người quyết 2026-11-27): after a done, the feature's code is compiled outside Unity
+    (compile_check.py). Nothing is refused: the lines say whether it compiles, so CodeLead and the feature see it."""
+    if Path(root).resolve() != HERE.parent.parent.resolve():
+        return []      # a test's made-up root: no Unity project to compile
+    try:
+        p = subprocess.run([sys.executable, str(HERE / "compile_check.py"), feature, "--quiet"], cwd=str(root),
+                           capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=900)
+    except (OSError, subprocess.SubprocessError) as ex:
+        return [f"Biên dịch: chưa kiểm được ({ex})."]
+    out = [x for x in p.stdout.splitlines() if x.strip()]
+    if p.returncode == 0:
+        return ["Biên dịch (compile_check): sạch."]
+    if p.returncode == 1:
+        return (["CẢNH BÁO biên dịch: code của feature chưa biên dịch được (vẫn ghi done, soft gate). Sửa trước khi "
+                 f"nạp vào Unity: python Management/tools/compile_check.py {feature}"] + out[1:12])
+    if p.returncode == 3:
+        return ["Biên dịch: chưa kiểm được, vì một assembly phụ thuộc (ngoài feature) đang lỗi: không phải lỗi của bạn."] + out[1:6]
+    return ["Biên dịch: chưa kiểm được: " + (p.stderr.strip().splitlines() or ["thiếu công cụ"])[-1]]
+
+
 def run(root, argv):
     """(exit code, text to print)."""
     if len(argv) == 2 and argv[1] == "status":
@@ -54,9 +76,9 @@ def run(root, argv):
     if action == "doing" and len(rest) == 2:
         lines = rb.mark(root, feature, rest[0], "doing", feature, note=rest[1])
     elif action == "done" and len(rest) == 3 and rest[1] == "play":
-        lines = rb.mark(root, feature, rest[0], "done", feature, play=rest[2])
+        lines = rb.mark(root, feature, rest[0], "done", feature, play=rest[2]) + compile_note(root, feature)
     elif action == "done" and len(rest) == 2:
-        lines = rb.mark(root, feature, rest[0], "done", feature, tests=rest[1].split(","))
+        lines = rb.mark(root, feature, rest[0], "done", feature, tests=rest[1].split(",")) + compile_note(root, feature)
     elif action == "verify" and len(rest) == 1:
         lines = rb.mark(root, feature, rest[0], "verify", "@CodeLead")
     elif action == "reject" and len(rest) == 2:

@@ -52,10 +52,11 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 | Chơi thử, `tester.py` | `.claude/rules/tester.md` |
 | Tạo thư mục feature `scaffold.py` (@Manager, @CodeLead) | `.claude/rules/codelead.md`, `.claude/rules/manager.md` |
 | Hỏi người, `ask.py` (Leader ghi, Manager hỏi và trả lời) | `.claude/rules/manager.md`, mục "Hỏi người" |
+| Nháp `draft.py`, phiếu Editor `editor_ticket.py`, kiểm biên dịch `compile_check.py` | `.claude/rules/unity.md`, mục "Nháp, phiếu Editor"; feature: `.claude/rules/feature.md` |
 | Thử lại guard | `python .claude/hooks/test_guard.py` |
 
 - Lệnh shell chạy từ gốc project.
-- Mọi phiên đã gán, kể cả subagent của nó, chạy được mọi lệnh shell và Python (người quyết 2026-11-26): pipe, nối lệnh, `python -c`, script riêng. Guard chỉ còn giữ cổng của `dispatch.py send`, `ask.py add|answer|cancel`, `gd_req.py doing|done`, `studio.py review|cancel` và giai đoạn, cả trong chuỗi lệnh. Sửa file vẫn bằng Edit/Write theo bảng Vùng; không dùng shell để sửa vùng mình bị cấm. Phiên chưa gán chỉ chạy được các lệnh trong danh sách của guard. Gộp lệnh để bớt lượt gọi.
+- Mọi phiên đã gán, kể cả subagent của nó, chạy được mọi lệnh shell và Python (người quyết 2026-11-26): pipe, nối lệnh, `python -c`, script riêng. Guard chỉ còn giữ cổng của `dispatch.py send`, `ask.py add|answer|cancel`, `draft.py` (nháp của mình; `apply` chỉ khi giữ phiếu Editor hay Editor trống), `editor_ticket.py` (phiếu của mình), `gd_req.py doing|done`, `studio.py review|cancel` và giai đoạn, cả trong chuỗi lệnh. Sửa file vẫn bằng Edit/Write theo bảng Vùng; không dùng shell để sửa vùng mình bị cấm. Phiên chưa gán chỉ chạy được các lệnh trong danh sách của guard. Gộp lệnh để bớt lượt gọi.
 
 ## Nhắn ai
 - Tầng 3, 5, 6, 7 chạy theo việc. Giao việc cho chúng bằng hộp thư: `python Management/tools/dispatch.py send <tên> --from <vai> "<việc>"` (Leader, theo phần mình) hoặc tab Hộp thư (người).
@@ -80,16 +81,20 @@ Game Unity ghép từ các feature ĐỘC LẬP. AI viết code và đề xuất
 ## Vùng
 | Vùng | Đọc | Sửa |
 |---|---|---|
-| Feature của mình | được | được |
+| Feature của mình | được | được; code (`.cs`) nên viết ở nháp, nạp khi giữ phiếu Editor (soft gate) |
+| `UnityProject/Drafts/<Tên>` (nháp code) | được | phiên của feature đó, cùng luật vùng như thư mục thật; @CodeLead mọi nháp; `.draft.json` chỉ `draft.py` |
 | Khung của feature mình: `Scripts/Contracts`, `Scripts/Internal/Base`, `Scripts/View/Base`, `*.asmdef`, `AssemblyInfo.cs` | được | chỉ @CodeLead |
 | Khung của Core: `*.asmdef`, `AssemblyInfo.cs`, `I*.cs`, `*Base.cs` (ngoài `Tests/`) | được | chỉ @CodeLead |
 | `Scripts/Contracts`, `FeatureAssets/Public`, `CLAUDE.md` của feature khác | được | cấm |
 | `Scripts/Internal`, `Scripts/View`, `FeatureAssets/Private` của feature khác | cấm | cấm |
 | `Assets/Core` | được | chỉ `@Core` (trừ khung) |
 | `Assets/_Composition` | được | chỉ @CodeLead |
+| Code (`Scripts/Internal`, `Scripts/View`, `Tests`) của mọi feature, service, `Assets/Core` | được | thêm @CodeLead, chỉ để sửa lỗi biên dịch nhanh (soft gate, người quyết 2026-11-27) |
+| `Assets/SimpleCoreTools` (script Editor của project) | được | chỉ `@human` |
 | `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json` | được | báo @CodeLead; @CodeLead hỏi người qua Manager (`ask.py`, `--allow`), từng lần |
 | `Management/toolwork` | được | chỉ `toolwork.py` |
 | `Management/asks` | được | chỉ `ask.py` (`add`: Leader; `answer`: @Manager) |
+| `Management/editor-tickets` | được | chỉ `editor_ticket.py` và server |
 | `Management/studio` | được | feature, @GameDesigner, @UIDesigner: tạo `order.md` mới trong thư mục order của mình; tool: `lessons.md`, `work/` của order; còn lại chỉ `studio.py` và trang |
 | `Resources` | được | chỉ `studio.py` |
 | `Management/game-design/ai` | được | chỉ @GameDesigner; `.frame-concept/*.frame` chỉ @UIDesigner |

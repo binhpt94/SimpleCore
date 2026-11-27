@@ -1205,6 +1205,65 @@ def model_choice_cases(check):
         shutil.rmtree(store, ignore_errors=True)
 
 
+def editor_cases(check):
+    """Editor tickets (người quyết 2026-11-27): one grant at a time, loads together, tests at the end of a round."""
+    et = ss.editor_ticket
+    root = Path(tempfile.mkdtemp(prefix="editor-"))
+    store = tempfile.mkdtemp(prefix="editor-store-")
+    told, runs, marks = [], [], []
+    real = (ss.ROOT, ss.tell, ss.runner_turn, ss.run_in_background, ss.test_assemblies, ss.drafts.entries, ss.drafts.apply,
+            ss.reqbook.mark, ss.guard.STORE_DIR)
+    try:
+        ss.ROOT = root
+        ss.guard.STORE_DIR = store
+        ss.tell = lambda target, text, key: told.append((target, text, key)) or ("told", target)
+        ss.run_in_background = lambda fn, group: runs.append(list(fn(group)))
+        ss.test_assemblies = lambda group: ["Game.Wallet.Tests"]
+        ss.drafts.entries = lambda r, name: [("x.cs", "sửa", False)] if name in ("Wallet", "Hud") else []
+        ss.drafts.apply = lambda r, name: ([f"Đã nạp nháp {name}"], True)
+        ss.reqbook.mark = lambda r, f, ref, action, by, tests=None, **k: marks.append((f, ref, action, tuple(tests or ())))
+        ss.runner_turn = lambda prompt: {"clean": True, "errors": []}      # never a real claude turn in a test
+        check("editor: nothing waits, nothing happens", ss.editor_tick(now=1), [])
+        et.add(root, "Home", [], ["tạo HomeMain.prefab"], now=1)
+        ss.editor_tick(now=2)
+        check("editor: a ticket of its own work is granted and its chat told",
+              ([t["session"] for t in et.holder(root)], told[-1][0], "tạo HomeMain.prefab" in told[-1][1]), (["Home"], "Home", True))
+        check("editor: nothing else while it holds the Editor", ss.editor_tick(now=3), [])
+        et.add(root, "Wallet", ["refresh", "clean"], now=4)
+        et.add(root, "Hud", ["refresh", "clean"], now=5)
+        et.add(root, "Save", reqs=[{"ref": "feature-save/save-io/io-rules#write", "tests": ["Game.Save.Tests.SaveTests.Writes"]}], now=6)
+        did = ss.editor_tick(now=2 + ss.GRANT_UNUSED_SECONDS + 1)
+        check("editor: a turn granted and never used is given back", ("unused", "Home") in did, True)
+        # Home was requeued at the end: the code-only tickets go first as one load
+        check("editor: the load of every code-only ticket, compiled once, clean",
+              (runs[-1][-1][0], runs[-1][-1][2], sorted(k for _, _, k in told if k.startswith("editor-load"))[:1] != []),
+              ("load", "sạch", True))
+        check("editor: the load released its tickets", [t["session"] for t in et.holder(root)], [])
+        et.drop(root, "Home")
+        ss.runner_turn = lambda prompt: {"ok": True, "failed": [], "passed": ["Game.Save.Tests.SaveTests.Writes"]}
+        ss.editor_tick(now=10 ** 9)
+        check("editor: the test run marks done the requirements whose tests passed",
+              marks, [("Save", "feature-save/save-io/io-rules#write", "done", ("SaveTests.Writes",))])
+        check("editor: after the test run the queue is empty", (et.queue(root), et.holder(root)), ([], []))
+        et.add(root, "Wallet", ["refresh", "clean"], now=10 ** 9 + 1)
+        ss.runner_turn = lambda prompt: {"clean": False, "errors": ["UnityProject/Assets/Features/Wallet/W.cs:3: CS0103: x"]}
+        ss.editor_tick(now=10 ** 9 + 2)
+        q = et.queue(root)
+        check("editor: a load left with compile errors makes a CodeLead fix ticket first, with the errors",
+              (q[0]["session"], q[0]["priority"], "CS0103" in " ".join(q[0]["notes"])), ("@CodeLead", True, True))
+        ss.guard.write_lock(store, {"session": "x", "who": "Wallet", "until": time.time() + 60})
+        check("editor: a chat using the Editor directly: no grant meanwhile", ss.editor_tick(now=10 ** 9 + 3), [])
+        ss.guard.release_lock(store)
+        with open(os.path.join(store, ss.guard.HUMAN_EDITOR_FILE), "w", encoding="utf-8") as f:
+            json.dump({"since": 1, "reason": "play"}, f)
+        check("editor: the human uses the Editor: no grant", ss.editor_tick(now=10 ** 9 + 4), [])
+    finally:
+        (ss.ROOT, ss.tell, ss.runner_turn, ss.run_in_background, ss.test_assemblies, ss.drafts.entries, ss.drafts.apply,
+         ss.reqbook.mark, ss.guard.STORE_DIR) = real
+        shutil.rmtree(root, ignore_errors=True)
+        shutil.rmtree(store, ignore_errors=True)
+
+
 def main():
     store = tempfile.mkdtemp(prefix="setup-store-")
     profile_cases(check)
@@ -1430,6 +1489,7 @@ def main():
     unnamed_cases(check)
     usage_cases(check)
     model_choice_cases(check)
+    editor_cases(check)
     ss.guard.STORE_DIR = tempfile.mkdtemp(prefix="courier-store-")      # never the real Editor lock: a tester may be playing
     cli_cases(check)
     courier_cases(check)

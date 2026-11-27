@@ -98,6 +98,9 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / ".claude" / "hooks"))
 import bind_session  # noqa: E402
 import ask  # noqa: E402
+import draft as drafts  # noqa: E402
+import editor_ticket  # noqa: E402
+import reqbook  # noqa: E402
 import dispatch  # noqa: E402
 import gamedesign  # noqa: E402
 import guard  # noqa: E402
@@ -2134,6 +2137,218 @@ def inbox_reqs(feature):
     return {"ok": True, "reqs": out, "allowed": v["allowed"], "reason": v["reason"]}
 
 
+# ---------------------------------------------------------------- Editor tickets (người quyết 2026-11-27)
+# The server hands the shared Unity Editor to one ticket at a time (editor_ticket.py). A ticket of the chat's own work
+# (assets, scene) or CodeLead's fix: the chat gets one message and works; its Stop hook gives the Editor back. Every
+# waiting code-only ticket: the server loads their drafts together (draft.py apply) and a short headless run on a cheap
+# model compiles and reads the console; compile errors make a CodeLead fix ticket that goes first. When nothing else
+# needs the Editor, one EditMode run serves every ticket waiting for its tests; the requirements whose tests pass are
+# marked done in their book, the chats with failures get one message.
+EDITOR_SOURCE = "phiếu Editor"
+RUNNER_ROLE = "@UnityAutoPlay"      # its role may compile, read the console and run tests; it writes nothing
+RUNNER_MODEL = "haiku"
+GRANT_UNUSED_SECONDS = 20 * 60      # a granted chat that did not touch the Editor by then gives its turn back
+RUNNER = {"busy": False, "last": None}
+RUNNER_LOCK = threading.Lock()
+JSON_TAIL_RX = re.compile(r"\{[^{}]*(\{[^{}]*\}[^{}]*)*\}\s*$", re.S)
+
+RUNNER_LOAD = ("Bạn là phiên biên dịch của server (vai @UnityAutoPlay, chỉ đọc, không sửa gì, không nhắn ai). Không đọc "
+               "luật hay skill. Nạp tool bằng ToolSearch select:mcp__UnityMCP__refresh_unity,mcp__UnityMCP__read_console. "
+               "Gọi refresh_unity (scope all, mode force, compile request, wait_for_ready true), rồi read_console lấy lỗi "
+               "biên dịch (types error). In DÒNG CUỐI là đúng một JSON: {{\"clean\": true|false, \"errors\": "
+               "[\"<file>:<dòng>: <mã>: <câu>\", ...]}} (tối đa 30 lỗi). Unity không kết nối được thì "
+               "{{\"clean\": false, \"errors\": [\"UNITY: <câu lỗi>\"]}}. Bản nháp vừa nạp: {files}.")
+RUNNER_TEST = ("Bạn là phiên chạy test của server (vai @UnityAutoPlay, chỉ đọc, không sửa gì, không nhắn ai). Không đọc "
+               "luật hay skill. Nạp tool bằng ToolSearch select:mcp__UnityMCP__run_tests,mcp__UnityMCP__get_test_job. "
+               "Chạy run_tests mode EditMode với assembly_names {assemblies}, chờ get_test_job tới khi xong. In DÒNG CUỐI "
+               "là đúng một JSON: {{\"ok\": true|false, \"failed\": [{{\"name\": \"<tên đầy đủ>\", \"message\": "
+               "\"<câu lỗi ngắn>\"}}], \"passed\": [\"<tên đầy đủ>\", ...]}}. Unity không kết nối được thì "
+               "{{\"ok\": false, \"failed\": [{{\"name\": \"UNITY\", \"message\": \"<câu lỗi>\"}}], \"passed\": []}}.")
+
+
+def ticket_feature(session):
+    """The draft / book name of a ticket's session (Core for @Core); None for a Leader."""
+    if session == "@Core":
+        return "Core"
+    return None if session.startswith("@") else session
+
+
+def runner_turn(prompt):
+    """One headless turn of the cheap runner, bound to RUNNER_ROLE, not saved as a thread. Returns its last JSON line."""
+    sid = str(uuid.uuid4())
+    bind(sid, RUNNER_ROLE)
+    try:
+        out = run_claude(["-p", "--model", RUNNER_MODEL, "--session-id", sid, "--no-session-persistence"]
+                         + profile_args(RUNNER_ROLE) + [prompt])
+    finally:
+        try:
+            os.remove(guard.binding_path(sid, guard.STORE_DIR))
+        except OSError:
+            pass
+    for line in reversed(out.splitlines()):
+        line = line.strip()
+        if line.startswith("{") and line.endswith("}"):
+            try:
+                return json.loads(line)
+            except ValueError:
+                continue
+    raise RuntimeError("phiên chạy không in JSON: " + out[-300:])
+
+
+def tell(target, text, key):
+    """One message to a ticket's chat: the inbox of a chat on demand; CodeLead through its open thread; else nothing."""
+    try:
+        if dispatch.pool_of(target):
+            dispatch.send(ROOT, target, text, EDITOR_SOURCE, key=key)
+            return ("told", target)
+        if target == "@CodeLead":
+            lead = next((t for t in threads() if t.get("binding") == "@CodeLead" and t.get("live")), None)
+            if lead:
+                relay(lead, text)
+                return ("told", target)
+            return ("not-live", target)
+    except Exception as ex:
+        return ("tell-failed", target, str(ex)[:120])
+    return ("no-inbox", target)
+
+
+def grant_text(t):
+    notes = "; ".join(t.get("notes") or [])
+    return (f"Tới lượt bạn dùng Unity Editor (phiếu {t['id']}): {editor_ticket.describe(t)}." + (f" Ghi chú: {notes}." if notes else "")
+            + " Làm hết rồi tắt bit bằng editor_ticket.py done --session " + t["session"] + " <việc>; nạp nháp bằng draft.py apply "
+            "nếu có; kết thúc lượt là trả Editor. Không giữ Editor sang việc khác.")
+
+
+def load_run(group):
+    """The load of every waiting code-only ticket: drafts into Assets, one compile, the verdict to everyone."""
+    did, loaded, files = [], [], []
+    for t in group:
+        name = ticket_feature(t["session"])
+        if name and drafts.entries(ROOT, name):
+            lines, ok = drafts.apply(ROOT, name)
+            if not ok:      # drifted from its base: this ticket leaves the load, the chat rebases and queues again
+                t.update(state="dropped", notes=(t.get("notes") or []) + ["nháp lệch gốc"])
+                editor_ticket.save(ROOT, t)
+                did.append(tell(t["session"], "Nháp chưa nạp được: " + " ".join(lines) + " Rebase rồi nộp phiếu lại.",
+                                f"editor-drift:{t['id']}"))
+                continue
+            files.append(name)
+        loaded.append(t)
+    if not loaded:
+        return did
+    try:
+        verdict = runner_turn(RUNNER_LOAD.format(files=", ".join(files) or "(không có, chỉ biên dịch)"))
+    except Exception as ex:
+        verdict = {"clean": False, "errors": [f"phiên biên dịch lỗi: {str(ex)[:200]}"]}
+    clean = bool(verdict.get("clean"))
+    result = editor_ticket.release(ROOT, met=["refresh", "clean"] if clean else ["refresh"])
+    errors = [str(e) for e in verdict.get("errors") or []][:30]
+    for t in loaded:
+        text = ("Nháp của bạn đã nạp vào Unity và project biên dịch sạch." if clean else
+                "Nháp đã nạp nhưng project còn lỗi biên dịch; CodeLead sửa trước. Lỗi: " + "; ".join(errors[:8]))
+        did.append(tell(t["session"], text, f"editor-load:{t['id']}"))
+    did += [tell(w["session"], "Phiếu của bạn xong: code mới đã nạp, project sạch.", f"editor-met:{w['id']}") for w in result["satisfied"]]
+    if result["fix"]:
+        fix = result["fix"]
+        fix["notes"] = (fix.get("notes") or []) + ["lỗi: " + "; ".join(errors[:12])]
+        editor_ticket.save(ROOT, fix)
+    did.append(("load", ", ".join(t["session"] for t in loaded), "sạch" if clean else f"{len(errors)} lỗi"))
+    return did
+
+
+def test_assemblies(group):
+    """The EditMode test assemblies of the features in the run, and of the project assemblies depending on them."""
+    import compile_check
+    ch = compile_check.Checker(ROOT)
+    names = set()
+    for t in group:
+        name = ticket_feature(t["session"])
+        if not name:
+            continue
+        try:
+            names |= ch.dependents(ch.in_folder(ch.folder_of(name)))
+        except ValueError:
+            continue
+    return sorted(n for n in names if n.endswith(".Tests"))
+
+
+def test_run(group):
+    did = []
+    assemblies = test_assemblies(group)
+    try:
+        verdict = runner_turn(RUNNER_TEST.format(assemblies=json.dumps(assemblies)))
+    except Exception as ex:
+        verdict = {"ok": False, "failed": [{"name": "RUNNER", "message": str(ex)[:200]}], "passed": []}
+    passed = [str(x) for x in verdict.get("passed") or []]
+    failed = [x for x in verdict.get("failed") or [] if isinstance(x, dict)]
+    broken = any(f.get("name") in ("UNITY", "RUNNER") for f in failed)
+    short = lambda full: ".".join(str(full).split(".")[-2:])      # noqa: E731  Lớp.Hàm, as the book keeps it
+    ok_names = {short(x) for x in passed}
+    for t in group:
+        name = ticket_feature(t["session"])
+        mine_failed = [f for f in failed if f.get("name") and name and f"Game.{name.replace('_Services/', 'Services.')}." in str(f["name"])]
+        for r in t.get("reqs") or []:
+            tests = [short(x) for x in r.get("tests") or []]
+            if name and tests and not broken and all(x in ok_names for x in tests):
+                try:
+                    reqbook.mark(ROOT, name, r["ref"], "done", name, tests=tests)
+                    did.append(("done", name, r["ref"]))
+                except ValueError as ex:
+                    did.append(("done-refused", name, r["ref"], str(ex)[:120]))
+        if mine_failed:
+            did.append(tell(t["session"], "Test hỏng ở lô test của server: " + "; ".join(
+                f"{f['name']}: {str(f.get('message') or '')[:160]}" for f in mine_failed[:10]) + ". Sửa trong nháp rồi nộp phiếu lại.",
+                f"editor-test:{t['id']}"))
+    editor_ticket.release(ROOT, met=[] if broken else ["test"])
+    did.append(("test", len(assemblies), f"{len(passed)} qua, {len(failed)} hỏng"))
+    return did
+
+
+def run_in_background(fn, group):
+    def go():
+        try:
+            for step in fn(group):
+                print("phiếu Editor:", *step, flush=True)
+        except Exception as ex:
+            print(f"phiếu Editor: lỗi {ex}", file=sys.stderr, flush=True)
+            try:
+                editor_ticket.release(ROOT)
+            except Exception:
+                pass
+        finally:
+            with RUNNER_LOCK:
+                RUNNER["busy"] = False
+    with RUNNER_LOCK:
+        RUNNER["busy"] = True
+    threading.Thread(target=go, name="editor-runner", daemon=True).start()
+
+
+def editor_tick(now=None):
+    """One pass: give back a turn granted and never used, then grant the Editor when it is free."""
+    now = time.time() if now is None else now
+    did = []
+    with RUNNER_LOCK:
+        if RUNNER["busy"]:
+            return did
+    for t in editor_ticket.holder(ROOT):
+        if t.get("grant") in ("own", "fix") and not t.get("used") and now - t.get("granted_at", now) > GRANT_UNUSED_SECONDS:
+            editor_ticket.release(ROOT, t["session"], now=now)
+            did.append(("unused", t["session"]))
+    if editor_ticket.holder(ROOT) or guard.human_editor(guard.STORE_DIR) or guard.read_lock(guard.STORE_DIR):
+        return did
+    kind, group = editor_ticket.grant_next(ROOT, now=now)
+    if kind in ("own", "fix"):
+        t = group[0]
+        did.append(tell(t["session"], grant_text(t), f"editor-grant:{t['id']}"))
+    elif kind in ("load", "test"):
+        for t in group:
+            t["runner"] = RUNNER_ROLE
+            editor_ticket.save(ROOT, t)
+        run_in_background(load_run if kind == "load" else test_run, group)
+        did.append((kind, ", ".join(t["session"] for t in group)))
+    return did
+
+
 def courier_loop():
     lock = None
     while lock is None:      # one courier on this machine: another server already delivering keeps the lock
@@ -2147,6 +2362,8 @@ def courier_loop():
                 print("hộp thư:", *step, flush=True)
             for step in watch_tick() + wake_blocked():
                 print("canh phiên:", *step, flush=True)
+            for step in editor_tick():
+                print("phiếu Editor:", *step, flush=True)
         except Exception as ex:      # the loop must survive anything a tick meets
             print(f"hộp thư: lỗi {ex}", file=sys.stderr, flush=True)
         time.sleep(COURIER_SECONDS)

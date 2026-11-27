@@ -10,7 +10,7 @@ Việc kiểm là phần tốn nhất của bạn: khoảng một nửa chi phí
 
 ## Các bước
 1. **Lập lô**: `python Management/tools/gd_req.py status`, rồi `gd_req.py <Tên>` cho từng feature có yêu cầu chờ kiểm. Ghi mỗi feature: danh sách `<node>#<id>` chờ kiểm, tên test đã trích (hoặc `play`), assembly test (`Game.<Tên>.Tests`; test nối dây ở `_Composition/Tests`).
-2. **Biên dịch và chạy test**: gọi đúng một subagent `cl-unity-runner`, giao:
+2. **Biên dịch và chạy test**: yêu cầu đi qua phiếu Editor thì server đã chạy test ở lô cuối vòng và chỉ ghi `done` khi test qua: không chạy lại, sang bước 3. Còn lại (done ghi tay, test nối dây) thì gọi đúng một subagent `cl-unity-runner`, giao:
    - danh sách assembly hoặc lớp test cần chạy cho cả lô;
    - yêu cầu "biên dịch, đọc console, chạy test, trả về test hỏng và lỗi biên dịch".
 

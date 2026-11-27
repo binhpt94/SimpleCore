@@ -61,3 +61,4 @@ Thumbs.db
 
 # studio.py: khoá của một lượt đang chạy, không commit
 Management/studio/**/.run.lock
+/Management/editor-tickets/

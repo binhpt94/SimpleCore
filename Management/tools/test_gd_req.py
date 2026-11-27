@@ -450,8 +450,22 @@ def run_cli(root):
     check("CLI: a folder live does not name", (rc, "live không có feature" in out), (1, True))
 
 
+def run_compile_note(root):
+    """Soft compile gate on done (người quyết 2026-11-27): nothing refused, a line says whether it compiles."""
+    import gd_req
+    check("compile note: a made-up root compiles nothing", gd_req.compile_note(root, "Wallet"), [])
+    real_run, real_here = gd_req.subprocess.run, gd_req.HERE
+    gd_req.HERE = Path(root) / "Management" / "tools"
+    try:
+        for code, want in ((0, "sạch"), (1, "CẢNH BÁO"), (3, "không phải lỗi của bạn"), (2, "chưa kiểm được")):
+            gd_req.subprocess.run = lambda *a, code=code, **k: subprocess.CompletedProcess(a, code, "compile_check: x\nLỖI  A: 1 lỗi\n", "thiếu dotnet")
+            check(f"compile note: exit {code} says {want}", want in " ".join(gd_req.compile_note(root, "Wallet")))
+    finally:
+        gd_req.subprocess.run, gd_req.HERE = real_run, real_here
+
+
 def main():
-    for fn in (run_list, run_flow, run_tables, run_stage, run_progress_gate, run_changes, run_cli):
+    for fn in (run_list, run_flow, run_tables, run_stage, run_progress_gate, run_changes, run_cli, run_compile_note):
         root = make_root()
         try:
             if fn in (run_changes,):

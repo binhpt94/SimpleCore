@@ -156,10 +156,18 @@ for _commands, _name in ((MANAGER_COMMANDS, "Manager"), (CODELEAD_COMMANDS, "Cod
 # that asked or @Manager drops one (cancel). Looking: every chat. Checked in gated() below, on each part of a chain.
 ASK = PY + r"Management/tools/ask\.py "
 ALLOWED_COMMANDS.append(ASK + r"(list( --all)?|show q[0-9]{8}-[0-9a-f]{4})")
+ALLOWED_COMMANDS.append(PY + r"Management/tools/draft\.py (status|diff) (_Services/)?@?[A-Za-z][A-Za-z0-9]*( [A-Za-z0-9_./-]+\.cs)?")
+ALLOWED_COMMANDS.append(PY + r"Management/tools/editor_ticket\.py list")
+ALLOWED_COMMANDS.append(PY + r"Management/tools/compile_check\.py ((_Services/)?@?[A-Za-z][A-Za-z0-9]*( --draft)?|--all)( --quiet)?")
 ASK_RX = re.compile(r"^python3? Management/tools/ask\.py (add|answer|cancel)\b(.*)$", re.S)
 ASK_FROM_RX = re.compile(r"^ --from ['\"]?@?([A-Za-z]+)['\"]? ")
 ASK_ID_RX = re.compile(r"^ ['\"]?(q[0-9]{8}-[0-9a-f]{4})['\"]?( |$)")
 ASK_LEADERS = ("@CodeLead", "@GameDesigner", "@UIDesigner")
+# draft.py (a feature's drafts) and editor_ticket.py (Editor tickets): a chat works on its own drafts and tickets
+# only (@CodeLead on any); draft.py apply loads a draft into Assets, so only the Editor ticket holder (or anyone while
+# the Editor is free and nobody waits) runs it. Looking (status, diff, list) is free.
+DRAFT_RX = re.compile(r"^python3? Management/tools/draft\.py (start|new|delete|rebase|drop|apply) ['\"]?((?:_Services/)?@?[A-Za-z][A-Za-z0-9]*)['\"]?(\s|$)")
+TICKET_RX = re.compile(r"^python3? Management/tools/editor_ticket\.py (add|done|drop|release) --session ['\"]?((?:_Services/)?@?[A-Za-z][A-Za-z0-9]*)['\"]?(\s|$)")
 PROPOSALS_ZONE = "Management/proposals"
 PROPOSALS_MSG = ("Management/proposals is closed (2026-11-26): it is kept to be read, nothing new is written there. What needs "
                  "the human's decision is asked in the chat (the problem, the options, the one you advise, who is blocked). "
@@ -1454,6 +1462,11 @@ def decide_unity(tool, ti, mode, feature, area, who, root, session, store):
         writes = writes or unity_kind(t, p)[2] == "write"
     if "deny" in decisions:
         return "deny", reasons[decisions.index("deny")]
+    if needs_lock or shared or writes:
+        blocked = ticket_block(root, who, store)
+        if blocked:
+            return "deny", blocked
+        mark_ticket_used(root, who)
     if writes and other and other.get("who") in TESTER_ROLES:      # an asset written or deleted reloads Unity too
         return tester_block(store, session, who, other)
     if (needs_lock or shared) and other:
@@ -1708,6 +1721,29 @@ LEADER_ASK = ("only @Manager asks the human (người quyết 2026-11-27). Do no
               "A permission the human gives comes with it: the same call then passes")
 
 
+def draft_reminder(data, session_value, root, store, result):
+    """Soft gate: a feature, a service or @Core editing a .cs of Assets while it does not hold the Editor ticket is let
+    through with a reminder to write a draft instead."""
+    if not result or result[0] != "allow" or unity_name(data.get("tool_name")) not in EDIT_TOOLS:
+        return result
+    raw = (session_value or "").strip().replace("\\", "/")
+    role = role_of(raw)
+    who = role or raw
+    if role and role not in ROLE_AREAS:
+        return result
+    ti = data.get("tool_input") if isinstance(data.get("tool_input"), dict) else {}
+    path = text_of(ti.get("file_path"))
+    root = canonical_root(root)
+    full = resolve_target(path, root) if path else ""
+    if not full or not inside(full, under(root, "UnityProject", "Assets")) or not full.lower().endswith(".cs"):
+        return result
+    try:
+        held = {t.get("session") for t in ticket_module().holder(root) if t.get("grant") in ("own", "fix")}
+    except Exception:
+        held = set()
+    return result if who in held else (result[0], result[1] + DRAFT_REMINDER)
+
+
 def ask_leader(session_value):
     """The name of a Leader chat (CodeLead, GameDesigner, UIDesigner) for LEADER_ASK; None for any other chat."""
     role = role_of((session_value or "").strip().replace("\\", "/"))
@@ -1755,6 +1791,117 @@ def ask_gate(action, rest, role, mode, root):
     return "deny", "only the Leader that asked, or @Manager, cancels a question"
 
 
+# ---------------------------------------------------------------- drafts and Editor tickets (người quyết 2026-11-27)
+# A feature writes its code in UnityProject/Drafts/<Tên>/ (draft.py), loaded into Assets only by the holder of the
+# Editor ticket (editor_ticket.py). The Editor itself (scene, play, tests, compile, assets) goes to the ticket holder.
+DRAFTS_DIR = "Drafts"
+DRAFT_OWN_FILES = (".draft.json", ".applied")
+HUMAN_EDITOR_FILE = "human-editor.json"      # in the store: the human uses the Editor (Play, or the Unity menu)
+DRAFT_REMINDER = (" Nhắc (soft gate): code của feature viết vào nháp UnityProject/Drafts/<Tên>/ (draft.py), nộp phiếu "
+                  "editor_ticket.py và chỉ nạp vào Assets khi tới lượt; sửa thẳng Assets lúc người khác dùng Editor có "
+                  "thể làm vỡ biên dịch của cả project.")
+CODELEAD_FIX_NOTE = (" Nhắc (soft gate, người quyết 2026-11-27): CodeLead sửa code của feature chỉ để gỡ lỗi biên dịch "
+                     "nhanh; đổi hành vi thì giao feature. Ghi vào báo cáo.")
+CODE_PART_RX = re.compile(r"^(Features/(_Services/)?[A-Za-z][A-Za-z0-9]*/(Scripts/(Internal|View)|Tests)/|Core/).+\.cs$", re.I)
+
+
+def ticket_module():
+    """editor_ticket.py of this guard's own project, loaded by path."""
+    mod = sys.modules.get("coresimple_editor_ticket")
+    if mod is None:
+        import importlib.util
+        path = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "Management", "tools", "editor_ticket.py"))
+        spec = importlib.util.spec_from_file_location("coresimple_editor_ticket", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        sys.modules["coresimple_editor_ticket"] = mod
+    return mod
+
+
+def human_editor(store):
+    """The human's own use of the Editor (Play, or the Unity menu 'Tôi đang dùng Editor'), or None."""
+    try:
+        with open(os.path.join(store or STORE_DIR, HUMAN_EDITOR_FILE), encoding="utf-8") as f:
+            h = json.load(f)
+    except (OSError, ValueError):
+        return None
+    if not isinstance(h, dict) or (isinstance(h.get("until"), (int, float)) and h["until"] < time.time()):
+        return None
+    return h
+
+
+def ticket_block(root, who, store):
+    """Why this chat may not use the Editor now (a ticket is granted to someone else, or the human uses it), with what
+    to do instead; None when it may. Reads stay allowed elsewhere."""
+    h = human_editor(store)
+    if h:
+        return ("người đang dùng Unity Editor (" + str(h.get("reason") or "") + "): không dùng Editor lúc này. Nộp phiếu "
+                f"python Management/tools/editor_ticket.py add --session {who} … rồi làm việc khác; server nhắn khi tới lượt.")
+    try:
+        held = ticket_module().holder(root)
+    except Exception:
+        return None
+    if not held:
+        return None      # the Editor is free: use it now (người quyết: no lock in the way, just use it)
+    allowed = {t.get("session") for t in held if t.get("grant") in ("own", "fix")} | {t.get("runner") for t in held}
+    if who in allowed:
+        return None
+    names = ", ".join(sorted({t.get("runner") or t.get("session") for t in held}))
+    return (f"Editor đang được cấp cho {names} (phiếu editor_ticket). Không BÁO CHẶN: nộp phiếu python "
+            f"Management/tools/editor_ticket.py add --session {who} [--common refresh,clean] [--task \"<việc>\"] rồi làm việc "
+            "khác (viết nháp); server nhắn khi tới lượt.")
+
+
+def draft_gate(action, name, who, mode, root, store):
+    """draft.py start|new|delete|rebase|drop|apply <name>: own drafts only (CodeLead any); apply needs the ticket."""
+    own = name == who or (name in ("Core", "@Core") and who == "@Core")
+    if not (own or mode in ("human", "codelead")):
+        return "deny", f"draft of {name} belongs to that feature's chat; work on your own ({who})"
+    if action != "apply" or mode == "human":
+        return "allow", f"draft.py {action} {name}"
+    blocked = ticket_block(root, who, store)
+    if blocked:
+        return "deny", blocked
+    try:
+        held, waiting = ticket_module().holder(root), ticket_module().queue(root)
+    except Exception:
+        held, waiting = [], []
+    if not held and waiting:
+        return "deny", ("tickets wait for the Editor: put yours in the queue (editor_ticket.py add) and load the draft "
+                        "when the server says it is your turn")
+    mark_ticket_used(root, who)
+    return "allow", f"draft.py apply {name}: this chat may use the Editor now"
+
+
+def mark_ticket_used(root, who):
+    """The holder made an Editor call: its turn counts, so the Stop hook may release its ticket."""
+    try:
+        mod = ticket_module()
+        for t in mod.holder(root):
+            if t.get("session") == who and not t.get("used"):
+                t["used"] = True
+                mod.save(root, t)
+    except Exception:
+        pass
+
+
+def draft_target(full, root):
+    """(feature name, the Assets path it mirrors, the draft-relative path) for a file in UnityProject/Drafts, else None."""
+    base = under(root, "UnityProject", DRAFTS_DIR)
+    if not inside(full, base):
+        return None
+    seg = rel_segments(full, base)
+    if len(seg) >= 2 and seg[0] == "_Services":
+        name, rest = "_Services/" + seg[1], seg[2:]
+    else:
+        name, rest = seg[0], seg[1:]
+    if name in ("Core", "_Composition"):
+        target = under(root, "UnityProject", "Assets", name, *rest)
+    else:
+        target = under(root, "UnityProject", "Assets", "Features", *name.split("/"), *rest)
+    return name, target, rest
+
+
 def leader_allowance(data, name, root):
     """An answered question of that Leader whose --allow covers this call (its paths, its command), or None."""
     ti = data.get("tool_input")
@@ -1795,6 +1942,7 @@ def decide(data, session_value, root, store=None):
     if name and unity_name(data.get("tool_name")) == "AskUserQuestion":
         return "deny", LEADER_ASK.format(name=name)
     result = decide_raw(data, session_value, root, store)
+    result = draft_reminder(data, session_value, root, store, result)
     if name and result and result[0] == "ask":
         item = leader_allowance(data, name, canonical_root(root))
         if item:
@@ -1942,6 +2090,15 @@ def decide_raw(data, session_value, root, store=None):
             m = ASK_RX.match(one)
             if m:
                 return ask_gate(m.group(1), m.group(2), role, mode, root)
+            m = DRAFT_RX.match(one)
+            if m:
+                return draft_gate(m.group(1), m.group(2), who, mode, root, store)
+            m = TICKET_RX.match(one)
+            if m:
+                name = m.group(2)
+                if mode in ("human", "codelead") or name == who or (name == "Core" and who == "@Core"):
+                    return "allow", f"editor ticket of {name}"
+                return "deny", f"--session must name this chat ({who}); a ticket is the chat's own"
             m = FEATURE_REQ_RX.match(one)
             # doing / done in a requirement book: only the chat of that feature. The note may hold "..", the rest may not.
             if m and not SHELL_META_RX.search(one) and ".." not in one.split(' "')[0]:
@@ -2003,7 +2160,20 @@ def decide_raw(data, session_value, root, store=None):
         if mode == "none":
             return "deny", ("this chat has no valid FEATURE, so all edits are blocked. Only the human can set it "
                             "(by typing FEATURE=<name> <PIN> in the chat). Stop and tell the human.")
-        playing = tester_playing(store, data.get("session_id")) if inside(full, under(root, "UnityProject", "Assets")) else None
+        drafted = draft_target(full, root)
+        if drafted:      # a draft: the same rules as the file of Assets it stands for, without the Editor
+            name, target, rest = drafted
+            if not rest or rest[-1] in DRAFT_OWN_FILES or DRAFT_OWN_FILES[1] in rest:
+                return "deny", "Drafts/<Tên>/.draft.json and .applied are written by draft.py only"
+            if not rest[-1].lower().endswith(".cs"):
+                return "deny", "a draft holds .cs files only (assets and prefabs are made in the Editor, in the turn with the ticket)"
+            mirrored = dict(data, tool_input=dict(ti, file_path=target), _draft_of=name)
+            verdict = decide_raw(mirrored, session_value, root, store)
+            if verdict and verdict[0] == "allow":
+                return "allow", f"draft of {name} (as {'/'.join(rest)})"
+            return verdict
+        playing = (tester_playing(store, data.get("session_id")) if inside(full, under(root, "UnityProject", "Assets"))
+                   and not data.get("_draft_of") else None)      # a draft is not in Assets: a play-test does not mind it
         if playing:
             return tester_block(store, data.get("session_id"), raw if mode == "feature" else who, playing)
         # Files that define the boundary itself.
@@ -2019,6 +2189,13 @@ def decide_raw(data, session_value, root, store=None):
                 if any("InternalsVisibleTo" in s for s in edit_texts(ti)):
                     return "deny", "InternalsVisibleTo belongs in AssemblyInfo.cs only"
                 return "allow", f"@CodeLead edits {name}"
+            code_part = inside(full, under(root, "UnityProject", "Assets")) and CODE_PART_RX.match(
+                "/".join(rel_segments(full, under(root, "UnityProject", "Assets"))))
+            if edit != "skeleton" and code_part:
+                locked = codelead_gate(full, root)
+                if locked:
+                    return "deny", locked
+                return "allow", f"@CodeLead fixes the code of {name}." + CODELEAD_FIX_NOTE
             if edit != "skeleton":
                 return "deny", (f"@CodeLead edits only the skeleton (Contracts, *.asmdef, AssemblyInfo.cs, Scripts/*/Base, "
                                 f"I*.cs of Core) and Assets/{LEAD_AREA}, not {name}. Send the owning session exactly "

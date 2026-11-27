@@ -38,10 +38,14 @@ Từ 2026-11-26 tầng dưới là phần của bạn: feature, service, @Core v
 - **Yêu cầu hẹp** khi test tự động và việc bạn tự Play không phủ được một thao tác (bấm, kéo, một chuỗi thao tác lúc Play): tin theo khuôn `XÁC NHẬN · Feature: … · Thao tác: … (từng bước) · Mong đợi: … · Scene hoặc state cheat: …`.
 - **Ai khác gọi được:** @GameDesigner và @UIDesigner chỉ gọi nó cho yêu cầu `XÁC NHẬN` hẹp; việc rộng hơn họ nhờ bạn. @Manager không gọi tester.
 
+## Khi unity-mcp mất kết nối
+Không giao việc dev mới (feature, service, @Core, tester) cho tới khi unity-mcp kết nối lại. Chỉ sửa lỗi biên dịch đang chặn: `python Management/tools/compile_check.py --all`, sửa (`codelead.md`, quyền sửa code feature), rồi `refresh_unity`. Việc thiết kế, frame, order ảnh của Leader khác không bị ảnh hưởng.
+
 ## Khi tầng dưới báo chặn
 Feature, service, @Core, tester, và tool làm order của feature nhắn bạn `BÁO CHẶN · …` (không nhắn Manager nữa).
 1. Lỗi trong vùng của bạn (khung, `_Composition`, khoá Editor bạn giữ): gỡ ngay, rồi báo phiên đó qua hộp thư.
-2. Lỗi của phiên khác: giao đúng phiên đó qua hộp thư, kèm file và câu lỗi.
+2. Lỗi biên dịch, test sai cú pháp, sửa nhanh: tự sửa (quyền sửa code feature, `codelead.md`), không gửi thư. Lỗi hành vi của phiên khác: giao đúng phiên đó qua hộp thư, kèm file và câu lỗi.
+2b. Báo chặn "Editor bận": không còn hợp lệ, phiên đó nộp phiếu Editor (`editor_ticket.py`); nhắc nó một lần nếu cần.
 3. Câu hỏi thiết kế: gom các câu của nhiều feature, hỏi `GameDesigner` một tin. Có câu trả lời thì chuyển xuống từng feature.
 4. Cần sửa `UnityProject/Packages`, `UnityProject/ProjectSettings`, `Management/tools/rules.json`: hỏi người qua Manager, từng lần: ghi `python Management/tools/ask.py add --from CodeLead "<việc>" --blocker "…" --options "A …·B …" --suggest "…" --waiting "<phiên nào>"`, nhắn `Manager` `HỎI NGƯỜI · <id> · <việc>` (`--options` nêu đúng đường dẫn và thay đổi). Người cho phép thì Manager trả `TRẢ LỜI` kèm cho phép, và lệnh đó của bạn chạy được; gửi lại phiên đó (bước 7).
 5. Chỉ người gỡ được (guard, quyền, công cụ, server tắt): nhắn `Manager` một tin BÁO CHẶN gom các chỗ đó; gỡ xong thì báo lại phiên bị chặn (bước 7). Trong lúc chờ, giao việc không phụ thuộc cho feature khác.

@@ -1268,15 +1268,21 @@ def run_codelead_cases():
     internal = F + "/Wallet/Scripts/Internal/Old.cs"
     u = lambda name, **ti: t(g, L, ti.pop("expect"), "mcp__unityMCP__" + name, ti)      # noqa: E731
 
-    g = "codelead: edits nothing outside the skeleton"
-    for p in (internal, F + "/Wallet/Scripts/View/V.cs", F + "/Wallet/Tests/T.cs", F + "/Wallet/FeatureAssets/Private/c.asset",
-              F + "/Wallet/FeatureAssets/Public/Icon.prefab", F + "/Wallet/CLAUDE.md", A + "/Core/Old.cs",
-              A + "/Core/Tests/IFake.cs",
+    g = "codelead: fixes feature and Core code (soft gate, 2026-11-27)"
+    for p in (internal, F + "/Wallet/Scripts/View/V.cs", F + "/Wallet/Tests/T.cs", A + "/Core/Old.cs", A + "/Core/Tests/IFake.cs"):
+        w(g, L, "allow", p)
+    t(g, L, "allow", "MultiEdit", {"file_path": internal, "edits": []})
+    t(g, L, "allow", "NotebookEdit", {"notebook_path": internal})
+    reason = guard.decide({"tool_name": "Write", "tool_input": {"file_path": internal, "content": "x"}, "cwd": FX,
+                           "session_id": "test-session"}, L, FX, STORE)[1]
+    check(g, L, True, "the allow reminds it is for compile fixes", "lỗi biên dịch" in reason)
+    w(g + ": not a locked feature's code", L, "deny", F + "/Shop/Scripts/Internal/S.cs")
+    g = "codelead: edits nothing else outside the skeleton"
+    for p in (F + "/Wallet/FeatureAssets/Private/c.asset",
+              F + "/Wallet/FeatureAssets/Public/Icon.prefab", F + "/Wallet/CLAUDE.md",
               FX + "/Management/proposals/decision.md", FX + "/Management/tools/rules.json",
               FX + "/Management/data/x.js", FX + "/.claude/settings.json", FX + "/CLAUDE.md"):
         w(g, L, "deny", p)
-    t(g, L, "deny", "MultiEdit", {"file_path": internal, "edits": []})
-    t(g, L, "deny", "NotebookEdit", {"notebook_path": internal})
     t(g, L, "deny", guard.UNITY_ASSET_TOOL, {"action": "delete", "path": "Assets/Core/Old.cs"})
     t(g, L, "allow", "Bash", {"command": VALIDATE})
     t(g, L, "deny", "Bash", {"command": "dotnet build"})
@@ -1394,13 +1400,15 @@ def run_codelead_cases():
     for p in (F + "/Shop/Scripts/Contracts/IShop.cs", F + "/Shop/Scripts/Internal/Base/B.cs",
               F + "/Shop/Scripts/Internal/Game.Shop.Internal.asmdef"):
         e(g + ": locked feature (code gate)", L, "deny", p)
-    for p in (F + "/Wallet/Scripts/Internal/Basement.cs", F + "/Wallet/Scripts/Internal/Sub/Base/X.cs",
-              F + "/Wallet/Scripts/Contracts.cs", A + "/Core/Icon.png", A + "/Core/ServiceRegistry.cs", A + "/Core/Ix.cs"):
+    for p in (F + "/Wallet/Scripts/Contracts.cs", A + "/Core/Icon.png"):
         e(g + ": not skeleton", L, "deny", p)
+    for p in (F + "/Wallet/Scripts/Internal/Basement.cs", F + "/Wallet/Scripts/Internal/Sub/Base/X.cs",
+              A + "/Core/ServiceRegistry.cs", A + "/Core/Ix.cs"):
+        e(g + ": not skeleton but code (soft gate, 2026-11-27)", L, "allow", p)
     e(g, L, "deny", F + "/Wallet/Scripts/Internal/x.asmref")
     if not WIN:
         e(g + ": case-sensitive", L, "deny", F + "/Wallet/scripts/contracts/IWallet.cs")
-        e(g + ": case-sensitive", L, "deny", F + "/Wallet/Scripts/Internal/base/B.cs")
+        e(g + ": case-sensitive, code of Internal (soft gate)", L, "allow", F + "/Wallet/Scripts/Internal/base/B.cs")
     dl = lambda expect, path: t(g, L, expect, guard.UNITY_ASSET_TOOL, {"action": "delete", "path": path})  # noqa: E731
     dl("allow", "Assets/Features/Wallet/Scripts/Contracts/IWallet.cs")
     dl("allow", "Assets/Features/Wallet/Scripts/Internal/Game.Wallet.Internal.asmdef")
@@ -2584,6 +2592,77 @@ def run_headless_cases():
     check(g + " (Leaders: not BÁO CHẶN)", "@CodeLead", True, "dotnet build", got[0] == "deny" and "BÁO CHẶN" not in got[1])
 
 
+def run_draft_ticket_cases():
+    """Drafts and Editor tickets (người quyết 2026-11-27): a feature writes drafts under the same rules as its folder;
+    the Editor goes to the ticket holder; a direct edit of Assets code is let through with a reminder."""
+    import shutil
+    g = "drafts"
+    D = FX + "/UnityProject/Drafts"
+    w(g, "Wallet", "allow", D + "/Wallet/Scripts/Internal/New.cs")
+    w(g, "Wallet", "allow", D + "/Wallet/Tests/NewTests.cs")
+    w(g + " (the skeleton stays CodeLead's)", "Wallet", "deny", D + "/Wallet/Scripts/Contracts/IWallet.cs")
+    w(g + " (only .cs)", "Wallet", "deny", D + "/Wallet/Scripts/Internal/a.asset")
+    w(g + " (draft.py's own files)", "Wallet", "deny", D + "/Wallet/.draft.json")
+    w(g + " (another feature's draft)", "Wallet", "deny", D + "/Shop/Scripts/Internal/S.cs")
+    w(g + " (CodeLead drafts a contract)", "@CodeLead", "allow", D + "/Wallet/Scripts/Contracts/IWallet.cs")
+    w(g + " (a service)", "_Services/Popup", "allow", D + "/_Services/Popup/Scripts/Internal/P.cs")
+    w(g + " (Core)", "@Core", "allow", D + "/Core/NewThing.cs")
+    reason = guard.decide({"tool_name": "Write", "tool_input": {"file_path": F + "/Wallet/Scripts/Internal/W.cs", "content": "x"},
+                           "cwd": FX, "session_id": "test-session"}, "Wallet", FX, STORE)
+    check(g, "Wallet", True, "a direct edit of Assets code passes with a reminder (soft gate)",
+          reason[0] == "allow" and "Nhắc (soft gate)" in reason[1])
+
+    g = "editor tickets"
+    et = guard.ticket_module()
+    tdir = os.path.join(FX, "Management", "editor-tickets")
+    shutil.rmtree(tdir, ignore_errors=True)
+    refresh = "mcp__unityMCP__refresh_unity"
+    try:
+        t(g + " (Editor free: use it)", "Wallet", "allow", refresh, {})
+        guard.release_lock(STORE)
+        et.add(FX, "_Services/Popup", ["refresh"], ["tạo PopupConfig.asset"], now=1)
+        kind, group = et.grant_next(FX, now=2)
+        got = guard.decide({"tool_name": refresh, "tool_input": {}, "cwd": FX, "session_id": "test-session"}, "Wallet", FX, STORE)
+        check(g, "Wallet", True, "granted to another: refused with how to queue", got[0] == "deny" and "editor_ticket.py add --session Wallet" in got[1])
+        t(g + " (the holder uses it)", "_Services/Popup", "allow", refresh, {})
+        check(g, "_Services/Popup", True, "the holder's call marks its ticket used", et.holder(FX)[0].get("used"))
+        guard.release_lock(STORE)
+        t(g + " (reads stay open)", "Wallet", "allow", "mcp__unityMCP__read_console", {})
+        et.release(FX, "_Services/Popup", now=3)
+        with open(os.path.join(STORE, guard.HUMAN_EDITOR_FILE), "w", encoding="utf-8") as f:
+            json.dump({"since": 1, "reason": "play"}, f)
+        got = guard.decide({"tool_name": refresh, "tool_input": {}, "cwd": FX, "session_id": "test-session"}, "Wallet", FX, STORE)
+        check(g, "Wallet", True, "the human uses the Editor: refused", got[0] == "deny" and "người đang dùng Unity Editor" in got[1])
+        os.remove(os.path.join(STORE, guard.HUMAN_EDITOR_FILE))
+        sh = lambda cmd: {"command": cmd}      # noqa: E731
+        t(g + " (own draft)", "Wallet", "allow", "Bash", sh("python Management/tools/draft.py start Wallet Scripts/Internal/W.cs"))
+        t(g + " (another's draft)", "Wallet", "deny", "Bash", sh("python Management/tools/draft.py start Shop Scripts/Internal/S.cs"))
+        t(g + " (CodeLead: any draft)", "@CodeLead", "allow", "Bash", sh("python Management/tools/draft.py drop Shop"))
+        t(g + " (looking is free)", "Wallet", "allow", "Bash", sh("python Management/tools/draft.py status Shop"))
+        et.drop(FX, "_Services/Popup")      # what was left of its turn
+        t(g + " (apply while the Editor is free, nobody waiting)", "Wallet", "allow", "Bash", sh("python Management/tools/draft.py apply Wallet"))
+        et.add(FX, "_Services/Popup", ["refresh"], ["x"], now=5)
+        t(g + " (apply while others wait: queue first)", "Wallet", "deny", "Bash", sh("python Management/tools/draft.py apply Wallet"))
+        et.grant_next(FX, now=6)
+        t(g + " (apply while granted to another)", "Wallet", "deny", "Bash", sh("python Management/tools/draft.py apply Wallet"))
+        t(g + " (the holder applies)", "_Services/Popup", "allow", "Bash", sh("python Management/tools/draft.py apply _Services/Popup"))
+        t(g + " (ticket of its own)", "Wallet", "allow", "Bash", sh("python Management/tools/editor_ticket.py add --session Wallet --common refresh"))
+        t(g + " (not another's)", "Wallet", "deny", "Bash", sh("python Management/tools/editor_ticket.py release --session _Services/Popup"))
+        t(g + " (in a chain too)", "Wallet", "deny", "Bash", sh("ls; python Management/tools/draft.py apply Wallet"))
+        import bind_session
+        check(g, "@CodeLead", True, "CodeLead's guard line shows who holds the Editor and what waits",
+              "Phiếu Editor:" in bind_session.editor_line(FX, None) and "_Services/Popup" in bind_session.editor_line(FX, None))
+        et.add(FX, "Wallet", ["refresh", "clean"], now=7)
+        check(g, "Wallet", True, "a feature's guard line shows its own ticket", "Phiếu Editor của bạn" in bind_session.editor_line(FX, "Wallet"))
+    finally:
+        try:
+            os.remove(os.path.join(STORE, guard.HUMAN_EDITOR_FILE))
+        except OSError:
+            pass
+        guard.release_lock(STORE)
+        shutil.rmtree(tdir, ignore_errors=True)
+
+
 def run_leader_ask_cases():
     """Only @Manager asks the human (người quyết 2026-11-27): a Leader writes the question in ask.py and messages
     Manager; a permission the human gives through Manager lets the same call through, as many times as given."""
@@ -2703,6 +2782,7 @@ def main():
         run_cases()
         run_headless_cases()
         run_leader_ask_cases()
+        run_draft_ticket_cases()
         run_free_shell_cases()
         run_free_read_cases()
     finally:
