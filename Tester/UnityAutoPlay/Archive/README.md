@@ -11,5 +11,7 @@
 - 20261127-152230: Run: kỉ lục qua feature-save, popup thua và chơi lại · dở: không chơi, vì việc đã được chơi và ghi ở đợt `20261127-151417` (đạt).
 - 20261127-152146: Run: kỉ lục ở feature-save, popup thua, chơi lại (IDEA) · dở: không chơi, vì việc đã được chơi và ghi ở đợt `20261127-151417` (đạt).
 - 20261127-152024: Run: ki luc qua feature-save, popup thua, choi lai · dở: không chơi vì là đợt trùng; kết quả của việc nằm ở đợt `20261127-151417` (đạt).
+- 20261125-131408: IDEA quai bi ha bien mat sau Choi lai · đạt: sau mỗi lần Chơi lại, quái bị hạ đều thu nhỏ rồi bị huỷ thật, không còn hình kẹt hay object ẩn ở lượt 2 và 3; nhún khi đi đúng 0.1u; console không lỗi. Hình thu nhỏ chỉ đo được ở các đoạn Editor chạy đủ khung hình.
+- 20261125-115759: IDEA mot luot day du 12 feature va choi lai 3 lan · đạt: cả 9 bước chạy đúng thiết kế IDEA, chơi 4 lượt liền không dồn object và console không lỗi; có 1 lỗi bố cục nhẹ ở 5:3 và vài mục chỉ kiểm được một phần vì giới hạn của unity-mcp.
 - 20261125-015850: cheat new-record · <đạt | không đạt | dở>: <một câu>
 - 20261125-014348: chot IDEA · đạt: cả 9 bước của Manager và 11 node vòng 4 đều đúng thiết kế ở mức IDEA. Cheat Hud `mid-battle` và HudUpgrade `mixed-buttons` (phần hiển thị) đạt. Ba cheat PopupLose `new-record`, Popup `sample-popup`, SceneFlow `load-error` chưa kiểm vì chỉ bật được qua config asset.
